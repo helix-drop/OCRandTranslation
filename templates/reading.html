@@ -1,0 +1,1413 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.progress-dot.failed { background: var(--red); opacity: 0.75; }
+.usage-panel.compact {
+  padding: 10px 12px;
+  margin: 8px 16px 0;
+  border-radius: 12px;
+}
+.usage-panel.compact .usage-panel-head { margin-bottom: 8px; }
+.usage-panel.compact .usage-panel-title { font-size: 13px; }
+.usage-panel.compact .usage-panel-subtitle { font-size: 11px; }
+.usage-panel.compact .usage-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.usage-panel.compact .usage-card {
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+.usage-panel.compact .usage-card-label {
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+.usage-panel.compact .usage-card-value {
+  font-size: 16px;
+  line-height: 1.2;
+}
+.usage-draft-mini {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--bdrL);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.78);
+}
+.usage-draft-mini.hidden { display: none; }
+.usage-draft-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.usage-draft-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--txt);
+}
+.usage-draft-state {
+  font-size: 11px;
+  color: var(--acc);
+  font-weight: 700;
+}
+.usage-draft-state[data-status="aborted"],
+.usage-draft-state[data-status="error"] { color: var(--red); }
+.usage-draft-state[data-status="done"] { color: var(--grn); }
+.usage-draft-progress, .usage-draft-note {
+  font-size: 11px;
+  color: var(--txL);
+  line-height: 1.5;
+}
+.usage-draft-preview {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--cn);
+  line-height: 1.7;
+  max-height: 4.8em;
+  overflow: hidden;
+}
+@media (max-width: 900px) {
+  .usage-panel.compact .usage-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.page-nav {
+  position: relative;
+}
+.page-nav-btn {
+  min-width: 118px;
+  max-width: 180px;
+  padding: 6px 10px;
+  border: 1px solid var(--bdrL);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.82);
+  color: var(--txt);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.page-nav-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 248px;
+  padding: 10px;
+  border: 1px solid var(--bdr);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 12px 28px rgba(44, 36, 22, 0.14);
+  z-index: 220;
+}
+.page-nav-panel.hidden { display: none; }
+.page-nav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.page-nav-title {
+  font-size: 11px;
+  color: var(--txL);
+  font-weight: 700;
+}
+.page-nav-jump {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.page-nav-input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--bdrL);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.92);
+  color: var(--txt);
+  font-size: 12px;
+}
+.page-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow: auto;
+}
+.page-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--txt);
+  background: rgba(248,244,236,0.72);
+}
+.page-nav-item.current {
+  background: rgba(183, 146, 76, 0.16);
+  color: var(--acc);
+  font-weight: 700;
+}
+.page-nav-item-status {
+  font-size: 11px;
+  color: var(--txL);
+  flex-shrink: 0;
+}
+.page-nav-ellipsis {
+  padding: 4px 8px;
+  color: var(--txL);
+  font-size: 11px;
+}
+</style>
+
+<!-- Export Modal -->
+<div class="modal-overlay hidden" id="exportModal" onclick="if(event.target===this)this.classList.add('hidden');">
+  <div class="modal-box">
+    <div class="flex justify-between mb-16">
+      <span style="font-weight:700;font-size:16px;">导出</span>
+      <button onclick="document.getElementById('exportModal').classList.add('hidden');" style="background:transparent;border:none;color:var(--txL);font-size:20px;cursor:pointer;">&times;</button>
+    </div>
+    <div class="flex gap-8 mb-12">
+      <button class="btn btn-pri" onclick="copyExport();">复制</button>
+      <a href="{{ url_for('download_md') }}" class="btn btn-grn">下载 .md</a>
+    </div>
+    <textarea id="exportText" readonly placeholder="加载中…"></textarea>
+    <div id="exportLoading" class="hidden" style="text-align:center;padding:20px;color:var(--txL);">加载中…</div>
+  </div>
+</div>
+
+<!-- Compact Header Bar -->
+<div class="header-bar" style="padding:6px 16px;gap:6px;">
+  <div class="flex items-center gap-8" style="flex:1;min-width:0;">
+    <a href="{{ url_for('home') }}" style="color:var(--txL);font-size:16px;padding:2px 4px;">&larr;</a>
+    <span class="title" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ doc_title }}</span>
+    <span class="page-num" style="font-size:11px;">p.{{ cur_page_bp }}/p.{{ last_page }}</span>
+  </div>
+  <!-- 导航 -->
+  <div class="flex items-center gap-4">
+    {% if prev_bp %}
+    <a href="{{ url_for('reading', bp=prev_bp, usage=1 if usage_open else None) }}" class="nav-arrow">&larr;</a>
+    {% else %}
+    <span class="nav-arrow disabled">&larr;</span>
+    {% endif %}
+
+    {% if page_total > 1 %}
+    <div class="page-nav" id="pageNav">
+      <button type="button" class="page-nav-btn" id="pageNavBtn" onclick="togglePageNav();">p.{{ cur_page_bp }} · {{ '已译' if cur_page_bp in translated_bps else ('失败' if cur_page_bp in failed_bps else '待译') }}</button>
+      <div class="page-nav-panel hidden" id="pageNavPanel">
+        <div class="page-nav-head">
+          <div class="page-nav-title">跳转页码</div>
+          <button type="button" class="tb" style="font-size:10px;" onclick="togglePageNav(false);">收起</button>
+        </div>
+        <div class="page-nav-jump">
+          <input type="number" min="{{ first_page }}" max="{{ last_page }}" step="1" placeholder="输入 p.x" class="page-nav-input" id="pageJumpInput">
+          <button type="button" class="tb" style="font-size:10px;" onclick="jumpToPageInput();">跳转</button>
+        </div>
+        <div class="page-nav-list" id="pageNavList"></div>
+      </div>
+    </div>
+    {% else %}
+    <span style="font-size:11px;color:var(--txS);">p.{{ cur_page_bp }}</span>
+    {% endif %}
+
+    {% if next_bp %}
+    <a href="{{ url_for('reading', bp=next_bp, usage=1 if usage_open else None) }}" class="nav-arrow">&rarr;</a>
+    {% else %}
+    <span class="nav-arrow disabled">&rarr;</span>
+    {% endif %}
+  </div>
+  <!-- 工具按钮 -->
+  <div class="flex items-center gap-4">
+    {% if has_pdf %}
+    <button class="tb" onclick="togglePdfPanel();" id="pdfBtn" title="PDF 原文">PDF</button>
+    {% endif %}
+    <button class="tb {{ 'active' if usage_open else '' }}" onclick="toggleUsageDashboard();" id="usageBtn" title="显示/隐藏 API 用量">API</button>
+    <button class="tb" onclick="toggleOriginal();" id="origBtn" title="显示/隐藏原文">原文</button>
+    <button class="tb" onclick="toggleLayout();" id="layoutBtn" title="切换布局">{{ '⇅' if side_by_side else '⇆' }}</button>
+    <button class="tb" onclick="openExportModal();" title="导出">导出</button>
+    <div class="toolbar-more" id="moreMenu">
+      <button class="tb" onclick="this.parentElement.classList.toggle('open');">⋯</button>
+      <div class="toolbar-dropdown">
+        <div class="toolbar-dropdown-label">翻译模型</div>
+        {% for key, m in models.items() %}
+        <a href="{{ url_for('set_model', key=key, next='reading') }}" class="toolbar-dropdown-item {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+        {% endfor %}
+        <div class="toolbar-dropdown-sep"></div>
+        <a href="{{ url_for('settings') }}#glossary" class="toolbar-dropdown-item">术语词典</a>
+        <a href="{{ url_for('reset_text') }}" class="toolbar-dropdown-item" style="color:var(--red);">清除翻译</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Translation Progress Bar -->
+<div id="translateProgress" style="display:none;padding:4px 16px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="tpLabel" style="font-size:11px;font-weight:600;color:var(--acc);">翻译中…</span>
+    <span id="tpStats" style="font-size:10px;color:var(--txL);"></span>
+    <div style="flex:1;background:var(--bg2);border-radius:4px;height:4px;overflow:hidden;">
+      <div id="tpBar" style="background:var(--acc);height:100%;width:0%;border-radius:4px;transition:width 0.3s;"></div>
+    </div>
+    <span id="tpPct" style="font-size:10px;font-weight:600;color:var(--acc);">0%</span>
+    <button class="tb" style="color:var(--red);font-size:10px;" onclick="stopTranslate();" id="tpStopBtn">停止</button>
+  </div>
+  <div id="tpDetail" style="font-size:9px;color:var(--txL);margin-top:1px;"></div>
+</div>
+
+<div id="translateUsagePanel" class="usage-panel compact {{ '' if usage_open else 'hidden' }}">
+  <div class="usage-panel-head">
+    <div>
+      <div class="usage-panel-title">翻译仪表盘</div>
+      <div class="usage-panel-subtitle">只显示当前进度和必要用量</div>
+    </div>
+    <button type="button" class="tb" onclick="toggleUsageDashboard(false);" title="收起">收起</button>
+  </div>
+
+  <div class="usage-grid">
+    <div class="usage-card">
+      <div class="usage-card-label">当前阶段</div>
+      <div class="usage-card-value" id="usagePhase">-</div>
+    </div>
+    <div class="usage-card">
+      <div class="usage-card-label">当前模型</div>
+      <div class="usage-card-value" id="usageModel">-</div>
+    </div>
+    <div class="usage-card">
+      <div class="usage-card-label">请求数</div>
+      <div class="usage-card-value" id="usageRequestCount">0</div>
+    </div>
+    <div class="usage-card">
+      <div class="usage-card-label">总 Tokens</div>
+      <div class="usage-card-value" id="usageTotalTokens">0</div>
+    </div>
+    <div class="usage-card">
+      <div class="usage-card-label">当前页</div>
+      <div class="usage-card-value" id="usageCurrentPage">-</div>
+    </div>
+    <div class="usage-card">
+      <div class="usage-card-label">最近更新</div>
+      <div class="usage-card-value usage-card-value-sm" id="usageUpdatedAt">-</div>
+    </div>
+  </div>
+  <div id="usageDraftMini" class="usage-draft-mini hidden">
+    <div class="usage-draft-row">
+      <div class="usage-draft-title">当前翻译位置</div>
+      <div class="usage-draft-state" id="usageDraftState" data-status="idle">空闲</div>
+    </div>
+    <div class="usage-draft-progress" id="usageDraftProgress">等待翻译任务启动</div>
+    <div class="usage-draft-note" id="usageDraftNote"></div>
+    <div class="usage-draft-preview" id="usageDraftPreview"></div>
+  </div>
+</div>
+
+<!-- Main layout: PDF preview + Content -->
+<div class="reading-main-layout {{ 'with-pdf' if has_pdf else '' }}" id="readingLayout">
+
+  <!-- PDF Preview Panel (left) -->
+  {% if has_pdf %}
+  <div class="pdf-panel" id="pdfPanel">
+    <div class="pdf-panel-header">
+      <span style="font-weight:600;font-size:13px;">PDF 原文</span>
+      <div class="flex gap-6 items-center">
+        <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfPrevPage()">◀</button>
+        <span id="pdfPageInfo" style="font-size:11px;color:var(--txL);">p.{{ cur_page_bp }}</span>
+        <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfNextPage()">▶</button>
+        <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="togglePdfPanel()" title="收起">✕</button>
+      </div>
+    </div>
+    <div class="pdf-img-container" id="pdfImgContainer">
+      <img id="pdfImg" class="pdf-img" src="{{ url_for('pdf_page', file_idx=page_map.get(cur_page_bp, 0)) }}" alt="PDF p.{{ cur_page_bp }}">
+      <div id="pdfHighlights" class="pdf-highlights"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Content Panel (right) -->
+  <div class="content-panel" id="contentPanel">
+
+<div class="container-wide">
+  {% if display_entries %}
+
+  <!-- Model badge -->
+  <div class="flex gap-8 items-center mb-10">
+    {% if cur_model_label %}
+    <span style="font-size:11px;color:var(--txL);background:var(--bg2);padding:2px 8px;border-radius:8px;">{{ cur_model_label }}</span>
+    {% endif %}
+    <span style="background:var(--bg2);color:var(--acc);font-size:12px;padding:3px 10px;border-radius:10px;font-weight:600;border:1px solid var(--bdrL);">p.{{ cur_page_bp }}</span>
+    <span style="font-size:11px;color:var(--txL);">{{ display_entries|length }} 段</span>
+  </div>
+
+  {% for pe in display_entries %}
+  {% set hlevel = pe.heading_level|default(0) %}
+
+  {% if hlevel > 0 %}
+  <!-- Heading with translation -->
+  <div class="heading-block heading-h{{ hlevel }}" data-para-idx="{{ loop.index0 }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin:{{ '32px' if hlevel == 1 else '24px' }} 0 12px;">
+    <div class="heading-original">{{ pe.original }}</div>
+    {% if pe.translation %}
+    <div class="heading-translation">{{ pe.translation }}</div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <!-- Body paragraph -->
+  <div class="para-block" data-para-idx="{{ loop.index0 }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin-bottom:24px;">
+
+    <!-- Side by side -->
+    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" style="{{ '' if side_by_side else 'display:none;' }}">
+      <div class="reading-columns">
+        <div>
+          <div class="card">
+            <div class="lbl">原文 <span style="color:var(--txL);font-size:11px;">p.{{ pe.pages }}</span></div>
+            <div class="text-fr">{{ pe.original_html|safe }}</div>
+          </div>
+          {% if pe.footnotes %}
+          <div class="footnote-box">
+            <div class="lbl">脚注</div>
+            <div class="text-fn">{{ pe.footnotes }}</div>
+          </div>
+          {% endif %}
+        </div>
+        <div>
+          <div class="card card-alt">
+            <div class="lbl">中文翻译</div>
+            <div class="text-cn">{{ pe.translation or '' }}</div>
+          </div>
+          {% if pe.footnotes_translation %}
+          <div class="footnote-box-cn">
+            <div class="lbl">脚注翻译</div>
+            <div class="text-cn" style="font-size:13px;line-height:1.8;">{{ pe.footnotes_translation }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stacked -->
+    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" style="{{ 'display:none;' if side_by_side else '' }}">
+      <div class="card">
+        <div class="lbl">原文 <span style="color:var(--txL);font-size:11px;">p.{{ pe.pages }}</span></div>
+        <div class="text-fr" style="font-size:16px;">{{ pe.original_html|safe }}</div>
+      </div>
+      {% if pe.footnotes %}
+      <div class="footnote-box">
+        <div class="lbl">脚注</div>
+        <div class="text-fn" style="font-size:14px;line-height:1.8;">{{ pe.footnotes }}</div>
+      </div>
+      {% endif %}
+      <div class="card card-alt">
+        <div class="lbl">中文翻译</div>
+        <div class="text-cn" style="font-size:16px;">{{ pe.translation or '' }}</div>
+      </div>
+      {% if pe.footnotes_translation %}
+      <div class="footnote-box-cn">
+        <div class="lbl">脚注翻译</div>
+        <div class="text-cn" style="font-size:14px;line-height:1.9;">{{ pe.footnotes_translation }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div><!-- para-block -->
+  {% endif %}
+  {% endfor %}
+
+  <!-- Actions -->
+  <div class="flex justify-center gap-8 mt-12 flex-wrap">
+    <a href="{{ url_for('retranslate', bp=cur_page_bp, model=model_key) }}" class="btn btn-gho" style="font-size:12px;"
+       onclick="this.innerHTML='<span class=spinner></span> 重译中&hellip;';this.style.pointerEvents='none';">
+      用{{ models[model_key].label }}重译本页
+    </a>
+    {% for mk, mv in models.items() if mk != model_key %}
+    <a href="{{ url_for('retranslate', bp=cur_page_bp, model=mk) }}" class="btn btn-gho" style="font-size:12px;color:var(--acc);border:1px solid var(--bdrL);"
+       onclick="this.innerHTML='<span class=spinner></span> 重译中&hellip;';this.style.pointerEvents='none';">
+      换{{ mv.label }}重译
+    </a>
+    {% endfor %}
+    {% if has_pdf %}
+    <button type="button" class="btn btn-gho" style="font-size:12px;color:var(--red);border:1px solid var(--bdrL);"
+            id="reparsePageBtn" onclick="startReparsePage({{ cur_page_bp }});">
+      🔄 重新解析本页
+    </button>
+    {% endif %}
+  </div>
+
+  {% endif %}
+  {% if not display_entries %}
+  <div class="page-placeholder">
+    <div class="page-placeholder-title">{{ '本页翻译失败' if current_page_failed else '本页尚未提交翻译' }}</div>
+    <div class="page-placeholder-subtitle">
+      {% if current_page_failed and current_page_failure %}
+      你正在查看 p.{{ cur_page_bp }}。最近一次失败原因：{{ current_page_failure.error }}。修正后可以从本页重新开始翻译。
+      {% else %}
+      你正在查看 p.{{ cur_page_bp }}。如果后台正在翻这一页，流式草稿会显示在上方；否则可以直接从这一页开始翻译。
+      {% endif %}
+    </div>
+    <div class="flex gap-8 mt-12 flex-wrap">
+      <button type="button" class="btn btn-pri" onclick="startTranslateAll({{ cur_page_bp }});">从本页开始翻译</button>
+      {% if has_pdf %}
+      <button type="button" class="btn btn-gho" onclick="togglePdfPanel();">查看 PDF 原页</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Progress dots -->
+  <div class="mt-28">
+    <div class="progress-dots">
+      {% for bp in page_bps %}
+      <a href="{{ url_for('reading', bp=bp, usage=1 if usage_open else None) }}" data-page-bp="{{ bp }}" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps else 'pending')) }}" title="p.{{ bp }} · {{ '已译' if bp in translated_bps else ('失败' if bp in failed_bps else '待译') }}"></a>
+      {% endfor %}
+    </div>
+    <div style="font-size:11px;color:var(--txL);margin-top:6px;">
+      已译{{ translated_bps|length }}页 · 失败{{ failed_bps|length }}页 · 当前 p.{{ cur_page_bp }} / p.{{ last_page }}
+    </div>
+  </div>
+</div>
+
+  </div><!-- content-panel -->
+</div><!-- reading-main-layout -->
+
+{% if has_pdf %}
+<!-- Collapsed PDF toggle button -->
+<button class="pdf-toggle-btn hidden" id="pdfToggleBtn" onclick="togglePdfPanel()" title="显示 PDF 原文">📄</button>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+var sideBySide = {{ 'true' if side_by_side else 'false' }};
+var showOriginal = true;
+
+function toggleOriginal() {
+  showOriginal = !showOriginal;
+  document.body.classList.toggle('hide-original', !showOriginal);
+  var btn = document.getElementById('origBtn');
+  if (btn) {
+    btn.style.opacity = showOriginal ? '1' : '0.5';
+    btn.title = showOriginal ? '隐藏原文' : '显示原文';
+  }
+}
+
+function toggleLayout() {
+  sideBySide = !sideBySide;
+  document.querySelectorAll('.sbs-view').forEach(function(el) {
+    el.style.display = sideBySide ? '' : 'none';
+  });
+  document.querySelectorAll('.stk-view').forEach(function(el) {
+    el.style.display = sideBySide ? 'none' : '';
+  });
+  document.getElementById('layoutBtn').textContent = sideBySide ? '⇅' : '⇆';
+  // Save preference
+  fetch('{{ url_for("set_pref") }}', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({side_by_side: sideBySide})
+  });
+}
+
+function copyExport() {
+  var ta = document.getElementById('exportText');
+  ta.select();
+  document.execCommand('copy');
+  alert('已复制');
+}
+
+// ===== PDF Preview Panel (图片模式) =====
+var pdfVisible = {{ 'true' if has_pdf else 'false' }};
+var curPdfBp = {{ cur_page_bp }};
+var pageMap = {{ page_map|tojson }};
+// 获取所有 bookPage 键（排序后用于翻页）
+var allBps = Object.keys(pageMap).map(Number).sort(function(a,b){return a-b;});
+
+function togglePdfPanel() {
+  var panel = document.getElementById('pdfPanel');
+  var toggleBtn = document.getElementById('pdfToggleBtn');
+  var layout = document.getElementById('readingLayout');
+  if (!panel) return;
+
+  pdfVisible = !pdfVisible;
+  if (pdfVisible) {
+    panel.style.display = '';
+    layout.classList.add('with-pdf');
+    if (toggleBtn) toggleBtn.classList.add('hidden');
+  } else {
+    panel.style.display = 'none';
+    layout.classList.remove('with-pdf');
+    if (toggleBtn) toggleBtn.classList.remove('hidden');
+  }
+}
+
+function pdfGoToBp(bp) {
+  var img = document.getElementById('pdfImg');
+  if (!img) return;
+  var fileIdx = pageMap[bp];
+  if (fileIdx === undefined) return;
+  curPdfBp = bp;
+  img.src = '{{ url_for("pdf_page", file_idx=0) }}'.replace('/0', '/' + fileIdx);
+  var info = document.getElementById('pdfPageInfo');
+  if (info) info.textContent = 'p.' + bp;
+  clearHighlights();
+}
+
+function pdfPrevPage() {
+  var i = allBps.indexOf(curPdfBp);
+  if (i > 0) pdfGoToBp(allBps[i - 1]);
+}
+
+function pdfNextPage() {
+  var i = allBps.indexOf(curPdfBp);
+  if (i >= 0 && i < allBps.length - 1) pdfGoToBp(allBps[i + 1]);
+}
+
+// ===== PDF 高亮层 =====
+var activePara = -1;
+// 页面 imgW/imgH（用于 bbox 百分比换算）
+var pageImgW = {{ (pages[page_map.get(cur_page_bp, 0)].imgW if pages and page_map.get(cur_page_bp, 0) is not none and page_map.get(cur_page_bp, 0) < pages|length else 0) }};
+var pageImgH = {{ (pages[page_map.get(cur_page_bp, 0)].imgH if pages and page_map.get(cur_page_bp, 0) is not none and page_map.get(cur_page_bp, 0) < pages|length else 0) }};
+
+function clearHighlights() {
+  var c = document.getElementById('pdfHighlights');
+  if (c) c.innerHTML = '';
+  activePara = -1;
+  document.querySelectorAll('.para-block.active-para, .heading-block.active-para').forEach(function(el) {
+    el.classList.remove('active-para');
+  });
+}
+
+function showHighlights(paraIdx, bboxes) {
+  var c = document.getElementById('pdfHighlights');
+  if (!c || !pageImgW || !pageImgH) return;
+  c.innerHTML = '';
+  activePara = paraIdx;
+  bboxes.forEach(function(bb) {
+    var div = document.createElement('div');
+    div.className = 'pdf-hl-box';
+    div.style.left   = (bb[0] / pageImgW * 100) + '%';
+    div.style.top    = (bb[1] / pageImgH * 100) + '%';
+    div.style.width  = ((bb[2] - bb[0]) / pageImgW * 100) + '%';
+    div.style.height = ((bb[3] - bb[1]) / pageImgH * 100) + '%';
+    c.appendChild(div);
+  });
+}
+
+// 段落 hover/click → 高亮 PDF 区域
+document.addEventListener('DOMContentLoaded', function() {
+  var blocks = document.querySelectorAll('[data-para-idx]');
+  blocks.forEach(function(el) {
+    var idx = parseInt(el.getAttribute('data-para-idx'));
+    var bboxes = [];
+    try { bboxes = JSON.parse(el.getAttribute('data-bboxes') || '[]'); } catch(e) {}
+
+    el.addEventListener('mouseenter', function() {
+      if (bboxes.length && pdfVisible) {
+        showHighlights(idx, bboxes);
+        el.classList.add('active-para');
+      }
+    });
+    el.addEventListener('mouseleave', function() {
+      clearHighlights();
+    });
+    el.addEventListener('click', function() {
+      if (bboxes.length && pdfVisible) {
+        showHighlights(idx, bboxes);
+        // 滚动 PDF 图片到高亮区域
+        var container = document.getElementById('pdfImgContainer');
+        var img = document.getElementById('pdfImg');
+        if (container && img && bboxes[0]) {
+          var scrollY = (bboxes[0][1] / pageImgH) * img.offsetHeight - 60;
+          container.scrollTop = Math.max(0, scrollY);
+        }
+      }
+    });
+  });
+});
+
+// ===== 后台连续翻译 (SSE) =====
+var translateES = null;
+var translateStatusPoll = null;
+var usagePoll = null;
+var usageSamples = [];
+var translatedPageBps = {{ translated_bps|tojson }};
+var failedPageBps = {{ failed_bps|tojson }};
+var initialTranslateSnapshot = {{ translate_snapshot|tojson }};
+var allBps = {{ page_bps|tojson }};
+var pageNavRenderSignature = '';
+var pageNavButtonLabel = '';
+var streamDraftState = {
+  active: false,
+  bp: null,
+  paraIdx: null,
+  paraTotal: 0,
+  paraDone: 0,
+  paragraphs: [],
+  status: 'idle',
+  note: '',
+  updatedAt: 0,
+  lastError: '',
+};
+var currentDocId = '{{ current_doc_id }}';
+var currentPageBp = {{ cur_page_bp }};
+var usageDashboardOpen = {{ 'true' if usage_open else 'false' }};
+var readingAutoStart = '{{ request.args.get("auto", "0") }}';
+var readingStartBp = '{{ request.args.get("start_bp", "") }}';
+
+function pageStateLabel(bp) {
+  bp = Number(bp);
+  if (streamDraftState.bp === bp && (streamDraftState.status === 'streaming' || streamDraftState.status === 'aborted' || streamDraftState.status === 'error')) {
+    if (streamDraftState.status === 'aborted') return '已中断';
+    if (streamDraftState.status === 'error') return '失败';
+    return '翻译中';
+  }
+  if (failedPageBps.indexOf(bp) >= 0) return '失败';
+  return translatedPageBps.indexOf(bp) >= 0 ? '已译' : '待译';
+}
+
+function buildReadingUrl(bp, usageOpen, autoStart, startBp) {
+  var url = new URL('{{ url_for("reading", _external=False) }}', window.location.origin);
+  if (bp !== undefined && bp !== null && bp !== '') {
+    url.searchParams.set('bp', bp);
+  }
+  if (usageOpen) {
+    url.searchParams.set('usage', '1');
+  }
+  if (autoStart === '1') {
+    url.searchParams.set('auto', '1');
+  }
+  if (startBp) {
+    url.searchParams.set('start_bp', startBp);
+  }
+  return url.pathname + (url.search ? url.search : '');
+}
+
+function syncReadingUrl() {
+  history.replaceState(null, '', buildReadingUrl(currentPageBp, usageDashboardOpen, readingAutoStart, readingStartBp));
+}
+
+function goReadingPage(bp) {
+  window.location.href = buildReadingUrl(bp, usageDashboardOpen, '0', '');
+}
+
+function resetStreamDraftState() {
+  streamDraftState = {
+    active: false,
+    bp: null,
+    paraIdx: null,
+    paraTotal: 0,
+    paraDone: 0,
+    paragraphs: [],
+    status: 'idle',
+    note: '流式翻译开始后，这里会显示当前页正在生成的中文草稿。',
+    updatedAt: 0,
+    lastError: '',
+  };
+}
+
+function hydrateStreamDraftFromSnapshot(snapshot) {
+  var draft = (snapshot && snapshot.draft) || {};
+  var paragraphs = Array.isArray(draft.paragraphs) ? draft.paragraphs.slice() : [];
+  streamDraftState = {
+    active: !!draft.active,
+    bp: draft.bp || null,
+    paraIdx: draft.para_idx === undefined || draft.para_idx === null ? null : draft.para_idx,
+    paraTotal: Number(draft.para_total || 0),
+    paraDone: Number(draft.para_done || 0),
+    paragraphs: paragraphs,
+    status: draft.status || 'idle',
+    note: draft.note || '流式翻译开始后，这里会显示当前页正在生成的中文草稿。',
+    updatedAt: Number(draft.updated_at || 0),
+    lastError: draft.last_error || '',
+  };
+}
+
+function renderStreamDraftState() {
+  var panel = document.getElementById('usageDraftMini');
+  var badge = document.getElementById('usageDraftState');
+  var progress = document.getElementById('usageDraftProgress');
+  var note = document.getElementById('usageDraftNote');
+  var preview = document.getElementById('usageDraftPreview');
+
+  var shouldShow = streamDraftState.active || streamDraftState.status === 'aborted' || streamDraftState.status === 'done' || streamDraftState.status === 'error';
+  panel.classList.toggle('hidden', !shouldShow);
+  if (!shouldShow) {
+    return;
+  }
+
+  badge.textContent = (
+    streamDraftState.status === 'streaming' ? '生成中' :
+    streamDraftState.status === 'aborted' ? '已中断' :
+    streamDraftState.status === 'error' ? '失败' :
+    streamDraftState.status === 'done' ? '已提交' : '空闲'
+  );
+  badge.dataset.status = streamDraftState.status;
+  progress.textContent = streamDraftState.bp
+    ? ('p.' + streamDraftState.bp + ' · 段落 ' + (streamDraftState.paraIdx === null ? '-' : (streamDraftState.paraIdx + 1)) + '/' + (streamDraftState.paraTotal || '?') + ' · 已完成 ' + (streamDraftState.paraDone || 0) + '/' + (streamDraftState.paraTotal || 0))
+    : '等待翻译任务启动';
+  note.textContent = streamDraftState.lastError ? ((streamDraftState.note || '') + ' ' + streamDraftState.lastError).trim() : (streamDraftState.note || '');
+  preview.textContent = streamDraftState.paraIdx !== null && streamDraftState.paragraphs[streamDraftState.paraIdx]
+    ? streamDraftState.paragraphs[streamDraftState.paraIdx]
+    : (streamDraftState.paragraphs.join('').trim() || '');
+  renderPageNavigationState();
+}
+
+function applyStreamDelta(data) {
+  if (!data) return;
+  streamDraftState.active = true;
+  streamDraftState.status = 'streaming';
+  streamDraftState.bp = data.bp || streamDraftState.bp;
+  streamDraftState.paraIdx = data.para_idx;
+  streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
+  if (!streamDraftState.paragraphs.length && streamDraftState.paraTotal > 0) {
+    streamDraftState.paragraphs = Array(streamDraftState.paraTotal).fill('');
+  }
+  streamDraftState.paragraphs[data.para_idx] = data.translation_so_far || '';
+  streamDraftState.note = '当前页尚未提交到硬盘；停止后会丢弃这一页草稿。';
+  renderStreamDraftState();
+}
+
+function renderPageNavigationState() {
+  var navBtn = document.getElementById('pageNavBtn');
+  if (navBtn) {
+    var nextLabel = 'p.' + currentPageBp + ' · ' + pageStateLabel(currentPageBp);
+    if (pageNavButtonLabel !== nextLabel) {
+      navBtn.textContent = nextLabel;
+      pageNavButtonLabel = nextLabel;
+    }
+  }
+
+  var navList = document.getElementById('pageNavList');
+  var navPanel = document.getElementById('pageNavPanel');
+  if (navList && navPanel && !navPanel.classList.contains('hidden')) {
+    var currentIndex = allBps.indexOf(currentPageBp);
+    var start = Math.max(0, currentIndex - 4);
+    var end = Math.min(allBps.length, currentIndex + 5);
+    var visible = allBps.slice(start, end);
+    var items = [];
+
+    if (start > 0) {
+      items.push(renderPageNavItem(allBps[0]));
+      if (start > 1) items.push('<div class="page-nav-ellipsis">…</div>');
+    }
+    visible.forEach(function(bp) {
+      items.push(renderPageNavItem(bp));
+    });
+    if (end < allBps.length) {
+      if (end < allBps.length - 1) items.push('<div class="page-nav-ellipsis">…</div>');
+      items.push(renderPageNavItem(allBps[allBps.length - 1]));
+    }
+    var nextSignature = items.join('');
+    if (pageNavRenderSignature !== nextSignature) {
+      navList.innerHTML = nextSignature;
+      pageNavRenderSignature = nextSignature;
+    }
+  }
+
+  document.querySelectorAll('.progress-dot[data-page-bp]').forEach(function(dot) {
+    var bp = Number(dot.getAttribute('data-page-bp'));
+    dot.classList.remove('done', 'pending', 'streaming', 'failed');
+    if (bp === currentPageBp) {
+      return;
+    }
+    if (streamDraftState.bp === bp && streamDraftState.status === 'streaming') {
+      dot.classList.add('streaming');
+    } else if (failedPageBps.indexOf(bp) >= 0) {
+      dot.classList.add('failed');
+    } else if (translatedPageBps.indexOf(bp) >= 0) {
+      dot.classList.add('done');
+    } else {
+      dot.classList.add('pending');
+    }
+  });
+}
+
+function renderPageNavItem(bp) {
+  bp = Number(bp);
+  var cls = bp === currentPageBp ? 'page-nav-item current' : 'page-nav-item';
+  return '<a href="' + buildReadingUrl(bp, usageDashboardOpen, '0', '') + '" class="' + cls + '">' +
+    '<span>p.' + bp + '</span>' +
+    '<span class="page-nav-item-status">' + pageStateLabel(bp) + '</span>' +
+  '</a>';
+}
+
+function togglePageNav(forceOpen) {
+  var panel = document.getElementById('pageNavPanel');
+  if (!panel) return;
+  var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !shouldOpen);
+  if (shouldOpen) {
+    pageNavRenderSignature = '';
+    renderPageNavigationState();
+    var input = document.getElementById('pageJumpInput');
+    if (input) input.focus();
+  }
+}
+
+function jumpToPageInput() {
+  var input = document.getElementById('pageJumpInput');
+  if (!input) return;
+  var bp = Number(input.value || 0);
+  if (!bp || allBps.indexOf(bp) < 0) return;
+  goReadingPage(bp);
+}
+
+function getResumeStartBp(state) {
+  if (!state) return null;
+  var totalPages = Math.max(Number(state.total_pages || 0), allBps.length || 0);
+  var donePages = Math.max(0, Number(state.done_pages || 0));
+  if (totalPages && donePages > totalPages) {
+    donePages = totalPages;
+  }
+
+  var currentBp = Number(state.current_bp || 0);
+  if (currentBp) {
+    var bpIndex = allBps.indexOf(currentBp);
+    if (bpIndex >= 0 && bpIndex < allBps.length - 1) {
+      return allBps[bpIndex + 1];
+    }
+  }
+
+  if (donePages >= 0 && donePages < allBps.length) {
+    return allBps[donePages];
+  }
+  return null;
+}
+
+function resumeTranslateFromSnapshot(state) {
+  var nextBp = getResumeStartBp(state);
+  if (!nextBp) {
+    refreshTranslateStatus();
+    return;
+  }
+  startTranslateAll(nextBp);
+}
+
+function formatUsageNumber(value) {
+  return (value || 0).toLocaleString('zh-CN');
+}
+
+function formatUsagePhase(phase) {
+  var labels = {
+    idle: '空闲',
+    running: '翻译中',
+    stopping: '停止中',
+    stopped: '已停止',
+    done: '已完成',
+    error: '失败'
+  };
+  return labels[phase] || '-';
+}
+
+function renderUsageDashboard(payload) {
+  var snapshot = (payload && payload.snapshot) || {};
+  document.getElementById('usagePhase').textContent = formatUsagePhase(snapshot.phase);
+  document.getElementById('usageModel').textContent = snapshot.model || '-';
+  document.getElementById('usageRequestCount').textContent = formatUsageNumber(snapshot.request_count);
+  document.getElementById('usageTotalTokens').textContent = formatUsageNumber(snapshot.total_tokens);
+  document.getElementById('usageCurrentPage').textContent = snapshot.current_bp ? ('p.' + snapshot.current_bp) : '-';
+  document.getElementById('usageUpdatedAt').textContent = snapshot.updated_at
+    ? new Date(snapshot.updated_at * 1000).toLocaleTimeString('zh-CN', {hour12: false})
+    : '-';
+}
+
+function refreshUsageDashboard() {
+  if (!usageDashboardOpen) return Promise.resolve();
+  return fetch('{{ url_for("translate_api_usage_data") }}?doc_id=' + encodeURIComponent(currentDocId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      renderUsageDashboard(d);
+      return d;
+    });
+}
+
+function startUsagePolling() {
+  if (usagePoll) return;
+  usagePoll = setInterval(function() {
+    refreshUsageDashboard();
+  }, 1000);
+}
+
+function stopUsagePolling() {
+  if (!usagePoll) return;
+  clearInterval(usagePoll);
+  usagePoll = null;
+}
+
+function toggleUsageDashboard(forceOpen) {
+  if (typeof forceOpen === 'boolean') {
+    usageDashboardOpen = forceOpen;
+  } else {
+    usageDashboardOpen = !usageDashboardOpen;
+  }
+
+  var panel = document.getElementById('translateUsagePanel');
+  var btn = document.getElementById('usageBtn');
+  panel.classList.toggle('hidden', !usageDashboardOpen);
+  btn.classList.toggle('active', usageDashboardOpen);
+
+  if (usageDashboardOpen) {
+    refreshUsageDashboard();
+    startUsagePolling();
+  } else {
+    stopUsagePolling();
+  }
+
+  syncReadingUrl();
+}
+
+function showProgress(show) {
+  document.getElementById('translateProgress').style.display = show ? '' : 'none';
+}
+
+function setTranslateProgress(pct, label, stats, detail) {
+  document.getElementById('tpBar').style.width = pct + '%';
+  document.getElementById('tpPct').textContent = Math.round(pct) + '%';
+  if (label) document.getElementById('tpLabel').textContent = label;
+  if (stats) document.getElementById('tpStats').textContent = stats;
+  if (detail !== undefined) document.getElementById('tpDetail').textContent = detail;
+}
+
+function closeTranslateSSE() {
+  if (!translateES) return;
+  translateES.close();
+  translateES = null;
+}
+
+function startTranslateStatusPolling() {
+  if (translateStatusPoll) return;
+  translateStatusPoll = setInterval(function() {
+    refreshTranslateStatus();
+  }, 2000);
+}
+
+function stopTranslateStatusPolling() {
+  if (!translateStatusPoll) return;
+  clearInterval(translateStatusPoll);
+  translateStatusPoll = null;
+}
+
+function isActiveTranslatePhase(phase) {
+  return phase === 'running' || phase === 'stopping';
+}
+
+function shouldShowTranslateSnapshot(state) {
+  return !!state && state.phase && state.phase !== 'idle';
+}
+
+function renderTranslateSnapshot(state) {
+  var stopBtn = document.getElementById('tpStopBtn');
+  var bar = document.getElementById('tpBar');
+  var resumeBp = getResumeStartBp(state);
+  failedPageBps = Array.isArray(state && state.failed_bps) ? state.failed_bps.map(function(bp) { return Number(bp); }) : [];
+  if (state && state.draft) {
+    hydrateStreamDraftFromSnapshot(state);
+    renderStreamDraftState();
+  }
+  renderPageNavigationState();
+
+  if (!shouldShowTranslateSnapshot(state)) {
+    showProgress(false);
+    stopTranslateStatusPolling();
+    closeTranslateSSE();
+    return;
+  }
+
+  showProgress(true);
+
+  var totalPages = state.total_pages || 0;
+  var donePages = state.done_pages || 0;
+  var pct = totalPages ? (donePages / totalPages) * 100 : 0;
+  var stats = totalPages ? (donePages + '/' + totalPages + '页') : '';
+  var detail = '已译 ' + (state.translated_paras || 0) + ' 段 / ' + (state.translated_chars || 0) + ' 字';
+  var totalTokens = state.total_tokens || 0;
+  if (totalTokens > 0) {
+    detail += ' · ' + totalTokens + ' tokens';
+  }
+
+  bar.style.background = 'var(--acc)';
+  stopBtn.style.display = '';
+
+  if (state.phase === 'running') {
+    setTranslateProgress(
+      pct,
+      state.current_bp ? ('翻译 p.' + state.current_bp + '…') : '翻译中…',
+      stats,
+      detail
+    );
+    stopBtn.disabled = false;
+    stopBtn.textContent = '停止';
+    stopBtn.onclick = stopTranslate;
+  } else if (state.phase === 'stopping') {
+    setTranslateProgress(
+      pct,
+      state.current_bp ? ('停止中，等待 p.' + state.current_bp + ' 完成…') : '停止中…',
+      stats,
+      detail
+    );
+    stopBtn.disabled = true;
+    stopBtn.textContent = '停止中…';
+    stopBtn.onclick = stopTranslate;
+  } else if (state.phase === 'stopped') {
+    setTranslateProgress(pct, '翻译已停止', stats, detail);
+    bar.style.background = 'var(--txL)';
+    if (resumeBp) {
+      stopBtn.style.display = '';
+      stopBtn.disabled = false;
+      stopBtn.textContent = '继续翻译';
+      stopBtn.onclick = function() { resumeTranslateFromSnapshot(state); };
+    } else {
+      stopBtn.style.display = 'none';
+    }
+  } else if (state.phase === 'done') {
+    setTranslateProgress(100, '全部翻译完成', stats, detail);
+    bar.style.background = 'var(--grn)';
+    stopBtn.style.display = 'none';
+  } else if (state.phase === 'error') {
+    setTranslateProgress(pct, '翻译失败', stats, state.last_error || detail);
+    bar.style.background = 'var(--red)';
+    stopBtn.style.display = 'none';
+  }
+
+  if (isActiveTranslatePhase(state.phase)) {
+    startTranslateStatusPolling();
+    if (!translateES) {
+      listenTranslateSSE();
+    }
+  } else {
+    stopTranslateStatusPolling();
+    closeTranslateSSE();
+  }
+}
+
+function refreshTranslateStatus() {
+  return fetch('{{ url_for("translate_status") }}?doc_id=' + encodeURIComponent(currentDocId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      renderTranslateSnapshot(d);
+      if (usageDashboardOpen) {
+        refreshUsageDashboard();
+      }
+      return d;
+    });
+}
+
+function startTranslateAll(startBp) {
+  showProgress(true);
+  setTranslateProgress(0, '启动翻译…', '', '');
+  document.getElementById('tpBar').style.background = 'var(--acc)';
+  var stopBtn = document.getElementById('tpStopBtn');
+  stopBtn.style.display = '';
+  stopBtn.disabled = false;
+  stopBtn.textContent = '停止';
+  stopBtn.onclick = stopTranslate;
+
+  var form = new FormData();
+  form.append('start_bp', startBp);
+  form.append('doc_title', '{{ doc_title }}');
+  form.append('doc_id', currentDocId);
+
+  fetch('{{ url_for("start_translate_all") }}', {method: 'POST', body: form})
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.error) {
+        setTranslateProgress(0, '启动失败', d.error, '');
+        return;
+      }
+      refreshTranslateStatus();
+    });
+}
+
+function listenTranslateSSE() {
+  closeTranslateSSE();
+  translateES = new EventSource('{{ url_for("translate_all_sse") }}?doc_id=' + encodeURIComponent(currentDocId));
+
+  translateES.addEventListener('init', function(e) {
+    refreshTranslateStatus();
+  });
+
+  translateES.addEventListener('page_start', function(e) {
+    resetStreamDraftState();
+    refreshTranslateStatus();
+  });
+
+  translateES.addEventListener('stream_page_init', function(e) {
+    var d = JSON.parse(e.data);
+    streamDraftState.active = true;
+    streamDraftState.status = 'streaming';
+    streamDraftState.bp = d.bp;
+    streamDraftState.paraIdx = 0;
+    streamDraftState.paraTotal = d.para_total || 0;
+    streamDraftState.paraDone = 0;
+    streamDraftState.paragraphs = Array(streamDraftState.paraTotal).fill('');
+    streamDraftState.note = '当前页正在流式翻译，完整结束后才会写入硬盘。';
+    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
+    streamDraftState.lastError = '';
+    renderStreamDraftState();
+  });
+
+  translateES.addEventListener('stream_para_delta', function(e) {
+    applyStreamDelta(JSON.parse(e.data));
+  });
+
+  translateES.addEventListener('stream_para_done', function(e) {
+    var d = JSON.parse(e.data);
+    streamDraftState.active = true;
+    streamDraftState.status = 'streaming';
+    streamDraftState.bp = d.bp || streamDraftState.bp;
+    streamDraftState.paraIdx = d.para_idx;
+    streamDraftState.paraDone = Math.max(streamDraftState.paraDone || 0, Number(d.para_idx || 0) + 1);
+    if (!streamDraftState.paragraphs.length && streamDraftState.paraTotal > 0) {
+      streamDraftState.paragraphs = Array(streamDraftState.paraTotal).fill('');
+    }
+    streamDraftState.paragraphs[d.para_idx] = d.translation || streamDraftState.paragraphs[d.para_idx] || '';
+    streamDraftState.note = '该段已完成，正在继续翻译后续段落。';
+    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
+    streamDraftState.lastError = '';
+    renderStreamDraftState();
+  });
+
+  translateES.addEventListener('stream_page_aborted', function(e) {
+    var d = JSON.parse(e.data);
+    streamDraftState.active = false;
+    streamDraftState.status = 'aborted';
+    streamDraftState.bp = d.bp || streamDraftState.bp;
+    streamDraftState.paraIdx = d.para_idx;
+    streamDraftState.note = '当前页已停止，草稿未提交到硬盘。点击“继续翻译”会从这一页重新开始。';
+    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
+    renderStreamDraftState();
+  });
+
+  translateES.addEventListener('page_done', function(e) {
+    var d = JSON.parse(e.data);
+    streamDraftState.active = false;
+    streamDraftState.status = 'done';
+    streamDraftState.bp = d.bp || streamDraftState.bp;
+    streamDraftState.paraDone = streamDraftState.paraTotal;
+    streamDraftState.note = '当前页已完整提交到硬盘。';
+    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
+    failedPageBps = failedPageBps.filter(function(bp) { return bp !== Number(d.bp); });
+    if (translatedPageBps.indexOf(Number(d.bp)) < 0) {
+      translatedPageBps.push(Number(d.bp));
+      translatedPageBps.sort(function(a, b) { return a - b; });
+    }
+    renderStreamDraftState();
+    refreshTranslateStatus();
+
+    // 仅在 auto=1 的首轮自动启动场景刷新当前页，手动翻页时不能触发整页跳转。
+    if (readingAutoStart === '1' && currentPageBp === d.bp) {
+      window.location.href = buildReadingUrl(d.bp, usageDashboardOpen, '0', '');
+    }
+  });
+
+  translateES.addEventListener('page_error', function(e) {
+    var d = JSON.parse(e.data);
+    if (failedPageBps.indexOf(Number(d.bp)) < 0) {
+      failedPageBps.push(Number(d.bp));
+      failedPageBps.sort(function(a, b) { return a - b; });
+    }
+    refreshTranslateStatus();
+  });
+
+  translateES.addEventListener('all_done', function(e) {
+    resetStreamDraftState();
+    renderStreamDraftState();
+    refreshTranslateStatus();
+  });
+
+  translateES.addEventListener('stopped', function(e) {
+    refreshTranslateStatus();
+  });
+
+  translateES.addEventListener('error', function() {
+    refreshTranslateStatus();
+  });
+
+  translateES.addEventListener('idle', function() {
+    closeTranslateSSE();
+    refreshTranslateStatus();
+  });
+}
+
+function stopTranslate() {
+  var btn = document.getElementById('tpStopBtn');
+  // 只更新按钮文字作为反馈，不修改其他 UI
+  btn.textContent = '停止中…';
+  btn.disabled = true;
+
+  fetch('{{ url_for("stop_translate") }}?doc_id=' + encodeURIComponent(currentDocId))
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(d) {
+      if (d.status !== 'stopping') {
+        throw new Error('stop rejected');
+      }
+    })
+    .catch(function(err) {
+      // 请求失败，恢复按钮（SSE 会继续推送状态）
+      btn.textContent = '停止';
+      btn.disabled = false;
+      console.error('停止请求失败:', err);
+    });
+  // 注意：UI 更新完全由 SSE 事件驱动，不在这里处理
+}
+
+// ===== 单页重新解析 =====
+function startReparsePage(pageBp) {
+  var btn = document.getElementById('reparsePageBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ 解析中…';
+
+  fetch('{{ url_for("reparse_page", page_bp=0) }}'.replace('/0', '/' + pageBp), {method: 'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        alert('重新解析失败: ' + data.error);
+        btn.disabled = false;
+        btn.textContent = '🔄 重新解析本页';
+        return;
+      }
+      if (data.task_id) {
+        listenReparseSSE(data.task_id, pageBp);
+      }
+    })
+    .catch(function(err) {
+      alert('请求失败: ' + err);
+      btn.disabled = false;
+      btn.textContent = '🔄 重新解析本页';
+    });
+}
+
+function listenReparseSSE(taskId, pageBp) {
+  var es = new EventSource('{{ url_for("process_sse") }}?task_id=' + taskId);
+  var btn = document.getElementById('reparsePageBtn');
+
+  es.addEventListener('progress', function(e) {
+    var d = JSON.parse(e.data);
+    // 显示进度在按钮上
+    if (btn && d.label) {
+      btn.textContent = '⏳ ' + d.label;
+    }
+  });
+
+  es.addEventListener('done', function(e) {
+    es.close();
+    if (btn) {
+      btn.textContent = '✓ 解析完成';
+      btn.style.color = 'var(--grn)';
+    }
+    // 刷新页面以显示新解析的内容
+    setTimeout(function() {
+      window.location.reload();
+    }, 800);
+  });
+
+  es.addEventListener('error_msg', function(e) {
+    es.close();
+    var d = JSON.parse(e.data);
+    alert('重新解析失败: ' + (d.error || '未知错误'));
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '🔄 重新解析本页';
+    }
+  });
+
+  es.onerror = function() {
+    es.close();
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '🔄 重新解析本页';
+    }
+  };
+}
+
+// ===== 导出功能 =====
+function openExportModal() {
+  document.getElementById('exportModal').classList.remove('hidden');
+  loadExportContent();
+}
+
+function loadExportContent() {
+  var textarea = document.getElementById('exportText');
+  var loading = document.getElementById('exportLoading');
+
+  // 如果已经有内容且不是占位符，不重复加载
+  if (textarea.value && textarea.value !== '加载中…') {
+    return;
+  }
+
+  textarea.classList.add('hidden');
+  loading.classList.remove('hidden');
+
+  fetch('{{ url_for("export_md") }}')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      textarea.value = d.markdown || '';
+      loading.classList.add('hidden');
+      textarea.classList.remove('hidden');
+    })
+    .catch(function(err) {
+      loading.textContent = '加载失败: ' + err;
+    });
+}
+
+function copyExport() {
+  var textarea = document.getElementById('exportText');
+  if (!textarea.value || textarea.value === '加载中…') {
+    alert('内容尚未加载完成');
+    return;
+  }
+  textarea.select();
+  document.execCommand('copy');
+  var btn = event.target;
+  var originalText = btn.textContent;
+  btn.textContent = '已复制';
+  setTimeout(function() { btn.textContent = originalText; }, 1500);
+}
+
+// ===== 点击外部关闭 dropdown =====
+document.addEventListener('click', function(e) {
+  var mm = document.getElementById('moreMenu');
+  if (mm && !mm.contains(e.target)) {
+    mm.classList.remove('open');
+  }
+  var pageNav = document.getElementById('pageNav');
+  if (pageNav && !pageNav.contains(e.target)) {
+    togglePageNav(false);
+  }
+});
+
+// 页面加载时：检查是否需要自动启动翻译
+(function() {
+  resetStreamDraftState();
+  if (initialTranslateSnapshot && initialTranslateSnapshot.draft) {
+    hydrateStreamDraftFromSnapshot(initialTranslateSnapshot);
+    failedPageBps = Array.isArray(initialTranslateSnapshot.failed_bps) ? initialTranslateSnapshot.failed_bps.map(function(bp) { return Number(bp); }) : failedPageBps;
+    renderStreamDraftState();
+  }
+  renderPageNavigationState();
+  var params = new URLSearchParams(window.location.search);
+  var autoStart = params.get('auto');
+  var startBp = params.get('start_bp');
+
+  if (autoStart === '1' && startBp) {
+    startTranslateAll(startBp);
+    readingAutoStart = '0';
+    readingStartBp = '';
+    syncReadingUrl();
+  } else {
+    refreshTranslateStatus();
+  }
+
+  if (usageDashboardOpen) {
+    refreshUsageDashboard();
+    startUsagePolling();
+  }
+})();
+</script>
+{% endblock %}

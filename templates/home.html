@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <!-- Title -->
+  <div class="text-center mb-20" style="margin-bottom:48px;">
+    <h1 style="font-size:28px;font-weight:700;margin-bottom:6px;">外文文献阅读器</h1>
+    <p style="color:var(--txS);font-size:15px;font-style:italic;">Foreign Literature Reader</p>
+    <p style="color:var(--txL);font-size:12px;margin-top:8px;">PDF/图片 → PaddleOCR版面解析 → AI翻译</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="card">
+    <div class="flex justify-between items-center mb-16 flex-wrap gap-8">
+      <span style="font-size:15px;font-weight:600;">数据来源</span>
+      <div class="flex gap-8 items-center">
+        <div class="model-picker">
+          {% for key, m in models.items() %}
+          <a href="{{ url_for('set_model', key=key) }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+          {% endfor %}
+        </div>
+        <a href="{{ url_for('settings') }}" class="btn btn-sec btn-sm">设置</a>
+      </div>
+    </div>
+
+    <!-- Upload PDF/Image -->
+    <div class="mb-14">
+      <div class="upload-area" style="padding:20px;display:block;" id="uploadArea">
+        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.bmp,.tiff,.tif" style="display:none;">
+        <div class="icon" id="uploadIcon">📄</div>
+        <div class="title" id="uploadTitle">上传 PDF / 图片</div>
+        <div class="subtitle" id="uploadSubtitle">调用 PaddleOCR 解析版面，PDF文字层自动优先</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar (hidden by default) -->
+    <div id="progressSection" style="display:none;" class="mb-14">
+      <div style="margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:600;" id="progressLabel">准备中…</span>
+        <span style="font-size:12px;color:var(--txL);float:right;" id="progressPct">0%</span>
+      </div>
+      <div style="background:var(--bg2);border-radius:6px;height:8px;overflow:hidden;">
+        <div id="progressBar" style="background:var(--acc);height:100%;width:0%;border-radius:6px;transition:width 0.3s;"></div>
+      </div>
+      <div id="progressDetail" style="font-size:11px;color:var(--txL);margin-top:4px;"></div>
+    </div>
+
+    <!-- Status -->
+    {% if status_msg %}
+    <div class="status-bar {{ status_state }}">
+      <span class="icon">{{ '⏳' if status_state == 'loading' else ('✓' if status_state == 'success' else '✗') }}</span>
+      <span class="msg">{{ status_msg }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Source Status -->
+    {% if has_pages %}
+    <div class="source-status">
+      <div class="flex gap-16 flex-wrap mb-6">
+        <div style="flex:1;min-width:140px;">
+          <div class="label">数据来源</div>
+          <div style="font-size:13px;color:var(--grn);">✓ {{ src_name }} ({{ page_count }}页)</div>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <div class="label">页码范围</div>
+          <div style="font-size:12px;color:var(--txS);">p.{{ first_page }} → p.{{ last_page }}</div>
+        </div>
+      </div>
+      {% if has_pdf %}
+      <div class="flex gap-8" style="margin-top:10px;">
+        <button type="button" id="reparseBtn" class="btn btn-sm btn-sec" onclick="startReparse()">🔄 重新解析</button>
+        <span style="font-size:11px;color:var(--txL);line-height:1.4;">若原文/脚注显示异常，可重新解析（保留已有翻译）</span>
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div style="background:var(--bg);border-radius:8px;padding:16px;text-align:center;">
+      <p style="font-size:13px;color:var(--txS);line-height:1.8;margin:0;">
+        <strong>上传PDF或图片</strong>，自动调用PaddleOCR解析版面。<br>
+        <span style="font-size:12px;color:var(--txL);">页眉页脚自动检测移除。每日可解析3000页。</span>
+      </p>
+    </div>
+    {% endif %}
+
+    <!-- Logs -->
+    {% if logs %}
+    <details style="margin-top:8px;">
+      <summary style="color:var(--txL);font-size:12px;cursor:pointer;">解析日志</summary>
+      <div class="log-panel">
+        {% for l in logs %}
+        <div class="log-line {{ 'error' if 'ERROR' in l else ('success' if '✓' in l or '移除' in l else '') }}">{{ l }}</div>
+        {% endfor %}
+      </div>
+    </details>
+    {% endif %}
+
+    <!-- Live log panel (for SSE) -->
+    <div id="liveLogPanel" style="display:none;margin-top:8px;">
+      <div class="log-panel" id="liveLog" style="max-height:150px;"></div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex gap-12 flex-wrap mt-16">
+    {% if has_pages %}
+    <a href="{{ url_for('start_from_beginning') }}" class="btn btn-pri btn-lg" style="flex:1;justify-content:center;"
+       onclick="this.innerHTML='<span class=spinner></span> 加载中…';this.style.pointerEvents='none';">从首页开始读</a>
+    <a href="{{ url_for('input_page') }}" class="btn btn-sec btn-lg" style="flex:1;justify-content:center;">从指定页开始</a>
+    {% else %}
+    <span class="btn btn-pri btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从首页开始读</span>
+    <span class="btn btn-sec btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从指定页开始</span>
+    {% endif %}
+
+    {% if has_entries %}
+    <a href="{{ url_for('reading') }}" class="btn btn-grn btn-lg" style="flex:1;justify-content:center;">继续 §{{ entry_idx + 1 }}/{{ entry_count }}</a>
+    {% endif %}
+  </div>
+
+  {% if error %}
+  <p class="error-msg">{{ error }}</p>
+  {% endif %}
+
+  <!-- 文档列表 -->
+  {% if docs %}
+  <div class="card" style="margin-top:20px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">已导入文档</div>
+    <div class="doc-list">
+      {% for doc in docs %}
+      <div class="doc-item {{ 'doc-active' if doc.id == current_doc_id else '' }}">
+        <div class="doc-info">
+          <div class="doc-name">
+            {% if doc.id == current_doc_id %}<span class="doc-current-badge">当前</span>{% endif %}
+            {{ doc.name }}
+          </div>
+          <div class="doc-meta-line">
+            {{ doc.page_count }}页
+            {% if doc.entry_count %} · {{ doc.entry_count }}段已译{% endif %}
+            {% if doc.has_pdf %} · PDF{% endif %}
+          </div>
+        </div>
+        <div class="doc-actions">
+          {% if doc.id != current_doc_id %}
+          <a href="{{ url_for('switch_doc', doc_id=doc.id) }}" class="btn btn-sm btn-sec">切换</a>
+          {% endif %}
+          <a href="{{ url_for('delete_doc_route', doc_id=doc.id) }}" class="btn btn-sm btn-red-ghost"
+             onclick="return confirm('确定删除「{{ doc.name }}」？');">删除</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Glossary Toggle -->
+  <div class="mt-24">
+    <a href="{{ url_for('settings') }}#glossary" class="btn btn-gho" style="padding:8px 0;font-size:13px;">术语词典 ▸</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var fileInput = document.getElementById('fileInput');
+var uploadArea = document.getElementById('uploadArea');
+var progressSection = document.getElementById('progressSection');
+var progressBar = document.getElementById('progressBar');
+var progressLabel = document.getElementById('progressLabel');
+var progressPct = document.getElementById('progressPct');
+var progressDetail = document.getElementById('progressDetail');
+var liveLogPanel = document.getElementById('liveLogPanel');
+var liveLog = document.getElementById('liveLog');
+
+function preventDragDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+function setDragActive(active) {
+  uploadArea.classList.toggle('dragover', active);
+}
+
+uploadArea.addEventListener('click', function() {
+  fileInput.click();
+});
+
+['dragenter', 'dragover'].forEach(function(evtName) {
+  uploadArea.addEventListener(evtName, function(e) {
+    preventDragDefaults(e);
+    setDragActive(true);
+  });
+});
+
+['dragleave', 'dragend'].forEach(function(evtName) {
+  uploadArea.addEventListener(evtName, function(e) {
+    preventDragDefaults(e);
+    if (!uploadArea.contains(e.relatedTarget)) {
+      setDragActive(false);
+    }
+  });
+});
+
+uploadArea.addEventListener('drop', function(e) {
+  preventDragDefaults(e);
+  setDragActive(false);
+  if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
+  startUpload(e.dataTransfer.files[0]);
+});
+
+['dragenter', 'dragover', 'drop'].forEach(function(evtName) {
+  document.addEventListener(evtName, preventDragDefaults);
+});
+
+fileInput.addEventListener('change', function() {
+  if (!fileInput.files.length) return;
+  startUpload(fileInput.files[0]);
+});
+
+function setProgress(pct, label, detail) {
+  progressBar.style.width = pct + '%';
+  progressPct.textContent = Math.round(pct) + '%';
+  if (label) progressLabel.textContent = label;
+  if (detail !== undefined) progressDetail.textContent = detail;
+}
+
+function addLog(msg, cls) {
+  liveLogPanel.style.display = '';
+  var div = document.createElement('div');
+  div.className = 'log-line' + (cls ? ' ' + cls : '');
+  div.textContent = msg;
+  liveLog.appendChild(div);
+  liveLog.scrollTop = liveLog.scrollHeight;
+}
+
+function startUpload(file) {
+  setDragActive(false);
+  // Show progress, hide upload area interactivity
+  progressSection.style.display = '';
+  document.getElementById('uploadIcon').textContent = '⏳';
+  document.getElementById('uploadTitle').textContent = file.name;
+  document.getElementById('uploadSubtitle').textContent = '上传中…';
+  uploadArea.style.pointerEvents = 'none';
+  uploadArea.style.opacity = '0.6';
+  liveLog.innerHTML = '';
+
+  setProgress(0, '上传文件…', '');
+
+  var xhr = new XMLHttpRequest();
+  var formData = new FormData();
+  formData.append('file', file);
+
+  // Upload progress
+  xhr.upload.addEventListener('progress', function(e) {
+    if (e.lengthComputable) {
+      var pct = (e.loaded / e.total) * 30; // upload = 0-30%
+      setProgress(pct, '上传文件…', Math.round(e.loaded / 1024 / 1024) + 'MB / ' + Math.round(e.total / 1024 / 1024) + 'MB');
+    }
+  });
+
+  xhr.addEventListener('load', function() {
+    if (xhr.status === 200) {
+      var resp = JSON.parse(xhr.responseText);
+      if (resp.task_id) {
+        setProgress(30, '文件已上传，开始解析…', '');
+        addLog('文件上传完成');
+        startSSE(resp.task_id);
+      } else if (resp.error) {
+        setProgress(0, '上传失败', resp.error);
+        progressBar.style.background = 'var(--red)';
+        resetUploadArea();
+      }
+    } else {
+      setProgress(0, '上传失败', 'HTTP ' + xhr.status);
+      progressBar.style.background = 'var(--red)';
+      resetUploadArea();
+    }
+  });
+
+  xhr.addEventListener('error', function() {
+    setProgress(0, '上传失败', '网络错误');
+    progressBar.style.background = 'var(--red)';
+    resetUploadArea();
+  });
+
+  xhr.open('POST', '{{ url_for("upload_file") }}');
+  xhr.send(formData);
+}
+
+function startSSE(taskId) {
+  var es = new EventSource('{{ url_for("process_sse") }}?task_id=' + taskId);
+
+  es.addEventListener('progress', function(e) {
+    var d = JSON.parse(e.data);
+    // d: {pct, label, detail, log?}
+    var pct = 30 + d.pct * 0.7; // OCR processing = 30-100%
+    setProgress(pct, d.label || '', d.detail || '');
+    if (d.log) addLog(d.log);
+  });
+
+  es.addEventListener('log', function(e) {
+    var d = JSON.parse(e.data);
+    addLog(d.msg, d.cls || '');
+  });
+
+  es.addEventListener('done', function(e) {
+    es.close();
+    var d = JSON.parse(e.data);
+    setProgress(100, '解析完成', d.summary || '');
+    progressBar.style.background = 'var(--grn)';
+    addLog(d.summary || '完成', 'success');
+    // Reload page after short delay
+    setTimeout(function() { window.location.reload(); }, 800);
+  });
+
+  es.addEventListener('error_msg', function(e) {
+    es.close();
+    var d = JSON.parse(e.data);
+    setProgress(0, '解析失败', d.error || '');
+    progressBar.style.background = 'var(--red)';
+    addLog(d.error || '未知错误', 'error');
+    resetUploadArea();
+  });
+
+  es.onerror = function() {
+    es.close();
+    setProgress(0, '连接中断', '');
+    progressBar.style.background = 'var(--red)';
+    resetUploadArea();
+  };
+}
+
+function startReparse() {
+  var btn = document.getElementById('reparseBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ 准备中…';
+
+  progressSection.style.display = '';
+  liveLog.innerHTML = '';
+  liveLogPanel.style.display = '';
+  setProgress(5, '请求重新解析…', '');
+
+  fetch('{{ url_for("reparse") }}', {method: 'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        setProgress(0, '重新解析失败', data.error);
+        progressBar.style.background = 'var(--red)';
+        addLog('错误: ' + data.error, 'error');
+        btn.disabled = false;
+        btn.textContent = '🔄 重新解析';
+        return;
+      }
+      if (data.task_id) {
+        setProgress(10, '开始重新解析…', '');
+        addLog('开始重新解析文档');
+        startSSE(data.task_id);
+        setTimeout(function() { window.location.reload(); }, 1200);
+      }
+    })
+    .catch(function(err) {
+      setProgress(0, '请求失败', String(err));
+      progressBar.style.background = 'var(--red)';
+      addLog('请求失败: ' + err, 'error');
+      btn.disabled = false;
+      btn.textContent = '🔄 重新解析';
+    });
+}
+
+function resetUploadArea() {
+  uploadArea.style.pointerEvents = '';
+  uploadArea.style.opacity = '';
+  setDragActive(false);
+  document.getElementById('uploadIcon').textContent = '📄';
+  document.getElementById('uploadTitle').textContent = '上传 PDF / 图片';
+  document.getElementById('uploadSubtitle').textContent = '调用 PaddleOCR 解析版面，PDF文字层自动优先';
+  fileInput.value = '';
+}
+</script>
+{% endblock %}

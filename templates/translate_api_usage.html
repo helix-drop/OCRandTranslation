@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-wide">
+  <div class="card">
+    <div class="flex justify-between items-center mb-16 flex-wrap gap-8">
+      <div>
+        <div style="font-size:18px;font-weight:700;">翻译 API Token 统计</div>
+        <div style="font-size:12px;color:var(--txL);margin-top:4px;">{{ doc_title or '当前文档' }}</div>
+      </div>
+      <div class="flex gap-8">
+        <a href="{{ url_for('reading') }}" class="btn btn-sec">返回阅读</a>
+        <a href="{{ url_for('home') }}" class="btn btn-gho">首页</a>
+      </div>
+    </div>
+
+    <div class="flex gap-12 flex-wrap mb-16">
+      <div class="card flex-1" style="min-width:180px;margin-bottom:0;">
+        <div class="lbl">当前阶段</div>
+        <div id="usagePhase" style="font-size:20px;font-weight:700;">{{ snapshot.phase }}</div>
+      </div>
+      <div class="card flex-1" style="min-width:180px;margin-bottom:0;">
+        <div class="lbl">Prompt Tokens</div>
+        <div id="sumPrompt" style="font-size:20px;font-weight:700;">{{ snapshot.prompt_tokens }}</div>
+      </div>
+      <div class="card flex-1" style="min-width:180px;margin-bottom:0;">
+        <div class="lbl">Completion Tokens</div>
+        <div id="sumCompletion" style="font-size:20px;font-weight:700;">{{ snapshot.completion_tokens }}</div>
+      </div>
+      <div class="card flex-1" style="min-width:180px;margin-bottom:0;">
+        <div class="lbl">Total Tokens</div>
+        <div id="sumTotal" style="font-size:20px;font-weight:700;color:var(--acc);">{{ snapshot.total_tokens }}</div>
+      </div>
+      <div class="card flex-1" style="min-width:180px;margin-bottom:0;">
+        <div class="lbl">请求数</div>
+        <div id="sumRequests" style="font-size:20px;font-weight:700;">{{ snapshot.request_count }}</div>
+      </div>
+    </div>
+
+    <div class="flex gap-12 flex-wrap mb-16">
+      <div class="card flex-1" style="min-width:220px;margin-bottom:0;">
+        <div class="lbl">翻译进度</div>
+        <div id="usageProgress" style="font-size:15px;font-weight:600;">{{ snapshot.done_pages }}/{{ snapshot.total_pages }} 页</div>
+      </div>
+      <div class="card flex-1" style="min-width:220px;margin-bottom:0;">
+        <div class="lbl">最近页码</div>
+        <div id="usageCurrentPage" style="font-size:15px;font-weight:600;">{{ snapshot.current_bp or '-' }}</div>
+      </div>
+      <div class="card flex-1" style="min-width:220px;margin-bottom:0;">
+        <div class="lbl">模型</div>
+        <div id="usageModel" style="font-size:15px;font-weight:600;">{{ snapshot.model or '-' }}</div>
+      </div>
+      <div class="card flex-1" style="min-width:220px;margin-bottom:0;">
+        <div class="lbl">更新时间</div>
+        <div id="usageUpdatedAt" style="font-size:15px;font-weight:600;">-</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0;">
+      <div class="flex justify-between items-center mb-12">
+        <div style="font-size:15px;font-weight:600;">按页明细</div>
+        <div style="font-size:12px;color:var(--txL);">已落盘页面的累计统计</div>
+      </div>
+      <div style="overflow:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="text-align:left;border-bottom:1px solid var(--bdrL);">
+              <th style="padding:8px 10px;">页码</th>
+              <th style="padding:8px 10px;">模型</th>
+              <th style="padding:8px 10px;">请求数</th>
+              <th style="padding:8px 10px;">Prompt</th>
+              <th style="padding:8px 10px;">Completion</th>
+              <th style="padding:8px 10px;">Total</th>
+            </tr>
+          </thead>
+          <tbody id="usageTableBody">
+            {% for page in pages %}
+            <tr style="border-bottom:1px solid var(--bdrL);">
+              <td style="padding:8px 10px;">p.{{ page.page_bp }}</td>
+              <td style="padding:8px 10px;">{{ page.model or '-' }}</td>
+              <td style="padding:8px 10px;">{{ page.request_count }}</td>
+              <td style="padding:8px 10px;">{{ page.prompt_tokens }}</td>
+              <td style="padding:8px 10px;">{{ page.completion_tokens }}</td>
+              <td style="padding:8px 10px;color:var(--acc);font-weight:600;">{{ page.total_tokens }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" style="padding:12px 10px;color:var(--txL);">暂无使用记录</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var currentDocId = '{{ doc_id }}';
+
+function formatUsageTime(ts) {
+  if (!ts) return '-';
+  var d = new Date(ts * 1000);
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleString();
+}
+
+function renderUsage(payload) {
+  var snapshot = payload.snapshot || {};
+  document.getElementById('usagePhase').textContent = snapshot.phase || 'idle';
+  document.getElementById('sumPrompt').textContent = snapshot.prompt_tokens || 0;
+  document.getElementById('sumCompletion').textContent = snapshot.completion_tokens || 0;
+  document.getElementById('sumTotal').textContent = snapshot.total_tokens || 0;
+  document.getElementById('sumRequests').textContent = snapshot.request_count || 0;
+  document.getElementById('usageProgress').textContent = (snapshot.done_pages || 0) + '/' + (snapshot.total_pages || 0) + ' 页';
+  document.getElementById('usageCurrentPage').textContent = snapshot.current_bp || '-';
+  document.getElementById('usageModel').textContent = snapshot.model || '-';
+  document.getElementById('usageUpdatedAt').textContent = formatUsageTime(snapshot.updated_at);
+
+  var tbody = document.getElementById('usageTableBody');
+  var pages = payload.pages || [];
+  if (!pages.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:12px 10px;color:var(--txL);">暂无使用记录</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = pages.map(function(page) {
+    return '<tr style="border-bottom:1px solid var(--bdrL);">' +
+      '<td style="padding:8px 10px;">p.' + (page.page_bp || '-') + '</td>' +
+      '<td style="padding:8px 10px;">' + (page.model || '-') + '</td>' +
+      '<td style="padding:8px 10px;">' + (page.request_count || 0) + '</td>' +
+      '<td style="padding:8px 10px;">' + (page.prompt_tokens || 0) + '</td>' +
+      '<td style="padding:8px 10px;">' + (page.completion_tokens || 0) + '</td>' +
+      '<td style="padding:8px 10px;color:var(--acc);font-weight:600;">' + (page.total_tokens || 0) + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function refreshUsage() {
+  fetch('{{ url_for("translate_api_usage_data") }}?doc_id=' + encodeURIComponent(currentDocId))
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderUsage(data); });
+}
+
+setInterval(refreshUsage, 2000);
+</script>
+{% endblock %}

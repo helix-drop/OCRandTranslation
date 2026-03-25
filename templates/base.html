@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>外文文献阅读器</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* Inline flash messages */
+    .flash { padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }
+    .flash-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .flash-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .flash-info { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  </style>
+</head>
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="max-width:640px;margin:12px auto;padding:0 24px;">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-md">
+  <!-- Top bar -->
+  <div class="flex justify-between items-center mb-20" style="margin-bottom:32px;">
+    <a href="{{ url_for('home') }}" class="btn btn-gho" style="font-size:13px;">← 首页</a>
+    <div class="flex gap-8 items-center">
+      <span class="badge badge-ocr">OCR</span>
+      <div class="model-picker compact">
+        {% for key, m in models.items() %}
+        <a href="{{ url_for('set_model', key=key, next='input') }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Doc title -->
+  <form method="POST" action="{{ url_for('start_reading') }}" id="startForm">
+    <div class="mb-20">
+      <label style="font-size:12px;color:var(--txS);">文档标题</label>
+      <input name="doc_title" class="inp inp-card" style="font-size:15px;font-family:Georgia,serif;margin-top:4px;"
+             value="{{ doc_title }}" placeholder="文档标题">
+    </div>
+
+    <!-- Main card -->
+    <div class="card" style="padding:28px;">
+      <div style="font-size:16px;font-weight:600;margin-bottom:12px;">输入起始页码</div>
+      <p style="color:var(--txS);font-size:14px;margin-bottom:16px;line-height:1.7;">
+        定位该页完整段落（跨页合并），翻译后可继续阅读后续段落。
+      </p>
+      <div class="flex gap-12 items-center">
+        <input name="start_page" type="number" class="inp inp-lg" style="width:180px;"
+               placeholder="如 {{ first_page }}" min="{{ first_page }}" max="{{ last_page }}" required>
+        <button type="submit" class="btn btn-pri btn-lg">开始阅读</button>
+      </div>
+      <p style="color:var(--txL);font-size:12px;margin-top:10px;">范围: {{ first_page }}-{{ last_page }}</p>
+    </div>
+  </form>
+
+  {% if error %}
+  <p class="error-msg">{{ error }}</p>
+  {% endif %}
+
+  {% set provider = models[model_key].provider %}
+  {% if provider == 'qwen' and not dashscope_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">当前模型为 Qwen，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DashScope API Key。</p>
+  </div>
+  {% elif provider == 'anthropic' and not anthropic_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 Anthropic API Key。</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
