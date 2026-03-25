@@ -3,6 +3,10 @@ local_data/
 data/
 example/
 
+# 开发进度文档（个人使用，不同步）
+PROGRESS.md
+DEV.md
+
 # 系统文件
 .DS_Store
 Thumbs.db
