@@ -27,6 +27,7 @@ PyMuPDF>=1.24.0
 ## 项目结构
 
 ```
+├── .gitignore          # Git 忽略规则（本地数据、系统文件、缓存等）
 ├── app.py              # Flask 主应用，路由定义
 ├── config.py           # 配置管理，多文档管理，API Key 存取
 ├── ocr_client.py       # PaddleOCR API 客户端（分片上传）
@@ -38,16 +39,38 @@ PyMuPDF>=1.24.0
 ├── storage.py          # 磁盘持久化，模板变量，Markdown 导出
 ├── tasks.py            # 后台任务：OCR 处理，翻译 worker，状态管理
 ├── start.sh            # 一键启动脚本
+├── requirements.txt    # Python 依赖
 ├── templates/
 │   ├── base.html       # 基础布局模板
 │   ├── home.html       # 首页（文档列表）
 │   ├── input.html      # 解析结果预览 / 翻译起始页选择
 │   ├── reading.html    # 双语对照阅读页
-│   └── settings.html   # 设置页（API Key、术语词典）
+│   ├── settings.html   # 设置页（API Key、术语词典）
+│   └── translate_api_usage.html  # API 用量页面
 ├── static/
 │   └── style.css       # 全局样式
-└── data/               # 运行时数据（gitignore）
+└── local_data/         # 本地数据文件夹（gitignore，不同步到 GitHub）
+    ├── example/        # 示例 PDF 和 OCR 结果
+    ├── data/           # 运行时临时数据
+    └── README.md       # 本地数据文件夹说明
 ```
+
+### 数据存储策略
+
+| 路径 | 状态 | 说明 |
+|---|---|---|
+| `.gitignore` | 已跟踪 | 定义忽略规则 |
+| `local_data/user_data/` | 已忽略 | API 密钥、PDF 原文、OCR 结果、翻译数据 |
+| `local_data/example/` | 已忽略 | 示例文档（可手动放置） |
+| `__pycache__/` | 已忽略 | Python 缓存文件 |
+| `.DS_Store` | 已忽略 | macOS 系统文件 |
+| `.venv/` | 已忽略 | Python 虚拟环境 |
+
+**重要**：
+- 所有敏感数据存储在项目目录下的 `local_data/user_data/`，便于备份和便携
+- 首次启动时自动创建目录结构
+- 旧版本数据（`~/.foreign_lit_reader/`）会自动迁移
+- 分发时需确保安装到用户有写入权限的目录
 
 ## 核心数据流
 
@@ -331,8 +354,8 @@ API 地址：`https://e2k8b6b77ba5qei2.aistudio-app.com/layout-parsing`
 ## 数据存储结构
 
 ```
-~/.foreign_lit_reader/
-├── config.json                  # 全局配置
+local_data/user_data/                 # 项目目录下的用户数据（便于备份和便携）
+├── config.json                       # 全局配置
 │   {
 │     "paddle_token": "...",
 │     "anthropic_key": "...",
@@ -341,39 +364,34 @@ API 地址：`https://e2k8b6b77ba5qei2.aistudio-app.com/layout-parsing`
 │     "glossary": [["term", "定义"], ...]
 │   }
 │
-├── data/
-│   ├── current.txt              # 当前活跃文档 ID
-│   └── documents/
-│       └── {doc_id}/            # 每个文档一个目录
-│           ├── meta.json        # 文档元数据
-│           │   {"id", "name", "created", "page_count", "entry_count"}
-│           ├── pages.json       # OCR 解析结果
-│           │   {"name": "文件名", "pages": [page, ...]}
-│           ├── entries.json     # 翻译结果
-│           │   {"title": "标题", "idx": 0, "entries": [entry, ...]}
-│           ├── source.pdf       # PDF 副本（供预览）
-│           └── translate_state.json  # 翻译状态（运行时）
-│               {
-│                 "doc_id": str,
-│                 "phase": "idle|running|stopping|stopped|done|error",
-│                 "running": bool,
-│                 "stop_requested": bool,
-│                 "total_pages": int,
-│                 "done_pages": int,
-│                 "pending_pages": int,
-│                 "current_bp": int|null,
-│                 "current_page_idx": int,
-│                 "translated_chars": int,
-│                 "translated_paras": int,
-│                 "request_count": int,
-│                 "prompt_tokens": int,
-│                 "completion_tokens": int,
-│                 "total_tokens": int,
-│                 "model": str,
-│                 "last_error": str,
-│                 "updated_at": float
-│               }
+└── data/
+    ├── current.txt                   # 当前活跃文档 ID
+    └── documents/
+        └── {doc_id}/                 # 每个文档一个目录
+            ├── meta.json             # 文档元数据
+            │   {"id", "name", "created", "page_count", "entry_count"}
+            ├── pages.json            # OCR 解析结果
+            │   {"name": "文件名", "pages": [page, ...]}
+            ├── entries/              # 翻译结果（按页存储）
+            │   ├── meta.json         # {"title": "标题", "idx": 0}
+            │   └── pages/
+            │       └── {bp:06d}.json # 每页一个文件
+            ├── source.pdf            # PDF 副本（供预览）
+            └── translate_state.json  # 翻译状态（运行时）
+                {
+                  "doc_id": str,
+                  "phase": "idle|running|stopping|stopped|done|error",
+                  "running": bool,
+                  "stop_requested": bool,
+                  ...
+                }
 ```
+
+**跨平台路径**：
+- Windows: `项目目录\local_data\user_data\`
+- macOS/Linux: `项目目录/local_data/user_data/`
+
+**旧版本迁移**：首次启动时自动从 `~/.foreign_lit_reader/` 迁移数据。
 
 **entry 数据结构**（entries.json 中的每个 entry）：
 

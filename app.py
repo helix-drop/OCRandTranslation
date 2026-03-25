@@ -22,7 +22,7 @@ from flask import (
 from io import BytesIO
 
 from config import (
-    MODELS, ensure_dirs,
+    MODELS, ensure_dirs, check_write_permission,
     get_paddle_token, set_paddle_token,
     get_anthropic_key, set_anthropic_key,
     get_dashscope_key, set_dashscope_key,
@@ -30,7 +30,7 @@ from config import (
     get_model_key, set_model_key,
     get_current_doc_id, set_current_doc,
     list_docs, update_doc_meta, delete_doc,
-    migrate_legacy_data,
+    migrate_legacy_data, LOCAL_DATA_DIR,
 )
 from text_processing import get_page_range, get_next_page_bp
 from pdf_extract import render_pdf_page
@@ -703,6 +703,20 @@ def reset_all():
 # ============ MAIN ============
 
 if __name__ == "__main__":
+    # 检查写入权限
+    can_write, error_msg = check_write_permission()
+    if not can_write:
+        print("=" * 60)
+        print("错误：无法访问数据目录")
+        print("=" * 60)
+        print(error_msg)
+        print("-" * 60)
+        print(f"数据目录: {LOCAL_DATA_DIR}")
+        print("=" * 60)
+        import sys
+        sys.exit(1)
+
     ensure_dirs()
     migrate_legacy_data()
+    print(f"数据目录: {LOCAL_DATA_DIR}")
     app.run(debug=True, port=8080, threaded=True)

@@ -1,14 +1,24 @@
-"""本地配置存储：API令牌、术语表、用户偏好、多文档管理。"""
+"""本地配置存储：API令牌、术语表、用户偏好、多文档管理。
+
+数据存储路径：项目目录下的 local_data/user_data/
+便于应用分发和便携使用。
+"""
 import json
 import os
 import time
 import uuid as _uuid
 
-CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".foreign_lit_reader")
+# 项目根目录（config.py 所在目录的父目录）
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+LOCAL_DATA_DIR = os.path.join(PROJECT_ROOT, "local_data")
+CONFIG_DIR = os.path.join(LOCAL_DATA_DIR, "user_data")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 DATA_DIR = os.path.join(CONFIG_DIR, "data")
 DOCS_DIR = os.path.join(DATA_DIR, "documents")
 CURRENT_FILE = os.path.join(DATA_DIR, "current.txt")
+
+# 旧数据路径（用于迁移）
+OLD_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".foreign_lit_reader")
 
 GLOSSARY_INIT = []
 
@@ -21,13 +31,66 @@ MODELS = {
 }
 
 
+def check_write_permission() -> tuple[bool, str]:
+    """检查是否有写入权限，返回 (是否可写, 错误信息)。"""
+    try:
+        # 尝试创建 local_data 目录
+        os.makedirs(LOCAL_DATA_DIR, exist_ok=True)
+        # 尝试写入测试文件
+        test_file = os.path.join(LOCAL_DATA_DIR, ".write_test")
+        with open(test_file, "w") as f:
+            f.write("test")
+        os.remove(test_file)
+        return True, ""
+    except PermissionError:
+        return False, f"没有写入权限: {LOCAL_DATA_DIR}\n请将应用安装到用户有权限的目录（如文档文件夹、桌面），或使用管理员权限运行。"
+    except Exception as e:
+        return False, f"无法访问数据目录: {e}"
+
+
 def ensure_dirs():
+    """确保所有数据目录存在。"""
     os.makedirs(CONFIG_DIR, exist_ok=True)
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(DOCS_DIR, exist_ok=True)
 
 
+def migrate_from_old_location():
+    """从旧位置 (~/.foreign_lit_reader/) 迁移数据到新位置。"""
+    if not os.path.isdir(OLD_CONFIG_DIR):
+        return  # 无旧数据
+
+    # 检查新位置是否已有数据
+    if os.path.isdir(DATA_DIR) and os.listdir(DATA_DIR):
+        return  # 新位置已有数据，不迁移
+
+    try:
+        import shutil
+        # 迁移配置文件
+        old_config_file = os.path.join(OLD_CONFIG_DIR, "config.json")
+        if os.path.isfile(old_config_file):
+            ensure_dirs()
+            shutil.copy2(old_config_file, CONFIG_FILE)
+
+        # 迁移数据目录
+        old_data_dir = os.path.join(OLD_CONFIG_DIR, "data")
+        if os.path.isdir(old_data_dir):
+            ensure_dirs()
+            for item in os.listdir(old_data_dir):
+                src = os.path.join(old_data_dir, item)
+                dst = os.path.join(DATA_DIR, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
+    except Exception:
+        pass  # 迁移失败不影响使用
+
+
 def load_config() -> dict:
+    """加载配置，自动迁移旧数据。"""
+    # 首次加载时尝试从旧位置迁移
+    migrate_from_old_location()
     ensure_dirs()
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
