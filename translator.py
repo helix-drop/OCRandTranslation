@@ -32,6 +32,14 @@ def _build_usage(prompt_tokens: int = 0, completion_tokens: int = 0, total_token
     }
 
 
+def _normalize_optional_text(val) -> str:
+    if val is None:
+        return ""
+    if isinstance(val, list):
+        return "\n".join(str(item) for item in val)
+    return str(val)
+
+
 def build_prompt(gloss_str: str) -> str:
     lines = [
         "你是一位专业的学术文献翻译专家，擅长将外文学术论文翻译为中文。",
@@ -43,6 +51,8 @@ def build_prompt(gloss_str: str) -> str:
         "- 保留原文分段（用\\n\\n分隔段落）",
         "- 专有名词、人名、术语在中文翻译中首次出现时标注原文",
         "- 引用格式(如作者, 年份)保留原样",
+        "- 如果当前段落类型是标题，只翻译标题文本本身，绝对不要吸收前后文正文",
+        "- 标题段保持标题形态，不要扩写、解释或补出下一段内容",
         "",
         "重要（关于脚注）：",
         "- 正文(===正文===之间的内容)和脚注(===页面脚注===之间的内容)是严格分开的",
@@ -64,6 +74,66 @@ def build_prompt(gloss_str: str) -> str:
     if gloss_str.strip():
         lines.extend(["", "术语词典：", gloss_str])
     return "\n".join(lines)
+
+
+def _trim_context_text(text: str, limit: int = 200, from_end: bool = False) -> str:
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    if len(text) <= limit:
+        return text
+    return text[-limit:] if from_end else text[:limit]
+
+
+def _build_translate_message(
+    para_text: str,
+    para_pages: str,
+    footnotes: str,
+    heading_level: int = 0,
+    para_idx: int | None = None,
+    para_total: int | None = None,
+    prev_context: str = "",
+    next_context: str = "",
+    section_path: list[str] | None = None,
+    cross_page: str | None = None,
+) -> str:
+    parts = [f"页码：{para_pages}"]
+    parts.append(f"段落类型：{'标题' if heading_level > 0 else '正文'}")
+    if heading_level > 0:
+        parts.append(f"标题级别：H{heading_level}")
+
+    if para_idx is not None and para_total:
+        parts.append(f"段落序号：{para_idx + 1}/{para_total}")
+    if section_path:
+        parts.append("章节路径：" + " > ".join(str(item).strip() for item in section_path if str(item).strip()))
+    if cross_page:
+        parts.append(f"跨页标记：{cross_page}")
+
+    msg = "\n".join(parts)
+    if prev_context:
+        msg += f"\n\n===前文原文片段===\n{_trim_context_text(prev_context, limit=200, from_end=True)}\n===前文结束==="
+    msg += f"\n\n===正文===\n{para_text}\n===正文结束==="
+    if next_context:
+        msg += f"\n\n===后文原文片段===\n{_trim_context_text(next_context, limit=200, from_end=False)}\n===后文结束==="
+    if footnotes:
+        msg += f"\n\n===页面脚注===\n{footnotes}\n===页面脚注结束==="
+    else:
+        msg += "\n\n===页面脚注===\n本页无脚注\n===页面脚注结束==="
+    return msg
+
+
+def _nonempty_lines(text: str) -> list[str]:
+    return [line.strip() for line in re.split(r"\n+", str(text or "")) if line.strip()]
+
+
+def _normalize_translation_text(translation: str, para_text: str, heading_level: int = 0) -> str:
+    translation = str(translation or "").strip()
+    if heading_level <= 0 or not translation:
+        return translation
+    source_lines = _nonempty_lines(para_text)
+    translated_lines = _nonempty_lines(translation)
+    if not source_lines or not translated_lines:
+        return translation
+    max_lines = max(1, len(source_lines))
+    return "\n".join(translated_lines[:max_lines]).strip()
 
 
 def parse_json_response(text: str) -> dict | None:
@@ -113,6 +183,62 @@ def parse_json_response(text: str) -> dict | None:
         pass
 
     return None
+
+
+def _decode_json_string_prefix(text: str) -> tuple[str, bool]:
+    """解码 JSON 字符串前缀，允许末尾存在未闭合或未完成的转义。"""
+    out = []
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == '"':
+            return "".join(out), True
+        if ch != "\\":
+            out.append(ch)
+            i += 1
+            continue
+
+        i += 1
+        if i >= len(text):
+            break
+        esc = text[i]
+        mapping = {
+            '"': '"',
+            "\\": "\\",
+            "/": "/",
+            "b": "\b",
+            "f": "\f",
+            "n": "\n",
+            "r": "\r",
+            "t": "\t",
+        }
+        if esc == "u":
+            if i + 4 >= len(text):
+                break
+            hex_part = text[i + 1:i + 5]
+            if not re.fullmatch(r"[0-9a-fA-F]{4}", hex_part):
+                break
+            out.append(chr(int(hex_part, 16)))
+            i += 5
+            continue
+        if esc in mapping:
+            out.append(mapping[esc])
+            i += 1
+            continue
+        out.append(esc)
+        i += 1
+    return "".join(out), False
+
+
+def _extract_translation_preview(text: str) -> str:
+    """从可能未完成的 JSON 文本中提取 translation 字段已生成的可见内容。"""
+    if not text:
+        return ""
+    match = re.search(r'"translation"\s*:\s*"', text)
+    if not match:
+        return ""
+    decoded, _closed = _decode_json_string_prefix(text[match.end():])
+    return decoded
 
 
 def _call_anthropic(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
@@ -411,6 +537,13 @@ def translate_paragraph(
     model_id: str,
     api_key: str,
     provider: str = "anthropic",
+    heading_level: int = 0,
+    para_idx: int | None = None,
+    para_total: int | None = None,
+    prev_context: str = "",
+    next_context: str = "",
+    section_path: list[str] | None = None,
+    cross_page: str | None = None,
 ) -> dict:
     """
     翻译一个段落。
@@ -424,11 +557,18 @@ def translate_paragraph(
     gloss_str = "\n".join(f"{g[0]}→{g[1]}" for g in glossary)
     sys_prompt = build_prompt(gloss_str)
 
-    msg = f"页码：{para_pages}\n\n===正文===\n{para_text}\n===正文结束==="
-    if footnotes:
-        msg += f"\n\n===页面脚注===\n{footnotes}\n===页面脚注结束==="
-    else:
-        msg += "\n\n===页面脚注===\n本页无脚注\n===页面脚注结束==="
+    msg = _build_translate_message(
+        para_text=para_text,
+        para_pages=para_pages,
+        footnotes=footnotes,
+        heading_level=heading_level,
+        para_idx=para_idx,
+        para_total=para_total,
+        prev_context=prev_context,
+        next_context=next_context,
+        section_path=section_path,
+        cross_page=cross_page,
+    )
 
     if provider == "qwen":
         result = _call_qwen(sys_prompt, msg, model_id, api_key)
@@ -445,13 +585,16 @@ def translate_paragraph(
             "pages": para_pages,
             "original": para_text,
             "translation": full,
-            "footnotes": "",
+            "footnotes": footnotes,
             "footnotes_translation": "",
         }
     if not p.get("pages"):
         p["pages"] = para_pages
     if p.get("original"):
         p["original"] = re.sub(r"^>\s*", "", p["original"], flags=re.MULTILINE).strip()
+    p["footnotes"] = _normalize_optional_text(p.get("footnotes", "")).strip() or _normalize_optional_text(footnotes).strip()
+    p["footnotes_translation"] = _normalize_optional_text(p.get("footnotes_translation", "")).strip()
+    p["translation"] = _normalize_translation_text(p.get("translation", ""), para_text, heading_level=heading_level)
     p["_usage"] = result.get("usage", _empty_usage())
 
     return p
@@ -466,6 +609,13 @@ def stream_translate_paragraph(
     api_key: str,
     provider: str = "anthropic",
     stop_checker=None,
+    heading_level: int = 0,
+    para_idx: int | None = None,
+    para_total: int | None = None,
+    prev_context: str = "",
+    next_context: str = "",
+    section_path: list[str] | None = None,
+    cross_page: str | None = None,
 ):
     """
     流式翻译一个段落。
@@ -478,11 +628,18 @@ def stream_translate_paragraph(
     gloss_str = "\n".join(f"{g[0]}→{g[1]}" for g in glossary)
     sys_prompt = build_prompt(gloss_str)
 
-    msg = f"页码：{para_pages}\n\n===正文===\n{para_text}\n===正文结束==="
-    if footnotes:
-        msg += f"\n\n===页面脚注===\n{footnotes}\n===页面脚注结束==="
-    else:
-        msg += "\n\n===页面脚注===\n本页无脚注\n===页面脚注结束==="
+    msg = _build_translate_message(
+        para_text=para_text,
+        para_pages=para_pages,
+        footnotes=footnotes,
+        heading_level=heading_level,
+        para_idx=para_idx,
+        para_total=para_total,
+        prev_context=prev_context,
+        next_context=next_context,
+        section_path=section_path,
+        cross_page=cross_page,
+    )
 
     if provider == "qwen":
         stream_iter = _stream_qwen(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
@@ -490,10 +647,24 @@ def stream_translate_paragraph(
         stream_iter = _stream_anthropic(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
 
     final_usage = _empty_usage()
+    raw_stream_text = ""
+    streamed_preview = ""
     for event in stream_iter:
         if event["type"] == "usage":
             final_usage = event.get("usage", _empty_usage())
             yield event
+            continue
+        if event["type"] == "delta":
+            raw_stream_text += event.get("text", "")
+            preview = _normalize_translation_text(
+                _extract_translation_preview(raw_stream_text),
+                para_text,
+                heading_level=heading_level,
+            )
+            if len(preview) > len(streamed_preview):
+                delta_text = preview[len(streamed_preview):]
+                streamed_preview = preview
+                yield {"type": "delta", "text": delta_text}
             continue
         if event["type"] != "done":
             yield event
@@ -509,13 +680,16 @@ def stream_translate_paragraph(
                 "pages": para_pages,
                 "original": para_text,
                 "translation": full,
-                "footnotes": "",
+                "footnotes": footnotes,
                 "footnotes_translation": "",
             }
         if not p.get("pages"):
             p["pages"] = para_pages
         if p.get("original"):
             p["original"] = re.sub(r"^>\s*", "", p["original"], flags=re.MULTILINE).strip()
+        p["footnotes"] = _normalize_optional_text(p.get("footnotes", "")).strip() or _normalize_optional_text(footnotes).strip()
+        p["footnotes_translation"] = _normalize_optional_text(p.get("footnotes_translation", "")).strip()
+        p["translation"] = _normalize_translation_text(p.get("translation", ""), para_text, heading_level=heading_level)
         p["_usage"] = final_usage
 
         yield {

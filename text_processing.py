@@ -166,16 +166,16 @@ _SKIP_FN_RE = [
 def _is_boilerplate_footnote(text: str) -> bool:
     """判断整段脚注是否为通讯作者/地址等样板内容。"""
     lines = text.strip().split("\n")
+    nonempty_lines = [line.strip() for line in lines if line.strip()]
+    if any(re.match(r"^\d+[\.\)]\s*", line) for line in nonempty_lines):
+        return False
     match_count = 0
-    for line in lines:
-        stripped = line.strip()
-        if not stripped:
-            continue
+    for stripped in nonempty_lines:
         for pat in _SKIP_FN_RE:
             if pat.search(stripped):
                 match_count += 1
                 break
-    total = len([l for l in lines if l.strip()])
+    total = len(nonempty_lines)
     return total > 0 and match_count >= total * 0.5
 
 

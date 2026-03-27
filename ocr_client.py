@@ -8,15 +8,36 @@ from pypdf import PdfReader, PdfWriter
 API_URL = "https://e2k8b6b77ba5qei2.aistudio-app.com/layout-parsing"
 CHUNK_SIZE = 90  # 每次最多上传90页，PaddleOCR限制100页
 
+# 版面解析接口按官方字段名组织请求参数。
+# 当前应用场景是论文/图书阅读，因此显式开启版面区域、表格和公式识别，
+# 同时关闭图表、印章等与阅读场景无关的能力，减少噪声。
+DEFAULT_LAYOUT_PARSING_OPTIONS = {
+    "useDocOrientationClassify": True,
+    "useTextlineOrientation": False,
+    "useSealRecognition": False,
+    "useTableRecognition": True,
+    "useFormulaRecognition": True,
+    "useChartRecognition": False,
+    "useRegionDetection": True,
+    "formatBlockContent": False,
+    "visualize": False,
+}
+
+
+def _build_layout_parsing_options(file_type: int, overrides: dict | None = None) -> dict:
+    options = dict(DEFAULT_LAYOUT_PARSING_OPTIONS)
+    # 文本图像矫正更适合拍照图片，不适合 PDF 文字页。
+    options["useDocUnwarping"] = (file_type == 1)
+    if overrides:
+        options.update(overrides)
+    return options
+
 
 def _send_ocr_request(
     file_data_b64: str,
     token: str,
     file_type: int,
-    use_doc_orientation_classify: bool = False,
-    use_doc_unwarping: bool = False,
-    use_chart_recognition: bool = False,
-    visualize: bool = False,
+    request_options: dict,
 ) -> dict:
     """发送单次 OCR 请求，返回 result 字典。"""
     headers = {
@@ -26,11 +47,8 @@ def _send_ocr_request(
     payload = {
         "file": file_data_b64,
         "fileType": file_type,
-        "useDocOrientationClassify": use_doc_orientation_classify,
-        "useDocUnwarping": use_doc_unwarping,
-        "useChartRecognition": use_chart_recognition,
-        "visualize": visualize,
     }
+    payload.update(request_options)
 
     response = requests.post(API_URL, json=payload, headers=headers, timeout=300)
 
@@ -46,7 +64,22 @@ def _send_ocr_request(
         msg = response.text[:300] if response.text else ""
         raise RuntimeError(f"PaddleOCR API 错误 {response.status_code}: {msg}")
 
-    return response.json()["result"]
+    try:
+        body = response.json()
+    except ValueError as exc:
+        raise RuntimeError("PaddleOCR API 返回了无法解析的 JSON") from exc
+
+    if not isinstance(body, dict):
+        raise RuntimeError("PaddleOCR API 返回了无法识别的响应结构")
+
+    error_code = body.get("errorCode")
+    if error_code not in (None, 0):
+        raise RuntimeError(body.get("errorMsg") or f"PaddleOCR API 返回错误码 {error_code}")
+
+    if "result" not in body:
+        raise RuntimeError("PaddleOCR API 响应缺少 result 字段")
+
+    return body["result"]
 
 
 def _split_pdf_bytes(file_bytes: bytes, chunk_size: int = CHUNK_SIZE) -> list[bytes]:
@@ -101,17 +134,19 @@ def call_paddle_ocr_bytes(
         file_type: 0=PDF, 1=图片
         on_progress: 可选回调 (current_chunk, total_chunks)
     """
+    request_options = _build_layout_parsing_options(file_type, kwargs)
+
     # 图片不需要分片
     if file_type != 0:
         b64 = base64.b64encode(file_bytes).decode("ascii")
-        return _send_ocr_request(b64, token, file_type, **kwargs)
+        return _send_ocr_request(b64, token, file_type, request_options=request_options)
 
     # PDF: 检查是否需要分片
     chunks = _split_pdf_bytes(file_bytes)
 
     if len(chunks) == 1:
         b64 = base64.b64encode(file_bytes).decode("ascii")
-        return _send_ocr_request(b64, token, file_type, **kwargs)
+        return _send_ocr_request(b64, token, file_type, request_options=request_options)
 
     # 多分片：逐个上传，合并结果
     all_results = []
@@ -119,7 +154,7 @@ def call_paddle_ocr_bytes(
         if on_progress:
             on_progress(i + 1, len(chunks))
         b64 = base64.b64encode(chunk_bytes).decode("ascii")
-        result = _send_ocr_request(b64, token, file_type, **kwargs)
+        result = _send_ocr_request(b64, token, file_type, request_options=request_options)
         all_results.append(result)
 
     return _merge_ocr_results(all_results)

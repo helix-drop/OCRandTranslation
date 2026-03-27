@@ -3,7 +3,7 @@
 <div class="container">
   <div class="flex justify-between items-center" style="margin-bottom:32px;">
     <h1 style="font-size:22px;font-weight:700;">设置</h1>
-    <a href="{{ url_for('home') }}" class="btn btn-sec">← 返回</a>
+    <a href="{{ url_for('home', doc_id=current_doc_id) }}" class="btn btn-sec">← 返回</a>
   </div>
 
   <!-- PaddleOCR Token -->
@@ -15,7 +15,10 @@
         <input name="paddle_token" class="inp" type="password" value="{{ paddle_token }}"
                placeholder="输入 PaddleOCR API Token">
         <div class="hint">
-          访问 <a href="https://aistudio.baidu.com/paddleocr/task" target="_blank">PaddleOCR 官网</a> 获取令牌。每日可解析 3000 页。
+          访问 <a href="https://aistudio.baidu.com/paddleocr/task" target="_blank">PaddleOCR 官网</a> 获取令牌。
+          如果要自己查询今日解析页数，请打开
+          <a href="https://aistudio.baidu.com/paddleocr" target="_blank" rel="noreferrer">https://aistudio.baidu.com/paddleocr</a>
+          查看官方站内配额状态。
         </div>
         <button type="submit" class="btn btn-pri mt-10">保存令牌</button>
       </form>
@@ -71,6 +74,7 @@
         <h3 style="margin-bottom:0;">术语词典 ({{ glossary|length }} 条)</h3>
       </div>
       <form method="POST" action="{{ url_for('save_glossary') }}" id="glossaryForm">
+        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
         <div class="glossary-scroll" id="glossaryList">
           {% for term, defn in glossary %}
           <div class="glossary-row" data-idx="{{ loop.index0 }}">
@@ -96,11 +100,11 @@
       <h3>数据管理</h3>
       <div class="flex gap-8 flex-wrap">
         {% if has_entries %}
-        <a href="{{ url_for('reset_text_action') }}" class="btn btn-sec" style="font-size:12px;"
+        <a href="{{ url_for('reset_text_action', doc_id=current_doc_id) }}" class="btn btn-sec" style="font-size:12px;"
            onclick="return confirm('确定清除翻译数据？');">清除翻译数据</a>
         {% endif %}
         {% if has_pages %}
-        <a href="{{ url_for('reset_all') }}" class="btn btn-red-ghost" style="font-size:12px;border:1px solid var(--red);"
+        <a href="{{ url_for('reset_all', doc_id=current_doc_id) }}" class="btn btn-red-ghost" style="font-size:12px;border:1px solid var(--red);"
            onclick="return confirm('确定清除所有数据？');">清除所有数据</a>
         {% endif %}
         {% if not has_pages and not has_entries %}

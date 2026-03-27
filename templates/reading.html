@@ -10,30 +10,58 @@
 .usage-panel.compact .usage-panel-head { margin-bottom: 8px; }
 .usage-panel.compact .usage-panel-title { font-size: 13px; }
 .usage-panel.compact .usage-panel-subtitle { font-size: 11px; }
-.usage-panel.compact .usage-grid {
+.usage-layout {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   gap: 8px;
 }
-.usage-panel.compact .usage-card {
+.usage-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.usage-section {
   min-width: 0;
-  padding: 8px 10px;
-  border-radius: 10px;
-}
-.usage-panel.compact .usage-card-label {
-  font-size: 10px;
-  margin-bottom: 4px;
-}
-.usage-panel.compact .usage-card-value {
-  font-size: 16px;
-  line-height: 1.2;
-}
-.usage-draft-mini {
-  margin-top: 8px;
   padding: 9px 10px;
   border: 1px solid var(--bdrL);
   border-radius: 10px;
   background: rgba(255,255,255,0.78);
+}
+.usage-section-title {
+  margin-bottom: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--txL);
+}
+.usage-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.usage-metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.usage-metric-label {
+  font-size: 11px;
+  color: var(--txL);
+}
+.usage-metric-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--txt);
+  text-align: right;
+}
+.usage-metric-value-sm {
+  font-size: 12px;
+}
+.usage-draft-mini {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
 }
 .usage-draft-mini.hidden { display: none; }
 .usage-draft-row {
@@ -69,9 +97,97 @@
   max-height: 4.8em;
   overflow: hidden;
 }
+.usage-draft-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.usage-draft-actions.hidden { display: none; }
+.usage-draft-card-error {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--red);
+}
+.usage-draft-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.usage-draft-card-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.usage-draft-list {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 4px;
+}
+.usage-draft-card {
+  flex: 0 0 220px;
+  width: 220px;
+  height: 280px;
+  padding: 10px;
+  border: 1px solid var(--bdrL);
+  border-radius: 12px;
+  background: rgba(250,247,241,0.96);
+  display: flex;
+  flex-direction: column;
+}
+.usage-draft-card[data-status="running"] {
+  border-color: rgba(183, 146, 76, 0.55);
+}
+.usage-draft-card[data-status="done"] {
+  border-color: rgba(67, 124, 89, 0.45);
+}
+.usage-draft-card[data-status="error"],
+.usage-draft-card[data-status="aborted"] {
+  border-color: rgba(179, 74, 57, 0.45);
+}
+.usage-draft-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.usage-draft-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--txt);
+}
+.usage-draft-card-status {
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.usage-draft-card-status[data-status="running"] { color: var(--acc); }
+.usage-draft-card-status[data-status="done"] { color: var(--grn); }
+.usage-draft-card-status[data-status="error"],
+.usage-draft-card-status[data-status="aborted"] { color: var(--red); }
+.usage-draft-card-status[data-status="pending"] { color: var(--txL); }
+.usage-draft-card-body {
+  flex: 1;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--tx);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+@media (max-width: 1100px) {
+  .usage-layout {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 900px) {
-  .usage-panel.compact .usage-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .usage-section {
+    padding: 8px 9px;
   }
 }
 .page-nav {
@@ -162,6 +278,215 @@
   color: var(--txL);
   font-size: 11px;
 }
+.reading-main-layout .container-wide {
+  max-width: 1040px;
+  padding-bottom: 132px;
+}
+.reading-main-layout.with-pdf .container-wide {
+  max-width: 980px;
+}
+.reading-main-layout .page-shell {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.reading-main-layout.with-pdf .page-shell {
+  max-width: 880px;
+}
+.floating-page-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 240;
+}
+.floating-page-nav-btn {
+  min-width: 112px;
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(44, 36, 22, 0.5);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(44, 36, 22, 0.18);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+.floating-page-nav-btn:hover {
+  background: rgba(44, 36, 22, 0.74);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+.floating-page-nav-btn:active {
+  transform: translateY(0);
+}
+.floating-page-nav-btn.disabled {
+  background: rgba(107, 93, 77, 0.34);
+  color: rgba(255,255,255,0.72);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.pdf-page-item {
+  position: relative;
+  margin: 0 0 14px;
+  min-height: 420px;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  min-width: 100%;
+  transition: width 0.18s ease, min-width 0.18s ease;
+  box-shadow: 0 12px 32px rgba(17, 12, 7, 0.18);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pdf-page-item .pdf-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.page-preview-card {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--bdrL);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(247,241,231,0.80));
+  text-align: left;
+}
+.page-preview-card + .page-preview-card {
+  margin-top: 10px;
+}
+.page-preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.page-preview-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(183, 146, 76, 0.22);
+  background: rgba(255,255,255,0.9);
+  color: var(--txS);
+  font-size: 11px;
+  font-weight: 700;
+}
+.page-placeholder-actions {
+  justify-content: center;
+}
+.page-placeholder-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--txL);
+  line-height: 1.7;
+}
+.page-preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--txL);
+  text-transform: uppercase;
+}
+.page-preview-text {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--txt);
+  word-break: break-word;
+}
+.page-preview-text.preview-paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  white-space: normal;
+}
+.page-preview-paragraph {
+  text-indent: 1.5em;
+  line-height: 2;
+}
+.page-preview-paragraph.is-lead {
+  text-indent: 0;
+}
+.page-preview-footnotes {
+  color: var(--txS);
+  font-size: 14px;
+  line-height: 1.85;
+}
+.page-footnotes-section {
+  margin-top: 22px;
+  padding: 16px 16px 14px;
+  border: 1px solid rgba(183, 146, 76, 0.16);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(247,242,233,0.84));
+  box-shadow: 0 6px 16px rgba(44, 36, 22, 0.04);
+}
+.page-footnotes-head {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.page-footnotes-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--acc);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.page-footnotes-subtitle {
+  font-size: 12px;
+  color: var(--txL);
+  line-height: 1.7;
+}
+.page-footnotes-bridge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(183, 146, 76, 0.12);
+  color: var(--txS);
+  font-size: 11px;
+  font-weight: 700;
+}
+.page-footnotes-card {
+  margin-top: 0;
+}
+.page-footnotes-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  .floating-page-nav {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    transform: none;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .floating-page-nav-btn {
+    min-width: 0;
+    flex: 1;
+    height: 44px;
+    padding: 0 14px;
+  }
+  .page-preview-meta {
+    justify-content: flex-start;
+  }
+}
 </style>
 
 <!-- Export Modal -->
@@ -173,7 +498,7 @@
     </div>
     <div class="flex gap-8 mb-12">
       <button class="btn btn-pri" onclick="copyExport();">复制</button>
-      <a href="{{ url_for('download_md') }}" class="btn btn-grn">下载 .md</a>
+      <a href="{{ url_for('download_md', doc_id=current_doc_id) }}" class="btn btn-grn">下载 .md</a>
     </div>
     <textarea id="exportText" readonly placeholder="加载中…"></textarea>
     <div id="exportLoading" class="hidden" style="text-align:center;padding:20px;color:var(--txL);">加载中…</div>
@@ -183,21 +508,21 @@
 <!-- Compact Header Bar -->
 <div class="header-bar" style="padding:6px 16px;gap:6px;">
   <div class="flex items-center gap-8" style="flex:1;min-width:0;">
-    <a href="{{ url_for('home') }}" style="color:var(--txL);font-size:16px;padding:2px 4px;">&larr;</a>
+    <a href="{{ url_for('home', doc_id=current_doc_id) }}" style="color:var(--txL);font-size:16px;padding:2px 4px;">&larr;</a>
     <span class="title" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ doc_title }}</span>
     <span class="page-num" style="font-size:11px;">p.{{ cur_page_bp }}/p.{{ last_page }}</span>
   </div>
   <!-- 导航 -->
   <div class="flex items-center gap-4">
     {% if prev_bp %}
-    <a href="{{ url_for('reading', bp=prev_bp, usage=1 if usage_open else None) }}" class="nav-arrow">&larr;</a>
+    <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="nav-arrow">&larr;</a>
     {% else %}
     <span class="nav-arrow disabled">&larr;</span>
     {% endif %}
 
     {% if page_total > 1 %}
     <div class="page-nav" id="pageNav">
-      <button type="button" class="page-nav-btn" id="pageNavBtn" onclick="togglePageNav();">p.{{ cur_page_bp }} · {{ '已译' if cur_page_bp in translated_bps else ('失败' if cur_page_bp in failed_bps else '待译') }}</button>
+      <button type="button" class="page-nav-btn" id="pageNavBtn" onclick="togglePageNav();">p.{{ cur_page_bp }} · {{ '部分完成' if cur_page_bp in partial_failed_bps else ('已译' if cur_page_bp in translated_bps else ('失败' if cur_page_bp in failed_bps else '待译')) }}</button>
       <div class="page-nav-panel hidden" id="pageNavPanel">
         <div class="page-nav-head">
           <div class="page-nav-title">跳转页码</div>
@@ -215,7 +540,7 @@
     {% endif %}
 
     {% if next_bp %}
-    <a href="{{ url_for('reading', bp=next_bp, usage=1 if usage_open else None) }}" class="nav-arrow">&rarr;</a>
+    <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="nav-arrow">&rarr;</a>
     {% else %}
     <span class="nav-arrow disabled">&rarr;</span>
     {% endif %}
@@ -225,20 +550,21 @@
     {% if has_pdf %}
     <button class="tb" onclick="togglePdfPanel();" id="pdfBtn" title="PDF 原文">PDF</button>
     {% endif %}
-    <button class="tb {{ 'active' if usage_open else '' }}" onclick="toggleUsageDashboard();" id="usageBtn" title="显示/隐藏 API 用量">API</button>
+    <button class="tb" onclick="activateReadingFocusMode();" id="focusBtn" title="进入笔记专注模式">专注</button>
+    <button class="tb {{ 'active' if usage_open else '' }}" onclick="toggleUsageDashboard();" id="usageBtn" title="显示/隐藏翻译进度">进度</button>
     <button class="tb" onclick="toggleOriginal();" id="origBtn" title="显示/隐藏原文">原文</button>
-    <button class="tb" onclick="toggleLayout();" id="layoutBtn" title="切换布局">{{ '⇅' if side_by_side else '⇆' }}</button>
+    <button class="tb" onclick="toggleLayout();" id="layoutBtn" title="切换布局">{{ '改单栏' if side_by_side else '改双栏' }}</button>
     <button class="tb" onclick="openExportModal();" title="导出">导出</button>
     <div class="toolbar-more" id="moreMenu">
       <button class="tb" onclick="this.parentElement.classList.toggle('open');">⋯</button>
       <div class="toolbar-dropdown">
         <div class="toolbar-dropdown-label">翻译模型</div>
         {% for key, m in models.items() %}
-        <a href="{{ url_for('set_model', key=key, next='reading') }}" class="toolbar-dropdown-item {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+        <a href="{{ url_for('set_model', key=key, next='reading', doc_id=current_doc_id) }}" class="toolbar-dropdown-item {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
         {% endfor %}
         <div class="toolbar-dropdown-sep"></div>
         <a href="{{ url_for('settings') }}#glossary" class="toolbar-dropdown-item">术语词典</a>
-        <a href="{{ url_for('reset_text') }}" class="toolbar-dropdown-item" style="color:var(--red);">清除翻译</a>
+        <a href="{{ url_for('reset_text', doc_id=current_doc_id) }}" class="toolbar-dropdown-item" style="color:var(--red);">清除翻译</a>
       </div>
     </div>
   </div>
@@ -261,67 +587,124 @@
 <div id="translateUsagePanel" class="usage-panel compact {{ '' if usage_open else 'hidden' }}">
   <div class="usage-panel-head">
     <div>
-      <div class="usage-panel-title">翻译仪表盘</div>
-      <div class="usage-panel-subtitle">只显示当前进度和必要用量</div>
+      <div class="usage-panel-title">翻译进度</div>
+      <div class="usage-panel-subtitle">只显示当前翻译进度和必要用量</div>
     </div>
     <button type="button" class="tb" onclick="toggleUsageDashboard(false);" title="收起">收起</button>
   </div>
 
-  <div class="usage-grid">
-    <div class="usage-card">
-      <div class="usage-card-label">当前阶段</div>
-      <div class="usage-card-value" id="usagePhase">-</div>
+  <div class="usage-layout">
+    <div class="usage-column">
+      <div class="usage-section">
+        <div class="usage-section-title">概览</div>
+        <div class="usage-metrics">
+          <div class="usage-metric">
+            <span class="usage-metric-label">当前阶段</span>
+            <span class="usage-metric-value" id="usagePhase">-</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">当前模型</span>
+            <span class="usage-metric-value" id="usageModel">-</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">当前页</span>
+            <span class="usage-metric-value" id="usageCurrentPage">-</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">最近更新</span>
+            <span class="usage-metric-value usage-metric-value-sm" id="usageUpdatedAt">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="usage-section">
+        <div class="usage-section-title">并发统计</div>
+        <div class="usage-metrics">
+          <div class="usage-metric">
+            <span class="usage-metric-label">请求数</span>
+            <span class="usage-metric-value" id="usageRequestCount">0</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">总 Tokens</span>
+            <span class="usage-metric-value" id="usageTotalTokens">0</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">并发段数</span>
+            <span class="usage-metric-value" id="usageParallel">0/0</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">失败段数</span>
+            <span class="usage-metric-value" id="usageDraftErrors">0</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">近60秒 Tokens</span>
+            <span class="usage-metric-value" id="usageRecentTokens">0</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">平均 token/s</span>
+            <span class="usage-metric-value" id="usageTokenRate">0.0</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="usage-card">
-      <div class="usage-card-label">当前模型</div>
-      <div class="usage-card-value" id="usageModel">-</div>
+
+    <div class="usage-column">
+      <div class="usage-section">
+        <div class="usage-section-title">当前页状态</div>
+        <div id="usageDraftMini" class="usage-draft-mini hidden">
+          <div class="usage-draft-row">
+            <div class="usage-draft-title">当前翻译位置</div>
+            <div class="usage-draft-state" id="usageDraftState" data-status="idle">空闲</div>
+          </div>
+          <div class="usage-draft-progress" id="usageDraftProgress">等待翻译任务启动</div>
+          <div class="usage-draft-note" id="usageDraftNote"></div>
+          <div class="usage-draft-actions hidden" id="usageDraftActions"></div>
+          <div class="usage-draft-preview" id="usageDraftPreview"></div>
+        </div>
+      </div>
+
+      <div class="usage-section">
+        <div class="usage-section-title">段落列表</div>
+        <div class="usage-draft-list" id="usageDraftList"></div>
+      </div>
     </div>
-    <div class="usage-card">
-      <div class="usage-card-label">请求数</div>
-      <div class="usage-card-value" id="usageRequestCount">0</div>
-    </div>
-    <div class="usage-card">
-      <div class="usage-card-label">总 Tokens</div>
-      <div class="usage-card-value" id="usageTotalTokens">0</div>
-    </div>
-    <div class="usage-card">
-      <div class="usage-card-label">当前页</div>
-      <div class="usage-card-value" id="usageCurrentPage">-</div>
-    </div>
-    <div class="usage-card">
-      <div class="usage-card-label">最近更新</div>
-      <div class="usage-card-value usage-card-value-sm" id="usageUpdatedAt">-</div>
-    </div>
-  </div>
-  <div id="usageDraftMini" class="usage-draft-mini hidden">
-    <div class="usage-draft-row">
-      <div class="usage-draft-title">当前翻译位置</div>
-      <div class="usage-draft-state" id="usageDraftState" data-status="idle">空闲</div>
-    </div>
-    <div class="usage-draft-progress" id="usageDraftProgress">等待翻译任务启动</div>
-    <div class="usage-draft-note" id="usageDraftNote"></div>
-    <div class="usage-draft-preview" id="usageDraftPreview"></div>
   </div>
 </div>
 
 <!-- Main layout: PDF preview + Content -->
-<div class="reading-main-layout {{ 'with-pdf' if has_pdf else '' }}" id="readingLayout">
+<div class="reading-main-layout {{ 'with-pdf' if pdf_visible else '' }}" id="readingLayout">
 
   <!-- PDF Preview Panel (left) -->
   {% if has_pdf %}
-  <div class="pdf-panel" id="pdfPanel">
+  <div class="pdf-panel" id="pdfPanel" style="{{ '' if pdf_visible else 'display:none;' }}">
     <div class="pdf-panel-header">
-      <span style="font-weight:600;font-size:13px;">PDF 原文</span>
-      <div class="flex gap-6 items-center">
+      <div class="pdf-panel-title">
+        <span style="font-weight:600;font-size:13px;">PDF 原文</span>
+        <span class="pdf-panel-subtitle">支持双击放大、Ctrl/Cmd + 滚轮连续缩放，并可切换紧凑 / 平衡 / 核对宽度。</span>
+      </div>
+      <div class="pdf-panel-controls">
         <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfPrevPage()">◀</button>
         <span id="pdfPageInfo" style="font-size:11px;color:var(--txL);">p.{{ cur_page_bp }}</span>
         <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfNextPage()">▶</button>
+        <button type="button" class="btn btn-gho" id="pdfPanelModeBtn" style="font-size:11px;padding:3px 8px;" onclick="cyclePdfPanelMode()">平衡</button>
+        <div class="pdf-zoom-controls">
+          <button type="button" class="btn btn-gho" id="pdfZoomOutBtn" style="font-size:11px;padding:3px 8px;" onclick="stepPdfZoom(-0.2)">－</button>
+          <span class="pdf-zoom-info" id="pdfZoomInfo">100%</span>
+          <button type="button" class="btn btn-gho" id="pdfZoomInBtn" style="font-size:11px;padding:3px 8px;" onclick="stepPdfZoom(0.2)">＋</button>
+          <button type="button" class="btn btn-gho" id="pdfZoomResetBtn" style="font-size:11px;padding:3px 8px;" onclick="resetPdfZoom()">适中</button>
+        </div>
         <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="togglePdfPanel()" title="收起">✕</button>
       </div>
     </div>
-    <div class="pdf-img-container" id="pdfImgContainer">
-      <img id="pdfImg" class="pdf-img" src="{{ url_for('pdf_page', file_idx=page_map.get(cur_page_bp, 0)) }}" alt="PDF p.{{ cur_page_bp }}">
-      <div id="pdfHighlights" class="pdf-highlights"></div>
+    <div class="pdf-img-container" id="pdfScrollContainer">
+      {% for bp in page_bps %}
+      <div class="pdf-page-item" data-pdf-bp="{{ bp }}" data-pdf-src="{{ url_for('pdf_page', file_idx=page_map.get(bp, 0), doc_id=current_doc_id) }}" data-pdf-alt="PDF p.{{ bp }}">
+        {% if bp in pdf_initial_mounted_bps %}
+        <img class="pdf-img" loading="lazy" alt="PDF p.{{ bp }}">
+        {% endif %}
+        <div class="pdf-highlights" data-pdf-highlight-bp="{{ bp }}"></div>
+      </div>
+      {% endfor %}
     </div>
   </div>
   {% endif %}
@@ -330,7 +713,9 @@
   <div class="content-panel" id="contentPanel">
 
 <div class="container-wide">
+  <div class="page-shell">
   {% if display_entries %}
+  {% set page_footnotes = namespace(original=[], translated=[]) %}
 
   <!-- Model badge -->
   <div class="flex gap-8 items-center mb-10">
@@ -343,115 +728,248 @@
 
   {% for pe in display_entries %}
   {% set hlevel = pe.heading_level|default(0) %}
+  {% set para_status = pe._status|default('done') %}
+  {% set para_bp = pe.pages|default(cur_page_bp) %}
+  {% set para_source = pe._translation_source|default('model') %}
+  {% if pe.footnotes and pe.footnotes not in page_footnotes.original %}
+  {% set _ = page_footnotes.original.append(pe.footnotes) %}
+  {% endif %}
+  {% if pe.footnotes_translation and pe.footnotes_translation not in page_footnotes.translated %}
+  {% set _ = page_footnotes.translated.append(pe.footnotes_translation) %}
+  {% endif %}
 
   {% if hlevel > 0 %}
   <!-- Heading with translation -->
-  <div class="heading-block heading-h{{ hlevel }}" data-para-idx="{{ loop.index0 }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin:{{ '32px' if hlevel == 1 else '24px' }} 0 12px;">
+  <div class="heading-block heading-h{{ hlevel }}" data-para-idx="{{ loop.index0 }}" data-para-bp="{{ para_bp }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin:{{ '32px' if hlevel == 1 else '24px' }} 0 12px;">
     <div class="heading-original">{{ pe.original }}</div>
     {% if pe.translation %}
-    <div class="heading-translation">{{ pe.translation }}</div>
+    <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
+    {% endif %}
+    <div class="flex gap-8 items-center mt-8" data-manual-controls="{{ loop.index0 }}" data-para-updated-at="{{ pe.updated_at|default(0)|int }}">
+      <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="openManualRevisionEditor({{ loop.index0 }});">编辑译文</button>
+      <span class="manual-revision-badge" data-manual-badge="{{ loop.index0 }}" style="font-size:11px;color:var(--txL);">
+        {{ '人工修订' if para_source == 'manual' else '机器译文' }}
+      </span>
+    </div>
+    <div id="manualRevisionEditor{{ loop.index0 }}" class="hidden" style="margin-top:8px;">
+      <textarea id="manualRevisionInput{{ loop.index0 }}" class="inp" style="min-height:96px;">{{ pe.translation or '' }}</textarea>
+      <div class="flex gap-8 items-center mt-8">
+        <button type="button" class="btn btn-pri btn-sm" onclick="saveManualRevision({{ loop.index0 }}, {{ para_bp }});">保存修订</button>
+        <button type="button" class="btn btn-sec btn-sm" onclick="cancelManualRevision({{ loop.index0 }});">取消</button>
+        <span id="manualRevisionHint{{ loop.index0 }}" style="font-size:11px;color:var(--txL);"></span>
+      </div>
+    </div>
+    {% if para_status == 'error' %}
+    <div style="margin-top:6px;font-size:11px;color:var(--red);">该段翻译失败，占位内容已保留。</div>
     {% endif %}
   </div>
 
   {% else %}
   <!-- Body paragraph -->
-  <div class="para-block" data-para-idx="{{ loop.index0 }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin-bottom:24px;">
+  <div class="para-block" data-para-idx="{{ loop.index0 }}" data-para-bp="{{ para_bp }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin-bottom:24px;">
+    {% if para_status == 'error' %}
+    <div style="margin-bottom:8px;font-size:11px;font-weight:600;color:var(--red);">本段翻译失败，当前显示为失败占位。可重新翻译本页修复。</div>
+    {% endif %}
 
     <!-- Side by side -->
     <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" style="{{ '' if side_by_side else 'display:none;' }}">
       <div class="reading-columns">
         <div>
-          <div class="card">
+          <div class="card original-card">
             <div class="lbl">原文 <span style="color:var(--txL);font-size:11px;">p.{{ pe.pages }}</span></div>
             <div class="text-fr">{{ pe.original_html|safe }}</div>
           </div>
-          {% if pe.footnotes %}
-          <div class="footnote-box">
-            <div class="lbl">脚注</div>
-            <div class="text-fn">{{ pe.footnotes }}</div>
-          </div>
-          {% endif %}
         </div>
         <div>
           <div class="card card-alt">
             <div class="lbl">中文翻译</div>
-            <div class="text-cn">{{ pe.translation or '' }}</div>
+            <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation or '' }}</div>
           </div>
-          {% if pe.footnotes_translation %}
-          <div class="footnote-box-cn">
-            <div class="lbl">脚注翻译</div>
-            <div class="text-cn" style="font-size:13px;line-height:1.8;">{{ pe.footnotes_translation }}</div>
-          </div>
-          {% endif %}
         </div>
       </div>
     </div>
 
     <!-- Stacked -->
     <div class="stk-view {{ 'hidden' if side_by_side else '' }}" style="{{ 'display:none;' if side_by_side else '' }}">
-      <div class="card">
+      <div class="card original-card">
         <div class="lbl">原文 <span style="color:var(--txL);font-size:11px;">p.{{ pe.pages }}</span></div>
         <div class="text-fr" style="font-size:16px;">{{ pe.original_html|safe }}</div>
       </div>
-      {% if pe.footnotes %}
-      <div class="footnote-box">
-        <div class="lbl">脚注</div>
-        <div class="text-fn" style="font-size:14px;line-height:1.8;">{{ pe.footnotes }}</div>
-      </div>
-      {% endif %}
       <div class="card card-alt">
         <div class="lbl">中文翻译</div>
-        <div class="text-cn" style="font-size:16px;">{{ pe.translation or '' }}</div>
+        <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}" style="font-size:16px;">{{ pe.translation or '' }}</div>
       </div>
-      {% if pe.footnotes_translation %}
-      <div class="footnote-box-cn">
-        <div class="lbl">脚注翻译</div>
-        <div class="text-cn" style="font-size:14px;line-height:1.9;">{{ pe.footnotes_translation }}</div>
+    </div>
+
+    <div class="flex gap-8 items-center mt-8" data-manual-controls="{{ loop.index0 }}" data-para-updated-at="{{ pe.updated_at|default(0)|int }}">
+      <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="openManualRevisionEditor({{ loop.index0 }});">编辑译文</button>
+      <span class="manual-revision-badge" data-manual-badge="{{ loop.index0 }}" style="font-size:11px;color:var(--txL);">
+        {{ '人工修订' if para_source == 'manual' else '机器译文' }}
+      </span>
+    </div>
+    <div id="manualRevisionEditor{{ loop.index0 }}" class="hidden" style="margin-top:8px;">
+      <textarea id="manualRevisionInput{{ loop.index0 }}" class="inp" style="min-height:96px;">{{ pe.translation or '' }}</textarea>
+      <div class="flex gap-8 items-center mt-8">
+        <button type="button" class="btn btn-pri btn-sm" onclick="saveManualRevision({{ loop.index0 }}, {{ para_bp }});">保存修订</button>
+        <button type="button" class="btn btn-sec btn-sm" onclick="cancelManualRevision({{ loop.index0 }});">取消</button>
+        <span id="manualRevisionHint{{ loop.index0 }}" style="font-size:11px;color:var(--txL);"></span>
       </div>
-      {% endif %}
     </div>
 
   </div><!-- para-block -->
   {% endif %}
   {% endfor %}
 
+  {% set visible_page_footnotes = page_footnotes.original or page_footnotes.translated %}
+  {% if visible_page_footnotes %}
+  <div class="page-footnotes-section">
+    <div class="page-footnotes-head">
+      <div class="page-footnotes-title">本页脚注</div>
+      <div class="page-footnotes-subtitle">脚注统一放在整页正文之后，便于连续阅读和做笔记。</div>
+    </div>
+    <div class="page-footnotes-bridge">这一页的脚注仍属于当前阅读节奏，可以顺着正文往下看。</div>
+    {% if next_bp %}
+    <div class="page-footnotes-next">读完脚注后可直接继续 p.{{ next_bp }}，不用回到上面重新找位置。</div>
+    {% endif %}
+    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" style="{{ '' if side_by_side else 'display:none;' }}">
+      <div class="footnotes-columns">
+        {% if page_footnotes.original %}
+        <div class="page-footnotes-card page-footnotes-original-card">
+          <div class="lbl">脚注原文</div>
+          <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
+        </div>
+        {% endif %}
+        {% if page_footnotes.translated %}
+        <div class="footnote-box-cn page-footnotes-card">
+          <div class="lbl">脚注翻译</div>
+          <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" style="{{ 'display:none;' if side_by_side else '' }}">
+      <div class="page-footnotes-stack">
+        {% if page_footnotes.original %}
+        <div class="page-footnotes-card page-footnotes-original-card">
+          <div class="lbl">脚注原文</div>
+          <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
+        </div>
+        {% endif %}
+        {% if page_footnotes.translated %}
+        <div class="footnote-box-cn page-footnotes-card">
+          <div class="lbl">脚注翻译</div>
+          <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Actions -->
   <div class="flex justify-center gap-8 mt-12 flex-wrap">
-    <a href="{{ url_for('retranslate', bp=cur_page_bp, model=model_key) }}" class="btn btn-gho" style="font-size:12px;"
-       onclick="this.innerHTML='<span class=spinner></span> 重译中&hellip;';this.style.pointerEvents='none';">
+    <button type="button" class="btn btn-gho" style="font-size:12px;"
+            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, model=model_key) }}', this);">
       用{{ models[model_key].label }}重译本页
-    </a>
+    </button>
     {% for mk, mv in models.items() if mk != model_key %}
-    <a href="{{ url_for('retranslate', bp=cur_page_bp, model=mk) }}" class="btn btn-gho" style="font-size:12px;color:var(--acc);border:1px solid var(--bdrL);"
-       onclick="this.innerHTML='<span class=spinner></span> 重译中&hellip;';this.style.pointerEvents='none';">
+    <button type="button" class="btn btn-gho" style="font-size:12px;color:var(--acc);border:1px solid var(--bdrL);"
+            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, model=mk) }}', this);">
       换{{ mv.label }}重译
-    </a>
+    </button>
     {% endfor %}
     {% if has_pdf %}
     <button type="button" class="btn btn-gho" style="font-size:12px;color:var(--red);border:1px solid var(--bdrL);"
-            id="reparsePageBtn" onclick="startReparsePage({{ cur_page_bp }});">
-      🔄 重新解析本页
+            id="reparsePageBtn" onclick="confirmReparsePage({{ cur_page_bp }});"
+            title="不走 PDF 文字层，强制使用 OCR 文字重做这一页版面解析，并自动重译本页">
+      🔄 强制 OCR 重解析本页
     </button>
     {% endif %}
   </div>
+  {% if has_pdf %}
+  <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+    重解析完成后会自动重译本页。已有译文会被新的本页重译结果覆盖。
+  </div>
+  {% endif %}
 
   {% endif %}
   {% if not display_entries %}
+  {% set draft_bp = translate_snapshot.draft.bp|default(0)|int %}
+  {% set draft_status = translate_snapshot.draft.status|default('idle') %}
+  {% set resume_bp = translate_snapshot.resume_bp|default(0)|int %}
+  {% set has_stopped_draft = draft_bp == cur_page_bp and draft_status == 'aborted' %}
+  {% set has_error_draft = draft_bp == cur_page_bp and draft_status == 'error' %}
+  {% set placeholder_title = 'p.' ~ cur_page_bp ~ ' 需要重试' if current_page_failed else ('p.' ~ cur_page_bp ~ ' 可以继续' if has_stopped_draft or has_error_draft or resume_bp == cur_page_bp else 'p.' ~ cur_page_bp ~ ' 可直接开始阅读') %}
+  {% set placeholder_action = '重试 p.' ~ cur_page_bp if current_page_failed or has_error_draft else ('从 p.' ~ cur_page_bp ~ ' 继续' if has_stopped_draft or resume_bp == cur_page_bp else '从 p.' ~ cur_page_bp ~ ' 开始翻译') %}
   <div class="page-placeholder">
-    <div class="page-placeholder-title">{{ '本页翻译失败' if current_page_failed else '本页尚未提交翻译' }}</div>
+    <div class="page-placeholder-title">{{ placeholder_title }}</div>
     <div class="page-placeholder-subtitle">
       {% if current_page_failed and current_page_failure %}
-      你正在查看 p.{{ cur_page_bp }}。最近一次失败原因：{{ current_page_failure.error }}。修正后可以从本页重新开始翻译。
+      你正在查看 p.{{ cur_page_bp }}。最近一次失败原因：{{ current_page_failure.error }}。处理完后可以直接重试这一页。
+      {% elif has_error_draft %}
+      你正在查看 p.{{ cur_page_bp }}。这一页保留了失败草稿，可以直接重试。
+      {% elif has_stopped_draft or resume_bp == cur_page_bp %}
+      你正在查看 p.{{ cur_page_bp }}。这一页有已停止的草稿，可以直接继续。
       {% else %}
-      你正在查看 p.{{ cur_page_bp }}。如果后台正在翻这一页，流式草稿会显示在上方；否则可以直接从这一页开始翻译。
+      你正在查看 p.{{ cur_page_bp }}。下面先给你这一页的 OCR 原文预览；需要正式阅读稿时，再从这一页开始翻译。
       {% endif %}
     </div>
-    <div class="flex gap-8 mt-12 flex-wrap">
-      <button type="button" class="btn btn-pri" onclick="startTranslateAll({{ cur_page_bp }});">从本页开始翻译</button>
+    <div class="page-preview-meta">
+      <span class="page-preview-chip">
+        {% if current_page_failed %}
+        失败页
+        {% elif has_error_draft %}
+        失败草稿已保留
+        {% elif has_stopped_draft or resume_bp == cur_page_bp %}
+        可从当前页继续
+        {% else %}
+        OCR 原文已就绪
+        {% endif %}
+      </span>
+      {% if current_page_markdown %}
+      <span class="page-preview-chip">可先读原文再决定是否翻译</span>
+      {% endif %}
+      {% if current_page_footnotes %}
+      <span class="page-preview-chip">本页含脚注</span>
+      {% endif %}
+    </div>
+    <div class="flex gap-8 mt-12 flex-wrap page-placeholder-actions">
+      <button type="button" class="btn btn-pri" onclick="startTranslateAll({{ cur_page_bp }});">{{ placeholder_action }}</button>
+      {% if resume_bp and resume_bp != cur_page_bp %}
+      <button type="button" class="btn btn-gho" onclick="startTranslateAll({{ resume_bp }});">继续到 p.{{ resume_bp }}</button>
+      {% endif %}
       {% if has_pdf %}
+      <button type="button" class="btn btn-gho" style="color:var(--red);border:1px solid var(--bdrL);"
+              id="reparsePageBtn" onclick="startReparsePage({{ cur_page_bp }});"
+              title="不走 PDF 文字层，强制使用 OCR 文字重做这一页版面解析，并自动重译本页">
+        🔄 强制 OCR 重解析本页
+      </button>
       <button type="button" class="btn btn-gho" onclick="togglePdfPanel();">查看 PDF 原页</button>
       {% endif %}
     </div>
+    {% if has_pdf %}
+    <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+      如果这一页版面识别明显不对，可直接强制 OCR 重解析本页，不走 PDF 文字层。
+      完成后会自动重译本页，把新的版面文本重新写成译文。
+    </div>
+    {% endif %}
+    <div class="page-placeholder-hint">建议先看下面的 OCR 预览，确认这一页内容和脚注都正常，再决定要不要立刻发起整页翻译。</div>
+    {% if current_page_markdown %}
+    <div class="page-preview-card">
+      <div class="page-preview-label">OCR 原文预览</div>
+      <div class="page-preview-text preview-paragraphs" id="pagePreviewText" data-preview-role="ocr-original">
+        {% for part in current_page_markdown_paragraphs %}
+        <p class="page-preview-paragraph {{ 'is-lead' if loop.first else '' }}">{{ part }}</p>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if current_page_footnotes %}
+    <div class="page-preview-card">
+      <div class="page-preview-label">本页脚注预览</div>
+      <div class="page-preview-text page-preview-footnotes">{{ current_page_footnotes }}</div>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 
@@ -459,55 +977,443 @@
   <div class="mt-28">
     <div class="progress-dots">
       {% for bp in page_bps %}
-      <a href="{{ url_for('reading', bp=bp, usage=1 if usage_open else None) }}" data-page-bp="{{ bp }}" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps else 'pending')) }}" title="p.{{ bp }} · {{ '已译' if bp in translated_bps else ('失败' if bp in failed_bps else '待译') }}"></a>
+      <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-page-bp="{{ bp }}" data-reading-bp="{{ bp }}" onclick="return handleReadingNavClick(event, {{ bp }});" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps or bp in partial_failed_bps else 'pending')) }}" title="p.{{ bp }} · {{ '已译' if bp in translated_bps else ('部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else '待译')) }}"></a>
       {% endfor %}
     </div>
     <div style="font-size:11px;color:var(--txL);margin-top:6px;">
-      已译{{ translated_bps|length }}页 · 失败{{ failed_bps|length }}页 · 当前 p.{{ cur_page_bp }} / p.{{ last_page }}
+      已译{{ translated_bps|length }}页 · 部分完成{{ partial_failed_bps|length }}页 · 失败{{ failed_bps|length }}页 · 当前 p.{{ cur_page_bp }} / p.{{ last_page }}
     </div>
   </div>
 </div>
 
   </div><!-- content-panel -->
+  </div>
 </div><!-- reading-main-layout -->
+
+{% if page_total > 1 %}
+<div class="floating-page-nav" id="floatingPageNav">
+  {% if prev_bp %}
+  <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="floating-page-nav-btn prev" title="上一页">&larr; 上一页</a>
+  {% else %}
+  <span class="floating-page-nav-btn prev disabled">已到第一页</span>
+  {% endif %}
+  {% if next_bp %}
+  <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="floating-page-nav-btn next" title="下一页">下一页 &rarr;</a>
+  {% else %}
+  <span class="floating-page-nav-btn next disabled">已到最后一页</span>
+  {% endif %}
+</div>
+{% endif %}
 
 {% if has_pdf %}
 <!-- Collapsed PDF toggle button -->
-<button class="pdf-toggle-btn hidden" id="pdfToggleBtn" onclick="togglePdfPanel()" title="显示 PDF 原文">📄</button>
+<button class="pdf-toggle-btn{{ ' hidden' if pdf_visible else '' }}" id="pdfToggleBtn" onclick="togglePdfPanel()" title="显示 PDF 原文">📄</button>
 {% endif %}
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-var sideBySide = {{ 'true' if side_by_side else 'false' }};
-var showOriginal = true;
+function createInitialStreamDraftState() {
+  return {
+    active: false,
+    bp: null,
+    paraIdx: null,
+    paraTotal: 0,
+    paraDone: 0,
+    parallelLimit: 0,
+    activeParaIndices: [],
+    paragraphStates: [],
+    paragraphErrors: [],
+    paragraphs: [],
+    status: 'idle',
+    note: '流式翻译开始后，这里会显示当前页正在生成的中文草稿。',
+    updatedAt: 0,
+    lastError: '',
+    restored: false,
+  };
+}
 
-function toggleOriginal() {
-  showOriginal = !showOriginal;
-  document.body.classList.toggle('hide-original', !showOriginal);
-  var btn = document.getElementById('origBtn');
-  if (btn) {
-    btn.style.opacity = showOriginal ? '1' : '0.5';
-    btn.title = showOriginal ? '隐藏原文' : '显示原文';
+var store = {
+  reading: {
+    currentBp: Number({{ cur_page_bp }}),
+    pdfBp: Number({{ cur_page_bp }}),
+    manualNavigationTargetBp: null,
+    autoStart: '{{ request.args.get("auto", "0") }}',
+    startBp: '{{ request.args.get("start_bp", "") }}',
+  },
+  pages: {
+    translatedBps: {{ translated_bps|tojson }}.map(function(bp) { return Number(bp); }),
+    partialFailedBps: {{ partial_failed_bps|tojson }}.map(function(bp) { return Number(bp); }),
+    failedBps: {{ failed_bps|tojson }}.map(function(bp) { return Number(bp); }),
+    allBps: {{ page_bps|tojson }}.map(function(bp) { return Number(bp); }),
+  },
+  streamDraft: createInitialStreamDraftState(),
+  guards: {
+    pendingCommittedRefreshBp: null,
+    committedRefreshInFlight: false,
+    manualNavigationInFlight: false,
+  },
+  ui: {
+    sideBySide: {{ 'true' if side_by_side else 'false' }},
+    showOriginal: {{ 'true' if show_original else 'false' }},
+    pdfVisible: {{ 'true' if pdf_visible else 'false' }},
+    pdfZoom: 1,
+    pdfPanelMode: 'balanced',
+    usageDashboardOpen: {{ 'true' if usage_open else 'false' }},
+  },
+};
+
+function dispatch(action, payload) {
+  function ensureDraftBuffers(total) {
+    var size = Math.max(0, Number(total || 0));
+    if (!store.streamDraft.paragraphs.length && size > 0) {
+      store.streamDraft.paragraphs = Array(size).fill('');
+    }
+    if (!store.streamDraft.paragraphStates.length && size > 0) {
+      store.streamDraft.paragraphStates = Array(size).fill('pending');
+    }
+    if (!store.streamDraft.paragraphErrors.length && size > 0) {
+      store.streamDraft.paragraphErrors = Array(size).fill('');
+    }
+  }
+  if (action === 'set_reading_bp') {
+    var nextBp = Number(payload && payload.bp || 0);
+    if (nextBp) {
+      store.reading.currentBp = nextBp;
+    }
+    return;
+  }
+  if (action === 'set_pdf_bp') {
+    var nextPdfBp = Number(payload && payload.bp || 0);
+    if (nextPdfBp) {
+      store.reading.pdfBp = nextPdfBp;
+    }
+    return;
+  }
+  if (action === 'set_manual_navigation_target') {
+    var targetBp = Number(payload && payload.bp || 0);
+    store.reading.manualNavigationTargetBp = targetBp || null;
+    return;
+  }
+  if (action === 'set_auto_start') {
+    store.reading.autoStart = String(payload && payload.value || '0');
+    return;
+  }
+  if (action === 'set_start_bp') {
+    store.reading.startBp = payload && payload.bp ? String(payload.bp) : '';
+    return;
+  }
+  if (action === 'set_manual_navigation_in_flight') {
+    store.guards.manualNavigationInFlight = !!(payload && payload.value);
+    return;
+  }
+  if (action === 'set_pending_committed_refresh_bp') {
+    var pendingBp = Number(payload && payload.bp || 0);
+    store.guards.pendingCommittedRefreshBp = pendingBp || null;
+    return;
+  }
+  if (action === 'set_committed_refresh_in_flight') {
+    store.guards.committedRefreshInFlight = !!(payload && payload.value);
+    return;
+  }
+  if (action === 'replace_stream_draft') {
+    store.streamDraft = payload && payload.draft ? payload.draft : createInitialStreamDraftState();
+    return;
+  }
+  if (action === 'set_pages_from_snapshot') {
+    if (payload && Array.isArray(payload.translatedBps)) {
+      store.pages.translatedBps = payload.translatedBps.map(function(bp) { return Number(bp); });
+    }
+    if (payload && Array.isArray(payload.failedBps)) {
+      store.pages.failedBps = payload.failedBps.map(function(bp) { return Number(bp); });
+    }
+    if (payload && Array.isArray(payload.partialFailedBps)) {
+      store.pages.partialFailedBps = payload.partialFailedBps.map(function(bp) { return Number(bp); });
+    }
+    return;
+  }
+  if (action === 'mark_page_done') {
+    var doneBp = Number(payload && payload.bp || 0);
+    if (!doneBp) return;
+    store.pages.failedBps = store.pages.failedBps.filter(function(bp) { return bp !== doneBp; });
+    store.pages.partialFailedBps = store.pages.partialFailedBps.filter(function(bp) { return bp !== doneBp; });
+    if (payload && payload.partialFailed) {
+      store.pages.partialFailedBps.push(doneBp);
+      store.pages.partialFailedBps.sort(function(a, b) { return a - b; });
+    }
+    if (store.pages.translatedBps.indexOf(doneBp) < 0) {
+      store.pages.translatedBps.push(doneBp);
+      store.pages.translatedBps.sort(function(a, b) { return a - b; });
+    }
+    return;
+  }
+  if (action === 'mark_page_error') {
+    var errBp = Number(payload && payload.bp || 0);
+    if (!errBp) return;
+    if (store.pages.failedBps.indexOf(errBp) < 0) {
+      store.pages.failedBps.push(errBp);
+      store.pages.failedBps.sort(function(a, b) { return a - b; });
+    }
+    return;
+  }
+  if (action === 'stream_page_init') {
+    var init = payload && payload.data ? payload.data : {};
+    var initDraft = createInitialStreamDraftState();
+    initDraft.active = true;
+    initDraft.status = 'streaming';
+    initDraft.bp = init.bp || null;
+    initDraft.paraIdx = 0;
+    initDraft.paraTotal = Number(init.para_total || 0);
+    initDraft.parallelLimit = Number(init.parallel_limit || 0);
+    initDraft.paragraphStates = Array(initDraft.paraTotal).fill('pending');
+    initDraft.paragraphErrors = Array(initDraft.paraTotal).fill('');
+    initDraft.paragraphs = Array(initDraft.paraTotal).fill('');
+    initDraft.note = '当前页正在流式翻译，完整结束后才会写入硬盘。';
+    initDraft.updatedAt = Math.floor(Date.now() / 1000);
+    dispatch('replace_stream_draft', { draft: initDraft });
+    return;
+  }
+  if (action === 'stream_para_start') {
+    var ps = payload && payload.data ? payload.data : {};
+    store.streamDraft.active = true;
+    store.streamDraft.status = 'streaming';
+    store.streamDraft.bp = ps.bp || store.streamDraft.bp;
+    store.streamDraft.paraIdx = ps.para_idx;
+    ensureDraftBuffers(store.streamDraft.paraTotal);
+    if (store.streamDraft.activeParaIndices.indexOf(Number(ps.para_idx)) < 0) {
+      store.streamDraft.activeParaIndices.push(Number(ps.para_idx));
+      store.streamDraft.activeParaIndices.sort(function(a, b) { return a - b; });
+    }
+    store.streamDraft.paragraphStates[ps.para_idx] = 'running';
+    store.streamDraft.paragraphErrors[ps.para_idx] = '';
+    store.streamDraft.updatedAt = Math.floor(Date.now() / 1000);
+    store.streamDraft.restored = false;
+    return;
+  }
+  if (action === 'stream_para_delta') {
+    var pd = payload && payload.data ? payload.data : {};
+    store.streamDraft.active = true;
+    store.streamDraft.status = 'streaming';
+    store.streamDraft.bp = pd.bp || store.streamDraft.bp;
+    store.streamDraft.paraIdx = pd.para_idx;
+    store.streamDraft.updatedAt = Math.floor(Date.now() / 1000);
+    ensureDraftBuffers(store.streamDraft.paraTotal);
+    if (store.streamDraft.activeParaIndices.indexOf(Number(pd.para_idx)) < 0) {
+      store.streamDraft.activeParaIndices.push(Number(pd.para_idx));
+      store.streamDraft.activeParaIndices.sort(function(a, b) { return a - b; });
+    }
+    store.streamDraft.paragraphStates[pd.para_idx] = 'running';
+    store.streamDraft.paragraphs[pd.para_idx] = pd.translation_so_far || '';
+    store.streamDraft.paragraphErrors[pd.para_idx] = '';
+    store.streamDraft.note = '当前页尚未提交到硬盘；停止后会丢弃这一页草稿。';
+    store.streamDraft.restored = false;
+    return;
+  }
+  if (action === 'stream_para_done') {
+    var done = payload && payload.data ? payload.data : {};
+    store.streamDraft.active = true;
+    store.streamDraft.status = 'streaming';
+    store.streamDraft.bp = done.bp || store.streamDraft.bp;
+    store.streamDraft.paraIdx = done.para_idx;
+    store.streamDraft.paraDone = Math.max(store.streamDraft.paraDone || 0, Number(done.para_idx || 0) + 1);
+    ensureDraftBuffers(store.streamDraft.paraTotal);
+    store.streamDraft.activeParaIndices = store.streamDraft.activeParaIndices.filter(function(idx) { return idx !== Number(done.para_idx); });
+    store.streamDraft.paragraphStates[done.para_idx] = 'done';
+    store.streamDraft.paragraphs[done.para_idx] = done.translation || store.streamDraft.paragraphs[done.para_idx] || '';
+    store.streamDraft.paragraphErrors[done.para_idx] = '';
+    store.streamDraft.note = '该段已完成，正在继续翻译后续段落。';
+    store.streamDraft.updatedAt = Math.floor(Date.now() / 1000);
+    store.streamDraft.lastError = '';
+    store.streamDraft.restored = false;
+    return;
+  }
+  if (action === 'stream_para_error') {
+    var pe = payload && payload.data ? payload.data : {};
+    store.streamDraft.active = true;
+    store.streamDraft.status = 'streaming';
+    store.streamDraft.bp = pe.bp || store.streamDraft.bp;
+    store.streamDraft.paraIdx = pe.para_idx;
+    store.streamDraft.paraDone = Math.max(store.streamDraft.paraDone || 0, Number(pe.para_idx || 0) + 1);
+    ensureDraftBuffers(store.streamDraft.paraTotal);
+    store.streamDraft.activeParaIndices = store.streamDraft.activeParaIndices.filter(function(idx) { return idx !== Number(pe.para_idx); });
+    store.streamDraft.paragraphStates[pe.para_idx] = 'error';
+    store.streamDraft.paragraphs[pe.para_idx] = pe.translation || store.streamDraft.paragraphs[pe.para_idx] || '';
+    store.streamDraft.paragraphErrors[pe.para_idx] = pe.error || '';
+    store.streamDraft.note = '该段翻译失败，已记录失败占位文本。';
+    store.streamDraft.updatedAt = Math.floor(Date.now() / 1000);
+    store.streamDraft.lastError = pe.error || '';
+    store.streamDraft.restored = false;
+    return;
+  }
+  if (action === 'stream_page_aborted') {
+    var aborted = payload && payload.data ? payload.data : {};
+    store.streamDraft.active = false;
+    store.streamDraft.status = 'aborted';
+    store.streamDraft.bp = aborted.bp || store.streamDraft.bp;
+    store.streamDraft.paraIdx = aborted.para_idx;
+    store.streamDraft.activeParaIndices = [];
+    store.streamDraft.note = '当前页已停止，草稿未提交到硬盘。点击“继续翻译”会从这一页重新开始。';
+    store.streamDraft.updatedAt = Math.floor(Date.now() / 1000);
+    store.streamDraft.restored = false;
+    return;
+  }
+  if (action === 'stream_page_done') {
+    var donePage = payload && payload.data ? payload.data : {};
+    var hasDraftError = !!donePage.partial_failed || (
+      Array.isArray(store.streamDraft.paragraphStates)
+      && store.streamDraft.paragraphStates.some(function(state) { return state === 'error'; })
+    );
+    store.streamDraft.active = false;
+    store.streamDraft.status = 'done';
+    store.streamDraft.bp = donePage.bp || store.streamDraft.bp;
+    store.streamDraft.paraDone = store.streamDraft.paraTotal;
+    store.streamDraft.activeParaIndices = [];
+    store.streamDraft.note = hasDraftError ? '当前页已完成，但仍有失败段，可直接重译本页。' : '当前页已完成并写入硬盘。';
+    store.streamDraft.updatedAt = Math.floor(Date.now() / 1000);
+    store.streamDraft.restored = false;
+    return;
+  }
+  if (action === 'toggle_pdf_panel') {
+    store.ui.pdfVisible = !store.ui.pdfVisible;
+    return;
+  }
+  if (action === 'set_pdf_zoom') {
+    var nextZoom = Number(payload && payload.value || 1);
+    if (nextZoom < 1) nextZoom = 1;
+    if (nextZoom > 2.4) nextZoom = 2.4;
+    store.ui.pdfZoom = Math.round(nextZoom * 100) / 100;
+    return;
+  }
+  if (action === 'cycle_pdf_panel_mode') {
+    var modes = ['compact', 'balanced', 'inspect'];
+    var currentIdx = modes.indexOf(store.ui.pdfPanelMode);
+    store.ui.pdfPanelMode = modes[(currentIdx + 1 + modes.length) % modes.length];
+    return;
+  }
+  if (action === 'toggle_original') {
+    store.ui.showOriginal = !store.ui.showOriginal;
+    return;
+  }
+  if (action === 'toggle_layout') {
+    store.ui.sideBySide = !store.ui.sideBySide;
+    return;
+  }
+  if (action === 'set_usage_dashboard_open') {
+    store.ui.usageDashboardOpen = !!(payload && payload.value);
+    return;
+  }
+  if (action === 'toggle_usage_dashboard') {
+    store.ui.usageDashboardOpen = !store.ui.usageDashboardOpen;
+    return;
+  }
+  if (action === 'navigate') {
+    var nextNavBp = Number(payload && payload.bp || 0);
+    var source = payload && payload.source ? payload.source : 'internal';
+    if (!nextNavBp) return;
+    dispatch('set_reading_bp', { bp: nextNavBp });
+    if (source !== 'pdf') {
+      dispatch('set_pdf_bp', { bp: nextNavBp });
+    }
+    if (source === 'manual') {
+      dispatch('set_manual_navigation_in_flight', { value: true });
+      dispatch('set_manual_navigation_target', { bp: nextNavBp });
+      dispatch('set_pending_committed_refresh_bp', { bp: null });
+      dispatch('set_committed_refresh_in_flight', { value: false });
+    }
   }
 }
 
+function toggleOriginal() {
+  dispatch('toggle_original');
+  applyOriginalVisibilityState();
+  syncReadingUrl();
+}
+
+function applyOriginalVisibilityState() {
+  document.body.classList.toggle('hide-original', !store.ui.showOriginal);
+  var btn = document.getElementById('origBtn');
+  if (btn) {
+    btn.classList.toggle('active', store.ui.showOriginal);
+    btn.style.opacity = store.ui.showOriginal ? '1' : '0.5';
+    btn.title = store.ui.showOriginal ? '隐藏原文' : '显示原文';
+  }
+  updateFocusModeButtonState();
+}
+
 function toggleLayout() {
-  sideBySide = !sideBySide;
-  document.querySelectorAll('.sbs-view').forEach(function(el) {
-    el.style.display = sideBySide ? '' : 'none';
-  });
-  document.querySelectorAll('.stk-view').forEach(function(el) {
-    el.style.display = sideBySide ? 'none' : '';
-  });
-  document.getElementById('layoutBtn').textContent = sideBySide ? '⇅' : '⇆';
-  // Save preference
+  dispatch('toggle_layout');
+  applyLayoutState();
+  syncReadingUrl();
+  // 保存布局偏好，避免下次重新进入时还原成旧布局。
   fetch('{{ url_for("set_pref") }}', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({side_by_side: sideBySide})
+    body: JSON.stringify({side_by_side: store.ui.sideBySide})
   });
+}
+
+function applyLayoutState() {
+  document.querySelectorAll('.sbs-view').forEach(function(el) {
+    el.style.display = store.ui.sideBySide ? '' : 'none';
+  });
+  document.querySelectorAll('.stk-view').forEach(function(el) {
+    el.style.display = store.ui.sideBySide ? 'none' : '';
+  });
+  var btn = document.getElementById('layoutBtn');
+  if (btn) {
+    btn.classList.toggle('active', store.ui.sideBySide);
+    btn.textContent = store.ui.sideBySide ? '改单栏' : '改双栏';
+    btn.title = store.ui.sideBySide ? '切回单栏阅读' : '切到双栏对照';
+  }
+  updateFocusModeButtonState();
+}
+
+function isReadingFocusMode() {
+  return !store.ui.pdfVisible && !store.ui.showOriginal && !store.ui.sideBySide && !store.ui.usageDashboardOpen;
+}
+
+function updateFocusModeButtonState() {
+  var btn = document.getElementById('focusBtn');
+  if (!btn) return;
+  btn.classList.toggle('active', isReadingFocusMode());
+  btn.title = isReadingFocusMode()
+    ? '当前已经是笔记专注模式'
+    : '收起 PDF 和进度，隐藏原文并切到单栏';
+}
+
+function activateReadingFocusMode() {
+  var layoutChanged = false;
+  if (store.ui.sideBySide) {
+    dispatch('toggle_layout');
+    layoutChanged = true;
+  }
+  if (store.ui.showOriginal) {
+    dispatch('toggle_original');
+  }
+  if (store.ui.pdfVisible) {
+    dispatch('toggle_pdf_panel');
+  }
+
+  applyLayoutState();
+  applyOriginalVisibilityState();
+  applyPdfPanelVisibilityState();
+
+  if (layoutChanged) {
+    fetch('{{ url_for("set_pref") }}', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({side_by_side: false})
+    });
+  }
+
+  if (store.ui.usageDashboardOpen) {
+    toggleUsageDashboard(false);
+  } else {
+    stopUsagePolling();
+    syncReadingUrl();
+    updateFocusModeButtonState();
+  }
 }
 
 function copyExport() {
@@ -518,69 +1424,442 @@ function copyExport() {
 }
 
 // ===== PDF Preview Panel (图片模式) =====
-var pdfVisible = {{ 'true' if has_pdf else 'false' }};
-var curPdfBp = {{ cur_page_bp }};
 var pageMap = {{ page_map|tojson }};
-// 获取所有 bookPage 键（排序后用于翻页）
-var allBps = Object.keys(pageMap).map(Number).sort(function(a,b){return a-b;});
+var pdfPageMetrics = {
+  {% for page in pages %}
+  "{{ page.bookPage }}": {imgW: {{ page.imgW|default(0) }}, imgH: {{ page.imgH|default(0) }}}{% if not loop.last %},{% endif %}
+  {% endfor %}
+};
+var pdfScrollObserver = null;
+var VIRTUAL_WINDOW_RADIUS = {{ pdf_virtual_window_radius|int }};
+var VIRTUAL_SCROLL_MIN_PAGES = {{ pdf_virtual_scroll_min_pages|int }};
+var virtualPdfState = {
+  enabled: false,
+  initialized: false,
+};
+var observerNavigateTimer = null;
+var pendingObserverBp = null;
+var OBSERVER_NAV_DEBOUNCE_MS = 180;
+var OBSERVER_NAV_SUPPRESS_MS = 420;
+var observerNavigationSuppressUntil = 0;
+var currentHighlightState = {
+  active: false,
+  paraIdx: null,
+  bboxes: [],
+  targetBp: null,
+};
+
+function suppressObserverNavigation(ms) {
+  var holdMs = Number(ms || OBSERVER_NAV_SUPPRESS_MS);
+  if (holdMs < 0) holdMs = 0;
+  observerNavigationSuppressUntil = Date.now() + holdMs;
+  pendingObserverBp = null;
+  clearTimeout(observerNavigateTimer);
+}
+
+function isObserverNavigationSuppressed() {
+  return Date.now() < observerNavigationSuppressUntil;
+}
 
 function togglePdfPanel() {
   var panel = document.getElementById('pdfPanel');
-  var toggleBtn = document.getElementById('pdfToggleBtn');
-  var layout = document.getElementById('readingLayout');
   if (!panel) return;
 
-  pdfVisible = !pdfVisible;
-  if (pdfVisible) {
-    panel.style.display = '';
-    layout.classList.add('with-pdf');
-    if (toggleBtn) toggleBtn.classList.add('hidden');
-  } else {
-    panel.style.display = 'none';
-    layout.classList.remove('with-pdf');
-    if (toggleBtn) toggleBtn.classList.remove('hidden');
+  dispatch('toggle_pdf_panel');
+  applyPdfPanelVisibilityState();
+  if (store.ui.pdfVisible) {
+    initPdfVirtualScroll();
+    applyPdfPagePlaceholders();
+    setupPdfScrollObserver();
+    alignPdfToReading({
+      bp: store.reading.currentBp,
+      source: 'reading',
+      behavior: 'auto',
+      forceScroll: true,
+      suppressMs: OBSERVER_NAV_SUPPRESS_MS,
+    });
+  }
+  syncReadingUrl();
+}
+
+function applyPdfPanelVisibilityState() {
+  var panel = document.getElementById('pdfPanel');
+  var toggleBtn = document.getElementById('pdfToggleBtn');
+  var layout = document.getElementById('readingLayout');
+  var btn = document.getElementById('pdfBtn');
+  var modeBtn = document.getElementById('pdfPanelModeBtn');
+  if (!panel || !layout) return;
+  panel.style.display = store.ui.pdfVisible ? '' : 'none';
+  layout.classList.toggle('with-pdf', store.ui.pdfVisible);
+  panel.setAttribute('data-panel-mode', store.ui.pdfPanelMode);
+  if (toggleBtn) {
+    toggleBtn.classList.toggle('hidden', store.ui.pdfVisible);
+  }
+  if (btn) {
+    btn.classList.toggle('active', store.ui.pdfVisible);
+    btn.title = store.ui.pdfVisible ? '收起 PDF 原页' : '显示 PDF 原页';
+  }
+  if (modeBtn) {
+    var modeLabelMap = { compact: '紧凑', balanced: '平衡', inspect: '核对' };
+    modeBtn.textContent = modeLabelMap[store.ui.pdfPanelMode] || '平衡';
+    modeBtn.title = '切换 PDF 面板宽度';
+  }
+  updatePdfZoomUi();
+  updateFocusModeButtonState();
+}
+
+function getPdfPageElement(bp) {
+  return document.querySelector('.pdf-page-item[data-pdf-bp="' + Number(bp) + '"]');
+}
+
+function getPdfImageForItem(pageEl) {
+  return pageEl ? pageEl.querySelector('.pdf-img') : null;
+}
+
+function normalizePdfScale(scale) {
+  var nextScale = Math.round(Number(scale || 0) * 100) / 100;
+  if (nextScale <= 0) return 2;
+  return nextScale;
+}
+
+function formatPdfScale(scale) {
+  return normalizePdfScale(scale).toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function getPdfRenderScale(bp) {
+  var container = document.getElementById('pdfScrollContainer');
+  if (!container) return 2;
+  var metrics = pdfPageMetrics[String(Number(bp) || 0)] || {};
+  var pageImgW = Number(metrics.imgW || 0);
+  if (pageImgW <= 0) return 2;
+  var pageEl = getPdfPageElement(bp);
+  var cssWidth = Math.max(1, (pageEl && pageEl.clientWidth) || container.clientWidth || 1);
+  var pixelRatio = Math.max(2, window.devicePixelRatio || 1) * Math.max(1, Number(store.ui.pdfZoom || 1));
+  var scale = (cssWidth * pixelRatio) / pageImgW;
+  if (scale < 1) scale = 1;
+  if (scale > 3.2) scale = 3.2;
+  return normalizePdfScale(scale);
+}
+
+function updatePdfZoomUi() {
+  var container = document.getElementById('pdfScrollContainer');
+  var info = document.getElementById('pdfZoomInfo');
+  var zoom = Math.max(1, Number(store.ui.pdfZoom || 1));
+  if (container) {
+    container.style.setProperty('--pdf-zoom', String(zoom));
+    container.dataset.zoomed = zoom > 1.05 ? '1' : '0';
+  }
+  if (info) {
+    info.textContent = Math.round(zoom * 100) + '%';
   }
 }
 
-function pdfGoToBp(bp) {
-  var img = document.getElementById('pdfImg');
+function rerenderMountedPdfImages() {
+  document.querySelectorAll('.pdf-page-item[data-pdf-bp]').forEach(function(el) {
+    var img = getPdfImageForItem(el);
+    if (img) syncPdfImageSrc(el, img);
+  });
+}
+
+function buildPdfZoomAnchor(container, event) {
+  if (!container) return null;
+  var rect = container.getBoundingClientRect();
+  var anchorX = rect.left + (container.clientWidth / 2);
+  var anchorY = rect.top + (container.clientHeight / 2);
+  if (event) {
+    if (typeof event.clientX === 'number') anchorX = event.clientX;
+    if (typeof event.clientY === 'number') anchorY = event.clientY;
+  }
+  return {
+    xRatio: (container.scrollLeft + Math.max(0, anchorX - rect.left)) / Math.max(1, container.scrollWidth),
+    yRatio: (container.scrollTop + Math.max(0, anchorY - rect.top)) / Math.max(1, container.scrollHeight),
+  };
+}
+
+function restorePdfZoomAnchor(container, anchor) {
+  if (!container || !anchor) return;
+  var targetLeft = anchor.xRatio * Math.max(0, container.scrollWidth) - (container.clientWidth / 2);
+  var targetTop = anchor.yRatio * Math.max(0, container.scrollHeight) - (container.clientHeight / 2);
+  container.scrollLeft = Math.max(0, targetLeft);
+  container.scrollTop = Math.max(0, targetTop);
+}
+
+function setPdfZoom(value, anchor) {
+  var container = document.getElementById('pdfScrollContainer');
+  dispatch('set_pdf_zoom', { value: value });
+  updatePdfZoomUi();
+  applyPdfPagePlaceholders();
+  restorePdfZoomAnchor(container, anchor);
+  rerenderMountedPdfImages();
+  maybeRestoreHighlight();
+}
+
+function stepPdfZoom(delta, anchor) {
+  setPdfZoom(Number(store.ui.pdfZoom || 1) + Number(delta || 0), anchor);
+}
+
+function cyclePdfPanelMode() {
+  dispatch('cycle_pdf_panel_mode');
+  applyPdfPanelVisibilityState();
+  applyPdfPagePlaceholders();
+  rerenderMountedPdfImages();
+  maybeRestoreHighlight();
+}
+
+function resetPdfZoom() {
+  setPdfZoom(1);
+}
+
+function togglePdfZoomFromGesture(pageEl, anchor) {
+  if (!pageEl) return;
+  var currentZoom = Math.max(1, Number(store.ui.pdfZoom || 1));
+  if (currentZoom > 1.05) {
+    setPdfZoom(1, anchor);
+    return;
+  }
+  setPdfZoom(1.8, anchor);
+}
+
+function initPdfZoomInteractions() {
+  var container = document.getElementById('pdfScrollContainer');
+  if (!container || container.dataset.zoomInteractionsReady === '1') return;
+  container.dataset.zoomInteractionsReady = '1';
+  container.addEventListener('dblclick', function(event) {
+    var pageItem = event.target && event.target.closest('.pdf-page-item');
+    if (!pageItem) return;
+    var anchor = buildPdfZoomAnchor(container, event);
+    togglePdfZoomFromGesture(pageItem, anchor);
+  });
+  container.addEventListener('wheel', function(event) {
+    if (!event.ctrlKey && !event.metaKey) return;
+    event.preventDefault();
+    var anchor = buildPdfZoomAnchor(container, event);
+    var delta = event.deltaY < 0 ? 0.1 : -0.1;
+    stepPdfZoom(delta, anchor);
+  }, { passive: false });
+}
+
+function buildPdfPageSrc(pageEl) {
+  if (!pageEl) return '';
+  var baseSrc = String(pageEl.getAttribute('data-pdf-src') || '');
+  if (!baseSrc) return '';
+  var bp = Number(pageEl.getAttribute('data-pdf-bp') || 0);
+  var url = new URL(baseSrc, window.location.origin);
+  var docId = getReadingDocIdParam();
+  if (docId) {
+    url.searchParams.set('doc_id', docId);
+  }
+  url.searchParams.set('scale', formatPdfScale(getPdfRenderScale(bp)));
+  return url.pathname + url.search;
+}
+
+function syncPdfImageSrc(pageEl, img) {
+  if (!pageEl || !img) return;
+  var nextSrc = buildPdfPageSrc(pageEl);
+  if (!nextSrc || img.getAttribute('src') === nextSrc) return;
+  img.addEventListener('load', function() {
+    maybeRestoreHighlight();
+  }, { once: true });
+  img.src = nextSrc;
+}
+
+function mountPdfImage(pageEl) {
+  if (!pageEl) return;
+  var alt = String(pageEl.getAttribute('data-pdf-alt') || 'PDF');
+  var img = getPdfImageForItem(pageEl);
+  if (!img) {
+    img = document.createElement('img');
+    img.className = 'pdf-img';
+    img.loading = 'lazy';
+    img.alt = alt;
+    var highlight = pageEl.querySelector('.pdf-highlights');
+    if (highlight) {
+      pageEl.insertBefore(img, highlight);
+    } else {
+      pageEl.appendChild(img);
+    }
+  }
+  img.alt = alt;
+  syncPdfImageSrc(pageEl, img);
+}
+
+function unmountPdfImage(pageEl) {
+  var img = getPdfImageForItem(pageEl);
   if (!img) return;
-  var fileIdx = pageMap[bp];
-  if (fileIdx === undefined) return;
-  curPdfBp = bp;
-  img.src = '{{ url_for("pdf_page", file_idx=0) }}'.replace('/0', '/' + fileIdx);
+  img.remove();
+}
+
+function initPdfVirtualScroll() {
+  var container = document.getElementById('pdfScrollContainer');
+  if (!container || virtualPdfState.initialized) return;
+  var items = container.querySelectorAll('.pdf-page-item[data-pdf-bp]');
+  virtualPdfState.enabled = items.length >= VIRTUAL_SCROLL_MIN_PAGES;
+  virtualPdfState.initialized = true;
+}
+
+function updatePdfVirtualWindow(centerBp) {
+  initPdfVirtualScroll();
+  if (!virtualPdfState.enabled) return;
+  var center = Number(centerBp || store.reading.pdfBp || store.reading.currentBp || 0);
+  if (!center) return;
+  var centerIdx = store.pages.allBps.indexOf(center);
+  if (centerIdx < 0) return;
+  var minIdx = Math.max(0, centerIdx - VIRTUAL_WINDOW_RADIUS);
+  var maxIdx = Math.min(store.pages.allBps.length - 1, centerIdx + VIRTUAL_WINDOW_RADIUS);
+  var keepSet = {};
+  for (var i = minIdx; i <= maxIdx; i += 1) {
+    keepSet[store.pages.allBps[i]] = true;
+  }
+  document.querySelectorAll('.pdf-page-item[data-pdf-bp]').forEach(function(el) {
+    var bp = Number(el.getAttribute('data-pdf-bp') || 0);
+    if (!bp) return;
+    if (keepSet[bp]) {
+      mountPdfImage(el);
+    } else {
+      unmountPdfImage(el);
+      var layer = el.querySelector('.pdf-highlights');
+      if (layer) layer.innerHTML = '';
+    }
+  });
+  maybeRestoreHighlight();
+}
+
+function getPdfHighlightLayer(bp) {
+  return document.querySelector('.pdf-highlights[data-pdf-highlight-bp="' + Number(bp) + '"]');
+}
+
+function updatePdfPageInfo(bp) {
   var info = document.getElementById('pdfPageInfo');
-  if (info) info.textContent = 'p.' + bp;
+  if (info && bp) info.textContent = 'p.' + bp;
+}
+
+function pdfGoToBp(bp) {
+  alignPdfToReading({
+    bp: bp,
+    source: 'pdf',
+    behavior: 'smooth',
+    forceScroll: true,
+    suppressMs: OBSERVER_NAV_SUPPRESS_MS,
+  });
   clearHighlights();
 }
 
 function pdfPrevPage() {
-  var i = allBps.indexOf(curPdfBp);
-  if (i > 0) pdfGoToBp(allBps[i - 1]);
+  var i = store.pages.allBps.indexOf(store.reading.pdfBp);
+  if (i > 0) pdfGoToBp(store.pages.allBps[i - 1]);
 }
 
 function pdfNextPage() {
-  var i = allBps.indexOf(curPdfBp);
-  if (i >= 0 && i < allBps.length - 1) pdfGoToBp(allBps[i + 1]);
+  var i = store.pages.allBps.indexOf(store.reading.pdfBp);
+  if (i >= 0 && i < store.pages.allBps.length - 1) pdfGoToBp(store.pages.allBps[i + 1]);
 }
 
 // ===== PDF 高亮层 =====
 var activePara = -1;
-// 页面 imgW/imgH（用于 bbox 百分比换算）
-var pageImgW = {{ (pages[page_map.get(cur_page_bp, 0)].imgW if pages and page_map.get(cur_page_bp, 0) is not none and page_map.get(cur_page_bp, 0) < pages|length else 0) }};
-var pageImgH = {{ (pages[page_map.get(cur_page_bp, 0)].imgH if pages and page_map.get(cur_page_bp, 0) is not none and page_map.get(cur_page_bp, 0) < pages|length else 0) }};
 
 function clearHighlights() {
-  var c = document.getElementById('pdfHighlights');
-  if (c) c.innerHTML = '';
+  document.querySelectorAll('.pdf-highlights').forEach(function(layer) {
+    layer.innerHTML = '';
+  });
   activePara = -1;
+  currentHighlightState = {
+    active: false,
+    paraIdx: null,
+    bboxes: [],
+    targetBp: null,
+  };
   document.querySelectorAll('.para-block.active-para, .heading-block.active-para').forEach(function(el) {
     el.classList.remove('active-para');
   });
 }
 
-function showHighlights(paraIdx, bboxes) {
-  var c = document.getElementById('pdfHighlights');
+function maybeRestoreHighlight() {
+  if (!currentHighlightState.active) return;
+  var targetBp = Number(currentHighlightState.targetBp || 0);
+  if (!targetBp) return;
+  var pageEl = getPdfPageElement(targetBp);
+  var img = pageEl ? pageEl.querySelector('.pdf-img') : null;
+  if (!img || !img.complete || img.offsetHeight <= 0) return;
+  showHighlights(currentHighlightState.paraIdx, currentHighlightState.bboxes, targetBp);
+}
+
+function resolveParagraphBp(el) {
+  if (!el) return Number(store.reading.currentBp || getVisiblePdfBp() || 0);
+  var raw = String(el.getAttribute('data-para-bp') || '').trim();
+  if (!raw) return Number(store.reading.currentBp || getVisiblePdfBp() || 0);
+  var m = raw.match(/\d+/);
+  return m ? Number(m[0]) : Number(store.reading.currentBp || getVisiblePdfBp() || 0);
+}
+
+function isPdfPageVisible(bp) {
+  var container = document.getElementById('pdfScrollContainer');
+  var pageEl = getPdfPageElement(bp);
+  if (!container || !pageEl) return false;
+  var top = pageEl.offsetTop;
+  var bottom = top + pageEl.offsetHeight;
+  var viewTop = container.scrollTop;
+  var viewBottom = viewTop + container.clientHeight;
+  var overlap = Math.max(0, Math.min(bottom, viewBottom) - Math.max(top, viewTop));
+  var ratio = overlap / Math.max(1, pageEl.offsetHeight);
+  return ratio >= 0.45;
+}
+
+function scrollPdfPageIntoView(bp, behavior, onlyWhenHidden) {
+  var pageEl = getPdfPageElement(bp);
+  if (!pageEl) return;
+  if (onlyWhenHidden && isPdfPageVisible(bp)) return;
+  pageEl.scrollIntoView({block: 'center', behavior: behavior || 'smooth'});
+}
+
+function scrollPdfToHighlight(bp, bbox, behavior) {
+  updatePdfVirtualWindow(bp);
+  var container = document.getElementById('pdfScrollContainer');
+  var pageEl = getPdfPageElement(bp);
+  var img = pageEl ? pageEl.querySelector('.pdf-img') : null;
+  var metrics = pdfPageMetrics[String(bp)] || {};
+  if (!container || !pageEl || !img || !bbox || Number(metrics.imgH || 0) <= 0) return;
+  var doScroll = function() {
+    var pageTop = pageEl.offsetTop;
+    var scrollY = pageTop + (bbox[1] / Number(metrics.imgH)) * Math.max(1, img.offsetHeight) - 60;
+    container.scrollTo({ top: Math.max(0, scrollY), behavior: behavior || 'smooth' });
+  };
+  if (img.complete && img.offsetHeight > 0) {
+    doScroll();
+    return;
+  }
+  img.addEventListener('load', doScroll, { once: true });
+}
+
+function alignPdfToReading(options) {
+  var opts = options || {};
+  var targetBp = Number(opts.bp || store.reading.currentBp || getVisiblePdfBp() || 0);
+  if (!targetBp) return;
+  var source = opts.source || 'reading';
+  var behavior = opts.behavior || 'auto';
+  var suppressMs = Number(opts.suppressMs || OBSERVER_NAV_SUPPRESS_MS);
+  var forceScroll = !!opts.forceScroll;
+
+  suppressObserverNavigation(suppressMs);
+  setVisiblePdfBp(targetBp, source);
+
+  var targetEl = getPdfPageElement(targetBp);
+  if (!targetEl) return;
+  if (!forceScroll && isPdfPageVisible(targetBp)) return;
+  targetEl.scrollIntoView({ block: 'center', behavior: behavior });
+}
+
+function showHighlights(paraIdx, bboxes, targetBp) {
+  targetBp = Number(targetBp || store.reading.currentBp || getVisiblePdfBp() || 0);
+  currentHighlightState = {
+    active: true,
+    paraIdx: paraIdx,
+    bboxes: Array.isArray(bboxes) ? bboxes.slice() : [],
+    targetBp: targetBp,
+  };
+  var c = getPdfHighlightLayer(targetBp);
+  var metrics = pdfPageMetrics[String(targetBp)] || {};
+  var pageImgW = Number(metrics.imgW || 0);
+  var pageImgH = Number(metrics.imgH || 0);
   if (!c || !pageImgW || !pageImgH) return;
   c.innerHTML = '';
   activePara = paraIdx;
@@ -604,8 +1883,11 @@ document.addEventListener('DOMContentLoaded', function() {
     try { bboxes = JSON.parse(el.getAttribute('data-bboxes') || '[]'); } catch(e) {}
 
     el.addEventListener('mouseenter', function() {
-      if (bboxes.length && pdfVisible) {
-        showHighlights(idx, bboxes);
+      if (bboxes.length && store.ui.pdfVisible) {
+        var targetBp = resolveParagraphBp(el);
+        setVisiblePdfBp(targetBp, 'reading');
+        scrollPdfPageIntoView(targetBp, 'auto', true);
+        showHighlights(idx, bboxes, targetBp);
         el.classList.add('active-para');
       }
     });
@@ -613,15 +1895,12 @@ document.addEventListener('DOMContentLoaded', function() {
       clearHighlights();
     });
     el.addEventListener('click', function() {
-      if (bboxes.length && pdfVisible) {
-        showHighlights(idx, bboxes);
-        // 滚动 PDF 图片到高亮区域
-        var container = document.getElementById('pdfImgContainer');
-        var img = document.getElementById('pdfImg');
-        if (container && img && bboxes[0]) {
-          var scrollY = (bboxes[0][1] / pageImgH) * img.offsetHeight - 60;
-          container.scrollTop = Math.max(0, scrollY);
-        }
+      if (bboxes.length && store.ui.pdfVisible) {
+        var targetBp = resolveParagraphBp(el);
+        setVisiblePdfBp(targetBp, 'reading');
+        scrollPdfPageIntoView(targetBp, 'smooth', false);
+        showHighlights(idx, bboxes, targetBp);
+        if (bboxes[0]) scrollPdfToHighlight(targetBp, bboxes[0], 'smooth');
       }
     });
   });
@@ -632,49 +1911,325 @@ var translateES = null;
 var translateStatusPoll = null;
 var usagePoll = null;
 var usageSamples = [];
-var translatedPageBps = {{ translated_bps|tojson }};
-var failedPageBps = {{ failed_bps|tojson }};
+var usageLiveState = {
+  initialized: false,
+  totalTokens: 0,
+  requestCount: 0,
+  currentBp: null,
+  updatedAt: 0,
+};
+var lastUsageSnapshot = null;
 var initialTranslateSnapshot = {{ translate_snapshot|tojson }};
-var allBps = {{ page_bps|tojson }};
+var translateSessionActivated = {{ 'true' if show_initial_translate_snapshot else 'false' }};
 var pageNavRenderSignature = '';
 var pageNavButtonLabel = '';
-var streamDraftState = {
-  active: false,
-  bp: null,
-  paraIdx: null,
-  paraTotal: 0,
-  paraDone: 0,
-  paragraphs: [],
-  status: 'idle',
-  note: '',
-  updatedAt: 0,
-  lastError: '',
-};
+var currentPageHasEntry = {{ 'true' if has_current_entry else 'false' }};
 var currentDocId = '{{ current_doc_id }}';
-var currentPageBp = {{ cur_page_bp }};
-var usageDashboardOpen = {{ 'true' if usage_open else 'false' }};
-var readingAutoStart = '{{ request.args.get("auto", "0") }}';
-var readingStartBp = '{{ request.args.get("start_bp", "") }}';
+var currentModelKey = '{{ model_key }}';
+var manualRevisionSaving = {};
+
+function getManualRevisionControls(idx) {
+  return document.querySelector('[data-manual-controls="' + idx + '"]');
+}
+
+function getManualRevisionHintNode(idx) {
+  return document.getElementById('manualRevisionHint' + idx);
+}
+
+function getManualRevisionInputNode(idx) {
+  return document.getElementById('manualRevisionInput' + idx);
+}
+
+function getManualRevisionEditorNode(idx) {
+  return document.getElementById('manualRevisionEditor' + idx);
+}
+
+function getManualRevisionTranslationNodes(idx) {
+  return document.querySelectorAll('.js-para-translation[data-para-idx="' + idx + '"]');
+}
+
+function setManualRevisionBadge(idx, source) {
+  document.querySelectorAll('[data-manual-badge="' + idx + '"]').forEach(function(node) {
+    node.textContent = source === 'manual' ? '人工修订' : '机器译文';
+  });
+}
+
+function setManualRevisionHint(idx, message, isError) {
+  var hint = getManualRevisionHintNode(idx);
+  if (!hint) return;
+  hint.textContent = message || '';
+  hint.style.color = isError ? 'var(--red)' : 'var(--txL)';
+}
+
+function openManualRevisionEditor(idx) {
+  idx = Number(idx);
+  var editor = getManualRevisionEditorNode(idx);
+  var input = getManualRevisionInputNode(idx);
+  if (!editor || !input) return;
+  var nodes = getManualRevisionTranslationNodes(idx);
+  if (nodes && nodes.length > 0) {
+    input.value = nodes[0].textContent || '';
+  }
+  editor.classList.remove('hidden');
+  setManualRevisionHint(idx, '', false);
+  input.focus();
+}
+
+function cancelManualRevision(idx) {
+  idx = Number(idx);
+  var editor = getManualRevisionEditorNode(idx);
+  if (!editor) return;
+  editor.classList.add('hidden');
+  setManualRevisionHint(idx, '', false);
+}
+
+function saveManualRevision(idx, bp) {
+  idx = Number(idx);
+  bp = Number(bp || 0);
+  if (!bp) return;
+  if (manualRevisionSaving[idx]) return;
+  var input = getManualRevisionInputNode(idx);
+  var controls = getManualRevisionControls(idx);
+  if (!input || !controls) return;
+  var nextText = String(input.value || '');
+  var baseUpdatedAt = Number(controls.getAttribute('data-para-updated-at') || 0) || null;
+  manualRevisionSaving[idx] = true;
+  setManualRevisionHint(idx, '保存中…', false);
+  fetch('{{ url_for("save_manual_revision") }}?doc_id=' + encodeURIComponent(currentDocId), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      bp: bp,
+      segment_index: idx,
+      translation: nextText,
+      base_updated_at: baseUpdatedAt,
+    }),
+  }).then(function(resp) {
+    return resp.json().then(function(data) {
+      return { status: resp.status, data: data };
+    });
+  }).then(function(result) {
+    if (result.status === 409) {
+      var serverSeg = (result.data && result.data.server_segment) ? result.data.server_segment : null;
+      var hintNode = getManualRevisionHintNode(idx);
+      if (hintNode) {
+        hintNode.innerHTML = '';
+        var msgSpan = document.createElement('span');
+        msgSpan.textContent = '段落已被更新，请先刷新后再保存。';
+        msgSpan.style.color = 'var(--red)';
+        hintNode.appendChild(msgSpan);
+        if (serverSeg) {
+          var reloadBtn = document.createElement('button');
+          reloadBtn.type = 'button';
+          reloadBtn.className = 'btn btn-gho btn-sm';
+          reloadBtn.style.cssText = 'margin-left:8px;font-size:11px;padding:2px 8px;';
+          reloadBtn.textContent = '刷新段落';
+          (function(capturedSeg, capturedIdx, capturedControls) {
+            reloadBtn.onclick = function() {
+              var input = getManualRevisionInputNode(capturedIdx);
+              if (input) input.value = capturedSeg.translation || '';
+              if (capturedControls && capturedSeg.updated_at) {
+                capturedControls.setAttribute('data-para-updated-at', String(capturedSeg.updated_at));
+              }
+              setManualRevisionHint(capturedIdx, '已载入最新版本，可继续修改后保存', false);
+            };
+          })(serverSeg, idx, controls);
+          hintNode.appendChild(reloadBtn);
+        }
+      }
+      return;
+    }
+    if (result.status !== 200 || !result.data || !result.data.ok) {
+      var errorText = (result.data && result.data.error) ? result.data.error : '保存失败，请稍后重试';
+      setManualRevisionHint(idx, errorText, true);
+      return;
+    }
+    var segment = result.data.segment || {};
+    var renderedText = String(segment.translation || '');
+    getManualRevisionTranslationNodes(idx).forEach(function(node) {
+      node.textContent = renderedText;
+    });
+    if (segment.updated_at) {
+      controls.setAttribute('data-para-updated-at', String(segment.updated_at));
+    }
+    setManualRevisionBadge(idx, String(segment._translation_source || 'manual'));
+    setManualRevisionHint(idx, '已保存', false);
+    cancelManualRevision(idx);
+  }).catch(function() {
+    setManualRevisionHint(idx, '保存失败，请稍后重试', true);
+  }).finally(function() {
+    manualRevisionSaving[idx] = false;
+  });
+}
+
+function setCurrentReadingBp(bp) {
+  dispatch('set_reading_bp', { bp: bp });
+}
+
+function setCurrentPdfBp(bp) {
+  dispatch('set_pdf_bp', { bp: bp });
+}
+
+function setManualNavigationTargetBp(bp) {
+  dispatch('set_manual_navigation_target', { bp: bp });
+}
+
+function setReadingAutoStart(value) {
+  dispatch('set_auto_start', { value: value });
+}
+
+function setReadingStartBp(bp) {
+  dispatch('set_start_bp', { bp: bp });
+}
+
+function getVisiblePdfBp() {
+  return Number(store.reading.pdfBp || 0) || null;
+}
+
+function setVisiblePdfBp(bp, source) {
+  var nextBp = Number(bp || 0);
+  if (!nextBp) return null;
+  if (source === 'observer') {
+    if (isObserverNavigationSuppressed() || store.guards.manualNavigationInFlight) {
+      return null;
+    }
+    pendingObserverBp = nextBp;
+    setCurrentPdfBp(nextBp);
+    clearTimeout(observerNavigateTimer);
+    observerNavigateTimer = setTimeout(function() {
+      if (!pendingObserverBp) return;
+      dispatch('navigate', { bp: pendingObserverBp, source: 'observer' });
+      renderPageNavigationState();
+    }, OBSERVER_NAV_DEBOUNCE_MS);
+  } else {
+    pendingObserverBp = null;
+    clearTimeout(observerNavigateTimer);
+    setCurrentPdfBp(nextBp);
+  }
+  updatePdfVirtualWindow(nextBp);
+  updatePdfPageInfo(nextBp);
+  return source || 'internal';
+}
+
+function syncReadingBpFromPdf(source) {
+  var visibleBp = getVisiblePdfBp();
+  if (!visibleBp || source === 'reading') return;
+  dispatch('navigate', { bp: visibleBp, source: source || 'observer' });
+}
+
+function syncPdfBpFromReading(source) {
+  if (source === 'pdf') return;
+  alignPdfToReading({
+    bp: store.reading.currentBp,
+    source: source || 'reading',
+    behavior: 'auto',
+    forceScroll: true,
+    suppressMs: OBSERVER_NAV_SUPPRESS_MS,
+  });
+}
+
+function setupPdfScrollObserver() {
+  if (pdfScrollObserver || typeof IntersectionObserver === 'undefined') return;
+  var container = document.getElementById('pdfScrollContainer');
+  if (!container) return;
+  pdfScrollObserver = new IntersectionObserver(function(entries) {
+    var bestEntry = null;
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
+        bestEntry = entry;
+      }
+    });
+    if (!bestEntry) return;
+    var bp = Number(bestEntry.target.getAttribute('data-pdf-bp') || 0);
+    if (!bp) return;
+    setVisiblePdfBp(bp, 'observer');
+  }, {
+    root: container,
+    threshold: [0.35, 0.6, 0.85],
+  });
+  container.querySelectorAll('.pdf-page-item[data-pdf-bp]').forEach(function(el) {
+    pdfScrollObserver.observe(el);
+  });
+}
+
+function applyPdfPagePlaceholders() {
+  var container = document.getElementById('pdfScrollContainer');
+  if (!container) return;
+  container.querySelectorAll('.pdf-page-item[data-pdf-bp]').forEach(function(el) {
+    var bp = Number(el.getAttribute('data-pdf-bp') || 0);
+    var metrics = pdfPageMetrics[String(bp)] || {};
+    var pageImgW = Number(metrics.imgW || 0);
+    var pageImgH = Number(metrics.imgH || 0);
+    var targetWidth = getPdfItemWidth(container, pageImgW, pageImgH);
+    el.style.width = targetWidth + 'px';
+    el.style.minWidth = targetWidth + 'px';
+    if (pageImgW > 0 && pageImgH > 0) {
+      el.style.aspectRatio = pageImgW + ' / ' + pageImgH;
+      var expectedHeight = Math.round(targetWidth * pageImgH / pageImgW);
+      el.style.minHeight = Math.max(240, expectedHeight) + 'px';
+    } else {
+      el.style.minHeight = '420px';
+    }
+    var img = getPdfImageForItem(el);
+    if (img) syncPdfImageSrc(el, img);
+  });
+}
+
+function getPdfItemWidth(container, pageImgW, pageImgH) {
+  var containerWidth = Math.max(280, (container && container.clientWidth) || 0);
+  var zoom = Math.max(1, Number(store.ui.pdfZoom || 1));
+  var usableWidth = Math.max(260, containerWidth - 24);
+  if (pageImgW > 0 && pageImgH > 0) {
+    var aspectRatio = pageImgW / Math.max(1, pageImgH);
+    var preferredWidth = Math.round(usableWidth * zoom);
+    if (aspectRatio > 0.92) {
+      preferredWidth = Math.round(preferredWidth * 0.94);
+    }
+    return Math.max(260, preferredWidth);
+  }
+  return Math.max(260, Math.round(usableWidth * zoom));
+}
 
 function pageStateLabel(bp) {
   bp = Number(bp);
-  if (streamDraftState.bp === bp && (streamDraftState.status === 'streaming' || streamDraftState.status === 'aborted' || streamDraftState.status === 'error')) {
-    if (streamDraftState.status === 'aborted') return '已中断';
-    if (streamDraftState.status === 'error') return '失败';
+  if (store.streamDraft.bp === bp && (store.streamDraft.status === 'streaming' || store.streamDraft.status === 'aborted' || store.streamDraft.status === 'error')) {
+    if (store.streamDraft.status === 'aborted') return '已停止';
+    if (store.streamDraft.status === 'error') return '失败';
     return '翻译中';
   }
-  if (failedPageBps.indexOf(bp) >= 0) return '失败';
-  return translatedPageBps.indexOf(bp) >= 0 ? '已译' : '待译';
+  if (store.pages.failedBps.indexOf(bp) >= 0) return '失败';
+  if (store.pages.partialFailedBps.indexOf(bp) >= 0) return '部分完成';
+  return store.pages.translatedBps.indexOf(bp) >= 0 ? '已译' : '待译';
 }
 
-function buildReadingUrl(bp, usageOpen, autoStart, startBp) {
+function getReadingUiStateParams() {
+  return {
+    usage: store.ui.usageDashboardOpen ? '1' : '0',
+    orig: store.ui.showOriginal ? '1' : '0',
+    layout: store.ui.sideBySide ? 'side' : 'stack',
+    pdf: store.ui.pdfVisible ? '1' : '0',
+  };
+}
+
+function getReadingDocIdParam() {
+  return String(currentDocId || '').trim();
+}
+
+function buildReadingUrl(bp, autoStart, startBp) {
   var url = new URL('{{ url_for("reading", _external=False) }}', window.location.origin);
   if (bp !== undefined && bp !== null && bp !== '') {
     url.searchParams.set('bp', bp);
   }
-  if (usageOpen) {
-    url.searchParams.set('usage', '1');
+  var docId = getReadingDocIdParam();
+  if (docId) {
+    url.searchParams.set('doc_id', docId);
   }
+  var uiParams = getReadingUiStateParams();
+  url.searchParams.set('usage', uiParams.usage);
+  url.searchParams.set('orig', uiParams.orig);
+  url.searchParams.set('layout', uiParams.layout);
+  url.searchParams.set('pdf', uiParams.pdf);
   if (autoStart === '1') {
     url.searchParams.set('auto', '1');
   }
@@ -684,44 +2239,134 @@ function buildReadingUrl(bp, usageOpen, autoStart, startBp) {
   return url.pathname + (url.search ? url.search : '');
 }
 
+function forceReloadReadingPage(bp) {
+  if (store.guards.manualNavigationInFlight) return;
+  var targetUrl = buildReadingUrl(bp, '0', '');
+  var currentUrl = window.location.pathname + window.location.search;
+  if (currentUrl === targetUrl) {
+    window.location.reload();
+    return;
+  }
+  window.location.replace(targetUrl);
+}
+
 function syncReadingUrl() {
-  history.replaceState(null, '', buildReadingUrl(currentPageBp, usageDashboardOpen, readingAutoStart, readingStartBp));
+  history.replaceState(null, '', buildReadingUrl(store.reading.currentBp, store.reading.autoStart, store.reading.startBp));
+}
+
+function handleReadingNavClick(event, bp) {
+  if (event) event.preventDefault();
+  goReadingPage(bp);
+  return false;
 }
 
 function goReadingPage(bp) {
-  window.location.href = buildReadingUrl(bp, usageDashboardOpen, '0', '');
+  bp = Number(bp || 0);
+  if (!bp) return;
+  pendingObserverBp = null;
+  clearTimeout(observerNavigateTimer);
+  if (bp === Number(store.reading.currentBp || 0)) {
+    if (store.ui.pdfVisible) {
+      pdfGoToBp(bp);
+    }
+    syncReadingUrl();
+    return;
+  }
+  dispatch('navigate', { bp: bp, source: 'manual' });
+  syncPdfBpFromReading('reading');
+  window.location.href = buildReadingUrl(bp, '0', '');
+}
+
+function shouldRefreshCommittedCurrentPage(bp) {
+  bp = Number(bp);
+  return !!bp && bp === Number(store.reading.currentBp) && !currentPageHasEntry;
+}
+
+function scheduleCommittedPageRefresh(bp) {
+  bp = Number(bp);
+  if (store.guards.manualNavigationInFlight) return;
+  if (!shouldRefreshCommittedCurrentPage(bp)) return;
+  dispatch('set_pending_committed_refresh_bp', { bp: bp });
+}
+
+function maybeRefreshCommittedCurrentPage(state) {
+  if (store.guards.manualNavigationInFlight) return;
+  var translatedFromState = Array.isArray(state && state.translated_bps)
+    ? state.translated_bps.map(function(bp) { return Number(bp); })
+    : [];
+  var targetBp = Number(store.guards.pendingCommittedRefreshBp || 0);
+
+  if (!targetBp && !currentPageHasEntry && translatedFromState.indexOf(Number(store.reading.currentBp)) >= 0) {
+    targetBp = Number(store.reading.currentBp);
+    dispatch('set_pending_committed_refresh_bp', { bp: targetBp });
+  }
+  if (!targetBp) return;
+
+  if (!shouldRefreshCommittedCurrentPage(targetBp)) {
+    if (currentPageHasEntry || Number(store.reading.currentBp) !== targetBp) {
+      dispatch('set_pending_committed_refresh_bp', { bp: null });
+      dispatch('set_committed_refresh_in_flight', { value: false });
+    }
+    return;
+  }
+
+  var translatedNow = store.pages.translatedBps.indexOf(targetBp) >= 0 || translatedFromState.indexOf(targetBp) >= 0;
+  if (!translatedNow || store.guards.committedRefreshInFlight) return;
+
+  dispatch('set_committed_refresh_in_flight', { value: true });
+  dispatch('set_pending_committed_refresh_bp', { bp: null });
+  forceReloadReadingPage(targetBp);
 }
 
 function resetStreamDraftState() {
-  streamDraftState = {
-    active: false,
-    bp: null,
-    paraIdx: null,
-    paraTotal: 0,
-    paraDone: 0,
-    paragraphs: [],
-    status: 'idle',
-    note: '流式翻译开始后，这里会显示当前页正在生成的中文草稿。',
-    updatedAt: 0,
-    lastError: '',
-  };
+  dispatch('replace_stream_draft', { draft: createInitialStreamDraftState() });
+}
+
+function hasDraftErrorState(draft) {
+  return !!(
+    draft
+    && Array.isArray(draft.paragraph_states)
+    && draft.paragraph_states.some(function(state) { return state === 'error'; })
+  );
+}
+
+function hasDraftVisibleText(draft) {
+  return !!(
+    draft
+    && Array.isArray(draft.paragraphs)
+    && draft.paragraphs.some(function(text) { return String(text || '').trim(); })
+  );
+}
+
+function hasRestorableDraft(state) {
+  var draft = (state && state.draft) || {};
+  var draftBp = Number(draft.bp || 0);
+  var status = String(draft.status || 'idle');
+  if (!draftBp) return false;
+  if (status !== 'aborted' && status !== 'error') return false;
+  return hasDraftVisibleText(draft) || hasDraftErrorState(draft);
 }
 
 function hydrateStreamDraftFromSnapshot(snapshot) {
   var draft = (snapshot && snapshot.draft) || {};
   var paragraphs = Array.isArray(draft.paragraphs) ? draft.paragraphs.slice() : [];
-  streamDraftState = {
+  dispatch('replace_stream_draft', { draft: {
     active: !!draft.active,
     bp: draft.bp || null,
     paraIdx: draft.para_idx === undefined || draft.para_idx === null ? null : draft.para_idx,
     paraTotal: Number(draft.para_total || 0),
     paraDone: Number(draft.para_done || 0),
+    parallelLimit: Number(draft.parallel_limit || 0),
+    activeParaIndices: Array.isArray(draft.active_para_indices) ? draft.active_para_indices.map(Number) : [],
+    paragraphStates: Array.isArray(draft.paragraph_states) ? draft.paragraph_states.slice() : [],
+    paragraphErrors: Array.isArray(draft.paragraph_errors) ? draft.paragraph_errors.slice() : [],
     paragraphs: paragraphs,
     status: draft.status || 'idle',
     note: draft.note || '流式翻译开始后，这里会显示当前页正在生成的中文草稿。',
     updatedAt: Number(draft.updated_at || 0),
     lastError: draft.last_error || '',
-  };
+    restored: true,
+  }});
 }
 
 function renderStreamDraftState() {
@@ -729,50 +2374,130 @@ function renderStreamDraftState() {
   var badge = document.getElementById('usageDraftState');
   var progress = document.getElementById('usageDraftProgress');
   var note = document.getElementById('usageDraftNote');
+  var actions = document.getElementById('usageDraftActions');
   var preview = document.getElementById('usageDraftPreview');
+  var list = document.getElementById('usageDraftList');
 
-  var shouldShow = streamDraftState.active || streamDraftState.status === 'aborted' || streamDraftState.status === 'done' || streamDraftState.status === 'error';
+  var shouldShow = store.streamDraft.active || store.streamDraft.status === 'aborted' || store.streamDraft.status === 'done' || store.streamDraft.status === 'error';
   panel.classList.toggle('hidden', !shouldShow);
   if (!shouldShow) {
     return;
   }
 
   badge.textContent = (
-    streamDraftState.status === 'streaming' ? '生成中' :
-    streamDraftState.status === 'aborted' ? '已中断' :
-    streamDraftState.status === 'error' ? '失败' :
-    streamDraftState.status === 'done' ? '已提交' : '空闲'
+    store.streamDraft.status === 'streaming' ? '翻译中' :
+    store.streamDraft.status === 'aborted' ? '已停止' :
+    store.streamDraft.status === 'error' ? '失败' :
+    store.streamDraft.status === 'done' ? '已完成' : '空闲'
   );
-  badge.dataset.status = streamDraftState.status;
-  progress.textContent = streamDraftState.bp
-    ? ('p.' + streamDraftState.bp + ' · 段落 ' + (streamDraftState.paraIdx === null ? '-' : (streamDraftState.paraIdx + 1)) + '/' + (streamDraftState.paraTotal || '?') + ' · 已完成 ' + (streamDraftState.paraDone || 0) + '/' + (streamDraftState.paraTotal || 0))
+  badge.dataset.status = store.streamDraft.status;
+  var runningCount = Array.isArray(store.streamDraft.activeParaIndices) ? store.streamDraft.activeParaIndices.length : 0;
+  var parallelLimit = Number(store.streamDraft.parallelLimit || 0);
+  var errorCount = Array.isArray(store.streamDraft.paragraphStates)
+    ? store.streamDraft.paragraphStates.filter(function(state) { return state === 'error'; }).length
+    : 0;
+  var restoredLabel = store.streamDraft.restored ? ' · 已恢复' : '';
+  progress.textContent = store.streamDraft.bp
+    ? ('p.' + store.streamDraft.bp + restoredLabel + ' · 并发 ' + runningCount + '/' + parallelLimit + ' · 已完成 ' + (store.streamDraft.paraDone || 0) + '/' + (store.streamDraft.paraTotal || 0))
     : '等待翻译任务启动';
-  note.textContent = streamDraftState.lastError ? ((streamDraftState.note || '') + ' ' + streamDraftState.lastError).trim() : (streamDraftState.note || '');
-  preview.textContent = streamDraftState.paraIdx !== null && streamDraftState.paragraphs[streamDraftState.paraIdx]
-    ? streamDraftState.paragraphs[streamDraftState.paraIdx]
-    : (streamDraftState.paragraphs.join('').trim() || '');
+  var noteParts = [];
+  if (store.streamDraft.restored && store.streamDraft.bp) {
+    noteParts.push('已恢复 p.' + store.streamDraft.bp + ' 的草稿');
+  }
+  if (store.streamDraft.note) {
+    noteParts.push(store.streamDraft.note);
+  }
+  if (store.streamDraft.lastError) {
+    noteParts.push(store.streamDraft.lastError);
+  }
+  note.textContent = noteParts.join(' · ');
+  if (actions) {
+    var draftActions = [];
+    var draftBp = Number(store.streamDraft.bp || 0);
+    if (draftBp && draftBp !== Number(store.reading.currentBp || 0)) {
+      draftActions.push('<button type="button" class="btn btn-gho usage-draft-card-btn" onclick="goReadingPage(' + draftBp + ');">前往 p.' + draftBp + '</button>');
+    }
+    if (draftBp && (store.streamDraft.status === 'aborted' || store.streamDraft.status === 'error' || errorCount > 0)) {
+      var retryLabel = currentPageHasEntry && draftBp === Number(store.reading.currentBp || 0)
+        ? ('重译 p.' + draftBp)
+        : (store.streamDraft.status === 'aborted' ? ('从 p.' + draftBp + ' 继续') : ('重试 p.' + draftBp));
+      draftActions.push('<button type="button" class="btn btn-gho usage-draft-card-btn" onclick="retryDraftPage();">' + retryLabel + '</button>');
+    }
+    actions.classList.toggle('hidden', !draftActions.length);
+    actions.innerHTML = draftActions.join('');
+  }
+  preview.textContent = store.streamDraft.paraIdx !== null && store.streamDraft.paragraphs[store.streamDraft.paraIdx]
+    ? store.streamDraft.paragraphs[store.streamDraft.paraIdx]
+    : (store.streamDraft.paragraphs.join('').trim() || '');
+  if (list) {
+    list.innerHTML = store.streamDraft.paragraphs.map(function(text, idx) {
+      var state = store.streamDraft.paragraphStates[idx] || 'pending';
+      var label = state === 'running' ? '翻译中' : state === 'done' ? '已完成' : state === 'error' ? '失败' : state === 'aborted' ? '已停止' : '待译';
+      var body = text ? text : (state === 'pending' ? '等待开始…' : '');
+      var errorText = Array.isArray(store.streamDraft.paragraphErrors) ? (store.streamDraft.paragraphErrors[idx] || '') : '';
+      var errorHtml = state === 'error' && errorText
+        ? '<div class="usage-draft-card-error">' + escapeHtml(errorText) + '</div>'
+        : '';
+      var actionHtml = state === 'error'
+        ? '<div class="usage-draft-card-actions"><button type="button" class="btn btn-gho usage-draft-card-btn" onclick="retryDraftParagraph(' + idx + ');">重试 p.' + (store.streamDraft.bp || store.reading.currentBp) + '</button></div>'
+        : '';
+      return '<div class="usage-draft-card" data-status="' + state + '">' +
+        '<div class="usage-draft-card-head">' +
+        '<div class="usage-draft-card-title">第 ' + (idx + 1) + ' 段</div>' +
+        '<div class="usage-draft-card-status" data-status="' + state + '">' + label + '</div>' +
+        '</div>' +
+        '<div class="usage-draft-card-body">' + escapeHtml(body) + errorHtml + actionHtml + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  var parallelEl = document.getElementById('usageParallel');
+  if (parallelEl) parallelEl.textContent = runningCount + '/' + parallelLimit;
+  var errorEl = document.getElementById('usageDraftErrors');
+  if (errorEl) errorEl.textContent = String(errorCount);
   renderPageNavigationState();
 }
 
 function applyStreamDelta(data) {
   if (!data) return;
-  streamDraftState.active = true;
-  streamDraftState.status = 'streaming';
-  streamDraftState.bp = data.bp || streamDraftState.bp;
-  streamDraftState.paraIdx = data.para_idx;
-  streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
-  if (!streamDraftState.paragraphs.length && streamDraftState.paraTotal > 0) {
-    streamDraftState.paragraphs = Array(streamDraftState.paraTotal).fill('');
-  }
-  streamDraftState.paragraphs[data.para_idx] = data.translation_so_far || '';
-  streamDraftState.note = '当前页尚未提交到硬盘；停止后会丢弃这一页草稿。';
+  dispatch('stream_para_delta', { data: data });
   renderStreamDraftState();
+}
+
+function escapeHtml(text) {
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function retryDraftPage() {
+  var draftBp = Number(store.streamDraft.bp || 0);
+  if (!draftBp) return;
+  if (draftBp !== Number(store.reading.currentBp || 0)) {
+    goReadingPage(draftBp);
+    return;
+  }
+  if (currentPageHasEntry || store.pages.partialFailedBps.indexOf(draftBp) >= 0) {
+    var retryUrl = '/retranslate/' + draftBp + '/' + encodeURIComponent(currentModelKey);
+    var retryDocId = getReadingDocIdParam();
+    if (retryDocId) {
+      retryUrl += '?doc_id=' + encodeURIComponent(retryDocId);
+    }
+    window.location.href = retryUrl;
+    return;
+  }
+  startTranslateAll(draftBp);
+}
+
+function retryDraftParagraph(paraIdx) {
+  store.streamDraft.paraIdx = Number(paraIdx || 0);
+  retryDraftPage();
 }
 
 function renderPageNavigationState() {
   var navBtn = document.getElementById('pageNavBtn');
   if (navBtn) {
-    var nextLabel = 'p.' + currentPageBp + ' · ' + pageStateLabel(currentPageBp);
+    var nextLabel = 'p.' + store.reading.currentBp + ' · ' + pageStateLabel(store.reading.currentBp);
     if (pageNavButtonLabel !== nextLabel) {
       navBtn.textContent = nextLabel;
       pageNavButtonLabel = nextLabel;
@@ -782,22 +2507,22 @@ function renderPageNavigationState() {
   var navList = document.getElementById('pageNavList');
   var navPanel = document.getElementById('pageNavPanel');
   if (navList && navPanel && !navPanel.classList.contains('hidden')) {
-    var currentIndex = allBps.indexOf(currentPageBp);
+    var currentIndex = store.pages.allBps.indexOf(store.reading.currentBp);
     var start = Math.max(0, currentIndex - 4);
-    var end = Math.min(allBps.length, currentIndex + 5);
-    var visible = allBps.slice(start, end);
+    var end = Math.min(store.pages.allBps.length, currentIndex + 5);
+    var visible = store.pages.allBps.slice(start, end);
     var items = [];
 
     if (start > 0) {
-      items.push(renderPageNavItem(allBps[0]));
+      items.push(renderPageNavItem(store.pages.allBps[0]));
       if (start > 1) items.push('<div class="page-nav-ellipsis">…</div>');
     }
     visible.forEach(function(bp) {
       items.push(renderPageNavItem(bp));
     });
-    if (end < allBps.length) {
-      if (end < allBps.length - 1) items.push('<div class="page-nav-ellipsis">…</div>');
-      items.push(renderPageNavItem(allBps[allBps.length - 1]));
+    if (end < store.pages.allBps.length) {
+      if (end < store.pages.allBps.length - 1) items.push('<div class="page-nav-ellipsis">…</div>');
+      items.push(renderPageNavItem(store.pages.allBps[store.pages.allBps.length - 1]));
     }
     var nextSignature = items.join('');
     if (pageNavRenderSignature !== nextSignature) {
@@ -809,14 +2534,17 @@ function renderPageNavigationState() {
   document.querySelectorAll('.progress-dot[data-page-bp]').forEach(function(dot) {
     var bp = Number(dot.getAttribute('data-page-bp'));
     dot.classList.remove('done', 'pending', 'streaming', 'failed');
-    if (bp === currentPageBp) {
+    dot.title = 'p.' + bp + ' · ' + pageStateLabel(bp);
+    if (bp === store.reading.currentBp) {
       return;
     }
-    if (streamDraftState.bp === bp && streamDraftState.status === 'streaming') {
+    if (store.streamDraft.bp === bp && store.streamDraft.status === 'streaming') {
       dot.classList.add('streaming');
-    } else if (failedPageBps.indexOf(bp) >= 0) {
+    } else if (store.pages.failedBps.indexOf(bp) >= 0) {
       dot.classList.add('failed');
-    } else if (translatedPageBps.indexOf(bp) >= 0) {
+    } else if (store.pages.partialFailedBps.indexOf(bp) >= 0) {
+      dot.classList.add('failed');
+    } else if (store.pages.translatedBps.indexOf(bp) >= 0) {
       dot.classList.add('done');
     } else {
       dot.classList.add('pending');
@@ -826,8 +2554,8 @@ function renderPageNavigationState() {
 
 function renderPageNavItem(bp) {
   bp = Number(bp);
-  var cls = bp === currentPageBp ? 'page-nav-item current' : 'page-nav-item';
-  return '<a href="' + buildReadingUrl(bp, usageDashboardOpen, '0', '') + '" class="' + cls + '">' +
+  var cls = bp === store.reading.currentBp ? 'page-nav-item current' : 'page-nav-item';
+  return '<a href="' + buildReadingUrl(bp, '0', '') + '" data-reading-bp="' + bp + '" onclick="return handleReadingNavClick(event, ' + bp + ');" class="' + cls + '">' +
     '<span>p.' + bp + '</span>' +
     '<span class="page-nav-item-status">' + pageStateLabel(bp) + '</span>' +
   '</a>';
@@ -850,30 +2578,22 @@ function jumpToPageInput() {
   var input = document.getElementById('pageJumpInput');
   if (!input) return;
   var bp = Number(input.value || 0);
-  if (!bp || allBps.indexOf(bp) < 0) return;
+  if (!bp || store.pages.allBps.indexOf(bp) < 0) return;
   goReadingPage(bp);
 }
 
 function getResumeStartBp(state) {
   if (!state) return null;
-  var totalPages = Math.max(Number(state.total_pages || 0), allBps.length || 0);
-  var donePages = Math.max(0, Number(state.done_pages || 0));
-  if (totalPages && donePages > totalPages) {
-    donePages = totalPages;
-  }
+  var resumeBp = Number(state.resume_bp || 0);
+  return resumeBp > 0 ? resumeBp : null;
+}
 
-  var currentBp = Number(state.current_bp || 0);
-  if (currentBp) {
-    var bpIndex = allBps.indexOf(currentBp);
-    if (bpIndex >= 0 && bpIndex < allBps.length - 1) {
-      return allBps[bpIndex + 1];
-    }
-  }
-
-  if (donePages >= 0 && donePages < allBps.length) {
-    return allBps[donePages];
-  }
-  return null;
+function getResumeActionLabel(state) {
+  if (!state) return '继续翻译';
+  var resumeBp = getResumeStartBp(state);
+  if (state.phase === 'partial_failed') return resumeBp ? ('重试 p.' + resumeBp) : '重试失败页';
+  if (state.phase === 'error') return resumeBp ? ('从 p.' + resumeBp + ' 继续') : '从出错页继续';
+  return resumeBp ? ('继续到 p.' + resumeBp) : '继续翻译';
 }
 
 function resumeTranslateFromSnapshot(state) {
@@ -889,6 +2609,122 @@ function formatUsageNumber(value) {
   return (value || 0).toLocaleString('zh-CN');
 }
 
+function trimUsageSamples(nowMs) {
+  var cutoff = Number(nowMs || Date.now()) - 60000;
+  usageSamples = usageSamples.filter(function(sample) {
+    return Number(sample.ts || 0) >= cutoff;
+  });
+}
+
+function recordUsageSample(totalTokens, tsMs) {
+  var ts = Number(tsMs || Date.now());
+  var total = Math.max(0, Number(totalTokens || 0));
+  trimUsageSamples(ts);
+  var last = usageSamples[usageSamples.length - 1];
+  if (last && Number(last.total || 0) === total) {
+    last.ts = ts;
+    return;
+  }
+  usageSamples.push({ ts: ts, total: total });
+  trimUsageSamples(ts);
+}
+
+function resetUsageTracking(snapshot) {
+  var base = snapshot || {};
+  var updatedAtMs = Number(base.updated_at || 0) ? Number(base.updated_at) * 1000 : Date.now();
+  usageLiveState.initialized = true;
+  usageLiveState.totalTokens = Math.max(0, Number(base.total_tokens || 0));
+  usageLiveState.requestCount = Math.max(0, Number(base.request_count || 0));
+  usageLiveState.currentBp = Number(base.current_bp || 0) || null;
+  usageLiveState.updatedAt = updatedAtMs;
+  usageSamples = [];
+  recordUsageSample(usageLiveState.totalTokens, updatedAtMs);
+}
+
+function syncUsageTracking(snapshot) {
+  var base = snapshot || {};
+  var phase = String(base.phase || 'idle');
+  var snapshotTotal = Math.max(0, Number(base.total_tokens || 0));
+  var snapshotRequestCount = Math.max(0, Number(base.request_count || 0));
+  var snapshotUpdatedAtMs = Number(base.updated_at || 0) ? Number(base.updated_at) * 1000 : Date.now();
+  if (!usageLiveState.initialized) {
+    resetUsageTracking(base);
+    return;
+  }
+  if (!isActiveTranslatePhase(phase)) {
+    resetUsageTracking(base);
+    return;
+  }
+  if (snapshotTotal < usageLiveState.totalTokens || snapshotRequestCount < usageLiveState.requestCount) {
+    return;
+  }
+  if (
+    snapshotTotal > usageLiveState.totalTokens
+    || snapshotRequestCount > usageLiveState.requestCount
+    || Number(base.current_bp || 0) !== Number(usageLiveState.currentBp || 0)
+  ) {
+    usageLiveState.totalTokens = snapshotTotal;
+    usageLiveState.requestCount = snapshotRequestCount;
+    usageLiveState.currentBp = Number(base.current_bp || 0) || null;
+    usageLiveState.updatedAt = snapshotUpdatedAtMs;
+    recordUsageSample(snapshotTotal, snapshotUpdatedAtMs);
+  }
+}
+
+function getUsageDisplaySnapshot(snapshot) {
+  var base = Object.assign({}, snapshot || {});
+  if (!isActiveTranslatePhase(base.phase) || !usageLiveState.initialized) {
+    return base;
+  }
+  base.total_tokens = Math.max(Math.max(0, Number(base.total_tokens || 0)), usageLiveState.totalTokens);
+  base.request_count = Math.max(Math.max(0, Number(base.request_count || 0)), usageLiveState.requestCount);
+  if (usageLiveState.currentBp) {
+    base.current_bp = usageLiveState.currentBp;
+  }
+  if (usageLiveState.updatedAt) {
+    base.updated_at = Math.max(Math.max(0, Number(base.updated_at || 0)), Math.floor(usageLiveState.updatedAt / 1000));
+  }
+  return base;
+}
+
+function getUsageSampleStats() {
+  trimUsageSamples(Date.now());
+  if (!usageSamples.length) {
+    return { recentTokens: 0, tokenRate: 0 };
+  }
+  var first = usageSamples[0];
+  var last = usageSamples[usageSamples.length - 1];
+  var recentTokens = Math.max(0, Number(last.total || 0) - Number(first.total || 0));
+  var spanSeconds = Math.max(0, (Number(last.ts || 0) - Number(first.ts || 0)) / 1000);
+  return {
+    recentTokens: recentTokens,
+    tokenRate: spanSeconds > 0 ? (recentTokens / spanSeconds) : 0,
+  };
+}
+
+function formatTokenRate(value) {
+  var rate = Math.max(0, Number(value || 0));
+  return rate.toFixed(rate >= 10 ? 0 : 1);
+}
+
+function applyStreamUsage(eventData) {
+  var payload = eventData || {};
+  var usage = payload.usage || {};
+  var deltaTokens = Math.max(0, Number(usage.total_tokens || 0));
+  var deltaRequests = Math.max(0, Number(usage.request_count || 0));
+  if (!usageLiveState.initialized) {
+    resetUsageTracking(lastUsageSnapshot || {});
+  }
+  usageLiveState.totalTokens += deltaTokens;
+  usageLiveState.requestCount += deltaRequests;
+  usageLiveState.currentBp = Number(payload.bp || usageLiveState.currentBp || 0) || usageLiveState.currentBp;
+  usageLiveState.updatedAt = Date.now();
+  recordUsageSample(usageLiveState.totalTokens, usageLiveState.updatedAt);
+  if (store.ui.usageDashboardOpen) {
+    renderUsageDashboard({ snapshot: lastUsageSnapshot || {} });
+  }
+}
+
 function formatUsagePhase(phase) {
   var labels = {
     idle: '空闲',
@@ -896,6 +2732,7 @@ function formatUsagePhase(phase) {
     stopping: '停止中',
     stopped: '已停止',
     done: '已完成',
+    partial_failed: '部分完成',
     error: '失败'
   };
   return labels[phase] || '-';
@@ -903,18 +2740,33 @@ function formatUsagePhase(phase) {
 
 function renderUsageDashboard(payload) {
   var snapshot = (payload && payload.snapshot) || {};
-  document.getElementById('usagePhase').textContent = formatUsagePhase(snapshot.phase);
-  document.getElementById('usageModel').textContent = snapshot.model || '-';
-  document.getElementById('usageRequestCount').textContent = formatUsageNumber(snapshot.request_count);
-  document.getElementById('usageTotalTokens').textContent = formatUsageNumber(snapshot.total_tokens);
-  document.getElementById('usageCurrentPage').textContent = snapshot.current_bp ? ('p.' + snapshot.current_bp) : '-';
-  document.getElementById('usageUpdatedAt').textContent = snapshot.updated_at
-    ? new Date(snapshot.updated_at * 1000).toLocaleTimeString('zh-CN', {hour12: false})
+  lastUsageSnapshot = snapshot;
+  syncUsageTracking(snapshot);
+  var display = getUsageDisplaySnapshot(snapshot);
+  var sampleStats = isActiveTranslatePhase(display.phase) ? getUsageSampleStats() : { recentTokens: 0, tokenRate: 0 };
+  document.getElementById('usagePhase').textContent = formatUsagePhase(display.phase);
+  document.getElementById('usageModel').textContent = display.model || '-';
+  document.getElementById('usageRequestCount').textContent = formatUsageNumber(display.request_count);
+  document.getElementById('usageTotalTokens').textContent = formatUsageNumber(display.total_tokens);
+  document.getElementById('usageCurrentPage').textContent = display.current_bp ? ('p.' + display.current_bp) : '-';
+  document.getElementById('usageUpdatedAt').textContent = display.updated_at
+    ? new Date(display.updated_at * 1000).toLocaleTimeString('zh-CN', {hour12: false})
     : '-';
+  document.getElementById('usageRecentTokens').textContent = formatUsageNumber(sampleStats.recentTokens);
+  document.getElementById('usageTokenRate').textContent = formatTokenRate(sampleStats.tokenRate);
+  var draft = display.draft || {};
+  var activeParaIndices = Array.isArray(draft.active_para_indices) ? draft.active_para_indices : [];
+  var parallelLimit = Number(draft.parallel_limit || 0);
+  document.getElementById('usageParallel').textContent = activeParaIndices.length + '/' + parallelLimit;
+  document.getElementById('usageDraftErrors').textContent = String(
+    Array.isArray(draft.paragraph_states)
+      ? draft.paragraph_states.filter(function(state) { return state === 'error'; }).length
+      : 0
+  );
 }
 
 function refreshUsageDashboard() {
-  if (!usageDashboardOpen) return Promise.resolve();
+  if (!store.ui.usageDashboardOpen) return Promise.resolve();
   return fetch('{{ url_for("translate_api_usage_data") }}?doc_id=' + encodeURIComponent(currentDocId))
     .then(function(r) { return r.json(); })
     .then(function(d) {
@@ -938,17 +2790,17 @@ function stopUsagePolling() {
 
 function toggleUsageDashboard(forceOpen) {
   if (typeof forceOpen === 'boolean') {
-    usageDashboardOpen = forceOpen;
+    dispatch('set_usage_dashboard_open', { value: forceOpen });
   } else {
-    usageDashboardOpen = !usageDashboardOpen;
+    dispatch('toggle_usage_dashboard');
   }
 
   var panel = document.getElementById('translateUsagePanel');
   var btn = document.getElementById('usageBtn');
-  panel.classList.toggle('hidden', !usageDashboardOpen);
-  btn.classList.toggle('active', usageDashboardOpen);
+  panel.classList.toggle('hidden', !store.ui.usageDashboardOpen);
+  btn.classList.toggle('active', store.ui.usageDashboardOpen);
 
-  if (usageDashboardOpen) {
+  if (store.ui.usageDashboardOpen) {
     refreshUsageDashboard();
     startUsagePolling();
   } else {
@@ -956,6 +2808,7 @@ function toggleUsageDashboard(forceOpen) {
   }
 
   syncReadingUrl();
+  updateFocusModeButtonState();
 }
 
 function showProgress(show) {
@@ -993,20 +2846,52 @@ function isActiveTranslatePhase(phase) {
   return phase === 'running' || phase === 'stopping';
 }
 
+function shouldHydrateTranslateDraft(state) {
+  if (!state || !state.draft) return false;
+  return !!(state.draft.active || translateSessionActivated || hasRestorableDraft(state));
+}
+
 function shouldShowTranslateSnapshot(state) {
-  return !!state && state.phase && state.phase !== 'idle';
+  if (!state || !state.phase || state.phase === 'idle') return false;
+  if (isActiveTranslatePhase(state.phase)) return true;
+  return translateSessionActivated;
+}
+
+function formatTranslatePhaseLabel(state) {
+  var phase = state && state.phase ? state.phase : 'idle';
+  var label = formatUsagePhase(phase);
+  if ((phase === 'running' || phase === 'stopping') && state && state.current_bp) {
+    return label + ' · p.' + state.current_bp;
+  }
+  return label;
 }
 
 function renderTranslateSnapshot(state) {
   var stopBtn = document.getElementById('tpStopBtn');
   var bar = document.getElementById('tpBar');
   var resumeBp = getResumeStartBp(state);
-  failedPageBps = Array.isArray(state && state.failed_bps) ? state.failed_bps.map(function(bp) { return Number(bp); }) : [];
-  if (state && state.draft) {
+  if (isActiveTranslatePhase(state && state.phase)) {
+    translateSessionActivated = true;
+  }
+  lastUsageSnapshot = state || lastUsageSnapshot;
+  syncUsageTracking(state || {});
+  dispatch('set_pages_from_snapshot', {
+    translatedBps: Array.isArray(state && state.translated_bps) ? state.translated_bps : null,
+    failedBps: Array.isArray(state && state.failed_bps) ? state.failed_bps : [],
+    partialFailedBps: Array.isArray(state && state.partial_failed_bps) ? state.partial_failed_bps : null,
+  });
+  if (shouldHydrateTranslateDraft(state)) {
     hydrateStreamDraftFromSnapshot(state);
     renderStreamDraftState();
+  } else {
+    resetStreamDraftState();
+    renderStreamDraftState();
+  }
+  if (!currentPageHasEntry && store.pages.translatedBps.indexOf(Number(store.reading.currentBp)) >= 0) {
+    scheduleCommittedPageRefresh(store.reading.currentBp);
   }
   renderPageNavigationState();
+  maybeRefreshCommittedCurrentPage(state);
 
   if (!shouldShowTranslateSnapshot(state)) {
     showProgress(false);
@@ -1019,8 +2904,19 @@ function renderTranslateSnapshot(state) {
 
   var totalPages = state.total_pages || 0;
   var donePages = state.done_pages || 0;
-  var pct = totalPages ? (donePages / totalPages) * 100 : 0;
-  var stats = totalPages ? (donePages + '/' + totalPages + '页') : '';
+  var processedPages = Math.max(0, Number(state.processed_pages || state.done_pages || 0));
+  if (totalPages && processedPages > totalPages) {
+    processedPages = totalPages;
+  }
+  var pct = totalPages ? (processedPages / totalPages) * 100 : 0;
+  var stats = totalPages ? ('已处理 ' + processedPages + '/' + totalPages + '页') : '';
+  if (totalPages) {
+    stats += ' · 已译 ' + donePages + '/' + totalPages + '页';
+  }
+  var partialFailedCount = Array.isArray(state.partial_failed_bps) ? state.partial_failed_bps.length : 0;
+  if (partialFailedCount > 0) {
+    stats += ' · 部分完成 ' + partialFailedCount + '页';
+  }
   var detail = '已译 ' + (state.translated_paras || 0) + ' 段 / ' + (state.translated_chars || 0) + ' 字';
   var totalTokens = state.total_tokens || 0;
   if (totalTokens > 0) {
@@ -1033,7 +2929,7 @@ function renderTranslateSnapshot(state) {
   if (state.phase === 'running') {
     setTranslateProgress(
       pct,
-      state.current_bp ? ('翻译 p.' + state.current_bp + '…') : '翻译中…',
+      formatTranslatePhaseLabel(state),
       stats,
       detail
     );
@@ -1043,7 +2939,7 @@ function renderTranslateSnapshot(state) {
   } else if (state.phase === 'stopping') {
     setTranslateProgress(
       pct,
-      state.current_bp ? ('停止中，等待 p.' + state.current_bp + ' 完成…') : '停止中…',
+      formatTranslatePhaseLabel(state),
       stats,
       detail
     );
@@ -1051,24 +2947,42 @@ function renderTranslateSnapshot(state) {
     stopBtn.textContent = '停止中…';
     stopBtn.onclick = stopTranslate;
   } else if (state.phase === 'stopped') {
-    setTranslateProgress(pct, '翻译已停止', stats, detail);
+    setTranslateProgress(pct, formatTranslatePhaseLabel(state), stats, detail);
     bar.style.background = 'var(--txL)';
     if (resumeBp) {
       stopBtn.style.display = '';
       stopBtn.disabled = false;
-      stopBtn.textContent = '继续翻译';
+      stopBtn.textContent = getResumeActionLabel(state);
       stopBtn.onclick = function() { resumeTranslateFromSnapshot(state); };
     } else {
       stopBtn.style.display = 'none';
     }
   } else if (state.phase === 'done') {
-    setTranslateProgress(100, '全部翻译完成', stats, detail);
+    setTranslateProgress(100, formatTranslatePhaseLabel(state), stats, detail);
     bar.style.background = 'var(--grn)';
     stopBtn.style.display = 'none';
+  } else if (state.phase === 'partial_failed') {
+    setTranslateProgress(100, formatTranslatePhaseLabel(state), stats, detail);
+    bar.style.background = 'var(--acc)';
+    if (resumeBp) {
+      stopBtn.style.display = '';
+      stopBtn.disabled = false;
+      stopBtn.textContent = getResumeActionLabel(state);
+      stopBtn.onclick = function() { resumeTranslateFromSnapshot(state); };
+    } else {
+      stopBtn.style.display = 'none';
+    }
   } else if (state.phase === 'error') {
-    setTranslateProgress(pct, '翻译失败', stats, state.last_error || detail);
+    setTranslateProgress(pct, formatTranslatePhaseLabel(state), stats, state.last_error || detail);
     bar.style.background = 'var(--red)';
-    stopBtn.style.display = 'none';
+    if (resumeBp) {
+      stopBtn.style.display = '';
+      stopBtn.disabled = false;
+      stopBtn.textContent = getResumeActionLabel(state);
+      stopBtn.onclick = function() { resumeTranslateFromSnapshot(state); };
+    } else {
+      stopBtn.style.display = 'none';
+    }
   }
 
   if (isActiveTranslatePhase(state.phase)) {
@@ -1087,7 +3001,7 @@ function refreshTranslateStatus() {
     .then(function(r) { return r.json(); })
     .then(function(d) {
       renderTranslateSnapshot(d);
-      if (usageDashboardOpen) {
+      if (store.ui.usageDashboardOpen) {
         refreshUsageDashboard();
       }
       return d;
@@ -1095,6 +3009,8 @@ function refreshTranslateStatus() {
 }
 
 function startTranslateAll(startBp) {
+  translateSessionActivated = true;
+  setReadingStartBp(startBp);
   showProgress(true);
   setTranslateProgress(0, '启动翻译…', '', '');
   document.getElementById('tpBar').style.background = 'var(--acc)';
@@ -1135,16 +3051,7 @@ function listenTranslateSSE() {
 
   translateES.addEventListener('stream_page_init', function(e) {
     var d = JSON.parse(e.data);
-    streamDraftState.active = true;
-    streamDraftState.status = 'streaming';
-    streamDraftState.bp = d.bp;
-    streamDraftState.paraIdx = 0;
-    streamDraftState.paraTotal = d.para_total || 0;
-    streamDraftState.paraDone = 0;
-    streamDraftState.paragraphs = Array(streamDraftState.paraTotal).fill('');
-    streamDraftState.note = '当前页正在流式翻译，完整结束后才会写入硬盘。';
-    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
-    streamDraftState.lastError = '';
+    dispatch('stream_page_init', { data: d });
     renderStreamDraftState();
   });
 
@@ -1152,62 +3059,50 @@ function listenTranslateSSE() {
     applyStreamDelta(JSON.parse(e.data));
   });
 
+  translateES.addEventListener('stream_para_start', function(e) {
+    var d = JSON.parse(e.data);
+    dispatch('stream_para_start', { data: d });
+    renderStreamDraftState();
+  });
+
   translateES.addEventListener('stream_para_done', function(e) {
     var d = JSON.parse(e.data);
-    streamDraftState.active = true;
-    streamDraftState.status = 'streaming';
-    streamDraftState.bp = d.bp || streamDraftState.bp;
-    streamDraftState.paraIdx = d.para_idx;
-    streamDraftState.paraDone = Math.max(streamDraftState.paraDone || 0, Number(d.para_idx || 0) + 1);
-    if (!streamDraftState.paragraphs.length && streamDraftState.paraTotal > 0) {
-      streamDraftState.paragraphs = Array(streamDraftState.paraTotal).fill('');
-    }
-    streamDraftState.paragraphs[d.para_idx] = d.translation || streamDraftState.paragraphs[d.para_idx] || '';
-    streamDraftState.note = '该段已完成，正在继续翻译后续段落。';
-    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
-    streamDraftState.lastError = '';
+    dispatch('stream_para_done', { data: d });
+    renderStreamDraftState();
+  });
+
+  translateES.addEventListener('stream_para_error', function(e) {
+    var d = JSON.parse(e.data);
+    dispatch('stream_para_error', { data: d });
     renderStreamDraftState();
   });
 
   translateES.addEventListener('stream_page_aborted', function(e) {
     var d = JSON.parse(e.data);
-    streamDraftState.active = false;
-    streamDraftState.status = 'aborted';
-    streamDraftState.bp = d.bp || streamDraftState.bp;
-    streamDraftState.paraIdx = d.para_idx;
-    streamDraftState.note = '当前页已停止，草稿未提交到硬盘。点击“继续翻译”会从这一页重新开始。';
-    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
+    dispatch('stream_page_aborted', { data: d });
     renderStreamDraftState();
+  });
+
+  translateES.addEventListener('stream_usage', function(e) {
+    applyStreamUsage(JSON.parse(e.data));
   });
 
   translateES.addEventListener('page_done', function(e) {
     var d = JSON.parse(e.data);
-    streamDraftState.active = false;
-    streamDraftState.status = 'done';
-    streamDraftState.bp = d.bp || streamDraftState.bp;
-    streamDraftState.paraDone = streamDraftState.paraTotal;
-    streamDraftState.note = '当前页已完整提交到硬盘。';
-    streamDraftState.updatedAt = Math.floor(Date.now() / 1000);
-    failedPageBps = failedPageBps.filter(function(bp) { return bp !== Number(d.bp); });
-    if (translatedPageBps.indexOf(Number(d.bp)) < 0) {
-      translatedPageBps.push(Number(d.bp));
-      translatedPageBps.sort(function(a, b) { return a - b; });
-    }
+    dispatch('stream_page_done', { data: d });
+    var hasDraftError = !!d.partial_failed || (
+      Array.isArray(store.streamDraft.paragraphStates)
+      && store.streamDraft.paragraphStates.some(function(state) { return state === 'error'; })
+    );
+    dispatch('mark_page_done', { bp: d.bp, partialFailed: hasDraftError });
     renderStreamDraftState();
+    scheduleCommittedPageRefresh(d.bp);
     refreshTranslateStatus();
-
-    // 仅在 auto=1 的首轮自动启动场景刷新当前页，手动翻页时不能触发整页跳转。
-    if (readingAutoStart === '1' && currentPageBp === d.bp) {
-      window.location.href = buildReadingUrl(d.bp, usageDashboardOpen, '0', '');
-    }
   });
 
   translateES.addEventListener('page_error', function(e) {
     var d = JSON.parse(e.data);
-    if (failedPageBps.indexOf(Number(d.bp)) < 0) {
-      failedPageBps.push(Number(d.bp));
-      failedPageBps.sort(function(a, b) { return a - b; });
-    }
+    dispatch('mark_page_error', { bp: d.bp });
     refreshTranslateStatus();
   });
 
@@ -1256,20 +3151,75 @@ function stopTranslate() {
   // 注意：UI 更新完全由 SSE 事件驱动，不在这里处理
 }
 
+// ===== 重译前人工修订警告 =====
+function confirmRetranslate(retranslateUrl, btn) {
+  var bp = Number('{{ cur_page_bp }}');
+  var docId = getReadingDocIdParam() || currentDocId || '';
+  fetch('/check_retranslate_warnings?doc_id=' + encodeURIComponent(docId) + '&bp=' + bp)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var count = (data && data.ok) ? (data.manual_count || 0) : 0;
+      if (count > 0) {
+        var ok = window.confirm(
+          '本页有 ' + count + ' 段人工修订，重译后将被机器译文覆盖（修订内容可在历史记录中查阅）。\n\n确认重译？'
+        );
+        if (!ok) return;
+      }
+      if (btn) {
+        btn.innerHTML = '<span class=spinner></span> 重译中&hellip;';
+        btn.style.pointerEvents = 'none';
+      }
+      window.location.href = retranslateUrl;
+    })
+    .catch(function() {
+      // 检查失败时直接跳转，不阻断操作
+      if (btn) {
+        btn.innerHTML = '<span class=spinner></span> 重译中&hellip;';
+        btn.style.pointerEvents = 'none';
+      }
+      window.location.href = retranslateUrl;
+    });
+}
+
+function confirmReparsePage(pageBp) {
+  var bp = Number(pageBp || '{{ cur_page_bp }}');
+  var docId = getReadingDocIdParam() || currentDocId || '';
+  fetch('/check_retranslate_warnings?doc_id=' + encodeURIComponent(docId) + '&bp=' + bp)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var count = (data && data.ok) ? (data.manual_count || 0) : 0;
+      if (count > 0) {
+        var ok = window.confirm(
+          '本页有 ' + count + ' 段人工修订，重解析并重译后将被新的机器译文覆盖（修订内容可在历史记录中查阅）。\n\n确认重解析？'
+        );
+        if (!ok) return;
+      }
+      startReparsePage(pageBp);
+    })
+    .catch(function() {
+      startReparsePage(pageBp);
+    });
+}
+
 // ===== 单页重新解析 =====
 function startReparsePage(pageBp) {
   var btn = document.getElementById('reparsePageBtn');
   if (!btn) return;
   btn.disabled = true;
-  btn.textContent = '⏳ 解析中…';
+  btn.textContent = '⏳ OCR 重解析并重译中…';
 
-  fetch('{{ url_for("reparse_page", page_bp=0) }}'.replace('/0', '/' + pageBp), {method: 'POST'})
+  var reparseUrl = '{{ url_for("reparse_page", page_bp=0) }}'.replace('/0', '/' + pageBp);
+  var reparseDocId = getReadingDocIdParam();
+  if (reparseDocId) {
+    reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);
+  }
+  fetch(reparseUrl, {method: 'POST'})
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) {
-        alert('重新解析失败: ' + data.error);
+        alert(data.error);
         btn.disabled = false;
-        btn.textContent = '🔄 重新解析本页';
+        btn.textContent = '🔄 强制 OCR 重解析本页';
         return;
       }
       if (data.task_id) {
@@ -1279,7 +3229,7 @@ function startReparsePage(pageBp) {
     .catch(function(err) {
       alert('请求失败: ' + err);
       btn.disabled = false;
-      btn.textContent = '🔄 重新解析本页';
+      btn.textContent = '🔄 强制 OCR 重解析本页';
     });
 }
 
@@ -1298,10 +3248,10 @@ function listenReparseSSE(taskId, pageBp) {
   es.addEventListener('done', function(e) {
     es.close();
     if (btn) {
-      btn.textContent = '✓ 解析完成';
+      btn.textContent = '✓ OCR 重解析并重译完成';
       btn.style.color = 'var(--grn)';
     }
-    // 刷新页面以显示新解析的内容
+    // 刷新页面以显示新的解析和重译内容
     setTimeout(function() {
       window.location.reload();
     }, 800);
@@ -1310,10 +3260,10 @@ function listenReparseSSE(taskId, pageBp) {
   es.addEventListener('error_msg', function(e) {
     es.close();
     var d = JSON.parse(e.data);
-    alert('重新解析失败: ' + (d.error || '未知错误'));
+    alert(d.error || '未知错误');
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '🔄 重新解析本页';
+      btn.textContent = '🔄 强制 OCR 重解析本页';
     }
   });
 
@@ -1321,7 +3271,7 @@ function listenReparseSSE(taskId, pageBp) {
     es.close();
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '🔄 重新解析本页';
+      btn.textContent = '🔄 强制 OCR 重解析本页';
     }
   };
 }
@@ -1344,7 +3294,7 @@ function loadExportContent() {
   textarea.classList.add('hidden');
   loading.classList.remove('hidden');
 
-  fetch('{{ url_for("export_md") }}')
+  fetch('{{ url_for("export_md") }}?doc_id=' + encodeURIComponent(currentDocId))
     .then(function(r) { return r.json(); })
     .then(function(d) {
       textarea.value = d.markdown || '';
@@ -1385,9 +3335,39 @@ document.addEventListener('click', function(e) {
 // 页面加载时：检查是否需要自动启动翻译
 (function() {
   resetStreamDraftState();
-  if (initialTranslateSnapshot && initialTranslateSnapshot.draft) {
+  applyOriginalVisibilityState();
+  applyLayoutState();
+  applyPdfPanelVisibilityState();
+  initPdfZoomInteractions();
+  if (store.ui.pdfVisible) {
+    initPdfVirtualScroll();
+    applyPdfPagePlaceholders();
+    setupPdfScrollObserver();
+    alignPdfToReading({
+      bp: store.reading.currentBp,
+      source: 'reading',
+      behavior: 'auto',
+      forceScroll: true,
+      suppressMs: OBSERVER_NAV_SUPPRESS_MS,
+    });
+    setTimeout(function() {
+      alignPdfToReading({
+        bp: store.reading.currentBp,
+        source: 'reading',
+        behavior: 'auto',
+        forceScroll: true,
+        suppressMs: OBSERVER_NAV_SUPPRESS_MS,
+      });
+    }, OBSERVER_NAV_DEBOUNCE_MS);
+  }
+  var shouldRestoreDraft = shouldHydrateTranslateDraft(initialTranslateSnapshot);
+  if (shouldRestoreDraft) {
     hydrateStreamDraftFromSnapshot(initialTranslateSnapshot);
-    failedPageBps = Array.isArray(initialTranslateSnapshot.failed_bps) ? initialTranslateSnapshot.failed_bps.map(function(bp) { return Number(bp); }) : failedPageBps;
+    dispatch('set_pages_from_snapshot', {
+      translatedBps: Array.isArray(initialTranslateSnapshot.translated_bps) ? initialTranslateSnapshot.translated_bps : null,
+      failedBps: Array.isArray(initialTranslateSnapshot.failed_bps) ? initialTranslateSnapshot.failed_bps : null,
+      partialFailedBps: Array.isArray(initialTranslateSnapshot.partial_failed_bps) ? initialTranslateSnapshot.partial_failed_bps : null,
+    });
     renderStreamDraftState();
   }
   renderPageNavigationState();
@@ -1397,17 +3377,21 @@ document.addEventListener('click', function(e) {
 
   if (autoStart === '1' && startBp) {
     startTranslateAll(startBp);
-    readingAutoStart = '0';
-    readingStartBp = '';
+    setReadingAutoStart('0');
+    setReadingStartBp('');
     syncReadingUrl();
   } else {
     refreshTranslateStatus();
   }
 
-  if (usageDashboardOpen) {
+  if (store.ui.usageDashboardOpen) {
     refreshUsageDashboard();
     startUsagePolling();
   }
 })();
+
+window.addEventListener('resize', function() {
+  applyPdfPagePlaceholders();
+});
 </script>
 {% endblock %}

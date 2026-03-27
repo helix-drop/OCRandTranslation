@@ -76,9 +76,40 @@ class TranslatorStreamingTest(unittest.TestCase):
                 provider="qwen",
             ))
 
-        self.assertEqual([event["type"] for event in events], ["delta", "delta", "delta", "usage", "done"])
+        self.assertEqual([event["type"] for event in events], ["delta", "usage", "done"])
         self.assertEqual(events[-1]["result"]["translation"], "译文")
         self.assertEqual(events[-1]["usage"]["total_tokens"], 18)
+        self.assertEqual("".join(event.get("text", "") for event in events if event["type"] == "delta"), "译文")
+        self.assertFalse(any('{"pages"' in event.get("text", "") for event in events if event["type"] == "delta"))
+
+    def test_stream_translate_paragraph_hides_raw_json_during_streaming(self):
+        json_text = (
+            '{"pages":"4","original":"orig","translation":"第一句\\n第二句",'
+            '"footnotes":"","footnotes_translation":""}'
+        )
+        chunks = [
+            _FakeChunk(json_text[:18]),
+            _FakeChunk(json_text[18:42]),
+            _FakeChunk(json_text[42:68]),
+            _FakeChunk(json_text[68:], usage=_FakeUsage(prompt_tokens=9, completion_tokens=5, total_tokens=14)),
+        ]
+        fake_response = _FakeStreamResponse(chunks)
+
+        with patch.object(translator, "OpenAI", return_value=_FakeOpenAIClient(fake_response)):
+            events = list(translator.stream_translate_paragraph(
+                para_text="orig",
+                para_pages="4",
+                footnotes="",
+                glossary=[],
+                model_id="fake-model",
+                api_key="fake-key",
+                provider="qwen",
+            ))
+
+        delta_text = "".join(event.get("text", "") for event in events if event["type"] == "delta")
+        self.assertEqual(delta_text, "第一句\n第二句")
+        self.assertEqual(events[-1]["result"]["translation"], "第一句\n第二句")
+        self.assertFalse('translation":' in delta_text)
 
     def test_stream_translate_paragraph_respects_stop_checker(self):
         holder = {}
@@ -108,6 +139,35 @@ class TranslatorStreamingTest(unittest.TestCase):
                 ))
 
         self.assertTrue(holder["response"].closed)
+
+    def test_stream_translate_paragraph_keeps_heading_translation_from_swallowing_body(self):
+        json_text = (
+            '{"pages":"11","original":"Funding","translation":"资助\\n\\n本研究获得资助。",'
+            '"footnotes":"","footnotes_translation":""}'
+        )
+        chunks = [
+            _FakeChunk(json_text[:30]),
+            _FakeChunk(json_text[30:68]),
+            _FakeChunk(json_text[68:], usage=_FakeUsage(prompt_tokens=6, completion_tokens=4, total_tokens=10)),
+        ]
+        fake_response = _FakeStreamResponse(chunks)
+
+        with patch.object(translator, "OpenAI", return_value=_FakeOpenAIClient(fake_response)):
+            events = list(translator.stream_translate_paragraph(
+                para_text="Funding",
+                para_pages="11",
+                footnotes="",
+                glossary=[],
+                model_id="fake-model",
+                api_key="fake-key",
+                provider="qwen",
+                heading_level=2,
+                next_context="This research received funding from the Ministry of Science and Technology, Taiwan.",
+            ))
+
+        delta_text = "".join(event.get("text", "") for event in events if event["type"] == "delta")
+        self.assertEqual(delta_text, "资助")
+        self.assertEqual(events[-1]["result"]["translation"], "资助")
 
 
 if __name__ == "__main__":

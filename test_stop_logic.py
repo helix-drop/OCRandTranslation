@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""测试停止翻译逻辑的完整流程。"""
+"""停止翻译逻辑的手工烟雾测试。"""
+
+if __name__ != "__main__":
+    import pytest
+    pytestmark = pytest.mark.skip("历史手工脚本，请直接运行 `python3 test_stop_logic.py`。")
 
 import json
 import os
@@ -10,8 +14,6 @@ import threading
 import requests
 
 BASE_URL = "http://127.0.0.1:8080"
-TEST_DOC_ID = "test_doc_001"
-
 def log(step, msg):
     print(f"\n[{step}] {msg}")
 
@@ -30,25 +32,19 @@ def test_step_1_check_app():
         print(f"  ✗ 应用未响应: {e}")
         return False
 
-def test_step_2_create_mock_state():
-    """步骤2: 创建模拟的翻译状态文件"""
-    log("2", "创建模拟翻译状态文件...")
+def _get_current_doc_id():
+    from config import get_current_doc_id
+    return get_current_doc_id()
 
-    # 创建模拟文档目录
-    doc_dir = f"output/{TEST_DOC_ID}"
-    os.makedirs(doc_dir, exist_ok=True)
 
-    # 创建 running 状态
-    state_path = f"{doc_dir}/translate_state.json"
-    with open(state_path, "w") as f:
-        json.dump({"running": True, "stop_requested": False}, f)
-
-    print(f"  ✓ 状态文件创建: {state_path}")
-
-    # 模拟设置当前文档
-    from config import set_current_doc
-    set_current_doc(TEST_DOC_ID)
-
+def test_step_2_check_current_doc():
+    """步骤2: 确认当前文档上下文"""
+    log("2", "确认当前文档上下文...")
+    doc_id = _get_current_doc_id()
+    if not doc_id:
+        print("  ✗ 没有当前文档，请先在应用里选中一个真实文档")
+        return False
+    print(f"  ✓ 当前文档: {doc_id}")
     return True
 
 def test_step_3_check_status_api():
@@ -56,7 +52,11 @@ def test_step_3_check_status_api():
     log("3", "测试 /translate_status 接口...")
 
     try:
-        r = requests.get(f"{BASE_URL}/translate_status", timeout=5)
+        doc_id = _get_current_doc_id()
+        if not doc_id:
+            print("  ✗ 没有当前文档，无法检查状态")
+            return False
+        r = requests.get(f"{BASE_URL}/translate_status", params={"doc_id": doc_id}, timeout=5)
         data = r.json()
         print(f"  返回: {json.dumps(data, indent=2)}")
 
@@ -75,15 +75,19 @@ def test_step_4_stop_translate():
     log("4", "测试 /stop_translate 接口...")
 
     try:
-        r = requests.get(f"{BASE_URL}/stop_translate", timeout=5)
+        doc_id = _get_current_doc_id()
+        if not doc_id:
+            print("  ✗ 没有当前文档，无法发送停止请求")
+            return False
+        r = requests.get(f"{BASE_URL}/stop_translate", params={"doc_id": doc_id}, timeout=5)
         data = r.json()
         print(f"  返回: {json.dumps(data, indent=2)}")
 
-        if data.get("stopped"):
+        if data.get("status") == "stopping":
             print("  ✓ 停止请求成功")
             return True
         else:
-            print("  ! 停止请求未返回成功（可能是没有运行中的任务）")
+            print("  ! 停止请求未返回 stopping（可能当前没有运行中的任务）")
             return True  # 这不算失败
     except Exception as e:
         print(f"  ✗ 停止接口调用失败: {e}")
@@ -93,19 +97,19 @@ def test_step_5_check_state_file():
     """步骤5: 验证状态文件是否正确更新"""
     log("5", "验证状态文件更新...")
 
-    state_path = f"output/{TEST_DOC_ID}/translate_state.json"
-    if os.path.exists(state_path):
-        with open(state_path) as f:
-            state = json.load(f)
+    doc_id = _get_current_doc_id()
+    if not doc_id:
+        print("  ✗ 没有当前文档，无法检查状态")
+        return False
+    try:
+        r = requests.get(f"{BASE_URL}/translate_status", params={"doc_id": doc_id}, timeout=5)
+        state = r.json()
         print(f"  当前状态: {json.dumps(state, indent=2)}")
-
-        if state.get("stop_requested"):
-            print("  ✓ stop_requested 已标记为 true")
-        else:
-            print("  ! stop_requested 仍为 false（可能是没有活跃任务）")
+        if "stop_requested" in state:
+            print("  ✓ 状态接口可返回 stop_requested")
         return True
-    else:
-        print(f"  ✗ 状态文件不存在: {state_path}")
+    except Exception as e:
+        print(f"  ✗ 状态检查失败: {e}")
         return False
 
 def test_step_6_simulate_refresh():
@@ -127,14 +131,12 @@ def test_step_7_clean_state():
     """步骤7: 清理状态，模拟翻译完全停止"""
     log("7", "模拟翻译完全停止后的状态...")
 
-    # 创建 stopped 状态
-    doc_dir = f"output/{TEST_DOC_ID}"
-    state_path = f"{doc_dir}/translate_state.json"
-    with open(state_path, "w") as f:
-        json.dump({"running": False, "stop_requested": False}, f)
-
     try:
-        r = requests.get(f"{BASE_URL}/translate_status", timeout=5)
+        doc_id = _get_current_doc_id()
+        if not doc_id:
+            print("  ✗ 没有当前文档，无法检查停止后状态")
+            return False
+        r = requests.get(f"{BASE_URL}/translate_status", params={"doc_id": doc_id}, timeout=5)
         data = r.json()
         print(f"  停止后状态: {json.dumps(data, indent=2)}")
 
@@ -152,10 +154,7 @@ def cleanup():
     """清理测试数据"""
     log("清理", "删除测试数据...")
     import shutil
-    doc_dir = f"output/{TEST_DOC_ID}"
-    if os.path.exists(doc_dir):
-        shutil.rmtree(doc_dir)
-        print(f"  ✓ 删除测试目录: {doc_dir}")
+    print("  ✓ 无需删除伪造状态目录")
 
 def main():
     print("=" * 60)
@@ -169,7 +168,7 @@ def main():
 
     # 运行所有测试步骤
     results.append(("步骤1: 应用状态", test_step_1_check_app()))
-    results.append(("步骤2: 创建模拟状态", test_step_2_create_mock_state()))
+    results.append(("步骤2: 当前文档检查", test_step_2_check_current_doc()))
     results.append(("步骤3: 状态API", test_step_3_check_status_api()))
     results.append(("步骤4: 停止API", test_step_4_stop_translate()))
     results.append(("步骤5: 状态文件检查", test_step_5_check_state_file()))

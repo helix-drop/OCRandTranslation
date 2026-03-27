@@ -15,10 +15,10 @@
       <div class="flex gap-8 items-center">
         <div class="model-picker">
           {% for key, m in models.items() %}
-          <a href="{{ url_for('set_model', key=key) }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+          <a href="{{ url_for('set_model', key=key, doc_id=current_doc_id) }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
           {% endfor %}
         </div>
-        <a href="{{ url_for('settings') }}" class="btn btn-sec btn-sm">设置</a>
+        <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="btn btn-sec btn-sm">设置</a>
       </div>
     </div>
 
@@ -100,20 +100,36 @@
   </div>
 
   <!-- Action Buttons -->
+  {% if has_entries %}
+  {% set safe_entry_idx = entry_idx if entry_idx < entries|length else (entries|length - 1) %}
+  {% set resume_entry = entries[safe_entry_idx] %}
+  {% set resume_bp = resume_entry.get('_pageBP', first_page) %}
+  {% endif %}
   <div class="flex gap-12 flex-wrap mt-16">
     {% if has_pages %}
-    <a href="{{ url_for('start_from_beginning') }}" class="btn btn-pri btn-lg" style="flex:1;justify-content:center;"
-       onclick="this.innerHTML='<span class=spinner></span> 加载中…';this.style.pointerEvents='none';">从首页开始读</a>
-    <a href="{{ url_for('input_page') }}" class="btn btn-sec btn-lg" style="flex:1;justify-content:center;">从指定页开始</a>
+    <a href="{{ url_for('reading', bp=first_page, auto=1, start_bp=first_page, doc_id=current_doc_id) }}" class="btn btn-pri btn-lg" style="flex:1;justify-content:center;"
+       data-reading-entry="1"
+       onclick="return guardReadingEntrance(event, this);">从 p.{{ first_page }} 开始读</a>
+    <a href="{{ url_for('input_page', doc_id=current_doc_id) }}" class="btn btn-sec btn-lg" style="flex:1;justify-content:center;">跳到指定页</a>
     {% else %}
-    <span class="btn btn-pri btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从首页开始读</span>
-    <span class="btn btn-sec btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从指定页开始</span>
+    <span class="btn btn-pri btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从 p.1 开始读</span>
+    <span class="btn btn-sec btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">跳到指定页</span>
     {% endif %}
 
     {% if has_entries %}
-    <a href="{{ url_for('reading') }}" class="btn btn-grn btn-lg" style="flex:1;justify-content:center;">继续 §{{ entry_idx + 1 }}/{{ entry_count }}</a>
+    <a href="{{ url_for('reading', doc_id=current_doc_id) }}" class="btn btn-grn btn-lg" style="flex:1;justify-content:center;" data-reading-entry="1"
+       onclick="return guardReadingEntrance(event, this);">继续读 p.{{ resume_bp }}</a>
     {% endif %}
   </div>
+  {% if has_pages %}
+  <div class="home-action-note">
+    {% if has_entries %}
+    当前文档可从 p.{{ resume_bp }} 继续，也可以重新从 p.{{ first_page }} 开始进入阅读。
+    {% else %}
+    第一次进入建议先从 p.{{ first_page }} 开始，再按页继续往后读。
+    {% endif %}
+  </div>
+  {% endif %}
 
   {% if error %}
   <p class="error-msg">{{ error }}</p>
@@ -122,24 +138,41 @@
   <!-- 文档列表 -->
   {% if docs %}
   <div class="card" style="margin-top:20px;">
-    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">已导入文档</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">OCR-JSON解析成功文档</div>
     <div class="doc-list">
       {% for doc in docs %}
       <div class="doc-item {{ 'doc-active' if doc.id == current_doc_id else '' }}">
         <div class="doc-info">
+          {% set translated_pages = doc.entry_count or 0 %}
+          {% set total_pages = doc.page_count or 0 %}
+          {% set progress_pct = (translated_pages * 100 / total_pages)|round(0, 'floor') if total_pages else 0 %}
+          {% if doc.id == current_doc_id %}
+          <div class="doc-current-banner">当前阅读文档 · 后续阅读、重解析和导出都会以这一份为准</div>
+          {% endif %}
           <div class="doc-name">
             {% if doc.id == current_doc_id %}<span class="doc-current-badge">当前</span>{% endif %}
             {{ doc.name }}
           </div>
           <div class="doc-meta-line">
             {{ doc.page_count }}页
-            {% if doc.entry_count %} · {{ doc.entry_count }}段已译{% endif %}
+            {% if doc.entry_count %} · {{ doc.entry_count }}页已译{% endif %}
             {% if doc.has_pdf %} · PDF{% endif %}
+          </div>
+          <div class="doc-progress-meta">
+            <span>已译 {{ translated_pages }}/{{ total_pages }} 页</span>
+            <span>{{ progress_pct|int }}%</span>
+          </div>
+          <div class="doc-progress-track" aria-hidden="true">
+            <span class="doc-progress-fill" style="width:{{ progress_pct }}%;"></span>
           </div>
         </div>
         <div class="doc-actions">
           {% if doc.id != current_doc_id %}
           <a href="{{ url_for('switch_doc', doc_id=doc.id) }}" class="btn btn-sm btn-sec">切换</a>
+          {% endif %}
+          {% if doc.entry_count %}
+          <a href="{{ url_for('reset_text', doc_id=doc.id) }}" class="btn btn-sm btn-gho"
+             onclick="return confirm('确定清空「{{ doc.name }}」的翻译数据？');">清空翻译数据</a>
           {% endif %}
           <a href="{{ url_for('delete_doc_route', doc_id=doc.id) }}" class="btn btn-sm btn-red-ghost"
              onclick="return confirm('确定删除「{{ doc.name }}」？');">删除</a>
@@ -152,7 +185,7 @@
 
   <!-- Glossary Toggle -->
   <div class="mt-24">
-    <a href="{{ url_for('settings') }}#glossary" class="btn btn-gho" style="padding:8px 0;font-size:13px;">术语词典 ▸</a>
+    <a href="{{ url_for('settings', doc_id=current_doc_id) }}#glossary" class="btn btn-gho" style="padding:8px 0;font-size:13px;">术语词典 ▸</a>
   </div>
 </div>
 {% endblock %}
@@ -168,6 +201,7 @@ var progressPct = document.getElementById('progressPct');
 var progressDetail = document.getElementById('progressDetail');
 var liveLogPanel = document.getElementById('liveLogPanel');
 var liveLog = document.getElementById('liveLog');
+var readingEntrancesDisabled = false;
 
 function preventDragDefaults(e) {
   e.preventDefault();
@@ -221,6 +255,29 @@ function setProgress(pct, label, detail) {
   if (detail !== undefined) progressDetail.textContent = detail;
 }
 
+function setReadingEntrancesDisabled(disabled) {
+  readingEntrancesDisabled = !!disabled;
+  document.querySelectorAll('[data-reading-entry="1"]').forEach(function(btn) {
+    btn.classList.toggle('is-disabled', !!disabled);
+    btn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    btn.tabIndex = disabled ? -1 : 0;
+    btn.style.pointerEvents = disabled ? 'none' : '';
+    btn.style.opacity = disabled ? '0.45' : '';
+  });
+}
+
+function guardReadingEntrance(event, el) {
+  if (readingEntrancesDisabled) {
+    if (event) event.preventDefault();
+    return false;
+  }
+  if (el) {
+    el.innerHTML = '<span class=spinner></span> 加载中…';
+    el.style.pointerEvents = 'none';
+  }
+  return true;
+}
+
 function addLog(msg, cls) {
   liveLogPanel.style.display = '';
   var div = document.createElement('div');
@@ -234,6 +291,7 @@ function startUpload(file) {
   setDragActive(false);
   // Show progress, hide upload area interactivity
   progressSection.style.display = '';
+  setReadingEntrancesDisabled(true);
   document.getElementById('uploadIcon').textContent = '⏳';
   document.getElementById('uploadTitle').textContent = file.name;
   document.getElementById('uploadSubtitle').textContent = '上传中…';
@@ -265,11 +323,13 @@ function startUpload(file) {
       } else if (resp.error) {
         setProgress(0, '上传失败', resp.error);
         progressBar.style.background = 'var(--red)';
+        setReadingEntrancesDisabled(false);
         resetUploadArea();
       }
     } else {
       setProgress(0, '上传失败', 'HTTP ' + xhr.status);
       progressBar.style.background = 'var(--red)';
+      setReadingEntrancesDisabled(false);
       resetUploadArea();
     }
   });
@@ -277,6 +337,7 @@ function startUpload(file) {
   xhr.addEventListener('error', function() {
     setProgress(0, '上传失败', '网络错误');
     progressBar.style.background = 'var(--red)';
+    setReadingEntrancesDisabled(false);
     resetUploadArea();
   });
 
@@ -316,6 +377,7 @@ function startSSE(taskId) {
     setProgress(0, '解析失败', d.error || '');
     progressBar.style.background = 'var(--red)';
     addLog(d.error || '未知错误', 'error');
+    setReadingEntrancesDisabled(false);
     resetUploadArea();
   });
 
@@ -323,6 +385,7 @@ function startSSE(taskId) {
     es.close();
     setProgress(0, '连接中断', '');
     progressBar.style.background = 'var(--red)';
+    setReadingEntrancesDisabled(false);
     resetUploadArea();
   };
 }
@@ -332,13 +395,19 @@ function startReparse() {
   if (!btn) return;
   btn.disabled = true;
   btn.textContent = '⏳ 准备中…';
+  setReadingEntrancesDisabled(true);
 
   progressSection.style.display = '';
   liveLog.innerHTML = '';
   liveLogPanel.style.display = '';
   setProgress(5, '请求重新解析…', '');
 
-  fetch('{{ url_for("reparse") }}', {method: 'POST'})
+  var reparseUrl = '{{ url_for("reparse") }}';
+  {% if current_doc_id %}
+  reparseUrl += '?doc_id={{ current_doc_id }}';
+  {% endif %}
+
+  fetch(reparseUrl, {method: 'POST'})
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) {
@@ -347,6 +416,7 @@ function startReparse() {
         addLog('错误: ' + data.error, 'error');
         btn.disabled = false;
         btn.textContent = '🔄 重新解析';
+        setReadingEntrancesDisabled(false);
         return;
       }
       if (data.task_id) {
@@ -362,6 +432,7 @@ function startReparse() {
       addLog('请求失败: ' + err, 'error');
       btn.disabled = false;
       btn.textContent = '🔄 重新解析';
+      setReadingEntrancesDisabled(false);
     });
 }
 
@@ -369,6 +440,7 @@ function resetUploadArea() {
   uploadArea.style.pointerEvents = '';
   uploadArea.style.opacity = '';
   setDragActive(false);
+  setReadingEntrancesDisabled(false);
   document.getElementById('uploadIcon').textContent = '📄';
   document.getElementById('uploadTitle').textContent = '上传 PDF / 图片';
   document.getElementById('uploadSubtitle').textContent = '调用 PaddleOCR 解析版面，PDF文字层自动优先';

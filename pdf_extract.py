@@ -1,6 +1,7 @@
 """PDF 文字层提取与 OCR 布局合并、按页渲染。"""
 import io
 import re
+import unicodedata
 from functools import lru_cache
 
 from pypdf import PdfReader
@@ -15,18 +16,27 @@ def extract_pdf_text(file_bytes: bytes) -> list[dict]:
                      "items": [{"str","x","y","w","h"}], "fullText": str}
         如果PDF无有效文字层，返回空列表。
     """
-    reader = PdfReader(io.BytesIO(file_bytes))
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes))
+    except Exception:
+        return []
     pdf_pages = []
-    total_chars = 0
+    usable_chars = 0
 
     for i, page in enumerate(reader.pages):
-        mediabox = page.mediabox
-        pdf_w = float(mediabox.width)
-        pdf_h = float(mediabox.height)
+        try:
+            mediabox = page.mediabox
+            pdf_w = float(mediabox.width)
+            pdf_h = float(mediabox.height)
+        except Exception:
+            pdf_w = 0.0
+            pdf_h = 0.0
 
         # pypdf extract_text for quick check
-        raw_text = (page.extract_text() or "").strip()
-        total_chars += len(raw_text)
+        try:
+            raw_text = (page.extract_text() or "").strip()
+        except Exception:
+            raw_text = ""
 
         # Use visitor to get positioned text items
         items = []
@@ -47,13 +57,20 @@ def extract_pdf_text(file_bytes: bytes) -> list[dict]:
                 "h": abs(h),
             })
 
-        try:
-            page.extract_text(visitor_text=visitor)
-        except Exception:
-            pass
+        if raw_text:
+            try:
+                page.extract_text(visitor_text=visitor)
+            except Exception:
+                items = []
 
         full_text = " ".join(it["str"] for it in items).strip()
         full_text = re.sub(r"\s+", " ", full_text)
+        page_sample = (full_text or raw_text or "")[:2000]
+        if page_sample and not _is_pdf_text_layer_readable(page_sample):
+            items = []
+            full_text = ""
+        if items and full_text:
+            usable_chars += len(full_text)
 
         pdf_pages.append({
             "pageIdx": i,
@@ -63,13 +80,8 @@ def extract_pdf_text(file_bytes: bytes) -> list[dict]:
             "fullText": full_text,
         })
 
-    # 判断PDF是否有有效文字层：总字符数 > 页数*20
-    if total_chars < len(reader.pages) * 20:
-        return []
-
-    # 检测控制字符污染（特殊字体编码的 PDF）
-    sample_text = " ".join(p["fullText"] for p in pdf_pages[:10])
-    if sample_text and _is_corrupted(sample_text):
+    # 只要最终没有留下任何可用文字层，就整体回退到 OCR
+    if usable_chars < 20:
         return []
 
     return pdf_pages
@@ -81,6 +93,48 @@ def _is_corrupted(text: str) -> bool:
         return False
     ctrl_count = sum(1 for c in text if ord(c) < 0x20 and c not in '\n\r\t')
     return ctrl_count > len(text) * 0.3
+
+
+def _is_pdf_text_layer_readable(sample_text: str) -> bool:
+    """对文字层做最小抽样判断，识别明显乱码或不可读文本。"""
+    if not sample_text:
+        return False
+
+    sample = re.sub(r"\s+", " ", sample_text).strip()
+    if not sample:
+        return False
+    if "\ufffd" in sample:
+        return False
+    if _is_corrupted(sample):
+        return False
+
+    total = len(sample)
+    readable = 0
+    weird = 0
+    for ch in sample:
+        cat = unicodedata.category(ch)
+        if ch.isalnum() or cat.startswith("L") or cat.startswith("N"):
+            readable += 1
+            continue
+        if cat.startswith("P") or cat.startswith("Z"):
+            readable += 1
+            continue
+        if "\u4e00" <= ch <= "\u9fff" or "\u3400" <= ch <= "\u4dbf":
+            readable += 1
+            continue
+        if cat in ("Cc", "Cf", "Co", "Cs", "So", "Sk"):
+            weird += 1
+
+    if total >= 20 and readable / total < 0.55:
+        return False
+    if total >= 20 and weird / total > 0.2:
+        return False
+
+    tokens = re.findall(r"[^\W\d_]{2,}", sample, flags=re.UNICODE)
+    if total >= 60 and not tokens:
+        return False
+
+    return True
 
 
 def combine_sources(layout_pages: list, pdf_pages: list) -> dict:

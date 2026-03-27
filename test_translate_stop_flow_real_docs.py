@@ -9,10 +9,12 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import app as app_module
 import config
+import pdf_extract
 import tasks
 from config import create_doc, ensure_dirs, get_doc_dir, set_current_doc
 from ocr_parser import parse_ocr, clean_header_footer
@@ -94,6 +96,17 @@ def _build_fake_translate_with_first_page_error(started: threading.Event, releas
     return _fake_translate
 
 
+def _build_fallback_pages(start_bp: int, count: int):
+    return [{
+        "bookPage": start_bp + idx,
+        "fileIdx": idx,
+        "imgW": 1000,
+        "imgH": 1600,
+        "markdown": f"Fallback page {start_bp + idx}",
+        "footnotes": "",
+    } for idx in range(count)]
+
+
 class TranslateStopFlowRealDocsTest(unittest.TestCase):
     def setUp(self):
         self.temp_root = tempfile.mkdtemp(prefix="translate-stop-", dir="/tmp")
@@ -103,6 +116,8 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.client = app_module.app.test_client()
         self.doc_a_id, self.doc_a_pages = self._create_doc_fixture(DOC_A_PDF, DOC_A_OCR)
         self.doc_b_id, self.doc_b_pages = self._create_doc_fixture(DOC_B_PDF, DOC_B_OCR)
+        tasks._clear_translate_state(self.doc_a_id)
+        tasks._clear_translate_state(self.doc_b_id)
 
     def tearDown(self):
         self._wait_for_worker_stop(timeout=3.0)
@@ -134,16 +149,32 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.fail("后台翻译线程未在预期时间内停止")
 
     def _create_doc_fixture(self, pdf_path: Path, ocr_path: Path):
-        with open(ocr_path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-        parsed = parse_ocr(raw)
-        cleaned = clean_header_footer(parsed["pages"])
-        pages = cleaned["pages"]
+        has_source_files = pdf_path.exists() and ocr_path.exists()
+        if has_source_files:
+            with open(ocr_path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            parsed = parse_ocr(raw)
+            cleaned = clean_header_footer(parsed["pages"])
+            pages = cleaned["pages"]
+            doc_name = pdf_path.name
+        else:
+            # 回归测试在无 example 数据时使用最小可用页面夹具，避免环境依赖导致失败。
+            if "第三章" in str(pdf_path):
+                pages = _build_fallback_pages(start_bp=101, count=6)
+                doc_name = "第三章.pdf"
+            else:
+                pages = _build_fallback_pages(start_bp=1, count=12)
+                doc_name = "10.1177@0957154X19859204.pdf"
 
-        doc_id = create_doc(pdf_path.name)
-        save_pages_to_disk(pages, pdf_path.name, doc_id)
+        doc_id = create_doc(doc_name)
+        save_pages_to_disk(pages, doc_name, doc_id)
         save_entries_to_disk([], pdf_path.stem, 0, doc_id)
-        shutil.copy2(pdf_path, Path(get_doc_dir(doc_id)) / "source.pdf")
+        source_pdf = Path(get_doc_dir(doc_id)) / "source.pdf"
+        if pdf_path.exists():
+            shutil.copy2(pdf_path, source_pdf)
+        else:
+            with open(source_pdf, "wb") as f:
+                f.write(b"%PDF-1.4\n%fallback\n")
         return doc_id, pages
 
     def test_status_and_stop_follow_started_doc_not_current_doc(self):
@@ -217,7 +248,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertGreater(len(entries_a), 0)
         self.assertEqual(entries_b, [])
 
-    def test_worker_persists_entries_as_page_files(self):
+    def test_worker_persists_entries_to_sqlite(self):
         started = threading.Event()
         release = threading.Event()
         first_bp, _ = get_page_range(self.doc_a_pages)
@@ -239,8 +270,10 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             self._wait_for_worker_stop(timeout=3.0)
 
         doc_dir = Path(get_doc_dir(self.doc_a_id))
-        self.assertTrue((doc_dir / "entries" / "meta.json").exists())
-        self.assertTrue(any((doc_dir / "entries" / "pages").glob("*.json")))
+        entries, title, idx = load_entries_from_disk(self.doc_a_id)
+        self.assertEqual(title, "Doc A")
+        self.assertEqual(idx, max(0, len(entries) - 1))
+        self.assertEqual(entries[0]["_pageBP"], first_bp)
         self.assertFalse((doc_dir / "entries.json").exists())
 
     def test_fetch_next_persists_single_page_without_rewriting_all_entries(self):
@@ -282,6 +315,47 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 302)
         entries, _, _ = load_entries_from_disk(self.doc_a_id)
         self.assertEqual([entry.get("_pageBP") for entry in entries[:2]], [first_bp, first_bp + 1])
+
+    def test_fetch_next_uses_explicit_doc_id_instead_of_current_doc(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page 1",
+                "translation": "翻译 1",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(app_module, "translate_page", return_value={
+                "_pageBP": first_bp + 1,
+                "_model": "sonnet",
+                "_page_entries": [{
+                    "original": "Page 2",
+                    "translation": "翻译 2",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": str(first_bp + 1),
+                }],
+                "pages": str(first_bp + 1),
+            }),
+        ):
+            resp = self.client.get("/fetch_next", query_string={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 302)
+        entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
+        entries_b, _, _ = load_entries_from_disk(self.doc_b_id)
+        self.assertEqual([entry.get("_pageBP") for entry in entries_a[:2]], [first_bp, first_bp + 1])
+        self.assertEqual(entries_b, [])
 
     def test_retranslate_persists_single_page_without_rewriting_all_entries(self):
         save_entries_to_disk([
@@ -336,6 +410,153 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 302)
         entries, _, _ = load_entries_from_disk(self.doc_a_id)
         self.assertEqual(entries[1]["_page_entries"][0]["translation"], "新的翻译 2")
+
+    def test_retranslate_uses_explicit_doc_id_instead_of_current_doc(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page 1",
+                "translation": "旧翻译",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(app_module, "translate_page", return_value={
+                "_pageBP": first_bp,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "original": "Page 1",
+                    "translation": "新的翻译",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": str(first_bp),
+                }],
+                "pages": str(first_bp),
+            }),
+        ):
+            resp = self.client.get(f"/retranslate/{first_bp}/sonnet", query_string={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 302)
+        entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
+        entries_b, _, _ = load_entries_from_disk(self.doc_b_id)
+        self.assertEqual(entries_a[0]["_page_entries"][0]["translation"], "新的翻译")
+        self.assertEqual(entries_b, [])
+
+    def test_pdf_file_uses_explicit_doc_id_instead_of_current_doc(self):
+        doc_a_pdf = Path(get_doc_dir(self.doc_a_id)) / "source.pdf"
+        doc_b_pdf = Path(get_doc_dir(self.doc_b_id)) / "source.pdf"
+        doc_a_pdf.write_bytes(b"%PDF-1.4\n%doc-a\n")
+        doc_b_pdf.write_bytes(b"%PDF-1.4\n%doc-b\n")
+        set_current_doc(self.doc_b_id)
+
+        resp = self.client.get("/pdf_file", query_string={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.mimetype, "application/pdf")
+        self.assertEqual(resp.get_data(), b"%PDF-1.4\n%doc-a\n")
+
+    def test_pdf_page_uses_explicit_doc_id_instead_of_current_doc(self):
+        doc_a_pdf = str(Path(get_doc_dir(self.doc_a_id)) / "source.pdf")
+        set_current_doc(self.doc_b_id)
+
+        with patch.object(app_module, "render_pdf_page", return_value=b"png-bytes") as render_mock:
+            resp = self.client.get("/pdf_page/0", query_string={"doc_id": self.doc_a_id, "scale": "1.25"})
+
+        self.assertEqual(resp.status_code, 200)
+        render_mock.assert_called_once_with(doc_a_pdf, 0, scale=1.25)
+
+    def test_reparse_page_uses_explicit_doc_id_instead_of_current_doc(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        captured = {}
+
+        class FakeThread:
+            def __init__(self, target=None, args=(), daemon=None):
+                captured["target"] = target
+                captured["args"] = args
+                captured["daemon"] = daemon
+
+            def start(self):
+                return None
+
+        with (
+            patch.object(app_module, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(app_module.threading, "Thread", FakeThread),
+        ):
+            set_current_doc(self.doc_b_id)
+            resp = self.client.post(f"/reparse_page/{first_bp}", data={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("task_id", resp.get_json())
+        self.assertEqual(captured["args"][1], self.doc_a_id)
+        self.assertEqual(captured["args"][2], first_bp)
+
+    def test_reparse_uses_explicit_doc_id_instead_of_current_doc(self):
+        captured = {}
+
+        class FakeThread:
+            def __init__(self, target=None, args=(), daemon=None):
+                captured["target"] = target
+                captured["args"] = args
+                captured["daemon"] = daemon
+
+            def start(self):
+                return None
+
+        with (
+            patch.object(app_module, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(app_module.threading, "Thread", FakeThread),
+        ):
+            set_current_doc(self.doc_b_id)
+            resp = self.client.post("/reparse", data={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("task_id", resp.get_json())
+        self.assertEqual(captured["args"][1], self.doc_a_id)
+
+    def test_delete_doc_is_blocked_while_translation_is_running(self):
+        started = threading.Event()
+        release = threading.Event()
+        first_bp, _ = get_page_range(self.doc_a_pages)
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate(started, release)),
+            patch.object(app_module, "delete_doc") as delete_mock,
+        ):
+            try:
+                set_current_doc(self.doc_a_id)
+                resp = self.client.post("/start_translate_all", data={
+                    "doc_id": self.doc_a_id,
+                    "start_bp": first_bp,
+                    "doc_title": "Doc A",
+                })
+                self.assertEqual(resp.get_json()["status"], "started")
+                self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
+
+                delete_resp = self.client.get(f"/delete_doc/{self.doc_a_id}", follow_redirects=True)
+                html = delete_resp.get_data(as_text=True)
+
+                self.assertEqual(delete_resp.status_code, 200)
+                self.assertIn("该文档正在翻译中，请先停止翻译后再删除。", html)
+                delete_mock.assert_not_called()
+                self.assertTrue(Path(get_doc_dir(self.doc_a_id)).exists())
+            finally:
+                release.set()
+                self._wait_for_worker_stop(timeout=3.0)
+
+        entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
+        self.assertGreater(len(entries_a), 0)
 
     def test_translate_status_exposes_rich_progress_snapshot(self):
         started = threading.Event()
@@ -450,12 +671,482 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn(f"var currentDocId = '{self.doc_a_id}';", html)
-        self.assertIn("var currentPageBp = 1;", html)
+        self.assertIn("currentBp: Number(1)", html)
         self.assertIn("goReadingPage", html)
         self.assertIn("translate_status", html)
         self.assertIn("start_translate_all", html)
         self.assertIn("stop_translate", html)
-        self.assertIn("readingAutoStart === '1' && currentPageBp === d.bp", html)
+        self.assertIn("autoStart: '1'", html)
+
+    def test_reading_uses_explicit_doc_id_for_nav_pdf_and_retranslate_links(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        resp = self.client.get(
+            "/reading",
+            query_string={
+                "bp": first_bp,
+                "doc_id": self.doc_a_id,
+                "usage": "0",
+                "orig": "0",
+                "layout": "stack",
+                "pdf": "0",
+            },
+        )
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(f"var currentDocId = '{self.doc_a_id}';", html)
+        self.assertIn("翻译 A", html)
+        self.assertIn(f'/reading?bp={first_bp}&amp;doc_id={self.doc_a_id}&amp;usage=0&amp;orig=0&amp;layout=stack&amp;pdf=0', html)
+        self.assertIn(f'data-pdf-src="/pdf_page/0?doc_id={self.doc_a_id}"', html)
+        self.assertIn(f'/retranslate/{first_bp}/sonnet?doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/reset_text?doc_id={self.doc_a_id}', html)
+        self.assertIn("reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);", html)
+
+    def test_home_page_preserves_current_doc_id_in_navigation_links(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        resp = self.client.get("/", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(f'/input?doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/reading?doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/reading?bp={first_bp}&amp;auto=1&amp;start_bp={first_bp}&amp;doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/settings?doc_id={self.doc_a_id}', html)
+        self.assertIn(f"reparseUrl += '?doc_id={self.doc_a_id}';", html)
+
+    def test_home_page_renders_clear_translation_action_between_switch_and_delete(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        save_entries_to_disk([{
+            "_pageBP": 101,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page B",
+                "translation": "翻译 B",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "101",
+            }],
+            "pages": "101",
+        }], "Doc B", 0, self.doc_b_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get("/", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("OCR-JSON解析成功文档", html)
+        switch_idx = html.index(f'/switch_doc/{self.doc_b_id}')
+        clear_idx = html.index(f'/reset_text?doc_id={self.doc_b_id}')
+        delete_idx = html.index(f'/delete_doc/{self.doc_b_id}')
+        self.assertLess(switch_idx, clear_idx)
+        self.assertLess(clear_idx, delete_idx)
+        self.assertIn(f'/reset_text?doc_id={self.doc_b_id}', html)
+        self.assertIn("当前阅读文档", html)
+        self.assertIn("doc-current-banner", html)
+
+    def test_home_page_marks_reading_entrances_for_temporary_disable(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get("/", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('data-reading-entry="1"', html)
+        self.assertIn('onclick="return guardReadingEntrance(event, this);"', html)
+        self.assertIn("var readingEntrancesDisabled = false;", html)
+        self.assertIn("setReadingEntrancesDisabled(true);", html)
+        self.assertIn("setReadingEntrancesDisabled(false);", html)
+        self.assertIn("if (readingEntrancesDisabled) {", html)
+        self.assertIn("return false;", html)
+        self.assertIn("el.innerHTML = '<span class=spinner></span> 加载中…';", html)
+        self.assertIn("startUpload(file)", html)
+        self.assertIn("startReparse()", html)
+        self.assertIn("resetUploadArea()", html)
+
+    def test_input_page_binds_current_doc_id_for_start_and_model_switch(self):
+        set_current_doc(self.doc_b_id)
+
+        resp = self.client.get("/input", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(f'<input type="hidden" name="doc_id" value="{self.doc_a_id}">', html)
+        self.assertIn(f'/set_model/sonnet?next=input&amp;doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/?doc_id={self.doc_a_id}', html)
+        self.assertIn('id="paddleQuotaStatusCard"', html)
+        self.assertIn("fetch('/paddle_quota_status')", html)
+        self.assertIn("官方站内可查看 OCR 配额状态", html)
+
+    def test_paddle_quota_status_route_returns_graceful_fallback(self):
+        resp = self.client.get("/paddle_quota_status")
+        data = resp.get_json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(data["supported"], False)
+        self.assertEqual(data["status"], "unavailable")
+        self.assertIn("官方站内可查看", data["message"])
+        self.assertIn("429", data["message"])
+        self.assertIn("aistudio.baidu.com/paddleocr", data["official_url"])
+
+    def test_settings_page_exposes_official_quota_query_link(self):
+        resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("https://aistudio.baidu.com/paddleocr", html)
+        self.assertIn("自己查询今日解析页数", html)
+        self.assertNotIn("每日可解析 3000 页", html)
+
+    def test_start_reading_uses_form_doc_id_when_redirecting_to_reading(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        set_current_doc(self.doc_b_id)
+
+        with patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}):
+            resp = self.client.post("/start_reading", data={
+                "doc_id": self.doc_a_id,
+                "start_page": first_bp,
+                "doc_title": "Doc A",
+            })
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
+
+    def test_start_from_beginning_keeps_existing_translations(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        with patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}):
+            resp = self.client.get("/start_from_beginning", query_string={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
+        entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
+        self.assertEqual(entries_a[0]["_page_entries"][0]["translation"], "翻译 A")
+
+    def test_reading_export_links_bind_current_doc_id(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=stack&pdf=0&usage=0&orig=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(f'href="/download_md?doc_id={self.doc_a_id}"', html)
+        self.assertIn("fetch('/export_md?doc_id=' + encodeURIComponent(currentDocId))", html)
+
+    def test_reading_page_shows_page_footnote_preview_from_real_page_data(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        page_footnotes = "1. 脚注原文甲\n2. 脚注原文乙"
+        save_pages_to_disk([
+            {
+                "bookPage": first_bp,
+                "fileIdx": 0,
+                "imgW": 1000,
+                "imgH": 1600,
+                "markdown": "正文原文甲",
+                "footnotes": page_footnotes,
+            },
+            {
+                "bookPage": first_bp + 1,
+                "fileIdx": 1,
+                "imgW": 1000,
+                "imgH": 1600,
+                "markdown": "正文原文乙",
+                "footnotes": "",
+            },
+        ], "Doc A", self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=stack&pdf=0&usage=0&orig=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("本页脚注预览", html)
+        self.assertIn("page-preview-footnotes", html)
+        self.assertIn(page_footnotes, html)
+        self.assertIn("page-placeholder", html)
+        self.assertIn("本页含脚注", html)
+
+    def test_reading_page_splits_ocr_preview_into_multiple_paragraphs(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        preview_text = (
+            "First paragraph opens the page with enough text to read naturally.\n\n"
+            "Second paragraph continues the argument with a separate idea.\n"
+            "Third paragraph should stay distinct instead of being merged into one block."
+        )
+        save_pages_to_disk([{
+            "bookPage": first_bp,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": preview_text,
+            "footnotes": "",
+        }], "Doc A", self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=stack&pdf=0&usage=0&orig=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('class="page-preview-text preview-paragraphs"', html)
+        self.assertGreaterEqual(html.count('class="page-preview-paragraph'), 2)
+        self.assertIn("First paragraph opens the page with enough text to read naturally.", html)
+        self.assertIn("Second paragraph continues the argument with a separate idea.", html)
+        self.assertIn("Third paragraph should stay distinct instead of being merged into one block.", html)
+
+    def test_reading_page_renders_page_level_footnotes_from_entry_data(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        page_footnotes = "1. 脚注原文甲\n2. 脚注原文乙"
+        page_footnotes_translation = "1. 脚注译文甲\n2. 脚注译文乙"
+        save_pages_to_disk([
+            {
+                "bookPage": first_bp,
+                "fileIdx": 0,
+                "imgW": 1000,
+                "imgH": 1600,
+                "markdown": "正文原文甲",
+                "footnotes": page_footnotes,
+            },
+            {
+                "bookPage": first_bp + 1,
+                "fileIdx": 1,
+                "imgW": 1000,
+                "imgH": 1600,
+                "markdown": "正文原文乙",
+                "footnotes": "",
+            },
+        ], "Doc A", self.doc_a_id)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "正文原文甲",
+                "translation": "正文译文甲",
+                "footnotes": page_footnotes,
+                "footnotes_translation": page_footnotes_translation,
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=stack&pdf=0&usage=0&orig=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("本页脚注", html)
+        self.assertIn("脚注原文", html)
+        self.assertIn("脚注翻译", html)
+        self.assertIn(page_footnotes, html)
+        self.assertIn(page_footnotes_translation, html)
+        self.assertLess(html.index("正文译文甲"), html.index("本页脚注"))
+        self.assertIn("读完脚注后可直接继续", html)
+
+    def test_reading_page_defaults_to_orig_zero_and_keeps_original_footnotes_visible(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        page_footnotes = "1. 脚注原文甲\n2. 脚注原文乙"
+        save_pages_to_disk([{
+            "bookPage": first_bp,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "正文原文甲",
+            "footnotes": page_footnotes,
+        }], "Doc A", self.doc_a_id)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "正文原文甲",
+                "translation": "正文译文甲",
+                "footnotes": page_footnotes,
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=stack&pdf=0&usage=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("本页脚注", html)
+        self.assertIn("脚注原文", html)
+        self.assertIn(page_footnotes, html)
+        self.assertNotIn("脚注翻译", html)
+        self.assertNotIn("本页脚注预览", html)
+        self.assertNotIn("你正在查看 p.", html)
+        self.assertNotIn("OCR 原文已就绪", html)
+
+    def test_reading_page_keeps_original_footnotes_visible_with_pdf_panel_open(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        page_footnotes = "1. 脚注原文甲\n2. 脚注原文乙"
+        save_pages_to_disk([{
+            "bookPage": first_bp,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "正文原文甲",
+            "footnotes": page_footnotes,
+        }], "Doc A", self.doc_a_id)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "正文原文甲",
+                "translation": "正文译文甲",
+                "footnotes": page_footnotes,
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=side&pdf=1&usage=0&orig=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('class="reading-main-layout with-pdf"', html)
+        self.assertIn('class="pdf-panel" id="pdfPanel"', html)
+        self.assertIn('PDF 原文', html)
+        self.assertIn(f'data-pdf-src="/pdf_page/0?doc_id={self.doc_a_id}"', html)
+        self.assertIn("本页脚注", html)
+        self.assertIn("脚注原文", html)
+        self.assertIn(page_footnotes, html)
+        self.assertNotIn("脚注翻译", html)
+        self.assertNotIn("本页脚注预览", html)
+        self.assertNotIn("你正在查看 p.", html)
+
+    def test_reading_page_exposes_pdf_zoom_controls(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "正文原文甲",
+                "translation": "正文译文甲",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get(f"/reading?bp={first_bp}&doc_id={self.doc_a_id}&layout=stack&pdf=1&usage=0&orig=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("pdfZoomOutBtn", html)
+        self.assertIn("pdfZoomInfo", html)
+        self.assertIn("pdfZoomInBtn", html)
+        self.assertIn("pdfZoomResetBtn", html)
+        self.assertIn("pdfPanelModeBtn", html)
+        self.assertIn("var targetWidth = getPdfItemWidth(container, pageImgW, pageImgH);", html)
+        self.assertIn("el.style.width = targetWidth + 'px';", html)
+        self.assertIn("el.style.minWidth = targetWidth + 'px';", html)
+        self.assertIn("overflow-x: auto;", html)
+        self.assertIn("dispatch('cycle_pdf_panel_mode');", html)
+        self.assertIn("panel.setAttribute('data-panel-mode', store.ui.pdfPanelMode);", html)
+        self.assertIn("container.addEventListener('dblclick', function(event) {", html)
+        self.assertIn("togglePdfZoomFromGesture(pageItem, anchor);", html)
+        self.assertIn("container.addEventListener('wheel', function(event) {", html)
+        self.assertIn("if (!event.ctrlKey && !event.metaKey) return;", html)
+        self.assertIn("stepPdfZoom(delta, anchor);", html)
+        self.assertIn("var anchor = buildPdfZoomAnchor(container, event);", html)
+        self.assertIn("restorePdfZoomAnchor(container, anchor);", html)
+        self.assertIn("container.scrollLeft = Math.max(0, targetLeft);", html)
+        self.assertIn("container.scrollTop = Math.max(0, targetTop);", html)
 
     def test_reading_route_supports_physical_page_without_translated_entry(self):
         set_current_doc(self.doc_a_id)
@@ -463,11 +1154,234 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("本页尚未提交翻译", html)
-        self.assertIn("var currentPageBp = 5;", html)
+        self.assertIn("p.5 可直接开始阅读", html)
+        self.assertIn("currentBp: Number(5)", html)
         self.assertIn("pageNavBtn", html)
         self.assertIn("pageNavList", html)
         self.assertNotIn("navSelect", html)
+
+    def test_reset_text_uses_explicit_doc_id_instead_of_current_doc(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        save_entries_to_disk([{
+            "_pageBP": 101,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page B",
+                "translation": "翻译 B",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "101",
+            }],
+            "pages": "101",
+        }], "Doc B", 0, self.doc_b_id)
+        set_current_doc(self.doc_b_id)
+
+        resp = self.client.get("/reset_text", query_string={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/input", resp.location)
+        entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
+        entries_b, _, _ = load_entries_from_disk(self.doc_b_id)
+        self.assertEqual(entries_a, [])
+        self.assertEqual(entries_b[0]["_page_entries"][0]["translation"], "翻译 B")
+
+    def test_reset_text_action_uses_explicit_doc_id_instead_of_current_doc(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        resp = self.client.get("/reset_text_action", query_string={"doc_id": self.doc_a_id})
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/settings", resp.location)
+        entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
+        self.assertEqual(entries_a, [])
+
+    def test_reset_all_uses_explicit_doc_id_and_blocks_while_translation_running(self):
+        started = threading.Event()
+        release = threading.Event()
+        first_bp, _ = get_page_range(self.doc_a_pages)
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate(started, release)),
+        ):
+            try:
+                set_current_doc(self.doc_b_id)
+                resp = self.client.post("/start_translate_all", data={
+                    "doc_id": self.doc_a_id,
+                    "start_bp": first_bp,
+                    "doc_title": "Doc A",
+                })
+                self.assertEqual(resp.get_json()["status"], "started")
+                self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
+
+                delete_resp = self.client.get("/reset_all", query_string={"doc_id": self.doc_a_id}, follow_redirects=True)
+                html = delete_resp.get_data(as_text=True)
+                self.assertIn("该文档正在翻译中，请先停止翻译后再删除。", html)
+                self.assertTrue(Path(get_doc_dir(self.doc_a_id)).exists())
+                self.assertTrue(Path(get_doc_dir(self.doc_b_id)).exists())
+            finally:
+                release.set()
+                self._wait_for_worker_stop(timeout=3.0)
+
+    def test_reset_all_stale_settings_tab_uses_page_doc_id_not_current_doc(self):
+        resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(f'/reset_all?doc_id={self.doc_a_id}', html)
+
+        set_current_doc(self.doc_b_id)
+        delete_resp = self.client.get("/reset_all", query_string={"doc_id": self.doc_a_id}, follow_redirects=True)
+
+        self.assertEqual(delete_resp.status_code, 200)
+        self.assertFalse(Path(get_doc_dir(self.doc_a_id)).exists())
+        self.assertTrue(Path(get_doc_dir(self.doc_b_id)).exists())
+
+    def test_reset_all_reports_failure_when_delete_does_not_remove_directory(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+        set_current_doc(self.doc_b_id)
+
+        with patch.object(app_module, "delete_doc", side_effect=lambda doc_id: None):
+            resp = self.client.get("/reset_all", query_string={"doc_id": self.doc_a_id}, follow_redirects=True)
+
+        html = resp.get_data(as_text=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("删除失败，请稍后重试", html)
+        self.assertTrue(Path(get_doc_dir(self.doc_a_id)).exists())
+        self.assertTrue(Path(get_doc_dir(self.doc_b_id)).exists())
+
+    def test_settings_page_renders_reset_link_with_current_doc_id(self):
+        save_entries_to_disk([{
+            "_pageBP": 101,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page B",
+                "translation": "翻译 B",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "101",
+            }],
+            "pages": "101",
+        }], "Doc B", 0, self.doc_b_id)
+        set_current_doc(self.doc_a_id)
+
+        resp = self.client.get("/settings", query_string={"doc_id": self.doc_b_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(f'/reset_text_action?doc_id={self.doc_b_id}', html)
+        self.assertIn(f'/reset_all?doc_id={self.doc_b_id}', html)
+
+    def test_extract_pdf_text_returns_empty_when_pdf_reader_raises(self):
+        with patch.object(pdf_extract, "PdfReader", side_effect=RuntimeError("broken pdf")):
+            pages = pdf_extract.extract_pdf_text(b"broken-pdf")
+
+        self.assertEqual(pages, [])
+
+    def test_extract_pdf_text_falls_back_to_ocr_when_page_extract_raises(self):
+        class FakePage:
+            def __init__(self, text: str, raise_on_extract: bool = False):
+                self._text = text
+                self._raise_on_extract = raise_on_extract
+                self.mediabox = SimpleNamespace(width=100.0, height=200.0)
+
+            def extract_text(self, visitor_text=None):
+                if self._raise_on_extract:
+                    raise RuntimeError("extract failed")
+                if visitor_text is not None:
+                    visitor_text(self._text, None, [0, 0, 0, 0, 10, 20], None, 12)
+                return self._text
+
+        class FakeReader:
+            def __init__(self, pages):
+                self.pages = pages
+
+        pages = [
+            FakePage("This is a readable page with normal words and punctuation."),
+            FakePage("This page should fall back to OCR.", raise_on_extract=True),
+        ]
+
+        with patch.object(pdf_extract, "PdfReader", return_value=FakeReader(pages)):
+            pdf_pages = pdf_extract.extract_pdf_text(b"mixed-pdf")
+
+        self.assertEqual(len(pdf_pages), 2)
+        self.assertTrue(pdf_pages[0]["items"])
+        self.assertTrue(pdf_pages[0]["fullText"])
+        self.assertEqual(pdf_pages[1]["items"], [])
+        self.assertEqual(pdf_pages[1]["fullText"], "")
+
+    def test_extract_pdf_text_falls_back_for_unreadable_later_page(self):
+        class FakePage:
+            def __init__(self, text: str):
+                self._text = text
+                self.mediabox = SimpleNamespace(width=100.0, height=200.0)
+
+            def extract_text(self, visitor_text=None):
+                if visitor_text is not None:
+                    visitor_text(self._text, None, [0, 0, 0, 0, 10, 20], None, 12)
+                return self._text
+
+        class FakeReader:
+            def __init__(self, pages):
+                self.pages = pages
+
+        mixed_pages = [
+            FakePage("This is a readable page with normal words and punctuation."),
+            FakePage("Another readable page with enough words to pass the check."),
+            FakePage("\uf8ff\uf0aa\uf0ab\uf0ac\u0001\u0002\u0003"),
+        ]
+
+        with patch.object(pdf_extract, "PdfReader", return_value=FakeReader(mixed_pages)):
+            pdf_pages = pdf_extract.extract_pdf_text(b"mixed-pdf")
+
+        self.assertEqual(len(pdf_pages), 3)
+        self.assertTrue(pdf_pages[0]["items"])
+        self.assertTrue(pdf_pages[1]["items"])
+        self.assertEqual(pdf_pages[2]["items"], [])
+        self.assertEqual(pdf_pages[2]["fullText"], "")
 
     def test_reading_route_embeds_failed_pages_and_persisted_draft(self):
         set_current_doc(self.doc_a_id)
@@ -496,8 +1410,10 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("本页翻译失败", html)
-        self.assertIn('var failedPageBps = [5];', html)
+        self.assertIn("p.5 需要重试", html)
+        self.assertIn("失败页", html)
+        self.assertIn("最近一次失败原因：boom on 5", html)
+        self.assertIn("failedBps: [5].map(function(bp) { return Number(bp); })", html)
         self.assertIn('"status": "error"', html)
         self.assertIn("usageDraftMini", html)
         self.assertIn("失败1页", html)

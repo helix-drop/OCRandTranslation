@@ -5,6 +5,7 @@
 """
 import json
 import os
+import tempfile
 import time
 import uuid as _uuid
 
@@ -21,6 +22,10 @@ CURRENT_FILE = os.path.join(DATA_DIR, "current.txt")
 OLD_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".foreign_lit_reader")
 
 GLOSSARY_INIT = []
+PARA_MAX_CONCURRENCY = 3
+PARA_CONTEXT_WINDOW = 200
+PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT = 5
+PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT = 80
 
 MODELS = {
     "sonnet": {"id": "claude-sonnet-4-6", "label": "Sonnet 4.6", "provider": "anthropic"},
@@ -29,6 +34,35 @@ MODELS = {
     "qwen-max": {"id": "qwen-max", "label": "Qwen-Max", "provider": "qwen"},
     "qwen-turbo": {"id": "qwen-turbo", "label": "Qwen-Turbo", "provider": "qwen"},
 }
+
+
+def _coerce_int(value, default: int, minimum: int) -> int:
+    """将配置值转换为整数，并限制最小值。"""
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed >= minimum else default
+
+
+def get_pdf_virtual_window_radius() -> int:
+    """获取 PDF 卷轴虚拟窗口半径。"""
+    cfg = load_config()
+    return _coerce_int(
+        cfg.get("pdf_virtual_window_radius"),
+        PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT,
+        1,
+    )
+
+
+def get_pdf_virtual_scroll_min_pages() -> int:
+    """获取启用 PDF 虚拟滚动的最小页数阈值。"""
+    cfg = load_config()
+    return _coerce_int(
+        cfg.get("pdf_virtual_scroll_min_pages"),
+        PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT,
+        1,
+    )
 
 
 def check_write_permission() -> tuple[bool, str]:
@@ -53,6 +87,47 @@ def ensure_dirs():
     os.makedirs(CONFIG_DIR, exist_ok=True)
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(DOCS_DIR, exist_ok=True)
+
+
+def get_sqlite_db_path() -> str:
+    """返回 SQLite 主库路径。"""
+    ensure_dirs()
+    return os.path.join(DATA_DIR, "app.db")
+
+
+def _atomic_write_json(path: str, payload):
+    """原子写入 JSON，避免读到半写文件。"""
+    directory = os.path.dirname(path) or "."
+    os.makedirs(directory, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(prefix=".tmp-", suffix=".json", dir=directory)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, path)
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+def _safe_read_json(path: str, default):
+    """安全读取 JSON；遇到空文件或损坏内容时返回默认值。"""
+    if not os.path.isfile(path):
+        if isinstance(default, dict):
+            return dict(default)
+        if isinstance(default, list):
+            return list(default)
+        return default
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError, ValueError):
+        if isinstance(default, dict):
+            return dict(default)
+        if isinstance(default, list):
+            return list(default)
+        return default
 
 
 def migrate_from_old_location():
@@ -92,16 +167,12 @@ def load_config() -> dict:
     # 首次加载时尝试从旧位置迁移
     migrate_from_old_location()
     ensure_dirs()
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    return _safe_read_json(CONFIG_FILE, {})
 
 
 def save_config(cfg: dict):
     ensure_dirs()
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, ensure_ascii=False, indent=2)
+    _atomic_write_json(CONFIG_FILE, cfg)
 
 
 def get_paddle_token() -> str:
@@ -134,15 +205,48 @@ def set_dashscope_key(key: str):
     save_config(cfg)
 
 
-def get_glossary() -> list:
-    cfg = load_config()
-    return cfg.get("glossary", GLOSSARY_INIT)
+def _glossary_state_key(doc_id: str) -> str:
+    return f"glossary:{doc_id}"
 
 
-def set_glossary(glossary: list):
-    cfg = load_config()
-    cfg["glossary"] = glossary
-    save_config(cfg)
+def get_glossary(doc_id: str = "") -> list:
+    target_doc_id = (doc_id or get_current_doc_id() or "").strip()
+    if not target_doc_id:
+        return list(GLOSSARY_INIT)
+    from sqlite_store import SQLiteRepository
+
+    raw = SQLiteRepository().get_app_state(_glossary_state_key(target_doc_id))
+    if not raw:
+        return list(GLOSSARY_INIT)
+    try:
+        data = json.loads(raw)
+    except (TypeError, ValueError):
+        return list(GLOSSARY_INIT)
+    if not isinstance(data, list):
+        return list(GLOSSARY_INIT)
+    normalized = []
+    for item in data:
+        if not isinstance(item, (list, tuple)) or len(item) < 2:
+            continue
+        normalized.append([str(item[0] or ""), str(item[1] or "")])
+    return normalized
+
+
+def set_glossary(glossary: list, doc_id: str = ""):
+    target_doc_id = (doc_id or get_current_doc_id() or "").strip()
+    if not target_doc_id:
+        return
+    from sqlite_store import SQLiteRepository
+
+    normalized = []
+    for item in glossary or []:
+        if not isinstance(item, (list, tuple)) or len(item) < 2:
+            continue
+        normalized.append([str(item[0] or ""), str(item[1] or "")])
+    SQLiteRepository().set_app_state(
+        _glossary_state_key(target_doc_id),
+        json.dumps(normalized, ensure_ascii=False),
+    )
 
 
 def get_model_key() -> str:
@@ -160,37 +264,43 @@ def set_model_key(key: str):
 def create_doc(name: str) -> str:
     """创建新文档目录，返回 doc_id。"""
     ensure_dirs()
+    from sqlite_store import SQLiteRepository
+
     doc_id = _uuid.uuid4().hex[:12]
     doc_dir = os.path.join(DOCS_DIR, doc_id)
     os.makedirs(doc_dir, exist_ok=True)
-    meta = {
-        "id": doc_id,
-        "name": name,
-        "created": time.time(),
-        "page_count": 0,
-        "entry_count": 0,
-    }
-    with open(os.path.join(doc_dir, "meta.json"), "w", encoding="utf-8") as f:
-        json.dump(meta, f, ensure_ascii=False, indent=2)
+    now = int(time.time())
+    SQLiteRepository().upsert_document(
+        doc_id,
+        name,
+        created_at=now,
+        updated_at=now,
+        page_count=0,
+        entry_count=0,
+        last_entry_idx=0,
+        has_pdf=0,
+        status="ready",
+    )
     set_current_doc(doc_id)
     return doc_id
 
 
 def get_current_doc_id() -> str:
     """返回当前活跃文档 ID，无则返回空字符串。"""
-    if os.path.exists(CURRENT_FILE):
-        with open(CURRENT_FILE, "r") as f:
-            doc_id = f.read().strip()
-        if doc_id and os.path.isdir(os.path.join(DOCS_DIR, doc_id)):
-            return doc_id
+    from sqlite_store import SQLiteRepository
+
+    doc_id = (SQLiteRepository().get_app_state("current_doc_id") or "").strip()
+    if doc_id and os.path.isdir(os.path.join(DOCS_DIR, doc_id)):
+        return doc_id
     return ""
 
 
 def set_current_doc(doc_id: str):
     """设置当前活跃文档。"""
     ensure_dirs()
-    with open(CURRENT_FILE, "w") as f:
-        f.write(doc_id)
+    from sqlite_store import SQLiteRepository
+
+    SQLiteRepository().set_app_state("current_doc_id", doc_id)
 
 
 def get_doc_dir(doc_id: str = "") -> str:
@@ -205,18 +315,12 @@ def get_doc_dir(doc_id: str = "") -> str:
 def list_docs() -> list[dict]:
     """列出所有文档的元数据，按创建时间倒序。"""
     ensure_dirs()
-    docs = []
-    if not os.path.isdir(DOCS_DIR):
-        return docs
-    for name in os.listdir(DOCS_DIR):
-        meta_path = os.path.join(DOCS_DIR, name, "meta.json")
-        if os.path.isfile(meta_path):
-            with open(meta_path, "r", encoding="utf-8") as f:
-                meta = json.load(f)
-            meta["id"] = name  # 确保 id 一致
-            meta["has_pdf"] = os.path.isfile(os.path.join(DOCS_DIR, name, "source.pdf"))
-            docs.append(meta)
-    docs.sort(key=lambda d: d.get("created", 0), reverse=True)
+    from sqlite_store import SQLiteRepository
+
+    docs = SQLiteRepository().list_documents()
+    for meta in docs:
+        doc_id = meta.get("id", "")
+        meta["has_pdf"] = os.path.isfile(os.path.join(DOCS_DIR, doc_id, "source.pdf"))
     return docs
 
 
@@ -225,15 +329,24 @@ def update_doc_meta(doc_id: str, **kwargs):
     doc_dir = get_doc_dir(doc_id)
     if not doc_dir:
         return
-    meta_path = os.path.join(doc_dir, "meta.json")
-    if os.path.isfile(meta_path):
-        with open(meta_path, "r", encoding="utf-8") as f:
-            meta = json.load(f)
-    else:
-        meta = {"id": doc_id}
+    from sqlite_store import SQLiteRepository
+
+    meta = get_doc_meta(doc_id)
+    if not meta:
+        meta = {"id": doc_id, "name": kwargs.get("name", "")}
     meta.update(kwargs)
-    with open(meta_path, "w", encoding="utf-8") as f:
-        json.dump(meta, f, ensure_ascii=False, indent=2)
+    SQLiteRepository().upsert_document(
+        doc_id,
+        meta.get("name", ""),
+        created_at=int(meta.get("created", time.time()) or time.time()),
+        updated_at=int(time.time()),
+        page_count=int(meta.get("page_count", 0) or 0),
+        entry_count=int(meta.get("entry_count", 0) or 0),
+        has_pdf=int(meta.get("has_pdf", 0) or 0),
+        last_entry_idx=int(meta.get("last_entry_idx", 0) or 0),
+        status=meta.get("status", "ready"),
+        source_pdf_path=meta.get("source_pdf_path"),
+    )
 
 
 def get_doc_meta(doc_id: str = "") -> dict:
@@ -241,61 +354,24 @@ def get_doc_meta(doc_id: str = "") -> dict:
     doc_dir = get_doc_dir(doc_id)
     if not doc_dir:
         return {}
-    meta_path = os.path.join(doc_dir, "meta.json")
-    if not os.path.isfile(meta_path):
-        return {}
-    with open(meta_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    from sqlite_store import SQLiteRepository
+
+    meta = SQLiteRepository().get_document(doc_id)
+    return meta if isinstance(meta, dict) else {}
 
 
 def delete_doc(doc_id: str):
     """删除文档目录。"""
     import shutil
+    from sqlite_store import SQLiteRepository
+
+    is_current = get_current_doc_id() == doc_id
     doc_dir = os.path.join(DOCS_DIR, doc_id)
     if os.path.isdir(doc_dir):
         shutil.rmtree(doc_dir)
+    SQLiteRepository().delete_document(doc_id)
     # 如果删除的是当前文档，清除 current
-    if get_current_doc_id() == doc_id:
-        if os.path.exists(CURRENT_FILE):
-            os.remove(CURRENT_FILE)
+    if is_current:
+        SQLiteRepository().set_app_state("current_doc_id", "")
 
 
-def migrate_legacy_data():
-    """将旧的单文件数据迁移到多文档结构。"""
-    ensure_dirs()
-    old_pages = os.path.join(DATA_DIR, "pages.json")
-    if not os.path.isfile(old_pages):
-        return  # 无旧数据
-
-    # 读取旧数据获取名称
-    with open(old_pages, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    if isinstance(data, list):
-        name = "迁移数据"
-        pages = data
-    else:
-        name = data.get("name", "迁移数据")
-        pages = data.get("pages", [])
-
-    if not pages:
-        os.remove(old_pages)
-        return
-
-    # 创建新文档
-    doc_id = create_doc(name)
-    doc_dir = get_doc_dir(doc_id)
-
-    # 移动文件
-    import shutil
-    shutil.move(old_pages, os.path.join(doc_dir, "pages.json"))
-
-    old_entries = os.path.join(DATA_DIR, "entries.json")
-    if os.path.isfile(old_entries):
-        shutil.move(old_entries, os.path.join(doc_dir, "entries.json"))
-
-    old_pdf = os.path.join(DATA_DIR, "source.pdf")
-    if os.path.isfile(old_pdf):
-        shutil.move(old_pdf, os.path.join(doc_dir, "source.pdf"))
-
-    # 更新元数据
-    update_doc_meta(doc_id, page_count=len(pages))

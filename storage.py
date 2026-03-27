@@ -1,5 +1,4 @@
 """磁盘持久化与辅助函数：数据读写、模板变量、文本处理工具。"""
-import json
 import os
 import re
 import shutil
@@ -10,6 +9,7 @@ from config import (
     get_glossary, get_model_key,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
 )
+from sqlite_store import SQLiteRepository
 from text_processing import get_page_range
 
 
@@ -27,52 +27,6 @@ def _entries_root(doc_id: str = "") -> str:
     return _doc_path("entries", doc_id)
 
 
-def _entries_meta_path(doc_id: str = "") -> str:
-    root = _entries_root(doc_id)
-    return os.path.join(root, "meta.json") if root else ""
-
-
-def _entries_pages_dir(doc_id: str = "") -> str:
-    root = _entries_root(doc_id)
-    return os.path.join(root, "pages") if root else ""
-
-
-def _entry_page_path(bp: int, doc_id: str = "") -> str:
-    pages_dir = _entries_pages_dir(doc_id)
-    if not pages_dir or bp is None:
-        return ""
-    return os.path.join(pages_dir, f"{int(bp):06d}.json")
-
-
-def _write_json(path: str, payload):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False)
-
-
-def _load_entries_meta(doc_id: str = "") -> dict:
-    meta_path = _entries_meta_path(doc_id)
-    if meta_path and os.path.exists(meta_path):
-        with open(meta_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if isinstance(data, dict):
-                return {
-                    "title": data.get("title", ""),
-                    "idx": int(data.get("idx", 0) or 0),
-                }
-    return {"title": "", "idx": 0}
-
-
-def _list_entry_page_paths(doc_id: str = "") -> list[str]:
-    pages_dir = _entries_pages_dir(doc_id)
-    if not pages_dir or not os.path.isdir(pages_dir):
-        return []
-    return sorted(
-        os.path.join(pages_dir, name)
-        for name in os.listdir(pages_dir)
-        if name.endswith(".json")
-    )
-
-
 def _remove_legacy_entries_file(doc_id: str = ""):
     legacy_path = _doc_path("entries.json", doc_id)
     if legacy_path and os.path.exists(legacy_path):
@@ -80,42 +34,36 @@ def _remove_legacy_entries_file(doc_id: str = ""):
 
 
 def save_pages_to_disk(pages: list, name: str, doc_id: str = ""):
-    path = _doc_path("pages.json", doc_id)
-    if not path:
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
         return
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump({"name": name, "pages": pages}, f, ensure_ascii=False)
-    update_doc_meta(doc_id or get_current_doc_id(), page_count=len(pages), name=name)
+    SQLiteRepository().replace_pages(target_doc_id, pages)
+    update_doc_meta(target_doc_id, page_count=len(pages), name=name)
 
 
 def load_pages_from_disk(doc_id: str = "") -> tuple[list, str]:
-    path = _doc_path("pages.json", doc_id)
-    if path and os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if isinstance(data, list):
-                return data, ""
-            return data.get("pages", []), data.get("name", "")
-    return [], ""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return [], ""
+    repo = SQLiteRepository()
+    pages = repo.load_pages(target_doc_id)
+    meta = repo.get_document(target_doc_id) or {}
+    return pages, meta.get("name", "")
 
 
 def save_entries_to_disk(entries: list, title: str, idx: int, doc_id: str = ""):
-    root = _entries_root(doc_id)
-    pages_dir = _entries_pages_dir(doc_id)
-    meta_path = _entries_meta_path(doc_id)
-    if not root or not pages_dir or not meta_path:
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
         return
-    os.makedirs(pages_dir, exist_ok=True)
-    for page_path in _list_entry_page_paths(doc_id):
-        os.remove(page_path)
+    repo = SQLiteRepository()
+    repo.clear_translation_pages(target_doc_id)
     for entry in entries:
         bp = entry.get("_pageBP")
         if bp is None:
             continue
-        _write_json(_entry_page_path(bp, doc_id), entry)
-    _write_json(meta_path, {"title": title, "idx": idx})
-    _remove_legacy_entries_file(doc_id)
-    update_doc_meta(doc_id or get_current_doc_id(), entry_count=len(entries), last_entry_idx=idx)
+        repo.save_translation_page(target_doc_id, int(bp), entry)
+    repo.set_translation_title(target_doc_id, title)
+    update_doc_meta(target_doc_id, entry_count=len(entries), last_entry_idx=idx)
 
 
 def save_entry_cursor(idx: int, doc_id: str = ""):
@@ -123,49 +71,33 @@ def save_entry_cursor(idx: int, doc_id: str = ""):
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return
-    meta = _load_entries_meta(target_doc_id)
-    meta["idx"] = idx
-    meta_path = _entries_meta_path(target_doc_id)
-    root = _entries_root(target_doc_id)
-    if meta_path and root:
-        os.makedirs(root, exist_ok=True)
-        _write_json(meta_path, meta)
     update_doc_meta(target_doc_id, last_entry_idx=idx)
 
 
 def load_entries_from_disk(doc_id: str = "") -> tuple[list, str, int]:
-    entries = []
-    for page_path in _list_entry_page_paths(doc_id):
-        with open(page_path, "r", encoding="utf-8") as f:
-            payload = json.load(f)
-            if isinstance(payload, dict):
-                entries.append(payload)
-    entries.sort(key=lambda entry: entry.get("_pageBP") or 0)
-    meta = _load_entries_meta(doc_id)
-    return entries, meta.get("title", ""), meta.get("idx", 0)
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return [], "", 0
+    repo = SQLiteRepository()
+    entries = repo.list_effective_translation_pages(target_doc_id)
+    title = repo.get_translation_title(target_doc_id)
+    meta = get_doc_meta(target_doc_id)
+    return entries, title, int(meta.get("last_entry_idx", 0) or 0)
 
 
 def save_entry_to_disk(entry: dict, title: str, doc_id: str = "") -> int:
     target_doc_id = doc_id or get_current_doc_id()
     bp = entry.get("_pageBP")
-    page_path = _entry_page_path(bp, target_doc_id)
-    pages_dir = _entries_pages_dir(target_doc_id)
-    root = _entries_root(target_doc_id)
-    if not target_doc_id or not page_path or not pages_dir or not root:
+    if not target_doc_id or bp is None:
         return 0
-
-    os.makedirs(pages_dir, exist_ok=True)
-    _write_json(page_path, entry)
-
-    page_paths = _list_entry_page_paths(target_doc_id)
-    page_bps = [int(os.path.splitext(os.path.basename(path))[0]) for path in page_paths]
-    idx = page_bps.index(int(bp)) if bp is not None and int(bp) in page_bps else max(0, len(page_paths) - 1)
-    meta = _load_entries_meta(target_doc_id)
-    meta["title"] = meta.get("title") or title
-    meta["idx"] = idx
-    _write_json(_entries_meta_path(target_doc_id), meta)
-    _remove_legacy_entries_file(target_doc_id)
-    update_doc_meta(target_doc_id, entry_count=len(page_paths), last_entry_idx=idx)
+    repo = SQLiteRepository()
+    repo.save_translation_page(target_doc_id, int(bp), entry)
+    existing_entries = repo.list_effective_translation_pages(target_doc_id)
+    page_bps = [int(item.get("_pageBP")) for item in existing_entries if item.get("_pageBP") is not None]
+    idx = page_bps.index(int(bp)) if int(bp) in page_bps else max(0, len(page_bps) - 1)
+    current_title = repo.get_translation_title(target_doc_id)
+    repo.set_translation_title(target_doc_id, current_title or title)
+    update_doc_meta(target_doc_id, entry_count=len(existing_entries), last_entry_idx=idx)
     return idx
 
 
@@ -173,6 +105,8 @@ def clear_entries_from_disk(doc_id: str = ""):
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return
+    SQLiteRepository().clear_translation_pages(target_doc_id)
+    SQLiteRepository().set_translation_title(target_doc_id, "")
     root = _entries_root(target_doc_id)
     if root and os.path.isdir(root):
         shutil.rmtree(root)
@@ -272,12 +206,12 @@ def gen_markdown(entries: list) -> str:
     return md.strip() + "\n"
 
 
-def get_app_state() -> dict:
+def get_app_state(doc_id: str = "") -> dict:
     """获取所有共享的模板变量。"""
-    pages, src_name = load_pages_from_disk()
-    entries, doc_title, entry_idx = load_entries_from_disk()
+    pages, src_name = load_pages_from_disk(doc_id)
+    entries, doc_title, entry_idx = load_entries_from_disk(doc_id)
     model_key = get_model_key()
-    meta = get_doc_meta()
+    meta = get_doc_meta(doc_id)
     entry_idx = meta.get("last_entry_idx", entry_idx)
 
     first_page, last_page = get_page_range(pages) if pages else (1, 1)
@@ -290,7 +224,7 @@ def get_app_state() -> dict:
         "entry_idx": entry_idx,
         "model_key": model_key,
         "models": MODELS,
-        "glossary": get_glossary(),
+        "glossary": get_glossary(doc_id),
         "paddle_token": get_paddle_token(),
         "anthropic_key": get_anthropic_key(),
         "dashscope_key": get_dashscope_key(),

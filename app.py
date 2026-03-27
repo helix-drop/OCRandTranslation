@@ -10,6 +10,7 @@ Foreign Literature Reader
 """
 import json
 import os
+import re
 import uuid
 import tempfile
 import threading
@@ -28,9 +29,11 @@ from config import (
     get_dashscope_key, set_dashscope_key,
     get_glossary, set_glossary,
     get_model_key, set_model_key,
+    get_pdf_virtual_window_radius, get_pdf_virtual_scroll_min_pages,
     get_current_doc_id, set_current_doc,
+    get_doc_meta, get_doc_dir,
     list_docs, update_doc_meta, delete_doc,
-    migrate_legacy_data, LOCAL_DATA_DIR,
+    LOCAL_DATA_DIR,
 )
 from text_processing import get_page_range, get_next_page_bp
 from pdf_extract import render_pdf_page
@@ -47,19 +50,71 @@ from tasks import (
     start_translate_task, has_active_translate_task,
     is_translate_running, is_stop_requested, get_translate_snapshot,
     request_stop_translate, get_translate_events,
+    reconcile_translate_state_after_page_success,
+    reconcile_translate_state_after_page_failure,
 )
+from sqlite_store import SQLiteRepository
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+
+def _get_partial_failed_bps(doc_id: str) -> list[int]:
+    entries, _, _ = load_entries_from_disk(doc_id)
+    return sorted(
+        entry.get("_pageBP")
+        for entry in entries
+        if entry.get("_pageBP") is not None
+        and any((pe.get("_status") == "error") for pe in entry.get("_page_entries", []))
+    )
+
+
+def _build_preview_paragraphs(text: str) -> list[str]:
+    raw = _ensure_str(text).replace("\r\n", "\n").strip()
+    if not raw:
+        return []
+    blocks = [
+        re.sub(r"\s+", " ", part).strip()
+        for part in re.split(r"\n{2,}", raw)
+        if part and part.strip()
+    ]
+    if len(blocks) > 1:
+        return blocks
+    line_blocks = [
+        re.sub(r"\s+", " ", line).strip()
+        for line in raw.splitlines()
+        if line and line.strip()
+    ]
+    if len(line_blocks) > 1:
+        return line_blocks
+    single = line_blocks[0] if line_blocks else ""
+    if len(single) < 420:
+        return line_blocks
+    sentence_blocks = [
+        part.strip()
+        for part in re.split(r'(?<=[\.\!\?…:;»”])\s+(?=[A-ZÀ-ÖØ-Þ0-9«“])', single)
+        if part and part.strip()
+    ]
+    return sentence_blocks or line_blocks
 
 
 def _build_translate_usage_payload(doc_id: str) -> dict:
     """构建翻译 API 使用情况页面/接口的数据。"""
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     snapshot = get_translate_snapshot(doc_id)
+    snapshot["partial_failed_bps"] = _get_partial_failed_bps(doc_id)
     pages = []
+    total_manual_revisions = 0
+    pages_with_manual_revisions = 0
     for entry in entries:
         usage = entry.get("_usage") or {}
+        manual_revision_count = sum(
+            1 for seg in (entry.get("_page_entries") or [])
+            if isinstance(seg, dict) and seg.get("_translation_source") == "manual"
+        )
+        total_manual_revisions += manual_revision_count
+        if manual_revision_count > 0:
+            pages_with_manual_revisions += 1
         pages.append({
             "page_bp": entry.get("_pageBP"),
             "model": entry.get("_model", ""),
@@ -67,23 +122,54 @@ def _build_translate_usage_payload(doc_id: str) -> dict:
             "prompt_tokens": int(usage.get("prompt_tokens", 0) or 0),
             "completion_tokens": int(usage.get("completion_tokens", 0) or 0),
             "total_tokens": int(usage.get("total_tokens", 0) or 0),
+            "manual_revision_count": manual_revision_count,
         })
     return {
         "doc_id": doc_id,
         "doc_title": doc_title,
         "snapshot": snapshot,
         "pages": pages,
+        "total_manual_revisions": total_manual_revisions,
+        "pages_with_manual_revisions": pages_with_manual_revisions,
     }
+
+
+def _request_doc_id() -> str:
+    return request.values.get("doc_id", "").strip() or get_current_doc_id()
+
+
+def _guard_doc_delete(doc_id: str):
+    """删除前统一校验，避免翻译中的文档被误删。"""
+    if not doc_id:
+        flash("暂无可删除的文档", "error")
+        return redirect(url_for("home"))
+    if is_translate_running(doc_id):
+        flash("该文档正在翻译中，请先停止翻译后再删除。", "error")
+        return redirect(url_for("home", doc_id=doc_id))
+    return None
+
+
+def _delete_doc_with_verification(doc_id: str) -> bool:
+    """删除文档后做一次磁盘验收，避免假删除成功。"""
+    doc_dir = get_doc_dir(doc_id)
+    try:
+        delete_doc(doc_id)
+    except Exception:
+        return False
+    return not (doc_dir and os.path.isdir(doc_dir))
 
 
 # ============ ROUTES: 首页与文档管理 ============
 
 @app.route("/")
 def home():
-    state = get_app_state()
+    requested_doc_id = request.args.get("doc_id", "").strip()
+    current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
+    if requested_doc_id and current_doc_id == requested_doc_id:
+        set_current_doc(current_doc_id)
+    state = get_app_state(current_doc_id)
     logs = session.pop("logs", [])
     docs = list_docs()
-    current_doc_id = get_current_doc_id()
     return render_template("home.html", logs=logs, docs=docs, current_doc_id=current_doc_id, **state)
 
 
@@ -97,27 +183,42 @@ def switch_doc(doc_id):
 @app.route("/delete_doc/<doc_id>")
 def delete_doc_route(doc_id):
     """删除指定文档。"""
-    delete_doc(doc_id)
+    blocked = _guard_doc_delete(doc_id)
+    if blocked:
+        return blocked
+    if not _delete_doc_with_verification(doc_id):
+        flash("删除失败，请稍后重试", "error")
+        return redirect(url_for("home", doc_id=doc_id))
     flash("文档已删除", "success")
     return redirect(url_for("home"))
 
 
 @app.route("/input")
 def input_page():
-    state = get_app_state()
+    requested_doc_id = request.args.get("doc_id", "").strip()
+    current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
+    if requested_doc_id and current_doc_id == requested_doc_id:
+        set_current_doc(current_doc_id)
+    state = get_app_state(current_doc_id)
     if not state["has_pages"]:
         flash("请先上传文件。", "error")
         return redirect(url_for("home"))
-    return render_template("input.html", **state)
+    return render_template("input.html", current_doc_id=current_doc_id, **state)
 
 
 # ============ ROUTES: 阅读 ============
 
 @app.route("/reading")
 def reading():
-    state = get_app_state()
-    current_doc_id = get_current_doc_id()
+    requested_doc_id = request.args.get("doc_id", "").strip()
+    current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
+    if requested_doc_id and current_doc_id == requested_doc_id:
+        set_current_doc(current_doc_id)
+    state = get_app_state(current_doc_id)
     usage_open = request.args.get("usage", "0") == "1"
+    show_original = request.args.get("orig", "0") == "1"
+    layout_mode = request.args.get("layout", "stack").strip()
+    pdf_requested = request.args.get("pdf", "0") == "1"
     if not state["has_pages"]:
         flash("请先上传文件。", "error")
         return redirect(url_for("home"))
@@ -126,6 +227,7 @@ def reading():
     page_bps = [pg["bookPage"] for pg in pages]
     entries = state["entries"]
     translate_snapshot = get_translate_snapshot(current_doc_id)
+    show_initial_translate_snapshot = translate_snapshot.get("phase") in ("running", "stopping")
     failed_pages = translate_snapshot.get("failed_pages", [])
     failed_bps = sorted({
         page.get("bp") for page in failed_pages
@@ -148,6 +250,13 @@ def reading():
     page_entries = cur.get("_page_entries", [])
     glossary = state["glossary"]
     has_current_entry = bool(cur)
+    current_page_data = next(
+        (pg for pg in pages if pg.get("bookPage") == cur_page_bp),
+        {},
+    )
+    current_page_markdown = _ensure_str(current_page_data.get("markdown", "")).strip()
+    current_page_markdown_paragraphs = _build_preview_paragraphs(current_page_markdown)
+    current_page_footnotes = _ensure_str(current_page_data.get("footnotes", "")).strip()
 
     display_entries = []
     for pe in page_entries:
@@ -171,6 +280,15 @@ def reading():
     prev_bp = page_bps[page_index - 1] if page_index > 0 else None
     next_bp = page_bps[page_index + 1] if page_index < len(page_bps) - 1 else None
     translated_bps = sorted(entry_by_bp.keys())
+    partial_failed_bps = translate_snapshot.get("partial_failed_bps") or _get_partial_failed_bps(current_doc_id)
+    pdf_virtual_window_radius = get_pdf_virtual_window_radius()
+    pdf_virtual_scroll_min_pages = get_pdf_virtual_scroll_min_pages()
+    if len(page_bps) >= pdf_virtual_scroll_min_pages:
+        initial_start = max(0, page_index - pdf_virtual_window_radius)
+        initial_end = min(len(page_bps), page_index + pdf_virtual_window_radius + 1)
+        pdf_initial_mounted_bps = page_bps[initial_start:initial_end]
+    else:
+        pdf_initial_mounted_bps = list(page_bps)
     if cur_page_bp in translated_bps:
         save_entry_cursor(translated_bps.index(cur_page_bp), current_doc_id)
     current_page_failure = next(
@@ -178,7 +296,13 @@ def reading():
         None,
     )
 
-    side_by_side = session.get("side_by_side", True)
+    side_by_side = session.get("side_by_side", False)
+    if layout_mode == "side":
+        side_by_side = True
+    elif layout_mode == "stack":
+        side_by_side = False
+    pdf_available = has_pdf(current_doc_id)
+    pdf_visible = pdf_available and pdf_requested
     export_md = ""
 
     return render_template(
@@ -192,6 +316,7 @@ def reading():
         next_bp=next_bp,
         page_bps=page_bps,
         translated_bps=translated_bps,
+        partial_failed_bps=partial_failed_bps,
         failed_bps=failed_bps,
         has_current_entry=has_current_entry,
         current_page_failed=cur_page_bp in failed_bps and not has_current_entry,
@@ -211,11 +336,20 @@ def reading():
         entry_count=state["entry_count"],
         src_name=state["src_name"],
         glossary=glossary,
-        has_pdf=has_pdf(),
+        has_pdf=pdf_available,
         page_map=page_map,
         current_doc_id=current_doc_id,
         usage_open=usage_open,
+        show_original=show_original,
+        pdf_visible=pdf_visible,
+        current_page_markdown=current_page_markdown,
+        current_page_markdown_paragraphs=current_page_markdown_paragraphs,
+        current_page_footnotes=current_page_footnotes,
         translate_snapshot=translate_snapshot,
+        show_initial_translate_snapshot=show_initial_translate_snapshot,
+        pdf_virtual_window_radius=pdf_virtual_window_radius,
+        pdf_virtual_scroll_min_pages=pdf_virtual_scroll_min_pages,
+        pdf_initial_mounted_bps=pdf_initial_mounted_bps,
     )
 
 
@@ -262,9 +396,10 @@ def reparse():
     if not paddle_token:
         return jsonify({"error": "请先在设置中输入 PaddleOCR 令牌。"}), 200
 
-    doc_id = get_current_doc_id()
+    doc_id = _request_doc_id()
     if not doc_id:
         return jsonify({"error": "没有活跃文档。"}), 200
+    set_current_doc(doc_id)
 
     pdf_path = get_pdf_path(doc_id)
     if not pdf_path or not os.path.exists(pdf_path):
@@ -288,9 +423,10 @@ def reparse_page(page_bp):
     if not paddle_token:
         return jsonify({"error": "请先在设置中输入 PaddleOCR 令牌。"}), 200
 
-    doc_id = get_current_doc_id()
+    doc_id = _request_doc_id()
     if not doc_id:
         return jsonify({"error": "没有活跃文档。"}), 200
+    set_current_doc(doc_id)
 
     pdf_path = get_pdf_path(doc_id)
     if not pdf_path or not os.path.exists(pdf_path):
@@ -354,7 +490,10 @@ def process_sse():
 @app.route("/start_from_beginning")
 def start_from_beginning():
     """从首页开始阅读。"""
-    pages, src_name = load_pages_from_disk()
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
     if not pages:
         flash("请先上传文件。", "error")
         return redirect(url_for("home"))
@@ -368,15 +507,15 @@ def start_from_beginning():
         return redirect(url_for("home"))
 
     first_page, _ = get_page_range(pages)
-    doc_title = src_name or "Untitled"
-
-    save_entries_to_disk([], doc_title, 0)
-    return redirect(url_for("reading", bp=first_page, auto=1, start_bp=first_page))
+    return redirect(url_for("reading", bp=first_page, auto=1, start_bp=first_page, doc_id=doc_id))
 
 
 @app.route("/start_reading", methods=["POST"])
 def start_reading():
-    pages, src_name = load_pages_from_disk()
+    doc_id = request.form.get("doc_id", "").strip() or get_current_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    pages, src_name = load_pages_from_disk(doc_id)
     if not pages:
         flash("请先上传文件。", "error")
         return redirect(url_for("home"))
@@ -395,23 +534,26 @@ def start_reading():
 
     if not start_page or start_page < first or start_page > last:
         flash(f"请输入有效页码 ({first}-{last})", "error")
-        return redirect(url_for("input_page"))
+        return redirect(url_for("input_page", doc_id=doc_id))
 
-    save_entries_to_disk([], doc_title, 0)
-    return redirect(url_for("reading", bp=start_page, auto=1, start_bp=start_page))
+    save_entries_to_disk([], doc_title, 0, doc_id)
+    return redirect(url_for("reading", bp=start_page, auto=1, start_bp=start_page, doc_id=doc_id))
 
 
 @app.route("/fetch_next")
 def fetch_next():
     """翻译下一页。"""
-    pages, _ = load_pages_from_disk()
-    entries, doc_title, entry_idx = load_entries_from_disk()
+    doc_id = _request_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
+    entries, doc_title, entry_idx = load_entries_from_disk(doc_id)
     model_key = get_model_key()
     t_args = get_translate_args(model_key)
 
     if not pages or not entries or not t_args["api_key"]:
         flash("数据不完整或缺少API Key", "error")
-        return redirect(url_for("reading"))
+        return redirect(url_for("reading", doc_id=doc_id))
 
     last_entry = entries[-1]
     last_page_bp = last_entry.get("_pageBP") or last_entry.get("_endBP", 1)
@@ -419,22 +561,27 @@ def fetch_next():
 
     if next_bp is None:
         flash("已到末尾", "info")
-        return redirect(url_for("reading", bp=last_page_bp))
+        return redirect(url_for("reading", bp=last_page_bp, doc_id=doc_id))
 
     try:
-        p = translate_page(pages, next_bp, model_key, t_args, get_glossary())
-        save_entry_to_disk(p, doc_title)
-        return redirect(url_for("reading", bp=next_bp))
+        p = translate_page(pages, next_bp, model_key, t_args, get_glossary(doc_id))
+        save_entry_to_disk(p, doc_title, doc_id)
+        reconcile_translate_state_after_page_success(doc_id, next_bp)
+        return redirect(url_for("reading", bp=next_bp, doc_id=doc_id))
     except Exception as e:
+        reconcile_translate_state_after_page_failure(doc_id, next_bp, str(e))
         flash(f"翻译失败: {e}", "error")
-        return redirect(url_for("reading", bp=last_page_bp))
+        return redirect(url_for("reading", bp=last_page_bp, doc_id=doc_id))
 
 
 @app.route("/retranslate/<int:bp>/<model>")
 def retranslate(bp, model):
     """重新翻译整页。"""
-    pages, _ = load_pages_from_disk()
-    entries, doc_title, _ = load_entries_from_disk()
+    doc_id = _request_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
+    entries, doc_title, _ = load_entries_from_disk(doc_id)
 
     if model not in MODELS:
         model = get_model_key()
@@ -448,16 +595,81 @@ def retranslate(bp, model):
 
     if target_idx is None or not t_args["api_key"]:
         flash("数据不完整或缺少API Key", "error")
-        return redirect(url_for("reading"))
+        return redirect(url_for("reading", doc_id=doc_id))
 
     try:
-        new_entry = translate_page(pages, bp, model, t_args, get_glossary())
-        save_entry_to_disk(new_entry, doc_title)
+        new_entry = translate_page(pages, bp, model, t_args, get_glossary(doc_id))
+        save_entry_to_disk(new_entry, doc_title, doc_id)
+        reconcile_translate_state_after_page_success(doc_id, bp)
         flash(f"重译完成 ({MODELS[model]['label']})", "success")
     except Exception as e:
+        reconcile_translate_state_after_page_failure(doc_id, bp, str(e))
         flash(f"重译失败: {e}", "error")
 
-    return redirect(url_for("reading", bp=bp))
+    return redirect(url_for("reading", bp=bp, doc_id=doc_id))
+
+
+@app.route("/save_manual_revision", methods=["POST"])
+def save_manual_revision():
+    """保存当前页某段人工修订译文。"""
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    payload = request.get_json(silent=True) or {}
+    bp = payload.get("bp")
+    segment_index = payload.get("segment_index")
+    translation = payload.get("translation")
+    base_updated_at = payload.get("base_updated_at")
+    if bp is None or segment_index is None:
+        return jsonify({"ok": False, "error": "缺少页码或段落索引"}), 400
+    if translation is None:
+        return jsonify({"ok": False, "error": "缺少修订译文"}), 400
+    try:
+        segment = SQLiteRepository().save_manual_translation_segment(
+            doc_id=doc_id,
+            book_page=int(bp),
+            segment_index=int(segment_index),
+            translation=str(translation),
+            updated_by="local_user",
+            base_updated_at=int(base_updated_at) if base_updated_at is not None else None,
+        )
+        return jsonify({"ok": True, "segment": segment})
+    except RuntimeError as e:
+        server_segment = SQLiteRepository().get_translation_segment(
+            doc_id, int(bp), int(segment_index)
+        )
+        return jsonify({"ok": False, "error": str(e), "server_segment": server_segment}), 409
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 404
+
+
+@app.route("/segment_history")
+def segment_history():
+    """返回某个段落的历史版本列表。"""
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    try:
+        bp = int(request.args.get("bp", 0))
+        seg_idx = int(request.args.get("segment_index", 0))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "无效页码或段落索引"}), 400
+    revisions = SQLiteRepository().list_segment_revisions(doc_id, bp, seg_idx)
+    return jsonify({"ok": True, "revisions": revisions})
+
+
+@app.route("/check_retranslate_warnings")
+def check_retranslate_warnings():
+    """返回当前页人工修订段落数，用于重译前警告提示。"""
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    try:
+        bp = int(request.args.get("bp", 0))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "无效页码"}), 400
+    count = SQLiteRepository().count_manual_segments(doc_id, bp)
+    return jsonify({"ok": True, "manual_count": count})
 
 
 # ============ ROUTES: 后台翻译 SSE ============
@@ -523,6 +735,7 @@ def start_translate_all():
     if not entries:
         save_entries_to_disk([], doc_title, 0, doc_id)
 
+    set_current_doc(doc_id)
     start_translate_task(doc_id, start_bp, doc_title)
     return jsonify({"status": "started"})
 
@@ -539,7 +752,15 @@ def stop_translate():
 def translate_status():
     """查询翻译状态。"""
     doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
-    return jsonify(get_translate_snapshot(doc_id))
+    snapshot = get_translate_snapshot(doc_id)
+    entries, _, _ = load_entries_from_disk(doc_id)
+    snapshot["translated_bps"] = sorted(
+        entry.get("_pageBP")
+        for entry in entries
+        if entry.get("_pageBP") is not None
+    )
+    snapshot["partial_failed_bps"] = snapshot.get("partial_failed_bps") or _get_partial_failed_bps(doc_id)
+    return jsonify(snapshot)
 
 
 @app.route("/translate_api_usage")
@@ -556,7 +777,7 @@ def translate_api_usage():
             bp = entries[max(0, min(state["entry_idx"], len(entries) - 1))].get("_pageBP", state["first_page"])
         else:
             bp = state["first_page"]
-    return redirect(url_for("reading", bp=bp, usage=1, auto=request.args.get("auto", "0")))
+    return redirect(url_for("reading", bp=bp, usage=1, auto=request.args.get("auto", "0"), doc_id=doc_id))
 
 
 @app.route("/translate_api_usage_data")
@@ -566,12 +787,28 @@ def translate_api_usage_data():
     return jsonify(_build_translate_usage_payload(doc_id))
 
 
+@app.route("/paddle_quota_status")
+def paddle_quota_status():
+    """PaddleOCR 配额状态降级接口。"""
+    official_url = "https://aistudio.baidu.com/paddleocr"
+    return jsonify({
+        "supported": False,
+        "status": "unavailable",
+        "official_url": official_url,
+        "message": "官方站内可查看 OCR 配额状态；当前应用未接入公开额度查询接口。若当日额度用尽，OCR 阶段会返回 429 提示。",
+    })
+
+
 # ============ ROUTES: 设置 ============
 
 @app.route("/settings")
 def settings():
-    state = get_app_state()
-    return render_template("settings.html", **state)
+    requested_doc_id = request.args.get("doc_id", "").strip()
+    current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
+    if requested_doc_id and current_doc_id == requested_doc_id:
+        set_current_doc(current_doc_id)
+    state = get_app_state(current_doc_id)
+    return render_template("settings.html", current_doc_id=current_doc_id, **state)
 
 
 @app.route("/save_settings", methods=["POST"])
@@ -594,6 +831,9 @@ def save_settings():
 
 @app.route("/save_glossary", methods=["POST"])
 def save_glossary():
+    doc_id = _request_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
     glossary = []
     for key in request.form:
         if key.startswith("term_"):
@@ -602,9 +842,9 @@ def save_glossary():
             defn = request.form.get(f"defn_{n}", "").strip()
             if term or defn:
                 glossary.append([term, defn])
-    set_glossary(glossary)
+    set_glossary(glossary, doc_id=doc_id)
     flash(f"词典已保存 ({len(glossary)} 条)", "success")
-    return redirect(url_for("settings") + "#glossary")
+    return redirect(url_for("settings", doc_id=doc_id) + "#glossary")
 
 
 @app.route("/set_model/<key>")
@@ -612,10 +852,11 @@ def set_model(key):
     if key in MODELS:
         set_model_key(key)
     next_page = request.args.get("next", "home")
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
     if next_page == "reading":
-        return redirect(url_for("reading"))
+        return redirect(url_for("reading", doc_id=doc_id))
     elif next_page == "input":
-        return redirect(url_for("input_page"))
+        return redirect(url_for("input_page", doc_id=doc_id))
     elif next_page == "settings":
         return redirect(url_for("settings"))
     return redirect(url_for("home"))
@@ -633,7 +874,8 @@ def set_pref():
 
 @app.route("/download_md")
 def download_md():
-    entries, doc_title, _ = load_entries_from_disk()
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    entries, doc_title, _ = load_entries_from_disk(doc_id)
     md = "\ufeff" + gen_markdown(entries)
     buf = BytesIO(md.encode("utf-8"))
     filename = (doc_title or "export") + ".md"
@@ -643,7 +885,8 @@ def download_md():
 @app.route("/export_md")
 def export_md():
     """API端点：按需返回 markdown 内容供预览。"""
-    entries, doc_title, _ = load_entries_from_disk()
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    entries, doc_title, _ = load_entries_from_disk(doc_id)
     md = gen_markdown(entries)
     return jsonify({"markdown": md})
 
@@ -653,7 +896,7 @@ def export_md():
 @app.route("/pdf_file")
 def pdf_file():
     """提供当前文档的 PDF 文件用于内嵌预览。"""
-    path = get_pdf_path()
+    path = get_pdf_path(request.args.get("doc_id", "").strip())
     if not path or not os.path.exists(path):
         return "PDF 文件不存在", 404
     return send_file(path, mimetype="application/pdf")
@@ -662,11 +905,17 @@ def pdf_file():
 @app.route("/pdf_page/<int:file_idx>")
 def pdf_page(file_idx):
     """渲染 PDF 指定页为 PNG 图片。"""
-    path = get_pdf_path()
+    path = get_pdf_path(request.args.get("doc_id", "").strip())
     if not path or not os.path.exists(path):
         return "PDF 文件不存在", 404
+    raw_scale = request.args.get("scale", "")
+    scale = 2.0
+    if raw_scale != "":
+        scale = request.args.get("scale", type=float)
+        if scale is None or scale <= 0:
+            return "scale 参数无效", 400
     try:
-        png_bytes = render_pdf_page(path, file_idx)
+        png_bytes = render_pdf_page(path, file_idx, scale=scale)
         return Response(png_bytes, mimetype="image/png",
                         headers={"Cache-Control": "public, max-age=3600"})
     except Exception as e:
@@ -678,14 +927,20 @@ def pdf_page(file_idx):
 @app.route("/reset_text")
 def reset_text():
     """清除当前文档的翻译数据，保留页面数据。"""
-    clear_entries_from_disk(get_current_doc_id())
+    doc_id = _request_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    clear_entries_from_disk(doc_id)
     return redirect(url_for("input_page"))
 
 
 @app.route("/reset_text_action")
 def reset_text_action():
     """从设置页清除当前文档翻译数据。"""
-    clear_entries_from_disk(get_current_doc_id())
+    doc_id = _request_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    clear_entries_from_disk(doc_id)
     flash("翻译数据已清除", "success")
     return redirect(url_for("settings"))
 
@@ -693,9 +948,17 @@ def reset_text_action():
 @app.route("/reset_all")
 def reset_all():
     """删除当前文档。"""
-    doc_id = get_current_doc_id()
-    if doc_id:
-        delete_doc(doc_id)
+    requested_doc_id = request.values.get("doc_id", "").strip()
+    doc_id = requested_doc_id or get_current_doc_id()
+    if requested_doc_id and not get_doc_meta(requested_doc_id):
+        flash("文档不存在", "error")
+        return redirect(url_for("home"))
+    blocked = _guard_doc_delete(doc_id)
+    if blocked:
+        return blocked
+    if doc_id and not _delete_doc_with_verification(doc_id):
+        flash("删除失败，请稍后重试", "error")
+        return redirect(url_for("home", doc_id=doc_id))
     flash("当前文档已删除", "success")
     return redirect(url_for("home"))
 
@@ -717,6 +980,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     ensure_dirs()
-    migrate_legacy_data()
     print(f"数据目录: {LOCAL_DATA_DIR}")
     app.run(debug=True, port=8080, threaded=True)

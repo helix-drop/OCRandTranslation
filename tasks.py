@@ -1,15 +1,20 @@
 """后台任务：OCR 文件处理、页面翻译、连续翻译 worker。"""
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
+import queue
 import re
+import tempfile
 import threading
 import time
 
+import config as app_config
 from config import (
     MODELS,
     get_paddle_token, get_glossary, get_model_key,
     create_doc, get_doc_dir,
 )
+from sqlite_store import SQLiteRepository
 from ocr_client import call_paddle_ocr_bytes
 from text_processing import (
     parse_ocr, clean_header_footer,
@@ -247,6 +252,160 @@ def _merge_usage(base: dict, delta: dict | None) -> dict:
     return usage
 
 
+def _trim_para_context(text: str, limit: int = 200, from_end: bool = False) -> str:
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    if len(text) <= limit:
+        return text
+    return text[-limit:] if from_end else text[:limit]
+
+
+def _get_para_context_window() -> int:
+    try:
+        return max(50, min(500, int(getattr(app_config, "PARA_CONTEXT_WINDOW", 200) or 200)))
+    except Exception:
+        return 200
+
+
+def _get_para_max_concurrency() -> int:
+    try:
+        return max(1, min(3, int(getattr(app_config, "PARA_MAX_CONCURRENCY", 3) or 3)))
+    except Exception:
+        return 3
+
+
+def _entry_has_paragraph_error(entry: dict) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    return any((pe.get("_status") == "error") for pe in entry.get("_page_entries", []))
+
+
+def _collect_partial_failed_bps(doc_id: str, target_bps: list[int] | None = None) -> list[int]:
+    if not doc_id:
+        return []
+    target_bp_set = set(target_bps) if target_bps else None
+    entries, _, _ = load_entries_from_disk(doc_id)
+    partial_failed = set()
+    for entry in entries:
+        bp = entry.get("_pageBP")
+        if bp is None:
+            continue
+        bp = int(bp)
+        if target_bp_set is not None and bp not in target_bp_set:
+            continue
+        if _entry_has_paragraph_error(entry):
+            partial_failed.add(bp)
+    return sorted(partial_failed)
+
+
+def _extract_page_footnote_summary(page_entries: list[dict], fallback_footnotes: str = "") -> tuple[str, str]:
+    page_footnotes = _ensure_str(fallback_footnotes).strip()
+    page_footnotes_translation = ""
+    for entry in page_entries:
+        if not isinstance(entry, dict):
+            continue
+        if not page_footnotes:
+            page_footnotes = _ensure_str(entry.get("footnotes", "")).strip()
+        if not page_footnotes_translation:
+            page_footnotes_translation = _ensure_str(entry.get("footnotes_translation", "")).strip()
+        if page_footnotes and page_footnotes_translation:
+            break
+    return page_footnotes, page_footnotes_translation
+
+
+def _build_para_jobs(paragraphs: list, ctx: dict, para_bboxes: list, target_bp: int, context_window: int = 200) -> list[dict]:
+    jobs = []
+    title_stack = []
+    first_para_idx = next((idx for idx, para in enumerate(paragraphs) if para.get("text", "").strip()), None)
+    first_body_idx = next((idx for idx, para in enumerate(paragraphs) if para.get("heading_level", 0) == 0 and para.get("text", "").strip()), None)
+    footnote_owner_idx = first_body_idx if first_body_idx is not None else first_para_idx
+    page_footnotes = _ensure_str(ctx.get("footnotes", "")).strip()
+
+    for idx, para in enumerate(paragraphs):
+        hlevel = int(para.get("heading_level", 0) or 0)
+        text = para.get("text", "").strip()
+        if not text:
+            continue
+
+        if hlevel > 0:
+            while len(title_stack) >= hlevel:
+                title_stack.pop()
+            title_stack.append(text)
+
+        prev_text = ""
+        next_text = ""
+        for prev_idx in range(idx - 1, -1, -1):
+            prev_candidate = paragraphs[prev_idx].get("text", "").strip()
+            if prev_candidate:
+                prev_text = prev_candidate
+                break
+        for next_idx in range(idx + 1, len(paragraphs)):
+            next_candidate = paragraphs[next_idx].get("text", "").strip()
+            if next_candidate:
+                next_text = next_candidate
+                break
+
+        cross = para.get("cross_page")
+        if not prev_text and cross in ("cont_prev", "cont_both"):
+            prev_text = ctx.get("prev_tail", "") or ""
+        if not next_text and cross in ("cont_next", "cont_both", "merged_next"):
+            next_text = ctx.get("next_head", "") or ""
+
+        jobs.append({
+            "para_idx": len(jobs),
+            "source_idx": idx,
+            "bp": target_bp,
+            "heading_level": hlevel,
+            "text": text,
+            "cross_page": cross,
+            "bboxes": para_bboxes[idx] if idx < len(para_bboxes) else [],
+            "footnotes": page_footnotes if idx == footnote_owner_idx else "",
+            "prev_context": "" if hlevel > 0 else _trim_para_context(prev_text, limit=context_window, from_end=True),
+            "next_context": "" if hlevel > 0 else _trim_para_context(next_text, limit=context_window, from_end=False),
+            "section_path": list(title_stack),
+        })
+    for job in jobs:
+        job["para_total"] = len(jobs)
+    return jobs
+
+
+def _make_page_entry(job: dict, target_bp: int, result: dict | None = None, error: str = "") -> dict:
+    result = result or {}
+    is_error = bool(error)
+    translation = f"[翻译失败: {error}]" if is_error else _ensure_str(result.get("translation", ""))
+    result_footnotes = _ensure_str(result.get("footnotes", "")).strip()
+    job_footnotes = _ensure_str(job.get("footnotes", "")).strip()
+    footnotes = result_footnotes or job_footnotes
+    footnotes_translation = _ensure_str(result.get("footnotes_translation", "")).strip()
+    return {
+        "original": _ensure_str(result.get("original", job["text"])),
+        "translation": translation,
+        "footnotes": footnotes,
+        "footnotes_translation": footnotes_translation,
+        "heading_level": job["heading_level"],
+        "pages": str(target_bp),
+        "_rawText": job["text"],
+        "_startBP": target_bp,
+        "_endBP": target_bp,
+        "_cross_page": job["cross_page"],
+        "_bboxes": job["bboxes"],
+        "_status": "error" if is_error else "done",
+        "_error": str(error) if is_error else "",
+    }
+
+
+def _count_finished_paragraphs(states: list[str]) -> int:
+    return sum(1 for state in states if state in ("done", "error"))
+
+
+def _primary_para_idx(active_indices: set[int], states: list[str]) -> int | None:
+    if active_indices:
+        return min(active_indices)
+    for idx in range(len(states) - 1, -1, -1):
+        if states[idx] in ("done", "error", "aborted"):
+            return idx
+    return None
+
+
 def translate_page(pages, target_bp, model_key, t_args, glossary):
     """翻译指定页面：基于 markdown 解析段落，处理跨页，逐段翻译。"""
     total_usage = {
@@ -274,83 +433,66 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
             paragraphs, structure_usage = _llm_fix_paragraphs(paragraphs, page_md, t_args, target_bp)
             total_usage = _merge_usage(total_usage, structure_usage)
 
-    fn_filtered = ctx["footnotes"]
-
-    # 获取段落对应的 bbox 坐标
     para_bboxes = get_paragraph_bboxes(pages, target_bp, paragraphs)
+    para_jobs = _build_para_jobs(paragraphs, ctx, para_bboxes, target_bp, context_window=_get_para_context_window())
 
-    # 预处理：构建翻译任务列表
-    tasks = []
-    fn_assigned = False
-    for para in paragraphs:
-        hlevel = para.get("heading_level", 0)
-        text = para["text"].strip()
-        cross = para.get("cross_page")
-        if not text:
-            continue
-        if hlevel == 0 and not fn_assigned:
-            fn_for_para = fn_filtered
-            fn_assigned = True
-        else:
-            fn_for_para = ""
-        bbox_idx = len(tasks)
-        tasks.append((len(tasks), hlevel, text, cross, fn_for_para, bbox_idx))
-
-    if not tasks:
+    if not para_jobs:
         raise RuntimeError(f"第{target_bp}页未找到有效内容")
 
-    # 并发翻译（max_workers=4）
-    results = [None] * len(tasks)
+    # 段内并发翻译，和流式路径保持同一上限。
+    results = [None] * len(para_jobs)
+    max_parallel = min(_get_para_max_concurrency(), len(para_jobs))
 
-    def _do_translate(idx, hlevel, text, fn):
-        return idx, translate_paragraph(
-            para_text=text,
+    def _do_translate(job: dict):
+        return job["para_idx"], translate_paragraph(
+            para_text=job["text"],
             para_pages=str(target_bp),
-            footnotes=fn if hlevel == 0 else "",
+            footnotes=job["footnotes"],
             glossary=glossary,
+            heading_level=job["heading_level"],
+            para_idx=job["para_idx"],
+            para_total=job["para_total"],
+            prev_context=job["prev_context"],
+            next_context=job["next_context"],
+            section_path=job["section_path"],
+            cross_page=job["cross_page"],
             **t_args,
         )
 
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=max_parallel) as pool:
         futures = {
-            pool.submit(_do_translate, idx, hlevel, text, fn): (idx, hlevel, text, cross, bbox_idx)
-            for idx, hlevel, text, cross, fn, bbox_idx in tasks
+            pool.submit(_do_translate, job): job
+            for job in para_jobs
         }
         for future in as_completed(futures):
-            idx, hlevel, text, cross, bbox_idx = futures[future]
+            job = futures[future]
             try:
                 _, p = future.result()
             except Exception as e:
-                p = {"original": text, "translation": f"[翻译失败: {e}]",
+                p = {"original": job["text"], "translation": f"[翻译失败: {e}]",
                      "footnotes": "", "footnotes_translation": ""}
             total_usage = _merge_usage(total_usage, p.get("_usage"))
-            results[idx] = {
-                "original": _ensure_str(p.get("original", text)),
-                "translation": _ensure_str(p.get("translation", "")),
-                "footnotes": _ensure_str(p.get("footnotes", "")),
-                "footnotes_translation": _ensure_str(p.get("footnotes_translation", "")),
-                "heading_level": hlevel,
-                "pages": str(target_bp),
-                "_rawText": text,
-                "_startBP": target_bp,
-                "_endBP": target_bp,
-                "_cross_page": cross,
-                "_bboxes": para_bboxes[bbox_idx] if bbox_idx < len(para_bboxes) else [],
-            }
+            results[job["para_idx"]] = _make_page_entry(job, target_bp, result=p)
 
     page_entries = [r for r in results if r is not None]
+    page_footnotes, page_footnotes_translation = _extract_page_footnote_summary(
+        page_entries,
+        fallback_footnotes=ctx.get("footnotes", ""),
+    )
 
     return {
         "_pageBP": target_bp,
         "_model": model_key,
         "_usage": total_usage,
         "_page_entries": page_entries,
+        "footnotes": page_footnotes,
+        "footnotes_translation": page_footnotes_translation,
         "pages": str(target_bp),
     }
 
 
 def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id: str, stop_checker=None):
-    """流式翻译指定页面：逐段推送增量，但仅在整页完成后返回 entry。"""
+    """流式翻译指定页面：段内有界并发推送增量，但仅在整页完成后返回 entry。"""
     total_usage = {
         "prompt_tokens": 0,
         "completion_tokens": 0,
@@ -374,229 +516,244 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
             paragraphs, structure_usage = _llm_fix_paragraphs(paragraphs, page_md, t_args, target_bp)
             total_usage = _merge_usage(total_usage, structure_usage)
 
-    fn_filtered = ctx["footnotes"]
     para_bboxes = get_paragraph_bboxes(pages, target_bp, paragraphs)
-    page_entries = []
-    fn_assigned = False
+    para_jobs = _build_para_jobs(paragraphs, ctx, para_bboxes, target_bp, context_window=_get_para_context_window())
+
+    if not para_jobs:
+        raise RuntimeError(f"第{target_bp}页未找到有效内容")
+
+    max_parallel = min(_get_para_max_concurrency(), len(para_jobs))
+    results = [None] * len(para_jobs)
+    paragraph_texts = [""] * len(para_jobs)
+    paragraph_states = ["pending"] * len(para_jobs)
+    paragraph_errors = [""] * len(para_jobs)
+    active_para_indices = set()
+    event_queue: queue.Queue = queue.Queue()
+    pending_jobs = list(para_jobs)
+    running_count = 0
+    aborted = False
+    scheduled_para_indices = set()
+    finished_para_indices = set()
+
+    def _save_parallel_draft(status: str, note: str, last_error: str = ""):
+        ordered_active = sorted(active_para_indices)
+        _save_stream_draft(
+            doc_id,
+            active=bool(active_para_indices) and status == "streaming",
+            bp=target_bp,
+            para_idx=_primary_para_idx(active_para_indices, paragraph_states),
+            para_total=len(para_jobs),
+            para_done=_count_finished_paragraphs(paragraph_states),
+            parallel_limit=max_parallel,
+            active_para_indices=ordered_active,
+            paragraph_states=list(paragraph_states),
+            paragraph_errors=list(paragraph_errors),
+            paragraphs=list(paragraph_texts),
+            status=status,
+            note=note,
+            last_error=last_error,
+        )
+
+    def _worker_stream(job: dict):
+        event_queue.put({"type": "start", "job": job})
+        try:
+            for event in stream_translate_paragraph(
+                para_text=job["text"],
+                para_pages=str(target_bp),
+                footnotes=job["footnotes"],
+                glossary=glossary,
+                stop_checker=None,
+                heading_level=job["heading_level"],
+                para_idx=job["para_idx"],
+                para_total=job["para_total"],
+                prev_context=job["prev_context"],
+                next_context=job["next_context"],
+                section_path=job["section_path"],
+                cross_page=job["cross_page"],
+                **t_args,
+            ):
+                payload = {"type": event["type"], "job": job}
+                payload.update({k: v for k, v in event.items() if k != "type"})
+                event_queue.put(payload)
+        except TranslateStreamAborted:
+            event_queue.put({"type": "aborted", "job": job})
+        except Exception as e:
+            event_queue.put({"type": "error", "job": job, "error": str(e)})
+
+    def _submit_next_job(pool: ThreadPoolExecutor) -> bool:
+        nonlocal running_count
+        if aborted or not pending_jobs:
+            return False
+        job = None
+        while pending_jobs:
+            candidate = pending_jobs.pop(0)
+            para_idx = candidate["para_idx"]
+            if para_idx in scheduled_para_indices or para_idx in finished_para_indices:
+                continue
+            job = candidate
+            break
+        if not job:
+            return False
+        scheduled_para_indices.add(job["para_idx"])
+        pool.submit(_worker_stream, job)
+        running_count += 1
+        return True
 
     translate_push("stream_page_init", {
         "doc_id": doc_id,
         "bp": target_bp,
-        "para_total": len(paragraphs),
+        "para_total": len(para_jobs),
+        "parallel_limit": max_parallel,
     })
     _save_stream_draft(
         doc_id,
         active=True,
         bp=target_bp,
-        para_idx=0 if paragraphs else None,
-        para_total=len(paragraphs),
+        para_idx=0 if para_jobs else None,
+        para_total=len(para_jobs),
         para_done=0,
-        paragraphs=[""] * len(paragraphs),
+        parallel_limit=max_parallel,
+        paragraphs=[""] * len(para_jobs),
+        active_para_indices=[],
+        paragraph_states=["pending"] * len(para_jobs),
+        paragraph_errors=[""] * len(para_jobs),
         status="streaming",
         note="当前页正在流式翻译，完整结束后才会写入硬盘。",
         last_error="",
     )
 
-    for para_idx, para in enumerate(paragraphs):
-        if stop_checker and stop_checker():
+    with ThreadPoolExecutor(max_workers=max_parallel) as pool:
+        for _ in range(max_parallel):
+            if not _submit_next_job(pool):
+                break
+
+        while running_count > 0:
+            event = event_queue.get()
+            job = event["job"]
+            para_idx = job["para_idx"]
+            evt_type = event["type"]
+
+            if evt_type == "start":
+                active_para_indices.add(para_idx)
+                paragraph_states[para_idx] = "running"
+                paragraph_errors[para_idx] = ""
+                translate_push("stream_para_start", {
+                    "doc_id": doc_id,
+                    "bp": target_bp,
+                    "para_idx": para_idx,
+                })
+                _save_parallel_draft("streaming", "当前页尚未提交到硬盘；如请求停止，将在本页完成后停止。")
+                continue
+
+            if evt_type == "delta":
+                delta_text = event.get("text", "")
+                if delta_text:
+                    paragraph_texts[para_idx] = event.get("translation_so_far", paragraph_texts[para_idx] + delta_text)
+                    translate_push("stream_para_delta", {
+                        "doc_id": doc_id,
+                        "bp": target_bp,
+                        "para_idx": para_idx,
+                        "delta": delta_text,
+                        "translation_so_far": paragraph_texts[para_idx],
+                    })
+                    _save_parallel_draft("streaming", "当前页尚未提交到硬盘；如请求停止，将在本页完成后停止。")
+                continue
+
+            if evt_type == "usage":
+                total_usage = _merge_usage(total_usage, event.get("usage"))
+                translate_push("stream_usage", {
+                    "doc_id": doc_id,
+                    "bp": target_bp,
+                    "para_idx": para_idx,
+                    "usage": event.get("usage", {}),
+                })
+                continue
+
+            running_count = max(0, running_count - 1)
+            active_para_indices.discard(para_idx)
+            finished_para_indices.add(para_idx)
+
+            if evt_type == "done":
+                p = event["result"]
+                results[para_idx] = _make_page_entry(job, target_bp, result=p)
+                paragraph_texts[para_idx] = _ensure_str(p.get("translation", ""))
+                paragraph_states[para_idx] = "done"
+                paragraph_errors[para_idx] = ""
+                translate_push("stream_para_done", {
+                    "doc_id": doc_id,
+                    "bp": target_bp,
+                    "para_idx": para_idx,
+                    "translation": paragraph_texts[para_idx],
+                })
+                _save_parallel_draft("streaming", "该段已完成，正在继续翻译后续段落。")
+            elif evt_type == "error":
+                error_text = str(event.get("error", "未知错误"))
+                results[para_idx] = _make_page_entry(job, target_bp, error=error_text)
+                paragraph_texts[para_idx] = results[para_idx]["translation"]
+                paragraph_states[para_idx] = "error"
+                paragraph_errors[para_idx] = error_text
+                translate_push("stream_para_error", {
+                    "doc_id": doc_id,
+                    "bp": target_bp,
+                    "para_idx": para_idx,
+                    "error": error_text,
+                    "translation": paragraph_texts[para_idx],
+                })
+                _save_parallel_draft("streaming", "该段翻译失败，已记录失败占位文本。", last_error=error_text)
+            elif evt_type == "aborted":
+                paragraph_states[para_idx] = "aborted"
+                aborted = True
+            else:
+                paragraph_states[para_idx] = "error"
+                paragraph_errors[para_idx] = f"未知事件: {evt_type}"
+                results[para_idx] = _make_page_entry(job, target_bp, error=f"未知事件: {evt_type}")
+                paragraph_texts[para_idx] = results[para_idx]["translation"]
+                translate_push("stream_para_error", {
+                    "doc_id": doc_id,
+                    "bp": target_bp,
+                    "para_idx": para_idx,
+                    "error": f"未知事件: {evt_type}",
+                    "translation": paragraph_texts[para_idx],
+                })
+                _save_parallel_draft("streaming", "该段翻译失败，已记录失败占位文本。", last_error=f"未知事件: {evt_type}")
+
+            while running_count < max_parallel and not aborted and pending_jobs:
+                if not _submit_next_job(pool):
+                    break
+
+        if aborted:
             translate_push("stream_page_aborted", {
                 "doc_id": doc_id,
                 "bp": target_bp,
-                "para_idx": para_idx,
+                "para_idx": _primary_para_idx(active_para_indices, paragraph_states),
             })
-            snapshot = _load_translate_state(doc_id)
-            draft = _default_stream_draft_state()
-            draft.update(snapshot.get("draft") or {})
-            _save_stream_draft(
-                doc_id,
-                active=False,
-                bp=target_bp,
-                para_idx=para_idx,
-                para_total=len(paragraphs),
-                para_done=min(len(paragraphs), int(draft.get("para_done", 0) or 0)),
-                paragraphs=draft.get("paragraphs", []),
-                status="aborted",
-                note="当前页已停止，草稿未提交到硬盘。",
-            )
+            _save_parallel_draft("aborted", "当前页已停止，草稿未提交到硬盘。")
             raise TranslateStreamAborted("用户停止流式翻译")
 
-        hlevel = para.get("heading_level", 0)
-        text = para["text"].strip()
-        cross = para.get("cross_page")
-        if not text:
-            continue
-
-        if hlevel == 0 and not fn_assigned:
-            fn_for_para = fn_filtered
-            fn_assigned = True
-        else:
-            fn_for_para = ""
-
-        partial_translation = []
-        try:
-            for event in stream_translate_paragraph(
-                para_text=text,
-                para_pages=str(target_bp),
-                footnotes=fn_for_para if hlevel == 0 else "",
-                glossary=glossary,
-                stop_checker=stop_checker,
-                **t_args,
-            ):
-                if event["type"] == "delta":
-                    delta_text = event.get("text", "")
-                    if delta_text:
-                        partial_translation.append(delta_text)
-                        snapshot = _load_translate_state(doc_id)
-                        draft = _default_stream_draft_state()
-                        draft.update(snapshot.get("draft") or {})
-                        paragraphs_so_far = list(draft.get("paragraphs", []))
-                        if len(paragraphs_so_far) < len(paragraphs):
-                            paragraphs_so_far.extend([""] * (len(paragraphs) - len(paragraphs_so_far)))
-                        paragraphs_so_far[para_idx] = "".join(partial_translation)
-                        translate_push("stream_para_delta", {
-                            "doc_id": doc_id,
-                            "bp": target_bp,
-                            "para_idx": para_idx,
-                            "delta": delta_text,
-                            "translation_so_far": "".join(partial_translation),
-                        })
-                        _save_stream_draft(
-                            doc_id,
-                            active=True,
-                            bp=target_bp,
-                            para_idx=para_idx,
-                            para_total=len(paragraphs),
-                            para_done=min(para_idx, int(draft.get("para_done", 0) or 0)),
-                            paragraphs=paragraphs_so_far,
-                            status="streaming",
-                            note="当前页尚未提交到硬盘；停止后会丢弃这一页草稿。",
-                            last_error="",
-                        )
-                elif event["type"] == "usage":
-                    total_usage = _merge_usage(total_usage, event.get("usage"))
-                    translate_push("stream_usage", {
-                        "doc_id": doc_id,
-                        "bp": target_bp,
-                        "para_idx": para_idx,
-                        "usage": event.get("usage", {}),
-                    })
-                elif event["type"] == "done":
-                    p = event["result"]
-                    page_entries.append({
-                        "original": _ensure_str(p.get("original", text)),
-                        "translation": _ensure_str(p.get("translation", "")),
-                        "footnotes": _ensure_str(p.get("footnotes", "")),
-                        "footnotes_translation": _ensure_str(p.get("footnotes_translation", "")),
-                        "heading_level": hlevel,
-                        "pages": str(target_bp),
-                        "_rawText": text,
-                        "_startBP": target_bp,
-                        "_endBP": target_bp,
-                        "_cross_page": cross,
-                        "_bboxes": para_bboxes[para_idx] if para_idx < len(para_bboxes) else [],
-                    })
-                    translate_push("stream_para_done", {
-                        "doc_id": doc_id,
-                        "bp": target_bp,
-                        "para_idx": para_idx,
-                        "translation": _ensure_str(p.get("translation", "")),
-                    })
-                    snapshot = _load_translate_state(doc_id)
-                    draft = _default_stream_draft_state()
-                    draft.update(snapshot.get("draft") or {})
-                    draft_paragraphs = list(draft.get("paragraphs", []))
-                    if len(draft_paragraphs) < len(paragraphs):
-                        draft_paragraphs.extend([""] * (len(paragraphs) - len(draft_paragraphs)))
-                    draft_paragraphs[para_idx] = _ensure_str(p.get("translation", ""))
-                    _save_stream_draft(
-                        doc_id,
-                        active=True,
-                        bp=target_bp,
-                        para_idx=para_idx,
-                        para_total=len(paragraphs),
-                        para_done=max(int(draft.get("para_done", 0) or 0), para_idx + 1),
-                        paragraphs=draft_paragraphs,
-                        status="streaming",
-                        note="该段已完成，正在继续翻译后续段落。",
-                        last_error="",
-                    )
-        except TranslateStreamAborted:
-            translate_push("stream_page_aborted", {
-                "doc_id": doc_id,
-                "bp": target_bp,
-                "para_idx": para_idx,
-            })
-            snapshot = _load_translate_state(doc_id)
-            draft = _default_stream_draft_state()
-            draft.update(snapshot.get("draft") or {})
-            _save_stream_draft(
-                doc_id,
-                active=False,
-                bp=target_bp,
-                para_idx=para_idx,
-                para_total=len(paragraphs),
-                para_done=min(len(paragraphs), int(draft.get("para_done", 0) or 0)),
-                paragraphs=draft.get("paragraphs", []),
-                status="aborted",
-                note="当前页已停止，草稿未提交到硬盘。",
-            )
-            raise
-        except Exception as e:
-            error_text = f"[翻译失败: {e}]"
-            page_entries.append({
-                "original": text,
-                "translation": error_text,
-                "footnotes": "",
-                "footnotes_translation": "",
-                "heading_level": hlevel,
-                "pages": str(target_bp),
-                "_rawText": text,
-                "_startBP": target_bp,
-                "_endBP": target_bp,
-                "_cross_page": cross,
-                "_bboxes": para_bboxes[para_idx] if para_idx < len(para_bboxes) else [],
-            })
-            snapshot = _load_translate_state(doc_id)
-            draft = _default_stream_draft_state()
-            draft.update(snapshot.get("draft") or {})
-            draft_paragraphs = list(draft.get("paragraphs", []))
-            if len(draft_paragraphs) < len(paragraphs):
-                draft_paragraphs.extend([""] * (len(paragraphs) - len(draft_paragraphs)))
-            draft_paragraphs[para_idx] = error_text
-            _save_stream_draft(
-                doc_id,
-                active=True,
-                bp=target_bp,
-                para_idx=para_idx,
-                para_total=len(paragraphs),
-                para_done=max(int(draft.get("para_done", 0) or 0), para_idx + 1),
-                paragraphs=draft_paragraphs,
-                status="streaming",
-                note="该段翻译失败，已记录失败占位文本。",
-                last_error=str(e),
-            )
+    page_entries = [entry for entry in results if entry is not None]
 
     if not page_entries:
         raise RuntimeError(f"第{target_bp}页未找到有效内容")
 
-    _save_stream_draft(
-        doc_id,
-        active=False,
-        bp=target_bp,
-        para_idx=(len(paragraphs) - 1) if paragraphs else None,
-        para_total=len(paragraphs),
-        para_done=len(page_entries),
-        paragraphs=[_ensure_str(entry.get("translation", "")) for entry in page_entries],
-        status="done",
-        note="当前页已完整提交到硬盘。",
-        last_error="",
+    page_footnotes, page_footnotes_translation = _extract_page_footnote_summary(
+        page_entries,
+        fallback_footnotes=ctx.get("footnotes", ""),
     )
+
+    paragraph_texts = [_ensure_str(entry.get("translation", "")) if entry else "" for entry in results]
+    paragraph_states = [
+        ("error" if entry and entry.get("_status") == "error" else "done") if entry else state
+        for entry, state in zip(results, paragraph_states)
+    ]
+    _save_parallel_draft("done", "当前页已完整提交到硬盘。")
 
     return {
         "_pageBP": target_bp,
         "_model": model_key,
         "_usage": total_usage,
         "_page_entries": page_entries,
+        "footnotes": page_footnotes,
+        "footnotes_translation": page_footnotes_translation,
         "pages": str(target_bp),
     }
 
@@ -619,6 +776,10 @@ def _default_stream_draft_state() -> dict:
         "para_idx": None,
         "para_total": 0,
         "para_done": 0,
+        "parallel_limit": 0,
+        "active_para_indices": [],
+        "paragraph_states": [],
+        "paragraph_errors": [],
         "paragraphs": [],
         "status": "idle",
         "note": "",
@@ -633,8 +794,11 @@ def _default_translate_state(doc_id: str = "") -> dict:
         "phase": "idle",
         "running": False,
         "stop_requested": False,
+        "start_bp": None,
+        "resume_bp": None,
         "total_pages": 0,
         "done_pages": 0,
+        "processed_pages": 0,
         "pending_pages": 0,
         "current_bp": None,
         "current_page_idx": 0,
@@ -647,6 +811,7 @@ def _default_translate_state(doc_id: str = "") -> dict:
         "model": "",
         "last_error": "",
         "failed_bps": [],
+        "partial_failed_bps": [],
         "failed_pages": [],
         "draft": _default_stream_draft_state(),
         "updated_at": 0,
@@ -661,77 +826,209 @@ def _clamp_page_progress(total_pages: int, done_pages: int) -> tuple[int, int]:
     return total, done
 
 
-def _get_translate_state_path(doc_id: str) -> str:
-    """获取翻译状态文件路径。"""
-    if not doc_id:
-        return ""
-    from config import get_doc_dir
-    d = get_doc_dir(doc_id)
-    if not d:
-        return ""
-    return os.path.join(d, "translate_state.json")
+def _remaining_pages(total_pages: int, processed_pages: int) -> int:
+    total = max(0, int(total_pages or 0))
+    processed = max(0, int(processed_pages or 0))
+    if total and processed > total:
+        processed = total
+    return max(0, total - processed)
+
+
+def _collect_target_bps(pages: list, start_bp: int | None) -> list[int]:
+    if not pages:
+        return []
+    bp = start_bp
+    if bp is None:
+        bp, _ = get_page_range(pages)
+    if bp is None:
+        return []
+    target_bps = []
+    seen = set()
+    while bp is not None and bp not in seen:
+        target_bps.append(bp)
+        seen.add(bp)
+        bp = get_next_page_bp(pages, bp)
+    return target_bps
+
+
+def _compute_resume_bp(doc_id: str, state: dict) -> int | None:
+    if not doc_id or not isinstance(state, dict):
+        return None
+    phase = state.get("phase", "idle")
+    if phase in ("idle", "done"):
+        return None
+    pages, _ = load_pages_from_disk(doc_id)
+    target_bps = _collect_target_bps(pages, state.get("start_bp"))
+    if not target_bps:
+        return None
+    entries, _, _ = load_entries_from_disk(doc_id)
+    translated_bps = {
+        int(entry.get("_pageBP"))
+        for entry in entries
+        if entry.get("_pageBP") is not None and int(entry.get("_pageBP")) in target_bps
+    }
+    failed_bps = {
+        int(bp)
+        for bp in state.get("failed_bps", [])
+        if bp is not None and int(bp) in target_bps
+    }
+    partial_failed_bps = {
+        int(bp)
+        for bp in state.get("partial_failed_bps", [])
+        if bp is not None and int(bp) in target_bps
+    }
+    processed_bps = translated_bps | failed_bps
+    current_bp = state.get("current_bp")
+    current_bp = int(current_bp) if current_bp is not None else None
+
+    if phase == "partial_failed":
+        for bp in target_bps:
+            if bp in failed_bps or bp in partial_failed_bps:
+                return bp
+        return None
+
+    if phase == "error" and current_bp in target_bps:
+        return current_bp
+
+    if phase == "stopped" and current_bp in target_bps and current_bp not in processed_bps:
+        return current_bp
+
+    for bp in target_bps:
+        if bp not in processed_bps:
+            return bp
+    return None
+
+
+def _normalize_translate_state(state: dict, assume_inactive: bool = False) -> dict:
+    """统一收口磁盘快照字段，避免前端读取到自相矛盾的状态。"""
+    if not isinstance(state, dict):
+        return _default_translate_state()
+
+    state["start_bp"] = int(state.get("start_bp")) if state.get("start_bp") is not None else None
+    state["resume_bp"] = int(state.get("resume_bp")) if state.get("resume_bp") is not None else None
+    total_pages, done_pages = _clamp_page_progress(
+        state.get("total_pages", 0),
+        state.get("done_pages", 0),
+    )
+    state["total_pages"] = total_pages
+    state["done_pages"] = done_pages
+    processed_pages = max(0, int(state.get("processed_pages", done_pages) or 0))
+    if total_pages and processed_pages > total_pages:
+        processed_pages = total_pages
+    if processed_pages < done_pages:
+        processed_pages = done_pages
+    state["processed_pages"] = processed_pages
+    state["pending_pages"] = max(0, int(state.get("pending_pages", max(0, total_pages - done_pages)) or 0))
+    current_page_idx = max(0, int(state.get("current_page_idx", 0) or 0))
+    if total_pages and current_page_idx > total_pages:
+        current_page_idx = total_pages
+    state["current_page_idx"] = current_page_idx
+
+    phase = state.get("phase", "idle")
+    draft = state.get("draft")
+    if not isinstance(draft, dict):
+        draft = _default_stream_draft_state()
+    if not isinstance(draft.get("active_para_indices"), list):
+        draft["active_para_indices"] = []
+    if not isinstance(draft.get("paragraph_states"), list):
+        draft["paragraph_states"] = []
+    if not isinstance(draft.get("paragraph_errors"), list):
+        draft["paragraph_errors"] = []
+    if not isinstance(draft.get("paragraphs"), list):
+        draft["paragraphs"] = []
+    if not isinstance(state.get("partial_failed_bps"), list):
+        state["partial_failed_bps"] = []
+
+    if phase in ("idle", "done", "partial_failed", "stopped", "error"):
+        state["running"] = False
+        state["stop_requested"] = False
+    if phase == "done":
+        state["processed_pages"] = total_pages
+        state["pending_pages"] = 0
+    elif phase == "partial_failed":
+        state["processed_pages"] = total_pages
+        state["pending_pages"] = 0
+
+    if assume_inactive and phase in ("running", "stopping"):
+        state["running"] = False
+        state["stop_requested"] = False
+        state["phase"] = "stopped"
+        if draft.get("active"):
+            draft["active"] = False
+            draft["active_para_indices"] = []
+            if draft.get("status") == "streaming":
+                draft["status"] = "aborted"
+                draft["note"] = "后台翻译未处于活动状态，当前页草稿已中断。"
+
+    if state.get("phase") in ("done", "partial_failed", "stopped", "error"):
+        draft["active"] = False
+        draft["active_para_indices"] = []
+
+    state["draft"] = draft
+    state["total_tokens"] = state.get("prompt_tokens", 0) + state.get("completion_tokens", 0)
+    return state
 
 
 def _save_translate_state(doc_id: str, running: bool, stop_requested: bool, **extra):
-    """保存翻译状态到磁盘。"""
-    path = _get_translate_state_path(doc_id)
-    if not path:
+    """保存翻译状态到 SQLite。"""
+    if not doc_id:
         return
-    try:
-        state = _load_translate_state(doc_id)
-        state.update(extra)
-        state["doc_id"] = doc_id
-        state["running"] = running
-        state["stop_requested"] = stop_requested
-        if "phase" not in extra:
-            state["phase"] = "stopping" if stop_requested else ("running" if running else state.get("phase", "idle"))
-        state["total_tokens"] = state.get("prompt_tokens", 0) + state.get("completion_tokens", 0)
-        state["updated_at"] = time.time()
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False)
-    except Exception:
-        pass
+    state = _load_translate_state(doc_id)
+    state.update(extra)
+    state["doc_id"] = doc_id
+    state["running"] = running
+    state["stop_requested"] = stop_requested
+    if "phase" not in extra:
+        state["phase"] = "stopping" if stop_requested else ("running" if running else state.get("phase", "idle"))
+    state["total_tokens"] = state.get("prompt_tokens", 0) + state.get("completion_tokens", 0)
+    state["updated_at"] = time.time()
+    payload = dict(state)
+    payload.pop("doc_id", None)
+    SQLiteRepository().save_translate_run(doc_id, **payload)
 
 
 def _load_translate_state(doc_id: str) -> dict:
-    """从磁盘加载翻译状态。"""
+    """从 SQLite 加载翻译状态。"""
     default = _default_translate_state(doc_id)
-    path = _get_translate_state_path(doc_id)
-    if not path or not os.path.exists(path):
+    if not doc_id:
         return default
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if not isinstance(data, dict):
-                return default
-            default.update(data)
-            default["doc_id"] = doc_id
-            draft = default.get("draft")
-            if not isinstance(draft, dict):
-                draft = {}
-            merged_draft = _default_stream_draft_state()
-            merged_draft.update(draft)
-            if not isinstance(merged_draft.get("paragraphs"), list):
-                merged_draft["paragraphs"] = []
-            default["draft"] = merged_draft
-            if not isinstance(default.get("failed_bps"), list):
-                default["failed_bps"] = []
-            if not isinstance(default.get("failed_pages"), list):
-                default["failed_pages"] = []
-            default["total_tokens"] = default.get("prompt_tokens", 0) + default.get("completion_tokens", 0)
-            return default
-    except Exception:
+    repo = SQLiteRepository()
+    data = repo.get_effective_translate_run(doc_id)
+    if not isinstance(data, dict):
         return default
+    default.update(data)
+    failures = repo.list_translate_failures(doc_id)
+    if failures:
+        default["failed_pages"] = failures
+        default["failed_bps"] = [int(item["bp"]) for item in failures if item.get("bp") is not None]
+    default["doc_id"] = doc_id
+    draft = default.get("draft")
+    if not isinstance(draft, dict):
+        draft = {}
+    merged_draft = _default_stream_draft_state()
+    merged_draft.update(draft)
+    if not isinstance(merged_draft.get("active_para_indices"), list):
+        merged_draft["active_para_indices"] = []
+    if not isinstance(merged_draft.get("paragraph_states"), list):
+        merged_draft["paragraph_states"] = []
+    if not isinstance(merged_draft.get("paragraph_errors"), list):
+        merged_draft["paragraph_errors"] = []
+    if not isinstance(merged_draft.get("paragraphs"), list):
+        merged_draft["paragraphs"] = []
+    default["draft"] = merged_draft
+    if not isinstance(default.get("failed_bps"), list):
+        default["failed_bps"] = []
+    if not isinstance(default.get("partial_failed_bps"), list):
+        default["partial_failed_bps"] = []
+    if not isinstance(default.get("failed_pages"), list):
+        default["failed_pages"] = []
+    return _normalize_translate_state(default)
 
 
 def _clear_translate_state(doc_id: str):
-    """清除磁盘上的翻译状态。"""
-    path = _get_translate_state_path(doc_id)
-    if path and os.path.exists(path):
-        try:
-            os.remove(path)
-        except Exception:
-            pass
+    """清除 SQLite 中的翻译状态。"""
+    if doc_id:
+        SQLiteRepository().clear_translate_runs(doc_id)
 
 
 def _save_stream_draft(doc_id: str, **fields):
@@ -743,6 +1040,12 @@ def _save_stream_draft(doc_id: str, **fields):
     draft.update(fields)
     paragraphs = draft.get("paragraphs")
     draft["paragraphs"] = list(paragraphs) if isinstance(paragraphs, list) else []
+    active_para_indices = draft.get("active_para_indices")
+    draft["active_para_indices"] = list(active_para_indices) if isinstance(active_para_indices, list) else []
+    paragraph_states = draft.get("paragraph_states")
+    draft["paragraph_states"] = list(paragraph_states) if isinstance(paragraph_states, list) else []
+    paragraph_errors = draft.get("paragraph_errors")
+    draft["paragraph_errors"] = list(paragraph_errors) if isinstance(paragraph_errors, list) else []
     draft["updated_at"] = time.time()
     _save_translate_state(
         doc_id,
@@ -798,6 +1101,136 @@ def _mark_failed_page_state(doc_id: str, bp: int, error: str):
     )
 
 
+def reconcile_translate_state_after_page_success(doc_id: str, bp: int):
+    if not doc_id or bp is None:
+        return
+    _clear_failed_page_state(doc_id, bp)
+    snapshot = _load_translate_state(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
+    target_bps = _collect_target_bps(pages, snapshot.get("start_bp"))
+    total_pages = len(target_bps) if target_bps else int(snapshot.get("total_pages", 0) or 0)
+    entries, _, _ = load_entries_from_disk(doc_id)
+    translated_bps = {
+        int(entry.get("_pageBP"))
+        for entry in entries
+        if entry.get("_pageBP") is not None and (not target_bps or int(entry.get("_pageBP")) in target_bps)
+    }
+    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+    done_bps = translated_bps - set(partial_failed_bps)
+    done_pages = min(total_pages, len(done_bps)) if total_pages else len(done_bps)
+    failed_pages = [
+        page for page in snapshot.get("failed_pages", [])
+        if isinstance(page, dict) and page.get("bp") is not None and (not target_bps or int(page.get("bp")) in target_bps)
+    ]
+    failed_bps = sorted(int(page.get("bp")) for page in failed_pages)
+    processed_floor = len(set(failed_bps) | translated_bps)
+    processed_pages = max(processed_floor, int(snapshot.get("processed_pages", done_pages) or 0))
+    if total_pages:
+        processed_pages = min(total_pages, processed_pages)
+    pending_pages = _remaining_pages(total_pages, processed_pages)
+    previous_phase = snapshot.get("phase", "idle")
+
+    if snapshot.get("running", False):
+        phase = "stopping" if snapshot.get("stop_requested", False) else "running"
+    elif failed_bps or partial_failed_bps:
+        phase = "partial_failed" if pending_pages == 0 else previous_phase
+        if phase == "done":
+            phase = "partial_failed"
+    else:
+        if pending_pages == 0 and total_pages:
+            phase = "done"
+        elif previous_phase in ("error", "partial_failed"):
+            phase = "stopped"
+        else:
+            phase = previous_phase
+
+    next_last_error = failed_pages[0].get("error", "") if failed_pages else ""
+    _save_translate_state(
+        doc_id,
+        running=snapshot.get("running", False),
+        stop_requested=snapshot.get("stop_requested", False),
+        phase=phase,
+        total_pages=total_pages,
+        done_pages=done_pages,
+        processed_pages=processed_pages,
+        pending_pages=pending_pages,
+        current_bp=snapshot.get("current_bp"),
+        current_page_idx=snapshot.get("current_page_idx", 0),
+        translated_chars=snapshot.get("translated_chars", 0),
+        translated_paras=snapshot.get("translated_paras", 0),
+        request_count=snapshot.get("request_count", 0),
+        prompt_tokens=snapshot.get("prompt_tokens", 0),
+        completion_tokens=snapshot.get("completion_tokens", 0),
+        model=snapshot.get("model", ""),
+        failed_pages=failed_pages,
+        failed_bps=failed_bps,
+        partial_failed_bps=partial_failed_bps,
+        last_error=next_last_error,
+    )
+
+
+def reconcile_translate_state_after_page_failure(doc_id: str, bp: int, error: str):
+    if not doc_id or bp is None:
+        return
+    _mark_failed_page_state(doc_id, bp, error)
+    snapshot = _load_translate_state(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
+    target_bps = _collect_target_bps(pages, snapshot.get("start_bp"))
+    total_pages = len(target_bps) if target_bps else int(snapshot.get("total_pages", 0) or 0)
+    entries, _, _ = load_entries_from_disk(doc_id)
+    translated_bps = {
+        int(entry.get("_pageBP"))
+        for entry in entries
+        if entry.get("_pageBP") is not None and (not target_bps or int(entry.get("_pageBP")) in target_bps)
+    }
+    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+    done_bps = translated_bps - set(partial_failed_bps)
+    done_pages = min(total_pages, len(done_bps)) if total_pages else len(done_bps)
+    failed_pages = [
+        page for page in snapshot.get("failed_pages", [])
+        if isinstance(page, dict) and page.get("bp") is not None and (not target_bps or int(page.get("bp")) in target_bps)
+    ]
+    failed_bps = sorted(int(page.get("bp")) for page in failed_pages)
+    processed_floor = len(set(failed_bps) | translated_bps)
+    processed_pages = max(processed_floor, int(snapshot.get("processed_pages", done_pages) or 0))
+    if total_pages:
+        processed_pages = min(total_pages, processed_pages)
+    pending_pages = _remaining_pages(total_pages, processed_pages)
+    previous_phase = snapshot.get("phase", "idle")
+
+    if snapshot.get("running", False):
+        phase = "stopping" if snapshot.get("stop_requested", False) else "running"
+    elif pending_pages == 0 and (failed_bps or partial_failed_bps):
+        phase = "partial_failed"
+    elif previous_phase in ("error", "partial_failed", "stopped"):
+        phase = previous_phase
+    else:
+        phase = "stopped"
+
+    _save_translate_state(
+        doc_id,
+        running=snapshot.get("running", False),
+        stop_requested=snapshot.get("stop_requested", False),
+        phase=phase,
+        total_pages=total_pages,
+        done_pages=done_pages,
+        processed_pages=processed_pages,
+        pending_pages=pending_pages,
+        current_bp=bp,
+        current_page_idx=snapshot.get("current_page_idx", 0),
+        translated_chars=snapshot.get("translated_chars", 0),
+        translated_paras=snapshot.get("translated_paras", 0),
+        request_count=snapshot.get("request_count", 0),
+        prompt_tokens=snapshot.get("prompt_tokens", 0),
+        completion_tokens=snapshot.get("completion_tokens", 0),
+        model=snapshot.get("model", ""),
+        failed_pages=failed_pages,
+        failed_bps=failed_bps,
+        partial_failed_bps=partial_failed_bps,
+        last_error=str(error),
+    )
+
+
 def translate_push(event_type: str, data: dict):
     with _translate_lock:
         _translate_task["events"].append((event_type, data))
@@ -836,13 +1269,27 @@ def get_translate_snapshot(doc_id: str) -> dict:
     if not doc_id:
         return _default_translate_state()
     state = _load_translate_state(doc_id)
+    has_active_worker = False
     with _translate_lock:
         if _translate_task["doc_id"] == doc_id:
+            has_active_worker = True
             state["running"] = _translate_task["running"]
             state["stop_requested"] = _translate_task["stop"]
             if state["running"] and state["phase"] not in ("running", "stopping"):
                 state["phase"] = "stopping" if state["stop_requested"] else "running"
-    state["total_tokens"] = state.get("prompt_tokens", 0) + state.get("completion_tokens", 0)
+    state = _normalize_translate_state(state, assume_inactive=not has_active_worker)
+    pages, _ = load_pages_from_disk(doc_id)
+    target_bps = _collect_target_bps(pages, state.get("start_bp"))
+    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+    state["partial_failed_bps"] = partial_failed_bps
+    if (
+        partial_failed_bps
+        and not state.get("running")
+        and state.get("phase") not in ("running", "stopping", "error")
+        and state.get("pending_pages", 0) == 0
+    ):
+        state["phase"] = "partial_failed"
+    state["resume_bp"] = _compute_resume_bp(doc_id, state)
     return state
 
 
@@ -858,6 +1305,18 @@ def is_stop_requested(doc_id: str) -> bool:
     if not doc_id:
         return False
     return get_translate_snapshot(doc_id).get("stop_requested", False)
+
+
+def _runtime_stop_requested(doc_id: str) -> bool:
+    """读取运行时 stop 标记，避免并发下被旧快照覆盖。"""
+    if not doc_id:
+        return False
+    with _translate_lock:
+        return bool(
+            _translate_task["running"]
+            and _translate_task["doc_id"] == doc_id
+            and _translate_task["stop"]
+        )
 
 
 def request_stop_translate(doc_id: str) -> bool:
@@ -876,6 +1335,7 @@ def request_stop_translate(doc_id: str) -> bool:
         phase="stopping",
         total_pages=snapshot.get("total_pages", 0),
         done_pages=snapshot.get("done_pages", 0),
+        processed_pages=snapshot.get("processed_pages", snapshot.get("done_pages", 0)),
         pending_pages=snapshot.get("pending_pages", 0),
         current_bp=snapshot.get("current_bp"),
         current_page_idx=snapshot.get("current_page_idx", 0),
@@ -907,8 +1367,10 @@ def start_translate_task(doc_id: str, start_bp: int, doc_title: str) -> bool:
         running=True,
         stop_requested=False,
         phase="running",
+        start_bp=start_bp,
         total_pages=0,
         done_pages=0,
+        processed_pages=0,
         pending_pages=0,
         current_bp=None,
         current_page_idx=0,
@@ -920,6 +1382,7 @@ def start_translate_task(doc_id: str, start_bp: int, doc_title: str) -> bool:
         model=get_model_key(),
         last_error="",
         failed_bps=[],
+        partial_failed_bps=[],
         failed_pages=[],
         draft=_default_stream_draft_state(),
     )
@@ -936,7 +1399,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
         entries, _, _ = load_entries_from_disk(doc_id)
         model_key = get_model_key()
         t_args = get_translate_args(model_key)
-        glossary = get_glossary()
+        glossary = get_glossary(doc_id)
 
         if not pages or not t_args["api_key"]:
             translate_push("error", {"msg": "数据不完整或缺少 API Key"})
@@ -956,10 +1419,11 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             bp = get_next_page_bp(pages, bp)
 
         doc_bp_set = set(doc_bps)
+        partial_failed_doc_bps = set(_collect_partial_failed_bps(doc_id, doc_bps))
         done_bps = set()
         for e in entries:
             pbp = e.get("_pageBP")
-            if pbp is not None and pbp in doc_bp_set:
+            if pbp is not None and pbp in doc_bp_set and pbp not in partial_failed_doc_bps:
                 done_bps.add(pbp)
 
         pending_bps = [b for b in all_bps if b not in done_bps]
@@ -976,9 +1440,11 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             running=True,
             stop_requested=False,
             phase="running",
+            start_bp=start_bp,
             total_pages=total_pages,
             done_pages=done_pages,
-            pending_pages=max(0, total_pages - done_pages),
+            processed_pages=done_pages,
+            pending_pages=_remaining_pages(total_pages, done_pages),
             current_bp=None,
             current_page_idx=done_pages,
             translated_chars=0,
@@ -989,14 +1455,13 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             model=model_key,
             last_error="",
             failed_bps=[],
+            partial_failed_bps=sorted(partial_failed_doc_bps),
             failed_pages=[],
             draft=_default_stream_draft_state(),
         )
 
         for i, bp in enumerate(pending_bps):
-            should_stop = False
-            with _translate_lock:
-                should_stop = _translate_task["stop"]
+            should_stop = _runtime_stop_requested(doc_id)
             if should_stop:
                 snapshot = _load_translate_state(doc_id)
                 state_total, state_done = _clamp_page_progress(
@@ -1010,7 +1475,8 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     phase="stopped",
                     total_pages=state_total,
                     done_pages=state_done,
-                    pending_pages=max(0, state_total - state_done),
+                    processed_pages=snapshot.get("processed_pages", state_done),
+                    pending_pages=_remaining_pages(state_total, snapshot.get("processed_pages", state_done)),
                     current_bp=snapshot.get("current_bp"),
                     current_page_idx=snapshot.get("current_page_idx", done_pages + i),
                     translated_chars=snapshot.get("translated_chars", 0),
@@ -1030,14 +1496,38 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                 snapshot.get("total_pages", total_pages),
                 snapshot.get("done_pages", done_pages + i),
             )
+            stop_requested_now = _runtime_stop_requested(doc_id)
+            if stop_requested_now:
+                _save_translate_state(
+                    doc_id,
+                    running=False,
+                    stop_requested=False,
+                    phase="stopped",
+                    total_pages=state_total,
+                    done_pages=state_done,
+                    processed_pages=snapshot.get("processed_pages", state_done),
+                    pending_pages=_remaining_pages(state_total, snapshot.get("processed_pages", state_done)),
+                    current_bp=snapshot.get("current_bp"),
+                    current_page_idx=snapshot.get("current_page_idx", done_pages + i),
+                    translated_chars=snapshot.get("translated_chars", 0),
+                    translated_paras=snapshot.get("translated_paras", 0),
+                    request_count=snapshot.get("request_count", 0),
+                    prompt_tokens=snapshot.get("prompt_tokens", 0),
+                    completion_tokens=snapshot.get("completion_tokens", 0),
+                    model=snapshot.get("model", model_key),
+                    last_error="",
+                )
+                translate_push("stopped", {"msg": "翻译已停止"})
+                return
             _save_translate_state(
                 doc_id,
                 running=True,
-                stop_requested=snapshot.get("stop_requested", False),
-                phase="stopping" if snapshot.get("stop_requested", False) else "running",
+                stop_requested=stop_requested_now,
+                phase="stopping" if stop_requested_now else "running",
                 total_pages=state_total,
                 done_pages=state_done,
-                pending_pages=max(0, state_total - state_done),
+                processed_pages=snapshot.get("processed_pages", state_done),
+                pending_pages=_remaining_pages(state_total, snapshot.get("processed_pages", state_done)),
                 current_bp=bp,
                 current_page_idx=current_page_idx,
                 translated_chars=snapshot.get("translated_chars", 0),
@@ -1078,21 +1568,28 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     snapshot.get("total_pages", total_pages),
                     snapshot.get("done_pages", 0),
                 )
-                next_done_pages = min(state_total, snapshot_done + 1)
+                page_has_partial_failure = _entry_has_paragraph_error(entry)
+                next_processed_pages = min(
+                    state_total,
+                    int(snapshot.get("processed_pages", snapshot_done) or 0) + 1,
+                )
+                next_done_pages = min(state_total, snapshot_done + (0 if page_has_partial_failure else 1))
                 translated_chars = snapshot.get("translated_chars", 0) + char_count
                 translated_paras = snapshot.get("translated_paras", 0) + para_count
                 request_count = snapshot.get("request_count", 0) + int(entry_usage.get("request_count", 0) or 0)
                 prompt_tokens = snapshot.get("prompt_tokens", 0) + int(entry_usage.get("prompt_tokens", 0) or 0)
                 completion_tokens = snapshot.get("completion_tokens", 0) + int(entry_usage.get("completion_tokens", 0) or 0)
+                partial_failed_bps = _collect_partial_failed_bps(doc_id, doc_bps)
 
                 _save_translate_state(
                     doc_id,
                     running=True,
-                    stop_requested=snapshot.get("stop_requested", False),
-                    phase="stopping" if snapshot.get("stop_requested", False) else "running",
+                    stop_requested=_runtime_stop_requested(doc_id),
+                    phase="stopping" if _runtime_stop_requested(doc_id) else "running",
                     total_pages=state_total,
                     done_pages=next_done_pages,
-                    pending_pages=max(0, state_total - next_done_pages),
+                    processed_pages=next_processed_pages,
+                    pending_pages=_remaining_pages(state_total, next_processed_pages),
                     current_bp=bp,
                     current_page_idx=current_page_idx,
                     translated_chars=translated_chars,
@@ -1101,8 +1598,49 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
                     model=model_key,
+                    partial_failed_bps=partial_failed_bps,
                     last_error="",
                 )
+                stop_requested_now = _runtime_stop_requested(doc_id)
+                if stop_requested_now:
+                    stop_snapshot = _load_translate_state(doc_id)
+                    stop_total, stop_done = _clamp_page_progress(
+                        stop_snapshot.get("total_pages", total_pages),
+                        stop_snapshot.get("done_pages", next_done_pages),
+                    )
+                    _save_translate_state(
+                        doc_id,
+                        running=False,
+                        stop_requested=False,
+                        phase="stopped",
+                        total_pages=stop_total,
+                        done_pages=stop_done,
+                        processed_pages=stop_snapshot.get("processed_pages", stop_done),
+                        pending_pages=_remaining_pages(stop_total, stop_snapshot.get("processed_pages", stop_done)),
+                        current_bp=bp,
+                        current_page_idx=current_page_idx,
+                        translated_chars=stop_snapshot.get("translated_chars", translated_chars),
+                        translated_paras=stop_snapshot.get("translated_paras", translated_paras),
+                        request_count=stop_snapshot.get("request_count", request_count),
+                        prompt_tokens=stop_snapshot.get("prompt_tokens", prompt_tokens),
+                        completion_tokens=stop_snapshot.get("completion_tokens", completion_tokens),
+                        model=stop_snapshot.get("model", model_key),
+                        partial_failed_bps=stop_snapshot.get("partial_failed_bps", partial_failed_bps),
+                        last_error="",
+                    )
+                    translate_push("page_done", {
+                        "bp": bp,
+                        "page_idx": current_page_idx,
+                        "total": total_pages,
+                        "entry_idx": entry_idx,
+                        "para_count": para_count,
+                        "char_count": char_count,
+                        "usage": entry_usage,
+                        "model": model_key,
+                        "partial_failed": any((pe.get("_status") == "error") for pe in entry.get("_page_entries", [])),
+                    })
+                    translate_push("stopped", {"msg": "翻译已停止", "bp": bp})
+                    return
                 translate_push("page_done", {
                     "bp": bp,
                     "page_idx": current_page_idx,
@@ -1112,6 +1650,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     "char_count": char_count,
                     "usage": entry_usage,
                     "model": model_key,
+                    "partial_failed": any((pe.get("_status") == "error") for pe in entry.get("_page_entries", [])),
                 })
 
             except TranslateStreamAborted:
@@ -1127,7 +1666,8 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     phase="stopped",
                     total_pages=state_total,
                     done_pages=state_done,
-                    pending_pages=max(0, state_total - state_done),
+                    processed_pages=snapshot.get("processed_pages", state_done),
+                    pending_pages=_remaining_pages(state_total, snapshot.get("processed_pages", state_done)),
                     current_bp=bp,
                     current_page_idx=current_page_idx,
                     translated_chars=snapshot.get("translated_chars", 0),
@@ -1160,6 +1700,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     para_idx=draft.get("para_idx"),
                     para_total=draft.get("para_total", 0),
                     para_done=draft.get("para_done", 0),
+                    paragraph_errors=draft.get("paragraph_errors", []),
                     paragraphs=draft.get("paragraphs", []),
                     status="error",
                     note=f"p.{bp} 翻译失败，等待重试。",
@@ -1170,6 +1711,10 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     snapshot.get("total_pages", total_pages),
                     snapshot.get("done_pages", done_pages + i),
                 )
+                next_processed_pages = min(
+                    state_total,
+                    int(snapshot.get("processed_pages", state_done) or 0) + 1,
+                )
                 _save_translate_state(
                     doc_id,
                     running=True,
@@ -1177,7 +1722,8 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     phase="stopping" if snapshot.get("stop_requested", False) else "running",
                     total_pages=state_total,
                     done_pages=state_done,
-                    pending_pages=max(0, state_total - state_done),
+                    processed_pages=next_processed_pages,
+                    pending_pages=_remaining_pages(state_total, next_processed_pages),
                     current_bp=bp,
                     current_page_idx=current_page_idx,
                     translated_chars=snapshot.get("translated_chars", 0),
@@ -1186,6 +1732,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     prompt_tokens=snapshot.get("prompt_tokens", 0),
                     completion_tokens=snapshot.get("completion_tokens", 0),
                     model=model_key,
+                    partial_failed_bps=snapshot.get("partial_failed_bps", []),
                     last_error=str(e),
                 )
                 translate_push("page_error", {
@@ -1200,14 +1747,28 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             snapshot.get("total_pages", total_pages),
             snapshot.get("done_pages", total_pages),
         )
+        final_failed_bps = [
+            bp for bp in snapshot.get("failed_bps", [])
+            if bp is not None
+        ]
+        final_partial_failed_bps = _collect_partial_failed_bps(doc_id, doc_bps)
+        entries, _, _ = load_entries_from_disk(doc_id)
+        translated_bps = {
+            int(entry.get("_pageBP"))
+            for entry in entries
+            if entry.get("_pageBP") is not None and int(entry.get("_pageBP")) in doc_bp_set
+        }
+        final_done_pages = min(state_total, len(translated_bps - set(final_partial_failed_bps))) if state_total else len(translated_bps - set(final_partial_failed_bps))
+        final_phase = "partial_failed" if (final_failed_bps or final_partial_failed_bps) else "done"
         _save_translate_state(
             doc_id,
             running=False,
             stop_requested=False,
-            phase="done",
+            phase=final_phase,
             total_pages=state_total,
-            done_pages=state_done,
-            pending_pages=max(0, state_total - state_done),
+            done_pages=final_done_pages,
+            processed_pages=state_total,
+            pending_pages=0,
             current_bp=snapshot.get("current_bp"),
             current_page_idx=snapshot.get("current_page_idx", state_total),
             translated_chars=snapshot.get("translated_chars", 0),
@@ -1216,9 +1777,9 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             prompt_tokens=snapshot.get("prompt_tokens", 0),
             completion_tokens=snapshot.get("completion_tokens", 0),
             model=snapshot.get("model", model_key),
-            last_error="",
+            partial_failed_bps=final_partial_failed_bps,
+            last_error=snapshot.get("last_error", ""),
         )
-        entries, _, _ = load_entries_from_disk(doc_id)
         translate_push("all_done", {
             "total_pages": total_pages,
             "total_entries": len(entries),
@@ -1237,7 +1798,8 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             phase="error",
             total_pages=state_total,
             done_pages=state_done,
-            pending_pages=max(0, state_total - state_done),
+            processed_pages=snapshot.get("processed_pages", state_done),
+            pending_pages=_remaining_pages(state_total, snapshot.get("processed_pages", state_done)),
             current_bp=snapshot.get("current_bp"),
             current_page_idx=snapshot.get("current_page_idx", 0),
             translated_chars=snapshot.get("translated_chars", 0),
@@ -1318,7 +1880,7 @@ def reparse_file(task_id: str, doc_id: str):
         final_pages = hf["pages"]
         all_logs.extend(hf["log"])
 
-        # Step 4: 保存（覆盖 pages.json，保留 entries.json）
+        # Step 4: 保存页面数据（写入 SQLite，保留翻译结果）
         task_push(task_id, "progress", {"pct": 95, "label": "保存数据…", "detail": ""})
         save_pages_to_disk(final_pages, file_name, doc_id)
 
@@ -1332,7 +1894,7 @@ def reparse_file(task_id: str, doc_id: str):
 
 def reparse_single_page(task_id: str, doc_id: str, target_bp: int, file_idx: int):
     """后台线程：对单页重新执行 OCR 解析（保留翻译数据）。"""
-    from pdf_extract import extract_single_page_pdf, extract_pdf_text, combine_sources
+    from pdf_extract import extract_single_page_pdf
 
     with _tasks_lock:
         task = _tasks.get(task_id)
@@ -1370,12 +1932,17 @@ def reparse_single_page(task_id: str, doc_id: str, target_bp: int, file_idx: int
         new_page["bookPage"] = target_bp
         new_page["fileIdx"] = file_idx
 
-        # PDF文字层提取
-        task_push(task_id, "progress", {"pct": 75, "label": "提取 PDF 文字层…", "detail": ""})
-        pdf_pages = extract_pdf_text(single_page_bytes)
-        if pdf_pages:
-            combined = combine_sources([new_page], pdf_pages)
-            new_page = combined["pages"][0]
+        # 单页手动重解析固定走 OCR 文本，避免坏掉的 PDF 文字层再次覆盖版面文本。
+        task_push(task_id, "progress", {
+            "pct": 75,
+            "label": "保留 OCR 文字…",
+            "detail": "手动重解析会跳过 PDF 文字层",
+        })
+        task_push(task_id, "log", {
+            "msg": "手动重解析模式：跳过 PDF 文字层，强制使用 OCR 文字",
+            "cls": "success",
+        })
+        new_page["textSource"] = "ocr"
 
         # 清理页眉页脚
         task_push(task_id, "progress", {"pct": 85, "label": "清理页眉页脚…", "detail": ""})
@@ -1393,8 +1960,40 @@ def reparse_single_page(task_id: str, doc_id: str, target_bp: int, file_idx: int
                 updated_pages.append(p)
 
         save_pages_to_disk(updated_pages, file_name, doc_id)
+        entries, doc_title, _ = load_entries_from_disk(doc_id)
+        entry_title = doc_title or file_name
 
-        summary = f"第 {target_bp} 页重新解析完成"
+        try:
+            model_key = ""
+            for entry in entries:
+                if entry.get("_pageBP") == target_bp and entry.get("_model") in MODELS:
+                    model_key = entry.get("_model")
+                    break
+            if not model_key:
+                model_key = get_model_key()
+            t_args = get_translate_args(model_key)
+            if not t_args["api_key"]:
+                raise RuntimeError("缺少翻译 API Key，请先在设置中配置。")
+
+            model_label = MODELS.get(model_key, {}).get("label", model_key)
+            task_push(task_id, "progress", {
+                "pct": 97,
+                "label": "自动重译本页…",
+                "detail": f"使用 {model_label}",
+            })
+            task_push(task_id, "log", {
+                "msg": f"开始自动重译第 {target_bp} 页（{model_label}）",
+                "cls": "success",
+            })
+            new_entry = translate_page(updated_pages, target_bp, model_key, t_args, get_glossary(doc_id))
+            save_entry_to_disk(new_entry, entry_title, doc_id)
+            reconcile_translate_state_after_page_success(doc_id, target_bp)
+        except Exception as e:
+            reconcile_translate_state_after_page_failure(doc_id, target_bp, str(e))
+            task_push(task_id, "error_msg", {"error": f"第 {target_bp} 页 OCR 重解析已完成，但自动重译失败: {e}"})
+            return
+
+        summary = f"第 {target_bp} 页 OCR 重解析并重译完成"
         task_push(task_id, "done", {"summary": summary, "bp": target_bp})
 
     except Exception as e:
