@@ -6,7 +6,7 @@
 
 - 日期：2026-03-27
 - 执行者：Cursor
-- 当前内容：已完成翻译工程化第三阶段（历史记录追踪、重译前警告、409 冲突 UX 收口）验收；当前测试可放行
+- 当前内容：已完成阅读页仪表盘人工修订统计与段级「查看历史」UI；当前测试可放行
 
 ## 记录格式
 
@@ -31,3 +31,4 @@
 | 2026-03-27 | Cursor | 旧 JSON 主路径退场：移除 `storage.py` 中 6 个死函数及 `json`/`tempfile` import；移除 `config.py` 中失效的 `migrate_legacy_data()`；移除 `app.py` 中对应引入和调用；修正 `tasks.py` 过时注释；导入烟雾检查 + 全量测试 `102 passed, 8 skipped` | 通过 | 业务主流程已不再包含 JSON 文件读写路径；`storage.py` 仅保留 `_entries_root` 和 `_remove_legacy_entries_file` 供 `clear_entries_from_disk` 清理残余旧目录；`migrate_from_old_location()` 保留用于迁移旧位置 `config.json` |
 | 2026-03-27 | Cursor | 翻译工程化第二阶段验收：人工修订 MVP + 每书独立术语表 + 最小元数据增强；执行 `./.venv/bin/python -m pytest test_sqlite_store.py test_sqlite_mainline.py test_tasks_streaming.py -q`、`./.venv/bin/python -m pytest test_translate_stop_flow_real_docs.py -q`、`./.venv/bin/python -m pytest -q` | 通过 | 结果分别为 `54 passed`、`50 passed`、全量 `108 passed, 8 skipped`；已覆盖人工修订保存冲突、阅读回显与导出一致、术语表按 `doc_id` 隔离、翻译入口按书注入词典、usage 接口人工修订计数，以及既有 `resume_bp/phase/failed_pages` 主链路不回退 |
 | 2026-03-27 | Cursor | 翻译工程化第三阶段验收：历史记录追踪 + 重译前警告 + 409 冲突 UX 收口；执行 `./.venv/bin/python -m pytest test_sqlite_store.py test_sqlite_mainline.py -q`、`./.venv/bin/python -m pytest -q` | 通过 | 结果分别为 `29 passed`、全量 `117 passed, 8 skipped`（较第二阶段增加 9 个新测试）；已覆盖 `segment_revisions` schema、人工修订前快照、重译前快照、`list_segment_revisions`、`count_manual_segments`、`/segment_history` API、`/check_retranslate_warnings` API、409 冲突响应携带 `server_segment`、重译/重解析按钮改为先检查人工修订数再弹确认对话框、前端 409 冲突时展示"刷新段落"按钮 |
+| 2026-03-27 | Cursor | 阅读页仪表盘人工修订统计 + 段级查看历史 UI；执行 `./.venv/bin/python -m pytest test_sqlite_mainline.py -q`、`./.venv/bin/python -m pytest -q` | 通过 | `test_reading_page_has_history_button_and_usage_manual_metrics` 新增；全量 `118 passed, 8 skipped`；阅读页「翻译进度」概览含人工修订段数与含修订页数；每段「查看历史」调用 `/segment_history` 内联展示历史版本 |

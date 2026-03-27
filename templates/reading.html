@@ -614,6 +614,14 @@
             <span class="usage-metric-label">最近更新</span>
             <span class="usage-metric-value usage-metric-value-sm" id="usageUpdatedAt">-</span>
           </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">人工修订段数</span>
+            <span class="usage-metric-value" id="usageManualRevisions">-</span>
+          </div>
+          <div class="usage-metric">
+            <span class="usage-metric-label">含修订页数</span>
+            <span class="usage-metric-value" id="usagePagesWithRevisions">-</span>
+          </div>
         </div>
       </div>
 
@@ -750,6 +758,7 @@
       <span class="manual-revision-badge" data-manual-badge="{{ loop.index0 }}" style="font-size:11px;color:var(--txL);">
         {{ '人工修订' if para_source == 'manual' else '机器译文' }}
       </span>
+      <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="toggleSegmentHistory({{ loop.index0 }}, {{ para_bp }});">查看历史</button>
     </div>
     <div id="manualRevisionEditor{{ loop.index0 }}" class="hidden" style="margin-top:8px;">
       <textarea id="manualRevisionInput{{ loop.index0 }}" class="inp" style="min-height:96px;">{{ pe.translation or '' }}</textarea>
@@ -759,6 +768,7 @@
         <span id="manualRevisionHint{{ loop.index0 }}" style="font-size:11px;color:var(--txL);"></span>
       </div>
     </div>
+    <div id="segmentHistoryPanel{{ loop.index0 }}" class="hidden" style="margin-top:8px;"></div>
     {% if para_status == 'error' %}
     <div style="margin-top:6px;font-size:11px;color:var(--red);">该段翻译失败，占位内容已保留。</div>
     {% endif %}
@@ -806,6 +816,7 @@
       <span class="manual-revision-badge" data-manual-badge="{{ loop.index0 }}" style="font-size:11px;color:var(--txL);">
         {{ '人工修订' if para_source == 'manual' else '机器译文' }}
       </span>
+      <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="toggleSegmentHistory({{ loop.index0 }}, {{ para_bp }});">查看历史</button>
     </div>
     <div id="manualRevisionEditor{{ loop.index0 }}" class="hidden" style="margin-top:8px;">
       <textarea id="manualRevisionInput{{ loop.index0 }}" class="inp" style="min-height:96px;">{{ pe.translation or '' }}</textarea>
@@ -815,6 +826,7 @@
         <span id="manualRevisionHint{{ loop.index0 }}" style="font-size:11px;color:var(--txL);"></span>
       </div>
     </div>
+    <div id="segmentHistoryPanel{{ loop.index0 }}" class="hidden" style="margin-top:8px;"></div>
 
   </div><!-- para-block -->
   {% endif %}
@@ -1983,6 +1995,67 @@ function cancelManualRevision(idx) {
   setManualRevisionHint(idx, '', false);
 }
 
+function revisionDisplayText(rev) {
+  var m = rev.manual_translation_text;
+  if (m !== null && m !== undefined && String(m).trim() !== '') return String(m);
+  return String(rev.translation_text || '');
+}
+
+function renderSegmentHistory(panel, revisions) {
+  if (!revisions || !revisions.length) {
+    panel.innerHTML = '<span style="font-size:11px;color:var(--txL);">暂无历史版本</span>';
+    return;
+  }
+  var html = '<div style="border:1px solid var(--bdr);border-radius:6px;padding:8px;">'
+    + '<div style="font-size:11px;font-weight:600;margin-bottom:6px;">历史版本</div>';
+  revisions.forEach(function(rev) {
+    var time = (rev.created_at || 0)
+      ? new Date((rev.created_at || 0) * 1000).toLocaleString('zh-CN', { hour12: false })
+      : '-';
+    var source = (rev.revision_source === 'manual') ? '人工' : '机器';
+    var text = revisionDisplayText(rev);
+    html += '<div style="padding:6px 0;border-bottom:1px solid var(--bdrL);">'
+      + '<div style="font-size:11px;color:var(--txL);margin-bottom:4px;">'
+      + '<span>' + escapeHtml(time) + '</span> '
+      + '<span style="color:var(--acc);">' + escapeHtml(source) + '</span>'
+      + (rev.updated_by ? (' <span style="color:var(--txL);">' + escapeHtml(String(rev.updated_by)) + '</span>') : '')
+      + '</div>'
+      + '<div style="font-size:13px;line-height:1.45;white-space:pre-wrap;">' + escapeHtml(text) + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  panel.innerHTML = html;
+}
+
+function toggleSegmentHistory(idx, bp) {
+  idx = Number(idx);
+  bp = Number(bp || 0);
+  if (!bp) return;
+  var panel = document.getElementById('segmentHistoryPanel' + idx);
+  if (!panel) return;
+  if (!panel.classList.contains('hidden')) {
+    panel.classList.add('hidden');
+    return;
+  }
+  panel.innerHTML = '<span style="font-size:11px;color:var(--txL);">加载中…</span>';
+  panel.classList.remove('hidden');
+  var url = '{{ url_for("segment_history") }}?doc_id=' + encodeURIComponent(currentDocId)
+    + '&bp=' + bp + '&segment_index=' + idx;
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || !data.ok) {
+        var err = (data && data.error) ? data.error : '加载失败';
+        panel.innerHTML = '<span style="font-size:11px;color:var(--red);">' + escapeHtml(err) + '</span>';
+        return;
+      }
+      renderSegmentHistory(panel, data.revisions || []);
+    })
+    .catch(function() {
+      panel.innerHTML = '<span style="font-size:11px;color:var(--red);">加载失败，请稍后重试</span>';
+    });
+}
+
 function saveManualRevision(idx, bp) {
   idx = Number(idx);
   bp = Number(bp || 0);
@@ -2763,6 +2836,12 @@ function renderUsageDashboard(payload) {
       ? draft.paragraph_states.filter(function(state) { return state === 'error'; }).length
       : 0
   );
+  var manualTotal = Number((payload && payload.total_manual_revisions) || 0);
+  var pagesWith = Number((payload && payload.pages_with_manual_revisions) || 0);
+  var elM = document.getElementById('usageManualRevisions');
+  var elP = document.getElementById('usagePagesWithRevisions');
+  if (elM) elM.textContent = formatUsageNumber(manualTotal);
+  if (elP) elP.textContent = formatUsageNumber(pagesWith);
 }
 
 function refreshUsageDashboard() {

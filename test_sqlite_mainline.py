@@ -617,6 +617,38 @@ class SQLiteMainlineTest(unittest.TestCase):
         self.assertIn("人工修订 A", export_payload["markdown"])
         self.assertNotIn("机器译文 A", export_payload["markdown"])
 
+    def test_reading_page_has_history_button_and_usage_manual_metrics(self):
+        doc_id = create_doc("history-btn.pdf")
+        save_pages_to_disk([{
+            "bookPage": 16,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "Page 16",
+            "footnotes": "",
+            "textSource": "ocr",
+        }], "history-btn.pdf", doc_id)
+        save_entries_to_disk([{
+            "_pageBP": 16,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Paragraph A",
+                "translation": "机器译文 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "16",
+                "_status": "done",
+                "_error": "",
+            }],
+            "pages": "16",
+        }], "History Btn", 0, doc_id)
+
+        read_html = self.client.get(f"/reading?bp=16&doc_id={doc_id}").get_data(as_text=True)
+        self.assertIn("查看历史", read_html)
+        self.assertIn('id="usageManualRevisions"', read_html)
+        self.assertIn('id="usagePagesWithRevisions"', read_html)
+
     def test_save_manual_revision_conflict_returns_409(self):
         doc_id = create_doc("manual-revision-conflict.pdf")
         save_pages_to_disk([{
