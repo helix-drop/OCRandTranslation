@@ -5,8 +5,8 @@
 ## 当前状态
 
 - 日期：2026-03-27
-- 执行者：Cursor
-- 当前内容：已完成阅读页仪表盘人工修订统计与段级「查看历史」UI；当前测试可放行
+- 执行者：Codex（已合并本轮 Cursor 记录）
+- 当前内容：已完成 SQLite 主链路、人工修订历史、PDF 对照拖拽收口、Windows 静态兼容性核查与新手向文档同步；当前关键测试为 `124 passed`
 
 ## 记录格式
 
@@ -32,3 +32,6 @@
 | 2026-03-27 | Cursor | 翻译工程化第二阶段验收：人工修订 MVP + 每书独立术语表 + 最小元数据增强；执行 `./.venv/bin/python -m pytest test_sqlite_store.py test_sqlite_mainline.py test_tasks_streaming.py -q`、`./.venv/bin/python -m pytest test_translate_stop_flow_real_docs.py -q`、`./.venv/bin/python -m pytest -q` | 通过 | 结果分别为 `54 passed`、`50 passed`、全量 `108 passed, 8 skipped`；已覆盖人工修订保存冲突、阅读回显与导出一致、术语表按 `doc_id` 隔离、翻译入口按书注入词典、usage 接口人工修订计数，以及既有 `resume_bp/phase/failed_pages` 主链路不回退 |
 | 2026-03-27 | Cursor | 翻译工程化第三阶段验收：历史记录追踪 + 重译前警告 + 409 冲突 UX 收口；执行 `./.venv/bin/python -m pytest test_sqlite_store.py test_sqlite_mainline.py -q`、`./.venv/bin/python -m pytest -q` | 通过 | 结果分别为 `29 passed`、全量 `117 passed, 8 skipped`（较第二阶段增加 9 个新测试）；已覆盖 `segment_revisions` schema、人工修订前快照、重译前快照、`list_segment_revisions`、`count_manual_segments`、`/segment_history` API、`/check_retranslate_warnings` API、409 冲突响应携带 `server_segment`、重译/重解析按钮改为先检查人工修订数再弹确认对话框、前端 409 冲突时展示"刷新段落"按钮 |
 | 2026-03-27 | Cursor | 阅读页仪表盘人工修订统计 + 段级查看历史 UI；执行 `./.venv/bin/python -m pytest test_sqlite_mainline.py -q`、`./.venv/bin/python -m pytest -q` | 通过 | `test_reading_page_has_history_button_and_usage_manual_metrics` 新增；全量 `118 passed, 8 skipped`；阅读页「翻译进度」概览含人工修订段数与含修订页数；每段「查看历史」调用 `/segment_history` 内联展示历史版本 |
+| 2026-03-27 | Codex | PDF 对照收口与 Windows 兼容性核查：`python3 -m py_compile app.py config.py tasks.py storage.py text_processing.py translator.py pdf_extract.py ocr_client.py sqlite_store.py`、`python3 -m unittest test_tasks_streaming.ReadingRefreshContractTest.test_static_css_contains_pdf_horizontal_overscroll test_tasks_streaming.ReadingRefreshContractTest.test_static_css_keeps_pdf_resizer_pinned_to_viewport test_tasks_streaming.ReadingRefreshContractTest.test_reading_page_refreshes_pdf_layout_during_resizer_drag`、核对 `start.ps1/start.bat/start.sh` 与核心路径代码 | 通过 | Python 代码编译通过，3 项 PDF 阅读页回归测试通过；已确认仓库内具备 Windows 启动入口 `start.ps1/start.bat`，核心路径处理统一走 `os.path.join(...)`，未发现明显写死 Unix 路径；本条结论属于静态核查，不代表已在 Windows 实机启动 |
+| 2026-03-27 | Codex | 提交前关键回归复核：`./.venv/bin/python -m pytest test_sqlite_store.py test_sqlite_mainline.py test_tasks_streaming.py test_translate_stop_flow_real_docs.py -q` | 通过 | 总结果 `104 passed`；已覆盖 SQLite 主链路、阅读页 PDF 拖拽/横向手势修复、阅读入口与 `doc_id` 绑定、重译与导出主路径，当前提交前状态可继续推进 |
+| 2026-03-27 | Codex | rebase 后综合回归：`./.venv/bin/python -m pytest test_sqlite_store.py test_sqlite_mainline.py test_tasks_streaming.py test_translate_stop_flow_real_docs.py test_backend_backlog.py -q` | 通过 | 总结果 `124 passed`；已覆盖 SQLite 主链路、人工修订与历史记录、PDF 拖拽/横向手势修复、TOC 存取、术语 CRUD、阅读入口与 `doc_id` 绑定、重译与导出主路径 |

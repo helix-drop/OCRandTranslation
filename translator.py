@@ -1,11 +1,11 @@
-"""翻译模块：支持 Anthropic Claude 和 Qwen (DashScope) API。"""
+"""翻译模块：支持 DeepSeek 和 Qwen (DashScope) API。"""
 import json
 import re
 
-import anthropic
 from openai import OpenAI
 
 DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 
 
 class TranslateStreamAborted(RuntimeError):
@@ -43,13 +43,16 @@ def _normalize_optional_text(val) -> str:
 def build_prompt(gloss_str: str) -> str:
     lines = [
         "你是一位专业的学术文献翻译专家，擅长将外文学术论文翻译为中文。",
+        "硬性要求：所有翻译结果必须使用简体中文，不得输出繁体中文。",
         "",
-        "任务：校正原文，翻译为中文。",
+        "任务：校正原文，翻译为简体中文。",
         "",
         "校正规则：",
         "- 修复OCR造成的断词、多余空格、错字",
         "- 保留原文分段（用\\n\\n分隔段落）",
         "- 专有名词、人名、术语在中文翻译中首次出现时标注原文",
+        "- 若术语词典给出了映射，正文出现该术语时必须优先使用词典译法，禁止换成同义词",
+        "- 术语词典是硬约束：宁可句子生硬，也不要违背词典映射",
         "- 引用格式(如作者, 年份)保留原样",
         "- 如果当前段落类型是标题，只翻译标题文本本身，绝对不要吸收前后文正文",
         "- 标题段保持标题形态，不要扩写、解释或补出下一段内容",
@@ -67,12 +70,16 @@ def build_prompt(gloss_str: str) -> str:
         '  "pages": "页码",',
         '  "original": "校正后的正文原文",',
         '  "footnotes": "校正后的脚注原文，无则空字符串",',
-        '  "translation": "正文的中文翻译(段落与原文对应)",',
-        '  "footnotes_translation": "脚注的中文翻译，无则空字符串"',
+        '  "translation": "正文的简体中文翻译(段落与原文对应)",',
+        '  "footnotes_translation": "脚注的简体中文翻译，无则空字符串"',
         "}",
     ]
     if gloss_str.strip():
-        lines.extend(["", "术语词典：", gloss_str])
+        lines.extend([
+            "",
+            "术语词典（硬约束，严格按右侧译法）：",
+            gloss_str,
+        ])
     return "\n".join(lines)
 
 
@@ -134,6 +141,63 @@ def _normalize_translation_text(translation: str, para_text: str, heading_level:
         return translation
     max_lines = max(1, len(source_lines))
     return "\n".join(translated_lines[:max_lines]).strip()
+
+
+def _collect_required_glossary(para_text: str, glossary: list) -> list[tuple[str, str]]:
+    source = str(para_text or "")
+    required: list[tuple[str, str]] = []
+    seen = set()
+    for item in glossary or []:
+        if not isinstance(item, (list, tuple)) or len(item) < 2:
+            continue
+        term = str(item[0] or "").strip()
+        defn = str(item[1] or "").strip()
+        if not term or not defn:
+            continue
+        key = term.lower()
+        if key in seen:
+            continue
+        if re.search(re.escape(term), source, flags=re.IGNORECASE):
+            required.append((term, defn))
+            seen.add(key)
+    return required
+
+
+def _missing_glossary_defs(translation: str, required: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    tgt = str(translation or "")
+    return [(term, defn) for term, defn in required if defn not in tgt]
+
+
+def _enforce_glossary_rewrite(
+    translation: str,
+    para_text: str,
+    required: list[tuple[str, str]],
+    model_id: str,
+    api_key: str,
+    provider: str,
+) -> str:
+    if not required:
+        return translation
+    required_text = "\n".join(f"- {term} => {defn}" for term, defn in required)
+    sys_prompt = (
+        "你是术语校对助手。任务：只改写给定中文译文中的术语用法，其他语义和结构尽量保持不变。"
+        "必须使用指定术语映射，且输出必须是简体中文。"
+        "不要输出解释，不要Markdown，不要JSON，只输出改写后的简体中文译文正文。"
+    )
+    user_msg = (
+        "请按以下术语硬约束改写译文：\n"
+        f"{required_text}\n\n"
+        f"原文片段：\n{para_text}\n\n"
+        f"当前译文：\n{translation}"
+    )
+    try:
+        if provider == "qwen":
+            revised = _call_qwen(sys_prompt, user_msg, model_id, api_key).get("text", "").strip()
+        else:
+            revised = _call_deepseek(sys_prompt, user_msg, model_id, api_key).get("text", "").strip()
+        return revised or translation
+    except Exception:
+        return translation
 
 
 def parse_json_response(text: str) -> dict | None:
@@ -241,31 +305,35 @@ def _extract_translation_preview(text: str) -> str:
     return decoded
 
 
-def _call_anthropic(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
-    """调用 Anthropic Claude API。"""
-    client = anthropic.Anthropic(api_key=api_key)
-    response = client.messages.create(
-        model=model_id,
-        max_tokens=4096,
-        system=sys_prompt,
-        messages=[{"role": "user", "content": user_msg}],
-    )
-    full = ""
-    for block in response.content:
-        if block.type == "text":
-            full += block.text
-    usage = _build_usage(
-        prompt_tokens=getattr(response.usage, "input_tokens", 0),
-        completion_tokens=getattr(response.usage, "output_tokens", 0),
-    )
-    return {"text": full, "usage": usage}
-
-
 def _call_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
     """调用 Qwen (DashScope) API，使用 OpenAI 兼容接口。"""
     client = OpenAI(
         api_key=api_key,
         base_url=DASHSCOPE_BASE_URL,
+    )
+    response = client.chat.completions.create(
+        model=model_id,
+        max_tokens=4096,
+        messages=[
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+    )
+    usage = _build_usage(
+        prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
+        completion_tokens=getattr(response.usage, "completion_tokens", 0),
+        total_tokens=getattr(response.usage, "total_tokens", None),
+    )
+    if response.choices and response.choices[0].message.content:
+        return {"text": response.choices[0].message.content, "usage": usage}
+    return {"text": "", "usage": usage}
+
+
+def _call_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
+    """调用 DeepSeek API，使用 OpenAI 兼容接口。"""
+    client = OpenAI(
+        api_key=api_key,
+        base_url=DEEPSEEK_BASE_URL,
     )
     response = client.chat.completions.create(
         model=model_id,
@@ -359,36 +427,46 @@ def _extract_openai_delta_text(chunk) -> str:
     return ""
 
 
-def _stream_anthropic(sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
-    """Anthropic 流式文本输出。"""
-    client = anthropic.Anthropic(api_key=api_key)
+def _stream_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
+    """DeepSeek/OpenAI 兼容接口流式文本输出。"""
+    client = OpenAI(
+        api_key=api_key,
+        base_url=DEEPSEEK_BASE_URL,
+    )
+    response = client.chat.completions.create(
+        model=model_id,
+        max_tokens=4096,
+        messages=[
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+        stream=True,
+        stream_options={"include_usage": True},
+    )
     full_parts = []
-    stream = None
+    usage = _empty_usage()
     try:
-        stream = client.messages.stream(
-            model=model_id,
-            max_tokens=4096,
-            system=sys_prompt,
-            messages=[{"role": "user", "content": user_msg}],
-        )
-        with stream as response:
-            for text in response.text_stream:
-                _check_stream_stop(stop_checker)
-                if not text:
-                    continue
+        for chunk in response:
+            _check_stream_stop(stop_checker)
+            text = _extract_openai_delta_text(chunk)
+            if text:
                 full_parts.append(text)
                 yield {"type": "delta", "text": text}
-            final_message = response.get_final_message()
-        usage = _build_usage(
-            prompt_tokens=getattr(getattr(final_message, "usage", None), "input_tokens", 0),
-            completion_tokens=getattr(getattr(final_message, "usage", None), "output_tokens", 0),
-        )
+            chunk_usage = getattr(chunk, "usage", None)
+            if chunk_usage:
+                usage = _build_usage(
+                    prompt_tokens=getattr(chunk_usage, "prompt_tokens", 0),
+                    completion_tokens=getattr(chunk_usage, "completion_tokens", 0),
+                    total_tokens=getattr(chunk_usage, "total_tokens", None),
+                )
         full_text = "".join(full_parts)
         yield {"type": "usage", "usage": usage}
         yield {"type": "done", "text": full_text, "usage": usage}
     except TranslateStreamAborted:
-        _close_stream_response(stream)
+        _close_stream_response(response)
         raise
+    finally:
+        _close_stream_response(response)
 
 
 def _stream_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
@@ -468,7 +546,7 @@ def structure_page(
     markdown: str,
     model_id: str,
     api_key: str,
-    provider: str = "anthropic",
+    provider: str = "deepseek",
     page_num: int = 0,
 ) -> dict:
     """
@@ -479,7 +557,7 @@ def structure_page(
         markdown: 上下文 markdown（含前后页片段）
         model_id: LLM model id
         api_key: API key
-        provider: "anthropic" 或 "qwen"
+        provider: "deepseek" 或 "qwen"
         page_num: 当前页码
 
     Returns:
@@ -503,7 +581,7 @@ def structure_page(
     if provider == "qwen":
         api_result = _call_qwen(_STRUCTURE_SYSTEM, msg, model_id, api_key)
     else:
-        api_result = _call_anthropic(_STRUCTURE_SYSTEM, msg, model_id, api_key)
+        api_result = _call_deepseek(_STRUCTURE_SYSTEM, msg, model_id, api_key)
 
     full = api_result.get("text", "")
     if not full:
@@ -536,7 +614,7 @@ def translate_paragraph(
     glossary: list,
     model_id: str,
     api_key: str,
-    provider: str = "anthropic",
+    provider: str = "deepseek",
     heading_level: int = 0,
     para_idx: int | None = None,
     para_total: int | None = None,
@@ -549,7 +627,7 @@ def translate_paragraph(
     翻译一个段落。
 
     Args:
-        provider: "anthropic" 或 "qwen"
+        provider: "deepseek" 或 "qwen"
 
     Returns:
         包含 pages, original, translation, footnotes, footnotes_translation 的字典
@@ -573,7 +651,7 @@ def translate_paragraph(
     if provider == "qwen":
         result = _call_qwen(sys_prompt, msg, model_id, api_key)
     else:
-        result = _call_anthropic(sys_prompt, msg, model_id, api_key)
+        result = _call_deepseek(sys_prompt, msg, model_id, api_key)
 
     full = result.get("text", "")
     if not full:
@@ -595,6 +673,18 @@ def translate_paragraph(
     p["footnotes"] = _normalize_optional_text(p.get("footnotes", "")).strip() or _normalize_optional_text(footnotes).strip()
     p["footnotes_translation"] = _normalize_optional_text(p.get("footnotes_translation", "")).strip()
     p["translation"] = _normalize_translation_text(p.get("translation", ""), para_text, heading_level=heading_level)
+    required_glossary = _collect_required_glossary(para_text, glossary)
+    missing_defs = _missing_glossary_defs(p["translation"], required_glossary)
+    if missing_defs:
+        revised = _enforce_glossary_rewrite(
+            translation=p["translation"],
+            para_text=para_text,
+            required=missing_defs,
+            model_id=model_id,
+            api_key=api_key,
+            provider=provider,
+        )
+        p["translation"] = _normalize_translation_text(revised, para_text, heading_level=heading_level)
     p["_usage"] = result.get("usage", _empty_usage())
 
     return p
@@ -607,7 +697,7 @@ def stream_translate_paragraph(
     glossary: list,
     model_id: str,
     api_key: str,
-    provider: str = "anthropic",
+    provider: str = "deepseek",
     stop_checker=None,
     heading_level: int = 0,
     para_idx: int | None = None,
@@ -644,7 +734,7 @@ def stream_translate_paragraph(
     if provider == "qwen":
         stream_iter = _stream_qwen(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
     else:
-        stream_iter = _stream_anthropic(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
+        stream_iter = _stream_deepseek(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
 
     final_usage = _empty_usage()
     raw_stream_text = ""
@@ -690,6 +780,18 @@ def stream_translate_paragraph(
         p["footnotes"] = _normalize_optional_text(p.get("footnotes", "")).strip() or _normalize_optional_text(footnotes).strip()
         p["footnotes_translation"] = _normalize_optional_text(p.get("footnotes_translation", "")).strip()
         p["translation"] = _normalize_translation_text(p.get("translation", ""), para_text, heading_level=heading_level)
+        required_glossary = _collect_required_glossary(para_text, glossary)
+        missing_defs = _missing_glossary_defs(p["translation"], required_glossary)
+        if missing_defs:
+            revised = _enforce_glossary_rewrite(
+                translation=p["translation"],
+                para_text=para_text,
+                required=missing_defs,
+                model_id=model_id,
+                api_key=api_key,
+                provider=provider,
+            )
+            p["translation"] = _normalize_translation_text(revised, para_text, heading_level=heading_level)
         p["_usage"] = final_usage
 
         yield {

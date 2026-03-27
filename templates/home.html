@@ -73,10 +73,12 @@
       {% endif %}
     </div>
     {% else %}
-    <div style="background:var(--bg);border-radius:8px;padding:16px;text-align:center;">
-      <p style="font-size:13px;color:var(--txS);line-height:1.8;margin:0;">
-        <strong>上传PDF或图片</strong>，自动调用PaddleOCR解析版面。<br>
-        <span style="font-size:12px;color:var(--txL);">页眉页脚自动检测移除。每日可解析3000页。</span>
+    <div style="background:var(--card);border:2px dashed var(--bdrL);border-radius:12px;padding:40px 20px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;opacity:0.8;">📚</div>
+      <h3 style="font-size:16px;color:var(--txt);margin-bottom:8px;">还没有解析任何文档</h3>
+      <p style="font-size:13px;color:var(--txS);line-height:1.8;max-width:400px;margin:0 auto;">
+        请在上方<strong>上传PDF或图片</strong>。<br>
+        <span style="font-size:12px;color:var(--txL);">支持自动调用 PaddleOCR 进行高精度版面解析，自动检测并移除页眉页脚。</span>
       </p>
     </div>
     {% endif %}

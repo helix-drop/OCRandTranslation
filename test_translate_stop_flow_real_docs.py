@@ -713,7 +713,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertIn("翻译 A", html)
         self.assertIn(f'/reading?bp={first_bp}&amp;doc_id={self.doc_a_id}&amp;usage=0&amp;orig=0&amp;layout=stack&amp;pdf=0', html)
         self.assertIn(f'data-pdf-src="/pdf_page/0?doc_id={self.doc_a_id}"', html)
-        self.assertIn(f'/retranslate/{first_bp}/sonnet?doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/retranslate/{first_bp}/deepseek-chat?doc_id={self.doc_a_id}', html)
         self.assertIn(f'/reset_text?doc_id={self.doc_a_id}', html)
         self.assertIn("reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);", html)
 
@@ -829,7 +829,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn(f'<input type="hidden" name="doc_id" value="{self.doc_a_id}">', html)
-        self.assertIn(f'/set_model/sonnet?next=input&amp;doc_id={self.doc_a_id}', html)
+        self.assertIn(f'/set_model/deepseek-chat?next=input&amp;doc_id={self.doc_a_id}', html)
         self.assertIn(f'/?doc_id={self.doc_a_id}', html)
         self.assertIn('id="paddleQuotaStatusCard"', html)
         self.assertIn("fetch('/paddle_quota_status')", html)

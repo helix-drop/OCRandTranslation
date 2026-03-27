@@ -25,15 +25,17 @@
     </div>
   </div>
 
-  <!-- Anthropic API Key -->
+  <!-- DeepSeek API Key -->
   <div class="card">
     <div class="settings-section">
-      <h3>Anthropic API Key</h3>
+      <h3>DeepSeek API Key</h3>
       <form method="POST" action="{{ url_for('save_settings') }}">
-        <input type="hidden" name="section" value="anthropic">
-        <input name="anthropic_key" class="inp" type="password" value="{{ anthropic_key }}"
-               placeholder="输入 Anthropic API Key (sk-ant-...)">
-        <div class="hint">用于调用 Claude 进行翻译。</div>
+        <input type="hidden" name="section" value="deepseek">
+        <input name="deepseek_key" class="inp" type="password" value="{{ deepseek_key }}"
+               placeholder="输入 DeepSeek API Key">
+        <div class="hint">
+          访问 <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">DeepSeek Platform</a> 获取 API Key。用于调用 DeepSeek 系列模型。
+        </div>
         <button type="submit" class="btn btn-pri mt-10">保存 Key</button>
       </form>
     </div>

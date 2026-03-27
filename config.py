@@ -28,8 +28,8 @@ PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT = 5
 PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT = 80
 
 MODELS = {
-    "sonnet": {"id": "claude-sonnet-4-6", "label": "Sonnet 4.6", "provider": "anthropic"},
-    "opus": {"id": "claude-opus-4-6", "label": "Opus 4.6", "provider": "anthropic"},
+    "deepseek-chat": {"id": "deepseek-chat", "label": "DeepSeek-Chat", "provider": "deepseek"},
+    "deepseek-reasoner": {"id": "deepseek-reasoner", "label": "DeepSeek-Reasoner", "provider": "deepseek"},
     "qwen-plus": {"id": "qwen-plus", "label": "Qwen-Plus", "provider": "qwen"},
     "qwen-max": {"id": "qwen-max", "label": "Qwen-Max", "provider": "qwen"},
     "qwen-turbo": {"id": "qwen-turbo", "label": "Qwen-Turbo", "provider": "qwen"},
@@ -185,13 +185,13 @@ def set_paddle_token(token: str):
     save_config(cfg)
 
 
-def get_anthropic_key() -> str:
-    return load_config().get("anthropic_key", "")
+def get_deepseek_key() -> str:
+    return load_config().get("deepseek_key", "")
 
 
-def set_anthropic_key(key: str):
+def set_deepseek_key(key: str):
     cfg = load_config()
-    cfg["anthropic_key"] = key
+    cfg["deepseek_key"] = key
     save_config(cfg)
 
 
@@ -249,8 +249,58 @@ def set_glossary(glossary: list, doc_id: str = ""):
     )
 
 
+def _normalize_glossary_term(term: str) -> str:
+    return str(term or "").strip().lower()
+
+
+def list_glossary_items(doc_id: str = "") -> list[list[str]]:
+    items = get_glossary(doc_id) or []
+    normalized = []
+    for item in items:
+        if not isinstance(item, (list, tuple)) or len(item) < 2:
+            continue
+        term = str(item[0]).strip()
+        defn = str(item[1]).strip()
+        if term and defn:
+            normalized.append([term, defn])
+    return normalized
+
+
+def upsert_glossary_item(term: str, defn: str, doc_id: str = "") -> tuple[list[list[str]], bool]:
+    term = str(term or "").strip()
+    defn = str(defn or "").strip()
+    if not term or not defn:
+        raise ValueError("term/defn 不能为空")
+
+    key = _normalize_glossary_term(term)
+    items = list_glossary_items(doc_id)
+    updated = False
+    for idx, item in enumerate(items):
+        if _normalize_glossary_term(item[0]) == key:
+            items[idx] = [term, defn]
+            updated = True
+            break
+    if not updated:
+        items.append([term, defn])
+    set_glossary(items, doc_id=doc_id)
+    return items, updated
+
+
+def delete_glossary_item(term: str, doc_id: str = "") -> tuple[list[list[str]], bool]:
+    key = _normalize_glossary_term(term)
+    if not key:
+        return list_glossary_items(doc_id), False
+    items = list_glossary_items(doc_id)
+    kept = [item for item in items if _normalize_glossary_term(item[0]) != key]
+    deleted = len(kept) != len(items)
+    if deleted:
+        set_glossary(kept, doc_id=doc_id)
+    return kept if deleted else items, deleted
+
+
 def get_model_key() -> str:
-    return load_config().get("model_key", "sonnet")
+    key = load_config().get("model_key", "deepseek-chat")
+    return key if key in MODELS else "deepseek-chat"
 
 
 def set_model_key(key: str):
@@ -373,5 +423,4 @@ def delete_doc(doc_id: str):
     # 如果删除的是当前文档，清除 current
     if is_current:
         SQLiteRepository().set_app_state("current_doc_id", "")
-
 

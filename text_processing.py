@@ -16,7 +16,7 @@ from text_utils import (  # noqa: F401
     ends_mid, starts_low,
 )
 from ocr_parser import parse_ocr, clean_header_footer  # noqa: F401
-from pdf_extract import extract_pdf_text, combine_sources  # noqa: F401
+from pdf_extract import extract_pdf_text, extract_pdf_toc, combine_sources  # noqa: F401
 
 
 # ============ 旧段落引擎（基于 blocks） ============
@@ -150,6 +150,20 @@ def find_next_paras(pages: list, end_bp: int, raw_text: str = "", count: int = 1
 
 # ============ 脚注处理 ============
 
+_LATEX_FOOTNOTE_MARK_RE = re.compile(r"\$\s*\^\{(\d+)\}\s*\$")
+_PLAIN_FOOTNOTE_MARK_RE = re.compile(r"(?<![\w\[])\^\{(\d+)\}")
+
+
+def normalize_latex_footnote_markers(text: str) -> str:
+    """将 OCR 遗留的脚注标记（如 $ ^{12} $）标准化为 [12]。"""
+    raw = (text or "").strip()
+    if not raw:
+        return ""
+    normalized = _LATEX_FOOTNOTE_MARK_RE.sub(r"[\1]", raw)
+    normalized = _PLAIN_FOOTNOTE_MARK_RE.sub(r"[\1]", normalized)
+    return normalized
+
+
 # 非实质性脚注模式
 _SKIP_FN_RE = [
     re.compile(r"Corresponding\s+author", re.I),
@@ -181,6 +195,7 @@ def _is_boilerplate_footnote(text: str) -> bool:
 
 def _filter_footnote_lines(text: str) -> str:
     """过滤掉通讯作者、邮箱等非实质性脚注。"""
+    text = normalize_latex_footnote_markers(text)
     if _is_boilerplate_footnote(text):
         return ""
     return text.strip()
@@ -290,7 +305,7 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
     items = []
 
     for line in lines:
-        stripped = line.strip()
+        stripped = normalize_latex_footnote_markers(line)
         if not stripped:
             items.append({"type": "blank", "level": 0, "text": ""})
             continue
@@ -452,7 +467,10 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
 
     # ====== Step 5: 跨页段落处理 ======
     if result and result[0].get("cross_page") in ("cont_prev", "cont_both"):
-        result.pop(0)
+        if len(result) > 1:
+            result.pop(0)
+        else:
+            result[0]["cross_page"] = None
 
     if result and result[-1].get("cross_page") == "cont_next":
         chain_texts = []
@@ -551,7 +569,7 @@ def _fallback_blocks_to_paragraphs(pg: dict, bp: int) -> list[dict]:
     """当 markdown 不可用时，用 OCR blocks 回退。"""
     raw = []
     for b in pg.get("blocks", []):
-        txt = b.get("text", "").strip()
+        txt = normalize_latex_footnote_markers(b.get("text", ""))
         if len(txt) < 2:
             continue
         if b.get("is_meta"):

@@ -61,9 +61,9 @@
   <div class="card" style="border-color:var(--red);margin-top:16px;">
     <p style="color:var(--red);font-size:13px;">当前模型为 Qwen，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DashScope API Key。</p>
   </div>
-  {% elif provider == 'anthropic' and not anthropic_key %}
+{% elif provider == 'deepseek' and not deepseek_key %}
   <div class="card" style="border-color:var(--red);margin-top:16px;">
-    <p style="color:var(--red);font-size:13px;">请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 Anthropic API Key。</p>
+  <p style="color:var(--red);font-size:13px;">当前模型为 DeepSeek，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DeepSeek API Key。</p>
   </div>
   {% endif %}
 </div>

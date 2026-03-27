@@ -33,7 +33,18 @@ echo "========================================="
 echo ""
 
 # 自动打开浏览器（延迟1秒等服务启动）
-(sleep 1 && open "http://localhost:8080") &
+open_browser() {
+    local url="$1"
+    if command -v open >/dev/null 2>&1; then
+        open "$url" >/dev/null 2>&1
+    elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$url" >/dev/null 2>&1
+    else
+        echo "未检测到浏览器打开命令，请手动访问: $url"
+    fi
+}
+
+(sleep 1 && open_browser "http://localhost:8080") &
 
 # 启动 Flask
 python3 app.py

@@ -47,7 +47,8 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             has_pdf INTEGER NOT NULL DEFAULT 0,
             last_entry_idx INTEGER NOT NULL DEFAULT 0,
             status TEXT NOT NULL DEFAULT 'ready',
-            source_pdf_path TEXT
+            source_pdf_path TEXT,
+            toc_json TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_documents_updated_at ON documents(updated_at);
 
@@ -183,6 +184,12 @@ def _create_schema(conn: sqlite3.Connection) -> None:
     )
     _ensure_column(
         conn,
+        "documents",
+        "toc_json",
+        "toc_json TEXT",
+    )
+    _ensure_column(
+        conn,
         "translation_segments",
         "manual_translation_text",
         "manual_translation_text TEXT",
@@ -261,14 +268,15 @@ class SQLiteRepository:
             "last_entry_idx": int(fields.pop("last_entry_idx", 0)),
             "status": fields.pop("status", "ready"),
             "source_pdf_path": fields.pop("source_pdf_path", None),
+            "toc_json": fields.pop("toc_json", None),
         }
         with transaction(self.db_path) as conn:
             conn.execute(
                 """
                 INSERT INTO documents(
                     id, name, created_at, updated_at, page_count, entry_count,
-                    has_pdf, last_entry_idx, status, source_pdf_path
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    has_pdf, last_entry_idx, status, source_pdf_path, toc_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     updated_at=excluded.updated_at,
@@ -277,7 +285,8 @@ class SQLiteRepository:
                     has_pdf=excluded.has_pdf,
                     last_entry_idx=excluded.last_entry_idx,
                     status=excluded.status,
-                    source_pdf_path=excluded.source_pdf_path
+                    source_pdf_path=excluded.source_pdf_path,
+                    toc_json=excluded.toc_json
                 """,
                 (
                     doc_id,
@@ -290,6 +299,7 @@ class SQLiteRepository:
                     payload["last_entry_idx"],
                     payload["status"],
                     payload["source_pdf_path"],
+                    payload["toc_json"],
                 ),
             )
 
@@ -316,6 +326,33 @@ class SQLiteRepository:
                 payload["created"] = payload.get("created_at", 0)
                 docs.append(payload)
             return docs
+
+    def set_document_toc(self, doc_id: str, toc_items: list[dict]) -> None:
+        now = int(time.time())
+        toc_json = json.dumps(toc_items or [], ensure_ascii=False)
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                """
+                UPDATE documents
+                SET toc_json = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (toc_json, now, doc_id),
+            )
+
+    def get_document_toc(self, doc_id: str) -> list[dict]:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT toc_json FROM documents WHERE id = ?",
+                (doc_id,),
+            ).fetchone()
+            if not row or not row["toc_json"]:
+                return []
+            try:
+                items = json.loads(row["toc_json"])
+            except Exception:
+                return []
+            return items if isinstance(items, list) else []
 
     def delete_document(self, doc_id: str) -> None:
         with transaction(self.db_path) as conn:

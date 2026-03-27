@@ -540,6 +540,67 @@ class ReadingRefreshContractTest(unittest.TestCase):
         self.assertIn('class="pdf-panel" id="pdfPanel" style="display:none;"', html)
         self.assertIn('class="pdf-toggle-btn" id="pdfToggleBtn"', html)
 
+    def test_reading_page_syncs_pdf_resizer_visibility_with_panel_state(self):
+        self._save_range_pages(1, 2)
+
+        resp = self.client.get("/reading?bp=1&usage=0&orig=0&layout=stack&pdf=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("var resizer = document.getElementById('pdfResizer');", html)
+        self.assertIn("resizer.style.display = store.ui.pdfVisible ? '' : 'none';", html)
+
+    def test_reading_page_refreshes_pdf_layout_during_resizer_drag(self):
+        self._save_range_pages(1, 2)
+
+        resp = self.client.get("/reading?bp=1&pdf=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("function applyPdfPagePlaceholders(options)", html)
+        self.assertRegex(
+            html,
+            re.compile(
+                r"window\.addEventListener\('mousemove', function\(e\) \{[\s\S]*?"
+                r"applyPdfPagePlaceholders\(\{ syncImageSrc: false \}\);",
+                re.S,
+            ),
+        )
+        self.assertRegex(
+            html,
+            re.compile(
+                r"window\.addEventListener\('mouseup', function\(e\) \{[\s\S]*?"
+                r"applyPdfPagePlaceholders\(\);",
+                re.S,
+            ),
+        )
+
+    def test_static_css_keeps_pdf_resizer_pinned_to_viewport(self):
+        resp = self.client.get("/static/style.css")
+        css = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertRegex(
+            css,
+            re.compile(
+                r"\.resizer\s*\{[^}]*position:\s*sticky;[^}]*top:\s*0;[^}]*height:\s*100vh;",
+                re.S,
+            ),
+        )
+
+    def test_static_css_contains_pdf_horizontal_overscroll(self):
+        resp = self.client.get("/static/style.css")
+        css = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertRegex(
+            css,
+            re.compile(
+                r"\.pdf-img-container\s*\{[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*none;",
+                re.S,
+            ),
+        )
+
     def test_reading_page_exposes_force_ocr_reparse_action_in_placeholder_and_content(self):
         self._save_range_pages(1, 1)
 

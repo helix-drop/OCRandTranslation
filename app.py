@@ -5,7 +5,7 @@ Foreign Literature Reader
 功能流程：
 1. 上传 PDF/图片 → 调用 PaddleOCR API 解析版面
 2. 解析 OCR 结果，清理页眉页脚
-3. 构建段落，调用 Claude API 翻译
+3. 构建段落，调用 DeepSeek/Qwen API 翻译
 4. 阅读、导航、导出
 """
 import json
@@ -25,9 +25,10 @@ from io import BytesIO
 from config import (
     MODELS, ensure_dirs, check_write_permission,
     get_paddle_token, set_paddle_token,
-    get_anthropic_key, set_anthropic_key,
+    get_deepseek_key, set_deepseek_key,
     get_dashscope_key, set_dashscope_key,
     get_glossary, set_glossary,
+    list_glossary_items, upsert_glossary_item, delete_glossary_item,
     get_model_key, set_model_key,
     get_pdf_virtual_window_radius, get_pdf_virtual_scroll_min_pages,
     get_current_doc_id, set_current_doc,
@@ -35,14 +36,15 @@ from config import (
     list_docs, update_doc_meta, delete_doc,
     LOCAL_DATA_DIR,
 )
-from text_processing import get_page_range, get_next_page_bp
+from text_processing import get_page_range, get_next_page_bp, normalize_latex_footnote_markers
 from pdf_extract import render_pdf_page
 from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, highlight_terms, _ensure_str,
-    gen_markdown, get_app_state, has_pdf, get_pdf_path,
+    gen_markdown, get_app_state, has_pdf, get_pdf_path, load_pdf_toc_from_disk,
 )
+from sqlite_store import SQLiteRepository
 from tasks import (
     create_task, get_task, get_task_events, set_task_final,
     remove_task, process_file, reparse_file,
@@ -50,13 +52,70 @@ from tasks import (
     start_translate_task, has_active_translate_task,
     is_translate_running, is_stop_requested, get_translate_snapshot,
     request_stop_translate, get_translate_events,
+    request_stop_active_translate, wait_for_translate_idle,
     reconcile_translate_state_after_page_success,
     reconcile_translate_state_after_page_failure,
 )
-from sqlite_store import SQLiteRepository
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+
+def _strip_html_table(t: str) -> str:
+    """将 HTML <table> 转为制表符分隔的纯文本行。"""
+    cleaned = re.sub(r"</?table[^>]*>", "", t)
+    cleaned = re.sub(r"</?tbody[^>]*>", "", cleaned)
+    cleaned = re.sub(r"</?thead[^>]*>", "", cleaned)
+    cleaned = re.sub(r"</tr>", "\n", cleaned)
+    cleaned = re.sub(r"<tr[^>]*>", "", cleaned)
+    cleaned = re.sub(r"</t[dh]>", "\t", cleaned)
+    cleaned = re.sub(r"<t[dh][^>]*>", "", cleaned)
+    cleaned = re.sub(r"<[^>]+>", "", cleaned)
+    lines = [ln.strip() for ln in cleaned.split("\n") if ln.strip()]
+    return "\n".join(lines)
+
+
+def _extract_json_translation(t: str) -> str | None:
+    """尝试从 LLM 返回的 JSON 结构中提取 translation 字段。"""
+    try:
+        obj = json.loads(t)
+        if isinstance(obj, dict):
+            for key in ("translation", "翻译", "text", "content"):
+                if key in obj and isinstance(obj[key], str):
+                    return obj[key].strip()
+    except (json.JSONDecodeError, ValueError):
+        pass
+    for key in ("translation", "翻译"):
+        m = re.search(rf'"{key}"\s*:\s*"((?:[^"\\]|\\.)*)"', t, re.DOTALL)
+        if m:
+            return m.group(1).replace("\\n", "\n").replace('\\"', '"').strip()
+    for key in ("translation", "翻译"):
+        marker = f'"{key}": "'
+        idx = t.find(marker)
+        if idx >= 0:
+            rest = t[idx + len(marker):]
+            end = 0
+            while end < len(rest):
+                if rest[end] == '"' and (end == 0 or rest[end - 1] != '\\'):
+                    break
+                end += 1
+            if end > 0:
+                return rest[:end].replace("\\n", "\n").replace('\\"', '"').strip()
+    return None
+
+
+def _clean_display_text(text: str) -> str:
+    """清洗翻译/原文中的异常格式：JSON 泄漏提取翻译，HTML 表格转可读文本。"""
+    if not text:
+        return text
+    t = text.strip()
+    if t.startswith("{") and ('"translation"' in t or '"翻译"' in t):
+        extracted = _extract_json_translation(t)
+        if extracted:
+            t = extracted
+    if "<table" in t.lower() and "<td" in t.lower():
+        t = _strip_html_table(t)
+    return t
 
 
 def _get_partial_failed_bps(doc_id: str) -> list[int]:
@@ -70,7 +129,7 @@ def _get_partial_failed_bps(doc_id: str) -> list[int]:
 
 
 def _build_preview_paragraphs(text: str) -> list[str]:
-    raw = _ensure_str(text).replace("\r\n", "\n").strip()
+    raw = normalize_latex_footnote_markers(_ensure_str(text)).replace("\r\n", "\n").strip()
     if not raw:
         return []
     blocks = [
@@ -239,8 +298,14 @@ def reading():
         if bp is not None:
             entry_by_bp[bp] = entry
 
-    cur_page_bp = request.args.get("bp", type=int)
+    requested_bp = request.args.get("bp", type=int)
+    cur_page_bp = requested_bp
     if cur_page_bp not in page_bps:
+        if requested_bp is not None and page_bps:
+            flash(
+                f"页码 {requested_bp} 不在范围 p.{page_bps[0]}-p.{page_bps[-1]} 内，已跳转到 p.{state.get('first_page', page_bps[0])}。",
+                "info",
+            )
         if entries:
             cur_page_bp = entries[max(0, min(state["entry_idx"], len(entries) - 1))].get("_pageBP", state.get("first_page", 1))
         else:
@@ -256,13 +321,17 @@ def reading():
     )
     current_page_markdown = _ensure_str(current_page_data.get("markdown", "")).strip()
     current_page_markdown_paragraphs = _build_preview_paragraphs(current_page_markdown)
-    current_page_footnotes = _ensure_str(current_page_data.get("footnotes", "")).strip()
+    current_page_footnotes = normalize_latex_footnote_markers(
+        _ensure_str(current_page_data.get("footnotes", ""))
+    ).strip()
 
     display_entries = []
     for pe in page_entries:
         pe_copy = dict(pe)
         for field in ("original", "translation", "footnotes", "footnotes_translation"):
-            pe_copy[field] = _ensure_str(pe_copy.get(field))
+            pe_copy[field] = _clean_display_text(
+                normalize_latex_footnote_markers(_ensure_str(pe_copy.get(field)))
+            )
         pe_copy["original_html"] = highlight_terms(pe_copy["original"], glossary)
         display_entries.append(pe_copy)
 
@@ -316,6 +385,7 @@ def reading():
         next_bp=next_bp,
         page_bps=page_bps,
         translated_bps=translated_bps,
+        has_translation_history=state.get("has_translation_history", False),
         partial_failed_bps=partial_failed_bps,
         failed_bps=failed_bps,
         has_current_entry=has_current_entry,
@@ -501,7 +571,7 @@ def start_from_beginning():
     model_key = get_model_key()
     t_args = get_translate_args(model_key)
     if not t_args["api_key"]:
-        provider = MODELS[model_key].get("provider", "anthropic")
+        provider = MODELS[model_key].get("provider", "deepseek")
         name = "DashScope API Key" if provider == "qwen" else "Anthropic API Key"
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("home"))
@@ -523,7 +593,7 @@ def start_reading():
     model_key = get_model_key()
     t_args = get_translate_args(model_key)
     if not t_args["api_key"]:
-        provider = MODELS[model_key].get("provider", "anthropic")
+        provider = MODELS[model_key].get("provider", "deepseek")
         name = "DashScope API Key" if provider == "qwen" else "Anthropic API Key"
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("input_page"))
@@ -713,10 +783,19 @@ def translate_all_sse():
 @app.route("/start_translate_all", methods=["POST"])
 def start_translate_all():
     """启动后台连续翻译。"""
-    if has_active_translate_task():
-        return jsonify({"status": "already_running"})
-
     doc_id = request.form.get("doc_id", "").strip() or get_current_doc_id()
+    force_restart = request.form.get("force_restart", "").strip() == "1"
+
+    active_running = has_active_translate_task()
+    if active_running and not force_restart:
+        return jsonify({"status": "already_running"})
+    if active_running and force_restart:
+        stop_requested = request_stop_active_translate()
+        if not stop_requested:
+            return jsonify({"status": "switch_timeout", "error": "failed_to_request_stop"})
+        if not wait_for_translate_idle(timeout_s=4.0, poll_interval_s=0.05):
+            return jsonify({"status": "switch_timeout"})
+
     pages, src_name = load_pages_from_disk(doc_id)
     if not pages:
         return jsonify({"error": "no_pages"})
@@ -736,8 +815,13 @@ def start_translate_all():
         save_entries_to_disk([], doc_title, 0, doc_id)
 
     set_current_doc(doc_id)
-    start_translate_task(doc_id, start_bp, doc_title)
-    return jsonify({"status": "started"})
+    started = start_translate_task(doc_id, start_bp, doc_title)
+    if not started:
+        return jsonify({"status": "switch_timeout"})
+    return jsonify({
+        "status": "switching" if force_restart else "started",
+        "start_bp": start_bp,
+    })
 
 
 @app.route("/stop_translate")
@@ -769,7 +853,7 @@ def translate_api_usage():
     doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
     if doc_id:
         set_current_doc(doc_id)
-    state = get_app_state()
+    state = get_app_state(doc_id)
     bp = request.args.get("bp", type=int)
     if bp is None:
         entries = state.get("entries", [])
@@ -818,10 +902,10 @@ def save_settings():
         token = request.form.get("paddle_token", "").strip()
         set_paddle_token(token)
         flash("PaddleOCR 令牌已保存", "success")
-    elif section == "anthropic":
-        key = request.form.get("anthropic_key", "").strip()
-        set_anthropic_key(key)
-        flash("Anthropic API Key 已保存", "success")
+    elif section == "deepseek":
+        key = request.form.get("deepseek_key", "").strip()
+        set_deepseek_key(key)
+        flash("DeepSeek API Key 已保存", "success")
     elif section == "dashscope":
         key = request.form.get("dashscope_key", "").strip()
         set_dashscope_key(key)
@@ -835,16 +919,65 @@ def save_glossary():
     if doc_id:
         set_current_doc(doc_id)
     glossary = []
+    seen_terms = set()
     for key in request.form:
         if key.startswith("term_"):
             n = key[5:]
             term = request.form.get(f"term_{n}", "").strip()
             defn = request.form.get(f"defn_{n}", "").strip()
-            if term or defn:
+            if term and defn:
+                normalized = term.lower()
+                if normalized in seen_terms:
+                    continue
+                seen_terms.add(normalized)
                 glossary.append([term, defn])
     set_glossary(glossary, doc_id=doc_id)
     flash(f"词典已保存 ({len(glossary)} 条)", "success")
     return redirect(url_for("settings", doc_id=doc_id) + "#glossary")
+
+
+@app.route("/api/glossary")
+def api_glossary_list():
+    doc_id = _request_doc_id()
+    return jsonify({"items": list_glossary_items(doc_id=doc_id)})
+
+
+@app.route("/api/glossary", methods=["POST"])
+def api_glossary_create():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    data = request.get_json(silent=True) or {}
+    term = str(data.get("term", "")).strip()
+    defn = str(data.get("defn", "")).strip()
+    if not term or not defn:
+        return jsonify({"ok": False, "error": "term/defn 不能为空"}), 400
+    items, updated = upsert_glossary_item(term, defn, doc_id=doc_id)
+    return jsonify({"ok": True, "updated": updated, "items": items})
+
+
+@app.route("/api/glossary/<path:term>", methods=["PUT", "PATCH"])
+def api_glossary_update(term):
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    data = request.get_json(silent=True) or {}
+    defn = str(data.get("defn", "")).strip()
+    if not defn:
+        return jsonify({"ok": False, "error": "defn 不能为空"}), 400
+    items, _ = upsert_glossary_item(term, defn, doc_id=doc_id)
+    return jsonify({"ok": True, "updated": True, "items": items})
+
+
+@app.route("/api/glossary/<path:term>", methods=["DELETE"])
+def api_glossary_delete(term):
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    items, deleted = delete_glossary_item(term, doc_id=doc_id)
+    if not deleted:
+        return jsonify({"ok": False, "error": "term 不存在", "items": items}), 404
+    return jsonify({"ok": True, "deleted": True, "items": items})
 
 
 @app.route("/set_model/<key>")
@@ -922,6 +1055,14 @@ def pdf_page(file_idx):
         return f"渲染失败: {e}", 400
 
 
+@app.route("/pdf_toc")
+def pdf_toc():
+    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    if not doc_id:
+        return jsonify({"doc_id": "", "toc": []})
+    return jsonify({"doc_id": doc_id, "toc": load_pdf_toc_from_disk(doc_id)})
+
+
 # ============ ROUTES: 重置 ============
 
 @app.route("/reset_text")
@@ -981,4 +1122,6 @@ if __name__ == "__main__":
 
     ensure_dirs()
     print(f"数据目录: {LOCAL_DATA_DIR}")
-    app.run(debug=True, port=8080, threaded=True)
+    debug_env = os.getenv("FLASK_DEBUG", "").strip().lower()
+    debug_mode = debug_env in ("1", "true", "yes", "on")
+    app.run(debug=debug_mode, port=8080, threaded=True)

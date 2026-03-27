@@ -87,6 +87,62 @@ def extract_pdf_text(file_bytes: bytes) -> list[dict]:
     return pdf_pages
 
 
+def extract_pdf_toc(file_bytes: bytes) -> list[dict]:
+    """提取 PDF 目录（书签）为扁平结构。"""
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes))
+    except Exception:
+        return []
+
+    try:
+        outline = reader.outline
+    except Exception:
+        return []
+    if not outline:
+        return []
+
+    items = []
+
+    def _resolve_page_idx(node) -> int | None:
+        try:
+            page_idx = reader.get_destination_page_number(node)
+            if isinstance(page_idx, int) and page_idx >= 0:
+                return page_idx
+        except Exception:
+            return None
+        return None
+
+    def _node_title(node) -> str:
+        title = getattr(node, "title", "") or ""
+        title = str(title).strip()
+        return re.sub(r"\s+", " ", title)
+
+    def _walk(nodes, depth: int):
+        for node in nodes:
+            if isinstance(node, list):
+                _walk(node, depth + 1)
+                continue
+            title = _node_title(node)
+            if not title:
+                continue
+            page_idx = _resolve_page_idx(node)
+            if page_idx is None:
+                continue
+            items.append(
+                {
+                    "title": title,
+                    "depth": max(0, depth),
+                    "file_idx": int(page_idx),
+                }
+            )
+
+    if isinstance(outline, list):
+        _walk(outline, 0)
+    else:
+        _walk([outline], 0)
+    return items
+
+
 def _is_corrupted(text: str) -> bool:
     """检测文本是否被 \\x01 等控制字符污染（字体编码异常的 PDF 常见）。"""
     if not text:

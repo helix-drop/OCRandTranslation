@@ -47,3 +47,13 @@ output/*.json
 output/*.txt
 output/*.pdf
 !output/.gitkeep
+output/**/*
+
+# 发布无关的代理/实验文件
+.agents/
+.codex/
+verification.md
+
+# 本地调试探针
+tmp-*.html
+tmp_*.js

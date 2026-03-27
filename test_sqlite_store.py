@@ -427,6 +427,19 @@ class SQLiteStoreTest(unittest.TestCase):
         repo.save_manual_translation_segment("hist-4", 3, 1, "人工修订 B")
         self.assertEqual(repo.count_manual_segments("hist-4", 3), 2)
 
+    def test_document_toc_roundtrip(self):
+        repo = SQLiteRepository(self.db_path)
+        repo.upsert_document("doc-toc", "Doc Toc")
+        toc = [
+            {"title": "Chapter 1", "depth": 0, "file_idx": 0},
+            {"title": "Section 1.1", "depth": 1, "file_idx": 3},
+        ]
+
+        repo.set_document_toc("doc-toc", toc)
+
+        loaded = repo.get_document_toc("doc-toc")
+        self.assertEqual(loaded, toc)
+
 
 if __name__ == "__main__":
     unittest.main()

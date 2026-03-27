@@ -715,6 +715,7 @@
       {% endfor %}
     </div>
   </div>
+  <div class="resizer" id="pdfResizer" style="{{ '' if pdf_visible else 'display:none;' }}"></div>
   {% endif %}
 
   <!-- Content Panel (right) -->
@@ -1500,8 +1501,12 @@ function applyPdfPanelVisibilityState() {
   var layout = document.getElementById('readingLayout');
   var btn = document.getElementById('pdfBtn');
   var modeBtn = document.getElementById('pdfPanelModeBtn');
+  var resizer = document.getElementById('pdfResizer');
   if (!panel || !layout) return;
   panel.style.display = store.ui.pdfVisible ? '' : 'none';
+  if (resizer) {
+    resizer.style.display = store.ui.pdfVisible ? '' : 'none';
+  }
   layout.classList.toggle('with-pdf', store.ui.pdfVisible);
   panel.setAttribute('data-panel-mode', store.ui.pdfPanelMode);
   if (toggleBtn) {
@@ -1611,6 +1616,11 @@ function stepPdfZoom(delta, anchor) {
 }
 
 function cyclePdfPanelMode() {
+  var panel = document.getElementById('pdfPanel');
+  if (panel) {
+    panel.style.width = '';
+    panel.style.maxWidth = '';
+  }
   dispatch('cycle_pdf_panel_mode');
   applyPdfPanelVisibilityState();
   applyPdfPagePlaceholders();
@@ -2226,7 +2236,8 @@ function setupPdfScrollObserver() {
   });
 }
 
-function applyPdfPagePlaceholders() {
+function applyPdfPagePlaceholders(options) {
+  var opts = options || {};
   var container = document.getElementById('pdfScrollContainer');
   if (!container) return;
   container.querySelectorAll('.pdf-page-item[data-pdf-bp]').forEach(function(el) {
@@ -2245,7 +2256,7 @@ function applyPdfPagePlaceholders() {
       el.style.minHeight = '420px';
     }
     var img = getPdfImageForItem(el);
-    if (img) syncPdfImageSrc(el, img);
+    if (img && opts.syncImageSrc !== false) syncPdfImageSrc(el, img);
   });
 }
 
@@ -3355,6 +3366,48 @@ function listenReparseSSE(taskId, pageBp) {
   };
 }
 
+function initPdfResizer() {
+  var resizer = document.getElementById('pdfResizer');
+  var panel = document.getElementById('pdfPanel');
+  if (!resizer || !panel) return;
+
+  var isResizing = false;
+  var startX = 0;
+  var startWidth = 0;
+
+  resizer.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    isResizing = true;
+    startX = e.clientX;
+    startWidth = panel.offsetWidth;
+    resizer.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (!isResizing) return;
+    var currentX = e.clientX;
+    var newWidth = startWidth + (currentX - startX);
+    if (newWidth < 200) newWidth = 200;
+    if (newWidth > 800) newWidth = 800;
+    panel.style.maxWidth = 'none';
+    panel.style.width = newWidth + 'px';
+    applyPdfPagePlaceholders({ syncImageSrc: false });
+    maybeRestoreHighlight();
+  });
+
+  window.addEventListener('mouseup', function(e) {
+    if (!isResizing) return;
+    isResizing = false;
+    applyPdfPagePlaceholders();
+    maybeRestoreHighlight();
+    resizer.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+}
+
 // ===== 导出功能 =====
 function openExportModal() {
   document.getElementById('exportModal').classList.remove('hidden');
@@ -3418,6 +3471,7 @@ document.addEventListener('click', function(e) {
   applyLayoutState();
   applyPdfPanelVisibilityState();
   initPdfZoomInteractions();
+  initPdfResizer();
   if (store.ui.pdfVisible) {
     initPdfVirtualScroll();
     applyPdfPagePlaceholders();

@@ -32,8 +32,10 @@ from translator import (
 from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, load_entries_from_disk,
+    save_pdf_toc_to_disk,
     get_translate_args, _ensure_str,
 )
+from pdf_extract import extract_pdf_toc
 
 
 # ============ OCR TASK MANAGEMENT ============
@@ -174,6 +176,14 @@ def process_file(task_id: str):
                 task_push(task_id, "log", {"msg": "PDF 已保存供预览"})
             except Exception as e:
                 task_push(task_id, "log", {"msg": f"PDF保存失败: {e}"})
+            toc_items = extract_pdf_toc(file_bytes)
+            save_pdf_toc_to_disk(doc_id, toc_items)
+            if toc_items:
+                task_push(task_id, "log", {"msg": f"已提取 PDF 目录 ({len(toc_items)} 条)", "cls": "success"})
+            else:
+                task_push(task_id, "log", {"msg": "PDF 未检测到目录书签"})
+        else:
+            save_pdf_toc_to_disk(doc_id, [])
 
         # Step 5: Save pages data
         task_push(task_id, "progress", {"pct": 95, "label": "保存数据…", "detail": ""})
@@ -1350,6 +1360,29 @@ def request_stop_translate(doc_id: str) -> bool:
     return True
 
 
+def request_stop_active_translate() -> bool:
+    """请求停止当前活动翻译任务（不关心 doc_id）。"""
+    with _translate_lock:
+        running = _translate_task.get("running", False)
+        active_doc_id = _translate_task.get("doc_id", "")
+    if not running or not active_doc_id:
+        return False
+    return request_stop_translate(active_doc_id)
+
+
+def wait_for_translate_idle(timeout_s: float = 3.0, poll_interval_s: float = 0.05) -> bool:
+    """等待后台翻译进入空闲状态。"""
+    deadline = time.time() + max(0.0, float(timeout_s))
+    interval = max(0.01, float(poll_interval_s))
+    while time.time() <= deadline:
+        with _translate_lock:
+            if not _translate_task.get("running", False):
+                return True
+        time.sleep(interval)
+    with _translate_lock:
+        return not _translate_task.get("running", False)
+
+
 def start_translate_task(doc_id: str, start_bp: int, doc_title: str) -> bool:
     """启动后台翻译任务，返回是否成功启动。"""
     if not doc_id:
@@ -1880,9 +1913,10 @@ def reparse_file(task_id: str, doc_id: str):
         final_pages = hf["pages"]
         all_logs.extend(hf["log"])
 
-        # Step 4: 保存页面数据（写入 SQLite，保留翻译结果）
+        # Step 4: 保存页面数据（SQLite 主写入）
         task_push(task_id, "progress", {"pct": 95, "label": "保存数据…", "detail": ""})
         save_pages_to_disk(final_pages, file_name, doc_id)
+        save_pdf_toc_to_disk(doc_id, extract_pdf_toc(file_bytes))
 
         first, last = get_page_range(final_pages)
         summary = f"重新解析完成！{len(final_pages)}页 (p.{first}-{last})"

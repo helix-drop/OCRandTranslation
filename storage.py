@@ -5,7 +5,7 @@ import shutil
 
 from config import (
     MODELS,
-    get_paddle_token, get_anthropic_key, get_dashscope_key,
+    get_paddle_token, get_deepseek_key, get_dashscope_key,
     get_glossary, get_model_key,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
 )
@@ -25,6 +25,29 @@ def _doc_path(filename: str, doc_id: str = "") -> str:
 
 def _entries_root(doc_id: str = "") -> str:
     return _doc_path("entries", doc_id)
+
+
+def _entries_pages_dir(doc_id: str = "") -> str:
+    root = _entries_root(doc_id)
+    return os.path.join(root, "pages") if root else ""
+
+
+def _entry_page_path(bp: int, doc_id: str = "") -> str:
+    pages_dir = _entries_pages_dir(doc_id)
+    if not pages_dir or bp is None:
+        return ""
+    return os.path.join(pages_dir, f"{int(bp):06d}.json")
+
+
+def _list_entry_page_paths(doc_id: str = "") -> list[str]:
+    pages_dir = _entries_pages_dir(doc_id)
+    if not pages_dir or not os.path.isdir(pages_dir):
+        return []
+    return sorted(
+        os.path.join(pages_dir, name)
+        for name in os.listdir(pages_dir)
+        if name.endswith(".json")
+    )
 
 
 def _remove_legacy_entries_file(doc_id: str = ""):
@@ -125,17 +148,33 @@ def get_pdf_path(doc_id: str = "") -> str:
     return _doc_path("source.pdf", doc_id)
 
 
+def save_pdf_toc_to_disk(doc_id: str, toc_items: list[dict]) -> None:
+    """保存 PDF 目录结构到 SQLite 文档记录。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return
+    SQLiteRepository().set_document_toc(target_doc_id, toc_items or [])
+
+
+def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
+    """读取 PDF 目录结构。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return []
+    return SQLiteRepository().get_document_toc(target_doc_id)
+
+
 # ============ HELPERS ============
 
 def get_translate_args(model_key: str) -> dict:
     """根据模型key返回 translate_paragraph 所需的 model_id, api_key, provider。"""
-    model = MODELS[model_key]
-    provider = model.get("provider", "anthropic")
+    model = MODELS.get(model_key) or MODELS["deepseek-chat"]
+    provider = model.get("provider", "deepseek")
     model_id = model["id"]
     if provider == "qwen":
         api_key = get_dashscope_key()
     else:
-        api_key = get_anthropic_key()
+        api_key = get_deepseek_key()
     return {"model_id": model_id, "api_key": api_key, "provider": provider}
 
 
@@ -216,6 +255,7 @@ def get_app_state(doc_id: str = "") -> dict:
 
     first_page, last_page = get_page_range(pages) if pages else (1, 1)
 
+    has_entries = len(entries) > 0
     return {
         "pages": pages,
         "src_name": src_name,
@@ -226,10 +266,11 @@ def get_app_state(doc_id: str = "") -> dict:
         "models": MODELS,
         "glossary": get_glossary(doc_id),
         "paddle_token": get_paddle_token(),
-        "anthropic_key": get_anthropic_key(),
+        "deepseek_key": get_deepseek_key(),
         "dashscope_key": get_dashscope_key(),
         "has_pages": len(pages) > 0,
-        "has_entries": len(entries) > 0,
+        "has_entries": has_entries,
+        "has_translation_history": has_entries,
         "page_count": len(pages),
         "first_page": first_page,
         "last_page": last_page,
