@@ -231,7 +231,7 @@ def get_connection(db_path: str | None = None) -> sqlite3.Connection:
 
 
 def initialize_database(db_path: str | None = None) -> str:
-    with get_connection(db_path) as conn:
+    with read_connection(db_path) as conn:
         _create_schema(conn)
         row = conn.execute("PRAGMA journal_mode").fetchone()
         return row[0] if row else ""
@@ -247,6 +247,16 @@ def transaction(db_path: str | None = None):
     except Exception:
         conn.rollback()
         raise
+    finally:
+        conn.close()
+
+
+@contextmanager
+def read_connection(db_path: str | None = None):
+    """只读/查询连接：退出时显式关闭，避免 FD 泄漏。"""
+    conn = get_connection(db_path)
+    try:
+        yield conn
     finally:
         conn.close()
 
@@ -304,7 +314,7 @@ class SQLiteRepository:
             )
 
     def get_document(self, doc_id: str) -> dict | None:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 "SELECT * FROM documents WHERE id = ?",
                 (doc_id,),
@@ -316,7 +326,7 @@ class SQLiteRepository:
             return payload
 
     def list_documents(self) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 "SELECT * FROM documents ORDER BY created_at DESC, id DESC"
             ).fetchall()
@@ -341,7 +351,7 @@ class SQLiteRepository:
             )
 
     def get_document_toc(self, doc_id: str) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 "SELECT toc_json FROM documents WHERE id = ?",
                 (doc_id,),
@@ -386,7 +396,7 @@ class SQLiteRepository:
                 )
 
     def load_pages(self, doc_id: str) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 """
                 SELECT book_page, file_idx, img_w, img_h, markdown, footnotes, text_source, payload_json
@@ -688,7 +698,7 @@ class SQLiteRepository:
             )
 
     def get_app_state(self, key: str) -> str | None:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 "SELECT state_value FROM app_state WHERE state_key = ?",
                 (key,),
@@ -702,7 +712,7 @@ class SQLiteRepository:
         return self.get_app_state(f"translation_title:{doc_id}") or ""
 
     def get_latest_translate_run(self, doc_id: str) -> dict | None:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 """
                 SELECT * FROM translate_runs
@@ -715,7 +725,7 @@ class SQLiteRepository:
             return self._row_to_translate_run(row)
 
     def get_active_translate_run(self, doc_id: str) -> dict | None:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 """
                 SELECT * FROM translate_runs
@@ -739,7 +749,7 @@ class SQLiteRepository:
             conn.execute("DELETE FROM translate_runs WHERE doc_id = ?", (doc_id,))
 
     def list_translate_failures(self, doc_id: str) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 """
                 SELECT book_page, error_message, created_at, updated_at, failure_type
@@ -760,7 +770,7 @@ class SQLiteRepository:
             ]
 
     def get_effective_translation_page(self, doc_id: str, book_page: int) -> dict | None:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 """
                 SELECT * FROM translation_pages
@@ -780,7 +790,7 @@ class SQLiteRepository:
             return payload
 
     def list_effective_translation_pages(self, doc_id: str) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 """
                 SELECT * FROM translation_pages
@@ -807,7 +817,7 @@ class SQLiteRepository:
             conn.execute("DELETE FROM translation_pages WHERE doc_id = ?", (doc_id,))
 
     def get_translation_segment(self, doc_id: str, book_page: int, segment_index: int) -> dict | None:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 """
                 SELECT s.*
@@ -921,7 +931,7 @@ class SQLiteRepository:
         return payload
 
     def list_translation_segments(self, translation_page_id: int) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 """
                 SELECT * FROM translation_segments
@@ -938,7 +948,7 @@ class SQLiteRepository:
     def list_segment_revisions(
         self, doc_id: str, book_page: int, segment_index: int, limit: int = 20
     ) -> list[dict]:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 """
                 SELECT r.*
@@ -953,7 +963,7 @@ class SQLiteRepository:
             return [dict(row) for row in rows]
 
     def count_manual_segments(self, doc_id: str, book_page: int) -> int:
-        with get_connection(self.db_path) as conn:
+        with read_connection(self.db_path) as conn:
             row = conn.execute(
                 """
                 SELECT COUNT(*) AS cnt

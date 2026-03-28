@@ -11,7 +11,9 @@
     <div class="settings-section">
       <h3>PaddleOCR 令牌</h3>
       <form method="POST" action="{{ url_for('save_settings') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="section" value="paddle">
+        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
         <input name="paddle_token" class="inp" type="password" value="{{ paddle_token }}"
                placeholder="输入 PaddleOCR API Token">
         <div class="hint">
@@ -30,7 +32,9 @@
     <div class="settings-section">
       <h3>DeepSeek API Key</h3>
       <form method="POST" action="{{ url_for('save_settings') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="section" value="deepseek">
+        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
         <input name="deepseek_key" class="inp" type="password" value="{{ deepseek_key }}"
                placeholder="输入 DeepSeek API Key">
         <div class="hint">
@@ -46,7 +50,9 @@
     <div class="settings-section">
       <h3>DashScope API Key (Qwen)</h3>
       <form method="POST" action="{{ url_for('save_settings') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="section" value="dashscope">
+        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
         <input name="dashscope_key" class="inp" type="password" value="{{ dashscope_key }}"
                placeholder="输入 DashScope API Key (sk-...)">
         <div class="hint">
@@ -63,9 +69,89 @@
       <h3>翻译模型</h3>
       <div class="model-picker">
         {% for key, m in models.items() %}
-        <a href="{{ url_for('set_model', key=key, next='settings') }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+        <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <input type="hidden" name="next" value="settings">
+          <button type="submit" class="btn {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
+        </form>
         {% endfor %}
+        <button type="button" class="btn {{ 'active' if custom_model_enabled else '' }}" onclick="toggleCustomModelPanel();">
+          {{ ('自定义: ' ~ custom_model_name) if custom_model_name else '自定义模型' }}
+        </button>
       </div>
+      <div id="customModelPanel" class="custom-model-panel{% if not custom_model_panel_open %} hidden{% endif %}"{% if not custom_model_panel_open %} hidden{% endif %}>
+        {% if custom_model_name %}
+        <div class="custom-model-actions">
+          <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="section" value="custom_model_activate">
+            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+            <button type="submit" class="btn {{ 'active' if custom_model_enabled else '' }}">使用已保存模型：{{ custom_model_name }}</button>
+          </form>
+          <span class="custom-model-bound">
+            {% if custom_model_base_key and custom_model_base_key in models %}
+            绑定模型族：{{ models[custom_model_base_key].label }}
+            {% else %}
+            尚未绑定模型族
+            {% endif %}
+          </span>
+        </div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('save_settings') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="section" value="custom_model">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <label for="customModelName" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">自定义模型名</label>
+          <input id="customModelName" name="custom_model_name" class="inp" type="text" value="{{ custom_model_name }}"
+                 placeholder="例如：qwen-plus-2025-02-01">
+          <div class="hint" style="margin-top:8px;">
+            当前生效模型 ID：
+            <code>{% if custom_model_enabled and custom_model_name %}{{ custom_model_name }}{% else %}{{ models[model_key].id }}{% endif %}</code>
+          </div>
+          <div class="hint" style="margin-top:6px;">
+            保存后会立刻写入本地配置，并绑定当前选中的模型族/API Key。
+          </div>
+          <button type="submit" class="btn btn-pri mt-10">保存并启用</button>
+        </form>
+        {% if custom_model_name %}
+        <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form" style="margin-top:10px;">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="section" value="custom_model_clear">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <button type="submit" class="btn btn-sec">清空已保存模型</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Parallel Translation -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>翻译性能</h3>
+      <form method="POST" action="{{ url_for('save_settings') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="section" value="translate_parallel">
+        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+        <input type="hidden" name="translate_parallel_enabled" value="off">
+        <label class="flex items-center gap-8" style="font-weight:600;margin-bottom:10px;">
+          <input type="checkbox" name="translate_parallel_enabled" value="on"{% if translate_parallel_enabled %} checked{% endif %}
+                 onchange="toggleParallelLimitState(this.checked)">
+          <span>开启段内并发翻译</span>
+        </label>
+        <div class="hint" style="margin-bottom:12px;">
+          默认关闭。开启后，单页会同时请求多个段落，通常会更快，但也更容易触发模型限流、超时或单页失败。即使开启，实际并发数仍会按所选模型自动收紧。
+        </div>
+        <div class="flex items-center gap-8" style="flex-wrap:wrap;">
+          <label for="translateParallelLimit" style="font-size:13px;color:var(--tx);">并发上限</label>
+          <input id="translateParallelLimit" name="translate_parallel_limit" class="inp" type="number" min="1" max="10"
+                 value="{{ translate_parallel_limit }}" style="width:96px;"
+                 {% if not translate_parallel_enabled %}disabled{% endif %}>
+          <span class="hint" style="margin:0;">范围 1-10；<code>Qwen-Plus</code> 和 <code>Qwen-Turbo</code> 最高可到 10。</span>
+        </div>
+        <button type="submit" class="btn btn-pri mt-10">保存并发设置</button>
+      </form>
     </div>
   </div>
 
@@ -76,6 +162,7 @@
         <h3 style="margin-bottom:0;">术语词典 ({{ glossary|length }} 条)</h3>
       </div>
       <form method="POST" action="{{ url_for('save_glossary') }}" id="glossaryForm">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
         <div class="glossary-scroll" id="glossaryList">
           {% for term, defn in glossary %}
@@ -102,12 +189,20 @@
       <h3>数据管理</h3>
       <div class="flex gap-8 flex-wrap">
         {% if has_entries %}
-        <a href="{{ url_for('reset_text_action', doc_id=current_doc_id) }}" class="btn btn-sec" style="font-size:12px;"
-           onclick="return confirm('确定清除翻译数据？');">清除翻译数据</a>
+        <form method="POST" action="{{ url_for('reset_text_action') }}" class="inline-form"
+              onsubmit="return confirm('确定清除翻译数据？');">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <button type="submit" class="btn btn-sec" style="font-size:12px;">清除翻译数据</button>
+        </form>
         {% endif %}
         {% if has_pages %}
-        <a href="{{ url_for('reset_all', doc_id=current_doc_id) }}" class="btn btn-red-ghost" style="font-size:12px;border:1px solid var(--red);"
-           onclick="return confirm('确定清除所有数据？');">清除所有数据</a>
+        <form method="POST" action="{{ url_for('reset_all') }}" class="inline-form"
+              onsubmit="return confirm('确定清除所有数据？');">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <button type="submit" class="btn btn-red-ghost" style="font-size:12px;border:1px solid var(--red);">清除所有数据</button>
+        </form>
         {% endif %}
         {% if not has_pages and not has_entries %}
         <span style="font-size:13px;color:var(--txL);">暂无数据</span>
@@ -133,5 +228,27 @@ function addGlossaryRow() {
   nextIdx++;
   document.getElementById('glossaryCount').value = nextIdx;
 }
+
+function toggleParallelLimitState(enabled) {
+  var input = document.getElementById('translateParallelLimit');
+  if (!input) return;
+  input.disabled = !enabled;
+}
+
+function toggleCustomModelPanel(forceOpen) {
+  var panel = document.getElementById('customModelPanel');
+  if (!panel) return;
+  var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : panel.hidden;
+  panel.hidden = !shouldOpen;
+  panel.classList.toggle('hidden', !shouldOpen);
+  if (shouldOpen) {
+    var input = document.getElementById('customModelName');
+    if (input) input.focus();
+  }
+}
+
+{% if custom_model_panel_open %}
+toggleCustomModelPanel(true);
+{% endif %}
 </script>
 {% endblock %}

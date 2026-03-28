@@ -22,10 +22,15 @@ CURRENT_FILE = os.path.join(DATA_DIR, "current.txt")
 OLD_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".foreign_lit_reader")
 
 GLOSSARY_INIT = []
-PARA_MAX_CONCURRENCY = 3
+PARA_MAX_CONCURRENCY = 10
 PARA_CONTEXT_WINDOW = 200
 PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT = 5
 PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT = 80
+TRANSLATE_PARALLEL_ENABLED_DEFAULT = False
+TRANSLATE_PARALLEL_LIMIT_DEFAULT = 10
+CUSTOM_MODEL_NAME_DEFAULT = ""
+CUSTOM_MODEL_ENABLED_DEFAULT = False
+CUSTOM_MODEL_BASE_KEY_DEFAULT = ""
 
 MODELS = {
     "deepseek-chat": {"id": "deepseek-chat", "label": "DeepSeek-Chat", "provider": "deepseek"},
@@ -43,6 +48,22 @@ def _coerce_int(value, default: int, minimum: int) -> int:
     except (TypeError, ValueError):
         return default
     return parsed if parsed >= minimum else default
+
+
+def _coerce_bool(value, default: bool = False) -> bool:
+    """将配置值转换为布尔值。"""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "yes", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "off"}:
+            return False
+        return default
+    return bool(value)
 
 
 def get_pdf_virtual_window_radius() -> int:
@@ -63,6 +84,40 @@ def get_pdf_virtual_scroll_min_pages() -> int:
         PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT,
         1,
     )
+
+
+def get_translate_parallel_enabled() -> bool:
+    """获取段内并发翻译开关。"""
+    cfg = load_config()
+    return _coerce_bool(
+        cfg.get("translate_parallel_enabled"),
+        TRANSLATE_PARALLEL_ENABLED_DEFAULT,
+    )
+
+
+def get_translate_parallel_limit() -> int:
+    """获取段内并发翻译上限。"""
+    cfg = load_config()
+    return max(1, min(10, _coerce_int(
+        cfg.get("translate_parallel_limit"),
+        TRANSLATE_PARALLEL_LIMIT_DEFAULT,
+        1,
+    )))
+
+
+def set_translate_parallel_settings(enabled: bool, limit) -> tuple[bool, int]:
+    """保存段内并发翻译设置，返回归一化后的值。"""
+    normalized_enabled = _coerce_bool(enabled, TRANSLATE_PARALLEL_ENABLED_DEFAULT)
+    normalized_limit = max(1, min(10, _coerce_int(
+        limit,
+        TRANSLATE_PARALLEL_LIMIT_DEFAULT,
+        1,
+    )))
+    cfg = load_config()
+    cfg["translate_parallel_enabled"] = normalized_enabled
+    cfg["translate_parallel_limit"] = normalized_limit
+    save_config(cfg)
+    return normalized_enabled, normalized_limit
 
 
 def check_write_permission() -> tuple[bool, str]:
@@ -132,6 +187,10 @@ def _safe_read_json(path: str, default):
 
 def migrate_from_old_location():
     """从旧位置 (~/.foreign_lit_reader/) 迁移数据到新位置。"""
+    # 新位置已有配置时，不再重复迁移，避免后续写入被旧配置覆盖。
+    if os.path.isfile(CONFIG_FILE):
+        return
+
     if not os.path.isdir(OLD_CONFIG_DIR):
         return  # 无旧数据
 
@@ -175,34 +234,38 @@ def save_config(cfg: dict):
     _atomic_write_json(CONFIG_FILE, cfg)
 
 
+def _get_config_value(key: str, default=""):
+    return load_config().get(key, default)
+
+
+def _set_config_value(key: str, value):
+    cfg = load_config()
+    cfg[key] = value
+    save_config(cfg)
+
+
 def get_paddle_token() -> str:
-    return load_config().get("paddle_token", "")
+    return _get_config_value("paddle_token", "")
 
 
 def set_paddle_token(token: str):
-    cfg = load_config()
-    cfg["paddle_token"] = token
-    save_config(cfg)
+    _set_config_value("paddle_token", token)
 
 
 def get_deepseek_key() -> str:
-    return load_config().get("deepseek_key", "")
+    return _get_config_value("deepseek_key", "")
 
 
 def set_deepseek_key(key: str):
-    cfg = load_config()
-    cfg["deepseek_key"] = key
-    save_config(cfg)
+    _set_config_value("deepseek_key", key)
 
 
 def get_dashscope_key() -> str:
-    return load_config().get("dashscope_key", "")
+    return _get_config_value("dashscope_key", "")
 
 
 def set_dashscope_key(key: str):
-    cfg = load_config()
-    cfg["dashscope_key"] = key
-    save_config(cfg)
+    _set_config_value("dashscope_key", key)
 
 
 def _glossary_state_key(doc_id: str) -> str:
@@ -299,13 +362,60 @@ def delete_glossary_item(term: str, doc_id: str = "") -> tuple[list[list[str]], 
 
 
 def get_model_key() -> str:
-    key = load_config().get("model_key", "deepseek-chat")
+    key = _get_config_value("model_key", "deepseek-chat")
     return key if key in MODELS else "deepseek-chat"
 
 
 def set_model_key(key: str):
+    _set_config_value("model_key", key)
+
+
+def get_custom_model_name() -> str:
+    """获取用户自定义模型名。"""
+    value = _get_config_value("custom_model_name", CUSTOM_MODEL_NAME_DEFAULT)
+    return str(value or "").strip()
+
+
+def get_custom_model_enabled() -> bool:
+    """获取用户是否启用了自定义模型。"""
     cfg = load_config()
-    cfg["model_key"] = key
+    return _coerce_bool(
+        cfg.get("custom_model_enabled"),
+        CUSTOM_MODEL_ENABLED_DEFAULT,
+    )
+
+
+def get_custom_model_base_key() -> str:
+    """获取自定义模型绑定的预设模型 key。"""
+    value = str(_get_config_value("custom_model_base_key", CUSTOM_MODEL_BASE_KEY_DEFAULT) or "").strip()
+    return value if value in MODELS else ""
+
+
+def set_custom_model_name(name: str):
+    _set_config_value("custom_model_name", str(name or "").strip())
+
+
+def set_custom_model_enabled(enabled: bool):
+    _set_config_value("custom_model_enabled", _coerce_bool(enabled, CUSTOM_MODEL_ENABLED_DEFAULT))
+
+
+def set_custom_model_base_key(key: str):
+    _set_config_value("custom_model_base_key", key if key in MODELS else "")
+
+
+def save_custom_model_selection(name: str, enabled: bool, base_key: str):
+    """统一保存自定义模型的名称、启用状态和绑定模型族。"""
+    normalized_name = str(name or "").strip()
+    normalized_base_key = base_key if base_key in MODELS else ""
+    normalized_enabled = bool(
+        normalized_name
+        and normalized_base_key
+        and _coerce_bool(enabled, CUSTOM_MODEL_ENABLED_DEFAULT)
+    )
+    cfg = load_config()
+    cfg["custom_model_name"] = normalized_name
+    cfg["custom_model_enabled"] = normalized_enabled
+    cfg["custom_model_base_key"] = normalized_base_key
     save_config(cfg)
 
 
@@ -423,4 +533,3 @@ def delete_doc(doc_id: str):
     # 如果删除的是当前文档，清除 current
     if is_current:
         SQLiteRepository().set_app_state("current_doc_id", "")
-

@@ -6,7 +6,9 @@ import shutil
 from config import (
     MODELS,
     get_paddle_token, get_deepseek_key, get_dashscope_key,
-    get_glossary, get_model_key,
+    get_glossary, get_model_key, get_custom_model_name,
+    get_custom_model_enabled, get_custom_model_base_key,
+    get_translate_parallel_enabled, get_translate_parallel_limit,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
 )
 from sqlite_store import SQLiteRepository
@@ -166,11 +168,23 @@ def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
 
 # ============ HELPERS ============
 
+def _resolve_translate_model(model_key: str) -> tuple[dict, str]:
+    active_model_key = model_key if model_key in MODELS else "deepseek-chat"
+    custom_model_name = get_custom_model_name()
+    custom_model_enabled = get_custom_model_enabled()
+    if custom_model_enabled and custom_model_name:
+        bound_model_key = get_custom_model_base_key()
+        if bound_model_key:
+            active_model_key = bound_model_key
+    model = MODELS.get(active_model_key) or MODELS["deepseek-chat"]
+    model_id = custom_model_name if custom_model_enabled and custom_model_name else model["id"]
+    return model, model_id
+
+
 def get_translate_args(model_key: str) -> dict:
     """根据模型key返回 translate_paragraph 所需的 model_id, api_key, provider。"""
-    model = MODELS.get(model_key) or MODELS["deepseek-chat"]
+    model, model_id = _resolve_translate_model(model_key)
     provider = model.get("provider", "deepseek")
-    model_id = model["id"]
     if provider == "qwen":
         api_key = get_dashscope_key()
     else:
@@ -204,45 +218,106 @@ def _ensure_str(val) -> str:
     return str(val)
 
 
+def _nonempty_markdown_lines(text) -> list[str]:
+    return [line.strip() for line in _ensure_str(text).split("\n") if line.strip()]
+
+
+def _append_blockquote(md_lines: list[str], text) -> None:
+    lines = _nonempty_markdown_lines(text)
+    if not lines:
+        return
+    for line in lines:
+        md_lines.append(f"> {line}")
+    md_lines.append("")
+
+
+def _append_paragraph(md_lines: list[str], text) -> None:
+    content = _ensure_str(text).strip()
+    if not content:
+        return
+    md_lines.append(content)
+    md_lines.append("")
+
+
+def _append_labeled_block(md_lines: list[str], label: str, text) -> None:
+    lines = _nonempty_markdown_lines(text)
+    if not lines:
+        return
+    md_lines.append(f"[{label}] {lines[0]}")
+    for line in lines[1:]:
+        md_lines.append(line)
+    md_lines.append("")
+
+
+def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, list[tuple[str, str]]]:
+    assignments: dict[int, list[tuple[str, str]]] = {}
+    body_indices = [
+        idx for idx, pe in enumerate(page_entries)
+        if int(pe.get("heading_level", 0) or 0) <= 0
+        and (_ensure_str(pe.get("original")).strip() or _ensure_str(pe.get("translation")).strip())
+    ]
+    if not body_indices:
+        body_indices = list(range(len(page_entries)))
+
+    footnote_entries = []
+    for idx, pe in enumerate(page_entries):
+        footnotes = _ensure_str(pe.get("footnotes")).strip()
+        footnotes_translation = _ensure_str(pe.get("footnotes_translation")).strip()
+        if footnotes or footnotes_translation:
+            footnote_entries.append((idx, footnotes, footnotes_translation))
+
+    if not footnote_entries:
+        return assignments
+
+    # 当前翻译链路里，整页脚注在“无法挂到具体段落”时会默认落到首段。
+    # 导出时把这类单点脚注移到该页最后一段后，避免截断正文阅读节奏。
+    if len(footnote_entries) == 1 and body_indices:
+        idx, footnotes, footnotes_translation = footnote_entries[0]
+        first_body_idx = body_indices[0]
+        last_body_idx = body_indices[-1]
+        if last_body_idx != idx and (idx not in body_indices or idx == first_body_idx):
+            return {last_body_idx: [(footnotes, footnotes_translation)]}
+
+    for idx, footnotes, footnotes_translation in footnote_entries:
+        assignments.setdefault(idx, []).append((footnotes, footnotes_translation))
+    return assignments
+
+
 def gen_markdown(entries: list) -> str:
-    md = ""
+    md_lines: list[str] = []
     for e in entries:
         page_entries = e.get("_page_entries")
         if page_entries:
-            page_bp = e.get("_pageBP", "?")
-            md += f"---\n**Page {page_bp}**\n\n"
-            for pe in page_entries:
+            footnote_assignments = _resolve_page_footnote_assignments(page_entries)
+            for idx, pe in enumerate(page_entries):
                 hlevel = pe.get("heading_level", 0)
                 orig = _ensure_str(pe.get("original")).strip()
+                tr = _ensure_str(pe.get("translation")).strip()
                 if hlevel > 0:
                     prefix = "#" * min(hlevel, 6)
-                    md += f"{prefix} {orig}\n\n"
-                    tr = _ensure_str(pe.get("translation")).strip()
-                    if tr:
-                        md += f"{prefix} {tr}\n\n"
+                    heading = orig or tr
+                    if heading:
+                        md_lines.append(f"{prefix} {heading}")
+                        md_lines.append("")
                 else:
-                    for line in orig.split("\n"):
-                        line = line.strip()
-                        if line:
-                            md += f"> {line}\n"
-                    md += "\n"
-                    md += _ensure_str(pe.get("translation")).strip() + "\n\n"
-                    fn = _ensure_str(pe.get("footnotes")).strip()
-                    fn_tr = _ensure_str(pe.get("footnotes_translation")).strip()
-                    if fn:
-                        md += fn + "\n"
-                        if fn_tr:
-                            md += fn_tr + "\n"
-                        md += "\n"
+                    _append_blockquote(md_lines, orig)
+                    _append_paragraph(md_lines, tr)
+
+                for footnotes, footnotes_translation in footnote_assignments.get(idx, []):
+                    _append_labeled_block(md_lines, "脚注", footnotes)
+                    _append_labeled_block(md_lines, "脚注翻译", footnotes_translation)
         else:
             orig = _ensure_str(e.get("original")).strip()
-            for line in orig.split("\n"):
-                line = line.strip()
-                if line:
-                    md += f"> {line}\n"
-            md += "\n"
-            md += _ensure_str(e.get("translation")).strip() + "\n\n"
-    return md.strip() + "\n"
+            _append_blockquote(md_lines, orig)
+            _append_paragraph(md_lines, e.get("translation"))
+            _append_labeled_block(md_lines, "脚注", e.get("footnotes"))
+            _append_labeled_block(md_lines, "脚注翻译", e.get("footnotes_translation"))
+
+    while md_lines and not md_lines[-1].strip():
+        md_lines.pop()
+    if not md_lines:
+        return ""
+    return "\n".join(md_lines) + "\n"
 
 
 def get_app_state(doc_id: str = "") -> dict:
@@ -268,6 +343,11 @@ def get_app_state(doc_id: str = "") -> dict:
         "paddle_token": get_paddle_token(),
         "deepseek_key": get_deepseek_key(),
         "dashscope_key": get_dashscope_key(),
+        "custom_model_name": get_custom_model_name(),
+        "custom_model_enabled": get_custom_model_enabled(),
+        "custom_model_base_key": get_custom_model_base_key(),
+        "translate_parallel_enabled": get_translate_parallel_enabled(),
+        "translate_parallel_limit": get_translate_parallel_limit(),
         "has_pages": len(pages) > 0,
         "has_entries": has_entries,
         "has_translation_history": has_entries,

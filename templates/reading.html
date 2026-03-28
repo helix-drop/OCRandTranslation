@@ -550,7 +550,6 @@
     {% if has_pdf %}
     <button class="tb" onclick="togglePdfPanel();" id="pdfBtn" title="PDF 原文">PDF</button>
     {% endif %}
-    <button class="tb" onclick="activateReadingFocusMode();" id="focusBtn" title="进入笔记专注模式">专注</button>
     <button class="tb {{ 'active' if usage_open else '' }}" onclick="toggleUsageDashboard();" id="usageBtn" title="显示/隐藏翻译进度">进度</button>
     <button class="tb" onclick="toggleOriginal();" id="origBtn" title="显示/隐藏原文">原文</button>
     <button class="tb" onclick="toggleLayout();" id="layoutBtn" title="切换布局">{{ '改单栏' if side_by_side else '改双栏' }}</button>
@@ -560,11 +559,30 @@
       <div class="toolbar-dropdown">
         <div class="toolbar-dropdown-label">翻译模型</div>
         {% for key, m in models.items() %}
-        <a href="{{ url_for('set_model', key=key, next='reading', doc_id=current_doc_id) }}" class="toolbar-dropdown-item {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+        <form method="POST" action="{{ url_for('set_model', key=key) }}" class="toolbar-dropdown-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <input type="hidden" name="next" value="reading">
+          <input type="hidden" name="bp" value="{{ cur_page_bp }}">
+          <input type="hidden" name="usage" value="{{ 1 if usage_open else 0 }}">
+          <input type="hidden" name="orig" value="{{ 1 if show_original else 0 }}">
+          <input type="hidden" name="layout" value="{{ 'side' if side_by_side else 'stack' }}">
+          <input type="hidden" name="pdf" value="{{ 1 if pdf_visible else 0 }}">
+          <button type="submit" class="toolbar-dropdown-item {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
+        </form>
         {% endfor %}
+        <a href="{{ url_for('settings', doc_id=current_doc_id, open_custom_model=1) }}#customModelPanel"
+           class="toolbar-dropdown-item {{ 'active' if custom_model_enabled else '' }}">
+          {{ ('自定义模型（' ~ custom_model_name ~ '）') if custom_model_name else '自定义模型' }}
+        </a>
         <div class="toolbar-dropdown-sep"></div>
-        <a href="{{ url_for('settings') }}#glossary" class="toolbar-dropdown-item">术语词典</a>
-        <a href="{{ url_for('reset_text', doc_id=current_doc_id) }}" class="toolbar-dropdown-item" style="color:var(--red);">清除翻译</a>
+        <a href="{{ url_for('settings', doc_id=current_doc_id) }}#glossary" class="toolbar-dropdown-item">术语词典</a>
+        <form method="POST" action="{{ url_for('reset_text') }}" class="toolbar-dropdown-form"
+              onsubmit="return confirm('确定清除翻译数据？');">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <button type="submit" class="toolbar-dropdown-item" style="color:var(--red);">清除翻译</button>
+        </form>
       </div>
     </div>
   </div>
@@ -883,7 +901,11 @@
   <div class="flex justify-center gap-8 mt-12 flex-wrap">
     <button type="button" class="btn btn-gho" style="font-size:12px;"
             onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, model=model_key) }}', this);">
+      {% if custom_model_name %}
+      用自定义模型（{{ custom_model_name }}）重译本页
+      {% else %}
       用{{ models[model_key].label }}重译本页
+      {% endif %}
     </button>
     {% for mk, mv in models.items() if mk != model_key %}
     <button type="button" class="btn btn-gho" style="font-size:12px;color:var(--acc);border:1px solid var(--bdrL);"
@@ -1271,6 +1293,23 @@ function dispatch(action, payload) {
     store.streamDraft.restored = false;
     return;
   }
+  if (action === 'rate_limit_wait') {
+    var wait = payload && payload.data ? payload.data : {};
+    var waitDraft = createInitialStreamDraftState();
+    waitDraft.active = false;
+    waitDraft.status = 'throttled';
+    waitDraft.bp = Number(wait.bp || 0) || null;
+    waitDraft.paraIdx = null;
+    waitDraft.paraTotal = Number(wait.para_total || 0);
+    waitDraft.paraDone = Number(wait.para_done || 0);
+    waitDraft.parallelLimit = Number(wait.parallel_limit || 0);
+    waitDraft.note = wait.message || ('触发限流，等待 ' + Number(wait.wait_seconds || 0) + ' 秒后自动重试。');
+    waitDraft.lastError = '';
+    waitDraft.updatedAt = Math.floor(Date.now() / 1000);
+    waitDraft.restored = false;
+    dispatch('replace_stream_draft', { draft: waitDraft });
+    return;
+  }
   if (action === 'stream_page_done') {
     var donePage = payload && payload.data ? payload.data : {};
     var hasDraftError = !!donePage.partial_failed || (
@@ -1351,7 +1390,6 @@ function applyOriginalVisibilityState() {
     btn.style.opacity = store.ui.showOriginal ? '1' : '0.5';
     btn.title = store.ui.showOriginal ? '隐藏原文' : '显示原文';
   }
-  updateFocusModeButtonState();
 }
 
 function toggleLayout() {
@@ -1361,7 +1399,7 @@ function toggleLayout() {
   // 保存布局偏好，避免下次重新进入时还原成旧布局。
   fetch('{{ url_for("set_pref") }}', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: withCsrfHeaders({'Content-Type': 'application/json'}),
     body: JSON.stringify({side_by_side: store.ui.sideBySide})
   });
 }
@@ -1378,54 +1416,6 @@ function applyLayoutState() {
     btn.classList.toggle('active', store.ui.sideBySide);
     btn.textContent = store.ui.sideBySide ? '改单栏' : '改双栏';
     btn.title = store.ui.sideBySide ? '切回单栏阅读' : '切到双栏对照';
-  }
-  updateFocusModeButtonState();
-}
-
-function isReadingFocusMode() {
-  return !store.ui.pdfVisible && !store.ui.showOriginal && !store.ui.sideBySide && !store.ui.usageDashboardOpen;
-}
-
-function updateFocusModeButtonState() {
-  var btn = document.getElementById('focusBtn');
-  if (!btn) return;
-  btn.classList.toggle('active', isReadingFocusMode());
-  btn.title = isReadingFocusMode()
-    ? '当前已经是笔记专注模式'
-    : '收起 PDF 和进度，隐藏原文并切到单栏';
-}
-
-function activateReadingFocusMode() {
-  var layoutChanged = false;
-  if (store.ui.sideBySide) {
-    dispatch('toggle_layout');
-    layoutChanged = true;
-  }
-  if (store.ui.showOriginal) {
-    dispatch('toggle_original');
-  }
-  if (store.ui.pdfVisible) {
-    dispatch('toggle_pdf_panel');
-  }
-
-  applyLayoutState();
-  applyOriginalVisibilityState();
-  applyPdfPanelVisibilityState();
-
-  if (layoutChanged) {
-    fetch('{{ url_for("set_pref") }}', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({side_by_side: false})
-    });
-  }
-
-  if (store.ui.usageDashboardOpen) {
-    toggleUsageDashboard(false);
-  } else {
-    stopUsagePolling();
-    syncReadingUrl();
-    updateFocusModeButtonState();
   }
 }
 
@@ -1522,7 +1512,6 @@ function applyPdfPanelVisibilityState() {
     modeBtn.title = '切换 PDF 面板宽度';
   }
   updatePdfZoomUi();
-  updateFocusModeButtonState();
 }
 
 function getPdfPageElement(bp) {
@@ -2066,6 +2055,28 @@ function toggleSegmentHistory(idx, bp) {
     });
 }
 
+function submitPostAction(url, fields) {
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  var csrfInput = document.createElement('input');
+  csrfInput.type = 'hidden';
+  csrfInput.name = '_csrf_token';
+  csrfInput.value = getCsrfToken();
+  form.appendChild(csrfInput);
+  Object.keys(fields || {}).forEach(function(key) {
+    var value = fields[key];
+    if (value === undefined || value === null || value === '') return;
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = String(value);
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+}
+
 function saveManualRevision(idx, bp) {
   idx = Number(idx);
   bp = Number(bp || 0);
@@ -2080,7 +2091,7 @@ function saveManualRevision(idx, bp) {
   setManualRevisionHint(idx, '保存中…', false);
   fetch('{{ url_for("save_manual_revision") }}?doc_id=' + encodeURIComponent(currentDocId), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: withCsrfHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({
       bp: bp,
       segment_index: idx,
@@ -2462,7 +2473,7 @@ function renderStreamDraftState() {
   var preview = document.getElementById('usageDraftPreview');
   var list = document.getElementById('usageDraftList');
 
-  var shouldShow = store.streamDraft.active || store.streamDraft.status === 'aborted' || store.streamDraft.status === 'done' || store.streamDraft.status === 'error';
+  var shouldShow = store.streamDraft.active || store.streamDraft.status === 'aborted' || store.streamDraft.status === 'done' || store.streamDraft.status === 'error' || store.streamDraft.status === 'throttled';
   panel.classList.toggle('hidden', !shouldShow);
   if (!shouldShow) {
     return;
@@ -2470,6 +2481,7 @@ function renderStreamDraftState() {
 
   badge.textContent = (
     store.streamDraft.status === 'streaming' ? '翻译中' :
+    store.streamDraft.status === 'throttled' ? '等待中' :
     store.streamDraft.status === 'aborted' ? '已停止' :
     store.streamDraft.status === 'error' ? '失败' :
     store.streamDraft.status === 'done' ? '已完成' : '空闲'
@@ -2484,6 +2496,9 @@ function renderStreamDraftState() {
   progress.textContent = store.streamDraft.bp
     ? ('p.' + store.streamDraft.bp + restoredLabel + ' · 并发 ' + runningCount + '/' + parallelLimit + ' · 已完成 ' + (store.streamDraft.paraDone || 0) + '/' + (store.streamDraft.paraTotal || 0))
     : '等待翻译任务启动';
+  if (store.streamDraft.status === 'throttled' && store.streamDraft.note) {
+    progress.textContent = store.streamDraft.note;
+  }
   var noteParts = [];
   if (store.streamDraft.restored && store.streamDraft.bp) {
     noteParts.push('已恢复 p.' + store.streamDraft.bp + ' 的草稿');
@@ -2564,10 +2579,7 @@ function retryDraftPage() {
   if (currentPageHasEntry || store.pages.partialFailedBps.indexOf(draftBp) >= 0) {
     var retryUrl = '/retranslate/' + draftBp + '/' + encodeURIComponent(currentModelKey);
     var retryDocId = getReadingDocIdParam();
-    if (retryDocId) {
-      retryUrl += '?doc_id=' + encodeURIComponent(retryDocId);
-    }
-    window.location.href = retryUrl;
+    submitPostAction(retryUrl, {doc_id: retryDocId});
     return;
   }
   startTranslateAll(draftBp);
@@ -2898,7 +2910,6 @@ function toggleUsageDashboard(forceOpen) {
   }
 
   syncReadingUrl();
-  updateFocusModeButtonState();
 }
 
 function showProgress(show) {
@@ -2936,15 +2947,42 @@ function isActiveTranslatePhase(phase) {
   return phase === 'running' || phase === 'stopping';
 }
 
+function hasPageProgressInStore() {
+  return (
+    (Array.isArray(store.pages.translatedBps) && store.pages.translatedBps.length > 0) ||
+    (Array.isArray(store.pages.partialFailedBps) && store.pages.partialFailedBps.length > 0) ||
+    (Array.isArray(store.pages.failedBps) && store.pages.failedBps.length > 0)
+  );
+}
+
+function hasPageProgressInSnapshot(state) {
+  return !!(
+    state && (
+      (Array.isArray(state.translated_bps) && state.translated_bps.length > 0) ||
+      (Array.isArray(state.partial_failed_bps) && state.partial_failed_bps.length > 0) ||
+      (Array.isArray(state.failed_bps) && state.failed_bps.length > 0)
+    )
+  );
+}
+
 function shouldHydrateTranslateDraft(state) {
   if (!state || !state.draft) return false;
-  return !!(state.draft.active || translateSessionActivated || hasRestorableDraft(state));
+  return !!(
+    state.draft.active
+    || (state.draft.status === 'throttled')
+    || translateSessionActivated
+    || hasRestorableDraft(state)
+  );
 }
 
 function shouldShowTranslateSnapshot(state) {
-  if (!state || !state.phase || state.phase === 'idle') return false;
+  if (!state) return hasPageProgressInStore();
+  if (!state.phase) return hasPageProgressInSnapshot(state) || hasPageProgressInStore();
+  if (state.phase === 'idle') {
+    return hasPageProgressInSnapshot(state) || hasPageProgressInStore();
+  }
   if (isActiveTranslatePhase(state.phase)) return true;
-  return translateSessionActivated;
+  return translateSessionActivated || hasPageProgressInSnapshot(state) || hasPageProgressInStore();
 }
 
 function formatTranslatePhaseLabel(state) {
@@ -2995,6 +3033,16 @@ function renderTranslateSnapshot(state) {
   var totalPages = state.total_pages || 0;
   var donePages = state.done_pages || 0;
   var processedPages = Math.max(0, Number(state.processed_pages || state.done_pages || 0));
+  var translatedCount = Array.isArray(state.translated_bps) ? state.translated_bps.length : 0;
+  if (state.phase === 'idle' && processedPages === 0 && translatedCount > 0) {
+    processedPages = translatedCount;
+  }
+  if (state.phase === 'idle' && donePages === 0 && translatedCount > 0) {
+    donePages = translatedCount;
+  }
+  if (!totalPages && Array.isArray(store.pages.allBps) && store.pages.allBps.length) {
+    totalPages = store.pages.allBps.length;
+  }
   if (totalPages && processedPages > totalPages) {
     processedPages = totalPages;
   }
@@ -3073,6 +3121,10 @@ function renderTranslateSnapshot(state) {
     } else {
       stopBtn.style.display = 'none';
     }
+  } else if (state.phase === 'idle') {
+    setTranslateProgress(pct, formatTranslatePhaseLabel(state), stats, detail);
+    bar.style.background = 'var(--txL)';
+    stopBtn.style.display = 'none';
   }
 
   if (isActiveTranslatePhase(state.phase)) {
@@ -3115,7 +3167,11 @@ function startTranslateAll(startBp) {
   form.append('doc_title', '{{ doc_title }}');
   form.append('doc_id', currentDocId);
 
-  fetch('{{ url_for("start_translate_all") }}', {method: 'POST', body: form})
+  fetch('{{ url_for("start_translate_all") }}', {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+    body: form
+  })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.error) {
@@ -3177,6 +3233,12 @@ function listenTranslateSSE() {
     applyStreamUsage(JSON.parse(e.data));
   });
 
+  translateES.addEventListener('rate_limit_wait', function(e) {
+    var d = JSON.parse(e.data);
+    dispatch('rate_limit_wait', { data: d });
+    renderStreamDraftState();
+  });
+
   translateES.addEventListener('page_done', function(e) {
     var d = JSON.parse(e.data);
     dispatch('stream_page_done', { data: d });
@@ -3222,7 +3284,11 @@ function stopTranslate() {
   btn.textContent = '停止中…';
   btn.disabled = true;
 
-  fetch('{{ url_for("stop_translate") }}?doc_id=' + encodeURIComponent(currentDocId))
+  fetch('{{ url_for("stop_translate") }}', {
+    method: 'POST',
+    headers: withCsrfHeaders({'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}),
+    body: 'doc_id=' + encodeURIComponent(currentDocId)
+  })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
@@ -3243,6 +3309,14 @@ function stopTranslate() {
 
 // ===== 重译前人工修订警告 =====
 function confirmRetranslate(retranslateUrl, btn) {
+  function submitRetranslateAction() {
+    if (btn) {
+      btn.innerHTML = '<span class=spinner></span> 重译中&hellip;';
+      btn.style.pointerEvents = 'none';
+    }
+    submitPostAction(retranslateUrl, {doc_id: docId});
+  }
+
   var bp = Number('{{ cur_page_bp }}');
   var docId = getReadingDocIdParam() || currentDocId || '';
   fetch('/check_retranslate_warnings?doc_id=' + encodeURIComponent(docId) + '&bp=' + bp)
@@ -3255,19 +3329,11 @@ function confirmRetranslate(retranslateUrl, btn) {
         );
         if (!ok) return;
       }
-      if (btn) {
-        btn.innerHTML = '<span class=spinner></span> 重译中&hellip;';
-        btn.style.pointerEvents = 'none';
-      }
-      window.location.href = retranslateUrl;
+      submitRetranslateAction();
     })
     .catch(function() {
       // 检查失败时直接跳转，不阻断操作
-      if (btn) {
-        btn.innerHTML = '<span class=spinner></span> 重译中&hellip;';
-        btn.style.pointerEvents = 'none';
-      }
-      window.location.href = retranslateUrl;
+      submitRetranslateAction();
     });
 }
 
@@ -3303,7 +3369,10 @@ function startReparsePage(pageBp) {
   if (reparseDocId) {
     reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);
   }
-  fetch(reparseUrl, {method: 'POST'})
+  fetch(reparseUrl, {
+    method: 'POST',
+    headers: withCsrfHeaders()
+  })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) {

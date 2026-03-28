@@ -22,9 +22,13 @@ from text_processing import (
     get_page_range, get_next_page_bp,
     get_page_context_for_translate,
     get_paragraph_bboxes,
+    assign_page_footnotes_to_paragraphs,
 )
 from translator import (
     TranslateStreamAborted,
+    RateLimitedError,
+    TransientProviderError,
+    QuotaExceededError,
     stream_translate_paragraph,
     translate_paragraph,
     structure_page,
@@ -276,11 +280,32 @@ def _get_para_context_window() -> int:
         return 200
 
 
-def _get_para_max_concurrency() -> int:
+def _get_active_translate_args(model_key: str | None = None) -> tuple[str, dict]:
+    resolved_model_key = model_key or get_model_key()
+    return resolved_model_key, get_translate_args(resolved_model_key)
+
+
+_MODEL_PARA_LIMITS = {
+    "qwen-turbo": 10,
+    "qwen-plus": 10,
+    "deepseek-chat": 6,
+    "qwen-max": 4,
+    "deepseek-reasoner": 3,
+}
+
+
+def _get_para_max_concurrency(model_key: str, para_total: int) -> int:
+    if para_total <= 0:
+        return 1
+    if not app_config.get_translate_parallel_enabled():
+        return 1
     try:
-        return max(1, min(3, int(getattr(app_config, "PARA_MAX_CONCURRENCY", 3) or 3)))
+        configured_default = max(1, min(10, int(getattr(app_config, "PARA_MAX_CONCURRENCY", 10) or 10)))
     except Exception:
-        return 3
+        configured_default = 10
+    user_limit = app_config.get_translate_parallel_limit()
+    model_limit = _MODEL_PARA_LIMITS.get(str(model_key or "").strip(), 4)
+    return max(1, min(para_total, user_limit, model_limit, configured_default))
 
 
 def _entry_has_paragraph_error(entry: dict) -> bool:
@@ -308,27 +333,29 @@ def _collect_partial_failed_bps(doc_id: str, target_bps: list[int] | None = None
 
 
 def _extract_page_footnote_summary(page_entries: list[dict], fallback_footnotes: str = "") -> tuple[str, str]:
-    page_footnotes = _ensure_str(fallback_footnotes).strip()
-    page_footnotes_translation = ""
+    footnote_parts = []
+    footnote_translation_parts = []
+    seen_footnotes = set()
+    seen_translations = set()
     for entry in page_entries:
         if not isinstance(entry, dict):
             continue
-        if not page_footnotes:
-            page_footnotes = _ensure_str(entry.get("footnotes", "")).strip()
-        if not page_footnotes_translation:
-            page_footnotes_translation = _ensure_str(entry.get("footnotes_translation", "")).strip()
-        if page_footnotes and page_footnotes_translation:
-            break
+        footnotes = _ensure_str(entry.get("footnotes", "")).strip()
+        footnotes_translation = _ensure_str(entry.get("footnotes_translation", "")).strip()
+        if footnotes and footnotes not in seen_footnotes:
+            seen_footnotes.add(footnotes)
+            footnote_parts.append(footnotes)
+        if footnotes_translation and footnotes_translation not in seen_translations:
+            seen_translations.add(footnotes_translation)
+            footnote_translation_parts.append(footnotes_translation)
+    page_footnotes = "\n".join(footnote_parts).strip() or _ensure_str(fallback_footnotes).strip()
+    page_footnotes_translation = "\n".join(footnote_translation_parts).strip()
     return page_footnotes, page_footnotes_translation
 
 
 def _build_para_jobs(paragraphs: list, ctx: dict, para_bboxes: list, target_bp: int, context_window: int = 200) -> list[dict]:
     jobs = []
     title_stack = []
-    first_para_idx = next((idx for idx, para in enumerate(paragraphs) if para.get("text", "").strip()), None)
-    first_body_idx = next((idx for idx, para in enumerate(paragraphs) if para.get("heading_level", 0) == 0 and para.get("text", "").strip()), None)
-    footnote_owner_idx = first_body_idx if first_body_idx is not None else first_para_idx
-    page_footnotes = _ensure_str(ctx.get("footnotes", "")).strip()
 
     for idx, para in enumerate(paragraphs):
         hlevel = int(para.get("heading_level", 0) or 0)
@@ -368,7 +395,7 @@ def _build_para_jobs(paragraphs: list, ctx: dict, para_bboxes: list, target_bp: 
             "text": text,
             "cross_page": cross,
             "bboxes": para_bboxes[idx] if idx < len(para_bboxes) else [],
-            "footnotes": page_footnotes if idx == footnote_owner_idx else "",
+            "footnotes": _ensure_str(para.get("footnotes", "")).strip(),
             "prev_context": "" if hlevel > 0 else _trim_para_context(prev_text, limit=context_window, from_end=True),
             "next_context": "" if hlevel > 0 else _trim_para_context(next_text, limit=context_window, from_end=False),
             "section_path": list(title_stack),
@@ -444,6 +471,13 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
             total_usage = _merge_usage(total_usage, structure_usage)
 
     para_bboxes = get_paragraph_bboxes(pages, target_bp, paragraphs)
+    paragraphs, resolved_page_footnotes = assign_page_footnotes_to_paragraphs(
+        pages,
+        target_bp,
+        paragraphs,
+        para_bboxes=para_bboxes,
+    )
+    ctx["footnotes"] = resolved_page_footnotes
     para_jobs = _build_para_jobs(paragraphs, ctx, para_bboxes, target_bp, context_window=_get_para_context_window())
 
     if not para_jobs:
@@ -451,7 +485,7 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
 
     # 段内并发翻译，和流式路径保持同一上限。
     results = [None] * len(para_jobs)
-    max_parallel = min(_get_para_max_concurrency(), len(para_jobs))
+    max_parallel = _get_para_max_concurrency(model_key, len(para_jobs))
 
     def _do_translate(job: dict):
         return job["para_idx"], translate_paragraph(
@@ -527,12 +561,20 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
             total_usage = _merge_usage(total_usage, structure_usage)
 
     para_bboxes = get_paragraph_bboxes(pages, target_bp, paragraphs)
+    paragraphs, resolved_page_footnotes = assign_page_footnotes_to_paragraphs(
+        pages,
+        target_bp,
+        paragraphs,
+        para_bboxes=para_bboxes,
+    )
+    ctx["footnotes"] = resolved_page_footnotes
     para_jobs = _build_para_jobs(paragraphs, ctx, para_bboxes, target_bp, context_window=_get_para_context_window())
 
     if not para_jobs:
         raise RuntimeError(f"第{target_bp}页未找到有效内容")
 
-    max_parallel = min(_get_para_max_concurrency(), len(para_jobs))
+    max_parallel = _get_para_max_concurrency(model_key, len(para_jobs))
+    dynamic_parallel_limit = max_parallel
     results = [None] * len(para_jobs)
     paragraph_texts = [""] * len(para_jobs)
     paragraph_states = ["pending"] * len(para_jobs)
@@ -544,6 +586,8 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
     aborted = False
     scheduled_para_indices = set()
     finished_para_indices = set()
+    consecutive_rate_limits = 0
+    successful_after_throttle = 0
 
     def _save_parallel_draft(status: str, note: str, last_error: str = ""):
         ordered_active = sorted(active_para_indices)
@@ -587,6 +631,24 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
                 event_queue.put(payload)
         except TranslateStreamAborted:
             event_queue.put({"type": "aborted", "job": job})
+        except QuotaExceededError as e:
+            event_queue.put({"type": "error", "job": job, "error": str(e), "error_kind": "quota"})
+        except RateLimitedError as e:
+            event_queue.put({
+                "type": "error",
+                "job": job,
+                "error": str(e),
+                "error_kind": "rate_limit",
+                "retry_after_s": float(e.retry_after_s) if e.retry_after_s is not None else None,
+            })
+        except TransientProviderError as e:
+            event_queue.put({
+                "type": "error",
+                "job": job,
+                "error": str(e),
+                "error_kind": "transient",
+                "retry_after_s": float(e.retry_after_s) if e.retry_after_s is not None else None,
+            })
         except Exception as e:
             event_queue.put({"type": "error", "job": job, "error": str(e)})
 
@@ -608,6 +670,46 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
         pool.submit(_worker_stream, job)
         running_count += 1
         return True
+
+    def _compute_backoff_seconds(error_kind: str, retry_after_s: float | None = None) -> float:
+        nonlocal consecutive_rate_limits
+        if retry_after_s is not None and retry_after_s >= 0:
+            return min(90.0, float(retry_after_s))
+        if error_kind == "rate_limit":
+            consecutive_rate_limits += 1
+            # 8/16/32/64/90 秒封顶 + 抖动，避免并发请求同时恢复。
+            base = min(90.0, 8.0 * (2 ** max(0, consecutive_rate_limits - 1)))
+            return min(90.0, base + (0.1 * (consecutive_rate_limits % 10)))
+        return 3.0
+
+    def _emit_throttle_wait(seconds: float, reason: str):
+        wait_s = max(0.0, float(seconds))
+        msg = f"触发{reason}，等待 {int(wait_s)} 秒后自动重试。"
+        translate_push("rate_limit_wait", {
+            "doc_id": doc_id,
+            "bp": target_bp,
+            "wait_seconds": int(wait_s),
+            "reason": reason,
+            "parallel_limit": dynamic_parallel_limit,
+            "max_parallel": max_parallel,
+            "message": msg,
+        })
+        _save_stream_draft(
+            doc_id,
+            active=False,
+            bp=target_bp,
+            para_idx=_primary_para_idx(active_para_indices, paragraph_states),
+            para_total=len(para_jobs),
+            para_done=_count_finished_paragraphs(paragraph_states),
+            parallel_limit=dynamic_parallel_limit,
+            active_para_indices=sorted(active_para_indices),
+            paragraph_states=list(paragraph_states),
+            paragraph_errors=list(paragraph_errors),
+            paragraphs=list(paragraph_texts),
+            status="throttled",
+            note=msg,
+            last_error="",
+        )
 
     translate_push("stream_page_init", {
         "doc_id": doc_id,
@@ -633,7 +735,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
     )
 
     with ThreadPoolExecutor(max_workers=max_parallel) as pool:
-        for _ in range(max_parallel):
+        for _ in range(dynamic_parallel_limit):
             if not _submit_next_job(pool):
                 break
 
@@ -681,14 +783,21 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
 
             running_count = max(0, running_count - 1)
             active_para_indices.discard(para_idx)
-            finished_para_indices.add(para_idx)
 
             if evt_type == "done":
+                finished_para_indices.add(para_idx)
                 p = event["result"]
                 results[para_idx] = _make_page_entry(job, target_bp, result=p)
                 paragraph_texts[para_idx] = _ensure_str(p.get("translation", ""))
                 paragraph_states[para_idx] = "done"
                 paragraph_errors[para_idx] = ""
+                if consecutive_rate_limits > 0:
+                    successful_after_throttle += 1
+                    if successful_after_throttle >= 20 and dynamic_parallel_limit < max_parallel:
+                        dynamic_parallel_limit += 1
+                        successful_after_throttle = 0
+                else:
+                    successful_after_throttle = 0
                 translate_push("stream_para_done", {
                     "doc_id": doc_id,
                     "bp": target_bp,
@@ -697,7 +806,49 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
                 })
                 _save_parallel_draft("streaming", "该段已完成，正在继续翻译后续段落。")
             elif evt_type == "error":
+                error_kind = event.get("error_kind", "")
                 error_text = str(event.get("error", "未知错误"))
+                if error_kind == "quota":
+                    paragraph_states[para_idx] = "error"
+                    paragraph_errors[para_idx] = error_text
+                    _save_stream_draft(
+                        doc_id,
+                        active=False,
+                        bp=target_bp,
+                        para_idx=para_idx,
+                        para_total=len(para_jobs),
+                        para_done=_count_finished_paragraphs(paragraph_states),
+                        parallel_limit=dynamic_parallel_limit,
+                        active_para_indices=sorted(active_para_indices),
+                        paragraph_states=list(paragraph_states),
+                        paragraph_errors=list(paragraph_errors),
+                        paragraphs=list(paragraph_texts),
+                        status="error",
+                        note="检测到额度耗尽，已停止自动重试。",
+                        last_error=error_text,
+                    )
+                    raise QuotaExceededError(error_text)
+                if error_kind in ("rate_limit", "transient"):
+                    paragraph_states[para_idx] = "pending"
+                    paragraph_errors[para_idx] = ""
+                    scheduled_para_indices.discard(para_idx)
+                    finished_para_indices.discard(para_idx)
+                    pending_jobs.insert(0, job)
+                    wait_seconds = _compute_backoff_seconds(error_kind, event.get("retry_after_s"))
+                    if error_kind == "rate_limit":
+                        dynamic_parallel_limit = max(1, dynamic_parallel_limit // 2)
+                        successful_after_throttle = 0
+                    _emit_throttle_wait(wait_seconds, "限流" if error_kind == "rate_limit" else "临时故障")
+                    deadline = time.time() + wait_seconds
+                    while time.time() < deadline:
+                        if stop_checker and stop_checker():
+                            raise TranslateStreamAborted("用户停止流式翻译")
+                        time.sleep(0.2)
+                    while running_count < dynamic_parallel_limit and not aborted and pending_jobs:
+                        if not _submit_next_job(pool):
+                            break
+                    continue
+                finished_para_indices.add(para_idx)
                 results[para_idx] = _make_page_entry(job, target_bp, error=error_text)
                 paragraph_texts[para_idx] = results[para_idx]["translation"]
                 paragraph_states[para_idx] = "error"
@@ -711,9 +862,11 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
                 })
                 _save_parallel_draft("streaming", "该段翻译失败，已记录失败占位文本。", last_error=error_text)
             elif evt_type == "aborted":
+                finished_para_indices.add(para_idx)
                 paragraph_states[para_idx] = "aborted"
                 aborted = True
             else:
+                finished_para_indices.add(para_idx)
                 paragraph_states[para_idx] = "error"
                 paragraph_errors[para_idx] = f"未知事件: {evt_type}"
                 results[para_idx] = _make_page_entry(job, target_bp, error=f"未知事件: {evt_type}")
@@ -727,7 +880,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
                 })
                 _save_parallel_draft("streaming", "该段翻译失败，已记录失败占位文本。", last_error=f"未知事件: {evt_type}")
 
-            while running_count < max_parallel and not aborted and pending_jobs:
+            while running_count < dynamic_parallel_limit and not aborted and pending_jobs:
                 if not _submit_next_job(pool):
                     break
 
@@ -1430,8 +1583,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
     try:
         pages, _ = load_pages_from_disk(doc_id)
         entries, _, _ = load_entries_from_disk(doc_id)
-        model_key = get_model_key()
-        t_args = get_translate_args(model_key)
+        model_key, t_args = _get_active_translate_args()
         glossary = get_glossary(doc_id)
 
         if not pages or not t_args["api_key"]:
@@ -1578,8 +1730,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             })
 
             try:
-                model_key = get_model_key()
-                t_args = get_translate_args(model_key)
+                model_key, t_args = _get_active_translate_args()
                 entry = translate_page_stream(
                     pages,
                     bp,
@@ -1712,6 +1863,33 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                     last_error="",
                 )
                 translate_push("stopped", {"msg": "翻译已停止", "bp": bp})
+                return
+            except QuotaExceededError as e:
+                snapshot = _load_translate_state(doc_id)
+                state_total, state_done = _clamp_page_progress(
+                    snapshot.get("total_pages", total_pages),
+                    snapshot.get("done_pages", done_pages + i),
+                )
+                _save_translate_state(
+                    doc_id,
+                    running=False,
+                    stop_requested=False,
+                    phase="error",
+                    total_pages=state_total,
+                    done_pages=state_done,
+                    processed_pages=snapshot.get("processed_pages", state_done),
+                    pending_pages=_remaining_pages(state_total, snapshot.get("processed_pages", state_done)),
+                    current_bp=bp,
+                    current_page_idx=current_page_idx,
+                    translated_chars=snapshot.get("translated_chars", 0),
+                    translated_paras=snapshot.get("translated_paras", 0),
+                    request_count=snapshot.get("request_count", 0),
+                    prompt_tokens=snapshot.get("prompt_tokens", 0),
+                    completion_tokens=snapshot.get("completion_tokens", 0),
+                    model=model_key,
+                    last_error=str(e),
+                )
+                translate_push("error", {"msg": str(e), "bp": bp, "kind": "quota"})
                 return
             except Exception as e:
                 _mark_failed_page_state(doc_id, bp, str(e))
@@ -2003,9 +2181,7 @@ def reparse_single_page(task_id: str, doc_id: str, target_bp: int, file_idx: int
                 if entry.get("_pageBP") == target_bp and entry.get("_model") in MODELS:
                     model_key = entry.get("_model")
                     break
-            if not model_key:
-                model_key = get_model_key()
-            t_args = get_translate_args(model_key)
+            model_key, t_args = _get_active_translate_args(model_key)
             if not t_args["api_key"]:
                 raise RuntimeError("缺少翻译 API Key，请先在设置中配置。")
 

@@ -19,6 +19,7 @@ import tasks
 from config import create_doc, ensure_dirs, get_doc_dir, set_current_doc
 from ocr_parser import parse_ocr, clean_header_footer
 from storage import load_entries_from_disk, save_entries_to_disk, save_pages_to_disk
+from testsupport import ClientCSRFMixin
 from text_processing import get_page_range
 
 
@@ -107,7 +108,7 @@ def _build_fallback_pages(start_bp: int, count: int):
     } for idx in range(count)]
 
 
-class TranslateStopFlowRealDocsTest(unittest.TestCase):
+class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
         self.temp_root = tempfile.mkdtemp(prefix="translate-stop-", dir="/tmp")
         self._patch_config_dirs(self.temp_root)
@@ -189,7 +190,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         ):
             try:
                 set_current_doc(self.doc_a_id)
-                resp = self.client.post("/start_translate_all", data={
+                resp = self._post("/start_translate_all", data={
                     "doc_id": self.doc_a_id,
                     "start_bp": first_bp,
                     "doc_title": "Doc A",
@@ -198,7 +199,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
                 self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
 
                 set_current_doc(self.doc_b_id)
-                stop_resp = self.client.get("/stop_translate", query_string={"doc_id": self.doc_a_id})
+                stop_resp = self._post("/stop_translate", data={"doc_id": self.doc_a_id})
                 self.assertEqual(stop_resp.get_json()["status"], "stopping")
 
                 status_a = self.client.get("/translate_status", query_string={"doc_id": self.doc_a_id}).get_json()
@@ -229,7 +230,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         ):
             try:
                 set_current_doc(self.doc_a_id)
-                resp = self.client.post("/start_translate_all", data={
+                resp = self._post("/start_translate_all", data={
                     "doc_id": self.doc_a_id,
                     "start_bp": first_bp,
                     "doc_title": "Doc A",
@@ -259,7 +260,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate(started, release)),
         ):
             set_current_doc(self.doc_a_id)
-            resp = self.client.post("/start_translate_all", data={
+            resp = self._post("/start_translate_all", data={
                 "doc_id": self.doc_a_id,
                 "start_bp": first_bp,
                 "doc_title": "Doc A",
@@ -310,7 +311,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             }),
             patch.object(app_module, "save_entries_to_disk", side_effect=AssertionError("fetch_next 不应重写整份 entries")),
         ):
-            resp = self.client.get("/fetch_next")
+            resp = self._post("/fetch_next")
 
         self.assertEqual(resp.status_code, 302)
         entries, _, _ = load_entries_from_disk(self.doc_a_id)
@@ -349,7 +350,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
                 "pages": str(first_bp + 1),
             }),
         ):
-            resp = self.client.get("/fetch_next", query_string={"doc_id": self.doc_a_id})
+            resp = self._post("/fetch_next", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 302)
         entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
@@ -405,7 +406,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             }),
             patch.object(app_module, "save_entries_to_disk", side_effect=AssertionError("retranslate 不应重写整份 entries")),
         ):
-            resp = self.client.get("/retranslate/2/sonnet")
+            resp = self._post("/retranslate/2/sonnet")
 
         self.assertEqual(resp.status_code, 302)
         entries, _, _ = load_entries_from_disk(self.doc_a_id)
@@ -444,7 +445,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
                 "pages": str(first_bp),
             }),
         ):
-            resp = self.client.get(f"/retranslate/{first_bp}/sonnet", query_string={"doc_id": self.doc_a_id})
+            resp = self._post(f"/retranslate/{first_bp}/sonnet", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 302)
         entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
@@ -460,10 +461,12 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         set_current_doc(self.doc_b_id)
 
         resp = self.client.get("/pdf_file", query_string={"doc_id": self.doc_a_id})
-
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.mimetype, "application/pdf")
-        self.assertEqual(resp.get_data(), b"%PDF-1.4\n%doc-a\n")
+        try:
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.mimetype, "application/pdf")
+            self.assertEqual(resp.get_data(), b"%PDF-1.4\n%doc-a\n")
+        finally:
+            resp.close()
 
     def test_pdf_page_uses_explicit_doc_id_instead_of_current_doc(self):
         doc_a_pdf = str(Path(get_doc_dir(self.doc_a_id)) / "source.pdf")
@@ -493,7 +496,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             patch.object(app_module.threading, "Thread", FakeThread),
         ):
             set_current_doc(self.doc_b_id)
-            resp = self.client.post(f"/reparse_page/{first_bp}", data={"doc_id": self.doc_a_id})
+            resp = self._post(f"/reparse_page/{first_bp}", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn("task_id", resp.get_json())
@@ -517,7 +520,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             patch.object(app_module.threading, "Thread", FakeThread),
         ):
             set_current_doc(self.doc_b_id)
-            resp = self.client.post("/reparse", data={"doc_id": self.doc_a_id})
+            resp = self._post("/reparse", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn("task_id", resp.get_json())
@@ -536,7 +539,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         ):
             try:
                 set_current_doc(self.doc_a_id)
-                resp = self.client.post("/start_translate_all", data={
+                resp = self._post("/start_translate_all", data={
                     "doc_id": self.doc_a_id,
                     "start_bp": first_bp,
                     "doc_title": "Doc A",
@@ -544,7 +547,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
                 self.assertEqual(resp.get_json()["status"], "started")
                 self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
 
-                delete_resp = self.client.get(f"/delete_doc/{self.doc_a_id}", follow_redirects=True)
+                delete_resp = self._post(f"/delete_doc/{self.doc_a_id}", follow_redirects=True)
                 html = delete_resp.get_data(as_text=True)
 
                 self.assertEqual(delete_resp.status_code, 200)
@@ -570,7 +573,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         ):
             try:
                 set_current_doc(self.doc_a_id)
-                resp = self.client.post("/start_translate_all", data={
+                resp = self._post("/start_translate_all", data={
                     "doc_id": self.doc_a_id,
                     "start_bp": first_bp,
                     "doc_title": "Doc A",
@@ -616,7 +619,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         ):
             try:
                 set_current_doc(self.doc_a_id)
-                resp = self.client.post("/start_translate_all", data={
+                resp = self._post("/start_translate_all", data={
                     "doc_id": self.doc_a_id,
                     "start_bp": start_bp,
                     "doc_title": "Doc A",
@@ -643,7 +646,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate(started, release)),
         ):
             set_current_doc(self.doc_a_id)
-            resp = self.client.post("/start_translate_all", data={
+            resp = self._post("/start_translate_all", data={
                 "doc_id": self.doc_a_id,
                 "start_bp": first_bp,
                 "doc_title": "Doc A",
@@ -651,7 +654,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             self.assertEqual(resp.get_json()["status"], "started")
             self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
 
-            stop_resp = self.client.get("/stop_translate", query_string={"doc_id": self.doc_a_id})
+            stop_resp = self._post("/stop_translate", data={"doc_id": self.doc_a_id})
             self.assertEqual(stop_resp.get_json()["status"], "stopping")
 
             release.set()
@@ -713,8 +716,9 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertIn("翻译 A", html)
         self.assertIn(f'/reading?bp={first_bp}&amp;doc_id={self.doc_a_id}&amp;usage=0&amp;orig=0&amp;layout=stack&amp;pdf=0', html)
         self.assertIn(f'data-pdf-src="/pdf_page/0?doc_id={self.doc_a_id}"', html)
-        self.assertIn(f'/retranslate/{first_bp}/deepseek-chat?doc_id={self.doc_a_id}', html)
-        self.assertIn(f'/reset_text?doc_id={self.doc_a_id}', html)
+        self.assertIn("submitPostAction(retryUrl, {doc_id: retryDocId});", html)
+        self.assertIn('action="/reset_text"', html)
+        self.assertIn(f'name="doc_id" value="{self.doc_a_id}"', html)
         self.assertIn("reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);", html)
 
     def test_home_page_preserves_current_doc_id_in_navigation_links(self):
@@ -779,12 +783,12 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn("OCR-JSON解析成功文档", html)
-        switch_idx = html.index(f'/switch_doc/{self.doc_b_id}')
-        clear_idx = html.index(f'/reset_text?doc_id={self.doc_b_id}')
-        delete_idx = html.index(f'/delete_doc/{self.doc_b_id}')
+        switch_idx = html.index(f'action="/switch_doc/{self.doc_b_id}"')
+        clear_idx = html.index('action="/reset_text"', switch_idx)
+        delete_idx = html.index(f'action="/delete_doc/{self.doc_b_id}"', clear_idx)
         self.assertLess(switch_idx, clear_idx)
         self.assertLess(clear_idx, delete_idx)
-        self.assertIn(f'/reset_text?doc_id={self.doc_b_id}', html)
+        self.assertIn(f'name="doc_id" value="{self.doc_b_id}"', html)
         self.assertIn("当前阅读文档", html)
         self.assertIn("doc-current-banner", html)
 
@@ -829,7 +833,9 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn(f'<input type="hidden" name="doc_id" value="{self.doc_a_id}">', html)
-        self.assertIn(f'/set_model/deepseek-chat?next=input&amp;doc_id={self.doc_a_id}', html)
+        self.assertIn('action="/set_model/deepseek-chat"', html)
+        self.assertIn('name="next" value="input"', html)
+        self.assertIn(f'name="doc_id" value="{self.doc_a_id}"', html)
         self.assertIn(f'/?doc_id={self.doc_a_id}', html)
         self.assertIn('id="paddleQuotaStatusCard"', html)
         self.assertIn("fetch('/paddle_quota_status')", html)
@@ -855,12 +861,365 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertIn("自己查询今日解析页数", html)
         self.assertNotIn("每日可解析 3000 页", html)
 
+    def test_settings_page_hides_custom_model_panel_until_expanded(self):
+        resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('id="customModelPanel"', html)
+        self.assertIn("toggleCustomModelPanel", html)
+        self.assertIn("custom-model-panel", html)
+        self.assertIn("hidden", html)
+
+    def test_settings_page_expands_custom_model_panel_when_requested(self):
+        resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id, "open_custom_model": "1"})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('name="custom_model_name"', html)
+        self.assertIn('name="section" value="custom_model"', html)
+        self.assertIn("保存并启用", html)
+
+    def test_model_switch_uis_all_expose_custom_model_button(self):
+        config.save_config({
+            "model_key": "qwen-plus",
+            "custom_model_name": "qwen-custom-prod",
+            "custom_model_enabled": True,
+            "custom_model_base_key": "qwen-plus",
+        })
+        set_current_doc(self.doc_a_id)
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        save_entries_to_disk([{
+            "_pageBP": first_bp,
+            "_model": "qwen-plus",
+            "_page_entries": [{
+                "original": "Page A",
+                "translation": "翻译 A",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": str(first_bp),
+            }],
+            "pages": str(first_bp),
+        }], "Doc A", 0, self.doc_a_id)
+
+        home_html = self.client.get("/", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
+        input_html = self.client.get("/input", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
+        reading_html = self.client.get("/reading", query_string={"bp": first_bp, "doc_id": self.doc_a_id}).get_data(as_text=True)
+        settings_html = self.client.get("/settings", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
+
+        self.assertIn("自定义: qwen-custom-prod", home_html)
+        self.assertIn("自定义: qwen-custom-prod", input_html)
+        self.assertIn("自定义模型", reading_html)
+        self.assertIn("重译本页", reading_html)
+        self.assertIn("自定义: qwen-custom-prod", settings_html)
+        self.assertIn('action="/set_model/deepseek-chat"', home_html)
+        self.assertIn('action="/set_model/deepseek-chat"', input_html)
+        self.assertIn('action="/set_model/deepseek-chat"', reading_html)
+        self.assertIn('action="/set_model/deepseek-chat"', settings_html)
+        self.assertIn('/settings?doc_id=' + self.doc_a_id + '&amp;open_custom_model=1#customModelPanel', home_html)
+        self.assertIn('/settings?doc_id=' + self.doc_a_id + '&amp;open_custom_model=1#customModelPanel', input_html)
+        self.assertIn('/settings?doc_id=' + self.doc_a_id + '&amp;open_custom_model=1#customModelPanel', reading_html)
+        self.assertNotIn('class="btn active">DeepSeek-Chat</a>', home_html)
+        self.assertNotIn('class="btn active">DeepSeek-Chat</a>', input_html)
+        self.assertNotIn('class="toolbar-dropdown-item active">DeepSeek-Chat</a>', reading_html)
+        self.assertNotIn('class="btn active">DeepSeek-Chat</a>', settings_html)
+
+    def test_switching_to_preset_model_disables_custom_mode_but_keeps_saved_name(self):
+        config.save_config({
+            "model_key": "qwen-plus",
+            "custom_model_name": "qwen-custom-prod",
+            "custom_model_enabled": True,
+            "custom_model_base_key": "qwen-plus",
+        })
+        set_current_doc(self.doc_a_id)
+
+        resp = self._post("/set_model/qwen-max", data={"next": "settings", "doc_id": self.doc_a_id})
+        self.assertEqual(resp.status_code, 302)
+
+        settings_html = self.client.get("/settings", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
+        saved = config.load_config()
+        self.assertEqual(config.get_custom_model_name(), "qwen-custom-prod")
+        self.assertFalse(saved.get("custom_model_enabled"))
+        self.assertEqual(saved.get("custom_model_base_key"), "qwen-plus")
+        self.assertIn('action="/set_model/qwen-max"', settings_html)
+        self.assertIn('自定义: qwen-custom-prod', settings_html)
+
+        t_args = app_module.get_translate_args("qwen-max")
+        self.assertEqual(t_args["model_id"], "qwen-max")
+
+    def test_form_route_rejects_missing_csrf_token(self):
+        config.set_model_key("deepseek-chat")
+
+        resp = self.client.post("/set_model/qwen-max", data={
+            "next": "settings",
+            "doc_id": self.doc_a_id,
+        })
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(config.get_model_key(), "deepseek-chat")
+
+    def test_reading_model_switch_preserves_current_reading_context(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        html = self.client.get("/reading", query_string={
+            "bp": first_bp,
+            "doc_id": self.doc_a_id,
+            "orig": 1,
+            "layout": "side",
+            "pdf": 1,
+            "usage": 1,
+        }).get_data(as_text=True)
+
+        self.assertIn(f'name="bp" value="{first_bp}"', html)
+        self.assertIn('name="usage" value="1"', html)
+        self.assertIn('name="orig" value="1"', html)
+        self.assertIn('name="layout" value="side"', html)
+        self.assertIn('name="pdf" value="1"', html)
+
+        resp = self._post("/set_model/qwen-max", data={
+            "next": "reading",
+            "doc_id": self.doc_a_id,
+            "bp": first_bp,
+            "usage": "1",
+            "orig": "1",
+            "layout": "side",
+            "pdf": "1",
+        })
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn(f"/reading?doc_id={self.doc_a_id}", resp.location)
+        self.assertIn(f"bp={first_bp}", resp.location)
+        self.assertIn("usage=1", resp.location)
+        self.assertIn("orig=1", resp.location)
+        self.assertIn("layout=side", resp.location)
+        self.assertIn("pdf=1", resp.location)
+
+    def test_reading_page_does_not_expose_removed_focus_mode(self):
+        first_bp, _ = get_page_range(self.doc_a_pages)
+        html = self.client.get("/reading", query_string={
+            "bp": first_bp,
+            "doc_id": self.doc_a_id,
+            "orig": 1,
+            "layout": "side",
+            "pdf": 1,
+            "usage": 1,
+            "focus": 1,
+        }).get_data(as_text=True)
+
+        self.assertNotIn('id="focusBtn"', html)
+        self.assertNotIn('id="distractionFreeExitBtn"', html)
+        self.assertNotIn("toggleDistractionFree(", html)
+        self.assertNotIn("distraction-free", html)
+        self.assertNotIn('name="focus"', html)
+        self.assertNotIn("focus=1", html)
+        self.assertIn('name="usage" value="1"', html)
+        self.assertIn('name="orig" value="1"', html)
+        self.assertIn('name="layout" value="side"', html)
+        self.assertIn('name="pdf" value="1"', html)
+        self.assertIn('class="reading-main-layout with-pdf"', html)
+
+    def test_save_settings_accepts_valid_custom_model_name(self):
+        config.set_model_key("qwen-max")
+        resp = self._post("/save_settings", data={
+            "section": "custom_model",
+            "custom_model_name": "qwen-plus-2025_03.1",
+        }, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("已保存自定义模型名", html)
+        saved = config.load_config()
+        self.assertEqual(config.get_custom_model_name(), "qwen-plus-2025_03.1")
+        self.assertTrue(saved.get("custom_model_enabled"))
+        self.assertEqual(saved.get("custom_model_base_key"), "qwen-max")
+        self.assertIn('name="custom_model_name"', html)
+        self.assertIn('value="qwen-plus-2025_03.1"', html)
+        self.assertIn("使用已保存模型", html)
+
+    def test_activate_saved_custom_model_restores_bound_provider_without_refilling(self):
+        config.save_config({
+            "model_key": "deepseek-chat",
+            "deepseek_key": "deepseek-test-key",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model_name": "qwen-plus-custom-2025",
+            "custom_model_enabled": False,
+            "custom_model_base_key": "qwen-max",
+        })
+
+        resp = self._post("/save_settings", data={
+            "section": "custom_model_activate",
+        }, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        saved = config.load_config()
+        self.assertTrue(saved.get("custom_model_enabled"))
+        self.assertEqual(saved.get("model_key"), "qwen-max")
+        t_args = app_module.get_translate_args(saved["model_key"])
+        self.assertEqual(t_args["provider"], "qwen")
+        self.assertEqual(t_args["model_id"], "qwen-plus-custom-2025")
+        self.assertEqual(t_args["api_key"], "dashscope-test-key")
+        self.assertIn("已启用已保存的自定义模型", html)
+
+    def test_save_settings_rejects_invalid_custom_model_name(self):
+        config.save_config({
+            "model_key": "qwen-plus",
+            "custom_model_name": "qwen-plus",
+            "custom_model_enabled": True,
+            "custom_model_base_key": "qwen-plus",
+        })
+        resp = self._post("/save_settings", data={
+            "section": "custom_model",
+            "custom_model_name": "qwen/plus",
+        }, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("自定义模型名格式无效", html)
+        self.assertEqual(config.get_custom_model_name(), "qwen-plus")
+
+    def test_mutating_get_routes_are_rejected(self):
+        routes = [
+            ("/set_model/qwen-max", {"doc_id": self.doc_a_id, "next": "settings"}),
+            ("/switch_doc/" + self.doc_b_id, {}),
+            ("/delete_doc/" + self.doc_b_id, {}),
+            ("/start_from_beginning", {"doc_id": self.doc_a_id}),
+            ("/fetch_next", {"doc_id": self.doc_a_id}),
+            ("/retranslate/1/deepseek-chat", {"doc_id": self.doc_a_id}),
+            ("/stop_translate", {"doc_id": self.doc_a_id}),
+            ("/reset_text", {"doc_id": self.doc_a_id}),
+            ("/reset_text_action", {"doc_id": self.doc_a_id}),
+            ("/reset_all", {"doc_id": self.doc_a_id}),
+        ]
+
+        for path, query in routes:
+            with self.subTest(path=path):
+                resp = self.client.get(path, query_string=query)
+                self.assertEqual(resp.status_code, 405)
+
+    def test_settings_page_defaults_parallel_translation_to_disabled(self):
+        resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('name="translate_parallel_enabled"', html)
+        self.assertIn('name="translate_parallel_limit"', html)
+        self.assertIn('value="10"', html)
+        self.assertIn("开启段内并发翻译", html)
+        self.assertNotIn('name="translate_parallel_enabled" checked', html)
+
+    def test_save_settings_persists_parallel_translation_preferences(self):
+        resp = self._post("/save_settings", data={
+            "section": "translate_parallel",
+            "translate_parallel_enabled": "on",
+            "translate_parallel_limit": "9",
+        }, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("已开启段内并发翻译", html)
+        self.assertIn('name="translate_parallel_enabled" value="on" checked', html)
+        self.assertIn('name="translate_parallel_limit"', html)
+        self.assertIn('value="9"', html)
+
+    def test_save_settings_coerces_invalid_parallel_limit_back_to_ten(self):
+        resp = self._post("/save_settings", data={
+            "section": "translate_parallel",
+            "translate_parallel_enabled": "on",
+            "translate_parallel_limit": "99",
+        }, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('name="translate_parallel_enabled" value="on" checked', html)
+        self.assertIn('value="10"', html)
+
+    def test_save_parallel_settings_while_translation_running_persists_and_warns_next_page(self):
+        started = threading.Event()
+        release = threading.Event()
+        first_bp, _ = get_page_range(self.doc_a_pages)
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate(started, release)),
+        ):
+            try:
+                set_current_doc(self.doc_a_id)
+                start_resp = self._post("/start_translate_all", data={
+                    "doc_id": self.doc_a_id,
+                    "start_bp": first_bp,
+                    "doc_title": "Doc A",
+                })
+                self.assertEqual(start_resp.get_json()["status"], "started")
+                self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
+
+                resp = self._post("/save_settings", data={
+                    "section": "translate_parallel",
+                    "translate_parallel_enabled": "on",
+                    "translate_parallel_limit": "8",
+                }, follow_redirects=True)
+                html = resp.get_data(as_text=True)
+
+                self.assertEqual(resp.status_code, 200)
+                self.assertIn("已开启段内并发翻译", html)
+                self.assertIn("新的并发设置会从下一页开始生效", html)
+                self.assertIn('name="translate_parallel_enabled" value="on" checked', html)
+                self.assertIn('value="8"', html)
+                self.assertTrue(config.get_translate_parallel_enabled())
+                self.assertEqual(config.get_translate_parallel_limit(), 8)
+            finally:
+                release.set()
+                self._wait_for_worker_stop(timeout=3.0)
+
+    def test_existing_config_file_wont_be_overwritten_by_legacy_migration(self):
+        original_old_config_dir = config.OLD_CONFIG_DIR
+        original_config_dir = config.CONFIG_DIR
+        original_config_file = config.CONFIG_FILE
+        original_data_dir = config.DATA_DIR
+        original_docs_dir = config.DOCS_DIR
+        original_current_file = config.CURRENT_FILE
+
+        legacy_root = tempfile.mkdtemp(prefix="legacy-config-", dir="/tmp")
+        new_root = tempfile.mkdtemp(prefix="new-config-", dir="/tmp")
+        try:
+            legacy_cfg = {"translate_parallel_enabled": False, "translate_parallel_limit": 2}
+            os.makedirs(legacy_root, exist_ok=True)
+            with open(os.path.join(legacy_root, "config.json"), "w", encoding="utf-8") as f:
+                json.dump(legacy_cfg, f, ensure_ascii=False)
+
+            config.CONFIG_DIR = new_root
+            config.CONFIG_FILE = os.path.join(new_root, "config.json")
+            config.DATA_DIR = os.path.join(new_root, "data")
+            config.DOCS_DIR = os.path.join(config.DATA_DIR, "documents")
+            config.CURRENT_FILE = os.path.join(config.DATA_DIR, "current.txt")
+            config.OLD_CONFIG_DIR = legacy_root
+
+            # 第一次会触发旧配置迁移
+            enabled, limit = config.set_translate_parallel_settings(True, "9")
+            self.assertTrue(enabled)
+            self.assertEqual(limit, 9)
+
+            # 第二次读取不应再次被旧配置覆盖
+            loaded = config.load_config()
+            self.assertTrue(bool(loaded.get("translate_parallel_enabled")))
+            self.assertEqual(int(loaded.get("translate_parallel_limit")), 9)
+        finally:
+            config.OLD_CONFIG_DIR = original_old_config_dir
+            config.CONFIG_DIR = original_config_dir
+            config.CONFIG_FILE = original_config_file
+            config.DATA_DIR = original_data_dir
+            config.DOCS_DIR = original_docs_dir
+            config.CURRENT_FILE = original_current_file
+            shutil.rmtree(legacy_root, ignore_errors=True)
+            shutil.rmtree(new_root, ignore_errors=True)
+
     def test_start_reading_uses_form_doc_id_when_redirecting_to_reading(self):
         first_bp, _ = get_page_range(self.doc_a_pages)
         set_current_doc(self.doc_b_id)
 
         with patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}):
-            resp = self.client.post("/start_reading", data={
+            resp = self._post("/start_reading", data={
                 "doc_id": self.doc_a_id,
                 "start_page": first_bp,
                 "doc_title": "Doc A",
@@ -887,12 +1246,23 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         set_current_doc(self.doc_b_id)
 
         with patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}):
-            resp = self.client.get("/start_from_beginning", query_string={"doc_id": self.doc_a_id})
+            resp = self._post("/start_from_beginning", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 302)
         self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
         entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
         self.assertEqual(entries_a[0]["_page_entries"][0]["translation"], "翻译 A")
+
+    def test_start_from_beginning_missing_deepseek_key_uses_correct_provider_name(self):
+        config.set_model_key("deepseek-chat")
+        config.set_deepseek_key("")
+
+        resp = self._post("/start_from_beginning", data={"doc_id": self.doc_a_id}, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("DeepSeek API Key", html)
+        self.assertNotIn("Anthropic API Key", html)
 
     def test_reading_export_links_bind_current_doc_id(self):
         first_bp, _ = get_page_range(self.doc_a_pages)
@@ -1190,7 +1560,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         }], "Doc B", 0, self.doc_b_id)
         set_current_doc(self.doc_b_id)
 
-        resp = self.client.get("/reset_text", query_string={"doc_id": self.doc_a_id})
+        resp = self._post("/reset_text", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/input", resp.location)
@@ -1216,7 +1586,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         }], "Doc A", 0, self.doc_a_id)
         set_current_doc(self.doc_b_id)
 
-        resp = self.client.get("/reset_text_action", query_string={"doc_id": self.doc_a_id})
+        resp = self._post("/reset_text_action", data={"doc_id": self.doc_a_id})
 
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/settings", resp.location)
@@ -1235,7 +1605,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         ):
             try:
                 set_current_doc(self.doc_b_id)
-                resp = self.client.post("/start_translate_all", data={
+                resp = self._post("/start_translate_all", data={
                     "doc_id": self.doc_a_id,
                     "start_bp": first_bp,
                     "doc_title": "Doc A",
@@ -1243,7 +1613,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
                 self.assertEqual(resp.get_json()["status"], "started")
                 self.assertTrue(started.wait(timeout=1.0), "翻译线程没有进入首段翻译")
 
-                delete_resp = self.client.get("/reset_all", query_string={"doc_id": self.doc_a_id}, follow_redirects=True)
+                delete_resp = self._post("/reset_all", data={"doc_id": self.doc_a_id}, follow_redirects=True)
                 html = delete_resp.get_data(as_text=True)
                 self.assertIn("该文档正在翻译中，请先停止翻译后再删除。", html)
                 self.assertTrue(Path(get_doc_dir(self.doc_a_id)).exists())
@@ -1257,10 +1627,11 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn(f'/reset_all?doc_id={self.doc_a_id}', html)
+        self.assertIn('action="/reset_all"', html)
+        self.assertIn(f'name="doc_id" value="{self.doc_a_id}"', html)
 
         set_current_doc(self.doc_b_id)
-        delete_resp = self.client.get("/reset_all", query_string={"doc_id": self.doc_a_id}, follow_redirects=True)
+        delete_resp = self._post("/reset_all", data={"doc_id": self.doc_a_id}, follow_redirects=True)
 
         self.assertEqual(delete_resp.status_code, 200)
         self.assertFalse(Path(get_doc_dir(self.doc_a_id)).exists())
@@ -1284,7 +1655,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         set_current_doc(self.doc_b_id)
 
         with patch.object(app_module, "delete_doc", side_effect=lambda doc_id: None):
-            resp = self.client.get("/reset_all", query_string={"doc_id": self.doc_a_id}, follow_redirects=True)
+            resp = self._post("/reset_all", data={"doc_id": self.doc_a_id}, follow_redirects=True)
 
         html = resp.get_data(as_text=True)
         self.assertEqual(resp.status_code, 200)
@@ -1312,8 +1683,9 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn(f'/reset_text_action?doc_id={self.doc_b_id}', html)
-        self.assertIn(f'/reset_all?doc_id={self.doc_b_id}', html)
+        self.assertIn('action="/reset_text_action"', html)
+        self.assertIn('action="/reset_all"', html)
+        self.assertIn(f'name="doc_id" value="{self.doc_b_id}"', html)
 
     def test_extract_pdf_text_returns_empty_when_pdf_reader_raises(self):
         with patch.object(pdf_extract, "PdfReader", side_effect=RuntimeError("broken pdf")):
@@ -1457,7 +1829,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate_with_usage(started, release, usage)),
         ):
             set_current_doc(self.doc_a_id)
-            resp = self.client.post("/start_translate_all", data={
+            resp = self._post("/start_translate_all", data={
                 "doc_id": self.doc_a_id,
                 "start_bp": last_bp,
                 "doc_title": "Doc A",
@@ -1485,7 +1857,7 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
             patch.object(tasks, "translate_page_stream", side_effect=_build_fake_translate_with_first_page_error(started, release, first_bp)),
         ):
             set_current_doc(self.doc_a_id)
-            resp = self.client.post("/start_translate_all", data={
+            resp = self._post("/start_translate_all", data={
                 "doc_id": self.doc_a_id,
                 "start_bp": first_bp,
                 "doc_title": "Doc A",
@@ -1522,6 +1894,37 @@ class TranslateStopFlowRealDocsTest(unittest.TestCase):
         self.assertIn("applyStreamDelta", html)
         self.assertIn("renderStreamDraftState", html)
         self.assertNotIn("href=\"/translate_api_usage", html)
+
+    def test_reading_page_progress_logic_keeps_bar_visible_for_idle_history(self):
+        set_current_doc(self.doc_a_id)
+        resp = self.client.get("/reading?bp=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("function hasPageProgressInStore()", html)
+        self.assertIn("function hasPageProgressInSnapshot(state)", html)
+        self.assertIn("if (state.phase === 'idle') {", html)
+        self.assertIn("return hasPageProgressInSnapshot(state) || hasPageProgressInStore();", html)
+        self.assertIn("} else if (state.phase === 'idle') {", html)
+
+    def test_reading_page_embeds_rate_limit_wait_rendering_hooks(self):
+        set_current_doc(self.doc_a_id)
+        resp = self.client.get("/reading?bp=1&auto=1&usage=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("if (action === 'rate_limit_wait') {", html)
+        self.assertIn("store.streamDraft.status === 'throttled'", html)
+        self.assertIn("translateES.addEventListener('rate_limit_wait'", html)
+
+    def test_reading_page_retranslate_flow_submits_post_action(self):
+        set_current_doc(self.doc_a_id)
+        resp = self.client.get("/reading?bp=1&auto=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("submitPostAction(retranslateUrl, {doc_id: docId});", html)
+        self.assertNotIn("window.location.href = retranslateUrl;", html)
 
     def test_reading_page_exposes_resume_translate_action_after_stop(self):
         set_current_doc(self.doc_a_id)

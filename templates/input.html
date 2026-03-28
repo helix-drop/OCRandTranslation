@@ -8,14 +8,24 @@
       <span class="badge badge-ocr">OCR</span>
       <div class="model-picker compact">
         {% for key, m in models.items() %}
-        <a href="{{ url_for('set_model', key=key, next='input', doc_id=current_doc_id) }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+        <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <input type="hidden" name="next" value="input">
+          <button type="submit" class="btn {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
+        </form>
         {% endfor %}
+        <a href="{{ url_for('settings', doc_id=current_doc_id, open_custom_model=1) }}#customModelPanel"
+           class="btn {{ 'active' if custom_model_enabled else '' }}">
+          {{ ('自定义: ' ~ custom_model_name) if custom_model_name else '自定义模型' }}
+        </a>
       </div>
     </div>
   </div>
 
   <!-- Doc title -->
   <form method="POST" action="{{ url_for('start_reading') }}" id="startForm">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
     <div class="mb-20">
       <label style="font-size:12px;color:var(--txS);">文档标题</label>

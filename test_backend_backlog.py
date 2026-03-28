@@ -14,9 +14,10 @@ from pdf_extract import extract_pdf_toc
 from pypdf import PdfWriter
 from sqlite_store import SQLiteRepository, get_connection
 from storage import get_app_state, save_entries_to_disk
+from testsupport import ClientCSRFMixin
 
 
-class BackendBacklogTest(unittest.TestCase):
+class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
         self.temp_root = tempfile.mkdtemp(prefix="backend-backlog-", dir="/tmp")
         self._patch_config_dirs(self.temp_root)
@@ -81,7 +82,7 @@ class BackendBacklogTest(unittest.TestCase):
         set_current_doc(doc_id)
 
         # create
-        resp = self.client.post(
+        resp = self._post_json(
             "/api/glossary",
             query_string={"doc_id": doc_id},
             json={"term": "State", "defn": "状态"},
@@ -98,7 +99,7 @@ class BackendBacklogTest(unittest.TestCase):
         self.assertIn(["State", "状态"], items)
 
         # update
-        upd_resp = self.client.put(
+        upd_resp = self._put_json(
             "/api/glossary/State",
             query_string={"doc_id": doc_id},
             json={"defn": "状态(更新)"},
@@ -108,12 +109,25 @@ class BackendBacklogTest(unittest.TestCase):
         self.assertIn(["State", "状态(更新)"], upd_items)
 
         # delete
-        del_resp = self.client.delete("/api/glossary/State", query_string={"doc_id": doc_id})
+        del_resp = self._delete("/api/glossary/State", query_string={"doc_id": doc_id})
         self.assertEqual(del_resp.status_code, 200)
         self.assertTrue(del_resp.get_json()["ok"])
 
-        missing_resp = self.client.delete("/api/glossary/State", query_string={"doc_id": doc_id})
+        missing_resp = self._delete("/api/glossary/State", query_string={"doc_id": doc_id})
         self.assertEqual(missing_resp.status_code, 404)
+
+    def test_glossary_api_rejects_missing_csrf_token(self):
+        doc_id = create_doc("glossary-csrf.pdf")
+        set_current_doc(doc_id)
+
+        resp = self.client.post(
+            "/api/glossary",
+            query_string={"doc_id": doc_id},
+            json={"term": "State", "defn": "状态"},
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.get_json()["error"], "csrf_failed")
 
     def test_extract_pdf_toc_handles_empty_and_bookmarked_pdf(self):
         self.assertEqual(extract_pdf_toc(b"not-a-pdf"), [])

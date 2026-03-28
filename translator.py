@@ -1,7 +1,6 @@
 """翻译模块：支持 DeepSeek 和 Qwen (DashScope) API。"""
 import json
 import re
-
 from openai import OpenAI
 
 DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -10,6 +9,78 @@ DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 
 class TranslateStreamAborted(RuntimeError):
     """流式翻译被外部停止。"""
+
+
+class RateLimitedError(RuntimeError):
+    """请求触发限流，可等待后重试。"""
+
+    def __init__(self, message: str, retry_after_s: float | None = None):
+        super().__init__(message)
+        self.retry_after_s = retry_after_s
+
+
+class TransientProviderError(RuntimeError):
+    """上游服务临时异常，可短暂等待后重试。"""
+
+    def __init__(self, message: str, retry_after_s: float | None = None):
+        super().__init__(message)
+        self.retry_after_s = retry_after_s
+
+
+class QuotaExceededError(RuntimeError):
+    """额度耗尽，不应继续自动重试。"""
+
+
+def _parse_retry_after_seconds(headers) -> float | None:
+    if not headers:
+        return None
+    raw = headers.get("Retry-After")
+    if raw is None:
+        return None
+    try:
+        return max(0.0, float(str(raw).strip()))
+    except (TypeError, ValueError):
+        return None
+
+
+def _extract_exc_status_headers(exc: Exception) -> tuple[int | None, dict | None]:
+    status = None
+    headers = None
+    response = getattr(exc, "response", None)
+    if response is not None:
+        status = getattr(response, "status_code", None)
+        headers = getattr(response, "headers", None)
+    if status is None:
+        status = getattr(exc, "status_code", None)
+    return status, headers
+
+
+def _classify_provider_exception(exc: Exception) -> Exception:
+    status, headers = _extract_exc_status_headers(exc)
+    retry_after_s = _parse_retry_after_seconds(headers)
+    text = str(exc or "")
+    normalized = text.lower()
+
+    if status == 429 or "rate limit" in normalized or "too many requests" in normalized:
+        return RateLimitedError("触发模型限流，稍后自动重试。", retry_after_s=retry_after_s)
+
+    quota_keywords = (
+        "insufficient_quota",
+        "quota exceeded",
+        "quota is exceeded",
+        "exceeded your current quota",
+        "余额不足",
+        "额度不足",
+        "额度已用尽",
+        "账户额度已用尽",
+    )
+    if status == 402 or any(keyword in normalized for keyword in quota_keywords):
+        return QuotaExceededError("模型额度已耗尽，请充值或更换 API Key 后重试。")
+
+    if status in (500, 502, 503, 504) or "timeout" in normalized or "temporarily unavailable" in normalized:
+        return TransientProviderError("模型服务暂时不可用，稍后自动重试。", retry_after_s=retry_after_s)
+
+    return exc
 
 
 def _empty_usage() -> dict:
@@ -305,20 +376,29 @@ def _extract_translation_preview(text: str) -> str:
     return decoded
 
 
+def _call_provider(provider: str, sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
+    if provider == "qwen":
+        return _call_qwen(sys_prompt, user_msg, model_id, api_key)
+    return _call_deepseek(sys_prompt, user_msg, model_id, api_key)
+
+
 def _call_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
     """调用 Qwen (DashScope) API，使用 OpenAI 兼容接口。"""
     client = OpenAI(
         api_key=api_key,
         base_url=DASHSCOPE_BASE_URL,
     )
-    response = client.chat.completions.create(
-        model=model_id,
-        max_tokens=4096,
-        messages=[
-            {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": user_msg},
-        ],
-    )
+    try:
+        response = client.chat.completions.create(
+            model=model_id,
+            max_tokens=4096,
+            messages=[
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+    except Exception as exc:
+        raise _classify_provider_exception(exc) from exc
     usage = _build_usage(
         prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
         completion_tokens=getattr(response.usage, "completion_tokens", 0),
@@ -335,14 +415,17 @@ def _call_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str) 
         api_key=api_key,
         base_url=DEEPSEEK_BASE_URL,
     )
-    response = client.chat.completions.create(
-        model=model_id,
-        max_tokens=4096,
-        messages=[
-            {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": user_msg},
-        ],
-    )
+    try:
+        response = client.chat.completions.create(
+            model=model_id,
+            max_tokens=4096,
+            messages=[
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+    except Exception as exc:
+        raise _classify_provider_exception(exc) from exc
     usage = _build_usage(
         prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
         completion_tokens=getattr(response.usage, "completion_tokens", 0),
@@ -433,35 +516,41 @@ def _stream_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str
         api_key=api_key,
         base_url=DEEPSEEK_BASE_URL,
     )
-    response = client.chat.completions.create(
-        model=model_id,
-        max_tokens=4096,
-        messages=[
-            {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": user_msg},
-        ],
-        stream=True,
-        stream_options={"include_usage": True},
-    )
+    try:
+        response = client.chat.completions.create(
+            model=model_id,
+            max_tokens=4096,
+            messages=[
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": user_msg},
+            ],
+            stream=True,
+            stream_options={"include_usage": True},
+        )
+    except Exception as exc:
+        raise _classify_provider_exception(exc) from exc
     full_parts = []
     usage = _empty_usage()
     try:
-        for chunk in response:
-            _check_stream_stop(stop_checker)
-            text = _extract_openai_delta_text(chunk)
-            if text:
-                full_parts.append(text)
-                yield {"type": "delta", "text": text}
-            chunk_usage = getattr(chunk, "usage", None)
-            if chunk_usage:
-                usage = _build_usage(
-                    prompt_tokens=getattr(chunk_usage, "prompt_tokens", 0),
-                    completion_tokens=getattr(chunk_usage, "completion_tokens", 0),
-                    total_tokens=getattr(chunk_usage, "total_tokens", None),
-                )
-        full_text = "".join(full_parts)
-        yield {"type": "usage", "usage": usage}
-        yield {"type": "done", "text": full_text, "usage": usage}
+        try:
+            for chunk in response:
+                _check_stream_stop(stop_checker)
+                text = _extract_openai_delta_text(chunk)
+                if text:
+                    full_parts.append(text)
+                    yield {"type": "delta", "text": text}
+                chunk_usage = getattr(chunk, "usage", None)
+                if chunk_usage:
+                    usage = _build_usage(
+                        prompt_tokens=getattr(chunk_usage, "prompt_tokens", 0),
+                        completion_tokens=getattr(chunk_usage, "completion_tokens", 0),
+                        total_tokens=getattr(chunk_usage, "total_tokens", None),
+                    )
+            full_text = "".join(full_parts)
+            yield {"type": "usage", "usage": usage}
+            yield {"type": "done", "text": full_text, "usage": usage}
+        except Exception as exc:
+            raise _classify_provider_exception(exc) from exc
     except TranslateStreamAborted:
         _close_stream_response(response)
         raise
@@ -475,40 +564,52 @@ def _stream_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str, st
         api_key=api_key,
         base_url=DASHSCOPE_BASE_URL,
     )
-    response = client.chat.completions.create(
-        model=model_id,
-        max_tokens=4096,
-        messages=[
-            {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": user_msg},
-        ],
-        stream=True,
-        stream_options={"include_usage": True},
-    )
+    try:
+        response = client.chat.completions.create(
+            model=model_id,
+            max_tokens=4096,
+            messages=[
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": user_msg},
+            ],
+            stream=True,
+            stream_options={"include_usage": True},
+        )
+    except Exception as exc:
+        raise _classify_provider_exception(exc) from exc
     full_parts = []
     usage = _empty_usage()
     try:
-        for chunk in response:
-            _check_stream_stop(stop_checker)
-            text = _extract_openai_delta_text(chunk)
-            if text:
-                full_parts.append(text)
-                yield {"type": "delta", "text": text}
-            chunk_usage = getattr(chunk, "usage", None)
-            if chunk_usage:
-                usage = _build_usage(
-                    prompt_tokens=getattr(chunk_usage, "prompt_tokens", 0),
-                    completion_tokens=getattr(chunk_usage, "completion_tokens", 0),
-                    total_tokens=getattr(chunk_usage, "total_tokens", None),
-                )
-        full_text = "".join(full_parts)
-        yield {"type": "usage", "usage": usage}
-        yield {"type": "done", "text": full_text, "usage": usage}
+        try:
+            for chunk in response:
+                _check_stream_stop(stop_checker)
+                text = _extract_openai_delta_text(chunk)
+                if text:
+                    full_parts.append(text)
+                    yield {"type": "delta", "text": text}
+                chunk_usage = getattr(chunk, "usage", None)
+                if chunk_usage:
+                    usage = _build_usage(
+                        prompt_tokens=getattr(chunk_usage, "prompt_tokens", 0),
+                        completion_tokens=getattr(chunk_usage, "completion_tokens", 0),
+                        total_tokens=getattr(chunk_usage, "total_tokens", None),
+                    )
+            full_text = "".join(full_parts)
+            yield {"type": "usage", "usage": usage}
+            yield {"type": "done", "text": full_text, "usage": usage}
+        except Exception as exc:
+            raise _classify_provider_exception(exc) from exc
     except TranslateStreamAborted:
         _close_stream_response(response)
         raise
     finally:
         _close_stream_response(response)
+
+
+def _stream_provider(provider: str, sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
+    if provider == "qwen":
+        return _stream_qwen(sys_prompt, user_msg, model_id, api_key, stop_checker=stop_checker)
+    return _stream_deepseek(sys_prompt, user_msg, model_id, api_key, stop_checker=stop_checker)
 
 
 _STRUCTURE_SYSTEM = """你是文档结构分析专家。
@@ -578,10 +679,7 @@ def structure_page(
     # 构建用户消息
     msg = f"页码: {page_num}\n\n===OCR标签===\n{labels_str}\n===OCR标签结束===\n\n===连续文本===\n{markdown}\n===连续文本结束==="
 
-    if provider == "qwen":
-        api_result = _call_qwen(_STRUCTURE_SYSTEM, msg, model_id, api_key)
-    else:
-        api_result = _call_deepseek(_STRUCTURE_SYSTEM, msg, model_id, api_key)
+    api_result = _call_provider(provider, _STRUCTURE_SYSTEM, msg, model_id, api_key)
 
     full = api_result.get("text", "")
     if not full:
@@ -605,6 +703,36 @@ def structure_page(
         clean.append({"heading_level": hl, "text": text})
 
     return {"paragraphs": clean, "usage": api_result.get("usage", _empty_usage())}
+
+
+def _prepare_translate_request(
+    para_text: str,
+    para_pages: str,
+    footnotes: str,
+    glossary: list,
+    heading_level: int = 0,
+    para_idx: int | None = None,
+    para_total: int | None = None,
+    prev_context: str = "",
+    next_context: str = "",
+    section_path: list[str] | None = None,
+    cross_page: str | None = None,
+) -> tuple[str, str]:
+    gloss_str = "\n".join(f"{g[0]}→{g[1]}" for g in glossary)
+    sys_prompt = build_prompt(gloss_str)
+    msg = _build_translate_message(
+        para_text=para_text,
+        para_pages=para_pages,
+        footnotes=footnotes,
+        heading_level=heading_level,
+        para_idx=para_idx,
+        para_total=para_total,
+        prev_context=prev_context,
+        next_context=next_context,
+        section_path=section_path,
+        cross_page=cross_page,
+    )
+    return sys_prompt, msg
 
 
 def translate_paragraph(
@@ -632,13 +760,11 @@ def translate_paragraph(
     Returns:
         包含 pages, original, translation, footnotes, footnotes_translation 的字典
     """
-    gloss_str = "\n".join(f"{g[0]}→{g[1]}" for g in glossary)
-    sys_prompt = build_prompt(gloss_str)
-
-    msg = _build_translate_message(
+    sys_prompt, msg = _prepare_translate_request(
         para_text=para_text,
         para_pages=para_pages,
         footnotes=footnotes,
+        glossary=glossary,
         heading_level=heading_level,
         para_idx=para_idx,
         para_total=para_total,
@@ -648,10 +774,7 @@ def translate_paragraph(
         cross_page=cross_page,
     )
 
-    if provider == "qwen":
-        result = _call_qwen(sys_prompt, msg, model_id, api_key)
-    else:
-        result = _call_deepseek(sys_prompt, msg, model_id, api_key)
+    result = _call_provider(provider, sys_prompt, msg, model_id, api_key)
 
     full = result.get("text", "")
     if not full:
@@ -715,13 +838,11 @@ def stream_translate_paragraph(
     - {"type": "usage", "usage": {...}}
     - {"type": "done", "text": full_text, "usage": {...}, "result": {...}}
     """
-    gloss_str = "\n".join(f"{g[0]}→{g[1]}" for g in glossary)
-    sys_prompt = build_prompt(gloss_str)
-
-    msg = _build_translate_message(
+    sys_prompt, msg = _prepare_translate_request(
         para_text=para_text,
         para_pages=para_pages,
         footnotes=footnotes,
+        glossary=glossary,
         heading_level=heading_level,
         para_idx=para_idx,
         para_total=para_total,
@@ -731,10 +852,14 @@ def stream_translate_paragraph(
         cross_page=cross_page,
     )
 
-    if provider == "qwen":
-        stream_iter = _stream_qwen(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
-    else:
-        stream_iter = _stream_deepseek(sys_prompt, msg, model_id, api_key, stop_checker=stop_checker)
+    stream_iter = _stream_provider(
+        provider,
+        sys_prompt,
+        msg,
+        model_id,
+        api_key,
+        stop_checker=stop_checker,
+    )
 
     final_usage = _empty_usage()
     raw_stream_text = ""

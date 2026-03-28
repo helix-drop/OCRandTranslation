@@ -138,15 +138,6 @@ with sync_playwright() as p:
     half.screenshot(path=f"{SD}/16_dark_p20.png", full_page=True)
     print("  16 深色主题 p.20")
 
-    # 沉浸模式
-    half.evaluate("document.documentElement.setAttribute('data-theme', '')")
-    time.sleep(0.3)
-    half.evaluate("if(typeof toggleDistractionFree==='function') toggleDistractionFree()")
-    time.sleep(0.5)
-    half.screenshot(path=f"{SD}/17_immersive_p20.png", full_page=True)
-    print("  17 沉浸模式 p.20")
-    half.evaluate("if(typeof toggleDistractionFree==='function') toggleDistractionFree()")
-
     # ====== 全宽正文质量检查 ======
     print("\n=== 全宽正文质量 ===")
     full.goto(f"{BASE}/reading?doc_id={DOC_ID}&bp=15&orig=1&layout=side")

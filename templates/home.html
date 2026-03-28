@@ -15,8 +15,17 @@
       <div class="flex gap-8 items-center">
         <div class="model-picker">
           {% for key, m in models.items() %}
-          <a href="{{ url_for('set_model', key=key, doc_id=current_doc_id) }}" class="btn {{ 'active' if key == model_key else '' }}">{{ m.label }}</a>
+          <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+            <input type="hidden" name="next" value="home">
+            <button type="submit" class="btn {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
+          </form>
           {% endfor %}
+          <a href="{{ url_for('settings', doc_id=current_doc_id, open_custom_model=1) }}#customModelPanel"
+             class="btn {{ 'active' if custom_model_enabled else '' }}">
+            {{ ('自定义: ' ~ custom_model_name) if custom_model_name else '自定义模型' }}
+          </a>
         </div>
         <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="btn btn-sec btn-sm">设置</a>
       </div>
@@ -170,14 +179,24 @@
         </div>
         <div class="doc-actions">
           {% if doc.id != current_doc_id %}
-          <a href="{{ url_for('switch_doc', doc_id=doc.id) }}" class="btn btn-sm btn-sec">切换</a>
+          <form method="POST" action="{{ url_for('switch_doc', doc_id=doc.id) }}" class="inline-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-sm btn-sec">切换</button>
+          </form>
           {% endif %}
           {% if doc.entry_count %}
-          <a href="{{ url_for('reset_text', doc_id=doc.id) }}" class="btn btn-sm btn-gho"
-             onclick="return confirm('确定清空「{{ doc.name }}」的翻译数据？');">清空翻译数据</a>
+          <form method="POST" action="{{ url_for('reset_text') }}" class="inline-form"
+                onsubmit="return confirm('确定清空「{{ doc.name }}」的翻译数据？');">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="doc_id" value="{{ doc.id }}">
+            <button type="submit" class="btn btn-sm btn-gho">清空翻译数据</button>
+          </form>
           {% endif %}
-          <a href="{{ url_for('delete_doc_route', doc_id=doc.id) }}" class="btn btn-sm btn-red-ghost"
-             onclick="return confirm('确定删除「{{ doc.name }}」？');">删除</a>
+          <form method="POST" action="{{ url_for('delete_doc_route', doc_id=doc.id) }}" class="inline-form"
+                onsubmit="return confirm('确定删除「{{ doc.name }}」？');">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-sm btn-red-ghost">删除</button>
+          </form>
         </div>
       </div>
       {% endfor %}
@@ -344,6 +363,7 @@ function startUpload(file) {
   });
 
   xhr.open('POST', '{{ url_for("upload_file") }}');
+  xhr.setRequestHeader('X-CSRF-Token', getCsrfToken());
   xhr.send(formData);
 }
 
@@ -409,7 +429,10 @@ function startReparse() {
   reparseUrl += '?doc_id={{ current_doc_id }}';
   {% endif %}
 
-  fetch(reparseUrl, {method: 'POST'})
+  fetch(reparseUrl, {
+    method: 'POST',
+    headers: withCsrfHeaders()
+  })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) {

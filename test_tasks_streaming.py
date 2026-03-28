@@ -15,8 +15,9 @@ import config
 import ocr_client
 import tasks
 from config import create_doc, ensure_dirs, get_doc_meta, set_current_doc
-from storage import load_pages_from_disk, save_entries_to_disk, save_pages_to_disk
-from translator import TranslateStreamAborted
+from storage import load_pages_from_disk, save_entries_to_disk, save_pages_to_disk, get_translate_args
+from testsupport import ClientCSRFMixin
+from translator import TranslateStreamAborted, RateLimitedError, QuotaExceededError
 
 
 class TasksStreamingTest(unittest.TestCase):
@@ -98,6 +99,51 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(snapshot["draft"]["para_done"], 2)
         self.assertEqual(snapshot["draft"]["paragraphs"], ["甲乙", "甲乙"])
 
+    def test_get_translate_args_prefers_custom_model_name_when_enabled(self):
+        config.save_config({
+            "model_key": "qwen-plus",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model_name": "qwen-plus-custom-202503",
+            "custom_model_enabled": True,
+            "custom_model_base_key": "qwen-plus",
+        })
+
+        t_args = get_translate_args("qwen-plus")
+
+        self.assertEqual(t_args["provider"], "qwen")
+        self.assertEqual(t_args["model_id"], "qwen-plus-custom-202503")
+        self.assertEqual(t_args["api_key"], "dashscope-test-key")
+
+    def test_get_translate_args_uses_preset_model_id_when_custom_name_saved_but_disabled(self):
+        config.save_config({
+            "model_key": "qwen-max",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model_name": "qwen3.5-plus-longcontext",
+            "custom_model_enabled": False,
+            "custom_model_base_key": "qwen-max",
+        })
+
+        t_args = get_translate_args("qwen-max")
+
+        self.assertEqual(t_args["provider"], "qwen")
+        self.assertEqual(t_args["model_id"], "qwen-max")
+
+    def test_get_translate_args_uses_bound_provider_from_custom_model_base_key(self):
+        config.save_config({
+            "model_key": "deepseek-chat",
+            "deepseek_key": "deepseek-test-key",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model_name": "qwen3.5-plus-longcontext",
+            "custom_model_enabled": True,
+            "custom_model_base_key": "qwen-max",
+        })
+
+        t_args = get_translate_args("deepseek-chat")
+
+        self.assertEqual(t_args["provider"], "qwen")
+        self.assertEqual(t_args["model_id"], "qwen3.5-plus-longcontext")
+        self.assertEqual(t_args["api_key"], "dashscope-test-key")
+
     def test_translate_page_stream_aborts_without_entry_when_stopped(self):
         def _fake_stream(*args, **kwargs):
             yield {"type": "delta", "text": "甲"}
@@ -131,6 +177,11 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(snapshot["draft"]["paragraphs"][0], "甲")
 
     def test_translate_page_stream_keeps_result_order_under_parallelism(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 2,
+        })
+
         def _fake_stream(*args, **kwargs):
             para_idx = kwargs["para_idx"]
             if para_idx == 0:
@@ -153,7 +204,6 @@ class TasksStreamingTest(unittest.TestCase):
             patch.object(tasks, "get_paragraph_bboxes", return_value=[[], []]),
             patch.object(tasks, "_needs_llm_fix", return_value=False),
             patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
-            patch.object(config, "PARA_MAX_CONCURRENCY", 2),
         ):
             entry = tasks.translate_page_stream(
                 pages=self.pages,
@@ -168,7 +218,71 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual([item["translation"] for item in entry["_page_entries"]], ["译文1", "译文2"])
         self.assertEqual([item["_status"] for item in entry["_page_entries"]], ["done", "done"])
 
+    def test_translate_page_stream_retries_after_rate_limit_wait(self):
+        attempts = {"count": 0}
+        pushed = []
+
+        def _fake_stream(*args, **kwargs):
+            attempts["count"] += 1
+            if attempts["count"] == 1:
+                raise RateLimitedError("触发限流", retry_after_s=0.1)
+            yield {"type": "done", "text": "", "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1}, "result": {
+                "pages": "1",
+                "original": kwargs["para_text"],
+                "translation": "重试后成功",
+                "footnotes": "",
+                "footnotes_translation": "",
+            }}
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value={"paragraphs": [{"heading_level": 0, "text": "Para one"}], "footnotes": ""}),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[]]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+            patch.object(tasks, "translate_push", side_effect=lambda event_type, data: pushed.append((event_type, data))),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=self.pages,
+                target_bp=1,
+                model_key="qwen-plus",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertGreaterEqual(attempts["count"], 2)
+        self.assertEqual(entry["_page_entries"][0]["translation"], "重试后成功")
+        self.assertIn("rate_limit_wait", [event_type for event_type, _ in pushed])
+        snapshot = tasks.get_translate_snapshot(self.doc_id)
+        self.assertIn(snapshot["draft"]["status"], ("done", "throttled"))
+
+    def test_translate_page_stream_raises_quota_error_without_retry(self):
+        def _fake_stream(*args, **kwargs):
+            raise QuotaExceededError("模型额度已耗尽")
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value={"paragraphs": [{"heading_level": 0, "text": "Para one"}], "footnotes": ""}),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[]]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            with self.assertRaises(QuotaExceededError):
+                tasks.translate_page_stream(
+                    pages=self.pages,
+                    target_bp=1,
+                    model_key="qwen-plus",
+                    t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                    glossary=[],
+                    doc_id=self.doc_id,
+                    stop_checker=lambda: False,
+                )
+
     def test_translate_page_stream_respects_configured_parallelism(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 3,
+        })
         context = {
             "paragraphs": [
                 {"heading_level": 0, "text": "Para one"},
@@ -204,7 +318,6 @@ class TasksStreamingTest(unittest.TestCase):
             patch.object(tasks, "get_paragraph_bboxes", return_value=[[], [], [], []]),
             patch.object(tasks, "_needs_llm_fix", return_value=False),
             patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
-            patch.object(config, "PARA_MAX_CONCURRENCY", 3),
         ):
             entry = tasks.translate_page_stream(
                 pages=self.pages,
@@ -221,7 +334,212 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(len(seen), 4)
         self.assertEqual([item["translation"] for item in entry["_page_entries"]], ["完成-0", "完成-1", "完成-2", "完成-3"])
 
+    def test_translate_page_stream_defaults_to_serial_when_parallel_disabled(self):
+        config.save_config({
+            "translate_parallel_enabled": False,
+            "translate_parallel_limit": 10,
+        })
+        context = {
+            "paragraphs": [
+                {"heading_level": 0, "text": "Para one"},
+                {"heading_level": 0, "text": "Para two"},
+                {"heading_level": 0, "text": "Para three"},
+            ],
+            "footnotes": "",
+        }
+        active = 0
+        peak = 0
+
+        def _fake_stream(*args, **kwargs):
+            nonlocal active, peak
+            active += 1
+            peak = max(peak, active)
+            try:
+                time.sleep(0.02)
+                yield {"type": "done", "text": "", "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "request_count": 1}, "result": {
+                    "pages": "1",
+                    "original": kwargs["para_text"],
+                    "translation": f"完成-{kwargs['para_idx']}",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                }}
+            finally:
+                active -= 1
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[], [], []]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=self.pages,
+                target_bp=1,
+                model_key="qwen-plus",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(peak, 1)
+        self.assertEqual(entry["_page_entries"][0]["translation"], "完成-0")
+
+    def test_translate_page_stream_allows_qwen_plus_up_to_ten_parallel(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 10,
+        })
+        context = {
+            "paragraphs": [
+                {"heading_level": 0, "text": f"Para {idx}"}
+                for idx in range(12)
+            ],
+            "footnotes": "",
+        }
+        active = 0
+        peak = 0
+
+        def _fake_stream(*args, **kwargs):
+            nonlocal active, peak
+            active += 1
+            peak = max(peak, active)
+            try:
+                time.sleep(0.03)
+                yield {"type": "done", "text": "", "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "request_count": 1}, "result": {
+                    "pages": "1",
+                    "original": kwargs["para_text"],
+                    "translation": f"完成-{kwargs['para_idx']}",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                }}
+            finally:
+                active -= 1
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[] for _ in range(12)]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=self.pages,
+                target_bp=1,
+                model_key="qwen-plus",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(peak, 10)
+        self.assertEqual(len(entry["_page_entries"]), 12)
+
+    def test_translate_page_stream_allows_qwen_turbo_up_to_ten_parallel(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 10,
+        })
+        context = {
+            "paragraphs": [
+                {"heading_level": 0, "text": f"Para {idx}"}
+                for idx in range(12)
+            ],
+            "footnotes": "",
+        }
+        active = 0
+        peak = 0
+
+        def _fake_stream(*args, **kwargs):
+            nonlocal active, peak
+            active += 1
+            peak = max(peak, active)
+            try:
+                time.sleep(0.03)
+                yield {"type": "done", "text": "", "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "request_count": 1}, "result": {
+                    "pages": "1",
+                    "original": kwargs["para_text"],
+                    "translation": f"完成-{kwargs['para_idx']}",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                }}
+            finally:
+                active -= 1
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[] for _ in range(12)]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=self.pages,
+                target_bp=1,
+                model_key="qwen-turbo",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(peak, 10)
+        self.assertEqual(len(entry["_page_entries"]), 12)
+
+    def test_translate_page_stream_keeps_reasoner_at_three_parallel_when_enabled(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 10,
+        })
+        context = {
+            "paragraphs": [
+                {"heading_level": 0, "text": f"Para {idx}"}
+                for idx in range(12)
+            ],
+            "footnotes": "",
+        }
+        active = 0
+        peak = 0
+
+        def _fake_stream(*args, **kwargs):
+            nonlocal active, peak
+            active += 1
+            peak = max(peak, active)
+            try:
+                time.sleep(0.03)
+                yield {"type": "done", "text": "", "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "request_count": 1}, "result": {
+                    "pages": "1",
+                    "original": kwargs["para_text"],
+                    "translation": f"完成-{kwargs['para_idx']}",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                }}
+            finally:
+                active -= 1
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[] for _ in range(12)]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=self.pages,
+                target_bp=1,
+                model_key="deepseek-reasoner",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "deepseek"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(peak, 3)
+        self.assertEqual(len(entry["_page_entries"]), 12)
+
     def test_translate_page_stream_finishes_current_page_even_if_stop_requested_midway(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 1,
+        })
         context = {
             "paragraphs": [
                 {"heading_level": 0, "text": "Para one"},
@@ -252,7 +570,6 @@ class TasksStreamingTest(unittest.TestCase):
             patch.object(tasks, "get_paragraph_bboxes", return_value=[[], [], []]),
             patch.object(tasks, "_needs_llm_fix", return_value=False),
             patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
-            patch.object(config, "PARA_MAX_CONCURRENCY", 1),
         ):
             entry = tasks.translate_page_stream(
                 pages=self.pages,
@@ -273,8 +590,8 @@ class TasksStreamingTest(unittest.TestCase):
     def test_translate_page_stream_writes_page_level_footnotes_summary(self):
         context = {
             "paragraphs": [
-                {"heading_level": 2, "text": "Chapter"},
-                {"heading_level": 0, "text": "Body paragraph"},
+                {"heading_level": 2, "text": "Chapter", "footnotes": ""},
+                {"heading_level": 0, "text": "Body paragraph", "footnotes": "7. Original footnote"},
             ],
             "footnotes": "7. Original footnote",
         }
@@ -309,7 +626,107 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(entry["footnotes_translation"], "7. 脚注译文")
         self.assertEqual(entry["_page_entries"][1]["footnotes"], "7. Original footnote")
 
+    def test_translate_page_stream_assigns_marker_matched_footnotes_to_each_paragraph(self):
+        pages = [{
+            "bookPage": 1,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "First paragraph[1].\n\nSecond paragraph[2].",
+            "footnotes": "[1] First footnote\n[2] Second footnote",
+            "fnBlocks": [
+                {"text": "[1] First footnote", "bbox": [80, 1280, 920, 1330], "label": "footnote"},
+                {"text": "[2] Second footnote", "bbox": [80, 1340, 920, 1390], "label": "footnote"},
+            ],
+            "blocks": [
+                {"text": "First paragraph[1].", "bbox": [80, 160, 920, 260], "label": "text", "is_meta": False},
+                {"text": "Second paragraph[2].", "bbox": [80, 320, 920, 420], "label": "text", "is_meta": False},
+            ],
+        }]
+
+        def _fake_stream(*args, **kwargs):
+            footnotes = kwargs["footnotes"]
+            footnotes_translation = ""
+            if footnotes:
+                if "[1]" in footnotes:
+                    footnotes_translation = "[1] 第一条脚注译文"
+                elif "[2]" in footnotes:
+                    footnotes_translation = "[2] 第二条脚注译文"
+            yield {"type": "done", "text": "", "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "request_count": 1}, "result": {
+                "pages": "1",
+                "original": kwargs["para_text"],
+                "translation": f"译文-{kwargs['para_idx']}",
+                "footnotes": footnotes,
+                "footnotes_translation": footnotes_translation,
+            }}
+
+        with (
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=pages,
+                target_bp=1,
+                model_key="fake-model",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(entry["_page_entries"][0]["footnotes"], "[1] First footnote")
+        self.assertEqual(entry["_page_entries"][1]["footnotes"], "[2] Second footnote")
+        self.assertEqual(entry["footnotes"], "[1] First footnote\n[2] Second footnote")
+        self.assertEqual(entry["footnotes_translation"], "[1] 第一条脚注译文\n[2] 第二条脚注译文")
+
+    def test_translate_page_stream_places_unmatched_footnote_on_last_body_paragraph(self):
+        pages = [{
+            "bookPage": 1,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "Opening paragraph.\n\nClosing paragraph.",
+            "footnotes": "1. Page-level footnote",
+            "fnBlocks": [
+                {"text": "1. Page-level footnote", "bbox": [80, 1340, 920, 1390], "label": "footnote"},
+            ],
+            "blocks": [
+                {"text": "Opening paragraph.", "bbox": [80, 160, 920, 260], "label": "text", "is_meta": False},
+                {"text": "Closing paragraph.", "bbox": [80, 340, 920, 440], "label": "text", "is_meta": False},
+            ],
+        }]
+
+        def _fake_stream(*args, **kwargs):
+            yield {"type": "done", "text": "", "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "request_count": 1}, "result": {
+                "pages": "1",
+                "original": kwargs["para_text"],
+                "translation": f"译文-{kwargs['para_idx']}",
+                "footnotes": kwargs["footnotes"],
+                "footnotes_translation": "1. 页面脚注译文" if kwargs["footnotes"] else "",
+            }}
+
+        with (
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=pages,
+                target_bp=1,
+                model_key="fake-model",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(entry["_page_entries"][0]["footnotes"], "")
+        self.assertEqual(entry["_page_entries"][1]["footnotes"], "1. Page-level footnote")
+        self.assertEqual(entry["footnotes"], "1. Page-level footnote")
+        self.assertEqual(entry["footnotes_translation"], "1. 页面脚注译文")
+
     def test_translate_page_stream_keeps_heading_and_body_in_separate_slots(self):
+        config.save_config({
+            "translate_parallel_enabled": True,
+            "translate_parallel_limit": 2,
+        })
         context = {
             "paragraphs": [
                 {"heading_level": 2, "text": "Funding"},
@@ -334,7 +751,6 @@ class TasksStreamingTest(unittest.TestCase):
             patch.object(tasks, "get_paragraph_bboxes", return_value=[[], []]),
             patch.object(tasks, "_needs_llm_fix", return_value=False),
             patch.object(tasks, "stream_translate_paragraph", side_effect=_fake_stream),
-            patch.object(config, "PARA_MAX_CONCURRENCY", 2),
         ):
             entry = tasks.translate_page_stream(
                 pages=self.pages,
@@ -398,7 +814,7 @@ class OCRClientTest(unittest.TestCase):
                 )
 
 
-class ReadingRefreshContractTest(unittest.TestCase):
+class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
         self.temp_root = tempfile.mkdtemp(prefix="reading-refresh-", dir="/tmp")
         self._patch_config_dirs(self.temp_root)
@@ -577,29 +993,35 @@ class ReadingRefreshContractTest(unittest.TestCase):
 
     def test_static_css_keeps_pdf_resizer_pinned_to_viewport(self):
         resp = self.client.get("/static/style.css")
-        css = resp.get_data(as_text=True)
+        try:
+            css = resp.get_data(as_text=True)
 
-        self.assertEqual(resp.status_code, 200)
-        self.assertRegex(
-            css,
-            re.compile(
-                r"\.resizer\s*\{[^}]*position:\s*sticky;[^}]*top:\s*0;[^}]*height:\s*100vh;",
-                re.S,
-            ),
-        )
+            self.assertEqual(resp.status_code, 200)
+            self.assertRegex(
+                css,
+                re.compile(
+                    r"\.resizer\s*\{[^}]*position:\s*sticky;[^}]*top:\s*0;[^}]*height:\s*100vh;",
+                    re.S,
+                ),
+            )
+        finally:
+            resp.close()
 
     def test_static_css_contains_pdf_horizontal_overscroll(self):
         resp = self.client.get("/static/style.css")
-        css = resp.get_data(as_text=True)
+        try:
+            css = resp.get_data(as_text=True)
 
-        self.assertEqual(resp.status_code, 200)
-        self.assertRegex(
-            css,
-            re.compile(
-                r"\.pdf-img-container\s*\{[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*none;",
-                re.S,
-            ),
-        )
+            self.assertEqual(resp.status_code, 200)
+            self.assertRegex(
+                css,
+                re.compile(
+                    r"\.pdf-img-container\s*\{[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*none;",
+                    re.S,
+                ),
+            )
+        finally:
+            resp.close()
 
     def test_reading_page_exposes_force_ocr_reparse_action_in_placeholder_and_content(self):
         self._save_range_pages(1, 1)
@@ -816,7 +1238,7 @@ class ReadingRefreshContractTest(unittest.TestCase):
         self.assertIn('"paragraph_errors"', html)
         self.assertIn("Array.isArray(draft.paragraph_errors) ? draft.paragraph_errors.slice() : []", html)
         self.assertIn("usage-draft-card-error", html)
-        self.assertIn("return !!(state.draft.active || translateSessionActivated || hasRestorableDraft(state));", html)
+        self.assertIn("state.draft.status === 'throttled'", html)
         self.assertIn("onclick=\"toggleUsageDashboard();\"", html)
         self.assertNotIn("syncUsagePanel();", html)
         self.assertIn("retryDraftPage()", html)
@@ -887,7 +1309,7 @@ class ReadingRefreshContractTest(unittest.TestCase):
         self.assertIn("var translateSessionActivated = false;", html)
         self.assertIn("function shouldHydrateTranslateDraft(state)", html)
         self.assertIn("function hasRestorableDraft(state)", html)
-        self.assertIn("return !!(state.draft.active || translateSessionActivated || hasRestorableDraft(state));", html)
+        self.assertIn("state.draft.status === 'throttled'", html)
 
     def test_get_translate_snapshot_closes_stale_running_state_without_active_worker(self):
         tasks._save_translate_state(
@@ -1203,7 +1625,7 @@ class ReadingRefreshContractTest(unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", return_value=fixed_entry),
         ):
-            resp = self.client.get("/retranslate/1/sonnet")
+            resp = self._post("/retranslate/1/sonnet", data={"doc_id": self.doc_id})
 
         self.assertEqual(resp.status_code, 302)
         snapshot = tasks.get_translate_snapshot(self.doc_id)
@@ -1253,7 +1675,7 @@ class ReadingRefreshContractTest(unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", side_effect=RuntimeError("新的失败原因")),
         ):
-            resp = self.client.get("/retranslate/1/sonnet")
+            resp = self._post("/retranslate/1/sonnet", data={"doc_id": self.doc_id})
 
         self.assertEqual(resp.status_code, 302)
         snapshot = tasks.get_translate_snapshot(self.doc_id)

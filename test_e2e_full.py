@@ -8,6 +8,7 @@ import sys
 import json
 import time
 import requests
+from testsupport import prime_requests_csrf, with_csrf_headers
 
 BASE = "http://127.0.0.1:8080"
 SCREENSHOT_DIR = "/tmp/e2e_screenshots"
@@ -18,11 +19,49 @@ SHORT_PDF = os.path.join(EXAMPLE_DIR, "10.1177@0957154X19859204.pdf")
 LONG_PDF = os.path.join(EXAMPLE_DIR, "第三章.pdf")
 
 results = []
+ACTIVE_TRANSLATE_PHASES = {"running", "stopping"}
+TERMINAL_TRANSLATE_PHASES = {"idle", "stopped", "done", "partial_failed", "error"}
 
 def record(name, status, detail=""):
     results.append({"name": name, "status": status, "detail": detail})
     icon = "✅" if status == "PASS" else ("❌" if status == "FAIL" else "⚠️")
     print(f"  {icon} {name}: {detail}" if detail else f"  {icon} {name}")
+
+
+def fetch_translate_status(doc_id):
+    r = requests.get(f"{BASE}/translate_status?doc_id={doc_id}")
+    if r.status_code != 200:
+        raise RuntimeError(f"translate_status failed: {r.status_code}")
+    return r.json()
+
+
+def wait_for_translate_status(doc_id, predicate, timeout=30, interval=1.0):
+    deadline = time.time() + timeout
+    last = {}
+    while time.time() < deadline:
+        last = fetch_translate_status(doc_id)
+        if predicate(last):
+            return last
+        time.sleep(interval)
+    return last
+
+
+def wait_for_progress_or_terminal(doc_id, timeout=35):
+    return wait_for_translate_status(
+        doc_id,
+        lambda data: bool(data.get("translated_bps")) or data.get("phase") in TERMINAL_TRANSLATE_PHASES,
+        timeout=timeout,
+        interval=1.0,
+    )
+
+
+def wait_for_terminal_state(doc_id, timeout=20):
+    return wait_for_translate_status(
+        doc_id,
+        lambda data: (not data.get("running")) and data.get("phase") in TERMINAL_TRANSLATE_PHASES,
+        timeout=timeout,
+        interval=1.0,
+    )
 
 
 def test_with_playwright():
@@ -37,6 +76,8 @@ def test_with_playwright():
             pg.wait_for_load_state("networkidle")
 
     with sync_playwright() as p:
+        api_session = requests.Session()
+        csrf_token = prime_requests_csrf(api_session, BASE)
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1280, "height": 900})
 
@@ -108,7 +149,7 @@ def test_with_playwright():
             {"term": "monomanie", "defn": "偏执狂（19世纪精神医学概念）"},
         ]
         for t in test_terms:
-            r = requests.post(f"{BASE}/api/glossary", json=t)
+            r = api_session.post(f"{BASE}/api/glossary", json=t, headers=with_csrf_headers(csrf_token))
             if r.status_code == 200 and r.json().get("ok"):
                 record(f"术语表添加 '{t['term']}'", "PASS")
             else:
@@ -122,14 +163,18 @@ def test_with_playwright():
         record("术语表添加验证", "PASS" if all_found else "FAIL", f"共 {len(items)} 条")
 
         # 4d. 更新测试
-        r = requests.put(f"{BASE}/api/glossary/Esquirol", json={"defn": "让-艾蒂安·多米尼克·艾斯基洛尔（精神病学奠基人之一）"})
+        r = api_session.put(
+            f"{BASE}/api/glossary/Esquirol",
+            json={"defn": "让-艾蒂安·多米尼克·艾斯基洛尔（精神病学奠基人之一）"},
+            headers=with_csrf_headers(csrf_token),
+        )
         if r.status_code == 200 and r.json().get("ok"):
             record("术语表更新 PUT", "PASS")
         else:
             record("术语表更新 PUT", "FAIL", str(r.text)[:100])
 
         # 4e. 删除测试（只删一个，保留其他给翻译测试用）
-        r = requests.delete(f"{BASE}/api/glossary/monomanie")
+        r = api_session.delete(f"{BASE}/api/glossary/monomanie", headers=with_csrf_headers(csrf_token))
         if r.status_code == 200 and r.json().get("ok"):
             record("术语表删除 DELETE", "PASS")
         else:
@@ -190,11 +235,11 @@ def test_with_playwright():
 
         # 启动翻译（从第一页开始翻译几页）
         first_bp = 1
-        r = requests.post(f"{BASE}/start_translate_all", data={
+        r = api_session.post(f"{BASE}/start_translate_all", data={
             "doc_id": "5d8d44cba1c2",
             "start_bp": first_bp,
             "doc_title": "10.1177@0957154X19859204"
-        })
+        }, headers=with_csrf_headers(csrf_token))
         if r.status_code == 200:
             resp = r.json()
             if resp.get("status") in ("started", "already_running"):
@@ -205,37 +250,44 @@ def test_with_playwright():
             record("启动批量翻译", "FAIL", f"status={r.status_code}")
 
         # 等待翻译进行一段时间（翻译2-3页后停止）
-        print("  ... 等待翻译进行 ...")
-        time.sleep(30)
-
-        # 查看翻译进度
-        r = requests.get(f"{BASE}/translate_status?doc_id=5d8d44cba1c2")
-        if r.status_code == 200:
-            status_data = r.json()
-            phase = status_data.get("phase", "unknown")
-            new_translated = status_data.get("translated_bps", [])
+        print("  ... 等待翻译开始或自然完成 ...")
+        status_data = wait_for_progress_or_terminal("5d8d44cba1c2", timeout=35)
+        phase = status_data.get("phase", "unknown")
+        new_translated = status_data.get("translated_bps", [])
+        if phase in ACTIVE_TRANSLATE_PHASES or phase in TERMINAL_TRANSLATE_PHASES:
             record("翻译进度检查", "PASS", f"phase={phase}, 已翻译 {len(new_translated)} 页")
         else:
-            record("翻译进度检查", "FAIL")
+            record("翻译进度检查", "FAIL", f"phase={phase}")
 
-        # 停止翻译
-        r = requests.get(f"{BASE}/stop_translate?doc_id=5d8d44cba1c2")
-        if r.status_code == 200:
-            resp = r.json()
-            record("停止翻译", "PASS", resp.get("status"))
+        if status_data.get("running") and phase in ACTIVE_TRANSLATE_PHASES:
+            r = api_session.post(
+                f"{BASE}/stop_translate",
+                data={"doc_id": "5d8d44cba1c2"},
+                headers=with_csrf_headers(csrf_token),
+            )
+            if r.status_code == 200:
+                resp = r.json()
+                stop_status = resp.get("status")
+                if stop_status == "stopping":
+                    record("停止翻译", "PASS", stop_status)
+                elif stop_status == "not_running":
+                    latest = fetch_translate_status("5d8d44cba1c2")
+                    latest_phase = latest.get("phase", "unknown")
+                    latest_running = bool(latest.get("running"))
+                    ok = (not latest_running) and latest_phase in TERMINAL_TRANSLATE_PHASES
+                    detail = f"status=not_running, phase={latest_phase}, running={latest_running}"
+                    record("停止翻译", "PASS" if ok else "FAIL", detail)
+                else:
+                    record("停止翻译", "FAIL", stop_status or str(resp))
+            else:
+                record("停止翻译", "FAIL", f"status={r.status_code}")
         else:
-            record("停止翻译", "FAIL")
+            record("停止翻译", "PASS", f"任务已自然结束，phase={phase}")
 
-        time.sleep(5)
-
-        # 检查停止后的状态
-        r = requests.get(f"{BASE}/translate_status?doc_id=5d8d44cba1c2")
-        if r.status_code == 200:
-            status_data = r.json()
-            phase = status_data.get("phase", "unknown")
-            record("停止后状态", "PASS" if phase in ("idle", "stopped") else "WARN", f"phase={phase}")
-        else:
-            record("停止后状态", "FAIL")
+        status_data = wait_for_terminal_state("5d8d44cba1c2", timeout=20)
+        phase = status_data.get("phase", "unknown")
+        is_terminal = (not status_data.get("running")) and phase in TERMINAL_TRANSLATE_PHASES
+        record("停止后状态", "PASS" if is_terminal else "FAIL", f"phase={phase}, running={status_data.get('running')}")
 
         # 截图阅读页（翻译后）
         page.goto(f"{BASE}/reading?doc_id=5d8d44cba1c2&bp=1")
@@ -295,16 +347,14 @@ def test_with_playwright():
         time.sleep(0.5)
         record("字号缩小", "PASS")
 
-        # 7g. 沉浸模式
-        try:
-            page.evaluate("if(typeof toggleDistractionFree==='function') toggleDistractionFree()")
-            time.sleep(0.5)
-            page.screenshot(path=f"{SCREENSHOT_DIR}/12_distraction_free.png")
-            is_df = page.evaluate("document.body.classList.contains('distraction-free')")
-            record("沉浸模式", "PASS" if is_df else "WARN", "已激活" if is_df else "未检测到 class")
-            page.evaluate("if(typeof toggleDistractionFree==='function') toggleDistractionFree()")
-        except Exception as e:
-            record("沉浸模式", "WARN", str(e)[:80])
+        # 7g. 沉浸模式入口已移除
+        focus_btn_count = page.locator("#focusBtn").count()
+        exit_btn_count = page.locator("#distractionFreeExitBtn").count()
+        record(
+            "沉浸模式入口已移除",
+            "PASS" if focus_btn_count == 0 and exit_btn_count == 0 else "FAIL",
+            f"focusBtn={focus_btn_count}, exitBtn={exit_btn_count}"
+        )
 
         # ======== 8. 切换到长文档测试 ========
         print("\n=== 8. 长文档测试（法语书 99 页） ===")
@@ -337,11 +387,11 @@ def test_with_playwright():
         record("最后一页访问", "PASS")
 
         # 翻译长文档几页
-        r = requests.post(f"{BASE}/start_translate_all", data={
+        r = api_session.post(f"{BASE}/start_translate_all", data={
             "doc_id": "5a21aca40a53",
             "start_bp": 7,
             "doc_title": "序言+第一章"
-        })
+        }, headers=with_csrf_headers(csrf_token))
         if r.status_code == 200:
             resp = r.json()
             record("长文档启动翻译", "PASS", resp.get("status"))
@@ -352,7 +402,11 @@ def test_with_playwright():
         time.sleep(30)
 
         # 停止
-        requests.get(f"{BASE}/stop_translate?doc_id=5a21aca40a53")
+        api_session.post(
+            f"{BASE}/stop_translate",
+            data={"doc_id": "5a21aca40a53"},
+            headers=with_csrf_headers(csrf_token),
+        )
         time.sleep(5)
 
         # 查看翻译结果
@@ -371,7 +425,11 @@ def test_with_playwright():
         record("长文档翻译页面展示", "PASS")
 
         # 重译测试
-        r = requests.get(f"{BASE}/retranslate/7/qwen-plus?doc_id=5a21aca40a53")
+        r = api_session.post(
+            f"{BASE}/retranslate/7/qwen-plus",
+            data={"doc_id": "5a21aca40a53"},
+            headers=with_csrf_headers(csrf_token),
+        )
         if r.status_code == 200:
             record("重译 p.7", "PASS")
         else:
@@ -454,12 +512,14 @@ def test_with_playwright():
         record("无效页码跳转", "PASS", "应有提示并跳转到有效页")
 
         # 12c. 多文档切换
-        page.goto(f"{BASE}/switch_doc/5d8d44cba1c2")
+        api_session.post(f"{BASE}/switch_doc/5d8d44cba1c2", headers=with_csrf_headers(csrf_token))
+        page.goto(f"{BASE}/")
         wait_ready(page)
         page.screenshot(path=f"{SCREENSHOT_DIR}/20_switch_to_short.png")
         record("切换到短文档", "PASS")
 
-        page.goto(f"{BASE}/switch_doc/5a21aca40a53")
+        api_session.post(f"{BASE}/switch_doc/5a21aca40a53", headers=with_csrf_headers(csrf_token))
+        page.goto(f"{BASE}/")
         wait_ready(page)
         record("切换回长文档", "PASS")
 

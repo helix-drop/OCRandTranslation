@@ -13,9 +13,10 @@ import tasks
 from config import create_doc, ensure_dirs, get_current_doc_id, get_doc_meta, list_docs, set_current_doc
 from sqlite_store import SQLiteRepository
 from storage import load_entries_from_disk, load_pages_from_disk, save_entries_to_disk, save_pages_to_disk
+from testsupport import ClientCSRFMixin
 
 
-class SQLiteMainlineTest(unittest.TestCase):
+class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
         self.temp_root = tempfile.mkdtemp(prefix="sqlite-mainline-", dir="/tmp")
         self._patch_config_dirs(self.temp_root)
@@ -248,6 +249,109 @@ class SQLiteMainlineTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("导出译文", payload["markdown"])
 
+    def test_export_md_formats_headings_body_and_paragraph_footnotes_like_reading_notes(self):
+        doc_id = create_doc("export-format.pdf")
+        save_entries_to_disk([{
+            "_pageBP": 2,
+            "_model": "qwen-plus",
+            "_page_entries": [
+                {
+                    "original": "2_LECON DU 17 JANVIER 1979",
+                    "translation": "1979年1月17日课程",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 1,
+                    "pages": "2",
+                },
+                {
+                    "original": "Le liberalisme et un nouvel art de gouverner.",
+                    "translation": "自由主义与一种新的治理技艺。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "2",
+                },
+                {
+                    "original": "Je voudrais affiner ces hypotheses.",
+                    "translation": "我想进一步细化这些假设。",
+                    "footnotes": "1. Note originale",
+                    "footnotes_translation": "1. 脚注译文",
+                    "heading_level": 0,
+                    "pages": "2",
+                },
+            ],
+            "pages": "2",
+        }], "Export Format", 0, doc_id)
+
+        resp = self.client.get(f"/export_md?doc_id={doc_id}")
+        payload = resp.get_json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            payload["markdown"],
+            "# 2_LECON DU 17 JANVIER 1979\n\n"
+            "> Le liberalisme et un nouvel art de gouverner.\n\n"
+            "自由主义与一种新的治理技艺。\n\n"
+            "> Je voudrais affiner ces hypotheses.\n\n"
+            "我想进一步细化这些假设。\n\n"
+            "[脚注] 1. Note originale\n\n"
+            "[脚注翻译] 1. 脚注译文\n",
+        )
+        self.assertNotIn("1979年1月17日课程", payload["markdown"])
+        self.assertNotIn("**Page 2**", payload["markdown"])
+        self.assertNotIn("---", payload["markdown"])
+
+    def test_export_md_moves_unresolved_page_footnotes_below_last_body_paragraph(self):
+        doc_id = create_doc("export-page-footnote.pdf")
+        save_entries_to_disk([{
+            "_pageBP": 3,
+            "_model": "qwen-plus",
+            "_page_entries": [
+                {
+                    "original": "PREMIERE PARTIE",
+                    "translation": "第一部分",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 1,
+                    "pages": "3",
+                },
+                {
+                    "original": "Premier paragraphe.",
+                    "translation": "第一段。",
+                    "footnotes": "1. Note de page",
+                    "footnotes_translation": "1. 页面脚注译文",
+                    "heading_level": 0,
+                    "pages": "3",
+                },
+                {
+                    "original": "Dernier paragraphe.",
+                    "translation": "最后一段。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "3",
+                },
+            ],
+            "pages": "3",
+        }], "Export Page Footnote", 0, doc_id)
+
+        resp = self.client.get(f"/export_md?doc_id={doc_id}")
+        payload = resp.get_json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            payload["markdown"],
+            "# PREMIERE PARTIE\n\n"
+            "> Premier paragraphe.\n\n"
+            "第一段。\n\n"
+            "> Dernier paragraphe.\n\n"
+            "最后一段。\n\n"
+            "[脚注] 1. Note de page\n\n"
+            "[脚注翻译] 1. 页面脚注译文\n",
+        )
+        self.assertLess(payload["markdown"].index("第一段。"), payload["markdown"].index("最后一段。"))
+        self.assertLess(payload["markdown"].index("最后一段。"), payload["markdown"].index("[脚注]"))
+
     def test_translate_snapshot_loads_failures_from_translate_failures_table(self):
         doc_id = create_doc("failure.pdf")
         tasks._save_translate_state(
@@ -440,7 +544,7 @@ class SQLiteMainlineTest(unittest.TestCase):
                 "pages": "2",
             }),
         ):
-            resp = self.client.get(f"/fetch_next?doc_id={doc_id}")
+            resp = self._post("/fetch_next", data={"doc_id": doc_id})
 
         self.assertEqual(resp.status_code, 302)
         status = self.client.get(f"/translate_status?doc_id={doc_id}").get_json()
@@ -502,7 +606,7 @@ class SQLiteMainlineTest(unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", side_effect=RuntimeError("fetch_next boom")),
         ):
-            resp = self.client.get(f"/fetch_next?doc_id={doc_id}")
+            resp = self._post("/fetch_next", data={"doc_id": doc_id})
 
         self.assertEqual(resp.status_code, 302)
         status = self.client.get(f"/translate_status?doc_id={doc_id}").get_json()
@@ -556,7 +660,7 @@ class SQLiteMainlineTest(unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", side_effect=RuntimeError("retranslate boom")),
         ):
-            resp = self.client.get(f"/retranslate/7/sonnet?doc_id={doc_id}")
+            resp = self._post(f"/retranslate/7/sonnet", data={"doc_id": doc_id})
 
         self.assertEqual(resp.status_code, 302)
         status = self.client.get(f"/translate_status?doc_id={doc_id}").get_json()
@@ -593,7 +697,7 @@ class SQLiteMainlineTest(unittest.TestCase):
         }], "Manual Revision", 0, doc_id)
 
         read_before = self.client.get(f"/reading?bp=16&doc_id={doc_id}").get_data(as_text=True)
-        resp = self.client.post(
+        resp = self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={
@@ -676,7 +780,7 @@ class SQLiteMainlineTest(unittest.TestCase):
             "pages": "8",
         }], "Manual Revision Conflict", 0, doc_id)
 
-        first = self.client.post(
+        first = self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={
@@ -686,7 +790,7 @@ class SQLiteMainlineTest(unittest.TestCase):
             },
         ).get_json()
         stale_base = int(first["segment"]["updated_at"]) - 1
-        second = self.client.post(
+        second = self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={
@@ -767,7 +871,7 @@ class SQLiteMainlineTest(unittest.TestCase):
                 "pages": "2",
             }) as mock_translate,
         ):
-            resp = self.client.get(f"/fetch_next?doc_id={doc_a}")
+            resp = self._post("/fetch_next", data={"doc_id": doc_a})
 
         self.assertEqual(resp.status_code, 302)
         used_glossary = mock_translate.call_args[0][4]
@@ -801,7 +905,7 @@ class SQLiteMainlineTest(unittest.TestCase):
             "pages": "3",
         }], "Usage Manual Revision", 0, doc_id)
 
-        self.client.post(
+        self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={
@@ -842,7 +946,7 @@ class SQLiteMainlineTest(unittest.TestCase):
             }],
             "pages": "10",
         }], doc_id_name, 0, doc_id)
-        resp = self.client.post(
+        resp = self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={"bp": 10, "segment_index": 0, "translation": "人工修订文本"},
@@ -902,14 +1006,14 @@ class SQLiteMainlineTest(unittest.TestCase):
             "pages": "5",
         }], "Conflict Server Seg", 0, doc_id)
 
-        first = self.client.post(
+        first = self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={"bp": 5, "segment_index": 0, "translation": "人工修订 C1"},
         ).get_json()
 
         stale_base = int(first["segment"]["updated_at"]) - 1
-        second = self.client.post(
+        second = self._post_json(
             "/save_manual_revision",
             query_string={"doc_id": doc_id},
             json={

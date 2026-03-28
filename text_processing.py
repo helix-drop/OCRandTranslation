@@ -662,6 +662,227 @@ def get_paragraph_bboxes(pages: list, bp: int, paragraphs: list) -> list:
     return result
 
 
+_FOOTNOTE_START_RE = re.compile(
+    r"^\s*(?:\[(?P<bracket_num>\d{1,3})\]|(?P<num>\d{1,3})[\.\)]|(?P<sym>[*†‡§¶#]))\s*"
+)
+_INLINE_BRACKET_MARK_RE = re.compile(r"\[(\d{1,3})\]")
+_INLINE_SYMBOL_MARK_RE = re.compile(r"(?<!\w)([*†‡§¶#])(?!\w)")
+
+
+def _normalize_footnote_marker(token: str) -> str:
+    raw = str(token or "").strip()
+    if not raw:
+        return ""
+    if raw.isdigit():
+        return f"n:{int(raw)}"
+    return f"s:{raw.lower()}"
+
+
+def _extract_leading_footnote_marker(text: str) -> str:
+    normalized = normalize_latex_footnote_markers(text or "")
+    match = _FOOTNOTE_START_RE.match(normalized)
+    if not match:
+        return ""
+    token = match.group("bracket_num") or match.group("num") or match.group("sym") or ""
+    return _normalize_footnote_marker(token)
+
+
+def _extract_inline_footnote_markers(text: str) -> set[str]:
+    normalized = normalize_latex_footnote_markers(text or "")
+    markers = {
+        _normalize_footnote_marker(token)
+        for token in _INLINE_BRACKET_MARK_RE.findall(normalized)
+    }
+    markers.update(
+        _normalize_footnote_marker(token)
+        for token in _INLINE_SYMBOL_MARK_RE.findall(normalized)
+    )
+    markers.discard("")
+    return markers
+
+
+def _split_footnote_text_items(text: str) -> list[str]:
+    lines = [line.strip() for line in _ensure_nonempty_lines(text)]
+    if not lines:
+        return []
+    items = []
+    current = []
+    for line in lines:
+        if _extract_leading_footnote_marker(line) and current:
+            items.append("\n".join(current).strip())
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        items.append("\n".join(current).strip())
+    return items
+
+
+def _ensure_nonempty_lines(text: str) -> list[str]:
+    return [line.strip() for line in str(text or "").split("\n") if line.strip()]
+
+
+def _bbox_top(bboxes: list) -> float | None:
+    values = [float(bbox[1]) for bbox in bboxes if bbox and len(bbox) >= 4]
+    return min(values) if values else None
+
+
+def _bbox_bottom(bboxes: list) -> float | None:
+    values = [float(bbox[3]) for bbox in bboxes if bbox and len(bbox) >= 4]
+    return max(values) if values else None
+
+
+def _join_unique_texts(texts: list[str]) -> str:
+    seen = set()
+    ordered = []
+    for text in texts:
+        stripped = str(text or "").strip()
+        if stripped and stripped not in seen:
+            seen.add(stripped)
+            ordered.append(stripped)
+    return "\n".join(ordered)
+
+
+def _extract_page_footnote_items(page: dict | None) -> list[dict]:
+    if not page:
+        return []
+
+    items = []
+    seen = set()
+    fn_blocks = page.get("fnBlocks") or []
+    if fn_blocks:
+        sources = [{
+            "text": blk.get("text", ""),
+            "bbox": blk.get("bbox"),
+        } for blk in fn_blocks]
+    else:
+        sources = [{
+            "text": page.get("footnotes", ""),
+            "bbox": None,
+        }]
+
+    for source in sources:
+        filtered = _filter_footnote_lines(source.get("text", ""))
+        if not filtered:
+            continue
+        for item_text in _split_footnote_text_items(filtered):
+            if item_text in seen:
+                continue
+            seen.add(item_text)
+            bbox = source.get("bbox")
+            items.append({
+                "text": item_text,
+                "marker": _extract_leading_footnote_marker(item_text),
+                "top": float(bbox[1]) if bbox and len(bbox) >= 4 else None,
+            })
+    return items
+
+
+def _pick_marker_matched_paragraph(match_indices: list[int], footnote_top: float | None, para_meta: dict[int, dict]) -> int:
+    if len(match_indices) == 1:
+        return match_indices[0]
+    if footnote_top is not None:
+        candidates = []
+        for idx in match_indices:
+            bottom = para_meta.get(idx, {}).get("bottom")
+            if bottom is not None and bottom <= footnote_top + 20:
+                candidates.append((max(0.0, footnote_top - bottom), idx))
+        if candidates:
+            candidates.sort(key=lambda item: (item[0], -item[1]))
+            return candidates[0][1]
+    return match_indices[-1]
+
+
+def _pick_confident_paragraph_by_position(target_indices: list[int], footnote_top: float | None, para_meta: dict[int, dict]) -> int | None:
+    if footnote_top is None:
+        return None
+    candidates = []
+    for idx in target_indices:
+        bottom = para_meta.get(idx, {}).get("bottom")
+        if bottom is None or bottom > footnote_top + 20:
+            continue
+        candidates.append((max(0.0, footnote_top - bottom), idx))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: (item[0], -item[1]))
+    best_dist, best_idx = candidates[0]
+    if len(candidates) == 1:
+        return best_idx if best_dist <= 240 else None
+    second_dist, _ = candidates[1]
+    if best_dist <= 40:
+        return best_idx
+    if best_dist <= 100 and second_dist >= best_dist * 1.8:
+        return best_idx
+    return None
+
+
+def assign_page_footnotes_to_paragraphs(
+    pages: list,
+    bp: int,
+    paragraphs: list,
+    para_bboxes: list | None = None,
+) -> tuple[list[dict], str]:
+    enriched = [dict(para) for para in paragraphs]
+    if not enriched:
+        return [], ""
+
+    target_indices = [
+        idx for idx, para in enumerate(enriched)
+        if int(para.get("heading_level", 0) or 0) == 0 and str(para.get("text", "")).strip()
+    ]
+    if not target_indices:
+        target_indices = [idx for idx, para in enumerate(enriched) if str(para.get("text", "")).strip()]
+    if not target_indices:
+        return enriched, ""
+
+    page = _find_page(pages, bp)
+    footnote_items = _extract_page_footnote_items(page)
+    if not footnote_items:
+        for para in enriched:
+            para["footnotes"] = str(para.get("footnotes", "") or "").strip()
+        return enriched, _join_unique_texts([para.get("footnotes", "") for para in enriched])
+
+    if para_bboxes is None:
+        para_bboxes = get_paragraph_bboxes(pages, bp, enriched)
+
+    para_meta = {}
+    for idx, para in enumerate(enriched):
+        para_meta[idx] = {
+            "markers": _extract_inline_footnote_markers(para.get("text", "")),
+            "top": _bbox_top(para_bboxes[idx] if idx < len(para_bboxes) else []),
+            "bottom": _bbox_bottom(para_bboxes[idx] if idx < len(para_bboxes) else []),
+        }
+        para["footnotes"] = ""
+
+    assignments: dict[int, list[str]] = {idx: [] for idx in target_indices}
+    unresolved = []
+
+    for item in footnote_items:
+        marker = item.get("marker", "")
+        matched = []
+        if marker:
+            matched = [
+                idx for idx in target_indices
+                if marker in para_meta.get(idx, {}).get("markers", set())
+            ]
+        if matched:
+            target_idx = _pick_marker_matched_paragraph(matched, item.get("top"), para_meta)
+            assignments.setdefault(target_idx, []).append(item["text"])
+        else:
+            unresolved.append(item)
+
+    for item in unresolved:
+        target_idx = _pick_confident_paragraph_by_position(target_indices, item.get("top"), para_meta)
+        if target_idx is None:
+            target_idx = target_indices[-1]
+        assignments.setdefault(target_idx, []).append(item["text"])
+
+    for idx in target_indices:
+        enriched[idx]["footnotes"] = _join_unique_texts(assignments.get(idx, []))
+
+    return enriched, _join_unique_texts([item["text"] for item in footnote_items])
+
+
 def get_page_context_for_translate(pages: list, bp: int) -> dict:
     """
     获取页面翻译所需的所有信息。

@@ -11,6 +11,7 @@ Foreign Literature Reader
 import json
 import os
 import re
+import secrets
 import uuid
 import tempfile
 import threading
@@ -27,9 +28,12 @@ from config import (
     get_paddle_token, set_paddle_token,
     get_deepseek_key, set_deepseek_key,
     get_dashscope_key, set_dashscope_key,
+    set_translate_parallel_settings,
     get_glossary, set_glossary,
     list_glossary_items, upsert_glossary_item, delete_glossary_item,
     get_model_key, set_model_key,
+    get_custom_model_name, get_custom_model_enabled, get_custom_model_base_key,
+    set_custom_model_enabled, save_custom_model_selection,
     get_pdf_virtual_window_radius, get_pdf_virtual_scroll_min_pages,
     get_current_doc_id, set_current_doc,
     get_doc_meta, get_doc_dir,
@@ -59,6 +63,67 @@ from tasks import (
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+CUSTOM_MODEL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
+JSON_CSRF_ENDPOINTS = {
+    "api_glossary_create",
+    "api_glossary_update",
+    "api_glossary_delete",
+    "upload_file",
+    "reparse",
+    "reparse_page",
+    "save_manual_revision",
+    "set_pref",
+    "start_translate_all",
+    "stop_translate",
+}
+
+
+def _ensure_csrf_token() -> str:
+    token = session.get("_csrf_token", "").strip()
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["_csrf_token"] = token
+    return token
+
+
+@app.context_processor
+def inject_csrf_token():
+    return {"csrf_token": _ensure_csrf_token()}
+
+
+def _should_return_json_for_csrf_failure() -> bool:
+    if request.endpoint in JSON_CSRF_ENDPOINTS:
+        return True
+    if request.path.startswith("/api/"):
+        return True
+    return bool(request.is_json)
+
+
+def _csrf_token_is_valid() -> bool:
+    session_token = session.get("_csrf_token", "").strip()
+    if not session_token:
+        return False
+    request_token = request.form.get("_csrf_token", "").strip()
+    header_token = request.headers.get("X-CSRF-Token", "").strip()
+    provided_token = request_token or header_token
+    if not provided_token:
+        return False
+    return secrets.compare_digest(session_token, provided_token)
+
+
+@app.before_request
+def verify_csrf_for_unsafe_methods():
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return None
+    if request.endpoint is None:
+        return None
+    if _csrf_token_is_valid():
+        return None
+    message = "CSRF 校验失败"
+    if _should_return_json_for_csrf_failure():
+        return jsonify({"ok": False, "error": "csrf_failed", "message": message}), 403
+    return Response(message, status=403, mimetype="text/plain")
 
 
 def _strip_html_table(t: str) -> str:
@@ -197,6 +262,97 @@ def _request_doc_id() -> str:
     return request.values.get("doc_id", "").strip() or get_current_doc_id()
 
 
+def _redirect_settings(doc_id: str = "", open_custom_model: bool = False):
+    target_doc_id = (doc_id or get_current_doc_id() or "").strip()
+    params = {}
+    if target_doc_id:
+        params["doc_id"] = target_doc_id
+    if open_custom_model:
+        params["open_custom_model"] = "1"
+    target = url_for("settings", **params)
+    if open_custom_model:
+        target += "#customModelPanel"
+    return redirect(target)
+
+
+def _redirect_after_model_change(next_page: str, doc_id: str):
+    if next_page == "reading":
+        reading_params = {}
+        if doc_id:
+            reading_params["doc_id"] = doc_id
+        bp = request.values.get("bp", type=int)
+        if bp is not None:
+            reading_params["bp"] = bp
+        for key in ("usage", "orig", "pdf"):
+            value = request.values.get(key, "").strip()
+            if value in {"0", "1"}:
+                reading_params[key] = value
+        layout = request.values.get("layout", "").strip()
+        if layout in {"side", "stack"}:
+            reading_params["layout"] = layout
+        return redirect(url_for("reading", **reading_params))
+    if next_page == "input":
+        return redirect(url_for("input_page", doc_id=doc_id))
+    if next_page == "settings":
+        return _redirect_settings(doc_id)
+    return redirect(url_for("home", doc_id=doc_id))
+
+
+def _save_text_setting(form_key: str, setter, success_message: str):
+    setter(request.form.get(form_key, "").strip())
+    flash(success_message, "success")
+
+
+def _save_translate_parallel_section():
+    enabled_values = [
+        str(v).strip().lower()
+        for v in request.form.getlist("translate_parallel_enabled")
+    ]
+    enabled = any(v in {"1", "true", "yes", "on"} for v in enabled_values)
+    limit = request.form.get("translate_parallel_limit", "").strip()
+    normalized_enabled, normalized_limit = set_translate_parallel_settings(enabled, limit)
+    if normalized_enabled:
+        flash(f"已开启段内并发翻译（上限 {normalized_limit}，实际会按模型自动调整）", "success")
+    else:
+        flash("已关闭段内并发翻译", "success")
+    if has_active_translate_task():
+        flash("当前页的翻译已经启动，新的并发设置会从下一页开始生效。", "info")
+
+
+def _save_custom_model_section(section: str, current_doc_id: str):
+    if section == "custom_model":
+        custom_model_name = request.form.get("custom_model_name", "").strip()
+        if custom_model_name and not CUSTOM_MODEL_NAME_PATTERN.fullmatch(custom_model_name):
+            flash("自定义模型名格式无效：仅允许字母、数字、-、_、.", "error")
+            return _redirect_settings(current_doc_id, open_custom_model=True)
+        if custom_model_name:
+            base_key = get_model_key()
+            save_custom_model_selection(custom_model_name, True, base_key)
+            flash(f"已保存自定义模型名：{custom_model_name}", "success")
+        else:
+            save_custom_model_selection("", False, "")
+            flash("已清空自定义模型名，恢复使用默认模型 ID", "success")
+        return _redirect_settings(current_doc_id, open_custom_model=True)
+
+    if section == "custom_model_activate":
+        custom_model_name = get_custom_model_name()
+        custom_model_base_key = get_custom_model_base_key()
+        if not custom_model_name or not custom_model_base_key:
+            flash("还没有可启用的自定义模型，请先保存模型名。", "error")
+        else:
+            set_model_key(custom_model_base_key)
+            set_custom_model_enabled(True)
+            flash(f"已启用已保存的自定义模型：{custom_model_name}", "success")
+        return _redirect_settings(current_doc_id, open_custom_model=True)
+
+    if section == "custom_model_clear":
+        save_custom_model_selection("", False, "")
+        flash("已清空自定义模型名，恢复使用默认模型 ID", "success")
+        return _redirect_settings(current_doc_id, open_custom_model=True)
+
+    return None
+
+
 def _guard_doc_delete(doc_id: str):
     """删除前统一校验，避免翻译中的文档被误删。"""
     if not doc_id:
@@ -232,14 +388,14 @@ def home():
     return render_template("home.html", logs=logs, docs=docs, current_doc_id=current_doc_id, **state)
 
 
-@app.route("/switch_doc/<doc_id>")
+@app.route("/switch_doc/<doc_id>", methods=["POST"])
 def switch_doc(doc_id):
     """切换到指定文档。"""
     set_current_doc(doc_id)
     return redirect(url_for("home"))
 
 
-@app.route("/delete_doc/<doc_id>")
+@app.route("/delete_doc/<doc_id>", methods=["POST"])
 def delete_doc_route(doc_id):
     """删除指定文档。"""
     blocked = _guard_doc_delete(doc_id)
@@ -396,6 +552,7 @@ def reading():
         export_md=export_md,
         doc_title=state.get("doc_title", ""),
         model_key=state["model_key"],
+        custom_model_name=state.get("custom_model_name", ""),
         models=MODELS,
         pages=pages,
         has_pages=state["has_pages"],
@@ -557,10 +714,10 @@ def process_sse():
 
 # ============ ROUTES: 翻译 ============
 
-@app.route("/start_from_beginning")
+@app.route("/start_from_beginning", methods=["POST"])
 def start_from_beginning():
     """从首页开始阅读。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if doc_id:
         set_current_doc(doc_id)
     pages, _ = load_pages_from_disk(doc_id)
@@ -572,7 +729,7 @@ def start_from_beginning():
     t_args = get_translate_args(model_key)
     if not t_args["api_key"]:
         provider = MODELS[model_key].get("provider", "deepseek")
-        name = "DashScope API Key" if provider == "qwen" else "Anthropic API Key"
+        name = "DashScope API Key" if provider == "qwen" else "DeepSeek API Key"
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("home"))
 
@@ -594,7 +751,7 @@ def start_reading():
     t_args = get_translate_args(model_key)
     if not t_args["api_key"]:
         provider = MODELS[model_key].get("provider", "deepseek")
-        name = "DashScope API Key" if provider == "qwen" else "Anthropic API Key"
+        name = "DashScope API Key" if provider == "qwen" else "DeepSeek API Key"
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("input_page"))
 
@@ -610,7 +767,7 @@ def start_reading():
     return redirect(url_for("reading", bp=start_page, auto=1, start_bp=start_page, doc_id=doc_id))
 
 
-@app.route("/fetch_next")
+@app.route("/fetch_next", methods=["POST"])
 def fetch_next():
     """翻译下一页。"""
     doc_id = _request_doc_id()
@@ -644,7 +801,7 @@ def fetch_next():
         return redirect(url_for("reading", bp=last_page_bp, doc_id=doc_id))
 
 
-@app.route("/retranslate/<int:bp>/<model>")
+@app.route("/retranslate/<int:bp>/<model>", methods=["POST"])
 def retranslate(bp, model):
     """重新翻译整页。"""
     doc_id = _request_doc_id()
@@ -824,10 +981,10 @@ def start_translate_all():
     })
 
 
-@app.route("/stop_translate")
+@app.route("/stop_translate", methods=["POST"])
 def stop_translate():
     """停止后台翻译。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     stopped = request_stop_translate(doc_id)
     return jsonify({"status": "stopping" if stopped else "not_running"})
 
@@ -892,25 +1049,36 @@ def settings():
     if requested_doc_id and current_doc_id == requested_doc_id:
         set_current_doc(current_doc_id)
     state = get_app_state(current_doc_id)
-    return render_template("settings.html", current_doc_id=current_doc_id, **state)
+    custom_model_panel_open = request.args.get("open_custom_model", "0") == "1"
+    return render_template(
+        "settings.html",
+        current_doc_id=current_doc_id,
+        custom_model_panel_open=custom_model_panel_open,
+        **state,
+    )
 
 
 @app.route("/save_settings", methods=["POST"])
 def save_settings():
     section = request.form.get("section")
-    if section == "paddle":
-        token = request.form.get("paddle_token", "").strip()
-        set_paddle_token(token)
-        flash("PaddleOCR 令牌已保存", "success")
-    elif section == "deepseek":
-        key = request.form.get("deepseek_key", "").strip()
-        set_deepseek_key(key)
-        flash("DeepSeek API Key 已保存", "success")
-    elif section == "dashscope":
-        key = request.form.get("dashscope_key", "").strip()
-        set_dashscope_key(key)
-        flash("DashScope API Key 已保存", "success")
-    return redirect(url_for("settings"))
+    current_doc_id = _request_doc_id()
+    if current_doc_id:
+        set_current_doc(current_doc_id)
+    secret_sections = {
+        "paddle": ("paddle_token", set_paddle_token, "PaddleOCR 令牌已保存"),
+        "deepseek": ("deepseek_key", set_deepseek_key, "DeepSeek API Key 已保存"),
+        "dashscope": ("dashscope_key", set_dashscope_key, "DashScope API Key 已保存"),
+    }
+    secret_section = secret_sections.get(section)
+    if secret_section:
+        _save_text_setting(*secret_section)
+    elif section == "translate_parallel":
+        _save_translate_parallel_section()
+    else:
+        custom_model_redirect = _save_custom_model_section(section, current_doc_id)
+        if custom_model_redirect is not None:
+            return custom_model_redirect
+    return _redirect_settings(current_doc_id)
 
 
 @app.route("/save_glossary", methods=["POST"])
@@ -980,19 +1148,16 @@ def api_glossary_delete(term):
     return jsonify({"ok": True, "deleted": True, "items": items})
 
 
-@app.route("/set_model/<key>")
+@app.route("/set_model/<key>", methods=["POST"])
 def set_model(key):
     if key in MODELS:
         set_model_key(key)
-    next_page = request.args.get("next", "home")
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
-    if next_page == "reading":
-        return redirect(url_for("reading", doc_id=doc_id))
-    elif next_page == "input":
-        return redirect(url_for("input_page", doc_id=doc_id))
-    elif next_page == "settings":
-        return redirect(url_for("settings"))
-    return redirect(url_for("home"))
+        set_custom_model_enabled(False)
+    next_page = request.values.get("next", "home")
+    doc_id = request.values.get("doc_id", "").strip() or get_current_doc_id()
+    if doc_id:
+        set_current_doc(doc_id)
+    return _redirect_after_model_change(next_page, doc_id)
 
 
 @app.route("/set_pref", methods=["POST"])
@@ -1065,17 +1230,17 @@ def pdf_toc():
 
 # ============ ROUTES: 重置 ============
 
-@app.route("/reset_text")
+@app.route("/reset_text", methods=["POST"])
 def reset_text():
     """清除当前文档的翻译数据，保留页面数据。"""
     doc_id = _request_doc_id()
     if doc_id:
         set_current_doc(doc_id)
     clear_entries_from_disk(doc_id)
-    return redirect(url_for("input_page"))
+    return redirect(url_for("input_page", doc_id=doc_id))
 
 
-@app.route("/reset_text_action")
+@app.route("/reset_text_action", methods=["POST"])
 def reset_text_action():
     """从设置页清除当前文档翻译数据。"""
     doc_id = _request_doc_id()
@@ -1083,10 +1248,10 @@ def reset_text_action():
         set_current_doc(doc_id)
     clear_entries_from_disk(doc_id)
     flash("翻译数据已清除", "success")
-    return redirect(url_for("settings"))
+    return _redirect_settings(doc_id)
 
 
-@app.route("/reset_all")
+@app.route("/reset_all", methods=["POST"])
 def reset_all():
     """删除当前文档。"""
     requested_doc_id = request.values.get("doc_id", "").strip()

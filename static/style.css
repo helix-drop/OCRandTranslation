@@ -248,7 +248,8 @@ a:hover { text-decoration: underline; }
 .source-status .label { font-size: 11px; color: var(--txL); margin-bottom: 4px; font-weight: 600; }
 
 /* ============ MODEL PICKER ============ */
-.model-picker { display: flex; gap: 4px; }
+.model-picker { display: flex; gap: 4px; flex-wrap: wrap; }
+.model-picker form { margin: 0; }
 .model-picker .btn {
   padding: 5px 12px;
   font-size: 12px;
@@ -263,6 +264,30 @@ a:hover { text-decoration: underline; }
 }
 .model-picker.compact .btn { padding: 3px 8px; font-size: 11px; }
 .model-picker .sep-bar { width: 1px; height: 20px; background: var(--bdrL); margin: 0 2px; }
+.inline-form { margin: 0; }
+
+.custom-model-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed var(--bdrL);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.custom-model-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.custom-model-saved {
+  font-size: 12px;
+  color: var(--txS);
+}
+.custom-model-bound {
+  font-size: 12px;
+  color: var(--txL);
+}
 
 /* ============ TEXT DISPLAY ============ */
 .text-fr {
@@ -649,20 +674,6 @@ body.hide-original .reading-columns > div:first-child {
   line-height: 1.65;
 }
 
-.distraction-free-exit {
-  display: none;
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 10001;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-}
-
-body.distraction-free .distraction-free-exit {
-  display: inline-flex !important;
-  align-items: center;
-}
-
 @media (max-width: 860px) {
   .heading-h1 .heading-original {
     font-size: 22px;
@@ -980,6 +991,14 @@ body.distraction-free .distraction-free-exit {
   display: block; padding: 6px 14px; font-size: 12px;
   color: var(--txt); text-decoration: none;
   transition: background 0.1s;
+}
+.toolbar-dropdown form { margin: 0; }
+.toolbar-dropdown-form .toolbar-dropdown-item {
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
 }
 .toolbar-dropdown-item:hover { background: var(--bg2); text-decoration: none; }
 .toolbar-dropdown-item.active { color: var(--acc); font-weight: 600; }
@@ -1311,16 +1330,6 @@ body.distraction-free .distraction-free-exit {
 }
 .progress-dot.streaming {
   animation: breathe 1.5s infinite ease-in-out;
-}
-
-/* 沉浸模式 */
-body.distraction-free .header-bar,
-body.distraction-free .pdf-panel-header,
-body.distraction-free .floating-page-nav {
-  display: none !important;
-}
-body.distraction-free .reading-main-layout {
-  min-height: 100vh;
 }
 
 .resizer {
