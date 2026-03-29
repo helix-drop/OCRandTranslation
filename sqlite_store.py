@@ -190,6 +190,18 @@ def _create_schema(conn: sqlite3.Connection) -> None:
     )
     _ensure_column(
         conn,
+        "documents",
+        "toc_source",
+        "toc_source TEXT NOT NULL DEFAULT 'auto'",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_page_offset",
+        "toc_page_offset INTEGER NOT NULL DEFAULT 0",
+    )
+    _ensure_column(
+        conn,
         "translation_segments",
         "manual_translation_text",
         "manual_translation_text TEXT",
@@ -363,6 +375,24 @@ class SQLiteRepository:
             except Exception:
                 return []
             return items if isinstance(items, list) else []
+
+    def set_document_toc_source_offset(self, doc_id: str, source: str, offset: int) -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "UPDATE documents SET toc_source = ?, toc_page_offset = ?, updated_at = ? WHERE id = ?",
+                (source, int(offset), now, doc_id),
+            )
+
+    def get_document_toc_source_offset(self, doc_id: str) -> tuple[str, int]:
+        with read_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT toc_source, toc_page_offset FROM documents WHERE id = ?",
+                (doc_id,),
+            ).fetchone()
+            if not row:
+                return ("auto", 0)
+            return (row["toc_source"] or "auto", int(row["toc_page_offset"] or 0))
 
     def delete_document(self, doc_id: str) -> None:
         with transaction(self.db_path) as conn:

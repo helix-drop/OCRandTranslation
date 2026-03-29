@@ -41,12 +41,14 @@ from config import (
     LOCAL_DATA_DIR,
 )
 from text_processing import get_page_range, get_next_page_bp, normalize_latex_footnote_markers
-from pdf_extract import render_pdf_page
+from pdf_extract import render_pdf_page, parse_toc_file
 from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, highlight_terms, _ensure_str,
-    gen_markdown, get_app_state, has_pdf, get_pdf_path, load_pdf_toc_from_disk,
+    gen_markdown, get_app_state, has_pdf, get_pdf_path,
+    load_pdf_toc_from_disk, save_pdf_toc_to_disk,
+    save_toc_source_offset, load_toc_source_offset,
 )
 from sqlite_store import SQLiteRepository
 from tasks import (
@@ -501,6 +503,10 @@ def reading():
     for pg in pages:
         page_map[pg["bookPage"]] = pg["fileIdx"]
 
+    # 目录（仅用户主动上传的才传给阅读页）
+    toc_source, toc_offset = load_toc_source_offset(current_doc_id)
+    toc_items = load_pdf_toc_from_disk(current_doc_id) if toc_source == "user" else []
+
     page_index = page_bps.index(cur_page_bp) if cur_page_bp in page_bps else 0
     prev_bp = page_bps[page_index - 1] if page_index > 0 else None
     next_bp = page_bps[page_index + 1] if page_index < len(page_bps) - 1 else None
@@ -577,6 +583,8 @@ def reading():
         pdf_virtual_window_radius=pdf_virtual_window_radius,
         pdf_virtual_scroll_min_pages=pdf_virtual_scroll_min_pages,
         pdf_initial_mounted_bps=pdf_initial_mounted_bps,
+        toc_items=toc_items,
+        toc_offset=toc_offset,
     )
 
 
@@ -1249,12 +1257,86 @@ def pdf_page(file_idx):
         return f"渲染失败: {e}", 400
 
 
+def _guess_toc_offset(new_items: list[dict], auto_toc: list[dict]) -> tuple[int, str]:
+    """用新导入目录的前几条标题匹配现有 PDF 书签，猜测页码偏移量。
+    返回 (offset, matched_title)，匹配失败时返回 (0, "")。
+    """
+    if not new_items or not auto_toc:
+        return 0, ""
+    for new_item in new_items[:5]:
+        new_title = (new_item.get("title") or "").strip().lower()
+        book_page = new_item.get("book_page")
+        if not new_title or not book_page:
+            continue
+        for auto_item in auto_toc:
+            auto_title = (auto_item.get("title") or "").strip().lower()
+            file_idx = auto_item.get("file_idx")
+            if file_idx is None:
+                continue
+            if new_title in auto_title or auto_title in new_title:
+                offset = file_idx - (book_page - 1)
+                return max(0, offset), auto_item.get("title", "")
+    return 0, ""
+
+
 @app.route("/pdf_toc")
 def pdf_toc():
     doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
     if not doc_id:
-        return jsonify({"doc_id": "", "toc": []})
-    return jsonify({"doc_id": doc_id, "toc": load_pdf_toc_from_disk(doc_id)})
+        return jsonify({"doc_id": "", "toc": [], "source": "auto", "offset": 0})
+    toc = load_pdf_toc_from_disk(doc_id)
+    source, offset = load_toc_source_offset(doc_id)
+    return jsonify({"doc_id": doc_id, "toc": toc, "source": source, "offset": offset})
+
+
+@app.route("/api/toc/import", methods=["POST"])
+def api_toc_import():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    if "file" not in request.files:
+        return jsonify({"ok": False, "error": "未上传文件"}), 400
+    f = request.files["file"]
+    if not f.filename:
+        return jsonify({"ok": False, "error": "未上传文件"}), 400
+    try:
+        new_items = parse_toc_file(f)
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+    except Exception:
+        return jsonify({"ok": False, "error": "文件解析失败，请检查格式"}), 400
+    if not new_items:
+        return jsonify({"ok": False, "error": "文件中未找到有效目录行（需含标题、深度、页码三列）"}), 400
+
+    # 尝试用现有 PDF 书签 TOC 自动猜测偏移
+    existing_source, _ = load_toc_source_offset(doc_id)
+    auto_toc = load_pdf_toc_from_disk(doc_id) if existing_source == "auto" else []
+    offset, matched_title = _guess_toc_offset(new_items, auto_toc)
+
+    save_pdf_toc_to_disk(doc_id, new_items)
+    save_toc_source_offset(doc_id, "user", offset)
+
+    return jsonify({
+        "ok": True,
+        "imported": len(new_items),
+        "offset": offset,
+        "offset_matched_title": matched_title,
+        "offset_auto": bool(matched_title),
+    })
+
+
+@app.route("/api/toc/set_offset", methods=["POST"])
+def api_toc_set_offset():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    data = request.get_json(silent=True) or {}
+    try:
+        offset = int(data.get("offset", 0))
+    except (ValueError, TypeError):
+        return jsonify({"ok": False, "error": "offset 必须为整数"}), 400
+    save_toc_source_offset(doc_id, "user", offset)
+    return jsonify({"ok": True, "offset": offset})
 
 
 # ============ ROUTES: 重置 ============

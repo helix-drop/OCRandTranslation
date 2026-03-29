@@ -7,6 +7,59 @@ from functools import lru_cache
 from pypdf import PdfReader
 
 
+def parse_toc_file(file_storage) -> list[dict]:
+    """解析用户上传的 xlsx/csv 目录文件，返回 [{title, depth, book_page}] 列表。
+
+    格式：第一列标题，第二列深度（整数，0=章 1=节 2=小节），第三列原书印刷页码（整数）。
+    首行含表头关键字时自动跳过，空行自动忽略。
+    """
+    filename = (file_storage.filename or "").lower()
+    raw = file_storage.read()
+
+    if filename.endswith(".csv"):
+        import csv
+        text = raw.decode("utf-8-sig", errors="replace")
+        rows = list(csv.reader(io.StringIO(text)))
+    elif filename.endswith((".xlsx", ".xls")):
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+        ws = wb.active
+        rows = []
+        for row in ws.iter_rows(values_only=True):
+            rows.append([str(c) if c is not None else "" for c in row])
+        wb.close()
+    else:
+        raise ValueError("仅支持 .csv / .xlsx 格式")
+
+    result: list[dict] = []
+    for i, row in enumerate(rows):
+        if len(row) < 3:
+            continue
+        title = str(row[0] or "").strip()
+        raw_depth = str(row[1] or "").strip()
+        raw_page = str(row[2] or "").strip()
+        if not title or not raw_page:
+            continue
+        # 跳过表头行
+        if i == 0:
+            combined = (title + raw_depth + raw_page).lower()
+            header_hints = ("title", "标题", "depth", "深度", "level", "层级", "page", "页码")
+            if any(h in combined for h in header_hints):
+                continue
+        try:
+            depth = max(0, int(raw_depth))
+        except (ValueError, TypeError):
+            depth = 0
+        try:
+            book_page = int(str(raw_page).split(".")[0])  # 兼容 "15.0" 格式
+        except (ValueError, TypeError):
+            continue
+        if book_page <= 0:
+            continue
+        result.append({"title": title, "depth": depth, "book_page": book_page})
+    return result
+
+
 def extract_pdf_text(file_bytes: bytes) -> list[dict]:
     """
     从PDF文件提取文字层信息。

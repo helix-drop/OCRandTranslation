@@ -166,6 +166,20 @@ def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
     return SQLiteRepository().get_document_toc(target_doc_id)
 
 
+def save_toc_source_offset(doc_id: str, source: str, offset: int) -> None:
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return
+    SQLiteRepository().set_document_toc_source_offset(target_doc_id, source, offset)
+
+
+def load_toc_source_offset(doc_id: str = "") -> tuple[str, int]:
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return ("auto", 0)
+    return SQLiteRepository().get_document_toc_source_offset(target_doc_id)
+
+
 # ============ HELPERS ============
 
 def _resolve_translate_model(model_key: str) -> tuple[dict, str]:

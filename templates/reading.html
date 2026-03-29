@@ -554,6 +554,23 @@
     <button class="tb" onclick="toggleOriginal();" id="origBtn" title="显示/隐藏原文">原文</button>
     <button class="tb" onclick="toggleLayout();" id="layoutBtn" title="切换布局">{{ '改单栏' if side_by_side else '改双栏' }}</button>
     <button class="tb" onclick="openExportModal();" title="导出">导出</button>
+    {% if toc_items %}
+    <div class="toolbar-toc" id="tocMenu">
+      <button class="tb" id="tocBtn" onclick="toggleTocMenu();" title="目录导航">目录</button>
+      <div class="toolbar-dropdown" id="tocDropdown">
+        <div class="toolbar-dropdown-label">目录导航</div>
+        {% for item in toc_items %}
+        <button type="button"
+                class="toolbar-dropdown-item toc-item toc-depth-{{ [item.depth, 3]|min }}"
+                data-book-page="{{ item.book_page }}"
+                onclick="tocJumpToBookPage({{ item.book_page }});">
+          <span class="toc-item-title">{{ item.title }}</span>
+          <span class="toc-page-num">p.{{ item.book_page }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
     <div class="toolbar-more" id="moreMenu">
       <button class="tb" onclick="this.parentElement.classList.toggle('open');">⋯</button>
       <div class="toolbar-dropdown">
@@ -1425,6 +1442,52 @@ function copyExport() {
   document.execCommand('copy');
   alert('已复制');
 }
+
+// ===== TOC Navigation =====
+{% if toc_items %}
+var TOC_OFFSET = {{ toc_offset|default(0)|int }};
+var _tocRevPageMap = (function() {
+  var pm = {{ page_map|tojson }};
+  var rev = {};
+  for (var k in pm) { rev[pm[k]] = Number(k); }
+  return rev;
+})();
+
+function toggleTocMenu() {
+  document.getElementById('tocMenu').classList.toggle('open');
+}
+
+function tocJumpToBookPage(bookPage) {
+  var fileIdx = bookPage - 1 + TOC_OFFSET;
+  var targetBp = _tocRevPageMap[fileIdx];
+  if (targetBp) {
+    document.getElementById('tocMenu').classList.remove('open');
+    goReadingPage(targetBp);
+  }
+}
+
+function tocUpdateCurrentChapter() {
+  var pm = {{ page_map|tojson }};
+  var curFileIdx = pm[String({{ cur_page_bp }})] !== undefined ? pm[String({{ cur_page_bp }})] : -1;
+  var items = document.querySelectorAll('.toc-item');
+  var activeItem = null;
+  items.forEach(function(item) {
+    item.classList.remove('toc-active');
+    var bookPage = Number(item.dataset.bookPage);
+    var itemFileIdx = bookPage - 1 + TOC_OFFSET;
+    if (itemFileIdx <= curFileIdx) { activeItem = item; }
+  });
+  if (activeItem) {
+    activeItem.classList.add('toc-active');
+    // 若下拉已打开则滚动到高亮项
+    var dd = document.getElementById('tocDropdown');
+    if (dd && document.getElementById('tocMenu').classList.contains('open')) {
+      activeItem.scrollIntoView({block: 'nearest'});
+    }
+  }
+}
+tocUpdateCurrentChapter();
+{% endif %}
 
 // ===== PDF Preview Panel (图片模式) =====
 var pageMap = {{ page_map|tojson }};
@@ -3526,6 +3589,10 @@ document.addEventListener('click', function(e) {
   var mm = document.getElementById('moreMenu');
   if (mm && !mm.contains(e.target)) {
     mm.classList.remove('open');
+  }
+  var tocMenu = document.getElementById('tocMenu');
+  if (tocMenu && !tocMenu.contains(e.target)) {
+    tocMenu.classList.remove('open');
   }
   var pageNav = document.getElementById('pageNav');
   if (pageNav && !pageNav.contains(e.target)) {
