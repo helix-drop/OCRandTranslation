@@ -392,8 +392,8 @@ class SQLiteRepository:
                     has_pdf=excluded.has_pdf,
                     last_entry_idx=excluded.last_entry_idx,
                     status=excluded.status,
-                    source_pdf_path=excluded.source_pdf_path,
-                    toc_json=excluded.toc_json
+                    source_pdf_path=COALESCE(excluded.source_pdf_path, documents.source_pdf_path),
+                    toc_json=COALESCE(excluded.toc_json, documents.toc_json)
                 """,
                 (
                     doc_id,

@@ -161,6 +161,215 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(t_args["provider"], "qwen")
         self.assertEqual(t_args["model_id"], "qwen-max")
 
+    def test_translate_page_stream_accepts_full_translate_args_payload(self):
+        config.save_config({
+            "active_model_mode": "custom",
+            "active_builtin_model_key": "qwen-plus",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model": {
+                "enabled": True,
+                "display_name": "qwen3.5-plus",
+                "provider_type": "qwen",
+                "model_id": "qwen3.5-plus",
+                "base_url": "",
+                "qwen_region": "cn",
+                "api_key_mode": "builtin_dashscope",
+                "custom_api_key": "",
+                "extra_body": {"enable_thinking": False},
+            },
+        })
+        t_args = get_translate_args()
+        self.assertIn("model_key", t_args)
+        self.assertIn("display_label", t_args)
+        captured = {}
+
+        def _strict_stream(
+            para_text,
+            para_pages,
+            footnotes,
+            glossary,
+            model_id,
+            api_key,
+            provider="deepseek",
+            stop_checker=None,
+            base_url=None,
+            request_overrides=None,
+            heading_level=0,
+            para_idx=None,
+            para_total=None,
+            prev_context="",
+            next_context="",
+            section_path=None,
+            cross_page=None,
+        ):
+            captured.update({
+                "model_id": model_id,
+                "api_key": api_key,
+                "provider": provider,
+                "base_url": base_url,
+                "request_overrides": request_overrides,
+                "para_idx": para_idx,
+            })
+            yield {"type": "usage", "usage": {"prompt_tokens": 2, "completion_tokens": 1, "total_tokens": 3, "request_count": 1}}
+            yield {"type": "done", "text": "", "usage": {"prompt_tokens": 2, "completion_tokens": 1, "total_tokens": 3, "request_count": 1}, "result": {
+                "pages": para_pages,
+                "original": para_text,
+                "translation": f"流式译文{para_idx + 1}",
+                "footnotes": footnotes,
+                "footnotes_translation": "",
+                "_usage": {"prompt_tokens": 2, "completion_tokens": 1, "total_tokens": 3, "request_count": 1},
+            }}
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=self.context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[], []]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "stream_translate_paragraph", new=_strict_stream),
+        ):
+            entry = tasks.translate_page_stream(
+                pages=self.pages,
+                target_bp=1,
+                model_key="qwen-plus",
+                t_args=t_args,
+                glossary=[],
+                doc_id=self.doc_id,
+                stop_checker=lambda: False,
+            )
+
+        self.assertEqual(entry["_page_entries"][0]["translation"], "流式译文1")
+        self.assertEqual(captured["model_id"], "qwen3.5-plus")
+        self.assertEqual(captured["provider"], "qwen")
+        self.assertEqual(captured["request_overrides"], {"extra_body": {"enable_thinking": False}})
+
+    def test_translate_page_accepts_full_translate_args_payload(self):
+        config.save_config({
+            "active_model_mode": "custom",
+            "active_builtin_model_key": "qwen-plus",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model": {
+                "enabled": True,
+                "display_name": "qwen3.5-plus",
+                "provider_type": "qwen",
+                "model_id": "qwen3.5-plus",
+                "base_url": "",
+                "qwen_region": "sg",
+                "api_key_mode": "builtin_dashscope",
+                "custom_api_key": "",
+                "extra_body": {"enable_thinking": False},
+            },
+        })
+        t_args = get_translate_args()
+        captured = {}
+
+        def _strict_translate(
+            para_text,
+            para_pages,
+            footnotes,
+            glossary,
+            model_id,
+            api_key,
+            provider="deepseek",
+            base_url=None,
+            request_overrides=None,
+            heading_level=0,
+            para_idx=None,
+            para_total=None,
+            prev_context="",
+            next_context="",
+            section_path=None,
+            cross_page=None,
+        ):
+            captured.update({
+                "model_id": model_id,
+                "api_key": api_key,
+                "provider": provider,
+                "base_url": base_url,
+                "request_overrides": request_overrides,
+            })
+            return {
+                "pages": para_pages,
+                "original": para_text,
+                "translation": f"普通译文{para_idx + 1}",
+                "footnotes": footnotes,
+                "footnotes_translation": "",
+                "_usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1},
+            }
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=self.context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[], []]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "translate_paragraph", new=_strict_translate),
+        ):
+            entry = tasks.translate_page(
+                pages=self.pages,
+                target_bp=1,
+                model_key="qwen-plus",
+                t_args=t_args,
+                glossary=[],
+            )
+
+        self.assertEqual(entry["_page_entries"][0]["translation"], "普通译文1")
+        self.assertEqual(captured["model_id"], "qwen3.5-plus")
+        self.assertEqual(captured["base_url"], "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
+        self.assertEqual(captured["request_overrides"], {"extra_body": {"enable_thinking": False}})
+
+    def test_llm_fix_paragraphs_accepts_full_translate_args_payload(self):
+        config.save_config({
+            "active_model_mode": "custom",
+            "active_builtin_model_key": "qwen-plus",
+            "dashscope_key": "dashscope-test-key",
+            "custom_model": {
+                "enabled": True,
+                "display_name": "qwen3.5-plus",
+                "provider_type": "qwen",
+                "model_id": "qwen3.5-plus",
+                "base_url": "",
+                "qwen_region": "cn",
+                "api_key_mode": "builtin_dashscope",
+                "custom_api_key": "",
+                "extra_body": {"enable_thinking": False},
+            },
+        })
+        t_args = get_translate_args()
+        captured = {}
+
+        def _strict_structure(
+            blocks,
+            markdown,
+            model_id,
+            api_key,
+            provider="deepseek",
+            base_url=None,
+            request_overrides=None,
+            page_num=0,
+        ):
+            captured.update({
+                "model_id": model_id,
+                "api_key": api_key,
+                "provider": provider,
+                "base_url": base_url,
+                "request_overrides": request_overrides,
+                "page_num": page_num,
+            })
+            return {
+                "paragraphs": [{"heading_level": 0, "text": "修正后段落"}],
+                "usage": {"prompt_tokens": 4, "completion_tokens": 2, "total_tokens": 6, "request_count": 1},
+            }
+
+        with patch.object(tasks, "structure_page", new=_strict_structure):
+            paragraphs, usage = tasks._llm_fix_paragraphs(
+                paragraphs=[{"heading_level": 0, "text": "原始段落"}],
+                page_md="原始 markdown",
+                t_args=t_args,
+                page_num=7,
+            )
+
+        self.assertEqual(paragraphs[0]["text"], "修正后段落")
+        self.assertEqual(usage["total_tokens"], 6)
+        self.assertEqual(captured["model_id"], "qwen3.5-plus")
+        self.assertEqual(captured["request_overrides"], {"extra_body": {"enable_thinking": False}})
+
     def test_load_config_migrates_legacy_custom_model_shape(self):
         config.save_config({
             "model_key": "deepseek-chat",
@@ -425,7 +634,7 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(peak, 1)
         self.assertEqual(entry["_page_entries"][0]["translation"], "完成-0")
 
-    def test_translate_page_stream_allows_qwen_plus_up_to_ten_parallel(self):
+    def test_translate_page_stream_allows_ten_parallel_for_qwen_plus(self):
         config.save_config({
             "translate_parallel_enabled": True,
             "translate_parallel_limit": 10,
@@ -475,7 +684,7 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(peak, 10)
         self.assertEqual(len(entry["_page_entries"]), 12)
 
-    def test_translate_page_stream_allows_qwen_turbo_up_to_ten_parallel(self):
+    def test_translate_page_stream_allows_ten_parallel_for_qwen_turbo(self):
         config.save_config({
             "translate_parallel_enabled": True,
             "translate_parallel_limit": 10,
@@ -525,7 +734,7 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(peak, 10)
         self.assertEqual(len(entry["_page_entries"]), 12)
 
-    def test_translate_page_stream_keeps_reasoner_at_three_parallel_when_enabled(self):
+    def test_translate_page_stream_allows_ten_parallel_for_reasoner_when_user_requests_it(self):
         config.save_config({
             "translate_parallel_enabled": True,
             "translate_parallel_limit": 10,
@@ -572,7 +781,7 @@ class TasksStreamingTest(unittest.TestCase):
                 stop_checker=lambda: False,
             )
 
-        self.assertEqual(peak, 3)
+        self.assertEqual(peak, 10)
         self.assertEqual(len(entry["_page_entries"]), 12)
 
     def test_translate_page_stream_finishes_current_page_even_if_stop_requested_midway(self):

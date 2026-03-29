@@ -1,5 +1,6 @@
 """磁盘持久化与辅助函数：数据读写、模板变量、文本处理工具。"""
 from dataclasses import asdict, dataclass, field
+import io
 import os
 import re
 import shutil
@@ -168,6 +169,54 @@ def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
     if not target_doc_id:
         return []
     return SQLiteRepository().get_document_toc(target_doc_id)
+
+
+def _parse_saved_toc_file(path: str) -> list[dict]:
+    from pdf_extract import parse_toc_file
+
+    class _SavedTocFile(io.BytesIO):
+        def __init__(self, raw: bytes, filename: str):
+            super().__init__(raw)
+            self.filename = filename
+
+    with open(path, "rb") as f:
+        raw = f.read()
+    return parse_toc_file(_SavedTocFile(raw, os.path.basename(path)))
+
+
+def load_user_toc_from_disk(doc_id: str = "") -> list[dict]:
+    """读取用户导入目录；若 SQLite 内容意外丢失，则从已持久化文件恢复。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return []
+    toc_items = load_pdf_toc_from_disk(target_doc_id)
+    if toc_items:
+        return toc_items
+    source, _ = load_toc_source_offset(target_doc_id)
+    if source != "user":
+        return []
+    path = get_toc_file_path(target_doc_id)
+    if not path or not os.path.exists(path):
+        return []
+    try:
+        recovered = _parse_saved_toc_file(path)
+    except Exception:
+        return []
+    if recovered:
+        save_pdf_toc_to_disk(target_doc_id, recovered)
+    return recovered
+
+
+def save_auto_pdf_toc_to_disk(doc_id: str, toc_items: list[dict]) -> None:
+    """保存自动提取的 PDF 书签，但不覆盖用户手动导入的目录。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return
+    source, _ = load_toc_source_offset(target_doc_id)
+    if source == "user":
+        if load_user_toc_from_disk(target_doc_id) or get_toc_file_path(target_doc_id):
+            return
+    save_pdf_toc_to_disk(target_doc_id, toc_items)
 
 
 def save_toc_file(doc_id: str, file_storage) -> None:

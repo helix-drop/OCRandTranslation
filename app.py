@@ -49,7 +49,7 @@ from storage import (
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
     gen_markdown, get_app_state, has_pdf, get_pdf_path,
-    load_pdf_toc_from_disk, save_pdf_toc_to_disk,
+    load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
 )
@@ -317,7 +317,7 @@ def _save_translate_parallel_section():
     limit = request.form.get("translate_parallel_limit", "").strip()
     normalized_enabled, normalized_limit = set_translate_parallel_settings(enabled, limit)
     if normalized_enabled:
-        flash(f"已开启段内并发翻译（上限 {normalized_limit}，实际会按模型自动调整）", "success")
+        flash(f"已开启段内并发翻译（上限 {normalized_limit}）", "success")
     else:
         flash("已关闭段内并发翻译", "success")
     if has_active_translate_task():
@@ -568,7 +568,7 @@ def reading():
 
     # 目录（仅用户主动上传的才传给阅读页）
     toc_source, toc_offset = load_toc_source_offset(current_doc_id)
-    toc_items = load_pdf_toc_from_disk(current_doc_id) if toc_source == "user" else []
+    toc_items = load_user_toc_from_disk(current_doc_id) if toc_source == "user" else []
 
     page_index = page_bps.index(cur_page_bp) if cur_page_bp in page_bps else 0
     prev_bp = page_bps[page_index - 1] if page_index > 0 else None
@@ -1140,7 +1140,7 @@ def settings():
     state = get_app_state(current_doc_id)
     custom_model_panel_open = request.args.get("open_custom_model", "0") == "1"
     toc_source, toc_offset = load_toc_source_offset(current_doc_id)
-    toc_items = load_pdf_toc_from_disk(current_doc_id) if toc_source == "user" else []
+    toc_items = load_user_toc_from_disk(current_doc_id) if toc_source == "user" else []
     toc_file = get_toc_file_info(current_doc_id)
     toc_file["uploaded_at_display"] = _format_unix_ts(toc_file.get("uploaded_at"))
     return render_template(
@@ -1382,8 +1382,8 @@ def pdf_toc():
     doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
     if not doc_id:
         return jsonify({"doc_id": "", "toc": [], "source": "auto", "offset": 0, "toc_file": get_toc_file_info("")})
-    toc = load_pdf_toc_from_disk(doc_id)
     source, offset = load_toc_source_offset(doc_id)
+    toc = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
     return jsonify({"doc_id": doc_id, "toc": toc, "source": source, "offset": offset, "toc_file": get_toc_file_info(doc_id)})
 
 

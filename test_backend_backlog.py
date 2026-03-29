@@ -6,16 +6,106 @@ import os
 import shutil
 import tempfile
 import unittest
+import zipfile
 
 import config
 import app as app_module
-from config import create_doc, ensure_dirs, set_current_doc
+from config import create_doc, ensure_dirs, set_current_doc, update_doc_meta
 from pdf_extract import extract_pdf_toc
 from pypdf import PdfWriter
 from sqlite_store import SQLiteRepository, get_connection
-from storage import get_app_state, get_toc_file_info, get_toc_file_path, save_entries_to_disk, save_toc_file
+from storage import (
+    get_app_state,
+    get_toc_file_info,
+    get_toc_file_path,
+    save_auto_pdf_toc_to_disk,
+    save_entries_to_disk,
+    save_pages_to_disk,
+    save_toc_file,
+)
 from testsupport import ClientCSRFMixin
 from werkzeug.datastructures import FileStorage
+
+
+def _build_simple_xlsx(rows: list[list[object]]) -> bytes:
+    def _col_name(index: int) -> str:
+        result = ""
+        value = index + 1
+        while value:
+            value, rem = divmod(value - 1, 26)
+            result = chr(65 + rem) + result
+        return result
+
+    def _xml_escape(value: object) -> str:
+        text = str(value)
+        return (
+            text.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+        )
+
+    sheet_rows = []
+    for row_idx, row in enumerate(rows, start=1):
+        cells = []
+        for col_idx, value in enumerate(row):
+            ref = f"{_col_name(col_idx)}{row_idx}"
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                cells.append(f'<c r="{ref}"><v>{value}</v></c>')
+            else:
+                cells.append(
+                    f'<c r="{ref}" t="inlineStr"><is><t>{_xml_escape(value)}</t></is></c>'
+                )
+        sheet_rows.append(f'<row r="{row_idx}">{"".join(cells)}</row>')
+    sheet_xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        '<sheetData>'
+        + "".join(sheet_rows)
+        + "</sheetData></worksheet>"
+    )
+    workbook_xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        '<sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets>'
+        "</workbook>"
+    )
+    workbook_rels = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" '
+        'Target="worksheets/sheet1.xml"/>'
+        "</Relationships>"
+    )
+    root_rels = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" '
+        'Target="xl/workbook.xml"/>'
+        "</Relationships>"
+    )
+    content_types = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="xml" ContentType="application/xml"/>'
+        '<Override PartName="/xl/workbook.xml" '
+        'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet1.xml" '
+        'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        "</Types>"
+    )
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", root_rels)
+        zf.writestr("xl/workbook.xml", workbook_xml)
+        zf.writestr("xl/_rels/workbook.xml.rels", workbook_rels)
+        zf.writestr("xl/worksheets/sheet1.xml", sheet_xml)
+    return buf.getvalue()
 
 
 class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
@@ -180,6 +270,132 @@ class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("当前未选择目录索引文件", html)
         self.assertIn("重新上传替换目录文件", html)
+
+    def test_update_doc_meta_does_not_clear_existing_toc(self):
+        doc_id = create_doc("toc-meta.pdf")
+        toc = [{"title": "第一章", "depth": 0, "book_page": 1}]
+        SQLiteRepository().set_document_toc(doc_id, toc)
+        SQLiteRepository().set_document_toc_source_offset(doc_id, "user", 2)
+
+        update_doc_meta(doc_id, last_entry_idx=3)
+
+        self.assertEqual(SQLiteRepository().get_document_toc(doc_id), toc)
+
+    def test_auto_pdf_toc_does_not_overwrite_user_toc(self):
+        doc_id = create_doc("toc-auto-protect.pdf")
+        user_toc = [{"title": "用户目录", "depth": 0, "book_page": 3}]
+        SQLiteRepository().set_document_toc(doc_id, user_toc)
+        SQLiteRepository().set_document_toc_source_offset(doc_id, "user", 5)
+        save_toc_file(
+            doc_id,
+            FileStorage(stream=io.BytesIO(b"title,depth,page\nUser,0,3\n"), filename="user-toc.csv"),
+        )
+
+        save_auto_pdf_toc_to_disk(doc_id, [{"title": "PDF 书签", "depth": 0, "file_idx": 0}])
+
+        self.assertEqual(SQLiteRepository().get_document_toc(doc_id), user_toc)
+
+    def test_reading_keeps_toc_button_after_navigation_state_updates(self):
+        doc_id = create_doc("toc-reading.pdf")
+        set_current_doc(doc_id)
+        save_pages_to_disk(
+            [
+                {"bookPage": 1, "fileIdx": 5, "markdown": "第一页正文", "footnotes": ""},
+                {"bookPage": 2, "fileIdx": 6, "markdown": "第二页正文", "footnotes": ""},
+            ],
+            "toc-reading.pdf",
+            doc_id,
+        )
+        save_entries_to_disk(
+            [
+                {
+                    "_pageBP": 1,
+                    "_model": "qwen-plus",
+                    "_page_entries": [{"original": "A", "translation": "甲"}],
+                    "pages": "1",
+                },
+                {
+                    "_pageBP": 2,
+                    "_model": "qwen-plus",
+                    "_page_entries": [{"original": "B", "translation": "乙"}],
+                    "pages": "2",
+                },
+            ],
+            "阅读页目录测试",
+            0,
+            doc_id,
+        )
+        SQLiteRepository().set_document_toc(
+            doc_id,
+            [
+                {"title": "第一章", "depth": 0, "book_page": 1},
+                {"title": "第二章", "depth": 0, "book_page": 2},
+            ],
+        )
+        SQLiteRepository().set_document_toc_source_offset(doc_id, "user", 4)
+        save_toc_file(
+            doc_id,
+            FileStorage(stream=io.BytesIO(b"title,depth,page\nChapter 1,0,1\nChapter 2,0,2\n"), filename="阅读目录.csv"),
+        )
+
+        first_resp = self.client.get("/reading", query_string={"doc_id": doc_id, "bp": 1})
+        first_html = first_resp.get_data(as_text=True)
+        self.assertEqual(first_resp.status_code, 200)
+        self.assertIn('id="tocBtn"', first_html)
+
+        second_resp = self.client.get("/reading", query_string={"doc_id": doc_id, "bp": 2})
+        second_html = second_resp.get_data(as_text=True)
+        self.assertEqual(second_resp.status_code, 200)
+        self.assertIn('id="tocBtn"', second_html)
+        self.assertEqual(len(SQLiteRepository().get_document_toc(doc_id)), 2)
+
+    def test_pdf_toc_recovers_user_toc_from_saved_file_when_json_missing(self):
+        doc_id = create_doc("toc-recover.pdf")
+        set_current_doc(doc_id)
+        SQLiteRepository().set_document_toc_source_offset(doc_id, "user", 6)
+        save_toc_file(
+            doc_id,
+            FileStorage(
+                stream=io.BytesIO("title,depth,page\n导论,0,1\n第一章,0,7\n".encode("utf-8")),
+                filename="recover-toc.csv",
+            ),
+        )
+
+        resp = self.client.get("/pdf_toc", query_string={"doc_id": doc_id})
+
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(len(data["toc"]), 2)
+        self.assertEqual(data["toc"][0]["title"], "导论")
+        self.assertEqual(SQLiteRepository().get_document_toc(doc_id)[1]["book_page"], 7)
+
+    def test_pdf_toc_recovers_user_toc_from_saved_xlsx_file_without_openpyxl(self):
+        doc_id = create_doc("toc-recover-xlsx.pdf")
+        set_current_doc(doc_id)
+        SQLiteRepository().set_document_toc_source_offset(doc_id, "user", 4)
+        save_toc_file(
+            doc_id,
+            FileStorage(
+                stream=io.BytesIO(
+                    _build_simple_xlsx(
+                        [
+                            ["title", "depth", "page"],
+                            ["前言", 0, 1],
+                            ["第一章", 1, 9],
+                        ]
+                    )
+                ),
+                filename="recover-toc.xlsx",
+            ),
+        )
+
+        resp = self.client.get("/pdf_toc", query_string={"doc_id": doc_id})
+
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(len(data["toc"]), 2)
+        self.assertEqual(data["toc"][0]["title"], "前言")
+        self.assertEqual(data["toc"][1]["book_page"], 9)
 
     def test_glossary_crud_api(self):
         doc_id = create_doc("glossary-api.pdf")

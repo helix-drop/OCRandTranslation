@@ -36,7 +36,7 @@ from translator import (
 from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, load_entries_from_disk,
-    save_pdf_toc_to_disk,
+    save_auto_pdf_toc_to_disk,
     get_translate_args, _ensure_str,
 )
 from pdf_extract import extract_pdf_toc
@@ -181,13 +181,13 @@ def process_file(task_id: str):
             except Exception as e:
                 task_push(task_id, "log", {"msg": f"PDF保存失败: {e}"})
             toc_items = extract_pdf_toc(file_bytes)
-            save_pdf_toc_to_disk(doc_id, toc_items)
+            save_auto_pdf_toc_to_disk(doc_id, toc_items)
             if toc_items:
                 task_push(task_id, "log", {"msg": f"已提取 PDF 目录 ({len(toc_items)} 条)", "cls": "success"})
             else:
                 task_push(task_id, "log", {"msg": "PDF 未检测到目录书签"})
         else:
-            save_pdf_toc_to_disk(doc_id, [])
+            save_auto_pdf_toc_to_disk(doc_id, [])
 
         # Step 5: Save pages data
         task_push(task_id, "progress", {"pct": 95, "label": "保存数据…", "detail": ""})
@@ -241,12 +241,13 @@ def _llm_fix_paragraphs(paragraphs: list, page_md: str, t_args: dict, page_num: 
         "total_tokens": 0,
         "request_count": 0,
     }
+    request_args = _provider_request_args(t_args)
     try:
         fixed = structure_page(
             blocks=[],
             markdown=page_md,
             page_num=page_num,
-            **t_args,
+            **request_args,
         )
         if fixed and fixed.get("paragraphs"):
             return fixed["paragraphs"], fixed.get("usage", empty_usage)
@@ -289,13 +290,18 @@ def _get_active_translate_args(model_key: str | None = None) -> tuple[str, dict]
     return resolved_model_key, t_args
 
 
-_MODEL_PARA_LIMITS = {
-    "qwen-turbo": 10,
-    "qwen-plus": 10,
-    "deepseek-chat": 6,
-    "qwen-max": 4,
-    "deepseek-reasoner": 3,
-}
+def _provider_request_args(t_args: dict) -> dict:
+    """从翻译状态 payload 中筛出真正传给模型 SDK 的请求字段。"""
+    if not isinstance(t_args, dict):
+        return {}
+    request_overrides = t_args.get("request_overrides")
+    return {
+        "model_id": str(t_args.get("model_id", "") or "").strip(),
+        "api_key": str(t_args.get("api_key", "") or "").strip(),
+        "provider": str(t_args.get("provider", "deepseek") or "deepseek").strip() or "deepseek",
+        "base_url": t_args.get("base_url"),
+        "request_overrides": dict(request_overrides) if isinstance(request_overrides, dict) else None,
+    }
 
 
 def _get_para_max_concurrency(model_key: str, para_total: int) -> int:
@@ -308,8 +314,7 @@ def _get_para_max_concurrency(model_key: str, para_total: int) -> int:
     except Exception:
         configured_default = 10
     user_limit = app_config.get_translate_parallel_limit()
-    model_limit = _MODEL_PARA_LIMITS.get(str(model_key or "").strip(), 4)
-    return max(1, min(para_total, user_limit, model_limit, configured_default))
+    return max(1, min(para_total, user_limit, configured_default))
 
 
 def _entry_has_paragraph_error(entry: dict) -> bool:
@@ -506,6 +511,7 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
     # 段内并发翻译，和流式路径保持同一上限。
     results = [None] * len(para_jobs)
     max_parallel = _get_para_max_concurrency(model_key, len(para_jobs))
+    request_args = _provider_request_args(t_args)
 
     def _do_translate(job: dict):
         return job["para_idx"], translate_paragraph(
@@ -520,7 +526,7 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
             next_context=job["next_context"],
             section_path=job["section_path"],
             cross_page=job["cross_page"],
-            **t_args,
+            **request_args,
         )
 
     with ThreadPoolExecutor(max_workers=max_parallel) as pool:
@@ -595,6 +601,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
 
     max_parallel = _get_para_max_concurrency(model_key, len(para_jobs))
     dynamic_parallel_limit = max_parallel
+    request_args = _provider_request_args(t_args)
     results = [None] * len(para_jobs)
     paragraph_texts = [""] * len(para_jobs)
     paragraph_states = ["pending"] * len(para_jobs)
@@ -644,7 +651,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
                 next_context=job["next_context"],
                 section_path=job["section_path"],
                 cross_page=job["cross_page"],
-                **t_args,
+                **request_args,
             ):
                 payload = {"type": event["type"], "job": job}
                 payload.update({k: v for k, v in event.items() if k != "type"})
@@ -2127,7 +2134,7 @@ def reparse_file(task_id: str, doc_id: str):
         # Step 4: 保存页面数据（SQLite 主写入）
         task_push(task_id, "progress", {"pct": 95, "label": "保存数据…", "detail": ""})
         save_pages_to_disk(final_pages, file_name, doc_id)
-        save_pdf_toc_to_disk(doc_id, extract_pdf_toc(file_bytes))
+        save_auto_pdf_toc_to_disk(doc_id, extract_pdf_toc(file_bytes))
 
         first, last = get_page_range(final_pages)
         summary = f"重新解析完成！{len(final_pages)}页 (p.{first}-{last})"

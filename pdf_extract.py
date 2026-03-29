@@ -2,9 +2,78 @@
 import io
 import re
 import unicodedata
+import xml.etree.ElementTree as ET
+import zipfile
 from functools import lru_cache
 
 from pypdf import PdfReader
+
+
+def _xlsx_col_to_index(cell_ref: str) -> int:
+    letters = "".join(ch for ch in str(cell_ref or "") if ch.isalpha()).upper()
+    value = 0
+    for ch in letters:
+        value = value * 26 + (ord(ch) - 64)
+    return max(0, value - 1)
+
+
+def _load_xlsx_rows_without_openpyxl(raw: bytes) -> list[list[str]]:
+    ns = {
+        "main": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+        "rel": "http://schemas.openxmlformats.org/package/2006/relationships",
+        "docrel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+    }
+    with zipfile.ZipFile(io.BytesIO(raw)) as zf:
+        shared_strings: list[str] = []
+        if "xl/sharedStrings.xml" in zf.namelist():
+            root = ET.fromstring(zf.read("xl/sharedStrings.xml"))
+            for si in root.findall("main:si", ns):
+                parts = [node.text or "" for node in si.findall(".//main:t", ns)]
+                shared_strings.append("".join(parts))
+
+        sheet_path = "xl/worksheets/sheet1.xml"
+        try:
+            workbook_xml = ET.fromstring(zf.read("xl/workbook.xml"))
+            sheet = workbook_xml.find("main:sheets/main:sheet", ns)
+            rel_id = sheet.attrib.get(f"{{{ns['docrel']}}}id", "") if sheet is not None else ""
+            if rel_id and "xl/_rels/workbook.xml.rels" in zf.namelist():
+                rels_xml = ET.fromstring(zf.read("xl/_rels/workbook.xml.rels"))
+                for rel in rels_xml.findall("rel:Relationship", ns):
+                    if rel.attrib.get("Id") == rel_id:
+                        target = str(rel.attrib.get("Target", "")).lstrip("/")
+                        if target:
+                            sheet_path = f"xl/{target}" if not target.startswith("xl/") else target
+                        break
+        except Exception:
+            pass
+
+        root = ET.fromstring(zf.read(sheet_path))
+        rows: list[list[str]] = []
+        for row in root.findall(".//main:sheetData/main:row", ns):
+            cells: dict[int, str] = {}
+            max_idx = -1
+            for cell in row.findall("main:c", ns):
+                idx = _xlsx_col_to_index(cell.attrib.get("r", ""))
+                max_idx = max(max_idx, idx)
+                cell_type = cell.attrib.get("t", "")
+                value = ""
+                if cell_type == "inlineStr":
+                    parts = [node.text or "" for node in cell.findall(".//main:t", ns)]
+                    value = "".join(parts)
+                else:
+                    raw_value = (cell.findtext("main:v", "", ns) or "").strip()
+                    if cell_type == "s":
+                        try:
+                            value = shared_strings[int(raw_value)]
+                        except Exception:
+                            value = ""
+                    else:
+                        value = raw_value
+                cells[idx] = value
+            if max_idx < 0:
+                continue
+            rows.append([cells.get(i, "") for i in range(max_idx + 1)])
+        return rows
 
 
 def parse_toc_file(file_storage) -> list[dict]:
@@ -21,13 +90,19 @@ def parse_toc_file(file_storage) -> list[dict]:
         text = raw.decode("utf-8-sig", errors="replace")
         rows = list(csv.reader(io.StringIO(text)))
     elif filename.endswith((".xlsx", ".xls")):
-        import openpyxl
-        wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
-        ws = wb.active
-        rows = []
-        for row in ws.iter_rows(values_only=True):
-            rows.append([str(c) if c is not None else "" for c in row])
-        wb.close()
+        try:
+            import openpyxl
+
+            wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+            ws = wb.active
+            rows = []
+            for row in ws.iter_rows(values_only=True):
+                rows.append([str(c) if c is not None else "" for c in row])
+            wb.close()
+        except ModuleNotFoundError:
+            if filename.endswith(".xls"):
+                raise ValueError("缺少 xls 解析依赖，请安装 openpyxl 后重试")
+            rows = _load_xlsx_rows_without_openpyxl(raw)
     else:
         raise ValueError("仅支持 .csv / .xlsx 格式")
 

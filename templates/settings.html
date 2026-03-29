@@ -162,14 +162,14 @@
           <span>开启段内并发翻译</span>
         </label>
         <div class="hint" style="margin-bottom:12px;">
-          默认关闭。开启后，单页会同时请求多个段落，通常会更快，但也更容易触发模型限流、超时或单页失败。即使开启，实际并发数仍会按所选模型自动收紧。
+          默认关闭。开启后，单页会同时请求多个段落，通常会更快，但也更容易触发模型限流、超时或单页失败。实际并发数按你这里填写的上限执行。
         </div>
         <div class="flex items-center gap-8" style="flex-wrap:wrap;">
           <label for="translateParallelLimit" style="font-size:13px;color:var(--tx);">并发上限</label>
           <input id="translateParallelLimit" name="translate_parallel_limit" class="inp" type="number" min="1" max="10"
                  value="{{ translate_parallel_limit }}" style="width:96px;"
                  {% if not translate_parallel_enabled %}disabled{% endif %}>
-          <span class="hint" style="margin:0;">范围 1-10；<code>Qwen-Plus</code> 和 <code>Qwen-Turbo</code> 最高可到 10。</span>
+          <span class="hint" style="margin:0;">范围 1-10；数值越高，请求越密集，也越容易遇到限流或超时。</span>
         </div>
         <button type="submit" class="btn btn-pri mt-10">保存并发设置</button>
       </form>
