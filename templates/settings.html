@@ -183,6 +183,27 @@
     </div>
   </div>
 
+  <!-- TOC Offset (仅用户已导入目录时显示) -->
+  {% if toc_source == 'user' %}
+  <div class="card" id="toc-offset">
+    <div class="settings-section">
+      <h3>书籍目录页码偏移</h3>
+      <p class="hint" style="margin-bottom:14px;">
+        已导入目录 {{ toc_item_count }} 条。若目录跳转落页不准，调整偏移后刷新阅读页即可生效。<br>
+        <strong>偏移含义：</strong>原书第 1 印刷页对应 PDF 的第几页（1-based）。例如封面占 3 页，则填 4。
+      </p>
+      <div class="flex items-center gap-8" style="flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--txS);">原书第 1 页 = PDF 第</label>
+        <input id="tocOffsetSettingsInput" type="number" min="1" class="inp"
+               style="width:80px;" value="{{ toc_offset + 1 }}">
+        <label style="font-size:13px;color:var(--txS);">页</label>
+        <button type="button" class="btn btn-pri btn-sm" onclick="saveTocOffset();">保存偏移</button>
+      </div>
+      <div id="tocOffsetSettingsMsg" style="display:none;font-size:12px;margin-top:8px;"></div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Data Management -->
   <div class="card">
     <div class="settings-section">
@@ -249,6 +270,41 @@ function toggleCustomModelPanel(forceOpen) {
 
 {% if custom_model_panel_open %}
 toggleCustomModelPanel(true);
+{% endif %}
+
+{% if toc_source == 'user' %}
+function saveTocOffset() {
+  var raw = document.getElementById('tocOffsetSettingsInput').value;
+  var pdfPage1 = parseInt(raw, 10);
+  var msgEl = document.getElementById('tocOffsetSettingsMsg');
+  if (isNaN(pdfPage1) || pdfPage1 < 1) {
+    msgEl.style.display = '';
+    msgEl.textContent = '请输入有效页码（≥ 1）';
+    msgEl.style.color = 'var(--red)';
+    return;
+  }
+  fetch('/api/toc/set_offset?doc_id={{ current_doc_id }}', {
+    method: 'POST',
+    headers: Object.assign({'Content-Type': 'application/json'}, withCsrfHeaders()),
+    body: JSON.stringify({ offset: pdfPage1 - 1 })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      msgEl.style.display = '';
+      if (d.ok) {
+        msgEl.textContent = '偏移已保存（offset = ' + d.offset + '），前往阅读页刷新即可生效';
+        msgEl.style.color = 'var(--grn)';
+      } else {
+        msgEl.textContent = d.error || '保存失败';
+        msgEl.style.color = 'var(--red)';
+      }
+    })
+    .catch(function(err) {
+      msgEl.style.display = '';
+      msgEl.textContent = '请求失败：' + err;
+      msgEl.style.color = 'var(--red)';
+    });
+}
 {% endif %}
 </script>
 {% endblock %}

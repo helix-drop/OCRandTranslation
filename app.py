@@ -1058,10 +1058,15 @@ def settings():
         set_current_doc(current_doc_id)
     state = get_app_state(current_doc_id)
     custom_model_panel_open = request.args.get("open_custom_model", "0") == "1"
+    toc_source, toc_offset = load_toc_source_offset(current_doc_id)
+    toc_items = load_pdf_toc_from_disk(current_doc_id) if toc_source == "user" else []
     return render_template(
         "settings.html",
         current_doc_id=current_doc_id,
         custom_model_panel_open=custom_model_panel_open,
+        toc_source=toc_source,
+        toc_offset=toc_offset,
+        toc_item_count=len(toc_items),
         **state,
     )
 
