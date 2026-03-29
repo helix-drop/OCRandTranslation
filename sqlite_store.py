@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import time
 from contextlib import contextmanager
@@ -9,7 +10,7 @@ from contextlib import contextmanager
 from config import ensure_dirs, get_sqlite_db_path
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 5
 
 
 def _apply_pragmas(conn: sqlite3.Connection) -> None:
@@ -75,7 +76,10 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             doc_id TEXT NOT NULL,
             run_id INTEGER,
             book_page INTEGER NOT NULL,
+            model_source TEXT,
             model_key TEXT,
+            model_id TEXT,
+            provider TEXT,
             status TEXT NOT NULL DEFAULT 'done',
             pages_label TEXT,
             usage_json TEXT,
@@ -114,7 +118,10 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             doc_id TEXT NOT NULL,
             phase TEXT NOT NULL,
+            model_source TEXT,
             model_key TEXT,
+            model_id TEXT,
+            provider TEXT,
             start_bp INTEGER,
             current_bp INTEGER,
             resume_bp INTEGER,
@@ -190,6 +197,42 @@ def _create_schema(conn: sqlite3.Connection) -> None:
     )
     _ensure_column(
         conn,
+        "translation_pages",
+        "model_source",
+        "model_source TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_pages",
+        "model_id",
+        "model_id TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_pages",
+        "provider",
+        "provider TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translate_runs",
+        "model_source",
+        "model_source TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translate_runs",
+        "model_id",
+        "model_id TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translate_runs",
+        "provider",
+        "provider TEXT",
+    )
+    _ensure_column(
+        conn,
         "documents",
         "toc_source",
         "toc_source TEXT NOT NULL DEFAULT 'auto'",
@@ -199,6 +242,18 @@ def _create_schema(conn: sqlite3.Connection) -> None:
         "documents",
         "toc_page_offset",
         "toc_page_offset INTEGER NOT NULL DEFAULT 0",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_file_name",
+        "toc_file_name TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_file_uploaded_at",
+        "toc_file_uploaded_at INTEGER",
     )
     _ensure_column(
         conn,
@@ -223,6 +278,36 @@ def _create_schema(conn: sqlite3.Connection) -> None:
         "translation_segments",
         "manual_updated_by",
         "manual_updated_by TEXT",
+    )
+    conn.execute(
+        """
+        UPDATE translation_pages
+        SET model_source = COALESCE(NULLIF(model_source, ''), 'builtin'),
+            model_id = COALESCE(NULLIF(model_id, ''), model_key),
+            provider = COALESCE(
+                NULLIF(provider, ''),
+                CASE
+                    WHEN model_key LIKE 'qwen-%' THEN 'qwen'
+                    WHEN model_key LIKE 'deepseek-%' THEN 'deepseek'
+                    ELSE ''
+                END
+            )
+        """
+    )
+    conn.execute(
+        """
+        UPDATE translate_runs
+        SET model_source = COALESCE(NULLIF(model_source, ''), 'builtin'),
+            model_id = COALESCE(NULLIF(model_id, ''), model_key),
+            provider = COALESCE(
+                NULLIF(provider, ''),
+                CASE
+                    WHEN model_key LIKE 'qwen-%' THEN 'qwen'
+                    WHEN model_key LIKE 'deepseek-%' THEN 'deepseek'
+                    ELSE ''
+                END
+            )
+        """
     )
     conn.execute(
         """
@@ -394,6 +479,20 @@ class SQLiteRepository:
                 return ("auto", 0)
             return (row["toc_source"] or "auto", int(row["toc_page_offset"] or 0))
 
+    def set_document_toc_file_meta(self, doc_id: str, file_name: str, uploaded_at: int | None = None) -> None:
+        now = int(time.time())
+        effective_uploaded_at = int(uploaded_at or now)
+        normalized_name = os.path.basename(str(file_name or "").strip())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                """
+                UPDATE documents
+                SET toc_file_name = ?, toc_file_uploaded_at = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (normalized_name, effective_uploaded_at, now, doc_id),
+            )
+
     def delete_document(self, doc_id: str) -> None:
         with transaction(self.db_path) as conn:
             conn.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
@@ -465,6 +564,9 @@ class SQLiteRepository:
         payload["draft"] = json.loads(payload.pop("draft_json") or "{}")
         if payload.get("model_key") and not payload.get("model"):
             payload["model"] = payload["model_key"]
+        payload["model_source"] = payload.get("model_source") or "builtin"
+        payload["model_id"] = payload.get("model_id") or payload.get("model_key") or ""
+        payload["provider"] = payload.get("provider") or ""
         payload["updated_at"] = float(payload.get("updated_at", 0) or 0)
         return payload
 
@@ -472,7 +574,10 @@ class SQLiteRepository:
         now = int(time.time())
         payload = {
             "phase": fields.get("phase", "idle"),
+            "model_source": fields.get("model_source") or "builtin",
             "model_key": fields.get("model_key") or fields.get("model") or "",
+            "model_id": fields.get("model_id") or fields.get("model") or fields.get("model_key") or "",
+            "provider": fields.get("provider") or "",
             "start_bp": fields.get("start_bp"),
             "current_bp": fields.get("current_bp"),
             "resume_bp": fields.get("resume_bp"),
@@ -495,6 +600,10 @@ class SQLiteRepository:
             "failed_pages_json": json.dumps(fields.get("failed_pages") or [], ensure_ascii=False),
             "draft_json": json.dumps(fields.get("draft"), ensure_ascii=False) if fields.get("draft") is not None else None,
         }
+        if not payload["provider"] and payload["model_key"].startswith("qwen-"):
+            payload["provider"] = "qwen"
+        elif not payload["provider"] and payload["model_key"].startswith("deepseek-"):
+            payload["provider"] = "deepseek"
         with transaction(self.db_path) as conn:
             row = conn.execute(
                 """
@@ -509,7 +618,7 @@ class SQLiteRepository:
                 cur = conn.execute(
                     """
                     UPDATE translate_runs
-                    SET phase = ?, model_key = ?, start_bp = ?, current_bp = ?, resume_bp = ?,
+                    SET phase = ?, model_source = ?, model_key = ?, model_id = ?, provider = ?, start_bp = ?, current_bp = ?, resume_bp = ?,
                         stop_requested = ?, running = ?, done_pages = ?, total_pages = ?,
                         processed_pages = ?, pending_pages = ?, current_page_idx = ?,
                         translated_paras = ?, translated_chars = ?, prompt_tokens = ?,
@@ -520,7 +629,10 @@ class SQLiteRepository:
                     """,
                     (
                         payload["phase"],
+                        payload["model_source"],
                         payload["model_key"],
+                        payload["model_id"],
+                        payload["provider"],
                         payload["start_bp"],
                         payload["current_bp"],
                         payload["resume_bp"],
@@ -556,18 +668,21 @@ class SQLiteRepository:
             cur = conn.execute(
                 """
                 INSERT INTO translate_runs(
-                    doc_id, phase, model_key, start_bp, current_bp, resume_bp,
+                    doc_id, phase, model_source, model_key, model_id, provider, start_bp, current_bp, resume_bp,
                     stop_requested, running, done_pages, total_pages, processed_pages,
                     pending_pages, current_page_idx, translated_paras, translated_chars,
                     prompt_tokens, completion_tokens, total_tokens, request_count,
                     last_error, failed_bps_json, partial_failed_bps_json, failed_pages_json,
                     draft_json, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     doc_id,
                     payload["phase"],
+                    payload["model_source"],
                     payload["model_key"],
+                    payload["model_id"],
+                    payload["provider"],
                     payload["start_bp"],
                     payload["current_bp"],
                     payload["resume_bp"],
@@ -636,15 +751,24 @@ class SQLiteRepository:
         with transaction(self.db_path) as conn:
             active_run = self.get_active_translate_run(doc_id)
             usage_json = json.dumps(entry.get("_usage") or {}, ensure_ascii=False)
+            model_key = entry.get("_model_key", "")
+            provider = entry.get("_provider", "")
+            if not provider and str(model_key).startswith("qwen-"):
+                provider = "qwen"
+            elif not provider and str(model_key).startswith("deepseek-"):
+                provider = "deepseek"
             conn.execute(
                 """
                 INSERT INTO translation_pages(
-                    doc_id, run_id, book_page, model_key, status, pages_label, usage_json,
+                    doc_id, run_id, book_page, model_source, model_key, model_id, provider, status, pages_label, usage_json,
                     error_message, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(doc_id, book_page) DO UPDATE SET
+                    model_source=excluded.model_source,
                     run_id=excluded.run_id,
                     model_key=excluded.model_key,
+                    model_id=excluded.model_id,
+                    provider=excluded.provider,
                     status=excluded.status,
                     pages_label=excluded.pages_label,
                     usage_json=excluded.usage_json,
@@ -655,7 +779,10 @@ class SQLiteRepository:
                     doc_id,
                     active_run["id"] if active_run else None,
                     int(book_page),
-                    entry.get("_model"),
+                    entry.get("_model_source", "builtin"),
+                    model_key,
+                    entry.get("_model_id") or entry.get("_model") or entry.get("_model_key", ""),
+                    provider,
                     entry.get("_status", "done"),
                     entry.get("pages"),
                     usage_json,
@@ -812,7 +939,11 @@ class SQLiteRepository:
             if not row:
                 return None
             payload = dict(row)
-            payload["_model"] = payload.get("model_key")
+            payload["_model_source"] = payload.get("model_source") or "builtin"
+            payload["_model_key"] = payload.get("model_key") or ""
+            payload["_model_id"] = payload.get("model_id") or payload.get("model_key") or ""
+            payload["_provider"] = payload.get("provider") or ""
+            payload["_model"] = payload["_model_id"]
             payload["_status"] = payload.get("status", "done")
             payload["_usage"] = json.loads(payload.get("usage_json") or "{}")
             payload["_error"] = payload.get("error_message")
@@ -833,7 +964,11 @@ class SQLiteRepository:
             for row in rows:
                 payload = dict(row)
                 payload["_pageBP"] = payload.get("book_page")
-                payload["_model"] = payload.get("model_key")
+                payload["_model_source"] = payload.get("model_source") or "builtin"
+                payload["_model_key"] = payload.get("model_key") or ""
+                payload["_model_id"] = payload.get("model_id") or payload.get("model_key") or ""
+                payload["_provider"] = payload.get("provider") or ""
+                payload["_model"] = payload["_model_id"]
                 payload["_status"] = payload.get("status", "done")
                 payload["_usage"] = json.loads(payload.get("usage_json") or "{}")
                 payload["_error"] = payload.get("error_message")

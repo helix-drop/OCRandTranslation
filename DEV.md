@@ -38,9 +38,10 @@
 
 | 路径 | 内容 |
 |---|---|
-| `local_data/user_data/config.json` | API Key、术语表、模型偏好、自定义模型状态、部分阅读设置 |
+| `local_data/user_data/config.json` | API Key、术语表、当前模型模式、预设模型 key、单条自定义模型配置、部分阅读设置 |
 | `local_data/user_data/data/app.db` | SQLite 主库 |
 | `local_data/user_data/data/documents/{doc_id}/source.pdf` | 文档原始 PDF 副本 |
+| `local_data/user_data/data/documents/{doc_id}/toc_source.csv/xlsx` | 当前生效的目录索引原文件；会一直保留，直到被新上传文件替换 |
 
 ### SQLite 当前核心表
 
@@ -52,25 +53,56 @@
 - `translate_failures`
 - `app_state`
 
+当前稳定约定：
+
+- `translate_runs` 与 `translation_pages` 都会保存 `model_source`、`model_key`、`model_id`、`provider`
+- `documents` 会保存目录文件元数据：`toc_file_name`、`toc_file_uploaded_at`
+- 当前 SQLite schema 版本是 `5`
+
+## 当前模型配置约定
+
+当前模型配置已经改成“一等公民自定义模型”结构，稳定字段如下：
+
+- `active_model_mode`：`builtin` 或 `custom`
+- `active_builtin_model_key`：当前启用的预设模型 key
+- `custom_model`：单条自定义模型配置，字段固定为
+  - `enabled`
+  - `display_name`
+  - `provider_type`：`qwen` / `deepseek` / `openai_compatible`
+  - `model_id`
+  - `base_url`
+  - `qwen_region`：`cn` / `sg` / `us`
+  - `api_key_mode`：`builtin_dashscope` / `builtin_deepseek` / `custom`
+  - `custom_api_key`
+  - `extra_body`
+
+生效模型统一通过 [storage.py](/Users/hao/OCRandTranslation/storage.py) 的 `ResolvedModelSpec` 解析：
+
+- 入口目标只允许 `builtin:<key>` 或 `custom`
+- 返回统一字段：`model_source`、`model_key`、`model_id`、`provider`、`base_url`、`api_key`、`display_label`、`request_overrides`
+- `qwen` 自定义模型会按 `qwen_region` 选择 DashScope 兼容地址，默认 `cn`
+- `qwen` 自定义模型默认携带 `extra_body={"enable_thinking": false}`
+- `openai_compatible` 自定义模型只使用用户填写的 `base_url + custom_api_key`，不复用 DashScope / DeepSeek 全局 Key
+
 ## 模块总览
 
 以下行数基于当前发布前代码基线。
 
 | 文件 | 行数 | 作用 |
 |---|---:|---|
-| [app.py](/Users/hao/OCRandTranslation/app.py) | 1321 | Flask 入口、页面路由、改状态接口、导出与 PDF 接口 |
-| [tasks.py](/Users/hao/OCRandTranslation/tasks.py) | 2210 | OCR 任务、翻译 worker、流式状态、停止与恢复逻辑 |
-| [translator.py](/Users/hao/OCRandTranslation/translator.py) | 927 | Prompt、模型调用、流式翻译、术语约束 |
+| [app.py](/Users/hao/OCRandTranslation/app.py) | 1507 | Flask 入口、页面路由、改状态接口、导出与 PDF 接口 |
+| [tasks.py](/Users/hao/OCRandTranslation/tasks.py) | 2243 | OCR 任务、翻译 worker、流式状态、停止与恢复逻辑 |
+| [translator.py](/Users/hao/OCRandTranslation/translator.py) | 947 | Prompt、模型调用、流式翻译、术语约束 |
 | [text_processing.py](/Users/hao/OCRandTranslation/text_processing.py) | 964 | 页文本整理、段落切分、脚注归属、翻译上下文 |
-| [sqlite_store.py](/Users/hao/OCRandTranslation/sqlite_store.py) | 976 | SQLite schema、连接、事务、仓储接口 |
-| [config.py](/Users/hao/OCRandTranslation/config.py) | 583 | 配置读写、术语表（含批量文件解析）、多文档、自定义模型状态 |
-| [storage.py](/Users/hao/OCRandTranslation/storage.py) | 358 | 页数据落盘、翻译参数解析、Markdown 导出、应用状态汇总 |
+| [sqlite_store.py](/Users/hao/OCRandTranslation/sqlite_store.py) | 1141 | SQLite schema、连接、事务、仓储接口 |
+| [config.py](/Users/hao/OCRandTranslation/config.py) | 768 | 配置读写、术语表（含批量文件解析）、多文档、自定义模型配置与迁移 |
+| [storage.py](/Users/hao/OCRandTranslation/storage.py) | 522 | 页数据落盘、模型解析、Markdown 导出、应用状态汇总 |
 | [pdf_extract.py](/Users/hao/OCRandTranslation/pdf_extract.py) | 368 | PDF 文字层提取、TOC 提取、页面渲染、版面合并 |
 | [ocr_client.py](/Users/hao/OCRandTranslation/ocr_client.py) | 160 | PaddleOCR 远程接口请求 |
-| [templates/reading.html](/Users/hao/OCRandTranslation/templates/reading.html) | 3599 | 阅读页模板、工具栏、PDF 面板、前端状态脚本 |
-| [templates/home.html](/Users/hao/OCRandTranslation/templates/home.html) | 604 | 首页、上传入口、文档列表、OCR 进度、术语词典导入模态框 |
-| [templates/settings.html](/Users/hao/OCRandTranslation/templates/settings.html) | 254 | 设置页、模型、并发、术语表、清理动作 |
-| [templates/input.html](/Users/hao/OCRandTranslation/templates/input.html) | 99 | OCR 配额提示与进入设置 |
+| [templates/reading.html](/Users/hao/OCRandTranslation/templates/reading.html) | 3714 | 阅读页模板、工具栏、PDF 面板、前端状态脚本 |
+| [templates/home.html](/Users/hao/OCRandTranslation/templates/home.html) | 807 | 首页、上传入口、文档列表、OCR 进度、术语词典与目录导入模态框 |
+| [templates/settings.html](/Users/hao/OCRandTranslation/templates/settings.html) | 421 | 设置页、模型、并发、术语表、目录文件状态与清理动作 |
+| [templates/input.html](/Users/hao/OCRandTranslation/templates/input.html) | 103 | OCR 配额提示与进入设置 |
 | [templates/base.html](/Users/hao/OCRandTranslation/templates/base.html) | 46 | 全局页面骨架、CSRF token 注入 |
 | [static/style.css](/Users/hao/OCRandTranslation/static/style.css) | 1450 | 全局样式 |
 
@@ -85,13 +117,13 @@
 | CSRF 令牌与校验 | `82-126` | 45 | 生成 token、注入模板、拦截改状态请求 | 上游是 Flask session；下游是全部 `POST/PUT/PATCH/DELETE` 路由 |
 | `_clean_display_text` 及其辅助 | `129-222` | 94 | 清理展示文本中的表格 / JSON 泄漏并生成预览段落 | 上游是翻译结果；下游是阅读页渲染 |
 | `_build_translate_usage_payload` | `225-258` | 34 | 汇总当前翻译使用量与人工修订统计 | 下游是阅读页用量面板 |
-| 设置页跳转与模型切换辅助 | `261-353` | 93 | 统一 doc_id、设置页重定向、并发设置、自定义模型保存 | 上游是设置表单；下游是 `config.py`、`storage.py` |
+| 设置页跳转与模型切换辅助 | `261-353` | 93 | 统一 doc_id、设置页重定向、并发设置、自定义模型保存 / 启用 | 上游是设置表单；下游是 `config.py`、`storage.py` |
 | 文档删除保护 | `356-374` | 19 | 拦截当前文档删除与磁盘清理前校验 | 下游是文档管理路由 |
 | `home` / `input_page` / `settings` | `380-421`、`1046-1081` | 52 | 首页、输入页、设置页渲染入口 | 上游是浏览器 GET；下游是模板 |
 | `reading` | `427-580` | 154 | 阅读页主入口，组装当前页、PDF、术语、翻译状态、UI 参数 | 上游是 SQLite、配置、存储；下游是 `templates/reading.html` |
 | 上传与重解析 | `586-680` | 95 | 上传文件、整书重解析、单页重解析 | 下游是 `tasks.py` OCR 任务与 SSE |
 | SSE 任务流 | `684-712` | 29 | 输出 OCR 任务事件流 | 上游是 `tasks.py` 任务事件 |
-| 从头开始 / 继续翻译 / 重译 | `718-836` | 119 | 启动翻译、继续下一页、重译当前页 | 下游是 `tasks.py` 翻译状态机 |
+| 从头开始 / 继续翻译 / 重译 | `718-836` | 119 | 启动翻译、继续下一页、按显式 `target` 重译当前页 | 下游是 `tasks.py` 翻译状态机 |
 | 人工修订与历史 | `840-899` | 60 | 保存段级修订、查看历史、重译前警告 | 下游是 SQLite 段级历史 |
 | 批量翻译 SSE 与启动 | `905-989` | 85 | 输出翻译事件流、启动整书翻译、停止翻译 | 下游是 `tasks.py` worker |
 | 状态与用量接口 | `993-1040` | 48 | 当前翻译状态、API 用量、Paddle 配额状态 | 下游是阅读页轮询与设置页提示 |
@@ -148,7 +180,7 @@
 | 目录与 JSON 读写 | `123-234` | 112 | 检查写权限、创建目录、原子写配置、旧位置迁移 | 上游是应用启动；下游是全部配置接口 |
 | API Key 读写 | `237-268` | 32 | Paddle、DeepSeek、DashScope Key 持久化 | 下游是设置页和翻译调用 |
 | 术语表 | `271-407` | 137 | 按 `doc_id` 读写术语表、CRUD；`parse_glossary_file` 解析上传的 csv/xlsx 文件并返回规范化列表 | 下游是设置页、首页导入接口与翻译 prompt |
-| 当前模型与自定义模型 | `364-419` | 56 | 当前模型 key、自定义模型名、启用态、基础模型绑定 | 下游是设置页和 `storage.py` |
+| 当前模型与自定义模型 | `364-419` | 56 | `active_model_mode`、`active_builtin_model_key`、`custom_model` 归一化、旧配置迁移、显式启用 / 停用 | 下游是设置页和 `storage.py` |
 | 多文档管理 | `424-535` | 112 | 创建文档、切换当前文档、文档目录、元数据、删除 | 下游是首页与阅读页文档切换 |
 
 ### `storage.py`
@@ -160,7 +192,7 @@
 | 文档与页路径辅助 | `20-58` | 39 | 统一页文件、旧目录、条目目录路径 | 下游是 OCR 和清空流程 |
 | 页面与条目落盘 | `61-139` | 79 | 保存 / 读取页面、单页条目、游标、清空旧条目目录 | 上游是 OCR / 翻译结果；下游是导出与阅读 |
 | PDF 辅助 | `142-166` | 25 | 判断 PDF、返回 PDF 路径、保存 / 读取 TOC | 下游是阅读页 PDF 面板 |
-| 生效模型解析 | `171-192` | 22 | 结合当前模型和自定义模型状态，返回实际 provider / key / model_id | 上游是设置页；下游是 `tasks.py` |
+| 生效模型解析 | `171-192` | 22 | 解析 `builtin:<key>` / `custom`，返回统一 `ResolvedModelSpec` 与请求覆盖项 | 上游是设置页；下游是 `tasks.py`、`translator.py` |
 | Markdown 辅助与脚注归属 | `195-283` | 89 | 高亮术语、清理文本、把脚注归到段落 | 下游是导出 |
 | `gen_markdown` | `286-320` | 35 | 把当前条目生成 Markdown | 下游是导出接口 |
 | `get_app_state` | `323-358` | 36 | 汇总当前文档状态、历史、页范围与导出所需摘要 | 下游是首页、阅读页 |
@@ -171,7 +203,7 @@
 
 | 名称 | 行段 | 块行数 | 作用 | 上下游关系 |
 |---|---|---:|---|---|
-| schema 创建 | `15-222` | 208 | PRAGMA、字段补齐、全量 schema 初始化 | 上游是应用启动；下游是全部业务表 |
+| schema 创建 | `15-222` | 208 | PRAGMA、字段补齐、全量 schema 初始化；迁移 `model_source/model_id/provider` 到运行和页结果表 | 上游是应用启动；下游是全部业务表 |
 | 连接与事务 | `225-261` | 37 | 统一连接、初始化、读写事务上下文 | 下游是 `SQLiteRepository` |
 | `SQLiteRepository` | `264-976` | 713 | 文档、页面、翻译 run、段落、失败页、修订历史的增删改查 | 上游是 `app.py`、`tasks.py`、`storage.py` |
 
@@ -235,7 +267,7 @@
 | 代码块 | 行段 | 块行数 | 作用 |
 |---|---|---:|---|
 | API Key 区域 | `9-64` | 56 | Paddle、DeepSeek、DashScope 保存 |
-| 模型与并发设置 | `66-156` | 91 | 模型切换、自定义模型、段内并发 |
+| 模型与并发设置 | `66-156` | 91 | 模型切换、单条自定义模型保存 / 启用、段内并发 |
 | 术语表与数据管理 | `158-213` | 56 | 术语表编辑、清空、重置动作 |
 | 前端脚本 | `215-254` | 40 | 术语行增删、自定义模型面板、并发输入状态 |
 
@@ -291,7 +323,7 @@
 - `POST /reparse_page/<page_bp>`
 - `POST /start_from_beginning`
 - `POST /fetch_next`
-- `POST /retranslate/<bp>/<model>`
+- `POST /retranslate/<bp>`
 - `POST /save_manual_revision`
 - `POST /start_translate_all`
 - `POST /stop_translate`
@@ -308,6 +340,11 @@
 - `POST /reset_text`
 - `POST /reset_text_action`
 - `POST /reset_all`
+
+其中 `POST /retranslate/<bp>` 还要求显式目标参数：
+
+- `target=custom`
+- `target=builtin:<key>`
 
 ### 主数据流
 

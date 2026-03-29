@@ -660,7 +660,7 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", side_effect=RuntimeError("retranslate boom")),
         ):
-            resp = self._post(f"/retranslate/7/sonnet", data={"doc_id": doc_id})
+            resp = self._post(f"/retranslate/7", data={"doc_id": doc_id, "target": "builtin:qwen-plus"})
 
         self.assertEqual(resp.status_code, 302)
         status = self.client.get(f"/translate_status?doc_id={doc_id}").get_json()

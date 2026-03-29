@@ -928,16 +928,16 @@
   <!-- Actions -->
   <div class="flex justify-center gap-8 mt-12 flex-wrap">
     <button type="button" class="btn btn-gho" style="font-size:12px;"
-            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, model=model_key) }}', this);">
-      {% if custom_model_name %}
-      用自定义模型（{{ custom_model_name }}）重译本页
+            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, target=('custom' if custom_model_enabled else ('builtin:' ~ model_key))) }}', this);">
+      {% if custom_model_enabled %}
+      用自定义模型（{{ current_model_label }}）重译本页
       {% else %}
-      用{{ models[model_key].label }}重译本页
+      用{{ current_model_label }}重译本页
       {% endif %}
     </button>
-    {% for mk, mv in models.items() if mk != model_key %}
+    {% for mk, mv in models.items() if custom_model_enabled or mk != model_key %}
     <button type="button" class="btn btn-gho" style="font-size:12px;color:var(--acc);border:1px solid var(--bdrL);"
-            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, model=mk) }}', this);">
+            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, target=('builtin:' ~ mk)) }}', this);">
       换{{ mv.label }}重译
     </button>
     {% endfor %}
@@ -2047,7 +2047,7 @@ var pageNavRenderSignature = '';
 var pageNavButtonLabel = '';
 var currentPageHasEntry = {{ 'true' if has_current_entry else 'false' }};
 var currentDocId = '{{ current_doc_id }}';
-var currentModelKey = '{{ model_key }}';
+var currentModelTarget = '{{ "custom" if custom_model_enabled else ("builtin:" ~ model_key) }}';
 var manualRevisionSaving = {};
 
 function getManualRevisionControls(idx) {
@@ -2688,7 +2688,7 @@ function retryDraftPage() {
     return;
   }
   if (currentPageHasEntry || store.pages.partialFailedBps.indexOf(draftBp) >= 0) {
-    var retryUrl = '/retranslate/' + draftBp + '/' + encodeURIComponent(currentModelKey);
+    var retryUrl = '/retranslate/' + draftBp + '?target=' + encodeURIComponent(currentModelTarget);
     var retryDocId = getReadingDocIdParam();
     submitPostAction(retryUrl, {doc_id: retryDocId});
     return;

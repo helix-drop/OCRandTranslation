@@ -24,6 +24,16 @@ class _FakeChoice:
         self.delta = _FakeDelta(content)
 
 
+class _FakeMessage:
+    def __init__(self, content=""):
+        self.content = content
+
+
+class _FakeNonStreamChoice:
+    def __init__(self, content=""):
+        self.message = _FakeMessage(content)
+
+
 class _FakeChunk:
     def __init__(self, content="", usage=None):
         self.choices = [] if content is None else [_FakeChoice(content)]
@@ -47,9 +57,17 @@ class _FakeOpenAIClient:
         self._response = response
         self.chat = self
         self.completions = self
+        self.calls = []
 
     def create(self, **kwargs):
+        self.calls.append(kwargs)
         return self._response
+
+
+class _FakeNonStreamResponse:
+    def __init__(self, content, usage=None):
+        self.choices = [_FakeNonStreamChoice(content)]
+        self.usage = usage or _FakeUsage()
 
 
 class TranslatorStreamingTest(unittest.TestCase):
@@ -168,6 +186,57 @@ class TranslatorStreamingTest(unittest.TestCase):
         delta_text = "".join(event.get("text", "") for event in events if event["type"] == "delta")
         self.assertEqual(delta_text, "资助")
         self.assertEqual(events[-1]["result"]["translation"], "资助")
+
+    def test_translate_paragraph_accepts_non_stream_content_list(self):
+        response = _FakeNonStreamResponse(
+            [
+                {"type": "output_text", "text": '{"pages":"1","original":"orig","translation":"译文","footnotes":"","footnotes_translation":""}'},
+            ],
+            usage=_FakeUsage(prompt_tokens=5, completion_tokens=3, total_tokens=8),
+        )
+        client = _FakeOpenAIClient(response)
+
+        with patch.object(translator, "OpenAI", return_value=client):
+            result = translator.translate_paragraph(
+                para_text="orig",
+                para_pages="1",
+                footnotes="",
+                glossary=[],
+                model_id="qwen3.5-plus",
+                api_key="fake-key",
+                provider="qwen",
+                base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+                request_overrides={"extra_body": {"enable_thinking": False}},
+            )
+
+        self.assertEqual(result["translation"], "译文")
+        self.assertEqual(result["_usage"]["total_tokens"], 8)
+
+    def test_stream_qwen_request_includes_disable_thinking_extra_body(self):
+        json_text = (
+            '{"pages":"1","original":"orig","translation":"译文",'
+            '"footnotes":"","footnotes_translation":""}'
+        )
+        response = _FakeStreamResponse([
+            _FakeChunk(json_text, usage=_FakeUsage(prompt_tokens=2, completion_tokens=1, total_tokens=3)),
+        ])
+        client = _FakeOpenAIClient(response)
+
+        with patch.object(translator, "OpenAI", return_value=client):
+            events = list(translator.stream_translate_paragraph(
+                para_text="orig",
+                para_pages="1",
+                footnotes="",
+                glossary=[],
+                model_id="qwen3.5-plus",
+                api_key="fake-key",
+                provider="qwen",
+                base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+                request_overrides={"extra_body": {"enable_thinking": False}},
+            ))
+
+        self.assertEqual(events[-1]["result"]["translation"], "译文")
+        self.assertEqual(client.calls[0]["extra_body"], {"enable_thinking": False})
 
 
 if __name__ == "__main__":

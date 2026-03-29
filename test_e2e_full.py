@@ -426,8 +426,8 @@ def test_with_playwright():
 
         # 重译测试
         r = api_session.post(
-            f"{BASE}/retranslate/7/qwen-plus",
-            data={"doc_id": "5a21aca40a53"},
+            f"{BASE}/retranslate/7",
+            data={"doc_id": "5a21aca40a53", "target": "builtin:qwen-plus"},
             headers=with_csrf_headers(csrf_token),
         )
         if r.status_code == 200:

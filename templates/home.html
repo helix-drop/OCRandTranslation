@@ -564,6 +564,48 @@ var _glossaryItems = [];
 var _glossaryPage = 0;
 var GLOSSARY_PAGE_SIZE = 10;
 
+function formatUnixTimeLocal(ts) {
+  var value = Number(ts || 0);
+  if (!value) return '';
+  var d = new Date(value * 1000);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('zh-CN', { hour12: false });
+}
+
+function renderTocModalMeta(data) {
+  var meta = document.getElementById('tocModalMeta');
+  if (!meta) return;
+  var tocFile = (data && data.toc_file) || {};
+  var tocCount = (data && Array.isArray(data.toc)) ? data.toc.length : 0;
+  var offset = Number((data && data.offset) || 0);
+  if (tocFile.exists) {
+    var parts = ['当前目录文件：' + (tocFile.display_name || '未命名目录文件')];
+    var uploadedAt = formatUnixTimeLocal(tocFile.uploaded_at);
+    if (uploadedAt) parts.push('导入时间：' + uploadedAt);
+    parts.push('已导入目录：' + tocCount + ' 条');
+    parts.push('页码偏移 ' + offset);
+    if (tocFile.is_legacy_name) parts.push('旧记录，原始文件名不可恢复');
+    meta.textContent = parts.join(' · ');
+    return;
+  }
+  if (data && data.source === 'user' && tocCount) {
+    meta.textContent = '已导入目录：' + tocCount + ' 条 · 页码偏移 ' + offset;
+    return;
+  }
+  meta.textContent = '尚未导入目录';
+}
+
+function refreshTocModalMeta() {
+  if (!_glossaryDocId) return Promise.resolve();
+  return fetch('/pdf_toc?doc_id=' + encodeURIComponent(_glossaryDocId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      renderTocModalMeta(d);
+      return d;
+    })
+    .catch(function() {});
+}
+
 function openGlossaryModal(docId, docName) {
   _glossaryDocId = docId;
   document.getElementById('glossaryModalTitle').textContent = '词典与目录 · ' + docName;
@@ -587,17 +629,7 @@ function openGlossaryModal(docId, docName) {
     .catch(function() {});
 
   // 拉取目录信息
-  fetch('/pdf_toc?doc_id=' + encodeURIComponent(docId))
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var meta = document.getElementById('tocModalMeta');
-      if (d.source === 'user' && d.toc && d.toc.length) {
-        meta.textContent = '已导入目录：' + d.toc.length + ' 条，页码偏移 ' + d.offset;
-      } else {
-        meta.textContent = '尚未导入目录';
-      }
-    })
-    .catch(function() {});
+  refreshTocModalMeta();
 
   document.getElementById('glossaryModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -724,7 +756,7 @@ function doTocImport() {
           autoMsg.textContent = '未能自动匹配偏移，请手动输入原书第 1 页对应的 PDF 页码。';
           autoMsg.style.color = 'var(--txS)';
         }
-        document.getElementById('tocModalMeta').textContent = '已导入目录：' + d.imported + ' 条';
+        refreshTocModalMeta();
       } else {
         setTocMsg(d.error || '导入失败', 'error');
       }
@@ -754,7 +786,7 @@ function doTocSetOffset() {
       if (d.ok) {
         msgEl.textContent = '偏移已保存，前往阅读页刷新即可使用目录导航';
         msgEl.style.color = 'var(--grn)';
-        document.getElementById('tocModalMeta').textContent = '已导入目录，页码偏移 ' + offset;
+        refreshTocModalMeta();
       } else {
         msgEl.textContent = d.error || '保存失败';
         msgEl.style.color = 'var(--red)';

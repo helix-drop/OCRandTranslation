@@ -281,8 +281,12 @@ def _get_para_context_window() -> int:
 
 
 def _get_active_translate_args(model_key: str | None = None) -> tuple[str, dict]:
-    resolved_model_key = model_key or get_model_key()
-    return resolved_model_key, get_translate_args(resolved_model_key)
+    if model_key and model_key in MODELS:
+        t_args = get_translate_args(f"builtin:{model_key}")
+        return model_key, t_args
+    t_args = get_translate_args()
+    resolved_model_key = t_args.get("model_key") or get_model_key()
+    return resolved_model_key, t_args
 
 
 _MODEL_PARA_LIMITS = {
@@ -403,6 +407,22 @@ def _build_para_jobs(paragraphs: list, ctx: dict, para_bboxes: list, target_bp: 
     for job in jobs:
         job["para_total"] = len(jobs)
     return jobs
+
+
+def _entry_model_meta(t_args: dict, fallback_model_key: str) -> dict:
+    model_source = str(t_args.get("model_source", "builtin") or "builtin")
+    model_key = str(t_args.get("model_key", "") or "").strip()
+    model_id = str(t_args.get("model_id", "") or model_key or fallback_model_key).strip()
+    provider = str(t_args.get("provider", "") or "").strip()
+    display_label = str(t_args.get("display_label", "") or model_id or model_key or fallback_model_key).strip()
+    return {
+        "_model_source": model_source,
+        "_model_key": model_key,
+        "_model_id": model_id,
+        "_provider": provider,
+        "_display_label": display_label,
+        "_model": model_id or model_key or fallback_model_key,
+    }
 
 
 def _make_page_entry(job: dict, target_bp: int, result: dict | None = None, error: str = "") -> dict:
@@ -526,7 +546,7 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
 
     return {
         "_pageBP": target_bp,
-        "_model": model_key,
+        **_entry_model_meta(t_args, model_key),
         "_usage": total_usage,
         "_page_entries": page_entries,
         "footnotes": page_footnotes,
@@ -912,7 +932,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
 
     return {
         "_pageBP": target_bp,
-        "_model": model_key,
+        **_entry_model_meta(t_args, model_key),
         "_usage": total_usage,
         "_page_entries": page_entries,
         "footnotes": page_footnotes,
@@ -972,6 +992,10 @@ def _default_translate_state(doc_id: str = "") -> dict:
         "completion_tokens": 0,
         "total_tokens": 0,
         "model": "",
+        "model_source": "",
+        "model_key": "",
+        "model_id": "",
+        "provider": "",
         "last_error": "",
         "failed_bps": [],
         "partial_failed_bps": [],
@@ -1548,6 +1572,7 @@ def start_translate_task(doc_id: str, start_bp: int, doc_title: str) -> bool:
         _translate_task["events"] = []
         _translate_task["doc_id"] = doc_id
 
+    initial_args = get_translate_args()
     _save_translate_state(
         doc_id,
         running=True,
@@ -1565,7 +1590,11 @@ def start_translate_task(doc_id: str, start_bp: int, doc_title: str) -> bool:
         request_count=0,
         prompt_tokens=0,
         completion_tokens=0,
-        model=get_model_key(),
+        model=initial_args.get("display_label") or initial_args.get("model_id") or initial_args.get("model_key") or get_model_key(),
+        model_source=initial_args.get("model_source", "builtin"),
+        model_key=initial_args.get("model_key", ""),
+        model_id=initial_args.get("model_id", ""),
+        provider=initial_args.get("provider", ""),
         last_error="",
         failed_bps=[],
         partial_failed_bps=[],
@@ -1637,7 +1666,11 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             request_count=0,
             prompt_tokens=0,
             completion_tokens=0,
-            model=model_key,
+            model=t_args.get("display_label") or t_args.get("model_id") or model_key,
+            model_source=t_args.get("model_source", "builtin"),
+            model_key=t_args.get("model_key", ""),
+            model_id=t_args.get("model_id", ""),
+            provider=t_args.get("provider", ""),
             last_error="",
             failed_bps=[],
             partial_failed_bps=sorted(partial_failed_doc_bps),

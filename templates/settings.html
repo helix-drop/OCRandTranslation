@@ -81,45 +81,66 @@
         </button>
       </div>
       <div id="customModelPanel" class="custom-model-panel{% if not custom_model_panel_open %} hidden{% endif %}"{% if not custom_model_panel_open %} hidden{% endif %}>
-        {% if custom_model_name %}
+        {% if custom_model.model_id %}
         <div class="custom-model-actions">
           <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-            <input type="hidden" name="section" value="custom_model_activate">
+            <input type="hidden" name="section" value="custom_model_enable">
             <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-            <button type="submit" class="btn {{ 'active' if custom_model_enabled else '' }}">使用已保存模型：{{ custom_model_name }}</button>
+            <button type="submit" class="btn {{ 'active' if custom_model_enabled else '' }}">启用此自定义模型：{{ custom_model.display_name or custom_model.model_id }}</button>
           </form>
           <span class="custom-model-bound">
-            {% if custom_model_base_key and custom_model_base_key in models %}
-            绑定模型族：{{ models[custom_model_base_key].label }}
-            {% else %}
-            尚未绑定模型族
-            {% endif %}
+            Provider：{{ custom_model.provider_type }}{% if custom_model.provider_type == 'qwen' %} · 地域：{{ custom_model.qwen_region }}{% endif %}
           </span>
         </div>
         {% endif %}
         <form method="POST" action="{{ url_for('save_settings') }}">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="section" value="custom_model">
+          <input type="hidden" name="section" value="custom_model_save">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <label for="customModelName" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">自定义模型名</label>
-          <input id="customModelName" name="custom_model_name" class="inp" type="text" value="{{ custom_model_name }}"
-                 placeholder="例如：qwen-plus-2025-02-01">
+          <label for="customModelDisplayName" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">展示名</label>
+          <input id="customModelDisplayName" name="display_name" class="inp" type="text" value="{{ custom_model.display_name }}"
+                 placeholder="例如：Qwen 3.5 Plus">
+          <label for="customModelProvider" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">Provider</label>
+          <select id="customModelProvider" name="provider_type" class="inp" onchange="toggleCustomModelProviderFields(this.value)">
+            <option value="qwen"{% if custom_model.provider_type == 'qwen' %} selected{% endif %}>Qwen (DashScope)</option>
+            <option value="deepseek"{% if custom_model.provider_type == 'deepseek' %} selected{% endif %}>DeepSeek</option>
+            <option value="openai_compatible"{% if custom_model.provider_type == 'openai_compatible' %} selected{% endif %}>OpenAI Compatible</option>
+          </select>
+          <label for="customModelId" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">模型 ID</label>
+          <input id="customModelId" name="model_id" class="inp" type="text" value="{{ custom_model.model_id }}"
+                 placeholder="例如：qwen3.5-plus">
+          <div id="qwenRegionWrap" style="margin-top:12px;{% if custom_model.provider_type != 'qwen' %}display:none;{% endif %}">
+            <label for="customModelQwenRegion" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Qwen 地域</label>
+            <select id="customModelQwenRegion" name="qwen_region" class="inp">
+              <option value="cn"{% if custom_model.qwen_region == 'cn' %} selected{% endif %}>中国内地</option>
+              <option value="sg"{% if custom_model.qwen_region == 'sg' %} selected{% endif %}>新加坡</option>
+              <option value="us"{% if custom_model.qwen_region == 'us' %} selected{% endif %}>美国</option>
+            </select>
+          </div>
+          <div id="openaiCompatWrap" style="margin-top:12px;{% if custom_model.provider_type != 'openai_compatible' %}display:none;{% endif %}">
+            <label for="customModelBaseUrl" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Base URL</label>
+            <input id="customModelBaseUrl" name="base_url" class="inp" type="text" value="{{ custom_model.base_url }}"
+                   placeholder="例如：https://example.com/v1">
+            <label for="customModelApiKey" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">专用 API Key</label>
+            <input id="customModelApiKey" name="custom_api_key" class="inp" type="password" value="{{ custom_model.custom_api_key }}"
+                   placeholder="输入该 OpenAI 兼容服务的 API Key">
+          </div>
           <div class="hint" style="margin-top:8px;">
             当前生效模型 ID：
-            <code>{% if custom_model_enabled and custom_model_name %}{{ custom_model_name }}{% else %}{{ models[model_key].id }}{% endif %}</code>
+            <code>{{ current_model_id }}</code>
           </div>
           <div class="hint" style="margin-top:6px;">
-            保存后会立刻写入本地配置，并绑定当前选中的模型族/API Key。
+            保存只更新配置，不会自动切换。确认无误后，再点上方“启用此自定义模型”。
           </div>
-          <button type="submit" class="btn btn-pri mt-10">保存并启用</button>
+          <button type="submit" class="btn btn-pri mt-10">保存自定义模型配置</button>
         </form>
-        {% if custom_model_name %}
+        {% if custom_model.model_id %}
         <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form" style="margin-top:10px;">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="section" value="custom_model_clear">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <button type="submit" class="btn btn-sec">清空已保存模型</button>
+          <button type="submit" class="btn btn-sec">清空自定义模型配置</button>
         </form>
         {% endif %}
       </div>
@@ -180,6 +201,40 @@
           <button type="submit" class="btn btn-pri btn-sm">保存词典</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- TOC File -->
+  <div class="card" id="toc-file">
+    <div class="settings-section">
+      <h3>当前目录索引文件</h3>
+      {% if toc_file.exists %}
+      <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 12px;align-items:start;font-size:13px;">
+        <div style="color:var(--txL);">原始文件名</div>
+        <div style="color:var(--txt);word-break:break-word;">{{ toc_file.display_name }}</div>
+        <div style="color:var(--txL);">导入时间</div>
+        <div style="color:var(--txt);">{{ toc_file.uploaded_at_display or '未知' }}</div>
+        <div style="color:var(--txL);">目录条数</div>
+        <div style="color:var(--txt);">{{ toc_item_count }} 条</div>
+        <div style="color:var(--txL);">页码偏移</div>
+        <div style="color:var(--txt);">{{ toc_offset }}</div>
+      </div>
+      {% if toc_file.is_legacy_name %}
+      <div class="hint" style="margin-top:10px;">旧记录，原始文件名不可恢复；当前仅能显示保存后的固定文件名。</div>
+      {% endif %}
+      {% else %}
+      <div class="hint" style="margin-bottom:10px;">当前未选择目录索引文件</div>
+      {% endif %}
+      <div class="hint" style="margin-top:10px;">
+        上传后的目录文件会持续保留，直到被新上传的目录文件替换。
+      </div>
+      <div style="margin-top:12px;">
+        <input type="file" id="settingsTocFileInput" accept=".csv,.xlsx" style="font-size:12px;color:var(--txt);">
+      </div>
+      <div class="flex gap-8 mt-10" style="align-items:center;flex-wrap:wrap;">
+        <button type="button" class="btn btn-pri btn-sm" id="settingsTocImportBtn" onclick="replaceTocFileFromSettings();">重新上传替换目录文件</button>
+      </div>
+      <div id="settingsTocImportMsg" style="display:none;font-size:12px;margin-top:10px;"></div>
     </div>
   </div>
 
@@ -263,14 +318,70 @@ function toggleCustomModelPanel(forceOpen) {
   panel.hidden = !shouldOpen;
   panel.classList.toggle('hidden', !shouldOpen);
   if (shouldOpen) {
-    var input = document.getElementById('customModelName');
+    var input = document.getElementById('customModelId');
     if (input) input.focus();
   }
+}
+
+function toggleCustomModelProviderFields(providerType) {
+  var qwenWrap = document.getElementById('qwenRegionWrap');
+  var openaiWrap = document.getElementById('openaiCompatWrap');
+  if (qwenWrap) qwenWrap.style.display = providerType === 'qwen' ? '' : 'none';
+  if (openaiWrap) openaiWrap.style.display = providerType === 'openai_compatible' ? '' : 'none';
+}
+
+function setSettingsTocMsg(msg, type) {
+  var el = document.getElementById('settingsTocImportMsg');
+  if (!el) return;
+  if (!msg) {
+    el.style.display = 'none';
+    el.textContent = '';
+    return;
+  }
+  el.style.display = '';
+  el.textContent = msg;
+  el.style.color = type === 'error' ? 'var(--red)' : 'var(--grn)';
+}
+
+function replaceTocFileFromSettings() {
+  var input = document.getElementById('settingsTocFileInput');
+  var btn = document.getElementById('settingsTocImportBtn');
+  if (!input || !input.files || !input.files.length) {
+    setSettingsTocMsg('请先选择目录文件', 'error');
+    return;
+  }
+  btn.disabled = true;
+  setSettingsTocMsg('上传中…', 'ok');
+  var fd = new FormData();
+  fd.append('file', input.files[0]);
+  fetch('/api/toc/import?doc_id={{ current_doc_id }}', {
+    method: 'POST',
+    headers: { 'X-CSRF-Token': getCsrfToken() },
+    body: fd
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      btn.disabled = false;
+      if (d.ok) {
+        var name = (d.toc_file && d.toc_file.display_name) ? d.toc_file.display_name : '目录文件';
+        setSettingsTocMsg('已替换目录文件：' + name + '，正在刷新页面…', 'ok');
+        window.setTimeout(function() {
+          window.location.href = '{{ url_for("settings", doc_id=current_doc_id) }}#toc-file';
+        }, 180);
+        return;
+      }
+      setSettingsTocMsg(d.error || '上传失败', 'error');
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      setSettingsTocMsg('请求失败：' + err, 'error');
+    });
 }
 
 {% if custom_model_panel_open %}
 toggleCustomModelPanel(true);
 {% endif %}
+toggleCustomModelProviderFields('{{ custom_model.provider_type }}');
 
 {% if toc_source == 'user' %}
 function saveTocOffset() {

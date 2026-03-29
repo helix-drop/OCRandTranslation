@@ -33,7 +33,9 @@ from config import (
     list_glossary_items, upsert_glossary_item, delete_glossary_item, parse_glossary_file,
     get_model_key, set_model_key,
     get_custom_model_name, get_custom_model_enabled, get_custom_model_base_key,
-    set_custom_model_enabled, save_custom_model_selection,
+    get_custom_model_config, save_custom_model_config,
+    enable_custom_model, clear_custom_model_config, disable_custom_model,
+    get_active_model_mode,
     get_pdf_virtual_window_radius, get_pdf_virtual_scroll_min_pages,
     get_current_doc_id, set_current_doc,
     get_doc_meta, get_doc_dir,
@@ -45,11 +47,11 @@ from pdf_extract import render_pdf_page, parse_toc_file
 from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
-    get_translate_args, highlight_terms, _ensure_str,
+    get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
     gen_markdown, get_app_state, has_pdf, get_pdf_path,
     load_pdf_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
-    save_toc_file,
+    save_toc_file, get_toc_file_info,
 )
 from sqlite_store import SQLiteRepository
 from tasks import (
@@ -67,7 +69,7 @@ from tasks import (
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-CUSTOM_MODEL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
+CUSTOM_MODEL_ID_PATTERN = re.compile(r"^[A-Za-z0-9._:/-]+$")
 JSON_CSRF_ENDPOINTS = {
     "api_glossary_create",
     "api_glossary_update",
@@ -322,35 +324,93 @@ def _save_translate_parallel_section():
         flash("当前页的翻译已经启动，新的并发设置会从下一页开始生效。", "info")
 
 
+def _current_model_target() -> str:
+    return "custom" if get_active_model_mode() == "custom" else f"builtin:{get_model_key()}"
+
+
 def _save_custom_model_section(section: str, current_doc_id: str):
-    if section == "custom_model":
-        custom_model_name = request.form.get("custom_model_name", "").strip()
-        if custom_model_name and not CUSTOM_MODEL_NAME_PATTERN.fullmatch(custom_model_name):
-            flash("自定义模型名格式无效：仅允许字母、数字、-、_、.", "error")
+    if section == "custom_model_save":
+        provider_type = request.form.get("provider_type", "").strip().lower()
+        display_name = request.form.get("display_name", "").strip()
+        model_id = request.form.get("model_id", "").strip()
+        qwen_region = request.form.get("qwen_region", "cn").strip().lower()
+        base_url = request.form.get("base_url", "").strip()
+        custom_api_key = request.form.get("custom_api_key", "").strip()
+
+        if provider_type not in {"qwen", "deepseek", "openai_compatible"}:
+            flash("自定义模型 provider 无效。", "error")
             return _redirect_settings(current_doc_id, open_custom_model=True)
-        if custom_model_name:
-            base_key = get_model_key()
-            save_custom_model_selection(custom_model_name, True, base_key)
-            flash(f"已保存自定义模型名：{custom_model_name}", "success")
-        else:
-            save_custom_model_selection("", False, "")
-            flash("已清空自定义模型名，恢复使用默认模型 ID", "success")
+        if not model_id:
+            flash("自定义模型必须填写模型 ID。", "error")
+            return _redirect_settings(current_doc_id, open_custom_model=True)
+        if not CUSTOM_MODEL_ID_PATTERN.fullmatch(model_id):
+            flash("模型 ID 格式无效：仅允许字母、数字、.、_、-、:、/", "error")
+            return _redirect_settings(current_doc_id, open_custom_model=True)
+        if provider_type == "openai_compatible":
+            if not base_url:
+                flash("OpenAI 兼容模型必须填写 Base URL。", "error")
+                return _redirect_settings(current_doc_id, open_custom_model=True)
+            if not custom_api_key:
+                flash("OpenAI 兼容模型必须填写专用 API Key。", "error")
+                return _redirect_settings(current_doc_id, open_custom_model=True)
+
+        custom_model = {
+            "enabled": True,
+            "display_name": display_name or model_id,
+            "provider_type": provider_type,
+            "model_id": model_id,
+            "base_url": base_url if provider_type == "openai_compatible" else "",
+            "qwen_region": qwen_region if provider_type == "qwen" else "cn",
+            "api_key_mode": "builtin_dashscope" if provider_type == "qwen" else ("builtin_deepseek" if provider_type == "deepseek" else "custom"),
+            "custom_api_key": custom_api_key if provider_type == "openai_compatible" else "",
+            "extra_body": {"enable_thinking": False} if provider_type == "qwen" else {},
+        }
+        save_custom_model_config(custom_model)
+        flash(f"已保存自定义模型配置：{custom_model['display_name']}", "success")
         return _redirect_settings(current_doc_id, open_custom_model=True)
 
-    if section == "custom_model_activate":
-        custom_model_name = get_custom_model_name()
-        custom_model_base_key = get_custom_model_base_key()
-        if not custom_model_name or not custom_model_base_key:
-            flash("还没有可启用的自定义模型，请先保存模型名。", "error")
+    if section == "custom_model_enable":
+        custom_model = get_custom_model_config()
+        if not custom_model.get("enabled") or not custom_model.get("model_id"):
+            flash("还没有可启用的自定义模型，请先保存配置。", "error")
         else:
-            set_model_key(custom_model_base_key)
-            set_custom_model_enabled(True)
-            flash(f"已启用已保存的自定义模型：{custom_model_name}", "success")
+            enable_custom_model()
+            flash(f"已启用自定义模型：{custom_model.get('display_name') or custom_model.get('model_id')}", "success")
+        return _redirect_settings(current_doc_id, open_custom_model=True)
+
+    if section == "custom_model":
+        # 兼容旧表单 section，转成新保存逻辑。
+        legacy_name = request.form.get("custom_model_name", "").strip()
+        if legacy_name:
+            save_custom_model_config({
+                "enabled": True,
+                "display_name": legacy_name,
+                "provider_type": "qwen",
+                "model_id": legacy_name,
+                "base_url": "",
+                "qwen_region": "cn",
+                "api_key_mode": "builtin_dashscope",
+                "custom_api_key": "",
+                "extra_body": {"enable_thinking": False},
+            })
+            flash(f"已保存自定义模型配置：{legacy_name}", "success")
+        else:
+            clear_custom_model_config()
+            flash("已清空自定义模型配置，恢复使用默认模型", "success")
         return _redirect_settings(current_doc_id, open_custom_model=True)
 
     if section == "custom_model_clear":
-        save_custom_model_selection("", False, "")
-        flash("已清空自定义模型名，恢复使用默认模型 ID", "success")
+        clear_custom_model_config()
+        flash("已清空自定义模型配置，恢复使用默认模型", "success")
+        return _redirect_settings(current_doc_id, open_custom_model=True)
+
+    if section == "custom_model_activate":
+        custom_model = get_custom_model_config()
+        if not custom_model.get("model_id"):
+            flash("还没有可启用的自定义模型，请先保存配置。", "error")
+        else:
+            enable_custom_model()
+            flash(f"已启用自定义模型：{custom_model.get('display_name') or custom_model.get('model_id')}", "success")
         return _redirect_settings(current_doc_id, open_custom_model=True)
 
     return None
@@ -495,9 +555,11 @@ def reading():
         display_entries.append(pe_copy)
 
     cur_model_label = ""
-    m = cur.get("_model", "")
-    if m and m in MODELS:
-        cur_model_label = MODELS[m]["label"]
+    if cur:
+        if cur.get("_model_source") == "builtin" and cur.get("_model_key") in MODELS:
+            cur_model_label = MODELS[cur.get("_model_key")]["label"]
+        else:
+            cur_model_label = cur.get("_model_id") or cur.get("_model") or ""
 
     # 构建 bookPage → fileIdx 映射表（供前端 PDF 定位）
     page_map = {}
@@ -555,11 +617,19 @@ def reading():
         current_page_failed=cur_page_bp in failed_bps and not has_current_entry,
         current_page_failure=current_page_failure,
         cur_model_label=cur_model_label,
+        active_model_mode=state["active_model_mode"],
+        active_builtin_model_key=state["active_builtin_model_key"],
         side_by_side=side_by_side,
         export_md=export_md,
         doc_title=state.get("doc_title", ""),
         model_key=state["model_key"],
+        custom_model=state["custom_model"],
         custom_model_name=state.get("custom_model_name", ""),
+        custom_model_enabled=state["custom_model_enabled"],
+        current_model_source=state["current_model_source"],
+        current_model_id=state["current_model_id"],
+        current_model_label=state["current_model_label"],
+        current_model_provider=state["current_model_provider"],
         models=MODELS,
         pages=pages,
         has_pages=state["has_pages"],
@@ -735,10 +805,10 @@ def start_from_beginning():
         return redirect(url_for("home"))
 
     model_key = get_model_key()
-    t_args = get_translate_args(model_key)
+    t_args = get_translate_args()
     if not t_args["api_key"]:
-        provider = MODELS[model_key].get("provider", "deepseek")
-        name = "DashScope API Key" if provider == "qwen" else "DeepSeek API Key"
+        provider = t_args.get("provider", "deepseek")
+        name = "DashScope API Key" if provider == "qwen" else ("DeepSeek API Key" if provider == "deepseek" else "OpenAI 兼容 API Key")
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("home"))
 
@@ -757,10 +827,10 @@ def start_reading():
         return redirect(url_for("home"))
 
     model_key = get_model_key()
-    t_args = get_translate_args(model_key)
+    t_args = get_translate_args()
     if not t_args["api_key"]:
-        provider = MODELS[model_key].get("provider", "deepseek")
-        name = "DashScope API Key" if provider == "qwen" else "DeepSeek API Key"
+        provider = t_args.get("provider", "deepseek")
+        name = "DashScope API Key" if provider == "qwen" else ("DeepSeek API Key" if provider == "deepseek" else "OpenAI 兼容 API Key")
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("input_page"))
 
@@ -785,7 +855,7 @@ def fetch_next():
     pages, _ = load_pages_from_disk(doc_id)
     entries, doc_title, entry_idx = load_entries_from_disk(doc_id)
     model_key = get_model_key()
-    t_args = get_translate_args(model_key)
+    t_args = get_translate_args()
 
     if not pages or not entries or not t_args["api_key"]:
         flash("数据不完整或缺少API Key", "error")
@@ -810,8 +880,8 @@ def fetch_next():
         return redirect(url_for("reading", bp=last_page_bp, doc_id=doc_id))
 
 
-@app.route("/retranslate/<int:bp>/<model>", methods=["POST"])
-def retranslate(bp, model):
+@app.route("/retranslate/<int:bp>", methods=["POST"])
+def retranslate(bp):
     """重新翻译整页。"""
     doc_id = _request_doc_id()
     if doc_id:
@@ -819,9 +889,19 @@ def retranslate(bp, model):
     pages, _ = load_pages_from_disk(doc_id)
     entries, doc_title, _ = load_entries_from_disk(doc_id)
 
-    if model not in MODELS:
-        model = get_model_key()
-    t_args = get_translate_args(model)
+    target = request.values.get("target", "").strip()
+    if target == "custom":
+        model_key = get_model_key()
+        t_args = get_translate_args("custom")
+    elif target.startswith("builtin:"):
+        model_key = target.split(":", 1)[1].strip()
+        if model_key not in MODELS:
+            flash("重译目标无效", "error")
+            return redirect(url_for("reading", bp=bp, doc_id=doc_id))
+        t_args = get_translate_args(target)
+    else:
+        flash("重译目标无效", "error")
+        return redirect(url_for("reading", bp=bp, doc_id=doc_id))
 
     target_idx = None
     for i, entry in enumerate(entries):
@@ -834,10 +914,10 @@ def retranslate(bp, model):
         return redirect(url_for("reading", doc_id=doc_id))
 
     try:
-        new_entry = translate_page(pages, bp, model, t_args, get_glossary(doc_id))
+        new_entry = translate_page(pages, bp, model_key, t_args, get_glossary(doc_id))
         save_entry_to_disk(new_entry, doc_title, doc_id)
         reconcile_translate_state_after_page_success(doc_id, bp)
-        flash(f"重译完成 ({MODELS[model]['label']})", "success")
+        flash(f"重译完成 ({t_args.get('display_label') or t_args.get('model_id') or model_key})", "success")
     except Exception as e:
         reconcile_translate_state_after_page_failure(doc_id, bp, str(e))
         flash(f"重译失败: {e}", "error")
@@ -967,7 +1047,7 @@ def start_translate_all():
         return jsonify({"error": "no_pages"})
 
     model_key = get_model_key()
-    t_args = get_translate_args(model_key)
+    t_args = get_translate_args()
     if not t_args["api_key"]:
         return jsonify({"error": "no_api_key"})
 
@@ -1061,6 +1141,8 @@ def settings():
     custom_model_panel_open = request.args.get("open_custom_model", "0") == "1"
     toc_source, toc_offset = load_toc_source_offset(current_doc_id)
     toc_items = load_pdf_toc_from_disk(current_doc_id) if toc_source == "user" else []
+    toc_file = get_toc_file_info(current_doc_id)
+    toc_file["uploaded_at_display"] = _format_unix_ts(toc_file.get("uploaded_at"))
     return render_template(
         "settings.html",
         current_doc_id=current_doc_id,
@@ -1068,6 +1150,7 @@ def settings():
         toc_source=toc_source,
         toc_offset=toc_offset,
         toc_item_count=len(toc_items),
+        toc_file=toc_file,
         **state,
     )
 
@@ -1195,7 +1278,7 @@ def api_glossary_import():
 def set_model(key):
     if key in MODELS:
         set_model_key(key)
-        set_custom_model_enabled(False)
+        disable_custom_model()
     next_page = request.values.get("next", "home")
     doc_id = request.values.get("doc_id", "").strip() or get_current_doc_id()
     if doc_id:
@@ -1285,14 +1368,23 @@ def _guess_toc_offset(new_items: list[dict], auto_toc: list[dict]) -> tuple[int,
     return 0, ""
 
 
+def _format_unix_ts(ts: int | float | None) -> str:
+    if not ts:
+        return ""
+    try:
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(ts)))
+    except Exception:
+        return ""
+
+
 @app.route("/pdf_toc")
 def pdf_toc():
     doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
     if not doc_id:
-        return jsonify({"doc_id": "", "toc": [], "source": "auto", "offset": 0})
+        return jsonify({"doc_id": "", "toc": [], "source": "auto", "offset": 0, "toc_file": get_toc_file_info("")})
     toc = load_pdf_toc_from_disk(doc_id)
     source, offset = load_toc_source_offset(doc_id)
-    return jsonify({"doc_id": doc_id, "toc": toc, "source": source, "offset": offset})
+    return jsonify({"doc_id": doc_id, "toc": toc, "source": source, "offset": offset, "toc_file": get_toc_file_info(doc_id)})
 
 
 @app.route("/api/toc/import", methods=["POST"])
@@ -1333,6 +1425,7 @@ def api_toc_import():
         "offset": offset,
         "offset_matched_title": matched_title,
         "offset_auto": bool(matched_title),
+        "toc_file": get_toc_file_info(doc_id),
     })
 
 

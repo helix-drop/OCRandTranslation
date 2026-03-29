@@ -1,13 +1,17 @@
 """磁盘持久化与辅助函数：数据读写、模板变量、文本处理工具。"""
+from dataclasses import asdict, dataclass, field
 import os
 import re
 import shutil
+import time
 
 from config import (
     MODELS,
+    QWEN_BASE_URLS,
+    DEEPSEEK_BASE_URL,
     get_paddle_token, get_deepseek_key, get_dashscope_key,
-    get_glossary, get_model_key, get_custom_model_name,
-    get_custom_model_enabled, get_custom_model_base_key,
+    get_glossary,
+    get_active_model_mode, get_active_builtin_model_key, get_custom_model_config,
     get_translate_parallel_enabled, get_translate_parallel_limit,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
 )
@@ -168,12 +172,12 @@ def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
 
 def save_toc_file(doc_id: str, file_storage) -> None:
     """将用户上传的目录原始文件持久化到文档目录，文件名固定为 toc_source.{ext}。"""
-    import shutil
     target_doc_id = doc_id or get_current_doc_id()
     doc_dir = get_doc_dir(target_doc_id)
     if not doc_dir:
         return
-    filename = (file_storage.filename or "").lower()
+    original_name = os.path.basename(str(file_storage.filename or "").strip())
+    filename = original_name.lower()
     ext = "xlsx" if filename.endswith(".xlsx") else "csv"
     dest = os.path.join(doc_dir, f"toc_source.{ext}")
     # 删除旧格式文件（xlsx/csv 互换时清理）
@@ -184,6 +188,11 @@ def save_toc_file(doc_id: str, file_storage) -> None:
     file_storage.seek(0)
     with open(dest, "wb") as f:
         shutil.copyfileobj(file_storage, f)
+    SQLiteRepository().set_document_toc_file_meta(
+        target_doc_id,
+        original_name,
+        uploaded_at=int(time.time()),
+    )
 
 
 def get_toc_file_path(doc_id: str = "") -> str:
@@ -197,6 +206,39 @@ def get_toc_file_path(doc_id: str = "") -> str:
         if os.path.exists(path):
             return path
     return ""
+
+
+def get_toc_file_info(doc_id: str = "") -> dict:
+    """返回当前文档已保存目录文件的展示信息。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    path = get_toc_file_path(target_doc_id)
+    info = {
+        "exists": False,
+        "display_name": "",
+        "original_name": "",
+        "uploaded_at": 0,
+        "saved_path": "",
+        "is_legacy_name": False,
+    }
+    if not path or not os.path.exists(path):
+        return info
+
+    meta = get_doc_meta(target_doc_id) if target_doc_id else {}
+    original_name = os.path.basename(str(meta.get("toc_file_name", "") or "").strip())
+    uploaded_at = int(meta.get("toc_file_uploaded_at", 0) or 0)
+    if uploaded_at <= 0:
+        try:
+            uploaded_at = int(os.path.getmtime(path))
+        except OSError:
+            uploaded_at = 0
+    return {
+        "exists": True,
+        "display_name": original_name or os.path.basename(path),
+        "original_name": original_name,
+        "uploaded_at": uploaded_at,
+        "saved_path": path,
+        "is_legacy_name": not bool(original_name),
+    }
 
 
 def save_toc_source_offset(doc_id: str, source: str, offset: int) -> None:
@@ -215,28 +257,93 @@ def load_toc_source_offset(doc_id: str = "") -> tuple[str, int]:
 
 # ============ HELPERS ============
 
-def _resolve_translate_model(model_key: str) -> tuple[dict, str]:
-    active_model_key = model_key if model_key in MODELS else "deepseek-chat"
-    custom_model_name = get_custom_model_name()
-    custom_model_enabled = get_custom_model_enabled()
-    if custom_model_enabled and custom_model_name:
-        bound_model_key = get_custom_model_base_key()
-        if bound_model_key:
-            active_model_key = bound_model_key
-    model = MODELS.get(active_model_key) or MODELS["deepseek-chat"]
-    model_id = custom_model_name if custom_model_enabled and custom_model_name else model["id"]
-    return model, model_id
+@dataclass(slots=True)
+class ResolvedModelSpec:
+    source: str
+    model_key: str
+    model_id: str
+    provider: str
+    base_url: str
+    api_key: str
+    display_label: str
+    request_overrides: dict = field(default_factory=dict)
 
 
-def get_translate_args(model_key: str) -> dict:
-    """根据模型key返回 translate_paragraph 所需的 model_id, api_key, provider。"""
-    model, model_id = _resolve_translate_model(model_key)
-    provider = model.get("provider", "deepseek")
-    if provider == "qwen":
-        api_key = get_dashscope_key()
-    else:
-        api_key = get_deepseek_key()
-    return {"model_id": model_id, "api_key": api_key, "provider": provider}
+def _infer_builtin_key_from_custom_model(provider: str, model_id: str) -> str:
+    normalized_provider = str(provider or "").strip().lower()
+    normalized_model_id = str(model_id or "").strip().lower()
+    if normalized_provider == "qwen":
+        if "max" in normalized_model_id:
+            return "qwen-max"
+        if "turbo" in normalized_model_id or "flash" in normalized_model_id:
+            return "qwen-turbo"
+        return "qwen-plus"
+    if normalized_provider == "deepseek":
+        if "reasoner" in normalized_model_id or normalized_model_id.endswith("-r1"):
+            return "deepseek-reasoner"
+        return "deepseek-chat"
+    return ""
+
+
+def resolve_model_spec(target: str | None = None) -> ResolvedModelSpec:
+    active_mode = get_active_model_mode()
+    active_builtin_key = get_active_builtin_model_key()
+    custom_model = get_custom_model_config()
+
+    normalized_target = str(target or "").strip()
+    if normalized_target.startswith("builtin:"):
+        builtin_key = normalized_target.split(":", 1)[1].strip()
+        builtin_key = builtin_key if builtin_key in MODELS else active_builtin_key
+        model = MODELS.get(builtin_key) or MODELS["deepseek-chat"]
+        provider = model.get("provider", "deepseek")
+        api_key = get_dashscope_key() if provider == "qwen" else get_deepseek_key()
+        return ResolvedModelSpec(
+            source="builtin",
+            model_key=builtin_key,
+            model_id=model["id"],
+            provider=provider,
+            base_url=QWEN_BASE_URLS["cn"] if provider == "qwen" else DEEPSEEK_BASE_URL,
+            api_key=api_key,
+            display_label=model.get("label", model["id"]),
+            request_overrides={},
+        )
+    if normalized_target == "custom":
+        active_mode = "custom"
+
+    if active_mode == "custom" and custom_model.get("enabled") and custom_model.get("model_id"):
+        provider = custom_model.get("provider_type", "qwen")
+        if provider == "qwen":
+            api_key = get_dashscope_key()
+            base_url = QWEN_BASE_URLS.get(custom_model.get("qwen_region", "cn"), QWEN_BASE_URLS["cn"])
+            request_overrides = {"extra_body": dict(custom_model.get("extra_body") or {"enable_thinking": False})}
+        elif provider == "deepseek":
+            api_key = get_deepseek_key()
+            base_url = DEEPSEEK_BASE_URL
+            request_overrides = {}
+        else:
+            api_key = str(custom_model.get("custom_api_key", "") or "").strip()
+            base_url = str(custom_model.get("base_url", "") or "").strip()
+            request_overrides = {}
+        return ResolvedModelSpec(
+            source="custom",
+            model_key="",
+            model_id=str(custom_model.get("model_id", "") or "").strip(),
+            provider=provider,
+            base_url=base_url,
+            api_key=api_key,
+            display_label=str(custom_model.get("display_name", "") or custom_model.get("model_id", "")).strip(),
+            request_overrides=request_overrides,
+        )
+
+    return resolve_model_spec(f"builtin:{active_builtin_key}")
+
+
+def get_translate_args(target: str | None = None) -> dict:
+    """返回统一解析后的翻译请求参数。"""
+    spec = resolve_model_spec(target)
+    payload = asdict(spec)
+    payload["model_source"] = payload.pop("source")
+    return payload
 
 
 def highlight_terms(text: str, glossary: list) -> str:
@@ -371,7 +478,10 @@ def get_app_state(doc_id: str = "") -> dict:
     """获取所有共享的模板变量。"""
     pages, src_name = load_pages_from_disk(doc_id)
     entries, doc_title, entry_idx = load_entries_from_disk(doc_id)
-    model_key = get_model_key()
+    active_model_mode = get_active_model_mode()
+    active_builtin_model_key = get_active_builtin_model_key()
+    custom_model = get_custom_model_config()
+    resolved_spec = resolve_model_spec()
     meta = get_doc_meta(doc_id)
     entry_idx = meta.get("last_entry_idx", entry_idx)
 
@@ -384,15 +494,22 @@ def get_app_state(doc_id: str = "") -> dict:
         "entries": entries,
         "doc_title": doc_title,
         "entry_idx": entry_idx,
-        "model_key": model_key,
+        "model_key": active_builtin_model_key,
         "models": MODELS,
         "glossary": get_glossary(doc_id),
         "paddle_token": get_paddle_token(),
         "deepseek_key": get_deepseek_key(),
         "dashscope_key": get_dashscope_key(),
-        "custom_model_name": get_custom_model_name(),
-        "custom_model_enabled": get_custom_model_enabled(),
-        "custom_model_base_key": get_custom_model_base_key(),
+        "active_model_mode": active_model_mode,
+        "active_builtin_model_key": active_builtin_model_key,
+        "custom_model": custom_model,
+        "custom_model_name": custom_model.get("display_name") or custom_model.get("model_id", ""),
+        "custom_model_enabled": active_model_mode == "custom",
+        "custom_model_base_key": "",
+        "current_model_source": resolved_spec.source,
+        "current_model_id": resolved_spec.model_id,
+        "current_model_label": resolved_spec.display_label,
+        "current_model_provider": resolved_spec.provider,
         "translate_parallel_enabled": get_translate_parallel_enabled(),
         "translate_parallel_limit": get_translate_parallel_limit(),
         "has_pages": len(pages) > 0,

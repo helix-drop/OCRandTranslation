@@ -15,7 +15,13 @@ import config
 import ocr_client
 import tasks
 from config import create_doc, ensure_dirs, get_doc_meta, set_current_doc
-from storage import load_pages_from_disk, save_entries_to_disk, save_pages_to_disk, get_translate_args
+from storage import (
+    load_pages_from_disk,
+    save_entries_to_disk,
+    save_pages_to_disk,
+    get_translate_args,
+    resolve_model_spec,
+)
 from testsupport import ClientCSRFMixin
 from translator import TranslateStreamAborted, RateLimitedError, QuotaExceededError
 
@@ -101,48 +107,82 @@ class TasksStreamingTest(unittest.TestCase):
 
     def test_get_translate_args_prefers_custom_model_name_when_enabled(self):
         config.save_config({
-            "model_key": "qwen-plus",
+            "active_model_mode": "custom",
+            "active_builtin_model_key": "qwen-plus",
             "dashscope_key": "dashscope-test-key",
-            "custom_model_name": "qwen-plus-custom-202503",
-            "custom_model_enabled": True,
-            "custom_model_base_key": "qwen-plus",
+            "custom_model": {
+                "enabled": True,
+                "display_name": "Qwen 3.5 Plus",
+                "provider_type": "qwen",
+                "model_id": "qwen3.5-plus",
+                "base_url": "",
+                "qwen_region": "sg",
+                "api_key_mode": "builtin_dashscope",
+                "custom_api_key": "",
+                "extra_body": {"enable_thinking": False},
+            },
         })
 
-        t_args = get_translate_args("qwen-plus")
+        spec = resolve_model_spec()
+        t_args = get_translate_args()
 
-        self.assertEqual(t_args["provider"], "qwen")
-        self.assertEqual(t_args["model_id"], "qwen-plus-custom-202503")
+        self.assertEqual(spec.source, "custom")
+        self.assertEqual(spec.model_key, "")
+        self.assertEqual(spec.model_id, "qwen3.5-plus")
+        self.assertEqual(spec.provider, "qwen")
+        self.assertEqual(spec.base_url, "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
+        self.assertEqual(spec.display_label, "Qwen 3.5 Plus")
+        self.assertEqual(spec.request_overrides, {"extra_body": {"enable_thinking": False}})
         self.assertEqual(t_args["api_key"], "dashscope-test-key")
 
-    def test_get_translate_args_uses_preset_model_id_when_custom_name_saved_but_disabled(self):
+    def test_get_translate_args_uses_builtin_target_when_explicitly_requested(self):
         config.save_config({
-            "model_key": "qwen-max",
+            "active_model_mode": "custom",
+            "active_builtin_model_key": "qwen-max",
             "dashscope_key": "dashscope-test-key",
-            "custom_model_name": "qwen3.5-plus-longcontext",
-            "custom_model_enabled": False,
-            "custom_model_base_key": "qwen-max",
+            "custom_model": {
+                "enabled": True,
+                "display_name": "Qwen 3.5 Plus",
+                "provider_type": "qwen",
+                "model_id": "qwen3.5-plus",
+                "base_url": "",
+                "qwen_region": "cn",
+                "api_key_mode": "builtin_dashscope",
+                "custom_api_key": "",
+                "extra_body": {"enable_thinking": False},
+            },
         })
 
-        t_args = get_translate_args("qwen-max")
+        spec = resolve_model_spec("builtin:qwen-max")
+        t_args = get_translate_args("builtin:qwen-max")
 
+        self.assertEqual(spec.source, "builtin")
+        self.assertEqual(spec.model_key, "qwen-max")
         self.assertEqual(t_args["provider"], "qwen")
         self.assertEqual(t_args["model_id"], "qwen-max")
 
-    def test_get_translate_args_uses_bound_provider_from_custom_model_base_key(self):
+    def test_load_config_migrates_legacy_custom_model_shape(self):
         config.save_config({
             "model_key": "deepseek-chat",
             "deepseek_key": "deepseek-test-key",
             "dashscope_key": "dashscope-test-key",
-            "custom_model_name": "qwen3.5-plus-longcontext",
+            "custom_model_name": "qwen3.5-plus",
             "custom_model_enabled": True,
             "custom_model_base_key": "qwen-max",
         })
 
-        t_args = get_translate_args("deepseek-chat")
+        migrated = config.load_config()
+        spec = resolve_model_spec()
 
-        self.assertEqual(t_args["provider"], "qwen")
-        self.assertEqual(t_args["model_id"], "qwen3.5-plus-longcontext")
-        self.assertEqual(t_args["api_key"], "dashscope-test-key")
+        self.assertEqual(migrated["active_model_mode"], "custom")
+        self.assertEqual(migrated["active_builtin_model_key"], "deepseek-chat")
+        self.assertEqual(migrated["custom_model"]["provider_type"], "qwen")
+        self.assertEqual(migrated["custom_model"]["model_id"], "qwen3.5-plus")
+        self.assertEqual(migrated["custom_model"]["api_key_mode"], "builtin_dashscope")
+        self.assertEqual(spec.provider, "qwen")
+        self.assertEqual(spec.model_key, "")
+        self.assertEqual(spec.model_id, "qwen3.5-plus")
+        self.assertEqual(spec.api_key, "dashscope-test-key")
 
     def test_translate_page_stream_aborts_without_entry_when_stopped(self):
         def _fake_stream(*args, **kwargs):
@@ -1625,7 +1665,7 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", return_value=fixed_entry),
         ):
-            resp = self._post("/retranslate/1/sonnet", data={"doc_id": self.doc_id})
+            resp = self._post("/retranslate/1", data={"doc_id": self.doc_id, "target": "builtin:qwen-plus"})
 
         self.assertEqual(resp.status_code, 302)
         snapshot = tasks.get_translate_snapshot(self.doc_id)
@@ -1675,7 +1715,7 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
             patch.object(app_module, "get_translate_args", return_value={"model_id": "fake", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(app_module, "translate_page", side_effect=RuntimeError("新的失败原因")),
         ):
-            resp = self._post("/retranslate/1/sonnet", data={"doc_id": self.doc_id})
+            resp = self._post("/retranslate/1", data={"doc_id": self.doc_id, "target": "builtin:qwen-plus"})
 
         self.assertEqual(resp.status_code, 302)
         snapshot = tasks.get_translate_snapshot(self.doc_id)

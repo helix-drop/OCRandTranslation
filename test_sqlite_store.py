@@ -48,6 +48,23 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertIn("translate_failures", tables)
         self.assertIn("app_state", tables)
 
+        with get_connection(self.db_path) as conn:
+            translation_columns = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(translation_pages)").fetchall()
+            }
+            run_columns = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(translate_runs)").fetchall()
+            }
+
+        self.assertIn("model_source", translation_columns)
+        self.assertIn("model_id", translation_columns)
+        self.assertIn("provider", translation_columns)
+        self.assertIn("model_source", run_columns)
+        self.assertIn("model_id", run_columns)
+        self.assertIn("provider", run_columns)
+
     def test_repository_persists_document_pages_run_and_segments(self):
         repo = SQLiteRepository(self.db_path)
         repo.upsert_document(
@@ -86,7 +103,10 @@ class SQLiteStoreTest(unittest.TestCase):
         run_id = repo.save_translate_run(
             "doc-1",
             phase="running",
+            model_source="custom",
             model_key="qwen-plus",
+            model_id="qwen3.5-plus",
+            provider="qwen",
             start_bp=7,
             current_bp=8,
             resume_bp=8,
@@ -103,7 +123,11 @@ class SQLiteStoreTest(unittest.TestCase):
             "doc-1",
             7,
             {
-                "_model": "qwen-plus",
+                "_model": "qwen3.5-plus",
+                "_model_source": "custom",
+                "_model_key": "qwen-plus",
+                "_model_id": "qwen3.5-plus",
+                "_provider": "qwen",
                 "_status": "done",
                 "pages": "7",
                 "_usage": {"total_tokens": 20},
@@ -137,6 +161,9 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertEqual(latest_run["phase"], "running")
         self.assertEqual(latest_run["resume_bp"], 8)
         self.assertEqual(latest_run["total_tokens"], 320)
+        self.assertEqual(latest_run["model_source"], "custom")
+        self.assertEqual(latest_run["model_id"], "qwen3.5-plus")
+        self.assertEqual(latest_run["provider"], "qwen")
 
         segments = repo.list_translation_segments(translation_page_id)
         self.assertEqual(len(segments), 2)
@@ -158,6 +185,13 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertEqual(doc_row["has_pdf"], 1)
         self.assertEqual(len(page_rows), 2)
         self.assertEqual(page_rows[1]["text_source"], "pdf")
+
+        page = repo.get_effective_translation_page("doc-1", 7)
+        self.assertEqual(page["_model"], "qwen3.5-plus")
+        self.assertEqual(page["_model_source"], "custom")
+        self.assertEqual(page["_model_key"], "qwen-plus")
+        self.assertEqual(page["_model_id"], "qwen3.5-plus")
+        self.assertEqual(page["_provider"], "qwen")
 
     def test_translation_segments_follow_translation_page_cascade_delete(self):
         repo = SQLiteRepository(self.db_path)

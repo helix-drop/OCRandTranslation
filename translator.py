@@ -107,7 +107,17 @@ def _normalize_optional_text(val) -> str:
     if val is None:
         return ""
     if isinstance(val, list):
-        return "\n".join(str(item) for item in val)
+        texts = []
+        for item in val:
+            if isinstance(item, dict):
+                text = item.get("text", "")
+            elif isinstance(item, str):
+                text = item
+            else:
+                text = getattr(item, "text", "")
+            if text:
+                texts.append(str(text))
+        return "".join(texts)
     return str(val)
 
 
@@ -246,6 +256,8 @@ def _enforce_glossary_rewrite(
     model_id: str,
     api_key: str,
     provider: str,
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
 ) -> str:
     if not required:
         return translation
@@ -262,10 +274,15 @@ def _enforce_glossary_rewrite(
         f"当前译文：\n{translation}"
     )
     try:
-        if provider == "qwen":
-            revised = _call_qwen(sys_prompt, user_msg, model_id, api_key).get("text", "").strip()
-        else:
-            revised = _call_deepseek(sys_prompt, user_msg, model_id, api_key).get("text", "").strip()
+        revised = _call_provider(
+            provider,
+            sys_prompt,
+            user_msg,
+            model_id,
+            api_key,
+            base_url=base_url,
+            request_overrides=request_overrides,
+        ).get("text", "").strip()
         return revised or translation
     except Exception:
         return translation
@@ -376,27 +393,29 @@ def _extract_translation_preview(text: str) -> str:
     return decoded
 
 
-def _call_provider(provider: str, sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
-    if provider == "qwen":
-        return _call_qwen(sys_prompt, user_msg, model_id, api_key)
-    return _call_deepseek(sys_prompt, user_msg, model_id, api_key)
+def _extract_openai_message_text(message_content) -> str:
+    if isinstance(message_content, str):
+        return message_content
+    return _normalize_optional_text(message_content)
 
 
-def _call_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
-    """调用 Qwen (DashScope) API，使用 OpenAI 兼容接口。"""
+def _call_openai_chat(base_url: str, sys_prompt: str, user_msg: str, model_id: str, api_key: str, request_overrides: dict | None = None) -> dict:
     client = OpenAI(
         api_key=api_key,
-        base_url=DASHSCOPE_BASE_URL,
+        base_url=base_url,
     )
+    create_kwargs = {
+        "model": model_id,
+        "max_tokens": 4096,
+        "messages": [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+    }
+    if isinstance(request_overrides, dict):
+        create_kwargs.update(request_overrides)
     try:
-        response = client.chat.completions.create(
-            model=model_id,
-            max_tokens=4096,
-            messages=[
-                {"role": "system", "content": sys_prompt},
-                {"role": "user", "content": user_msg},
-            ],
-        )
+        response = client.chat.completions.create(**create_kwargs)
     except Exception as exc:
         raise _classify_provider_exception(exc) from exc
     usage = _build_usage(
@@ -404,36 +423,30 @@ def _call_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> d
         completion_tokens=getattr(response.usage, "completion_tokens", 0),
         total_tokens=getattr(response.usage, "total_tokens", None),
     )
-    if response.choices and response.choices[0].message.content:
-        return {"text": response.choices[0].message.content, "usage": usage}
+    if response.choices and getattr(response.choices[0], "message", None):
+        content = _extract_openai_message_text(getattr(response.choices[0].message, "content", ""))
+        return {"text": content, "usage": usage}
     return {"text": "", "usage": usage}
 
 
-def _call_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str) -> dict:
-    """调用 DeepSeek API，使用 OpenAI 兼容接口。"""
-    client = OpenAI(
-        api_key=api_key,
-        base_url=DEEPSEEK_BASE_URL,
+def _call_provider(
+    provider: str,
+    sys_prompt: str,
+    user_msg: str,
+    model_id: str,
+    api_key: str,
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
+) -> dict:
+    resolved_base_url = base_url or (DASHSCOPE_BASE_URL if provider == "qwen" else DEEPSEEK_BASE_URL)
+    return _call_openai_chat(
+        resolved_base_url,
+        sys_prompt,
+        user_msg,
+        model_id,
+        api_key,
+        request_overrides=request_overrides,
     )
-    try:
-        response = client.chat.completions.create(
-            model=model_id,
-            max_tokens=4096,
-            messages=[
-                {"role": "system", "content": sys_prompt},
-                {"role": "user", "content": user_msg},
-            ],
-        )
-    except Exception as exc:
-        raise _classify_provider_exception(exc) from exc
-    usage = _build_usage(
-        prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
-        completion_tokens=getattr(response.usage, "completion_tokens", 0),
-        total_tokens=getattr(response.usage, "total_tokens", None),
-    )
-    if response.choices and response.choices[0].message.content:
-        return {"text": response.choices[0].message.content, "usage": usage}
-    return {"text": "", "usage": usage}
 
 
 def _parse_json_array(text: str) -> list | None:
@@ -510,23 +523,34 @@ def _extract_openai_delta_text(chunk) -> str:
     return ""
 
 
-def _stream_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
-    """DeepSeek/OpenAI 兼容接口流式文本输出。"""
+def _stream_openai_chat(
+    base_url: str,
+    sys_prompt: str,
+    user_msg: str,
+    model_id: str,
+    api_key: str,
+    stop_checker=None,
+    request_overrides: dict | None = None,
+):
+    """OpenAI 兼容接口流式文本输出。"""
     client = OpenAI(
         api_key=api_key,
-        base_url=DEEPSEEK_BASE_URL,
+        base_url=base_url,
     )
+    create_kwargs = {
+        "model": model_id,
+        "max_tokens": 4096,
+        "messages": [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+        "stream": True,
+        "stream_options": {"include_usage": True},
+    }
+    if isinstance(request_overrides, dict):
+        create_kwargs.update(request_overrides)
     try:
-        response = client.chat.completions.create(
-            model=model_id,
-            max_tokens=4096,
-            messages=[
-                {"role": "system", "content": sys_prompt},
-                {"role": "user", "content": user_msg},
-            ],
-            stream=True,
-            stream_options={"include_usage": True},
-        )
+        response = client.chat.completions.create(**create_kwargs)
     except Exception as exc:
         raise _classify_provider_exception(exc) from exc
     full_parts = []
@@ -558,58 +582,26 @@ def _stream_deepseek(sys_prompt: str, user_msg: str, model_id: str, api_key: str
         _close_stream_response(response)
 
 
-def _stream_qwen(sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
-    """Qwen/OpenAI 兼容接口流式文本输出。"""
-    client = OpenAI(
-        api_key=api_key,
-        base_url=DASHSCOPE_BASE_URL,
+def _stream_provider(
+    provider: str,
+    sys_prompt: str,
+    user_msg: str,
+    model_id: str,
+    api_key: str,
+    stop_checker=None,
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
+):
+    resolved_base_url = base_url or (DASHSCOPE_BASE_URL if provider == "qwen" else DEEPSEEK_BASE_URL)
+    return _stream_openai_chat(
+        resolved_base_url,
+        sys_prompt,
+        user_msg,
+        model_id,
+        api_key,
+        stop_checker=stop_checker,
+        request_overrides=request_overrides,
     )
-    try:
-        response = client.chat.completions.create(
-            model=model_id,
-            max_tokens=4096,
-            messages=[
-                {"role": "system", "content": sys_prompt},
-                {"role": "user", "content": user_msg},
-            ],
-            stream=True,
-            stream_options={"include_usage": True},
-        )
-    except Exception as exc:
-        raise _classify_provider_exception(exc) from exc
-    full_parts = []
-    usage = _empty_usage()
-    try:
-        try:
-            for chunk in response:
-                _check_stream_stop(stop_checker)
-                text = _extract_openai_delta_text(chunk)
-                if text:
-                    full_parts.append(text)
-                    yield {"type": "delta", "text": text}
-                chunk_usage = getattr(chunk, "usage", None)
-                if chunk_usage:
-                    usage = _build_usage(
-                        prompt_tokens=getattr(chunk_usage, "prompt_tokens", 0),
-                        completion_tokens=getattr(chunk_usage, "completion_tokens", 0),
-                        total_tokens=getattr(chunk_usage, "total_tokens", None),
-                    )
-            full_text = "".join(full_parts)
-            yield {"type": "usage", "usage": usage}
-            yield {"type": "done", "text": full_text, "usage": usage}
-        except Exception as exc:
-            raise _classify_provider_exception(exc) from exc
-    except TranslateStreamAborted:
-        _close_stream_response(response)
-        raise
-    finally:
-        _close_stream_response(response)
-
-
-def _stream_provider(provider: str, sys_prompt: str, user_msg: str, model_id: str, api_key: str, stop_checker=None):
-    if provider == "qwen":
-        return _stream_qwen(sys_prompt, user_msg, model_id, api_key, stop_checker=stop_checker)
-    return _stream_deepseek(sys_prompt, user_msg, model_id, api_key, stop_checker=stop_checker)
 
 
 _STRUCTURE_SYSTEM = """你是文档结构分析专家。
@@ -648,6 +640,8 @@ def structure_page(
     model_id: str,
     api_key: str,
     provider: str = "deepseek",
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
     page_num: int = 0,
 ) -> dict:
     """
@@ -679,7 +673,15 @@ def structure_page(
     # 构建用户消息
     msg = f"页码: {page_num}\n\n===OCR标签===\n{labels_str}\n===OCR标签结束===\n\n===连续文本===\n{markdown}\n===连续文本结束==="
 
-    api_result = _call_provider(provider, _STRUCTURE_SYSTEM, msg, model_id, api_key)
+    api_result = _call_provider(
+        provider,
+        _STRUCTURE_SYSTEM,
+        msg,
+        model_id,
+        api_key,
+        base_url=base_url,
+        request_overrides=request_overrides,
+    )
 
     full = api_result.get("text", "")
     if not full:
@@ -743,6 +745,8 @@ def translate_paragraph(
     model_id: str,
     api_key: str,
     provider: str = "deepseek",
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
     heading_level: int = 0,
     para_idx: int | None = None,
     para_total: int | None = None,
@@ -774,7 +778,15 @@ def translate_paragraph(
         cross_page=cross_page,
     )
 
-    result = _call_provider(provider, sys_prompt, msg, model_id, api_key)
+    result = _call_provider(
+        provider,
+        sys_prompt,
+        msg,
+        model_id,
+        api_key,
+        base_url=base_url,
+        request_overrides=request_overrides,
+    )
 
     full = result.get("text", "")
     if not full:
@@ -806,6 +818,8 @@ def translate_paragraph(
             model_id=model_id,
             api_key=api_key,
             provider=provider,
+            base_url=base_url,
+            request_overrides=request_overrides,
         )
         p["translation"] = _normalize_translation_text(revised, para_text, heading_level=heading_level)
     p["_usage"] = result.get("usage", _empty_usage())
@@ -822,6 +836,8 @@ def stream_translate_paragraph(
     api_key: str,
     provider: str = "deepseek",
     stop_checker=None,
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
     heading_level: int = 0,
     para_idx: int | None = None,
     para_total: int | None = None,
@@ -859,6 +875,8 @@ def stream_translate_paragraph(
         model_id,
         api_key,
         stop_checker=stop_checker,
+        base_url=base_url,
+        request_overrides=request_overrides,
     )
 
     final_usage = _empty_usage()
@@ -915,6 +933,8 @@ def stream_translate_paragraph(
                 model_id=model_id,
                 api_key=api_key,
                 provider=provider,
+                base_url=base_url,
+                request_overrides=request_overrides,
             )
             p["translation"] = _normalize_translation_text(revised, para_text, heading_level=heading_level)
         p["_usage"] = final_usage

@@ -28,9 +28,22 @@ PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT = 5
 PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT = 80
 TRANSLATE_PARALLEL_ENABLED_DEFAULT = False
 TRANSLATE_PARALLEL_LIMIT_DEFAULT = 10
+ACTIVE_MODEL_MODE_DEFAULT = "builtin"
+ACTIVE_BUILTIN_MODEL_KEY_DEFAULT = "deepseek-chat"
 CUSTOM_MODEL_NAME_DEFAULT = ""
 CUSTOM_MODEL_ENABLED_DEFAULT = False
 CUSTOM_MODEL_BASE_KEY_DEFAULT = ""
+CUSTOM_MODEL_DEFAULT = {
+    "enabled": False,
+    "display_name": "",
+    "provider_type": "qwen",
+    "model_id": "",
+    "base_url": "",
+    "qwen_region": "cn",
+    "api_key_mode": "builtin_dashscope",
+    "custom_api_key": "",
+    "extra_body": {},
+}
 
 MODELS = {
     "deepseek-chat": {"id": "deepseek-chat", "label": "DeepSeek-Chat", "provider": "deepseek"},
@@ -39,6 +52,115 @@ MODELS = {
     "qwen-max": {"id": "qwen-max", "label": "Qwen-Max", "provider": "qwen"},
     "qwen-turbo": {"id": "qwen-turbo", "label": "Qwen-Turbo", "provider": "qwen"},
 }
+
+QWEN_BASE_URLS = {
+    "cn": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "sg": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    "us": "https://dashscope-us.aliyuncs.com/compatible-mode/v1",
+}
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+CUSTOM_MODEL_PROVIDER_TYPES = {"qwen", "deepseek", "openai_compatible"}
+CUSTOM_MODEL_API_KEY_MODES = {"builtin_dashscope", "builtin_deepseek", "custom"}
+
+
+def _default_custom_model_config() -> dict:
+    return dict(CUSTOM_MODEL_DEFAULT)
+
+
+def _normalize_builtin_model_key(key) -> str:
+    normalized = str(key or "").strip()
+    return normalized if normalized in MODELS else ACTIVE_BUILTIN_MODEL_KEY_DEFAULT
+
+
+def _normalize_active_model_mode(value) -> str:
+    normalized = str(value or "").strip().lower()
+    return normalized if normalized in {"builtin", "custom"} else ACTIVE_MODEL_MODE_DEFAULT
+
+
+def _normalize_custom_model_config(value) -> dict:
+    source = value if isinstance(value, dict) else {}
+    cfg = _default_custom_model_config()
+    cfg["enabled"] = _coerce_bool(source.get("enabled"), False)
+    cfg["display_name"] = str(source.get("display_name", "") or "").strip()
+    provider_type = str(source.get("provider_type", "qwen") or "").strip().lower()
+    cfg["provider_type"] = provider_type if provider_type in CUSTOM_MODEL_PROVIDER_TYPES else "qwen"
+    cfg["model_id"] = str(source.get("model_id", "") or "").strip()
+    cfg["base_url"] = str(source.get("base_url", "") or "").strip()
+    qwen_region = str(source.get("qwen_region", "cn") or "").strip().lower()
+    cfg["qwen_region"] = qwen_region if qwen_region in QWEN_BASE_URLS else "cn"
+    api_key_mode = str(source.get("api_key_mode", "") or "").strip().lower()
+    cfg["api_key_mode"] = api_key_mode if api_key_mode in CUSTOM_MODEL_API_KEY_MODES else ""
+    cfg["custom_api_key"] = str(source.get("custom_api_key", "") or "").strip()
+    extra_body = source.get("extra_body")
+    cfg["extra_body"] = dict(extra_body) if isinstance(extra_body, dict) else {}
+
+    if cfg["provider_type"] == "qwen":
+        cfg["api_key_mode"] = "builtin_dashscope"
+        if "enable_thinking" not in cfg["extra_body"]:
+            cfg["extra_body"]["enable_thinking"] = False
+        cfg["base_url"] = ""
+        cfg["custom_api_key"] = ""
+    elif cfg["provider_type"] == "deepseek":
+        cfg["api_key_mode"] = "builtin_deepseek"
+        cfg["base_url"] = ""
+        cfg["custom_api_key"] = ""
+        cfg["qwen_region"] = "cn"
+        cfg["extra_body"] = {}
+    else:
+        cfg["api_key_mode"] = "custom"
+        cfg["qwen_region"] = "cn"
+        cfg["extra_body"] = {}
+    if not cfg["display_name"] and cfg["model_id"]:
+        cfg["display_name"] = cfg["model_id"]
+    if not cfg["model_id"]:
+        cfg["enabled"] = False
+    return cfg
+
+
+def _migrate_legacy_model_config(cfg: dict) -> tuple[dict, bool]:
+    changed = False
+    normalized = dict(cfg or {})
+    if "active_builtin_model_key" not in normalized:
+        normalized["active_builtin_model_key"] = _normalize_builtin_model_key(
+            normalized.get("model_key", ACTIVE_BUILTIN_MODEL_KEY_DEFAULT)
+        )
+        changed = True
+    else:
+        normalized["active_builtin_model_key"] = _normalize_builtin_model_key(normalized.get("active_builtin_model_key"))
+
+    if "custom_model" not in normalized:
+        legacy_name = str(normalized.get("custom_model_name", CUSTOM_MODEL_NAME_DEFAULT) or "").strip()
+        legacy_enabled = _coerce_bool(normalized.get("custom_model_enabled"), CUSTOM_MODEL_ENABLED_DEFAULT)
+        legacy_base_key = str(normalized.get("custom_model_base_key", CUSTOM_MODEL_BASE_KEY_DEFAULT) or "").strip()
+        provider_type = "qwen"
+        if legacy_base_key in MODELS:
+            provider_type = MODELS[legacy_base_key].get("provider", "qwen")
+        custom_model = _default_custom_model_config()
+        custom_model.update({
+            "enabled": bool(legacy_name and legacy_enabled),
+            "display_name": legacy_name,
+            "provider_type": provider_type if provider_type in {"qwen", "deepseek"} else "qwen",
+            "model_id": legacy_name,
+            "qwen_region": "cn",
+            "api_key_mode": "builtin_dashscope" if provider_type == "qwen" else "builtin_deepseek",
+        })
+        if provider_type == "qwen":
+            custom_model["extra_body"] = {"enable_thinking": False}
+        normalized["custom_model"] = custom_model
+        changed = True
+    normalized["custom_model"] = _normalize_custom_model_config(normalized.get("custom_model"))
+
+    if "active_model_mode" not in normalized:
+        normalized["active_model_mode"] = "custom" if normalized["custom_model"]["enabled"] else "builtin"
+        changed = True
+    else:
+        normalized["active_model_mode"] = _normalize_active_model_mode(normalized.get("active_model_mode"))
+
+    if normalized["active_model_mode"] == "custom" and not normalized["custom_model"]["enabled"]:
+        normalized["active_model_mode"] = "builtin"
+        changed = True
+
+    return normalized, changed
 
 
 def _coerce_int(value, default: int, minimum: int) -> int:
@@ -226,12 +348,18 @@ def load_config() -> dict:
     # 首次加载时尝试从旧位置迁移
     migrate_from_old_location()
     ensure_dirs()
-    return _safe_read_json(CONFIG_FILE, {})
+    cfg = _safe_read_json(CONFIG_FILE, {})
+    normalized, changed = _migrate_legacy_model_config(cfg)
+    if changed or normalized != cfg:
+        save_config(normalized)
+        return normalized
+    return normalized
 
 
 def save_config(cfg: dict):
     ensure_dirs()
-    _atomic_write_json(CONFIG_FILE, cfg)
+    normalized, _changed = _migrate_legacy_model_config(cfg)
+    _atomic_write_json(CONFIG_FILE, normalized)
 
 
 def _get_config_value(key: str, default=""):
@@ -409,61 +537,118 @@ def parse_glossary_file(file_storage) -> list[list[str]]:
     return result
 
 
+def get_active_model_mode() -> str:
+    cfg = load_config()
+    return _normalize_active_model_mode(cfg.get("active_model_mode"))
+
+
+def set_active_model_mode(mode: str):
+    cfg = load_config()
+    cfg["active_model_mode"] = _normalize_active_model_mode(mode)
+    save_config(cfg)
+
+
+def get_active_builtin_model_key() -> str:
+    cfg = load_config()
+    return _normalize_builtin_model_key(cfg.get("active_builtin_model_key"))
+
+
+def set_active_builtin_model_key(key: str):
+    cfg = load_config()
+    cfg["active_builtin_model_key"] = _normalize_builtin_model_key(key)
+    save_config(cfg)
+
+
+def get_custom_model_config() -> dict:
+    cfg = load_config()
+    return _normalize_custom_model_config(cfg.get("custom_model"))
+
+
+def save_custom_model_config(custom_model: dict):
+    cfg = load_config()
+    cfg["custom_model"] = _normalize_custom_model_config(custom_model)
+    save_config(cfg)
+
+
+def clear_custom_model_config():
+    cfg = load_config()
+    cfg["custom_model"] = _default_custom_model_config()
+    if _normalize_active_model_mode(cfg.get("active_model_mode")) == "custom":
+        cfg["active_model_mode"] = "builtin"
+    save_config(cfg)
+
+
+def enable_custom_model():
+    cfg = load_config()
+    custom_model = _normalize_custom_model_config(cfg.get("custom_model"))
+    if custom_model.get("enabled") and custom_model.get("model_id"):
+        cfg["active_model_mode"] = "custom"
+    save_config(cfg)
+
+
+def disable_custom_model():
+    cfg = load_config()
+    cfg["active_model_mode"] = "builtin"
+    save_config(cfg)
+
+
 def get_model_key() -> str:
-    key = _get_config_value("model_key", "deepseek-chat")
-    return key if key in MODELS else "deepseek-chat"
+    return get_active_builtin_model_key()
 
 
 def set_model_key(key: str):
-    _set_config_value("model_key", key)
+    set_active_builtin_model_key(key)
 
 
 def get_custom_model_name() -> str:
-    """获取用户自定义模型名。"""
-    value = _get_config_value("custom_model_name", CUSTOM_MODEL_NAME_DEFAULT)
-    return str(value or "").strip()
+    return str(get_custom_model_config().get("model_id", "") or "").strip()
 
 
 def get_custom_model_enabled() -> bool:
-    """获取用户是否启用了自定义模型。"""
-    cfg = load_config()
-    return _coerce_bool(
-        cfg.get("custom_model_enabled"),
-        CUSTOM_MODEL_ENABLED_DEFAULT,
-    )
+    return get_active_model_mode() == "custom"
 
 
 def get_custom_model_base_key() -> str:
-    """获取自定义模型绑定的预设模型 key。"""
-    value = str(_get_config_value("custom_model_base_key", CUSTOM_MODEL_BASE_KEY_DEFAULT) or "").strip()
-    return value if value in MODELS else ""
+    return ""
 
 
 def set_custom_model_name(name: str):
-    _set_config_value("custom_model_name", str(name or "").strip())
+    cfg = get_custom_model_config()
+    normalized_name = str(name or "").strip()
+    cfg["model_id"] = normalized_name
+    cfg["display_name"] = normalized_name
+    save_custom_model_config(cfg)
 
 
 def set_custom_model_enabled(enabled: bool):
-    _set_config_value("custom_model_enabled", _coerce_bool(enabled, CUSTOM_MODEL_ENABLED_DEFAULT))
+    if _coerce_bool(enabled, False):
+        enable_custom_model()
+    else:
+        disable_custom_model()
 
 
 def set_custom_model_base_key(key: str):
-    _set_config_value("custom_model_base_key", key if key in MODELS else "")
+    # 新结构不再依赖基础模型族；保留空实现以兼容旧测试/调用。
+    _ = key
 
 
 def save_custom_model_selection(name: str, enabled: bool, base_key: str):
-    """统一保存自定义模型的名称、启用状态和绑定模型族。"""
-    normalized_name = str(name or "").strip()
-    normalized_base_key = base_key if base_key in MODELS else ""
-    normalized_enabled = bool(
-        normalized_name
-        and normalized_base_key
-        and _coerce_bool(enabled, CUSTOM_MODEL_ENABLED_DEFAULT)
-    )
+    """兼容旧入口：按旧结构写入并自动迁移为新结构。"""
+    provider_type = MODELS.get(base_key, {}).get("provider", "qwen")
+    custom_model = {
+        "enabled": bool(str(name or "").strip() and _coerce_bool(enabled, False)),
+        "display_name": str(name or "").strip(),
+        "provider_type": provider_type if provider_type in {"qwen", "deepseek"} else "qwen",
+        "model_id": str(name or "").strip(),
+        "base_url": "",
+        "qwen_region": "cn",
+        "api_key_mode": "builtin_dashscope" if provider_type == "qwen" else "builtin_deepseek",
+        "custom_api_key": "",
+        "extra_body": {"enable_thinking": False} if provider_type == "qwen" else {},
+    }
     cfg = load_config()
-    cfg["custom_model_name"] = normalized_name
-    cfg["custom_model_enabled"] = normalized_enabled
-    cfg["custom_model_base_key"] = normalized_base_key
+    cfg["custom_model"] = custom_model
+    cfg["active_model_mode"] = "custom" if custom_model["enabled"] else "builtin"
     save_config(cfg)
 
 

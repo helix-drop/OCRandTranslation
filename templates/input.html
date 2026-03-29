@@ -66,7 +66,7 @@
   <p class="error-msg">{{ error }}</p>
   {% endif %}
 
-  {% set provider = models[model_key].provider %}
+  {% set provider = current_model_provider %}
   {% if provider == 'qwen' and not dashscope_key %}
   <div class="card" style="border-color:var(--red);margin-top:16px;">
     <p style="color:var(--red);font-size:13px;">当前模型为 Qwen，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DashScope API Key。</p>
@@ -74,6 +74,10 @@
 {% elif provider == 'deepseek' and not deepseek_key %}
   <div class="card" style="border-color:var(--red);margin-top:16px;">
   <p style="color:var(--red);font-size:13px;">当前模型为 DeepSeek，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DeepSeek API Key。</p>
+  </div>
+  {% elif provider == 'openai_compatible' and not custom_model.custom_api_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">当前模型为 OpenAI 兼容服务，请先在 <a href="{{ url_for('settings') }}">设置</a> 中补全 Base URL 和专用 API Key。</p>
   </div>
   {% endif %}
 </div>
