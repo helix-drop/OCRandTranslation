@@ -30,7 +30,7 @@ from config import (
     get_dashscope_key, set_dashscope_key,
     set_translate_parallel_settings,
     get_glossary, set_glossary,
-    list_glossary_items, upsert_glossary_item, delete_glossary_item,
+    list_glossary_items, upsert_glossary_item, delete_glossary_item, parse_glossary_file,
     get_model_key, set_model_key,
     get_custom_model_name, get_custom_model_enabled, get_custom_model_base_key,
     set_custom_model_enabled, save_custom_model_selection,
@@ -1146,6 +1146,35 @@ def api_glossary_delete(term):
     if not deleted:
         return jsonify({"ok": False, "error": "term 不存在", "items": items}), 404
     return jsonify({"ok": True, "deleted": True, "items": items})
+
+
+@app.route("/api/glossary/import", methods=["POST"])
+def api_glossary_import():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    if "file" not in request.files:
+        return jsonify({"ok": False, "error": "未上传文件"}), 400
+    f = request.files["file"]
+    if not f.filename:
+        return jsonify({"ok": False, "error": "未上传文件"}), 400
+    mode = request.form.get("mode", "append")
+    try:
+        new_items = parse_glossary_file(f)
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+    except Exception:
+        return jsonify({"ok": False, "error": "文件解析失败，请检查格式"}), 400
+    if not new_items:
+        return jsonify({"ok": False, "error": "文件中未找到有效术语行"}), 400
+    if mode == "overwrite":
+        set_glossary(new_items, doc_id=doc_id)
+        items = list_glossary_items(doc_id=doc_id)
+    else:
+        for term, defn in new_items:
+            upsert_glossary_item(term, defn, doc_id=doc_id)
+        items = list_glossary_items(doc_id=doc_id)
+    return jsonify({"ok": True, "imported": len(new_items), "total": len(items), "items": items})
 
 
 @app.route("/set_model/<key>", methods=["POST"])

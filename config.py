@@ -361,6 +361,54 @@ def delete_glossary_item(term: str, doc_id: str = "") -> tuple[list[list[str]], 
     return kept if deleted else items, deleted
 
 
+def parse_glossary_file(file_storage) -> list[list[str]]:
+    """解析上传的 csv 或 xlsx 文件，返回 [[term, defn], ...] 列表。
+
+    规则：
+    - 只取前两列，忽略多余列
+    - 跳过空行
+    - 如果第一行两列均为非数字纯文字且疑似表头（不含常规术语特征），自动跳过
+    - term/defn 均 strip 处理
+    """
+    import io
+
+    filename = (file_storage.filename or "").lower()
+    raw = file_storage.read()
+
+    if filename.endswith(".csv"):
+        import csv
+        text = raw.decode("utf-8-sig", errors="replace")
+        reader = csv.reader(io.StringIO(text))
+        rows = list(reader)
+    elif filename.endswith((".xlsx", ".xls")):
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+        ws = wb.active
+        rows = []
+        for row in ws.iter_rows(values_only=True):
+            rows.append([str(c) if c is not None else "" for c in row])
+        wb.close()
+    else:
+        raise ValueError("仅支持 .csv / .xlsx 格式")
+
+    result: list[list[str]] = []
+    for i, row in enumerate(rows):
+        if len(row) < 2:
+            continue
+        term = str(row[0] or "").strip()
+        defn = str(row[1] or "").strip()
+        if not term or not defn:
+            continue
+        # 跳过首行表头：两列均为纯文字且内容像列名（含"术语""term""译文""translation"等）
+        if i == 0:
+            combined = (term + defn).lower()
+            header_hints = ("term", "术语", "source", "原文", "defn", "译文", "translation", "target", "中文")
+            if any(h in combined for h in header_hints):
+                continue
+        result.append([term, defn])
+    return result
+
+
 def get_model_key() -> str:
     key = _get_config_value("model_key", "deepseek-chat")
     return key if key in MODELS else "deepseek-chat"

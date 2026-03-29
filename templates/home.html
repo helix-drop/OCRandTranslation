@@ -184,6 +184,8 @@
             <button type="submit" class="btn btn-sm btn-sec">切换</button>
           </form>
           {% endif %}
+          <button type="button" class="btn btn-sm btn-sec"
+                  onclick="openGlossaryModal('{{ doc.id }}', '{{ doc.name|e }}')">管理术语词典</button>
           {% if doc.entry_count %}
           <form method="POST" action="{{ url_for('reset_text') }}" class="inline-form"
                 onsubmit="return confirm('确定清空「{{ doc.name }}」的翻译数据？');">
@@ -207,6 +209,55 @@
   <!-- Glossary Toggle -->
   <div class="mt-24">
     <a href="{{ url_for('settings', doc_id=current_doc_id) }}#glossary" class="btn btn-gho" style="padding:8px 0;font-size:13px;">术语词典 ▸</a>
+  </div>
+</div>
+
+<!-- Glossary Import Modal -->
+<div id="glossaryModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeGlossaryModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="glossaryModalTitle">管理术语词典</span>
+      <button type="button" class="modal-close" onclick="closeGlossaryModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="glossaryModalMeta" style="font-size:12px;color:var(--txS);margin:0 0 14px;"></p>
+
+      <div class="modal-section-title">批量导入</div>
+      <div class="modal-hint">
+        <strong>文件格式要求：</strong>支持 <code>.xlsx</code> 和 <code>.csv</code> 两种格式。<br>
+        ・第一列：源语言术语（如法语原文）<br>
+        ・第二列：中文译文<br>
+        ・首行如果是表头（含"术语""term""译文""translation"等字样）会自动跳过，也可直接从数据行开始<br>
+        ・其余列忽略，空行自动跳过
+        <div style="margin-top:8px;color:var(--txL);font-size:11px;">
+          示例（CSV）：<br>
+          <code>raison,理性</code><br>
+          <code>monomanie,偏执狂</code>
+        </div>
+      </div>
+
+      <div style="margin:14px 0 8px;">
+        <label style="font-size:12px;font-weight:600;color:var(--txS);">选择文件</label><br>
+        <input type="file" id="glossaryFileInput" accept=".csv,.xlsx"
+               style="margin-top:6px;font-size:12px;color:var(--txt);">
+      </div>
+
+      <div style="margin:10px 0 14px;display:flex;gap:16px;font-size:12px;">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+          <input type="radio" name="glossaryImportMode" value="append" checked> 追加（与现有术语合并，同名术语以新值覆盖）
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+          <input type="radio" name="glossaryImportMode" value="overwrite"> 覆盖（清空现有词典后导入）
+        </label>
+      </div>
+
+      <div id="glossaryImportMsg" style="display:none;font-size:12px;margin-bottom:10px;"></div>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="button" class="btn btn-pri btn-sm" id="glossaryImportBtn" onclick="doGlossaryImport()">导入</button>
+        <a id="glossarySettingsLink" href="#" class="btn btn-gho btn-sm" style="font-size:11px;">前往设置页管理 ▸</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -471,5 +522,83 @@ function resetUploadArea() {
   document.getElementById('uploadSubtitle').textContent = '调用 PaddleOCR 解析版面，PDF文字层自动优先';
   fileInput.value = '';
 }
+
+// ---- Glossary Import Modal ----
+var _glossaryDocId = '';
+
+function openGlossaryModal(docId, docName) {
+  _glossaryDocId = docId;
+  document.getElementById('glossaryModalTitle').textContent = '管理术语词典 · ' + docName;
+  document.getElementById('glossarySettingsLink').href = '{{ url_for("settings") }}?doc_id=' + docId + '#glossary';
+  document.getElementById('glossaryFileInput').value = '';
+  setGlossaryMsg('', '');
+  document.getElementById('glossaryImportBtn').disabled = false;
+
+  // 拉取当前词典条数
+  fetch('/api/glossary?doc_id=' + encodeURIComponent(docId), { headers: withCsrfHeaders() })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var count = d.items ? d.items.length : 0;
+      document.getElementById('glossaryModalMeta').textContent = '当前词典：' + count + ' 条术语';
+    })
+    .catch(function() {});
+
+  document.getElementById('glossaryModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGlossaryModal() {
+  document.getElementById('glossaryModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function setGlossaryMsg(msg, type) {
+  var el = document.getElementById('glossaryImportMsg');
+  if (!msg) { el.style.display = 'none'; el.textContent = ''; return; }
+  el.style.display = '';
+  el.textContent = msg;
+  el.style.color = type === 'error' ? 'var(--red)' : 'var(--grn)';
+}
+
+function doGlossaryImport() {
+  var fileInput = document.getElementById('glossaryFileInput');
+  if (!fileInput.files || !fileInput.files.length) {
+    setGlossaryMsg('请先选择文件', 'error');
+    return;
+  }
+  var mode = document.querySelector('input[name="glossaryImportMode"]:checked').value;
+  var btn = document.getElementById('glossaryImportBtn');
+  btn.disabled = true;
+  setGlossaryMsg('导入中…', '');
+
+  var fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('mode', mode);
+
+  fetch('/api/glossary/import?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: { 'X-CSRF-Token': getCsrfToken() },
+    body: fd
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      btn.disabled = false;
+      if (d.ok) {
+        setGlossaryMsg('导入成功：新增/更新 ' + d.imported + ' 条，词典共 ' + d.total + ' 条', 'ok');
+        document.getElementById('glossaryModalMeta').textContent = '当前词典：' + d.total + ' 条术语';
+        fileInput.value = '';
+      } else {
+        setGlossaryMsg(d.error || '导入失败', 'error');
+      }
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      setGlossaryMsg('请求失败：' + err, 'error');
+    });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeGlossaryModal();
+});
 </script>
 {% endblock %}
