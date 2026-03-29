@@ -568,6 +568,17 @@
           <span class="toc-page-num">p.{{ item.book_page }}</span>
         </button>
         {% endfor %}
+        <div class="toolbar-dropdown-sep"></div>
+        <div style="padding:8px 14px;">
+          <div style="font-size:10px;font-weight:600;color:var(--txL);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">页码偏移校准</div>
+          <div style="font-size:11px;color:var(--txS);margin-bottom:6px;">原书第 1 页 = PDF 第 <input id="tocOffsetReadingInput" type="number" min="1"
+               value="{{ toc_offset + 1 }}"
+               style="width:48px;padding:2px 4px;font-size:11px;border:1px solid var(--bdr);border-radius:3px;background:var(--card);color:var(--txt);"> 页</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" class="btn btn-pri btn-sm" style="font-size:11px;" onclick="tocSaveOffset();">保存</button>
+            <span id="tocOffsetReadingMsg" style="font-size:11px;display:none;"></span>
+          </div>
+        </div>
       </div>
     </div>
     {% endif %}
@@ -1487,6 +1498,43 @@ function tocUpdateCurrentChapter() {
   }
 }
 tocUpdateCurrentChapter();
+
+function tocSaveOffset() {
+  var raw = document.getElementById('tocOffsetReadingInput').value;
+  var pdfPage1 = parseInt(raw, 10);
+  var msgEl = document.getElementById('tocOffsetReadingMsg');
+  if (isNaN(pdfPage1) || pdfPage1 < 1) {
+    msgEl.style.display = '';
+    msgEl.textContent = '请输入 ≥ 1 的整数';
+    msgEl.style.color = 'var(--red)';
+    return;
+  }
+  var newOffset = pdfPage1 - 1;
+  fetch('/api/toc/set_offset?doc_id={{ current_doc_id }}', {
+    method: 'POST',
+    headers: Object.assign({'Content-Type': 'application/json'}, withCsrfHeaders()),
+    body: JSON.stringify({ offset: newOffset })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      msgEl.style.display = '';
+      if (d.ok) {
+        TOC_OFFSET = newOffset;
+        tocUpdateCurrentChapter();
+        msgEl.textContent = '已保存';
+        msgEl.style.color = 'var(--grn)';
+        setTimeout(function() { msgEl.style.display = 'none'; }, 2000);
+      } else {
+        msgEl.textContent = d.error || '保存失败';
+        msgEl.style.color = 'var(--red)';
+      }
+    })
+    .catch(function(err) {
+      msgEl.style.display = '';
+      msgEl.textContent = '失败：' + err;
+      msgEl.style.color = 'var(--red)';
+    });
+}
 {% endif %}
 
 // ===== PDF Preview Panel (图片模式) =====

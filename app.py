@@ -49,6 +49,7 @@ from storage import (
     gen_markdown, get_app_state, has_pdf, get_pdf_path,
     load_pdf_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
+    save_toc_file,
 )
 from sqlite_store import SQLiteRepository
 from tasks import (
@@ -1320,6 +1321,11 @@ def api_toc_import():
 
     save_pdf_toc_to_disk(doc_id, new_items)
     save_toc_source_offset(doc_id, "user", offset)
+    try:
+        f.seek(0)
+        save_toc_file(doc_id, f)
+    except Exception:
+        pass  # 文件持久化失败不影响主流程
 
     return jsonify({
         "ok": True,

@@ -166,6 +166,39 @@ def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
     return SQLiteRepository().get_document_toc(target_doc_id)
 
 
+def save_toc_file(doc_id: str, file_storage) -> None:
+    """将用户上传的目录原始文件持久化到文档目录，文件名固定为 toc_source.{ext}。"""
+    import shutil
+    target_doc_id = doc_id or get_current_doc_id()
+    doc_dir = get_doc_dir(target_doc_id)
+    if not doc_dir:
+        return
+    filename = (file_storage.filename or "").lower()
+    ext = "xlsx" if filename.endswith(".xlsx") else "csv"
+    dest = os.path.join(doc_dir, f"toc_source.{ext}")
+    # 删除旧格式文件（xlsx/csv 互换时清理）
+    for old_ext in ("xlsx", "csv"):
+        old_path = os.path.join(doc_dir, f"toc_source.{old_ext}")
+        if old_path != dest and os.path.exists(old_path):
+            os.remove(old_path)
+    file_storage.seek(0)
+    with open(dest, "wb") as f:
+        shutil.copyfileobj(file_storage, f)
+
+
+def get_toc_file_path(doc_id: str = "") -> str:
+    """返回已保存的目录原始文件路径，不存在时返回空字符串。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    doc_dir = get_doc_dir(target_doc_id)
+    if not doc_dir:
+        return ""
+    for ext in ("xlsx", "csv"):
+        path = os.path.join(doc_dir, f"toc_source.{ext}")
+        if os.path.exists(path):
+            return path
+    return ""
+
+
 def save_toc_source_offset(doc_id: str, source: str, offset: int) -> None:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
