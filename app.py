@@ -54,7 +54,7 @@ from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
-    gen_markdown, get_app_state, has_pdf, get_pdf_path,
+    gen_markdown, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
     load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
@@ -85,7 +85,6 @@ JSON_CSRF_ENDPOINTS = {
     "reparse",
     "reparse_page",
     "save_manual_revision",
-    "set_pref",
     "start_translate_all",
     "stop_translate",
 }
@@ -260,8 +259,9 @@ def _degrade_orphan_ocr_images(text: str) -> str:
     return cleaned.strip()
 
 
-def _get_partial_failed_bps(doc_id: str) -> list[int]:
-    entries, _, _ = load_entries_from_disk(doc_id)
+def _get_partial_failed_bps(doc_id: str, entries: list[dict] | None = None) -> list[int]:
+    if entries is None:
+        entries, _, _ = load_entries_from_disk(doc_id)
     return sorted(
         entry.get("_pageBP")
         for entry in entries
@@ -300,11 +300,28 @@ def _build_preview_paragraphs(text: str) -> list[str]:
     return sentence_blocks or line_blocks
 
 
-def _build_translate_usage_payload(doc_id: str) -> dict:
+def _build_translate_usage_payload(
+    doc_id: str,
+    *,
+    entries: list[dict] | None = None,
+    snapshot: dict | None = None,
+) -> dict:
     """构建翻译 API 使用情况页面/接口的数据。"""
-    entries, doc_title, _ = load_entries_from_disk(doc_id)
-    snapshot = get_translate_snapshot(doc_id)
-    snapshot["partial_failed_bps"] = _get_partial_failed_bps(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
+    visible_page_view = load_visible_page_view(doc_id, pages=pages)
+    if entries is None:
+        entries, doc_title, _ = load_entries_from_disk(doc_id, pages=pages)
+    else:
+        _, doc_title, _ = load_entries_from_disk(doc_id, pages=pages)
+    if snapshot is None:
+        snapshot = get_translate_snapshot(
+            doc_id,
+            pages=pages,
+            entries=entries,
+            visible_page_view=visible_page_view,
+        )
+    if snapshot.get("partial_failed_bps") is None:
+        snapshot["partial_failed_bps"] = _get_partial_failed_bps(doc_id, entries=entries)
     pages = []
     total_manual_revisions = 0
     pages_with_manual_revisions = 0
@@ -366,9 +383,6 @@ def _redirect_after_model_change(next_page: str, doc_id: str):
             value = request.values.get(key, "").strip()
             if value in {"0", "1"}:
                 reading_params[key] = value
-        layout = request.values.get("layout", "").strip()
-        if layout in {"side", "stack"}:
-            reading_params["layout"] = layout
         return redirect(url_for("reading", **reading_params))
     if next_page == "input":
         return redirect(url_for("input_page", doc_id=doc_id))
@@ -569,7 +583,6 @@ def reading():
     state = get_app_state(current_doc_id)
     usage_open = request.args.get("usage", "0") == "1"
     show_original = request.args.get("orig", "0") == "1"
-    layout_mode = request.args.get("layout", "stack").strip()
     pdf_requested = request.args.get("pdf", "0") == "1"
     if not state["has_pages"]:
         flash("请先上传文件。", "error")
@@ -587,7 +600,12 @@ def reading():
         if pg.get("bookPage") is not None
     }
     entries = state["entries"]
-    translate_snapshot = get_translate_snapshot(current_doc_id)
+    translate_snapshot = get_translate_snapshot(
+        current_doc_id,
+        pages=pages,
+        entries=entries,
+        visible_page_view=state.get("visible_page_view"),
+    )
     show_initial_translate_snapshot = translate_snapshot.get("phase") in ("running", "stopping")
     failed_pages = translate_snapshot.get("failed_pages", [])
     failed_bps = sorted({
@@ -616,9 +634,6 @@ def reading():
                 value = request.args.get(key, "").strip()
                 if value:
                     redirect_params[key] = value
-            layout_value = request.args.get("layout", "").strip()
-            if layout_value in {"side", "stack"}:
-                redirect_params["layout"] = layout_value
             return redirect(url_for("reading", **redirect_params))
         if requested_bp < raw_page_bps[0] or requested_bp > raw_page_bps[-1]:
             target_bp = cur_page_bp
@@ -695,7 +710,9 @@ def reading():
     prev_bp = visible_page_bps[page_index - 1] if page_index > 0 else None
     next_bp = visible_page_bps[page_index + 1] if page_index < len(visible_page_bps) - 1 else None
     translated_bps = sorted(bp for bp in entry_by_bp.keys() if bp in visible_page_bps)
-    partial_failed_bps = translate_snapshot.get("partial_failed_bps") or _get_partial_failed_bps(current_doc_id)
+    partial_failed_bps = translate_snapshot.get("partial_failed_bps")
+    if partial_failed_bps is None:
+        partial_failed_bps = _get_partial_failed_bps(current_doc_id, entries=entries)
     pdf_virtual_window_radius = get_pdf_virtual_window_radius()
     pdf_virtual_scroll_min_pages = get_pdf_virtual_scroll_min_pages()
     if len(visible_page_bps) >= pdf_virtual_scroll_min_pages:
@@ -711,11 +728,6 @@ def reading():
         None,
     )
 
-    side_by_side = session.get("side_by_side", False)
-    if layout_mode == "side":
-        side_by_side = True
-    elif layout_mode == "stack":
-        side_by_side = False
     pdf_available = has_pdf(current_doc_id)
     pdf_visible = pdf_available and pdf_requested
     export_md = ""
@@ -740,7 +752,6 @@ def reading():
         cur_model_label=cur_model_label,
         active_model_mode=state["active_model_mode"],
         active_builtin_model_key=state["active_builtin_model_key"],
-        side_by_side=side_by_side,
         export_md=export_md,
         doc_title=state.get("doc_title", ""),
         model_key=state["model_key"],
@@ -991,7 +1002,7 @@ def fetch_next():
     if doc_id:
         set_current_doc(doc_id)
     pages, _ = load_pages_from_disk(doc_id)
-    entries, doc_title, entry_idx = load_entries_from_disk(doc_id)
+    entries, doc_title, entry_idx = load_entries_from_disk(doc_id, pages=pages)
     model_key = get_model_key()
     t_args = get_translate_args()
 
@@ -1025,7 +1036,7 @@ def retranslate(bp):
     if doc_id:
         set_current_doc(doc_id)
     pages, _ = load_pages_from_disk(doc_id)
-    entries, doc_title, _ = load_entries_from_disk(doc_id)
+    entries, doc_title, _ = load_entries_from_disk(doc_id, pages=pages)
 
     target = request.values.get("target", "").strip()
     if target == "custom":
@@ -1195,11 +1206,11 @@ def start_translate_all():
     start_bp = request.form.get("start_bp", type=int)
     doc_title = request.form.get("doc_title", "").strip() or src_name or "Untitled"
     if start_bp is None:
-        start_bp = build_visible_page_view(pages)["first_visible_page"] or get_page_range(pages)[0]
+        start_bp = load_visible_page_view(doc_id, pages=pages)["first_visible_page"] or get_page_range(pages)[0]
     else:
         start_bp = resolve_visible_page_bp(pages, start_bp) or start_bp
 
-    entries, _, _ = load_entries_from_disk(doc_id)
+    entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
     if not entries:
         save_entries_to_disk([], doc_title, 0, doc_id)
 
@@ -1225,10 +1236,16 @@ def stop_translate():
 def translate_status():
     """查询翻译状态。"""
     doc_id = _request_doc_id()
-    snapshot = get_translate_snapshot(doc_id)
     pages, _ = load_pages_from_disk(doc_id)
-    visible_bp_set = set(build_visible_page_view(pages)["visible_page_bps"])
-    entries, _, _ = load_entries_from_disk(doc_id)
+    visible_page_view = load_visible_page_view(doc_id, pages=pages)
+    entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
+    snapshot = get_translate_snapshot(
+        doc_id,
+        pages=pages,
+        entries=entries,
+        visible_page_view=visible_page_view,
+    )
+    visible_bp_set = set(visible_page_view["visible_page_bps"])
     snapshot["translated_bps"] = sorted(
         entry.get("_pageBP")
         for entry in entries
@@ -1242,8 +1259,11 @@ def translate_status():
         page for page in snapshot.get("failed_pages", [])
         if isinstance(page, dict) and page.get("bp") is not None and int(page.get("bp")) in visible_bp_set
     ]
+    partial_failed_bps = snapshot.get("partial_failed_bps")
+    if partial_failed_bps is None:
+        partial_failed_bps = _get_partial_failed_bps(doc_id, entries=entries)
     snapshot["partial_failed_bps"] = [
-        int(bp) for bp in (snapshot.get("partial_failed_bps") or _get_partial_failed_bps(doc_id))
+        int(bp) for bp in partial_failed_bps
         if bp is not None and int(bp) in visible_bp_set
     ]
     return jsonify(snapshot)
@@ -1270,7 +1290,16 @@ def translate_api_usage():
 def translate_api_usage_data():
     """翻译 API 使用情况数据接口。"""
     doc_id = _request_doc_id()
-    return jsonify(_build_translate_usage_payload(doc_id))
+    pages, _ = load_pages_from_disk(doc_id)
+    visible_page_view = load_visible_page_view(doc_id, pages=pages)
+    entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
+    snapshot = get_translate_snapshot(
+        doc_id,
+        pages=pages,
+        entries=entries,
+        visible_page_view=visible_page_view,
+    )
+    return jsonify(_build_translate_usage_payload(doc_id, entries=entries, snapshot=snapshot))
 
 
 @app.route("/paddle_quota_status")
@@ -1440,14 +1469,6 @@ def set_model(key):
     if doc_id:
         set_current_doc(doc_id)
     return _redirect_after_model_change(next_page, doc_id)
-
-
-@app.route("/set_pref", methods=["POST"])
-def set_pref():
-    data = request.get_json(silent=True) or {}
-    if "side_by_side" in data:
-        session["side_by_side"] = bool(data["side_by_side"])
-    return jsonify({"ok": True})
 
 
 # ============ ROUTES: 导出 ============

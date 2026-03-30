@@ -6,6 +6,7 @@ import re
 import shutil
 import time
 
+from flask import g, has_request_context
 from pypdf import PdfReader
 
 from config import (
@@ -25,6 +26,55 @@ from text_processing import get_page_range, build_visible_page_view
 # ============ DISK PERSISTENCE (多文档) ============
 
 _PRINT_PAGE_INT_RE = re.compile(r"^\d+$")
+_DOC_REQUEST_CACHE_KEY = "_doc_request_cache"
+
+
+def _get_request_cache_root() -> dict | None:
+    if not has_request_context():
+        return None
+    cache = getattr(g, _DOC_REQUEST_CACHE_KEY, None)
+    if cache is None:
+        cache = {}
+        setattr(g, _DOC_REQUEST_CACHE_KEY, cache)
+    return cache
+
+
+def _get_doc_request_cache(doc_id: str) -> dict | None:
+    if not doc_id:
+        return None
+    cache = _get_request_cache_root()
+    if cache is None:
+        return None
+    return cache.setdefault(doc_id, {})
+
+
+def _get_cached_doc_value(doc_id: str, key: str):
+    cache = _get_doc_request_cache(doc_id)
+    if cache is None:
+        return None
+    return cache.get(key)
+
+
+def _set_cached_doc_value(doc_id: str, key: str, value):
+    cache = _get_doc_request_cache(doc_id)
+    if cache is not None:
+        cache[key] = value
+    return value
+
+
+def _invalidate_doc_request_cache(doc_id: str, *keys: str) -> None:
+    if not has_request_context() or not doc_id:
+        return
+    cache = getattr(g, _DOC_REQUEST_CACHE_KEY, None)
+    if not isinstance(cache, dict) or doc_id not in cache:
+        return
+    if not keys:
+        cache.pop(doc_id, None)
+        return
+    for key in keys:
+        cache[doc_id].pop(key, None)
+    if not cache[doc_id]:
+        cache.pop(doc_id, None)
 
 def _doc_path(filename: str, doc_id: str = "") -> str:
     """获取当前文档目录下的文件路径。"""
@@ -73,6 +123,7 @@ def save_pages_to_disk(pages: list, name: str, doc_id: str = ""):
         return
     SQLiteRepository().replace_pages(target_doc_id, pages)
     update_doc_meta(target_doc_id, page_count=len(pages), name=name)
+    _invalidate_doc_request_cache(target_doc_id)
 
 
 def _parse_print_page_number(label) -> int | None:
@@ -317,6 +368,9 @@ def load_pages_from_disk(doc_id: str = "") -> tuple[list, str]:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return [], ""
+    cached = _get_cached_doc_value(target_doc_id, "pages_payload")
+    if cached is not None:
+        return cached
     repo = SQLiteRepository()
     pages = repo.load_pages(target_doc_id)
     if _pages_need_pdf_navigation_repair(pages):
@@ -332,7 +386,7 @@ def load_pages_from_disk(doc_id: str = "") -> tuple[list, str]:
         if changed:
             repo.replace_pages(target_doc_id, pages)
     meta = repo.get_document(target_doc_id) or {}
-    return pages, meta.get("name", "")
+    return _set_cached_doc_value(target_doc_id, "pages_payload", (pages, meta.get("name", "")))
 
 
 def save_entries_to_disk(entries: list, title: str, idx: int, doc_id: str = ""):
@@ -348,6 +402,7 @@ def save_entries_to_disk(entries: list, title: str, idx: int, doc_id: str = ""):
         repo.save_translation_page(target_doc_id, int(bp), entry)
     repo.set_translation_title(target_doc_id, title)
     update_doc_meta(target_doc_id, entry_count=len(entries), last_entry_idx=idx)
+    _invalidate_doc_request_cache(target_doc_id)
 
 
 def save_entry_cursor(idx: int, doc_id: str = ""):
@@ -358,23 +413,31 @@ def save_entry_cursor(idx: int, doc_id: str = ""):
     update_doc_meta(target_doc_id, last_entry_idx=idx)
 
 
-def load_entries_from_disk(doc_id: str = "") -> tuple[list, str, int]:
+def load_entries_from_disk(doc_id: str = "", pages: list | None = None) -> tuple[list, str, int]:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return [], "", 0
+    cached = _get_cached_doc_value(target_doc_id, "entries_payload")
+    if cached is not None:
+        return cached
     repo = SQLiteRepository()
     entries = repo.list_effective_translation_pages(target_doc_id)
-    pages, _ = load_pages_from_disk(target_doc_id)
+    if pages is None:
+        pages, _ = load_pages_from_disk(target_doc_id)
     entries, changed = _normalize_entries_page_metadata(entries, pages)
     if changed:
         for entry in entries:
             bp = entry.get("_pageBP")
             if bp is None:
                 continue
-            repo.save_translation_page(target_doc_id, int(bp), entry)
+                repo.save_translation_page(target_doc_id, int(bp), entry)
     title = repo.get_translation_title(target_doc_id)
     meta = get_doc_meta(target_doc_id)
-    return entries, title, int(meta.get("last_entry_idx", 0) or 0)
+    return _set_cached_doc_value(
+        target_doc_id,
+        "entries_payload",
+        (entries, title, int(meta.get("last_entry_idx", 0) or 0)),
+    )
 
 
 def save_entry_to_disk(entry: dict, title: str, doc_id: str = "") -> int:
@@ -390,6 +453,7 @@ def save_entry_to_disk(entry: dict, title: str, doc_id: str = "") -> int:
     current_title = repo.get_translation_title(target_doc_id)
     repo.set_translation_title(target_doc_id, current_title or title)
     update_doc_meta(target_doc_id, entry_count=len(existing_entries), last_entry_idx=idx)
+    _invalidate_doc_request_cache(target_doc_id)
     return idx
 
 
@@ -404,6 +468,19 @@ def clear_entries_from_disk(doc_id: str = ""):
         shutil.rmtree(root)
     _remove_legacy_entries_file(target_doc_id)
     update_doc_meta(target_doc_id, entry_count=0, last_entry_idx=0)
+    _invalidate_doc_request_cache(target_doc_id)
+
+
+def load_visible_page_view(doc_id: str = "", pages: list | None = None) -> dict:
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return build_visible_page_view([])
+    cached = _get_cached_doc_value(target_doc_id, "visible_page_view")
+    if cached is not None:
+        return cached
+    if pages is None:
+        pages, _ = load_pages_from_disk(target_doc_id)
+    return _set_cached_doc_value(target_doc_id, "visible_page_view", build_visible_page_view(pages))
 
 
 def has_pdf(doc_id: str = "") -> bool:
@@ -788,7 +865,8 @@ def gen_markdown(entries: list) -> str:
 def get_app_state(doc_id: str = "") -> dict:
     """获取所有共享的模板变量。"""
     pages, src_name = load_pages_from_disk(doc_id)
-    entries, doc_title, entry_idx = load_entries_from_disk(doc_id)
+    visible_page_view = load_visible_page_view(doc_id, pages=pages)
+    entries, doc_title, entry_idx = load_entries_from_disk(doc_id, pages=pages)
     active_model_mode = get_active_model_mode()
     active_builtin_model_key = get_active_builtin_model_key()
     custom_model = get_custom_model_config()
@@ -796,7 +874,6 @@ def get_app_state(doc_id: str = "") -> dict:
     meta = get_doc_meta(doc_id)
     entry_idx = meta.get("last_entry_idx", entry_idx)
 
-    visible_page_view = build_visible_page_view(pages)
     first_page = visible_page_view["first_visible_page"] or (get_page_range(pages)[0] if pages else 1)
     last_page = visible_page_view["last_visible_page"] or (get_page_range(pages)[1] if pages else 1)
     visible_page_count = int(visible_page_view["visible_page_count"] or 0)
@@ -832,6 +909,7 @@ def get_app_state(doc_id: str = "") -> dict:
         "page_count": visible_page_count or len(pages),
         "first_page": first_page,
         "last_page": last_page,
+        "visible_page_view": visible_page_view,
         "visible_page_bps": visible_page_view["visible_page_bps"],
         "hidden_placeholder_bps": visible_page_view["hidden_placeholder_bps"],
         "visible_page_count": visible_page_count or len(pages),

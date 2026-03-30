@@ -515,7 +515,7 @@
   <!-- 导航 -->
   <div class="flex items-center gap-4">
     {% if prev_bp %}
-    <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="nav-arrow">&larr;</a>
+    <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="nav-arrow">&larr;</a>
     {% else %}
     <span class="nav-arrow disabled">&larr;</span>
     {% endif %}
@@ -540,7 +540,7 @@
     {% endif %}
 
     {% if next_bp %}
-    <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="nav-arrow">&rarr;</a>
+    <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="nav-arrow">&rarr;</a>
     {% else %}
     <span class="nav-arrow disabled">&rarr;</span>
     {% endif %}
@@ -552,14 +552,6 @@
     {% endif %}
     <button class="tb {{ 'active' if usage_open else '' }}" onclick="toggleUsageDashboard();" id="usageBtn" title="显示/隐藏翻译进度">进度</button>
     <button class="tb" onclick="toggleOriginal();" id="origBtn" title="显示/隐藏原文">原文</button>
-    <div class="layout-mode-control {{ 'disabled' if not show_original else '' }}" id="layoutModeControl">
-      <span class="layout-mode-label">原译排列</span>
-      <div class="layout-mode-buttons" role="group" aria-label="原译排列">
-        <button type="button" id="layoutStackBtn" class="tb layout-mode-btn {{ '' if side_by_side else 'active' }}" aria-pressed="{{ 'false' if side_by_side else 'true' }}" title="原文在上，译文在下" onclick="setLayoutMode(false);" {{ 'disabled' if not show_original else '' }}>上下排列</button>
-        <button type="button" id="layoutSideBtn" class="tb layout-mode-btn {{ 'active' if side_by_side else '' }}" aria-pressed="{{ 'true' if side_by_side else 'false' }}" title="原文在左，译文在右" onclick="setLayoutMode(true);" {{ 'disabled' if not show_original else '' }}>左右排列</button>
-      </div>
-      <span class="layout-mode-hint" id="layoutModeHint">{{ '' if show_original else '先打开原文再切换排列' }}</span>
-    </div>
     <button class="tb" onclick="openExportModal();" title="导出">导出</button>
     {% if toc_items %}
     <div class="toolbar-toc" id="tocMenu">
@@ -603,7 +595,6 @@
           <input type="hidden" name="bp" value="{{ cur_page_bp }}">
           <input type="hidden" name="usage" value="{{ 1 if usage_open else 0 }}">
           <input type="hidden" name="orig" value="{{ 1 if show_original else 0 }}">
-          <input type="hidden" name="layout" value="{{ 'side' if side_by_side else 'stack' }}">
           <input type="hidden" name="pdf" value="{{ 1 if pdf_visible else 0 }}">
           <button type="submit" class="toolbar-dropdown-item {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
         </form>
@@ -809,33 +800,15 @@
   {% if hlevel > 0 %}
   <!-- Heading with translation -->
   <div class="heading-block heading-h{{ hlevel }}" data-para-idx="{{ loop.index0 }}" data-para-bp="{{ para_bp }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin:{{ '32px' if hlevel == 1 else '24px' }} 0 12px;">
-    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" data-reading-section="heading" data-reading-layout="side" style="{{ '' if side_by_side else 'display:none;' }}">
-      <div class="reading-layout-columns heading-layout-columns">
-        <div class="reading-layout-original heading-layout-original">
-          <div class="heading-layout-panel heading-layout-panel-original">
-            <div class="heading-original">{{ pe.original }}</div>
-          </div>
-        </div>
-        {% if pe.translation %}
-        <div class="reading-layout-translation">
-          <div class="heading-layout-panel heading-layout-panel-translation">
-            <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
-          </div>
-        </div>
-        {% endif %}
+    <div class="reading-layout-stack heading-layout-stack">
+      <div class="heading-layout-panel heading-layout-panel-original heading-layout-original">
+        <div class="heading-original">{{ pe.original }}</div>
       </div>
-    </div>
-    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" data-reading-section="heading" data-reading-layout="stack" style="{{ 'display:none;' if side_by_side else '' }}">
-      <div class="reading-layout-stack heading-layout-stack">
-        <div class="heading-layout-panel heading-layout-panel-original heading-layout-original">
-          <div class="heading-original">{{ pe.original }}</div>
-        </div>
-        {% if pe.translation %}
-        <div class="heading-layout-panel heading-layout-panel-translation">
-          <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
-        </div>
-        {% endif %}
+      {% if pe.translation %}
+      <div class="heading-layout-panel heading-layout-panel-translation">
+        <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
       </div>
+      {% endif %}
     </div>
     <div class="flex gap-8 items-center mt-8" data-manual-controls="{{ loop.index0 }}" data-para-updated-at="{{ pe.updated_at|default(0)|int }}">
       <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="openManualRevisionEditor({{ loop.index0 }});">编辑译文</button>
@@ -865,35 +838,14 @@
     <div style="margin-bottom:8px;font-size:11px;font-weight:600;color:var(--red);">本段翻译失败，当前显示为失败占位。可重新翻译本页修复。</div>
     {% endif %}
 
-    <!-- Side by side -->
-    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" data-reading-section="body" data-reading-layout="side" style="{{ '' if side_by_side else 'display:none;' }}">
-      <div class="reading-layout-columns">
-        <div class="reading-layout-original">
-          <div class="card original-card">
-            <div class="lbl">原文{% if para_pages_display %} <span style="color:var(--txL);font-size:11px;">{{ para_pages_display }}</span>{% endif %}</div>
-            <div class="text-fr">{{ pe.original_html|safe }}</div>
-          </div>
-        </div>
-        <div class="reading-layout-translation">
-          <div class="card card-alt">
-            <div class="lbl">中文翻译</div>
-            <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation or '' }}</div>
-          </div>
-        </div>
+    <div class="reading-layout-stack">
+      <div class="card original-card">
+        <div class="lbl">原文{% if para_pages_display %} <span style="color:var(--txL);font-size:11px;">{{ para_pages_display }}</span>{% endif %}</div>
+        <div class="text-fr" style="font-size:16px;">{{ pe.original_html|safe }}</div>
       </div>
-    </div>
-
-    <!-- Stacked -->
-    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" data-reading-section="body" data-reading-layout="stack" style="{{ 'display:none;' if side_by_side else '' }}">
-      <div class="reading-layout-stack">
-        <div class="card original-card">
-          <div class="lbl">原文{% if para_pages_display %} <span style="color:var(--txL);font-size:11px;">{{ para_pages_display }}</span>{% endif %}</div>
-          <div class="text-fr" style="font-size:16px;">{{ pe.original_html|safe }}</div>
-        </div>
-        <div class="card card-alt">
-          <div class="lbl">中文翻译</div>
-          <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}" style="font-size:16px;">{{ pe.translation or '' }}</div>
-        </div>
+      <div class="card card-alt">
+        <div class="lbl">中文翻译</div>
+        <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}" style="font-size:16px;">{{ pe.translation or '' }}</div>
       </div>
     </div>
 
@@ -929,41 +881,19 @@
     {% if next_bp %}
     <div class="page-footnotes-next">读完脚注后可直接继续 PDF 第{{ next_bp }}页，不用回到上面重新找位置。</div>
     {% endif %}
-    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" data-reading-section="footnotes" data-reading-layout="side" style="{{ '' if side_by_side else 'display:none;' }}">
-      <div class="reading-layout-columns">
-        {% if page_footnotes.original %}
-        <div class="reading-layout-original">
-          <div class="page-footnotes-card page-footnotes-original-card">
-            <div class="lbl">脚注原文</div>
-            <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
-          </div>
-        </div>
-        {% endif %}
-        {% if page_footnotes.translated %}
-        <div class="reading-layout-translation">
-          <div class="footnote-box-cn page-footnotes-card">
-            <div class="lbl">脚注翻译</div>
-            <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
-          </div>
-        </div>
-        {% endif %}
+    <div class="reading-layout-stack page-footnotes-stack">
+      {% if page_footnotes.original %}
+      <div class="page-footnotes-card page-footnotes-original-card">
+        <div class="lbl">脚注原文</div>
+        <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
       </div>
-    </div>
-    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" data-reading-section="footnotes" data-reading-layout="stack" style="{{ 'display:none;' if side_by_side else '' }}">
-      <div class="reading-layout-stack page-footnotes-stack">
-        {% if page_footnotes.original %}
-        <div class="page-footnotes-card page-footnotes-original-card">
-          <div class="lbl">脚注原文</div>
-          <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
-        </div>
-        {% endif %}
-        {% if page_footnotes.translated %}
-        <div class="footnote-box-cn page-footnotes-card">
-          <div class="lbl">脚注翻译</div>
-          <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
-        </div>
-        {% endif %}
+      {% endif %}
+      {% if page_footnotes.translated %}
+      <div class="footnote-box-cn page-footnotes-card">
+        <div class="lbl">脚注翻译</div>
+        <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
       </div>
+      {% endif %}
     </div>
   </div>
   {% endif %}
@@ -1083,7 +1013,7 @@
   <div class="mt-28">
     <div class="progress-dots">
       {% for bp in page_bps %}
-      <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-page-bp="{{ bp }}" data-reading-bp="{{ bp }}" onclick="return handleReadingNavClick(event, {{ bp }});" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps or bp in partial_failed_bps else 'pending')) }}" title="PDF 第{{ bp }}页 · {{ '已译' if bp in translated_bps else ('部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else '待译')) }}"></a>
+      <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}" data-page-bp="{{ bp }}" data-reading-bp="{{ bp }}" onclick="return handleReadingNavClick(event, {{ bp }});" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps or bp in partial_failed_bps else 'pending')) }}" title="PDF 第{{ bp }}页 · {{ '已译' if bp in translated_bps else ('部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else '待译')) }}"></a>
       {% endfor %}
     </div>
     <div style="font-size:11px;color:var(--txL);margin-top:6px;">
@@ -1099,12 +1029,12 @@
 {% if page_total > 1 %}
 <div class="floating-page-nav" id="floatingPageNav">
   {% if prev_bp %}
-  <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="floating-page-nav-btn prev" title="上一页">&larr; 上一页</a>
+  <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="floating-page-nav-btn prev" title="上一页">&larr; 上一页</a>
   {% else %}
   <span class="floating-page-nav-btn prev disabled">已到第一页</span>
   {% endif %}
   {% if next_bp %}
-  <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="floating-page-nav-btn next" title="下一页">下一页 &rarr;</a>
+  <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="floating-page-nav-btn next" title="下一页">下一页 &rarr;</a>
   {% else %}
   <span class="floating-page-nav-btn next disabled">已到最后一页</span>
   {% endif %}
@@ -1161,7 +1091,6 @@ var store = {
     manualNavigationInFlight: false,
   },
   ui: {
-    sideBySide: {{ 'true' if side_by_side else 'false' }},
     showOriginal: {{ 'true' if show_original else 'false' }},
     pdfVisible: {{ 'true' if pdf_visible else 'false' }},
     pdfZoom: 1,
@@ -1423,10 +1352,6 @@ function dispatch(action, payload) {
     store.ui.showOriginal = !store.ui.showOriginal;
     return;
   }
-  if (action === 'set_layout_mode') {
-    store.ui.sideBySide = !!(payload && payload.value);
-    return;
-  }
   if (action === 'set_usage_dashboard_open') {
     store.ui.usageDashboardOpen = !!(payload && payload.value);
     return;
@@ -1455,7 +1380,6 @@ function dispatch(action, payload) {
 function toggleOriginal() {
   dispatch('toggle_original');
   applyOriginalVisibilityState();
-  applyLayoutState();
   syncReadingUrl();
 }
 
@@ -1466,61 +1390,6 @@ function applyOriginalVisibilityState() {
     btn.classList.toggle('active', store.ui.showOriginal);
     btn.style.opacity = store.ui.showOriginal ? '1' : '0.5';
     btn.title = store.ui.showOriginal ? '隐藏原文' : '显示原文';
-  }
-}
-
-function persistLayoutPreference() {
-  // 保存布局偏好，避免下次重新进入时还原成旧布局。
-  fetch('{{ url_for("set_pref") }}', {
-    method: 'POST',
-    headers: withCsrfHeaders({'Content-Type': 'application/json'}),
-    body: JSON.stringify({side_by_side: store.ui.sideBySide})
-  });
-}
-
-function setLayoutMode(nextSideBySide) {
-  if (!store.ui.showOriginal) {
-    applyLayoutState();
-    return;
-  }
-  var nextValue = !!nextSideBySide;
-  if (store.ui.sideBySide === nextValue) {
-    applyLayoutState();
-    return;
-  }
-  dispatch('set_layout_mode', { value: nextValue });
-  applyLayoutState();
-  syncReadingUrl();
-  persistLayoutPreference();
-}
-
-function applyLayoutState() {
-  document.querySelectorAll('.sbs-view').forEach(function(el) {
-    el.style.display = store.ui.sideBySide ? '' : 'none';
-  });
-  document.querySelectorAll('.stk-view').forEach(function(el) {
-    el.style.display = store.ui.sideBySide ? 'none' : '';
-  });
-  var control = document.getElementById('layoutModeControl');
-  var stackBtn = document.getElementById('layoutStackBtn');
-  var sideBtn = document.getElementById('layoutSideBtn');
-  var hint = document.getElementById('layoutModeHint');
-  var disabled = !store.ui.showOriginal;
-  if (control) {
-    control.classList.toggle('disabled', disabled);
-  }
-  if (stackBtn) {
-    stackBtn.classList.toggle('active', !store.ui.sideBySide);
-    stackBtn.setAttribute('aria-pressed', store.ui.sideBySide ? 'false' : 'true');
-    stackBtn.disabled = disabled;
-  }
-  if (sideBtn) {
-    sideBtn.classList.toggle('active', store.ui.sideBySide);
-    sideBtn.setAttribute('aria-pressed', store.ui.sideBySide ? 'true' : 'false');
-    sideBtn.disabled = disabled;
-  }
-  if (hint) {
-    hint.textContent = disabled ? '先打开原文再切换排列' : '';
   }
 }
 
@@ -2488,7 +2357,6 @@ function getReadingUiStateParams() {
   return {
     usage: store.ui.usageDashboardOpen ? '1' : '0',
     orig: store.ui.showOriginal ? '1' : '0',
-    layout: store.ui.sideBySide ? 'side' : 'stack',
     pdf: store.ui.pdfVisible ? '1' : '0',
   };
 }
@@ -2525,7 +2393,6 @@ function buildReadingUrl(bp, autoStart, startBp) {
   var uiParams = getReadingUiStateParams();
   url.searchParams.set('usage', uiParams.usage);
   url.searchParams.set('orig', uiParams.orig);
-  url.searchParams.set('layout', uiParams.layout);
   url.searchParams.set('pdf', uiParams.pdf);
   if (autoStart === '1') {
     url.searchParams.set('auto', '1');
@@ -3771,7 +3638,6 @@ document.addEventListener('click', function(e) {
 (function() {
   resetStreamDraftState();
   applyOriginalVisibilityState();
-  applyLayoutState();
   applyPdfPanelVisibilityState();
   initPdfZoomInteractions();
   initPdfResizer();

@@ -324,11 +324,16 @@ def _entry_has_paragraph_error(entry: dict) -> bool:
     return any((pe.get("_status") == "error") for pe in entry.get("_page_entries", []))
 
 
-def _collect_partial_failed_bps(doc_id: str, target_bps: list[int] | None = None) -> list[int]:
+def _collect_partial_failed_bps(
+    doc_id: str,
+    target_bps: list[int] | None = None,
+    entries: list[dict] | None = None,
+) -> list[int]:
     if not doc_id:
         return []
     target_bp_set = set(target_bps) if target_bps else None
-    entries, _, _ = load_entries_from_disk(doc_id)
+    if entries is None:
+        entries, _, _ = load_entries_from_disk(doc_id)
     partial_failed = set()
     for entry in entries:
         bp = entry.get("_pageBP")
@@ -1039,8 +1044,13 @@ def _remaining_pages(total_pages: int, processed_pages: int) -> int:
     return max(0, total - processed)
 
 
-def _collect_target_bps(pages: list, start_bp: int | None) -> list[int]:
-    visible_page_bps = build_visible_page_view(pages)["visible_page_bps"]
+def _collect_target_bps(
+    pages: list,
+    start_bp: int | None,
+    visible_page_view: dict | None = None,
+) -> list[int]:
+    view = visible_page_view or build_visible_page_view(pages)
+    visible_page_bps = view["visible_page_bps"]
     if not visible_page_bps:
         return []
     resolved_start_bp = resolve_visible_page_bp(pages, start_bp)
@@ -1050,17 +1060,29 @@ def _collect_target_bps(pages: list, start_bp: int | None) -> list[int]:
     return visible_page_bps[start_index:]
 
 
-def _compute_resume_bp(doc_id: str, state: dict) -> int | None:
+def _compute_resume_bp(
+    doc_id: str,
+    state: dict,
+    *,
+    pages: list | None = None,
+    entries: list[dict] | None = None,
+    target_bps: list[int] | None = None,
+    partial_failed_bps: list[int] | None = None,
+    visible_page_view: dict | None = None,
+) -> int | None:
     if not doc_id or not isinstance(state, dict):
         return None
     phase = state.get("phase", "idle")
     if phase in ("idle", "done"):
         return None
-    pages, _ = load_pages_from_disk(doc_id)
-    target_bps = _collect_target_bps(pages, state.get("start_bp"))
+    if pages is None:
+        pages, _ = load_pages_from_disk(doc_id)
+    if target_bps is None:
+        target_bps = _collect_target_bps(pages, state.get("start_bp"), visible_page_view=visible_page_view)
     if not target_bps:
         return None
-    entries, _, _ = load_entries_from_disk(doc_id)
+    if entries is None:
+        entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
     translated_bps = {
         int(entry.get("_pageBP"))
         for entry in entries
@@ -1073,7 +1095,11 @@ def _compute_resume_bp(doc_id: str, state: dict) -> int | None:
     }
     partial_failed_bps = {
         int(bp)
-        for bp in state.get("partial_failed_bps", [])
+        for bp in (
+            partial_failed_bps
+            if partial_failed_bps is not None
+            else state.get("partial_failed_bps", [])
+        )
         if bp is not None and int(bp) in target_bps
     }
     processed_bps = translated_bps | failed_bps
@@ -1345,13 +1371,13 @@ def reconcile_translate_state_after_page_success(doc_id: str, bp: int):
     pages, _ = load_pages_from_disk(doc_id)
     target_bps = _collect_target_bps(pages, snapshot.get("start_bp"))
     total_pages = len(target_bps) if target_bps else int(snapshot.get("total_pages", 0) or 0)
-    entries, _, _ = load_entries_from_disk(doc_id)
+    entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
     translated_bps = {
         int(entry.get("_pageBP"))
         for entry in entries
         if entry.get("_pageBP") is not None and (not target_bps or int(entry.get("_pageBP")) in target_bps)
     }
-    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps, entries=entries)
     done_bps = translated_bps - set(partial_failed_bps)
     done_pages = min(total_pages, len(done_bps)) if total_pages else len(done_bps)
     failed_pages = [
@@ -1413,13 +1439,13 @@ def reconcile_translate_state_after_page_failure(doc_id: str, bp: int, error: st
     pages, _ = load_pages_from_disk(doc_id)
     target_bps = _collect_target_bps(pages, snapshot.get("start_bp"))
     total_pages = len(target_bps) if target_bps else int(snapshot.get("total_pages", 0) or 0)
-    entries, _, _ = load_entries_from_disk(doc_id)
+    entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
     translated_bps = {
         int(entry.get("_pageBP"))
         for entry in entries
         if entry.get("_pageBP") is not None and (not target_bps or int(entry.get("_pageBP")) in target_bps)
     }
-    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps, entries=entries)
     done_bps = translated_bps - set(partial_failed_bps)
     done_pages = min(total_pages, len(done_bps)) if total_pages else len(done_bps)
     failed_pages = [
@@ -1500,7 +1526,13 @@ def has_active_translate_task() -> bool:
         return _translate_task["running"]
 
 
-def get_translate_snapshot(doc_id: str) -> dict:
+def get_translate_snapshot(
+    doc_id: str,
+    *,
+    pages: list | None = None,
+    entries: list[dict] | None = None,
+    visible_page_view: dict | None = None,
+) -> dict:
     """获取指定文档的翻译快照。"""
     if not doc_id:
         return _default_translate_state()
@@ -1514,11 +1546,15 @@ def get_translate_snapshot(doc_id: str) -> dict:
             if state["running"] and state["phase"] not in ("running", "stopping"):
                 state["phase"] = "stopping" if state["stop_requested"] else "running"
     state = _normalize_translate_state(state, assume_inactive=not has_active_worker)
-    pages, _ = load_pages_from_disk(doc_id)
-    visible_page_view = build_visible_page_view(pages)
-    target_bps = _collect_target_bps(pages, state.get("start_bp"))
+    if pages is None:
+        pages, _ = load_pages_from_disk(doc_id)
+    if visible_page_view is None:
+        visible_page_view = build_visible_page_view(pages)
+    target_bps = _collect_target_bps(pages, state.get("start_bp"), visible_page_view=visible_page_view)
     target_bp_set = set(target_bps)
     if visible_page_view["hidden_placeholder_bps"] and target_bps:
+        if entries is None:
+            entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
         state["failed_pages"] = [
             page for page in state.get("failed_pages", [])
             if isinstance(page, dict) and page.get("bp") is not None and int(page.get("bp")) in target_bp_set
@@ -1528,21 +1564,20 @@ def get_translate_snapshot(doc_id: str) -> dict:
             for page in state["failed_pages"]
             if page.get("bp") is not None
         )
-        entries, _, _ = load_entries_from_disk(doc_id)
         translated_bps = {
             int(entry.get("_pageBP"))
             for entry in entries
             if entry.get("_pageBP") is not None and int(entry.get("_pageBP")) in target_bp_set
         }
         total_pages = len(target_bps)
-        partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+        partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps, entries=entries)
         done_bps = translated_bps - set(partial_failed_bps)
         processed_bps = translated_bps | set(state["failed_bps"])
         state["total_pages"] = total_pages
         state["done_pages"] = min(total_pages, len(done_bps))
         state["processed_pages"] = min(total_pages, len(processed_bps))
         state["pending_pages"] = _remaining_pages(total_pages, state["processed_pages"])
-    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+    partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps, entries=entries)
     state["partial_failed_bps"] = partial_failed_bps
     if (
         partial_failed_bps
@@ -1551,7 +1586,15 @@ def get_translate_snapshot(doc_id: str) -> dict:
         and state.get("pending_pages", 0) == 0
     ):
         state["phase"] = "partial_failed"
-    state["resume_bp"] = _compute_resume_bp(doc_id, state)
+    state["resume_bp"] = _compute_resume_bp(
+        doc_id,
+        state,
+        pages=pages,
+        entries=entries,
+        target_bps=target_bps,
+        partial_failed_bps=partial_failed_bps,
+        visible_page_view=visible_page_view,
+    )
     return state
 
 
@@ -1690,7 +1733,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             return
 
         pages, _ = load_pages_from_disk(doc_id)
-        entries, _, _ = load_entries_from_disk(doc_id)
+        entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
         model_key, t_args = _get_active_translate_args()
         glossary = get_glossary(doc_id)
 
@@ -1704,7 +1747,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
                 start_bp,
                 "no_api_key",
                 "缺少翻译 API Key",
-                total_pages=len(_collect_target_bps(pages, start_bp)),
+                total_pages=len(_collect_target_bps(pages, start_bp, visible_page_view=build_visible_page_view(pages))),
                 model_label=t_args.get("display_label") or t_args.get("model_id") or model_key,
             )
             return
@@ -1715,10 +1758,10 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             _mark_translate_start_error(doc_id, start_bp, "no_pages", "未找到可翻译页面")
             return
         normalized_start_bp = resolve_visible_page_bp(pages, start_bp) or doc_bps[0]
-        all_bps = _collect_target_bps(pages, normalized_start_bp)
+        all_bps = _collect_target_bps(pages, normalized_start_bp, visible_page_view=visible_page_view)
 
         doc_bp_set = set(doc_bps)
-        partial_failed_doc_bps = set(_collect_partial_failed_bps(doc_id, doc_bps))
+        partial_failed_doc_bps = set(_collect_partial_failed_bps(doc_id, doc_bps, entries=entries))
         done_bps = set()
         for e in entries:
             pbp = e.get("_pageBP")
@@ -2290,7 +2333,7 @@ def reparse_single_page(task_id: str, doc_id: str, target_bp: int, file_idx: int
                 updated_pages.append(p)
 
         save_pages_to_disk(updated_pages, file_name, doc_id)
-        entries, doc_title, _ = load_entries_from_disk(doc_id)
+        entries, doc_title, _ = load_entries_from_disk(doc_id, pages=updated_pages)
         entry_title = doc_title or file_name
 
         try:
