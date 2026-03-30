@@ -47,6 +47,7 @@ WATCHED_ENDPOINT_KEYWORDS = (
     "/pdf_page/",
     "/pdf_toc",
     "/api/toc/set_offset",
+    "/imgs/",
 )
 INVALID_DOC_IDS = {"", "undefined", "null", "None", None}
 
@@ -311,7 +312,7 @@ class HomeEntryRegressionE2ETest(unittest.TestCase):
                     wait_for_auto_sync=True,
                 )
                 self._check_reading_state(doc, reading_step, failures, page, require_pdf_success=False)
-                self._check_response_statuses(doc, reading_step, failures, page, endpoints=("/start_translate_all", "/translate_status"))
+                self._check_response_statuses(doc, reading_step, failures, page, endpoints=("/start_translate_all", "/translate_status", "/imgs/"))
 
                 current_step["name"] = f"{doc['slug']}::after_usage"
                 page.locator("#usageBtn").click()

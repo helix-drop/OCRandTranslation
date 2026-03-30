@@ -29,10 +29,22 @@ macOS / Linux：
 ./start.sh
 ```
 
+如果你希望“关闭这个专用浏览器窗口时，应用也一起退出”，改用：
+
+```bash
+./start_managed.sh
+```
+
 Windows 10 / 11：
 
 ```powershell
 .\start.ps1
+```
+
+如果你希望“关闭这个专用浏览器窗口时，应用也一起退出”，改用：
+
+```powershell
+.\start_managed.ps1
 ```
 
 如果 PowerShell 不方便，也可以直接双击：
@@ -41,12 +53,27 @@ Windows 10 / 11：
 start.bat
 ```
 
+受控窗口模式也提供双击入口：
+
+```bat
+start_managed.bat
+```
+
 这些启动脚本会自动完成下面几件事：
 
 1. 首次创建 `.venv` 虚拟环境
 2. 安装或更新依赖
 3. 启动程序
 4. 尝试打开浏览器到 `http://localhost:8080`
+
+### 两种启动模式
+
+- `普通模式`：`start.sh` / `start.ps1` / `start.bat`
+  - 关闭浏览器不会结束 Flask 服务
+- `受控窗口模式`：`start_managed.sh` / `start_managed.ps1` / `start_managed.bat`
+  - 会用专用 Chrome / Edge 窗口打开应用
+  - 关闭这个专用窗口后，应用进程会自动结束
+  - 如果系统里没有可用的 Chrome / Edge，会提示改用普通模式
 
 ### 第 2 步：填 API Key
 

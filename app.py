@@ -8,6 +8,7 @@ Foreign Literature Reader
 3. 构建段落，调用 DeepSeek/Qwen API 翻译
 4. 阅读、导航、导出
 """
+import html
 import json
 import os
 import re
@@ -43,6 +44,7 @@ from config import (
     LOCAL_DATA_DIR, normalize_doc_id,
 )
 from text_processing import get_page_range, get_next_page_bp, normalize_latex_footnote_markers
+from text_utils import strip_html
 from pdf_extract import render_pdf_page, parse_toc_file
 from storage import (
     save_pages_to_disk, load_pages_from_disk,
@@ -221,6 +223,39 @@ def _clean_display_text(text: str) -> str:
     return t
 
 
+_ORPHAN_OCR_IMG_RE = re.compile(
+    r"<img\b(?=[^>]*\bsrc=(['\"])imgs/[^'\"]+\1)[^>]*>",
+    re.IGNORECASE,
+)
+_IMG_ALT_RE = re.compile(r"""\balt=(['"])(.*?)\1""", re.IGNORECASE | re.DOTALL)
+_EMPTY_DIV_RE = re.compile(r"<div\b[^>]*>\s*</div>", re.IGNORECASE)
+_ONLY_PLACEHOLDER_DIV_RE = re.compile(r"<div\b[^>]*>\s*(\[(?:插图|图片)：[^\]]+\])\s*</div>", re.IGNORECASE)
+
+
+def _replace_orphan_ocr_img(match: re.Match[str]) -> str:
+    tag = match.group(0)
+    alt_match = _IMG_ALT_RE.search(tag)
+    alt_text = html.unescape(alt_match.group(2)).strip() if alt_match else ""
+    if alt_text and alt_text.lower() not in {"image", "img"}:
+        return f"[插图：{alt_text}]"
+    return ""
+
+
+def _degrade_orphan_ocr_images(text: str) -> str:
+    raw = _ensure_str(text)
+    if not raw:
+        return ""
+    cleaned = _ORPHAN_OCR_IMG_RE.sub(_replace_orphan_ocr_img, raw)
+    cleaned = _ONLY_PLACEHOLDER_DIV_RE.sub(r"\1", cleaned)
+    while True:
+        reduced = _EMPTY_DIV_RE.sub("", cleaned)
+        if reduced == cleaned:
+            break
+        cleaned = reduced
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
+
+
 def _get_partial_failed_bps(doc_id: str) -> list[int]:
     entries, _, _ = load_entries_from_disk(doc_id)
     return sorted(
@@ -232,7 +267,8 @@ def _get_partial_failed_bps(doc_id: str) -> list[int]:
 
 
 def _build_preview_paragraphs(text: str) -> list[str]:
-    raw = normalize_latex_footnote_markers(_ensure_str(text)).replace("\r\n", "\n").strip()
+    raw = _degrade_orphan_ocr_images(normalize_latex_footnote_markers(_ensure_str(text))).replace("\r\n", "\n").strip()
+    raw = strip_html(raw).strip()
     if not raw:
         return []
     blocks = [
@@ -612,7 +648,7 @@ def reading():
                 raw_print_label = start_label or end_label
             pe_copy["_printPageLabel"] = raw_print_label
         pe_copy["pages_display"] = format_print_page_display(raw_print_label)
-        pe_copy["original_html"] = highlight_terms(pe_copy["original"], glossary)
+        pe_copy["original_html"] = highlight_terms(_degrade_orphan_ocr_images(pe_copy["original"]), glossary)
         display_entries.append(pe_copy)
 
     cur_model_label = ""

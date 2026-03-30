@@ -1204,6 +1204,57 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
             file_resp.close()
             page_resp.close()
 
+    def test_reading_page_degrades_orphan_ocr_images_in_preview(self):
+        save_pages_to_disk([{
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": '<div style="text-align: center;"><img src="imgs/img_in_image_box_3_107_784_1005.jpg" alt="Image" width="99%" /></div>\n\nHOW CULTURE MATTERS',
+            "footnotes": "",
+        }], "Reading Refresh", self.doc_id)
+        save_entries_to_disk([], "Reading Refresh", 0, self.doc_id)
+
+        resp = self.client.get("/reading?bp=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn('src="imgs/', html)
+        self.assertNotIn("img_in_image_box", html)
+        self.assertNotIn("&lt;img", html)
+        self.assertIn("HOW CULTURE MATTERS", html)
+
+    def test_reading_page_degrades_orphan_ocr_images_in_original_html(self):
+        save_pages_to_disk([{
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "Body Original",
+            "footnotes": "",
+        }], "Reading Refresh", self.doc_id)
+        save_entries_to_disk([{
+            "_pageBP": 1,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": '<div style="text-align: center;"><img src="imgs/img_in_image_box_9_9_99_99.jpg" alt="Plate 1" width="45%" /></div>\n\nBody Original',
+                "translation": "正文译文",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "1",
+            }],
+            "pages": "1",
+        }], "Reading Refresh", 0, self.doc_id)
+
+        resp = self.client.get("/reading?bp=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn('src="imgs/', html)
+        self.assertNotIn("img_in_image_box", html)
+        self.assertIn("插图：Plate 1", html)
+
     def test_reading_page_embeds_controlled_commit_refresh_guards(self):
         self._save_range_pages(1, 2)
         resp = self.client.get("/reading?bp=1&auto=1")
