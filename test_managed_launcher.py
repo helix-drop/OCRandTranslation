@@ -13,6 +13,25 @@ ROOT = Path(__file__).resolve().parent
 
 
 class ManagedLauncherTest(unittest.TestCase):
+    def test_launcher_scripts_are_ascii_only_for_cross_platform_shells(self):
+        script_names = [
+            "start.sh",
+            "start.ps1",
+            "start.bat",
+            "start_managed.sh",
+            "start_managed.ps1",
+            "start_managed.bat",
+            "managed_launcher.py",
+        ]
+
+        for script_name in script_names:
+            with self.subTest(script_name=script_name):
+                content = (ROOT / script_name).read_text(encoding="utf-8")
+                self.assertTrue(
+                    content.isascii(),
+                    f"{script_name} must stay ASCII-only to avoid PowerShell encoding issues",
+                )
+
     def test_build_browser_command_for_macos_uses_app_mode_and_temp_profile(self):
         cmd = managed_launcher.build_browser_command(
             system="Darwin",

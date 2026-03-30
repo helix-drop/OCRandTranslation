@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""受控启动器：关闭专用浏览器窗口后自动结束应用进程。"""
+"""Managed launcher: closing the dedicated browser window stops the app."""
 
 from __future__ import annotations
 
@@ -98,11 +98,11 @@ def terminate_process(proc: subprocess.Popen | None, grace_s: float = 5.0) -> No
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="启动应用并绑定专用浏览器窗口生命周期。")
-    parser.add_argument("--server-python", required=True, help="用于启动 app.py 的 Python 解释器路径")
-    parser.add_argument("--url", default=DEFAULT_URL, help="应用访问地址，默认 http://localhost:8080")
-    parser.add_argument("--cwd", default=str(ROOT), help="仓库根目录")
-    parser.add_argument("--browser-path", default="", help="显式指定 Chrome/Edge 可执行文件")
+    parser = argparse.ArgumentParser(description="Start the app and bind it to a dedicated browser window.")
+    parser.add_argument("--server-python", required=True, help="Python executable used to launch app.py")
+    parser.add_argument("--url", default=DEFAULT_URL, help="App URL, default http://localhost:8080")
+    parser.add_argument("--cwd", default=str(ROOT), help="Repository root")
+    parser.add_argument("--browser-path", default="", help="Optional explicit Chrome/Edge executable path")
     return parser.parse_args()
 
 
@@ -128,13 +128,13 @@ def main() -> int:
             cwd=str(cwd),
         )
         if not wait_for_server(args.url):
-            print(f"受控启动失败：应用未能按时启动到 {args.url}", file=sys.stderr)
+            print(f"Managed launch failed: app did not become ready at {args.url} in time.", file=sys.stderr)
             return 1
 
         browser_path = args.browser_path or find_supported_browser(system)
         if not browser_path:
             print(
-                "受控启动模式未找到受支持的浏览器（Chrome / Edge）。请改用普通启动脚本。",
+                "Managed launch could not find Chrome or Edge. Use the standard launcher instead.",
                 file=sys.stderr,
             )
             return 1
@@ -148,7 +148,7 @@ def main() -> int:
             if browser_proc.poll() is not None:
                 return 0
             if server_proc.poll() is not None:
-                print("应用进程已提前退出，受控启动结束。", file=sys.stderr)
+                print("The app process exited early, so the managed launch is stopping.", file=sys.stderr)
                 return int(server_proc.returncode or 1)
             time.sleep(0.5)
     finally:
