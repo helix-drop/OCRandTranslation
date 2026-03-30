@@ -13,7 +13,7 @@ from sqlite_store import SQLiteRepository, get_connection, initialize_database
 
 class SQLiteStoreTest(unittest.TestCase):
     def setUp(self):
-        self.temp_root = tempfile.mkdtemp(prefix="sqlite-store-", dir="/tmp")
+        self.temp_root = tempfile.mkdtemp(prefix="sqlite-store-")
         self._patch_config_dirs(self.temp_root)
         config.ensure_dirs()
         self.db_path = config.get_sqlite_db_path()
@@ -67,6 +67,7 @@ class SQLiteStoreTest(unittest.TestCase):
 
     def test_repository_persists_document_pages_run_and_segments(self):
         repo = SQLiteRepository(self.db_path)
+        source_pdf_path = os.path.join(self.temp_root, "doc-1.pdf")
         repo.upsert_document(
             "doc-1",
             "Doc One",
@@ -75,7 +76,7 @@ class SQLiteStoreTest(unittest.TestCase):
             has_pdf=1,
             last_entry_idx=0,
             status="ready",
-            source_pdf_path="/tmp/doc-1.pdf",
+            source_pdf_path=source_pdf_path,
         )
         repo.replace_pages(
             "doc-1",

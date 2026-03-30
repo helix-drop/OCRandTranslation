@@ -510,7 +510,7 @@
   <div class="flex items-center gap-8" style="flex:1;min-width:0;">
     <a href="{{ url_for('home', doc_id=current_doc_id) }}" style="color:var(--txL);font-size:16px;padding:2px 4px;">&larr;</a>
     <span class="title" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ doc_title }}</span>
-    <span class="page-num" style="font-size:11px;">p.{{ cur_page_bp }}/p.{{ last_page }}</span>
+    <span class="page-num" style="font-size:11px;">PDF 第{{ cur_page_bp }}页 / 第{{ last_page }}页</span>
   </div>
   <!-- 导航 -->
   <div class="flex items-center gap-4">
@@ -522,21 +522,21 @@
 
     {% if page_total > 1 %}
     <div class="page-nav" id="pageNav">
-      <button type="button" class="page-nav-btn" id="pageNavBtn" onclick="togglePageNav();">p.{{ cur_page_bp }} · {{ '部分完成' if cur_page_bp in partial_failed_bps else ('已译' if cur_page_bp in translated_bps else ('失败' if cur_page_bp in failed_bps else '待译')) }}</button>
+      <button type="button" class="page-nav-btn" id="pageNavBtn" onclick="togglePageNav();">PDF 第{{ cur_page_bp }}页 · {{ '部分完成' if cur_page_bp in partial_failed_bps else ('已译' if cur_page_bp in translated_bps else ('失败' if cur_page_bp in failed_bps else '待译')) }}</button>
       <div class="page-nav-panel hidden" id="pageNavPanel">
         <div class="page-nav-head">
-          <div class="page-nav-title">跳转页码</div>
+          <div class="page-nav-title">跳转 PDF 页码</div>
           <button type="button" class="tb" style="font-size:10px;" onclick="togglePageNav(false);">收起</button>
         </div>
         <div class="page-nav-jump">
-          <input type="number" min="{{ first_page }}" max="{{ last_page }}" step="1" placeholder="输入 p.x" class="page-nav-input" id="pageJumpInput">
+          <input type="number" min="{{ first_page }}" max="{{ last_page }}" step="1" placeholder="输入 PDF 页码" class="page-nav-input" id="pageJumpInput">
           <button type="button" class="tb" style="font-size:10px;" onclick="jumpToPageInput();">跳转</button>
         </div>
         <div class="page-nav-list" id="pageNavList"></div>
       </div>
     </div>
     {% else %}
-    <span style="font-size:11px;color:var(--txS);">p.{{ cur_page_bp }}</span>
+    <span style="font-size:11px;color:var(--txS);">PDF 第{{ cur_page_bp }}页</span>
     {% endif %}
 
     {% if next_bp %}
@@ -546,13 +546,20 @@
     {% endif %}
   </div>
   <!-- 工具按钮 -->
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-4 flex-wrap">
     {% if has_pdf %}
     <button class="tb" onclick="togglePdfPanel();" id="pdfBtn" title="PDF 原文">PDF</button>
     {% endif %}
     <button class="tb {{ 'active' if usage_open else '' }}" onclick="toggleUsageDashboard();" id="usageBtn" title="显示/隐藏翻译进度">进度</button>
     <button class="tb" onclick="toggleOriginal();" id="origBtn" title="显示/隐藏原文">原文</button>
-    <button class="tb" onclick="toggleLayout();" id="layoutBtn" title="切换布局">{{ '改单栏' if side_by_side else '改双栏' }}</button>
+    <div class="layout-mode-control {{ 'disabled' if not show_original else '' }}" id="layoutModeControl">
+      <span class="layout-mode-label">原译排列</span>
+      <div class="layout-mode-buttons" role="group" aria-label="原译排列">
+        <button type="button" id="layoutStackBtn" class="tb layout-mode-btn {{ '' if side_by_side else 'active' }}" aria-pressed="{{ 'false' if side_by_side else 'true' }}" title="原文在上，译文在下" onclick="setLayoutMode(false);" {{ 'disabled' if not show_original else '' }}>上下排列</button>
+        <button type="button" id="layoutSideBtn" class="tb layout-mode-btn {{ 'active' if side_by_side else '' }}" aria-pressed="{{ 'true' if side_by_side else 'false' }}" title="原文在左，译文在右" onclick="setLayoutMode(true);" {{ 'disabled' if not show_original else '' }}>左右排列</button>
+      </div>
+      <span class="layout-mode-hint" id="layoutModeHint">{{ '' if show_original else '先打开原文再切换排列' }}</span>
+    </div>
     <button class="tb" onclick="openExportModal();" title="导出">导出</button>
     {% if toc_items %}
     <div class="toolbar-toc" id="tocMenu">
@@ -563,9 +570,11 @@
         <button type="button"
                 class="toolbar-dropdown-item toc-item toc-depth-{{ [item.depth, 3]|min }}"
                 data-book-page="{{ item.book_page }}"
-                onclick="tocJumpToBookPage({{ item.book_page }});">
+                data-target-page="{{ item.target_page if item.target_page is not none else '' }}"
+                onclick="tocJumpToPage({{ item.target_page if item.target_page is not none else 'null' }});"
+                {{ 'disabled' if item.target_page is none else '' }}>
           <span class="toc-item-title">{{ item.title }}</span>
-          <span class="toc-page-num">p.{{ item.book_page }}</span>
+          <span class="toc-page-num">{{ item.book_page_display or ('原书 p.' ~ item.book_page) }}</span>
         </button>
         {% endfor %}
         <div class="toolbar-dropdown-sep"></div>
@@ -738,7 +747,7 @@
       </div>
       <div class="pdf-panel-controls">
         <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfPrevPage()">◀</button>
-        <span id="pdfPageInfo" style="font-size:11px;color:var(--txL);">p.{{ cur_page_bp }}</span>
+        <span id="pdfPageInfo" style="font-size:11px;color:var(--txL);">PDF 第{{ cur_page_bp }}页</span>
         <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfNextPage()">▶</button>
         <button type="button" class="btn btn-gho" id="pdfPanelModeBtn" style="font-size:11px;padding:3px 8px;" onclick="cyclePdfPanelMode()">平衡</button>
         <div class="pdf-zoom-controls">
@@ -777,14 +786,18 @@
     {% if cur_model_label %}
     <span style="font-size:11px;color:var(--txL);background:var(--bg2);padding:2px 8px;border-radius:8px;">{{ cur_model_label }}</span>
     {% endif %}
-    <span style="background:var(--bg2);color:var(--acc);font-size:12px;padding:3px 10px;border-radius:10px;font-weight:600;border:1px solid var(--bdrL);">p.{{ cur_page_bp }}</span>
+    <span style="background:var(--bg2);color:var(--acc);font-size:12px;padding:3px 10px;border-radius:10px;font-weight:600;border:1px solid var(--bdrL);">PDF 第{{ cur_page_bp }}页</span>
+    {% if cur_page_print_display %}
+    <span style="font-size:11px;color:var(--txL);">{{ cur_page_print_display }}</span>
+    {% endif %}
     <span style="font-size:11px;color:var(--txL);">{{ display_entries|length }} 段</span>
   </div>
 
   {% for pe in display_entries %}
   {% set hlevel = pe.heading_level|default(0) %}
   {% set para_status = pe._status|default('done') %}
-  {% set para_bp = pe.pages|default(cur_page_bp) %}
+  {% set para_bp = pe._startBP|default(cur_page_bp)|int %}
+  {% set para_pages_display = pe.pages_display|default(pe.pages|default('')) %}
   {% set para_source = pe._translation_source|default('model') %}
   {% if pe.footnotes and pe.footnotes not in page_footnotes.original %}
   {% set _ = page_footnotes.original.append(pe.footnotes) %}
@@ -796,10 +809,34 @@
   {% if hlevel > 0 %}
   <!-- Heading with translation -->
   <div class="heading-block heading-h{{ hlevel }}" data-para-idx="{{ loop.index0 }}" data-para-bp="{{ para_bp }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin:{{ '32px' if hlevel == 1 else '24px' }} 0 12px;">
-    <div class="heading-original">{{ pe.original }}</div>
-    {% if pe.translation %}
-    <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
-    {% endif %}
+    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" data-reading-section="heading" data-reading-layout="side" style="{{ '' if side_by_side else 'display:none;' }}">
+      <div class="reading-layout-columns heading-layout-columns">
+        <div class="reading-layout-original heading-layout-original">
+          <div class="heading-layout-panel heading-layout-panel-original">
+            <div class="heading-original">{{ pe.original }}</div>
+          </div>
+        </div>
+        {% if pe.translation %}
+        <div class="reading-layout-translation">
+          <div class="heading-layout-panel heading-layout-panel-translation">
+            <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" data-reading-section="heading" data-reading-layout="stack" style="{{ 'display:none;' if side_by_side else '' }}">
+      <div class="reading-layout-stack heading-layout-stack">
+        <div class="heading-layout-panel heading-layout-panel-original heading-layout-original">
+          <div class="heading-original">{{ pe.original }}</div>
+        </div>
+        {% if pe.translation %}
+        <div class="heading-layout-panel heading-layout-panel-translation">
+          <div class="heading-translation js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
     <div class="flex gap-8 items-center mt-8" data-manual-controls="{{ loop.index0 }}" data-para-updated-at="{{ pe.updated_at|default(0)|int }}">
       <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="openManualRevisionEditor({{ loop.index0 }});">编辑译文</button>
       <span class="manual-revision-badge" data-manual-badge="{{ loop.index0 }}" style="font-size:11px;color:var(--txL);">
@@ -829,15 +866,15 @@
     {% endif %}
 
     <!-- Side by side -->
-    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" style="{{ '' if side_by_side else 'display:none;' }}">
-      <div class="reading-columns">
-        <div>
+    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" data-reading-section="body" data-reading-layout="side" style="{{ '' if side_by_side else 'display:none;' }}">
+      <div class="reading-layout-columns">
+        <div class="reading-layout-original">
           <div class="card original-card">
-            <div class="lbl">原文 <span style="color:var(--txL);font-size:11px;">p.{{ pe.pages }}</span></div>
+            <div class="lbl">原文{% if para_pages_display %} <span style="color:var(--txL);font-size:11px;">{{ para_pages_display }}</span>{% endif %}</div>
             <div class="text-fr">{{ pe.original_html|safe }}</div>
           </div>
         </div>
-        <div>
+        <div class="reading-layout-translation">
           <div class="card card-alt">
             <div class="lbl">中文翻译</div>
             <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}">{{ pe.translation or '' }}</div>
@@ -847,14 +884,16 @@
     </div>
 
     <!-- Stacked -->
-    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" style="{{ 'display:none;' if side_by_side else '' }}">
-      <div class="card original-card">
-        <div class="lbl">原文 <span style="color:var(--txL);font-size:11px;">p.{{ pe.pages }}</span></div>
-        <div class="text-fr" style="font-size:16px;">{{ pe.original_html|safe }}</div>
-      </div>
-      <div class="card card-alt">
-        <div class="lbl">中文翻译</div>
-        <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}" style="font-size:16px;">{{ pe.translation or '' }}</div>
+    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" data-reading-section="body" data-reading-layout="stack" style="{{ 'display:none;' if side_by_side else '' }}">
+      <div class="reading-layout-stack">
+        <div class="card original-card">
+          <div class="lbl">原文{% if para_pages_display %} <span style="color:var(--txL);font-size:11px;">{{ para_pages_display }}</span>{% endif %}</div>
+          <div class="text-fr" style="font-size:16px;">{{ pe.original_html|safe }}</div>
+        </div>
+        <div class="card card-alt">
+          <div class="lbl">中文翻译</div>
+          <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}" style="font-size:16px;">{{ pe.translation or '' }}</div>
+        </div>
       </div>
     </div>
 
@@ -888,26 +927,30 @@
     </div>
     <div class="page-footnotes-bridge">这一页的脚注仍属于当前阅读节奏，可以顺着正文往下看。</div>
     {% if next_bp %}
-    <div class="page-footnotes-next">读完脚注后可直接继续 p.{{ next_bp }}，不用回到上面重新找位置。</div>
+    <div class="page-footnotes-next">读完脚注后可直接继续 PDF 第{{ next_bp }}页，不用回到上面重新找位置。</div>
     {% endif %}
-    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" style="{{ '' if side_by_side else 'display:none;' }}">
-      <div class="footnotes-columns">
+    <div class="sbs-view {{ '' if side_by_side else 'hidden' }}" data-reading-section="footnotes" data-reading-layout="side" style="{{ '' if side_by_side else 'display:none;' }}">
+      <div class="reading-layout-columns">
         {% if page_footnotes.original %}
-        <div class="page-footnotes-card page-footnotes-original-card">
-          <div class="lbl">脚注原文</div>
-          <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
+        <div class="reading-layout-original">
+          <div class="page-footnotes-card page-footnotes-original-card">
+            <div class="lbl">脚注原文</div>
+            <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ page_footnotes.original|join('\n\n') }}</div>
+          </div>
         </div>
         {% endif %}
         {% if page_footnotes.translated %}
-        <div class="footnote-box-cn page-footnotes-card">
-          <div class="lbl">脚注翻译</div>
-          <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
+        <div class="reading-layout-translation">
+          <div class="footnote-box-cn page-footnotes-card">
+            <div class="lbl">脚注翻译</div>
+            <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ page_footnotes.translated|join('\n\n') }}</div>
+          </div>
         </div>
         {% endif %}
       </div>
     </div>
-    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" style="{{ 'display:none;' if side_by_side else '' }}">
-      <div class="page-footnotes-stack">
+    <div class="stk-view {{ 'hidden' if side_by_side else '' }}" data-reading-section="footnotes" data-reading-layout="stack" style="{{ 'display:none;' if side_by_side else '' }}">
+      <div class="reading-layout-stack page-footnotes-stack">
         {% if page_footnotes.original %}
         <div class="page-footnotes-card page-footnotes-original-card">
           <div class="lbl">脚注原文</div>
@@ -962,19 +1005,19 @@
   {% set resume_bp = translate_snapshot.resume_bp|default(0)|int %}
   {% set has_stopped_draft = draft_bp == cur_page_bp and draft_status == 'aborted' %}
   {% set has_error_draft = draft_bp == cur_page_bp and draft_status == 'error' %}
-  {% set placeholder_title = 'p.' ~ cur_page_bp ~ ' 需要重试' if current_page_failed else ('p.' ~ cur_page_bp ~ ' 可以继续' if has_stopped_draft or has_error_draft or resume_bp == cur_page_bp else 'p.' ~ cur_page_bp ~ ' 可直接开始阅读') %}
-  {% set placeholder_action = '重试 p.' ~ cur_page_bp if current_page_failed or has_error_draft else ('从 p.' ~ cur_page_bp ~ ' 继续' if has_stopped_draft or resume_bp == cur_page_bp else '从 p.' ~ cur_page_bp ~ ' 开始翻译') %}
+  {% set placeholder_title = 'PDF 第' ~ cur_page_bp ~ '页需要重试' if current_page_failed else ('PDF 第' ~ cur_page_bp ~ '页可以继续' if has_stopped_draft or has_error_draft or resume_bp == cur_page_bp else 'PDF 第' ~ cur_page_bp ~ '页可直接开始阅读') %}
+  {% set placeholder_action = '重试 PDF 第' ~ cur_page_bp ~ '页' if current_page_failed or has_error_draft else ('从 PDF 第' ~ cur_page_bp ~ '页继续' if has_stopped_draft or resume_bp == cur_page_bp else '从 PDF 第' ~ cur_page_bp ~ '页开始翻译') %}
   <div class="page-placeholder">
     <div class="page-placeholder-title">{{ placeholder_title }}</div>
     <div class="page-placeholder-subtitle">
       {% if current_page_failed and current_page_failure %}
-      你正在查看 p.{{ cur_page_bp }}。最近一次失败原因：{{ current_page_failure.error }}。处理完后可以直接重试这一页。
+      你正在查看 PDF 第{{ cur_page_bp }}页。最近一次失败原因：{{ current_page_failure.error }}。处理完后可以直接重试这一页。
       {% elif has_error_draft %}
-      你正在查看 p.{{ cur_page_bp }}。这一页保留了失败草稿，可以直接重试。
+      你正在查看 PDF 第{{ cur_page_bp }}页。这一页保留了失败草稿，可以直接重试。
       {% elif has_stopped_draft or resume_bp == cur_page_bp %}
-      你正在查看 p.{{ cur_page_bp }}。这一页有已停止的草稿，可以直接继续。
+      你正在查看 PDF 第{{ cur_page_bp }}页。这一页有已停止的草稿，可以直接继续。
       {% else %}
-      你正在查看 p.{{ cur_page_bp }}。下面先给你这一页的 OCR 原文预览；需要正式阅读稿时，再从这一页开始翻译。
+      你正在查看 PDF 第{{ cur_page_bp }}页。下面先给你这一页的 OCR 原文预览；需要正式阅读稿时，再从这一页开始翻译。
       {% endif %}
     </div>
     <div class="page-preview-meta">
@@ -999,7 +1042,7 @@
     <div class="flex gap-8 mt-12 flex-wrap page-placeholder-actions">
       <button type="button" class="btn btn-pri" onclick="startTranslateAll({{ cur_page_bp }});">{{ placeholder_action }}</button>
       {% if resume_bp and resume_bp != cur_page_bp %}
-      <button type="button" class="btn btn-gho" onclick="startTranslateAll({{ resume_bp }});">继续到 p.{{ resume_bp }}</button>
+      <button type="button" class="btn btn-gho" onclick="startTranslateAll({{ resume_bp }});">继续到 PDF 第{{ resume_bp }}页</button>
       {% endif %}
       {% if has_pdf %}
       <button type="button" class="btn btn-gho" style="color:var(--red);border:1px solid var(--bdrL);"
@@ -1040,11 +1083,11 @@
   <div class="mt-28">
     <div class="progress-dots">
       {% for bp in page_bps %}
-      <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-page-bp="{{ bp }}" data-reading-bp="{{ bp }}" onclick="return handleReadingNavClick(event, {{ bp }});" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps or bp in partial_failed_bps else 'pending')) }}" title="p.{{ bp }} · {{ '已译' if bp in translated_bps else ('部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else '待译')) }}"></a>
+      <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout='side' if side_by_side else 'stack', pdf=1 if pdf_visible else 0) }}" data-page-bp="{{ bp }}" data-reading-bp="{{ bp }}" onclick="return handleReadingNavClick(event, {{ bp }});" class="progress-dot {{ 'current' if bp == cur_page_bp else ('done' if bp in translated_bps else ('failed' if bp in failed_bps or bp in partial_failed_bps else 'pending')) }}" title="PDF 第{{ bp }}页 · {{ '已译' if bp in translated_bps else ('部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else '待译')) }}"></a>
       {% endfor %}
     </div>
     <div style="font-size:11px;color:var(--txL);margin-top:6px;">
-      已译{{ translated_bps|length }}页 · 部分完成{{ partial_failed_bps|length }}页 · 失败{{ failed_bps|length }}页 · 当前 p.{{ cur_page_bp }} / p.{{ last_page }}
+      已译{{ translated_bps|length }}页 · 部分完成{{ partial_failed_bps|length }}页 · 失败{{ failed_bps|length }}页 · 当前 PDF 第{{ cur_page_bp }}页 / 第{{ last_page }}页
     </div>
   </div>
 </div>
@@ -1126,6 +1169,11 @@ var store = {
     usageDashboardOpen: {{ 'true' if usage_open else 'false' }},
   },
 };
+
+function formatPdfPageLabel(bp) {
+  var value = Number(bp || 0);
+  return value ? ('PDF 第' + value + '页') : 'PDF 页';
+}
 
 function dispatch(action, payload) {
   function ensureDraftBuffers(total) {
@@ -1375,8 +1423,8 @@ function dispatch(action, payload) {
     store.ui.showOriginal = !store.ui.showOriginal;
     return;
   }
-  if (action === 'toggle_layout') {
-    store.ui.sideBySide = !store.ui.sideBySide;
+  if (action === 'set_layout_mode') {
+    store.ui.sideBySide = !!(payload && payload.value);
     return;
   }
   if (action === 'set_usage_dashboard_open') {
@@ -1407,6 +1455,7 @@ function dispatch(action, payload) {
 function toggleOriginal() {
   dispatch('toggle_original');
   applyOriginalVisibilityState();
+  applyLayoutState();
   syncReadingUrl();
 }
 
@@ -1420,16 +1469,29 @@ function applyOriginalVisibilityState() {
   }
 }
 
-function toggleLayout() {
-  dispatch('toggle_layout');
-  applyLayoutState();
-  syncReadingUrl();
+function persistLayoutPreference() {
   // 保存布局偏好，避免下次重新进入时还原成旧布局。
   fetch('{{ url_for("set_pref") }}', {
     method: 'POST',
     headers: withCsrfHeaders({'Content-Type': 'application/json'}),
     body: JSON.stringify({side_by_side: store.ui.sideBySide})
   });
+}
+
+function setLayoutMode(nextSideBySide) {
+  if (!store.ui.showOriginal) {
+    applyLayoutState();
+    return;
+  }
+  var nextValue = !!nextSideBySide;
+  if (store.ui.sideBySide === nextValue) {
+    applyLayoutState();
+    return;
+  }
+  dispatch('set_layout_mode', { value: nextValue });
+  applyLayoutState();
+  syncReadingUrl();
+  persistLayoutPreference();
 }
 
 function applyLayoutState() {
@@ -1439,11 +1501,26 @@ function applyLayoutState() {
   document.querySelectorAll('.stk-view').forEach(function(el) {
     el.style.display = store.ui.sideBySide ? 'none' : '';
   });
-  var btn = document.getElementById('layoutBtn');
-  if (btn) {
-    btn.classList.toggle('active', store.ui.sideBySide);
-    btn.textContent = store.ui.sideBySide ? '改单栏' : '改双栏';
-    btn.title = store.ui.sideBySide ? '切回单栏阅读' : '切到双栏对照';
+  var control = document.getElementById('layoutModeControl');
+  var stackBtn = document.getElementById('layoutStackBtn');
+  var sideBtn = document.getElementById('layoutSideBtn');
+  var hint = document.getElementById('layoutModeHint');
+  var disabled = !store.ui.showOriginal;
+  if (control) {
+    control.classList.toggle('disabled', disabled);
+  }
+  if (stackBtn) {
+    stackBtn.classList.toggle('active', !store.ui.sideBySide);
+    stackBtn.setAttribute('aria-pressed', store.ui.sideBySide ? 'false' : 'true');
+    stackBtn.disabled = disabled;
+  }
+  if (sideBtn) {
+    sideBtn.classList.toggle('active', store.ui.sideBySide);
+    sideBtn.setAttribute('aria-pressed', store.ui.sideBySide ? 'true' : 'false');
+    sideBtn.disabled = disabled;
+  }
+  if (hint) {
+    hint.textContent = disabled ? '先打开原文再切换排列' : '';
   }
 }
 
@@ -1457,20 +1534,13 @@ function copyExport() {
 // ===== TOC Navigation =====
 {% if toc_items %}
 var TOC_OFFSET = {{ toc_offset|default(0)|int }};
-var _tocRevPageMap = (function() {
-  var pm = {{ page_map|tojson }};
-  var rev = {};
-  for (var k in pm) { rev[pm[k]] = Number(k); }
-  return rev;
-})();
 
 function toggleTocMenu() {
   document.getElementById('tocMenu').classList.toggle('open');
 }
 
-function tocJumpToBookPage(bookPage) {
-  var fileIdx = bookPage - 1 + TOC_OFFSET;
-  var targetBp = _tocRevPageMap[fileIdx];
+function tocJumpToPage(targetPage) {
+  var targetBp = Number(targetPage || 0);
   if (targetBp) {
     document.getElementById('tocMenu').classList.remove('open');
     goReadingPage(targetBp);
@@ -1478,15 +1548,12 @@ function tocJumpToBookPage(bookPage) {
 }
 
 function tocUpdateCurrentChapter() {
-  var pm = {{ page_map|tojson }};
-  var curFileIdx = pm[String({{ cur_page_bp }})] !== undefined ? pm[String({{ cur_page_bp }})] : -1;
   var items = document.querySelectorAll('.toc-item');
   var activeItem = null;
   items.forEach(function(item) {
     item.classList.remove('toc-active');
-    var bookPage = Number(item.dataset.bookPage);
-    var itemFileIdx = bookPage - 1 + TOC_OFFSET;
-    if (itemFileIdx <= curFileIdx) { activeItem = item; }
+    var targetPage = Number(item.dataset.targetPage || 0);
+    if (targetPage && targetPage <= Number({{ cur_page_bp }})) { activeItem = item; }
   });
   if (activeItem) {
     activeItem.classList.add('toc-active');
@@ -1852,7 +1919,7 @@ function getPdfHighlightLayer(bp) {
 
 function updatePdfPageInfo(bp) {
   var info = document.getElementById('pdfPageInfo');
-  if (info && bp) info.textContent = 'p.' + bp;
+  if (info && bp) info.textContent = formatPdfPageLabel(bp);
 }
 
 function pdfGoToBp(bp) {
@@ -2605,14 +2672,14 @@ function renderStreamDraftState() {
     : 0;
   var restoredLabel = store.streamDraft.restored ? ' · 已恢复' : '';
   progress.textContent = store.streamDraft.bp
-    ? ('p.' + store.streamDraft.bp + restoredLabel + ' · 并发 ' + runningCount + '/' + parallelLimit + ' · 已完成 ' + (store.streamDraft.paraDone || 0) + '/' + (store.streamDraft.paraTotal || 0))
+    ? (formatPdfPageLabel(store.streamDraft.bp) + restoredLabel + ' · 并发 ' + runningCount + '/' + parallelLimit + ' · 已完成 ' + (store.streamDraft.paraDone || 0) + '/' + (store.streamDraft.paraTotal || 0))
     : '等待翻译任务启动';
   if (store.streamDraft.status === 'throttled' && store.streamDraft.note) {
     progress.textContent = store.streamDraft.note;
   }
   var noteParts = [];
   if (store.streamDraft.restored && store.streamDraft.bp) {
-    noteParts.push('已恢复 p.' + store.streamDraft.bp + ' 的草稿');
+    noteParts.push('已恢复 ' + formatPdfPageLabel(store.streamDraft.bp) + ' 的草稿');
   }
   if (store.streamDraft.note) {
     noteParts.push(store.streamDraft.note);
@@ -2625,12 +2692,12 @@ function renderStreamDraftState() {
     var draftActions = [];
     var draftBp = Number(store.streamDraft.bp || 0);
     if (draftBp && draftBp !== Number(store.reading.currentBp || 0)) {
-      draftActions.push('<button type="button" class="btn btn-gho usage-draft-card-btn" onclick="goReadingPage(' + draftBp + ');">前往 p.' + draftBp + '</button>');
+      draftActions.push('<button type="button" class="btn btn-gho usage-draft-card-btn" onclick="goReadingPage(' + draftBp + ');">前往' + formatPdfPageLabel(draftBp) + '</button>');
     }
     if (draftBp && (store.streamDraft.status === 'aborted' || store.streamDraft.status === 'error' || errorCount > 0)) {
       var retryLabel = currentPageHasEntry && draftBp === Number(store.reading.currentBp || 0)
-        ? ('重译 p.' + draftBp)
-        : (store.streamDraft.status === 'aborted' ? ('从 p.' + draftBp + ' 继续') : ('重试 p.' + draftBp));
+        ? ('重译' + formatPdfPageLabel(draftBp))
+        : (store.streamDraft.status === 'aborted' ? ('从' + formatPdfPageLabel(draftBp) + '继续') : ('重试' + formatPdfPageLabel(draftBp)));
       draftActions.push('<button type="button" class="btn btn-gho usage-draft-card-btn" onclick="retryDraftPage();">' + retryLabel + '</button>');
     }
     actions.classList.toggle('hidden', !draftActions.length);
@@ -2649,7 +2716,7 @@ function renderStreamDraftState() {
         ? '<div class="usage-draft-card-error">' + escapeHtml(errorText) + '</div>'
         : '';
       var actionHtml = state === 'error'
-        ? '<div class="usage-draft-card-actions"><button type="button" class="btn btn-gho usage-draft-card-btn" onclick="retryDraftParagraph(' + idx + ');">重试 p.' + (store.streamDraft.bp || store.reading.currentBp) + '</button></div>'
+        ? '<div class="usage-draft-card-actions"><button type="button" class="btn btn-gho usage-draft-card-btn" onclick="retryDraftParagraph(' + idx + ');">重试' + formatPdfPageLabel(store.streamDraft.bp || store.reading.currentBp) + '</button></div>'
         : '';
       return '<div class="usage-draft-card" data-status="' + state + '">' +
         '<div class="usage-draft-card-head">' +
@@ -2704,7 +2771,7 @@ function retryDraftParagraph(paraIdx) {
 function renderPageNavigationState() {
   var navBtn = document.getElementById('pageNavBtn');
   if (navBtn) {
-    var nextLabel = 'p.' + store.reading.currentBp + ' · ' + pageStateLabel(store.reading.currentBp);
+    var nextLabel = formatPdfPageLabel(store.reading.currentBp) + ' · ' + pageStateLabel(store.reading.currentBp);
     if (pageNavButtonLabel !== nextLabel) {
       navBtn.textContent = nextLabel;
       pageNavButtonLabel = nextLabel;
@@ -2741,7 +2808,7 @@ function renderPageNavigationState() {
   document.querySelectorAll('.progress-dot[data-page-bp]').forEach(function(dot) {
     var bp = Number(dot.getAttribute('data-page-bp'));
     dot.classList.remove('done', 'pending', 'streaming', 'failed');
-    dot.title = 'p.' + bp + ' · ' + pageStateLabel(bp);
+    dot.title = formatPdfPageLabel(bp) + ' · ' + pageStateLabel(bp);
     if (bp === store.reading.currentBp) {
       return;
     }
@@ -2763,7 +2830,7 @@ function renderPageNavItem(bp) {
   bp = Number(bp);
   var cls = bp === store.reading.currentBp ? 'page-nav-item current' : 'page-nav-item';
   return '<a href="' + buildReadingUrl(bp, '0', '') + '" data-reading-bp="' + bp + '" onclick="return handleReadingNavClick(event, ' + bp + ');" class="' + cls + '">' +
-    '<span>p.' + bp + '</span>' +
+    '<span>' + formatPdfPageLabel(bp) + '</span>' +
     '<span class="page-nav-item-status">' + pageStateLabel(bp) + '</span>' +
   '</a>';
 }
@@ -2798,9 +2865,9 @@ function getResumeStartBp(state) {
 function getResumeActionLabel(state) {
   if (!state) return '继续翻译';
   var resumeBp = getResumeStartBp(state);
-  if (state.phase === 'partial_failed') return resumeBp ? ('重试 p.' + resumeBp) : '重试失败页';
-  if (state.phase === 'error') return resumeBp ? ('从 p.' + resumeBp + ' 继续') : '从出错页继续';
-  return resumeBp ? ('继续到 p.' + resumeBp) : '继续翻译';
+  if (state.phase === 'partial_failed') return resumeBp ? ('重试' + formatPdfPageLabel(resumeBp)) : '重试失败页';
+  if (state.phase === 'error') return resumeBp ? ('从' + formatPdfPageLabel(resumeBp) + '继续') : '从出错页继续';
+  return resumeBp ? ('继续到' + formatPdfPageLabel(resumeBp)) : '继续翻译';
 }
 
 function resumeTranslateFromSnapshot(state) {
@@ -2955,7 +3022,7 @@ function renderUsageDashboard(payload) {
   document.getElementById('usageModel').textContent = display.model || '-';
   document.getElementById('usageRequestCount').textContent = formatUsageNumber(display.request_count);
   document.getElementById('usageTotalTokens').textContent = formatUsageNumber(display.total_tokens);
-  document.getElementById('usageCurrentPage').textContent = display.current_bp ? ('p.' + display.current_bp) : '-';
+  document.getElementById('usageCurrentPage').textContent = display.current_bp ? formatPdfPageLabel(display.current_bp) : '-';
   document.getElementById('usageUpdatedAt').textContent = display.updated_at
     ? new Date(display.updated_at * 1000).toLocaleTimeString('zh-CN', {hour12: false})
     : '-';
@@ -3100,7 +3167,7 @@ function formatTranslatePhaseLabel(state) {
   var phase = state && state.phase ? state.phase : 'idle';
   var label = formatUsagePhase(phase);
   if ((phase === 'running' || phase === 'stopping') && state && state.current_bp) {
-    return label + ' · p.' + state.current_bp;
+    return label + ' · ' + formatPdfPageLabel(state.current_bp);
   }
   return label;
 }

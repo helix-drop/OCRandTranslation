@@ -71,7 +71,7 @@
         </div>
         <div style="flex:1;min-width:140px;">
           <div class="label">页码范围</div>
-          <div style="font-size:12px;color:var(--txS);">p.{{ first_page }} → p.{{ last_page }}</div>
+          <div style="font-size:12px;color:var(--txS);">PDF 第{{ first_page }}页 → 第{{ last_page }}页</div>
         </div>
       </div>
       {% if has_pdf %}
@@ -120,24 +120,24 @@
     {% if has_pages %}
     <a href="{{ url_for('reading', bp=first_page, auto=1, start_bp=first_page, doc_id=current_doc_id) }}" class="btn btn-pri btn-lg" style="flex:1;justify-content:center;"
        data-reading-entry="1"
-       onclick="return guardReadingEntrance(event, this);">从 p.{{ first_page }} 开始读</a>
+       onclick="return guardReadingEntrance(event, this);">从 PDF 第{{ first_page }}页开始读</a>
     <a href="{{ url_for('input_page', doc_id=current_doc_id) }}" class="btn btn-sec btn-lg" style="flex:1;justify-content:center;">跳到指定页</a>
     {% else %}
-    <span class="btn btn-pri btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从 p.1 开始读</span>
+    <span class="btn btn-pri btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从 PDF 第1页开始读</span>
     <span class="btn btn-sec btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">跳到指定页</span>
     {% endif %}
 
     {% if has_entries %}
     <a href="{{ url_for('reading', doc_id=current_doc_id) }}" class="btn btn-grn btn-lg" style="flex:1;justify-content:center;" data-reading-entry="1"
-       onclick="return guardReadingEntrance(event, this);">继续读 p.{{ resume_bp }}</a>
+       onclick="return guardReadingEntrance(event, this);">继续读 PDF 第{{ resume_bp }}页</a>
     {% endif %}
   </div>
   {% if has_pages %}
   <div class="home-action-note">
     {% if has_entries %}
-    当前文档可从 p.{{ resume_bp }} 继续，也可以重新从 p.{{ first_page }} 开始进入阅读。
+    当前文档可从 PDF 第{{ resume_bp }}页继续，也可以重新从 PDF 第{{ first_page }}页开始进入阅读。
     {% else %}
-    第一次进入建议先从 p.{{ first_page }} 开始，再按页继续往后读。
+    第一次进入建议先从 PDF 第{{ first_page }}页开始，再按页继续往后读。
     {% endif %}
   </div>
   {% endif %}
@@ -578,18 +578,19 @@ function renderTocModalMeta(data) {
   var tocFile = (data && data.toc_file) || {};
   var tocCount = (data && Array.isArray(data.toc)) ? data.toc.length : 0;
   var offset = Number((data && data.offset) || 0);
+  var offsetDisplay = '原书第 1 页 = PDF 第' + (offset + 1) + '页';
   if (tocFile.exists) {
     var parts = ['当前目录文件：' + (tocFile.display_name || '未命名目录文件')];
     var uploadedAt = formatUnixTimeLocal(tocFile.uploaded_at);
     if (uploadedAt) parts.push('导入时间：' + uploadedAt);
     parts.push('已导入目录：' + tocCount + ' 条');
-    parts.push('页码偏移 ' + offset);
+    parts.push(offsetDisplay);
     if (tocFile.is_legacy_name) parts.push('旧记录，原始文件名不可恢复');
     meta.textContent = parts.join(' · ');
     return;
   }
   if (data && data.source === 'user' && tocCount) {
-    meta.textContent = '已导入目录：' + tocCount + ' 条 · 页码偏移 ' + offset;
+    meta.textContent = '已导入目录：' + tocCount + ' 条 · ' + offsetDisplay;
     return;
   }
   meta.textContent = '尚未导入目录';

@@ -18,7 +18,7 @@ from testsupport import ClientCSRFMixin
 
 class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
-        self.temp_root = tempfile.mkdtemp(prefix="sqlite-mainline-", dir="/tmp")
+        self.temp_root = tempfile.mkdtemp(prefix="sqlite-mainline-")
         self._patch_config_dirs(self.temp_root)
         ensure_dirs()
         self.client = app_module.app.test_client()

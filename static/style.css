@@ -480,13 +480,18 @@ a:hover { text-decoration: underline; }
 /* ============ ERROR ============ */
 .error-msg { color: var(--red); font-size: 13px; margin-top: 12px; }
 
-/* ============ SIDE-BY-SIDE LAYOUT ============ */
-.reading-columns {
+/* ============ READING LAYOUT MODES ============ */
+.reading-layout-columns {
   display: flex;
   gap: 22px;
   align-items: stretch;
 }
-.reading-columns > div { flex: 1; min-width: 0; }
+.reading-layout-columns > div { flex: 1; min-width: 0; }
+.reading-layout-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 /* ============ SEPARATOR ============ */
 .sep {
@@ -561,28 +566,12 @@ a:hover { text-decoration: underline; }
 }
 
 /* 隐藏原文模式 */
-body.hide-original .text-fr,
-body.hide-original .heading-original,
+body.hide-original .heading-layout-original,
 body.hide-original .footnote-box {
   display: none;
 }
 body.hide-original .original-card {
   display: none;
-}
-body.hide-original .reading-columns {
-  display: block;
-}
-body.hide-original .reading-columns > div:first-child {
-  display: none;
-}
-.footnotes-columns {
-  display: flex;
-  gap: 22px;
-  align-items: stretch;
-}
-.footnotes-columns > div {
-  flex: 1;
-  min-width: 0;
 }
 
 /* ============ HEADINGS (in reading page) ============ */
@@ -606,6 +595,26 @@ body.hide-original .reading-columns > div:first-child {
   top: -14px;
   height: 1px;
   background: var(--bdrL);
+}
+.heading-layout-panel {
+  min-width: 0;
+}
+.heading-layout-columns .heading-layout-panel {
+  height: 100%;
+}
+.heading-layout-columns .heading-layout-panel-translation {
+  padding-left: 18px;
+  border-left: 1px dashed var(--bdr);
+}
+.heading-layout-columns .heading-translation {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+.heading-layout-stack .heading-layout-panel-translation {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--bdr);
 }
 
 .heading-h1 {
@@ -638,11 +647,14 @@ body.hide-original .reading-columns > div:first-child {
   color: var(--fr);
   line-height: 1.45;
 }
-.heading-h2 .heading-translation {
-  font-size: 16px;
+.heading-h2 .heading-translation { font-size: 16px; }
+.heading-h2 .heading-layout-stack .heading-layout-panel-translation {
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--bdrL);
+}
+.heading-h2 .heading-layout-columns .heading-layout-panel-translation {
+  border-left: 1px solid var(--bdrL);
 }
 
 .heading-h3, .heading-h4, .heading-h5, .heading-h6 {
@@ -663,9 +675,21 @@ body.hide-original .reading-columns > div:first-child {
 .heading-h3 .heading-translation,
 .heading-h4 .heading-translation,
 .heading-h5 .heading-translation,
-.heading-h6 .heading-translation {
-  font-size: 14px;
+.heading-h6 .heading-translation { font-size: 14px; }
+.heading-h3 .heading-layout-stack .heading-layout-panel-translation,
+.heading-h4 .heading-layout-stack .heading-layout-panel-translation,
+.heading-h5 .heading-layout-stack .heading-layout-panel-translation,
+.heading-h6 .heading-layout-stack .heading-layout-panel-translation {
   margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
+}
+.heading-h3 .heading-layout-columns .heading-layout-panel-translation,
+.heading-h4 .heading-layout-columns .heading-layout-panel-translation,
+.heading-h5 .heading-layout-columns .heading-layout-panel-translation,
+.heading-h6 .heading-layout-columns .heading-layout-panel-translation {
+  padding-left: 14px;
+  border-left: 1px solid var(--bdrL);
 }
 
 .heading-translation {
@@ -1013,6 +1037,53 @@ body.hide-original .reading-columns > div:first-child {
   background: var(--acc);
   color: #fff;
   border-color: var(--acc);
+}
+.tb:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  background: rgba(244, 240, 232, 0.7);
+  color: var(--txL);
+}
+.tb:disabled:hover {
+  background: rgba(244, 240, 232, 0.7);
+  color: var(--txL);
+}
+
+.layout-mode-control {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+.layout-mode-control.disabled {
+  opacity: 0.92;
+}
+.layout-mode-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--txL);
+  letter-spacing: 0.8px;
+}
+.layout-mode-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--bdrL);
+  background: rgba(255,255,255,0.72);
+}
+.layout-mode-btn {
+  min-width: 68px;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.layout-mode-hint {
+  min-height: 1.25em;
+  font-size: 10px;
+  color: var(--txL);
+  line-height: 1.2;
 }
 
 .toolbar-more {

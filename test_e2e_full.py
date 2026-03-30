@@ -6,12 +6,13 @@
 import os
 import sys
 import json
+import tempfile
 import time
 import requests
 from testsupport import prime_requests_csrf, with_csrf_headers
 
 BASE = "http://127.0.0.1:8080"
-SCREENSHOT_DIR = "/tmp/e2e_screenshots"
+SCREENSHOT_DIR = os.path.join(tempfile.gettempdir(), "e2e_screenshots")
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 EXAMPLE_DIR = os.path.join(os.path.dirname(__file__), "local_data", "example")
@@ -314,7 +315,7 @@ def test_with_playwright():
         record("原文显示模式", "PASS")
 
         # 7c. PDF 面板
-        page.goto(f"{BASE}/reading?doc_id=5d8d44cba1c2&bp=1&pdf=1")
+        page.goto(f"{BASE}/reading?doc_id=5d8d44cba1c2&bp=1&orig=1&layout=side&pdf=1")
         wait_ready(page)
         time.sleep(2)
         page.screenshot(path=f"{SCREENSHOT_DIR}/08_pdf_panel.png", full_page=True)
@@ -324,11 +325,11 @@ def test_with_playwright():
         else:
             record("PDF 对照面板", "WARN", "未检测到 PDF 面板")
 
-        # 7d. 并排布局
+        # 7d. 左右排列
         page.goto(f"{BASE}/reading?doc_id=5d8d44cba1c2&bp=1&layout=side&orig=1")
         wait_ready(page)
         page.screenshot(path=f"{SCREENSHOT_DIR}/09_side_layout.png", full_page=True)
-        record("并排布局模式", "PASS")
+        record("原译左右排列模式", "PASS")
 
         # 7e. 主题切换
         for theme in ["dark", "sepia", "light"]:

@@ -216,8 +216,8 @@
         <div style="color:var(--txt);">{{ toc_file.uploaded_at_display or '未知' }}</div>
         <div style="color:var(--txL);">目录条数</div>
         <div style="color:var(--txt);">{{ toc_item_count }} 条</div>
-        <div style="color:var(--txL);">页码偏移</div>
-        <div style="color:var(--txt);">{{ toc_offset }}</div>
+        <div style="color:var(--txL);">目录对齐</div>
+        <div style="color:var(--txt);">原书第 1 页 = PDF 第{{ toc_offset + 1 }}页</div>
       </div>
       {% if toc_file.is_legacy_name %}
       <div class="hint" style="margin-top:10px;">旧记录，原始文件名不可恢复；当前仅能显示保存后的固定文件名。</div>

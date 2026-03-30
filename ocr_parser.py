@@ -114,20 +114,22 @@ def parse_ocr(data) -> dict:
             elif isinstance(md_field, str):
                 raw_markdown = md_field
 
-        if text_blocks or fn_blocks:
-            all_pages.append({
-                "fileIdx": pi,
-                "bookPage": None,
-                "detectedPage": detected_page,
-                "imgW": img_w,
-                "imgH": img_h,
-                "blocks": text_blocks,
-                "fnBlocks": fn_blocks,
-                "footnotes": "\n".join(footnotes),
-                "indent": None,
-                "textSource": "ocr",
-                "markdown": raw_markdown,
-            })
+        all_pages.append({
+            "fileIdx": pi,
+            "bookPage": pi + 1,
+            "pdfPage": pi + 1,
+            "printPage": None,
+            "printPageLabel": "",
+            "detectedPage": detected_page,
+            "imgW": img_w,
+            "imgH": img_h,
+            "blocks": text_blocks,
+            "fnBlocks": fn_blocks,
+            "footnotes": "\n".join(footnotes),
+            "indent": None,
+            "textSource": "ocr",
+            "markdown": raw_markdown,
+        })
 
     # Compute indent per page
     for p in all_pages:
@@ -138,7 +140,7 @@ def parse_ocr(data) -> dict:
             xs.sort()
             p["indent"] = xs[0] + 10
 
-    # Interpolate page numbers
+    # 推断原书印刷页码（仅作为显示/引用辅助，不参与导航）
     anchors = []
     for ai, p in enumerate(all_pages):
         if p["detectedPage"] is not None and p["detectedPage"] > 0:
@@ -162,58 +164,35 @@ def parse_ocr(data) -> dict:
             idx_span = a2["idx"] - a1["idx"]
             bp_span = a2["bp"] - a1["bp"]
             for fi in range(a1["idx"], a2["idx"] + 1):
-                all_pages[fi]["bookPage"] = round(a1["bp"] + (fi - a1["idx"]) / idx_span * bp_span)
+                inferred = round(a1["bp"] + (fi - a1["idx"]) / idx_span * bp_span)
+                if inferred > 0:
+                    all_pages[fi]["printPage"] = inferred
 
-        # Extrapolate before first anchor
-        r0 = (anchors[1]["bp"] - anchors[0]["bp"]) / (anchors[1]["idx"] - anchors[0]["idx"])
-        if r0 <= 0:
-            r0 = 1
-        for bi in range(anchors[0]["idx"] - 1, -1, -1):
-            all_pages[bi]["bookPage"] = round(anchors[0]["bp"] - (anchors[0]["idx"] - bi) * r0)
-            if all_pages[bi]["bookPage"] < 1:
-                all_pages[bi]["bookPage"] = bi + 1
-
-        # Extrapolate after last anchor
-        if len(anchors) >= 2:
-            r_n = (anchors[-1]["bp"] - anchors[-2]["bp"]) / (anchors[-1]["idx"] - anchors[-2]["idx"])
-        else:
-            r_n = 1
-        if r_n <= 0:
-            r_n = 1
-        for ei in range(anchors[-1]["idx"] + 1, len(all_pages)):
-            all_pages[ei]["bookPage"] = round(anchors[-1]["bp"] + (ei - anchors[-1]["idx"]) * r_n)
+        # 不再对前后封面/空白页强行外推印刷页码，避免制造错误数字。
 
     elif len(anchors) == 1:
-        for qi in range(len(all_pages)):
-            all_pages[qi]["bookPage"] = anchors[0]["bp"] + (qi - anchors[0]["idx"])
-            if all_pages[qi]["bookPage"] < 1:
-                all_pages[qi]["bookPage"] = qi + 1
+        all_pages[anchors[0]["idx"]]["printPage"] = anchors[0]["bp"]
     else:
-        log.append("WARN: 无页码，用文件序号")
-        for ni in range(len(all_pages)):
-            all_pages[ni]["bookPage"] = ni + 1
+        log.append("WARN: 未检测到可靠原书页码，仅保留 PDF 实页导航")
 
-    # Override with detected page where available
+    # OCR 直接识别到的页码优先
     for p in all_pages:
         if p["detectedPage"] is not None and p["detectedPage"] > 0:
-            p["bookPage"] = p["detectedPage"]
+            p["printPage"] = p["detectedPage"]
 
-    # 过滤插图页
-    figure_pages = [p for p in all_pages if _is_figure_page(p)]
-    for p in figure_pages:
-        log.append(f"SKIP figure page: fileIdx={p['fileIdx']} bp={p['bookPage']}")
-        all_pages.remove(p)
+    for p in all_pages:
+        if p.get("printPage"):
+            p["printPageLabel"] = str(p["printPage"])
+            p["printPageDisplay"] = f"原书 p.{p['printPageLabel']}"
+        else:
+            p["printPageLabel"] = ""
+            p["printPageDisplay"] = ""
+        p["isFigurePage"] = _is_figure_page(p)
 
-    # 确保 bookPage 严格递增
-    for i in range(1, len(all_pages)):
-        if all_pages[i]["bookPage"] <= all_pages[i - 1]["bookPage"]:
-            all_pages[i]["bookPage"] = all_pages[i - 1]["bookPage"] + 1
+    if all_pages:
+        log.append(f"PDF Range: 第1页-第{len(all_pages)}页 ({len(all_pages)}页)")
 
-    pages = [p for p in all_pages if p["bookPage"] and p["bookPage"] > 0 and (p["blocks"] or p["fnBlocks"])]
-    if pages:
-        log.append(f"Range: p.{pages[0]['bookPage']}-{pages[-1]['bookPage']} ({len(pages)}页)")
-
-    return {"pages": pages, "log": log}
+    return {"pages": all_pages, "log": log}
 
 
 # ============ 插图页检测 ============
@@ -226,6 +205,14 @@ def _is_figure_page(p):
     fn_blocks = p.get("fnBlocks", [])
     all_blocks = blocks + fn_blocks
     md = p.get("markdown", "")
+    meaningful_text_blocks = [
+        b for b in all_blocks
+        if (b.get("label", "") in ("text", "paragraph_title", "doc_title") and len((b.get("text", "") or "").strip()) >= 20)
+        or int(b.get("heading_level", 0) or 0) > 0
+    ]
+
+    if meaningful_text_blocks:
+        return False
 
     # markdown 含 <img> 标签 → 插图页
     if "<img" in md:
@@ -244,7 +231,7 @@ def _is_figure_page(p):
         return True
     # 有图片 block，且 text block 都是短图注（每个<500字）
     if img_blocks and text_blocks:
-        long_text = [b for b in text_blocks if len(b.get("text", "")) > 500]
+        long_text = [b for b in text_blocks if len(b.get("text", "")) > 120]
         if not long_text:
             return True
 

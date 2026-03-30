@@ -7,15 +7,19 @@ import shutil
 import tempfile
 import unittest
 import zipfile
+from unittest.mock import patch
 
 import config
 import app as app_module
 from config import create_doc, ensure_dirs, set_current_doc, update_doc_meta
 from pdf_extract import extract_pdf_toc
 from pypdf import PdfWriter
+from pypdf.constants import PageLabelStyle
 from sqlite_store import SQLiteRepository, get_connection
 from storage import (
     get_app_state,
+    load_entries_from_disk,
+    load_pages_from_disk,
     get_toc_file_info,
     get_toc_file_path,
     save_auto_pdf_toc_to_disk,
@@ -108,9 +112,25 @@ def _build_simple_xlsx(rows: list[list[object]]) -> bytes:
     return buf.getvalue()
 
 
+def _build_labeled_pdf(total_pages: int, label_start_page: int, start_label: int) -> bytes:
+    writer = PdfWriter()
+    for _ in range(total_pages):
+        writer.add_blank_page(width=200, height=200)
+    if 1 <= label_start_page <= total_pages:
+        writer.set_page_label(
+            label_start_page - 1,
+            total_pages - 1,
+            style=PageLabelStyle.DECIMAL,
+            start=start_label,
+        )
+    buf = io.BytesIO()
+    writer.write(buf)
+    return buf.getvalue()
+
+
 class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
-        self.temp_root = tempfile.mkdtemp(prefix="backend-backlog-", dir="/tmp")
+        self.temp_root = tempfile.mkdtemp(prefix="backend-backlog-")
         self._patch_config_dirs(self.temp_root)
         ensure_dirs()
         self.client = app_module.app.test_client()
@@ -136,6 +156,23 @@ class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn("toc_json", cols)
         self.assertIn("toc_file_name", cols)
         self.assertIn("toc_file_uploaded_at", cols)
+
+    def test_test_files_do_not_hardcode_unix_temp_dir(self):
+        repo_root = os.path.dirname(__file__)
+        unix_temp_fragment = "/" + "tmp"
+        offenders = []
+        for name in sorted(os.listdir(repo_root)):
+            if not name.startswith("test_") or not name.endswith(".py"):
+                continue
+            path = os.path.join(repo_root, name)
+            with open(path, "r", encoding="utf-8") as f:
+                if unix_temp_fragment in f.read():
+                    offenders.append(name)
+
+        self.assertFalse(
+            offenders,
+            f"测试文件仍硬编码了 Unix 临时目录: {', '.join(offenders)}",
+        )
 
     def test_get_app_state_exposes_has_translation_history(self):
         doc_id = create_doc("state.pdf")
@@ -348,6 +385,153 @@ class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(second_resp.status_code, 200)
         self.assertIn('id="tocBtn"', second_html)
         self.assertEqual(len(SQLiteRepository().get_document_toc(doc_id)), 2)
+
+    def test_load_pages_repairs_pdf_navigation_pages_and_migrates_entries(self):
+        doc_id = create_doc("repair-pages.pdf")
+        pdf_path = os.path.join(config.get_doc_dir(doc_id), "source.pdf")
+        with open(pdf_path, "wb") as f:
+            f.write(_build_labeled_pdf(total_pages=4, label_start_page=3, start_label=1))
+
+        save_pages_to_disk(
+            [
+                {"bookPage": 1, "fileIdx": 2, "markdown": "第三页正文", "footnotes": ""},
+                {"bookPage": 2, "fileIdx": 3, "markdown": "第四页正文", "footnotes": ""},
+            ],
+            "repair-pages.pdf",
+            doc_id,
+        )
+        save_entries_to_disk(
+            [
+                {
+                    "_pageBP": 1,
+                    "_model": "qwen-plus",
+                    "_page_entries": [
+                        {
+                            "original": "段落 A",
+                            "translation": "译文 A",
+                            "heading_level": 0,
+                            "pages": "原书 p.1",
+                            "_startBP": 1,
+                            "_endBP": 1,
+                            "_printPageLabel": "1",
+                        }
+                    ],
+                    "pages": "原书 p.1",
+                }
+            ],
+            "Repair Doc",
+            0,
+            doc_id,
+        )
+
+        pages, _ = load_pages_from_disk(doc_id)
+        self.assertEqual([page["bookPage"] for page in pages], [1, 2, 3, 4])
+        self.assertEqual(pages[2].get("pdfPage"), 3)
+        self.assertEqual(pages[2].get("printPageLabel"), "1")
+        self.assertEqual(pages[3].get("printPageLabel"), "2")
+
+        entries, _, _ = load_entries_from_disk(doc_id)
+        self.assertEqual(entries[0]["_pageBP"], 3)
+        self.assertEqual(entries[0]["pages"], "原书 p.1")
+        self.assertEqual(entries[0]["_page_entries"][0]["pages"], "原书 p.1")
+
+        state = get_app_state(doc_id)
+        self.assertEqual(state["first_page"], 1)
+        self.assertEqual(state["last_page"], 4)
+        self.assertEqual(state["page_count"], 4)
+
+    def test_start_reading_rejects_missing_page_even_if_within_numeric_range(self):
+        doc_id = create_doc("gap-input.pdf")
+        set_current_doc(doc_id)
+        save_pages_to_disk(
+            [
+                {"bookPage": 1, "fileIdx": 0, "markdown": "第一页", "footnotes": ""},
+                {"bookPage": 2, "fileIdx": 1, "markdown": "第二页", "footnotes": ""},
+                {"bookPage": 4, "fileIdx": 3, "markdown": "第四页", "footnotes": ""},
+            ],
+            "gap-input.pdf",
+            doc_id,
+        )
+
+        with patch.object(app_module, "get_translate_args", return_value={"api_key": "fake-key", "provider": "deepseek"}):
+            resp = self._post(
+                "/start_reading",
+                data={"doc_id": doc_id, "doc_title": "Gap Doc", "start_page": 3},
+                follow_redirects=True,
+            )
+
+        html = resp.get_data(as_text=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("请输入有效页码", html)
+        self.assertIn("输入起始页码", html)
+        self.assertNotIn("/reading?bp=3", html)
+
+    def test_reading_renders_resolved_toc_target_pages(self):
+        doc_id = create_doc("toc-target.pdf")
+        set_current_doc(doc_id)
+        save_pages_to_disk(
+            [
+                {"bookPage": 1, "fileIdx": 0, "markdown": "PDF 1", "footnotes": "", "pdfPage": 1, "printPageLabel": ""},
+                {"bookPage": 2, "fileIdx": 1, "markdown": "PDF 2", "footnotes": "", "pdfPage": 2, "printPageLabel": ""},
+                {"bookPage": 3, "fileIdx": 2, "markdown": "PDF 3", "footnotes": "", "pdfPage": 3, "printPageLabel": "1"},
+                {"bookPage": 4, "fileIdx": 3, "markdown": "PDF 4", "footnotes": "", "pdfPage": 4, "printPageLabel": "2"},
+            ],
+            "toc-target.pdf",
+            doc_id,
+        )
+        SQLiteRepository().set_document_toc(
+            doc_id,
+            [
+                {"title": "第一章", "depth": 0, "book_page": 1},
+                {"title": "第二章", "depth": 0, "book_page": 2},
+            ],
+        )
+        SQLiteRepository().set_document_toc_source_offset(doc_id, "user", 2)
+        save_toc_file(
+            doc_id,
+            FileStorage(stream=io.BytesIO(b"title,depth,page\nA,0,1\nB,0,2\n"), filename="toc.csv"),
+        )
+
+        resp = self.client.get("/reading", query_string={"doc_id": doc_id, "bp": 3})
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('data-target-page="3"', html)
+        self.assertIn('data-target-page="4"', html)
+        self.assertIn("原书 p.1", html)
+
+    def test_save_entries_preserves_segment_page_metadata(self):
+        doc_id = create_doc("segment-pages.pdf")
+        save_entries_to_disk(
+            [
+                {
+                    "_pageBP": 3,
+                    "_model": "qwen-plus",
+                    "_page_entries": [
+                        {
+                            "original": "段落 A",
+                            "translation": "译文 A",
+                            "heading_level": 0,
+                            "pages": "原书 p.1-2",
+                            "_startBP": 3,
+                            "_endBP": 4,
+                            "_printPageLabel": "1-2",
+                        }
+                    ],
+                    "pages": "原书 p.1",
+                }
+            ],
+            "Segment Doc",
+            0,
+            doc_id,
+        )
+
+        entries, _, _ = load_entries_from_disk(doc_id)
+        seg = entries[0]["_page_entries"][0]
+        self.assertEqual(seg["pages"], "原书 p.1-2")
+        self.assertEqual(seg["_startBP"], 3)
+        self.assertEqual(seg["_endBP"], 4)
+        self.assertEqual(seg["_printPageLabel"], "1-2")
 
     def test_pdf_toc_recovers_user_toc_from_saved_file_when_json_missing(self):
         doc_id = create_doc("toc-recover.pdf")

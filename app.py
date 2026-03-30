@@ -52,6 +52,7 @@ from storage import (
     load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
+    resolve_page_print_label, format_print_page_display,
 )
 from sqlite_store import SQLiteRepository
 from tasks import (
@@ -115,6 +116,38 @@ def _csrf_token_is_valid() -> bool:
     if not provided_token:
         return False
     return secrets.compare_digest(session_token, provided_token)
+
+
+def _default_reading_bp(page_bps: list[int], entries: list[dict], entry_idx: int, first_page: int) -> int:
+    if entries:
+        cursor_idx = max(0, min(int(entry_idx or 0), len(entries) - 1))
+        candidate = entries[cursor_idx].get("_pageBP")
+        if candidate in page_bps:
+            return int(candidate)
+    if first_page in page_bps:
+        return int(first_page)
+    return int(page_bps[0]) if page_bps else 1
+
+
+def _nearest_existing_bp(page_bps: list[int], requested_bp: int) -> int | None:
+    if not page_bps:
+        return None
+    return min(page_bps, key=lambda bp: (abs(int(bp) - int(requested_bp)), int(bp)))
+
+
+def _build_toc_reading_items(toc_items: list[dict], toc_offset: int, page_lookup: dict[int, dict]) -> list[dict]:
+    resolved_items = []
+    for item in toc_items or []:
+        resolved = dict(item)
+        try:
+            book_page = int(item.get("book_page") or 0)
+        except (TypeError, ValueError):
+            book_page = 0
+        target_page = book_page + int(toc_offset or 0) if book_page > 0 else None
+        resolved["book_page_display"] = format_print_page_display(book_page) if book_page > 0 else ""
+        resolved["target_page"] = target_page if target_page in page_lookup else None
+        resolved_items.append(resolved)
+    return resolved_items
 
 
 @app.before_request
@@ -503,6 +536,11 @@ def reading():
 
     pages = state["pages"]
     page_bps = [pg["bookPage"] for pg in pages]
+    page_lookup = {
+        int(pg["bookPage"]): pg
+        for pg in pages
+        if pg.get("bookPage") is not None
+    }
     entries = state["entries"]
     translate_snapshot = get_translate_snapshot(current_doc_id)
     show_initial_translate_snapshot = translate_snapshot.get("phase") in ("running", "stopping")
@@ -518,17 +556,17 @@ def reading():
             entry_by_bp[bp] = entry
 
     requested_bp = request.args.get("bp", type=int)
-    cur_page_bp = requested_bp
-    if cur_page_bp not in page_bps:
-        if requested_bp is not None and page_bps:
-            flash(
-                f"页码 {requested_bp} 不在范围 p.{page_bps[0]}-p.{page_bps[-1]} 内，已跳转到 p.{state.get('first_page', page_bps[0])}。",
-                "info",
-            )
-        if entries:
-            cur_page_bp = entries[max(0, min(state["entry_idx"], len(entries) - 1))].get("_pageBP", state.get("first_page", 1))
+    cur_page_bp = _default_reading_bp(page_bps, entries, state.get("entry_idx", 0), state.get("first_page", 1))
+    if requested_bp in page_bps:
+        cur_page_bp = int(requested_bp)
+    elif requested_bp is not None and page_bps:
+        if requested_bp < page_bps[0] or requested_bp > page_bps[-1]:
+            target_bp = cur_page_bp
+            flash(f"PDF 第{requested_bp}页超出范围，已跳转到 PDF 第{target_bp}页。", "info")
         else:
-            cur_page_bp = state.get("first_page", 1)
+            target_bp = _nearest_existing_bp(page_bps, requested_bp) or cur_page_bp
+            flash(f"PDF 第{requested_bp}页当前不可用，已跳转到 PDF 第{target_bp}页。", "info")
+        cur_page_bp = target_bp
 
     cur = entry_by_bp.get(cur_page_bp, {})
     page_entries = cur.get("_page_entries", [])
@@ -551,6 +589,28 @@ def reading():
             pe_copy[field] = _clean_display_text(
                 normalize_latex_footnote_markers(_ensure_str(pe_copy.get(field)))
             )
+        start_bp = pe_copy.get("_startBP")
+        end_bp = pe_copy.get("_endBP")
+        try:
+            start_bp = int(start_bp) if start_bp is not None else cur_page_bp
+        except (TypeError, ValueError):
+            start_bp = cur_page_bp
+        try:
+            end_bp = int(end_bp) if end_bp is not None else start_bp
+        except (TypeError, ValueError):
+            end_bp = start_bp
+        pe_copy["_startBP"] = start_bp
+        pe_copy["_endBP"] = end_bp
+        raw_print_label = str(pe_copy.get("_printPageLabel") or "").strip()
+        if not raw_print_label:
+            start_label = resolve_page_print_label(page_lookup.get(start_bp))
+            end_label = resolve_page_print_label(page_lookup.get(end_bp))
+            if start_label and end_label and start_label != end_label:
+                raw_print_label = f"{start_label}-{end_label}"
+            else:
+                raw_print_label = start_label or end_label
+            pe_copy["_printPageLabel"] = raw_print_label
+        pe_copy["pages_display"] = format_print_page_display(raw_print_label)
         pe_copy["original_html"] = highlight_terms(pe_copy["original"], glossary)
         display_entries.append(pe_copy)
 
@@ -569,6 +629,7 @@ def reading():
     # 目录（仅用户主动上传的才传给阅读页）
     toc_source, toc_offset = load_toc_source_offset(current_doc_id)
     toc_items = load_user_toc_from_disk(current_doc_id) if toc_source == "user" else []
+    toc_items = _build_toc_reading_items(toc_items, toc_offset, page_lookup)
 
     page_index = page_bps.index(cur_page_bp) if cur_page_bp in page_bps else 0
     prev_bp = page_bps[page_index - 1] if page_index > 0 else None
@@ -649,6 +710,7 @@ def reading():
         current_page_markdown=current_page_markdown,
         current_page_markdown_paragraphs=current_page_markdown_paragraphs,
         current_page_footnotes=current_page_footnotes,
+        cur_page_print_display=format_print_page_display(resolve_page_print_label(current_page_data)),
         translate_snapshot=translate_snapshot,
         show_initial_translate_snapshot=show_initial_translate_snapshot,
         pdf_virtual_window_radius=pdf_virtual_window_radius,
@@ -837,8 +899,9 @@ def start_reading():
     start_page = request.form.get("start_page", type=int)
     doc_title = request.form.get("doc_title", "").strip() or src_name or "Untitled"
     first, last = get_page_range(pages)
+    valid_pages = {int(page.get("bookPage")) for page in pages if page.get("bookPage") is not None}
 
-    if not start_page or start_page < first or start_page > last:
+    if not start_page or start_page not in valid_pages:
         flash(f"请输入有效页码 ({first}-{last})", "error")
         return redirect(url_for("input_page", doc_id=doc_id))
 

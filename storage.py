@@ -6,6 +6,8 @@ import re
 import shutil
 import time
 
+from pypdf import PdfReader
+
 from config import (
     MODELS,
     QWEN_BASE_URLS,
@@ -21,6 +23,8 @@ from text_processing import get_page_range
 
 
 # ============ DISK PERSISTENCE (多文档) ============
+
+_PRINT_PAGE_INT_RE = re.compile(r"^\d+$")
 
 def _doc_path(filename: str, doc_id: str = "") -> str:
     """获取当前文档目录下的文件路径。"""
@@ -71,12 +75,262 @@ def save_pages_to_disk(pages: list, name: str, doc_id: str = ""):
     update_doc_meta(target_doc_id, page_count=len(pages), name=name)
 
 
+def _parse_print_page_number(label) -> int | None:
+    raw = str(label or "").strip()
+    if not raw or not _PRINT_PAGE_INT_RE.match(raw):
+        return None
+    value = int(raw)
+    return value if value > 0 else None
+
+
+def resolve_page_print_label(page: dict | None) -> str:
+    if not isinstance(page, dict):
+        return ""
+    raw = str(page.get("printPageLabel") or "").strip()
+    if raw:
+        return raw
+    value = page.get("printPage")
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return ""
+    return str(parsed) if parsed > 0 else ""
+
+
+def format_print_page_display(label) -> str:
+    raw = str(label or "").strip()
+    if not raw:
+        return ""
+    return raw if raw.startswith("原书 p.") else f"原书 p.{raw}"
+
+
+def _normalize_page_payload(page: dict, book_page: int | None = None, file_idx: int | None = None) -> dict:
+    normalized = dict(page or {})
+    resolved_book_page = int(book_page if book_page is not None else normalized.get("bookPage", 0) or 0)
+    resolved_file_idx = int(file_idx if file_idx is not None else normalized.get("fileIdx", max(resolved_book_page - 1, 0)) or 0)
+    normalized["bookPage"] = resolved_book_page
+    normalized["pdfPage"] = int(normalized.get("pdfPage", resolved_book_page) or resolved_book_page)
+    normalized["fileIdx"] = resolved_file_idx
+    print_label = resolve_page_print_label(normalized)
+    if print_label:
+        normalized["printPageLabel"] = print_label
+        if normalized.get("printPage") is None:
+            parsed = _parse_print_page_number(print_label)
+            if parsed is not None:
+                normalized["printPage"] = parsed
+    else:
+        normalized["printPageLabel"] = ""
+    normalized["printPageDisplay"] = format_print_page_display(normalized.get("printPageLabel"))
+    return normalized
+
+
+def _pages_need_pdf_navigation_repair(pages: list[dict]) -> bool:
+    if not pages:
+        return False
+    ordered = sorted(pages, key=lambda item: int(item.get("fileIdx", 0) or 0))
+    for expected_file_idx, page in enumerate(ordered):
+        file_idx = int(page.get("fileIdx", -1) or -1)
+        book_page = int(page.get("bookPage", 0) or 0)
+        if file_idx != expected_file_idx or book_page != expected_file_idx + 1:
+            return True
+    return False
+
+
+def _read_pdf_page_count(doc_id: str) -> int:
+    pdf_path = get_pdf_path(doc_id)
+    if not pdf_path or not os.path.exists(pdf_path):
+        return 0
+    try:
+        with open(pdf_path, "rb") as f:
+            reader = PdfReader(f)
+            return len(reader.pages)
+    except Exception:
+        return 0
+
+
+def _repair_pages_for_pdf_navigation(doc_id: str, pages: list[dict]) -> tuple[list[dict], dict[int, int]]:
+    pdf_page_count = _read_pdf_page_count(doc_id)
+    if pdf_page_count <= 0:
+        return ([_normalize_page_payload(page) for page in pages], {})
+
+    ordered = sorted((dict(page) for page in pages), key=lambda item: int(item.get("fileIdx", 0) or 0))
+    existing_by_file_idx = {
+        int(page.get("fileIdx", 0) or 0): page
+        for page in ordered
+        if page.get("fileIdx") is not None
+    }
+    legacy_bp_to_pdf_bp = {}
+    known_print_numbers: dict[int, int] = {}
+    for page in ordered:
+        file_idx = int(page.get("fileIdx", 0) or 0)
+        legacy_bp = page.get("bookPage")
+        if legacy_bp is not None:
+            legacy_bp_to_pdf_bp[int(legacy_bp)] = file_idx + 1
+        print_label = resolve_page_print_label(page)
+        if not print_label:
+            legacy_book_page = page.get("bookPage")
+            legacy_pdf_page = file_idx + 1
+            try:
+                legacy_book_page = int(legacy_book_page)
+            except (TypeError, ValueError):
+                legacy_book_page = None
+            if legacy_book_page and legacy_book_page != legacy_pdf_page:
+                print_label = str(legacy_book_page)
+        print_num = _parse_print_page_number(print_label)
+        if print_num is not None:
+            known_print_numbers[file_idx] = print_num
+
+    sorted_known = sorted(known_print_numbers.items())
+    interpolated_print_numbers = dict(known_print_numbers)
+    for idx in range(len(sorted_known) - 1):
+        start_idx, start_num = sorted_known[idx]
+        end_idx, end_num = sorted_known[idx + 1]
+        gap = end_idx - start_idx
+        if gap <= 1:
+            continue
+        step = end_num - start_num
+        if step != gap:
+            continue
+        for file_idx in range(start_idx + 1, end_idx):
+            candidate = start_num + (file_idx - start_idx)
+            if candidate > 0:
+                interpolated_print_numbers[file_idx] = candidate
+
+    repaired_pages = []
+    for file_idx in range(pdf_page_count):
+        source_page = existing_by_file_idx.get(file_idx, {})
+        page = _normalize_page_payload(source_page, book_page=file_idx + 1, file_idx=file_idx)
+        if not page.get("printPageLabel"):
+            inferred_print_num = interpolated_print_numbers.get(file_idx)
+            if inferred_print_num is not None and inferred_print_num > 0:
+                page["printPage"] = inferred_print_num
+                page["printPageLabel"] = str(inferred_print_num)
+                page["printPageDisplay"] = format_print_page_display(page["printPageLabel"])
+        if file_idx not in existing_by_file_idx:
+            page["isPlaceholder"] = True
+            page["markdown"] = _ensure_str(page.get("markdown", ""))
+            page["footnotes"] = _ensure_str(page.get("footnotes", ""))
+            page["blocks"] = page.get("blocks") or []
+            page["fnBlocks"] = page.get("fnBlocks") or []
+            page["textSource"] = page.get("textSource") or "placeholder"
+        repaired_pages.append(page)
+    return repaired_pages, legacy_bp_to_pdf_bp
+
+
+def _normalize_placeholder_print_labels(pages: list[dict]) -> tuple[list[dict], bool]:
+    ordered = [_normalize_page_payload(page) for page in pages]
+    explicit_numbers: dict[int, int] = {}
+    for idx, page in enumerate(ordered):
+        if page.get("isPlaceholder"):
+            continue
+        print_num = _parse_print_page_number(page.get("printPageLabel"))
+        if print_num is not None:
+            explicit_numbers[idx] = print_num
+
+    changed = False
+    for idx, page in enumerate(ordered):
+        if not page.get("isPlaceholder"):
+            continue
+        prev_known = next(((i, explicit_numbers[i]) for i in range(idx - 1, -1, -1) if i in explicit_numbers), None)
+        next_known = next(((i, explicit_numbers[i]) for i in range(idx + 1, len(ordered)) if i in explicit_numbers), None)
+        confident_label = ""
+        if prev_known and next_known:
+            prev_idx, prev_num = prev_known
+            next_idx, next_num = next_known
+            if next_num - prev_num == next_idx - prev_idx:
+                confident_label = str(prev_num + (idx - prev_idx))
+        current_label = str(page.get("printPageLabel") or "").strip()
+        if confident_label:
+            if current_label != confident_label:
+                page["printPage"] = int(confident_label)
+                page["printPageLabel"] = confident_label
+                page["printPageDisplay"] = format_print_page_display(confident_label)
+                changed = True
+        elif current_label or page.get("printPage") or page.get("printPageDisplay"):
+            page["printPage"] = None
+            page["printPageLabel"] = ""
+            page["printPageDisplay"] = ""
+            changed = True
+    return ordered, changed
+
+
+def _segment_print_label_for_range(pages_by_bp: dict[int, dict], start_bp: int | None, end_bp: int | None) -> str:
+    if start_bp is None:
+        return ""
+    end_bp = end_bp if end_bp is not None else start_bp
+    start_label = resolve_page_print_label(pages_by_bp.get(int(start_bp)))
+    end_label = resolve_page_print_label(pages_by_bp.get(int(end_bp)))
+    if not start_label:
+        return ""
+    if not end_label or end_label == start_label:
+        return start_label
+    return f"{start_label}-{end_label}"
+
+
+def _normalize_entries_page_metadata(entries: list[dict], pages: list[dict]) -> tuple[list[dict], bool]:
+    pages_by_bp = {
+        int(page.get("bookPage")): page
+        for page in pages
+        if page.get("bookPage") is not None
+    }
+    changed = False
+    normalized_entries = []
+    for entry in entries:
+        entry_copy = dict(entry or {})
+        page_bp = entry_copy.get("_pageBP")
+        page_label = resolve_page_print_label(pages_by_bp.get(int(page_bp))) if page_bp is not None else ""
+        if not str(entry_copy.get("pages", "") or "").strip() and page_label:
+            entry_copy["pages"] = format_print_page_display(page_label)
+            changed = True
+
+        normalized_segments = []
+        for segment in entry_copy.get("_page_entries") or []:
+            segment_copy = dict(segment or {})
+            start_bp = segment_copy.get("_startBP")
+            end_bp = segment_copy.get("_endBP")
+            if start_bp is None and page_bp is not None:
+                segment_copy["_startBP"] = int(page_bp)
+                start_bp = int(page_bp)
+                changed = True
+            if end_bp is None and start_bp is not None:
+                segment_copy["_endBP"] = int(start_bp)
+                end_bp = int(start_bp)
+                changed = True
+
+            print_label = str(segment_copy.get("_printPageLabel") or "").strip()
+            if not print_label:
+                print_label = _segment_print_label_for_range(pages_by_bp, start_bp, end_bp)
+                if print_label:
+                    segment_copy["_printPageLabel"] = print_label
+                    changed = True
+            if not str(segment_copy.get("pages", "") or "").strip() and print_label:
+                segment_copy["pages"] = format_print_page_display(print_label)
+                changed = True
+            normalized_segments.append(segment_copy)
+
+        entry_copy["_page_entries"] = normalized_segments
+        normalized_entries.append(entry_copy)
+    return normalized_entries, changed
+
+
 def load_pages_from_disk(doc_id: str = "") -> tuple[list, str]:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return [], ""
     repo = SQLiteRepository()
     pages = repo.load_pages(target_doc_id)
+    if _pages_need_pdf_navigation_repair(pages):
+        repaired_pages, bp_map = _repair_pages_for_pdf_navigation(target_doc_id, pages)
+        repaired_pages, _ = _normalize_placeholder_print_labels(repaired_pages)
+        repo.replace_pages(target_doc_id, repaired_pages)
+        repo.remap_book_pages(target_doc_id, bp_map)
+        update_doc_meta(target_doc_id, page_count=len(repaired_pages))
+        pages = repaired_pages
+    else:
+        pages = [_normalize_page_payload(page) for page in pages]
+        pages, changed = _normalize_placeholder_print_labels(pages)
+        if changed:
+            repo.replace_pages(target_doc_id, pages)
     meta = repo.get_document(target_doc_id) or {}
     return pages, meta.get("name", "")
 
@@ -110,6 +364,14 @@ def load_entries_from_disk(doc_id: str = "") -> tuple[list, str, int]:
         return [], "", 0
     repo = SQLiteRepository()
     entries = repo.list_effective_translation_pages(target_doc_id)
+    pages, _ = load_pages_from_disk(target_doc_id)
+    entries, changed = _normalize_entries_page_metadata(entries, pages)
+    if changed:
+        for entry in entries:
+            bp = entry.get("_pageBP")
+            if bp is None:
+                continue
+            repo.save_translation_page(target_doc_id, int(bp), entry)
     title = repo.get_translation_title(target_doc_id)
     meta = get_doc_meta(target_doc_id)
     return entries, title, int(meta.get("last_entry_idx", 0) or 0)

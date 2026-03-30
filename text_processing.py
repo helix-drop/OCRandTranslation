@@ -272,6 +272,37 @@ def _find_page(pages: list, bp: int) -> dict | None:
     return None
 
 
+def _page_print_label(page: dict | None) -> str:
+    if not isinstance(page, dict):
+        return ""
+    raw = str(page.get("printPageLabel") or "").strip()
+    if raw:
+        return raw
+    value = page.get("printPage")
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return ""
+    return str(parsed) if parsed > 0 else ""
+
+
+def _page_print_display(page: dict | None) -> str:
+    label = _page_print_label(page)
+    return f"原书 p.{label}" if label else ""
+
+
+def _segment_print_label(pages: list, start_bp: int, end_bp: int) -> str:
+    start_page = _find_page(pages, start_bp)
+    end_page = _find_page(pages, end_bp)
+    start_label = _page_print_label(start_page)
+    end_label = _page_print_label(end_page)
+    if not start_label:
+        return ""
+    if not end_label or end_label == start_label:
+        return start_label
+    return f"{start_label}-{end_label}"
+
+
 def parse_page_markdown(pages: list, bp: int) -> list[dict]:
     """
     逐行解析某页的 markdown 文本，返回段落结构。
@@ -326,13 +357,13 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
         if buf:
             combined = " ".join(buf)
             if len(combined.strip()) > 1:
-                segments.append({"heading_level": 0, "text": combined.strip()})
+                segments.append({"heading_level": 0, "text": combined.strip(), "startBP": bp, "endBP": bp})
             buf.clear()
 
     for item in items:
         if item["type"] == "heading":
             flush_buf()
-            segments.append({"heading_level": item["level"], "text": item["text"]})
+            segments.append({"heading_level": item["level"], "text": item["text"], "startBP": bp, "endBP": bp})
         elif item["type"] == "text":
             buf.append(item["text"])
         elif item["type"] == "blank":
@@ -438,9 +469,9 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
             else:
                 prev["text"] += " " + txt
         elif is_short and not merged:
-            merged.append({"heading_level": 0, "text": txt})
+            merged.append({"heading_level": 0, "text": txt, "startBP": bp, "endBP": bp})
         else:
-            merged.append({"heading_level": hl, "text": txt})
+            merged.append({"heading_level": hl, "text": txt, "startBP": bp, "endBP": bp})
 
     # ====== Step 4: 检测跨页并合并 ======
     result = []
@@ -463,6 +494,8 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
             "heading_level": hl,
             "text": txt,
             "cross_page": cross_page,
+            "startBP": int(seg.get("startBP", bp) or bp),
+            "endBP": int(seg.get("endBP", bp) or bp),
         })
 
     # ====== Step 5: 跨页段落处理 ======
@@ -476,12 +509,14 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
         chain_texts = []
         scan_pg = next_pg
         scan_md = next_md
+        last_merged_bp = int(result[-1].get("endBP", bp) or bp)
         while scan_pg and scan_md:
             scan_paras = _parse_single_page_md(scan_pg, scan_md)
             if not scan_paras:
                 break
             first_para = scan_paras[0]
             chain_texts.append(first_para["text"])
+            last_merged_bp = int(scan_pg["bookPage"])
             if not ends_mid(first_para["text"]):
                 break
             next_scan_bp = scan_pg["bookPage"] + 1
@@ -490,6 +525,12 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
         if chain_texts:
             result[-1]["text"] = result[-1]["text"] + " " + " ".join(chain_texts)
             result[-1]["cross_page"] = "merged_next"
+            result[-1]["endBP"] = last_merged_bp
+
+    for item in result:
+        start_bp = int(item.get("startBP", bp) or bp)
+        end_bp = int(item.get("endBP", start_bp) or start_bp)
+        item["printPageLabel"] = _segment_print_label(pages, start_bp, end_bp)
 
     return result
 
@@ -593,7 +634,7 @@ def _fallback_blocks_to_paragraphs(pg: dict, bp: int) -> list[dict]:
         if real_hl > 0:
             hl = real_hl
 
-        raw.append({"heading_level": hl, "text": clean_text})
+        raw.append({"heading_level": hl, "text": clean_text, "startBP": bp, "endBP": bp})
 
     merged = []
     for seg in raw:
@@ -610,7 +651,14 @@ def _fallback_blocks_to_paragraphs(pg: dict, bp: int) -> list[dict]:
             else:
                 prev["text"] += " " + txt
         else:
-            merged.append({"heading_level": hl, "text": txt, "cross_page": None})
+            merged.append({
+                "heading_level": hl,
+                "text": txt,
+                "cross_page": None,
+                "startBP": int(seg.get("startBP", bp) or bp),
+                "endBP": int(seg.get("endBP", bp) or bp),
+                "printPageLabel": _segment_print_label([pg], bp, bp) if pg else "",
+            })
 
     return merged
 
@@ -921,6 +969,8 @@ def get_page_context_for_translate(pages: list, bp: int) -> dict:
         "paragraphs": paragraphs,
         "footnotes": fn,
         "page_num": bp,
+        "print_page_label": _page_print_label(cur),
+        "print_page_display": _page_print_display(cur),
         "prev_tail": prev_tail,
         "next_head": next_head,
     }
@@ -945,14 +995,14 @@ def get_page_text(pages: list, bp: int) -> dict | None:
         "startBP": bp,
         "endBP": bp,
         "footnotes": fn_text,
-        "pages": str(bp),
+        "pages": _page_print_display(cur),
     }
 
 
 def get_next_page_bp(pages: list, current_bp: int) -> int | None:
-    """获取当前页之后的下一个有内容的页码。"""
+    """获取当前页之后的下一个 PDF 实页。"""
     for pg in pages:
-        if pg["bookPage"] > current_bp and (pg.get("markdown") or pg.get("blocks")):
+        if pg["bookPage"] > current_bp:
             return pg["bookPage"]
     return None
 

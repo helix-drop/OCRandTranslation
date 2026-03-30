@@ -42,8 +42,8 @@
         <div id="usageProgress" style="font-size:15px;font-weight:600;">{{ snapshot.done_pages }}/{{ snapshot.total_pages }} 页</div>
       </div>
       <div class="card flex-1" style="min-width:220px;margin-bottom:0;">
-        <div class="lbl">最近页码</div>
-        <div id="usageCurrentPage" style="font-size:15px;font-weight:600;">{{ snapshot.current_bp or '-' }}</div>
+        <div class="lbl">最近 PDF 页</div>
+        <div id="usageCurrentPage" style="font-size:15px;font-weight:600;">{{ ('PDF 第' ~ snapshot.current_bp ~ '页') if snapshot.current_bp else '-' }}</div>
       </div>
       <div class="card flex-1" style="min-width:220px;margin-bottom:0;">
         <div class="lbl">模型</div>
@@ -75,7 +75,7 @@
           <tbody id="usageTableBody">
             {% for page in pages %}
             <tr style="border-bottom:1px solid var(--bdrL);">
-              <td style="padding:8px 10px;">p.{{ page.page_bp }}</td>
+              <td style="padding:8px 10px;">{{ ('PDF 第' ~ page.page_bp ~ '页') if page.page_bp else '-' }}</td>
               <td style="padding:8px 10px;">{{ page.model or '-' }}</td>
               <td style="padding:8px 10px;">{{ page.request_count }}</td>
               <td style="padding:8px 10px;">{{ page.prompt_tokens }}</td>
@@ -99,6 +99,11 @@
 <script>
 var currentDocId = '{{ doc_id }}';
 
+function formatPdfPageLabel(bp) {
+  var value = Number(bp || 0);
+  return value ? ('PDF 第' + value + '页') : '-';
+}
+
 function formatUsageTime(ts) {
   if (!ts) return '-';
   var d = new Date(ts * 1000);
@@ -114,7 +119,7 @@ function renderUsage(payload) {
   document.getElementById('sumTotal').textContent = snapshot.total_tokens || 0;
   document.getElementById('sumRequests').textContent = snapshot.request_count || 0;
   document.getElementById('usageProgress').textContent = (snapshot.done_pages || 0) + '/' + (snapshot.total_pages || 0) + ' 页';
-  document.getElementById('usageCurrentPage').textContent = snapshot.current_bp || '-';
+  document.getElementById('usageCurrentPage').textContent = formatPdfPageLabel(snapshot.current_bp);
   document.getElementById('usageModel').textContent = snapshot.model || '-';
   document.getElementById('usageUpdatedAt').textContent = formatUsageTime(snapshot.updated_at);
 
@@ -127,7 +132,7 @@ function renderUsage(payload) {
 
   tbody.innerHTML = pages.map(function(page) {
     return '<tr style="border-bottom:1px solid var(--bdrL);">' +
-      '<td style="padding:8px 10px;">p.' + (page.page_bp || '-') + '</td>' +
+      '<td style="padding:8px 10px;">' + formatPdfPageLabel(page.page_bp) + '</td>' +
       '<td style="padding:8px 10px;">' + (page.model || '-') + '</td>' +
       '<td style="padding:8px 10px;">' + (page.request_count || 0) + '</td>' +
       '<td style="padding:8px 10px;">' + (page.prompt_tokens || 0) + '</td>' +

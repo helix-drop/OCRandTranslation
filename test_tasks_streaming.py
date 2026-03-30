@@ -28,7 +28,7 @@ from translator import TranslateStreamAborted, RateLimitedError, QuotaExceededEr
 
 class TasksStreamingTest(unittest.TestCase):
     def setUp(self):
-        self.temp_root = tempfile.mkdtemp(prefix="tasks-stream-", dir="/tmp")
+        self.temp_root = tempfile.mkdtemp(prefix="tasks-stream-")
         self._patch_config_dirs(self.temp_root)
         ensure_dirs()
         self.doc_id = create_doc("streaming-test.pdf")
@@ -1065,7 +1065,7 @@ class OCRClientTest(unittest.TestCase):
 
 class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
-        self.temp_root = tempfile.mkdtemp(prefix="reading-refresh-", dir="/tmp")
+        self.temp_root = tempfile.mkdtemp(prefix="reading-refresh-")
         self._patch_config_dirs(self.temp_root)
         ensure_dirs()
         self.doc_id = create_doc("reading-refresh.pdf")
@@ -1103,6 +1103,31 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
             "markdown": f"Page {bp}",
             "footnotes": "",
         } for bp in range(first_bp, last_bp + 1)], "Reading Refresh", self.doc_id)
+
+    def _save_page_entries_with_heading_and_footnotes(self, bp: int = 1):
+        save_entries_to_disk([{
+            "_pageBP": bp,
+            "_model": "sonnet",
+            "_page_entries": [
+                {
+                    "original": "Heading Original",
+                    "translation": "标题译文",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 1,
+                    "pages": str(bp),
+                },
+                {
+                    "original": "Body Original",
+                    "translation": "正文译文",
+                    "footnotes": "1. 脚注原文甲",
+                    "footnotes_translation": "1. 脚注译文甲",
+                    "heading_level": 0,
+                    "pages": str(bp),
+                },
+            ],
+            "pages": str(bp),
+        }], "Reading Refresh", 0, self.doc_id)
 
     def test_translate_status_exposes_translated_bps_for_polling_recovery(self):
         save_entries_to_disk([{
@@ -1204,6 +1229,75 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn(f'/reading?bp=2&amp;doc_id={self.doc_id}&amp;usage=0&amp;orig=0&amp;layout=stack&amp;pdf=0', html)
         self.assertIn('class="pdf-panel" id="pdfPanel" style="display:none;"', html)
         self.assertIn('class="pdf-toggle-btn" id="pdfToggleBtn"', html)
+
+    def test_reading_page_uses_explicit_layout_controls_and_disables_them_when_original_hidden(self):
+        self._save_range_pages(1, 1)
+        self._save_page_entries_with_heading_and_footnotes()
+
+        resp = self.client.get("/reading?bp=1&usage=0&orig=0&layout=side&pdf=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("原译排列", html)
+        self.assertIn("上下排列", html)
+        self.assertIn("左右排列", html)
+        self.assertIn("先打开原文再切换排列", html)
+        self.assertNotIn("改双栏", html)
+        self.assertNotIn("改单栏", html)
+        self.assertRegex(
+            html,
+            re.compile(r'id="layoutStackBtn"[^>]*aria-pressed="false"[^>]*disabled', re.S),
+        )
+        self.assertRegex(
+            html,
+            re.compile(r'id="layoutSideBtn"[^>]*aria-pressed="true"[^>]*disabled', re.S),
+        )
+
+    def test_reading_page_applies_stack_layout_to_heading_body_and_footnotes(self):
+        self._save_range_pages(1, 1)
+        self._save_page_entries_with_heading_and_footnotes()
+
+        resp = self.client.get("/reading?bp=1&usage=0&orig=1&layout=stack&pdf=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('data-reading-section="heading" data-reading-layout="stack" style=""', html)
+        self.assertIn('data-reading-section="heading" data-reading-layout="side" style="display:none;"', html)
+        self.assertIn('data-reading-section="body" data-reading-layout="stack" style=""', html)
+        self.assertIn('data-reading-section="body" data-reading-layout="side" style="display:none;"', html)
+        self.assertIn('data-reading-section="footnotes" data-reading-layout="stack" style=""', html)
+        self.assertIn('data-reading-section="footnotes" data-reading-layout="side" style="display:none;"', html)
+
+    def test_reading_page_applies_side_layout_to_heading_body_and_footnotes(self):
+        self._save_range_pages(1, 1)
+        self._save_page_entries_with_heading_and_footnotes()
+
+        resp = self.client.get("/reading?bp=1&usage=0&orig=1&layout=side&pdf=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('data-reading-section="heading" data-reading-layout="side" style=""', html)
+        self.assertIn('data-reading-section="heading" data-reading-layout="stack" style="display:none;"', html)
+        self.assertIn('data-reading-section="body" data-reading-layout="side" style=""', html)
+        self.assertIn('data-reading-section="body" data-reading-layout="stack" style="display:none;"', html)
+        self.assertIn('data-reading-section="footnotes" data-reading-layout="side" style=""', html)
+        self.assertIn('data-reading-section="footnotes" data-reading-layout="stack" style="display:none;"', html)
+
+    def test_reading_page_keeps_pdf_panel_and_layout_controls_semantically_separate(self):
+        self._save_range_pages(1, 1)
+        self._save_page_entries_with_heading_and_footnotes()
+
+        resp = self.client.get("/reading?bp=1&usage=0&orig=1&layout=side&pdf=1")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('class="reading-main-layout with-pdf"', html)
+        self.assertIn("PDF 原文", html)
+        self.assertIn("原译排列", html)
+        self.assertIn("上下排列", html)
+        self.assertIn("左右排列", html)
+        self.assertNotIn("改双栏", html)
+        self.assertNotIn("改单栏", html)
 
     def test_reading_page_syncs_pdf_resizer_visibility_with_panel_state(self):
         self._save_range_pages(1, 2)
@@ -1428,7 +1522,7 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('p.2 · 部分完成', html)
+        self.assertIn('PDF 第2页 · 部分完成', html)
 
     def test_get_translate_snapshot_preserves_paragraph_errors_in_draft(self):
         tasks._save_translate_state(

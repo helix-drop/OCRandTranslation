@@ -3,14 +3,15 @@
 模拟陈思远（33岁历史学博后）半屏阅读场景
 覆盖: 封面→目录→正文→脚注→PDF对照→主题→深页→边缘页
 """
+import os
+import tempfile
 import time
 from playwright.sync_api import sync_playwright
 
 BASE = "http://127.0.0.1:8080"
 DOC_ID = "f32dece616c9"
-SD = "/tmp/mad_acts_screenshots"
+SD = os.path.join(tempfile.gettempdir(), "mad_acts_screenshots")
 
-import os
 os.makedirs(SD, exist_ok=True)
 
 def wait_ready(pg):

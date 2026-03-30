@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from config import ensure_dirs, get_sqlite_db_path
 
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 
 def _apply_pragmas(conn: sqlite3.Connection) -> None:
@@ -105,6 +105,10 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             manual_updated_by TEXT,
             footnotes_text TEXT,
             footnotes_translation_text TEXT,
+            pages_label TEXT,
+            start_book_page INTEGER,
+            end_book_page INTEGER,
+            print_page_label TEXT,
             heading_level INTEGER NOT NULL DEFAULT 0,
             segment_status TEXT NOT NULL DEFAULT 'done',
             error_message TEXT,
@@ -278,6 +282,30 @@ def _create_schema(conn: sqlite3.Connection) -> None:
         "translation_segments",
         "manual_updated_by",
         "manual_updated_by TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "pages_label",
+        "pages_label TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "start_book_page",
+        "start_book_page INTEGER",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "end_book_page",
+        "end_book_page INTEGER",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "print_page_label",
+        "print_page_label TEXT",
     )
     conn.execute(
         """
@@ -821,8 +849,9 @@ class SQLiteRepository:
                     INSERT INTO translation_segments(
                         translation_page_id, segment_index, original_text,
                         translation_text, footnotes_text, footnotes_translation_text,
+                        pages_label, start_book_page, end_book_page, print_page_label,
                         heading_level, segment_status, error_message, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         translation_page_id,
@@ -831,6 +860,10 @@ class SQLiteRepository:
                         segment.get("translation"),
                         segment.get("footnotes"),
                         segment.get("footnotes_translation"),
+                        segment.get("pages"),
+                        int(segment.get("_startBP")) if segment.get("_startBP") is not None else None,
+                        int(segment.get("_endBP")) if segment.get("_endBP") is not None else None,
+                        segment.get("_printPageLabel"),
                         int(segment.get("heading_level", 0) or 0),
                         segment.get("_status", "done"),
                         segment.get("_error"),
@@ -1091,9 +1124,138 @@ class SQLiteRepository:
         payload["_manual_updated_by"] = payload.get("manual_updated_by")
         payload["footnotes"] = payload.get("footnotes_text")
         payload["footnotes_translation"] = payload.get("footnotes_translation_text")
+        payload["pages"] = payload.get("pages_label")
+        payload["_startBP"] = payload.get("start_book_page")
+        payload["_endBP"] = payload.get("end_book_page")
+        payload["_printPageLabel"] = payload.get("print_page_label")
         payload["_status"] = payload.get("segment_status", "done")
         payload["_error"] = payload.get("error_message")
         return payload
+
+    def remap_book_pages(self, doc_id: str, bp_map: dict[int, int]) -> None:
+        normalized = {
+            int(old_bp): int(new_bp)
+            for old_bp, new_bp in (bp_map or {}).items()
+            if old_bp is not None and new_bp is not None and int(old_bp) != int(new_bp)
+        }
+        if not normalized:
+            return
+
+        def _remap_bp(value):
+            if value is None:
+                return None
+            try:
+                return normalized.get(int(value), int(value))
+            except (TypeError, ValueError):
+                return value
+
+        def _remap_bp_list(raw_json: str | None) -> str:
+            try:
+                items = json.loads(raw_json or "[]")
+            except Exception:
+                items = []
+            if not isinstance(items, list):
+                items = []
+            return json.dumps([_remap_bp(item) for item in items], ensure_ascii=False)
+
+        def _remap_failed_pages(raw_json: str | None) -> str:
+            try:
+                items = json.loads(raw_json or "[]")
+            except Exception:
+                items = []
+            normalized_items = []
+            for item in items if isinstance(items, list) else []:
+                if isinstance(item, dict):
+                    updated = dict(item)
+                    if updated.get("bp") is not None:
+                        updated["bp"] = _remap_bp(updated.get("bp"))
+                    normalized_items.append(updated)
+                else:
+                    normalized_items.append(item)
+            return json.dumps(normalized_items, ensure_ascii=False)
+
+        def _remap_draft(raw_json: str | None) -> str:
+            try:
+                draft = json.loads(raw_json or "{}")
+            except Exception:
+                draft = {}
+            if not isinstance(draft, dict):
+                draft = {}
+            if draft.get("bp") is not None:
+                draft["bp"] = _remap_bp(draft.get("bp"))
+            return json.dumps(draft, ensure_ascii=False)
+
+        with transaction(self.db_path) as conn:
+            page_rows = conn.execute(
+                "SELECT id, book_page FROM translation_pages WHERE doc_id = ?",
+                (doc_id,),
+            ).fetchall()
+            for row in page_rows:
+                old_bp = int(row["book_page"])
+                new_bp = normalized.get(old_bp)
+                if new_bp is None:
+                    continue
+                conn.execute(
+                    "UPDATE translation_pages SET book_page = ? WHERE id = ?",
+                    (-new_bp, int(row["id"])),
+                )
+            conn.execute(
+                "UPDATE translation_pages SET book_page = ABS(book_page) WHERE doc_id = ? AND book_page < 0",
+                (doc_id,),
+            )
+
+            for column in ("start_bp", "current_bp", "resume_bp"):
+                for old_bp, new_bp in normalized.items():
+                    conn.execute(
+                        f"UPDATE translate_runs SET {column} = ? WHERE doc_id = ? AND {column} = ?",
+                        (-new_bp, doc_id, old_bp),
+                    )
+                conn.execute(
+                    f"UPDATE translate_runs SET {column} = ABS({column}) WHERE doc_id = ? AND {column} < 0",
+                    (doc_id,),
+                )
+
+            failure_rows = conn.execute(
+                "SELECT id, book_page FROM translate_failures WHERE doc_id = ?",
+                (doc_id,),
+            ).fetchall()
+            for row in failure_rows:
+                old_bp = int(row["book_page"])
+                new_bp = normalized.get(old_bp)
+                if new_bp is None:
+                    continue
+                conn.execute(
+                    "UPDATE translate_failures SET book_page = ? WHERE id = ?",
+                    (-new_bp, int(row["id"])),
+                )
+            conn.execute(
+                "UPDATE translate_failures SET book_page = ABS(book_page) WHERE doc_id = ? AND book_page < 0",
+                (doc_id,),
+            )
+
+            run_rows = conn.execute(
+                """
+                SELECT id, failed_bps_json, partial_failed_bps_json, failed_pages_json, draft_json
+                FROM translate_runs
+                WHERE doc_id = ?
+                """,
+                (doc_id,),
+            ).fetchall()
+            for row in run_rows:
+                conn.execute(
+                    """
+                    UPDATE translate_runs
+                    SET failed_bps_json = ?, partial_failed_bps_json = ?, failed_pages_json = ?, draft_json = ?
+                    WHERE id = ?
+                    """,
+                    (
+                        _remap_bp_list(row["failed_bps_json"]),
+                        _remap_bp_list(row["partial_failed_bps_json"]),
+                        _remap_failed_pages(row["failed_pages_json"]),
+                        _remap_draft(row["draft_json"]),
+                        int(row["id"]),
+                    ),
+                )
 
     def list_translation_segments(self, translation_page_id: int) -> list[dict]:
         with read_connection(self.db_path) as conn:

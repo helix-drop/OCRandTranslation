@@ -403,6 +403,14 @@ def _build_para_jobs(paragraphs: list, ctx: dict, para_bboxes: list, target_bp: 
             "heading_level": hlevel,
             "text": text,
             "cross_page": cross,
+            "start_bp": int(para.get("startBP", target_bp) or target_bp),
+            "end_bp": int(para.get("endBP", target_bp) or target_bp),
+            "print_page_label": str(para.get("printPageLabel", "") or "").strip(),
+            "print_page_display": (
+                f"原书 p.{str(para.get('printPageLabel', '') or '').strip()}"
+                if str(para.get("printPageLabel", "") or "").strip()
+                else ""
+            ),
             "bboxes": para_bboxes[idx] if idx < len(para_bboxes) else [],
             "footnotes": _ensure_str(para.get("footnotes", "")).strip(),
             "prev_context": "" if hlevel > 0 else _trim_para_context(prev_text, limit=context_window, from_end=True),
@@ -438,16 +446,18 @@ def _make_page_entry(job: dict, target_bp: int, result: dict | None = None, erro
     job_footnotes = _ensure_str(job.get("footnotes", "")).strip()
     footnotes = result_footnotes or job_footnotes
     footnotes_translation = _ensure_str(result.get("footnotes_translation", "")).strip()
+    pages_label = str(job.get("print_page_display", "") or "").strip()
     return {
         "original": _ensure_str(result.get("original", job["text"])),
         "translation": translation,
         "footnotes": footnotes,
         "footnotes_translation": footnotes_translation,
         "heading_level": job["heading_level"],
-        "pages": str(target_bp),
+        "pages": pages_label,
         "_rawText": job["text"],
-        "_startBP": target_bp,
-        "_endBP": target_bp,
+        "_startBP": int(job.get("start_bp", target_bp) or target_bp),
+        "_endBP": int(job.get("end_bp", target_bp) or target_bp),
+        "_printPageLabel": str(job.get("print_page_label", "") or "").strip(),
         "_cross_page": job["cross_page"],
         "_bboxes": job["bboxes"],
         "_status": "error" if is_error else "done",
@@ -516,7 +526,7 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
     def _do_translate(job: dict):
         return job["para_idx"], translate_paragraph(
             para_text=job["text"],
-            para_pages=str(target_bp),
+            para_pages=job.get("print_page_label") or str(target_bp),
             footnotes=job["footnotes"],
             glossary=glossary,
             heading_level=job["heading_level"],
@@ -557,7 +567,7 @@ def translate_page(pages, target_bp, model_key, t_args, glossary):
         "_page_entries": page_entries,
         "footnotes": page_footnotes,
         "footnotes_translation": page_footnotes_translation,
-        "pages": str(target_bp),
+        "pages": ctx.get("print_page_display", ""),
     }
 
 
@@ -640,7 +650,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
         try:
             for event in stream_translate_paragraph(
                 para_text=job["text"],
-                para_pages=str(target_bp),
+                para_pages=job.get("print_page_label") or str(target_bp),
                 footnotes=job["footnotes"],
                 glossary=glossary,
                 stop_checker=None,
@@ -944,7 +954,7 @@ def translate_page_stream(pages, target_bp, model_key, t_args, glossary, doc_id:
         "_page_entries": page_entries,
         "footnotes": page_footnotes,
         "footnotes_translation": page_footnotes_translation,
-        "pages": str(target_bp),
+        "pages": ctx.get("print_page_display", ""),
     }
 
 

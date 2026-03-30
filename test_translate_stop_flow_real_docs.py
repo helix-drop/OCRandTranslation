@@ -110,7 +110,7 @@ def _build_fallback_pages(start_bp: int, count: int):
 
 class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
     def setUp(self):
-        self.temp_root = tempfile.mkdtemp(prefix="translate-stop-", dir="/tmp")
+        self.temp_root = tempfile.mkdtemp(prefix="translate-stop-")
         self._patch_config_dirs(self.temp_root)
         ensure_dirs()
         self._reset_translate_task()
@@ -1302,8 +1302,8 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         original_docs_dir = config.DOCS_DIR
         original_current_file = config.CURRENT_FILE
 
-        legacy_root = tempfile.mkdtemp(prefix="legacy-config-", dir="/tmp")
-        new_root = tempfile.mkdtemp(prefix="new-config-", dir="/tmp")
+        legacy_root = tempfile.mkdtemp(prefix="legacy-config-")
+        new_root = tempfile.mkdtemp(prefix="new-config-")
         try:
             legacy_cfg = {"translate_parallel_enabled": False, "translate_parallel_limit": 2}
             os.makedirs(legacy_root, exist_ok=True)
