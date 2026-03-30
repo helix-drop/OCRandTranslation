@@ -105,6 +105,21 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(snapshot["draft"]["para_done"], 2)
         self.assertEqual(snapshot["draft"]["paragraphs"], ["甲乙", "甲乙"])
 
+    def test_translate_worker_marks_error_when_pages_missing_after_initial_start(self):
+        doc_id = create_doc("worker-empty.pdf")
+
+        started = tasks.start_translate_task(doc_id, 1, "Worker Empty")
+
+        self.assertTrue(started)
+        self.assertTrue(tasks.wait_for_translate_idle(timeout_s=2.0, poll_interval_s=0.05))
+
+        snapshot = tasks.get_translate_snapshot(doc_id)
+        self.assertEqual(snapshot["phase"], "error")
+        self.assertFalse(snapshot["running"])
+        self.assertEqual(snapshot["total_pages"], 0)
+        self.assertEqual(snapshot["pending_pages"], 0)
+        self.assertIn("未找到可翻译页面", snapshot["last_error"])
+
     def test_get_translate_args_prefers_custom_model_name_when_enabled(self):
         config.save_config({
             "active_model_mode": "custom",
@@ -1147,6 +1162,22 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         status = self.client.get("/translate_status", query_string={"doc_id": self.doc_id}).get_json()
         self.assertEqual(status["translated_bps"], [1])
 
+    def test_start_translate_all_returns_doc_not_found_for_missing_doc(self):
+        resp = self._post("/start_translate_all", data={
+            "doc_id": "missing-doc-id",
+            "doc_title": "Missing",
+            "start_bp": 1,
+        })
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.get_json()["error"], "doc_not_found")
+
+    def test_translate_status_treats_literal_undefined_doc_id_as_missing_param(self):
+        resp = self.client.get("/translate_status", query_string={"doc_id": "undefined"})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.get_json()["doc_id"], self.doc_id)
+
     def test_reading_page_embeds_controlled_commit_refresh_guards(self):
         self._save_range_pages(1, 2)
         resp = self.client.get("/reading?bp=1&auto=1")
@@ -1229,6 +1260,23 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn(f'/reading?bp=2&amp;doc_id={self.doc_id}&amp;usage=0&amp;orig=0&amp;layout=stack&amp;pdf=0', html)
         self.assertIn('class="pdf-panel" id="pdfPanel" style="display:none;"', html)
         self.assertIn('class="pdf-toggle-btn" id="pdfToggleBtn"', html)
+
+    def test_reading_page_guards_request_doc_id_before_fetching(self):
+        self._save_range_pages(1, 2)
+
+        resp = self.client.get(f"/reading?bp=1&doc_id={self.doc_id}")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("function requireReadingDocId(actionLabel, onMissing)", html)
+        self.assertIn("raw === 'undefined' || raw === 'null' || raw === 'None'", html)
+        self.assertNotIn("encodeURIComponent(currentDocId)", html)
+        self.assertNotIn("form.append('doc_id', currentDocId);", html)
+        self.assertIn("var docId = requireReadingDocId('刷新翻译状态');", html)
+        self.assertIn("var docId = requireReadingDocId('刷新用量面板');", html)
+        self.assertIn("var docId = requireReadingDocId('启动翻译'", html)
+        self.assertIn("var docId = requireReadingDocId('订阅翻译进度');", html)
+        self.assertIn("var docId = requireReadingDocId('停止翻译'", html)
 
     def test_reading_page_uses_explicit_layout_controls_and_disables_them_when_original_hidden(self):
         self._save_range_pages(1, 1)

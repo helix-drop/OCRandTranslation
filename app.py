@@ -297,7 +297,10 @@ def _build_translate_usage_payload(doc_id: str) -> dict:
 
 
 def _request_doc_id() -> str:
-    return request.values.get("doc_id", "").strip() or get_current_doc_id()
+    raw = request.values.get("doc_id", "").strip()
+    if raw in {"undefined", "null", "None"}:
+        raw = ""
+    return raw or get_current_doc_id()
 
 
 def _redirect_settings(doc_id: str = "", open_custom_model: bool = False):
@@ -1025,7 +1028,7 @@ def save_manual_revision():
 @app.route("/segment_history")
 def segment_history():
     """返回某个段落的历史版本列表。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if not doc_id:
         return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
     try:
@@ -1040,7 +1043,7 @@ def segment_history():
 @app.route("/check_retranslate_warnings")
 def check_retranslate_warnings():
     """返回当前页人工修订段落数，用于重译前警告提示。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if not doc_id:
         return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
     try:
@@ -1056,7 +1059,7 @@ def check_retranslate_warnings():
 @app.route("/translate_all_sse")
 def translate_all_sse():
     """SSE 端点：推送后台翻译进度。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
 
     def generate():
         cursor = 0
@@ -1092,8 +1095,11 @@ def translate_all_sse():
 @app.route("/start_translate_all", methods=["POST"])
 def start_translate_all():
     """启动后台连续翻译。"""
-    doc_id = request.form.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     force_restart = request.form.get("force_restart", "").strip() == "1"
+
+    if not doc_id or not get_doc_meta(doc_id):
+        return jsonify({"error": "doc_not_found", "message": "文档不存在或已删除"})
 
     active_running = has_active_translate_task()
     if active_running and not force_restart:
@@ -1107,12 +1113,12 @@ def start_translate_all():
 
     pages, src_name = load_pages_from_disk(doc_id)
     if not pages:
-        return jsonify({"error": "no_pages"})
+        return jsonify({"error": "no_pages", "message": "未找到可翻译页面"})
 
     model_key = get_model_key()
     t_args = get_translate_args()
     if not t_args["api_key"]:
-        return jsonify({"error": "no_api_key"})
+        return jsonify({"error": "no_api_key", "message": "缺少翻译 API Key"})
 
     start_bp = request.form.get("start_bp", type=int)
     doc_title = request.form.get("doc_title", "").strip() or src_name or "Untitled"
@@ -1144,7 +1150,7 @@ def stop_translate():
 @app.route("/translate_status")
 def translate_status():
     """查询翻译状态。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     snapshot = get_translate_snapshot(doc_id)
     entries, _, _ = load_entries_from_disk(doc_id)
     snapshot["translated_bps"] = sorted(
@@ -1159,7 +1165,7 @@ def translate_status():
 @app.route("/translate_api_usage")
 def translate_api_usage():
     """翻译 API 使用情况入口，统一回到阅读页内仪表盘。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if doc_id:
         set_current_doc(doc_id)
     state = get_app_state(doc_id)
@@ -1176,7 +1182,7 @@ def translate_api_usage():
 @app.route("/translate_api_usage_data")
 def translate_api_usage_data():
     """翻译 API 使用情况数据接口。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     return jsonify(_build_translate_usage_payload(doc_id))
 
 

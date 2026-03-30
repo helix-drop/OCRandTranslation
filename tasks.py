@@ -12,7 +12,7 @@ import config as app_config
 from config import (
     MODELS,
     get_paddle_token, get_glossary, get_model_key,
-    create_doc, get_doc_dir,
+    create_doc, get_doc_dir, get_doc_meta,
 )
 from sqlite_store import SQLiteRepository
 from ocr_client import call_paddle_ocr_bytes
@@ -1191,6 +1191,43 @@ def _save_translate_state(doc_id: str, running: bool, stop_requested: bool, **ex
     SQLiteRepository().save_translate_run(doc_id, **payload)
 
 
+def _mark_translate_start_error(
+    doc_id: str,
+    start_bp: int,
+    error_code: str,
+    message: str,
+    *,
+    total_pages: int = 0,
+    model_label: str = "",
+):
+    safe_message = str(message or error_code or "启动失败")
+    translate_push("error", {"code": error_code, "msg": safe_message})
+    _save_translate_state(
+        doc_id,
+        running=False,
+        stop_requested=False,
+        phase="error",
+        start_bp=start_bp,
+        total_pages=max(0, int(total_pages or 0)),
+        done_pages=0,
+        processed_pages=0,
+        pending_pages=0,
+        current_bp=start_bp,
+        current_page_idx=0,
+        translated_chars=0,
+        translated_paras=0,
+        request_count=0,
+        prompt_tokens=0,
+        completion_tokens=0,
+        model=model_label,
+        last_error=safe_message,
+        failed_bps=[],
+        partial_failed_bps=[],
+        failed_pages=[],
+        draft=_default_stream_draft_state(),
+    )
+
+
 def _load_translate_state(doc_id: str) -> dict:
     """从 SQLite 加载翻译状态。"""
     default = _default_translate_state(doc_id)
@@ -1627,13 +1664,28 @@ def start_translate_task(doc_id: str, start_bp: int, doc_title: str) -> bool:
 def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
     """后台线程：从 start_bp 开始逐页翻译，每页完成后写入磁盘。"""
     try:
+        if not doc_id or not get_doc_meta(doc_id):
+            _mark_translate_start_error(doc_id, start_bp, "doc_not_found", "文档不存在或已删除")
+            return
+
         pages, _ = load_pages_from_disk(doc_id)
         entries, _, _ = load_entries_from_disk(doc_id)
         model_key, t_args = _get_active_translate_args()
         glossary = get_glossary(doc_id)
 
-        if not pages or not t_args["api_key"]:
-            translate_push("error", {"msg": "数据不完整或缺少 API Key"})
+        if not pages:
+            _mark_translate_start_error(doc_id, start_bp, "no_pages", "未找到可翻译页面")
+            return
+
+        if not t_args["api_key"]:
+            _mark_translate_start_error(
+                doc_id,
+                start_bp,
+                "no_api_key",
+                "缺少翻译 API Key",
+                total_pages=len(_collect_target_bps(pages, start_bp)),
+                model_label=t_args.get("display_label") or t_args.get("model_id") or model_key,
+            )
             return
 
         first, last = get_page_range(pages)

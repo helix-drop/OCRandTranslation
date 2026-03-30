@@ -2216,7 +2216,11 @@ function toggleSegmentHistory(idx, bp) {
   }
   panel.innerHTML = '<span style="font-size:11px;color:var(--txL);">加载中…</span>';
   panel.classList.remove('hidden');
-  var url = '{{ url_for("segment_history") }}?doc_id=' + encodeURIComponent(currentDocId)
+  var docId = requireReadingDocId('查看修订历史', function(message) {
+    panel.innerHTML = '<span style="font-size:11px;color:var(--red);">' + escapeHtml(message) + '</span>';
+  });
+  if (!docId) return;
+  var url = '{{ url_for("segment_history") }}?doc_id=' + encodeURIComponent(docId)
     + '&bp=' + bp + '&segment_index=' + idx;
   fetch(url)
     .then(function(r) { return r.json(); })
@@ -2265,9 +2269,13 @@ function saveManualRevision(idx, bp) {
   if (!input || !controls) return;
   var nextText = String(input.value || '');
   var baseUpdatedAt = Number(controls.getAttribute('data-para-updated-at') || 0) || null;
+  var docId = requireReadingDocId('保存人工修订', function(message) {
+    setManualRevisionHint(idx, message, true);
+  });
+  if (!docId) return;
   manualRevisionSaving[idx] = true;
   setManualRevisionHint(idx, '保存中…', false);
-  fetch('{{ url_for("save_manual_revision") }}?doc_id=' + encodeURIComponent(currentDocId), {
+  fetch('{{ url_for("save_manual_revision") }}?doc_id=' + encodeURIComponent(docId), {
     method: 'POST',
     headers: withCsrfHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({
@@ -2486,7 +2494,23 @@ function getReadingUiStateParams() {
 }
 
 function getReadingDocIdParam() {
-  return String(currentDocId || '').trim();
+  var raw = String(currentDocId || '').trim();
+  if (!raw || raw === 'undefined' || raw === 'null' || raw === 'None') {
+    return '';
+  }
+  return raw;
+}
+
+function requireReadingDocId(actionLabel, onMissing) {
+  var docId = getReadingDocIdParam();
+  if (docId) return docId;
+  var message = (actionLabel || '当前操作') + '失败：未找到当前文档，请刷新页面后重试。';
+  if (typeof onMissing === 'function') {
+    onMissing(message);
+  } else {
+    alert(message);
+  }
+  return '';
 }
 
 function buildReadingUrl(bp, autoStart, startBp) {
@@ -2756,7 +2780,8 @@ function retryDraftPage() {
   }
   if (currentPageHasEntry || store.pages.partialFailedBps.indexOf(draftBp) >= 0) {
     var retryUrl = '/retranslate/' + draftBp + '?target=' + encodeURIComponent(currentModelTarget);
-    var retryDocId = getReadingDocIdParam();
+    var retryDocId = requireReadingDocId('重试当前页');
+    if (!retryDocId) return;
     submitPostAction(retryUrl, {doc_id: retryDocId});
     return;
   }
@@ -3047,7 +3072,9 @@ function renderUsageDashboard(payload) {
 
 function refreshUsageDashboard() {
   if (!store.ui.usageDashboardOpen) return Promise.resolve();
-  return fetch('{{ url_for("translate_api_usage_data") }}?doc_id=' + encodeURIComponent(currentDocId))
+  var docId = requireReadingDocId('刷新用量面板');
+  if (!docId) return Promise.resolve(null);
+  return fetch('{{ url_for("translate_api_usage_data") }}?doc_id=' + encodeURIComponent(docId))
     .then(function(r) { return r.json(); })
     .then(function(d) {
       renderUsageDashboard(d);
@@ -3317,7 +3344,9 @@ function renderTranslateSnapshot(state) {
 }
 
 function refreshTranslateStatus() {
-  return fetch('{{ url_for("translate_status") }}?doc_id=' + encodeURIComponent(currentDocId))
+  var docId = requireReadingDocId('刷新翻译状态');
+  if (!docId) return Promise.resolve(null);
+  return fetch('{{ url_for("translate_status") }}?doc_id=' + encodeURIComponent(docId))
     .then(function(r) { return r.json(); })
     .then(function(d) {
       renderTranslateSnapshot(d);
@@ -3339,11 +3368,15 @@ function startTranslateAll(startBp) {
   stopBtn.disabled = false;
   stopBtn.textContent = '停止';
   stopBtn.onclick = stopTranslate;
+  var docId = requireReadingDocId('启动翻译', function(message) {
+    setTranslateProgress(0, '启动失败', message, '');
+  });
+  if (!docId) return;
 
   var form = new FormData();
   form.append('start_bp', startBp);
   form.append('doc_title', '{{ doc_title }}');
-  form.append('doc_id', currentDocId);
+  form.append('doc_id', docId);
 
   fetch('{{ url_for("start_translate_all") }}', {
     method: 'POST',
@@ -3353,7 +3386,7 @@ function startTranslateAll(startBp) {
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.error) {
-        setTranslateProgress(0, '启动失败', d.error, '');
+        setTranslateProgress(0, '启动失败', d.message || d.error, '');
         return;
       }
       refreshTranslateStatus();
@@ -3362,7 +3395,9 @@ function startTranslateAll(startBp) {
 
 function listenTranslateSSE() {
   closeTranslateSSE();
-  translateES = new EventSource('{{ url_for("translate_all_sse") }}?doc_id=' + encodeURIComponent(currentDocId));
+  var docId = requireReadingDocId('订阅翻译进度');
+  if (!docId) return;
+  translateES = new EventSource('{{ url_for("translate_all_sse") }}?doc_id=' + encodeURIComponent(docId));
 
   translateES.addEventListener('init', function(e) {
     refreshTranslateStatus();
@@ -3461,11 +3496,17 @@ function stopTranslate() {
   // 只更新按钮文字作为反馈，不修改其他 UI
   btn.textContent = '停止中…';
   btn.disabled = true;
+  var docId = requireReadingDocId('停止翻译', function(message) {
+    btn.textContent = '停止';
+    btn.disabled = false;
+    console.error(message);
+  });
+  if (!docId) return;
 
   fetch('{{ url_for("stop_translate") }}', {
     method: 'POST',
     headers: withCsrfHeaders({'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}),
-    body: 'doc_id=' + encodeURIComponent(currentDocId)
+    body: 'doc_id=' + encodeURIComponent(docId)
   })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -3487,6 +3528,8 @@ function stopTranslate() {
 
 // ===== 重译前人工修订警告 =====
 function confirmRetranslate(retranslateUrl, btn) {
+  var docId = requireReadingDocId('检查重译覆盖风险');
+  if (!docId) return;
   function submitRetranslateAction() {
     if (btn) {
       btn.innerHTML = '<span class=spinner></span> 重译中&hellip;';
@@ -3496,7 +3539,6 @@ function confirmRetranslate(retranslateUrl, btn) {
   }
 
   var bp = Number('{{ cur_page_bp }}');
-  var docId = getReadingDocIdParam() || currentDocId || '';
   fetch('/check_retranslate_warnings?doc_id=' + encodeURIComponent(docId) + '&bp=' + bp)
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -3517,7 +3559,8 @@ function confirmRetranslate(retranslateUrl, btn) {
 
 function confirmReparsePage(pageBp) {
   var bp = Number(pageBp || '{{ cur_page_bp }}');
-  var docId = getReadingDocIdParam() || currentDocId || '';
+  var docId = requireReadingDocId('检查重解析覆盖风险');
+  if (!docId) return;
   fetch('/check_retranslate_warnings?doc_id=' + encodeURIComponent(docId) + '&bp=' + bp)
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -3543,10 +3586,13 @@ function startReparsePage(pageBp) {
   btn.textContent = '⏳ OCR 重解析并重译中…';
 
   var reparseUrl = '{{ url_for("reparse_page", page_bp=0) }}'.replace('/0', '/' + pageBp);
-  var reparseDocId = getReadingDocIdParam();
-  if (reparseDocId) {
-    reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);
-  }
+  var reparseDocId = requireReadingDocId('重解析当前页', function(message) {
+    alert(message);
+    btn.disabled = false;
+    btn.textContent = '🔄 强制 OCR 重解析本页';
+  });
+  if (!reparseDocId) return;
+  reparseUrl += '?doc_id=' + encodeURIComponent(reparseDocId);
   fetch(reparseUrl, {
     method: 'POST',
     headers: withCsrfHeaders()
@@ -3664,6 +3710,12 @@ function openExportModal() {
 function loadExportContent() {
   var textarea = document.getElementById('exportText');
   var loading = document.getElementById('exportLoading');
+  var docId = requireReadingDocId('导出文稿', function(message) {
+    loading.textContent = message;
+    loading.classList.remove('hidden');
+    textarea.classList.add('hidden');
+  });
+  if (!docId) return;
 
   // 如果已经有内容且不是占位符，不重复加载
   if (textarea.value && textarea.value !== '加载中…') {
@@ -3673,7 +3725,7 @@ function loadExportContent() {
   textarea.classList.add('hidden');
   loading.classList.remove('hidden');
 
-  fetch('{{ url_for("export_md") }}?doc_id=' + encodeURIComponent(currentDocId))
+  fetch('{{ url_for("export_md") }}?doc_id=' + encodeURIComponent(docId))
     .then(function(r) { return r.json(); })
     .then(function(d) {
       textarea.value = d.markdown || '';
