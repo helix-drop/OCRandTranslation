@@ -45,6 +45,9 @@
         <button type="submit" class="btn btn-pri btn-lg">开始阅读</button>
       </div>
       <p style="color:var(--txL);font-size:12px;margin-top:10px;">范围: PDF 第{{ first_page }}页 - 第{{ last_page }}页</p>
+      {% if hidden_placeholder_bps %}
+      <p style="color:var(--txL);font-size:12px;margin-top:8px;">系统会自动跳过 {{ hidden_placeholder_bps|length }} 页空白页；如果输入的是空白页，会自动跳到最近的可读页。</p>
+      {% endif %}
     </div>
   </form>
 

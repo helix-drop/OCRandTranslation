@@ -27,9 +27,9 @@
 
 | 入口 | 作用 |
 |---|---|
-| [start.sh](/Users/hao/OCRandTranslation/start.sh) | macOS / Linux 一键建环境并启动 |
-| [start.ps1](/Users/hao/OCRandTranslation/start.ps1) | Windows PowerShell 一键启动 |
-| [start.bat](/Users/hao/OCRandTranslation/start.bat) | Windows 双击入口，内部转调 `start.ps1` |
+| [start_managed.sh](/Users/hao/OCRandTranslation/start_managed.sh) | macOS / Linux 官方启动入口；关闭专用浏览器窗口后会自动结束应用 |
+| [start_managed.ps1](/Users/hao/OCRandTranslation/start_managed.ps1) | Windows PowerShell 官方启动入口；关闭专用浏览器窗口后会自动结束应用 |
+| [start_managed.bat](/Users/hao/OCRandTranslation/start_managed.bat) | Windows 双击入口，内部转调 `start_managed.ps1` |
 | `python3 app.py` | 直接启动 Flask |
 
 默认端口：`8080`

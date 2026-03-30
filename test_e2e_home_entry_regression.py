@@ -440,6 +440,60 @@ class HomeEntryRegressionE2ETest(unittest.TestCase):
         self.assertEqual(doc["doc_id"], state["current_doc_id"], f"window.currentDocId 异常，见 {probe_path}")
         self.assertEqual([], pageerrors, f"阅读页脚本报错，见 {probe_path}")
 
+    def test_swidler_reading_flow_skips_placeholder_pages(self):
+        doc = next(item for item in self.doc_fixtures if item["slug"] == "swidler")
+        expected_sequence = [1, 3, 5, 6, 9]
+        report_path = self.artifact_dir / "swidler_placeholder_skip.json"
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(viewport={"width": 1440, "height": 960})
+            page.goto(self.base_url + "/")
+            self._wait_for_home(page)
+
+            doc_item = page.locator(".doc-item").filter(has_text=doc["name"]).first
+            if doc_item.locator(".doc-current-badge").count() < 1:
+                with page.expect_navigation(wait_until="networkidle"):
+                    doc_item.get_by_role("button", name="切换").click()
+
+            start_link = page.locator("a[data-reading-entry='1']").filter(has_text="从 PDF").first
+            with page.expect_navigation(wait_until="load"):
+                start_link.click()
+            self._wait_for_reading(page, wait_for_auto_sync=True)
+
+            observed_bps = [int(page.evaluate("() => Number(new URL(window.location.href).searchParams.get('bp') || 0)"))]
+            initial_html = page.content()
+            self.assertNotIn('data-page-bp="2"', initial_html, report_path)
+            self.assertNotIn('data-page-bp="4"', initial_html, report_path)
+            self.assertNotIn('data-page-bp="7"', initial_html, report_path)
+            self.assertNotIn('data-page-bp="8"', initial_html, report_path)
+            self.assertNotIn('data-page-bp="10"', initial_html, report_path)
+            self.assertNotIn('data-pdf-bp="2"', initial_html, report_path)
+            self.assertNotIn('data-pdf-bp="4"', initial_html, report_path)
+            self.assertNotIn('data-pdf-bp="7"', initial_html, report_path)
+            self.assertNotIn('data-pdf-bp="8"', initial_html, report_path)
+            self.assertNotIn('data-pdf-bp="10"', initial_html, report_path)
+
+            for _ in expected_sequence[1:]:
+                next_btn = page.locator("a.floating-page-nav-btn.next").first
+                with page.expect_navigation(wait_until="load"):
+                    next_btn.click()
+                self._wait_for_reading(page, wait_for_auto_sync=False)
+                observed_bps.append(
+                    int(page.evaluate("() => Number(new URL(window.location.href).searchParams.get('bp') || 0)"))
+                )
+
+            payload = {
+                "doc": doc,
+                "expected_sequence": expected_sequence,
+                "observed_bps": observed_bps,
+                "final_url": page.url,
+            }
+            report_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+            browser.close()
+
+        self.assertEqual(expected_sequence, observed_bps, f"Swidler 翻页未正确跳过空页，见 {report_path}")
+
     def _capture_step(
         self,
         *,

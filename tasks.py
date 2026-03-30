@@ -20,6 +20,7 @@ from text_processing import (
     parse_ocr, clean_header_footer,
     extract_pdf_text, combine_sources,
     get_page_range, get_next_page_bp,
+    build_visible_page_view, resolve_visible_page_bp,
     get_page_context_for_translate,
     get_paragraph_bboxes,
     assign_page_footnotes_to_paragraphs,
@@ -1039,20 +1040,14 @@ def _remaining_pages(total_pages: int, processed_pages: int) -> int:
 
 
 def _collect_target_bps(pages: list, start_bp: int | None) -> list[int]:
-    if not pages:
+    visible_page_bps = build_visible_page_view(pages)["visible_page_bps"]
+    if not visible_page_bps:
         return []
-    bp = start_bp
-    if bp is None:
-        bp, _ = get_page_range(pages)
-    if bp is None:
-        return []
-    target_bps = []
-    seen = set()
-    while bp is not None and bp not in seen:
-        target_bps.append(bp)
-        seen.add(bp)
-        bp = get_next_page_bp(pages, bp)
-    return target_bps
+    resolved_start_bp = resolve_visible_page_bp(pages, start_bp)
+    if resolved_start_bp is None:
+        resolved_start_bp = visible_page_bps[0]
+    start_index = visible_page_bps.index(resolved_start_bp)
+    return visible_page_bps[start_index:]
 
 
 def _compute_resume_bp(doc_id: str, state: dict) -> int | None:
@@ -1520,7 +1515,33 @@ def get_translate_snapshot(doc_id: str) -> dict:
                 state["phase"] = "stopping" if state["stop_requested"] else "running"
     state = _normalize_translate_state(state, assume_inactive=not has_active_worker)
     pages, _ = load_pages_from_disk(doc_id)
+    visible_page_view = build_visible_page_view(pages)
     target_bps = _collect_target_bps(pages, state.get("start_bp"))
+    target_bp_set = set(target_bps)
+    if visible_page_view["hidden_placeholder_bps"] and target_bps:
+        state["failed_pages"] = [
+            page for page in state.get("failed_pages", [])
+            if isinstance(page, dict) and page.get("bp") is not None and int(page.get("bp")) in target_bp_set
+        ]
+        state["failed_bps"] = sorted(
+            int(page.get("bp"))
+            for page in state["failed_pages"]
+            if page.get("bp") is not None
+        )
+        entries, _, _ = load_entries_from_disk(doc_id)
+        translated_bps = {
+            int(entry.get("_pageBP"))
+            for entry in entries
+            if entry.get("_pageBP") is not None and int(entry.get("_pageBP")) in target_bp_set
+        }
+        total_pages = len(target_bps)
+        partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
+        done_bps = translated_bps - set(partial_failed_bps)
+        processed_bps = translated_bps | set(state["failed_bps"])
+        state["total_pages"] = total_pages
+        state["done_pages"] = min(total_pages, len(done_bps))
+        state["processed_pages"] = min(total_pages, len(processed_bps))
+        state["pending_pages"] = _remaining_pages(total_pages, state["processed_pages"])
     partial_failed_bps = _collect_partial_failed_bps(doc_id, target_bps)
     state["partial_failed_bps"] = partial_failed_bps
     if (
@@ -1688,18 +1709,13 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             )
             return
 
-        first, last = get_page_range(pages)
-        doc_bps = []
-        bp = first
-        while bp is not None:
-            doc_bps.append(bp)
-            bp = get_next_page_bp(pages, bp)
-
-        all_bps = []
-        bp = start_bp
-        while bp is not None:
-            all_bps.append(bp)
-            bp = get_next_page_bp(pages, bp)
+        visible_page_view = build_visible_page_view(pages)
+        doc_bps = list(visible_page_view["visible_page_bps"])
+        if not doc_bps:
+            _mark_translate_start_error(doc_id, start_bp, "no_pages", "未找到可翻译页面")
+            return
+        normalized_start_bp = resolve_visible_page_bp(pages, start_bp) or doc_bps[0]
+        all_bps = _collect_target_bps(pages, normalized_start_bp)
 
         doc_bp_set = set(doc_bps)
         partial_failed_doc_bps = set(_collect_partial_failed_bps(doc_id, doc_bps))
@@ -1723,7 +1739,7 @@ def _translate_all_worker(doc_id: str, start_bp: int, doc_title: str):
             running=True,
             stop_requested=False,
             phase="running",
-            start_bp=start_bp,
+            start_bp=normalized_start_bp,
             total_pages=total_pages,
             done_pages=done_pages,
             processed_pages=done_pages,

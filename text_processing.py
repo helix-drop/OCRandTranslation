@@ -1001,9 +1001,10 @@ def get_page_text(pages: list, bp: int) -> dict | None:
 
 def get_next_page_bp(pages: list, current_bp: int) -> int | None:
     """获取当前页之后的下一个 PDF 实页。"""
-    for pg in pages:
-        if pg["bookPage"] > current_bp:
-            return pg["bookPage"]
+    visible_bps = build_visible_page_view(pages)["visible_page_bps"]
+    for bp in visible_bps:
+        if bp > current_bp:
+            return bp
     return None
 
 
@@ -1012,3 +1013,60 @@ def get_page_range(pages: list) -> tuple[int, int]:
     if not pages:
         return (1, 1)
     return (pages[0]["bookPage"], pages[-1]["bookPage"])
+
+
+def is_placeholder_page(page: dict | None) -> bool:
+    return bool((page or {}).get("isPlaceholder"))
+
+
+def build_visible_page_view(pages: list[dict]) -> dict:
+    ordered_pages = [
+        page for page in (pages or [])
+        if isinstance(page, dict) and page.get("bookPage") is not None
+    ]
+    hidden_placeholder_bps = [
+        int(page["bookPage"])
+        for page in ordered_pages
+        if is_placeholder_page(page)
+    ]
+    visible_pages = [
+        page for page in ordered_pages
+        if not is_placeholder_page(page)
+    ]
+    # 保底：如果整份文档全是占位页，就回退到原始页列表，避免把文档完全隐藏。
+    if ordered_pages and not visible_pages:
+        visible_pages = list(ordered_pages)
+        hidden_placeholder_bps = []
+    visible_page_bps = [int(page["bookPage"]) for page in visible_pages]
+    first_visible_page = visible_page_bps[0] if visible_page_bps else None
+    last_visible_page = visible_page_bps[-1] if visible_page_bps else None
+    return {
+        "visible_pages": visible_pages,
+        "visible_page_bps": visible_page_bps,
+        "hidden_placeholder_bps": hidden_placeholder_bps,
+        "first_visible_page": first_visible_page,
+        "last_visible_page": last_visible_page,
+        "visible_page_count": len(visible_pages),
+    }
+
+
+def resolve_visible_page_bp(pages: list[dict], requested_bp: int | None) -> int | None:
+    view = build_visible_page_view(pages)
+    visible_page_bps = view["visible_page_bps"]
+    if not visible_page_bps:
+        return None
+    if requested_bp is None:
+        return view["first_visible_page"]
+    try:
+        target_bp = int(requested_bp)
+    except (TypeError, ValueError):
+        return view["first_visible_page"]
+    if target_bp in visible_page_bps:
+        return target_bp
+    for bp in visible_page_bps:
+        if bp > target_bp:
+            return bp
+    for bp in reversed(visible_page_bps):
+        if bp < target_bp:
+            return bp
+    return view["first_visible_page"]

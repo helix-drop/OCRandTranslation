@@ -43,7 +43,11 @@ from config import (
     list_docs, update_doc_meta, delete_doc,
     LOCAL_DATA_DIR, normalize_doc_id,
 )
-from text_processing import get_page_range, get_next_page_bp, normalize_latex_footnote_markers
+from text_processing import (
+    get_page_range, get_next_page_bp,
+    normalize_latex_footnote_markers,
+    build_visible_page_view, resolve_visible_page_bp,
+)
 from text_utils import strip_html
 from pdf_extract import render_pdf_page, parse_toc_file
 from storage import (
@@ -572,7 +576,11 @@ def reading():
         return redirect(url_for("home"))
 
     pages = state["pages"]
-    page_bps = [pg["bookPage"] for pg in pages]
+    raw_page_bps = [pg["bookPage"] for pg in pages]
+    visible_page_bps = list(state.get("visible_page_bps") or raw_page_bps)
+    hidden_placeholder_bps = {
+        int(bp) for bp in (state.get("hidden_placeholder_bps") or [])
+    }
     page_lookup = {
         int(pg["bookPage"]): pg
         for pg in pages
@@ -593,15 +601,30 @@ def reading():
             entry_by_bp[bp] = entry
 
     requested_bp = request.args.get("bp", type=int)
-    cur_page_bp = _default_reading_bp(page_bps, entries, state.get("entry_idx", 0), state.get("first_page", 1))
-    if requested_bp in page_bps:
+    cur_page_bp = _default_reading_bp(visible_page_bps, entries, state.get("entry_idx", 0), state.get("first_page", 1))
+    if requested_bp in visible_page_bps:
         cur_page_bp = int(requested_bp)
-    elif requested_bp is not None and page_bps:
-        if requested_bp < page_bps[0] or requested_bp > page_bps[-1]:
+    elif requested_bp is not None and visible_page_bps:
+        target_bp = resolve_visible_page_bp(pages, requested_bp) or cur_page_bp
+        if requested_bp in hidden_placeholder_bps:
+            flash(f"PDF 第{requested_bp}页为空白页，已跳转到 PDF 第{target_bp}页。", "info")
+            redirect_params = {
+                "bp": target_bp,
+                "doc_id": current_doc_id,
+            }
+            for key in ("usage", "orig", "pdf", "auto", "start_bp"):
+                value = request.args.get(key, "").strip()
+                if value:
+                    redirect_params[key] = value
+            layout_value = request.args.get("layout", "").strip()
+            if layout_value in {"side", "stack"}:
+                redirect_params["layout"] = layout_value
+            return redirect(url_for("reading", **redirect_params))
+        if requested_bp < raw_page_bps[0] or requested_bp > raw_page_bps[-1]:
             target_bp = cur_page_bp
             flash(f"PDF 第{requested_bp}页超出范围，已跳转到 PDF 第{target_bp}页。", "info")
         else:
-            target_bp = _nearest_existing_bp(page_bps, requested_bp) or cur_page_bp
+            target_bp = target_bp or cur_page_bp
             flash(f"PDF 第{requested_bp}页当前不可用，已跳转到 PDF 第{target_bp}页。", "info")
         cur_page_bp = target_bp
 
@@ -668,19 +691,19 @@ def reading():
     toc_items = load_user_toc_from_disk(current_doc_id) if toc_source == "user" else []
     toc_items = _build_toc_reading_items(toc_items, toc_offset, page_lookup)
 
-    page_index = page_bps.index(cur_page_bp) if cur_page_bp in page_bps else 0
-    prev_bp = page_bps[page_index - 1] if page_index > 0 else None
-    next_bp = page_bps[page_index + 1] if page_index < len(page_bps) - 1 else None
-    translated_bps = sorted(entry_by_bp.keys())
+    page_index = visible_page_bps.index(cur_page_bp) if cur_page_bp in visible_page_bps else 0
+    prev_bp = visible_page_bps[page_index - 1] if page_index > 0 else None
+    next_bp = visible_page_bps[page_index + 1] if page_index < len(visible_page_bps) - 1 else None
+    translated_bps = sorted(bp for bp in entry_by_bp.keys() if bp in visible_page_bps)
     partial_failed_bps = translate_snapshot.get("partial_failed_bps") or _get_partial_failed_bps(current_doc_id)
     pdf_virtual_window_radius = get_pdf_virtual_window_radius()
     pdf_virtual_scroll_min_pages = get_pdf_virtual_scroll_min_pages()
-    if len(page_bps) >= pdf_virtual_scroll_min_pages:
+    if len(visible_page_bps) >= pdf_virtual_scroll_min_pages:
         initial_start = max(0, page_index - pdf_virtual_window_radius)
-        initial_end = min(len(page_bps), page_index + pdf_virtual_window_radius + 1)
-        pdf_initial_mounted_bps = page_bps[initial_start:initial_end]
+        initial_end = min(len(visible_page_bps), page_index + pdf_virtual_window_radius + 1)
+        pdf_initial_mounted_bps = visible_page_bps[initial_start:initial_end]
     else:
-        pdf_initial_mounted_bps = list(page_bps)
+        pdf_initial_mounted_bps = list(visible_page_bps)
     if cur_page_bp in translated_bps:
         save_entry_cursor(translated_bps.index(cur_page_bp), current_doc_id)
     current_page_failure = next(
@@ -703,10 +726,10 @@ def reading():
         display_entries=display_entries,
         cur_page_bp=cur_page_bp,
         current_page_index=page_index,
-        page_total=len(page_bps),
+        page_total=len(visible_page_bps),
         prev_bp=prev_bp,
         next_bp=next_bp,
-        page_bps=page_bps,
+        page_bps=visible_page_bps,
         translated_bps=translated_bps,
         has_translation_history=state.get("has_translation_history", False),
         partial_failed_bps=partial_failed_bps,
@@ -911,7 +934,8 @@ def start_from_beginning():
         flash(f"请先在设置中输入 {name}。", "error")
         return redirect(url_for("home"))
 
-    first_page, _ = get_page_range(pages)
+    visible_page_view = build_visible_page_view(pages)
+    first_page = visible_page_view["first_visible_page"] or get_page_range(pages)[0]
     return redirect(url_for("reading", bp=first_page, auto=1, start_bp=first_page, doc_id=doc_id))
 
 
@@ -935,12 +959,26 @@ def start_reading():
 
     start_page = request.form.get("start_page", type=int)
     doc_title = request.form.get("doc_title", "").strip() or src_name or "Untitled"
-    first, last = get_page_range(pages)
+    visible_page_view = build_visible_page_view(pages)
+    first = visible_page_view["first_visible_page"] or get_page_range(pages)[0]
+    last = visible_page_view["last_visible_page"] or get_page_range(pages)[1]
     valid_pages = {int(page.get("bookPage")) for page in pages if page.get("bookPage") is not None}
 
     if not start_page or start_page not in valid_pages:
         flash(f"请输入有效页码 ({first}-{last})", "error")
         return redirect(url_for("input_page", doc_id=doc_id))
+
+    resolved_start_page = resolve_visible_page_bp(pages, start_page)
+    if resolved_start_page is None:
+        flash("未找到可阅读页面。", "error")
+        return redirect(url_for("input_page", doc_id=doc_id))
+    page_lookup = {
+        int(page.get("bookPage")): page for page in pages if page.get("bookPage") is not None
+    }
+    if start_page != resolved_start_page:
+        if page_lookup.get(int(start_page), {}).get("isPlaceholder"):
+            flash(f"PDF 第{start_page}页为空白页，已跳转到 PDF 第{resolved_start_page}页。", "info")
+    start_page = resolved_start_page
 
     save_entries_to_disk([], doc_title, 0, doc_id)
     return redirect(url_for("reading", bp=start_page, auto=1, start_bp=start_page, doc_id=doc_id))
@@ -1157,7 +1195,9 @@ def start_translate_all():
     start_bp = request.form.get("start_bp", type=int)
     doc_title = request.form.get("doc_title", "").strip() or src_name or "Untitled"
     if start_bp is None:
-        start_bp, _ = get_page_range(pages)
+        start_bp = build_visible_page_view(pages)["first_visible_page"] or get_page_range(pages)[0]
+    else:
+        start_bp = resolve_visible_page_bp(pages, start_bp) or start_bp
 
     entries, _, _ = load_entries_from_disk(doc_id)
     if not entries:
@@ -1186,13 +1226,26 @@ def translate_status():
     """查询翻译状态。"""
     doc_id = _request_doc_id()
     snapshot = get_translate_snapshot(doc_id)
+    pages, _ = load_pages_from_disk(doc_id)
+    visible_bp_set = set(build_visible_page_view(pages)["visible_page_bps"])
     entries, _, _ = load_entries_from_disk(doc_id)
     snapshot["translated_bps"] = sorted(
         entry.get("_pageBP")
         for entry in entries
-        if entry.get("_pageBP") is not None
+        if entry.get("_pageBP") is not None and int(entry.get("_pageBP")) in visible_bp_set
     )
-    snapshot["partial_failed_bps"] = snapshot.get("partial_failed_bps") or _get_partial_failed_bps(doc_id)
+    snapshot["failed_bps"] = [
+        int(bp) for bp in snapshot.get("failed_bps", [])
+        if bp is not None and int(bp) in visible_bp_set
+    ]
+    snapshot["failed_pages"] = [
+        page for page in snapshot.get("failed_pages", [])
+        if isinstance(page, dict) and page.get("bp") is not None and int(page.get("bp")) in visible_bp_set
+    ]
+    snapshot["partial_failed_bps"] = [
+        int(bp) for bp in (snapshot.get("partial_failed_bps") or _get_partial_failed_bps(doc_id))
+        if bp is not None and int(bp) in visible_bp_set
+    ]
     return jsonify(snapshot)
 
 

@@ -74,6 +74,11 @@
           <div style="font-size:12px;color:var(--txS);">PDF 第{{ first_page }}页 → 第{{ last_page }}页</div>
         </div>
       </div>
+      {% if hidden_placeholder_bps %}
+      <div style="font-size:11px;color:var(--txL);line-height:1.6;">
+        已自动跳过 {{ hidden_placeholder_bps|length }} 页空白页；阅读、进度和自动翻译只会显示有内容的页面。
+      </div>
+      {% endif %}
       {% if has_pdf %}
       <div class="flex gap-8" style="margin-top:10px;">
         <button type="button" id="reparseBtn" class="btn btn-sm btn-sec" onclick="startReparse()">🔄 重新解析</button>

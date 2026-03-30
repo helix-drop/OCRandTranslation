@@ -1119,6 +1119,31 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
             "footnotes": "",
         } for bp in range(first_bp, last_bp + 1)], "Reading Refresh", self.doc_id)
 
+    def _save_pages(self, pages: list[dict]):
+        payload = []
+        for page in pages:
+            item = {
+                "bookPage": page["bookPage"],
+                "fileIdx": page.get("fileIdx", max(int(page["bookPage"]) - 1, 0)),
+                "imgW": page.get("imgW", 1000),
+                "imgH": page.get("imgH", 1600),
+                "markdown": page.get("markdown", ""),
+                "footnotes": page.get("footnotes", ""),
+            }
+            for key in (
+                "isPlaceholder",
+                "textSource",
+                "pdfPage",
+                "printPage",
+                "printPageLabel",
+                "blocks",
+                "fnBlocks",
+            ):
+                if key in page:
+                    item[key] = page[key]
+            payload.append(item)
+        save_pages_to_disk(payload, "Reading Refresh", self.doc_id)
+
     def _save_page_entries_with_heading_and_footnotes(self, bp: int = 1):
         save_entries_to_disk([{
             "_pageBP": bp,
@@ -1177,6 +1202,144 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.get_json()["doc_id"], self.doc_id)
+
+    def test_home_page_starts_from_first_visible_page_when_leading_placeholder_exists(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "Page 2", "footnotes": ""},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "Page 3", "footnotes": ""},
+        ])
+
+        resp = self.client.get("/")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("从 PDF 第2页开始读", html)
+        self.assertIn(f"/reading?bp=2&amp;auto=1&amp;start_bp=2&amp;doc_id={self.doc_id}", html)
+
+    def test_reading_route_redirects_placeholder_page_to_next_visible_page(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "Page 3", "footnotes": ""},
+            {"bookPage": 4, "fileIdx": 3, "markdown": "Page 4", "footnotes": ""},
+        ])
+
+        resp = self.client.get(f"/reading?bp=2&doc_id={self.doc_id}", follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("PDF 第2页为空白页，已跳转到 PDF 第3页。", html)
+        self.assertIn("PDF 第3页 / 第4页", html)
+
+    def test_reading_route_redirects_trailing_placeholder_page_to_previous_visible_page(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "Page 2", "footnotes": ""},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+        ])
+
+        resp = self.client.get(f"/reading?bp=3&doc_id={self.doc_id}", follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("PDF 第3页为空白页，已跳转到 PDF 第2页。", html)
+        self.assertIn("PDF 第2页 / 第2页", html)
+
+    def test_reading_page_hides_placeholder_pages_from_progress_and_pdf_panel(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "Page 3", "footnotes": ""},
+            {"bookPage": 4, "fileIdx": 3, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 5, "fileIdx": 4, "markdown": "Page 5", "footnotes": ""},
+        ])
+
+        resp = self.client.get(f"/reading?bp=1&doc_id={self.doc_id}")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('data-page-bp="1"', html)
+        self.assertIn('data-page-bp="3"', html)
+        self.assertIn('data-page-bp="5"', html)
+        self.assertNotIn('data-page-bp="2"', html)
+        self.assertNotIn('data-page-bp="4"', html)
+        self.assertIn('data-pdf-bp="1"', html)
+        self.assertIn('data-pdf-bp="3"', html)
+        self.assertIn('data-pdf-bp="5"', html)
+        self.assertNotIn('data-pdf-bp="2"', html)
+        self.assertNotIn('data-pdf-bp="4"', html)
+        self.assertIn(f'/reading?bp=3&amp;doc_id={self.doc_id}&amp;usage=0&amp;orig=0&amp;layout=stack&amp;pdf=0', html)
+
+    def test_start_translate_all_normalizes_placeholder_start_page_to_next_visible_page(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "Page 3", "footnotes": ""},
+        ])
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"api_key": "fake-key", "provider": "qwen"}),
+            patch.object(app_module, "start_translate_task", return_value=True) as start_mock,
+        ):
+            resp = self._post("/start_translate_all", data={
+                "doc_id": self.doc_id,
+                "doc_title": "Reading Refresh",
+                "start_bp": 2,
+            })
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.get_json()["start_bp"], 3)
+        start_mock.assert_called_once_with(self.doc_id, 3, "Reading Refresh")
+
+    def test_translate_status_filters_placeholder_failures_and_uses_visible_page_totals(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "Page 3", "footnotes": ""},
+            {"bookPage": 4, "fileIdx": 3, "markdown": "", "footnotes": "", "isPlaceholder": True, "textSource": "placeholder"},
+            {"bookPage": 5, "fileIdx": 4, "markdown": "Page 5", "footnotes": ""},
+        ])
+        save_entries_to_disk([{
+            "_pageBP": 1,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Page 1",
+                "translation": "翻译 1",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "1",
+            }],
+            "pages": "1",
+        }], "Reading Refresh", 0, self.doc_id)
+        tasks._save_translate_state(
+            self.doc_id,
+            running=False,
+            stop_requested=False,
+            phase="stopped",
+            start_bp=1,
+            total_pages=5,
+            done_pages=1,
+            processed_pages=3,
+            pending_pages=2,
+            current_bp=2,
+            current_page_idx=2,
+            failed_bps=[2, 4],
+            failed_pages=[
+                {"bp": 2, "error": "第2页未找到内容"},
+                {"bp": 4, "error": "第4页未找到内容"},
+            ],
+        )
+
+        status = self.client.get("/translate_status", query_string={"doc_id": self.doc_id}).get_json()
+
+        self.assertEqual(status["translated_bps"], [1])
+        self.assertEqual(status["failed_bps"], [])
+        self.assertEqual(status["total_pages"], 3)
+        self.assertEqual(status["done_pages"], 1)
+        self.assertEqual(status["processed_pages"], 1)
+        self.assertEqual(status["pending_pages"], 2)
 
     def test_set_model_treats_literal_undefined_doc_id_as_missing_param(self):
         resp = self._post(

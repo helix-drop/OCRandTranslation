@@ -19,7 +19,7 @@ from config import (
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
 )
 from sqlite_store import SQLiteRepository
-from text_processing import get_page_range
+from text_processing import get_page_range, build_visible_page_view
 
 
 # ============ DISK PERSISTENCE (多文档) ============
@@ -796,7 +796,10 @@ def get_app_state(doc_id: str = "") -> dict:
     meta = get_doc_meta(doc_id)
     entry_idx = meta.get("last_entry_idx", entry_idx)
 
-    first_page, last_page = get_page_range(pages) if pages else (1, 1)
+    visible_page_view = build_visible_page_view(pages)
+    first_page = visible_page_view["first_visible_page"] or (get_page_range(pages)[0] if pages else 1)
+    last_page = visible_page_view["last_visible_page"] or (get_page_range(pages)[1] if pages else 1)
+    visible_page_count = int(visible_page_view["visible_page_count"] or 0)
 
     has_entries = len(entries) > 0
     return {
@@ -826,8 +829,11 @@ def get_app_state(doc_id: str = "") -> dict:
         "has_pages": len(pages) > 0,
         "has_entries": has_entries,
         "has_translation_history": has_entries,
-        "page_count": len(pages),
+        "page_count": visible_page_count or len(pages),
         "first_page": first_page,
         "last_page": last_page,
+        "visible_page_bps": visible_page_view["visible_page_bps"],
+        "hidden_placeholder_bps": visible_page_view["hidden_placeholder_bps"],
+        "visible_page_count": visible_page_count or len(pages),
         "entry_count": len(entries),
     }
