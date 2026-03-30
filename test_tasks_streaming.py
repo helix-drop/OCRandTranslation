@@ -1099,8 +1099,10 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         with open(pdf_path, "wb") as f:
             f.write(b"%PDF-1.4\n%test\n")
         self.client = app_module.app.test_client()
+        self._reset_translate_task()
 
     def tearDown(self):
+        self._reset_translate_task()
         shutil.rmtree(self.temp_root, ignore_errors=True)
 
     def _patch_config_dirs(self, root: str):
@@ -1109,6 +1111,13 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         config.DATA_DIR = os.path.join(root, "data")
         config.DOCS_DIR = os.path.join(config.DATA_DIR, "documents")
         config.CURRENT_FILE = os.path.join(config.DATA_DIR, "current.txt")
+
+    def _reset_translate_task(self):
+        with tasks._translate_lock:
+            tasks._translate_task["running"] = False
+            tasks._translate_task["stop"] = False
+            tasks._translate_task["events"] = []
+            tasks._translate_task["doc_id"] = ""
 
     def _save_range_pages(self, first_bp: int, last_bp: int):
         save_pages_to_disk([{
@@ -1299,6 +1308,33 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("从 PDF 第2页开始读", html)
         self.assertIn(f"/reading?bp=2&amp;auto=1&amp;start_bp=2&amp;doc_id={self.doc_id}", html)
+
+    def test_home_page_requests_stop_for_active_translate_task(self):
+        tasks._save_translate_state(
+            self.doc_id,
+            running=True,
+            stop_requested=False,
+            phase="running",
+            total_pages=3,
+            done_pages=1,
+            processed_pages=1,
+            pending_pages=2,
+            current_bp=2,
+            current_page_idx=2,
+        )
+        with tasks._translate_lock:
+            tasks._translate_task["running"] = True
+            tasks._translate_task["stop"] = False
+            tasks._translate_task["events"] = []
+            tasks._translate_task["doc_id"] = self.doc_id
+
+        resp = self.client.get("/")
+        snapshot = tasks.get_translate_snapshot(self.doc_id)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(snapshot["running"])
+        self.assertTrue(snapshot["stop_requested"])
+        self.assertEqual(snapshot["phase"], "stopping")
 
     def test_reading_route_redirects_placeholder_page_to_next_visible_page(self):
         self._save_pages([

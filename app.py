@@ -533,6 +533,7 @@ def home():
     current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
     if requested_doc_id and current_doc_id == requested_doc_id:
         set_current_doc(current_doc_id)
+    request_stop_active_translate()
     state = get_app_state(current_doc_id)
     logs = session.pop("logs", [])
     docs = list_docs()
