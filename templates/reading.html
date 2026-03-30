@@ -1608,7 +1608,7 @@ function tocSaveOffset() {
 var pageMap = {{ page_map|tojson }};
 var pdfPageMetrics = {
   {% for page in pages %}
-  "{{ page.bookPage }}": {imgW: {{ page.imgW|default(0) }}, imgH: {{ page.imgH|default(0) }}}{% if not loop.last %},{% endif %}
+  "{{ page.bookPage }}": {imgW: {{ page.imgW|default(0, true)|tojson }}, imgH: {{ page.imgH|default(0, true)|tojson }}}{% if not loop.last %},{% endif %}
   {% endfor %}
 };
 var pdfScrollObserver = null;

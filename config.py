@@ -45,6 +45,15 @@ CUSTOM_MODEL_DEFAULT = {
     "extra_body": {},
 }
 
+INVALID_DOC_ID_LITERALS = {"undefined", "null", "None"}
+
+
+def normalize_doc_id(doc_id: str | None) -> str:
+    raw = str(doc_id or "").strip()
+    if not raw or raw in INVALID_DOC_ID_LITERALS:
+        return ""
+    return raw
+
 MODELS = {
     "deepseek-chat": {"id": "deepseek-chat", "label": "DeepSeek-Chat", "provider": "deepseek"},
     "deepseek-reasoner": {"id": "deepseek-reasoner", "label": "DeepSeek-Reasoner", "provider": "deepseek"},
@@ -682,7 +691,7 @@ def get_current_doc_id() -> str:
     """返回当前活跃文档 ID，无则返回空字符串。"""
     from sqlite_store import SQLiteRepository
 
-    doc_id = (SQLiteRepository().get_app_state("current_doc_id") or "").strip()
+    doc_id = normalize_doc_id(SQLiteRepository().get_app_state("current_doc_id"))
     if doc_id and os.path.isdir(os.path.join(DOCS_DIR, doc_id)):
         return doc_id
     return ""
@@ -693,7 +702,12 @@ def set_current_doc(doc_id: str):
     ensure_dirs()
     from sqlite_store import SQLiteRepository
 
-    SQLiteRepository().set_app_state("current_doc_id", doc_id)
+    normalized_doc_id = normalize_doc_id(doc_id)
+    if not normalized_doc_id:
+        return
+    if not os.path.isdir(os.path.join(DOCS_DIR, normalized_doc_id)):
+        return
+    SQLiteRepository().set_app_state("current_doc_id", normalized_doc_id)
 
 
 def get_doc_dir(doc_id: str = "") -> str:

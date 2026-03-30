@@ -14,7 +14,7 @@ import app as app_module
 import config
 import ocr_client
 import tasks
-from config import create_doc, ensure_dirs, get_doc_meta, set_current_doc
+from config import create_doc, ensure_dirs, get_current_doc_id, get_doc_meta, set_current_doc
 from storage import (
     load_pages_from_disk,
     save_entries_to_disk,
@@ -1177,6 +1177,32 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.get_json()["doc_id"], self.doc_id)
+
+    def test_set_model_treats_literal_undefined_doc_id_as_missing_param(self):
+        resp = self._post(
+            "/set_model/deepseek-chat",
+            data={"doc_id": "undefined", "next": "reading"},
+        )
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(get_current_doc_id(), self.doc_id)
+        self.assertIn(f"/reading?doc_id={self.doc_id}", resp.location)
+
+    def test_pdf_preview_routes_treat_literal_undefined_doc_id_as_missing_param(self):
+        with patch.object(app_module, "render_pdf_page", return_value=b"fake-png-bytes"):
+            file_resp = self.client.get("/pdf_file", query_string={"doc_id": "undefined"})
+            page_resp = self.client.get("/pdf_page/0", query_string={"doc_id": "undefined"})
+
+        try:
+            self.assertEqual(file_resp.status_code, 200)
+            self.assertEqual(file_resp.mimetype, "application/pdf")
+            self.assertTrue(file_resp.get_data().startswith(b"%PDF-1.4"))
+            self.assertEqual(page_resp.status_code, 200)
+            self.assertEqual(page_resp.mimetype, "image/png")
+            self.assertEqual(page_resp.get_data(), b"fake-png-bytes")
+        finally:
+            file_resp.close()
+            page_resp.close()
 
     def test_reading_page_embeds_controlled_commit_refresh_guards(self):
         self._save_range_pages(1, 2)

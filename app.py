@@ -40,7 +40,7 @@ from config import (
     get_current_doc_id, set_current_doc,
     get_doc_meta, get_doc_dir,
     list_docs, update_doc_meta, delete_doc,
-    LOCAL_DATA_DIR,
+    LOCAL_DATA_DIR, normalize_doc_id,
 )
 from text_processing import get_page_range, get_next_page_bp, normalize_latex_footnote_markers
 from pdf_extract import render_pdf_page, parse_toc_file
@@ -297,9 +297,7 @@ def _build_translate_usage_payload(doc_id: str) -> dict:
 
 
 def _request_doc_id() -> str:
-    raw = request.values.get("doc_id", "").strip()
-    if raw in {"undefined", "null", "None"}:
-        raw = ""
+    raw = normalize_doc_id(request.values.get("doc_id", ""))
     return raw or get_current_doc_id()
 
 
@@ -477,7 +475,7 @@ def _delete_doc_with_verification(doc_id: str) -> bool:
 
 @app.route("/")
 def home():
-    requested_doc_id = request.args.get("doc_id", "").strip()
+    requested_doc_id = normalize_doc_id(request.args.get("doc_id", ""))
     current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
     if requested_doc_id and current_doc_id == requested_doc_id:
         set_current_doc(current_doc_id)
@@ -509,7 +507,7 @@ def delete_doc_route(doc_id):
 
 @app.route("/input")
 def input_page():
-    requested_doc_id = request.args.get("doc_id", "").strip()
+    requested_doc_id = normalize_doc_id(request.args.get("doc_id", ""))
     current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
     if requested_doc_id and current_doc_id == requested_doc_id:
         set_current_doc(current_doc_id)
@@ -524,7 +522,7 @@ def input_page():
 
 @app.route("/reading")
 def reading():
-    requested_doc_id = request.args.get("doc_id", "").strip()
+    requested_doc_id = normalize_doc_id(request.args.get("doc_id", ""))
     current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
     if requested_doc_id and current_doc_id == requested_doc_id:
         set_current_doc(current_doc_id)
@@ -883,7 +881,7 @@ def start_from_beginning():
 
 @app.route("/start_reading", methods=["POST"])
 def start_reading():
-    doc_id = request.form.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if doc_id:
         set_current_doc(doc_id)
     pages, src_name = load_pages_from_disk(doc_id)
@@ -1202,7 +1200,7 @@ def paddle_quota_status():
 
 @app.route("/settings")
 def settings():
-    requested_doc_id = request.args.get("doc_id", "").strip()
+    requested_doc_id = normalize_doc_id(request.args.get("doc_id", ""))
     current_doc_id = requested_doc_id if requested_doc_id and get_doc_meta(requested_doc_id) else get_current_doc_id()
     if requested_doc_id and current_doc_id == requested_doc_id:
         set_current_doc(current_doc_id)
@@ -1349,7 +1347,7 @@ def set_model(key):
         set_model_key(key)
         disable_custom_model()
     next_page = request.values.get("next", "home")
-    doc_id = request.values.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if doc_id:
         set_current_doc(doc_id)
     return _redirect_after_model_change(next_page, doc_id)
@@ -1367,7 +1365,7 @@ def set_pref():
 
 @app.route("/download_md")
 def download_md():
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     md = "\ufeff" + gen_markdown(entries)
     buf = BytesIO(md.encode("utf-8"))
@@ -1378,7 +1376,7 @@ def download_md():
 @app.route("/export_md")
 def export_md():
     """API端点：按需返回 markdown 内容供预览。"""
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     md = gen_markdown(entries)
     return jsonify({"markdown": md})
@@ -1389,7 +1387,7 @@ def export_md():
 @app.route("/pdf_file")
 def pdf_file():
     """提供当前文档的 PDF 文件用于内嵌预览。"""
-    path = get_pdf_path(request.args.get("doc_id", "").strip())
+    path = get_pdf_path(_request_doc_id())
     if not path or not os.path.exists(path):
         return "PDF 文件不存在", 404
     return send_file(path, mimetype="application/pdf")
@@ -1398,7 +1396,7 @@ def pdf_file():
 @app.route("/pdf_page/<int:file_idx>")
 def pdf_page(file_idx):
     """渲染 PDF 指定页为 PNG 图片。"""
-    path = get_pdf_path(request.args.get("doc_id", "").strip())
+    path = get_pdf_path(_request_doc_id())
     if not path or not os.path.exists(path):
         return "PDF 文件不存在", 404
     raw_scale = request.args.get("scale", "")
@@ -1448,7 +1446,7 @@ def _format_unix_ts(ts: int | float | None) -> str:
 
 @app.route("/pdf_toc")
 def pdf_toc():
-    doc_id = request.args.get("doc_id", "").strip() or get_current_doc_id()
+    doc_id = _request_doc_id()
     if not doc_id:
         return jsonify({"doc_id": "", "toc": [], "source": "auto", "offset": 0, "toc_file": get_toc_file_info("")})
     source, offset = load_toc_source_offset(doc_id)
@@ -1538,7 +1536,7 @@ def reset_text_action():
 @app.route("/reset_all", methods=["POST"])
 def reset_all():
     """删除当前文档。"""
-    requested_doc_id = request.values.get("doc_id", "").strip()
+    requested_doc_id = normalize_doc_id(request.values.get("doc_id", ""))
     doc_id = requested_doc_id or get_current_doc_id()
     if requested_doc_id and not get_doc_meta(requested_doc_id):
         flash("文档不存在", "error")
