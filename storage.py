@@ -799,6 +799,54 @@ def _unwrap_translation_json(text: str) -> str:
     return text
 
 
+def build_toc_chapters(toc_items: list, offset: int = 0, total_pages: int = 0) -> list[dict]:
+    """将 TOC 条目转换为带页码范围的顶级章节列表。
+
+    只取 depth=0 的条目作为章节；若无 depth=0 条目则取全部。
+    返回：[{index, title, depth, start_bp, end_bp}, ...]
+    start_bp/end_bp 均为 1-based book_page（已加 offset）。
+    """
+    if not toc_items:
+        return []
+
+    def _bp(item: dict) -> int:
+        bp = int(item.get("book_page") or 0)
+        fi = item.get("file_idx")
+        if not bp and fi is not None:
+            bp = int(fi) + 1
+        return bp + int(offset or 0) if bp > 0 else 0
+
+    top_level = [item for item in toc_items if int(item.get("depth", 0) or 0) == 0]
+    candidates = top_level if top_level else list(toc_items)
+
+    chapters = []
+    for item in candidates:
+        bp = _bp(item)
+        if bp > 0:
+            chapters.append({
+                "title": item.get("title", ""),
+                "depth": int(item.get("depth", 0) or 0),
+                "start_bp": bp,
+                "end_bp": None,
+            })
+
+    if not chapters:
+        return []
+
+    chapters.sort(key=lambda c: c["start_bp"])
+
+    for i, ch in enumerate(chapters):
+        if i + 1 < len(chapters):
+            ch["end_bp"] = chapters[i + 1]["start_bp"] - 1
+        else:
+            ch["end_bp"] = total_pages if total_pages > 0 else ch["start_bp"]
+
+    for i, ch in enumerate(chapters):
+        ch["index"] = i
+
+    return chapters
+
+
 def build_toc_depth_map(toc_items: list, offset: int = 0) -> dict:
     """从原始 TOC 条目 + 页码偏移构建 {book_page: depth} 查找表。
 
@@ -883,10 +931,12 @@ def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, li
     return assignments
 
 
-def _resolve_heading_level(pe: dict, toc_depth_map: dict) -> int:
+def _resolve_heading_level(pe: dict, toc_depth_map: dict, min_non_toc_level: int = 1) -> int:
     """根据 TOC depth map 确定段落的 Markdown 标题层级。
 
-    优先用 TOC depth（depth+1 → # 数），无匹配时用 OCR 检测的 heading_level。
+    - TOC 命中：严格使用 depth+1，不受 OCR 检测值影响。
+    - TOC 未命中但 OCR 判定为标题：层级不低于 min_non_toc_level，
+      避免非目录标题与目录层级混淆。
     返回 0 表示普通正文，>0 表示标题。
     """
     hlevel = int(pe.get("heading_level", 0) or 0)
@@ -899,35 +949,59 @@ def _resolve_heading_level(pe: dict, toc_depth_map: dict) -> int:
         depth = toc_depth_map.get(int(start_bp))
         if depth is not None:
             return max(1, depth + 1)
-    return hlevel
+    # 不在 TOC 中：确保不浅于 min_non_toc_level
+    return max(min_non_toc_level, hlevel)
 
 
-def gen_markdown(entries: list, toc_depth_map: dict | None = None) -> str:
+def gen_markdown(
+    entries: list,
+    toc_depth_map: dict | None = None,
+    page_ranges: list[tuple[int, int]] | None = None,
+) -> str:
     """生成 Markdown 导出内容。
 
     Args:
         entries: 翻译条目列表。
         toc_depth_map: {book_page: depth} 查找表，由 build_toc_depth_map() 生成。
                        传入后用于修正标题的 # 层级；不传则沿用 OCR 检测值。
+        page_ranges: [(start_bp, end_bp), ...] 指定只导出哪些页码区间；
+                     None 表示导出全部。
     """
     dm = toc_depth_map or {}
+    # 非 TOC 标题的最低层级 = TOC 最深 depth 对应的 # 数 + 1
+    # 例：TOC 有 depth=0,1 → max_toc_level=2 → 非 TOC 标题至少 ### (3)
+    if dm:
+        min_non_toc_level = max(depth + 1 for depth in dm.values()) + 1
+    else:
+        min_non_toc_level = 1
+
+    def _in_ranges(bp: int) -> bool:
+        if page_ranges is None:
+            return True
+        return any(s <= bp <= e for s, e in page_ranges)
+
     md_lines: list[str] = []
     for e in entries:
+        bp = int(e.get("_pageBP") or e.get("book_page") or 0)
+        if not _in_ranges(bp):
+            continue
         page_entries = e.get("_page_entries")
         if page_entries:
             footnote_assignments = _resolve_page_footnote_assignments(page_entries)
             for idx, pe in enumerate(page_entries):
-                hlevel = _resolve_heading_level(pe, dm)
+                hlevel = _resolve_heading_level(pe, dm, min_non_toc_level)
                 orig = strip_html(_ensure_str(pe.get("original")).strip()).strip()
                 tr = strip_html(_unwrap_translation_json(_ensure_str(pe.get("translation")).strip())).strip()
                 if hlevel > 0:
                     prefix = "#" * min(hlevel, 6)
-                    # 标题同时输出原文和译文（分行），均使用相同层级
-                    if orig:
-                        md_lines.append(f"{prefix} {orig}")
-                        md_lines.append("")
-                    if tr and tr != orig:
+                    # 译文为主标题，原文以斜体注释跟随
+                    if tr:
                         md_lines.append(f"{prefix} {tr}")
+                        if orig and orig != tr:
+                            md_lines.append(f"*{orig}*")
+                        md_lines.append("")
+                    elif orig:
+                        md_lines.append(f"{prefix} {orig}")
                         md_lines.append("")
                 else:
                     _append_blockquote(md_lines, orig)

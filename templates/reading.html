@@ -496,9 +496,18 @@
       <span style="font-weight:700;font-size:16px;">导出</span>
       <button onclick="document.getElementById('exportModal').classList.add('hidden');" style="background:transparent;border:none;color:var(--txL);font-size:20px;cursor:pointer;">&times;</button>
     </div>
+    <!-- 章节选择器（有 TOC 时显示） -->
+    <div id="exportChapterSection" class="hidden" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:600;">章节选择</span>
+        <button class="tb" style="font-size:11px;" onclick="exportSelectAll(true);">全选</button>
+        <button class="tb" style="font-size:11px;" onclick="exportSelectAll(false);">全不选</button>
+      </div>
+      <div id="exportChapterList" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:4px 0;"></div>
+    </div>
     <div class="flex gap-8 mb-12">
       <button class="btn btn-pri" onclick="copyExport();">复制</button>
-      <a href="{{ url_for('download_md', doc_id=current_doc_id) }}" class="btn btn-grn">下载 .md</a>
+      <button class="btn btn-grn" id="exportDownloadBtn" onclick="downloadExportMd();">下载 .md</button>
     </div>
     <textarea id="exportText" readonly placeholder="加载中…"></textarea>
     <div id="exportLoading" class="hidden" style="text-align:center;padding:20px;color:var(--txL);">加载中…</div>
@@ -3569,12 +3578,95 @@ function initPdfResizer() {
 }
 
 // ===== 导出功能 =====
+var _exportChapters = [];   // [{index, title, start_bp, end_bp}, ...]
+var _exportDebounceTimer = null;
+
 function openExportModal() {
   document.getElementById('exportModal').classList.remove('hidden');
-  loadExportContent();
+  _loadExportChapters();
 }
 
-function loadExportContent() {
+function _loadExportChapters() {
+  var docId = requireReadingDocId('导出文稿', function() {});
+  if (!docId) return;
+  fetch('{{ url_for("api_toc_chapters") }}?doc_id=' + encodeURIComponent(docId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      _exportChapters = d.chapters || [];
+      _renderExportChapterList();
+      loadExportContent();
+    })
+    .catch(function() {
+      _exportChapters = [];
+      loadExportContent();
+    });
+}
+
+function _renderExportChapterList() {
+  var section = document.getElementById('exportChapterSection');
+  var list = document.getElementById('exportChapterList');
+  if (!_exportChapters.length) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  list.innerHTML = '';
+  _exportChapters.forEach(function(ch) {
+    var row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:3px 8px;cursor:pointer;font-size:12px;';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.dataset.idx = ch.index;
+    cb.addEventListener('change', function() { _scheduleExportReload(); });
+    var label = document.createElement('span');
+    label.style.cssText = 'flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    label.textContent = ch.title;
+    var pages = document.createElement('span');
+    pages.style.cssText = 'color:var(--txS);flex-shrink:0;';
+    pages.textContent = 'p.' + ch.start_bp + (ch.end_bp !== ch.start_bp ? '–' + ch.end_bp : '');
+    row.appendChild(cb);
+    row.appendChild(label);
+    row.appendChild(pages);
+    list.appendChild(row);
+  });
+}
+
+function exportSelectAll(checked) {
+  var list = document.getElementById('exportChapterList');
+  list.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = checked; });
+  _scheduleExportReload();
+}
+
+function _scheduleExportReload() {
+  clearTimeout(_exportDebounceTimer);
+  _exportDebounceTimer = setTimeout(function() { loadExportContent(true); }, 300);
+}
+
+function _exportBpRanges() {
+  if (!_exportChapters.length) return '';
+  var list = document.getElementById('exportChapterList');
+  var checked = Array.from(list.querySelectorAll('input[type=checkbox]:checked'));
+  // 全选时不传参（等同全部导出）
+  if (checked.length === _exportChapters.length) return '';
+  if (!checked.length) return '__none__';
+  return checked.map(function(cb) {
+    var ch = _exportChapters[parseInt(cb.dataset.idx)];
+    return ch.start_bp + '-' + ch.end_bp;
+  }).join(',');
+}
+
+function _exportChapterName() {
+  if (!_exportChapters.length) return '';
+  var list = document.getElementById('exportChapterList');
+  var checked = Array.from(list.querySelectorAll('input[type=checkbox]:checked'));
+  if (checked.length === 1) {
+    return _exportChapters[parseInt(checked[0].dataset.idx)].title;
+  }
+  return '';
+}
+
+function loadExportContent(force) {
   var textarea = document.getElementById('exportText');
   var loading = document.getElementById('exportLoading');
   var docId = requireReadingDocId('导出文稿', function(message) {
@@ -3584,15 +3676,25 @@ function loadExportContent() {
   });
   if (!docId) return;
 
-  // 如果已经有内容且不是占位符，不重复加载
-  if (textarea.value && textarea.value !== '加载中…') {
+  if (!force && textarea.value && textarea.value !== '加载中…') {
     return;
   }
 
   textarea.classList.add('hidden');
   loading.classList.remove('hidden');
 
-  fetch('{{ url_for("export_md") }}?doc_id=' + encodeURIComponent(docId))
+  var bpRanges = _exportBpRanges();
+  if (bpRanges === '__none__') {
+    textarea.value = '';
+    loading.classList.add('hidden');
+    textarea.classList.remove('hidden');
+    return;
+  }
+
+  var url = '{{ url_for("export_md") }}?doc_id=' + encodeURIComponent(docId);
+  if (bpRanges) url += '&bp_ranges=' + encodeURIComponent(bpRanges);
+
+  fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(d) {
       textarea.value = d.markdown || '';
@@ -3602,6 +3704,20 @@ function loadExportContent() {
     .catch(function(err) {
       loading.textContent = '加载失败: ' + err;
     });
+}
+
+function downloadExportMd() {
+  var docId = requireReadingDocId('导出文稿', function() {});
+  if (!docId) return;
+  var bpRanges = _exportBpRanges();
+  if (bpRanges === '__none__') { alert('请至少选择一个章节'); return; }
+  var url = '{{ url_for("download_md") }}?doc_id=' + encodeURIComponent(docId);
+  if (bpRanges) {
+    url += '&bp_ranges=' + encodeURIComponent(bpRanges);
+    var name = _exportChapterName();
+    if (name) url += '&chapter_name=' + encodeURIComponent(name);
+  }
+  window.location.href = url;
 }
 
 function copyExport() {

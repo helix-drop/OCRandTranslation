@@ -54,7 +54,7 @@ from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
-    gen_markdown, build_toc_depth_map, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
+    gen_markdown, build_toc_depth_map, build_toc_chapters, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
     load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
@@ -1484,14 +1484,62 @@ def _load_toc_depth_map(doc_id: str) -> dict:
     return build_toc_depth_map(toc_items, offset)
 
 
+def _load_toc_chapters_data(doc_id: str) -> list[dict]:
+    """加载并构建章节列表（用于按章节导出）。"""
+    source, offset = load_toc_source_offset(doc_id)
+    toc_items = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
+    meta = get_doc_meta(doc_id) or {}
+    total_pages = int(meta.get("page_count") or 0)
+    return build_toc_chapters(toc_items, offset, total_pages)
+
+
+def _parse_bp_ranges(raw: str) -> list[tuple[int, int]]:
+    """解析 '19-32,53-70' 格式为 [(19, 32), (53, 70)]。非法片段静默忽略。"""
+    result = []
+    for part in (raw or "").split(","):
+        part = part.strip()
+        if "-" in part:
+            try:
+                a, b = part.split("-", 1)
+                result.append((int(a), int(b)))
+            except (ValueError, TypeError):
+                pass
+    return result
+
+
+def _sanitize_filename(name: str) -> str:
+    """替换文件名中的非法字符。"""
+    import re as _re
+    return _re.sub(r'[<>:"/\\|?*]', " ", name).strip()
+
+
+@app.route("/api/toc_chapters")
+def api_toc_chapters():
+    """返回文档的顶级章节列表及页码范围，用于按章节导出。"""
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"chapters": []})
+    chapters = _load_toc_chapters_data(doc_id)
+    return jsonify({"chapters": chapters})
+
+
 @app.route("/download_md")
 def download_md():
     doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     toc_depth_map = _load_toc_depth_map(doc_id)
-    md = "\ufeff" + gen_markdown(entries, toc_depth_map=toc_depth_map)
+    page_ranges = _parse_bp_ranges(request.args.get("bp_ranges", "")) or None
+    md = "\ufeff" + gen_markdown(entries, toc_depth_map=toc_depth_map, page_ranges=page_ranges)
     buf = BytesIO(md.encode("utf-8"))
-    filename = (doc_title or "export") + ".md"
+    # 文件名：单章节用章节标题，多章节用「选中章节」
+    base = _sanitize_filename(doc_title or "export")
+    chapter_name = request.args.get("chapter_name", "").strip()
+    if page_ranges and chapter_name:
+        filename = f"{base} - {_sanitize_filename(chapter_name)}.md"
+    elif page_ranges:
+        filename = f"{base} - 选中章节.md"
+    else:
+        filename = f"{base}.md"
     return send_file(buf, as_attachment=True, download_name=filename, mimetype="text/markdown")
 
 
@@ -1501,7 +1549,8 @@ def export_md():
     doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     toc_depth_map = _load_toc_depth_map(doc_id)
-    md = gen_markdown(entries, toc_depth_map=toc_depth_map)
+    page_ranges = _parse_bp_ranges(request.args.get("bp_ranges", "")) or None
+    md = gen_markdown(entries, toc_depth_map=toc_depth_map, page_ranges=page_ranges)
     return jsonify({"markdown": md})
 
 
