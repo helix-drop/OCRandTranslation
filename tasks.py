@@ -40,7 +40,7 @@ from storage import (
     save_auto_pdf_toc_to_disk,
     get_translate_args, _ensure_str,
 )
-from pdf_extract import extract_pdf_toc
+from pdf_extract import extract_pdf_toc, extract_pdf_toc_from_links
 
 
 # ============ OCR TASK MANAGEMENT ============
@@ -182,6 +182,10 @@ def process_file(task_id: str):
             except Exception as e:
                 task_push(task_id, "log", {"msg": f"PDF保存失败: {e}"})
             toc_items = extract_pdf_toc(file_bytes)
+            if not toc_items:
+                toc_items = extract_pdf_toc_from_links(file_bytes)
+                if toc_items:
+                    task_push(task_id, "log", {"msg": f"已从目录页超链接提取目录 ({len(toc_items)} 条)", "cls": "success"})
             save_auto_pdf_toc_to_disk(doc_id, toc_items)
             if toc_items:
                 task_push(task_id, "log", {"msg": f"已提取 PDF 目录 ({len(toc_items)} 条)", "cls": "success"})
@@ -2255,7 +2259,8 @@ def reparse_file(task_id: str, doc_id: str):
         # Step 4: 保存页面数据（SQLite 主写入）
         task_push(task_id, "progress", {"pct": 95, "label": "保存数据…", "detail": ""})
         save_pages_to_disk(final_pages, file_name, doc_id)
-        save_auto_pdf_toc_to_disk(doc_id, extract_pdf_toc(file_bytes))
+        _toc = extract_pdf_toc(file_bytes) or extract_pdf_toc_from_links(file_bytes)
+        save_auto_pdf_toc_to_disk(doc_id, _toc)
 
         first, last = get_page_range(final_pages)
         summary = f"重新解析完成！{len(final_pages)}页 (p.{first}-{last})"

@@ -54,7 +54,7 @@ from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
-    gen_markdown, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
+    gen_markdown, build_toc_depth_map, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
     load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
@@ -702,9 +702,12 @@ def reading():
     for pg in pages:
         page_map[pg["bookPage"]] = pg["fileIdx"]
 
-    # 目录（仅用户主动上传的才传给阅读页）
+    # 目录：用户目录优先，无用户目录时使用自动提取的 PDF 书签/超链接目录
     toc_source, toc_offset = load_toc_source_offset(current_doc_id)
-    toc_items = load_user_toc_from_disk(current_doc_id) if toc_source == "user" else []
+    if toc_source == "user":
+        toc_items = load_user_toc_from_disk(current_doc_id)
+    else:
+        toc_items = load_pdf_toc_from_disk(current_doc_id)
     toc_items = _build_toc_reading_items(toc_items, toc_offset, page_lookup)
 
     page_index = visible_page_bps.index(cur_page_bp) if cur_page_bp in visible_page_bps else 0
@@ -1474,11 +1477,19 @@ def set_model(key):
 
 # ============ ROUTES: 导出 ============
 
+def _load_toc_depth_map(doc_id: str) -> dict:
+    """为导出路由加载并构建 TOC depth 查找表。"""
+    source, offset = load_toc_source_offset(doc_id)
+    toc_items = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
+    return build_toc_depth_map(toc_items, offset)
+
+
 @app.route("/download_md")
 def download_md():
     doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
-    md = "\ufeff" + gen_markdown(entries)
+    toc_depth_map = _load_toc_depth_map(doc_id)
+    md = "\ufeff" + gen_markdown(entries, toc_depth_map=toc_depth_map)
     buf = BytesIO(md.encode("utf-8"))
     filename = (doc_title or "export") + ".md"
     return send_file(buf, as_attachment=True, download_name=filename, mimetype="text/markdown")
@@ -1489,7 +1500,8 @@ def export_md():
     """API端点：按需返回 markdown 内容供预览。"""
     doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
-    md = gen_markdown(entries)
+    toc_depth_map = _load_toc_depth_map(doc_id)
+    md = gen_markdown(entries, toc_depth_map=toc_depth_map)
     return jsonify({"markdown": md})
 
 

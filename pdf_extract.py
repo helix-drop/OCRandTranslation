@@ -271,6 +271,114 @@ def extract_pdf_toc(file_bytes: bytes) -> list[dict]:
     return items
 
 
+def extract_pdf_toc_from_links(file_bytes: bytes) -> list[dict]:
+    """从 PDF 页面内嵌超链接提取目录结构（适用于无书签但目录页有内部链接的 PDF）。
+
+    策略：
+    1. 只扫描文档前 30% 的页面（目录通常在书首）
+    2. 找出其中内部链接最多的连续区段（目录页）
+    3. 链接目标页码须单调递增（区别于索引页的散乱跳转）
+    4. 提取链接行的完整文本作为标题
+
+    Returns:
+        [{title, depth, file_idx}] 列表，depth 按文字缩进推断（0/1）。
+    """
+    try:
+        import fitz
+    except ImportError:
+        return []
+
+    try:
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+    except Exception:
+        return []
+
+    try:
+        total_pages = len(doc)
+        # 只考虑前 30% 的页面，至多前 60 页
+        scan_limit = min(total_pages, max(20, int(total_pages * 0.3)))
+
+        # 统计前段各页的内部链接
+        page_data = []
+        for i in range(scan_limit):
+            try:
+                links = [lnk for lnk in doc[i].get_links() if lnk.get("kind") == 1]
+            except Exception:
+                links = []
+            page_data.append((i, links))
+
+        max_links = max((len(links) for _, links in page_data), default=0)
+        if max_links < 3:
+            return []
+
+        # 选取链接数 >= 50% 最大值的页面作为目录候选
+        threshold = max(3, max_links * 0.5)
+        toc_page_indices = [i for i, links in page_data if len(links) >= threshold]
+        if not toc_page_indices:
+            return []
+
+        items = []
+        seen_targets = set()
+
+        for page_idx in toc_page_indices:
+            page = doc[page_idx]
+            links = [lnk for lnk in page.get_links() if lnk.get("kind") == 1]
+            if not links:
+                continue
+
+            # 按 Y 坐标排序，检查目标页码是否单调递增（目录特征）
+            links_sorted = sorted(links, key=lambda lnk: lnk["from"].y0)
+            targets = [lnk.get("page", -1) for lnk in links_sorted if lnk.get("page", -1) >= 0]
+            if len(targets) < 3:
+                continue
+            # 至少 60% 的相邻对满足递增（允许索引中的重复/回跳）
+            increasing = sum(1 for a, b in zip(targets, targets[1:]) if b >= a)
+            if increasing / max(1, len(targets) - 1) < 0.6:
+                continue  # 不像目录页，跳过
+
+            # 计算页面最左侧链接的 x 坐标，用于推断缩进层级
+            min_x = min(lnk["from"].x0 for lnk in links)
+            indent_threshold = min_x + 15  # 超过此值视为子标题
+
+            page_h = page.rect.height
+
+            for lnk in links_sorted:
+                target_page = lnk.get("page")
+                if target_page is None or target_page < 0:
+                    continue
+                if target_page in seen_targets:
+                    continue
+
+                rect = lnk["from"]
+                # 提取同一行文字：从页面左边到右边，同 Y 范围
+                line_clip = fitz.Rect(0, rect.y0 - 2, page.rect.width, rect.y1 + 2)
+                text = page.get_text("text", clip=line_clip).strip()
+                text = re.sub(r"\s+", " ", text).strip()
+
+                # 过滤空文本或纯数字
+                if not text or re.match(r"^\d+$", text):
+                    continue
+
+                # 去掉末尾页码（如 "Introduction 11" → "Introduction"）
+                text = re.sub(r"\s+\d+\s*$", "", text).strip()
+                if not text:
+                    continue
+
+                depth = 1 if rect.x0 > indent_threshold else 0
+                items.append({
+                    "title": text,
+                    "depth": depth,
+                    "file_idx": int(target_page),
+                })
+                seen_targets.add(target_page)
+
+        # 按目标页码升序排列
+        items.sort(key=lambda x: x["file_idx"])
+        return items
+    finally:
+        doc.close()
+
+
 def _is_corrupted(text: str) -> bool:
     """检测文本是否被 \\x01 等控制字符污染（字体编码异常的 PDF 常见）。"""
     if not text:

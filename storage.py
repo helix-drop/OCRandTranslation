@@ -1,6 +1,7 @@
 """磁盘持久化与辅助函数：数据读写、模板变量、文本处理工具。"""
 from dataclasses import asdict, dataclass, field
 import io
+import json
 import os
 import re
 import shutil
@@ -21,6 +22,7 @@ from config import (
 )
 from sqlite_store import SQLiteRepository
 from text_processing import get_page_range, build_visible_page_view
+from text_utils import strip_html
 
 
 # ============ DISK PERSISTENCE (多文档) ============
@@ -760,6 +762,62 @@ def _ensure_str(val) -> str:
     return str(val)
 
 
+def _unwrap_translation_json(text: str) -> str:
+    """若 text 是 LLM 返回的 JSON 整体（误存为 translation），提取其中真正的 translation 字段。
+
+    先尝试 json.loads，失败则用正则定位 "translation": 后面的内容（兼容 JSON 中含未转义引号的情况）。
+    """
+    t = text.strip()
+    if not t.startswith("{"):
+        return text
+    # 快速判断：必须像翻译 JSON（含多个已知键）
+    if '"translation"' not in t or '"original"' not in t:
+        return text
+
+    # 尝试标准解析
+    try:
+        parsed = json.loads(t)
+        if isinstance(parsed, dict) and "translation" in parsed:
+            result = _ensure_str(parsed["translation"]).strip()
+            return result or text
+    except Exception:
+        pass
+
+    # 正则兜底：提取 "translation": "..." 的值
+    # 向后定位到 "footnotes_translation" 或 JSON 结尾作为截止标志
+    m = re.search(
+        r'"translation"\s*:\s*"(.*?)"\s*(?:,\s*"footnotes_translation"|[}\]])',
+        t,
+        re.DOTALL,
+    )
+    if m:
+        raw = m.group(1)
+        # 还原转义序列
+        result = raw.replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"').strip()
+        return result or text
+
+    return text
+
+
+def build_toc_depth_map(toc_items: list, offset: int = 0) -> dict:
+    """从原始 TOC 条目 + 页码偏移构建 {book_page: depth} 查找表。
+
+    auto-extracted TOC 使用 file_idx（0-based），user-uploaded 使用 book_page（1-based印刷页）。
+    book_page（有效页）= file_idx+1（自动目录）或 book_page+offset（用户目录）。
+    """
+    depth_map: dict[int, int] = {}
+    for item in toc_items or []:
+        depth = int(item.get("depth", 0) or 0)
+        bp = int(item.get("book_page") or 0)
+        fi = item.get("file_idx")
+        if not bp and fi is not None:
+            bp = int(fi) + 1  # 0-based → 1-based
+        if bp > 0:
+            effective = bp + int(offset or 0)
+            depth_map[effective] = depth
+    return depth_map
+
+
 def _nonempty_markdown_lines(text) -> list[str]:
     return [line.strip() for line in _ensure_str(text).split("\n") if line.strip()]
 
@@ -825,21 +883,51 @@ def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, li
     return assignments
 
 
-def gen_markdown(entries: list) -> str:
+def _resolve_heading_level(pe: dict, toc_depth_map: dict) -> int:
+    """根据 TOC depth map 确定段落的 Markdown 标题层级。
+
+    优先用 TOC depth（depth+1 → # 数），无匹配时用 OCR 检测的 heading_level。
+    返回 0 表示普通正文，>0 表示标题。
+    """
+    hlevel = int(pe.get("heading_level", 0) or 0)
+    if hlevel <= 0:
+        return 0
+    if not toc_depth_map:
+        return hlevel
+    start_bp = pe.get("_startBP")
+    if start_bp is not None:
+        depth = toc_depth_map.get(int(start_bp))
+        if depth is not None:
+            return max(1, depth + 1)
+    return hlevel
+
+
+def gen_markdown(entries: list, toc_depth_map: dict | None = None) -> str:
+    """生成 Markdown 导出内容。
+
+    Args:
+        entries: 翻译条目列表。
+        toc_depth_map: {book_page: depth} 查找表，由 build_toc_depth_map() 生成。
+                       传入后用于修正标题的 # 层级；不传则沿用 OCR 检测值。
+    """
+    dm = toc_depth_map or {}
     md_lines: list[str] = []
     for e in entries:
         page_entries = e.get("_page_entries")
         if page_entries:
             footnote_assignments = _resolve_page_footnote_assignments(page_entries)
             for idx, pe in enumerate(page_entries):
-                hlevel = pe.get("heading_level", 0)
-                orig = _ensure_str(pe.get("original")).strip()
-                tr = _ensure_str(pe.get("translation")).strip()
+                hlevel = _resolve_heading_level(pe, dm)
+                orig = strip_html(_ensure_str(pe.get("original")).strip()).strip()
+                tr = strip_html(_unwrap_translation_json(_ensure_str(pe.get("translation")).strip())).strip()
                 if hlevel > 0:
                     prefix = "#" * min(hlevel, 6)
-                    heading = orig or tr
-                    if heading:
-                        md_lines.append(f"{prefix} {heading}")
+                    # 标题同时输出原文和译文（分行），均使用相同层级
+                    if orig:
+                        md_lines.append(f"{prefix} {orig}")
+                        md_lines.append("")
+                    if tr and tr != orig:
+                        md_lines.append(f"{prefix} {tr}")
                         md_lines.append("")
                 else:
                     _append_blockquote(md_lines, orig)
@@ -849,9 +937,10 @@ def gen_markdown(entries: list) -> str:
                     _append_labeled_block(md_lines, "脚注", footnotes)
                     _append_labeled_block(md_lines, "脚注翻译", footnotes_translation)
         else:
-            orig = _ensure_str(e.get("original")).strip()
+            orig = strip_html(_ensure_str(e.get("original")).strip()).strip()
+            tr_legacy = strip_html(_unwrap_translation_json(_ensure_str(e.get("translation")).strip())).strip()
             _append_blockquote(md_lines, orig)
-            _append_paragraph(md_lines, e.get("translation"))
+            _append_paragraph(md_lines, tr_legacy)
             _append_labeled_block(md_lines, "脚注", e.get("footnotes"))
             _append_labeled_block(md_lines, "脚注翻译", e.get("footnotes_translation"))
 

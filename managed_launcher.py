@@ -27,7 +27,7 @@ def build_browser_command(system: str, browser_path: str, profile_dir: str, url:
         "--no-first-run",
         "--no-default-browser-check",
         "--new-window",
-        f"--app={url}",
+        url,
     ]
     if system == "Darwin":
         command.append("--disable-features=DialMediaRouteProvider")

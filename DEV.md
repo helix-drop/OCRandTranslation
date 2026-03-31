@@ -95,14 +95,14 @@
 
 | 文件 | 行数 | 作用 |
 |---|---:|---|
-| [app.py](/Users/hao/OCRandTranslation/app.py) | 1507 | Flask 入口、页面路由、改状态接口、导出与 PDF 接口 |
-| [tasks.py](/Users/hao/OCRandTranslation/tasks.py) | 2250 | OCR 任务、翻译 worker、流式状态、停止与恢复逻辑 |
+| [app.py](/Users/hao/OCRandTranslation/app.py) | 1697 | Flask 入口、页面路由、改状态接口、导出与 PDF 接口 |
+| [tasks.py](/Users/hao/OCRandTranslation/tasks.py) | 2376 | OCR 任务、翻译 worker、流式状态、停止与恢复逻辑 |
 | [translator.py](/Users/hao/OCRandTranslation/translator.py) | 947 | Prompt、模型调用、流式翻译、术语约束 |
 | [text_processing.py](/Users/hao/OCRandTranslation/text_processing.py) | 964 | 页文本整理、段落切分、脚注归属、翻译上下文 |
 | [sqlite_store.py](/Users/hao/OCRandTranslation/sqlite_store.py) | 1141 | SQLite schema、连接、事务、仓储接口 |
 | [config.py](/Users/hao/OCRandTranslation/config.py) | 768 | 配置读写、术语表（含批量文件解析）、多文档、自定义模型配置与迁移 |
-| [storage.py](/Users/hao/OCRandTranslation/storage.py) | 571 | 页数据落盘、模型解析、目录恢复、Markdown 导出、应用状态汇总 |
-| [pdf_extract.py](/Users/hao/OCRandTranslation/pdf_extract.py) | 496 | PDF 文字层提取、TOC 提取、xlsx/csv 目录解析、页面渲染、版面合并 |
+| [storage.py](/Users/hao/OCRandTranslation/storage.py) | 1006 | 页数据落盘、模型解析、目录恢复、Markdown 导出、应用状态汇总 |
+| [pdf_extract.py](/Users/hao/OCRandTranslation/pdf_extract.py) | 604 | PDF 文字层提取、TOC 提取、xlsx/csv 目录解析、页面渲染、版面合并 |
 | [ocr_client.py](/Users/hao/OCRandTranslation/ocr_client.py) | 160 | PaddleOCR 远程接口请求 |
 | [templates/reading.html](/Users/hao/OCRandTranslation/templates/reading.html) | 3714 | 阅读页模板、工具栏、PDF 面板、前端状态脚本 |
 | [templates/home.html](/Users/hao/OCRandTranslation/templates/home.html) | 807 | 首页、上传入口、文档列表、OCR 进度、术语词典与目录导入模态框 |
@@ -130,7 +130,7 @@
 | 人工修订与历史 | 保存段级修订、查看历史、重译前警告 | 下游是 SQLite 段级历史 |
 | 状态与用量接口 | 当前翻译状态、API 用量、Paddle 配额状态 | 下游是阅读页轮询与设置页提示 |
 | 术语表与目录 API | 术语 CRUD / 导入、目录导入、目录偏移保存、目录元数据返回 | 下游是设置页、首页模态框与阅读页目录入口 |
-| 导出与 PDF 接口 | 导出 Markdown、读取 PDF 文件、PDF 单页、TOC | 下游是阅读页和下载 |
+| 导出与 PDF 接口 | 导出 Markdown（附 TOC depth map 修正标题层级）、读取 PDF 文件、PDF 单页、TOC | 下游是阅读页和下载 |
 | 清空翻译 / 清空全部 | 清空译文、重置当前文档或整库状态 | 下游是 `storage.py`、`sqlite_store.py`、`config.py` |
 
 ### `tasks.py`
@@ -184,7 +184,7 @@
 
 ### `storage.py`
 
-`storage.py` 负责磁盘落盘和“当前应用状态”的聚合读取。
+`storage.py` 负责磁盘落盘和”当前应用状态”的聚合读取。
 
 | 名称 | 作用 | 上下游关系 |
 |---|---|---|
@@ -194,7 +194,10 @@
 | 用户目录恢复 | 当 `documents.toc_source='user'` 且 `toc_json` 丢失时，从 `documents/{doc_id}/toc_source.csv/xlsx` 自动解析并回写 SQLite；自动 PDF 书签不会覆盖用户目录 | 下游是首页模态框、设置页和阅读页目录按钮 |
 | 生效模型解析 | 解析 `builtin:<key>` / `custom`，返回统一 `ResolvedModelSpec` 与请求覆盖项 | 上游是设置页；下游是 `tasks.py`、`translator.py` |
 | Markdown 辅助与脚注归属 | 高亮术语、清理文本、把脚注归到段落 | 下游是导出 |
-| `gen_markdown` | 把当前条目生成 Markdown | 下游是导出接口 |
+| `_unwrap_translation_json` | 检测 `translation` 字段是否误存了 LLM 返回的完整 JSON 字符串；先尝试 `json.loads`，失败则用正则定位 `”translation”:` 后的内容并还原转义序列 | 由 `gen_markdown` 在输出每条译文前调用 |
+| `build_toc_depth_map` | 将 TOC 原始条目 + 页码偏移转成 `{book_page: depth}` 查找表；自动目录用 `file_idx+1`，用户目录用 `book_page+offset` | 由导出路由调用后传入 `gen_markdown` |
+| `_resolve_heading_level` | 根据 `toc_depth_map` 为 heading 段落确定 Markdown `#` 层级：TOC 匹配时用 `depth+1`，无匹配时退化到 OCR 检测值 | 由 `gen_markdown` 内部调用 |
+| `gen_markdown(entries, toc_depth_map)` | 把当前条目生成 Markdown；`toc_depth_map` 传入后用于修正标题 `#` 层级，同时处理 JSON 误存的译文 | 下游是导出接口 |
 | `get_app_state` | 汇总当前文档状态、历史、页范围与导出所需摘要 | 下游是首页、阅读页 |
 
 ### `sqlite_store.py`
@@ -231,7 +234,8 @@
 |---|---|---|
 | `parse_toc_file` | 解析用户上传的 csv/xlsx 目录文件；当前对 `.xlsx` 支持 `openpyxl` 和轻量 zip/xml 后备解析，两者任一可用即可恢复目录 | 下游是目录导入、目录自动恢复 |
 | `extract_pdf_text` | 从 PDF 文字层提取页面文本和 bbox | 下游是 OCR / PDF 混合解析 |
-| `extract_pdf_toc` | 提取 PDF 目录并转成扁平 TOC | 下游是 `documents.toc_json` |
+| `extract_pdf_toc` | 从 PDF 书签（outline）提取扁平 TOC；这是主路径 | 下游是 `documents.toc_json`（由 `tasks.py` 在上传 / 重解析时调用） |
+| `extract_pdf_toc_from_links` | 从 PDF 目录页内嵌超链接提取 TOC（fallback）；仅扫描文档前 30%，要求链接目标页码单调递增以排除索引页 | 仅当 `extract_pdf_toc` 返回空时被 `tasks.py` 调用 |
 | 文字层可读性判断 | 判断 PDF 文本层是否可靠 | 下游是混合解析策略 |
 | `combine_sources` | 合并 OCR 版面结果和 PDF 文字层 | 下游是 `process_file` |
 | `render_pdf_page` | 把单页 PDF 渲染成图片 bytes | 下游是 `/pdf_page` |
