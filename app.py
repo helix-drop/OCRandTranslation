@@ -55,7 +55,8 @@ from storage import (
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
     gen_markdown, build_toc_depth_map, build_toc_title_map, build_toc_chapters, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
-    compute_boilerplate_skip_bps,
+    compute_boilerplate_skip_bps, detect_endnote_collection_pages, build_endnote_index,
+    _build_chapter_ranges_from_depth_map,
     load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
@@ -1542,6 +1543,20 @@ def api_toc_chapters():
     return jsonify({"chapters": chapters})
 
 
+def _build_endnote_data(entries: list, toc_depth_map: dict) -> tuple[dict, set]:
+    """构建尾注索引和尾注集合页集合，供导出路由复用。"""
+    all_bps = [
+        int(e.get("_pageBP") or e.get("book_page") or 0)
+        for e in entries
+        if int(e.get("_pageBP") or e.get("book_page") or 0) > 0
+    ]
+    chapter_ranges = _build_chapter_ranges_from_depth_map(toc_depth_map, all_bps)
+    endnote_page_map = detect_endnote_collection_pages(entries, chapter_ranges)
+    endnote_index = build_endnote_index(entries, endnote_page_map)
+    endnote_page_bps = {bp for bps in endnote_page_map.values() for bp in bps}
+    return endnote_index, endnote_page_bps
+
+
 @app.route("/download_md")
 def download_md():
     doc_id = _request_doc_id()
@@ -1554,12 +1569,15 @@ def download_md():
     if exclude_boilerplate:
         chapters = _load_toc_chapters_data(doc_id)
         skip_bps = compute_boilerplate_skip_bps(entries, chapters)
+    endnote_index, endnote_page_bps = _build_endnote_data(entries, toc_depth_map)
     md = "\ufeff" + gen_markdown(
         entries,
         toc_depth_map=toc_depth_map,
         page_ranges=page_ranges,
         skip_bps=skip_bps,
         toc_title_map=toc_title_map,
+        endnote_index=endnote_index,
+        endnote_page_bps=endnote_page_bps,
     )
     buf = BytesIO(md.encode("utf-8"))
     # 文件名：单章节用章节标题，多章节用「选中章节」
@@ -1587,12 +1605,15 @@ def export_md():
     if exclude_boilerplate:
         chapters = _load_toc_chapters_data(doc_id)
         skip_bps = compute_boilerplate_skip_bps(entries, chapters)
+    endnote_index, endnote_page_bps = _build_endnote_data(entries, toc_depth_map)
     md = gen_markdown(
         entries,
         toc_depth_map=toc_depth_map,
         page_ranges=page_ranges,
         skip_bps=skip_bps,
         toc_title_map=toc_title_map,
+        endnote_index=endnote_index,
+        endnote_page_bps=endnote_page_bps,
     )
     return jsonify({"markdown": md})
 

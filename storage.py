@@ -37,6 +37,8 @@ _SUPERSCRIPT_FN_RE = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]{1,6}")
 _SUPERSCRIPT_TRANS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 _FN_LINE_NUM_RE = re.compile(r"^\s*(\d{1,4})\s*[\.\)、\]]\s*(.+?)\s*$")
 _FN_LINE_BRACKET_RE = re.compile(r"^\s*\[(\d{1,4})\]\s*(.+?)\s*$")
+# 宽松格式：数字 + 1-3个空格 + 实质内容（用于无标点编号的尾注页，如 "43 Hervé Guibert..."）
+_FN_LINE_LOOSE_RE = re.compile(r"^\s*(\d{1,4})\s{1,3}(\S.+?)\s*$")
 _EXPORT_BOILERPLATE_STRONG_PATTERNS = [
     re.compile(r"\ball rights reserved\b", re.IGNORECASE),
     re.compile(r"\bcopyright\b", re.IGNORECASE),
@@ -1066,7 +1068,12 @@ def _extract_marked_footnote_labels(text: str) -> list[str]:
     return labels
 
 
-def _split_footnote_items(text: str) -> list[tuple[str | None, str]]:
+def _split_footnote_items(text: str, strict: bool = True) -> list[tuple[str | None, str]]:
+    """将脚注/尾注文本拆分为 (label, content) 列表。
+
+    strict=True（默认）：仅识别带明确标点的编号格式，如 "1. text"、"[1] text"。
+    strict=False：额外识别无标点的宽松格式，如 "43 Hervé Guibert..."（用于尾注页）。
+    """
     lines = [ln.strip() for ln in _ensure_str(text).split("\n") if ln.strip()]
     if not lines:
         return []
@@ -1080,6 +1087,11 @@ def _split_footnote_items(text: str) -> list[tuple[str | None, str]]:
         if m_bracket:
             items.append((m_bracket.group(1), m_bracket.group(2).strip()))
             continue
+        if not strict:
+            m_loose = _FN_LINE_LOOSE_RE.match(line)
+            if m_loose:
+                items.append((m_loose.group(1), m_loose.group(2).strip()))
+                continue
         items.append((None, line))
     return items
 
@@ -1218,6 +1230,139 @@ def _resolve_chapter_for_bp(chapter_ranges: list[dict], bp: int) -> dict | None:
         if int(chapter["start_bp"]) <= int(bp) <= int(chapter["end_bp"]):
             return chapter
     return None
+
+
+# 尾注集合页判定：编号行占比阈值和最少条目数
+_ENDNOTE_PAGE_MIN_RATIO = 0.5
+_ENDNOTE_PAGE_MIN_ENTRIES = 3
+
+
+def detect_endnote_collection_pages(
+    entries: list[dict],
+    chapter_ranges: list[dict],
+) -> dict[int | None, list[int]]:
+    """检测正文中的尾注集合页，返回 {chapter_index: [bp, ...]}。
+
+    chapter_index=None 表示不属于任何章节（全书尾注区）。
+    """
+    result: dict[int | None, list[int]] = {}
+    for entry in entries or []:
+        bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
+        if bp <= 0:
+            continue
+        page_entries = entry.get("_page_entries") or []
+        # 合并该页所有 original 文本
+        all_orig = "\n".join(
+            _ensure_str(pe.get("original", "")).strip()
+            for pe in page_entries
+            if _ensure_str(pe.get("original", "")).strip()
+        )
+        if not all_orig:
+            # 兼容旧版无 _page_entries 的条目
+            all_orig = _ensure_str(entry.get("original", "")).strip()
+        if not all_orig:
+            continue
+        lines = [ln.strip() for ln in all_orig.split("\n") if ln.strip()]
+        if len(lines) < _ENDNOTE_PAGE_MIN_ENTRIES:
+            continue
+        # 用宽松模式统计编号行数（既含严格格式也含无标点格式）
+        numbered = sum(
+            1 for ln in lines
+            if _FN_LINE_NUM_RE.match(ln)
+            or _FN_LINE_BRACKET_RE.match(ln)
+            or _FN_LINE_LOOSE_RE.match(ln)
+        )
+        ratio = numbered / len(lines)
+        if ratio < _ENDNOTE_PAGE_MIN_RATIO or numbered < _ENDNOTE_PAGE_MIN_ENTRIES:
+            continue
+        chapter = _resolve_chapter_for_bp(chapter_ranges, bp)
+        cidx: int | None = int(chapter["index"]) if chapter else None
+        result.setdefault(cidx, []).append(bp)
+    return result
+
+
+def build_endnote_index(
+    entries: list[dict],
+    endnote_page_map: dict[int | None, list[int]],
+) -> dict[int | None, dict[int, dict]]:
+    """从尾注集合页解析编号条目，返回 {chapter_index: {number: {orig, tr}}}。
+
+    跨页连续处理：同章节的连续尾注页先合并文本再解析，避免跨页截断的条目丢失内容。
+    """
+    if not endnote_page_map:
+        return {}
+
+    # 按页码索引条目，方便快速查找
+    entry_by_bp: dict[int, dict] = {}
+    for entry in entries or []:
+        bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
+        if bp > 0:
+            entry_by_bp[bp] = entry
+
+    index: dict[int | None, dict[int, dict]] = {}
+
+    for cidx, bps in endnote_page_map.items():
+        sorted_bps = sorted(bps)
+        # 分别合并 original 和 translation 文本（保持行顺序）
+        orig_lines: list[str] = []
+        tr_lines: list[str] = []
+        for bp in sorted_bps:
+            entry = entry_by_bp.get(bp)
+            if not entry:
+                continue
+            page_entries = entry.get("_page_entries") or []
+            if page_entries:
+                for pe in page_entries:
+                    o = strip_html(_ensure_str(pe.get("original", "")).strip()).strip()
+                    t = strip_html(_unwrap_translation_json(_ensure_str(pe.get("translation", "")).strip())).strip()
+                    if o:
+                        orig_lines.extend(ln.strip() for ln in o.split("\n") if ln.strip())
+                    if t:
+                        tr_lines.extend(ln.strip() for ln in t.split("\n") if ln.strip())
+            else:
+                o = strip_html(_ensure_str(entry.get("original", "")).strip()).strip()
+                t = strip_html(_unwrap_translation_json(_ensure_str(entry.get("translation", "")).strip())).strip()
+                if o:
+                    orig_lines.extend(ln.strip() for ln in o.split("\n") if ln.strip())
+                if t:
+                    tr_lines.extend(ln.strip() for ln in t.split("\n") if ln.strip())
+
+        # 解析编号条目，合并多行
+        def _merge_items(raw_items: list[tuple[str | None, str]]) -> dict[int, str]:
+            merged: dict[int, str] = {}
+            cur_num: int | None = None
+            cur_parts: list[str] = []
+            for label, content in raw_items:
+                if label is not None and str(label).isdigit():
+                    if cur_num is not None:
+                        merged[cur_num] = " ".join(cur_parts).strip()
+                    cur_num = int(label)
+                    cur_parts = [content] if content else []
+                elif cur_num is not None:
+                    if content:
+                        cur_parts.append(content)
+                # label 非数字且 cur_num 为 None 时（如章节标题）直接跳过
+            if cur_num is not None:
+                merged[cur_num] = " ".join(cur_parts).strip()
+            return merged
+
+        orig_items = _split_footnote_items("\n".join(orig_lines), strict=False)
+        tr_items = _split_footnote_items("\n".join(tr_lines), strict=False)
+        orig_map = _merge_items(orig_items)
+        tr_map = _merge_items(tr_items)
+
+        all_nums = set(orig_map) | set(tr_map)
+        if not all_nums:
+            continue
+        chapter_index: dict[int, dict] = {}
+        for num in all_nums:
+            chapter_index[num] = {
+                "orig": orig_map.get(num, ""),
+                "tr": tr_map.get(num, ""),
+            }
+        index[cidx] = chapter_index
+
+    return index
 
 
 def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, list[tuple[str, str]]]:
@@ -1391,6 +1536,8 @@ def gen_markdown(
     page_ranges: list[tuple[int, int]] | None = None,
     skip_bps: set[int] | None = None,
     toc_title_map: dict[int, str] | None = None,
+    endnote_index: dict | None = None,
+    endnote_page_bps: set[int] | None = None,
 ) -> str:
     """生成 Markdown 导出内容。
 
@@ -1400,6 +1547,10 @@ def gen_markdown(
                        传入后用于修正标题的 # 层级；不传则沿用 OCR 检测值。
         page_ranges: [(start_bp, end_bp), ...] 指定只导出哪些页码区间；
                      None 表示导出全部。
+        endnote_index: {chapter_index: {number: {orig, tr}}} 尾注索引，
+                       由 build_endnote_index() 生成。传入后正文 [^n] 引用
+                       会与索引中的定义严格对应。
+        endnote_page_bps: 检测到的尾注集合页页码集合，这些页不输出正文内容。
     """
     dm = toc_depth_map or {}
     # 非 TOC 标题的最低层级 = TOC 最深 depth 对应的 # 数 + 1
@@ -1415,6 +1566,9 @@ def gen_markdown(
         return any(s <= bp <= e for s, e in page_ranges)
 
     skip_set = {int(bp) for bp in (skip_bps or set()) if int(bp) > 0}
+    # 尾注集合页完全隐藏——不输出正文，仅在尾注区块以 [^n]: 定义形式出现
+    if endnote_page_bps:
+        skip_set.update(int(bp) for bp in endnote_page_bps if int(bp) > 0)
     entries_for_export: list[dict] = []
     for e in entries:
         bp = int(e.get("_pageBP") or e.get("book_page") or 0)
@@ -1464,6 +1618,56 @@ def gen_markdown(
                 ):
                     hlevel = 0
                 inline_labels = _extract_marked_footnote_labels(f"{orig}\n{tr}")
+                # 尾注索引匹配：对正文中纯数字的 [^n] 引用，从 endnote_index 查找定义
+                if endnote_index and inline_labels:
+                    cidx_cur = int(current_chapter["index"]) if current_chapter else None
+                    for lbl in inline_labels:
+                        if not lbl.isdigit():
+                            continue
+                        num = int(lbl)
+                        note_data = None
+                        note_scope_key = None
+                        # 1. 优先查当前章节
+                        if cidx_cur in endnote_index and num in endnote_index[cidx_cur]:
+                            note_data = endnote_index[cidx_cur][num]
+                            note_scope_key = cidx_cur
+                        # 2. 次之查全书尾注（chapter_index=None）
+                        elif None in endnote_index and num in endnote_index[None]:
+                            note_data = endnote_index[None][num]
+                            note_scope_key = None
+                        # 3. 回退：书末尾注附录被归入其他章节时，跨章节查找
+                        #    （适用于书末统一尾注区与正文章节不对应的情况）
+                        else:
+                            for key, ch_notes in endnote_index.items():
+                                if num in ch_notes:
+                                    note_data = ch_notes[num]
+                                    note_scope_key = None  # 输出为全书尾注
+                                    break
+                        if note_data is None:
+                            continue
+                        if lbl in seen_footnote_labels:
+                            continue
+                        seen_footnote_labels.add(lbl)
+                        merged_parts = []
+                        if note_data.get("orig"):
+                            merged_parts.append(note_data["orig"])
+                        if note_data.get("tr"):
+                            merged_parts.append(f"译：{note_data['tr']}")
+                        content = "\n".join(merged_parts).strip()
+                        if not content:
+                            continue
+                        note_def = {
+                            "label": lbl,
+                            "content": content,
+                            "source_bp": bp,
+                            "note_type": "endnote",
+                            "note_scope": "chapter_end" if note_scope_key is not None else "book_end",
+                            "chapter_index": note_scope_key,
+                        }
+                        if note_scope_key is not None:
+                            chapter_endnotes.setdefault(note_scope_key, []).append(note_def)
+                        else:
+                            book_endnotes.append(note_def)
                 if hlevel > 0:
                     prefix = "#" * min(hlevel, 6)
                     # 译文为主标题，原文以斜体注释跟随
