@@ -54,7 +54,8 @@ from storage import (
     save_pages_to_disk, load_pages_from_disk,
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
-    gen_markdown, build_toc_depth_map, build_toc_chapters, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
+    gen_markdown, build_toc_depth_map, build_toc_title_map, build_toc_chapters, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
+    compute_boilerplate_skip_bps,
     load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
@@ -148,7 +149,15 @@ def _build_toc_reading_items(toc_items: list[dict], toc_offset: int, page_lookup
             book_page = int(item.get("book_page") or 0)
         except (TypeError, ValueError):
             book_page = 0
+        if book_page <= 0:
+            try:
+                file_idx = item.get("file_idx")
+                if file_idx is not None:
+                    book_page = int(file_idx) + 1
+            except (TypeError, ValueError):
+                book_page = 0
         target_page = book_page + int(toc_offset or 0) if book_page > 0 else None
+        resolved["book_page"] = book_page if book_page > 0 else item.get("book_page")
         resolved["book_page_display"] = format_print_page_display(book_page) if book_page > 0 else ""
         resolved["target_page"] = target_page if target_page in page_lookup else None
         resolved_items.append(resolved)
@@ -1484,6 +1493,12 @@ def _load_toc_depth_map(doc_id: str) -> dict:
     return build_toc_depth_map(toc_items, offset)
 
 
+def _load_toc_title_map(doc_id: str) -> dict[int, str]:
+    source, offset = load_toc_source_offset(doc_id)
+    toc_items = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
+    return build_toc_title_map(toc_items, offset)
+
+
 def _load_toc_chapters_data(doc_id: str) -> list[dict]:
     """加载并构建章节列表（用于按章节导出）。"""
     source, offset = load_toc_source_offset(doc_id)
@@ -1513,6 +1528,10 @@ def _sanitize_filename(name: str) -> str:
     return _re.sub(r'[<>:"/\\|?*]', " ", name).strip()
 
 
+def _parse_bool_flag(raw: str) -> bool:
+    return str(raw or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 @app.route("/api/toc_chapters")
 def api_toc_chapters():
     """返回文档的顶级章节列表及页码范围，用于按章节导出。"""
@@ -1528,8 +1547,20 @@ def download_md():
     doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     toc_depth_map = _load_toc_depth_map(doc_id)
+    toc_title_map = _load_toc_title_map(doc_id)
     page_ranges = _parse_bp_ranges(request.args.get("bp_ranges", "")) or None
-    md = "\ufeff" + gen_markdown(entries, toc_depth_map=toc_depth_map, page_ranges=page_ranges)
+    exclude_boilerplate = _parse_bool_flag(request.args.get("exclude_boilerplate", ""))
+    skip_bps = set()
+    if exclude_boilerplate:
+        chapters = _load_toc_chapters_data(doc_id)
+        skip_bps = compute_boilerplate_skip_bps(entries, chapters)
+    md = "\ufeff" + gen_markdown(
+        entries,
+        toc_depth_map=toc_depth_map,
+        page_ranges=page_ranges,
+        skip_bps=skip_bps,
+        toc_title_map=toc_title_map,
+    )
     buf = BytesIO(md.encode("utf-8"))
     # 文件名：单章节用章节标题，多章节用「选中章节」
     base = _sanitize_filename(doc_title or "export")
@@ -1549,8 +1580,20 @@ def export_md():
     doc_id = _request_doc_id()
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     toc_depth_map = _load_toc_depth_map(doc_id)
+    toc_title_map = _load_toc_title_map(doc_id)
     page_ranges = _parse_bp_ranges(request.args.get("bp_ranges", "")) or None
-    md = gen_markdown(entries, toc_depth_map=toc_depth_map, page_ranges=page_ranges)
+    exclude_boilerplate = _parse_bool_flag(request.args.get("exclude_boilerplate", ""))
+    skip_bps = set()
+    if exclude_boilerplate:
+        chapters = _load_toc_chapters_data(doc_id)
+        skip_bps = compute_boilerplate_skip_bps(entries, chapters)
+    md = gen_markdown(
+        entries,
+        toc_depth_map=toc_depth_map,
+        page_ranges=page_ranges,
+        skip_bps=skip_bps,
+        toc_title_map=toc_title_map,
+    )
     return jsonify({"markdown": md})
 
 

@@ -12,7 +12,18 @@ import app as app_module
 import tasks
 from config import create_doc, ensure_dirs, get_current_doc_id, get_doc_meta, list_docs, set_current_doc
 from sqlite_store import SQLiteRepository
-from storage import load_entries_from_disk, load_pages_from_disk, save_entries_to_disk, save_pages_to_disk
+from text_processing import parse_page_markdown
+from storage import (
+    compute_boilerplate_skip_bps,
+    build_toc_title_map,
+    gen_markdown,
+    load_entries_from_disk,
+    load_pages_from_disk,
+    save_pdf_toc_to_disk,
+    save_toc_source_offset,
+    save_entries_to_disk,
+    save_pages_to_disk,
+)
 from testsupport import ClientCSRFMixin
 
 
@@ -289,15 +300,15 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             payload["markdown"],
-            "# 2_LECON DU 17 JANVIER 1979\n\n"
+            "# 1979年1月17日课程\n"
+            "*2_LECON DU 17 JANVIER 1979*\n\n"
             "> Le liberalisme et un nouvel art de gouverner.\n\n"
             "自由主义与一种新的治理技艺。\n\n"
             "> Je voudrais affiner ces hypotheses.\n\n"
-            "我想进一步细化这些假设。\n\n"
-            "[脚注] 1. Note originale\n\n"
-            "[脚注翻译] 1. 脚注译文\n",
+            "我想进一步细化这些假设。 [^1]\n\n"
+            "[^1]: Note originale\n"
+            "    译：脚注译文\n",
         )
-        self.assertNotIn("1979年1月17日课程", payload["markdown"])
         self.assertNotIn("**Page 2**", payload["markdown"])
         self.assertNotIn("---", payload["markdown"])
 
@@ -341,16 +352,259 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             payload["markdown"],
-            "# PREMIERE PARTIE\n\n"
+            "# 第一部分\n"
+            "*PREMIERE PARTIE*\n\n"
             "> Premier paragraphe.\n\n"
             "第一段。\n\n"
             "> Dernier paragraphe.\n\n"
-            "最后一段。\n\n"
-            "[脚注] 1. Note de page\n\n"
-            "[脚注翻译] 1. 页面脚注译文\n",
+            "最后一段。 [^1]\n\n"
+            "[^1]: Note de page\n"
+            "    译：页面脚注译文\n",
         )
         self.assertLess(payload["markdown"].index("第一段。"), payload["markdown"].index("最后一段。"))
-        self.assertLess(payload["markdown"].index("最后一段。"), payload["markdown"].index("[脚注]"))
+        self.assertLess(payload["markdown"].index("最后一段。"), payload["markdown"].index("[^1]:"))
+
+    def test_export_md_normalizes_latex_and_superscript_markers_and_keeps_fallback_blocks(self):
+        doc_id = create_doc("export-footnote-markers.pdf")
+        save_entries_to_disk([{
+            "_pageBP": 9,
+            "_model": "qwen-plus",
+            "_page_entries": [
+                {
+                    "original": "Original text with $ ^{93} $ marker.",
+                    "translation": "译文含上标²²与LaTeX标记 ^{94}。",
+                    "footnotes": "93. Original note",
+                    "footnotes_translation": "93. 原注译文",
+                    "heading_level": 0,
+                    "pages": "9",
+                },
+                {
+                    "original": "Second block.",
+                    "translation": "第二段。",
+                    "footnotes": "No numbered footnote line",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "9",
+                },
+            ],
+            "pages": "9",
+        }], "Export Footnote Markers", 0, doc_id)
+
+        resp = self.client.get(f"/export_md?doc_id={doc_id}")
+        payload = resp.get_json()
+
+        self.assertEqual(resp.status_code, 200)
+        md = payload["markdown"]
+        self.assertIn("Original text with [^93] marker.", md)
+        self.assertIn("译文含上标[^22]与LaTeX标记 [^94]。", md)
+        self.assertIn("[^93]: Original note", md)
+        self.assertIn("    译：原注译文", md)
+        self.assertIn("[脚注] No numbered footnote line", md)
+
+    def test_export_md_routes_high_confidence_endnotes_to_chapter_end(self):
+        from storage import save_pdf_toc_to_disk, save_toc_source_offset
+
+        doc_id = create_doc("chapter-endnote.pdf")
+        save_pdf_toc_to_disk(doc_id, [
+            {"title": "章一", "depth": 0, "book_page": 1},
+            {"title": "章二", "depth": 0, "book_page": 6},
+        ])
+        save_toc_source_offset(doc_id, "user", 0)
+        long_note = "12. " + ("这是章节尾注内容。" * 30)
+        save_entries_to_disk([{
+            "_pageBP": 5,
+            "_model": "qwen-plus",
+            "_page_entries": [{
+                "original": "Body",
+                "translation": "正文段落。",
+                "footnotes": long_note,
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "5",
+            }],
+            "pages": "5",
+        }], "Chapter Endnote", 0, doc_id)
+
+        md = self.client.get(f"/export_md?doc_id={doc_id}").get_json()["markdown"]
+        self.assertIn("正文段落。 [^12]", md)
+        self.assertIn("## 本章尾注", md)
+        self.assertIn("[^12]:", md)
+
+    def test_export_md_routes_high_confidence_endnotes_to_book_end_without_chapters(self):
+        doc_id = create_doc("book-endnote.pdf")
+        long_note = "27. " + ("这是全书尾注内容。" * 30)
+        save_entries_to_disk([{
+            "_pageBP": 9,
+            "_model": "qwen-plus",
+            "_page_entries": [{
+                "original": "Body",
+                "translation": "最后页正文。",
+                "footnotes": long_note,
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "9",
+            }],
+            "pages": "9",
+        }], "Book Endnote", 0, doc_id)
+
+        md = self.client.get(f"/export_md?doc_id={doc_id}").get_json()["markdown"]
+        self.assertIn("最后页正文。 [^27]", md)
+        self.assertIn("## 全书尾注", md)
+        self.assertIn("[^27]:", md)
+
+    def test_compute_boilerplate_skip_bps_respects_toc_window_and_keeps_long_preface(self):
+        entries = [
+            {"_pageBP": 1, "_page_entries": [{"original": "All rights reserved. ISBN 978-7-123-45678-9", "translation": ""}]},
+            {"_pageBP": 2, "_page_entries": [{"original": "All rights reserved. ISBN 978-7-123-45678-9", "translation": ""}]},
+            {"_pageBP": 3, "_page_entries": [{"original": "序言 " + ("关于研究问题的铺垫。" * 40), "translation": ""}]},
+            {"_pageBP": 4, "_page_entries": [{"original": "图书在版编目 CIP 数据", "translation": ""}]},
+            {"_pageBP": 5, "_page_entries": [{"original": "Chapter One starts here.", "translation": "第一章从这里开始。"}]},
+        ]
+        chapters = [{"index": 0, "title": "第一章", "start_bp": 5, "end_bp": 20}]
+        skip = compute_boilerplate_skip_bps(entries, chapters)
+
+        self.assertIn(1, skip)
+        self.assertIn(2, skip)
+        self.assertIn(4, skip)
+        self.assertNotIn(3, skip)
+        self.assertNotIn(5, skip)
+
+    def test_export_md_exclude_boilerplate_flag_filters_pages(self):
+        doc_id = create_doc("exclude-boilerplate.pdf")
+        save_pdf_toc_to_disk(doc_id, [{"title": "第一章", "depth": 0, "book_page": 3}])
+        save_toc_source_offset(doc_id, "user", 0)
+        save_entries_to_disk([
+            {"_pageBP": 1, "_page_entries": [{"original": "All rights reserved. ISBN 9787111000000", "translation": "版权所有。"}]},
+            {"_pageBP": 2, "_page_entries": [{"original": "All rights reserved. ISBN 9787111000000", "translation": "版权所有。"}]},
+            {"_pageBP": 3, "_page_entries": [{"original": "正文开场。", "translation": "这是正文第一段。"}]},
+        ], "Exclude Boilerplate", 0, doc_id)
+
+        default_md = self.client.get(f"/export_md?doc_id={doc_id}").get_json()["markdown"]
+        filtered_md = self.client.get(f"/export_md?doc_id={doc_id}&exclude_boilerplate=1").get_json()["markdown"]
+
+        self.assertIn("版权所有", default_md)
+        self.assertIn("这是正文第一段。", default_md)
+        self.assertNotIn("版权所有", filtered_md)
+        self.assertIn("这是正文第一段。", filtered_md)
+
+    def test_export_md_without_toc_uses_strong_signal_only(self):
+        doc_id = create_doc("exclude-without-toc.pdf")
+        save_entries_to_disk([
+            {"_pageBP": 1, "_page_entries": [{"original": "图书在版编目 CIP 数据", "translation": ""}]},
+            {"_pageBP": 2, "_page_entries": [{"original": "这是一段普通短文。", "translation": "短正文。"}]},
+        ], "No TOC", 0, doc_id)
+
+        filtered_md = self.client.get(f"/export_md?doc_id={doc_id}&exclude_boilerplate=1").get_json()["markdown"]
+        self.assertNotIn("图书在版编目", filtered_md)
+        self.assertIn("短正文。", filtered_md)
+
+    def test_gen_markdown_demotes_preface_headings_before_first_toc_chapter(self):
+        entries = [
+            {
+                "_pageBP": 1,
+                "_page_entries": [
+                    {
+                        "_startBP": 1,
+                        "original": "COUVERTURE",
+                        "translation": "封面",
+                        "heading_level": 1,
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                    }
+                ],
+            },
+            {
+                "_pageBP": 5,
+                "_page_entries": [
+                    {
+                        "_startBP": 5,
+                        "original": "LECON DU 10 JANVIER 1979",
+                        "translation": "1979年1月10日课程",
+                        "heading_level": 1,
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                    }
+                ],
+            },
+        ]
+        toc_depth_map = {5: 0}
+        md = gen_markdown(entries, toc_depth_map=toc_depth_map)
+
+        self.assertIn("> COUVERTURE", md)
+        self.assertIn("封面", md)
+        self.assertIn("# 1979年1月10日课程", md)
+        self.assertNotIn("# 封面", md)
+
+    def test_gen_markdown_uses_nearby_toc_depth_when_heading_page_off_by_one(self):
+        entries = [
+            {
+                "_pageBP": 17,
+                "_page_entries": [
+                    {
+                        "_startBP": 17,
+                        "original": "LECON DU 10 JANVIER 1979",
+                        "translation": "1979年1月10日课程",
+                        "heading_level": 1,
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                    }
+                ],
+            }
+        ]
+        # TOC 锚点可能在上一页（常见于目录页码与实际正文起始轻微错位）
+        toc_depth_map = {16: 1}
+        md = gen_markdown(entries, toc_depth_map=toc_depth_map)
+        self.assertIn("## 1979年1月10日课程", md)
+
+    def test_gen_markdown_demotes_heading_when_toc_title_mismatch_on_same_page(self):
+        entries = [
+            {
+                "_pageBP": 20,
+                "_page_entries": [
+                    {
+                        "_startBP": 20,
+                        "original": "Abondance / rarete",
+                        "translation": "丰裕/稀缺",
+                        "heading_level": 1,
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                    }
+                ],
+            }
+        ]
+        toc_depth_map = {20: 0}
+        toc_title_map = {20: "Indices"}
+        md = gen_markdown(entries, toc_depth_map=toc_depth_map, toc_title_map=toc_title_map)
+        self.assertNotIn("# 丰裕/稀缺", md)
+        self.assertIn("丰裕/稀缺", md)
+
+    def test_build_toc_title_map_maps_effective_book_page(self):
+        title_map = build_toc_title_map(
+            [{"title": "Indices", "depth": 0, "book_page": 337}],
+            offset=13,
+        )
+        self.assertEqual(title_map[350], "Indices")
+
+    def test_parse_page_markdown_does_not_cross_merge_unrelated_chinese_next_page(self):
+        pages = [
+            {"bookPage": 1, "markdown": "这是第一页末尾没有句号"},
+            {"bookPage": 2, "markdown": "这是第二页的新段落。"},
+        ]
+        paras = parse_page_markdown(pages, 1)
+        self.assertEqual(len(paras), 1)
+        self.assertEqual(paras[0]["startBP"], 1)
+        self.assertEqual(paras[0]["endBP"], 1)
+        self.assertNotEqual(paras[0].get("cross_page"), "merged_next")
+
+    def test_parse_page_markdown_keeps_hyphen_continuation_merge(self):
+        pages = [
+            {"bookPage": 1, "markdown": "The central argu-"},
+            {"bookPage": 2, "markdown": "ment continues on next page."},
+        ]
+        paras = parse_page_markdown(pages, 1)
+        self.assertEqual(len(paras), 1)
+        self.assertEqual(paras[0]["endBP"], 2)
+        self.assertEqual(paras[0].get("cross_page"), "merged_next")
 
     def test_translate_snapshot_loads_failures_from_translate_failures_table(self):
         doc_id = create_doc("failure.pdf")
@@ -1060,6 +1314,32 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         revisions = repo.list_segment_revisions(doc_id, 10, 0)
         manual_texts = [r.get("manual_translation_text") for r in revisions]
         self.assertIn("人工修订文本", manual_texts)
+
+    def test_build_toc_reading_items_supports_file_idx_and_book_page(self):
+        page_lookup = {5: {"bookPage": 5}, 7: {"bookPage": 7}}
+
+        items_with_file_idx = app_module._build_toc_reading_items(
+            [{"title": "自动目录", "depth": 0, "file_idx": 4}],
+            0,
+            page_lookup,
+        )
+        self.assertEqual(items_with_file_idx[0]["book_page"], 5)
+        self.assertEqual(items_with_file_idx[0]["target_page"], 5)
+
+        items_with_book_page = app_module._build_toc_reading_items(
+            [{"title": "用户目录", "depth": 0, "book_page": 6}],
+            1,
+            page_lookup,
+        )
+        self.assertEqual(items_with_book_page[0]["book_page"], 6)
+        self.assertEqual(items_with_book_page[0]["target_page"], 7)
+
+        item_missing_lookup = app_module._build_toc_reading_items(
+            [{"title": "缺失页", "depth": 0, "file_idx": 98}],
+            0,
+            page_lookup,
+        )
+        self.assertIsNone(item_missing_lookup[0]["target_page"])
 
 
 if __name__ == "__main__":

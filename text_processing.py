@@ -584,10 +584,15 @@ def _is_continuation_from_prev(text: str, prev_md: str) -> bool:
         return False
     if starts_low(text):
         return True
+    stripped = text.lstrip()
+    if stripped and stripped[0] in ",.;:!?)]}\"'，。；：！？、）》】」』”’":
+        return True
     prev_tail = prev_md.rstrip()
+    if prev_tail.endswith("-"):
+        return True
     if prev_tail and ends_mid(prev_tail):
         hl, _ = extract_heading_level(text)
-        if hl == 0:
+        if hl == 0 and (starts_low(text) or (stripped and stripped[0] in ",.;:!?)]}\"'，。；：！？、）》】」』”’")):
             return True
     return False
 
@@ -600,8 +605,9 @@ def _is_continuation_to_next(text: str, next_md: str) -> bool:
         next_head = next_md.lstrip()
         if starts_low(next_head):
             return True
-        hl, _ = extract_heading_level(next_head.split("\n")[0])
-        if hl == 0 and ends_mid(text):
+        if next_head and next_head[0] in ",.;:!?)]}\"'，。；：！？、）》】」』”’":
+            return True
+        if text.rstrip().endswith("-"):
             return True
     return False
 

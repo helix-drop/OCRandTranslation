@@ -1,6 +1,5 @@
 #!/bin/bash
-# OCR Reader - managed launcher
-# Closing the dedicated browser window also stops the app.
+# OCR Reader launcher (normal browser mode)
 
 cd "$(dirname "$0")"
 
@@ -23,13 +22,29 @@ if [ ! -f "$MARKER" ] || [ requirements.txt -nt "$MARKER" ]; then
 fi
 
 echo ""
-echo "========================================="
-echo "  OCR Reader (managed window mode)"
-echo "  Closing the dedicated browser window stops the app"
-echo "========================================="
+echo "=================================="
+echo "  OCR Reader (normal browser mode)"
+echo "=================================="
 echo ""
 
-"$VENV_DIR/bin/python" managed_launcher.py \
-  --server-python "$VENV_DIR/bin/python" \
-  --url "http://localhost:8080" \
-  --cwd "$(pwd)"
+APP_URL="http://localhost:8080"
+"$VENV_DIR/bin/python" app.py &
+SERVER_PID=$!
+
+cleanup() {
+    if kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1
+    fi
+}
+trap cleanup EXIT INT TERM
+
+# Wait until the local server is ready, then open with default browser.
+for _ in $(seq 1 60); do
+    if curl -sSf "$APP_URL" >/dev/null 2>&1; then
+        open "$APP_URL" >/dev/null 2>&1 || true
+        break
+    fi
+    sleep 0.5
+done
+
+wait "$SERVER_PID"

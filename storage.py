@@ -1,11 +1,13 @@
 """磁盘持久化与辅助函数：数据读写、模板变量、文本处理工具。"""
 from dataclasses import asdict, dataclass, field
+from difflib import SequenceMatcher
 import io
 import json
 import os
 import re
 import shutil
 import time
+import unicodedata
 
 from flask import g, has_request_context
 from pypdf import PdfReader
@@ -29,6 +31,28 @@ from text_utils import strip_html
 
 _PRINT_PAGE_INT_RE = re.compile(r"^\d+$")
 _DOC_REQUEST_CACHE_KEY = "_doc_request_cache"
+_LATEX_FN_RE = re.compile(r"\$\s*\^\{(\d+)\}\s*\$")
+_PLAIN_FN_RE = re.compile(r"(?<![\w\[])\^\{(\d+)\}")
+_SUPERSCRIPT_FN_RE = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]{1,6}")
+_SUPERSCRIPT_TRANS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+_FN_LINE_NUM_RE = re.compile(r"^\s*(\d{1,4})\s*[\.\)、\]]\s*(.+?)\s*$")
+_FN_LINE_BRACKET_RE = re.compile(r"^\s*\[(\d{1,4})\]\s*(.+?)\s*$")
+_EXPORT_BOILERPLATE_STRONG_PATTERNS = [
+    re.compile(r"\ball rights reserved\b", re.IGNORECASE),
+    re.compile(r"\bcopyright\b", re.IGNORECASE),
+    re.compile(r"\bisbn(?:-1[03])?\b", re.IGNORECASE),
+    re.compile(r"\bcip\b", re.IGNORECASE),
+    re.compile(r"版权所有"),
+    re.compile(r"图书在版编目"),
+]
+_EXPORT_BOILERPLATE_WEAK_PATTERNS = [
+    re.compile(r"\bpublisher\b", re.IGNORECASE),
+    re.compile(r"\bprinted in\b", re.IGNORECASE),
+    re.compile(r"\beditorial\b", re.IGNORECASE),
+    re.compile(r"出版社"),
+    re.compile(r"印刷"),
+    re.compile(r"定价"),
+]
 
 
 def _get_request_cache_root() -> dict | None:
@@ -866,6 +890,20 @@ def build_toc_depth_map(toc_items: list, offset: int = 0) -> dict:
     return depth_map
 
 
+def build_toc_title_map(toc_items: list, offset: int = 0) -> dict[int, str]:
+    """从 TOC 条目 + 偏移构建 {book_page: title} 查找表。"""
+    title_map: dict[int, str] = {}
+    for item in toc_items or []:
+        bp = int(item.get("book_page") or 0)
+        fi = item.get("file_idx")
+        if not bp and fi is not None:
+            bp = int(fi) + 1
+        if bp > 0:
+            effective = bp + int(offset or 0)
+            title_map[int(effective)] = _ensure_str(item.get("title")).strip()
+    return title_map
+
+
 def _nonempty_markdown_lines(text) -> list[str]:
     return [line.strip() for line in _ensure_str(text).split("\n") if line.strip()]
 
@@ -895,6 +933,291 @@ def _append_labeled_block(md_lines: list[str], label: str, text) -> None:
     for line in lines[1:]:
         md_lines.append(line)
     md_lines.append("")
+
+
+def _normalize_heuristic_text(raw: str) -> str:
+    return re.sub(r"\s+", " ", _ensure_str(raw)).strip().lower()
+
+
+def _page_text_for_export_heuristic(entry: dict) -> str:
+    chunks: list[str] = []
+    page_entries = entry.get("_page_entries") or []
+    if page_entries:
+        for pe in page_entries:
+            orig = strip_html(_normalize_footnote_markers(_ensure_str(pe.get("original")).strip())).strip()
+            tr = strip_html(
+                _normalize_footnote_markers(
+                    _unwrap_translation_json(_ensure_str(pe.get("translation")).strip())
+                )
+            ).strip()
+            if orig:
+                chunks.append(orig)
+            if tr:
+                chunks.append(tr)
+    else:
+        orig = strip_html(_normalize_footnote_markers(_ensure_str(entry.get("original")).strip())).strip()
+        tr = strip_html(
+            _normalize_footnote_markers(_unwrap_translation_json(_ensure_str(entry.get("translation")).strip()))
+        ).strip()
+        if orig:
+            chunks.append(orig)
+        if tr:
+            chunks.append(tr)
+    return "\n".join(chunks).strip()
+
+
+def compute_boilerplate_skip_bps(
+    entries: list[dict],
+    chapters: list[dict] | None,
+    *,
+    max_leading_scan: int = 12,
+) -> set[int]:
+    page_texts: dict[int, str] = {}
+    for entry in entries or []:
+        bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
+        if bp <= 0:
+            continue
+        text = _page_text_for_export_heuristic(entry)
+        if text:
+            page_texts[bp] = text
+    if not page_texts:
+        return set()
+
+    sorted_bps = sorted(page_texts.keys())
+    last_bp = sorted_bps[-1]
+    leading_limit_bp = min(last_bp, int(max_leading_scan))
+    chapter_start_bp = None
+    if chapters:
+        starts = [int(ch.get("start_bp") or 0) for ch in chapters if int(ch.get("start_bp") or 0) > 0]
+        if starts:
+            chapter_start_bp = min(starts)
+
+    candidate_bps: set[int] = set()
+    if chapter_start_bp and chapter_start_bp > 1:
+        candidate_bps = {bp for bp in sorted_bps if bp < chapter_start_bp}
+    else:
+        candidate_bps = {bp for bp in sorted_bps if bp <= leading_limit_bp}
+
+    skip_bps: set[int] = set()
+    normalized_by_bp = {bp: _normalize_heuristic_text(page_texts[bp]) for bp in sorted_bps}
+    length_by_bp = {bp: len(normalized_by_bp[bp]) for bp in sorted_bps}
+
+    for bp in sorted_bps:
+        text = normalized_by_bp[bp]
+        text_len = length_by_bp[bp]
+        if text_len == 0:
+            continue
+        in_candidate = bp in candidate_bps
+        strong_hit = any(p.search(text) for p in _EXPORT_BOILERPLATE_STRONG_PATTERNS)
+        weak_hit = any(p.search(text) for p in _EXPORT_BOILERPLATE_WEAK_PATTERNS)
+        if (in_candidate or text_len <= 120) and strong_hit and text_len <= 1600:
+            skip_bps.add(bp)
+            continue
+        if in_candidate and text_len <= 220 and weak_hit:
+            skip_bps.add(bp)
+
+    leading_bps = [bp for bp in sorted_bps if bp <= leading_limit_bp]
+    for i in range(len(leading_bps)):
+        a_bp = leading_bps[i]
+        if a_bp in skip_bps:
+            continue
+        a_text = normalized_by_bp[a_bp]
+        if len(a_text) < 24:
+            continue
+        for j in range(i + 1, len(leading_bps)):
+            b_bp = leading_bps[j]
+            if b_bp in skip_bps:
+                continue
+            b_text = normalized_by_bp[b_bp]
+            if len(b_text) < 24:
+                continue
+            ratio = SequenceMatcher(None, a_text, b_text).ratio()
+            if ratio >= 0.92 and len(b_text) <= 1600:
+                skip_bps.add(b_bp)
+    return skip_bps
+
+
+def _normalize_footnote_markers(text: str) -> str:
+    raw = _ensure_str(text)
+    if not raw:
+        return ""
+    normalized = _LATEX_FN_RE.sub(r"[^\1]", raw)
+    normalized = _PLAIN_FN_RE.sub(r"[^\1]", normalized)
+
+    def _replace_superscript(match: re.Match) -> str:
+        digits = match.group(0).translate(_SUPERSCRIPT_TRANS)
+        if digits.isdigit():
+            return f"[^{digits}]"
+        return match.group(0)
+
+    normalized = _SUPERSCRIPT_FN_RE.sub(_replace_superscript, normalized)
+    return normalized
+
+
+def _extract_marked_footnote_labels(text: str) -> list[str]:
+    normalized = _normalize_footnote_markers(text)
+    labels = []
+    seen = set()
+    for m in re.finditer(r"\[\^([A-Za-z0-9_-]+)\]", normalized):
+        label = m.group(1)
+        if label not in seen:
+            seen.add(label)
+            labels.append(label)
+    return labels
+
+
+def _split_footnote_items(text: str) -> list[tuple[str | None, str]]:
+    lines = [ln.strip() for ln in _ensure_str(text).split("\n") if ln.strip()]
+    if not lines:
+        return []
+    items: list[tuple[str | None, str]] = []
+    for line in lines:
+        m_num = _FN_LINE_NUM_RE.match(line)
+        if m_num:
+            items.append((m_num.group(1), m_num.group(2).strip()))
+            continue
+        m_bracket = _FN_LINE_BRACKET_RE.match(line)
+        if m_bracket:
+            items.append((m_bracket.group(1), m_bracket.group(2).strip()))
+            continue
+        items.append((None, line))
+    return items
+
+
+def _classify_note_scope(
+    label: str,
+    content: str,
+    inline_labels: list[str],
+    source_bp: int,
+    chapter_end_bp: int | None,
+    doc_last_bp: int,
+    had_explicit_label: bool,
+) -> tuple[str, str]:
+    """返回 (note_type, note_scope)。
+
+    note_type: footnote | endnote
+    note_scope: paragraph_or_page | chapter_end | book_end
+    """
+    # 保守默认：脚注
+    if label in set(inline_labels):
+        return "footnote", "paragraph_or_page"
+    if not had_explicit_label:
+        return "footnote", "paragraph_or_page"
+
+    # 高置信尾注：编号清晰 + 正文未命中 + 内容较长 + 位于章末/书末附近
+    is_numeric_label = str(label).isdigit()
+    looks_long_note = len(_ensure_str(content)) >= 220
+    if is_numeric_label and looks_long_note:
+        if chapter_end_bp is not None and source_bp >= max(1, int(chapter_end_bp) - 1):
+            return "endnote", "chapter_end"
+        if source_bp >= max(1, int(doc_last_bp) - 1):
+            return "endnote", "book_end"
+    return "footnote", "paragraph_or_page"
+
+
+def _build_obsidian_footnote_defs(
+    footnotes,
+    footnotes_translation,
+    existing_labels: list[str],
+    preferred_labels: list[str] | None,
+    source_bp: int,
+    segment_idx: int,
+    chapter_index: int | None,
+    chapter_end_bp: int | None,
+    doc_last_bp: int,
+    fallback_prefix: str,
+) -> tuple[list[dict], list[str], list[tuple[str, str]]]:
+    items_fn = _split_footnote_items(footnotes)
+    items_tr = _split_footnote_items(footnotes_translation)
+    defs: list[dict] = []
+    fallback_blocks: list[tuple[str, str]] = []
+    labels_for_refs: list[str] = []
+
+    count = max(len(items_fn), len(items_tr))
+    if count == 0:
+        return defs, labels_for_refs, fallback_blocks
+
+    existing_set = set(existing_labels)
+    preferred = [lab for lab in (preferred_labels or []) if lab and lab not in existing_set]
+    preferred_idx = 0
+    for idx in range(count):
+        fn_label = items_fn[idx][0] if idx < len(items_fn) else None
+        fn_content = items_fn[idx][1] if idx < len(items_fn) else ""
+        tr_label = items_tr[idx][0] if idx < len(items_tr) else None
+        tr_content = items_tr[idx][1] if idx < len(items_tr) else ""
+        label = fn_label or tr_label
+        if not label:
+            if preferred_idx < len(preferred):
+                label = preferred[preferred_idx]
+                preferred_idx += 1
+            else:
+                # 无法解析编号时走保守回退，保持可读文本块而不是伪造编号。
+                if fn_content:
+                    fallback_blocks.append(("脚注", fn_content))
+                if tr_content:
+                    fallback_blocks.append(("脚注翻译", tr_content))
+                continue
+        label = re.sub(r"[^A-Za-z0-9_-]", "-", str(label)).strip("-") or f"{fallback_prefix}-{idx + 1}"
+        if label in existing_set:
+            label = f"{label}-{fallback_prefix}"
+        existing_set.add(label)
+        labels_for_refs.append(label)
+
+        merged = []
+        if fn_content:
+            merged.append(fn_content)
+        if tr_content:
+            merged.append(f"译：{tr_content}")
+        merged_text = "\n".join(merged).strip()
+        if merged_text:
+            note_type, note_scope = _classify_note_scope(
+                label=label,
+                content=merged_text,
+                inline_labels=preferred_labels or [],
+                source_bp=source_bp,
+                chapter_end_bp=chapter_end_bp,
+                doc_last_bp=doc_last_bp,
+                had_explicit_label=bool(fn_label or tr_label),
+            )
+            defs.append({
+                "label": label,
+                "content": merged_text,
+                "source_bp": int(source_bp),
+                "segment_idx": int(segment_idx),
+                "chapter_index": chapter_index,
+                "note_type": note_type,
+                "note_scope": note_scope,
+            })
+        else:
+            if _ensure_str(footnotes).strip():
+                fallback_blocks.append(("脚注", _ensure_str(footnotes)))
+            if _ensure_str(footnotes_translation).strip():
+                fallback_blocks.append(("脚注翻译", _ensure_str(footnotes_translation)))
+    return defs, labels_for_refs, fallback_blocks
+
+
+def _build_chapter_ranges_from_depth_map(toc_depth_map: dict[int, int], all_bps: list[int]) -> list[dict]:
+    bps = sorted(int(bp) for bp in all_bps if bp is not None)
+    if not bps:
+        return []
+    starts = sorted(
+        bp for bp, depth in (toc_depth_map or {}).items()
+        if int(depth) == 0
+    )
+    if not starts:
+        return []
+    ranges = []
+    for i, start in enumerate(starts):
+        end_bp = starts[i + 1] - 1 if i + 1 < len(starts) else bps[-1]
+        ranges.append({"index": i, "start_bp": int(start), "end_bp": int(end_bp)})
+    return ranges
+
+
+def _resolve_chapter_for_bp(chapter_ranges: list[dict], bp: int) -> dict | None:
+    for chapter in chapter_ranges:
+        if int(chapter["start_bp"]) <= int(bp) <= int(chapter["end_bp"]):
+            return chapter
+    return None
 
 
 def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, list[tuple[str, str]]]:
@@ -931,7 +1254,79 @@ def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, li
     return assignments
 
 
-def _resolve_heading_level(pe: dict, toc_depth_map: dict, min_non_toc_level: int = 1) -> int:
+def _resolve_heading_toc_match(pe: dict, bp: int, toc_depth_map: dict) -> tuple[int, int] | None:
+    if not toc_depth_map:
+        return None
+    probes: list[int] = []
+    start_bp = pe.get("_startBP")
+    if start_bp is not None:
+        try:
+            probes.append(int(start_bp))
+        except (TypeError, ValueError):
+            pass
+    try:
+        probes.append(int(bp))
+    except (TypeError, ValueError):
+        pass
+    probes = [p for p in probes if p > 0]
+    seen = set()
+    probes = [p for p in probes if not (p in seen or seen.add(p))]
+    for probe in probes:
+        depth = toc_depth_map.get(probe)
+        if depth is not None:
+            return int(probe), int(depth)
+    # 容错：目录锚点与段起始页可能有 1 页偏移，允许就近匹配。
+    keys = sorted(int(k) for k in toc_depth_map.keys())
+    best_depth = None
+    best_dist = None
+    for probe in probes:
+        for k in keys:
+            dist = abs(int(k) - int(probe))
+            if best_dist is None or dist < best_dist:
+                best_dist = dist
+                best_depth = int(toc_depth_map[k])
+    if best_dist is not None and best_dist <= 1 and best_depth is not None:
+        # 这里返回近邻页码与对应 depth
+        nearest_bp = None
+        for probe in probes:
+            for k in keys:
+                if abs(int(k) - int(probe)) == best_dist:
+                    nearest_bp = int(k)
+                    break
+            if nearest_bp is not None:
+                break
+        if nearest_bp is not None:
+            return nearest_bp, best_depth
+    return None
+
+
+def _normalize_heading_text_for_match(text: str) -> str:
+    normalized = unicodedata.normalize("NFKD", _ensure_str(text)).lower()
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9\u4e00-\u9fff]+", " ", normalized).strip()
+
+
+def _heading_matches_toc_title(orig: str, tr: str, toc_title: str) -> bool:
+    title = _normalize_heading_text_for_match(toc_title)
+    if not title:
+        return True
+    orig_norm = _normalize_heading_text_for_match(orig)
+    tr_norm = _normalize_heading_text_for_match(tr)
+    haystack = f"{orig_norm} {tr_norm}".strip()
+    if not haystack:
+        return False
+    if title in haystack:
+        return True
+    ratio = SequenceMatcher(None, haystack, title).ratio()
+    if ratio >= 0.5:
+        return True
+    tokens = [tok for tok in title.split() if len(tok) >= 4]
+    if tokens and any(tok in haystack for tok in tokens):
+        return True
+    return False
+
+
+def _resolve_heading_level(pe: dict, toc_depth_map: dict, min_non_toc_level: int = 1, bp: int = 0) -> tuple[int, int | None]:
     """根据 TOC depth map 确定段落的 Markdown 标题层级。
 
     - TOC 命中：严格使用 depth+1，不受 OCR 检测值影响。
@@ -941,22 +1336,61 @@ def _resolve_heading_level(pe: dict, toc_depth_map: dict, min_non_toc_level: int
     """
     hlevel = int(pe.get("heading_level", 0) or 0)
     if hlevel <= 0:
-        return 0
+        return 0, None
     if not toc_depth_map:
-        return hlevel
-    start_bp = pe.get("_startBP")
-    if start_bp is not None:
-        depth = toc_depth_map.get(int(start_bp))
-        if depth is not None:
-            return max(1, depth + 1)
-    # 不在 TOC 中：确保不浅于 min_non_toc_level
-    return max(min_non_toc_level, hlevel)
+        return hlevel, None
+    match = _resolve_heading_toc_match(pe, bp=bp, toc_depth_map=toc_depth_map)
+    if match is not None:
+        matched_bp, depth = match
+        return max(1, int(depth) + 1), matched_bp
+    # 有目录时，标题以目录为准；未命中目录的 OCR 标题统一降级为正文。
+    return 0, None
+
+
+def _looks_like_heading_noise(text: str) -> bool:
+    content = _ensure_str(text).strip()
+    if not content:
+        return True
+    if content in {"*", "#", "-", "—", "_"}:
+        return True
+    if re.match(r"^\d{1,3}[\.\)、]\s+", content):
+        return True
+    return False
+
+
+def _should_demote_heading(
+    *,
+    hlevel: int,
+    toc_depth_map: dict,
+    bp: int,
+    start_bp: int | None,
+    title_text: str,
+) -> bool:
+    if hlevel <= 0:
+        return False
+    if _looks_like_heading_noise(title_text):
+        return True
+    if not toc_depth_map:
+        return False
+
+    # 有目录时，目录首章之前的前置页标题统一降级为正文，避免封面/版权页被导成大量 ###。
+    top_level_starts = sorted(int(k) for k, depth in toc_depth_map.items() if int(depth) == 0)
+    if top_level_starts:
+        first_chapter_bp = top_level_starts[0]
+        if int(bp) < int(first_chapter_bp):
+            return True
+
+    if start_bp is not None and int(start_bp) in toc_depth_map:
+        return False
+    return False
 
 
 def gen_markdown(
     entries: list,
     toc_depth_map: dict | None = None,
     page_ranges: list[tuple[int, int]] | None = None,
+    skip_bps: set[int] | None = None,
+    toc_title_map: dict[int, str] | None = None,
 ) -> str:
     """生成 Markdown 导出内容。
 
@@ -980,18 +1414,56 @@ def gen_markdown(
             return True
         return any(s <= bp <= e for s, e in page_ranges)
 
-    md_lines: list[str] = []
+    skip_set = {int(bp) for bp in (skip_bps or set()) if int(bp) > 0}
+    entries_for_export: list[dict] = []
     for e in entries:
+        bp = int(e.get("_pageBP") or e.get("book_page") or 0)
+        if bp > 0 and bp in skip_set:
+            continue
+        entries_for_export.append(e)
+
+    md_lines: list[str] = []
+    all_bps = [
+        int(e.get("_pageBP") or e.get("book_page") or 0)
+        for e in entries_for_export
+        if int(e.get("_pageBP") or e.get("book_page") or 0) > 0
+    ]
+    if not all_bps:
+        return ""
+    doc_last_bp = max(all_bps) if all_bps else 1
+    chapter_ranges = _build_chapter_ranges_from_depth_map(dm, all_bps)
+    chapter_endnotes: dict[int, list[dict]] = {}
+    book_endnotes: list[dict] = []
+    seen_footnote_labels: set[str] = set()
+    for e in entries_for_export:
         bp = int(e.get("_pageBP") or e.get("book_page") or 0)
         if not _in_ranges(bp):
             continue
         page_entries = e.get("_page_entries")
         if page_entries:
             footnote_assignments = _resolve_page_footnote_assignments(page_entries)
+            current_chapter = _resolve_chapter_for_bp(chapter_ranges, bp)
             for idx, pe in enumerate(page_entries):
-                hlevel = _resolve_heading_level(pe, dm, min_non_toc_level)
-                orig = strip_html(_ensure_str(pe.get("original")).strip()).strip()
-                tr = strip_html(_unwrap_translation_json(_ensure_str(pe.get("translation")).strip())).strip()
+                hlevel, matched_toc_bp = _resolve_heading_level(pe, dm, min_non_toc_level, bp=bp)
+                orig = strip_html(_normalize_footnote_markers(_ensure_str(pe.get("original")).strip())).strip()
+                tr = strip_html(
+                    _normalize_footnote_markers(
+                        _unwrap_translation_json(_ensure_str(pe.get("translation")).strip())
+                    )
+                ).strip()
+                if hlevel > 0 and matched_toc_bp is not None and toc_title_map:
+                    toc_title = _ensure_str(toc_title_map.get(int(matched_toc_bp))).strip()
+                    if toc_title and not _heading_matches_toc_title(orig, tr, toc_title):
+                        hlevel = 0
+                if _should_demote_heading(
+                    hlevel=hlevel,
+                    toc_depth_map=dm,
+                    bp=bp,
+                    start_bp=pe.get("_startBP"),
+                    title_text=tr or orig,
+                ):
+                    hlevel = 0
+                inline_labels = _extract_marked_footnote_labels(f"{orig}\n{tr}")
                 if hlevel > 0:
                     prefix = "#" * min(hlevel, 6)
                     # 译文为主标题，原文以斜体注释跟随
@@ -1005,18 +1477,122 @@ def gen_markdown(
                         md_lines.append("")
                 else:
                     _append_blockquote(md_lines, orig)
-                    _append_paragraph(md_lines, tr)
+                    pending_ref_labels: list[str] = []
+                    fallback_blocks: list[tuple[str, str]] = []
+                    pending_footnote_defs: list[dict] = []
+                    for footnotes, footnotes_translation in footnote_assignments.get(idx, []):
+                        defs, parsed_labels, fallback = _build_obsidian_footnote_defs(
+                            footnotes=footnotes,
+                            footnotes_translation=footnotes_translation,
+                            existing_labels=list(seen_footnote_labels) + pending_ref_labels,
+                            preferred_labels=inline_labels,
+                            source_bp=bp,
+                            segment_idx=idx,
+                            chapter_index=current_chapter["index"] if current_chapter else None,
+                            chapter_end_bp=current_chapter["end_bp"] if current_chapter else None,
+                            doc_last_bp=doc_last_bp,
+                            fallback_prefix=f"p{bp}-s{idx}",
+                        )
+                        for note_def in defs:
+                            label = note_def["label"]
+                            if label not in seen_footnote_labels:
+                                seen_footnote_labels.add(label)
+                                pending_ref_labels.append(label)
+                                if note_def["note_type"] == "endnote":
+                                    if note_def["note_scope"] == "chapter_end" and note_def.get("chapter_index") is not None:
+                                        chapter_endnotes.setdefault(int(note_def["chapter_index"]), []).append(note_def)
+                                    else:
+                                        book_endnotes.append(note_def)
+                                else:
+                                    pending_footnote_defs.append(note_def)
+                        fallback_blocks.extend(fallback)
 
-                for footnotes, footnotes_translation in footnote_assignments.get(idx, []):
-                    _append_labeled_block(md_lines, "脚注", footnotes)
-                    _append_labeled_block(md_lines, "脚注翻译", footnotes_translation)
+                    tr_with_refs = tr
+                    for label in pending_ref_labels:
+                        marker = f"[^{label}]"
+                        if marker not in tr_with_refs and marker not in orig:
+                            tr_with_refs = (tr_with_refs + f" {marker}").strip() if tr_with_refs else marker
+                    _append_paragraph(md_lines, tr_with_refs)
+                    for note_def in pending_footnote_defs:
+                        content_lines = _nonempty_markdown_lines(note_def.get("content"))
+                        if not content_lines:
+                            continue
+                        md_lines.append(f"[^{note_def['label']}]: {content_lines[0]}")
+                        for line in content_lines[1:]:
+                            md_lines.append(f"    {line}")
+                        md_lines.append("")
+                    for fb_label, fb_text in fallback_blocks:
+                        _append_labeled_block(md_lines, fb_label, fb_text)
         else:
-            orig = strip_html(_ensure_str(e.get("original")).strip()).strip()
-            tr_legacy = strip_html(_unwrap_translation_json(_ensure_str(e.get("translation")).strip())).strip()
+            orig = strip_html(_normalize_footnote_markers(_ensure_str(e.get("original")).strip())).strip()
+            tr_legacy = strip_html(
+                _normalize_footnote_markers(_unwrap_translation_json(_ensure_str(e.get("translation")).strip()))
+            ).strip()
             _append_blockquote(md_lines, orig)
             _append_paragraph(md_lines, tr_legacy)
-            _append_labeled_block(md_lines, "脚注", e.get("footnotes"))
-            _append_labeled_block(md_lines, "脚注翻译", e.get("footnotes_translation"))
+            defs, _, fallback_blocks = _build_obsidian_footnote_defs(
+                e.get("footnotes"),
+                e.get("footnotes_translation"),
+                existing_labels=list(seen_footnote_labels),
+                preferred_labels=_extract_marked_footnote_labels(f"{orig}\n{tr_legacy}"),
+                source_bp=bp,
+                segment_idx=0,
+                chapter_index=_resolve_chapter_for_bp(chapter_ranges, bp)["index"] if _resolve_chapter_for_bp(chapter_ranges, bp) else None,
+                chapter_end_bp=_resolve_chapter_for_bp(chapter_ranges, bp)["end_bp"] if _resolve_chapter_for_bp(chapter_ranges, bp) else None,
+                doc_last_bp=doc_last_bp,
+                fallback_prefix=f"p{bp}-legacy",
+            )
+            for note_def in defs:
+                label = note_def["label"]
+                if label not in seen_footnote_labels:
+                    seen_footnote_labels.add(label)
+                    if note_def["note_type"] == "endnote":
+                        if note_def["note_scope"] == "chapter_end" and note_def.get("chapter_index") is not None:
+                            chapter_endnotes.setdefault(int(note_def["chapter_index"]), []).append(note_def)
+                        else:
+                            book_endnotes.append(note_def)
+                    else:
+                        content_lines = _nonempty_markdown_lines(note_def.get("content"))
+                        if content_lines:
+                            md_lines.append(f"[^{label}]: {content_lines[0]}")
+                            for line in content_lines[1:]:
+                                md_lines.append(f"    {line}")
+                            md_lines.append("")
+            for fb_label, fb_text in fallback_blocks:
+                _append_labeled_block(md_lines, fb_label, fb_text)
+
+    if chapter_endnotes:
+        if md_lines and md_lines[-1].strip():
+            md_lines.append("")
+        for chapter in chapter_ranges:
+            cidx = int(chapter["index"])
+            notes = chapter_endnotes.get(cidx) or []
+            if not notes:
+                continue
+            md_lines.append("## 本章尾注")
+            md_lines.append("")
+            for note_def in notes:
+                content_lines = _nonempty_markdown_lines(note_def.get("content"))
+                if not content_lines:
+                    continue
+                md_lines.append(f"[^{note_def['label']}]: {content_lines[0]}")
+                for line in content_lines[1:]:
+                    md_lines.append(f"    {line}")
+                md_lines.append("")
+
+    if book_endnotes:
+        if md_lines and md_lines[-1].strip():
+            md_lines.append("")
+        md_lines.append("## 全书尾注")
+        md_lines.append("")
+        for note_def in book_endnotes:
+            content_lines = _nonempty_markdown_lines(note_def.get("content"))
+            if not content_lines:
+                continue
+            md_lines.append(f"[^{note_def['label']}]: {content_lines[0]}")
+            for line in content_lines[1:]:
+                md_lines.append(f"    {line}")
+            md_lines.append("")
 
     while md_lines and not md_lines[-1].strip():
         md_lines.pop()

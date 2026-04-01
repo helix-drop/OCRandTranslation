@@ -505,6 +505,10 @@
       </div>
       <div id="exportChapterList" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:4px 0;"></div>
     </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:var(--txM);cursor:pointer;">
+      <input type="checkbox" id="exportExcludeBoilerplate" onchange="_scheduleExportReload();">
+      <span>省略非主体页（版权/广告/重复封面）</span>
+    </label>
     <div class="flex gap-8 mb-12">
       <button class="btn btn-pri" onclick="copyExport();">复制</button>
       <button class="btn btn-grn" id="exportDownloadBtn" onclick="downloadExportMd();">下载 .md</button>
@@ -3666,6 +3670,11 @@ function _exportChapterName() {
   return '';
 }
 
+function _excludeBoilerplateEnabled() {
+  var checkbox = document.getElementById('exportExcludeBoilerplate');
+  return !!(checkbox && checkbox.checked);
+}
+
 function loadExportContent(force) {
   var textarea = document.getElementById('exportText');
   var loading = document.getElementById('exportLoading');
@@ -3693,6 +3702,7 @@ function loadExportContent(force) {
 
   var url = '{{ url_for("export_md") }}?doc_id=' + encodeURIComponent(docId);
   if (bpRanges) url += '&bp_ranges=' + encodeURIComponent(bpRanges);
+  if (_excludeBoilerplateEnabled()) url += '&exclude_boilerplate=1';
 
   fetch(url)
     .then(function(r) { return r.json(); })
@@ -3716,6 +3726,9 @@ function downloadExportMd() {
     url += '&bp_ranges=' + encodeURIComponent(bpRanges);
     var name = _exportChapterName();
     if (name) url += '&chapter_name=' + encodeURIComponent(name);
+  }
+  if (_excludeBoilerplateEnabled()) {
+    url += '&exclude_boilerplate=1';
   }
   window.location.href = url;
 }

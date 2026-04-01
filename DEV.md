@@ -101,7 +101,7 @@
 | [text_processing.py](/Users/hao/OCRandTranslation/text_processing.py) | 964 | 页文本整理、段落切分、脚注归属、翻译上下文 |
 | [sqlite_store.py](/Users/hao/OCRandTranslation/sqlite_store.py) | 1141 | SQLite schema、连接、事务、仓储接口 |
 | [config.py](/Users/hao/OCRandTranslation/config.py) | 768 | 配置读写、术语表（含批量文件解析）、多文档、自定义模型配置与迁移 |
-| [storage.py](/Users/hao/OCRandTranslation/storage.py) | 1006 | 页数据落盘、模型解析、目录恢复、Markdown 导出、应用状态汇总 |
+| [storage.py](/Users/hao/OCRandTranslation/storage.py) | 1457 | 页数据落盘、模型解析、目录恢复、Markdown 导出、应用状态汇总 |
 | [pdf_extract.py](/Users/hao/OCRandTranslation/pdf_extract.py) | 604 | PDF 文字层提取、TOC 提取、xlsx/csv 目录解析、页面渲染、版面合并 |
 | [ocr_client.py](/Users/hao/OCRandTranslation/ocr_client.py) | 160 | PaddleOCR 远程接口请求 |
 | [templates/reading.html](/Users/hao/OCRandTranslation/templates/reading.html) | 3714 | 阅读页模板、工具栏、PDF 面板、前端状态脚本 |
@@ -197,8 +197,16 @@
 | `_unwrap_translation_json` | 检测 `translation` 字段是否误存了 LLM 返回的完整 JSON 字符串；先尝试 `json.loads`，失败则用正则定位 `”translation”:` 后的内容并还原转义序列 | 由 `gen_markdown` 在输出每条译文前调用 |
 | `build_toc_depth_map` | 将 TOC 原始条目 + 页码偏移转成 `{book_page: depth}` 查找表；自动目录用 `file_idx+1`，用户目录用 `book_page+offset` | 由导出路由调用后传入 `gen_markdown` |
 | `_resolve_heading_level` | 根据 `toc_depth_map` 为 heading 段落确定 Markdown `#` 层级：TOC 匹配时用 `depth+1`，无匹配时退化到 OCR 检测值 | 由 `gen_markdown` 内部调用 |
-| `gen_markdown(entries, toc_depth_map)` | 把当前条目生成 Markdown；`toc_depth_map` 传入后用于修正标题 `#` 层级，同时处理 JSON 误存的译文 | 下游是导出接口 |
+| `compute_boilerplate_skip_bps(entries, chapters)` | 计算导出时应跳过的页码集合：前衬窗口 + 版式关键词（强/弱信号）+ 前几页重复封面相似度 | 由导出路由在 `exclude_boilerplate=1` 时调用 |
+| `gen_markdown(entries, toc_depth_map, page_ranges, skip_bps)` | 把当前条目生成 Markdown；支持页码区间与跳页导出，并在导出前过滤 `skip_bps` 后重算导出范围 | 下游是导出接口 |
 | `get_app_state` | 汇总当前文档状态、历史、页范围与导出所需摘要 | 下游是首页、阅读页 |
+
+当前脚注/尾注导出稳定约定：
+
+- 先统一脚注标记为 Obsidian 兼容形式（如 `[^12]`）
+- 默认按脚注导出，定义就近输出在对应段落后
+- 仅高置信尾注分流到 `## 本章尾注` 或 `## 全书尾注`
+- 编号无法稳定解析时，保留 `[脚注]` / `[脚注翻译]` 回退块，不伪造编号
 
 ### `sqlite_store.py`
 
@@ -365,6 +373,11 @@
 5. 单页翻译内部调用 `translator.py`，结果写回 SQLite
 6. 阅读页通过 SSE + 轮询拿进度、用量、段落草稿
 7. 导出时由 `storage.gen_markdown` 生成 Markdown
+
+导出接口当前稳定参数：
+
+- `bp_ranges=19-32,53-70`：按页码区间（章节）导出
+- `exclude_boilerplate=1`：启用“非主体页过滤”（默认关闭）
 
 ## 测试分层与发布回归入口
 
