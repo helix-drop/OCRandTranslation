@@ -46,6 +46,12 @@ CUSTOM_MODEL_DEFAULT = {
 }
 
 INVALID_DOC_ID_LITERALS = {"undefined", "null", "None"}
+DOC_CLEANUP_HEADERS_FOOTERS_DEFAULT = True
+UPLOAD_CLEANUP_HEADERS_FOOTERS_DEFAULT = False
+DOC_AUTO_VISUAL_TOC_DEFAULT = False
+UPLOAD_AUTO_VISUAL_TOC_DEFAULT = False
+UPLOAD_CLEANUP_HEADERS_FOOTERS_KEY = "upload_cleanup_headers_footers_enabled"
+UPLOAD_AUTO_VISUAL_TOC_KEY = "upload_auto_visual_toc_enabled"
 
 
 def normalize_doc_id(doc_id: str | None) -> str:
@@ -663,7 +669,12 @@ def save_custom_model_selection(name: str, enabled: bool, base_key: str):
 
 # ============ 多文档管理 ============
 
-def create_doc(name: str) -> str:
+def create_doc(
+    name: str,
+    *,
+    cleanup_headers_footers: bool = DOC_CLEANUP_HEADERS_FOOTERS_DEFAULT,
+    auto_visual_toc_enabled: bool = DOC_AUTO_VISUAL_TOC_DEFAULT,
+) -> str:
     """创建新文档目录，返回 doc_id。"""
     ensure_dirs()
     from sqlite_store import SQLiteRepository
@@ -682,6 +693,11 @@ def create_doc(name: str) -> str:
         last_entry_idx=0,
         has_pdf=0,
         status="ready",
+        cleanup_headers_footers=cleanup_headers_footers,
+        auto_visual_toc_enabled=auto_visual_toc_enabled,
+        toc_visual_status="idle",
+        toc_visual_message="",
+        toc_visual_model_id="",
     )
     set_current_doc(doc_id)
     return doc_id
@@ -753,6 +769,21 @@ def update_doc_meta(doc_id: str, **kwargs):
         last_entry_idx=int(meta.get("last_entry_idx", 0) or 0),
         status=meta.get("status", "ready"),
         source_pdf_path=meta.get("source_pdf_path"),
+        cleanup_headers_footers=_coerce_bool(
+            meta.get("cleanup_headers_footers"),
+            DOC_CLEANUP_HEADERS_FOOTERS_DEFAULT,
+        ),
+        auto_visual_toc_enabled=_coerce_bool(
+            meta.get("auto_visual_toc_enabled"),
+            DOC_AUTO_VISUAL_TOC_DEFAULT,
+        ),
+        toc_visual_status=str(meta.get("toc_visual_status", "idle") or "idle").strip() or "idle",
+        toc_visual_message=str(meta.get("toc_visual_message", "") or ""),
+        toc_visual_model_id=str(meta.get("toc_visual_model_id", "") or ""),
+        toc_visual_phase=str(meta.get("toc_visual_phase", "") or ""),
+        toc_visual_progress_pct=int(meta.get("toc_visual_progress_pct", 0) or 0),
+        toc_visual_progress_label=str(meta.get("toc_visual_progress_label", "") or ""),
+        toc_visual_progress_detail=str(meta.get("toc_visual_progress_detail", "") or ""),
     )
 
 
@@ -765,6 +796,54 @@ def get_doc_meta(doc_id: str = "") -> dict:
 
     meta = SQLiteRepository().get_document(doc_id)
     return meta if isinstance(meta, dict) else {}
+
+
+def get_doc_cleanup_headers_footers(
+    doc_id: str = "",
+    default: bool = DOC_CLEANUP_HEADERS_FOOTERS_DEFAULT,
+) -> bool:
+    """返回文档的页眉页脚清理模式。"""
+    meta = get_doc_meta(doc_id)
+    if not meta:
+        return bool(default)
+    return _coerce_bool(meta.get("cleanup_headers_footers"), default)
+
+
+def get_doc_auto_visual_toc_enabled(
+    doc_id: str = "",
+    default: bool = DOC_AUTO_VISUAL_TOC_DEFAULT,
+) -> bool:
+    """返回文档是否启用自动视觉目录。"""
+    meta = get_doc_meta(doc_id)
+    if not meta:
+        return bool(default)
+    return _coerce_bool(meta.get("auto_visual_toc_enabled"), default)
+
+
+def get_upload_cleanup_headers_footers_enabled(
+    default: bool = UPLOAD_CLEANUP_HEADERS_FOOTERS_DEFAULT,
+) -> bool:
+    """返回首页上传时的页眉页脚清理默认勾选。"""
+    return _coerce_bool(_get_config_value(UPLOAD_CLEANUP_HEADERS_FOOTERS_KEY, default), default)
+
+
+def get_upload_auto_visual_toc_enabled(
+    default: bool = UPLOAD_AUTO_VISUAL_TOC_DEFAULT,
+) -> bool:
+    """返回首页上传时的自动视觉目录默认勾选。"""
+    return _coerce_bool(_get_config_value(UPLOAD_AUTO_VISUAL_TOC_KEY, default), default)
+
+
+def set_upload_processing_preferences(
+    *,
+    cleanup_headers_footers: bool,
+    auto_visual_toc: bool,
+) -> None:
+    """持久化首页上传区的两个勾选项。"""
+    cfg = load_config()
+    cfg[UPLOAD_CLEANUP_HEADERS_FOOTERS_KEY] = bool(cleanup_headers_footers)
+    cfg[UPLOAD_AUTO_VISUAL_TOC_KEY] = bool(auto_visual_toc)
+    save_config(cfg)
 
 
 def delete_doc(doc_id: str):

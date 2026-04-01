@@ -248,7 +248,7 @@ def _is_figure_page(p):
 
 # ============ 页眉页脚清理 ============
 
-def clean_header_footer(pages: list) -> dict:
+def clean_header_footer(pages: list, on_progress=None) -> dict:
     """
     检测并移除页眉页脚。
 
@@ -258,7 +258,12 @@ def clean_header_footer(pages: list) -> dict:
     3) 固定模式: 纯数字、数字+文字
     4) 移除匹配的区块
     """
+    def _emit(phase: str, pct: int, detail: str) -> None:
+        if callable(on_progress):
+            on_progress(phase, int(pct), str(detail or ""))
+
     if len(pages) < 3:
+        _emit("note_scan_ready", 100, "页数太少，跳过页眉页脚检测")
         return {"pages": pages, "log": ["页数太少，跳过页眉页脚检测"]}
 
     log = []
@@ -267,6 +272,7 @@ def clean_header_footer(pages: list) -> dict:
     HF_BOT_RATIO = 0.08
 
     # Collect candidate texts from header/footer zones
+    _emit("collect_candidates", 10, f"正在收集页眉/页脚候选（0/{len(pages)}页）")
     top_texts = {}
     bot_texts = {}
     for pg in pages:
@@ -306,9 +312,16 @@ def clean_header_footer(pages: list) -> dict:
 
     if hf_patterns:
         log.append(f"检测到{len(hf_patterns)}种重复页眉/页脚模式")
+    _emit("detect_patterns", 45, f"已检测到 {len(hf_patterns)} 种重复模式")
 
     # Remove matching blocks
-    for pg in pages:
+    for index, pg in enumerate(pages, start=1):
+        if index == 1 or index == len(pages) or index % 20 == 0:
+            _emit(
+                "apply_cleanup",
+                min(88, 50 + int(index / len(pages) * 38)),
+                f"正在应用页眉页脚清理（{index}/{len(pages)}页）",
+            )
         h = pg["imgH"]
         top_y = h * HF_TOP_RATIO
         bot_y = h * (1 - HF_BOT_RATIO)
@@ -337,4 +350,5 @@ def clean_header_footer(pages: list) -> dict:
 
     pages = [p for p in pages if p["blocks"] or p["fnBlocks"]]
     log.append(f"移除了{removed}个页眉/页脚区块")
+    _emit("note_scan_ready", 95, f"页眉页脚清理完成，已移除 {removed} 个区块，进入脚注/尾注检测")
     return {"pages": pages, "log": log}

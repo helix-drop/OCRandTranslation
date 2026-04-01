@@ -135,6 +135,26 @@ def parse_toc_file(file_storage) -> list[dict]:
     return result
 
 
+def write_user_toc_csv_bytes(items: list[dict]) -> bytes:
+    """将 [{title, depth, book_page}, ...] 写成 UTF-8 BOM CSV 字节，供 toc_source.csv 使用。"""
+    import csv
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["标题", "深度", "原书页码"])
+    for it in items or []:
+        try:
+            depth = max(0, int(it.get("depth") or 0))
+        except (TypeError, ValueError):
+            depth = 0
+        try:
+            bp = max(1, int(it.get("book_page") or 1))
+        except (TypeError, ValueError):
+            bp = 1
+        writer.writerow([str(it.get("title") or "").strip(), depth, bp])
+    return buf.getvalue().encode("utf-8-sig")
+
+
 def extract_pdf_text(file_bytes: bytes) -> list[dict]:
     """
     从PDF文件提取文字层信息。
@@ -602,3 +622,55 @@ def extract_single_page_pdf(source_pdf_path: str, file_idx: int) -> bytes | None
             doc.close()
     except Exception:
         return None
+
+
+def extract_pdf_page_link_targets(pdf_path: str, file_idx: int) -> list[dict]:
+    """提取指定 PDF 页中的内部链接目标，按视觉顺序返回。"""
+    import fitz
+
+    try:
+        doc = fitz.open(pdf_path)
+    except Exception:
+        return []
+    try:
+        if file_idx < 0 or file_idx >= len(doc):
+            return []
+        page = doc[file_idx]
+        raw_links = []
+        for link in page.get_links():
+            if link.get("kind") != 1:
+                continue
+            target = link.get("page")
+            if target is None or int(target) < 0:
+                continue
+            rect = link.get("from")
+            if rect is None:
+                continue
+            raw_links.append({
+                "target_file_idx": int(target),
+                "x0": float(rect.x0),
+                "y0": float(rect.y0),
+                "x1": float(rect.x1),
+                "y1": float(rect.y1),
+            })
+        raw_links.sort(key=lambda item: (round(item["y0"], 1), item["x0"]))
+        return [
+            {
+                "visual_order": index + 1,
+                "target_file_idx": item["target_file_idx"],
+                "bbox": [item["x0"], item["y0"], item["x1"], item["y1"]],
+            }
+            for index, item in enumerate(raw_links)
+        ]
+    finally:
+        doc.close()
+
+
+def read_pdf_page_labels(pdf_path: str) -> list[str]:
+    """读取 PDF 页标签，返回与 file_idx 对齐的标签数组。"""
+    try:
+        reader = PdfReader(pdf_path)
+        labels = list(getattr(reader, "page_labels", []) or [])
+    except Exception:
+        return []
+    return [str(label or "").strip() for label in labels]

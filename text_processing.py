@@ -152,16 +152,68 @@ def find_next_paras(pages: list, end_bp: int, raw_text: str = "", count: int = 1
 
 _LATEX_FOOTNOTE_MARK_RE = re.compile(r"\$\s*\^\{(\d+)\}\s*\$")
 _PLAIN_FOOTNOTE_MARK_RE = re.compile(r"(?<![\w\[])\^\{(\d+)\}")
+_OBSIDIAN_FOOTNOTE_MARK_RE = re.compile(r"\[\^(\d{1,6})\]")
+_SUPERSCRIPT_FOOTNOTE_MARK_RE = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]{1,6}")
+_SUPERSCRIPT_TO_DIGIT_TRANS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+_DIGIT_TO_SUPERSCRIPT_TRANS = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
+_READING_FOOTNOTE_LINE_RE = re.compile(r"^\s*(?:\[(\d{1,4})\]|(\d{1,4})[\.\)、\]])\s*(.+?)\s*$")
 
 
 def normalize_latex_footnote_markers(text: str) -> str:
-    """将 OCR 遗留的脚注标记（如 $ ^{12} $）标准化为 [12]。"""
+    """将多种脚注引用标记标准化为 [12]。"""
     raw = (text or "").strip()
     if not raw:
         return ""
     normalized = _LATEX_FOOTNOTE_MARK_RE.sub(r"[\1]", raw)
     normalized = _PLAIN_FOOTNOTE_MARK_RE.sub(r"[\1]", normalized)
+    normalized = _OBSIDIAN_FOOTNOTE_MARK_RE.sub(r"[\1]", normalized)
+
+    def _replace_superscript(match: re.Match) -> str:
+        digits = match.group(0).translate(_SUPERSCRIPT_TO_DIGIT_TRANS)
+        if digits.isdigit():
+            return f"[{digits}]"
+        return match.group(0)
+
+    normalized = _SUPERSCRIPT_FOOTNOTE_MARK_RE.sub(_replace_superscript, normalized)
     return normalized
+
+
+def normalize_footnote_markers_for_obsidian(text: str) -> str:
+    """将正文中的脚注引用统一标准化为 [^12]。"""
+    normalized = normalize_latex_footnote_markers(text)
+    return re.sub(r"\[(\d{1,6})\]", r"[^\1]", normalized)
+
+
+def render_superscript_footnote_references(text: str) -> str:
+    """将正文中的脚注引用渲染为上标。"""
+    normalized = normalize_latex_footnote_markers(text)
+
+    def _replace_bracket(match: re.Match) -> str:
+        digits = match.group(1)
+        return digits.translate(_DIGIT_TO_SUPERSCRIPT_TRANS)
+
+    return re.sub(r"\[(\d{1,6})\]", _replace_bracket, normalized)
+
+
+def render_reading_footnote_text(text: str) -> str:
+    """将脚注条目渲染为统一的 [1] 列表格式。"""
+    normalized = normalize_latex_footnote_markers(text)
+    if not normalized:
+        return ""
+    lines = []
+    for raw_line in normalized.splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            lines.append("")
+            continue
+        match = _READING_FOOTNOTE_LINE_RE.match(stripped)
+        if not match:
+            lines.append(stripped)
+            continue
+        number = match.group(1) or match.group(2) or ""
+        content = match.group(3).strip()
+        lines.append(f"[{number}] {content}".strip())
+    return "\n".join(lines).strip()
 
 
 # 非实质性脚注模式
@@ -272,6 +324,13 @@ def _find_page(pages: list, bp: int) -> dict | None:
     return None
 
 
+def _get_page_note_scan(page: dict | None) -> dict:
+    if not isinstance(page, dict):
+        return {}
+    scan = page.get("_note_scan")
+    return scan if isinstance(scan, dict) else {}
+
+
 def _page_print_label(page: dict | None) -> str:
     if not isinstance(page, dict):
         return ""
@@ -324,6 +383,15 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
     md = cur.get("markdown", "").strip()
     if not md:
         return _fallback_blocks_to_paragraphs(cur, bp)
+
+    note_scan = _get_page_note_scan(cur)
+    note_start_idx = note_scan.get("note_start_line_index")
+    page_kind = str(note_scan.get("page_kind", "") or "").strip()
+    if note_start_idx is not None and page_kind in ("endnote_collection", "mixed_body_endnotes"):
+        raw_lines = md.split("\n")
+        md = "\n".join(raw_lines[:max(0, int(note_start_idx))]).strip()
+        if not md:
+            return []
 
     # 获取前后页 markdown 用于跨页检测
     prev_pg = _find_page(pages, bp - 1)
@@ -801,6 +869,22 @@ def _extract_page_footnote_items(page: dict | None) -> list[dict]:
     if not page:
         return []
 
+    note_scan = _get_page_note_scan(page)
+    scan_items = []
+    for item in note_scan.get("items") or []:
+        if str(item.get("kind", "")).strip() != "footnote":
+            continue
+        filtered = _filter_footnote_lines(item.get("text", ""))
+        if not filtered:
+            continue
+        scan_items.append({
+            "text": filtered,
+            "marker": _extract_leading_footnote_marker(filtered),
+            "top": item.get("top"),
+        })
+    if scan_items:
+        return scan_items
+
     items = []
     seen = set()
     fn_blocks = page.get("fnBlocks") or []
@@ -955,12 +1039,22 @@ def get_page_context_for_translate(pages: list, bp: int) -> dict:
     cur = _find_page(pages, bp)
     fn = ""
     if cur:
-        raw_fn = cur.get("footnotes", "") or ""
-        # 清理控制字符污染（字体编码异常的 PDF 常见）
-        ctrl_count = sum(1 for c in raw_fn if ord(c) < 0x20 and c not in '\n\r\t')
-        if ctrl_count > len(raw_fn) * 0.3:
-            raw_fn = ""
-        fn = _filter_footnote_lines(raw_fn) if raw_fn else ""
+        note_scan = _get_page_note_scan(cur)
+        footnote_texts = [
+            _filter_footnote_lines(item.get("text", ""))
+            for item in (note_scan.get("items") or [])
+            if str(item.get("kind", "")).strip() == "footnote"
+        ]
+        footnote_texts = [text for text in footnote_texts if text]
+        if footnote_texts:
+            fn = _join_unique_texts(footnote_texts)
+        else:
+            raw_fn = cur.get("footnotes", "") or ""
+            # 清理控制字符污染（字体编码异常的 PDF 常见）
+            ctrl_count = sum(1 for c in raw_fn if ord(c) < 0x20 and c not in '\n\r\t')
+            if ctrl_count > len(raw_fn) * 0.3:
+                raw_fn = ""
+            fn = _filter_footnote_lines(raw_fn) if raw_fn else ""
 
     prev_pg = _find_page(pages, bp - 1)
     next_pg = _find_page(pages, bp + 1)
@@ -979,6 +1073,7 @@ def get_page_context_for_translate(pages: list, bp: int) -> dict:
         "print_page_display": _page_print_display(cur),
         "prev_tail": prev_tail,
         "next_head": next_head,
+        "note_scan": _get_page_note_scan(cur),
     }
 
 
@@ -994,7 +1089,17 @@ def get_page_text(pages: list, bp: int) -> dict | None:
     fn_text = ""
     cur = _find_page(pages, bp)
     if cur:
-        fn_text = _filter_footnote_lines(cur.get("footnotes", "")) if cur.get("footnotes") else ""
+        note_scan = _get_page_note_scan(cur)
+        footnote_texts = [
+            _filter_footnote_lines(item.get("text", ""))
+            for item in (note_scan.get("items") or [])
+            if str(item.get("kind", "")).strip() == "footnote"
+        ]
+        footnote_texts = [text for text in footnote_texts if text]
+        if footnote_texts:
+            fn_text = _join_unique_texts(footnote_texts)
+        elif cur.get("footnotes"):
+            fn_text = _filter_footnote_lines(cur.get("footnotes", ""))
 
     return {
         "text": text,

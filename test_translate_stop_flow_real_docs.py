@@ -218,6 +218,95 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
                 release.set()
                 self._wait_for_worker_stop(timeout=3.0)
 
+    def test_running_translation_reloads_glossary_before_each_page(self):
+        _, last_bp = get_page_range(self.doc_a_pages)
+        start_bp = max(1, last_bp - 1)
+        config.set_glossary([["OldTerm", "旧译法"]], doc_id=self.doc_a_id)
+        captured_glossaries = []
+
+        def _fake_translate(pages, target_bp, model_key, t_args, glossary, **kwargs):
+            captured_glossaries.append((target_bp, list(glossary)))
+            if len(captured_glossaries) == 1:
+                config.set_glossary([["NewTerm", "新译法"]], doc_id=self.doc_a_id)
+            return {
+                "_pageBP": target_bp,
+                "_model": model_key,
+                "_page_entries": [{
+                    "original": f"Page {target_bp}",
+                    "translation": f"翻译 {target_bp}",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": str(target_bp),
+                }],
+                "pages": str(target_bp),
+            }
+
+        with (
+            patch.object(app_module, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}),
+            patch.object(tasks, "translate_page_stream", side_effect=_fake_translate),
+        ):
+            resp = self._post("/start_translate_all", data={
+                "doc_id": self.doc_a_id,
+                "start_bp": start_bp,
+                "doc_title": "Doc A",
+            })
+            self.assertEqual(resp.get_json()["status"], "started")
+            self._wait_for_worker_stop(timeout=3.0)
+
+        self.assertEqual(len(captured_glossaries), 2)
+        self.assertEqual(captured_glossaries[0][1], [["OldTerm", "旧译法"]])
+        self.assertEqual(captured_glossaries[1][1], [["NewTerm", "新译法"]])
+
+    def test_reading_page_renders_glossary_retranslate_actions(self):
+        doc_id = create_doc("glossary-reading.pdf")
+        save_pages_to_disk(
+            [{"bookPage": 1, "fileIdx": 0, "imgW": 100, "imgH": 100, "markdown": "Alpha\n\nBeta", "footnotes": ""}],
+            "Glossary Reading",
+            doc_id,
+        )
+        save_entries_to_disk(
+            [{
+                "_pageBP": 1,
+                "_page_entries": [
+                    {
+                        "original": "Alpha",
+                        "translation": "阿尔法",
+                        "_machine_translation": "阿尔法",
+                        "_translation_source": "model",
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                        "heading_level": 0,
+                        "pages": "1",
+                        "_startBP": 1,
+                        "_endBP": 1,
+                    },
+                    {
+                        "original": "Beta",
+                        "translation": "贝塔",
+                        "_machine_translation": "贝塔",
+                        "_translation_source": "model",
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                        "heading_level": 0,
+                        "pages": "1",
+                        "_startBP": 1,
+                        "_endBP": 1,
+                    },
+                ],
+                "pages": "1",
+            }],
+            "Glossary Reading",
+            0,
+            doc_id,
+        )
+
+        html = self.client.get("/reading", query_string={"doc_id": doc_id, "bp": 1}).get_data(as_text=True)
+
+        self.assertIn("从本页起按当前词典补重译", html)
+        self.assertIn("从本段起补重译", html)
+
     def test_worker_saves_entries_back_to_started_doc_after_switch(self):
         started = threading.Event()
         release = threading.Event()

@@ -21,9 +21,22 @@ from config import (
     get_active_model_mode, get_active_builtin_model_key, get_custom_model_config,
     get_translate_parallel_enabled, get_translate_parallel_limit,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
+    get_doc_cleanup_headers_footers,
+    get_upload_cleanup_headers_footers_enabled,
+    get_doc_auto_visual_toc_enabled,
+    get_upload_auto_visual_toc_enabled,
 )
-from sqlite_store import SQLiteRepository
-from text_processing import get_page_range, build_visible_page_view
+from sqlite_store import (
+    SQLiteRepository,
+    TOC_SOURCE_AUTO,
+    TOC_SOURCE_AUTO_VISUAL,
+    TOC_SOURCE_USER,
+)
+from text_processing import (
+    get_page_range,
+    build_visible_page_view,
+    normalize_footnote_markers_for_obsidian,
+)
 from text_utils import strip_html
 
 
@@ -31,14 +44,17 @@ from text_utils import strip_html
 
 _PRINT_PAGE_INT_RE = re.compile(r"^\d+$")
 _DOC_REQUEST_CACHE_KEY = "_doc_request_cache"
-_LATEX_FN_RE = re.compile(r"\$\s*\^\{(\d+)\}\s*\$")
-_PLAIN_FN_RE = re.compile(r"(?<![\w\[])\^\{(\d+)\}")
-_SUPERSCRIPT_FN_RE = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]{1,6}")
-_SUPERSCRIPT_TRANS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 _FN_LINE_NUM_RE = re.compile(r"^\s*(\d{1,4})\s*[\.\)、\]]\s*(.+?)\s*$")
 _FN_LINE_BRACKET_RE = re.compile(r"^\s*\[(\d{1,4})\]\s*(.+?)\s*$")
 # 宽松格式：数字 + 1-3个空格 + 实质内容（用于无标点编号的尾注页，如 "43 Hervé Guibert..."）
 _FN_LINE_LOOSE_RE = re.compile(r"^\s*(\d{1,4})\s{1,3}(\S.+?)\s*$")
+_NOTES_HEADER_RE = re.compile(r"^\s*(?:notes?|注释|脚注|尾注)\s*$", re.IGNORECASE)
+_BACKMATTER_TITLE_RE = re.compile(r"\b(?:notes?|index)\b|注释|尾注|索引|indices", re.IGNORECASE)
+_CONTAINER_TITLE_RE = re.compile(r"^(?:cours|course|courses|lectures?|part|section|volume|book)\b", re.IGNORECASE)
+_CONTENT_TITLE_RE = re.compile(
+    r"^(?:\d+[\.\s]|chapter\b|introduction\b|epilogue\b|afterword\b|appendix\b|preface\b|conclusion\b|le[cç]on\b|lesson\b)",
+    re.IGNORECASE,
+)
 _EXPORT_BOILERPLATE_STRONG_PATTERNS = [
     re.compile(r"\ball rights reserved\b", re.IGNORECASE),
     re.compile(r"\bcopyright\b", re.IGNORECASE),
@@ -523,19 +539,25 @@ def get_pdf_path(doc_id: str = "") -> str:
 
 
 def save_pdf_toc_to_disk(doc_id: str, toc_items: list[dict]) -> None:
-    """保存 PDF 目录结构到 SQLite 文档记录。"""
+    """兼容旧调用：保存用户目录结构到 SQLite 文档记录。"""
+    save_user_toc_to_disk(doc_id, toc_items)
+
+
+def save_user_toc_to_disk(doc_id: str, toc_items: list[dict]) -> None:
+    """保存用户目录结构到 SQLite 文档记录。"""
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return
-    SQLiteRepository().set_document_toc(target_doc_id, toc_items or [])
+    SQLiteRepository().set_document_toc_for_source(target_doc_id, TOC_SOURCE_USER, toc_items or [])
+    _invalidate_doc_request_cache(target_doc_id)
 
 
 def load_pdf_toc_from_disk(doc_id: str = "") -> list[dict]:
-    """读取 PDF 目录结构。"""
+    """读取自动提取的 PDF 书签/超链接目录。"""
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return []
-    return SQLiteRepository().get_document_toc(target_doc_id)
+    return SQLiteRepository().get_document_toc_for_source(target_doc_id, TOC_SOURCE_AUTO)
 
 
 def _parse_saved_toc_file(path: str) -> list[dict]:
@@ -556,12 +578,9 @@ def load_user_toc_from_disk(doc_id: str = "") -> list[dict]:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return []
-    toc_items = load_pdf_toc_from_disk(target_doc_id)
+    toc_items = SQLiteRepository().get_document_toc_for_source(target_doc_id, TOC_SOURCE_USER)
     if toc_items:
         return toc_items
-    source, _ = load_toc_source_offset(target_doc_id)
-    if source != "user":
-        return []
     path = get_toc_file_path(target_doc_id)
     if not path or not os.path.exists(path):
         return []
@@ -570,20 +589,66 @@ def load_user_toc_from_disk(doc_id: str = "") -> list[dict]:
     except Exception:
         return []
     if recovered:
-        save_pdf_toc_to_disk(target_doc_id, recovered)
+        save_user_toc_to_disk(target_doc_id, recovered)
     return recovered
 
 
 def save_auto_pdf_toc_to_disk(doc_id: str, toc_items: list[dict]) -> None:
-    """保存自动提取的 PDF 书签，但不覆盖用户手动导入的目录。"""
+    """保存自动提取的 PDF 书签/超链接目录。"""
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return
-    source, _ = load_toc_source_offset(target_doc_id)
-    if source == "user":
-        if load_user_toc_from_disk(target_doc_id) or get_toc_file_path(target_doc_id):
-            return
-    save_pdf_toc_to_disk(target_doc_id, toc_items)
+    SQLiteRepository().set_document_toc_for_source(target_doc_id, TOC_SOURCE_AUTO, toc_items or [])
+    current_source, _ = SQLiteRepository().get_document_toc_source_offset(target_doc_id)
+    if current_source not in {TOC_SOURCE_USER, TOC_SOURCE_AUTO_VISUAL}:
+        SQLiteRepository().set_document_toc_source_offset(target_doc_id, TOC_SOURCE_AUTO, 0)
+    _invalidate_doc_request_cache(target_doc_id)
+
+
+def save_auto_visual_toc_to_disk(doc_id: str, toc_items: list[dict]) -> None:
+    """保存一份已就绪的自动视觉目录；若当前没有用户目录，则切换为视觉目录来源。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return
+    SQLiteRepository().set_document_toc_for_source(target_doc_id, TOC_SOURCE_AUTO_VISUAL, toc_items or [])
+    update_doc_meta(
+        target_doc_id,
+        toc_visual_status="ready",
+        toc_visual_message=f"已生成 {len(toc_items or [])} 条自动视觉目录。",
+    )
+    current_source, _ = SQLiteRepository().get_document_toc_source_offset(target_doc_id)
+    if current_source != TOC_SOURCE_USER:
+        SQLiteRepository().set_document_toc_source_offset(target_doc_id, TOC_SOURCE_AUTO_VISUAL, 0)
+    _invalidate_doc_request_cache(target_doc_id)
+
+
+def load_auto_visual_toc_from_disk(doc_id: str = "") -> list[dict]:
+    """读取自动视觉目录。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return []
+    return SQLiteRepository().get_document_toc_for_source(target_doc_id, TOC_SOURCE_AUTO_VISUAL)
+
+
+def load_effective_toc(doc_id: str = "") -> tuple[str, int, list[dict]]:
+    """按优先级返回当前生效目录：用户 > 自动视觉 > 自动 PDF。"""
+    target_doc_id = doc_id or get_current_doc_id()
+    if not target_doc_id:
+        return (TOC_SOURCE_AUTO, 0, [])
+
+    source, offset = SQLiteRepository().get_document_toc_source_offset(target_doc_id)
+    user_toc = load_user_toc_from_disk(target_doc_id)
+    if user_toc:
+        return (TOC_SOURCE_USER, int(offset or 0), user_toc)
+
+    meta = get_doc_meta(target_doc_id) or {}
+    visual_toc = load_auto_visual_toc_from_disk(target_doc_id)
+    visual_status = str(meta.get("toc_visual_status", "") or "").strip().lower()
+    if visual_toc and visual_status in {"ready", "needs_offset"}:
+        visual_offset = int(offset or 0) if source == TOC_SOURCE_AUTO_VISUAL else 0
+        return (TOC_SOURCE_AUTO_VISUAL, visual_offset, visual_toc)
+
+    return (TOC_SOURCE_AUTO, 0, load_pdf_toc_from_disk(target_doc_id))
 
 
 def save_toc_file(doc_id: str, file_storage) -> None:
@@ -657,18 +722,100 @@ def get_toc_file_info(doc_id: str = "") -> dict:
     }
 
 
+TOC_VISUAL_DRAFT_FILENAME = "toc_visual_draft.json"
+
+
+def get_toc_visual_draft_path(doc_id: str) -> str:
+    doc_dir = get_doc_dir(doc_id)
+    if not doc_dir:
+        return ""
+    return os.path.join(doc_dir, TOC_VISUAL_DRAFT_FILENAME)
+
+
+def load_toc_visual_draft(doc_id: str) -> tuple[list[dict], int] | None:
+    """读取自动视觉目录草稿；返回 (items, pending_offset) 或 None。"""
+    path = get_toc_visual_draft_path(doc_id)
+    if not path or not os.path.exists(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = json.load(f)
+    except Exception:
+        return None
+    if isinstance(raw, list):
+        return raw, 0
+    if not isinstance(raw, dict):
+        return None
+    items = raw.get("items")
+    if not isinstance(items, list):
+        return None
+    po = int(raw.get("pending_offset") or 0)
+    return items, po
+
+
+def save_toc_visual_draft(doc_id: str, items: list[dict], pending_offset: int) -> None:
+    """写入草稿文件；不修改 SQLite 中的自动视觉目录。"""
+    path = get_toc_visual_draft_path(doc_id)
+    if not path:
+        return
+    payload = {"items": items, "pending_offset": int(pending_offset or 0)}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    _invalidate_doc_request_cache(doc_id)
+
+
+def clear_toc_visual_draft(doc_id: str) -> None:
+    path = get_toc_visual_draft_path(doc_id)
+    if path and os.path.exists(path):
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+    _invalidate_doc_request_cache(doc_id)
+
+
+def has_toc_visual_draft(doc_id: str) -> bool:
+    p = get_toc_visual_draft_path(doc_id)
+    return bool(p and os.path.exists(p))
+
+
+def save_user_toc_csv_generated(doc_id: str, user_rows: list[dict]) -> None:
+    """根据用户目录行生成 toc_source.csv 并更新文件元数据。"""
+    from pdf_extract import write_user_toc_csv_bytes
+
+    target_doc_id = doc_id or get_current_doc_id()
+    doc_dir = get_doc_dir(target_doc_id)
+    if not doc_dir:
+        return
+    raw = write_user_toc_csv_bytes(user_rows)
+    dest = os.path.join(doc_dir, "toc_source.csv")
+    for old_ext in ("xlsx", "csv"):
+        old_path = os.path.join(doc_dir, f"toc_source.{old_ext}")
+        if old_path != dest and os.path.exists(old_path):
+            os.remove(old_path)
+    with open(dest, "wb") as f:
+        f.write(raw)
+    SQLiteRepository().set_document_toc_file_meta(
+        target_doc_id,
+        "toc_export.csv",
+        uploaded_at=int(time.time()),
+    )
+
+
 def save_toc_source_offset(doc_id: str, source: str, offset: int) -> None:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
         return
     SQLiteRepository().set_document_toc_source_offset(target_doc_id, source, offset)
+    _invalidate_doc_request_cache(target_doc_id)
 
 
 def load_toc_source_offset(doc_id: str = "") -> tuple[str, int]:
     target_doc_id = doc_id or get_current_doc_id()
     if not target_doc_id:
-        return ("auto", 0)
-    return SQLiteRepository().get_document_toc_source_offset(target_doc_id)
+        return (TOC_SOURCE_AUTO, 0)
+    source, offset, _ = load_effective_toc(target_doc_id)
+    return (source, offset)
 
 
 # ============ HELPERS ============
@@ -1039,21 +1186,73 @@ def compute_boilerplate_skip_bps(
     return skip_bps
 
 
+def detect_book_index_pages(entries: list[dict]) -> set[int]:
+    """检测书末索引页（人名/主题索引），返回应跳过的页码集合。"""
+    page_texts: dict[int, str] = {}
+    for entry in entries or []:
+        bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
+        if bp <= 0:
+            continue
+        text = _page_text_for_export_heuristic(entry)
+        if text:
+            page_texts[bp] = text
+    if not page_texts:
+        return set()
+
+    sorted_bps = sorted(page_texts.keys())
+    start_idx = int(len(sorted_bps) * 0.8)
+    scan_bps = sorted_bps[start_idx:] if start_idx < len(sorted_bps) else []
+    if not scan_bps:
+        return set()
+
+    def _looks_like_index_line(line: str) -> bool:
+        ln = line.strip()
+        if not ln:
+            return False
+        if not re.match(r"^[A-Za-zÀ-ÿ\u4e00-\u9fff]", ln):
+            return False
+        if "," not in ln and "，" not in ln:
+            return False
+        nums = re.findall(r"\d+", ln)
+        if len(nums) < 2:
+            return False
+        return True
+
+    stats_by_bp: dict[int, tuple[int, int, float]] = {}
+    for bp in scan_bps:
+        raw = _ensure_str(page_texts.get(bp))
+        lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+        if not lines:
+            continue
+        numeric_lines = [ln for ln in lines if re.search(r"\d", ln)]
+        if not numeric_lines:
+            continue
+        index_hits = sum(1 for ln in numeric_lines if _looks_like_index_line(ln))
+        ratio = index_hits / max(len(numeric_lines), 1)
+        stats_by_bp[bp] = (index_hits, len(numeric_lines), ratio)
+
+    strong_hits = {
+        bp for bp, (hits, _num_count, ratio) in stats_by_bp.items() if hits >= 5 and ratio >= 0.4
+    }
+    hit_bps: set[int] = set(strong_hits)
+    if strong_hits:
+        # 双语索引页常出现“半页命中、半页译文”，将与强命中页相邻的中等命中页一并纳入。
+        for bp, (hits, _num_count, ratio) in stats_by_bp.items():
+            if bp in hit_bps:
+                continue
+            if hits >= 5 and ratio >= 0.22 and any(abs(bp - s) <= 2 for s in strong_hits):
+                hit_bps.add(bp)
+        # 索引续页可能是弱格式（词条压行、参照项较多），对强命中邻页再放宽一档。
+        for bp, (hits, _num_count, ratio) in stats_by_bp.items():
+            if bp in hit_bps:
+                continue
+            if hits >= 4 and ratio >= 0.18 and any(abs(bp - s) <= 1 for s in hit_bps):
+                hit_bps.add(bp)
+    return hit_bps
+
+
 def _normalize_footnote_markers(text: str) -> str:
-    raw = _ensure_str(text)
-    if not raw:
-        return ""
-    normalized = _LATEX_FN_RE.sub(r"[^\1]", raw)
-    normalized = _PLAIN_FN_RE.sub(r"[^\1]", normalized)
-
-    def _replace_superscript(match: re.Match) -> str:
-        digits = match.group(0).translate(_SUPERSCRIPT_TRANS)
-        if digits.isdigit():
-            return f"[^{digits}]"
-        return match.group(0)
-
-    normalized = _SUPERSCRIPT_FN_RE.sub(_replace_superscript, normalized)
-    return normalized
+    return normalize_footnote_markers_for_obsidian(_ensure_str(text))
 
 
 def _extract_marked_footnote_labels(text: str) -> list[str]:
@@ -1208,20 +1407,120 @@ def _build_obsidian_footnote_defs(
     return defs, labels_for_refs, fallback_blocks
 
 
-def _build_chapter_ranges_from_depth_map(toc_depth_map: dict[int, int], all_bps: list[int]) -> list[dict]:
+def _extract_heading_number(text: str) -> int | None:
+    match = re.match(r"^\s*(\d{1,4})\b", _ensure_str(text))
+    return int(match.group(1)) if match else None
+
+
+def _looks_like_backmatter_title(title: str) -> bool:
+    return bool(_BACKMATTER_TITLE_RE.search(_ensure_str(title).strip()))
+
+
+def _looks_like_container_title(title: str) -> bool:
+    return bool(_CONTAINER_TITLE_RE.search(_ensure_str(title).strip()))
+
+
+def _looks_like_content_title(title: str) -> bool:
+    return bool(_CONTENT_TITLE_RE.search(_ensure_str(title).strip()))
+
+
+def _collect_entry_lines(entry: dict, field: str) -> list[str]:
+    lines: list[str] = []
+    page_entries = entry.get("_page_entries") or []
+    if page_entries:
+        for pe in page_entries:
+            raw = _ensure_str(pe.get(field, "")).strip()
+            if raw:
+                lines.extend(ln.strip() for ln in raw.split("\n") if ln.strip())
+    else:
+        raw = _ensure_str(entry.get(field, "")).strip()
+        if raw:
+            lines.extend(ln.strip() for ln in raw.split("\n") if ln.strip())
+    return lines
+
+
+def _extract_note_candidate_lines(lines: list[str]) -> list[str]:
+    for idx, line in enumerate(lines):
+        if _NOTES_HEADER_RE.match(line):
+            return [ln.strip() for ln in lines[idx + 1:] if ln.strip()]
+    return [ln.strip() for ln in lines if ln.strip()]
+
+
+def _split_consecutive_bps(bps: list[int]) -> list[list[int]]:
+    runs: list[list[int]] = []
+    current: list[int] = []
+    for bp in sorted(int(v) for v in bps):
+        if current and bp != current[-1] + 1:
+            runs.append(current)
+            current = [bp]
+        else:
+            current.append(bp)
+    if current:
+        runs.append(current)
+    return runs
+
+
+def _build_chapter_ranges_from_depth_map(
+    toc_depth_map: dict[int, int],
+    all_bps: list[int],
+    toc_title_map: dict[int, str] | None = None,
+) -> list[dict]:
     bps = sorted(int(bp) for bp in all_bps if bp is not None)
     if not bps:
         return []
-    starts = sorted(
-        bp for bp, depth in (toc_depth_map or {}).items()
-        if int(depth) == 0
+    toc_items = sorted(
+        (
+            {
+                "start_bp": int(bp),
+                "depth": int(depth),
+                "title": _ensure_str((toc_title_map or {}).get(int(bp), "")).strip(),
+            }
+            for bp, depth in (toc_depth_map or {}).items()
+            if int(bp) > 0
+        ),
+        key=lambda item: (int(item["start_bp"]), int(item["depth"])),
     )
-    if not starts:
+    if not toc_items:
         return []
+    min_depth = min(item["depth"] for item in toc_items)
+    top_items = [item for item in toc_items if item["depth"] == min_depth]
+    if not top_items:
+        return []
+
+    effective_items: list[dict] = []
+    for idx, item in enumerate(top_items):
+        section_start = int(item["start_bp"])
+        section_end = int(top_items[idx + 1]["start_bp"]) - 1 if idx + 1 < len(top_items) else bps[-1]
+        child_items = [
+            candidate for candidate in toc_items
+            if section_start < int(candidate["start_bp"]) <= section_end
+            and int(candidate["depth"]) == min_depth + 1
+        ]
+        should_promote_children = (
+            len(child_items) >= 3
+            and (section_end - section_start + 1) >= 40
+            and (_looks_like_container_title(item["title"]) or not _looks_like_content_title(item["title"]))
+        )
+        if should_promote_children:
+            effective_items.extend(child_items)
+        else:
+            effective_items.append(item)
+
+    effective_items = sorted(
+        {int(item["start_bp"]): item for item in effective_items if int(item["start_bp"]) > 0}.values(),
+        key=lambda item: int(item["start_bp"]),
+    )
     ranges = []
-    for i, start in enumerate(starts):
-        end_bp = starts[i + 1] - 1 if i + 1 < len(starts) else bps[-1]
-        ranges.append({"index": i, "start_bp": int(start), "end_bp": int(end_bp)})
+    for i, item in enumerate(effective_items):
+        start_bp = int(item["start_bp"])
+        end_bp = int(effective_items[i + 1]["start_bp"]) - 1 if i + 1 < len(effective_items) else bps[-1]
+        ranges.append({
+            "index": i,
+            "start_bp": start_bp,
+            "end_bp": int(end_bp),
+            "title": item["title"],
+            "depth": int(item["depth"]),
+        })
     return ranges
 
 
@@ -1230,6 +1529,17 @@ def _resolve_chapter_for_bp(chapter_ranges: list[dict], bp: int) -> dict | None:
         if int(chapter["start_bp"]) <= int(bp) <= int(chapter["end_bp"]):
             return chapter
     return None
+
+
+def _resolve_previous_content_chapter(chapter_ranges: list[dict], bp: int) -> dict | None:
+    candidate = None
+    for chapter in chapter_ranges:
+        if int(chapter["start_bp"]) > int(bp):
+            break
+        if _looks_like_backmatter_title(chapter.get("title", "")):
+            continue
+        candidate = chapter
+    return candidate
 
 
 # 尾注集合页判定：编号行占比阈值和最少条目数
@@ -1246,25 +1556,16 @@ def detect_endnote_collection_pages(
     chapter_index=None 表示不属于任何章节（全书尾注区）。
     """
     result: dict[int | None, list[int]] = {}
+    stats_by_bp: dict[int, dict] = {}
     for entry in entries or []:
         bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
         if bp <= 0:
             continue
-        page_entries = entry.get("_page_entries") or []
-        # 合并该页所有 original 文本
-        all_orig = "\n".join(
-            _ensure_str(pe.get("original", "")).strip()
-            for pe in page_entries
-            if _ensure_str(pe.get("original", "")).strip()
-        )
-        if not all_orig:
-            # 兼容旧版无 _page_entries 的条目
-            all_orig = _ensure_str(entry.get("original", "")).strip()
+        raw_lines = _collect_entry_lines(entry, "original")
+        all_orig = "\n".join(raw_lines).strip()
         if not all_orig:
             continue
         lines = [ln.strip() for ln in all_orig.split("\n") if ln.strip()]
-        if len(lines) < _ENDNOTE_PAGE_MIN_ENTRIES:
-            continue
         # 用宽松模式统计编号行数（既含严格格式也含无标点格式）
         numbered = sum(
             1 for ln in lines
@@ -1272,97 +1573,822 @@ def detect_endnote_collection_pages(
             or _FN_LINE_BRACKET_RE.match(ln)
             or _FN_LINE_LOOSE_RE.match(ln)
         )
-        ratio = numbered / len(lines)
-        if ratio < _ENDNOTE_PAGE_MIN_RATIO or numbered < _ENDNOTE_PAGE_MIN_ENTRIES:
-            continue
         chapter = _resolve_chapter_for_bp(chapter_ranges, bp)
         cidx: int | None = int(chapter["index"]) if chapter else None
-        result.setdefault(cidx, []).append(bp)
+        ratio = numbered / max(len(lines), 1)
+        has_notes_signal = any(
+            _NOTES_HEADER_RE.match(line)
+            or re.match(r"^\s*(?:notes?|注释|脚注|尾注)\b", line, re.IGNORECASE)
+            for line in lines
+        )
+        chapter_end_bp = int(chapter["end_bp"]) if chapter else None
+        near_chapter_end = bool(chapter_end_bp is not None and bp >= max(1, chapter_end_bp - 1))
+        stats_by_bp[bp] = {
+            "chapter_index": cidx,
+            "chapter_end_bp": chapter_end_bp,
+            "numbered": numbered,
+            "ratio": ratio,
+            "has_notes_signal": has_notes_signal,
+            "near_chapter_end": near_chapter_end,
+        }
+
+    # 第一轮：原有强规则
+    for bp, st in stats_by_bp.items():
+        if st["numbered"] >= _ENDNOTE_PAGE_MIN_ENTRIES and st["ratio"] >= _ENDNOTE_PAGE_MIN_RATIO:
+            result.setdefault(st["chapter_index"], []).append(bp)
+
+    # 第二轮：章节尾部边界页放宽（仅低风险补漏，不影响正文中段）
+    for bp, st in stats_by_bp.items():
+        cidx = st["chapter_index"]
+        if cidx is None:
+            continue
+        cur = result.setdefault(cidx, [])
+        if bp in cur:
+            continue
+        if st["near_chapter_end"] and st["numbered"] >= 2 and (
+            st["ratio"] >= 0.34 or st["has_notes_signal"]
+        ):
+            cur.append(bp)
+
+    # 第二点五轮：正文+尾注混合起始页补漏。
+    # 这类页往往只有 1 条尾注，但会出现 NOTES/尾注 标记，并紧邻已识别的尾注页。
+    for bp, st in stats_by_bp.items():
+        cidx = st["chapter_index"]
+        cur = result.setdefault(cidx, [])
+        if bp in cur:
+            continue
+        if st["numbered"] < 1 or not st["has_notes_signal"]:
+            continue
+        if any(abs(bp - hit_bp) <= 1 for hit_bp in cur):
+            cur.append(bp)
+
+    # 第三轮：紧邻已识别尾注页的续页放宽（同章节）
+    for bp, st in stats_by_bp.items():
+        cidx = st["chapter_index"]
+        if cidx is None:
+            continue
+        cur = result.setdefault(cidx, [])
+        if bp in cur:
+            continue
+        if st["numbered"] < 2:
+            continue
+        if st["ratio"] < 0.28:
+            continue
+        if any(abs(bp - hit_bp) <= 1 for hit_bp in cur):
+            cur.append(bp)
+
+    # 统一排序
+    for cidx in list(result.keys()):
+        cleaned_bps = sorted(set(result[cidx]))
+        filtered_runs: list[int] = []
+        for run in _split_consecutive_bps(cleaned_bps):
+            if len(run) == 1:
+                st = stats_by_bp.get(int(run[0]), {})
+                if not st.get("has_notes_signal") and not st.get("near_chapter_end"):
+                    continue
+            filtered_runs.extend(run)
+        result[cidx] = filtered_runs
+        if not result[cidx]:
+            result.pop(cidx, None)
     return result
+
+
+def _match_chapter_heading_line(line: str, chapter_ranges: list[dict]) -> dict | None:
+    raw = _ensure_str(line).strip()
+    if not raw or _NOTES_HEADER_RE.match(raw):
+        return None
+    normalized_line = _normalize_heading_text_for_match(raw)
+    if not normalized_line:
+        return None
+    best_match = None
+    best_score = 0.0
+    for chapter in chapter_ranges or []:
+        title = _ensure_str(chapter.get("title", "")).strip()
+        if not title or _looks_like_backmatter_title(title):
+            continue
+        normalized_title = _normalize_heading_text_for_match(title)
+        if not normalized_title:
+            continue
+        if normalized_line == normalized_title:
+            score = 1.0
+        elif normalized_line in normalized_title or normalized_title in normalized_line:
+            score = min(len(normalized_line), len(normalized_title)) / max(len(normalized_line), len(normalized_title), 1)
+        else:
+            score = SequenceMatcher(None, normalized_line, normalized_title).ratio()
+        if score > best_score:
+            best_score = score
+            best_match = chapter
+    if best_score >= 0.84:
+        return best_match
+    return None
+
+
+def _merge_numbered_note_items(raw_items: list[tuple[str | None, str]]) -> tuple[list[int], dict[int, str]]:
+    ordered_numbers: list[int] = []
+    merged: dict[int, str] = {}
+    current_num: int | None = None
+    current_parts: list[str] = []
+
+    def _repair_number(parsed_num: int, expected_num: int, content: str) -> int | None:
+        text = _ensure_str(content).strip()
+        if parsed_num == expected_num:
+            return parsed_num
+        # 同一章节尾注通常单调递增；若 OCR 把高位数字吞掉，常会出现 31 -> 3、28 -> 22 这类回退。
+        if parsed_num < expected_num and len(text) >= 8:
+            return expected_num
+        # PDF 文字层或 OCR 续行有时会把年份/页码拆到行首，避免把 2019 / 2024 之类误识别成新尾注。
+        if parsed_num >= 1000:
+            return None
+        # OCR 也会把 131 识别成 151 这类“中间位飘移”，优先回正到期望序号。
+        if (
+            parsed_num > expected_num
+            and len(text) >= 8
+            and len(str(parsed_num)) == len(str(expected_num))
+            and str(parsed_num)[0] == str(expected_num)[0]
+            and str(parsed_num)[-1] == str(expected_num)[-1]
+        ):
+            return expected_num
+        return parsed_num
+
+    def _flush_current() -> None:
+        nonlocal current_num, current_parts
+        if current_num is None:
+            return
+        text = " ".join(part for part in current_parts if part).strip()
+        if current_num not in ordered_numbers:
+            ordered_numbers.append(current_num)
+        if text:
+            existing = merged.get(current_num, "").strip()
+            merged[current_num] = f"{existing} {text}".strip() if existing else text
+        else:
+            merged.setdefault(current_num, "")
+
+    for label, content in raw_items:
+        if label is not None and str(label).isdigit():
+            parsed_num = int(label)
+            if current_num is not None:
+                repaired_num = _repair_number(parsed_num, current_num + 1, content)
+                if repaired_num is None:
+                    if content:
+                        current_parts.append(content)
+                    continue
+                parsed_num = repaired_num
+            _flush_current()
+            current_num = parsed_num
+            current_parts = [content] if content else []
+            continue
+        if current_num is not None and content:
+            current_parts.append(content)
+    _flush_current()
+    return ordered_numbers, merged
+
+
+def _load_pdf_note_lines_by_bp(doc_id: str, bps: list[int]) -> dict[int, list[str]]:
+    doc_key = _ensure_str(doc_id).strip()
+    wanted_bps = sorted({int(bp) for bp in (bps or []) if int(bp) > 0})
+    if not doc_key or not wanted_bps:
+        return {}
+    pdf_path = get_pdf_path(doc_key)
+    if not pdf_path or not os.path.exists(pdf_path):
+        return {}
+
+    page_cache: dict[int, list[str]] | None = None
+    request_cache = _get_doc_request_cache(doc_key)
+    if request_cache is not None:
+        page_cache = request_cache.setdefault("pdf_note_lines_by_bp", {})
+
+    missing_bps = (
+        [bp for bp in wanted_bps if bp not in page_cache]
+        if page_cache is not None
+        else wanted_bps
+    )
+    if missing_bps:
+        try:
+            reader = PdfReader(pdf_path)
+        except Exception:
+            return {}
+        page_count = len(reader.pages)
+        loaded_lines: dict[int, list[str]] = {}
+        for bp in missing_bps:
+            if bp <= 0 or bp > page_count:
+                loaded_lines[bp] = []
+                continue
+            try:
+                raw_text = _ensure_str(reader.pages[bp - 1].extract_text() or "")
+            except Exception:
+                raw_text = ""
+            loaded_lines[bp] = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
+        if page_cache is not None:
+            page_cache.update(loaded_lines)
+        else:
+            page_cache = loaded_lines
+    return {
+        bp: list((page_cache or {}).get(bp) or [])
+        for bp in wanted_bps
+        if (page_cache or {}).get(bp)
+    }
+
+
+def _resolve_endnote_run_default_chapter(run_pages: list[dict], chapter_ranges: list[dict]) -> dict | None:
+    if not run_pages:
+        return None
+    default_chapter = _resolve_previous_content_chapter(chapter_ranges, int(run_pages[0]["bp"]))
+    if default_chapter is None:
+        default_chapter = _resolve_chapter_for_bp(chapter_ranges, int(run_pages[0]["bp"]))
+        if default_chapter and _looks_like_backmatter_title(default_chapter.get("title", "")):
+            default_chapter = _resolve_previous_content_chapter(chapter_ranges, int(run_pages[0]["bp"]))
+    return default_chapter
+
+
+def _new_endnote_section(chapter: dict | None) -> dict:
+    return {
+        "chapter_index": int(chapter["index"]) if chapter and chapter.get("index") is not None else None,
+        "chapter_title": _ensure_str(chapter.get("title", "")).strip() if chapter else "",
+        "chapter_start_bp": int(chapter["start_bp"]) if chapter and chapter.get("start_bp") is not None else None,
+        "heading_number": _extract_heading_number(chapter.get("title", "")) if chapter else None,
+        "orig_lines": [],
+    }
+
+
+def _split_endnote_run_pages_into_sections(
+    run_pages: list[dict],
+    chapter_ranges: list[dict],
+    line_key: str,
+    forced_chapter: dict | None = None,
+) -> list[dict]:
+    if not run_pages:
+        return []
+    default_chapter = forced_chapter or _resolve_endnote_run_default_chapter(run_pages, chapter_ranges)
+    allow_heading_split = forced_chapter is None
+    sections: list[dict] = [_new_endnote_section(default_chapter)]
+    for page in run_pages:
+        page_lines = _extract_note_candidate_lines(page.get(line_key) or [])
+        for line in page_lines:
+            matched_chapter = _match_chapter_heading_line(line, chapter_ranges) if allow_heading_split else None
+            if matched_chapter is not None:
+                current = sections[-1]
+                matched_index = int(matched_chapter["index"])
+                if current["orig_lines"] or current["chapter_index"] != matched_index:
+                    sections.append(_new_endnote_section(matched_chapter))
+                else:
+                    current["chapter_index"] = matched_index
+                    current["chapter_title"] = _ensure_str(matched_chapter.get("title", "")).strip()
+                    current["chapter_start_bp"] = int(matched_chapter["start_bp"])
+                    current["heading_number"] = _extract_heading_number(matched_chapter.get("title", ""))
+                continue
+            sections[-1]["orig_lines"].append(line)
+    return sections
+
+
+def _prepare_endnote_sections(raw_sections: list[dict]) -> list[dict]:
+    prepared_sections: list[dict] = []
+    for section in raw_sections:
+        orig_order, orig_map = _merge_numbered_note_items(
+            _split_footnote_items("\n".join(section["orig_lines"]), strict=False)
+        )
+        if not orig_order and not orig_map:
+            continue
+        prepared_sections.append({
+            **section,
+            "note_numbers": orig_order,
+            "orig_map": orig_map,
+        })
+    return prepared_sections
+
+
+def _merge_pdf_endnote_sections(prepared_sections: list[dict], pdf_sections: list[dict]) -> list[dict]:
+    if not pdf_sections:
+        return prepared_sections
+
+    def _should_accept_pdf_number(number: int, existing_numbers: list[int]) -> bool:
+        if not existing_numbers:
+            return True
+        if number in set(existing_numbers):
+            return False
+        first = existing_numbers[0]
+        last = existing_numbers[-1]
+        if number < first:
+            return number >= max(1, first - 2)
+        if number > last:
+            return number <= last + 2
+        for left, right in zip(existing_numbers, existing_numbers[1:]):
+            if left < number < right:
+                return (right - left) >= 2
+        return False
+
+    def _find_target(pdf_section: dict, section_idx: int) -> dict | None:
+        chapter_index = pdf_section.get("chapter_index")
+        if chapter_index is not None:
+            same_chapter = [
+                section for section in prepared_sections
+                if section.get("chapter_index") == chapter_index
+            ]
+            if len(same_chapter) == 1:
+                return same_chapter[0]
+            if same_chapter:
+                return same_chapter[0]
+        if 0 <= section_idx < len(prepared_sections):
+            return prepared_sections[section_idx]
+        return None
+
+    for section_idx, pdf_section in enumerate(pdf_sections):
+        target = _find_target(pdf_section, section_idx)
+        if target is None:
+            target = {
+                "chapter_index": pdf_section.get("chapter_index"),
+                "chapter_title": pdf_section.get("chapter_title", ""),
+                "chapter_start_bp": pdf_section.get("chapter_start_bp"),
+                "heading_number": pdf_section.get("heading_number"),
+                "orig_lines": [],
+                "note_numbers": [],
+                "orig_map": {},
+                "tr_map": {},
+            }
+            prepared_sections.append(target)
+        if not target.get("chapter_title") and pdf_section.get("chapter_title"):
+            target["chapter_title"] = pdf_section["chapter_title"]
+        if target.get("chapter_start_bp") is None and pdf_section.get("chapter_start_bp") is not None:
+            target["chapter_start_bp"] = pdf_section["chapter_start_bp"]
+        merged_numbers = {int(v) for v in target.get("note_numbers", [])}
+        existing_numbers = sorted(merged_numbers)
+        target_orig_map = target.setdefault("orig_map", {})
+        for number, content in (pdf_section.get("orig_map") or {}).items():
+            if not _ensure_str(content).strip():
+                continue
+            if not _should_accept_pdf_number(int(number), existing_numbers):
+                continue
+            if not _ensure_str(target_orig_map.get(number, "")).strip():
+                target_orig_map[int(number)] = content
+            merged_numbers.add(int(number))
+            existing_numbers = sorted(merged_numbers)
+        target["note_numbers"] = sorted(merged_numbers)
+    prepared_sections.sort(
+        key=lambda section: (
+            section.get("chapter_index") is None,
+            int(section.get("chapter_start_bp") or 10**9),
+            _ensure_str(section.get("chapter_title", "")),
+        )
+    )
+    return prepared_sections
+
+
+def _clone_endnote_section(section: dict) -> dict:
+    return {
+        "chapter_index": section.get("chapter_index"),
+        "chapter_title": section.get("chapter_title", ""),
+        "chapter_start_bp": section.get("chapter_start_bp"),
+        "heading_number": section.get("heading_number"),
+        "orig_lines": list(section.get("orig_lines") or []),
+        "note_numbers": list(section.get("note_numbers") or []),
+        "orig_map": dict(section.get("orig_map") or {}),
+        "tr_map": dict(section.get("tr_map") or {}),
+    }
+
+
+def _endnote_section_score(section: dict | None) -> float:
+    if not section:
+        return float("-inf")
+    note_numbers = [int(v) for v in (section.get("note_numbers") or [])]
+    if not note_numbers:
+        return float("-inf")
+    uniq = sorted(set(note_numbers))
+    span = max(uniq[-1] - uniq[0] + 1, 1)
+    density = len(uniq) / span
+    start_penalty = min(max(uniq[0] - 1, 0), 8) * 0.08
+    order_resets = sum(
+        1 for prev, cur in zip(note_numbers, note_numbers[1:])
+        if int(cur) < int(prev)
+    )
+    return density - start_penalty - (order_resets * 0.2)
+
+
+def _should_prefer_pdf_section(ocr_section: dict | None, pdf_section: dict | None) -> bool:
+    if not pdf_section:
+        return False
+    if not ocr_section:
+        return True
+    note_numbers = [int(v) for v in (ocr_section.get("note_numbers") or [])]
+    if not note_numbers:
+        return True
+    uniq = sorted(set(note_numbers))
+    span = max(uniq[-1] - uniq[0] + 1, 1)
+    density = len(uniq) / span
+    order_resets = sum(
+        1 for prev, cur in zip(note_numbers, note_numbers[1:])
+        if int(cur) < int(prev)
+    )
+    has_large_outlier = any(int(v) >= 1000 for v in note_numbers) or (uniq[-1] - len(uniq) >= 15)
+    ocr_is_suspicious = (
+        uniq[0] > 1
+        or order_resets > 0
+        or density < 0.9
+        or has_large_outlier
+    )
+    if not ocr_is_suspicious:
+        return False
+    return _endnote_section_score(pdf_section) >= (_endnote_section_score(ocr_section) - 0.05)
+
+
+def _select_base_endnote_sections(ocr_sections: list[dict], pdf_sections: list[dict]) -> list[dict]:
+    if not pdf_sections:
+        return ocr_sections
+    if not ocr_sections:
+        return pdf_sections
+
+    selected_sections: list[dict] = []
+    used_pdf_indices: set[int] = set()
+
+    def _match_pdf_section(ocr_section: dict, ocr_idx: int) -> tuple[int | None, dict | None]:
+        chapter_index = ocr_section.get("chapter_index")
+        if chapter_index is not None:
+            for pdf_idx, pdf_section in enumerate(pdf_sections):
+                if pdf_idx in used_pdf_indices:
+                    continue
+                if pdf_section.get("chapter_index") == chapter_index:
+                    return pdf_idx, pdf_section
+        if ocr_idx < len(pdf_sections) and ocr_idx not in used_pdf_indices:
+            return ocr_idx, pdf_sections[ocr_idx]
+        return None, None
+
+    for ocr_idx, ocr_section in enumerate(ocr_sections):
+        pdf_idx, pdf_section = _match_pdf_section(ocr_section, ocr_idx)
+        if pdf_idx is None or pdf_section is None:
+            selected_sections.append(_clone_endnote_section(ocr_section))
+            continue
+        used_pdf_indices.add(pdf_idx)
+        if _should_prefer_pdf_section(ocr_section, pdf_section):
+            base_section = _clone_endnote_section(pdf_section)
+            supplement_section = ocr_section
+        else:
+            base_section = _clone_endnote_section(ocr_section)
+            supplement_section = pdf_section
+        selected_sections.extend(_merge_pdf_endnote_sections([base_section], [supplement_section]))
+
+    for pdf_idx, pdf_section in enumerate(pdf_sections):
+        if pdf_idx in used_pdf_indices:
+            continue
+        selected_sections.append(_clone_endnote_section(pdf_section))
+    return selected_sections
+
+
+def _build_endnote_run_sections(
+    run_pages: list[dict],
+    chapter_ranges: list[dict],
+    forced_chapter: dict | None = None,
+) -> list[dict]:
+    if not run_pages:
+        return []
+    all_tr_lines: list[str] = []
+    for page in run_pages:
+        all_tr_lines.extend(_extract_note_candidate_lines(page["tr_lines"]))
+
+    ocr_sections = _prepare_endnote_sections(
+        _split_endnote_run_pages_into_sections(
+            run_pages,
+            chapter_ranges,
+            line_key="orig_lines",
+            forced_chapter=forced_chapter,
+        )
+    )
+    pdf_sections = _prepare_endnote_sections(
+        _split_endnote_run_pages_into_sections(
+            run_pages,
+            chapter_ranges,
+            line_key="pdf_orig_lines",
+            forced_chapter=forced_chapter,
+        )
+    )
+    prepared_sections = _select_base_endnote_sections(ocr_sections, pdf_sections)
+
+    if not prepared_sections:
+        return []
+
+    tr_items = _split_footnote_items("\n".join(all_tr_lines), strict=False)
+    assigned_tr_items: list[list[tuple[str | None, str]]] = [[] for _ in prepared_sections]
+    section_idx = 0
+    current_has_numeric = False
+    last_numeric: int | None = None
+
+    def _peek_next_numeric(from_idx: int) -> int | None:
+        for future_label, _future_content in tr_items[from_idx:]:
+            if future_label is not None and str(future_label).isdigit():
+                return int(future_label)
+        return None
+
+    for item_idx, (label, content) in enumerate(tr_items):
+        if section_idx >= len(prepared_sections):
+            section_idx = len(prepared_sections) - 1
+        if label is not None and str(label).isdigit():
+            number = int(label)
+            skipped_heading = False
+            while section_idx + 1 < len(prepared_sections):
+                next_section = prepared_sections[section_idx + 1]
+                next_first = next_section["note_numbers"][0] if next_section["note_numbers"] else None
+                next_heading = next_section.get("heading_number")
+                next_numeric = _peek_next_numeric(item_idx + 1)
+                if (
+                    current_has_numeric
+                    and next_heading is not None
+                    and number == int(next_heading)
+                    and next_first is not None
+                    and next_numeric == int(next_first)
+                ):
+                    skipped_heading = True
+                    break
+                if (
+                    current_has_numeric
+                    and next_first is not None
+                    and number == int(next_first)
+                    and last_numeric is not None
+                    and number < last_numeric
+                ):
+                    section_idx += 1
+                    current_has_numeric = False
+                    last_numeric = None
+                    continue
+                break
+            if skipped_heading:
+                continue
+            assigned_tr_items[section_idx].append((label, content))
+            current_has_numeric = True
+            last_numeric = number
+            continue
+        if current_has_numeric or assigned_tr_items[section_idx]:
+            assigned_tr_items[section_idx].append((label, content))
+
+    for section, raw_tr_section_items in zip(prepared_sections, assigned_tr_items):
+        _tr_order, tr_map = _merge_numbered_note_items(raw_tr_section_items)
+        section["tr_map"] = tr_map
+
+    return prepared_sections
+
+
+def _normalize_note_title_hint(text: str) -> str:
+    normalized = unicodedata.normalize("NFKD", _ensure_str(text)).lower()
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9\u4e00-\u9fff]+", " ", normalized).strip()
+
+
+def _match_chapter_by_note_title(chapter_ranges: list[dict], title: str) -> dict | None:
+    target = _normalize_note_title_hint(title)
+    if not target:
+        return None
+    best = None
+    best_score = 0.0
+    for chapter in chapter_ranges or []:
+        chapter_title = _ensure_str(chapter.get("title", "")).strip()
+        if not chapter_title or _looks_like_backmatter_title(chapter_title):
+            continue
+        candidate = _normalize_note_title_hint(chapter_title)
+        if not candidate:
+            continue
+        if target in candidate or candidate in target:
+            return chapter
+        score = SequenceMatcher(None, target, candidate).ratio()
+        if score > best_score:
+            best = chapter
+            best_score = score
+    return best if best_score >= 0.58 else None
+
+
+def _build_structured_endnote_groups(
+    entries: list[dict],
+    chapter_ranges: list[dict] | None,
+    pages: list[dict] | None,
+) -> tuple[list[dict], set[int]]:
+    if not pages:
+        return [], set()
+    page_by_bp = {
+        int(page.get("bookPage") or 0): page
+        for page in (pages or [])
+        if int(page.get("bookPage") or 0) > 0
+    }
+    groups_by_key: dict[str, dict] = {}
+    group_order: list[str] = []
+    covered_bps: set[int] = set()
+
+    for entry in entries or []:
+        bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
+        if bp <= 0:
+            continue
+        page = page_by_bp.get(bp) or {}
+        note_scan = page.get("_note_scan") if isinstance(page, dict) else {}
+        segment_items = []
+        for seg_idx, pe in enumerate(entry.get("_page_entries") or []):
+            if _ensure_str(pe.get("_note_kind", "")).strip() != "endnote":
+                continue
+            number = pe.get("_note_number")
+            try:
+                number = int(number)
+            except (TypeError, ValueError):
+                continue
+            orig = _ensure_str(pe.get("original", "")).strip()
+            tr = _ensure_str(pe.get("translation", "")).strip()
+            if not orig and not tr:
+                continue
+            segment_items.append({
+                "order": seg_idx,
+                "number": number,
+                "orig": orig,
+                "tr": tr,
+                "marker": _ensure_str(pe.get("_note_marker", "")).strip(),
+                "section_title": _ensure_str(pe.get("_note_section_title", "")).strip(),
+                "confidence": float(pe.get("_note_confidence", 0.0) or 0.0),
+            })
+        if not segment_items:
+            continue
+        covered_bps.add(bp)
+        page_kind = _ensure_str((note_scan or {}).get("page_kind", "")).strip()
+        hint_title = ""
+        for item in segment_items:
+            if item["section_title"]:
+                hint_title = item["section_title"]
+                break
+        if not hint_title:
+            for hint in (note_scan or {}).get("section_hints") or []:
+                hint = _ensure_str(hint).strip()
+                if hint and not _looks_like_backmatter_title(hint):
+                    hint_title = hint
+                    break
+        chapter = _match_chapter_by_note_title(chapter_ranges or [], hint_title) if hint_title else None
+        if chapter is None and page_kind == "mixed_body_endnotes":
+            chapter = _resolve_chapter_for_bp(chapter_ranges or [], bp)
+            if chapter and _looks_like_backmatter_title(chapter.get("title", "")):
+                chapter = None
+        chapter_index = int(chapter["index"]) if chapter is not None else None
+        chapter_title = _ensure_str(chapter.get("title", "")).strip() if chapter is not None else hint_title
+        chapter_start_bp = chapter.get("start_bp") if chapter is not None else None
+        if chapter_index is not None:
+            group_key = f"chapter:{chapter_index}"
+        elif hint_title:
+            group_key = f"hint:{_normalize_note_title_hint(hint_title)}"
+        else:
+            group_key = f"book:{bp}"
+        if group_key not in groups_by_key:
+            groups_by_key[group_key] = {
+                "group_key": group_key,
+                "chapter_index": chapter_index,
+                "chapter_title": chapter_title,
+                "chapter_start_bp": chapter_start_bp,
+                "note_scope": "chapter_end" if chapter_index is not None else "book_end",
+                "notes": {},
+            }
+            group_order.append(group_key)
+        group = groups_by_key[group_key]
+        if not group.get("chapter_title") and chapter_title:
+            group["chapter_title"] = chapter_title
+        if group.get("chapter_start_bp") is None and chapter_start_bp is not None:
+            group["chapter_start_bp"] = chapter_start_bp
+        for item in sorted(segment_items, key=lambda data: (data["number"], data["order"])):
+            note_entry = group["notes"].setdefault(
+                int(item["number"]),
+                {
+                    "number": int(item["number"]),
+                    "orig": "",
+                    "tr": "",
+                    "source_bps": [bp],
+                },
+            )
+            if bp not in note_entry["source_bps"]:
+                note_entry["source_bps"].append(bp)
+            if item["orig"] and not note_entry.get("orig"):
+                note_entry["orig"] = item["orig"]
+            if item["tr"] and not note_entry.get("tr"):
+                note_entry["tr"] = item["tr"]
+
+    groups = [groups_by_key[key] for key in group_order]
+    groups.sort(
+        key=lambda group: (
+            group.get("chapter_index") is None,
+            int(group.get("chapter_start_bp") or 10**9),
+            _ensure_str(group.get("chapter_title", "")),
+            _ensure_str(group.get("group_key", "")),
+        )
+    )
+    return groups, covered_bps
 
 
 def build_endnote_index(
     entries: list[dict],
     endnote_page_map: dict[int | None, list[int]],
-) -> dict[int | None, dict[int, dict]]:
-    """从尾注集合页解析编号条目，返回 {chapter_index: {number: {orig, tr}}}。
+    chapter_ranges: list[dict] | None = None,
+    pages: list[dict] | None = None,
+) -> dict:
+    """从尾注集合页解析章节尾注，返回分组后的尾注索引。"""
+    structured_groups, structured_bps = _build_structured_endnote_groups(entries, chapter_ranges, pages)
+    if not endnote_page_map and not structured_groups:
+        return {"groups": []}
 
-    跨页连续处理：同章节的连续尾注页先合并文本再解析，避免跨页截断的条目丢失内容。
-    """
-    if not endnote_page_map:
-        return {}
-
-    # 按页码索引条目，方便快速查找
     entry_by_bp: dict[int, dict] = {}
     for entry in entries or []:
         bp = int(entry.get("_pageBP") or entry.get("book_page") or 0)
         if bp > 0:
             entry_by_bp[bp] = entry
+    doc_id = _ensure_str(next(
+        (
+            entry.get("doc_id")
+            for entry in entries or []
+            if _ensure_str(entry.get("doc_id")).strip()
+        ),
+        "",
+    )).strip()
+    pdf_note_lines_by_bp = _load_pdf_note_lines_by_bp(
+        doc_id,
+        [bp for bps in (endnote_page_map or {}).values() for bp in (bps or [])],
+    )
 
-    index: dict[int | None, dict[int, dict]] = {}
+    groups_by_key: dict[str, dict] = {
+        _ensure_str(group.get("group_key", "")): dict(group)
+        for group in structured_groups
+        if _ensure_str(group.get("group_key", ""))
+    }
+    group_order: list[str] = [
+        _ensure_str(group.get("group_key", ""))
+        for group in structured_groups
+        if _ensure_str(group.get("group_key", ""))
+    ]
 
-    for cidx, bps in endnote_page_map.items():
-        sorted_bps = sorted(bps)
-        # 分别合并 original 和 translation 文本（保持行顺序）
-        orig_lines: list[str] = []
-        tr_lines: list[str] = []
-        for bp in sorted_bps:
-            entry = entry_by_bp.get(bp)
-            if not entry:
+    for _cidx, bps in endnote_page_map.items():
+        candidate_chapter = None
+        if _cidx is not None:
+            candidate_chapter = next(
+                (
+                    chapter for chapter in (chapter_ranges or [])
+                    if chapter.get("index") == _cidx
+                ),
+                None,
+            )
+        for run_bps in _split_consecutive_bps(bps):
+            if run_bps and all(int(bp) in structured_bps for bp in run_bps):
                 continue
-            page_entries = entry.get("_page_entries") or []
-            if page_entries:
-                for pe in page_entries:
-                    o = strip_html(_ensure_str(pe.get("original", "")).strip()).strip()
-                    t = strip_html(_unwrap_translation_json(_ensure_str(pe.get("translation", "")).strip())).strip()
-                    if o:
-                        orig_lines.extend(ln.strip() for ln in o.split("\n") if ln.strip())
-                    if t:
-                        tr_lines.extend(ln.strip() for ln in t.split("\n") if ln.strip())
-            else:
-                o = strip_html(_ensure_str(entry.get("original", "")).strip()).strip()
-                t = strip_html(_unwrap_translation_json(_ensure_str(entry.get("translation", "")).strip())).strip()
-                if o:
-                    orig_lines.extend(ln.strip() for ln in o.split("\n") if ln.strip())
-                if t:
-                    tr_lines.extend(ln.strip() for ln in t.split("\n") if ln.strip())
+            forced_chapter = None
+            if candidate_chapter and not _looks_like_backmatter_title(candidate_chapter.get("title", "")):
+                chapter_end_bp = int(candidate_chapter.get("end_bp") or 0)
+                if int(run_bps[0]) <= chapter_end_bp + 2:
+                    forced_chapter = candidate_chapter
+            run_pages = []
+            for bp in run_bps:
+                entry = entry_by_bp.get(bp)
+                if not entry:
+                    continue
+                run_pages.append({
+                    "bp": int(bp),
+                    "orig_lines": _collect_entry_lines(entry, "original"),
+                    "tr_lines": _collect_entry_lines(entry, "translation"),
+                    "pdf_orig_lines": list(pdf_note_lines_by_bp.get(int(bp), [])),
+                })
+            for section in _build_endnote_run_sections(
+                run_pages,
+                chapter_ranges or [],
+                forced_chapter=forced_chapter,
+            ):
+                all_numbers = sorted(set(section.get("orig_map", {})) | set(section.get("tr_map", {})))
+                if not all_numbers:
+                    continue
+                chapter_index = section.get("chapter_index")
+                if chapter_index is None:
+                    group_key = f"book:{run_bps[0]}:{len(group_order)}"
+                else:
+                    group_key = f"chapter:{int(chapter_index)}"
+                if group_key not in groups_by_key:
+                    groups_by_key[group_key] = {
+                        "group_key": group_key,
+                        "chapter_index": chapter_index,
+                        "chapter_title": section.get("chapter_title", ""),
+                        "chapter_start_bp": section.get("chapter_start_bp"),
+                        "note_scope": "chapter_end" if chapter_index is not None else "book_end",
+                        "notes": {},
+                    }
+                    group_order.append(group_key)
+                group = groups_by_key[group_key]
+                if not group.get("chapter_title") and section.get("chapter_title"):
+                    group["chapter_title"] = section["chapter_title"]
+                if group.get("chapter_start_bp") is None and section.get("chapter_start_bp") is not None:
+                    group["chapter_start_bp"] = section["chapter_start_bp"]
+                for number in all_numbers:
+                    note_entry = group["notes"].setdefault(
+                        int(number),
+                        {
+                            "number": int(number),
+                            "orig": "",
+                            "tr": "",
+                            "source_bps": list(run_bps),
+                        },
+                    )
+                    if section.get("orig_map", {}).get(number) and not note_entry.get("orig"):
+                        note_entry["orig"] = section["orig_map"][number]
+                    if section.get("tr_map", {}).get(number) and not note_entry.get("tr"):
+                        note_entry["tr"] = section["tr_map"][number]
 
-        # 解析编号条目，合并多行
-        def _merge_items(raw_items: list[tuple[str | None, str]]) -> dict[int, str]:
-            merged: dict[int, str] = {}
-            cur_num: int | None = None
-            cur_parts: list[str] = []
-            for label, content in raw_items:
-                if label is not None and str(label).isdigit():
-                    if cur_num is not None:
-                        merged[cur_num] = " ".join(cur_parts).strip()
-                    cur_num = int(label)
-                    cur_parts = [content] if content else []
-                elif cur_num is not None:
-                    if content:
-                        cur_parts.append(content)
-                # label 非数字且 cur_num 为 None 时（如章节标题）直接跳过
-            if cur_num is not None:
-                merged[cur_num] = " ".join(cur_parts).strip()
-            return merged
-
-        orig_items = _split_footnote_items("\n".join(orig_lines), strict=False)
-        tr_items = _split_footnote_items("\n".join(tr_lines), strict=False)
-        orig_map = _merge_items(orig_items)
-        tr_map = _merge_items(tr_items)
-
-        all_nums = set(orig_map) | set(tr_map)
-        if not all_nums:
-            continue
-        chapter_index: dict[int, dict] = {}
-        for num in all_nums:
-            chapter_index[num] = {
-                "orig": orig_map.get(num, ""),
-                "tr": tr_map.get(num, ""),
-            }
-        index[cidx] = chapter_index
-
-    return index
+    groups = [groups_by_key[key] for key in group_order]
+    groups.sort(
+        key=lambda group: (
+            group.get("chapter_index") is None,
+            int(group.get("chapter_start_bp") or 10**9),
+            _ensure_str(group.get("chapter_title", "")),
+        )
+    )
+    return {"groups": groups}
 
 
 def _resolve_page_footnote_assignments(page_entries: list[dict]) -> dict[int, list[tuple[str, str]]]:
@@ -1530,6 +2556,146 @@ def _should_demote_heading(
     return False
 
 
+def _normalize_endnote_registry(
+    endnote_index: dict | None,
+    chapter_ranges: list[dict],
+    toc_title_map: dict[int, str] | None,
+) -> dict:
+    if not endnote_index:
+        return {
+            "groups": [],
+            "groups_by_chapter": {},
+            "book_groups": [],
+            "duplicate_chapter_numbers": set(),
+            "global_duplicate_numbers": set(),
+        }
+
+    if isinstance(endnote_index, dict) and "groups" in endnote_index:
+        raw_groups = list(endnote_index.get("groups") or [])
+    else:
+        raw_groups = []
+        for chapter_index, notes in (endnote_index or {}).items():
+            chapter = next(
+                (item for item in chapter_ranges if item.get("index") == chapter_index),
+                None,
+            )
+            chapter_title = ""
+            chapter_start_bp = None
+            if chapter is not None:
+                chapter_title = _ensure_str(chapter.get("title", "")).strip()
+                chapter_start_bp = chapter.get("start_bp")
+            if not chapter_title and chapter_start_bp is not None and toc_title_map:
+                chapter_title = _ensure_str(toc_title_map.get(int(chapter_start_bp), "")).strip()
+            raw_groups.append({
+                "group_key": f"chapter:{chapter_index}" if chapter_index is not None else "book:legacy",
+                "chapter_index": chapter_index,
+                "chapter_title": chapter_title,
+                "chapter_start_bp": chapter_start_bp,
+                "note_scope": "chapter_end" if chapter_index is not None else "book_end",
+                "notes": {
+                    int(number): {
+                        "number": int(number),
+                        "orig": _ensure_str(value.get("orig", "")),
+                        "tr": _ensure_str(value.get("tr", "")),
+                    }
+                    for number, value in (notes or {}).items()
+                    if str(number).isdigit()
+                },
+            })
+
+    groups: list[dict] = []
+    chapter_number_counts: dict[int, int] = {}
+    global_number_counts: dict[int, int] = {}
+    for group in raw_groups:
+        notes = {
+            int(number): {
+                "number": int(number),
+                "orig": _ensure_str(value.get("orig", "")),
+                "tr": _ensure_str(value.get("tr", "")),
+            }
+            for number, value in (group.get("notes") or {}).items()
+            if str(number).isdigit()
+        }
+        if not notes:
+            continue
+        normalized_group = {
+            "group_key": _ensure_str(group.get("group_key")).strip() or (
+                f"chapter:{group.get('chapter_index')}"
+                if group.get("chapter_index") is not None
+                else f"book:{len(groups)}"
+            ),
+            "chapter_index": group.get("chapter_index"),
+            "chapter_title": _ensure_str(group.get("chapter_title", "")).strip(),
+            "chapter_start_bp": group.get("chapter_start_bp"),
+            "note_scope": _ensure_str(group.get("note_scope", "")).strip() or (
+                "chapter_end" if group.get("chapter_index") is not None else "book_end"
+            ),
+            "notes": notes,
+        }
+        if (
+            not normalized_group["chapter_title"]
+            and normalized_group["chapter_index"] is not None
+        ):
+            chapter = next(
+                (
+                    item for item in chapter_ranges
+                    if item.get("index") == normalized_group["chapter_index"]
+                ),
+                None,
+            )
+            if chapter is not None:
+                normalized_group["chapter_title"] = _ensure_str(chapter.get("title", "")).strip()
+                normalized_group["chapter_start_bp"] = chapter.get("start_bp")
+        groups.append(normalized_group)
+        for number in notes:
+            global_number_counts[number] = global_number_counts.get(number, 0) + 1
+            if normalized_group["chapter_index"] is not None:
+                chapter_number_counts[number] = chapter_number_counts.get(number, 0) + 1
+
+    groups.sort(
+        key=lambda group: (
+            group.get("chapter_index") is None,
+            int(group.get("chapter_start_bp") or 10**9),
+            _ensure_str(group.get("chapter_title", "")),
+        )
+    )
+    chapter_ordinal = 0
+    for group in groups:
+        if group.get("chapter_index") is None:
+            group["chapter_label_prefix"] = ""
+            continue
+        group["chapter_label_prefix"] = f"ch{chapter_ordinal:02d}"
+        chapter_ordinal += 1
+    groups_by_chapter = {
+        int(group["chapter_index"]): group
+        for group in groups
+        if group.get("chapter_index") is not None
+    }
+    book_groups = [group for group in groups if group.get("chapter_index") is None]
+    return {
+        "groups": groups,
+        "groups_by_chapter": groups_by_chapter,
+        "book_groups": book_groups,
+        "duplicate_chapter_numbers": {
+            number for number, count in chapter_number_counts.items() if count > 1
+        },
+        "global_duplicate_numbers": {
+            number for number, count in global_number_counts.items() if count > 1
+        },
+    }
+
+
+def _build_endnote_label(group: dict, number: int, registry: dict) -> str:
+    num = int(number)
+    chapter_index = group.get("chapter_index")
+    if chapter_index is not None and num in set(registry.get("duplicate_chapter_numbers", set())):
+        prefix = _ensure_str(group.get("chapter_label_prefix", "")).strip() or f"ch{int(chapter_index)}"
+        return f"{prefix}-{num}"
+    if chapter_index is None and num in set(registry.get("global_duplicate_numbers", set())):
+        return f"book-{num}"
+    return str(num)
+
+
 def gen_markdown(
     entries: list,
     toc_depth_map: dict | None = None,
@@ -1585,7 +2751,10 @@ def gen_markdown(
     if not all_bps:
         return ""
     doc_last_bp = max(all_bps) if all_bps else 1
-    chapter_ranges = _build_chapter_ranges_from_depth_map(dm, all_bps)
+    chapter_ranges = _build_chapter_ranges_from_depth_map(dm, all_bps, toc_title_map=toc_title_map)
+    endnote_registry = _normalize_endnote_registry(endnote_index, chapter_ranges, toc_title_map)
+    used_endnote_chapter_groups: set[int] = set()
+    used_endnote_book_groups: set[str] = set()
     chapter_endnotes: dict[int, list[dict]] = {}
     book_endnotes: list[dict] = []
     seen_footnote_labels: set[str] = set()
@@ -1618,56 +2787,51 @@ def gen_markdown(
                 ):
                     hlevel = 0
                 inline_labels = _extract_marked_footnote_labels(f"{orig}\n{tr}")
-                # 尾注索引匹配：对正文中纯数字的 [^n] 引用，从 endnote_index 查找定义
-                if endnote_index and inline_labels:
+                label_rewrites: dict[str, str] = {}
+                # 尾注索引匹配：正文中的数字型 [^n] 优先绑定到当前章节尾注组。
+                if endnote_registry["groups"] and inline_labels:
                     cidx_cur = int(current_chapter["index"]) if current_chapter else None
+                    current_group = (
+                        endnote_registry["groups_by_chapter"].get(cidx_cur)
+                        if cidx_cur is not None
+                        else None
+                    )
                     for lbl in inline_labels:
                         if not lbl.isdigit():
                             continue
                         num = int(lbl)
-                        note_data = None
-                        note_scope_key = None
-                        # 1. 优先查当前章节
-                        if cidx_cur in endnote_index and num in endnote_index[cidx_cur]:
-                            note_data = endnote_index[cidx_cur][num]
-                            note_scope_key = cidx_cur
-                        # 2. 次之查全书尾注（chapter_index=None）
-                        elif None in endnote_index and num in endnote_index[None]:
-                            note_data = endnote_index[None][num]
-                            note_scope_key = None
-                        # 3. 回退：书末尾注附录被归入其他章节时，跨章节查找
-                        #    （适用于书末统一尾注区与正文章节不对应的情况）
+                        matched_group = None
+                        if current_group and num in current_group.get("notes", {}):
+                            matched_group = current_group
+                            used_endnote_chapter_groups.add(int(current_group["chapter_index"]))
                         else:
-                            for key, ch_notes in endnote_index.items():
-                                if num in ch_notes:
-                                    note_data = ch_notes[num]
-                                    note_scope_key = None  # 输出为全书尾注
-                                    break
-                        if note_data is None:
+                            candidate_book_groups = [
+                                group for group in endnote_registry["book_groups"]
+                                if num in group.get("notes", {})
+                            ]
+                            if len(candidate_book_groups) == 1:
+                                matched_group = candidate_book_groups[0]
+                                used_endnote_book_groups.add(_ensure_str(matched_group["group_key"]))
+                            else:
+                                candidate_chapter_groups = [
+                                    group for group in endnote_registry["groups"]
+                                    if group.get("chapter_index") is not None
+                                    and num in group.get("notes", {})
+                                ]
+                                if len(candidate_chapter_groups) == 1:
+                                    matched_group = candidate_chapter_groups[0]
+                                    used_endnote_chapter_groups.add(int(candidate_chapter_groups[0]["chapter_index"]))
+                        if matched_group is None:
                             continue
-                        if lbl in seen_footnote_labels:
-                            continue
-                        seen_footnote_labels.add(lbl)
-                        merged_parts = []
-                        if note_data.get("orig"):
-                            merged_parts.append(note_data["orig"])
-                        if note_data.get("tr"):
-                            merged_parts.append(f"译：{note_data['tr']}")
-                        content = "\n".join(merged_parts).strip()
-                        if not content:
-                            continue
-                        note_def = {
-                            "label": lbl,
-                            "content": content,
-                            "source_bp": bp,
-                            "note_type": "endnote",
-                            "note_scope": "chapter_end" if note_scope_key is not None else "book_end",
-                            "chapter_index": note_scope_key,
-                        }
-                        if note_scope_key is not None:
-                            chapter_endnotes.setdefault(note_scope_key, []).append(note_def)
-                        else:
-                            book_endnotes.append(note_def)
+                        rewritten_label = _build_endnote_label(matched_group, num, endnote_registry)
+                        seen_footnote_labels.add(rewritten_label)
+                        if rewritten_label != lbl:
+                            label_rewrites[lbl] = rewritten_label
+                if label_rewrites:
+                    for old_label, new_label in label_rewrites.items():
+                        orig = orig.replace(f"[^{old_label}]", f"[^{new_label}]")
+                        tr = tr.replace(f"[^{old_label}]", f"[^{new_label}]")
+                    inline_labels = [label_rewrites.get(lbl, lbl) for lbl in inline_labels]
                 if hlevel > 0:
                     prefix = "#" * min(hlevel, 6)
                     # 译文为主标题，原文以斜体注释跟随
@@ -1765,17 +2929,57 @@ def gen_markdown(
             for fb_label, fb_text in fallback_blocks:
                 _append_labeled_block(md_lines, fb_label, fb_text)
 
-    if chapter_endnotes:
+    def _note_sort_key(note_def: dict) -> tuple[int, str]:
+        explicit_number = note_def.get("number")
+        if explicit_number is not None:
+            return int(explicit_number), _ensure_str(note_def.get("label", ""))
+        label = _ensure_str(note_def.get("label", ""))
+        match = re.search(r"(\d+)$", label)
+        return (int(match.group(1)) if match else 10**9, label)
+
+    has_grouped_chapter_endnotes = bool(used_endnote_chapter_groups)
+    has_extra_chapter_endnotes = any(chapter_endnotes.get(int(chapter["index"])) for chapter in chapter_ranges)
+    if has_grouped_chapter_endnotes or has_extra_chapter_endnotes:
         if md_lines and md_lines[-1].strip():
             md_lines.append("")
+        md_lines.append("## 本章尾注")
+        md_lines.append("")
         for chapter in chapter_ranges:
             cidx = int(chapter["index"])
-            notes = chapter_endnotes.get(cidx) or []
-            if not notes:
+            group = (
+                endnote_registry["groups_by_chapter"].get(cidx)
+                if cidx in used_endnote_chapter_groups
+                else None
+            )
+            notes = list(chapter_endnotes.get(cidx) or [])
+            if not group and not notes:
                 continue
-            md_lines.append("## 本章尾注")
+            chapter_title = _ensure_str(chapter.get("title", "")).strip()
+            if group and group.get("chapter_title"):
+                chapter_title = _ensure_str(group.get("chapter_title", "")).strip()
+            if not chapter_title and toc_title_map:
+                chapter_title = _ensure_str(toc_title_map.get(int(chapter.get("start_bp", 0)), "")).strip()
+            if not chapter_title:
+                chapter_title = f"章节 {cidx + 1}"
+            md_lines.append(f"### {chapter_title}")
             md_lines.append("")
-            for note_def in notes:
+            if group:
+                for number in sorted(int(v) for v in group.get("notes", {}).keys()):
+                    note = group["notes"][number]
+                    merged_parts = []
+                    if note.get("orig"):
+                        merged_parts.append(note["orig"])
+                    if note.get("tr"):
+                        merged_parts.append(f"译：{note['tr']}")
+                    content_lines = _nonempty_markdown_lines("\n".join(merged_parts).strip())
+                    if not content_lines:
+                        continue
+                    label = _build_endnote_label(group, number, endnote_registry)
+                    md_lines.append(f"[^{label}]: {content_lines[0]}")
+                    for line in content_lines[1:]:
+                        md_lines.append(f"    {line}")
+                    md_lines.append("")
+            for note_def in sorted(notes, key=_note_sort_key):
                 content_lines = _nonempty_markdown_lines(note_def.get("content"))
                 if not content_lines:
                     continue
@@ -1784,12 +2988,31 @@ def gen_markdown(
                     md_lines.append(f"    {line}")
                 md_lines.append("")
 
-    if book_endnotes:
+    has_grouped_book_endnotes = bool(used_endnote_book_groups)
+    if has_grouped_book_endnotes or book_endnotes:
         if md_lines and md_lines[-1].strip():
             md_lines.append("")
         md_lines.append("## 全书尾注")
         md_lines.append("")
-        for note_def in book_endnotes:
+        for group in endnote_registry["book_groups"]:
+            if _ensure_str(group.get("group_key")) not in used_endnote_book_groups:
+                continue
+            for number in sorted(int(v) for v in group.get("notes", {}).keys()):
+                note = group["notes"][number]
+                merged_parts = []
+                if note.get("orig"):
+                    merged_parts.append(note["orig"])
+                if note.get("tr"):
+                    merged_parts.append(f"译：{note['tr']}")
+                content_lines = _nonempty_markdown_lines("\n".join(merged_parts).strip())
+                if not content_lines:
+                    continue
+                label = _build_endnote_label(group, number, endnote_registry)
+                md_lines.append(f"[^{label}]: {content_lines[0]}")
+                for line in content_lines[1:]:
+                    md_lines.append(f"    {line}")
+                md_lines.append("")
+        for note_def in sorted(book_endnotes, key=_note_sort_key):
             content_lines = _nonempty_markdown_lines(note_def.get("content"))
             if not content_lines:
                 continue
@@ -1816,6 +3039,31 @@ def get_app_state(doc_id: str = "") -> dict:
     resolved_spec = resolve_model_spec()
     meta = get_doc_meta(doc_id)
     entry_idx = meta.get("last_entry_idx", entry_idx)
+    cleanup_headers_footers_enabled = (
+        get_doc_cleanup_headers_footers(doc_id)
+        if doc_id
+        else True
+    )
+    auto_visual_toc_enabled = (
+        get_doc_auto_visual_toc_enabled(doc_id)
+        if doc_id
+        else False
+    )
+    visual_toc_status = str(meta.get("toc_visual_status", "idle") or "idle").strip() or "idle"
+    visual_toc_message = str(meta.get("toc_visual_message", "") or "").strip()
+    visual_toc_phase = str(meta.get("toc_visual_phase", "") or "").strip()
+    visual_toc_progress_pct = int(meta.get("toc_visual_progress_pct", 0) or 0)
+    visual_toc_progress_label = str(meta.get("toc_visual_progress_label", "") or "").strip()
+    visual_toc_progress_detail = str(meta.get("toc_visual_progress_detail", "") or "").strip()
+    visual_toc_status_label_map = {
+        "idle": "未生成",
+        "running": "生成中",
+        "ready": "已生成",
+        "unsupported": "当前模型不支持视觉目录",
+        "failed": "生成失败",
+        "needs_offset": "需要确认页码偏移",
+    }
+    visual_toc_status_label = visual_toc_status_label_map.get(visual_toc_status, visual_toc_status)
 
     first_page = visible_page_view["first_visible_page"] or (get_page_range(pages)[0] if pages else 1)
     last_page = visible_page_view["last_visible_page"] or (get_page_range(pages)[1] if pages else 1)
@@ -1857,4 +3105,22 @@ def get_app_state(doc_id: str = "") -> dict:
         "hidden_placeholder_bps": visible_page_view["hidden_placeholder_bps"],
         "visible_page_count": visible_page_count or len(pages),
         "entry_count": len(entries),
+        "cleanup_headers_footers_enabled": cleanup_headers_footers_enabled,
+        "cleanup_mode_label": "增强脚注/尾注模式（已清理）" if cleanup_headers_footers_enabled else "快速模式（未清理）",
+        "cleanup_mode_detail": "页眉页脚清理已开启，更利于脚注/尾注检测。" if cleanup_headers_footers_enabled else "已跳过页眉页脚清理，优先更快开始阅读。",
+        "upload_cleanup_default_enabled": get_upload_cleanup_headers_footers_enabled(),
+        "auto_visual_toc_enabled": auto_visual_toc_enabled,
+        "auto_visual_toc_mode_label": "自动视觉目录已开启" if auto_visual_toc_enabled else "自动视觉目录未开启",
+        "auto_visual_toc_mode_detail": (
+            visual_toc_message
+            or ("解析后会继续后台生成目录。" if auto_visual_toc_enabled else "当前文档不会自动生成视觉目录。")
+        ),
+        "visual_toc_status": visual_toc_status,
+        "visual_toc_status_label": visual_toc_status_label,
+        "visual_toc_status_message": visual_toc_message,
+        "visual_toc_phase": visual_toc_phase,
+        "visual_toc_progress_pct": visual_toc_progress_pct,
+        "visual_toc_progress_label": visual_toc_progress_label,
+        "visual_toc_progress_detail": visual_toc_progress_detail,
+        "upload_auto_visual_toc_default_enabled": get_upload_auto_visual_toc_enabled(),
     }

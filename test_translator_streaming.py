@@ -71,6 +71,40 @@ class _FakeNonStreamResponse:
 
 
 class TranslatorStreamingTest(unittest.TestCase):
+    def test_build_prompt_includes_footnote_invariants(self):
+        prompt = translator.build_prompt("")
+        self.assertIn("脚注/尾注编号与出现顺序必须守恒", prompt)
+        self.assertIn("必须保留脚注标记形态", prompt)
+        self.assertIn("看不清的脚注宁可原样保留在footnotes", prompt)
+
+    def test_build_translate_message_includes_export_contract(self):
+        msg = translator._build_translate_message(
+            para_text="Body text [^1]",
+            para_pages="10",
+            footnotes="1. Note",
+            heading_level=0,
+        )
+        self.assertIn("导出契约：original=正文原文", msg)
+        self.assertIn("脚注约束：编号与顺序必须守恒", msg)
+
+    def test_build_translate_message_marks_endnote_role(self):
+        msg = translator._build_translate_message(
+            para_text="1. Endnote entry text",
+            para_pages="172",
+            footnotes="",
+            heading_level=0,
+            content_role="endnote",
+        )
+        self.assertIn("内容角色：尾注条目", msg)
+        self.assertIn("这是尾注条目", msg)
+        self.assertIn("不得正文化", msg)
+
+    def test_structure_system_contains_notes_preservation_rules(self):
+        system = translator._STRUCTURE_SYSTEM
+        self.assertIn("脚注/尾注保真", system)
+        self.assertIn("NOTES/Notes/注释/尾注", system)
+        self.assertIn("不得把脚注/尾注条目并入普通正文段落", system)
+
     def test_stream_translate_paragraph_yields_delta_usage_and_done(self):
         json_text = (
             '{"pages":"1","original":"orig","translation":"译文",'

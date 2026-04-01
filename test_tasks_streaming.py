@@ -8,15 +8,22 @@ import tempfile
 import time
 import unittest
 import json
+from io import BytesIO
 from unittest.mock import Mock, patch
 
 import app as app_module
 import config
 import ocr_client
+import ocr_parser
 import storage
 import tasks
-from config import create_doc, ensure_dirs, get_current_doc_id, get_doc_meta, set_current_doc
+from config import (
+    create_doc, ensure_dirs, get_current_doc_id, get_doc_meta,
+    get_upload_auto_visual_toc_enabled, get_upload_cleanup_headers_footers_enabled,
+    set_current_doc, update_doc_meta,
+)
 from storage import (
+    load_entries_from_disk,
     load_pages_from_disk,
     save_entries_to_disk,
     save_pages_to_disk,
@@ -105,6 +112,163 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(snapshot["draft"]["para_total"], 2)
         self.assertEqual(snapshot["draft"]["para_done"], 2)
         self.assertEqual(snapshot["draft"]["paragraphs"], ["甲乙", "甲乙"])
+
+    def test_process_file_persists_cleanup_mode_and_skips_cleaning_when_disabled(self):
+        fd, file_path = tempfile.mkstemp(suffix=".pdf")
+        os.close(fd)
+        with open(file_path, "wb") as f:
+            f.write(b"%PDF-1.4\n%upload\n")
+        task_id = "uploadskip01"
+        tasks.create_task(
+            task_id,
+            file_path,
+            "upload-skip.pdf",
+            0,
+            options={"clean_header_footer": False},
+        )
+        self.addCleanup(tasks.remove_task, task_id)
+
+        ocr_page = {
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "blocks": [{
+                "text": "OCR 正文",
+                "x": 12,
+                "bbox": [0, 0, 50, 20],
+                "label": "text",
+                "is_meta": False,
+                "heading_level": 0,
+            }],
+            "fnBlocks": [],
+            "footnotes": "",
+            "indent": None,
+            "textSource": "ocr",
+            "markdown": "OCR 正文",
+        }
+
+        with (
+            patch.object(tasks, "call_paddle_ocr_bytes", return_value={"layoutParsingResults": []}),
+            patch.object(tasks, "parse_ocr", return_value={"pages": [ocr_page], "log": []}),
+            patch.object(tasks, "extract_pdf_text", return_value=[]),
+            patch.object(tasks, "_annotate_note_scans", side_effect=lambda pages, **kwargs: pages),
+            patch.object(tasks, "clean_header_footer") as clean_mock,
+            patch.object(tasks, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(tasks, "extract_pdf_toc", return_value=[]),
+            patch.object(tasks, "extract_pdf_toc_from_links", return_value=[]),
+        ):
+            tasks.process_file(task_id)
+
+        clean_mock.assert_not_called()
+        doc_id = get_current_doc_id()
+        meta = get_doc_meta(doc_id)
+        pages, _ = load_pages_from_disk(doc_id)
+        self.assertFalse(meta["cleanup_headers_footers"])
+        self.assertFalse(pages[0]["_cleanup_applied"])
+
+    def test_process_file_rechecks_saved_upload_preferences_after_pdf_extraction(self):
+        fd, file_path = tempfile.mkstemp(suffix=".pdf")
+        os.close(fd)
+        with open(file_path, "wb") as f:
+            f.write(b"%PDF-1.4\n%upload-refresh\n")
+        task_id = "uploadrefresh01"
+        tasks.create_task(
+            task_id,
+            file_path,
+            "upload-refresh.pdf",
+            0,
+            options={"clean_header_footer": False, "auto_visual_toc": False},
+        )
+        self.addCleanup(tasks.remove_task, task_id)
+
+        ocr_page = {
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "blocks": [{
+                "text": "OCR 正文",
+                "x": 12,
+                "bbox": [0, 0, 50, 20],
+                "label": "text",
+                "is_meta": False,
+                "heading_level": 0,
+            }],
+            "fnBlocks": [],
+            "footnotes": "",
+            "indent": None,
+            "textSource": "ocr",
+            "markdown": "OCR 正文",
+        }
+
+        def _flip_upload_preferences(_file_bytes):
+            config.set_upload_processing_preferences(
+                cleanup_headers_footers=True,
+                auto_visual_toc=True,
+            )
+            return []
+
+        with (
+            patch.object(tasks, "call_paddle_ocr_bytes", return_value={"layoutParsingResults": []}),
+            patch.object(tasks, "parse_ocr", return_value={"pages": [ocr_page], "log": []}),
+            patch.object(tasks, "extract_pdf_text", side_effect=_flip_upload_preferences),
+            patch.object(tasks, "_annotate_note_scans", side_effect=lambda pages, **kwargs: pages),
+            patch.object(tasks, "clean_header_footer", return_value={"pages": [ocr_page], "log": []}) as clean_mock,
+            patch.object(tasks, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(tasks, "extract_pdf_toc", return_value=[]),
+            patch.object(tasks, "extract_pdf_toc_from_links", return_value=[]),
+            patch.object(tasks, "start_auto_visual_toc_for_doc") as visual_toc_mock,
+        ):
+            tasks.process_file(task_id)
+
+        doc_id = get_current_doc_id()
+        meta = get_doc_meta(doc_id)
+        pages, _ = load_pages_from_disk(doc_id)
+        self.assertTrue(get_upload_cleanup_headers_footers_enabled())
+        self.assertTrue(get_upload_auto_visual_toc_enabled())
+        self.assertTrue(tasks.get_task(task_id)["options"]["clean_header_footer"])
+        self.assertTrue(tasks.get_task(task_id)["options"]["auto_visual_toc"])
+        clean_mock.assert_called_once()
+        visual_toc_mock.assert_called_once()
+        self.assertTrue(meta["cleanup_headers_footers"])
+        self.assertTrue(meta["auto_visual_toc_enabled"])
+        self.assertTrue(pages[0]["_cleanup_applied"])
+
+    def test_clean_header_footer_reports_detailed_progress_stages(self):
+        pages = []
+        for index in range(4):
+            pages.append(
+                {
+                    "bookPage": index + 1,
+                    "imgH": 1000,
+                    "blocks": [
+                        {"text": "Repeated Header", "bbox": [0, 10, 300, 30]},
+                        {"text": f"Body {index + 1}", "bbox": [40, 200, 400, 600]},
+                        {"text": str(index + 1), "bbox": [260, 950, 320, 980]},
+                    ],
+                    "fnBlocks": [],
+                }
+            )
+        events = []
+
+        result = ocr_parser.clean_header_footer(
+            pages,
+            on_progress=lambda phase, pct, detail: events.append((phase, pct, detail)),
+        )
+
+        self.assertGreaterEqual(len(events), 4)
+        phase_order = []
+        for phase, _, _ in events:
+            if phase not in phase_order:
+                phase_order.append(phase)
+        self.assertEqual(
+            phase_order[:4],
+            ["collect_candidates", "detect_patterns", "apply_cleanup", "note_scan_ready"],
+        )
+        self.assertIn("重复模式", events[1][2])
+        self.assertIn("页", events[2][2])
+        self.assertTrue(result["log"])
 
     def test_translate_worker_marks_error_when_pages_missing_after_initial_start(self):
         doc_id = create_doc("worker-empty.pdf")
@@ -217,6 +381,7 @@ class TasksStreamingTest(unittest.TestCase):
             next_context="",
             section_path=None,
             cross_page=None,
+            content_role="body",
         ):
             captured.update({
                 "model_id": model_id,
@@ -225,6 +390,7 @@ class TasksStreamingTest(unittest.TestCase):
                 "base_url": base_url,
                 "request_overrides": request_overrides,
                 "para_idx": para_idx,
+                "content_role": content_role,
             })
             yield {"type": "usage", "usage": {"prompt_tokens": 2, "completion_tokens": 1, "total_tokens": 3, "request_count": 1}}
             yield {"type": "done", "text": "", "usage": {"prompt_tokens": 2, "completion_tokens": 1, "total_tokens": 3, "request_count": 1}, "result": {
@@ -256,6 +422,7 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(captured["model_id"], "qwen3.5-plus")
         self.assertEqual(captured["provider"], "qwen")
         self.assertEqual(captured["request_overrides"], {"extra_body": {"enable_thinking": False}})
+        self.assertEqual(captured["content_role"], "body")
 
     def test_translate_page_accepts_full_translate_args_payload(self):
         config.save_config({
@@ -294,6 +461,7 @@ class TasksStreamingTest(unittest.TestCase):
             next_context="",
             section_path=None,
             cross_page=None,
+            content_role="body",
         ):
             captured.update({
                 "model_id": model_id,
@@ -301,6 +469,7 @@ class TasksStreamingTest(unittest.TestCase):
                 "provider": provider,
                 "base_url": base_url,
                 "request_overrides": request_overrides,
+                "content_role": content_role,
             })
             return {
                 "pages": para_pages,
@@ -329,6 +498,190 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(captured["model_id"], "qwen3.5-plus")
         self.assertEqual(captured["base_url"], "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
         self.assertEqual(captured["request_overrides"], {"extra_body": {"enable_thinking": False}})
+        self.assertEqual(captured["content_role"], "body")
+
+    def test_translate_page_uses_note_scan_page_footnotes_for_body_jobs(self):
+        pages = [{
+            "bookPage": 1,
+            "markdown": "Body paragraph [1].",
+            "footnotes": "",
+            "fnBlocks": [],
+            "_note_scan": {
+                "page_kind": "body_with_page_footnotes",
+                "items": [
+                    {
+                        "kind": "footnote",
+                        "marker": "1.",
+                        "number": 1,
+                        "text": "1. Page note from scan.",
+                        "order": 1,
+                        "source": "note_scan",
+                        "confidence": 1.0,
+                    }
+                ],
+                "section_hints": [],
+                "ambiguity_flags": [],
+                "reviewed_by_model": False,
+            },
+        }]
+        context = {
+            "paragraphs": [{"heading_level": 0, "text": "Body paragraph [1]."}],
+            "footnotes": "",
+            "page_num": 1,
+            "print_page_label": "1",
+            "print_page_display": "原书 p.1",
+            "prev_tail": "",
+            "next_head": "",
+        }
+        captured = {}
+
+        def _strict_translate(
+            para_text,
+            para_pages,
+            footnotes,
+            glossary,
+            model_id,
+            api_key,
+            provider="deepseek",
+            base_url=None,
+            request_overrides=None,
+            heading_level=0,
+            para_idx=None,
+            para_total=None,
+            prev_context="",
+            next_context="",
+            section_path=None,
+            cross_page=None,
+            content_role="body",
+        ):
+            captured["footnotes"] = footnotes
+            captured["content_role"] = content_role
+            return {
+                "pages": para_pages,
+                "original": para_text,
+                "translation": "正文译文",
+                "footnotes": footnotes,
+                "footnotes_translation": "",
+                "_usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1},
+            }
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[]]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "translate_paragraph", new=_strict_translate),
+        ):
+            entry = tasks.translate_page(
+                pages=pages,
+                target_bp=1,
+                model_key="qwen-plus",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+            )
+
+        self.assertEqual(captured["content_role"], "body")
+        self.assertEqual(captured["footnotes"], "1. Page note from scan.")
+        self.assertEqual(entry["footnotes"], "1. Page note from scan.")
+
+    def test_translate_page_turns_endnotes_into_individual_jobs(self):
+        pages = [{
+            "bookPage": 10,
+            "markdown": "Closing paragraph.\nNOTES\n1. First endnote.\n2. Second endnote.",
+            "footnotes": "",
+            "fnBlocks": [],
+            "_note_scan": {
+                "page_kind": "endnote_collection",
+                "items": [
+                    {
+                        "kind": "endnote",
+                        "marker": "1.",
+                        "number": 1,
+                        "text": "1. First endnote.",
+                        "order": 1,
+                        "source": "note_scan",
+                        "confidence": 1.0,
+                        "section_title": "Introduction",
+                    },
+                    {
+                        "kind": "endnote",
+                        "marker": "2.",
+                        "number": 2,
+                        "text": "2. Second endnote.",
+                        "order": 2,
+                        "source": "note_scan",
+                        "confidence": 1.0,
+                        "section_title": "Introduction",
+                    },
+                ],
+                "section_hints": ["NOTES", "Introduction"],
+                "ambiguity_flags": [],
+                "reviewed_by_model": False,
+            },
+        }]
+        context = {
+            "paragraphs": [{"heading_level": 0, "text": "This body paragraph should not be translated."}],
+            "footnotes": "",
+            "page_num": 10,
+            "print_page_label": "172",
+            "print_page_display": "原书 p.172",
+            "prev_tail": "",
+            "next_head": "",
+        }
+        calls = []
+
+        def _strict_translate(
+            para_text,
+            para_pages,
+            footnotes,
+            glossary,
+            model_id,
+            api_key,
+            provider="deepseek",
+            base_url=None,
+            request_overrides=None,
+            heading_level=0,
+            para_idx=None,
+            para_total=None,
+            prev_context="",
+            next_context="",
+            section_path=None,
+            cross_page=None,
+            content_role="body",
+        ):
+            calls.append({
+                "para_text": para_text,
+                "content_role": content_role,
+                "para_idx": para_idx,
+                "section_path": list(section_path or []),
+            })
+            return {
+                "pages": para_pages,
+                "original": para_text,
+                "translation": f"尾注译文{para_idx + 1}",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "_usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1},
+            }
+
+        with (
+            patch.object(tasks, "get_page_context_for_translate", return_value=context),
+            patch.object(tasks, "get_paragraph_bboxes", return_value=[[]]),
+            patch.object(tasks, "_needs_llm_fix", return_value=False),
+            patch.object(tasks, "translate_paragraph", new=_strict_translate),
+        ):
+            entry = tasks.translate_page(
+                pages=pages,
+                target_bp=10,
+                model_key="qwen-plus",
+                t_args={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"},
+                glossary=[],
+            )
+
+        self.assertEqual([call["content_role"] for call in calls], ["endnote", "endnote"])
+        self.assertEqual([call["para_text"] for call in calls], ["1. First endnote.", "2. Second endnote."])
+        self.assertEqual([pe["_note_kind"] for pe in entry["_page_entries"]], ["endnote", "endnote"])
+        self.assertEqual([pe["_note_number"] for pe in entry["_page_entries"]], [1, 2])
+        self.assertEqual([pe["_note_section_title"] for pe in entry["_page_entries"]], ["Introduction", "Introduction"])
 
     def test_llm_fix_paragraphs_accepts_full_translate_args_payload(self):
         config.save_config({
@@ -1309,6 +1662,357 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn("从 PDF 第2页开始读", html)
         self.assertIn(f"/reading?bp=2&amp;auto=1&amp;start_bp=2&amp;doc_id={self.doc_id}", html)
 
+    def test_home_page_renders_upload_toggles_off_by_default_and_current_mode_hint(self):
+        resp = self.client.get("/")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('id="cleanupHeaderFooterToggle"', html)
+        self.assertRegex(html, re.compile(r'id="cleanupHeaderFooterToggle"(?![^>]*checked)'))
+        self.assertIn('id="autoVisualTocToggle"', html)
+        self.assertRegex(html, re.compile(r'id="autoVisualTocToggle"(?![^>]*checked)'))
+        self.assertIn("开启页眉页脚清理", html)
+        self.assertIn("开启自动视觉目录", html)
+        self.assertIn("增强脚注/尾注模式（已清理）", html)
+
+    def test_upload_preferences_endpoint_updates_homepage_defaults(self):
+        resp = self._post_json(
+            "/api/upload_preferences",
+            json={"clean_header_footer": True, "auto_visual_toc": True},
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(get_upload_cleanup_headers_footers_enabled())
+        self.assertTrue(get_upload_auto_visual_toc_enabled())
+
+        home_resp = self.client.get("/")
+        html = home_resp.get_data(as_text=True)
+
+        self.assertIn('id="cleanupHeaderFooterToggle" checked', html)
+        self.assertIn('id="autoVisualTocToggle" checked', html)
+
+    def test_home_page_renders_single_upload_card_and_glossary_actions(self):
+        storage.save_auto_visual_toc_to_disk(
+            self.doc_id,
+            [
+                {
+                    "item_id": "visual-1",
+                    "title": "第一章",
+                    "depth": 0,
+                    "file_idx": 0,
+                    "visual_order": 1,
+                }
+            ],
+        )
+        resp = self.client.get("/")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('id="uploadCard"', html)
+        self.assertIn("增强解析并重跑", html)
+        self.assertIn("生成/重新生成自动视觉目录", html)
+        self.assertIn("这里填写的是 PDF 页码，不是书籍原页码", html)
+        self.assertIn("自动视觉目录调整", html)
+        self.assertIn("保存自动视觉目录调整", html)
+        self.assertIn("一键应用当前 offset", html)
+        self.assertIn("用本条反推 offset", html)
+        self.assertIn("删除此条", html)
+        self.assertIn("拖拽调整顺序", html)
+        self.assertIn("handleAutoVisualTocDrop", html)
+        self.assertIn('class="modal-box modal-box-wide"', html)
+        self.assertIn('class="auto-visual-toc-table"', html)
+
+    def test_upload_file_passes_upload_toggles_into_task_options(self):
+        captured = {}
+
+        class FakeThread:
+            def __init__(self, target=None, args=(), daemon=None):
+                captured["target"] = target
+                captured["args"] = args
+                captured["daemon"] = daemon
+
+            def start(self):
+                return None
+
+        with (
+            patch.object(app_module, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(app_module.threading, "Thread", FakeThread),
+        ):
+            default_resp = self.client.post(
+                "/upload_file",
+                data={
+                    "_csrf_token": self._ensure_csrf_token(),
+                    "file": (BytesIO(b"%PDF-1.4\n%default\n"), "default.pdf"),
+                },
+                content_type="multipart/form-data",
+            )
+            enabled_resp = self.client.post(
+                "/upload_file",
+                data={
+                    "_csrf_token": self._ensure_csrf_token(),
+                    "clean_header_footer": "1",
+                    "auto_visual_toc": "1",
+                    "file": (BytesIO(b"%PDF-1.4\n%enabled\n"), "enabled.pdf"),
+                },
+                content_type="multipart/form-data",
+            )
+
+        self.assertEqual(default_resp.status_code, 200)
+        self.assertEqual(enabled_resp.status_code, 200)
+        default_task_id = default_resp.get_json()["task_id"]
+        enabled_task_id = enabled_resp.get_json()["task_id"]
+        self.addCleanup(tasks.remove_task, default_task_id)
+        self.addCleanup(tasks.remove_task, enabled_task_id)
+        default_task = tasks.get_task(default_task_id)
+        enabled_task = tasks.get_task(enabled_task_id)
+        self.addCleanup(lambda: os.path.exists(default_task["file_path"]) and os.unlink(default_task["file_path"]))
+        self.addCleanup(lambda: os.path.exists(enabled_task["file_path"]) and os.unlink(enabled_task["file_path"]))
+
+        self.assertFalse(default_task["options"]["clean_header_footer"])
+        self.assertTrue(enabled_task["options"]["clean_header_footer"])
+        self.assertFalse(default_task["options"]["auto_visual_toc"])
+        self.assertTrue(enabled_task["options"]["auto_visual_toc"])
+        self.assertIs(captured["target"], app_module.process_file)
+
+    def test_reparse_enhanced_clears_translations_and_uses_cleanup_mode(self):
+        save_entries_to_disk(
+            [
+                {
+                    "_pageBP": 1,
+                    "_model": "qwen-plus",
+                    "_page_entries": [{"original": "A", "translation": "甲"}],
+                    "pages": "1",
+                }
+            ],
+            "Reading Refresh",
+            0,
+            self.doc_id,
+        )
+        captured = {}
+
+        class FakeThread:
+            def __init__(self, target=None, args=(), daemon=None):
+                captured["target"] = target
+                captured["args"] = args
+                captured["daemon"] = daemon
+
+            def start(self):
+                return None
+
+        with (
+            patch.object(app_module, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(app_module.threading, "Thread", FakeThread),
+        ):
+            resp = self._post("/api/doc/reparse_enhanced", data={"doc_id": self.doc_id})
+
+        self.assertEqual(resp.status_code, 200)
+        task_id = resp.get_json()["task_id"]
+        self.addCleanup(tasks.remove_task, task_id)
+        self.assertEqual(load_entries_from_disk(self.doc_id)[0], [])
+        self.assertTrue(tasks.get_task(task_id)["options"]["clean_header_footer"])
+        self.assertEqual(get_doc_meta(self.doc_id).get("cleanup_headers_footers"), 1)
+        self.assertEqual(captured["args"][1], self.doc_id)
+
+    def test_run_visual_toc_keeps_translations_and_enables_doc_flag(self):
+        save_entries_to_disk(
+            [
+                {
+                    "_pageBP": 1,
+                    "_model": "qwen-plus",
+                    "_page_entries": [{"original": "A", "translation": "甲"}],
+                    "pages": "1",
+                }
+            ],
+            "Reading Refresh",
+            0,
+            self.doc_id,
+        )
+
+        with patch.object(app_module, "start_auto_visual_toc_for_doc") as visual_mock:
+            resp = self._post("/api/doc/run_visual_toc", data={"doc_id": self.doc_id})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.get_json()["ok"])
+        self.assertEqual(len(load_entries_from_disk(self.doc_id)[0]), 1)
+        self.assertTrue(get_doc_meta(self.doc_id).get("auto_visual_toc_enabled"))
+        visual_mock.assert_called_once()
+
+    def test_reparse_routes_inherit_document_cleanup_and_visual_toc_mode(self):
+        update_doc_meta(self.doc_id, cleanup_headers_footers=False, auto_visual_toc_enabled=True)
+        captured = []
+
+        class FakeThread:
+            def __init__(self, target=None, args=(), daemon=None):
+                captured.append({"target": target, "args": args, "daemon": daemon})
+
+            def start(self):
+                return None
+
+        with (
+            patch.object(app_module, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(app_module.threading, "Thread", FakeThread),
+        ):
+            reparse_resp = self._post("/reparse", data={"doc_id": self.doc_id})
+            page_resp = self._post("/reparse_page/1", data={"doc_id": self.doc_id})
+
+        self.assertEqual(reparse_resp.status_code, 200)
+        self.assertEqual(page_resp.status_code, 200)
+        reparse_task_id = reparse_resp.get_json()["task_id"]
+        page_task_id = page_resp.get_json()["task_id"]
+        self.addCleanup(tasks.remove_task, reparse_task_id)
+        self.addCleanup(tasks.remove_task, page_task_id)
+        self.assertFalse(tasks.get_task(reparse_task_id)["options"]["clean_header_footer"])
+        self.assertFalse(tasks.get_task(page_task_id)["options"]["clean_header_footer"])
+        self.assertTrue(tasks.get_task(reparse_task_id)["options"]["auto_visual_toc"])
+        self.assertTrue(tasks.get_task(page_task_id)["options"]["auto_visual_toc"])
+
+    def test_process_file_starts_auto_visual_toc_background_job_when_enabled(self):
+        fd, file_path = tempfile.mkstemp(suffix=".pdf")
+        os.close(fd)
+        with open(file_path, "wb") as f:
+            f.write(b"%PDF-1.4\n%visual-toc\n")
+        task_id = "uploadvisual01"
+        tasks.create_task(
+            task_id,
+            file_path,
+            "upload-visual.pdf",
+            0,
+            options={"clean_header_footer": False, "auto_visual_toc": True},
+        )
+        self.addCleanup(tasks.remove_task, task_id)
+
+        ocr_page = {
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "blocks": [{
+                "text": "OCR 正文",
+                "x": 12,
+                "bbox": [0, 0, 50, 20],
+                "label": "text",
+                "is_meta": False,
+                "heading_level": 0,
+            }],
+            "fnBlocks": [],
+            "footnotes": "",
+            "indent": None,
+            "textSource": "ocr",
+            "markdown": "OCR 正文",
+        }
+
+        with (
+            patch.object(tasks, "call_paddle_ocr_bytes", return_value={"layoutParsingResults": []}),
+            patch.object(tasks, "parse_ocr", return_value={"pages": [ocr_page], "log": []}),
+            patch.object(tasks, "extract_pdf_text", return_value=[]),
+            patch.object(tasks, "_annotate_note_scans", side_effect=lambda pages, **kwargs: pages),
+            patch.object(tasks, "clean_header_footer") as clean_mock,
+            patch.object(tasks, "get_paddle_token", return_value="fake-paddle-token"),
+            patch.object(tasks, "extract_pdf_toc", return_value=[]),
+            patch.object(tasks, "extract_pdf_toc_from_links", return_value=[]),
+            patch.object(tasks, "start_auto_visual_toc_for_doc") as visual_toc_mock,
+        ):
+            tasks.process_file(task_id)
+
+        clean_mock.assert_not_called()
+        visual_toc_mock.assert_called_once()
+
+    def test_reading_page_normalizes_body_markers_to_superscript_and_footnote_items_to_brackets(self):
+        save_pages_to_disk([{
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "OCR [4] preview and [^5] preview and ⁶ preview",
+            "footnotes": "",
+        }], "Reading Refresh", self.doc_id)
+        save_entries_to_disk([{
+            "_pageBP": 1,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "Body [1] marker and [^2] marker and ³ marker",
+                "translation": "译文 [1] 标记和 [^2] 标记以及 ³ 标记",
+                "footnotes": "1. Note one\n[^2] Note two\n3) Note three",
+                "footnotes_translation": "1. 注释一\n[^2] 注释二\n3) 注释三",
+                "heading_level": 0,
+                "pages": "1",
+            }],
+            "pages": "1",
+        }], "Reading Refresh", 0, self.doc_id)
+
+        resp = self.client.get("/reading?bp=1&orig=1&pdf=0&usage=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("Body ¹ marker and ² marker and ³ marker", html)
+        self.assertIn("译文 ¹ 标记和 ² 标记以及 ³ 标记", html)
+        self.assertIn("[1] Note one", html)
+        self.assertIn("[2] Note two", html)
+        self.assertIn("[3] Note three", html)
+        self.assertNotIn("[^2] Note two", html)
+        self.assertNotIn("1. Note one", html)
+
+    def test_reading_page_shows_unresolved_visual_toc_items_with_pdf_page_editor(self):
+        self._save_pages([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "Page 2", "footnotes": ""},
+            {"bookPage": 3, "fileIdx": 2, "markdown": "Page 3", "footnotes": ""},
+        ])
+        storage.save_auto_visual_toc_to_disk(
+            self.doc_id,
+            [
+                {
+                    "item_id": "visual-1",
+                    "title": "可跳转章节",
+                    "depth": 0,
+                    "file_idx": 1,
+                    "visual_order": 1,
+                },
+                {
+                    "item_id": "visual-2",
+                    "title": "待补录章节",
+                    "depth": 0,
+                    "book_page": 12,
+                    "visual_order": 2,
+                },
+            ],
+        )
+        update_doc_meta(self.doc_id, toc_visual_status="needs_offset")
+
+        resp = self.client.get(f"/reading?bp=1&doc_id={self.doc_id}&orig=0&pdf=0&usage=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('id="tocBtn"', html)
+        self.assertIn("可跳转章节", html)
+        self.assertIn("待补录章节", html)
+        self.assertIn("未定位目录项", html)
+        self.assertIn("这里填写的是 PDF 页码，不是书籍原页码", html)
+        self.assertIn('data-toc-item-id="visual-2"', html)
+        self.assertIn("/api/toc/resolve_visual_item", html)
+
+    def test_reading_placeholder_preview_normalizes_markers_for_body_and_page_footnotes(self):
+        save_pages_to_disk([{
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "Preview [7] marker and [^8] marker and ⁹ marker",
+            "footnotes": "7. Preview note\n[^8] Preview second note\n9) Preview third note",
+        }], "Reading Refresh", self.doc_id)
+        save_entries_to_disk([], "Reading Refresh", 0, self.doc_id)
+
+        resp = self.client.get("/reading?bp=1&orig=0&pdf=0&usage=0")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("Preview ⁷ marker and ⁸ marker and ⁹ marker", html)
+        self.assertIn("[7] Preview note", html)
+        self.assertIn("[8] Preview second note", html)
+        self.assertIn("[9] Preview third note", html)
+        self.assertNotIn("7. Preview note", html)
+        self.assertNotIn("[^8] Preview second note", html)
+
     def test_home_page_requests_stop_for_active_translate_task(self):
         tasks._save_translate_state(
             self.doc_id,
@@ -1827,7 +2531,7 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
             patch("pdf_extract.extract_single_page_pdf", return_value=b"%PDF-1.4\n%page\n"),
             patch.object(tasks, "call_paddle_ocr_bytes", return_value={"layoutParsingResults": []}),
             patch.object(tasks, "parse_ocr", return_value={"pages": [ocr_page], "log": []}),
-            patch.object(tasks, "clean_header_footer", side_effect=lambda pages: {"pages": pages, "log": []}),
+            patch.object(tasks, "clean_header_footer", side_effect=lambda pages, on_progress=None: {"pages": pages, "log": []}),
             patch.object(tasks, "get_model_key", return_value="sonnet"),
             patch.object(tasks, "get_translate_args", return_value={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"}),
             patch.object(tasks, "get_glossary", return_value=[]),
@@ -1854,6 +2558,70 @@ class ReadingRefreshContractTest(ClientCSRFMixin, unittest.TestCase):
         event_dump = json.dumps(events, ensure_ascii=False)
         self.assertIn("强制使用 OCR 文字", event_dump)
         self.assertIn("自动重译本页", event_dump)
+
+    def test_reparse_single_page_skips_cleanup_when_document_mode_disabled(self):
+        update_doc_meta(self.doc_id, cleanup_headers_footers=False)
+        task_id = "reparseskip01"
+        pdf_path = os.path.join(config.DOCS_DIR, self.doc_id, "source.pdf")
+        tasks.create_task(task_id, pdf_path, "Reading Refresh", 0, options={"clean_header_footer": False})
+        self.addCleanup(tasks.remove_task, task_id)
+
+        ocr_page = {
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "blocks": [{
+                "text": "OCR 正文",
+                "x": 12,
+                "bbox": [0, 0, 50, 20],
+                "label": "text",
+                "is_meta": False,
+                "heading_level": 0,
+            }],
+            "fnBlocks": [],
+            "footnotes": "",
+            "indent": None,
+            "textSource": "ocr",
+            "markdown": "",
+        }
+        translated_entry = {
+            "_pageBP": 1,
+            "_model": "sonnet",
+            "_page_entries": [{
+                "original": "OCR 正文",
+                "translation": "快速模式重译正文",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "1",
+                "_status": "done",
+                "_error": "",
+            }],
+            "_usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1},
+            "pages": "1",
+        }
+
+        with (
+            patch("pdf_extract.extract_single_page_pdf", return_value=b"%PDF-1.4\n%page\n"),
+            patch.object(tasks, "call_paddle_ocr_bytes", return_value={"layoutParsingResults": []}),
+            patch.object(tasks, "parse_ocr", return_value={"pages": [ocr_page], "log": []}),
+            patch.object(tasks, "clean_header_footer") as clean_mock,
+            patch.object(tasks, "get_model_key", return_value="sonnet"),
+            patch.object(tasks, "get_translate_args", return_value={"model_id": "fake-model-id", "api_key": "fake-key", "provider": "qwen"}),
+            patch.object(tasks, "get_glossary", return_value=[]),
+            patch.object(tasks, "translate_page", return_value=translated_entry),
+            patch.object(tasks, "reconcile_translate_state_after_page_success"),
+        ):
+            tasks.reparse_single_page(task_id, self.doc_id, 1, 0)
+
+        clean_mock.assert_not_called()
+        pages, _ = load_pages_from_disk(self.doc_id)
+        self.assertFalse(pages[0]["_cleanup_applied"])
+        events, exists = tasks.get_task_events(task_id, 0)
+        self.assertTrue(exists)
+        event_dump = json.dumps(events, ensure_ascii=False)
+        self.assertIn("跳过页眉页脚清理", event_dump)
 
     def test_pdf_page_passes_scale_query_to_renderer(self):
         pdf_path = os.path.join(config.DOCS_DIR, self.doc_id, "source.pdf")

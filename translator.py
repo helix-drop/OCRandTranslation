@@ -121,7 +121,7 @@ def _normalize_optional_text(val) -> str:
     return str(val)
 
 
-def build_prompt(gloss_str: str) -> str:
+def build_prompt(gloss_str: str, content_role: str = "body") -> str:
     lines = [
         "你是一位专业的学术文献翻译专家，擅长将外文学术论文翻译为中文。",
         "硬性要求：所有翻译结果必须使用简体中文，不得输出繁体中文。",
@@ -142,6 +142,9 @@ def build_prompt(gloss_str: str) -> str:
         "- 正文(===正文===之间的内容)和脚注(===页面脚注===之间的内容)是严格分开的",
         "- \"original\"字段只包含正文，不要把正文内容移入脚注",
         "- \"footnotes\"字段只包含页面底部的脚注(如有)，不要把正文内容放入此字段",
+        "- 脚注/尾注编号与出现顺序必须守恒，不得擅自改号、跳号、并号",
+        "- 必须保留脚注标记形态（如 1. / [1] / [^1]），不要吞掉标记",
+        "- 看不清的脚注宁可原样保留在footnotes，也不要并入正文或编造内容",
         "- 输入中明确标记了\"本页无脚注\"时，footnotes和footnotes_translation必须为空字符串",
         "- 绝对禁止编造、推测或从其他来源引入脚注内容",
         "- 如果你看不到任何脚注内容，就返回空字符串，不要尝试\"补充\"",
@@ -155,6 +158,15 @@ def build_prompt(gloss_str: str) -> str:
         '  "footnotes_translation": "脚注的简体中文翻译，无则空字符串"',
         "}",
     ]
+    if content_role == "endnote":
+        lines.extend([
+            "",
+            "当前内容角色：尾注条目。",
+            "- ===正文=== 中给出的就是单条尾注原文，不是普通正文段落。",
+            "- 必须保留尾注编号、标记和顺序，不得吞号、改号、并号。",
+            "- 不得把尾注改写成流畅正文或综述句，宁可保守直译。",
+            "- footnotes 和 footnotes_translation 继续保持空字符串，尾注正文只写入 original/translation。",
+        ])
     if gloss_str.strip():
         lines.extend([
             "",
@@ -182,8 +194,14 @@ def _build_translate_message(
     next_context: str = "",
     section_path: list[str] | None = None,
     cross_page: str | None = None,
+    content_role: str = "body",
 ) -> str:
     parts = [f"页码：{para_pages}"]
+    parts.append("导出契约：original=正文原文，translation=正文译文，footnotes=脚注原文，footnotes_translation=脚注译文；字段之间禁止串写")
+    parts.append("脚注约束：编号与顺序必须守恒；无法确认时保留到footnotes，不得并入正文")
+    parts.append(f"内容角色：{'尾注条目' if content_role == 'endnote' else '正文段落'}")
+    if content_role == "endnote":
+        parts.append("这是尾注条目：不得正文化，不得吞号、改号、并号，尾注内容只写入 original/translation。")
     parts.append(f"段落类型：{'标题' if heading_level > 0 else '正文'}")
     if heading_level > 0:
         parts.append(f"标题级别：H{heading_level}")
@@ -623,6 +641,11 @@ _STRUCTURE_SYSTEM = """你是文档结构分析专家。
    - 如果当前页末尾的段落被截断（参考[下一页开头]的内容），在该段文本末尾标注 [续下页]
 6. 通讯作者/邮箱：如果出现 "Corresponding author"、邮箱地址等，单独一项，heading_level=-1（表示脚注，不翻译）。
 7. 保持完整：每个段落的文本必须是完整的，从 ===连续文本=== 中原样复制，不可截断或省略。
+8. 脚注/尾注保真：
+   - 遇到 NOTES/Notes/注释/尾注 及其编号条目（如 "1."、"[1]"、"12 "）时，必须保持原有编号顺序，不得重排。
+   - 不得把脚注/尾注条目并入普通正文段落；脚注区应独立成段输出。
+   - 对看不清或疑似噪声的脚注行，宁可原样保留，也不要改写成正文语句。
+9. 编号守恒：页面内已有的脚注/尾注编号及标记（数字、方括号、上标语义）必须尽量原样保留，不得擅自增删编号。
 
 输出：仅JSON数组，不加任何标记：
 [
@@ -632,6 +655,30 @@ _STRUCTURE_SYSTEM = """你是文档结构分析专家。
   {"heading_level": 0, "text": "该章节第一个完整段落的全部文字..."},
   {"heading_level": -1, "text": "Corresponding author: ..."}
 ]"""
+
+_NOTE_REVIEW_SYSTEM = """你是学术文献的脚注/尾注结构校对助手。
+
+任务：只根据当前页文本，判断这一页是否包含页面脚注或章节尾注，并输出结构化结果。
+
+规则：
+1. 只处理当前页，不补全其他页内容。
+2. 保留原有编号、标记和顺序，不得改号、并号、跳号。
+3. 允许输出 page_kind 为：
+   - body
+   - body_with_page_footnotes
+   - endnote_collection
+   - mixed_body_endnotes
+4. items 里每条必须包含：
+   - kind: footnote 或 endnote
+   - marker: 如 1. / [1]
+   - number: 数字编号，没有则 null
+   - text: 当前页可见的完整条目文本
+   - order: 当前页内顺序，从 1 开始
+   - confidence: 0 到 1
+   - section_title: 该条尾注所属的小节/章节标题，没有则空字符串
+5. 如果无法可靠识别，就减少 items，并把原因放进 ambiguity_flags。
+6. 只输出一个 JSON 对象，不要输出额外解释。
+"""
 
 
 def structure_page(
@@ -707,6 +754,79 @@ def structure_page(
     return {"paragraphs": clean, "usage": api_result.get("usage", _empty_usage())}
 
 
+def review_note_page(
+    markdown: str,
+    footnotes: str,
+    page_num: int,
+    model_id: str,
+    api_key: str,
+    provider: str = "deepseek",
+    base_url: str | None = None,
+    request_overrides: dict | None = None,
+    prev_context: str = "",
+    next_context: str = "",
+    rule_scan: dict | None = None,
+) -> dict:
+    rule_json = json.dumps(rule_scan or {}, ensure_ascii=False)
+    msg = (
+        f"页码: {page_num}\n\n"
+        f"===规则初判===\n{rule_json}\n===规则初判结束===\n\n"
+        f"===当前页文本===\n{markdown or ''}\n===当前页文本结束===\n\n"
+        f"===页面脚注字段===\n{footnotes or '本页无脚注'}\n===页面脚注字段结束===\n\n"
+        f"===上一页末尾===\n{prev_context or ''}\n===上一页末尾结束===\n\n"
+        f"===下一页开头===\n{next_context or ''}\n===下一页开头结束==="
+    )
+    api_result = _call_provider(
+        provider,
+        _NOTE_REVIEW_SYSTEM,
+        msg,
+        model_id,
+        api_key,
+        base_url=base_url,
+        request_overrides=request_overrides,
+    )
+    payload = parse_json_response(api_result.get("text", ""))
+    if not isinstance(payload, dict):
+        return {}
+    normalized_items = []
+    for idx, item in enumerate(payload.get("items") or [], 1):
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind", "")).strip()
+        text = str(item.get("text", "")).strip()
+        if kind not in {"footnote", "endnote"} or not text:
+            continue
+        number = item.get("number")
+        try:
+            number = int(number) if number is not None else None
+        except (TypeError, ValueError):
+            number = None
+        normalized_items.append({
+            "kind": kind,
+            "marker": str(item.get("marker", "")).strip(),
+            "number": number,
+            "text": text,
+            "order": int(item.get("order", idx) or idx),
+            "source": "model_review",
+            "confidence": float(item.get("confidence", 0.75) or 0.75),
+            "section_title": str(item.get("section_title", "")).strip(),
+        })
+    return {
+        "page_kind": str(payload.get("page_kind", "body")).strip() or "body",
+        "items": normalized_items,
+        "section_hints": [
+            str(item).strip()
+            for item in (payload.get("section_hints") or [])
+            if str(item).strip()
+        ],
+        "ambiguity_flags": [
+            str(item).strip()
+            for item in (payload.get("ambiguity_flags") or [])
+            if str(item).strip()
+        ],
+    }
+
+
 def _prepare_translate_request(
     para_text: str,
     para_pages: str,
@@ -719,9 +839,10 @@ def _prepare_translate_request(
     next_context: str = "",
     section_path: list[str] | None = None,
     cross_page: str | None = None,
+    content_role: str = "body",
 ) -> tuple[str, str]:
     gloss_str = "\n".join(f"{g[0]}→{g[1]}" for g in glossary)
-    sys_prompt = build_prompt(gloss_str)
+    sys_prompt = build_prompt(gloss_str, content_role=content_role)
     msg = _build_translate_message(
         para_text=para_text,
         para_pages=para_pages,
@@ -733,6 +854,7 @@ def _prepare_translate_request(
         next_context=next_context,
         section_path=section_path,
         cross_page=cross_page,
+        content_role=content_role,
     )
     return sys_prompt, msg
 
@@ -754,6 +876,7 @@ def translate_paragraph(
     next_context: str = "",
     section_path: list[str] | None = None,
     cross_page: str | None = None,
+    content_role: str = "body",
 ) -> dict:
     """
     翻译一个段落。
@@ -776,6 +899,7 @@ def translate_paragraph(
         next_context=next_context,
         section_path=section_path,
         cross_page=cross_page,
+        content_role=content_role,
     )
 
     result = _call_provider(
@@ -845,6 +969,7 @@ def stream_translate_paragraph(
     next_context: str = "",
     section_path: list[str] | None = None,
     cross_page: str | None = None,
+    content_role: str = "body",
 ):
     """
     流式翻译一个段落。
@@ -866,6 +991,7 @@ def stream_translate_paragraph(
         next_context=next_context,
         section_path=section_path,
         cross_page=cross_page,
+        content_role=content_role,
     )
 
     stream_iter = _stream_provider(

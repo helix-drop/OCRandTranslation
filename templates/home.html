@@ -33,11 +33,32 @@
 
     <!-- Upload PDF/Image -->
     <div class="mb-14">
-      <div class="upload-area" style="padding:20px;display:block;" id="uploadArea">
-        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.bmp,.tiff,.tif" style="display:none;">
-        <div class="icon" id="uploadIcon">📄</div>
-        <div class="title" id="uploadTitle">上传 PDF / 图片</div>
-        <div class="subtitle" id="uploadSubtitle">调用 PaddleOCR 解析版面，PDF文字层自动优先</div>
+      <div id="uploadCard" style="padding:16px;border:1px solid var(--bdrL);border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,241,231,0.84));">
+        <div class="upload-area" style="padding:20px;display:block;" id="uploadArea">
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.bmp,.tiff,.tif" style="display:none;">
+          <div class="icon" id="uploadIcon">📄</div>
+          <div class="title" id="uploadTitle">上传 PDF / 图片</div>
+          <div class="subtitle" id="uploadSubtitle">调用 PaddleOCR 解析版面，PDF文字层自动优先</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+          <label for="cleanupHeaderFooterToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
+            <input type="checkbox" id="cleanupHeaderFooterToggle" {% if upload_cleanup_default_enabled %}checked{% endif %} style="margin-top:3px;">
+            <span style="display:block;">
+              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">开启页眉页脚清理</span>
+              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">更慢，但脚注/尾注标记通常更准。默认关闭，方便先尽快开始阅读。</span>
+            </span>
+          </label>
+          <label for="autoVisualTocToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
+            <input type="checkbox" id="autoVisualTocToggle" {% if upload_auto_visual_toc_default_enabled %}checked{% endif %} style="margin-top:3px;">
+            <span style="display:block;">
+              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">开启自动视觉目录</span>
+              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">仅对 PDF 生效。解析完成后继续后台生成目录，目录标题和层级只依赖视觉识别。</span>
+            </span>
+          </label>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+          目录通常可以在解析完成后再上传；上传后会立即影响阅读导航、导出章节层级和尾注按章分组，不需要重新 OCR。
+        </div>
       </div>
     </div>
 
@@ -73,6 +94,16 @@
           <div class="label">页码范围</div>
           <div style="font-size:12px;color:var(--txS);">PDF 第{{ first_page }}页 → 第{{ last_page }}页</div>
         </div>
+        <div style="flex:1;min-width:180px;">
+          <div class="label">当前解析模式</div>
+          <div style="font-size:12px;color:var(--txS);">{{ cleanup_mode_label }}</div>
+          <div style="font-size:11px;color:var(--txL);line-height:1.5;margin-top:2px;">{{ cleanup_mode_detail }}</div>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <div class="label">自动视觉目录</div>
+          <div style="font-size:12px;color:var(--txS);">{{ auto_visual_toc_mode_label }} · {{ visual_toc_status_label }}</div>
+          <div style="font-size:11px;color:var(--txL);line-height:1.5;margin-top:2px;">{{ auto_visual_toc_mode_detail }}</div>
+        </div>
       </div>
       {% if hidden_placeholder_bps %}
       <div style="font-size:11px;color:var(--txL);line-height:1.6;">
@@ -82,9 +113,13 @@
       {% if has_pdf %}
       <div class="flex gap-8" style="margin-top:10px;">
         <button type="button" id="reparseBtn" class="btn btn-sm btn-sec" onclick="startReparse()">🔄 重新解析</button>
-        <span style="font-size:11px;color:var(--txL);line-height:1.4;">若原文/脚注显示异常，可重新解析（保留已有翻译）</span>
+        <span style="font-size:11px;color:var(--txL);line-height:1.4;">若原文/脚注显示异常，可重新解析（保留已有翻译，沿用当前解析模式）</span>
       </div>
       {% endif %}
+      <div id="backgroundDocStatus" style="display:{% if visual_toc_status == 'running' %}block{% else %}none{% endif %};margin-top:10px;padding:10px 12px;border:1px solid var(--bdrL);border-radius:10px;background:var(--bg2);">
+        <div id="backgroundDocStatusLabel" style="font-size:12px;font-weight:600;color:var(--txt);">{{ visual_toc_progress_label or visual_toc_status_label }}</div>
+        <div id="backgroundDocStatusDetail" style="margin-top:4px;font-size:11px;color:var(--txS);line-height:1.6;">{{ visual_toc_progress_detail or visual_toc_status_message }}</div>
+      </div>
     </div>
     {% else %}
     <div style="background:var(--card);border:2px dashed var(--bdrL);border-radius:12px;padding:40px 20px;text-align:center;">
@@ -92,7 +127,7 @@
       <h3 style="font-size:16px;color:var(--txt);margin-bottom:8px;">还没有解析任何文档</h3>
       <p style="font-size:13px;color:var(--txS);line-height:1.8;max-width:400px;margin:0 auto;">
         请在上方<strong>上传PDF或图片</strong>。<br>
-        <span style="font-size:12px;color:var(--txL);">支持自动调用 PaddleOCR 进行高精度版面解析，自动检测并移除页眉页脚。</span>
+        <span style="font-size:12px;color:var(--txL);">支持自动调用 PaddleOCR 进行高精度版面解析；可选页眉页脚清理和自动视觉目录，以平衡速度、目录质量与脚注/尾注精度。</span>
       </p>
     </div>
     {% endif %}
@@ -219,7 +254,7 @@
 
 <!-- Glossary Import Modal -->
 <div id="glossaryModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeGlossaryModal()">
-  <div class="modal-box">
+  <div class="modal-box modal-box-wide">
     <div class="modal-header">
       <span class="modal-title" id="glossaryModalTitle">词典与目录</span>
       <button type="button" class="modal-close" onclick="closeGlossaryModal()">×</button>
@@ -265,12 +300,117 @@
         <button type="button" class="btn btn-pri btn-sm" id="glossaryImportBtn" onclick="doGlossaryImport()">导入词典</button>
         <a id="glossarySettingsLink" href="#" class="btn btn-gho btn-sm" style="font-size:11px;">前往设置页管理 ▸</a>
       </div>
+      <div id="glossaryRetranslateBox" style="display:none;margin-top:10px;padding:10px 12px;border:1px solid var(--bdrL);border-radius:10px;background:rgba(255,255,255,0.78);">
+        <div id="glossaryRetranslateSummary" style="font-size:12px;color:var(--txt);line-height:1.7;"></div>
+        <div id="glossaryRetranslateReason" style="margin-top:6px;font-size:11px;color:var(--txL);line-height:1.6;"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+          <button type="button" class="btn btn-gho btn-sm" id="glossaryRetranslateBtn" onclick="startGlossaryRetranslateFromModal()">从上次阅读位置起按当前词典补重译</button>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--bdrL);margin:18px 0;"></div>
+
+      <div class="modal-section-title">解析增强</div>
+      <p id="enhancementMeta" style="font-size:12px;color:var(--txS);margin:0 0 10px;">
+        当前解析模式：{{ cleanup_mode_label }} · 自动视觉目录：{{ visual_toc_status_label }} · {{ '已有翻译数据' if has_translation_history else '暂未生成翻译数据' }}
+      </p>
+      <div class="modal-hint" style="margin-bottom:10px;">
+        <div style="font-size:12px;line-height:1.8;color:var(--txS);">
+          `增强解析并重跑` 会清空当前翻译数据，再按页眉页脚清理模式整书重解析。`生成/重新生成自动视觉目录` 不会清空翻译，只会重跑目录。
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:var(--txL);">这里填写的是 PDF 页码，不是书籍原页码。</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button type="button" class="btn btn-pri btn-sm" id="enhancedReparseBtn" onclick="doEnhancedReparse()">{{ '重新进行增强解析' if cleanup_headers_footers_enabled else '增强解析并重跑' }}</button>
+        <button type="button" class="btn btn-sec btn-sm" id="runVisualTocBtn" onclick="runVisualTocNow()">生成/重新生成自动视觉目录</button>
+      </div>
 
       <div style="height:1px;background:var(--bdrL);margin:18px 0;"></div>
 
       <!-- ===== 目录块 ===== -->
       <div class="modal-section-title">书籍目录</div>
       <p id="tocModalMeta" style="font-size:12px;color:var(--txS);margin:0 0 10px;"></p>
+
+      <div id="userEffectiveTocSection" style="display:none;margin-bottom:14px;padding:12px;border:1px solid var(--bdrL);border-radius:10px;background:rgba(255,255,255,0.85);">
+        <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px;">当前生效目录（可编辑）</div>
+        <p style="font-size:11px;color:var(--txL);line-height:1.7;margin:0 0 10px;">
+          以下为阅读页与导出使用的用户目录。请编辑 <strong>PDF 页码</strong>（与扫描件/阅读器页码对齐）；<strong>原书页码</strong>仅作印刷页对照与链接锚点，由「PDF 页码 − 上方 offset」自动算出，不可直接改。保存会写回 SQLite 与 toc_source.csv。
+        </p>
+        <div id="userEffectiveTocOffsetBar" style="margin-bottom:12px;padding:10px;border:1px solid var(--bdrL);border-radius:10px;background:var(--bg2);">
+          <div style="font-size:12px;font-weight:600;color:var(--txt);margin-bottom:6px;">全局 offset（阅读页）</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <label for="userEffectiveOffsetInput" style="font-size:11px;color:var(--txS);">offset</label>
+            <input type="number" id="userEffectiveOffsetInput" step="1" style="width:92px;padding:4px 6px;font-size:12px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);">
+            <button type="button" class="btn btn-sec btn-sm" id="userEffectiveOffsetApplyBtn" onclick="applyUserEffectiveOffset()">应用 offset 到阅读页</button>
+          </div>
+          <div id="userEffectiveOffsetHint" style="margin-top:6px;font-size:11px;color:var(--txL);line-height:1.6;"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="auto-visual-toc-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="color:var(--txL);border-bottom:1px solid var(--bdrL);">
+                <th style="text-align:left;padding:6px 4px;width:40px;">#</th>
+                <th style="text-align:left;padding:6px 4px;min-width:180px;">标题</th>
+                <th style="text-align:left;padding:6px 4px;width:72px;">深度</th>
+                <th style="text-align:left;padding:6px 4px;width:96px;">PDF 页码</th>
+                <th style="text-align:left;padding:6px 4px;width:88px;">原书页码</th>
+                <th style="text-align:left;padding:6px 4px;min-width:120px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="userEffectiveTocBody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-pri btn-sm" id="userTocSaveBtn" onclick="saveUserTocEdits()">保存对用户目录的修改</button>
+          <span style="font-size:11px;color:var(--txL);line-height:1.6;">保存会更新 SQLite 中的用户目录并覆盖已生成的 toc_source.csv。</span>
+        </div>
+      </div>
+
+      <div id="autoVisualTocEditorSection" style="display:none;margin-bottom:14px;padding:12px;border:1px solid var(--bdrL);border-radius:10px;background:rgba(255,255,255,0.8);">
+        <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:6px;">自动视觉目录调整</div>
+        <div style="font-size:11px;color:var(--txL);line-height:1.7;margin-bottom:10px;">
+          可直接调整标题、深度、顺序和 PDF 页码映射。支持拖拽调整顺序，也可继续用上下箭头微调。这里填写的是 PDF 页码，不是书籍原页码。
+        </div>
+        <div id="autoVisualOffsetEditor" style="margin-bottom:12px;padding:10px;border:1px solid var(--bdrL);border-radius:10px;background:var(--bg2);">
+          <div style="font-size:12px;font-weight:600;color:var(--txt);margin-bottom:6px;">offset 批量校准</div>
+          <div style="font-size:11px;color:var(--txS);line-height:1.7;margin-bottom:8px;">
+            这里的 `offset` 表示 `PDF 页码 = 原书页码 + offset`，可以是负数。建议先一键校准整本，再用单条 PDF 页码修少量例外。
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <label for="autoVisualOffsetInput" style="font-size:11px;color:var(--txS);">offset</label>
+            <input type="number" id="autoVisualOffsetInput" step="1" style="width:92px;padding:4px 6px;font-size:12px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);">
+            <button type="button" class="btn btn-sec btn-sm" id="applyAutoVisualOffsetBtn" onclick="applyAutoVisualOffset()">一键应用当前 offset</button>
+          </div>
+          <div id="autoVisualOffsetSummary" style="margin-top:6px;font-size:11px;color:var(--txL);line-height:1.6;"></div>
+          <div id="autoVisualOffsetHint" style="margin-top:4px;font-size:11px;color:var(--txL);line-height:1.6;"></div>
+          <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+            应用 offset 只保存全局页码偏移，不会丢弃你在上方表格中的未保存修改。「用本条反推 offset」按 PDF 页码 − 本条原书页码 计算；请先填写 PDF 页码。
+          </div>
+        </div>
+        <div id="autoVisualTocEditorWrap" style="overflow-x:auto;">
+          <table class="auto-visual-toc-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="color:var(--txL);border-bottom:1px solid var(--bdrL);">
+                <th style="text-align:left;padding:6px 4px;width:96px;">顺序</th>
+                <th style="text-align:left;padding:6px 4px;min-width:220px;">标题</th>
+                <th style="text-align:left;padding:6px 4px;width:96px;">深度</th>
+                <th style="text-align:left;padding:6px 4px;width:126px;">PDF 页码</th>
+                <th style="text-align:left;padding:6px 4px;min-width:120px;">说明</th>
+              </tr>
+            </thead>
+            <tbody id="autoVisualTocEditorBody"></tbody>
+          </table>
+        </div>
+        <div id="autoVisualTocEditorEmpty" style="display:none;font-size:11px;color:var(--txL);line-height:1.7;">
+          当前还没有可调整的自动视觉目录。先生成自动视觉目录后，这里会出现可编辑条目。
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-pri btn-sm" id="saveVisualDraftBtn" onclick="saveVisualDraft()">保存草稿</button>
+          <button type="button" class="btn btn-pri btn-sm" id="commitVisualDraftBtn" onclick="commitVisualDraft()">确认并覆盖为用户目录</button>
+          <button type="button" class="btn btn-sec btn-sm" id="saveAutoVisualTocBtn" onclick="saveAutoVisualTocEdits()">直接写回自动视觉</button>
+          <span style="font-size:11px;color:var(--txL);line-height:1.6;">拖拽调整顺序，或继续用上下箭头微调；留空 PDF 页码表示先保留为未定位。建议先「保存草稿」再「确认」写入用户目录。</span>
+        </div>
+      </div>
 
       <div class="modal-hint" style="margin-bottom:10px;">
         <strong>格式：</strong><code>.xlsx</code> / <code>.csv</code>，三列：第一列章节标题，第二列深度（0=章 1=节 2=小节），第三列原书印刷页码。
@@ -281,18 +421,8 @@
         <input type="file" id="tocFileInput" accept=".csv,.xlsx" style="font-size:12px;color:var(--txt);">
       </div>
       <div id="tocImportMsg" style="display:none;font-size:12px;margin-bottom:10px;"></div>
-
-      <!-- offset 校准区（导入成功后显示） -->
-      <div id="tocOffsetWrap" style="display:none;background:var(--bg2);border:1px solid var(--bdrL);border-radius:6px;padding:10px 12px;margin-bottom:10px;font-size:12px;">
-        <div style="font-weight:600;color:var(--txS);margin-bottom:6px;">页码偏移校准</div>
-        <div id="tocOffsetAutoMsg" style="color:var(--txS);margin-bottom:8px;"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <label style="color:var(--txS);">原书第 1 页 = PDF 第</label>
-          <input type="number" min="1" id="tocOffsetInput" style="width:60px;padding:3px 6px;font-size:12px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);">
-          <label style="color:var(--txS);">页</label>
-          <button type="button" class="btn btn-pri btn-sm" onclick="doTocSetOffset()">确认</button>
-        </div>
-        <div id="tocOffsetMsg" style="display:none;font-size:11px;margin-top:6px;"></div>
+      <div id="tocOffsetHint" class="modal-hint" style="margin-bottom:10px;">
+        自动视觉目录如果显示“需要确认页码偏移”，现在可以先在上面的“自动视觉目录调整”里一键应用 offset，再补录仍未定位的条目。
       </div>
 
       <button type="button" class="btn btn-pri btn-sm" id="tocImportBtn" onclick="doTocImport()">导入目录</button>
@@ -306,6 +436,8 @@
 <script>
 var fileInput = document.getElementById('fileInput');
 var uploadArea = document.getElementById('uploadArea');
+var cleanupHeaderFooterToggle = document.getElementById('cleanupHeaderFooterToggle');
+var autoVisualTocToggle = document.getElementById('autoVisualTocToggle');
 var progressSection = document.getElementById('progressSection');
 var progressBar = document.getElementById('progressBar');
 var progressLabel = document.getElementById('progressLabel');
@@ -314,6 +446,24 @@ var progressDetail = document.getElementById('progressDetail');
 var liveLogPanel = document.getElementById('liveLogPanel');
 var liveLog = document.getElementById('liveLog');
 var readingEntrancesDisabled = false;
+var docStatusPollTimer = null;
+
+function syncUploadPreferences() {
+  if (!cleanupHeaderFooterToggle || !autoVisualTocToggle) return Promise.resolve();
+  return fetch('{{ url_for("api_upload_preferences") }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': getCsrfToken(),
+    },
+    body: JSON.stringify({
+      clean_header_footer: !!cleanupHeaderFooterToggle.checked,
+      auto_visual_toc: !!autoVisualTocToggle.checked,
+    }),
+  }).catch(function() {
+    return null;
+  });
+}
 
 function preventDragDefaults(e) {
   e.preventDefault();
@@ -327,6 +477,13 @@ function setDragActive(active) {
 uploadArea.addEventListener('click', function() {
   fileInput.click();
 });
+
+if (cleanupHeaderFooterToggle) {
+  cleanupHeaderFooterToggle.addEventListener('change', syncUploadPreferences);
+}
+if (autoVisualTocToggle) {
+  autoVisualTocToggle.addEventListener('change', syncUploadPreferences);
+}
 
 ['dragenter', 'dragover'].forEach(function(evtName) {
   uploadArea.addEventListener(evtName, function(e) {
@@ -401,12 +558,17 @@ function addLog(msg, cls) {
 
 function startUpload(file) {
   setDragActive(false);
+  var cleanupEnabled = !!(cleanupHeaderFooterToggle && cleanupHeaderFooterToggle.checked);
+  var autoVisualEnabled = !!(autoVisualTocToggle && autoVisualTocToggle.checked);
   // Show progress, hide upload area interactivity
   progressSection.style.display = '';
   setReadingEntrancesDisabled(true);
   document.getElementById('uploadIcon').textContent = '⏳';
   document.getElementById('uploadTitle').textContent = file.name;
-  document.getElementById('uploadSubtitle').textContent = '上传中…';
+  document.getElementById('uploadSubtitle').textContent =
+    cleanupEnabled
+      ? (autoVisualEnabled ? '上传中…（增强脚注/尾注 + 自动视觉目录）' : '上传中…（增强脚注/尾注模式）')
+      : (autoVisualEnabled ? '上传中…（快速模式 + 自动视觉目录）' : '上传中…（快速模式）');
   uploadArea.style.pointerEvents = 'none';
   uploadArea.style.opacity = '0.6';
   liveLog.innerHTML = '';
@@ -416,6 +578,12 @@ function startUpload(file) {
   var xhr = new XMLHttpRequest();
   var formData = new FormData();
   formData.append('file', file);
+  if (cleanupEnabled) {
+    formData.append('clean_header_footer', '1');
+  }
+  if (autoVisualEnabled) {
+    formData.append('auto_visual_toc', '1');
+  }
 
   // Upload progress
   xhr.upload.addEventListener('progress', function(e) {
@@ -429,7 +597,11 @@ function startUpload(file) {
     if (xhr.status === 200) {
       var resp = JSON.parse(xhr.responseText);
       if (resp.task_id) {
-        setProgress(30, '文件已上传，开始解析…', '');
+        var uploadDetail = cleanupEnabled ? '已开启页眉页脚清理' : '快速模式：跳过页眉页脚清理';
+        if (autoVisualEnabled) {
+          uploadDetail += '；解析后会继续后台生成自动视觉目录';
+        }
+        setProgress(30, '文件已上传，开始解析…', uploadDetail);
         addLog('文件上传完成');
         startSSE(resp.task_id);
       } else if (resp.error) {
@@ -549,7 +721,64 @@ function startReparse() {
       btn.disabled = false;
       btn.textContent = '🔄 重新解析';
       setReadingEntrancesDisabled(false);
-    });
+  });
+}
+
+function renderDocProcessingStatus(data) {
+  if (!data || !data.has_doc) return;
+  var bgWrap = document.getElementById('backgroundDocStatus');
+  var bgLabel = document.getElementById('backgroundDocStatusLabel');
+  var bgDetail = document.getElementById('backgroundDocStatusDetail');
+  if (bgWrap && bgLabel && bgDetail) {
+    var isVisualRunning = data.toc_visual_status === 'running';
+    bgWrap.style.display = isVisualRunning ? 'block' : 'none';
+    bgLabel.textContent = data.toc_visual_progress_label || data.visual_toc_status_label || '自动视觉目录';
+    bgDetail.textContent = data.toc_visual_progress_detail || data.visual_toc_status_message || '';
+  }
+
+  var enhancementMeta = document.getElementById('enhancementMeta');
+  if (enhancementMeta) {
+    var modeLabel = data.cleanup_headers_footers_enabled ? '增强脚注/尾注模式（已清理）' : '快速模式（未清理）';
+    var translationLabel = data.has_translation_history ? '已有翻译数据' : '暂未生成翻译数据';
+    enhancementMeta.textContent = '当前解析模式：' + modeLabel + ' · 自动视觉目录：' + (data.visual_toc_status_label || '-') + ' · ' + translationLabel;
+  }
+
+  var runVisualBtn = document.getElementById('runVisualTocBtn');
+  if (runVisualBtn) {
+    runVisualBtn.disabled = data.toc_visual_status === 'running';
+    runVisualBtn.textContent = data.toc_visual_status === 'running'
+      ? (data.toc_visual_progress_label || '自动视觉目录生成中…')
+      : '生成/重新生成自动视觉目录';
+  }
+}
+
+function refreshDocProcessingStatus(docId) {
+  var targetDocId = docId || '{{ current_doc_id or "" }}';
+  if (!targetDocId) return Promise.resolve();
+  return fetch('/api/doc_processing_status?doc_id=' + encodeURIComponent(targetDocId))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderDocProcessingStatus(data);
+      return data;
+    })
+    .catch(function() {});
+}
+
+function startDocStatusPolling(docId) {
+  stopDocStatusPolling();
+  var targetDocId = docId || '{{ current_doc_id or "" }}';
+  if (!targetDocId) return;
+  refreshDocProcessingStatus(targetDocId);
+  docStatusPollTimer = setInterval(function() {
+    refreshDocProcessingStatus(targetDocId);
+  }, 3000);
+}
+
+function stopDocStatusPolling() {
+  if (docStatusPollTimer) {
+    clearInterval(docStatusPollTimer);
+    docStatusPollTimer = null;
+  }
 }
 
 function resetUploadArea() {
@@ -567,6 +796,15 @@ function resetUploadArea() {
 var _glossaryDocId = '';
 var _glossaryItems = [];
 var _glossaryPage = 0;
+var _glossaryRetranslatePreview = null;
+var _autoVisualTocItems = [];
+var _autoVisualTocOffset = 0;
+var _autoVisualTocSource = '';
+var _autoVisualTocEditorLoaded = false;
+var _autoVisualTocDraggedItemId = '';
+var _tocHasDraft = false;
+var _userTocEditItems = [];
+var _userTocDraggedIndex = -1;
 var GLOSSARY_PAGE_SIZE = 10;
 
 function formatUnixTimeLocal(ts) {
@@ -583,7 +821,7 @@ function renderTocModalMeta(data) {
   var tocFile = (data && data.toc_file) || {};
   var tocCount = (data && Array.isArray(data.toc)) ? data.toc.length : 0;
   var offset = Number((data && data.offset) || 0);
-  var offsetDisplay = '原书第 1 页 = PDF 第' + (offset + 1) + '页';
+  var offsetDisplay = formatTocOffsetDisplay(offset);
   if (tocFile.exists) {
     var parts = ['当前目录文件：' + (tocFile.display_name || '未命名目录文件')];
     var uploadedAt = formatUnixTimeLocal(tocFile.uploaded_at);
@@ -594,6 +832,17 @@ function renderTocModalMeta(data) {
     meta.textContent = parts.join(' · ');
     return;
   }
+  if (data && data.source === 'auto_visual' && tocCount) {
+    var visualParts = ['自动视觉目录：' + tocCount + ' 条'];
+    if (data.has_toc_draft) {
+      visualParts.push('存在未提交草稿（阅读页仍用当前生效目录，未套用草稿）');
+    }
+    if (data.toc_visual_status === 'needs_offset') {
+      visualParts.push('可先在本弹窗里一键应用 offset，再补录 PDF 页码');
+    }
+    meta.textContent = visualParts.join(' · ');
+    return;
+  }
   if (data && data.source === 'user' && tocCount) {
     meta.textContent = '已导入目录：' + tocCount + ' 条 · ' + offsetDisplay;
     return;
@@ -601,15 +850,1126 @@ function renderTocModalMeta(data) {
   meta.textContent = '尚未导入目录';
 }
 
-function refreshTocModalMeta() {
+function refreshUserEffectiveOffsetHint() {
+  var hint = document.getElementById('userEffectiveOffsetHint');
+  var input = document.getElementById('userEffectiveOffsetInput');
+  if (!hint || !input) return;
+  var raw = String(input.value || '').trim();
+  var offsetValue = parseInt(raw, 10);
+  if (raw === '' || isNaN(offsetValue)) {
+    hint.textContent = '请输入整数 offset（可为负数）。';
+    return;
+  }
+  if (offsetValue >= 0) {
+    hint.textContent = '对照公式：PDF 页码 = 原书页码 + ' + offsetValue + '（原书第 1 页 对应 PDF 第' + (offsetValue + 1) + '页）。编辑 PDF 页码后，原书列会自动更新。';
+  } else {
+    hint.textContent = '对照公式：PDF 页码 = 原书页码 − ' + Math.abs(offsetValue) + '。编辑 PDF 页码后，原书列会自动更新。';
+  }
+}
+
+function syncUserTocDerivedBookPages() {
+  var offIn = document.getElementById('userEffectiveOffsetInput');
+  var rawOff = offIn ? String(offIn.value || '').trim() : '0';
+  var off = parseInt(rawOff, 10);
+  if (rawOff === '' || isNaN(off)) off = 0;
+  var body = document.getElementById('userEffectiveTocBody');
+  if (!body) return;
+  Array.prototype.forEach.call(body.querySelectorAll('tr[data-user-toc-idx]'), function(tr) {
+    var pdfIn = tr.querySelector('.user-toc-pdf-page');
+    var span = tr.querySelector('.user-toc-book-display');
+    if (!span) return;
+    var pv = pdfIn ? parseInt(String(pdfIn.value || '').trim(), 10) : NaN;
+    if (!isNaN(pv) && pv >= 1) {
+      var bp = pv - off;
+      span.textContent = bp >= 1 ? String(bp) : '—';
+      span.style.color = bp >= 1 ? 'var(--txt)' : 'var(--txL)';
+    } else {
+      span.textContent = '—';
+      span.style.color = 'var(--txL)';
+    }
+  });
+}
+
+function clearUserTocDragState() {
+  Array.prototype.forEach.call(
+    document.querySelectorAll('#userEffectiveTocBody tr.user-toc-editor-row.is-drag-source, #userEffectiveTocBody tr.user-toc-editor-row.is-drag-target'),
+    function(row) {
+      row.classList.remove('is-drag-source');
+      row.classList.remove('is-drag-target');
+    }
+  );
+}
+
+function handleUserTocDragStart(event, index) {
+  if (index < 0) return;
+  _userTocDraggedIndex = index;
+  clearUserTocDragState();
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-user-toc-idx]') : null;
+  if (row) row.classList.add('is-drag-source');
+  if (event && event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    try {
+      event.dataTransfer.setData('text/plain', 'user-toc-' + String(index));
+    } catch (err) {}
+  }
+}
+
+function handleUserTocDragOver(event) {
+  if (_userTocDraggedIndex < 0) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  clearUserTocDragState();
+  var sourceRow = document.querySelector('#userEffectiveTocBody tr[data-user-toc-idx="' + _userTocDraggedIndex + '"]');
+  if (sourceRow) sourceRow.classList.add('is-drag-source');
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-user-toc-idx]') : null;
+  if (row) {
+    var tidx = parseInt(row.getAttribute('data-user-toc-idx') || '-1', 10);
+    if (tidx !== _userTocDraggedIndex) row.classList.add('is-drag-target');
+  }
+}
+
+function handleUserTocDragLeave(event) {
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-user-toc-idx]') : null;
+  if (!row) return;
+  if (event && event.relatedTarget && row.contains(event.relatedTarget)) return;
+  row.classList.remove('is-drag-target');
+}
+
+function handleUserTocDragEnd() {
+  _userTocDraggedIndex = -1;
+  clearUserTocDragState();
+}
+
+function handleUserTocDrop(event) {
+  if (_userTocDraggedIndex < 0) {
+    handleUserTocDragEnd();
+    return;
+  }
+  var dropRow = event && event.currentTarget ? event.currentTarget.closest('tr[data-user-toc-idx]') : null;
+  var targetIdxStr = dropRow ? dropRow.getAttribute('data-user-toc-idx') : '';
+  if (!targetIdxStr) {
+    handleUserTocDragEnd();
+    return;
+  }
+  event.preventDefault();
+  captureUserTocEditInputs();
+  var sourceIndex = _userTocDraggedIndex;
+  var targetIndex = parseInt(targetIdxStr, 10);
+  if (isNaN(targetIndex) || sourceIndex < 0 || targetIndex < 0) {
+    handleUserTocDragEnd();
+    return;
+  }
+  var row = dropRow;
+  var insertAfter = false;
+  if (row) {
+    var rect = row.getBoundingClientRect();
+    insertAfter = event.clientY > (rect.top + rect.height / 2);
+  }
+  var insertIndex = targetIndex + (insertAfter ? 1 : 0);
+  if (sourceIndex < insertIndex) insertIndex -= 1;
+  if (sourceIndex === insertIndex) {
+    handleUserTocDragEnd();
+    return;
+  }
+  var moved = _userTocEditItems.splice(sourceIndex, 1)[0];
+  _userTocEditItems.splice(insertIndex, 0, moved);
+  handleUserTocDragEnd();
+  renderUserTocEditorTable();
+  setTocMsg('已通过拖拽调整顺序，点击「保存对用户目录的修改」后生效', 'ok');
+}
+
+function renderUserTocEditorTable() {
+  var body = document.getElementById('userEffectiveTocBody');
+  if (!body) return;
+  handleUserTocDragEnd();
+  body.innerHTML = '';
+  _userTocEditItems.forEach(function(row, idx) {
+    var tr = document.createElement('tr');
+    tr.className = 'user-toc-editor-row';
+    tr.setAttribute('data-user-toc-idx', String(idx));
+    tr.style.borderBottom = '1px solid var(--bdrL)';
+    tr.ondragover = handleUserTocDragOver;
+    tr.ondragleave = handleUserTocDragLeave;
+    tr.ondrop = handleUserTocDrop;
+    var tdN = document.createElement('td');
+    tdN.style.padding = '8px 4px';
+    var orderWrap = document.createElement('div');
+    orderWrap.className = 'auto-visual-order-cell';
+    var dragHandle = document.createElement('button');
+    dragHandle.type = 'button';
+    dragHandle.className = 'auto-visual-drag-handle';
+    dragHandle.draggable = true;
+    dragHandle.textContent = '⋮⋮';
+    dragHandle.title = '拖拽调整顺序';
+    dragHandle.setAttribute('aria-label', '拖拽调整顺序');
+    dragHandle.ondragstart = function(event) { handleUserTocDragStart(event, idx); };
+    dragHandle.ondragend = handleUserTocDragEnd;
+    var orderBadge = document.createElement('span');
+    orderBadge.textContent = String(idx + 1);
+    orderBadge.style.minWidth = '18px';
+    orderBadge.style.fontWeight = '600';
+    orderBadge.style.color = 'var(--txt)';
+    orderWrap.appendChild(dragHandle);
+    orderWrap.appendChild(orderBadge);
+    tdN.appendChild(orderWrap);
+    var tdT = document.createElement('td');
+    tdT.style.padding = '6px 4px';
+    var inT = document.createElement('input');
+    inT.type = 'text';
+    inT.className = 'user-toc-title';
+    inT.value = row.title;
+    inT.style.cssText = 'width:100%;min-width:160px;padding:4px 6px;font-size:12px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);';
+    tdT.appendChild(inT);
+    var tdD = document.createElement('td');
+    tdD.style.padding = '6px 4px';
+    var inD = document.createElement('input');
+    inD.type = 'number';
+    inD.className = 'user-toc-depth';
+    inD.min = '0';
+    inD.step = '1';
+    inD.value = String(row.depth);
+    inD.style.cssText = 'width:64px;padding:4px 6px;font-size:12px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);';
+    tdD.appendChild(inD);
+    var tdPdf = document.createElement('td');
+    tdPdf.style.padding = '6px 4px';
+    var inPdf = document.createElement('input');
+    inPdf.type = 'number';
+    inPdf.className = 'user-toc-pdf-page';
+    inPdf.min = '1';
+    inPdf.step = '1';
+    inPdf.value = String(row.pdf_page);
+    inPdf.style.cssText = 'width:80px;padding:4px 6px;font-size:12px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);';
+    inPdf.oninput = syncUserTocDerivedBookPages;
+    tdPdf.appendChild(inPdf);
+    var tdBook = document.createElement('td');
+    tdBook.style.padding = '6px 4px';
+    var spBook = document.createElement('span');
+    spBook.className = 'user-toc-book-display';
+    spBook.style.fontSize = '12px';
+    tdBook.appendChild(spBook);
+    var tdAct = document.createElement('td');
+    tdAct.style.padding = '6px 4px';
+    var wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.flexWrap = 'wrap';
+    wrap.style.gap = '6px';
+    var upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'btn btn-sec btn-sm';
+    upBtn.textContent = '↑';
+    upBtn.disabled = idx === 0;
+    upBtn.onclick = function() { moveUserTocRow(idx, -1); };
+    var downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'btn btn-sec btn-sm';
+    downBtn.textContent = '↓';
+    downBtn.disabled = idx === _userTocEditItems.length - 1;
+    downBtn.onclick = function() { moveUserTocRow(idx, 1); };
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'btn btn-red-ghost btn-sm';
+    delBtn.textContent = '删除';
+    delBtn.onclick = function() { removeUserTocRow(idx); };
+    wrap.appendChild(upBtn);
+    wrap.appendChild(downBtn);
+    wrap.appendChild(delBtn);
+    tdAct.appendChild(wrap);
+    tr.appendChild(tdN);
+    tr.appendChild(tdT);
+    tr.appendChild(tdD);
+    tr.appendChild(tdPdf);
+    tr.appendChild(tdBook);
+    tr.appendChild(tdAct);
+    body.appendChild(tr);
+  });
+  syncUserTocDerivedBookPages();
+}
+
+function captureUserTocEditInputs() {
+  var body = document.getElementById('userEffectiveTocBody');
+  if (!body) return;
+  var trs = body.querySelectorAll('tr[data-user-toc-idx]');
+  var next = [];
+  Array.prototype.forEach.call(trs, function(tr) {
+    var titleIn = tr.querySelector('.user-toc-title');
+    var depthIn = tr.querySelector('.user-toc-depth');
+    var pdfIn = tr.querySelector('.user-toc-pdf-page');
+    next.push({
+      title: titleIn ? String(titleIn.value || '').trim() : '',
+      depth: depthIn ? Number(depthIn.value || 0) : 0,
+      pdf_page: pdfIn ? Number(pdfIn.value || 0) : 0,
+    });
+  });
+  // 只要 DOM 有行就直接同步；不做长度守卫——守卫会在 offset 应用后的
+  // refreshTocModalFromServerLight 中静默丢弃用户已编辑的内容（H1 bug）。
+  if (next.length > 0 || trs.length > 0) {
+    _userTocEditItems = next;
+  }
+}
+
+function moveUserTocRow(index, delta) {
+  captureUserTocEditInputs();
+  var j = index + delta;
+  if (index < 0 || j < 0 || j >= _userTocEditItems.length) return;
+  var tmp = _userTocEditItems[index];
+  _userTocEditItems[index] = _userTocEditItems[j];
+  _userTocEditItems[j] = tmp;
+  renderUserTocEditorTable();
+}
+
+function removeUserTocRow(index) {
+  captureUserTocEditInputs();
+  if (index < 0 || index >= _userTocEditItems.length) return;
+  _userTocEditItems.splice(index, 1);
+  renderUserTocEditorTable();
+  setTocMsg('已移除该行，点击「保存对用户目录的修改」后生效', 'ok');
+}
+
+/** 自动视觉目录有条目时隐藏「当前生效目录」编辑区，避免两个编辑器同时出现。 */
+function _syncTocSectionVisibility() {
+  var userSection = document.getElementById('userEffectiveTocSection');
+  if (!userSection) return;
+  var hasVisual = (_autoVisualTocItems || []).length > 0 || _autoVisualTocEditorLoaded;
+  if (hasVisual) {
+    userSection.style.display = 'none';
+  }
+}
+
+function renderUserEffectiveTocPreview(data) {
+  var section = document.getElementById('userEffectiveTocSection');
+  var body = document.getElementById('userEffectiveTocBody');
+  if (!section || !body) return;
+  var rows = (data && data.source === 'user' && Array.isArray(data.toc)) ? data.toc : [];
+  if (!rows.length) {
+    section.style.display = 'none';
+    body.innerHTML = '';
+    _userTocEditItems = [];
+    return;
+  }
+  section.style.display = '';
+  var off = Number((data && data.offset) || 0);
+  _userTocEditItems = rows.map(function(r) {
+    var bp = r && r.book_page != null ? Number(r.book_page) : 1;
+    return {
+      title: String((r && r.title) || ''),
+      depth: Number(r && r.depth != null ? r.depth : 0),
+      pdf_page: bp + off,
+    };
+  });
+  _userTocEditItems.sort(function(a, b) { return (a.pdf_page || 0) - (b.pdf_page || 0); });
+  var offIn = document.getElementById('userEffectiveOffsetInput');
+  if (offIn) {
+    offIn.value = String(off);
+    offIn.oninput = function() {
+      refreshUserEffectiveOffsetHint();
+      syncUserTocDerivedBookPages();
+    };
+  }
+  refreshUserEffectiveOffsetHint();
+  renderUserTocEditorTable();
+}
+
+function applyUserEffectiveOffset() {
+  if (!_glossaryDocId) return;
+  if (_autoVisualTocSource !== 'user') {
+    setTocMsg('当前生效目录不是用户目录，无法在此应用 offset', 'error');
+    return;
+  }
+  var input = document.getElementById('userEffectiveOffsetInput');
+  if (!input) return;
+  var raw = String(input.value || '').trim();
+  var offsetValue = parseInt(raw, 10);
+  if (raw === '' || isNaN(offsetValue)) {
+    setTocMsg('请输入整数 offset，可为负数', 'error');
+    return;
+  }
+  captureUserTocEditInputs();
+  var btn = document.getElementById('userEffectiveOffsetApplyBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '应用中…';
+  }
+  fetch('/api/toc/set_offset?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+    body: JSON.stringify({ offset: offsetValue }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '应用 offset 到阅读页';
+      }
+      if (!d.ok) {
+        setTocMsg(d.error || 'offset 保存失败', 'error');
+        return;
+      }
+      _autoVisualTocOffset = Number(d.offset || 0);
+      setTocMsg('已应用 offset：' + formatTocOffsetDisplay(_autoVisualTocOffset), 'ok');
+      refreshTocModalFromServerLight();
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '应用 offset 到阅读页';
+      }
+      setTocMsg('请求失败：' + err, 'error');
+    });
+}
+
+function saveUserTocEdits() {
+  if (!_glossaryDocId) return;
+  captureUserTocEditInputs();
+  var offIn = document.getElementById('userEffectiveOffsetInput');
+  if (!offIn) return;
+  var rawOff = String(offIn.value || '').trim();
+  var offsetVal = parseInt(rawOff, 10);
+  if (rawOff === '' || isNaN(offsetVal)) {
+    setTocMsg('请先填写整数 offset（与保存一并写入）', 'error');
+    return;
+  }
+  if (!_userTocEditItems.length) {
+    setTocMsg('没有可保存的目录行', 'error');
+    return;
+  }
+  for (var i = 0; i < _userTocEditItems.length; i += 1) {
+    var row = _userTocEditItems[i];
+    if (!String(row.title || '').trim()) {
+      setTocMsg('第 ' + (i + 1) + ' 行标题不能为空', 'error');
+      return;
+    }
+    if (!Number.isFinite(Number(row.depth)) || Number(row.depth) < 0) {
+      setTocMsg('第 ' + (i + 1) + ' 行深度必须为大于等于 0 的整数', 'error');
+      return;
+    }
+    if (!Number.isFinite(Number(row.pdf_page)) || Number(row.pdf_page) < 1) {
+      setTocMsg('第 ' + (i + 1) + ' 行 PDF 页码必须为大于等于 1 的整数', 'error');
+      return;
+    }
+    if (Number(row.pdf_page) - offsetVal < 1) {
+      setTocMsg('第 ' + (i + 1) + ' 行：在该 offset 下 PDF 页码过小，对应原书页将小于 1', 'error');
+      return;
+    }
+  }
+  var btn = document.getElementById('userTocSaveBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '保存中…';
+  }
+  fetch('/api/toc/update_user?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+    body: JSON.stringify({
+      items: _userTocEditItems.map(function(row) {
+        return {
+          title: String(row.title || '').trim(),
+          depth: Number(row.depth || 0),
+          pdf_page: Number(row.pdf_page),
+        };
+      }),
+      offset: offsetVal,
+    }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '保存对用户目录的修改';
+      }
+      if (!d.ok) {
+        setTocMsg(d.error || '保存失败', 'error');
+        return;
+      }
+      setTocMsg('已保存用户目录（共 ' + (d.updated || 0) + ' 条）', 'ok');
+      refreshTocModalFromServerFull();
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '保存对用户目录的修改';
+      }
+      setTocMsg('请求失败：' + err, 'error');
+    });
+}
+
+function formatTocOffsetDisplay(offset) {
+  var value = Number(offset || 0);
+  var signed = value > 0 ? ('+' + value) : String(value);
+  if (value >= 0) {
+    return '当前 offset：' + signed + '（原书第 1 页 = PDF 第' + (value + 1) + '页）';
+  }
+  return '当前 offset：' + signed + '（PDF 页码 = 原书页码 ' + signed + '）';
+}
+
+function normalizeAutoVisualTocItems(items) {
+  return (items || []).map(function(item, index) {
+    return {
+      item_id: String((item && item.item_id) || ''),
+      title: String((item && item.title) || ''),
+      depth: Number((item && item.depth) || 0),
+      file_idx: item && item.file_idx != null ? Number(item.file_idx) : null,
+      book_page: item && item.book_page != null ? Number(item.book_page) : null,
+      pdf_page: item && item.pdf_page != null ? Number(item.pdf_page) : null,
+      visual_order: Number((item && item.visual_order) || (index + 1)),
+    };
+  });
+}
+
+function findAutoVisualTocItemIndex(itemId) {
+  return (_autoVisualTocItems || []).findIndex(function(item) {
+    return String((item && item.item_id) || '') === String(itemId || '');
+  });
+}
+
+function clearAutoVisualTocDragState() {
+  Array.prototype.forEach.call(
+    document.querySelectorAll('#autoVisualTocEditorBody tr.is-drag-source, #autoVisualTocEditorBody tr.is-drag-target'),
+    function(row) {
+      row.classList.remove('is-drag-source');
+      row.classList.remove('is-drag-target');
+    }
+  );
+}
+
+function handleAutoVisualTocDragStart(event, itemId) {
+  if (!itemId) return;
+  _autoVisualTocDraggedItemId = String(itemId);
+  clearAutoVisualTocDragState();
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-item-id]') : null;
+  if (row) row.classList.add('is-drag-source');
+  if (event && event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    try {
+      event.dataTransfer.setData('text/plain', String(itemId));
+    } catch (err) {}
+  }
+}
+
+function handleAutoVisualTocDragOver(event) {
+  if (!_autoVisualTocDraggedItemId) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  clearAutoVisualTocDragState();
+  var sourceRow = document.querySelector('#autoVisualTocEditorBody tr[data-item-id="' + _autoVisualTocDraggedItemId + '"]');
+  if (sourceRow) sourceRow.classList.add('is-drag-source');
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-item-id]') : null;
+  if (row && row.getAttribute('data-item-id') !== _autoVisualTocDraggedItemId) {
+    row.classList.add('is-drag-target');
+  }
+}
+
+function handleAutoVisualTocDragLeave(event) {
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-item-id]') : null;
+  if (!row) return;
+  if (event && event.relatedTarget && row.contains(event.relatedTarget)) return;
+  row.classList.remove('is-drag-target');
+}
+
+function handleAutoVisualTocDragEnd() {
+  _autoVisualTocDraggedItemId = '';
+  clearAutoVisualTocDragState();
+}
+
+function handleAutoVisualTocDrop(event, targetItemId) {
+  if (!_autoVisualTocDraggedItemId || !targetItemId) {
+    handleAutoVisualTocDragEnd();
+    return;
+  }
+  event.preventDefault();
+  captureAutoVisualTocInputs();
+  var sourceIndex = findAutoVisualTocItemIndex(_autoVisualTocDraggedItemId);
+  var targetIndex = findAutoVisualTocItemIndex(targetItemId);
+  if (sourceIndex < 0 || targetIndex < 0) {
+    handleAutoVisualTocDragEnd();
+    return;
+  }
+  var row = event && event.currentTarget ? event.currentTarget.closest('tr[data-item-id]') : null;
+  var insertAfter = false;
+  if (row) {
+    var rect = row.getBoundingClientRect();
+    insertAfter = event.clientY > (rect.top + rect.height / 2);
+  }
+  var insertIndex = targetIndex + (insertAfter ? 1 : 0);
+  if (sourceIndex < insertIndex) insertIndex -= 1;
+  if (sourceIndex === insertIndex) {
+    handleAutoVisualTocDragEnd();
+    return;
+  }
+  var moved = _autoVisualTocItems.splice(sourceIndex, 1)[0];
+  _autoVisualTocItems.splice(insertIndex, 0, moved);
+  handleAutoVisualTocDragEnd();
+  renderAutoVisualTocEditor();
+  setTocMsg('已调整本地目录顺序，点击“保存自动视觉目录调整”后生效', 'ok');
+}
+
+function captureAutoVisualTocInputs() {
+  var rows = document.querySelectorAll('#autoVisualTocEditorBody tr[data-item-id]');
+  if (!rows.length) return;
+  _autoVisualTocItems = Array.prototype.map.call(rows, function(row, index) {
+    var itemId = row.getAttribute('data-item-id') || '';
+    var current = (_autoVisualTocItems || []).find(function(item) { return item.item_id === itemId; }) || {};
+    var titleInput = row.querySelector('.auto-visual-title');
+    var depthInput = row.querySelector('.auto-visual-depth');
+    var pdfPageInput = row.querySelector('.auto-visual-pdf-page');
+    var rawPdfPage = pdfPageInput ? String(pdfPageInput.value || '').trim() : '';
+    return {
+      item_id: itemId,
+      title: titleInput ? String(titleInput.value || '').trim() : String(current.title || ''),
+      depth: depthInput ? Number(depthInput.value || 0) : Number(current.depth || 0),
+      file_idx: current.file_idx != null ? Number(current.file_idx) : null,
+      book_page: current.book_page != null ? Number(current.book_page) : null,
+      pdf_page: rawPdfPage ? Number(rawPdfPage) : null,
+      visual_order: index + 1,
+    };
+  });
+}
+
+function renderAutoVisualOffsetEditor(hasItems) {
+  var input = document.getElementById('autoVisualOffsetInput');
+  var applyBtn = document.getElementById('applyAutoVisualOffsetBtn');
+  var summary = document.getElementById('autoVisualOffsetSummary');
+  var hint = document.getElementById('autoVisualOffsetHint');
+  if (!input || !applyBtn || !summary || !hint) return;
+  input.value = String(Number(_autoVisualTocOffset || 0));
+  var offsetValue = Number(_autoVisualTocOffset || 0);
+  var formula = offsetValue >= 0
+    ? ('PDF 页码 = 原书页码 + ' + offsetValue)
+    : ('PDF 页码 = 原书页码 - ' + Math.abs(offsetValue));
+  summary.textContent = '当前公式：' + formula + '。';
+  var active = !!hasItems && _autoVisualTocSource === 'auto_visual';
+  input.disabled = !active;
+  applyBtn.disabled = !active;
+  if (!hasItems) {
+    hint.textContent = '当前还没有可调整的自动视觉目录。';
+    return;
+  }
+  if (active) {
+    hint.textContent = '当前生效目录就是自动视觉目录，可以直接批量校准。';
+  } else {
+    hint.textContent = '当前生效目录不是自动视觉目录；为避免误改，这里的 offset 批量校准暂时不会直接启用。';
+  }
+}
+
+function renderAutoVisualTocEditor(items) {
+  var section = document.getElementById('autoVisualTocEditorSection');
+  var body = document.getElementById('autoVisualTocEditorBody');
+  var empty = document.getElementById('autoVisualTocEditorEmpty');
+  var wrap = document.getElementById('autoVisualTocEditorWrap');
+  var saveBtn = document.getElementById('saveAutoVisualTocBtn');
+  if (!section || !body || !empty || !wrap || !saveBtn) return;
+
+  if (Array.isArray(items)) {
+    _autoVisualTocItems = normalizeAutoVisualTocItems(items);
+    _autoVisualTocEditorLoaded = items.length > 0;
+  }
+  handleAutoVisualTocDragEnd();
+  var rowsData = _autoVisualTocItems || [];
+  var keepEditorVisible = rowsData.length > 0 || _autoVisualTocEditorLoaded;
+  section.style.display = keepEditorVisible ? '' : 'none';
+  empty.style.display = rowsData.length ? 'none' : '';
+  wrap.style.display = rowsData.length ? '' : 'none';
+  saveBtn.disabled = !keepEditorVisible;
+  renderAutoVisualOffsetEditor(rowsData.length > 0);
+  body.innerHTML = '';
+  if (!rowsData.length) {
+    if (_autoVisualTocEditorLoaded) {
+      empty.textContent = '当前已删空本地目录项。点击“保存自动视觉目录调整”后才会真正写回。';
+    } else {
+      empty.textContent = '当前还没有可调整的自动视觉目录。先生成自动视觉目录后，这里会出现可编辑条目。';
+    }
+    return;
+  }
+
+  rowsData.forEach(function(item, index) {
+    var tr = document.createElement('tr');
+    tr.className = 'auto-visual-toc-row';
+    tr.setAttribute('data-item-id', item.item_id);
+    tr.style.borderBottom = '1px solid var(--bdrL)';
+    tr.ondragover = handleAutoVisualTocDragOver;
+    tr.ondragleave = handleAutoVisualTocDragLeave;
+    tr.ondrop = function(event) { handleAutoVisualTocDrop(event, item.item_id); };
+
+    var orderTd = document.createElement('td');
+    orderTd.style.padding = '8px 4px';
+    var orderWrap = document.createElement('div');
+    orderWrap.className = 'auto-visual-order-cell';
+    var orderBadge = document.createElement('span');
+    orderBadge.textContent = String(index + 1);
+    orderBadge.style.minWidth = '18px';
+    orderBadge.style.fontWeight = '600';
+    orderBadge.style.color = 'var(--txt)';
+    var dragHandle = document.createElement('button');
+    dragHandle.type = 'button';
+    dragHandle.className = 'auto-visual-drag-handle';
+    dragHandle.draggable = true;
+    dragHandle.textContent = '⋮⋮';
+    dragHandle.title = '拖拽调整顺序';
+    dragHandle.setAttribute('aria-label', '拖拽调整顺序');
+    dragHandle.ondragstart = function(event) { handleAutoVisualTocDragStart(event, item.item_id); };
+    dragHandle.ondragend = handleAutoVisualTocDragEnd;
+    var orderActions = document.createElement('div');
+    orderActions.className = 'auto-visual-order-actions';
+    var upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'btn btn-sec btn-sm';
+    upBtn.textContent = '↑';
+    upBtn.disabled = index === 0;
+    upBtn.onclick = function() { moveAutoVisualTocItem(index, -1); };
+    var downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'btn btn-sec btn-sm';
+    downBtn.textContent = '↓';
+    downBtn.disabled = index >= rowsData.length - 1;
+    downBtn.onclick = function() { moveAutoVisualTocItem(index, 1); };
+    orderActions.appendChild(orderBadge);
+    orderActions.appendChild(upBtn);
+    orderActions.appendChild(downBtn);
+    orderWrap.appendChild(dragHandle);
+    orderWrap.appendChild(orderActions);
+    orderTd.appendChild(orderWrap);
+
+    var titleTd = document.createElement('td');
+    titleTd.style.padding = '8px 4px';
+    var titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.className = 'auto-visual-title';
+    titleInput.value = item.title || '';
+    titleInput.style.width = '100%';
+    titleInput.style.fontSize = '12px';
+    titleTd.appendChild(titleInput);
+
+    var depthTd = document.createElement('td');
+    depthTd.style.padding = '8px 4px';
+    var depthInput = document.createElement('input');
+    depthInput.type = 'number';
+    depthInput.min = '0';
+    depthInput.step = '1';
+    depthInput.className = 'auto-visual-depth';
+    depthInput.value = String(item.depth || 0);
+    depthInput.style.width = '74px';
+    depthInput.style.fontSize = '12px';
+    depthTd.appendChild(depthInput);
+
+    var pdfPageTd = document.createElement('td');
+    pdfPageTd.style.padding = '8px 4px';
+    var pdfPageInput = document.createElement('input');
+    pdfPageInput.type = 'number';
+    pdfPageInput.min = '1';
+    pdfPageInput.step = '1';
+    pdfPageInput.className = 'auto-visual-pdf-page';
+    pdfPageInput.placeholder = 'PDF页码';
+    pdfPageInput.value = item.pdf_page != null ? String(item.pdf_page) : '';
+    pdfPageInput.style.width = '92px';
+    pdfPageInput.style.fontSize = '12px';
+    pdfPageTd.appendChild(pdfPageInput);
+
+    var infoTd = document.createElement('td');
+    infoTd.style.padding = '8px 4px';
+    infoTd.style.fontSize = '11px';
+    infoTd.style.color = 'var(--txL)';
+    var infoWrap = document.createElement('div');
+    infoWrap.style.display = 'flex';
+    infoWrap.style.flexDirection = 'column';
+    infoWrap.style.alignItems = 'flex-start';
+    infoWrap.style.gap = '6px';
+    var infoText = document.createElement('div');
+    // file_idx 已设定 → 条目已解析，优先显示 PDF 页码
+    if (item.pdf_page != null) {
+      infoText.textContent = '已映射到 PDF 第' + item.pdf_page + '页'
+        + (item.book_page != null ? '（原书页码：' + item.book_page + '）' : '');
+    } else if (item.book_page != null) {
+      infoText.textContent = '原书页码：' + item.book_page + '（待补录 PDF 页）';
+    } else {
+      infoText.textContent = '暂未定位';
+    }
+    infoWrap.appendChild(infoText);
+    if (item.book_page != null) {
+      var inferBtn = document.createElement('button');
+      inferBtn.type = 'button';
+      inferBtn.className = 'btn btn-sec btn-sm';
+      inferBtn.textContent = '用本条反推 offset';
+      inferBtn.disabled = _autoVisualTocSource !== 'auto_visual';
+      inferBtn.onclick = function() { inferAutoVisualOffsetFromRow(index); };
+      infoWrap.appendChild(inferBtn);
+    }
+    var deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'btn btn-red-ghost btn-sm';
+    deleteBtn.textContent = '删除此条';
+    deleteBtn.onclick = function() { removeAutoVisualTocItem(index); };
+    infoWrap.appendChild(deleteBtn);
+    infoTd.appendChild(infoWrap);
+
+    tr.appendChild(orderTd);
+    tr.appendChild(titleTd);
+    tr.appendChild(depthTd);
+    tr.appendChild(pdfPageTd);
+    tr.appendChild(infoTd);
+    body.appendChild(tr);
+  });
+}
+
+function moveAutoVisualTocItem(index, delta) {
+  captureAutoVisualTocInputs();
+  var nextIndex = index + delta;
+  if (index < 0 || nextIndex < 0 || nextIndex >= _autoVisualTocItems.length) return;
+  var moved = _autoVisualTocItems.splice(index, 1)[0];
+  _autoVisualTocItems.splice(nextIndex, 0, moved);
+  renderAutoVisualTocEditor();
+}
+
+function removeAutoVisualTocItem(index) {
+  captureAutoVisualTocInputs();
+  if (index < 0 || index >= _autoVisualTocItems.length) return;
+  _autoVisualTocItems.splice(index, 1);
+  _autoVisualTocEditorLoaded = true;
+  renderAutoVisualTocEditor();
+  setTocMsg('已从本地移除该目录项，请点击「保存草稿」或「直接写回自动视觉」后生效', 'ok');
+}
+
+function applyAutoVisualOffset(successMsg) {
+  if (!_glossaryDocId) return;
+  if (_autoVisualTocSource !== 'auto_visual') {
+    setTocMsg('当前生效目录不是自动视觉目录，暂时不能在这里批量应用 offset', 'error');
+    return;
+  }
+  var input = document.getElementById('autoVisualOffsetInput');
+  if (!input) return;
+  var raw = String(input.value || '').trim();
+  var offsetValue = parseInt(raw, 10);
+  if (raw === '' || isNaN(offsetValue)) {
+    setTocMsg('请输入整数 offset，可为负数', 'error');
+    return;
+  }
+  if (_tocHasDraft) {
+    _autoVisualTocOffset = offsetValue;
+    renderAutoVisualOffsetEditor((_autoVisualTocItems || []).length > 0);
+    setTocMsg(successMsg || ('已设置草稿 offset：' + formatTocOffsetDisplay(_autoVisualTocOffset) + '（请点击「保存草稿」持久化）'), 'ok');
+    return;
+  }
+  var btn = document.getElementById('applyAutoVisualOffsetBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '应用中…';
+  }
+  fetch('/api/toc/set_offset?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+    body: JSON.stringify({ offset: offsetValue }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '一键应用当前 offset';
+      }
+      if (!d.ok) {
+        setTocMsg(d.error || 'offset 保存失败', 'error');
+        return;
+      }
+      _autoVisualTocOffset = Number(d.offset || 0);
+      renderAutoVisualOffsetEditor((_autoVisualTocItems || []).length > 0);
+      setTocMsg(successMsg || ('已应用 offset：' + formatTocOffsetDisplay(_autoVisualTocOffset)), 'ok');
+      refreshTocModalFromServerLight();
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '一键应用当前 offset';
+      }
+      setTocMsg('请求失败：' + err, 'error');
+    });
+}
+
+function inferAutoVisualOffsetFromRow(index) {
+  captureAutoVisualTocInputs();
+  var item = (_autoVisualTocItems || [])[index];
+  if (!item) {
+    setTocMsg('未找到目录项', 'error');
+    return;
+  }
+  if (_autoVisualTocSource !== 'auto_visual') {
+    setTocMsg('当前生效目录不是自动视觉目录，暂时不能在这里反推 offset', 'error');
+    return;
+  }
+  if (item.book_page == null || !Number.isFinite(Number(item.book_page))) {
+    setTocMsg('这条目录没有可用的原书页码，无法反推 offset', 'error');
+    return;
+  }
+  if (item.pdf_page == null || !Number.isFinite(Number(item.pdf_page))) {
+    setTocMsg('请先在这条目录里填写正确的 PDF 页码，再反推 offset', 'error');
+    return;
+  }
+  var inferredOffset = Number(item.pdf_page) - Number(item.book_page);
+  _autoVisualTocOffset = inferredOffset;
+  renderAutoVisualOffsetEditor((_autoVisualTocItems || []).length > 0);
+  applyAutoVisualOffset('已根据「' + item.title + '」反推并应用 offset：' + formatTocOffsetDisplay(inferredOffset));
+}
+
+/** 从服务器拉取目录：更新 meta、offset，并重绘自动视觉目录表格（与 SQLite 对齐）。 */
+function applyTocOffsetFieldsFromServer(d) {
+  _tocHasDraft = !!(d && d.has_toc_draft);
+  if (_tocHasDraft) {
+    _autoVisualTocOffset = Number((d && d.draft_pending_offset) || 0);
+  } else {
+    _autoVisualTocOffset = Number((d && d.offset) || 0);
+  }
+  _autoVisualTocSource = String((d && d.source) || '');
+}
+
+function refreshTocModalFromServerFull() {
   if (!_glossaryDocId) return Promise.resolve();
   return fetch('/pdf_toc?doc_id=' + encodeURIComponent(_glossaryDocId))
     .then(function(r) { return r.json(); })
     .then(function(d) {
+      applyTocOffsetFieldsFromServer(d);
       renderTocModalMeta(d);
+      renderUserEffectiveTocPreview(d);
+      renderAutoVisualTocEditor(d.auto_visual_toc || []);
+      _syncTocSectionVisibility();
       return d;
     })
     .catch(function() {});
+}
+
+/** 仅同步 meta 与 offset 区，不覆盖当前表格草稿（用于应用 offset、保存后对齐文案等）。 */
+function refreshTocModalFromServerLight() {
+  if (!_glossaryDocId) return Promise.resolve();
+  return fetch('/pdf_toc?doc_id=' + encodeURIComponent(_glossaryDocId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      captureUserTocEditInputs();
+      var prevOff = Number(_autoVisualTocOffset || 0);
+      var preserveUserTocDraft =
+        String((d && d.source) || '') === 'user' &&
+        _userTocEditItems &&
+        _userTocEditItems.length > 0;
+      applyTocOffsetFieldsFromServer(d);
+      renderTocModalMeta(d);
+      var newOff = Number((d && d.offset) || 0);
+      if (preserveUserTocDraft) {
+        _userTocEditItems = _userTocEditItems.map(function(row) {
+          var pp = Number(row.pdf_page);
+          if (!Number.isFinite(pp)) return row;
+          return {
+            title: row.title,
+            depth: row.depth,
+            pdf_page: pp - prevOff + newOff,
+          };
+        });
+        var offIn = document.getElementById('userEffectiveOffsetInput');
+        if (offIn) {
+          offIn.value = String(newOff);
+          offIn.oninput = function() {
+            refreshUserEffectiveOffsetHint();
+            syncUserTocDerivedBookPages();
+          };
+        }
+        refreshUserEffectiveOffsetHint();
+        renderUserTocEditorTable();
+      } else {
+        renderUserEffectiveTocPreview(d);
+      }
+      renderAutoVisualOffsetEditor((_autoVisualTocItems || []).length > 0);
+      _syncTocSectionVisibility();
+      return d;
+    })
+    .catch(function() {});
+}
+
+function saveAutoVisualTocEdits() {
+  if (!_glossaryDocId) return;
+  captureAutoVisualTocInputs();
+  if (!_autoVisualTocEditorLoaded && !_autoVisualTocItems.length) {
+    setTocMsg('当前没有可调整的自动视觉目录', 'error');
+    return;
+  }
+  for (var i = 0; i < _autoVisualTocItems.length; i += 1) {
+    var item = _autoVisualTocItems[i];
+    if (!item.item_id) {
+      setTocMsg('目录项缺少稳定标识，请先重新生成自动视觉目录', 'error');
+      return;
+    }
+    if (!String(item.title || '').trim()) {
+      setTocMsg('目录标题不能为空', 'error');
+      return;
+    }
+    if (!Number.isFinite(Number(item.depth)) || Number(item.depth) < 0) {
+      setTocMsg('目录深度必须是大于等于 0 的整数', 'error');
+      return;
+    }
+    if (item.pdf_page != null && (!Number.isFinite(Number(item.pdf_page)) || Number(item.pdf_page) < 1)) {
+      setTocMsg('PDF 页码必须是大于等于 1 的整数', 'error');
+      return;
+    }
+  }
+  var btn = document.getElementById('saveAutoVisualTocBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '保存中…';
+  }
+  fetch('/api/toc/update_auto_visual?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+    body: JSON.stringify({
+      items: _autoVisualTocItems.map(function(item) {
+        return {
+          item_id: item.item_id,
+          title: String(item.title || '').trim(),
+          depth: Number(item.depth || 0),
+          pdf_page: item.pdf_page != null ? Number(item.pdf_page) : '',
+        };
+      }),
+    }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '直接写回自动视觉';
+      }
+      if (!d.ok) {
+        setTocMsg(d.error || '保存失败', 'error');
+        return;
+      }
+      setTocMsg('已写回自动视觉目录', 'ok');
+      renderAutoVisualTocEditor(d.auto_visual_toc || []);
+      if (!d.auto_visual_toc || !d.auto_visual_toc.length) {
+        _autoVisualTocEditorLoaded = false;
+      }
+      refreshTocModalFromServerLight();
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '直接写回自动视觉';
+      }
+      setTocMsg('请求失败：' + err, 'error');
+    });
+}
+
+function _collectAutoVisualSubmitPayload() {
+  captureAutoVisualTocInputs();
+  if (!_autoVisualTocEditorLoaded && !_autoVisualTocItems.length) {
+    return { error: '当前没有可调整的自动视觉目录' };
+  }
+  for (var i = 0; i < _autoVisualTocItems.length; i += 1) {
+    var item = _autoVisualTocItems[i];
+    if (!item.item_id) {
+      return { error: '目录项缺少稳定标识，请先重新生成自动视觉目录' };
+    }
+    if (!String(item.title || '').trim()) {
+      return { error: '目录标题不能为空' };
+    }
+    if (!Number.isFinite(Number(item.depth)) || Number(item.depth) < 0) {
+      return { error: '目录深度必须是大于等于 0 的整数' };
+    }
+    if (item.pdf_page != null && (!Number.isFinite(Number(item.pdf_page)) || Number(item.pdf_page) < 1)) {
+      return { error: 'PDF 页码必须是大于等于 1 的整数' };
+    }
+  }
+  var input = document.getElementById('autoVisualOffsetInput');
+  var rawOff = input ? String(input.value || '').trim() : '0';
+  var pendingOffset = parseInt(rawOff, 10);
+  if (rawOff === '' || isNaN(pendingOffset)) {
+    return { error: '请输入整数 offset，可为负数' };
+  }
+  var items = _autoVisualTocItems.map(function(item) {
+    return {
+      item_id: item.item_id,
+      title: String(item.title || '').trim(),
+      depth: Number(item.depth || 0),
+      pdf_page: item.pdf_page != null ? Number(item.pdf_page) : '',
+    };
+  });
+  return { items: items, pending_offset: pendingOffset };
+}
+
+function saveVisualDraft() {
+  if (!_glossaryDocId) return;
+  var payload = _collectAutoVisualSubmitPayload();
+  if (payload.error) {
+    setTocMsg(payload.error, 'error');
+    return;
+  }
+  var btn = document.getElementById('saveVisualDraftBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '保存中…';
+  }
+  fetch('/api/toc/save_visual_draft?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+    body: JSON.stringify({
+      items: payload.items,
+      pending_offset: payload.pending_offset,
+    }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '保存草稿';
+      }
+      if (!d.ok) {
+        setTocMsg(d.error || '保存草稿失败', 'error');
+        return;
+      }
+      setTocMsg('已保存目录草稿（阅读页生效目录未变）', 'ok');
+      _tocHasDraft = true;
+      _autoVisualTocOffset = Number(d.draft_pending_offset || 0);
+      renderAutoVisualTocEditor(d.auto_visual_toc || []);
+      refreshTocModalFromServerLight();
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '保存草稿';
+      }
+      setTocMsg('请求失败：' + err, 'error');
+    });
+}
+
+function commitVisualDraft() {
+  if (!_glossaryDocId) return;
+  captureAutoVisualTocInputs();
+  var input = document.getElementById('autoVisualOffsetInput');
+  var rawOff = input ? String(input.value || '').trim() : '';
+  var pendingOffset = parseInt(rawOff, 10);
+  if (rawOff === '' || isNaN(pendingOffset)) {
+    setTocMsg('请输入整数 offset（与确认时一并写入用户目录）', 'error');
+    return;
+  }
+  var btn = document.getElementById('commitVisualDraftBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '提交中…';
+  }
+  fetch('/api/toc/commit_visual_draft?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+    body: JSON.stringify({ pending_offset: pendingOffset }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '确认并覆盖为用户目录';
+      }
+      if (!d.ok) {
+        setTocMsg(d.error || '确认失败', 'error');
+        return;
+      }
+      setTocMsg('已写入用户目录并清除草稿', 'ok');
+      refreshTocModalFromServerFull();
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '确认并覆盖为用户目录';
+      }
+      setTocMsg('请求失败：' + err, 'error');
+    });
 }
 
 function openGlossaryModal(docId, docName) {
@@ -620,9 +1980,11 @@ function openGlossaryModal(docId, docName) {
   document.getElementById('tocFileInput').value = '';
   setGlossaryMsg('', '');
   setTocMsg('', '');
-  document.getElementById('tocOffsetWrap').style.display = 'none';
   document.getElementById('glossaryImportBtn').disabled = false;
   document.getElementById('tocImportBtn').disabled = false;
+  var enhancedBtn = document.getElementById('enhancedReparseBtn');
+  if (enhancedBtn) enhancedBtn.disabled = false;
+  renderGlossaryRetranslatePreview(null);
 
   // 拉取词典
   fetch('/api/glossary?doc_id=' + encodeURIComponent(docId), { headers: withCsrfHeaders() })
@@ -635,7 +1997,10 @@ function openGlossaryModal(docId, docName) {
     .catch(function() {});
 
   // 拉取目录信息
-  refreshTocModalMeta();
+  refreshTocModalFromServerFull();
+  refreshGlossaryRetranslatePreview();
+  refreshDocProcessingStatus(docId);
+  startDocStatusPolling(docId);
 
   document.getElementById('glossaryModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -669,6 +2034,118 @@ function renderGlossaryPreview() {
   document.getElementById('glossaryPageInfo').textContent = (_glossaryPage + 1) + ' / ' + totalPages;
   document.getElementById('glossaryPrevBtn').disabled = _glossaryPage === 0;
   document.getElementById('glossaryNextBtn').disabled = _glossaryPage >= totalPages - 1;
+}
+
+function renderGlossaryRetranslatePreview(preview) {
+  var box = document.getElementById('glossaryRetranslateBox');
+  var summary = document.getElementById('glossaryRetranslateSummary');
+  var reason = document.getElementById('glossaryRetranslateReason');
+  var btn = document.getElementById('glossaryRetranslateBtn');
+  _glossaryRetranslatePreview = preview && preview.doc_id ? preview : null;
+  if (!box || !summary || !reason || !btn) return;
+
+  var hasTarget = !!(
+    _glossaryRetranslatePreview
+    && Number(_glossaryRetranslatePreview.affected_pages || 0) > 0
+    && Number(_glossaryRetranslatePreview.affected_segments || 0) > 0
+  );
+  if (!hasTarget) {
+    box.style.display = 'none';
+    summary.textContent = '';
+    reason.textContent = '';
+    btn.disabled = true;
+    return;
+  }
+
+  box.style.display = '';
+  var startBp = Number(_glossaryRetranslatePreview.start_bp || 0);
+  var affectedPages = Number(_glossaryRetranslatePreview.affected_pages || 0);
+  var affectedSegments = Number(_glossaryRetranslatePreview.affected_segments || 0);
+  var skippedManual = Number(_glossaryRetranslatePreview.skipped_manual_segments || 0);
+  var summaryParts = [];
+  if (startBp > 0) {
+    summaryParts.push('起点：PDF 第' + startBp + '页。');
+  }
+  summaryParts.push('预计影响 ' + affectedPages + ' 页、' + affectedSegments + ' 段机器译文。');
+  if (skippedManual > 0) {
+    summaryParts.push('其中 ' + skippedManual + ' 段人工修订会被跳过，不会覆盖。');
+  }
+  summary.textContent = summaryParts.join(' ');
+  reason.textContent = _glossaryRetranslatePreview.can_start ? '' : (_glossaryRetranslatePreview.reason || '');
+  btn.disabled = !_glossaryRetranslatePreview.can_start;
+}
+
+function refreshGlossaryRetranslatePreview() {
+  if (!_glossaryDocId) return Promise.resolve(null);
+  return fetch('/api/glossary_retranslate_preview?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    headers: withCsrfHeaders()
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      renderGlossaryRetranslatePreview(d);
+      return d;
+    })
+    .catch(function() {
+      renderGlossaryRetranslatePreview(null);
+      return null;
+    });
+}
+
+function buildGlossaryRetranslateConfirmText(preview) {
+  var parts = ['预计影响 ' + Number(preview.affected_pages || 0) + ' 页、' + Number(preview.affected_segments || 0) + ' 段。'];
+  var skippedManual = Number(preview.skipped_manual_segments || 0);
+  if (skippedManual > 0) {
+    parts.push('其中 ' + skippedManual + ' 段人工修订会被跳过，不会覆盖。');
+  }
+  parts.push('确认按当前词典开始补重译？');
+  return parts.join('\n\n');
+}
+
+function startGlossaryRetranslateFromModal() {
+  if (!_glossaryDocId) return;
+  var preview = _glossaryRetranslatePreview;
+  if (!preview || !preview.can_start) {
+    refreshGlossaryRetranslatePreview();
+    return;
+  }
+  if (!window.confirm(buildGlossaryRetranslateConfirmText(preview))) {
+    return;
+  }
+  var btn = document.getElementById('glossaryRetranslateBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '补重译启动中…';
+  }
+  var form = new FormData();
+  form.append('doc_id', _glossaryDocId);
+  form.append('start_bp', Number(preview.start_bp || 0));
+  form.append('start_segment_index', Number(preview.start_segment_index || 0));
+  fetch('{{ url_for("start_glossary_retranslate") }}', {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+    body: form,
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d || !d.ok) {
+        renderGlossaryRetranslatePreview(d || preview);
+        setGlossaryMsg((d && (d.message || d.reason)) || '词典补重译启动失败', 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '从上次阅读位置起按当前词典补重译';
+        }
+        return;
+      }
+      var targetBp = Number(d.start_bp || preview.start_bp || 0);
+      window.location.href = '{{ url_for("reading") }}?doc_id=' + encodeURIComponent(_glossaryDocId) + '&bp=' + encodeURIComponent(targetBp) + '&usage=1';
+    })
+    .catch(function(err) {
+      setGlossaryMsg('词典补重译启动失败：' + err, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '从上次阅读位置起按当前词典补重译';
+      }
+    });
 }
 
 function glossaryPageNav(dir) {
@@ -712,6 +2189,7 @@ function doGlossaryImport() {
       if (d.ok) {
         setGlossaryMsg('导入成功：新增/更新 ' + d.imported + ' 条，词典共 ' + d.total + ' 条', 'ok');
         fi.value = '';
+        renderGlossaryRetranslatePreview(d.retranslate_preview || null);
         // 刷新预览
         fetch('/api/glossary?doc_id=' + encodeURIComponent(_glossaryDocId), { headers: withCsrfHeaders() })
           .then(function(r) { return r.json(); })
@@ -749,20 +2227,10 @@ function doTocImport() {
       if (d.ok) {
         setTocMsg('已导入 ' + d.imported + ' 条目录', 'ok');
         fi.value = '';
-        // 显示 offset 校准区
-        var wrap = document.getElementById('tocOffsetWrap');
-        wrap.style.display = '';
-        var autoMsg = document.getElementById('tocOffsetAutoMsg');
-        var offsetInput = document.getElementById('tocOffsetInput');
-        offsetInput.value = d.offset + 1; // 展示给用户：原书第1页=PDF第N页（1-based）
         if (d.offset_auto) {
-          autoMsg.textContent = '已根据「' + d.offset_matched_title + '」自动校准，原书第 1 页 = PDF 第 ' + (d.offset + 1) + ' 页，请确认或修改。';
-          autoMsg.style.color = 'var(--grn)';
-        } else {
-          autoMsg.textContent = '未能自动匹配偏移，请手动输入原书第 1 页对应的 PDF 页码。';
-          autoMsg.style.color = 'var(--txS)';
+          setTocMsg('已导入 ' + d.imported + ' 条目录，并根据「' + d.offset_matched_title + '」自动校准页码偏移', 'ok');
         }
-        refreshTocModalMeta();
+        refreshTocModalFromServerFull();
       } else {
         setTocMsg(d.error || '导入失败', 'error');
       }
@@ -770,44 +2238,85 @@ function doTocImport() {
     .catch(function(err) { btn.disabled = false; setTocMsg('请求失败：' + err, 'error'); });
 }
 
-function doTocSetOffset() {
-  var raw = document.getElementById('tocOffsetInput').value;
-  var pdfPage1 = parseInt(raw, 10); // 用户输入的是"原书第1页 = PDF第N页"（1-based）
-  if (isNaN(pdfPage1) || pdfPage1 < 1) {
-    document.getElementById('tocOffsetMsg').style.display = '';
-    document.getElementById('tocOffsetMsg').textContent = '请输入有效页码（≥1）';
-    document.getElementById('tocOffsetMsg').style.color = 'var(--red)';
-    return;
+function doEnhancedReparse() {
+  if (!_glossaryDocId) return;
+  var btn = document.getElementById('enhancedReparseBtn');
+  if (!window.confirm('这会清空当前文档的翻译数据，并按增强模式整书重解析。确认继续？')) return;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '增强解析启动中…';
   }
-  var offset = pdfPage1 - 1; // 内部存储为 0-based offset
-  fetch('/api/toc/set_offset?doc_id=' + encodeURIComponent(_glossaryDocId), {
+  fetch('/api/doc/reparse_enhanced?doc_id=' + encodeURIComponent(_glossaryDocId), {
     method: 'POST',
-    headers: Object.assign({'Content-Type': 'application/json'}, withCsrfHeaders()),
-    body: JSON.stringify({ offset: offset })
+    headers: withCsrfHeaders(),
   })
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      var msgEl = document.getElementById('tocOffsetMsg');
-      msgEl.style.display = '';
-      if (d.ok) {
-        msgEl.textContent = '偏移已保存，前往阅读页刷新即可使用目录导航';
-        msgEl.style.color = 'var(--grn)';
-        refreshTocModalMeta();
-      } else {
-        msgEl.textContent = d.error || '保存失败';
-        msgEl.style.color = 'var(--red)';
+      if (d.error) {
+        setTocMsg(d.error, 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '增强解析并重跑';
+        }
+        return;
       }
+      closeGlossaryModal();
+      progressSection.style.display = '';
+      liveLog.innerHTML = '';
+      liveLogPanel.style.display = '';
+      setProgress(10, '开始增强解析…', '将清空旧翻译，并按页眉页脚清理模式重跑整书解析');
+      addLog('已启动增强解析重跑');
+      startSSE(d.task_id);
     })
     .catch(function(err) {
-      var msgEl = document.getElementById('tocOffsetMsg');
-      msgEl.style.display = '';
-      msgEl.textContent = '请求失败：' + err;
-      msgEl.style.color = 'var(--red)';
+      setTocMsg('请求失败：' + err, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '增强解析并重跑';
+      }
+    });
+}
+
+function runVisualTocNow() {
+  if (!_glossaryDocId) return;
+  var btn = document.getElementById('runVisualTocBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '自动视觉目录准备中…';
+  }
+  fetch('/api/doc/run_visual_toc?doc_id=' + encodeURIComponent(_glossaryDocId), {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.ok) {
+        setTocMsg(d.error || '启动失败', 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '生成/重新生成自动视觉目录';
+        }
+        return;
+      }
+      setTocMsg('自动视觉目录后台任务已启动', 'ok');
+      refreshDocProcessingStatus(_glossaryDocId);
+      refreshTocModalFromServerLight();
+    })
+    .catch(function(err) {
+      setTocMsg('请求失败：' + err, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '生成/重新生成自动视觉目录';
+      }
     });
 }
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeGlossaryModal();
 });
+
+{% if current_doc_id and has_pages %}
+startDocStatusPolling('{{ current_doc_id }}');
+{% endif %}
 </script>
 {% endblock %}

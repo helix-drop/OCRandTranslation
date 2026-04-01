@@ -39,6 +39,8 @@ from config import (
     get_active_model_mode,
     get_pdf_virtual_window_radius, get_pdf_virtual_scroll_min_pages,
     get_current_doc_id, set_current_doc,
+    get_doc_cleanup_headers_footers, get_doc_auto_visual_toc_enabled,
+    set_upload_processing_preferences,
     get_doc_meta, get_doc_dir,
     list_docs, update_doc_meta, delete_doc,
     LOCAL_DATA_DIR, normalize_doc_id,
@@ -46,6 +48,8 @@ from config import (
 from text_processing import (
     get_page_range, get_next_page_bp,
     normalize_latex_footnote_markers,
+    render_reading_footnote_text,
+    render_superscript_footnote_references,
     build_visible_page_view, resolve_visible_page_bp,
 )
 from text_utils import strip_html
@@ -55,11 +59,14 @@ from storage import (
     save_entries_to_disk, save_entry_to_disk, save_entry_cursor, load_entries_from_disk, clear_entries_from_disk,
     get_translate_args, resolve_model_spec, highlight_terms, _ensure_str,
     gen_markdown, build_toc_depth_map, build_toc_title_map, build_toc_chapters, get_app_state, has_pdf, get_pdf_path, load_visible_page_view,
-    compute_boilerplate_skip_bps, detect_endnote_collection_pages, build_endnote_index,
+    compute_boilerplate_skip_bps, detect_endnote_collection_pages, build_endnote_index, detect_book_index_pages,
     _build_chapter_ranges_from_depth_map,
-    load_pdf_toc_from_disk, load_user_toc_from_disk, save_pdf_toc_to_disk,
+    load_pdf_toc_from_disk, load_user_toc_from_disk, load_auto_visual_toc_from_disk, load_effective_toc, save_user_toc_to_disk, save_auto_visual_toc_to_disk,
+    TOC_SOURCE_USER,
     save_toc_source_offset, load_toc_source_offset,
     save_toc_file, get_toc_file_info,
+    load_toc_visual_draft, save_toc_visual_draft, clear_toc_visual_draft, has_toc_visual_draft,
+    save_user_toc_csv_generated,
     resolve_page_print_label, format_print_page_display,
 )
 from sqlite_store import SQLiteRepository
@@ -67,6 +74,9 @@ from tasks import (
     create_task, get_task, get_task_events, set_task_final,
     remove_task, process_file, reparse_file,
     translate_page,
+    start_auto_visual_toc_for_doc,
+    build_glossary_retranslate_preview,
+    start_glossary_retranslate_task,
     start_translate_task, has_active_translate_task,
     is_translate_running, is_stop_requested, get_translate_snapshot,
     request_stop_translate, get_translate_events,
@@ -83,11 +93,13 @@ JSON_CSRF_ENDPOINTS = {
     "api_glossary_create",
     "api_glossary_update",
     "api_glossary_delete",
+    "api_upload_preferences",
     "upload_file",
     "reparse",
     "reparse_page",
     "save_manual_revision",
     "start_translate_all",
+    "start_glossary_retranslate",
     "stop_translate",
 }
 
@@ -143,26 +155,230 @@ def _nearest_existing_bp(page_bps: list[int], requested_bp: int) -> int | None:
 
 
 def _build_toc_reading_items(toc_items: list[dict], toc_offset: int, page_lookup: dict[int, dict]) -> list[dict]:
+    file_idx_lookup = {}
+    for page in page_lookup.values():
+        try:
+            page_file_idx = int(page.get("fileIdx"))
+            page_bp = int(page.get("bookPage"))
+        except (TypeError, ValueError):
+            continue
+        file_idx_lookup[page_file_idx] = page_bp
     resolved_items = []
     for item in toc_items or []:
         resolved = dict(item)
         try:
+            file_idx = item.get("file_idx")
+            file_idx = int(file_idx) if file_idx is not None else None
+        except (TypeError, ValueError):
+            file_idx = None
+        try:
             book_page = int(item.get("book_page") or 0)
         except (TypeError, ValueError):
             book_page = 0
-        if book_page <= 0:
-            try:
-                file_idx = item.get("file_idx")
-                if file_idx is not None:
-                    book_page = int(file_idx) + 1
-            except (TypeError, ValueError):
-                book_page = 0
-        target_page = book_page + int(toc_offset or 0) if book_page > 0 else None
+        target_page = None
+        if file_idx is not None and file_idx in file_idx_lookup:
+            target_page = file_idx_lookup[file_idx]
+        elif book_page > 0:
+            candidate_page = book_page + int(toc_offset or 0)
+            if candidate_page in page_lookup:
+                target_page = candidate_page
+        if book_page <= 0 and file_idx is not None:
+            book_page = int(file_idx) + 1
         resolved["book_page"] = book_page if book_page > 0 else item.get("book_page")
         resolved["book_page_display"] = format_print_page_display(book_page) if book_page > 0 else ""
         resolved["target_page"] = target_page if target_page in page_lookup else None
+        resolved["unresolved"] = resolved["target_page"] is None
         resolved_items.append(resolved)
     return resolved_items
+
+
+def _build_pdf_page_lookup(pages: list[dict]) -> tuple[dict[int, dict], dict[int, int]]:
+    page_by_pdf_page = {}
+    pdf_page_by_file_idx = {}
+    for page in pages or []:
+        try:
+            pdf_page = int(page.get("bookPage"))
+            file_idx = int(page.get("fileIdx"))
+        except (TypeError, ValueError):
+            continue
+        page_by_pdf_page[pdf_page] = page
+        pdf_page_by_file_idx[file_idx] = pdf_page
+    return page_by_pdf_page, pdf_page_by_file_idx
+
+
+def _build_auto_visual_toc_editor_payload(doc_id: str) -> list[dict]:
+    visual_toc = load_auto_visual_toc_from_disk(doc_id)
+    if not visual_toc:
+        return []
+    return _build_auto_visual_toc_editor_payload_from_items(doc_id, visual_toc)
+
+
+def _build_auto_visual_toc_editor_payload_from_items(doc_id: str, visual_toc: list[dict]) -> list[dict]:
+    """按磁盘/JSON 数组顺序构建编辑器数据（与保存顺序一致，不按 PDF 页码重排）。"""
+    pages, _ = load_pages_from_disk(doc_id)
+    _, pdf_page_by_file_idx = _build_pdf_page_lookup(pages)
+
+    payload = []
+    for index, item in enumerate(visual_toc):
+        try:
+            file_idx = int(item.get("file_idx")) if item.get("file_idx") is not None else None
+        except (TypeError, ValueError):
+            file_idx = None
+        try:
+            depth = int(item.get("depth") or 0)
+        except (TypeError, ValueError):
+            depth = 0
+        try:
+            visual_order = int(item.get("visual_order") or 0)
+        except (TypeError, ValueError):
+            visual_order = 0
+        try:
+            book_page = int(item.get("book_page")) if item.get("book_page") is not None else None
+        except (TypeError, ValueError):
+            book_page = None
+        payload.append({
+            "item_id": str(item.get("item_id", "") or "").strip(),
+            "title": str(item.get("title", "") or ""),
+            "depth": depth,
+            "file_idx": file_idx,
+            "book_page": book_page,
+            "pdf_page": pdf_page_by_file_idx.get(file_idx) if file_idx is not None else None,
+            "visual_order": visual_order,
+            "_orig_idx": index,
+        })
+
+    def _stable_sort_key(p: dict) -> tuple[int, int]:
+        pdf_p = p.get("pdf_page")
+        primary = int(pdf_p) if pdf_p is not None else 10**9
+        return (primary, int(p.get("_orig_idx", 0)))
+
+    payload.sort(key=_stable_sort_key)
+    for p in payload:
+        p.pop("_orig_idx", None)
+    return payload
+
+
+def _visual_toc_base_for_draft_merge(doc_id: str) -> list[dict]:
+    """草稿存在则以草稿条目为合并基底，否则以 SQLite 自动视觉目录为基底。"""
+    draft = load_toc_visual_draft(doc_id)
+    if draft:
+        items, _ = draft
+        return list(items or [])
+    return load_auto_visual_toc_from_disk(doc_id) or []
+
+
+def _merge_auto_visual_submission(
+    doc_id: str,
+    submitted_items: list,
+    visual_toc: list[dict],
+) -> tuple[list[dict] | None, int, str | None]:
+    """将前端提交的目录行合并到 visual_toc 基底。成功返回 (updated_items, unresolved_count, None)，失败返回 (None, 0, error_msg)。"""
+    if not visual_toc:
+        return None, 0, "当前没有可调整的自动视觉目录"
+
+    existing_by_id = {}
+    for item in visual_toc:
+        item_id = str(item.get("item_id", "") or "").strip()
+        if not item_id:
+            return None, 0, "自动视觉目录缺少稳定条目标识，暂时无法手动调整"
+        existing_by_id[item_id] = item
+
+    submitted_ids = [str((item or {}).get("item_id", "") or "").strip() for item in submitted_items]
+    if len(set(submitted_ids)) != len(submitted_ids):
+        return None, 0, "目录项 ID 重复，请刷新后重试"
+    if not set(submitted_ids).issubset(set(existing_by_id.keys())):
+        return None, 0, "目录项集合已变化，请刷新后重试"
+
+    pages, _ = load_pages_from_disk(doc_id)
+    page_by_pdf_page, _ = _build_pdf_page_lookup(pages)
+    updated_items = []
+    unresolved_count = 0
+
+    for visual_order, raw_item in enumerate(submitted_items, start=1):
+        item_id = str((raw_item or {}).get("item_id", "") or "").strip()
+        current_item = dict(existing_by_id[item_id])
+        title = str((raw_item or {}).get("title", "") or "").strip()
+        if not title:
+            return None, 0, "目录标题不能为空"
+        try:
+            depth = int((raw_item or {}).get("depth", 0))
+        except (TypeError, ValueError):
+            return None, 0, "目录深度必须为整数"
+        if depth < 0:
+            return None, 0, "目录深度不能小于 0"
+
+        has_pdf_page = "pdf_page" in (raw_item or {})
+        raw_pdf_page = (raw_item or {}).get("pdf_page")
+        target_file_idx = current_item.get("file_idx")
+        if has_pdf_page:
+            if raw_pdf_page in ("", None):
+                target_file_idx = None
+            else:
+                try:
+                    pdf_page = int(raw_pdf_page)
+                except (TypeError, ValueError):
+                    return None, 0, "PDF 页码必须为整数"
+                if pdf_page < 1:
+                    return None, 0, "PDF 页码必须大于等于 1"
+                target_page = page_by_pdf_page.get(pdf_page)
+                if not target_page:
+                    return None, 0, f"未找到 PDF 第 {pdf_page} 页"
+                try:
+                    target_file_idx = int(target_page.get("fileIdx"))
+                except (TypeError, ValueError):
+                    return None, 0, f"PDF 第 {pdf_page} 页缺少可用页码映射"
+
+        current_item["title"] = title
+        current_item["depth"] = depth
+        current_item["visual_order"] = visual_order
+        current_item["resolved_by_user"] = True
+        current_item["resolution_source"] = "manual_edit"
+        if target_file_idx is None:
+            current_item.pop("file_idx", None)
+            unresolved_count += 1
+        else:
+            current_item["file_idx"] = int(target_file_idx)
+        updated_items.append(current_item)
+
+    return updated_items, unresolved_count, None
+
+
+def _visual_items_to_user_rows(
+    items: list[dict],
+    toc_offset: int,
+    pdf_page_by_file_idx: dict,
+) -> list[dict]:
+    """自动视觉条目转为用户目录行 {title, depth, book_page}。"""
+    rows = []
+    off = int(toc_offset or 0)
+    for it in items:
+        title = str(it.get("title") or "").strip()
+        if not title:
+            continue
+        try:
+            depth = max(0, int(it.get("depth") or 0))
+        except (TypeError, ValueError):
+            depth = 0
+        bp_raw = it.get("book_page")
+        if bp_raw is not None:
+            try:
+                book_page = max(1, int(bp_raw))
+            except (TypeError, ValueError):
+                book_page = 1
+        else:
+            fi = it.get("file_idx")
+            pdf_p = None
+            if fi is not None:
+                try:
+                    pdf_p = pdf_page_by_file_idx.get(int(fi))
+                except (TypeError, ValueError):
+                    pdf_p = None
+            if pdf_p is not None:
+                book_page = max(1, int(pdf_p) - off)
+            else:
+                book_page = 1
+        rows.append({"title": title, "depth": depth, "book_page": book_page})
+    return rows
 
 
 @app.before_request
@@ -310,6 +526,16 @@ def _build_preview_paragraphs(text: str) -> list[str]:
     return sentence_blocks or line_blocks
 
 
+def _render_reading_body_text(text: str) -> str:
+    cleaned = _clean_display_text(normalize_latex_footnote_markers(_ensure_str(text)))
+    return render_superscript_footnote_references(cleaned)
+
+
+def _render_reading_footnotes_text(text: str) -> str:
+    cleaned = _clean_display_text(normalize_latex_footnote_markers(_ensure_str(text)))
+    return render_reading_footnote_text(cleaned)
+
+
 def _build_translate_usage_payload(
     doc_id: str,
     *,
@@ -366,6 +592,16 @@ def _build_translate_usage_payload(
 def _request_doc_id() -> str:
     raw = normalize_doc_id(request.values.get("doc_id", ""))
     return raw or get_current_doc_id()
+
+
+def _serialize_glossary_retranslate_preview(preview: dict) -> dict:
+    payload = dict(preview or {})
+    payload["task"] = dict(payload.get("task") or {})
+    payload["target_bps"] = [
+        int(bp) for bp in (payload.get("target_bps") or [])
+        if bp is not None
+    ]
+    return payload
 
 
 def _redirect_settings(doc_id: str = "", open_custom_model: bool = False):
@@ -663,18 +899,21 @@ def reading():
         {},
     )
     current_page_markdown = _ensure_str(current_page_data.get("markdown", "")).strip()
-    current_page_markdown_paragraphs = _build_preview_paragraphs(current_page_markdown)
-    current_page_footnotes = normalize_latex_footnote_markers(
+    current_page_markdown_paragraphs = [
+        _render_reading_body_text(paragraph)
+        for paragraph in _build_preview_paragraphs(current_page_markdown)
+    ]
+    current_page_footnotes = _render_reading_footnotes_text(
         _ensure_str(current_page_data.get("footnotes", ""))
     ).strip()
 
     display_entries = []
     for pe in page_entries:
         pe_copy = dict(pe)
-        for field in ("original", "translation", "footnotes", "footnotes_translation"):
-            pe_copy[field] = _clean_display_text(
-                normalize_latex_footnote_markers(_ensure_str(pe_copy.get(field)))
-            )
+        for field in ("original", "translation"):
+            pe_copy[field] = _render_reading_body_text(pe_copy.get(field))
+        for field in ("footnotes", "footnotes_translation"):
+            pe_copy[field] = _render_reading_footnotes_text(pe_copy.get(field))
         start_bp = pe_copy.get("_startBP")
         end_bp = pe_copy.get("_endBP")
         try:
@@ -712,13 +951,12 @@ def reading():
     for pg in pages:
         page_map[pg["bookPage"]] = pg["fileIdx"]
 
-    # 目录：用户目录优先，无用户目录时使用自动提取的 PDF 书签/超链接目录
-    toc_source, toc_offset = load_toc_source_offset(current_doc_id)
-    if toc_source == "user":
-        toc_items = load_user_toc_from_disk(current_doc_id)
-    else:
-        toc_items = load_pdf_toc_from_disk(current_doc_id)
+    toc_source, toc_offset, toc_items = load_effective_toc(current_doc_id)
     toc_items = _build_toc_reading_items(toc_items, toc_offset, page_lookup)
+    toc_unresolved_items = [
+        item for item in toc_items
+        if item.get("unresolved") and str(item.get("item_id") or "").strip()
+    ]
 
     page_index = visible_page_bps.index(cur_page_bp) if cur_page_bp in visible_page_bps else 0
     prev_bp = visible_page_bps[page_index - 1] if page_index > 0 else None
@@ -740,6 +978,16 @@ def reading():
     current_page_failure = next(
         (page for page in failed_pages if isinstance(page, dict) and page.get("bp") == cur_page_bp),
         None,
+    )
+    translate_task = dict(translate_snapshot.get("task") or {})
+    glossary_retranslate_blocked = bool(
+        translate_snapshot.get("running")
+        and translate_task.get("kind") == "continuous"
+    )
+    glossary_retranslate_block_reason = (
+        "当前有连续翻译正在运行，新词典会从下一页起生效；补重译请在当前任务停止或完成后再发起。"
+        if glossary_retranslate_blocked
+        else ""
     )
 
     pdf_available = has_pdf(current_doc_id)
@@ -763,6 +1011,8 @@ def reading():
         has_current_entry=has_current_entry,
         current_page_failed=cur_page_bp in failed_bps and not has_current_entry,
         current_page_failure=current_page_failure,
+        glossary_retranslate_blocked=glossary_retranslate_blocked,
+        glossary_retranslate_block_reason=glossary_retranslate_block_reason,
         cur_model_label=cur_model_label,
         active_model_mode=state["active_model_mode"],
         active_builtin_model_key=state["active_builtin_model_key"],
@@ -803,6 +1053,8 @@ def reading():
         pdf_initial_mounted_bps=pdf_initial_mounted_bps,
         toc_items=toc_items,
         toc_offset=toc_offset,
+        toc_source=toc_source,
+        toc_unresolved_items=toc_unresolved_items,
     )
 
 
@@ -833,13 +1085,45 @@ def upload_file():
     f.save(tmp)
     tmp.close()
 
+    cleanup_enabled = _parse_bool_flag(request.form.get("clean_header_footer", ""))
+    auto_visual_toc_enabled = _parse_bool_flag(request.form.get("auto_visual_toc", ""))
+    set_upload_processing_preferences(
+        cleanup_headers_footers=cleanup_enabled,
+        auto_visual_toc=auto_visual_toc_enabled,
+    )
+
     task_id = uuid.uuid4().hex[:12]
-    create_task(task_id, tmp.name, file_name, file_type)
+    create_task(
+        task_id,
+        tmp.name,
+        file_name,
+        file_type,
+        options={
+            "clean_header_footer": cleanup_enabled,
+            "auto_visual_toc": auto_visual_toc_enabled,
+        },
+    )
 
     t = threading.Thread(target=process_file, args=(task_id,), daemon=True)
     t.start()
 
     return jsonify({"task_id": task_id})
+
+
+@app.route("/api/upload_preferences", methods=["POST"])
+def api_upload_preferences():
+    payload = request.get_json(silent=True) or request.form
+    cleanup_enabled = _parse_bool_flag((payload or {}).get("clean_header_footer", ""))
+    auto_visual_toc_enabled = _parse_bool_flag((payload or {}).get("auto_visual_toc", ""))
+    set_upload_processing_preferences(
+        cleanup_headers_footers=cleanup_enabled,
+        auto_visual_toc=auto_visual_toc_enabled,
+    )
+    return jsonify({
+        "ok": True,
+        "clean_header_footer": cleanup_enabled,
+        "auto_visual_toc": auto_visual_toc_enabled,
+    })
 
 
 @app.route("/reparse", methods=["POST"])
@@ -860,13 +1144,57 @@ def reparse():
 
     pages, file_name = load_pages_from_disk(doc_id)
     task_id = uuid.uuid4().hex[:12]
-    create_task(task_id, pdf_path, file_name or "source.pdf", 0)
+    create_task(
+        task_id,
+        pdf_path,
+        file_name or "source.pdf",
+        0,
+        options={
+            "clean_header_footer": get_doc_cleanup_headers_footers(doc_id),
+            "auto_visual_toc": get_doc_auto_visual_toc_enabled(doc_id),
+        },
+    )
 
     from tasks import reparse_file
     t = threading.Thread(target=reparse_file, args=(task_id, doc_id), daemon=True)
     t.start()
 
     return jsonify({"task_id": task_id})
+
+
+@app.route("/api/doc/reparse_enhanced", methods=["POST"])
+def api_doc_reparse_enhanced():
+    paddle_token = get_paddle_token()
+    if not paddle_token:
+        return jsonify({"error": "请先在设置中输入 PaddleOCR 令牌。"}), 200
+
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"error": "没有活跃文档。"}), 200
+    set_current_doc(doc_id)
+
+    pdf_path = get_pdf_path(doc_id)
+    if not pdf_path or not os.path.exists(pdf_path):
+        return jsonify({"error": "未找到 PDF 文件，无法增强重解析。"}), 200
+
+    pages, file_name = load_pages_from_disk(doc_id)
+    clear_entries_from_disk(doc_id)
+    update_doc_meta(doc_id, cleanup_headers_footers=True)
+    task_id = uuid.uuid4().hex[:12]
+    create_task(
+        task_id,
+        pdf_path,
+        file_name or "source.pdf",
+        0,
+        options={
+            "clean_header_footer": True,
+            "auto_visual_toc": get_doc_auto_visual_toc_enabled(doc_id),
+        },
+    )
+
+    t = threading.Thread(target=reparse_file, args=(task_id, doc_id), daemon=True)
+    t.start()
+    return jsonify({"task_id": task_id, "cleared_translations": True})
 
 
 @app.route("/reparse_page/<int:page_bp>", methods=["POST"])
@@ -897,13 +1225,48 @@ def reparse_page(page_bp):
         return jsonify({"error": f"未找到页码 {page_bp}"}), 200
 
     task_id = uuid.uuid4().hex[:12]
-    create_task(task_id, pdf_path, file_name or "source.pdf", 0)
+    create_task(
+        task_id,
+        pdf_path,
+        file_name or "source.pdf",
+        0,
+        options={
+            "clean_header_footer": get_doc_cleanup_headers_footers(doc_id),
+            "auto_visual_toc": get_doc_auto_visual_toc_enabled(doc_id),
+        },
+    )
 
     from tasks import reparse_single_page
     t = threading.Thread(target=reparse_single_page, args=(task_id, doc_id, page_bp, file_idx), daemon=True)
     t.start()
 
     return jsonify({"task_id": task_id})
+
+
+@app.route("/api/doc/run_visual_toc", methods=["POST"])
+def api_doc_run_visual_toc():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "没有活跃文档。"}), 400
+    set_current_doc(doc_id)
+
+    pdf_path = get_pdf_path(doc_id)
+    if not pdf_path or not os.path.exists(pdf_path):
+        return jsonify({"ok": False, "error": "未找到 PDF 文件，无法生成自动视觉目录。"}), 400
+
+    update_doc_meta(
+        doc_id,
+        auto_visual_toc_enabled=True,
+        toc_visual_status="running",
+        toc_visual_phase="queued",
+        toc_visual_progress_pct=1,
+        toc_visual_progress_label="自动视觉目录准备中",
+        toc_visual_progress_detail="后台任务已启动，正在准备目录识别…",
+        toc_visual_message="后台任务已启动，正在准备目录识别…",
+        toc_visual_model_id=resolve_model_spec().model_id,
+    )
+    start_auto_visual_toc_for_doc(doc_id, pdf_path, model_spec=resolve_model_spec())
+    return jsonify({"ok": True, "doc_id": doc_id})
 
 
 @app.route("/process_sse")
@@ -1405,7 +1768,6 @@ def api_glossary_list():
     doc_id = _request_doc_id()
     return jsonify({"items": list_glossary_items(doc_id=doc_id)})
 
-
 @app.route("/api/glossary", methods=["POST"])
 def api_glossary_create():
     doc_id = _request_doc_id()
@@ -1470,7 +1832,81 @@ def api_glossary_import():
         for term, defn in new_items:
             upsert_glossary_item(term, defn, doc_id=doc_id)
         items = list_glossary_items(doc_id=doc_id)
-    return jsonify({"ok": True, "imported": len(new_items), "total": len(items), "items": items})
+    preview = build_glossary_retranslate_preview(doc_id)
+    return jsonify({
+        "ok": True,
+        "imported": len(new_items),
+        "total": len(items),
+        "items": items,
+        "retranslate_preview": _serialize_glossary_retranslate_preview(preview),
+    })
+
+
+@app.route("/api/glossary_retranslate_preview")
+def api_glossary_retranslate_preview():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    start_bp = request.args.get("start_bp", type=int)
+    start_segment_index = request.args.get("start_segment_index", type=int)
+    preview = build_glossary_retranslate_preview(
+        doc_id,
+        start_bp=start_bp,
+        start_segment_index=start_segment_index,
+    )
+    return jsonify(_serialize_glossary_retranslate_preview(preview))
+
+
+@app.route("/start_glossary_retranslate", methods=["POST"])
+def start_glossary_retranslate():
+    doc_id = _request_doc_id()
+    if not doc_id or not get_doc_meta(doc_id):
+        return jsonify({"ok": False, "error": "doc_not_found", "message": "文档不存在或已删除"})
+    if has_active_translate_task():
+        preview = build_glossary_retranslate_preview(
+            doc_id,
+            start_bp=request.form.get("start_bp", type=int),
+            start_segment_index=request.form.get("start_segment_index", type=int),
+        )
+        payload = _serialize_glossary_retranslate_preview(preview)
+        payload.update({
+            "ok": False,
+            "status": "already_running",
+            "message": preview.get("reason") or "当前已有后台翻译任务正在运行。",
+        })
+        return jsonify(payload)
+
+    if doc_id:
+        set_current_doc(doc_id)
+    pages, src_name = load_pages_from_disk(doc_id)
+    entries, doc_title, _ = load_entries_from_disk(doc_id, pages=pages)
+    preview = build_glossary_retranslate_preview(
+        doc_id,
+        start_bp=request.form.get("start_bp", type=int),
+        start_segment_index=request.form.get("start_segment_index", type=int),
+        pages=pages,
+        entries=entries,
+    )
+    if not preview.get("can_start"):
+        payload = _serialize_glossary_retranslate_preview(preview)
+        payload.update({
+            "ok": False,
+            "status": "cannot_start",
+            "message": preview.get("reason") or "当前无法启动词典补重译。",
+        })
+        return jsonify(payload)
+
+    started, latest_preview = start_glossary_retranslate_task(
+        doc_id,
+        start_bp=preview.get("start_bp"),
+        start_segment_index=preview.get("start_segment_index", 0),
+        doc_title=request.form.get("doc_title", "").strip() or doc_title or src_name or "Untitled",
+    )
+    payload = _serialize_glossary_retranslate_preview(latest_preview)
+    payload["ok"] = bool(started)
+    payload["status"] = "started" if started else "cannot_start"
+    payload["message"] = "" if started else (latest_preview.get("reason") or "当前无法启动词典补重译。")
+    return jsonify(payload)
 
 
 @app.route("/set_model/<key>", methods=["POST"])
@@ -1489,21 +1925,18 @@ def set_model(key):
 
 def _load_toc_depth_map(doc_id: str) -> dict:
     """为导出路由加载并构建 TOC depth 查找表。"""
-    source, offset = load_toc_source_offset(doc_id)
-    toc_items = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
+    _, offset, toc_items = load_effective_toc(doc_id)
     return build_toc_depth_map(toc_items, offset)
 
 
 def _load_toc_title_map(doc_id: str) -> dict[int, str]:
-    source, offset = load_toc_source_offset(doc_id)
-    toc_items = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
+    _, offset, toc_items = load_effective_toc(doc_id)
     return build_toc_title_map(toc_items, offset)
 
 
 def _load_toc_chapters_data(doc_id: str) -> list[dict]:
     """加载并构建章节列表（用于按章节导出）。"""
-    source, offset = load_toc_source_offset(doc_id)
-    toc_items = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
+    _, offset, toc_items = load_effective_toc(doc_id)
     meta = get_doc_meta(doc_id) or {}
     total_pages = int(meta.get("page_count") or 0)
     return build_toc_chapters(toc_items, offset, total_pages)
@@ -1543,23 +1976,45 @@ def api_toc_chapters():
     return jsonify({"chapters": chapters})
 
 
-def _build_endnote_data(entries: list, toc_depth_map: dict) -> tuple[dict, set]:
+def _build_endnote_data(entries: list, toc_depth_map: dict, toc_title_map: dict | None = None, pages: list | None = None) -> tuple[dict, set]:
     """构建尾注索引和尾注集合页集合，供导出路由复用。"""
-    all_bps = [
+    if pages is None:
+        pages, _ = load_pages_from_disk(_request_doc_id())
+    all_bps = sorted({
         int(e.get("_pageBP") or e.get("book_page") or 0)
         for e in entries
         if int(e.get("_pageBP") or e.get("book_page") or 0) > 0
-    ]
-    chapter_ranges = _build_chapter_ranges_from_depth_map(toc_depth_map, all_bps)
+    } | {
+        int(page.get("bookPage") or 0)
+        for page in (pages or [])
+        if int(page.get("bookPage") or 0) > 0
+    })
+    chapter_ranges = _build_chapter_ranges_from_depth_map(toc_depth_map, all_bps, toc_title_map=toc_title_map)
     endnote_page_map = detect_endnote_collection_pages(entries, chapter_ranges)
-    endnote_index = build_endnote_index(entries, endnote_page_map)
+    structured_bps = []
+    for page in pages or []:
+        scan = page.get("_note_scan") if isinstance(page, dict) else {}
+        if not isinstance(scan, dict):
+            continue
+        if _ensure_str(scan.get("page_kind", "")).strip() not in {"endnote_collection", "mixed_body_endnotes"}:
+            continue
+        bp = int(page.get("bookPage") or 0)
+        if bp > 0:
+            structured_bps.append(bp)
+    if structured_bps:
+        endnote_page_map = dict(endnote_page_map)
+        endnote_page_map.setdefault(None, [])
+        endnote_page_map[None] = sorted(set(endnote_page_map[None]) | set(structured_bps))
+    endnote_index = build_endnote_index(entries, endnote_page_map, chapter_ranges=chapter_ranges, pages=pages)
     endnote_page_bps = {bp for bps in endnote_page_map.values() for bp in bps}
-    return endnote_index, endnote_page_bps
+    index_page_bps = detect_book_index_pages(entries)
+    return endnote_index, endnote_page_bps | index_page_bps
 
 
 @app.route("/download_md")
 def download_md():
     doc_id = _request_doc_id()
+    pages, _ = load_pages_from_disk(doc_id)
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     toc_depth_map = _load_toc_depth_map(doc_id)
     toc_title_map = _load_toc_title_map(doc_id)
@@ -1569,8 +2024,8 @@ def download_md():
     if exclude_boilerplate:
         chapters = _load_toc_chapters_data(doc_id)
         skip_bps = compute_boilerplate_skip_bps(entries, chapters)
-    endnote_index, endnote_page_bps = _build_endnote_data(entries, toc_depth_map)
-    md = "\ufeff" + gen_markdown(
+    endnote_index, endnote_page_bps = _build_endnote_data(entries, toc_depth_map, toc_title_map, pages=pages)
+    md = gen_markdown(
         entries,
         toc_depth_map=toc_depth_map,
         page_ranges=page_ranges,
@@ -1596,6 +2051,7 @@ def download_md():
 def export_md():
     """API端点：按需返回 markdown 内容供预览。"""
     doc_id = _request_doc_id()
+    pages, _ = load_pages_from_disk(doc_id)
     entries, doc_title, _ = load_entries_from_disk(doc_id)
     toc_depth_map = _load_toc_depth_map(doc_id)
     toc_title_map = _load_toc_title_map(doc_id)
@@ -1605,7 +2061,7 @@ def export_md():
     if exclude_boilerplate:
         chapters = _load_toc_chapters_data(doc_id)
         skip_bps = compute_boilerplate_skip_bps(entries, chapters)
-    endnote_index, endnote_page_bps = _build_endnote_data(entries, toc_depth_map)
+    endnote_index, endnote_page_bps = _build_endnote_data(entries, toc_depth_map, toc_title_map, pages=pages)
     md = gen_markdown(
         entries,
         toc_depth_map=toc_depth_map,
@@ -1684,10 +2140,62 @@ def _format_unix_ts(ts: int | float | None) -> str:
 def pdf_toc():
     doc_id = _request_doc_id()
     if not doc_id:
-        return jsonify({"doc_id": "", "toc": [], "source": "auto", "offset": 0, "toc_file": get_toc_file_info("")})
-    source, offset = load_toc_source_offset(doc_id)
-    toc = load_user_toc_from_disk(doc_id) if source == "user" else load_pdf_toc_from_disk(doc_id)
-    return jsonify({"doc_id": doc_id, "toc": toc, "source": source, "offset": offset, "toc_file": get_toc_file_info(doc_id)})
+        return jsonify({
+            "doc_id": "",
+            "toc": [],
+            "source": "auto",
+            "offset": 0,
+            "toc_file": get_toc_file_info(""),
+            "auto_visual_toc": [],
+            "has_toc_draft": False,
+            "draft_pending_offset": 0,
+        })
+    source, offset, toc = load_effective_toc(doc_id)
+    meta = get_doc_meta(doc_id) or {}
+    draft_bundle = load_toc_visual_draft(doc_id)
+    if draft_bundle:
+        d_items, d_off = draft_bundle
+        auto_visual_editor = _build_auto_visual_toc_editor_payload_from_items(doc_id, d_items)
+    else:
+        auto_visual_editor = _build_auto_visual_toc_editor_payload(doc_id)
+    return jsonify({
+        "doc_id": doc_id,
+        "toc": toc,
+        "source": source,
+        "offset": offset,
+        "toc_file": get_toc_file_info(doc_id),
+        "auto_visual_toc": auto_visual_editor,
+        "has_toc_draft": bool(draft_bundle),
+        "draft_pending_offset": int(draft_bundle[1]) if draft_bundle else 0,
+        "toc_visual_status": str(meta.get("toc_visual_status", "idle") or "idle").strip() or "idle",
+        "toc_visual_phase": str(meta.get("toc_visual_phase", "") or ""),
+        "toc_visual_progress_pct": int(meta.get("toc_visual_progress_pct", 0) or 0),
+        "toc_visual_progress_label": str(meta.get("toc_visual_progress_label", "") or ""),
+        "toc_visual_progress_detail": str(meta.get("toc_visual_progress_detail", "") or ""),
+        "toc_visual_message": str(meta.get("toc_visual_message", "") or ""),
+    })
+
+
+@app.route("/api/doc_processing_status")
+def api_doc_processing_status():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"doc_id": "", "has_doc": False})
+    state = get_app_state(doc_id)
+    return jsonify({
+        "doc_id": doc_id,
+        "has_doc": True,
+        "cleanup_headers_footers_enabled": state.get("cleanup_headers_footers_enabled", False),
+        "auto_visual_toc_enabled": state.get("auto_visual_toc_enabled", False),
+        "has_translation_history": state.get("has_translation_history", False),
+        "visual_toc_status_label": state.get("visual_toc_status_label", ""),
+        "visual_toc_status_message": state.get("visual_toc_status_message", ""),
+        "toc_visual_status": state.get("visual_toc_status", "idle"),
+        "toc_visual_phase": state.get("visual_toc_phase", ""),
+        "toc_visual_progress_pct": state.get("visual_toc_progress_pct", 0),
+        "toc_visual_progress_label": state.get("visual_toc_progress_label", ""),
+        "toc_visual_progress_detail": state.get("visual_toc_progress_detail", ""),
+    })
 
 
 @app.route("/api/toc/import", methods=["POST"])
@@ -1709,12 +2217,11 @@ def api_toc_import():
     if not new_items:
         return jsonify({"ok": False, "error": "文件中未找到有效目录行（需含标题、深度、页码三列）"}), 400
 
-    # 尝试用现有 PDF 书签 TOC 自动猜测偏移
-    existing_source, _ = load_toc_source_offset(doc_id)
-    auto_toc = load_pdf_toc_from_disk(doc_id) if existing_source == "auto" else []
+    # 尝试用现有自动目录自动猜测偏移（自动视觉优先，其次自动 PDF）
+    auto_toc = load_auto_visual_toc_from_disk(doc_id) or load_pdf_toc_from_disk(doc_id)
     offset, matched_title = _guess_toc_offset(new_items, auto_toc)
 
-    save_pdf_toc_to_disk(doc_id, new_items)
+    save_user_toc_to_disk(doc_id, new_items)
     save_toc_source_offset(doc_id, "user", offset)
     try:
         f.seek(0)
@@ -1732,6 +2239,71 @@ def api_toc_import():
     })
 
 
+@app.route("/api/toc/update_user", methods=["POST"])
+def api_toc_update_user():
+    """保存用户在模态框内编辑的生效目录行（来源须已为 user）。"""
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    source, current_offset, _ = load_effective_toc(doc_id)
+    if source != TOC_SOURCE_USER:
+        return jsonify({"ok": False, "error": "当前生效目录不是用户目录，无法在此保存"}), 400
+    data = request.get_json(silent=True) or {}
+    raw_items = data.get("items")
+    if not isinstance(raw_items, list) or not raw_items:
+        return jsonify({"ok": False, "error": "缺少目录行"}), 400
+    try:
+        offset = int(data.get("offset", current_offset))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "offset 必须为整数"}), 400
+
+    off = int(offset)
+    normalized: list[dict] = []
+    for raw in raw_items:
+        title = str((raw or {}).get("title", "") or "").strip()
+        if not title:
+            return jsonify({"ok": False, "error": "目录标题不能为空"}), 400
+        try:
+            depth = int((raw or {}).get("depth", 0))
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "深度必须为整数"}), 400
+        if depth < 0:
+            return jsonify({"ok": False, "error": "深度不能小于 0"}), 400
+        raw_pdf = (raw or {}).get("pdf_page", None)
+        if raw_pdf is not None and raw_pdf != "":
+            try:
+                pdf_page = int(raw_pdf)
+            except (TypeError, ValueError):
+                return jsonify({"ok": False, "error": "PDF 页码必须为整数"}), 400
+            if pdf_page < 1:
+                return jsonify({"ok": False, "error": "PDF 页码必须大于等于 1"}), 400
+            book_page = int(pdf_page) - off
+            if book_page < 1:
+                return jsonify({
+                    "ok": False,
+                    "error": f"在该 offset（{off}）下，PDF 第 {pdf_page} 页对应原书页码将小于 1，请提高 PDF 页码或调整 offset",
+                }), 400
+        else:
+            try:
+                book_page = int((raw or {}).get("book_page", 0))
+            except (TypeError, ValueError):
+                return jsonify({"ok": False, "error": "原书页码必须为整数"}), 400
+            if book_page < 1:
+                return jsonify({"ok": False, "error": "原书页码必须大于等于 1"}), 400
+        normalized.append({"title": title, "depth": depth, "book_page": book_page})
+
+    save_user_toc_to_disk(doc_id, normalized)
+    save_toc_source_offset(doc_id, "user", offset)
+    save_user_toc_csv_generated(doc_id, normalized)
+    _, _, toc = load_effective_toc(doc_id)
+    return jsonify({
+        "ok": True,
+        "updated": len(normalized),
+        "offset": offset,
+        "toc": toc,
+    })
+
+
 @app.route("/api/toc/set_offset", methods=["POST"])
 def api_toc_set_offset():
     doc_id = _request_doc_id()
@@ -1742,8 +2314,165 @@ def api_toc_set_offset():
         offset = int(data.get("offset", 0))
     except (ValueError, TypeError):
         return jsonify({"ok": False, "error": "offset 必须为整数"}), 400
-    save_toc_source_offset(doc_id, "user", offset)
-    return jsonify({"ok": True, "offset": offset})
+    source, _, _ = load_effective_toc(doc_id)
+    save_toc_source_offset(doc_id, source, offset)
+    return jsonify({"ok": True, "offset": offset, "source": source})
+
+
+@app.route("/api/toc/resolve_visual_item", methods=["POST"])
+def api_toc_resolve_visual_item():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    data = request.get_json(silent=True) or {}
+    item_id = str(data.get("item_id", "") or "").strip()
+    if not item_id:
+        return jsonify({"ok": False, "error": "缺少目录项 ID"}), 400
+    try:
+        pdf_page = int(data.get("pdf_page", 0))
+    except (ValueError, TypeError):
+        return jsonify({"ok": False, "error": "PDF 页码必须为整数"}), 400
+    if pdf_page < 1:
+        return jsonify({"ok": False, "error": "PDF 页码必须大于等于 1"}), 400
+
+    pages, _ = load_pages_from_disk(doc_id)
+    page_lookup = {
+        int(page.get("bookPage")): page
+        for page in pages
+        if page.get("bookPage") is not None
+    }
+    target_page = page_lookup.get(pdf_page)
+    if not target_page:
+        return jsonify({"ok": False, "error": "未找到该 PDF 页码"}), 400
+
+    visual_toc = load_auto_visual_toc_from_disk(doc_id)
+    updated_items = []
+    matched = False
+    target_file_idx = int(target_page.get("fileIdx"))
+    for item in visual_toc:
+        clone = dict(item)
+        if str(clone.get("item_id", "") or "").strip() == item_id:
+            clone["file_idx"] = target_file_idx
+            clone["resolved_by_user"] = True
+            clone["resolution_source"] = "manual_pdf_page"
+            matched = True
+        updated_items.append(clone)
+    if not matched:
+        return jsonify({"ok": False, "error": "未找到待补录的目录项"}), 404
+
+    save_auto_visual_toc_to_disk(doc_id, updated_items)
+    unresolved_count = sum(1 for item in updated_items if item.get("file_idx") is None)
+    if unresolved_count > 0:
+        update_doc_meta(
+            doc_id,
+            toc_visual_status="needs_offset",
+            toc_visual_message=f"已识别 {len(updated_items)} 条目录，但仍有 {unresolved_count} 条无法稳定定位到 PDF 页。",
+        )
+    return jsonify({"ok": True, "item_id": item_id, "pdf_page": pdf_page, "file_idx": target_file_idx})
+
+
+@app.route("/api/toc/update_auto_visual", methods=["POST"])
+def api_toc_update_auto_visual():
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    data = request.get_json(silent=True) or {}
+    submitted_items = data.get("items")
+    if not isinstance(submitted_items, list):
+        return jsonify({"ok": False, "error": "缺少目录项数据"}), 400
+
+    visual_toc = load_auto_visual_toc_from_disk(doc_id)
+    updated_items, unresolved_count, err = _merge_auto_visual_submission(doc_id, submitted_items, visual_toc)
+    if err:
+        return jsonify({"ok": False, "error": err}), 400
+
+    save_auto_visual_toc_to_disk(doc_id, updated_items)
+    if unresolved_count > 0:
+        update_doc_meta(
+            doc_id,
+            toc_visual_status="needs_offset",
+            toc_visual_message=f"已识别 {len(updated_items)} 条目录，但仍有 {unresolved_count} 条无法稳定定位到 PDF 页。",
+        )
+    else:
+        update_doc_meta(
+            doc_id,
+            toc_visual_status="ready",
+            toc_visual_message=f"已保存 {len(updated_items)} 条自动视觉目录调整。",
+        )
+    return jsonify({
+        "ok": True,
+        "updated": len(updated_items),
+        "unresolved": unresolved_count,
+        "auto_visual_toc": _build_auto_visual_toc_editor_payload(doc_id),
+    })
+
+
+@app.route("/api/toc/save_visual_draft", methods=["POST"])
+def api_toc_save_visual_draft():
+    """将合并后的自动视觉目录写入草稿文件；不修改 SQLite 自动视觉目录，阅读页不变。"""
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    data = request.get_json(silent=True) or {}
+    submitted_items = data.get("items")
+    if not isinstance(submitted_items, list):
+        return jsonify({"ok": False, "error": "缺少目录项数据"}), 400
+    try:
+        pending_offset = int(data.get("pending_offset", 0))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "pending_offset 必须为整数"}), 400
+
+    base = _visual_toc_base_for_draft_merge(doc_id)
+    updated_items, unresolved_count, err = _merge_auto_visual_submission(doc_id, submitted_items, base)
+    if err:
+        return jsonify({"ok": False, "error": err}), 400
+
+    save_toc_visual_draft(doc_id, updated_items, pending_offset)
+    return jsonify({
+        "ok": True,
+        "saved": len(updated_items),
+        "unresolved": unresolved_count,
+        "auto_visual_toc": _build_auto_visual_toc_editor_payload_from_items(doc_id, updated_items),
+        "has_toc_draft": True,
+        "draft_pending_offset": pending_offset,
+    })
+
+
+@app.route("/api/toc/commit_visual_draft", methods=["POST"])
+def api_toc_commit_visual_draft():
+    """将草稿转为用户目录（toc_user_json + toc_source.csv），并清除草稿。"""
+    doc_id = _request_doc_id()
+    if not doc_id:
+        return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
+    draft_bundle = load_toc_visual_draft(doc_id)
+    if not draft_bundle:
+        return jsonify({"ok": False, "error": "暂无草稿，请先保存草稿"}), 400
+    items, draft_off = draft_bundle
+    data = request.get_json(silent=True) or {}
+    try:
+        final_offset = int(data.get("pending_offset", draft_off))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "pending_offset 必须为整数"}), 400
+
+    pages, _ = load_pages_from_disk(doc_id)
+    _, pdf_page_by_file_idx = _build_pdf_page_lookup(pages)
+    user_rows = _visual_items_to_user_rows(items, final_offset, pdf_page_by_file_idx)
+    if not user_rows:
+        return jsonify({"ok": False, "error": "没有可提交的目录行"}), 400
+
+    save_user_toc_to_disk(doc_id, user_rows)
+    save_toc_source_offset(doc_id, "user", final_offset)
+    save_user_toc_csv_generated(doc_id, user_rows)
+    # 提交后将已解析的草稿条目写回 auto visual TOC，使编辑器下次打开时
+    # 展示的是已提交状态而非带未定位条目的旧数据。
+    save_auto_visual_toc_to_disk(doc_id, list(items))
+    clear_toc_visual_draft(doc_id)
+    return jsonify({
+        "ok": True,
+        "committed": len(user_rows),
+        "offset": final_offset,
+        "source": "user",
+    })
 
 
 # ============ ROUTES: 重置 ============

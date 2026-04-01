@@ -957,6 +957,9 @@ body.hide-original .original-card {
   width: 100%; max-width: 520px;
   max-height: 90vh; overflow-y: auto;
 }
+.modal-box-wide {
+  max-width: min(1120px, 92vw);
+}
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 18px 12px;
@@ -969,6 +972,9 @@ body.hide-original .original-card {
 }
 .modal-close:hover { color: var(--txt); }
 .modal-body { padding: 16px 18px 20px; }
+.modal-box-wide .modal-body {
+  padding: 18px 24px 24px;
+}
 .modal-section-title {
   font-size: 12px; font-weight: 700; color: var(--txS);
   text-transform: uppercase; letter-spacing: 0.05em;
@@ -984,6 +990,82 @@ body.hide-original .original-card {
   border-radius: 3px; padding: 0 4px; font-size: 11px;
   font-family: 'SF Mono', 'Fira Code', monospace;
   color: var(--txt);
+}
+.auto-visual-toc-table {
+  min-width: 860px;
+  table-layout: fixed;
+}
+.auto-visual-toc-table th:nth-child(1),
+.auto-visual-toc-table td:nth-child(1) {
+  width: 120px;
+}
+.auto-visual-toc-table th:nth-child(2),
+.auto-visual-toc-table td:nth-child(2) {
+  width: 320px;
+}
+.auto-visual-toc-table th:nth-child(3),
+.auto-visual-toc-table td:nth-child(3) {
+  width: 120px;
+}
+.auto-visual-toc-table th:nth-child(4),
+.auto-visual-toc-table td:nth-child(4) {
+  width: 140px;
+}
+.auto-visual-toc-table th:nth-child(5),
+.auto-visual-toc-table td:nth-child(5) {
+  width: 160px;
+}
+.auto-visual-toc-table input[type="text"],
+.auto-visual-toc-table input[type="number"] {
+  max-width: 100%;
+}
+.auto-visual-order-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auto-visual-order-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.auto-visual-drag-handle {
+  width: 28px;
+  height: 28px;
+  border: 1px dashed var(--bdr);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--txS);
+  cursor: grab;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+.auto-visual-drag-handle:hover {
+  border-color: var(--acc);
+  color: var(--acc);
+}
+.auto-visual-drag-handle:active {
+  cursor: grabbing;
+}
+.auto-visual-toc-row.is-drag-source {
+  opacity: 0.58;
+  background: rgba(139, 105, 20, 0.08);
+}
+.auto-visual-toc-row.is-drag-target {
+  background: rgba(139, 105, 20, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(139, 105, 20, 0.2);
+}
+.user-toc-editor-row.is-drag-source {
+  opacity: 0.58;
+  background: rgba(139, 105, 20, 0.08);
+}
+.user-toc-editor-row.is-drag-target {
+  background: rgba(139, 105, 20, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(139, 105, 20, 0.2);
 }
 .home-action-note {
   margin-top: 10px;

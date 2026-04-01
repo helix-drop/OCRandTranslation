@@ -14,8 +14,11 @@ from config import create_doc, ensure_dirs, get_current_doc_id, get_doc_meta, li
 from sqlite_store import SQLiteRepository
 from text_processing import parse_page_markdown
 from storage import (
+    _build_endnote_run_sections,
     compute_boilerplate_skip_bps,
     build_toc_title_map,
+    detect_book_index_pages,
+    detect_endnote_collection_pages,
     gen_markdown,
     load_entries_from_disk,
     load_pages_from_disk,
@@ -260,6 +263,30 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("导出译文", payload["markdown"])
 
+    def test_download_md_matches_export_preview_markdown(self):
+        doc_id = create_doc("download-export.pdf")
+        save_entries_to_disk([{
+            "_pageBP": 8,
+            "_model": "qwen-plus",
+            "_page_entries": [{
+                "original": "Original paragraph",
+                "translation": "下载导出一致性",
+                "footnotes": "",
+                "footnotes_translation": "",
+                "heading_level": 0,
+                "pages": "8",
+            }],
+            "pages": "8",
+        }], "Download Export", 0, doc_id)
+
+        export_payload = self.client.get(f"/export_md?doc_id={doc_id}").get_json()
+        download_resp = self.client.get(f"/download_md?doc_id={doc_id}")
+
+        self.assertEqual(download_resp.status_code, 200)
+        self.assertIn("text/markdown", download_resp.headers.get("Content-Type", ""))
+        self.assertIn(".md", download_resp.headers.get("Content-Disposition", ""))
+        self.assertEqual(download_resp.get_data(as_text=True), export_payload["markdown"])
+
     def test_export_md_formats_headings_body_and_paragraph_footnotes_like_reading_notes(self):
         doc_id = create_doc("export-format.pdf")
         save_entries_to_disk([{
@@ -401,6 +428,33 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn("    译：原注译文", md)
         self.assertIn("[脚注] No numbered footnote line", md)
 
+    def test_export_md_normalizes_bracket_inline_markers_to_obsidian_refs(self):
+        doc_id = create_doc("export-inline-brackets.pdf")
+        save_entries_to_disk([{
+            "_pageBP": 10,
+            "_model": "qwen-plus",
+            "_page_entries": [
+                {
+                    "original": "Original text [1] and [2].",
+                    "translation": "译文 [1] 和 [2]。",
+                    "footnotes": "1. Original note one\n2. Original note two",
+                    "footnotes_translation": "1. 原注一\n2. 原注二",
+                    "heading_level": 0,
+                    "pages": "10",
+                },
+            ],
+            "pages": "10",
+        }], "Export Inline Brackets", 0, doc_id)
+
+        resp = self.client.get(f"/export_md?doc_id={doc_id}")
+        payload = resp.get_json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("> Original text [^1] and [^2].", payload["markdown"])
+        self.assertIn("译文 [^1] 和 [^2]。", payload["markdown"])
+        self.assertIn("[^1]: Original note one", payload["markdown"])
+        self.assertIn("[^2]: Original note two", payload["markdown"])
+
     def test_export_md_routes_high_confidence_endnotes_to_chapter_end(self):
         from storage import save_pdf_toc_to_disk, save_toc_source_offset
 
@@ -497,6 +551,523 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         filtered_md = self.client.get(f"/export_md?doc_id={doc_id}&exclude_boilerplate=1").get_json()["markdown"]
         self.assertNotIn("图书在版编目", filtered_md)
         self.assertIn("短正文。", filtered_md)
+
+    def test_detect_book_index_pages_only_hits_tail_index_pages(self):
+        entries = []
+        for bp in range(1, 11):
+            text = f"普通正文第{bp}页。"
+            if bp == 9:
+                text = "\n".join([
+                    "Alpha, 1, 2, 3",
+                    "Beta, 4, 5, 6",
+                    "Gamma, 7, 8, 9",
+                    "Delta, 10, 11, 12",
+                    "Epsilon, 13, 14, 15",
+                    "Zeta, 16, 17, 18",
+                ])
+            if bp == 9:
+                text = "\n".join([
+                    "Afary, Janet, 26, 37, 205",
+                    "Althusser, Louis, 5, 9, 22-23",
+                    "Balibar, Etienne, 45, 89, 104",
+                    "Canguilhem, Georges, 41, 73, 95",
+                    "Deleuze, Gilles, 12, 58, 143",
+                    "Foucault, Michel, 1, 2, 3",
+                ])
+            entries.append(
+                {
+                    "_pageBP": bp,
+                    "_page_entries": [{"original": text, "translation": ""}],
+                }
+            )
+
+        detected = detect_book_index_pages(entries)
+        self.assertIn(9, detected)
+        self.assertNotIn(8, detected)
+        self.assertNotIn(10, detected)
+
+    def test_detect_book_index_pages_keeps_weak_continuation_near_strong_hits(self):
+        entries = []
+        for bp in range(1, 11):
+            text = f"普通正文第{bp}页。"
+            if bp == 9:
+                text = "\n".join([
+                    "Alpha, 1, 2, 3",
+                    "Beta, 4, 5, 6",
+                    "Gamma, 7, 8, 9",
+                    "Delta, 10, 11, 12",
+                    "Epsilon, 13, 14, 15",
+                    "Zeta, 16, 17, 18",
+                ])
+            if bp == 10:
+                text = "\n".join([
+                    "Theta, 21, 22, 23",
+                    "Iota, 24, 25, 26",
+                    "Kappa, 27, 28, 29",
+                    "Lambda, 30, 31, 32",
+                    "M, N, O",  # 弱格式噪声行
+                    "v. also references",
+                ])
+            entries.append(
+                {
+                    "_pageBP": bp,
+                    "_page_entries": [{"original": text, "translation": ""}],
+                }
+            )
+
+        detected = detect_book_index_pages(entries)
+        self.assertIn(9, detected)
+        self.assertIn(10, detected)
+
+    def test_detect_endnote_collection_pages_accepts_boundary_notes_page_with_two_items(self):
+        entries = [
+            {
+                "_pageBP": 9,
+                "_page_entries": [
+                    {
+                        "original": "NOTES\n1. first note line\n2. second note line",
+                        "translation": "",
+                    }
+                ],
+            },
+            {
+                "_pageBP": 8,
+                "_page_entries": [
+                    {
+                        "original": "正文段落，不应判为尾注集合。",
+                        "translation": "",
+                    }
+                ],
+            },
+        ]
+        chapter_ranges = [{"index": 0, "start_bp": 1, "end_bp": 9}]
+
+        page_map = detect_endnote_collection_pages(entries, chapter_ranges)
+        self.assertIn(0, page_map)
+        self.assertIn(9, page_map[0])
+        self.assertNotIn(8, page_map[0])
+
+    def test_detect_endnote_collection_pages_keeps_mixed_start_page_before_dense_notes_run(self):
+        entries = [
+            {
+                "_pageBP": 7,
+                "_page_entries": [
+                    {
+                        "original": "正文收尾段落。\nNOTES\n1. first note line",
+                        "translation": "",
+                    }
+                ],
+            },
+            {
+                "_pageBP": 8,
+                "_page_entries": [
+                    {
+                        "original": "2. second note line\n3. third note line\n4. fourth note line",
+                        "translation": "",
+                    }
+                ],
+            },
+            {
+                "_pageBP": 9,
+                "_page_entries": [
+                    {
+                        "original": "5. fifth note line\n6. sixth note line\n7. seventh note line",
+                        "translation": "",
+                    }
+                ],
+            },
+        ]
+        chapter_ranges = [{"index": 0, "title": "章一", "start_bp": 1, "end_bp": 9}]
+
+        page_map = detect_endnote_collection_pages(entries, chapter_ranges)
+        self.assertIn(0, page_map)
+        self.assertEqual(page_map[0], [7, 8, 9])
+
+    def test_detect_endnote_collection_pages_skips_isolated_numbered_page_without_notes_signal(self):
+        entries = [
+            {
+                "_pageBP": 10,
+                "_page_entries": [
+                    {
+                        "original": "\n".join([
+                            "14. note fourteen",
+                            "15. note fifteen",
+                            "16. note sixteen",
+                            "17. note seventeen",
+                            "18. note eighteen",
+                        ]),
+                        "translation": "",
+                    }
+                ],
+            },
+            {
+                "_pageBP": 19,
+                "_page_entries": [
+                    {
+                        "original": "正文收尾。",
+                        "translation": "",
+                    }
+                ],
+            },
+        ]
+        chapter_ranges = [{"index": 0, "title": "章一", "start_bp": 1, "end_bp": 20}]
+
+        page_map = detect_endnote_collection_pages(entries, chapter_ranges)
+        self.assertNotIn(0, page_map)
+
+    def test_build_endnote_run_sections_recovers_missing_number_from_pdf_text_layer(self):
+        chapter_ranges = [
+            {"index": 0, "title": "2. Searching for a Left Governmentality", "start_bp": 33, "end_bp": 52},
+            {"index": 1, "title": "3. Beyond the Sovereign Subject: Against Interpretation", "start_bp": 53, "end_bp": 70},
+        ]
+        run_pages = [
+            {
+                "bp": 172,
+                "orig_lines": [
+                    "2 Searching for a Left Governmentality",
+                    "111 Rosanvallon, Notre histoire intellectuelle et politique, p. 100.",
+                    "112 The SFIO was the historic French Socialist Party created in 1905.",
+                    "$ 12/1. $",
+                    "114 Interview de Michel Foucault, p. 1509.",
+                    "3 Beyond the Sovereign Subject: Against Interpretation",
+                ],
+                "tr_lines": [],
+                "pdf_orig_lines": [
+                    "2 Searching for a Left Governmentality",
+                    "111 Rosanvallon, Notre histoire intellectuelle et politique, p. 100.",
+                    "112 The SFIO was the historic French Socialist Party created in 1905.",
+                    "113 Michel Foucault, Structuralisme et poststructuralisme, p. 1271.",
+                    "114 Interview de Michel Foucault, p. 1509.",
+                    "3 Beyond the Sovereign Subject: Against Interpretation",
+                ],
+            }
+        ]
+
+        sections = _build_endnote_run_sections(run_pages, chapter_ranges)
+
+        self.assertEqual(len(sections), 1)
+        self.assertEqual(sections[0]["chapter_index"], 0)
+        self.assertIn(113, sections[0]["orig_map"])
+        self.assertEqual(
+            sections[0]["orig_map"][113],
+            "Michel Foucault, Structuralisme et poststructuralisme, p. 1271.",
+        )
+        self.assertEqual(sections[0]["note_numbers"], [111, 112, 113, 114])
+
+    def test_build_endnote_run_sections_recovers_gap_boundary_note_from_pdf_text_layer(self):
+        chapter_ranges = [
+            {"index": 0, "title": "5. The Revolution Beheaded", "start_bp": 101, "end_bp": 120},
+        ]
+        run_pages = [
+            {
+                "bp": 179,
+                "orig_lines": [
+                    "5 The Revolution Beheaded",
+                    "23 Ibid., p. 223.",
+                ],
+                "tr_lines": [],
+                "pdf_orig_lines": [
+                    "5 The Revolution Beheaded",
+                    "23 Ibid., p. 223.",
+                    "24 Ibid.",
+                ],
+            },
+            {
+                "bp": 180,
+                "orig_lines": [
+                    "25 See, in particular, Mitchell Dean, Critical and Effective Histories, pp. 174-93.",
+                ],
+                "tr_lines": [],
+                "pdf_orig_lines": [
+                    "25 See, in particular, Mitchell Dean, Critical and Effective Histories, pp. 174-93.",
+                ],
+            },
+        ]
+
+        sections = _build_endnote_run_sections(run_pages, chapter_ranges)
+
+        self.assertEqual(len(sections), 1)
+        self.assertEqual(sections[0]["chapter_index"], 0)
+        self.assertIn(24, sections[0]["orig_map"])
+        self.assertEqual(sections[0]["orig_map"][24], "Ibid.")
+        self.assertEqual(sections[0]["note_numbers"], [23, 24, 25])
+
+    def test_export_md_splits_contiguous_notes_by_chapter_and_sorts_each_section(self):
+        doc_id = create_doc("split-notes-by-chapter.pdf")
+        save_pdf_toc_to_disk(doc_id, [
+            {"title": "Introduction: The Last Man Takes LSD", "depth": 0, "book_page": 1},
+            {"title": "6. Foucault's Normativity", "depth": 0, "book_page": 5},
+            {"title": "7. Rogue Neoliberalism and Liturgical Power", "depth": 0, "book_page": 8},
+            {"title": "Notes", "depth": 0, "book_page": 10},
+            {"title": "Index", "depth": 0, "book_page": 13},
+        ])
+        save_toc_source_offset(doc_id, "user", 0)
+        save_entries_to_disk([
+            {
+                "_pageBP": 1,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 1,
+                    "original": "Introduction body [^3][^1][^2].",
+                    "translation": "引言正文[^3][^1][^2]。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "1",
+                }],
+                "pages": "1",
+            },
+            {
+                "_pageBP": 5,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 5,
+                    "original": "Normativity body [^2][^1].",
+                    "translation": "第六章正文[^2][^1]。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "5",
+                }],
+                "pages": "5",
+            },
+            {
+                "_pageBP": 8,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 8,
+                    "original": "Rogue body [^1].",
+                    "translation": "第七章正文[^1]。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "8",
+                }],
+                "pages": "8",
+            },
+            {
+                "_pageBP": 10,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 10,
+                    "original": "Introduction: The Last Man Takes LSD\n1 Intro note one.\n2 Intro note two.\n3 Intro note three.",
+                    "translation": "引言：最后的人服用迷幻药（LSD）\n1 引言注一。\n2 引言注二。\n3 引言注三。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "10",
+                }],
+                "pages": "10",
+            },
+            {
+                "_pageBP": 11,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 11,
+                    "original": "6 Foucault's Normativity\n1 Norm note one.\n2 Norm note two.",
+                    "translation": "6 福柯的规范性\n1 规范性注一。\n2 规范性注二。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "11",
+                }],
+                "pages": "11",
+            },
+            {
+                "_pageBP": 12,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 12,
+                    "original": "7 Rogue Neoliberalism and Liturgical Power\n1 Rogue note one.",
+                    "translation": "7 流氓新自由主义与礼仪权力\n1 流氓注一。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "12",
+                }],
+                "pages": "12",
+            },
+        ], "Split Notes By Chapter", 0, doc_id)
+
+        md = self.client.get(f"/export_md?doc_id={doc_id}").get_json()["markdown"]
+
+        self.assertEqual(md.count("## 本章尾注"), 1)
+        self.assertNotIn("## 全书尾注", md)
+        self.assertIn("引言正文[^3][^ch00-1][^ch00-2]。", md)
+        self.assertIn("第六章正文[^ch01-2][^ch01-1]。", md)
+        self.assertIn("第七章正文[^ch02-1]。", md)
+        self.assertIn("### Introduction: The Last Man Takes LSD", md)
+        self.assertIn("### 6. Foucault's Normativity", md)
+        self.assertIn("### 7. Rogue Neoliberalism and Liturgical Power", md)
+        self.assertIn("[^ch00-1]: Intro note one.", md)
+        self.assertIn("[^ch00-2]: Intro note two.", md)
+        self.assertIn("[^3]: Intro note three.", md)
+        self.assertIn("[^ch01-1]: Norm note one.", md)
+        self.assertIn("[^ch01-2]: Norm note two.", md)
+        self.assertIn("[^ch02-1]: Rogue note one.", md)
+
+        intro_pos = md.index("### Introduction: The Last Man Takes LSD")
+        chapter6_pos = md.index("### 6. Foucault's Normativity")
+        chapter7_pos = md.index("### 7. Rogue Neoliberalism and Liturgical Power")
+        self.assertLess(intro_pos, chapter6_pos)
+        self.assertLess(chapter6_pos, chapter7_pos)
+        self.assertLess(md.index("[^ch00-1]: Intro note one."), md.index("[^ch00-2]: Intro note two."))
+        self.assertLess(md.index("[^ch00-2]: Intro note two."), md.index("[^3]: Intro note three."))
+        self.assertLess(md.index("[^ch01-1]: Norm note one."), md.index("[^ch01-2]: Norm note two."))
+
+    def test_export_md_prefers_structured_endnote_metadata_when_raw_text_unparseable(self):
+        doc_id = create_doc("structured-endnotes.pdf")
+        save_pdf_toc_to_disk(doc_id, [
+            {"title": "Introduction", "depth": 0, "book_page": 1},
+            {"title": "Notes", "depth": 0, "book_page": 5},
+        ])
+        save_toc_source_offset(doc_id, "user", 0)
+        save_pages_to_disk([
+            {
+                "bookPage": 1,
+                "fileIdx": 0,
+                "markdown": "Introduction body [^1][^2].",
+                "footnotes": "",
+                "textSource": "ocr",
+            },
+            {
+                "bookPage": 5,
+                "fileIdx": 4,
+                "markdown": "NOISY OCR PAGE",
+                "footnotes": "",
+                "textSource": "ocr",
+                "_note_scan_version": 1,
+                "_note_scan": {
+                    "page_kind": "endnote_collection",
+                    "items": [
+                        {
+                            "kind": "endnote",
+                            "marker": "1.",
+                            "number": 1,
+                            "text": "Structured note one.",
+                            "order": 1,
+                            "source": "note_scan",
+                            "confidence": 1.0,
+                            "section_title": "Introduction",
+                        },
+                        {
+                            "kind": "endnote",
+                            "marker": "2.",
+                            "number": 2,
+                            "text": "Structured note two.",
+                            "order": 2,
+                            "source": "note_scan",
+                            "confidence": 1.0,
+                            "section_title": "Introduction",
+                        },
+                    ],
+                    "section_hints": ["Notes", "Introduction"],
+                    "ambiguity_flags": [],
+                    "reviewed_by_model": False,
+                },
+            },
+        ], "Structured Endnotes", doc_id)
+        save_entries_to_disk([
+            {
+                "_pageBP": 1,
+                "_model": "qwen-plus",
+                "_page_entries": [{
+                    "_startBP": 1,
+                    "original": "Introduction body [^1][^2].",
+                    "translation": "引言正文[^1][^2]。",
+                    "footnotes": "",
+                    "footnotes_translation": "",
+                    "heading_level": 0,
+                    "pages": "1",
+                }],
+                "pages": "1",
+            },
+            {
+                "_pageBP": 5,
+                "_model": "qwen-plus",
+                "_page_entries": [
+                    {
+                        "_startBP": 5,
+                        "original": "Structured note one.",
+                        "translation": "结构化尾注一。",
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                        "heading_level": 0,
+                        "pages": "5",
+                        "_note_kind": "endnote",
+                        "_note_marker": "1.",
+                        "_note_number": 1,
+                        "_note_section_title": "Introduction",
+                        "_note_confidence": 1.0,
+                    },
+                    {
+                        "_startBP": 5,
+                        "original": "Structured note two.",
+                        "translation": "结构化尾注二。",
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                        "heading_level": 0,
+                        "pages": "5",
+                        "_note_kind": "endnote",
+                        "_note_marker": "2.",
+                        "_note_number": 2,
+                        "_note_section_title": "Introduction",
+                        "_note_confidence": 1.0,
+                    },
+                ],
+                "pages": "5",
+            },
+        ], "Structured Endnotes", 0, doc_id)
+
+        md = self.client.get(f"/export_md?doc_id={doc_id}").get_json()["markdown"]
+
+        self.assertIn("引言正文[^1][^2]。", md)
+        self.assertIn("## 本章尾注", md)
+        self.assertIn("### Introduction", md)
+        self.assertIn("[^1]: Structured note one.", md)
+        self.assertIn("[^2]: Structured note two.", md)
+
+    def test_gen_markdown_prefixes_endnotes_when_chapter_numbers_overlap(self):
+        entries = [
+            {
+                "_pageBP": 1,
+                "_page_entries": [
+                    {
+                        "_startBP": 1,
+                        "original": "Chap1 body [^3].",
+                        "translation": "第一章正文[^3]。",
+                        "heading_level": 0,
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                    }
+                ],
+            },
+            {
+                "_pageBP": 6,
+                "_page_entries": [
+                    {
+                        "_startBP": 6,
+                        "original": "Chap2 body [^3].",
+                        "translation": "第二章正文[^3]。",
+                        "heading_level": 0,
+                        "footnotes": "",
+                        "footnotes_translation": "",
+                    }
+                ],
+            },
+        ]
+        toc_depth_map = {1: 0, 6: 0}
+        endnote_index = {
+            0: {3: {"orig": "Chapter 1 note", "tr": "第一章尾注"}},
+            1: {3: {"orig": "Chapter 2 note", "tr": "第二章尾注"}},
+        }
+
+        md = gen_markdown(entries, toc_depth_map=toc_depth_map, endnote_index=endnote_index)
+        self.assertIn("第一章正文[^ch00-3]。", md)
+        self.assertIn("第二章正文[^ch01-3]。", md)
+        self.assertIn("[^ch00-3]: Chapter 1 note", md)
+        self.assertIn("[^ch01-3]: Chapter 2 note", md)
+        self.assertNotIn("[^3]:", md)
 
     def test_gen_markdown_demotes_preface_headings_before_first_toc_chapter(self):
         entries = [

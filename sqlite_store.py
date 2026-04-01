@@ -10,7 +10,29 @@ from contextlib import contextmanager
 from config import ensure_dirs, get_sqlite_db_path
 
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 9
+
+TOC_SOURCE_AUTO = "auto"
+TOC_SOURCE_USER = "user"
+TOC_SOURCE_AUTO_VISUAL = "auto_visual"
+TOC_SOURCE_AUTO_PDF = "auto_pdf"
+TOC_SOURCES = {
+    TOC_SOURCE_AUTO,
+    TOC_SOURCE_USER,
+    TOC_SOURCE_AUTO_VISUAL,
+    TOC_SOURCE_AUTO_PDF,
+}
+
+
+def _toc_column_for_source(source: str) -> str:
+    normalized = str(source or "").strip().lower()
+    if normalized == TOC_SOURCE_USER:
+        return "toc_user_json"
+    if normalized == TOC_SOURCE_AUTO_VISUAL:
+        return "toc_auto_visual_json"
+    if normalized in {TOC_SOURCE_AUTO, TOC_SOURCE_AUTO_PDF}:
+        return "toc_auto_pdf_json"
+    raise ValueError(f"不支持的目录来源: {source}")
 
 
 def _apply_pragmas(conn: sqlite3.Connection) -> None:
@@ -49,7 +71,19 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             last_entry_idx INTEGER NOT NULL DEFAULT 0,
             status TEXT NOT NULL DEFAULT 'ready',
             source_pdf_path TEXT,
-            toc_json TEXT
+            toc_json TEXT,
+            toc_user_json TEXT,
+            toc_auto_pdf_json TEXT,
+            toc_auto_visual_json TEXT,
+            cleanup_headers_footers INTEGER NOT NULL DEFAULT 1,
+            auto_visual_toc_enabled INTEGER NOT NULL DEFAULT 0,
+            toc_visual_status TEXT NOT NULL DEFAULT 'idle',
+            toc_visual_message TEXT,
+            toc_visual_model_id TEXT,
+            toc_visual_phase TEXT,
+            toc_visual_progress_pct INTEGER NOT NULL DEFAULT 0,
+            toc_visual_progress_label TEXT,
+            toc_visual_progress_detail TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_documents_updated_at ON documents(updated_at);
 
@@ -109,6 +143,11 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             start_book_page INTEGER,
             end_book_page INTEGER,
             print_page_label TEXT,
+            note_kind TEXT,
+            note_marker TEXT,
+            note_number INTEGER,
+            note_section_title TEXT,
+            note_confidence REAL NOT NULL DEFAULT 0,
             heading_level INTEGER NOT NULL DEFAULT 0,
             segment_status TEXT NOT NULL DEFAULT 'done',
             error_message TEXT,
@@ -146,6 +185,7 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             failed_bps_json TEXT,
             partial_failed_bps_json TEXT,
             failed_pages_json TEXT,
+            task_json TEXT,
             draft_json TEXT,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
@@ -261,6 +301,98 @@ def _create_schema(conn: sqlite3.Connection) -> None:
     )
     _ensure_column(
         conn,
+        "documents",
+        "cleanup_headers_footers",
+        "cleanup_headers_footers INTEGER NOT NULL DEFAULT 1",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_user_json",
+        "toc_user_json TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_auto_pdf_json",
+        "toc_auto_pdf_json TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_auto_visual_json",
+        "toc_auto_visual_json TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "auto_visual_toc_enabled",
+        "auto_visual_toc_enabled INTEGER NOT NULL DEFAULT 0",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_status",
+        "toc_visual_status TEXT NOT NULL DEFAULT 'idle'",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_message",
+        "toc_visual_message TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_model_id",
+        "toc_visual_model_id TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_phase",
+        "toc_visual_phase TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_progress_pct",
+        "toc_visual_progress_pct INTEGER NOT NULL DEFAULT 0",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_progress_label",
+        "toc_visual_progress_label TEXT",
+    )
+    _ensure_column(
+        conn,
+        "documents",
+        "toc_visual_progress_detail",
+        "toc_visual_progress_detail TEXT",
+    )
+    conn.execute(
+        """
+        UPDATE documents
+        SET toc_user_json = CASE
+                WHEN COALESCE(toc_user_json, '') = ''
+                 AND COALESCE(toc_source, 'auto') = 'user'
+                 AND COALESCE(toc_json, '') <> ''
+                THEN toc_json
+                ELSE toc_user_json
+            END,
+            toc_auto_pdf_json = CASE
+                WHEN COALESCE(toc_auto_pdf_json, '') = ''
+                 AND COALESCE(toc_source, 'auto') <> 'user'
+                 AND COALESCE(toc_json, '') <> ''
+                THEN toc_json
+                ELSE toc_auto_pdf_json
+            END
+        WHERE COALESCE(toc_json, '') <> ''
+        """
+    )
+    _ensure_column(
+        conn,
         "translation_segments",
         "manual_translation_text",
         "manual_translation_text TEXT",
@@ -307,6 +439,36 @@ def _create_schema(conn: sqlite3.Connection) -> None:
         "print_page_label",
         "print_page_label TEXT",
     )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "note_kind",
+        "note_kind TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "note_marker",
+        "note_marker TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "note_number",
+        "note_number INTEGER",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "note_section_title",
+        "note_section_title TEXT",
+    )
+    _ensure_column(
+        conn,
+        "translation_segments",
+        "note_confidence",
+        "note_confidence REAL NOT NULL DEFAULT 0",
+    )
     conn.execute(
         """
         UPDATE translation_pages
@@ -336,6 +498,12 @@ def _create_schema(conn: sqlite3.Connection) -> None:
                 END
             )
         """
+    )
+    _ensure_column(
+        conn,
+        "translate_runs",
+        "task_json",
+        "task_json TEXT",
     )
     conn.execute(
         """
@@ -404,14 +572,30 @@ class SQLiteRepository:
             "status": fields.pop("status", "ready"),
             "source_pdf_path": fields.pop("source_pdf_path", None),
             "toc_json": fields.pop("toc_json", None),
+            "cleanup_headers_footers": int(fields.pop("cleanup_headers_footers", 1) or 0),
+            "toc_user_json": fields.pop("toc_user_json", None),
+            "toc_auto_pdf_json": fields.pop("toc_auto_pdf_json", None),
+            "toc_auto_visual_json": fields.pop("toc_auto_visual_json", None),
+            "auto_visual_toc_enabled": int(fields.pop("auto_visual_toc_enabled", 0) or 0),
+            "toc_visual_status": fields.pop("toc_visual_status", "idle"),
+            "toc_visual_message": fields.pop("toc_visual_message", None),
+            "toc_visual_model_id": fields.pop("toc_visual_model_id", None),
+            "toc_visual_phase": fields.pop("toc_visual_phase", None),
+            "toc_visual_progress_pct": int(fields.pop("toc_visual_progress_pct", 0) or 0),
+            "toc_visual_progress_label": fields.pop("toc_visual_progress_label", None),
+            "toc_visual_progress_detail": fields.pop("toc_visual_progress_detail", None),
         }
         with transaction(self.db_path) as conn:
             conn.execute(
                 """
                 INSERT INTO documents(
                     id, name, created_at, updated_at, page_count, entry_count,
-                    has_pdf, last_entry_idx, status, source_pdf_path, toc_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    has_pdf, last_entry_idx, status, source_pdf_path, toc_json,
+                    toc_user_json, toc_auto_pdf_json, toc_auto_visual_json,
+                    cleanup_headers_footers, auto_visual_toc_enabled,
+                    toc_visual_status, toc_visual_message, toc_visual_model_id,
+                    toc_visual_phase, toc_visual_progress_pct, toc_visual_progress_label, toc_visual_progress_detail
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     updated_at=excluded.updated_at,
@@ -421,7 +605,19 @@ class SQLiteRepository:
                     last_entry_idx=excluded.last_entry_idx,
                     status=excluded.status,
                     source_pdf_path=COALESCE(excluded.source_pdf_path, documents.source_pdf_path),
-                    toc_json=COALESCE(excluded.toc_json, documents.toc_json)
+                    toc_json=COALESCE(excluded.toc_json, documents.toc_json),
+                    toc_user_json=COALESCE(excluded.toc_user_json, documents.toc_user_json),
+                    toc_auto_pdf_json=COALESCE(excluded.toc_auto_pdf_json, documents.toc_auto_pdf_json),
+                    toc_auto_visual_json=COALESCE(excluded.toc_auto_visual_json, documents.toc_auto_visual_json),
+                    cleanup_headers_footers=excluded.cleanup_headers_footers,
+                    auto_visual_toc_enabled=excluded.auto_visual_toc_enabled,
+                    toc_visual_status=COALESCE(excluded.toc_visual_status, documents.toc_visual_status),
+                    toc_visual_message=COALESCE(excluded.toc_visual_message, documents.toc_visual_message),
+                    toc_visual_model_id=COALESCE(excluded.toc_visual_model_id, documents.toc_visual_model_id),
+                    toc_visual_phase=COALESCE(excluded.toc_visual_phase, documents.toc_visual_phase),
+                    toc_visual_progress_pct=excluded.toc_visual_progress_pct,
+                    toc_visual_progress_label=COALESCE(excluded.toc_visual_progress_label, documents.toc_visual_progress_label),
+                    toc_visual_progress_detail=COALESCE(excluded.toc_visual_progress_detail, documents.toc_visual_progress_detail)
                 """,
                 (
                     doc_id,
@@ -435,6 +631,18 @@ class SQLiteRepository:
                     payload["status"],
                     payload["source_pdf_path"],
                     payload["toc_json"],
+                    payload["toc_user_json"],
+                    payload["toc_auto_pdf_json"],
+                    payload["toc_auto_visual_json"],
+                    payload["cleanup_headers_footers"],
+                    payload["auto_visual_toc_enabled"],
+                    payload["toc_visual_status"],
+                    payload["toc_visual_message"],
+                    payload["toc_visual_model_id"],
+                    payload["toc_visual_phase"],
+                    payload["toc_visual_progress_pct"],
+                    payload["toc_visual_progress_label"],
+                    payload["toc_visual_progress_detail"],
                 ),
             )
 
@@ -463,22 +671,30 @@ class SQLiteRepository:
             return docs
 
     def set_document_toc(self, doc_id: str, toc_items: list[dict]) -> None:
+        self.set_document_toc_for_source(doc_id, TOC_SOURCE_USER, toc_items)
+
+    def get_document_toc(self, doc_id: str) -> list[dict]:
+        return self.get_document_toc_for_source(doc_id, TOC_SOURCE_USER)
+
+    def set_document_toc_for_source(self, doc_id: str, source: str, toc_items: list[dict]) -> None:
         now = int(time.time())
         toc_json = json.dumps(toc_items or [], ensure_ascii=False)
+        column = _toc_column_for_source(source)
         with transaction(self.db_path) as conn:
             conn.execute(
-                """
+                f"""
                 UPDATE documents
-                SET toc_json = ?, updated_at = ?
+                SET {column} = ?, updated_at = ?
                 WHERE id = ?
                 """,
                 (toc_json, now, doc_id),
             )
 
-    def get_document_toc(self, doc_id: str) -> list[dict]:
+    def get_document_toc_for_source(self, doc_id: str, source: str) -> list[dict]:
+        column = _toc_column_for_source(source)
         with read_connection(self.db_path) as conn:
             row = conn.execute(
-                "SELECT toc_json FROM documents WHERE id = ?",
+                f"SELECT {column} AS toc_json FROM documents WHERE id = ?",
                 (doc_id,),
             ).fetchone()
             if not row or not row["toc_json"]:
@@ -488,6 +704,25 @@ class SQLiteRepository:
             except Exception:
                 return []
             return items if isinstance(items, list) else []
+
+    def set_document_visual_toc_status(
+        self,
+        doc_id: str,
+        status: str,
+        *,
+        message: str = "",
+        model_id: str = "",
+    ) -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                """
+                UPDATE documents
+                SET toc_visual_status = ?, toc_visual_message = ?, toc_visual_model_id = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (str(status or "idle").strip() or "idle", str(message or ""), str(model_id or ""), now, doc_id),
+            )
 
     def set_document_toc_source_offset(self, doc_id: str, source: str, offset: int) -> None:
         now = int(time.time())
@@ -589,6 +824,7 @@ class SQLiteRepository:
         payload["failed_bps"] = json.loads(payload.pop("failed_bps_json") or "[]")
         payload["partial_failed_bps"] = json.loads(payload.pop("partial_failed_bps_json") or "[]")
         payload["failed_pages"] = json.loads(payload.pop("failed_pages_json") or "[]")
+        payload["task"] = json.loads(payload.pop("task_json") or "{}")
         payload["draft"] = json.loads(payload.pop("draft_json") or "{}")
         if payload.get("model_key") and not payload.get("model"):
             payload["model"] = payload["model_key"]
@@ -626,6 +862,7 @@ class SQLiteRepository:
             "failed_bps_json": json.dumps(fields.get("failed_bps") or [], ensure_ascii=False),
             "partial_failed_bps_json": json.dumps(fields.get("partial_failed_bps") or [], ensure_ascii=False),
             "failed_pages_json": json.dumps(fields.get("failed_pages") or [], ensure_ascii=False),
+            "task_json": json.dumps(fields.get("task") or {}, ensure_ascii=False),
             "draft_json": json.dumps(fields.get("draft"), ensure_ascii=False) if fields.get("draft") is not None else None,
         }
         if not payload["provider"] and payload["model_key"].startswith("qwen-"):
@@ -652,7 +889,7 @@ class SQLiteRepository:
                         translated_paras = ?, translated_chars = ?, prompt_tokens = ?,
                         completion_tokens = ?, total_tokens = ?, request_count = ?,
                         last_error = ?, failed_bps_json = ?, partial_failed_bps_json = ?,
-                        failed_pages_json = ?, draft_json = ?, updated_at = ?
+                        failed_pages_json = ?, task_json = ?, draft_json = ?, updated_at = ?
                     WHERE id = ?
                     """,
                     (
@@ -681,6 +918,7 @@ class SQLiteRepository:
                         payload["failed_bps_json"],
                         payload["partial_failed_bps_json"],
                         payload["failed_pages_json"],
+                        payload["task_json"],
                         payload["draft_json"],
                         now,
                         row["id"],
@@ -701,8 +939,8 @@ class SQLiteRepository:
                     pending_pages, current_page_idx, translated_paras, translated_chars,
                     prompt_tokens, completion_tokens, total_tokens, request_count,
                     last_error, failed_bps_json, partial_failed_bps_json, failed_pages_json,
-                    draft_json, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    task_json, draft_json, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     doc_id,
@@ -731,6 +969,7 @@ class SQLiteRepository:
                     payload["failed_bps_json"],
                     payload["partial_failed_bps_json"],
                     payload["failed_pages_json"],
+                    payload["task_json"],
                     payload["draft_json"],
                     now,
                     now,
@@ -844,26 +1083,52 @@ class SQLiteRepository:
                 (translation_page_id,),
             )
             for idx, segment in enumerate(entry.get("_page_entries") or []):
+                source = str(segment.get("_translation_source") or "").strip() or "model"
+                manual_translation = segment.get("_manual_translation")
+                machine_translation = segment.get("_machine_translation")
+                display_translation = segment.get("translation")
+                if source == "manual":
+                    if manual_translation in (None, ""):
+                        manual_translation = display_translation
+                    if machine_translation in (None, ""):
+                        machine_translation = None
+                else:
+                    if machine_translation in (None, ""):
+                        machine_translation = display_translation
+                    if manual_translation in (None, ""):
+                        manual_translation = None
                 conn.execute(
                     """
                     INSERT INTO translation_segments(
                         translation_page_id, segment_index, original_text,
-                        translation_text, footnotes_text, footnotes_translation_text,
+                        translation_text, manual_translation_text, translation_source,
+                        manual_updated_at, manual_updated_by,
+                        footnotes_text, footnotes_translation_text,
                         pages_label, start_book_page, end_book_page, print_page_label,
+                        note_kind, note_marker, note_number, note_section_title, note_confidence,
                         heading_level, segment_status, error_message, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         translation_page_id,
                         idx,
                         segment.get("original"),
-                        segment.get("translation"),
+                        machine_translation,
+                        manual_translation,
+                        source,
+                        int(segment.get("_manual_updated_at")) if segment.get("_manual_updated_at") is not None else None,
+                        segment.get("_manual_updated_by"),
                         segment.get("footnotes"),
                         segment.get("footnotes_translation"),
                         segment.get("pages"),
                         int(segment.get("_startBP")) if segment.get("_startBP") is not None else None,
                         int(segment.get("_endBP")) if segment.get("_endBP") is not None else None,
                         segment.get("_printPageLabel"),
+                        segment.get("_note_kind"),
+                        segment.get("_note_marker"),
+                        int(segment.get("_note_number")) if segment.get("_note_number") is not None else None,
+                        segment.get("_note_section_title"),
+                        float(segment.get("_note_confidence", 0.0) or 0.0),
                         int(segment.get("heading_level", 0) or 0),
                         segment.get("_status", "done"),
                         segment.get("_error"),
@@ -1128,6 +1393,11 @@ class SQLiteRepository:
         payload["_startBP"] = payload.get("start_book_page")
         payload["_endBP"] = payload.get("end_book_page")
         payload["_printPageLabel"] = payload.get("print_page_label")
+        payload["_note_kind"] = payload.get("note_kind")
+        payload["_note_marker"] = payload.get("note_marker")
+        payload["_note_number"] = payload.get("note_number")
+        payload["_note_section_title"] = payload.get("note_section_title")
+        payload["_note_confidence"] = float(payload.get("note_confidence", 0.0) or 0.0)
         payload["_status"] = payload.get("segment_status", "done")
         payload["_error"] = payload.get("error_message")
         return payload

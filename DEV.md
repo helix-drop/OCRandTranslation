@@ -207,6 +207,8 @@
 - 默认按脚注导出，定义就近输出在对应段落后
 - 仅高置信尾注分流到 `## 本章尾注` 或 `## 全书尾注`
 - 编号无法稳定解析时，保留 `[脚注]` / `[脚注翻译]` 回退块，不伪造编号
+- 新解析链路会在 `pages.payload_json` 中写入页级 `_note_scan`，记录该页是正文、页脚脚注页、尾注页还是正文+尾注混页，并保存结构化 note items
+- 新翻译链路会在 `translation_segments` 中保存 `_note_kind/_note_marker/_note_number/_note_section_title/_note_confidence`，导出优先使用这些结构化字段，旧 heuristics 只做兜底
 
 ### `sqlite_store.py`
 
@@ -231,7 +233,7 @@
 | `_fallback_blocks_to_paragraphs` | `568-615` | 48 | markdown 解析失败时退回块级解析 | 下游是 OCR 失败兜底 |
 | `get_paragraph_bboxes` | `618-662` | 45 | 给段落匹配页面 bbox | 下游是 PDF 高亮 |
 | 脚注归属系列 | `672-883` | 212 | 规范化脚注标记、提取页脚注、映射到段落 | 下游是阅读页和导出 |
-| `get_page_context_for_translate` | `886-926` | 41 | 生成单页翻译上下文 | 下游是 `tasks.py` / `translator.py` |
+| `get_page_context_for_translate` | `886-926` | 41 | 生成单页翻译上下文；优先读取页级 `_note_scan` 中的页面脚注，并在尾注页过滤掉尾注正文 | 下游是 `tasks.py` / `translator.py` |
 | 页面文本与页码范围 | `931-964` | 34 | 取当前页文本、下一页、文档页范围 | 下游是阅读页导航 |
 
 ### `pdf_extract.py`

@@ -585,14 +585,50 @@
         <div class="toolbar-dropdown-sep"></div>
         <div style="padding:8px 14px;">
           <div style="font-size:10px;font-weight:600;color:var(--txL);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">页码偏移校准</div>
-          <div style="font-size:11px;color:var(--txS);margin-bottom:6px;">原书第 1 页 = PDF 第 <input id="tocOffsetReadingInput" type="number" min="1"
-               value="{{ toc_offset + 1 }}"
-               style="width:48px;padding:2px 4px;font-size:11px;border:1px solid var(--bdr);border-radius:3px;background:var(--card);color:var(--txt);"> 页</div>
+          <div style="font-size:11px;color:var(--txS);margin-bottom:6px;">offset = <input id="tocOffsetReadingInput" type="number" step="1"
+               value="{{ toc_offset }}"
+               style="width:58px;padding:2px 4px;font-size:11px;border:1px solid var(--bdr);border-radius:3px;background:var(--card);color:var(--txt);"></div>
+          <div style="font-size:11px;color:var(--txL);margin-bottom:6px;">公式：PDF 页码 = 原书页码 + offset</div>
           <div style="display:flex;align-items:center;gap:6px;">
             <button type="button" class="btn btn-pri btn-sm" style="font-size:11px;" onclick="tocSaveOffset();">保存</button>
             <span id="tocOffsetReadingMsg" style="font-size:11px;display:none;"></span>
           </div>
         </div>
+        {% if toc_unresolved_items %}
+        <div class="toolbar-dropdown-sep"></div>
+        <div style="padding:8px 14px 12px;">
+          <div style="font-size:10px;font-weight:600;color:var(--txL);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">未定位目录项</div>
+          <div style="font-size:11px;color:var(--txS);line-height:1.7;margin-bottom:8px;">这里填写的是 PDF 页码，不是书籍原页码。</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            {% for item in toc_unresolved_items %}
+            <div data-toc-item-id="{{ item.item_id }}" style="padding:8px 10px;border:1px solid var(--bdrL);border-radius:8px;background:rgba(255,255,255,0.78);">
+              <div style="font-size:12px;font-weight:600;color:var(--txt);margin-bottom:3px;">{{ item.title }}</div>
+              <div style="font-size:11px;color:var(--txS);margin-bottom:7px;">
+                {% if item.book_page_display %}
+                当前原书页码：{{ item.book_page_display }}
+                {% elif item.book_page %}
+                当前原书页码：原书 p.{{ item.book_page }}
+                {% else %}
+                当前原书页码：未识别
+                {% endif %}
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <input type="number"
+                       min="1"
+                       placeholder="填写 PDF 页码"
+                       id="tocResolveInput-{{ item.item_id }}"
+                       style="width:92px;padding:4px 6px;font-size:11px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);color:var(--txt);">
+                <button type="button"
+                        class="btn btn-sec btn-sm"
+                        style="font-size:11px;"
+                        onclick="tocResolveVisualItem('{{ item.item_id }}');">保存</button>
+                <span id="tocResolveMsg-{{ item.item_id }}" style="font-size:11px;display:none;"></span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -829,6 +865,11 @@
         {{ '人工修订' if para_source == 'manual' else '机器译文' }}
       </span>
       <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="toggleSegmentHistory({{ loop.index0 }}, {{ para_bp }});">查看历史</button>
+      <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;"
+              onclick="triggerGlossaryRetranslatePreview({{ para_bp }}, {{ loop.index0 }}, this);"
+              {% if glossary_retranslate_blocked %}disabled title="{{ glossary_retranslate_block_reason }}"{% endif %}>
+        从本段起补重译
+      </button>
     </div>
     <div id="manualRevisionEditor{{ loop.index0 }}" class="hidden" style="margin-top:8px;">
       <textarea id="manualRevisionInput{{ loop.index0 }}" class="inp" style="min-height:96px;">{{ pe.translation or '' }}</textarea>
@@ -868,6 +909,11 @@
         {{ '人工修订' if para_source == 'manual' else '机器译文' }}
       </span>
       <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;" onclick="toggleSegmentHistory({{ loop.index0 }}, {{ para_bp }});">查看历史</button>
+      <button type="button" class="btn btn-gho" style="font-size:11px;padding:4px 10px;"
+              onclick="triggerGlossaryRetranslatePreview({{ para_bp }}, {{ loop.index0 }}, this);"
+              {% if glossary_retranslate_blocked %}disabled title="{{ glossary_retranslate_block_reason }}"{% endif %}>
+        从本段起补重译
+      </button>
     </div>
     <div id="manualRevisionEditor{{ loop.index0 }}" class="hidden" style="margin-top:8px;">
       <textarea id="manualRevisionInput{{ loop.index0 }}" class="inp" style="min-height:96px;">{{ pe.translation or '' }}</textarea>
@@ -914,6 +960,11 @@
   <!-- Actions -->
   <div class="flex justify-center gap-8 mt-12 flex-wrap">
     <button type="button" class="btn btn-gho" style="font-size:12px;"
+            onclick="triggerGlossaryRetranslatePreview({{ cur_page_bp }}, 0, this);"
+            {% if glossary_retranslate_blocked %}disabled title="{{ glossary_retranslate_block_reason }}"{% endif %}>
+      从本页起按当前词典补重译
+    </button>
+    <button type="button" class="btn btn-gho" style="font-size:12px;"
             onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, target=('custom' if custom_model_enabled else ('builtin:' ~ model_key))) }}', this);">
       {% if custom_model_enabled %}
       用自定义模型（{{ current_model_label }}）重译本页
@@ -938,6 +989,11 @@
   {% if has_pdf %}
   <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
     重解析完成后会自动重译本页。已有译文会被新的本页重译结果覆盖。
+  </div>
+  {% endif %}
+  {% if glossary_retranslate_blocked %}
+  <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+    {{ glossary_retranslate_block_reason }}
   </div>
   {% endif %}
 
@@ -1450,15 +1506,14 @@ tocUpdateCurrentChapter();
 
 function tocSaveOffset() {
   var raw = document.getElementById('tocOffsetReadingInput').value;
-  var pdfPage1 = parseInt(raw, 10);
+  var newOffset = parseInt(raw, 10);
   var msgEl = document.getElementById('tocOffsetReadingMsg');
-  if (isNaN(pdfPage1) || pdfPage1 < 1) {
+  if (String(raw || '').trim() === '' || isNaN(newOffset)) {
     msgEl.style.display = '';
-    msgEl.textContent = '请输入 ≥ 1 的整数';
+    msgEl.textContent = '请输入整数 offset，可为负数';
     msgEl.style.color = 'var(--red)';
     return;
   }
-  var newOffset = pdfPage1 - 1;
   fetch('/api/toc/set_offset?doc_id={{ current_doc_id }}', {
     method: 'POST',
     headers: Object.assign({'Content-Type': 'application/json'}, withCsrfHeaders()),
@@ -1473,6 +1528,41 @@ function tocSaveOffset() {
         msgEl.textContent = '已保存';
         msgEl.style.color = 'var(--grn)';
         setTimeout(function() { msgEl.style.display = 'none'; }, 2000);
+      } else {
+        msgEl.textContent = d.error || '保存失败';
+        msgEl.style.color = 'var(--red)';
+      }
+    })
+    .catch(function(err) {
+      msgEl.style.display = '';
+      msgEl.textContent = '失败：' + err;
+      msgEl.style.color = 'var(--red)';
+    });
+}
+
+function tocResolveVisualItem(itemId) {
+  var input = document.getElementById('tocResolveInput-' + itemId);
+  var msgEl = document.getElementById('tocResolveMsg-' + itemId);
+  var pdfPage = parseInt((input && input.value) || '', 10);
+  if (!msgEl) return;
+  if (isNaN(pdfPage) || pdfPage < 1) {
+    msgEl.style.display = '';
+    msgEl.textContent = '请输入 ≥ 1 的 PDF 页码';
+    msgEl.style.color = 'var(--red)';
+    return;
+  }
+  fetch('/api/toc/resolve_visual_item?doc_id={{ current_doc_id }}', {
+    method: 'POST',
+    headers: Object.assign({'Content-Type': 'application/json'}, withCsrfHeaders()),
+    body: JSON.stringify({ item_id: itemId, pdf_page: pdfPage })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      msgEl.style.display = '';
+      if (d.ok) {
+        msgEl.textContent = '已保存';
+        msgEl.style.color = 'var(--grn)';
+        setTimeout(function() { window.location.reload(); }, 400);
       } else {
         msgEl.textContent = d.error || '保存失败';
         msgEl.style.color = 'var(--red)';
@@ -2781,6 +2871,15 @@ function resumeTranslateFromSnapshot(state) {
     refreshTranslateStatus();
     return;
   }
+  var task = (state && state.task) || {};
+  if (String(task.kind || '') === 'glossary_retranslate') {
+    var nextSegmentIndex = Number(task.start_segment_index || 0);
+    if (Number(task.start_bp || 0) !== Number(nextBp)) {
+      nextSegmentIndex = 0;
+    }
+    startGlossaryRetranslate(nextBp, nextSegmentIndex);
+    return;
+  }
   startTranslateAll(nextBp);
 }
 
@@ -3072,7 +3171,11 @@ function shouldShowTranslateSnapshot(state) {
 
 function formatTranslatePhaseLabel(state) {
   var phase = state && state.phase ? state.phase : 'idle';
+  var task = (state && state.task) || {};
   var label = formatUsagePhase(phase);
+  if (task && task.label) {
+    label = task.label + ' · ' + label;
+  }
   if ((phase === 'running' || phase === 'stopping') && state && state.current_bp) {
     return label + ' · ' + formatPdfPageLabel(state.current_bp);
   }
@@ -3404,6 +3507,88 @@ function stopTranslate() {
       console.error('停止请求失败:', err);
     });
   // 注意：UI 更新完全由 SSE 事件驱动，不在这里处理
+}
+
+function fetchGlossaryRetranslatePreview(startBp, startSegmentIndex) {
+  var docId = requireReadingDocId('预览词典补重译范围');
+  if (!docId) return Promise.resolve(null);
+  var url = '/api/glossary_retranslate_preview?doc_id=' + encodeURIComponent(docId);
+  if (startBp !== undefined && startBp !== null && startBp !== '') {
+    url += '&start_bp=' + encodeURIComponent(startBp);
+  }
+  if (startSegmentIndex !== undefined && startSegmentIndex !== null && startSegmentIndex !== '') {
+    url += '&start_segment_index=' + encodeURIComponent(startSegmentIndex);
+  }
+  return fetch(url).then(function(r) { return r.json(); });
+}
+
+function buildGlossaryRetranslateConfirmText(preview) {
+  var parts = [
+    '预计影响 ' + Number(preview.affected_pages || 0) + ' 页、' + Number(preview.affected_segments || 0) + ' 段。'
+  ];
+  var skippedManual = Number(preview.skipped_manual_segments || 0);
+  if (skippedManual > 0) {
+    parts.push('其中 ' + skippedManual + ' 段人工修订会被跳过，不会覆盖。');
+  }
+  parts.push('确认按当前词典开始补重译？');
+  return parts.join('\n\n');
+}
+
+function startGlossaryRetranslate(startBp, startSegmentIndex, onStarted) {
+  var docId = requireReadingDocId('启动词典补重译');
+  if (!docId) return Promise.resolve(null);
+  var form = new FormData();
+  form.append('doc_id', docId);
+  form.append('start_bp', Number(startBp || 0));
+  form.append('start_segment_index', Number(startSegmentIndex || 0));
+  form.append('doc_title', '{{ doc_title }}');
+  return fetch('{{ url_for("start_glossary_retranslate") }}', {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+    body: form
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || !data.ok) {
+        alert((data && (data.message || data.reason)) || '词典补重译启动失败');
+        return data;
+      }
+      if (typeof onStarted === 'function') {
+        onStarted(data);
+      } else {
+        refreshTranslateStatus();
+      }
+      return data;
+    });
+}
+
+function triggerGlossaryRetranslatePreview(startBp, startSegmentIndex, btn) {
+  fetchGlossaryRetranslatePreview(startBp, startSegmentIndex)
+    .then(function(preview) {
+      if (!preview) return;
+      if (!preview.can_start) {
+        alert(preview.reason || '当前无法启动词典补重译');
+        return;
+      }
+      if (!window.confirm(buildGlossaryRetranslateConfirmText(preview))) {
+        return;
+      }
+      if (btn) {
+        btn.disabled = true;
+      }
+      startGlossaryRetranslate(preview.start_bp, preview.start_segment_index, function() {
+        refreshTranslateStatus();
+      }).catch(function(err) {
+        alert('词典补重译启动失败: ' + err);
+      }).finally(function() {
+        if (btn) {
+          btn.disabled = false;
+        }
+      });
+    })
+    .catch(function(err) {
+      alert('词典补重译预览失败: ' + err);
+    });
 }
 
 // ===== 重译前人工修订警告 =====
