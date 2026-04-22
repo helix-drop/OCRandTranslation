@@ -63,7 +63,8 @@ def select_example_books(
     normalized_doc_id = str(doc_id or "").strip()
 
     if normalized_slug:
-        books = [book for book in books if book.slug == normalized_slug]
+        slugs = [s.strip() for s in normalized_slug.split(',')]
+        books = [book for book in books if book.slug in slugs]
     if normalized_folder:
         books = [book for book in books if book.folder == normalized_folder]
     if normalized_doc_id:
