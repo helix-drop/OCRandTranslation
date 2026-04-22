@@ -335,7 +335,13 @@ def _collect_page_heading_candidates(page_rows: list[dict]) -> list[dict]:
             label = str(block.get("block_label") or "").strip().lower()
             if label not in {"doc_title", "paragraph_title"}:
                 continue
-            text = normalize_title(block.get("block_content") or "")
+            raw_content = str(block.get("block_content") or "")
+            if "\x01" in raw_content:
+                from document.text_layer_fixer import detect_and_fix_text
+                fixed_content, _ = detect_and_fix_text(raw_content, raise_on_failure=False)
+                if fixed_content:
+                    raw_content = fixed_content
+            text = normalize_title(raw_content)
             if not text:
                 continue
             bbox = list(block.get("block_bbox") or [])
@@ -381,6 +387,12 @@ def _collect_page_heading_candidates(page_rows: list[dict]) -> list[dict]:
                 ),
             )
         markdown = page_markdown_text(page)
+        if "\x01" in markdown:
+            from document.text_layer_fixer import detect_and_fix_text
+            fixed_md, _ = detect_and_fix_text(markdown, raise_on_failure=False)
+            if fixed_md:
+                markdown = fixed_md
+
         for index, raw_line in enumerate(markdown.splitlines()[:12]):
             line = str(raw_line or "").strip()
             if not line:

@@ -919,7 +919,7 @@ def request_llm_repair_actions(
     client = OpenAI(
         api_key=str(resolved_args.get("api_key") or ""),
         base_url=str(resolved_args.get("base_url") or ""),
-        timeout=45.0,
+        timeout=180.0,
     )
     image_refused = False
     started = time.time()

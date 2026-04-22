@@ -47,7 +47,7 @@ _LOCAL_DEF_LINE_RE = re.compile(r"^\s*\[\^[^\]]+\]:")
 
 ISSUE_SEVERITY = {
     "wrong_title": "blocking",
-    "mid_sentence_opening": "blocking",
+    "mid_sentence_opening": "major",
     "front_matter_leak": "blocking",
     "back_matter_leak": "major",
     "toc_residue": "blocking",

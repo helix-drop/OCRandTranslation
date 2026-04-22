@@ -161,20 +161,22 @@ def _build_page_roles(
                 chapter_by_page.setdefault(page_no, chapter)
 
     first_chapter_start = min((int(ch.start_page) for ch in chapters if int(ch.start_page) > 0), default=0)
-    inferred_back_matter_start = min(
-        (
-            int(row.page_no)
-            for row in partitions
-            if str(row.reason or "") in _BACK_MATTER_REASON_HINTS and int(row.page_no) > first_chapter_start
-        ),
-        default=0,
-    )
+    total_pages = max(1, len(partitions))
+    rear_page_role_min_page = max(24, int(total_pages * 0.45))
+    
     if int(back_matter_start_hint or 0) > 0:
-        if inferred_back_matter_start > 0:
-            back_matter_start = min(int(back_matter_start_hint), inferred_back_matter_start)
-        else:
-            back_matter_start = int(back_matter_start_hint)
+        back_matter_start = int(back_matter_start_hint)
     else:
+        inferred_back_matter_start = min(
+            (
+                int(row.page_no)
+                for row in partitions
+                if str(row.reason or "") in _BACK_MATTER_REASON_HINTS 
+                and int(row.page_no) > first_chapter_start
+                and int(row.page_no) >= rear_page_role_min_page
+            ),
+            default=0,
+        )
         back_matter_start = int(inferred_back_matter_start)
 
     rows: list[TocPageRole] = []
@@ -187,7 +189,7 @@ def _build_page_roles(
         elif page_no > 0 and back_matter_start > 0 and page_no >= back_matter_start:
             role = "back_matter"
             chapter_id = ""
-        elif str(row.reason or "") in _BACK_MATTER_REASON_HINTS:
+        elif back_matter_start == 0 and str(row.reason or "") in _BACK_MATTER_REASON_HINTS and page_no >= rear_page_role_min_page:
             role = "back_matter"
             chapter_id = ""
         elif str(row.page_role or "") in {"other"}:

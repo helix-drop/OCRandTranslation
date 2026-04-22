@@ -717,7 +717,7 @@ def build_phase6_status(phase6: Phase6Structure) -> StructureStatusRecord:
             blocking_reasons.append("local_note_contract_broken")
         if not export_semantic_contract_ok:
             blocking_reasons.append("export_semantic_contract_broken")
-        if not bool(phase6.export_audit.can_ship):
+        if bool(phase6.export_audit.applicable) and not bool(phase6.export_audit.can_ship):
             blocking_reasons.append("export_audit_blocking")
     blocking_reasons = _dedupe_preserve_order(blocking_reasons)
 
