@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 25780,
+          "row_id": 30860,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00446",
           "chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
@@ -42,8 +42,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "En cela, les aliénistes confortent l'opinion bourgeoise, prompte à assimiler la Commune à un pur acte de démence. L'évidence est en particulier admise chez les écrivains, unanimes, à quelques rares exceptions près, à condamner l'insurrection, comme l'a bien montré Paul Lidsky $ ^{66} $. Le plus violent d'entre eux, Maxime Du Camp, recourt d'ailleurs volontiers, on l'a vu, à la référence alié-niste. Ce fils de médecin, décoré des mains de Cavaignac pour sa participation dans la garde mobile en juin 1848, n'a",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         }
       ],
       "rebind_candidates": []
@@ -65,7 +65,7 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00446\",\n    \"marker\": \"66\",\n    \"note_text\": \"Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text for marker '66' is clearly visible at the bottom of the page screenshot but was not captured in the structured data (unmatched_note_items is empty). The anchor exists in the text.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00446\",\n    \"marker\": \"66\",\n    \"note_text\": \"Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Screenshot clearly shows footnote text on page 328 (corresponding to cluster page 338 in metadata) with marker '66'. OCR/structured data lacks this note item.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -74,8 +74,8 @@
       "anchor_phrase": "",
       "marker": "66",
       "note_text": "Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.",
-      "confidence": 0.95,
-      "reason": "The footnote text for marker '66' is clearly visible at the bottom of the page screenshot but was not captured in the structured data (unmatched_note_items is empty). The anchor exists in the text."
+      "confidence": 0.98,
+      "reason": "Screenshot clearly shows footnote text on page 328 (corresponding to cluster page 338 in metadata) with marker '66'. OCR/structured data lacks this note item."
     }
   ],
   "derived_truth": {
@@ -90,8 +90,8 @@
         "anchor_phrase": "",
         "marker": "66",
         "note_text": "Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '66' is clearly visible at the bottom of the page screenshot but was not captured in the structured data (unmatched_note_items is empty). The anchor exists in the text."
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote text on page 328 (corresponding to cluster page 338 in metadata) with marker '66'. OCR/structured data lacks this note item."
       }
     ],
     "auto_selected_actions": [
@@ -102,8 +102,8 @@
         "anchor_phrase": "",
         "marker": "66",
         "note_text": "Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '66' is clearly visible at the bottom of the page screenshot but was not captured in the structured data (unmatched_note_items is empty). The anchor exists in the text."
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote text on page 328 (corresponding to cluster page 338 in metadata) with marker '66'. OCR/structured data lacks this note item."
       }
     ],
     "auto_applied_actions": [
@@ -114,18 +114,18 @@
         "anchor_phrase": "",
         "marker": "66",
         "note_text": "Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '66' is clearly visible at the bottom of the page screenshot but was not captured in the structured data (unmatched_note_items is empty). The anchor exists in the text."
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote text on page 328 (corresponding to cluster page 338 in metadata) with marker '66'. OCR/structured data lacks this note item."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 1360,
-    "completion_tokens": 138,
-    "total_tokens": 1498,
+    "completion_tokens": 136,
+    "total_tokens": 1496,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 3672
+    "duration_ms": 4561
   }
 }

@@ -8,7 +8,7 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-spectresdelaguillotine:toc-ch-005-spectresdelaguillotine:footnote\",\n  \"chapter_title\": \"Spectres de la guillotine\",\n  \"page_range\": [\n    92,\n    100\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 91,\n      \"ocr_excerpt\": \"Dans les jours qui suivent, le stratagème semble fonctionner, du moins selon les critères de Pinel, puisque le patient demande à reprendre son travail et sollicite le retour de son enfant — signes de guérison. Mais l'amélioration ne dure pas, le patient retombe dans l'inaction, ravi-vant « les traces de son ancien délire, ce qui fut encore favorisé par l'imprudence qu'on eut de lui indiquer comme une simple plaisanterie la sentence définitive qu'on lui avait prononcée au nom de l'Assemblée nationale. J'ai regardé depuis cette époque son état comme incurable $ ^{73} $ ». Édifiante histoire, qui prodigue un éclairage croisé sur la cause des délires et les procédés de traitement. Que l'ouvrier, sur la foi d'indices « vagues » et de dangers « exagérés », se soit imaginé à tort, comme le suggère Pinel, devoir être soumis à la guillotine semble ici très secondaire. Ce n'est pas tant l'authenticité des faits et de leur origine qu'il faut rechercher, que les effets de réel d'un phantasme qu'il convient de soigner, dans un climat où la décollation s'est instituée comme le châtiment plausible de tout délit d'opinion. Comment ? Non pas en essayant de persuader le fou de sa méprise et de le ra ...\"\n    },\n    {\n      \"page_no\": 92,\n      \"ocr_excerpt\": \"curative $ ^{74} $» de l’aliéniste. La manœuvre, censée éradiquer, dans un geste symétrique, la peur (de la décapitation) par la peur (du tribunal), n’entre pas en contradiction avec l’intimidation, bien au contraire : l’« appareil de l’autorité », l’air «imposant» du (faux) président, la responsabilité du surveillant chargé (« sur sa tête »!) de veiller à l’exécution de la sentence, rappelle en tout point l’« appareil imposant de terreur » sur lequel Pinel a fondé sa méthode. Mais le choc salutaire escompté a été de courte durée, puisque, avant même d'apprendre qu'il avait été trompé, l'aliéné est retombé dans son ancien délire. Pinel reprendra mot pour mot le début de cette histoire dans la deuxième édition de son Traité, mais supprimera toute la partie sur le subterfuge malheureux $ ^{75} $. Le médecin consacré, le professeur et le statisticien de 1809 a pris la place du précurseur et du narrateur de 1800. Ajoutons que, dans aucun de ses écrits, Pinel ne jugera bon de rendre hommage à Joseph Daquin, médecin de Chambéry, qui le premier avait engagé l'homme de l'art à se « plier au caractère de l'insensé, & le devenir, pour ainsi dire, lui-même $ ^{76} $ » pour\"\n    },\n    {\n      \"page_no\": 100,\n      \"ocr_excerpt\": \"la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la camisole $ ^{86} $.» Il est très peu probable que ces derniers patients, dont ni l'âge ni la date de naissance ne sont mentionnés sur le registre, aient vécu l'époque révolutionnaire, sinon enfants. Ils ont en revanche accompagné cette génération de 1830 qui, n'ayant pas connu la Terreur, s'en est approprié une image mentale et en a conçu une représentation sans cesse plus fouillée, mais aussi gauchie et outrée par l'esprit de parti, entre histoire et fantasmagorie, alimentée par des rumeurs relayées, des souvenirs et des récits. La littérature, à partir du romantisme dit « frénétique », a sa part dans la construction d'un mythe, où le profil de la guillotine grossit comme un monstre dévorateur et creuse une ligne de partage entre les idéaux de 1789 et les fourvoiements de 1793. De la tête qui roule et regarde la foule atroupée dans Smarra ou Les Démons de la nuit (1821), exploration de la vie psychique par Charles Nodier, au « Secret de l'échafaud » (1884) de Villiers de L'Isle-Adam, où le condamné s'engage à cligner de l'œil une fois décapité pour prouver la subsistance de la volition après la mort, la ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00106\",\n      \"marker\": \"76\",\n      \"page_no\": 92,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Mais le choc salutaire escompté a été de courte durée, puisque, avant même d'apprendre qu'il avait été trompé, l'aliéné est retombé dans son ancien délire. Pinel reprendra mot pour mot le début de cette histoire dans la deuxième édition de ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00115\",\n      \"marker\": \"86\",\n      \"page_no\": 100,\n      \"paragraph_index\": 1,\n      \"source_text\": \"ou de lui mettre la camisole $ ^{86} $.»\"\n    },\n    {\n      \"anchor_id\": \"anchor-00116\",\n      \"marker\": \"86\",\n      \"page_no\": 100,\n      \"paragraph_index\": 4,\n      \"source_text\": \"la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la camisole $ ^{86} $.»\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00110\",\n      \"note_item_id\": \"fn-00110\",\n      \"current_anchor_id\": \"anchor-00103\",\n      \"marker\": \"70\",\n      \"note_page_no\": 92,\n      \"anchor_page_no\": 91,\n      \"current_anchor_marker\": \"70\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Joseph Daquin, La Philosophie de la foîhe, Chez Née de La Rochelle, libraire, 1792, p. 52. Militant pour l'hygiène dans les asiles, préconisant le travail et recommandant les bienfaits de la musique, Daquin résumait « « philosophiè à ces mo ...\",\n      \"anchor_excerpt\": \"Dans les jours qui suivent, le stratagème semble fonctionner, du moins selon les critères de Pinel, puisque le patient demande à reprendre son travail et sollicite le retour de son enfant — signes de guérison. Mais l'amélioration ne dure pa ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-005-spectresdelaguillotine:toc-ch-005-spectresdelaguillotine:footnote\",\n  \"chapter_title\": \"Spectres de la guillotine\",\n  \"page_range\": [\n    92,\n    100\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 91,\n      \"ocr_excerpt\": \"Dans les jours qui suivent, le stratagème semble fonctionner, du moins selon les critères de Pinel, puisque le patient demande à reprendre son travail et sollicite le retour de son enfant — signes de guérison. Mais l'amélioration ne dure pas, le patient retombe dans l'inaction, ravi-vant « les traces de son ancien délire, ce qui fut encore favorisé par l'imprudence qu'on eut de lui indiquer comme une simple plaisanterie la sentence définitive qu'on lui avait prononcée au nom de l'Assemblée nationale. J'ai regardé depuis cette époque son état comme incurable $ ^{73} $ ». Édifiante histoire, qui prodigue un éclairage croisé sur la cause des délires et les procédés de traitement. Que l'ouvrier, sur la foi d'indices « vagues » et de dangers « exagérés », se soit imaginé à tort, comme le suggère Pinel, devoir être soumis à la guillotine semble ici très secondaire. Ce n'est pas tant l'authenticité des faits et de leur origine qu'il faut rechercher, que les effets de réel d'un phantasme qu'il convient de soigner, dans un climat où la décollation s'est instituée comme le châtiment plausible de tout délit d'opinion. Comment ? Non pas en essayant de persuader le fou de sa méprise et de le ra ...\"\n    },\n    {\n      \"page_no\": 92,\n      \"ocr_excerpt\": \"curative $ ^{74} $» de l’aliéniste. La manœuvre, censée éradiquer, dans un geste symétrique, la peur (de la décapitation) par la peur (du tribunal), n’entre pas en contradiction avec l’intimidation, bien au contraire : l’« appareil de l’autorité », l’air «imposant» du (faux) président, la responsabilité du surveillant chargé (« sur sa tête »!) de veiller à l’exécution de la sentence, rappelle en tout point l’« appareil imposant de terreur » sur lequel Pinel a fondé sa méthode. Mais le choc salutaire escompté a été de courte durée, puisque, avant même d'apprendre qu'il avait été trompé, l'aliéné est retombé dans son ancien délire. Pinel reprendra mot pour mot le début de cette histoire dans la deuxième édition de son Traité, mais supprimera toute la partie sur le subterfuge malheureux $ ^{75} $. Le médecin consacré, le professeur et le statisticien de 1809 a pris la place du précurseur et du narrateur de 1800. Ajoutons que, dans aucun de ses écrits, Pinel ne jugera bon de rendre hommage à Joseph Daquin, médecin de Chambéry, qui le premier avait engagé l'homme de l'art à se « plier au caractère de l'insensé, & le devenir, pour ainsi dire, lui-même $ ^{76} $ » pour\"\n    },\n    {\n      \"page_no\": 100,\n      \"ocr_excerpt\": \"la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la camisole $ ^{86} $.» Il est très peu probable que ces derniers patients, dont ni l'âge ni la date de naissance ne sont mentionnés sur le registre, aient vécu l'époque révolutionnaire, sinon enfants. Ils ont en revanche accompagné cette génération de 1830 qui, n'ayant pas connu la Terreur, s'en est approprié une image mentale et en a conçu une représentation sans cesse plus fouillée, mais aussi gauchie et outrée par l'esprit de parti, entre histoire et fantasmagorie, alimentée par des rumeurs relayées, des souvenirs et des récits. La littérature, à partir du romantisme dit « frénétique », a sa part dans la construction d'un mythe, où le profil de la guillotine grossit comme un monstre dévorateur et creuse une ligne de partage entre les idéaux de 1789 et les fourvoiements de 1793. De la tête qui roule et regarde la foule atroupée dans Smarra ou Les Démons de la nuit (1821), exploration de la vie psychique par Charles Nodier, au « Secret de l'échafaud » (1884) de Villiers de L'Isle-Adam, où le condamné s'engage à cligner de l'œil une fois décapité pour prouver la subsistance de la volition après la mort, la ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00106\",\n      \"marker\": \"76\",\n      \"page_no\": 92,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Mais le choc salutaire escompté a été de courte durée, puisque, avant même d'apprendre qu'il avait été trompé, l'aliéné est retombé dans son ancien délire. Pinel reprendra mot pour mot le début de cette histoire dans la deuxième édition de ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00115\",\n      \"marker\": \"86\",\n      \"page_no\": 100,\n      \"paragraph_index\": 1,\n      \"source_text\": \"ou de lui mettre la camisole $ ^{86} $.»\"\n    },\n    {\n      \"anchor_id\": \"anchor-00116\",\n      \"marker\": \"86\",\n      \"page_no\": 100,\n      \"paragraph_index\": 4,\n      \"source_text\": \"la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la camisole $ ^{86} $.»\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00110\",\n      \"note_item_id\": \"fn-00110\",\n      \"current_anchor_id\": \"anchor-00103\",\n      \"marker\": \"70\",\n      \"note_page_no\": 92,\n      \"anchor_page_no\": 91,\n      \"current_anchor_marker\": \"70\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Joseph Daquin, La Philosophie de la foîhe, Chez Née de La Rochelle, libraire, 1792, p. 52. Militant pour l'hygiène dans les asiles, préconisant le travail et recommandant les bienfaits de la musique, Daquin résumait « « philosophiè à ces mo ...\",\n      \"anchor_excerpt\": \"Dans les jours qui suivent, le stratagème semble fonctionner, du moins selon les critères de Pinel, puisque le patient demande à reprendre son travail et sollicite le retour de son enfant — signes de guérison. Mais l'amélioration ne dure pa ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -18,6 +18,7 @@
       "allowed_actions": [
         "match",
         "ignore_ref",
+        "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
@@ -29,7 +30,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 25400,
+          "row_id": 30480,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00106",
           "chapter_id": "toc-ch-005-spectresdelaguillotine",
@@ -42,11 +43,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Mais le choc salutaire escompté a été de courte durée, puisque, avant même d'apprendre qu'il avait été trompé, l'aliéné est retombé dans son ancien délire. Pinel reprendra mot pour mot le début de cette histoire dans la deuxième édition de son Traité, mais supprimera toute la partie sur le subterfuge malheureux $ ^{75} $. Le médecin consacré, le professeur et le statisticien de 1809 a pris la place du précurseur et du narrateur de 1800. Ajoutons que, dans aucun de ses écrits, Pinel ne jugera bon de rendre hommage à Joseph Daquin, médecin de Chambéry, qui le premier avait engagé l'homme de l'art à se « plier au caractère de l'insensé, & le devenir, pour ainsi dire, lui-même $ ^{76} $ » pour",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         },
         {
-          "row_id": 25411,
+          "row_id": 30491,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00115",
           "chapter_id": "toc-ch-005-spectresdelaguillotine",
@@ -59,11 +60,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "ou de lui mettre la camisole $ ^{86} $.»",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         },
         {
-          "row_id": 25412,
+          "row_id": 30492,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00116",
           "chapter_id": "toc-ch-005-spectresdelaguillotine",
@@ -76,8 +77,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la camisole $ ^{86} $.»",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         }
       ],
       "rebind_candidates": [
@@ -128,7 +129,7 @@
     "page_context_count": 3,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00110\",\n    \"anchor_id\": \"anchor-00106\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00110 (marker 76) corresponds to the anchor at marker 76 on page 92. The current binding to anchor-00103 (marker 70) is incorrect. OCR misread '76' as '70' in the structured data.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00115\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate anchor. Both anchor-00115 and anchor-00116 point to the same marker '86' in the same sentence on page 100. Anchor-00115 is a fragment within the paragraph, while anchor-00116 covers the full context; we keep the more complete one.\"\n  }\n]\n```",
+  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00110\",\n    \"anchor_id\": \"anchor-00106\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note item fn-00110 (marker 76) is currently bound to a synthetic anchor on page 91. The screenshot for page 98 clearly shows footnote 76 at the bottom of the page, corresponding to the explicit anchor 'anchor-00106' (marker 76) in the text on the same page. The content matches Joseph Daquin.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00115\",\n    \"marker\": \"86\",\n    \"note_text\": \"Ibid., 1856-1858, 6R10, f° 111.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Anchor 'anchor-00115' (marker 86) on page 100 has no matching note item in the structured data. The screenshot for page 106 clearly displays footnote 86 with the text 'Ibid., 1856-1858, 6R10, f° 111.'.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00116\",\n    \"confidence\": 0.99,\n    \"reason\": \"Duplicate anchor. Both 'anchor-00115' and 'anchor-00116' refer to marker 86 on page 100. 'anchor-00115' is retained as it points to the specific phrase containing the marker, while 'anchor-00116' appears to be a redundant extraction from the paragraph start.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "match",
@@ -138,17 +139,27 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "The note item fn-00110 (marker 76) corresponds to the anchor at marker 76 on page 92. The current binding to anchor-00103 (marker 70) is incorrect. OCR misread '76' as '70' in the structured data."
+      "reason": "Note item fn-00110 (marker 76) is currently bound to a synthetic anchor on page 91. The screenshot for page 98 clearly shows footnote 76 at the bottom of the page, corresponding to the explicit anchor 'anchor-00106' (marker 76) in the text on the same page. The content matches Joseph Daquin."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00115",
+      "anchor_phrase": "",
+      "marker": "86",
+      "note_text": "Ibid., 1856-1858, 6R10, f° 111.",
+      "confidence": 0.98,
+      "reason": "Anchor 'anchor-00115' (marker 86) on page 100 has no matching note item in the structured data. The screenshot for page 106 clearly displays footnote 86 with the text 'Ibid., 1856-1858, 6R10, f° 111.'."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-00115",
+      "anchor_id": "anchor-00116",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate anchor. Both anchor-00115 and anchor-00116 point to the same marker '86' in the same sentence on page 100. Anchor-00115 is a fragment within the paragraph, while anchor-00116 covers the full context; we keep the more complete one."
+      "confidence": 0.99,
+      "reason": "Duplicate anchor. Both 'anchor-00115' and 'anchor-00116' refer to marker 86 on page 100. 'anchor-00115' is retained as it points to the specific phrase containing the marker, while 'anchor-00116' appears to be a redundant extraction from the paragraph start."
     }
   ],
   "derived_truth": {
@@ -164,17 +175,27 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The note item fn-00110 (marker 76) corresponds to the anchor at marker 76 on page 92. The current binding to anchor-00103 (marker 70) is incorrect. OCR misread '76' as '70' in the structured data."
+        "reason": "Note item fn-00110 (marker 76) is currently bound to a synthetic anchor on page 91. The screenshot for page 98 clearly shows footnote 76 at the bottom of the page, corresponding to the explicit anchor 'anchor-00106' (marker 76) in the text on the same page. The content matches Joseph Daquin."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00115",
+        "anchor_phrase": "",
+        "marker": "86",
+        "note_text": "Ibid., 1856-1858, 6R10, f° 111.",
+        "confidence": 0.98,
+        "reason": "Anchor 'anchor-00115' (marker 86) on page 100 has no matching note item in the structured data. The screenshot for page 106 clearly displays footnote 86 with the text 'Ibid., 1856-1858, 6R10, f° 111.'."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-00115",
+        "anchor_id": "anchor-00116",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor. Both anchor-00115 and anchor-00116 point to the same marker '86' in the same sentence on page 100. Anchor-00115 is a fragment within the paragraph, while anchor-00116 covers the full context; we keep the more complete one."
+        "confidence": 0.99,
+        "reason": "Duplicate anchor. Both 'anchor-00115' and 'anchor-00116' refer to marker 86 on page 100. 'anchor-00115' is retained as it points to the specific phrase containing the marker, while 'anchor-00116' appears to be a redundant extraction from the paragraph start."
       }
     ],
     "auto_selected_actions": [
@@ -186,17 +207,27 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The note item fn-00110 (marker 76) corresponds to the anchor at marker 76 on page 92. The current binding to anchor-00103 (marker 70) is incorrect. OCR misread '76' as '70' in the structured data."
+        "reason": "Note item fn-00110 (marker 76) is currently bound to a synthetic anchor on page 91. The screenshot for page 98 clearly shows footnote 76 at the bottom of the page, corresponding to the explicit anchor 'anchor-00106' (marker 76) in the text on the same page. The content matches Joseph Daquin."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00115",
+        "anchor_phrase": "",
+        "marker": "86",
+        "note_text": "Ibid., 1856-1858, 6R10, f° 111.",
+        "confidence": 0.98,
+        "reason": "Anchor 'anchor-00115' (marker 86) on page 100 has no matching note item in the structured data. The screenshot for page 106 clearly displays footnote 86 with the text 'Ibid., 1856-1858, 6R10, f° 111.'."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-00115",
+        "anchor_id": "anchor-00116",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor. Both anchor-00115 and anchor-00116 point to the same marker '86' in the same sentence on page 100. Anchor-00115 is a fragment within the paragraph, while anchor-00116 covers the full context; we keep the more complete one."
+        "confidence": 0.99,
+        "reason": "Duplicate anchor. Both 'anchor-00115' and 'anchor-00116' refer to marker 86 on page 100. 'anchor-00115' is retained as it points to the specific phrase containing the marker, while 'anchor-00116' appears to be a redundant extraction from the paragraph start."
       }
     ],
     "auto_applied_actions": [
@@ -209,28 +240,38 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The note item fn-00110 (marker 76) corresponds to the anchor at marker 76 on page 92. The current binding to anchor-00103 (marker 70) is incorrect. OCR misread '76' as '70' in the structured data."
+        "reason": "Note item fn-00110 (marker 76) is currently bound to a synthetic anchor on page 91. The screenshot for page 98 clearly shows footnote 76 at the bottom of the page, corresponding to the explicit anchor 'anchor-00106' (marker 76) in the text on the same page. The content matches Joseph Daquin."
       },
       {
-        "link_id": "link-00472",
-        "action": "ignore_ref",
         "note_item_id": "",
         "anchor_id": "anchor-00115",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "86",
+        "note_text": "Ibid., 1856-1858, 6R10, f° 111.",
+        "confidence": 0.98,
+        "reason": "Anchor 'anchor-00115' (marker 86) on page 100 has no matching note item in the structured data. The screenshot for page 106 clearly displays footnote 86 with the text 'Ibid., 1856-1858, 6R10, f° 111.'."
+      },
+      {
+        "link_id": "link-00473",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00116",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor. Both anchor-00115 and anchor-00116 point to the same marker '86' in the same sentence on page 100. Anchor-00115 is a fragment within the paragraph, while anchor-00116 covers the full context; we keep the more complete one."
+        "confidence": 0.99,
+        "reason": "Duplicate anchor. Both 'anchor-00115' and 'anchor-00116' refer to marker 86 on page 100. 'anchor-00115' is retained as it points to the specific phrase containing the marker, while 'anchor-00116' appears to be a redundant extraction from the paragraph start."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 3055,
-    "completion_tokens": 258,
-    "total_tokens": 3313,
+    "prompt_tokens": 3119,
+    "completion_tokens": 444,
+    "total_tokens": 3563,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 6235
+    "duration_ms": 9754
   }
 }

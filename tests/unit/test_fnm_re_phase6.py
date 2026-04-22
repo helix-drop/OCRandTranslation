@@ -254,6 +254,49 @@ class FnmRePhase6Test(unittest.TestCase):
         self.assertTrue(any("export_depth_too_shallow" in row.issue_codes for row in report.files))
         self.assertFalse(report.can_ship)
 
+    def test_audit_does_not_treat_prose_about_publishers_as_front_matter_leak(self):
+        title = "9 La lettre et l'esprit"
+        content = (
+            f"# {title}\n\n"
+            "La traduction du cours sur le Sophiste doit paraître en 2001 chez Gallimard, "
+            "et cette mention s'inscrit ici dans une analyse suivie de la réception française de Heidegger, "
+            "avec un paragraphe continu, argumenté et pleinement rédigé.\n\n"
+            "Le second paragraphe prolonge cette lecture en comparant plusieurs médiations éditoriales sans "
+            "reprendre la forme brève, fragmentaire ou métadonnée d'une page de faux titre."
+        )
+
+        file_report = export_audit_stage.audit_markdown_file(
+            path="chapters/012-9 La lettre et l'esprit.md",
+            title=title,
+            content=content,
+            chapter_titles=[title],
+            expected_role="chapter",
+            expected_title=title,
+        )
+
+        self.assertNotIn("front_matter_leak", set(file_report.issue_codes or []))
+
+    def test_audit_still_flags_obvious_front_matter_metadata_leak(self):
+        title = "Chapter One"
+        content = (
+            f"# {title}\n\n"
+            "Copyright 2024 Example Press\n"
+            "All rights reserved.\n"
+            "Printed in France.\n"
+            "ISBN 978-0-00-000000-0"
+        )
+
+        file_report = export_audit_stage.audit_markdown_file(
+            path="chapters/001-Chapter One.md",
+            title=title,
+            content=content,
+            chapter_titles=[title],
+            expected_role="chapter",
+            expected_title=title,
+        )
+
+        self.assertIn("front_matter_leak", set(file_report.issue_codes or []))
+
     def test_phase6_status_projects_chapter_and_note_region_progress(self):
         pages = [
             _make_page(
@@ -357,4 +400,3 @@ Legacy [FN-1] [EN-2] {{NOTE_REF:x}} and local ref [^1].
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -7,6 +7,7 @@ from FNM_RE.modules.book_note_type import build_book_note_profile
 from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.note_linking import (
     _apply_link_overrides,
+    _chapter_contracts,
     _repair_explicit_footnote_anchor_ocr_variants,
     build_note_link_table,
 )
@@ -263,6 +264,219 @@ class FnmReModule4LinkingTest(unittest.TestCase):
         matched = [row for row in result.data.effective_links if row.status == "matched" and row.note_kind == "endnote"]
         self.assertEqual(len(matched), 1)
         self.assertEqual(matched[0].chapter_id, "ch-1")
+
+    def test_chapter_endnote_first_marker_follows_anchor_order_not_note_page_order(self):
+        pages = [
+            _make_page(
+                1,
+                markdown="# Chapter One\nOpening argument [1].\n\nLater argument [2].",
+                block_text="Chapter One",
+            ),
+            _make_page(2, markdown="## Notes\n2. Second note."),
+            _make_page(3, markdown="1. First note."),
+        ]
+        region = LayerNoteRegion(
+            region_id="r-1",
+            chapter_id="ch-1",
+            page_start=2,
+            page_end=3,
+            pages=[2, 3],
+            note_kind="endnote",
+            scope="chapter",
+            source_scope="chapter",
+            source="unit-test",
+            bind_method="manual",
+            bind_confidence=1.0,
+            heading_text="Notes",
+            review_required=False,
+        )
+        note_items = [
+            LayerNoteItem(
+                note_item_id="n-2",
+                region_id="r-1",
+                chapter_id="ch-1",
+                page_no=2,
+                marker="2",
+                source_marker="2",
+                normalized_marker="2",
+                synth_marker="",
+                projection_mode="native",
+                marker_type="numeric",
+                text="Second note.",
+                source="unit-test",
+                is_reconstructed=False,
+                review_required=False,
+                note_kind="endnote",
+            ),
+            LayerNoteItem(
+                note_item_id="n-1",
+                region_id="r-1",
+                chapter_id="ch-1",
+                page_no=3,
+                marker="1",
+                source_marker="1",
+                normalized_marker="1",
+                synth_marker="",
+                projection_mode="native",
+                marker_type="numeric",
+                text="First note.",
+                source="unit-test",
+                is_reconstructed=False,
+                review_required=False,
+                note_kind="endnote",
+            ),
+        ]
+        layers = self._single_chapter_layers(
+            note_items=note_items,
+            note_regions=[region],
+            note_mode="chapter_endnote_primary",
+            book_type="endnote_only",
+        )
+
+        result = build_note_link_table(layers, pages)
+        contract_evidence = dict(result.evidence.get("chapter_contracts") or {}).get("ch-1") or {}
+
+        self.assertEqual(
+            [row.status for row in result.data.effective_links if row.note_kind == "endnote"],
+            ["matched", "matched"],
+        )
+        self.assertTrue(result.gate_report.hard["link.first_marker_is_one"])
+        self.assertEqual(contract_evidence.get("non_ignored_numeric_markers"), [1, 2])
+
+    def test_chapter_endnote_first_marker_ignores_cross_chapter_stale_anchor_order(self):
+        region = LayerNoteRegion(
+            region_id="r-1",
+            chapter_id="ch-1",
+            page_start=20,
+            page_end=21,
+            pages=[20, 21],
+            note_kind="endnote",
+            scope="chapter",
+            source_scope="chapter",
+            source="unit-test",
+            bind_method="manual",
+            bind_confidence=1.0,
+            heading_text="Notes",
+            review_required=False,
+        )
+        note_items = [
+            LayerNoteItem(
+                note_item_id="n-36",
+                region_id="r-1",
+                chapter_id="ch-1",
+                page_no=20,
+                marker="36",
+                source_marker="36",
+                normalized_marker="36",
+                synth_marker="",
+                projection_mode="native",
+                marker_type="numeric",
+                text="Stale note.",
+                source="unit-test",
+                is_reconstructed=False,
+                review_required=False,
+                note_kind="endnote",
+            ),
+            LayerNoteItem(
+                note_item_id="n-1",
+                region_id="r-1",
+                chapter_id="ch-1",
+                page_no=21,
+                marker="1",
+                source_marker="1",
+                normalized_marker="1",
+                synth_marker="",
+                projection_mode="native",
+                marker_type="numeric",
+                text="First real note.",
+                source="unit-test",
+                is_reconstructed=False,
+                review_required=False,
+                note_kind="endnote",
+            ),
+        ]
+        layers = self._single_chapter_layers(
+            note_items=note_items,
+            note_regions=[region],
+            note_mode="chapter_endnote_primary",
+            book_type="endnote_only",
+        )
+        anchors = [
+            BodyAnchorRecord(
+                anchor_id="anchor-stale",
+                chapter_id="ch-prev",
+                page_no=1,
+                paragraph_index=0,
+                char_start=10,
+                char_end=12,
+                source_marker="36",
+                normalized_marker="36",
+                anchor_kind="endnote",
+                certainty=1.0,
+                source_text="Old chapter marker 36.",
+                source="markdown",
+                synthetic=False,
+                ocr_repaired_from_marker="",
+            ),
+            BodyAnchorRecord(
+                anchor_id="anchor-real",
+                chapter_id="ch-1",
+                page_no=10,
+                paragraph_index=0,
+                char_start=20,
+                char_end=22,
+                source_marker="1",
+                normalized_marker="1",
+                anchor_kind="endnote",
+                certainty=1.0,
+                source_text="Current chapter marker 1.",
+                source="markdown",
+                synthetic=False,
+                ocr_repaired_from_marker="",
+            ),
+        ]
+        links = [
+            NoteLinkRecord(
+                link_id="link-stale",
+                chapter_id="ch-1",
+                region_id="r-1",
+                note_item_id="n-36",
+                anchor_id="anchor-stale",
+                status="matched",
+                resolver="repair",
+                confidence=1.0,
+                note_kind="endnote",
+                marker="36",
+                page_no_start=20,
+                page_no_end=20,
+            ),
+            NoteLinkRecord(
+                link_id="link-real",
+                chapter_id="ch-1",
+                region_id="r-1",
+                note_item_id="n-1",
+                anchor_id="anchor-real",
+                status="matched",
+                resolver="repair",
+                confidence=1.0,
+                note_kind="endnote",
+                marker="1",
+                page_no_start=21,
+                page_no_end=21,
+            ),
+        ]
+
+        contracts, contract_evidence = _chapter_contracts(
+            chapter_layers=layers,
+            effective_links=links,
+            body_anchors=anchors,
+        )
+
+        self.assertTrue(contracts[0].first_marker_is_one)
+        self.assertEqual(
+            contract_evidence["ch-1"].get("non_ignored_numeric_markers"),
+            [1, 36],
+        )
 
     def test_endnote_candidate_priority_prefers_book_projected(self):
         pages = [_make_page(1, markdown="# Chapter One\nBody [1].", block_text="Chapter One")]

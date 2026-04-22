@@ -68,64 +68,26 @@
     }
   },
   "cleanup": {
-    "cleaned_at": "2026-04-22T11:28:43",
+    "cleaned_at": "2026-04-22T17:14:22",
     "example_dir": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction",
     "removed": [
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces",
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_progress.json",
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_result.json",
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/FNM_REAL_TEST_REPORT.md",
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/auto_visual_toc.json",
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json",
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip",
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip"
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.zip"
     ],
     "removed_count": 8,
     "failed": [],
     "failed_count": 0
   },
-  "all_ok": false,
-  "blocked": true,
-  "blocking_reasons": [
-    "toc_role_semantics_invalid",
-    "export_audit_blocking",
-    "semantic_export_blocked"
-  ],
-  "blocking_details": [
-    {
-      "stage": "structure_verify",
-      "reason_code": "chapter_issue",
-      "page_no": null,
-      "chapter_title": "",
-      "paragraph_locator": "",
-      "evidence_text_preview": "",
-      "upstream_trace_refs": [
-        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
-        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
-      ]
-    },
-    {
-      "stage": "structure_verify",
-      "reason_code": "chapter_issue",
-      "page_no": null,
-      "chapter_title": "",
-      "paragraph_locator": "",
-      "evidence_text_preview": "",
-      "upstream_trace_refs": [
-        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
-        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
-      ]
-    },
-    {
-      "stage": "export_verify",
-      "reason_code": "semantic_export_blocked",
-      "page_no": null,
-      "chapter_title": "",
-      "paragraph_locator": "",
-      "evidence_text_preview": "[\"toc_role_semantics_invalid\", \"export_audit_blocking\"]",
-      "upstream_trace_refs": []
-    }
-  ],
+  "all_ok": true,
+  "blocked": false,
+  "blocking_reasons": [],
+  "blocking_details": [],
   "trace_index": [
     {
       "stage": "visual_toc.manual_input_extract",
@@ -139,82 +101,82 @@
       "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json",
       "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
       "model_id": "qwen3.5-plus",
-      "total_tokens": 1808
+      "total_tokens": 1806
     }
   ],
   "translation_mode": "placeholder",
   "translation_api_called": false,
   "final_zip": {
     "written": true,
-    "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip",
-    "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip",
+    "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip",
+    "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip",
     "reason": ""
   },
   "progress": {
     "status": "done",
     "current_stage": "report_write",
-    "started_at": "2026-04-22T11:28:43",
-    "updated_at": "2026-04-22T11:29:20",
+    "started_at": "2026-04-22T17:14:22",
+    "updated_at": "2026-04-22T17:15:07",
     "stage_history": [
       {
         "stage": "reingest",
         "status": "done",
         "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-        "at": "2026-04-22T11:28:43"
+        "at": "2026-04-22T17:14:22"
       },
       {
         "stage": "visual_toc",
         "status": "done",
         "detail": "needs_offset",
-        "at": "2026-04-22T11:29:12"
+        "at": "2026-04-22T17:14:50"
       },
       {
         "stage": "fnm_pipeline",
         "status": "done",
-        "detail": "review_required",
-        "at": "2026-04-22T11:29:14"
+        "detail": "ready",
+        "at": "2026-04-22T17:14:54"
       },
       {
         "stage": "llm_repair",
         "status": "done",
         "detail": "auto_applied=0",
-        "at": "2026-04-22T11:29:14"
+        "at": "2026-04-22T17:14:54"
       },
       {
         "stage": "fnm_pipeline_rebuild",
         "status": "done",
         "detail": "skipped",
-        "at": "2026-04-22T11:29:14"
+        "at": "2026-04-22T17:14:54"
       },
       {
         "stage": "structure_verify",
         "status": "done",
-        "detail": "review_required",
-        "at": "2026-04-22T11:29:17"
+        "detail": "ready",
+        "at": "2026-04-22T17:14:57"
       },
       {
         "stage": "placeholder_translate",
         "status": "done",
-        "detail": "translated_paras=156",
-        "at": "2026-04-22T11:29:20"
+        "detail": "translated_paras=735",
+        "at": "2026-04-22T17:15:00"
       },
       {
         "stage": "export_verify",
         "status": "done",
-        "detail": "semantic_export_blocked",
-        "at": "2026-04-22T11:29:20"
+        "detail": "ok",
+        "at": "2026-04-22T17:15:07"
       },
       {
         "stage": "zip_finalize",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T11:29:20"
+        "at": "2026-04-22T17:15:07"
       },
       {
         "stage": "report_write",
         "status": "done",
         "detail": "单书结果、报告、进度均已写入",
-        "at": "2026-04-22T11:29:20"
+        "at": "2026-04-22T17:15:07"
       }
     ]
   },
@@ -241,8 +203,8 @@
       "visual_toc.manual_input_extract": {
         "request_count": 2,
         "prompt_tokens": 2302,
-        "completion_tokens": 1416,
-        "total_tokens": 3718
+        "completion_tokens": 1414,
+        "total_tokens": 3716
       },
       "llm_repair.cluster_request": {
         "request_count": 0,
@@ -261,15 +223,15 @@
       "qwen3.5-plus": {
         "request_count": 2,
         "prompt_tokens": 2302,
-        "completion_tokens": 1416,
-        "total_tokens": 3718
+        "completion_tokens": 1414,
+        "total_tokens": 3716
       }
     },
     "total": {
       "request_count": 2,
       "prompt_tokens": 2302,
-      "completion_tokens": 1416,
-      "total_tokens": 3718
+      "completion_tokens": 1414,
+      "total_tokens": 3716
     }
   },
   "reingest": {
@@ -286,7 +248,7 @@
   },
   "visual_toc": {
     "status": "needs_offset",
-    "count": 14,
+    "count": 10,
     "scan_mode": "manual_pdf",
     "candidate_source": "manual_toc_upload",
     "candidate_indices": [],
@@ -300,20 +262,17 @@
         "start_file_idx": 0,
         "end_file_idx": 0,
         "page_count": 1,
-        "score": 14.0,
+        "score": 10.0,
         "selected_as": "primary_run"
       }
     ],
     "organization_summary": {
-      "max_body_depth": 3,
+      "max_body_depth": 2,
       "has_containers": false,
       "has_post_body": false,
       "has_back_matter": true,
       "body_root_titles": [
-        "1",
-        "3",
-        "5",
-        "7 Introduction",
+        "Introduction",
         "Self and narcissism",
         "Attachment and trauma",
         "Defense mechanisms and dissociation",
@@ -335,140 +294,96 @@
         "depth": 0,
         "printed_page": 1,
         "file_idx": null,
-        "visual_order": 28,
-        "role_hint": "front_matter",
+        "visual_order": 11,
+        "role_hint": "chapter",
         "book_page": 1,
-        "parent_title": "",
-        "body_candidate": false,
-        "export_candidate": false
-      },
-      {
-        "title": "1",
-        "depth": 0,
-        "printed_page": 2,
-        "file_idx": 8,
-        "visual_order": 29,
-        "role_hint": "chapter",
-        "parent_title": "",
-        "body_candidate": true,
-        "export_candidate": true
-      },
-      {
-        "title": "3",
-        "depth": 2,
-        "printed_page": 4,
-        "file_idx": 10,
-        "visual_order": 30,
-        "role_hint": "section",
-        "parent_title": "1",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "5",
-        "depth": 2,
-        "printed_page": 6,
-        "file_idx": 12,
-        "visual_order": 31,
-        "role_hint": "section",
-        "parent_title": "1",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "7 Introduction",
-        "depth": 0,
-        "printed_page": 1,
-        "file_idx": null,
-        "visual_order": 32,
-        "role_hint": "chapter",
         "parent_title": "",
         "body_candidate": true,
         "export_candidate": true
       },
       {
         "title": "Self and narcissism",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 13,
         "file_idx": 19,
-        "visual_order": 33,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 12,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Attachment and trauma",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 33,
         "file_idx": 39,
-        "visual_order": 34,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 13,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Defense mechanisms and dissociation",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 49,
         "file_idx": 55,
-        "visual_order": 35,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 14,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Cathexis and free energy",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 68,
         "file_idx": 74,
-        "visual_order": 36,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 15,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Unconscious and conscious",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 88,
         "file_idx": 94,
-        "visual_order": 37,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 16,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Dreams",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 105,
         "file_idx": 111,
-        "visual_order": 38,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 17,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Schizophrenia and depression",
-        "depth": 2,
+        "depth": 0,
         "printed_page": 126,
         "file_idx": 132,
-        "visual_order": 39,
-        "role_hint": "section",
-        "parent_title": "7 Introduction",
+        "visual_order": 18,
+        "role_hint": "chapter",
+        "parent_title": "",
         "body_candidate": true,
-        "export_candidate": false
+        "export_candidate": true
       },
       {
         "title": "Conclusion",
         "depth": 0,
         "printed_page": 146,
         "file_idx": 152,
-        "visual_order": 40,
+        "visual_order": 19,
         "role_hint": "chapter",
         "parent_title": "",
         "body_candidate": true,
@@ -479,7 +394,7 @@
         "depth": 0,
         "printed_page": 155,
         "file_idx": 161,
-        "visual_order": 41,
+        "visual_order": 20,
         "role_hint": "back_matter",
         "parent_title": "",
         "body_candidate": false,
@@ -599,7 +514,7 @@
           "printed_page": 1,
           "file_idx": null,
           "visual_order": 1,
-          "role_hint": "front_matter"
+          "role_hint": "chapter"
         },
         {
           "title": "Self and narcissism",
@@ -683,14 +598,14 @@
         "subentry_pattern": null
       }
     },
-    "resolved_item_count": 14,
+    "resolved_item_count": 10,
     "unresolved_item_count": 1,
     "selected_page_count": 1,
     "selected_run_count": 1,
     "suspected_partial_capture": true,
     "coverage_quality": "partial",
-    "navigable_item_count": 12,
-    "navigable_ready_count": 11,
+    "navigable_item_count": 9,
+    "navigable_ready_count": 8,
     "unresolved_navigable_count": 1,
     "usage_events": [
       {
@@ -714,8 +629,8 @@
         "model_id": "qwen3.5-plus",
         "request_count": 1,
         "prompt_tokens": 1120,
-        "completion_tokens": 688,
-        "total_tokens": 1808,
+        "completion_tokens": 686,
+        "total_tokens": 1806,
         "doc_id": "a3c9e1f7b284",
         "slug": "",
         "context": {
@@ -729,8 +644,8 @@
         "visual_toc.manual_input_extract": {
           "request_count": 2,
           "prompt_tokens": 2302,
-          "completion_tokens": 1416,
-          "total_tokens": 3718
+          "completion_tokens": 1414,
+          "total_tokens": 3716
         },
         "visual_toc.preflight": {
           "request_count": 0,
@@ -755,15 +670,15 @@
         "qwen3.5-plus": {
           "request_count": 2,
           "prompt_tokens": 2302,
-          "completion_tokens": 1416,
-          "total_tokens": 3718
+          "completion_tokens": 1414,
+          "total_tokens": 3716
         }
       },
       "total": {
         "request_count": 2,
         "prompt_tokens": 2302,
-        "completion_tokens": 1416,
-        "total_tokens": 3718
+        "completion_tokens": 1414,
+        "total_tokens": 3716
       }
     },
     "llm_traces": [
@@ -995,7 +910,7 @@
           }
         },
         "timing": {
-          "duration_ms": 14639
+          "duration_ms": 14535
         }
       },
       {
@@ -1023,7 +938,7 @@
           "source": "organization",
           "images_count": 1
         },
-        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 1,\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Self and narcissism\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 13,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Attachment and trauma\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 33,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Defense mechanisms and dissociation\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 49,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Cathexis and free energy\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 68,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Unconscious and conscious\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 88,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Dreams\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 105,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Schizophrenia and depression\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 126,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Conclusion\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 146,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 155,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Self and narcissism\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 13,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Attachment and trauma\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 33,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Defense mechanisms and dissociation\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 49,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Cathexis and free energy\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 68,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Unconscious and conscious\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 88,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Dreams\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 105,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Schizophrenia and depression\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 126,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Conclusion\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 146,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 155,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
         "response_parsed": {
           "endnotes_summary": {
             "present": false,
@@ -1039,7 +954,7 @@
               "depth": 0,
               "visual_order": 1,
               "printed_page": 1,
-              "role_hint": "front_matter",
+              "role_hint": "chapter",
               "parent_title": ""
             },
             {
@@ -1124,7 +1039,7 @@
               "printed_page": 1,
               "file_idx": null,
               "visual_order": 1,
-              "role_hint": "front_matter"
+              "role_hint": "chapter"
             },
             {
               "title": "Self and narcissism",
@@ -1214,8 +1129,8 @@
           "model_id": "qwen3.5-plus",
           "request_count": 1,
           "prompt_tokens": 1120,
-          "completion_tokens": 688,
-          "total_tokens": 1808,
+          "completion_tokens": 686,
+          "total_tokens": 1806,
           "doc_id": "a3c9e1f7b284",
           "slug": "",
           "context": {
@@ -1224,29 +1139,23 @@
           }
         },
         "timing": {
-          "duration_ms": 13360
+          "duration_ms": 13638
         }
       }
     ]
   },
   "pipeline": {
     "ok": true,
-    "run_id": 32,
+    "run_id": 39,
     "page_count": 168,
-    "section_count": 2,
+    "section_count": 9,
     "note_count": 0,
-    "unit_count": 4,
-    "structure_state": "review_required",
+    "unit_count": 16,
+    "structure_state": "ready",
     "manual_toc_required": false,
-    "blocking_reasons": [
-      "toc_role_semantics_invalid",
-      "export_audit_blocking"
-    ],
-    "review_counts": {
-      "toc_role_semantics_invalid": 1,
-      "export_audit_blocking": 1
-    },
-    "export_ready_real": false
+    "blocking_reasons": [],
+    "review_counts": {},
+    "export_ready_real": true
   },
   "llm_repair": {
     "cluster_count": 0,
@@ -1289,11 +1198,11 @@
   },
   "rebuild": {},
   "structure": {
-    "ok": false,
+    "ok": true,
     "status": "done",
     "page_count": 168,
-    "chapter_count": 2,
-    "section_head_count": 180,
+    "chapter_count": 9,
+    "section_head_count": 168,
     "note_region_count": 0,
     "note_item_count": 0,
     "body_anchor_count": 0,
@@ -1304,15 +1213,9 @@
     "footnote_count": 0,
     "endnote_count": 0,
     "linked_endnote_count": 0,
-    "structure_state": "review_required",
-    "review_counts": {
-      "toc_role_semantics_invalid": 1,
-      "export_audit_blocking": 1
-    },
-    "blocking_reasons": [
-      "toc_role_semantics_invalid",
-      "export_audit_blocking"
-    ],
+    "structure_state": "ready",
+    "review_counts": {},
+    "blocking_reasons": [],
     "link_summary": {
       "matched": 0,
       "footnote_orphan_note": 0,
@@ -1336,26 +1239,27 @@
       "footnote_primary": 0,
       "chapter_endnotes": 0,
       "book_endnotes": 0,
-      "body_only": 2,
+      "body_only": 9,
       "mixed_or_unclear": 0
     },
     "heading_review_summary": {
-      "chapter_candidate_count": 635,
-      "suppressed_candidate_count": 289,
+      "chapter_candidate_count": 629,
+      "suppressed_candidate_count": 288,
       "suppressed_reason_counts": {
-        "low_score": 111,
+        "low_score": 110,
         "sentence_like": 178
       },
       "partition_conflict_count": 0
     },
     "heading_graph_summary": {
-      "toc_body_item_count": 2,
-      "resolved_anchor_count": 2,
+      "toc_body_item_count": 9,
+      "resolved_anchor_count": 9,
       "provisional_anchor_count": 0,
-      "section_node_count": 218,
+      "section_node_count": 213,
       "unresolved_titles_preview": [],
       "boundary_conflict_titles_preview": [],
       "promoted_section_titles_preview": [
+        "Introduction",
         "Conclusion"
       ],
       "demoted_chapter_titles_preview": [
@@ -1363,12 +1267,12 @@
         "Aner Govrin – Editor",
         "Mismatch between psyche and brain – different models in psychoanalysis and neuroscience",
         "Overview and main goal of the book",
-        "ropsychology by AR Lurija that, through Solms’",
         "“Common currency” of brain and psyche - topography and dynamic",
         "“Common currency” of brain and psyche –",
-        "Psyche in psychoanalysis – dynamic, topographic, and spatio-temporal"
+        "Psyche in psychoanalysis – dynamic, topographic, and spatio-temporal",
+        "Psychoanalysis and neuroscience – contrasting views of psyche and brain"
       ],
-      "optimized_anchor_count": 1,
+      "optimized_anchor_count": 3,
       "residual_provisional_count": 0,
       "residual_provisional_titles_preview": [],
       "expanded_window_hit_count": 0,
@@ -1376,8 +1280,8 @@
     },
     "chapter_source_summary": {
       "source": "visual_toc",
-      "chapter_level": 3,
-      "visual_toc_chapter_count": 2,
+      "chapter_level": 2,
+      "visual_toc_chapter_count": 9,
       "legacy_chapter_count": 0,
       "fallback_used": false
     },
@@ -1389,37 +1293,33 @@
     },
     "toc_alignment_summary": {
       "chapter_level_body_items": 9,
-      "exported_chapter_count": 2,
+      "exported_chapter_count": 9,
       "missing_chapter_titles_preview": [],
       "misleveled_titles_preview": [],
       "reanchored_titles_preview": [
-        "7 Introduction",
-        "Introduction",
-        "1",
-        "3",
-        "5"
+        "Introduction"
       ],
       "missing_section_titles_preview": []
     },
     "toc_semantic_summary": {
-      "body_item_count": 11,
-      "chapter_item_count": 2,
+      "body_item_count": 9,
+      "chapter_item_count": 9,
       "part_item_count": 0,
       "back_matter_item_count": 0,
-      "first_body_pdf_page": 14,
+      "first_body_pdf_page": 20,
       "last_body_pdf_page": 153,
-      "body_span_ratio": 0.8333,
+      "body_span_ratio": 0.7976,
       "nonbody_contamination_count": 0,
       "mixed_level_chapter_count": 0
     },
     "toc_role_summary": {
       "container": 0,
       "endnotes": 0,
-      "chapter": 3,
-      "section": 10,
+      "chapter": 9,
+      "section": 0,
       "post_body": 0,
       "back_matter": 1,
-      "front_matter": 1
+      "front_matter": 0
     },
     "container_titles": [],
     "post_body_titles": [],
@@ -1427,7 +1327,7 @@
       "Index"
     ],
     "visual_toc_endnotes_summary": {},
-    "toc_semantic_contract_ok": false,
+    "toc_semantic_contract_ok": true,
     "toc_semantic_blocking_reasons": [],
     "toc_export_coverage_ok": true,
     "chapter_title_alignment_ok": true,
@@ -1463,14 +1363,63 @@
       "dense_anchor_zero_capture_pages": [],
       "chapters": [
         {
-          "chapter_id": "toc-ch-001-7introduction",
+          "chapter_id": "toc-ch-001-introduction",
           "note_mode": "no_notes",
           "expected_anchor_count": 0,
           "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-002-conclusion",
+          "chapter_id": "toc-ch-002-selfandnarcissism",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-003-attachmentandtrauma",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-004-defensemechanismsanddiss",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-005-cathexisandfreeenergy",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-006-unconsciousandconscious",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-007-dreams",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-008-schizophreniaanddepressi",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-009-conclusion",
           "note_mode": "no_notes",
           "expected_anchor_count": 0,
           "captured_note_count": 0,
@@ -1484,7 +1433,7 @@
       "reason": "book_type=no_notes"
     },
     "chapter_link_contract_summary": {
-      "chapter_count": 2,
+      "chapter_count": 9,
       "contract_required_count": 0,
       "failed_chapter_ids": []
     },
@@ -1508,9 +1457,9 @@
     },
     "chapter_issue_summary": [
       {
-        "chapter_id": "toc-ch-001-7introduction",
-        "title": "7 Introduction",
-        "path": "chapters/001-7 Introduction.md",
+        "chapter_id": "toc-ch-001-introduction",
+        "title": "Introduction",
+        "path": "chapters/001-Introduction.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1518,9 +1467,79 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-002-conclusion",
+        "chapter_id": "toc-ch-002-selfandnarcissism",
+        "title": "Self and narcissism",
+        "path": "chapters/002-Self and narcissism.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-003-attachmentandtrauma",
+        "title": "Attachment and trauma",
+        "path": "chapters/003-Attachment and trauma.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-004-defensemechanismsanddiss",
+        "title": "Defense mechanisms and dissociation",
+        "path": "chapters/004-Defense mechanisms and dissociation.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-005-cathexisandfreeenergy",
+        "title": "Cathexis and free energy",
+        "path": "chapters/005-Cathexis and free energy.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-006-unconsciousandconscious",
+        "title": "Unconscious and conscious",
+        "path": "chapters/006-Unconscious and conscious.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-007-dreams",
+        "title": "Dreams",
+        "path": "chapters/007-Dreams.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-008-schizophreniaanddepressi",
+        "title": "Schizophrenia and depression",
+        "path": "chapters/008-Schizophrenia and depression.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-009-conclusion",
         "title": "Conclusion",
-        "path": "chapters/002-Conclusion.md",
+        "path": "chapters/009-Conclusion.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1537,18 +1556,18 @@
       "orphan_local_ref_count": 0
     },
     "chapter_local_endnote_contract_ok": true,
-    "export_ready_test": false,
-    "export_ready_real": false,
-    "validation_needs_human_review": true,
+    "export_ready_test": true,
+    "export_ready_real": true,
+    "validation_needs_human_review": false,
     "validation_reason_counts": {}
   },
   "placeholders": {
     "ok": true,
-    "body_unit_count": 4,
+    "body_unit_count": 16,
     "note_unit_count": 0,
-    "changed_page_count": 28,
-    "translated_chars": 63483,
-    "translated_paras": 156,
+    "changed_page_count": 140,
+    "translated_chars": 301996,
+    "translated_paras": 735,
     "retry_summary": {
       "execution_mode": "test",
       "retry_progress": {
@@ -1564,30 +1583,193 @@
     }
   },
   "export": {
-    "ok": false,
-    "blocked": true,
-    "reason": "semantic_export_blocked",
-    "structure_state": "review_required",
-    "blocking_reasons": [
-      "toc_role_semantics_invalid",
-      "export_audit_blocking"
-    ],
+    "ok": true,
+    "blocked": false,
+    "file_count": 10,
+    "chapter_count": 9,
+    "zip_size": 100725,
     "execution_mode": "test",
-    "latest_export_zip_saved": false,
-    "latest_export_zip_path": "",
-    "latest_export_zip_folder": "Neuropsychoanalysis_Introduction",
-    "latest_export_zip_reason": "semantic_export_blocked",
-    "stale_export_artifact_detected": false,
-    "export_artifact_status": "blocked",
-    "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json",
+    "local_ref_total": 0,
+    "local_def_total": 0,
+    "unique_local_ref_count": 0,
+    "unique_local_def_count": 0,
+    "orphan_local_definition_count": 0,
+    "orphan_local_ref_count": 0,
+    "orphan_local_definitions_preview": [],
+    "orphan_local_refs_preview": [],
+    "pending_placeholder_count": 0,
+    "raw_note_heading_leak_count": 0,
+    "legacy_footnote_ref_count": 0,
+    "legacy_endnote_ref_count": 0,
+    "legacy_en_bracket_ref_count": 0,
+    "legacy_note_token_count": 0,
+    "forbidden_section_heading_count": 0,
+    "expected_note_count": 0,
+    "chapter_local_endnote_contract_ok": true,
+    "export_semantic_contract_ok": true,
+    "front_matter_leak_detected": false,
+    "toc_residue_detected": false,
+    "mid_paragraph_heading_detected": false,
+    "duplicate_paragraph_detected": false,
+    "preliminary_export_ok": true,
     "biopolitics_export_contract_ok": true,
     "biopolitics_export_audit": {
       "applicable": false,
       "ok": true
+    },
+    "export_drift_summary": {
+      "legacy_footnote_ref_count": 0,
+      "legacy_endnote_ref_count": 0,
+      "legacy_en_bracket_ref_count": 0,
+      "legacy_note_token_count": 0,
+      "orphan_local_definition_count": 0,
+      "orphan_local_ref_count": 0
+    },
+    "latest_export_zip_saved": true,
+    "latest_export_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.zip",
+    "latest_export_zip_folder": "Neuropsychoanalysis_Introduction",
+    "latest_export_zip_reason": "",
+    "stale_export_artifact_detected": false,
+    "export_artifact_status": "ready",
+    "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json",
+    "chapters": [
+      "Introduction",
+      "Self and narcissism",
+      "Attachment and trauma",
+      "Defense mechanisms and dissociation",
+      "Cathexis and free energy"
+    ],
+    "chapter_stats_preview": [
+      {
+        "title": "Introduction",
+        "path": "chapters/001-Introduction.md",
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "Self and narcissism",
+        "path": "chapters/002-Self and narcissism.md",
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "Attachment and trauma",
+        "path": "chapters/003-Attachment and trauma.md",
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "Defense mechanisms and dissociation",
+        "path": "chapters/004-Defense mechanisms and dissociation.md",
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "Cathexis and free energy",
+        "path": "chapters/005-Cathexis and free energy.md",
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      }
+    ],
+    "full_audit_can_ship": true,
+    "full_audit_blocking_issue_count": 0,
+    "full_audit_report_path": "/Users/hao/OCRandTranslation/output/fnm_book_audits/Neuropsychoanalysis_Introduction.json",
+    "full_audit_summary": {
+      "must_fix_before_next_book": [],
+      "recommended_followups": [
+        {
+          "issue_code": "chapter_boundary_missing_tail",
+          "count": 3
+        },
+        {
+          "issue_code": "mid_sentence_opening",
+          "count": 1
+        }
+      ]
     }
   },
-  "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip",
-  "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip",
+  "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip",
+  "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip",
   "zip_written": true,
   "zip_reason": ""
 }

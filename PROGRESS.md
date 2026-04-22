@@ -2,6 +2,69 @@
 
 本文件只记录**当前口径**、最近实测和下一步工作，不再堆叠历史阶段记录。
 
+## 2026-04-22 Biopolitics LLM repair 幻觉匹配修复（最新）
+
+### 问题
+
+`full8_20260422_real` 批跑中 Biopolitics 被 `link_first_marker_not_one` 阻塞。
+根因：LLM repair（qwen3.5-plus）auto-apply 把 `en-00001`（marker 1）错误匹配到
+`anchor-00065`（normalized_marker=19），而正确的 `anchor-00063`（marker=1）没被选中。
+这导致 rebuild 后 contract checker 排序 anchor 位置时 marker 2 排在 marker 1 前面，触发合同失败。
+
+### 修复
+
+在 `FNM_RE/llm_repair.py` 的 `run_llm_repair()` auto-apply `match` 分支增加 marker 一致性校验：
+- 当 anchor marker 与 note item marker 不一致（都是数字）时
+- 检查同章节是否存在非 synthetic 的、marker 完全匹配的其他 anchor
+- 若存在，拒绝自动应用该 match（防止 LLM 幻觉绑错 anchor）
+
+### 验证
+
+- 新增回归测试 `test_run_llm_repair_rejects_match_when_exact_marker_anchor_exists`
+- LLM repair 相关 7 tests OK
+- Biopolitics 真实重跑：`processed=1, passed=1, blocked=0`
+- 批次目录：`output/fnm_real_batch/biopolitics_marker_guard_20260422`
+
+
+## 2026-04-22 剩余两本阻塞书已收口
+
+### 当前状态
+
+- `Napoleon` 与 `Biopolitics` 这两本剩余阻塞书已完成代码修复 + 真实重跑，当前都已转为 `ready / passed`。
+- 这轮真正修到位的点有两类：
+  - `Biopolitics`
+    - `chapter_endnotes` 的首 marker 判定，之前会把“link 仍挂在旧 anchor_id 上、但 anchor 实际属于前一章”的脏链接当成当前章正文顺序，导致 `non_ignored_numeric_markers` 从 `36/37/38/40` 起跳。
+    - 现在章级合同只把“当前章自己的、且有有效页码的正文 anchor”用于首 marker 顺序判定；跨章 stale anchor 会回退到 link 自身页序，不再污染当前章的首条尾注判断。
+  - `Napoleon`
+    - 直接 `build_phase6_structure()` 已经会清掉“已导出章节仍残留在 `container_titles`”的问题，但正式批跑走的 `module snapshot/export audit` 链路还没同步这层清洗。
+    - 现在 `module export bundle` 与 `phase6 summary from modules` 都会把“已经作为 chapter/post_body 导出的标题”从 `container_titles` 里剔除，不再把 `II. L’asile, prison politique ?` 误判成 container。
+- 这两本真实批跑都继续优先使用了 `qwen3.5-plus`，没有切去更贵模型。
+
+### 最近自测
+
+- 单测回归：
+  - `python3 -m unittest tests.unit.test_fnm_re_module4_linking tests.unit.test_fnm_re_pipeline_snapshot tests.unit.test_fnm_re_phase6 tests.unit.fnm_re_phase1_cases.FnmRePhase1Test.test_napoleon_exported_roman_root_is_not_left_in_container_titles`
+  - `Ran 39 tests, OK`
+- 真实重跑：
+  - `python3 scripts/test_fnm_real_batch.py --slug Napoleon --batch-tag napoleon_fixcheck_20260422_rerun2`
+    - `processed=1, passed=1, blocked=0`
+    - 批次目录：`output/fnm_real_batch/napoleon_fixcheck_20260422_rerun2`
+    - `structure_state=ready`
+    - `blocking_reasons=[]`
+    - `qwen3.5-plus total_tokens=37170`
+  - `python3 scripts/test_fnm_real_batch.py --slug Biopolitics --batch-tag biopolitics_fixcheck_20260422_rerun2`
+    - `processed=1, passed=1, blocked=0`
+    - 批次目录：`output/fnm_real_batch/biopolitics_fixcheck_20260422_rerun2`
+    - `structure_state=ready`
+    - `blocking_reasons=[]`
+    - `chapter_link_contract_summary.failed_chapter_ids=[]`
+    - `qwen3.5-plus total_tokens=74714`
+
+### 下一步
+
+1. 重新做一次 8 本整批实跑，确认这轮两处修复在全批次口径下没有回退。
+2. 若还要继续压稳 `chapter_endnotes`，优先再扫一轮“跨章 stale anchor / 旧 anchor_id 残留”的样本。
+
 ## 2026-04-21 Visual TOC 语义型 depth 迁移已落地（最新）
 
 ### 当前状态
@@ -1483,3 +1546,33 @@
   1. 等 `Biopolitics` 本轮 FNM 重跑完成
   2. 直接核对 `documents.auto_toc_visual` / `fnm_chapters / toc_role_summary / export zip`
   3. 修正“组织方式进入视觉目录结果，但未进入结构/导出”的断点
+# 2026-04-22 剩余 3 本阻塞修复（代码已落地）
+
+- 已按“先补失败测试，再修实现”完成 3 个阻塞根因修复：
+  - `Biopolitics`：`chapter_endnotes` 的 `first_marker_is_one` 现在按正文 `anchor` 顺序判定，不再按尾注页顺序误判
+  - `Heidegger_en_France`：`export_audit.front_matter_leak` 已收紧，正文首段里讨论译本/出版社时不再误报
+  - `Napoleon`：若某个 Roman root 最终被导出成真实章节，会从 `container_titles` 里剔除，避免 `container_exported_as_chapter`
+- 顺手修复了一个会阻塞 `phase6` 回归验证的记录字段回归：
+  - `ExportAuditReportRecord.applicable` 已补回，并在 `pipeline/export_audit` 投影时保持
+- 当前验证：
+  - 定向单测与相邻回归共 `40` 项已通过
+  - 真实样本本地验证已通过：
+    - `Biopolitics`：`link.first_marker_is_one=True`
+    - `Napoleon`：`II. L’asile, prison politique ?` 仍会导出，但已不再留在 `container_titles`
+    - `Heidegger_en_France`：两章问题章的直接导出审计已不再出现 `front_matter_leak`
+- 三本真实重跑结果：
+  - `Napoleon`：仍 `blocked`
+    - `blocking_reasons = ["export_audit_blocking", "structure_review_required"]`
+    - `latest_export_status.json = blocked / structure_review_required`
+    - `qwen3.5-plus` 用量：`16` 请求，`37339` tokens
+  - `Biopolitics`：仍 `blocked`
+    - `blocking_reasons = ["link_first_marker_not_one", "structure_review_required"]`
+    - 仍剩 `toc-ch-006-leçondu14février1979` 一个 chapter contract 失败
+    - `qwen3.5-plus` 用量：`16` 请求，`70887` tokens
+  - `Heidegger_en_France`：已转 `ready`
+    - `latest_export_status.json = ready / ok`
+    - `output/fnm_book_audits/Heidegger_en_France.json -> can_ship=true`
+    - `qwen3.5-plus` 用量：`8` 请求，`23842` tokens
+- 下一步优先级：
+  - 继续精确定位 `Biopolitics` 在 `toc-ch-006-leçondu14février1979` 的残余 `first_marker_is_one` 变体
+  - 拆清 `Napoleon` 当前 `export_audit_blocking` 的具体命中项，避免只停留在汇总级 blocked

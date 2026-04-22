@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import re
 import time
 from dataclasses import dataclass, replace
 from collections import Counter
@@ -1470,6 +1471,7 @@ def _export_audit_record_from_module(report: Any) -> ExportAuditReportRecord:
         slug=str(report.slug or ""),
         doc_id=str(report.doc_id or ""),
         zip_path=str(report.zip_path or ""),
+        applicable=bool(getattr(report, "applicable", True)),
         structure_state=str(report.structure_state or ""),
         blocking_reasons=[str(item).strip() for item in list(report.blocking_reasons or []) if str(item).strip()],
         manual_toc_summary=dict(report.manual_toc_summary or {}),
@@ -1511,6 +1513,11 @@ def _phase6_summary_from_modules(
     manual_toc_summary: Mapping[str, Any] | None,
     pipeline_state: str,
 ) -> Phase6Summary:
+    def _summary_title_key(value: str) -> str:
+        text = re.sub(r"\s+", " ", str(value or "").strip())
+        text = re.sub(r"\s+([?!:;,])", r"\1", text)
+        return text.casefold()
+
     container_titles = [str(row.title or "") for row in toc_result.data.toc_tree if str(row.role or "") == "container"]
     post_body_titles = [str(row.title or "") for row in toc_result.data.chapters if str(row.role or "") == "post_body"]
     back_matter_titles = [
@@ -1518,6 +1525,17 @@ def _phase6_summary_from_modules(
         for row in toc_result.data.toc_tree
         if str(row.role or "") == "back_matter"
     ]
+    exported_title_keys = {
+        _summary_title_key(str(row.title or ""))
+        for row in export_result.data.chapters
+        if _summary_title_key(str(row.title or ""))
+    }
+    if exported_title_keys:
+        container_titles = [
+            title
+            for title in container_titles
+            if _summary_title_key(title) not in exported_title_keys
+        ]
     return Phase6Summary(
         page_partition_summary=dict(toc_result.evidence.get("page_partition_summary") or {}),
         heading_review_summary=dict(toc_result.evidence.get("heading_review_summary") or {}),

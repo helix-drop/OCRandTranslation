@@ -1,9 +1,9 @@
 # FNM Real Test Report — Biopolitics
 
 - doc_id: `0d285c0800db`
-- 状态: `blocked`
-- 导出可用: `False`
-- 阻塞原因: `["link_first_marker_not_one", "export_audit_blocking", "structure_review_required"]`
+- 状态: `ready`
+- 导出可用: `True`
+- 阻塞原因: `[]`
 - translation_mode: `placeholder`
 - translation_api_called: `False`
 - current_stage: `report_write`
@@ -18,29 +18,29 @@
 - manual_toc_pdf: exists=`True` path=`/Users/hao/OCRandTranslation/test_example/Biopolitics/Bioplitics目录.pdf` size=`6981680` sha256=`47d65ce2923c8a5bb29b08f46c4fec9fbc8127623508cad91f9ff84ebe2de9de`
 
 ## 清理结果
-- removed_count: `8`
-- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Biopolitics/auto_visual_toc.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.Biopolitics.blocked.test.zip", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.blocked.test.zip"]`
+- removed_count: `7`
+- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.Biopolitics.blocked.test.zip", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.blocked.test.zip"]`
 
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `755`
+- translated_paras: `752`
 
 ## Token by Stage
 - visual_toc.preflight: request=1, prompt=127, completion=24, total=151
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=6, prompt=10302, completion=3094, total=13396
-- llm_repair.cluster_request: request=9, prompt=52576, completion=3499, total=56075
+- visual_toc.manual_input_extract: request=6, prompt=10296, completion=3090, total=13386
+- llm_repair.cluster_request: request=9, prompt=52896, completion=4621, total=57517
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
 - optimized_anchor_count: `0`
 - residual_provisional_count: `0`
 - expanded_window_hit_count: `0`
-- composite_heading_count: `15`
+- composite_heading_count: `14`
 - residual_provisional_titles_preview: `[]`
-- `{"toc_body_item_count": 14, "resolved_anchor_count": 14, "provisional_anchor_count": 0, "section_node_count": 9, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": [], "demoted_chapter_titles_preview": ["MICHEL FOUCAULT", "Naissance de la biopolitique", "FRANÇOIS EWALD et ALESSANDRO FONTANA", "des physiocrates, de d’Argenson, d’Adam Smith, de Bentham, des utili-", "le marché, ou plutôt la concurrence pure, qui est l’essence même du", "cation, une discipline", "Indices", "liberté"], "optimized_anchor_count": 0, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 15}`
+- `{"toc_body_item_count": 14, "resolved_anchor_count": 14, "provisional_anchor_count": 0, "section_node_count": 9, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": [], "demoted_chapter_titles_preview": ["MICHEL FOUCAULT", "Naissance de la biopolitique", "FRANÇOIS EWALD et ALESSANDRO FONTANA", "des physiocrates, de d’Argenson, d’Adam Smith, de Bentham, des utili-", "le marché, ou plutôt la concurrence pure, qui est l’essence même du", "cation, une discipline", "Indices", "liberté"], "optimized_anchor_count": 0, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 14}`
 
 ## Endnotes Summary
 - present: `False`
@@ -54,8 +54,8 @@
 - `{"container": 2, "endnotes": 0, "chapter": 12, "section": 0, "post_body": 2, "back_matter": 2, "front_matter": 1}`
 
 ## Export
-- slug zip: `/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.Biopolitics.blocked.test.zip`
-- alias zip: `/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.blocked.test.zip`
+- slug zip: `/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.Biopolitics.test.zip`
+- alias zip: `/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.test.zip`
 
 ## LLM 交互摘要
 - trace_count: `16`
@@ -77,27 +77,3 @@
 - llm_repair.cluster_request: 根据 unresolved cluster 请求 LLM 给出注释链接修补建议 -> `/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.009.json`
 
 ## 阻塞定位明细
-- structure_verify / note_link_orphan_note: `原书 p.343 — 600-1800. Théorie du droit public et science de la police, de M. Stolleis (Paris...` | `600-1800. Théorie du droit public et science de la police, de M. Stolleis (Paris, PUF, 1998).`
-- structure_verify / note_link_orphan_note: `原书 p.347 — La bibliographie française sur le sujet étant extrêmement réduite, hormis la thè...` | `La bibliographie française sur le sujet étant extrêmement réduite, hormis la thèse de F. Bilger (La Pensée économique libérale de l'Allemagn...`
-- structure_verify / note_link_orphan_anchor: `原书 p.19 ¶0 — grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrèt...` | `grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer...`
-- structure_verify / note_link_orphan_anchor: `原书 p.19 ¶1 — L'an dernier, vous vous souvenez, j'avais essayé de faire l'étude de l'un de ces...` | `L'an dernier, vous vous souvenez, j'avais essayé de faire l'étude de l'un de ces épisodes importants, je crois, dans l'histoire du gouvernem...`
-- structure_verify / note_link_orphan_anchor: `原书 p.24 ¶1 — Vous avez aussi la théorie du droit naturel et des droits naturels que l'on fait...` | `Vous avez aussi la théorie du droit naturel et des droits naturels que l'on fait valoir comme droits imprescriptibles et qu'aucun souverain,...`
-- structure_verify / note_link_orphan_anchor: `原书 p.28 ¶0 — le peuvent pas, autrement dit, entre les choses à faire et les moyens à employer...` | `le peuvent pas, autrement dit, entre les choses à faire et les moyens à employer pour les faire d'une part, et les choses à ne pas faire. Le...`
-- structure_verify / note_link_orphan_anchor: `原书 p.29 ¶0 — XVII<sup>e</sup> et au XVII<sup>e</sup> siècle quand il disait : si le souverain...` | `XVII<sup>e</sup> et au XVII<sup>e</sup> siècle quand il disait : si le souverain franchit cette loi, alors il doit être puni par une sanctio...`
-- structure_verify / note_link_orphan_anchor: `原书 p.30 ¶1 — Deuxièmement, l'économie politique ne se propose pas du tout comme une objection...` | `Deuxièmement, l'économie politique ne se propose pas du tout comme une objection externe à la raison d'État et à son autonomie politique pui...`
-- structure_verify / note_link_orphan_anchor: `原书 p.36 ¶3 — Eh bien, ce moment dont j'ai essayé d'indiquer le principal composant, c'est don...` | `Eh bien, ce moment dont j'ai essayé d'indiquer le principal composant, c'est donc ce moment qui se situe entre Walpole dont je vous parlais...`
-- structure_verify / note_link_orphan_anchor: `原书 p.39 ¶0 — Alors, pardonnez-moi, pendant un certain nombre de séances dont je ne peux pas v...` | `Alors, pardonnez-moi, pendant un certain nombre de séances dont je ne peux pas vous fixer le nombre à l'avance, je vous parlerai du libérali...`
-- structure_verify / note_link_orphan_anchor: `原书 p.104 ¶0 — la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès...` | `la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès de Bad Dürkheim encore en 1949, le Parti socialiste alleman...`
-- structure_verify / note_link_orphan_anchor: `原书 p.106 ¶0 — Godesberg, ce fameux congrès de la renonciation absolue aux thèmes les plus trad...` | `Godesberg, ce fameux congrès de la renonciation absolue aux thèmes les plus traditionnels de la social-démocratie, c'était bien sûr la ruptu...`
-- structure_verify / note_link_orphan_anchor: `原书 p.121 ¶0 — Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain n...` | `Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants d...`
-- structure_verify / note_link_orphan_anchor: `原书 p.121 ¶0 — Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain n...` | `Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants d...`
-- structure_verify / note_link_orphan_anchor: `原书 p.122 ¶0 — Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eu...` | `Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle d...`
-- structure_verify / note_link_orphan_anchor: `原书 p.122 ¶0 — Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eu...` | `Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle d...`
-- structure_verify / note_link_orphan_anchor: `原书 p.122 ¶0 — Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eu...` | `Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle d...`
-- structure_verify / note_link_orphan_anchor: `原书 p.126 ¶2 — Enfin quatrième obstacle, lui, arrivé le plus récemment sur la scène historique...` | `Enfin quatrième obstacle, lui, arrivé le plus récemment sur la scène historique de l'Allemagne, ça a été le dirigisme de type keynésien. Dep...`
-- structure_verify / note_link_orphan_anchor: `原书 p.127 ¶0 — de réseau continu. On est allé tout naturellement de l'économie protégée à l'éco...` | `de réseau continu. On est allé tout naturellement de l'économie protégée à l'économie d'assistance. La planification type Rathenau, par exem...`
-- structure_verify / note_link_orphan_anchor: `原书 p.127 ¶0 — de réseau continu. On est allé tout naturellement de l'économie protégée à l'éco...` | `de réseau continu. On est allé tout naturellement de l'économie protégée à l'économie d'assistance. La planification type Rathenau, par exem...`
-- structure_verify / note_link_orphan_anchor: `原书 p.127 ¶0 — de réseau continu. On est allé tout naturellement de l'économie protégée à l'éco...` | `de réseau continu. On est allé tout naturellement de l'économie protégée à l'économie d'assistance. La planification type Rathenau, par exem...`
-- structure_verify / note_link_orphan_anchor: `原书 p.128 ¶1 — Et reprenant ce schéma et ce principe, ils étudient successivement différents ty...` | `Et reprenant ce schéma et ce principe, ils étudient successivement différents types d'économie, la planification soviétique par exemple. Ceu...`
-- structure_verify / note_link_orphan_anchor: `原书 p.128 ¶1 — Et reprenant ce schéma et ce principe, ils étudient successivement différents ty...` | `Et reprenant ce schéma et ce principe, ils étudient successivement différents types d'économie, la planification soviétique par exemple. Ceu...`
-- structure_verify / note_link_orphan_anchor: `原书 p.129 ¶1 — Deuxième leçon qu'ils ont tirée du nazisme, c'est celle-ci. Le nazisme, ont-ils...` | `Deuxième leçon qu'ils ont tirée du nazisme, c'est celle-ci. Le nazisme, ont-ils dit, qu'est-ce c'est ? C'est essentiellement, et avant tout,...`

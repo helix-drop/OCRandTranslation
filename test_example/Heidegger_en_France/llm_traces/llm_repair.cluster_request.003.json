@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 88319,
+          "row_id": 103223,
           "doc_id": "a5d9a08d6871",
           "anchor_id": "anchor-00490",
           "chapter_id": "toc-ch-012-lalettreetlesprit",
@@ -42,8 +42,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Il fallait aux auditeurs une oreille très fine – et patiente –, il faut aux lecteurs une attention soutenue pour ne pas se méprendre sur De l'esprit. L'ironie du sort a fait que ce livre n'a précédé que de quelques mois le scandale provoqué par la publication du livre de Farias. En un sens, il en a préparé le terrain (sans s'en douter) $ ^{109} $ en reposant « la question » et en suggérant que la pratique « retorse » de Heidegger relevait d'un art consommé pour « l'éviter ». Pourtant, rien de commun entre Derrida et Farias ; le premier sera même accusé par les partisans du second de « couvrir » Heidegger. Avec « l'affaire Heidegger », nous allons descendre vertigineuse-",
-          "created_at": 1776827544,
-          "updated_at": 1776827544
+          "created_at": 1776848024,
+          "updated_at": 1776848024
         }
       ],
       "rebind_candidates": [
@@ -186,7 +186,7 @@
     "page_context_count": 4,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01058\",\n    \"anchor_id\": \"anchor-00490\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 96 is on page 341 (bottom), while the text for anchor 96 ('...étrange complicité.') is at the top of page 342. The current binding to anchor-00485 (page 341) is incorrect as that anchor precedes footnote 95. Rebinding to anchor-00490 (page 342) correctly associates the note with its reference marker in the text.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00490\",\n    \"confidence\": 0.95,\n    \"reason\": \"This anchor (marker 109) is now correctly matched to fn-01058 (which was mislabeled as 96 in the input data but corresponds to the 'Ibid., p. 157' note found on page 341). No further action needed for this anchor.\"\n  }\n]",
+  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01058\",\n    \"anchor_id\": \"anchor-00490\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00690\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00691\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00692\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00693\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00694\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00695\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00696\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "match",
@@ -196,17 +196,77 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Footnote 96 is on page 341 (bottom), while the text for anchor 96 ('...étrange complicité.') is at the top of page 342. The current binding to anchor-00485 (page 341) is incorrect as that anchor precedes footnote 95. Rebinding to anchor-00490 (page 342) correctly associates the note with its reference marker in the text."
+      "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-00490",
+      "anchor_id": "synthetic-footnote-00690",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "This anchor (marker 109) is now correctly matched to fn-01058 (which was mislabeled as 96 in the input data but corresponds to the 'Ibid., p. 157' note found on page 341). No further action needed for this anchor."
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00691",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00692",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00693",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00694",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00695",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00696",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant."
     }
   ],
   "derived_truth": {
@@ -222,17 +282,77 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote 96 is on page 341 (bottom), while the text for anchor 96 ('...étrange complicité.') is at the top of page 342. The current binding to anchor-00485 (page 341) is incorrect as that anchor precedes footnote 95. Rebinding to anchor-00490 (page 342) correctly associates the note with its reference marker in the text."
+        "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-00490",
+        "anchor_id": "synthetic-footnote-00690",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "This anchor (marker 109) is now correctly matched to fn-01058 (which was mislabeled as 96 in the input data but corresponds to the 'Ibid., p. 157' note found on page 341). No further action needed for this anchor."
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00691",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00692",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00693",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00694",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00695",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00696",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant."
       }
     ],
     "auto_selected_actions": [
@@ -244,7 +364,77 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote 96 is on page 341 (bottom), while the text for anchor 96 ('...étrange complicité.') is at the top of page 342. The current binding to anchor-00485 (page 341) is incorrect as that anchor precedes footnote 95. Rebinding to anchor-00490 (page 342) correctly associates the note with its reference marker in the text."
+        "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00690",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00691",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00692",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00693",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00694",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00695",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00696",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant."
       }
     ],
     "auto_applied_actions": [
@@ -257,17 +447,17 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote 96 is on page 341 (bottom), while the text for anchor 96 ('...étrange complicité.') is at the top of page 342. The current binding to anchor-00485 (page 341) is incorrect as that anchor precedes footnote 95. Rebinding to anchor-00490 (page 342) correctly associates the note with its reference marker in the text."
+        "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 4228,
-    "completion_tokens": 281,
-    "total_tokens": 4509,
+    "completion_tokens": 705,
+    "total_tokens": 4933,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 7768
+    "duration_ms": 14818
   }
 }

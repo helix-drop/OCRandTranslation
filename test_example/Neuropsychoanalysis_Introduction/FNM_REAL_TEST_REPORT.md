@@ -1,9 +1,9 @@
 # FNM Real Test Report — Neuropsychoanalysis_Introduction
 
 - doc_id: `a3c9e1f7b284`
-- 状态: `blocked`
-- 导出可用: `False`
-- 阻塞原因: `["toc_role_semantics_invalid", "export_audit_blocking", "semantic_export_blocked"]`
+- 状态: `ready`
+- 导出可用: `True`
+- 阻塞原因: `[]`
 - translation_mode: `placeholder`
 - translation_api_called: `False`
 - current_stage: `report_write`
@@ -19,28 +19,28 @@
 
 ## 清理结果
 - removed_count: `8`
-- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/auto_visual_toc.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip"]`
+- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip", "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.zip"]`
 
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `156`
+- translated_paras: `735`
 
 ## Token by Stage
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=2, prompt=2302, completion=1416, total=3718
+- visual_toc.manual_input_extract: request=2, prompt=2302, completion=1414, total=3716
 - llm_repair.cluster_request: request=0, prompt=0, completion=0, total=0
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
-- optimized_anchor_count: `1`
+- optimized_anchor_count: `3`
 - residual_provisional_count: `0`
 - expanded_window_hit_count: `0`
 - composite_heading_count: `107`
 - residual_provisional_titles_preview: `[]`
-- `{"toc_body_item_count": 2, "resolved_anchor_count": 2, "provisional_anchor_count": 0, "section_node_count": 218, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": ["Conclusion"], "demoted_chapter_titles_preview": ["NEUROPSYCHOANALYSIS A Contemporary Introduction", "Aner Govrin – Editor", "Mismatch between psyche and brain – different models in psychoanalysis and neuroscience", "Overview and main goal of the book", "ropsychology by AR Lurija that, through Solms’", "“Common currency” of brain and psyche - topography and dynamic", "“Common currency” of brain and psyche –", "Psyche in psychoanalysis – dynamic, topographic, and spatio-temporal"], "optimized_anchor_count": 1, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 107}`
+- `{"toc_body_item_count": 9, "resolved_anchor_count": 9, "provisional_anchor_count": 0, "section_node_count": 213, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": ["Introduction", "Conclusion"], "demoted_chapter_titles_preview": ["NEUROPSYCHOANALYSIS A Contemporary Introduction", "Aner Govrin – Editor", "Mismatch between psyche and brain – different models in psychoanalysis and neuroscience", "Overview and main goal of the book", "“Common currency” of brain and psyche - topography and dynamic", "“Common currency” of brain and psyche –", "Psyche in psychoanalysis – dynamic, topographic, and spatio-temporal", "Psychoanalysis and neuroscience – contrasting views of psyche and brain"], "optimized_anchor_count": 3, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 107}`
 
 ## Endnotes Summary
 - present: `False`
@@ -51,11 +51,11 @@
 - subentry_pattern: ``
 
 ## TOC Role Summary
-- `{"container": 0, "endnotes": 0, "chapter": 3, "section": 10, "post_body": 0, "back_matter": 1, "front_matter": 1}`
+- `{"container": 0, "endnotes": 0, "chapter": 9, "section": 0, "post_body": 0, "back_matter": 1, "front_matter": 0}`
 
 ## Export
-- slug zip: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip`
-- alias zip: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip`
+- slug zip: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip`
+- alias zip: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip`
 
 ## LLM 交互摘要
 - trace_count: `2`
@@ -63,6 +63,3 @@
 - visual_toc.manual_input_extract: 根据整份目录页重建目录树，并识别尾注容器与子项 -> `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json`
 
 ## 阻塞定位明细
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- export_verify / semantic_export_blocked: `` | `["toc_role_semantics_invalid", "export_audit_blocking"]`

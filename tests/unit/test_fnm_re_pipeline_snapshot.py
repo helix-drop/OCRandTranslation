@@ -5,6 +5,11 @@ from unittest.mock import patch
 
 import FNM_RE.app.pipeline as pipeline_app
 from FNM_RE.app.pipeline import build_module_pipeline_snapshot
+from tests.unit.fnm_re_phase1_cases import (
+    _load_auto_visual_toc,
+    _load_auto_visual_toc_bundle,
+    _load_pages,
+)
 
 
 def _make_page(
@@ -238,6 +243,22 @@ class FnmRePipelineSnapshotTest(unittest.TestCase):
         self.assertTrue(region_summary.get("endnote_explorer_toc_hint_present"))
         self.assertEqual(int(region_summary.get("endnote_explorer_toc_subentry_count") or 0), 2)
         self.assertIn("1. Chapter One", list(region_summary.get("endnote_explorer_toc_titles_preview") or []))
+
+    def test_snapshot_napoleon_exported_roman_root_is_not_left_as_container(self):
+        snapshot = build_module_pipeline_snapshot(
+            _load_pages("Napoleon"),
+            toc_items=_load_auto_visual_toc("Napoleon"),
+            slug="napoleon",
+            doc_id="5df1d3d7f9c1",
+            visual_toc_bundle=_load_auto_visual_toc_bundle("Napoleon"),
+        )
+
+        exported_titles = [str(chapter.title or "") for chapter in snapshot.phase6.export_bundle.chapters]
+        container_titles = [str(title or "") for title in snapshot.phase6.summary.container_titles]
+
+        self.assertTrue(any(title.startswith("II. L’asile, prison politique") for title in exported_titles))
+        self.assertFalse(any(title.startswith("II. L’asile, prison politique") for title in container_titles))
+        self.assertTrue(bool(snapshot.phase6.export_audit.can_ship))
 
 
 if __name__ == "__main__":

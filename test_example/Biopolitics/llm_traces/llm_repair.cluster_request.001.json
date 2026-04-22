@@ -8,7 +8,7 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-leçondu7février1979:toc-ch-005-leçondu7février1979:footnote\",\n  \"chapter_title\": \"Leçon du 7 février 1979\",\n  \"page_range\": [\n    121,\n    138\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 121,\n      \"ocr_excerpt\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en ré ...\"\n    },\n    {\n      \"page_no\": 122,\n      \"ocr_excerpt\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commission, mais de fait ils en ont été, certains d'entre eux au moins, les inspirateurs, le principal étant évidemment Wilhelm Röpke¹⁶ qui était un économiste de la période de Weimar, qui a été un des conseillers de Schleicher¹⁷ et qui [aurait dû devenir] ministre de Schleicher si Schleicher n'avait pas été congédié au profit de Hitler au début de 1933. Ce Röpke est lui aussi un anti-keynésien et il est obligé de s'exiler en 1933. Il va à Istanbul¹⁸, il s'installe à Genève¹⁹. C'est là qu'il reste d'ailleurs jusqu'à la fin de sa carrière, et c'est en 1950 qu'il publie un petit livre qui s'appelle Orientation de la politique économique allemande²⁰, préfacé par Adenauer, et qui représente en quelque sorte le manifeste la plus clair, le plus simple, le plus tranchant de cette nouvelle économie politique. Il faudrait en ajouter d'autres. J'ajoute à propos de Röpke qu'il a écrit pendant la période de guerre et juste après la guerre une espèce de grande trilog ...\"\n    },\n    {\n      \"page_no\": 126,\n      \"ocr_excerpt\": \"le socialisme d'État bismarckien : pour que la nation allemande existe dans son unité, il ne fallait pas simplement qu'elle soit protégée contre l'extérieur par une politique protectionniste, il fallait de plus qu'à l'intérieur, tout ce qui pouvait compromettre l'unité nationale soit maîtrisé, jugulé, et d'une façon générale il fallait que le prolétariat, comme menace de l'unité nationale et de l'unité étatique, soit effectivement réintégré à l'intérieur du consensus social et politique. C'est, en gros, le thème du socialisme d'État bismarckien. Deuxième obstacle, par conséquent, à une politique libérale. Troisième obstacle, ça a bien entendu été, à partir de la guerre, le développement d'une économie planifiée, c'est-à-dire cette technique, à laquelle l'Allemagne a bien été contrainte dans sa situation pendant la guerre, [consistant à] organiser une économie centralisée autour d'un appareil administratif qui prenait l'essentiel des décisions dans l'ordre de l'économie, attribuant les ressources rares, fixant le niveau des prix et assurant le plein emploi. Économie planifiée dont l'Allemagne n'est pas sortie à la fin de la guerre, puisque cette planification a été reconduite ensuit ...\"\n    },\n    {\n      \"page_no\": 127,\n      \"ocr_excerpt\": \"de réseau continu. On est allé tout naturellement de l'économie protégée à l'économie d'assistance. La planification type Rathenau, par exemple, a été plus ou moins réutilisée dans une perspective keynésienne à la fin des années [19]20 et[s] dans les années 1930. Tout ceci, bien sûr, communiquait mais ne formait pas un système. Or ce que le nazisme finalement a apporté, ça a été la mise en coalescence stricte de ces différents éléments, c'est-à-dire l'organisation d'un système économique dans lequel l'économie protégée, l'économie d'assistance, l'économie planifiée, l'économie keynésienne formaient un tout, un tout solidement attaché, dont les différentes parties étaient solidement liées par l'administration économique qui était mise en place. Politique keynésienne du docteur Schacht $ ^{35} $, relayée en 1936 $ ^{*} $ par le plan quadriennal dont Göring était le responsable $ ^{36} $ et pour lequel, d'ailleurs, il était entouré d'un certain nombre de conseillers qui étaient ceux de Rathenau $ ^{37} $. Planification qui avait un double objectif : d'une part assurer l'autarcie économique de l'Allemagne, c'est-à-dire un protectionnisme absolu, et d'autre part une politique d'assistan ...\"\n    },\n    {\n      \"page_no\": 128,\n      \"ocr_excerpt\": \"disent : prenez n'importe lequel de ces éléments. Donnez-vous une économie protégée ou bien donnez-vous une intervention de type keynésien. Bien sûr, c'est apparemment des choses différentes, mais vous ne pourrez jamais développer l'une sans arriver d'une manière ou d'une autre à l'autre. C'est-à-dire que ces quatre éléments que l'histoire économique et politique allemande avait fait successivement apparaître sur la scène de l'action gouvernementale, ces quatre éléments, disent les néolibéraux, sont économiquement liés les uns aux autres et vous n'échapperez pas aux trois autres si vous vous donnez l'un. Et reprenant ce schéma et ce principe, ils étudient successivement différents types d'économie, la planification soviétique par exemple. Ceux d'entre eux, comme Hayek, qui connaissent bien les États-Unis ont repris l'exemple du New Deal, d'autres ont repris l'exemple anglais et, en particulier, les exemples de la politique keynésienne des grands programmes Beveridge mis au point pendant la guerre $ ^{38} $. Ils ont repris tout ça et ils ont dit : vous voyez que de toute façon, premièrement, ce sont les mêmes principes qui sont mis en jeu et, deuxièmement, chacun de ces éléments va ...\"\n    },\n    {\n      \"page_no\": 129,\n      \"ocr_excerpt\": \"drastique d'un plan autarcique comme celui de l'Allemagne. On a donc un certain invariant qu'on pourrait appeler, si vous voulez, l'invariant anti-libéral, qui a sa logique propre et sa nécessité interne. C'est cela que les ordolibéraux ont déchiffré dans l'expérience du nazisme. Deuxième leçon qu'ils ont tirée du nazisme, c'est celle-ci. Le nazisme, ont-ils dit, qu'est-ce c'est ? C'est essentiellement, et avant tout, la croissance indéfinie d'un pouvoir étatique. À dire vrai, ceci – qui nous paraît maintenant un lieu commun – présentait un certain paradoxe et représentait aussi un certain coup de force théorique ou analytique, car, quand on regarde la manière dont a fonctionné l'Allemagne nationale-socialiste, je crois que le moins qu'on puisse dire c'est que, en première approche du moins, ça a été la tentative la plus systématique de mise en état de dépérissement de l'État. Le nazisme, c'est le dépérissement de l'État pour un certain nombre de raisons. Cela apparaît, premièrement, dans la structure juridique même de l'Allemagne nationale-socialiste puisque vous savez bien que l'État, dans l'Allemagne nationale-socialiste, avait perdu son statut de personnalité juridique dans la ...\"\n    },\n    {\n      \"page_no\": 130,\n      \"ocr_excerpt\": \"La destruction systématique de l'État, en tout cas sa minorisation à titre de pur et simple instrument de quelque chose qui était la communauté du peuple, qui était le principe du Führer, qui était l'existence du parti, cette [minorisation]* de l'État marque bien la position subordonnée qu'il avait. Or, à cela, déchiffrant cette situation, les ordolibéraux répondent : ne vous y trompez pas. En fait, apparemment, l'État disparaît, apparemment l'État est subordonné, renié. Il n'en reste pas moins que si l'État est ainsi subordonné, c'est tout simplement que les formes traditionnelles de l'État du XIXe siècle ne peuvent pas faire face à cette nouvelle demande d'étatisation que, justement, la politique économique choisie par le III<sup>e</sup> Reich demandait. En fait, si vous vous donnez ce système économique dont je vous ai parlé à l'instant, il vous faut, pour le faire fonctionner, une sorte de sur-État, de supplément d'État, que les formes organisationnelles et institutionnelles qu'on connaît maintenant ne peuvent pas assurer. D'où la nécessité, précisément, pour ce nouvel État de se déborder lui-même par rapport aux formes que l'on connaît et de créer ces sortes de suppléments d'É ...\"\n    },\n    {\n      \"page_no\": 131,\n      \"ocr_excerpt\": \"Sozialismus $ ^{42} $. Qu'est-ce que l'économie et l'État bourgeois et capitaliste ont produit? Ils ont produit une société dans laquelle les individus sont arrachés à leur communauté naturelle et réunis les uns aux autres dans une forme, en quelque sorte, plate et anonyme qui est celle de la masse. Le capitalisme produit la masse. Le capitalisme produit, par conséquent, ce que Sombart n'appelle pas exactement unidimensionalité $ ^{43} $, mais dont il donne exactement la définition. Le capitalisme et la société bourgeoise ont privé les individus de communication directe et immédiate les uns avec les autres et ils les ont contraints à ne communiquer que par l'intermédiaire d'un appareil administratif et centralisé. [Ils ont] donc réduit les individus à l'état d'atomes, d'atomes soumis à une autorité, à une autorité abstraite dans laquelle ils ne se reconnaissent pas. La société capitaliste a également astreint les individus à un type de consommation massive qui a des fonctions d'uniformisation et de normalisation. Enfin, cette économie bourgeoise et capitaliste a voué les individus à n'avoir, au fond, de communication les uns avec les autres que par le jeu des signes et des spectacl ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00129\",\n      \"marker\": \"10\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00130\",\n      \"marker\": \"11\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00131\",\n      \"marker\": \"12\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00133\",\n      \"marker\": \"14\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00134\",\n      \"marker\": \"15\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00141\",\n      \"marker\": \"22\",\n      \"page_no\": 122,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commissi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00142\",\n      \"marker\": \"23\",\n      \"page_no\": 122,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commissi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00143\",\n      \"marker\": \"24\",\n      \"page_no\": 122,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commissi ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00061\",\n      \"note_item_id\": \"en-00025\",\n      \"current_anchor_id\": \"anchor-00174\",\n      \"marker\": \"1\",\n      \"note_page_no\": 139,\n      \"anchor_page_no\": 138,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Walter Eucken (1891-1950) : chef de l'école néolibérale allemande (École de Fribourg), dont les positions furent exposées dans la revue Ordo (cf. infra, note 8). Après avoir étudié l'économie à Bonn et Berlin, où il fut l'élève de Heinrich ...\",\n      \"anchor_excerpt\": \"qui la caractérise et qui la constitue. Ses effets bénéfiques, la concurrence les doit non pas à une antériorité de nature, à une donnée naturelle qu'elle porterait avec elle. Elle les doit à un privilège formel. La concurrence, c'est une e ...\"\n    },\n    {\n      \"link_id\": \"link-00062\",\n      \"note_item_id\": \"en-00026\",\n      \"current_anchor_id\": \"anchor-00175\",\n      \"marker\": \"2\",\n      \"note_page_no\": 139,\n      \"anchor_page_no\": 138,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Sur les rapports de Eucken avec Husserl, cf. F. Bilger, ibid., p. 47 (« Dès son arrivée dans la ville, Eucken se lia d'amitié profonde avec Husserl, spirituellement apparenté à Rudolf Eucken. Les deux hommes eurent des rapports fréquents, m ...\",\n      \"anchor_excerpt\": \"qui la caractérise et qui la constitue. Ses effets bénéfiques, la concurrence les doit non pas à une antériorité de nature, à une donnée naturelle qu'elle porterait avec elle. Elle les doit à un privilège formel. La concurrence, c'est une e ...\"\n    },\n    {\n      \"link_id\": \"link-00064\",\n      \"note_item_id\": \"en-00028\",\n      \"current_anchor_id\": \"anchor-00177\",\n      \"marker\": \"4\",\n      \"note_page_no\": 140,\n      \"anchor_page_no\": 138,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"W. Eucken, « Staatliche Strukturwandlungen und die Krisis des Kapitalismus » [Modifications structurelles de l'État et crise du capitalisme], Weltwirtschaftliches Archiv, Iéna, vol. 36 (2), 1932, p. 297-321.\",\n      \"anchor_excerpt\": \"Et tout comme pour Husserl une structure formelle ne se donne pas à l'intuition sans un certain nombre de conditions, de la même façon la concurrence comme logique économique essentielle n'apparaîtra et ne produira ses effets que sous un ce ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-005-leçondu7février1979:toc-ch-005-leçondu7février1979:footnote\",\n  \"chapter_title\": \"Leçon du 7 février 1979\",\n  \"page_range\": [\n    121,\n    138\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 121,\n      \"ocr_excerpt\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en ré ...\"\n    },\n    {\n      \"page_no\": 122,\n      \"ocr_excerpt\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commission, mais de fait ils en ont été, certains d'entre eux au moins, les inspirateurs, le principal étant évidemment Wilhelm Röpke¹⁶ qui était un économiste de la période de Weimar, qui a été un des conseillers de Schleicher¹⁷ et qui [aurait dû devenir] ministre de Schleicher si Schleicher n'avait pas été congédié au profit de Hitler au début de 1933. Ce Röpke est lui aussi un anti-keynésien et il est obligé de s'exiler en 1933. Il va à Istanbul¹⁸, il s'installe à Genève¹⁹. C'est là qu'il reste d'ailleurs jusqu'à la fin de sa carrière, et c'est en 1950 qu'il publie un petit livre qui s'appelle Orientation de la politique économique allemande²⁰, préfacé par Adenauer, et qui représente en quelque sorte le manifeste la plus clair, le plus simple, le plus tranchant de cette nouvelle économie politique. Il faudrait en ajouter d'autres. J'ajoute à propos de Röpke qu'il a écrit pendant la période de guerre et juste après la guerre une espèce de grande trilog ...\"\n    },\n    {\n      \"page_no\": 126,\n      \"ocr_excerpt\": \"le socialisme d'État bismarckien : pour que la nation allemande existe dans son unité, il ne fallait pas simplement qu'elle soit protégée contre l'extérieur par une politique protectionniste, il fallait de plus qu'à l'intérieur, tout ce qui pouvait compromettre l'unité nationale soit maîtrisé, jugulé, et d'une façon générale il fallait que le prolétariat, comme menace de l'unité nationale et de l'unité étatique, soit effectivement réintégré à l'intérieur du consensus social et politique. C'est, en gros, le thème du socialisme d'État bismarckien. Deuxième obstacle, par conséquent, à une politique libérale. Troisième obstacle, ça a bien entendu été, à partir de la guerre, le développement d'une économie planifiée, c'est-à-dire cette technique, à laquelle l'Allemagne a bien été contrainte dans sa situation pendant la guerre, [consistant à] organiser une économie centralisée autour d'un appareil administratif qui prenait l'essentiel des décisions dans l'ordre de l'économie, attribuant les ressources rares, fixant le niveau des prix et assurant le plein emploi. Économie planifiée dont l'Allemagne n'est pas sortie à la fin de la guerre, puisque cette planification a été reconduite ensuit ...\"\n    },\n    {\n      \"page_no\": 127,\n      \"ocr_excerpt\": \"de réseau continu. On est allé tout naturellement de l'économie protégée à l'économie d'assistance. La planification type Rathenau, par exemple, a été plus ou moins réutilisée dans une perspective keynésienne à la fin des années [19]20 et[s] dans les années 1930. Tout ceci, bien sûr, communiquait mais ne formait pas un système. Or ce que le nazisme finalement a apporté, ça a été la mise en coalescence stricte de ces différents éléments, c'est-à-dire l'organisation d'un système économique dans lequel l'économie protégée, l'économie d'assistance, l'économie planifiée, l'économie keynésienne formaient un tout, un tout solidement attaché, dont les différentes parties étaient solidement liées par l'administration économique qui était mise en place. Politique keynésienne du docteur Schacht $ ^{35} $, relayée en 1936 $ ^{*} $ par le plan quadriennal dont Göring était le responsable $ ^{36} $ et pour lequel, d'ailleurs, il était entouré d'un certain nombre de conseillers qui étaient ceux de Rathenau $ ^{37} $. Planification qui avait un double objectif : d'une part assurer l'autarcie économique de l'Allemagne, c'est-à-dire un protectionnisme absolu, et d'autre part une politique d'assistan ...\"\n    },\n    {\n      \"page_no\": 128,\n      \"ocr_excerpt\": \"disent : prenez n'importe lequel de ces éléments. Donnez-vous une économie protégée ou bien donnez-vous une intervention de type keynésien. Bien sûr, c'est apparemment des choses différentes, mais vous ne pourrez jamais développer l'une sans arriver d'une manière ou d'une autre à l'autre. C'est-à-dire que ces quatre éléments que l'histoire économique et politique allemande avait fait successivement apparaître sur la scène de l'action gouvernementale, ces quatre éléments, disent les néolibéraux, sont économiquement liés les uns aux autres et vous n'échapperez pas aux trois autres si vous vous donnez l'un. Et reprenant ce schéma et ce principe, ils étudient successivement différents types d'économie, la planification soviétique par exemple. Ceux d'entre eux, comme Hayek, qui connaissent bien les États-Unis ont repris l'exemple du New Deal, d'autres ont repris l'exemple anglais et, en particulier, les exemples de la politique keynésienne des grands programmes Beveridge mis au point pendant la guerre $ ^{38} $. Ils ont repris tout ça et ils ont dit : vous voyez que de toute façon, premièrement, ce sont les mêmes principes qui sont mis en jeu et, deuxièmement, chacun de ces éléments va ...\"\n    },\n    {\n      \"page_no\": 129,\n      \"ocr_excerpt\": \"drastique d'un plan autarcique comme celui de l'Allemagne. On a donc un certain invariant qu'on pourrait appeler, si vous voulez, l'invariant anti-libéral, qui a sa logique propre et sa nécessité interne. C'est cela que les ordolibéraux ont déchiffré dans l'expérience du nazisme. Deuxième leçon qu'ils ont tirée du nazisme, c'est celle-ci. Le nazisme, ont-ils dit, qu'est-ce c'est ? C'est essentiellement, et avant tout, la croissance indéfinie d'un pouvoir étatique. À dire vrai, ceci – qui nous paraît maintenant un lieu commun – présentait un certain paradoxe et représentait aussi un certain coup de force théorique ou analytique, car, quand on regarde la manière dont a fonctionné l'Allemagne nationale-socialiste, je crois que le moins qu'on puisse dire c'est que, en première approche du moins, ça a été la tentative la plus systématique de mise en état de dépérissement de l'État. Le nazisme, c'est le dépérissement de l'État pour un certain nombre de raisons. Cela apparaît, premièrement, dans la structure juridique même de l'Allemagne nationale-socialiste puisque vous savez bien que l'État, dans l'Allemagne nationale-socialiste, avait perdu son statut de personnalité juridique dans la ...\"\n    },\n    {\n      \"page_no\": 130,\n      \"ocr_excerpt\": \"La destruction systématique de l'État, en tout cas sa minorisation à titre de pur et simple instrument de quelque chose qui était la communauté du peuple, qui était le principe du Führer, qui était l'existence du parti, cette [minorisation]* de l'État marque bien la position subordonnée qu'il avait. Or, à cela, déchiffrant cette situation, les ordolibéraux répondent : ne vous y trompez pas. En fait, apparemment, l'État disparaît, apparemment l'État est subordonné, renié. Il n'en reste pas moins que si l'État est ainsi subordonné, c'est tout simplement que les formes traditionnelles de l'État du XIXe siècle ne peuvent pas faire face à cette nouvelle demande d'étatisation que, justement, la politique économique choisie par le III<sup>e</sup> Reich demandait. En fait, si vous vous donnez ce système économique dont je vous ai parlé à l'instant, il vous faut, pour le faire fonctionner, une sorte de sur-État, de supplément d'État, que les formes organisationnelles et institutionnelles qu'on connaît maintenant ne peuvent pas assurer. D'où la nécessité, précisément, pour ce nouvel État de se déborder lui-même par rapport aux formes que l'on connaît et de créer ces sortes de suppléments d'É ...\"\n    },\n    {\n      \"page_no\": 131,\n      \"ocr_excerpt\": \"Sozialismus $ ^{42} $. Qu'est-ce que l'économie et l'État bourgeois et capitaliste ont produit? Ils ont produit une société dans laquelle les individus sont arrachés à leur communauté naturelle et réunis les uns aux autres dans une forme, en quelque sorte, plate et anonyme qui est celle de la masse. Le capitalisme produit la masse. Le capitalisme produit, par conséquent, ce que Sombart n'appelle pas exactement unidimensionalité $ ^{43} $, mais dont il donne exactement la définition. Le capitalisme et la société bourgeoise ont privé les individus de communication directe et immédiate les uns avec les autres et ils les ont contraints à ne communiquer que par l'intermédiaire d'un appareil administratif et centralisé. [Ils ont] donc réduit les individus à l'état d'atomes, d'atomes soumis à une autorité, à une autorité abstraite dans laquelle ils ne se reconnaissent pas. La société capitaliste a également astreint les individus à un type de consommation massive qui a des fonctions d'uniformisation et de normalisation. Enfin, cette économie bourgeoise et capitaliste a voué les individus à n'avoir, au fond, de communication les uns avec les autres que par le jeu des signes et des spectacl ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00129\",\n      \"marker\": \"10\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00130\",\n      \"marker\": \"11\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00131\",\n      \"marker\": \"12\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00133\",\n      \"marker\": \"14\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00134\",\n      \"marker\": \"15\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phé ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00141\",\n      \"marker\": \"22\",\n      \"page_no\": 122,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commissi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00142\",\n      \"marker\": \"23\",\n      \"page_no\": 122,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commissi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00143\",\n      \"marker\": \"24\",\n      \"page_no\": 122,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commissi ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00061\",\n      \"note_item_id\": \"en-00025\",\n      \"current_anchor_id\": \"anchor-00174\",\n      \"marker\": \"1\",\n      \"note_page_no\": 139,\n      \"anchor_page_no\": 138,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Walter Eucken (1891-1950) : chef de l'école néolibérale allemande (École de Fribourg), dont les positions furent exposées dans la revue Ordo (cf. infra, note 8). Après avoir étudié l'économie à Bonn et Berlin, où il fut l'élève de Heinrich ...\",\n      \"anchor_excerpt\": \"qui la caractérise et qui la constitue. Ses effets bénéfiques, la concurrence les doit non pas à une antériorité de nature, à une donnée naturelle qu'elle porterait avec elle. Elle les doit à un privilège formel. La concurrence, c'est une e ...\"\n    },\n    {\n      \"link_id\": \"link-00062\",\n      \"note_item_id\": \"en-00026\",\n      \"current_anchor_id\": \"anchor-00175\",\n      \"marker\": \"2\",\n      \"note_page_no\": 139,\n      \"anchor_page_no\": 138,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Sur les rapports de Eucken avec Husserl, cf. F. Bilger, ibid., p. 47 (« Dès son arrivée dans la ville, Eucken se lia d'amitié profonde avec Husserl, spirituellement apparenté à Rudolf Eucken. Les deux hommes eurent des rapports fréquents, m ...\",\n      \"anchor_excerpt\": \"qui la caractérise et qui la constitue. Ses effets bénéfiques, la concurrence les doit non pas à une antériorité de nature, à une donnée naturelle qu'elle porterait avec elle. Elle les doit à un privilège formel. La concurrence, c'est une e ...\"\n    },\n    {\n      \"link_id\": \"link-00064\",\n      \"note_item_id\": \"en-00028\",\n      \"current_anchor_id\": \"anchor-00177\",\n      \"marker\": \"4\",\n      \"note_page_no\": 140,\n      \"anchor_page_no\": 138,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"W. Eucken, « Staatliche Strukturwandlungen und die Krisis des Kapitalismus » [Modifications structurelles de l'État et crise du capitalisme], Weltwirtschaftliches Archiv, Iéna, vol. 36 (2), 1932, p. 297-321.\",\n      \"anchor_excerpt\": \"Et tout comme pour Husserl une structure formelle ne se donne pas à l'intuition sans un certain nombre de conditions, de la même façon la concurrence comme logique économique essentielle n'apparaîtra et ne produira ses effets que sous un ce ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -18,6 +18,7 @@
       "allowed_actions": [
         "match",
         "ignore_ref",
+        "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
@@ -29,7 +30,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 36736,
+          "row_id": 46132,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00129",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -42,11 +43,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en réalité ce n'est pas d'économie nationale qu'il est question dans ce livre, mais justement de quelque chose qui est fondamentalement, doctrinalement, politiquement opposé à l'économie nationale. Et c'est lui qui, autour de cette revue Ordo qu'il dirige, constitue cette école d'économistes qu'on appelle l'École de Fribourg ou encore les « ordolibéraux ». C'est lui qui, donc, est un des conseillers, et sans doute le principal des conseillers scientifiques, qu'Erhard<sup>10</sup> avait réunis en 1948. Il y a donc Eucken dans cette commission. Il y a aussi Franz Böhm<sup>11</sup>, qui lui, justement, est un de ces juristes de Fribourg, phénoménologue de formation ou en tout cas jusqu'à un certain point disciple de Husserl. Ce Franz Böhm devient par la suite député au Bundestag et il a, jusque dans les années soixante-dix, une influence décisive dans la politique économique de l'Allemagne. Il y a également, toujours dans cette commission, Müller-Armack<sup>12</sup>, qui lui est un historien de l'économie, professeur je crois à Fribourg<sup>13</sup> ([mais] je n'en suis pas absolument sûr), et qui a écrit en 1941 un livre fort intéressant qui porte le titre curieux de Généalogie du style économique<sup>14</sup> et dans lequel il essaie justement de définir, en dehors de ce qui est la théorie économique pure et la politique économique pure, quelque chose qui serait en quelque sorte un art de gouverner économique, de gouverner économiquement, et qu'il appelle le style économique<sup>15</sup>. C'est ce Müller-Armack qui va devenir secrétaire d'État de Ludwig Erhard quand il est ministre de l'Économie et c'est un des négociateurs du traité de Rome. Voilà, avec d'autres, quelques-uns des personnages de cette commission scientifique.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36737,
+          "row_id": 46133,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00130",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -59,11 +60,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en réalité ce n'est pas d'économie nationale qu'il est question dans ce livre, mais justement de quelque chose qui est fondamentalement, doctrinalement, politiquement opposé à l'économie nationale. Et c'est lui qui, autour de cette revue Ordo qu'il dirige, constitue cette école d'économistes qu'on appelle l'École de Fribourg ou encore les « ordolibéraux ». C'est lui qui, donc, est un des conseillers, et sans doute le principal des conseillers scientifiques, qu'Erhard<sup>10</sup> avait réunis en 1948. Il y a donc Eucken dans cette commission. Il y a aussi Franz Böhm<sup>11</sup>, qui lui, justement, est un de ces juristes de Fribourg, phénoménologue de formation ou en tout cas jusqu'à un certain point disciple de Husserl. Ce Franz Böhm devient par la suite député au Bundestag et il a, jusque dans les années soixante-dix, une influence décisive dans la politique économique de l'Allemagne. Il y a également, toujours dans cette commission, Müller-Armack<sup>12</sup>, qui lui est un historien de l'économie, professeur je crois à Fribourg<sup>13</sup> ([mais] je n'en suis pas absolument sûr), et qui a écrit en 1941 un livre fort intéressant qui porte le titre curieux de Généalogie du style économique<sup>14</sup> et dans lequel il essaie justement de définir, en dehors de ce qui est la théorie économique pure et la politique économique pure, quelque chose qui serait en quelque sorte un art de gouverner économique, de gouverner économiquement, et qu'il appelle le style économique<sup>15</sup>. C'est ce Müller-Armack qui va devenir secrétaire d'État de Ludwig Erhard quand il est ministre de l'Économie et c'est un des négociateurs du traité de Rome. Voilà, avec d'autres, quelques-uns des personnages de cette commission scientifique.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36738,
+          "row_id": 46134,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00131",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -76,11 +77,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en réalité ce n'est pas d'économie nationale qu'il est question dans ce livre, mais justement de quelque chose qui est fondamentalement, doctrinalement, politiquement opposé à l'économie nationale. Et c'est lui qui, autour de cette revue Ordo qu'il dirige, constitue cette école d'économistes qu'on appelle l'École de Fribourg ou encore les « ordolibéraux ». C'est lui qui, donc, est un des conseillers, et sans doute le principal des conseillers scientifiques, qu'Erhard<sup>10</sup> avait réunis en 1948. Il y a donc Eucken dans cette commission. Il y a aussi Franz Böhm<sup>11</sup>, qui lui, justement, est un de ces juristes de Fribourg, phénoménologue de formation ou en tout cas jusqu'à un certain point disciple de Husserl. Ce Franz Böhm devient par la suite député au Bundestag et il a, jusque dans les années soixante-dix, une influence décisive dans la politique économique de l'Allemagne. Il y a également, toujours dans cette commission, Müller-Armack<sup>12</sup>, qui lui est un historien de l'économie, professeur je crois à Fribourg<sup>13</sup> ([mais] je n'en suis pas absolument sûr), et qui a écrit en 1941 un livre fort intéressant qui porte le titre curieux de Généalogie du style économique<sup>14</sup> et dans lequel il essaie justement de définir, en dehors de ce qui est la théorie économique pure et la politique économique pure, quelque chose qui serait en quelque sorte un art de gouverner économique, de gouverner économiquement, et qu'il appelle le style économique<sup>15</sup>. C'est ce Müller-Armack qui va devenir secrétaire d'État de Ludwig Erhard quand il est ministre de l'Économie et c'est un des négociateurs du traité de Rome. Voilà, avec d'autres, quelques-uns des personnages de cette commission scientifique.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36740,
+          "row_id": 46136,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00133",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -93,11 +94,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en réalité ce n'est pas d'économie nationale qu'il est question dans ce livre, mais justement de quelque chose qui est fondamentalement, doctrinalement, politiquement opposé à l'économie nationale. Et c'est lui qui, autour de cette revue Ordo qu'il dirige, constitue cette école d'économistes qu'on appelle l'École de Fribourg ou encore les « ordolibéraux ». C'est lui qui, donc, est un des conseillers, et sans doute le principal des conseillers scientifiques, qu'Erhard<sup>10</sup> avait réunis en 1948. Il y a donc Eucken dans cette commission. Il y a aussi Franz Böhm<sup>11</sup>, qui lui, justement, est un de ces juristes de Fribourg, phénoménologue de formation ou en tout cas jusqu'à un certain point disciple de Husserl. Ce Franz Böhm devient par la suite député au Bundestag et il a, jusque dans les années soixante-dix, une influence décisive dans la politique économique de l'Allemagne. Il y a également, toujours dans cette commission, Müller-Armack<sup>12</sup>, qui lui est un historien de l'économie, professeur je crois à Fribourg<sup>13</sup> ([mais] je n'en suis pas absolument sûr), et qui a écrit en 1941 un livre fort intéressant qui porte le titre curieux de Généalogie du style économique<sup>14</sup> et dans lequel il essaie justement de définir, en dehors de ce qui est la théorie économique pure et la politique économique pure, quelque chose qui serait en quelque sorte un art de gouverner économique, de gouverner économiquement, et qu'il appelle le style économique<sup>15</sup>. C'est ce Müller-Armack qui va devenir secrétaire d'État de Ludwig Erhard quand il est ministre de l'Économie et c'est un des négociateurs du traité de Rome. Voilà, avec d'autres, quelques-uns des personnages de cette commission scientifique.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36741,
+          "row_id": 46137,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00134",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -110,11 +111,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Husserl², qu'il s'était frotté de phénoménologie, qu'il avait connu un certain nombre de ces juristes qui ont été finalement si importants dans la théorie du droit en Allemagne au xx<sup>e</sup> siècle, ces juristes eux-mêmes frottés de phénoménologie et qui essayaient de réélaborer une théorie du droit qui échappe aussi bien aux contraintes de l'historicisme du XIX<sup>e</sup> siècle que de la conception formaliste, axiomatique, étatique de Kelsen<sup>3</sup>. Et ce Eucken avait dès 1930, [19]33, je ne sais plus très bien [à] quelle date, écrit un article qui a eu à ce moment-là un grand retentissement contre l'application éventuelle des méthodes keynésiennes en Allemagne pour résoudre la crise<sup>4</sup>, méthodes keynésiennes qui, vous le savez, étaient à cette époque-là prônées en Allemagne soit par quelqu'un comme Lautenbach<sup>5</sup>, soit par quelqu'un comme le docteur Schacht<sup>6</sup>. Eucken reste silencieux pendant la période nazie<sup>7</sup>. Il est toujours professeur à Fribourg. En 1936 il fonde une revue qui s'appelle Ordo<sup>8</sup> et en 1940 il publie un livre qui porte le titre un peu paradoxal de Grundlagen der Nationalökonomie<sup>9</sup>, alors qu'en réalité ce n'est pas d'économie nationale qu'il est question dans ce livre, mais justement de quelque chose qui est fondamentalement, doctrinalement, politiquement opposé à l'économie nationale. Et c'est lui qui, autour de cette revue Ordo qu'il dirige, constitue cette école d'économistes qu'on appelle l'École de Fribourg ou encore les « ordolibéraux ». C'est lui qui, donc, est un des conseillers, et sans doute le principal des conseillers scientifiques, qu'Erhard<sup>10</sup> avait réunis en 1948. Il y a donc Eucken dans cette commission. Il y a aussi Franz Böhm<sup>11</sup>, qui lui, justement, est un de ces juristes de Fribourg, phénoménologue de formation ou en tout cas jusqu'à un certain point disciple de Husserl. Ce Franz Böhm devient par la suite député au Bundestag et il a, jusque dans les années soixante-dix, une influence décisive dans la politique économique de l'Allemagne. Il y a également, toujours dans cette commission, Müller-Armack<sup>12</sup>, qui lui est un historien de l'économie, professeur je crois à Fribourg<sup>13</sup> ([mais] je n'en suis pas absolument sûr), et qui a écrit en 1941 un livre fort intéressant qui porte le titre curieux de Généalogie du style économique<sup>14</sup> et dans lequel il essaie justement de définir, en dehors de ce qui est la théorie économique pure et la politique économique pure, quelque chose qui serait en quelque sorte un art de gouverner économique, de gouverner économiquement, et qu'il appelle le style économique<sup>15</sup>. C'est ce Müller-Armack qui va devenir secrétaire d'État de Ludwig Erhard quand il est ministre de l'Économie et c'est un des négociateurs du traité de Rome. Voilà, avec d'autres, quelques-uns des personnages de cette commission scientifique.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36748,
+          "row_id": 46144,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00141",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -127,11 +128,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commission, mais de fait ils en ont été, certains d'entre eux au moins, les inspirateurs, le principal étant évidemment Wilhelm Röpke¹⁶ qui était un économiste de la période de Weimar, qui a été un des conseillers de Schleicher¹⁷ et qui [aurait dû devenir] ministre de Schleicher si Schleicher n'avait pas été congédié au profit de Hitler au début de 1933. Ce Röpke est lui aussi un anti-keynésien et il est obligé de s'exiler en 1933. Il va à Istanbul¹⁸, il s'installe à Genève¹⁹. C'est là qu'il reste d'ailleurs jusqu'à la fin de sa carrière, et c'est en 1950 qu'il publie un petit livre qui s'appelle Orientation de la politique économique allemande²⁰, préfacé par Adenauer, et qui représente en quelque sorte le manifeste la plus clair, le plus simple, le plus tranchant de cette nouvelle économie politique. Il faudrait en ajouter d'autres. J'ajoute à propos de Röpke qu'il a écrit pendant la période de guerre et juste après la guerre une espèce de grande trilogie qui est en quelque sorte la bible, avec les Grundlagen der Nationalökonomie, de cet ordolibéralisme, de ce néolibéralisme, une œuvre en trois volumes dont le premier porte le titre de Gesellschaftskrisis (La Crise de la société)²¹, terme dont vous connaissez le triste destin dans le vocabulaire politique contemporain et qui se référait explicitement, bien sûr, à La Crise des sciences européennes de Husserl²². Il y a Rüstow aussi²³. Il y a un personnage alors évidemment très important qui n'a pas fait partie de la commission lui non plus, mais dont la carrière, dont la trajectoire a finalement été très importante dans la définition du néolibéralisme contemporain. C'est quelqu'un qui vient d'Autriche, un Autrichien, von Hayek²⁴. Il vient d'Autriche, il vient du néolibéralisme, il émigre au moment de l'Anschluss ou juste avant l'Anschluss. Il va en Angleterre. Il va également aux États-Unis. Il a été, très manifestement, un des inspirateurs du libéralisme américain contemporain, ou de l'anarchocapitalisme si vous voulez, et il revient en Allemagne en 1962 où il est nommé professeur à Fribourg, et ainsi le cercle est bouclé.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36749,
+          "row_id": 46145,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00142",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -144,11 +145,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commission, mais de fait ils en ont été, certains d'entre eux au moins, les inspirateurs, le principal étant évidemment Wilhelm Röpke¹⁶ qui était un économiste de la période de Weimar, qui a été un des conseillers de Schleicher¹⁷ et qui [aurait dû devenir] ministre de Schleicher si Schleicher n'avait pas été congédié au profit de Hitler au début de 1933. Ce Röpke est lui aussi un anti-keynésien et il est obligé de s'exiler en 1933. Il va à Istanbul¹⁸, il s'installe à Genève¹⁹. C'est là qu'il reste d'ailleurs jusqu'à la fin de sa carrière, et c'est en 1950 qu'il publie un petit livre qui s'appelle Orientation de la politique économique allemande²⁰, préfacé par Adenauer, et qui représente en quelque sorte le manifeste la plus clair, le plus simple, le plus tranchant de cette nouvelle économie politique. Il faudrait en ajouter d'autres. J'ajoute à propos de Röpke qu'il a écrit pendant la période de guerre et juste après la guerre une espèce de grande trilogie qui est en quelque sorte la bible, avec les Grundlagen der Nationalökonomie, de cet ordolibéralisme, de ce néolibéralisme, une œuvre en trois volumes dont le premier porte le titre de Gesellschaftskrisis (La Crise de la société)²¹, terme dont vous connaissez le triste destin dans le vocabulaire politique contemporain et qui se référait explicitement, bien sûr, à La Crise des sciences européennes de Husserl²². Il y a Rüstow aussi²³. Il y a un personnage alors évidemment très important qui n'a pas fait partie de la commission lui non plus, mais dont la carrière, dont la trajectoire a finalement été très importante dans la définition du néolibéralisme contemporain. C'est quelqu'un qui vient d'Autriche, un Autrichien, von Hayek²⁴. Il vient d'Autriche, il vient du néolibéralisme, il émigre au moment de l'Anschluss ou juste avant l'Anschluss. Il va en Angleterre. Il va également aux États-Unis. Il a été, très manifestement, un des inspirateurs du libéralisme américain contemporain, ou de l'anarchocapitalisme si vous voulez, et il revient en Allemagne en 1962 où il est nommé professeur à Fribourg, et ainsi le cercle est bouclé.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36750,
+          "row_id": 46146,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00143",
           "chapter_id": "toc-ch-005-leçondu7février1979",
@@ -161,8 +162,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Il faudrait citer en fait, derrière eux, un certain nombre d'autres gens qui, eux aussi, ont [joué un rôle important dans]* cette nouvelle définition du libéralisme, de l'art libéral de gouverner. Ils n'ont pas fait partie de cette commission, mais de fait ils en ont été, certains d'entre eux au moins, les inspirateurs, le principal étant évidemment Wilhelm Röpke¹⁶ qui était un économiste de la période de Weimar, qui a été un des conseillers de Schleicher¹⁷ et qui [aurait dû devenir] ministre de Schleicher si Schleicher n'avait pas été congédié au profit de Hitler au début de 1933. Ce Röpke est lui aussi un anti-keynésien et il est obligé de s'exiler en 1933. Il va à Istanbul¹⁸, il s'installe à Genève¹⁹. C'est là qu'il reste d'ailleurs jusqu'à la fin de sa carrière, et c'est en 1950 qu'il publie un petit livre qui s'appelle Orientation de la politique économique allemande²⁰, préfacé par Adenauer, et qui représente en quelque sorte le manifeste la plus clair, le plus simple, le plus tranchant de cette nouvelle économie politique. Il faudrait en ajouter d'autres. J'ajoute à propos de Röpke qu'il a écrit pendant la période de guerre et juste après la guerre une espèce de grande trilogie qui est en quelque sorte la bible, avec les Grundlagen der Nationalökonomie, de cet ordolibéralisme, de ce néolibéralisme, une œuvre en trois volumes dont le premier porte le titre de Gesellschaftskrisis (La Crise de la société)²¹, terme dont vous connaissez le triste destin dans le vocabulaire politique contemporain et qui se référait explicitement, bien sûr, à La Crise des sciences européennes de Husserl²². Il y a Rüstow aussi²³. Il y a un personnage alors évidemment très important qui n'a pas fait partie de la commission lui non plus, mais dont la carrière, dont la trajectoire a finalement été très importante dans la définition du néolibéralisme contemporain. C'est quelqu'un qui vient d'Autriche, un Autrichien, von Hayek²⁴. Il vient d'Autriche, il vient du néolibéralisme, il émigre au moment de l'Anschluss ou juste avant l'Anschluss. Il va en Angleterre. Il va également aux États-Unis. Il a été, très manifestement, un des inspirateurs du libéralisme américain contemporain, ou de l'anarchocapitalisme si vous voulez, et il revient en Allemagne en 1962 où il est nommé professeur à Fribourg, et ainsi le cercle est bouclé.",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         }
       ],
       "rebind_candidates": [
@@ -277,37 +278,87 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00025\",\n    \"anchor_id\": \"anchor-00129\",\n    \"confidence\": 0.98,\n    \"reason\": \"The screenshot on page 107 clearly shows the marker '10' (OCR misread as 'l') immediately following 'Erhard'. The note item en-00025 corresponds to note 10 regarding Erhard.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00026\",\n    \"anchor_id\": \"anchor-00130\",\n    \"confidence\": 0.98,\n    \"reason\": \"The screenshot on page 107 clearly shows the marker '11' (OCR misread as 'l') immediately following 'Franz Böhm'. The note item en-00026 corresponds to note 11 regarding Franz Böhm.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00028\",\n    \"anchor_id\": \"anchor-00133\",\n    \"confidence\": 0.98,\n    \"reason\": \"The screenshot on page 107 clearly shows the marker '14' (OCR misread as 'l') at the end of the paragraph referencing 'Généalogie du style économique'. The note item en-00028 corresponds to note 14 regarding this book title.\"\n  }\n]\n```",
+  "response_raw_text": "[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00129\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'Husserl²' as marker 10; no such footnote exists on page 107 (image 1).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00130\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'Kelsen³' as marker 11; no such footnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00131\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'crise⁴' as marker 12; no such footnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00133\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'Schacht⁶' as marker 14; no such footnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00134\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'nazie⁷' as marker 15; no such footnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00141\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'Röpke¹⁶' as marker 22; no such footnote exists on page 108 (image 2).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00142\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'Schleicher¹⁷' as marker 23; no such footnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00143\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread 'Istanbul¹⁸' as marker 24; no such footnote exists.\"\n  }\n]",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "en-00025",
+      "action": "ignore_ref",
+      "note_item_id": "",
       "anchor_id": "anchor-00129",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.98,
-      "reason": "The screenshot on page 107 clearly shows the marker '10' (OCR misread as 'l') immediately following 'Erhard'. The note item en-00025 corresponds to note 10 regarding Erhard."
+      "confidence": 0.95,
+      "reason": "OCR misread 'Husserl²' as marker 10; no such footnote exists on page 107 (image 1)."
     },
     {
-      "action": "match",
-      "note_item_id": "en-00026",
+      "action": "ignore_ref",
+      "note_item_id": "",
       "anchor_id": "anchor-00130",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.98,
-      "reason": "The screenshot on page 107 clearly shows the marker '11' (OCR misread as 'l') immediately following 'Franz Böhm'. The note item en-00026 corresponds to note 11 regarding Franz Böhm."
+      "confidence": 0.95,
+      "reason": "OCR misread 'Kelsen³' as marker 11; no such footnote exists."
     },
     {
-      "action": "match",
-      "note_item_id": "en-00028",
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00131",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread 'crise⁴' as marker 12; no such footnote exists."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
       "anchor_id": "anchor-00133",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.98,
-      "reason": "The screenshot on page 107 clearly shows the marker '14' (OCR misread as 'l') at the end of the paragraph referencing 'Généalogie du style économique'. The note item en-00028 corresponds to note 14 regarding this book title."
+      "confidence": 0.95,
+      "reason": "OCR misread 'Schacht⁶' as marker 14; no such footnote exists."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00134",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread 'nazie⁷' as marker 15; no such footnote exists."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00141",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread 'Röpke¹⁶' as marker 22; no such footnote exists on page 108 (image 2)."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00142",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread 'Schleicher¹⁷' as marker 23; no such footnote exists."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00143",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread 'Istanbul¹⁸' as marker 24; no such footnote exists."
     }
   ],
   "derived_truth": {
@@ -316,111 +367,266 @@
     "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "en-00025",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00129",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '10' (OCR misread as 'l') immediately following 'Erhard'. The note item en-00025 corresponds to note 10 regarding Erhard."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Husserl²' as marker 10; no such footnote exists on page 107 (image 1)."
       },
       {
-        "action": "match",
-        "note_item_id": "en-00026",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00130",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '11' (OCR misread as 'l') immediately following 'Franz Böhm'. The note item en-00026 corresponds to note 11 regarding Franz Böhm."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Kelsen³' as marker 11; no such footnote exists."
       },
       {
-        "action": "match",
-        "note_item_id": "en-00028",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00131",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'crise⁴' as marker 12; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00133",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '14' (OCR misread as 'l') at the end of the paragraph referencing 'Généalogie du style économique'. The note item en-00028 corresponds to note 14 regarding this book title."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Schacht⁶' as marker 14; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00134",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'nazie⁷' as marker 15; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00141",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Röpke¹⁶' as marker 22; no such footnote exists on page 108 (image 2)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00142",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Schleicher¹⁷' as marker 23; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00143",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Istanbul¹⁸' as marker 24; no such footnote exists."
       }
     ],
     "auto_selected_actions": [
       {
-        "action": "match",
-        "note_item_id": "en-00025",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00129",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '10' (OCR misread as 'l') immediately following 'Erhard'. The note item en-00025 corresponds to note 10 regarding Erhard."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Husserl²' as marker 10; no such footnote exists on page 107 (image 1)."
       },
       {
-        "action": "match",
-        "note_item_id": "en-00026",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00130",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '11' (OCR misread as 'l') immediately following 'Franz Böhm'. The note item en-00026 corresponds to note 11 regarding Franz Böhm."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Kelsen³' as marker 11; no such footnote exists."
       },
       {
-        "action": "match",
-        "note_item_id": "en-00028",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00131",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'crise⁴' as marker 12; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00133",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '14' (OCR misread as 'l') at the end of the paragraph referencing 'Généalogie du style économique'. The note item en-00028 corresponds to note 14 regarding this book title."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Schacht⁶' as marker 14; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00134",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'nazie⁷' as marker 15; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00141",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Röpke¹⁶' as marker 22; no such footnote exists on page 108 (image 2)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00142",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Schleicher¹⁷' as marker 23; no such footnote exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00143",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Istanbul¹⁸' as marker 24; no such footnote exists."
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-00061",
-        "action": "match",
-        "note_item_id": "en-00025",
+        "link_id": "link-00291",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00129",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '10' (OCR misread as 'l') immediately following 'Erhard'. The note item en-00025 corresponds to note 10 regarding Erhard."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Husserl²' as marker 10; no such footnote exists on page 107 (image 1)."
       },
       {
-        "link_id": "link-00062",
-        "action": "match",
-        "note_item_id": "en-00026",
+        "link_id": "link-00292",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00130",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '11' (OCR misread as 'l') immediately following 'Franz Böhm'. The note item en-00026 corresponds to note 11 regarding Franz Böhm."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Kelsen³' as marker 11; no such footnote exists."
       },
       {
-        "link_id": "link-00064",
-        "action": "match",
-        "note_item_id": "en-00028",
+        "link_id": "link-00293",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00131",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'crise⁴' as marker 12; no such footnote exists."
+      },
+      {
+        "link_id": "link-00294",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-00133",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The screenshot on page 107 clearly shows the marker '14' (OCR misread as 'l') at the end of the paragraph referencing 'Généalogie du style économique'. The note item en-00028 corresponds to note 14 regarding this book title."
+        "confidence": 0.95,
+        "reason": "OCR misread 'Schacht⁶' as marker 14; no such footnote exists."
+      },
+      {
+        "link_id": "link-00295",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00134",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'nazie⁷' as marker 15; no such footnote exists."
+      },
+      {
+        "link_id": "link-00296",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00141",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Röpke¹⁶' as marker 22; no such footnote exists on page 108 (image 2)."
+      },
+      {
+        "link_id": "link-00297",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00142",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Schleicher¹⁷' as marker 23; no such footnote exists."
+      },
+      {
+        "link_id": "link-00298",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00143",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread 'Istanbul¹⁸' as marker 24; no such footnote exists."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 7980,
-    "completion_tokens": 359,
-    "total_tokens": 8339,
+    "prompt_tokens": 8044,
+    "completion_tokens": 564,
+    "total_tokens": 8608,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 8471
+    "duration_ms": 12333
   }
 }

@@ -1,10 +1,7 @@
 {
   "doc_id": "bd05138cd773",
-  "status": "blocked",
-  "reason": "semantic_export_blocked",
-  "blocking_reasons": [
-    "toc_role_semantics_invalid",
-    "link_first_marker_not_one"
-  ],
-  "generated_at": 1776828081
+  "status": "ready",
+  "reason": "ok",
+  "blocking_reasons": [],
+  "generated_at": 1776848741
 }

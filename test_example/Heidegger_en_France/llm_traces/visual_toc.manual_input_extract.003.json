@@ -23,18 +23,432 @@
     "source": "pdf",
     "file_idx": 2
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"9. La lettre et l’esprit\",\n    \"depth\": 0,\n    \"printed_page\": 317,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Soixante ans après !\",\n    \"depth\": 1,\n    \"printed_page\": 317,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Du tollé aux enjeux\",\n    \"depth\": 1,\n    \"printed_page\": 326,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"L’esprit souffle où il veut\",\n    \"depth\": 1,\n    \"printed_page\": 334,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Épilogue V\",\n    \"depth\": 1,\n    \"printed_page\": 343,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"10. Le retour du refoulé ?\",\n    \"depth\": 0,\n    \"printed_page\": 347,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Le feu aux poudres\",\n    \"depth\": 1,\n    \"printed_page\": 348,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Une tornade\",\n    \"depth\": 1,\n    \"printed_page\": 351,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Du sérieux !\",\n    \"depth\": 1,\n    \"printed_page\": 356,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Défenseurs et attaquants à la rescousse\",\n    \"depth\": 1,\n    \"printed_page\": 365,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"En quête d’interprétations philosophiques\",\n    \"depth\": 1,\n    \"printed_page\": 370,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Dramaturgie révélatrice ou vaine querelle ?\",\n    \"depth\": 1,\n    \"printed_page\": 378,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Épilogue VI\",\n    \"depth\": 1,\n    \"printed_page\": 386,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"11. Entre érudition et techno-science\",\n    \"depth\": 0,\n    \"printed_page\": 391,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Le « tournant » : l’aval et l’amont d’Être et temps\",\n    \"depth\": 1,\n    \"printed_page\": 401,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Un entre-deux fragile : les souvenirs d’un voyage en Grèce\",\n    \"depth\": 1,\n    \"printed_page\": 407,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"La science pense-t-elle ?\",\n    \"depth\": 1,\n    \"printed_page\": 411,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Haro sur la technique ?\",\n    \"depth\": 1,\n    \"printed_page\": 421,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"L’exception qui confirme la règle ?\",\n    \"depth\": 1,\n    \"printed_page\": 429,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Épilogue VII\",\n    \"depth\": 1,\n    \"printed_page\": 439,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"12. La croisée des chemins\",\n    \"depth\": 0,\n    \"printed_page\": 445,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Quelle phénoménologie ?\",\n    \"depth\": 1,\n    \"printed_page\": 446,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"D’une dette impensée à une éthique neuve\",\n    \"depth\": 1,\n    \"printed_page\": 453,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"La part de l’herméneutique\",\n    \"depth\": 1,\n    \"printed_page\": 464,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Le débat théologique\",\n    \"depth\": 1,\n    \"printed_page\": 478,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Un legs incontesté en histoire de la philosophie ?\",\n    \"depth\": 1,\n    \"printed_page\": 489,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conclusion\",\n    \"depth\": 0,\n    \"printed_page\": 501,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Pensée et poésie : un dialogue au sommet\",\n    \"depth\": 1,\n    \"printed_page\": 507,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"La fin de l’exception française ?\",\n    \"depth\": 1,\n    \"printed_page\":",
-  "response_parsed": {
-    "title": "9. La lettre et l’esprit",
-    "depth": 0,
-    "printed_page": 317,
-    "visual_order": 1,
-    "role_hint": "content",
-    "endnotes_candidate": false,
-    "endnotes_subentry_candidate": false
-  },
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"9. La lettre et l’esprit\",\n    \"depth\": 0,\n    \"printed_page\": 317,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Soixante ans après !\",\n    \"depth\": 1,\n    \"printed_page\": 317,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Du tollé aux enjeux\",\n    \"depth\": 1,\n    \"printed_page\": 326,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"L’esprit souffle où il veut\",\n    \"depth\": 1,\n    \"printed_page\": 334,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Épilogue V\",\n    \"depth\": 1,\n    \"printed_page\": 343,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"10. Le retour du refoulé ?\",\n    \"depth\": 0,\n    \"printed_page\": 347,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Le feu aux poudres\",\n    \"depth\": 1,\n    \"printed_page\": 348,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Une tornade\",\n    \"depth\": 1,\n    \"printed_page\": 351,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Du sérieux !\",\n    \"depth\": 1,\n    \"printed_page\": 356,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Défenseurs et attaquants à la rescousse\",\n    \"depth\": 1,\n    \"printed_page\": 365,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"En quête d’interprétations philosophiques\",\n    \"depth\": 1,\n    \"printed_page\": 370,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Dramaturgie révélatrice ou vaine querelle ?\",\n    \"depth\": 1,\n    \"printed_page\": 378,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Épilogue VI\",\n    \"depth\": 1,\n    \"printed_page\": 386,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"11. Entre érudition et techno-science\",\n    \"depth\": 0,\n    \"printed_page\": 391,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Le « tournant » : l’aval et l’amont d’Être et temps\",\n    \"depth\": 1,\n    \"printed_page\": 401,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Un entre-deux fragile : les souvenirs d’un voyage en Grèce\",\n    \"depth\": 1,\n    \"printed_page\": 407,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"La science pense-t-elle ?\",\n    \"depth\": 1,\n    \"printed_page\": 411,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Haro sur la technique ?\",\n    \"depth\": 1,\n    \"printed_page\": 421,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"L’exception qui confirme la règle ?\",\n    \"depth\": 1,\n    \"printed_page\": 429,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Épilogue VII\",\n    \"depth\": 1,\n    \"printed_page\": 439,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"12. La croisée des chemins\",\n    \"depth\": 0,\n    \"printed_page\": 445,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Quelle phénoménologie ?\",\n    \"depth\": 1,\n    \"printed_page\": 446,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"D’une dette impensée à une éthique neuve\",\n    \"depth\": 1,\n    \"printed_page\": 453,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"La part de l’herméneutique\",\n    \"depth\": 1,\n    \"printed_page\": 464,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Le débat théologique\",\n    \"depth\": 1,\n    \"printed_page\": 478,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Un legs incontesté en histoire de la philosophie ?\",\n    \"depth\": 1,\n    \"printed_page\": 489,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Conclusion\",\n    \"depth\": 0,\n    \"printed_page\": 501,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"Pensée et poésie : un dialogue au sommet\",\n    \"depth\": 1,\n    \"printed_page\": 507,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"La fin de l’exception française ?\",\n    \"depth\": 1,\n    \"printed_page\": 518,\n    \"visual_order\": 29,\n    \"role_hint\": \"content\"\n  },\n  {\n    \"title\": \"L’hapax de la philosophie et son avenir\",\n    \"depth\": 1,\n    \"printed_page\": 536,\n    \"visual_order\": 30,\n    \"role_hint\": \"content\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "title": "9. La lettre et l’esprit",
+      "depth": 0,
+      "printed_page": 317,
+      "visual_order": 1,
+      "role_hint": "content"
+    },
+    {
+      "title": "Soixante ans après !",
+      "depth": 1,
+      "printed_page": 317,
+      "visual_order": 2,
+      "role_hint": "content"
+    },
+    {
+      "title": "Du tollé aux enjeux",
+      "depth": 1,
+      "printed_page": 326,
+      "visual_order": 3,
+      "role_hint": "content"
+    },
+    {
+      "title": "L’esprit souffle où il veut",
+      "depth": 1,
+      "printed_page": 334,
+      "visual_order": 4,
+      "role_hint": "content"
+    },
+    {
+      "title": "Épilogue V",
+      "depth": 1,
+      "printed_page": 343,
+      "visual_order": 5,
+      "role_hint": "content"
+    },
+    {
+      "title": "10. Le retour du refoulé ?",
+      "depth": 0,
+      "printed_page": 347,
+      "visual_order": 6,
+      "role_hint": "content"
+    },
+    {
+      "title": "Le feu aux poudres",
+      "depth": 1,
+      "printed_page": 348,
+      "visual_order": 7,
+      "role_hint": "content"
+    },
+    {
+      "title": "Une tornade",
+      "depth": 1,
+      "printed_page": 351,
+      "visual_order": 8,
+      "role_hint": "content"
+    },
+    {
+      "title": "Du sérieux !",
+      "depth": 1,
+      "printed_page": 356,
+      "visual_order": 9,
+      "role_hint": "content"
+    },
+    {
+      "title": "Défenseurs et attaquants à la rescousse",
+      "depth": 1,
+      "printed_page": 365,
+      "visual_order": 10,
+      "role_hint": "content"
+    },
+    {
+      "title": "En quête d’interprétations philosophiques",
+      "depth": 1,
+      "printed_page": 370,
+      "visual_order": 11,
+      "role_hint": "content"
+    },
+    {
+      "title": "Dramaturgie révélatrice ou vaine querelle ?",
+      "depth": 1,
+      "printed_page": 378,
+      "visual_order": 12,
+      "role_hint": "content"
+    },
+    {
+      "title": "Épilogue VI",
+      "depth": 1,
+      "printed_page": 386,
+      "visual_order": 13,
+      "role_hint": "content"
+    },
+    {
+      "title": "11. Entre érudition et techno-science",
+      "depth": 0,
+      "printed_page": 391,
+      "visual_order": 14,
+      "role_hint": "content"
+    },
+    {
+      "title": "Le « tournant » : l’aval et l’amont d’Être et temps",
+      "depth": 1,
+      "printed_page": 401,
+      "visual_order": 15,
+      "role_hint": "content"
+    },
+    {
+      "title": "Un entre-deux fragile : les souvenirs d’un voyage en Grèce",
+      "depth": 1,
+      "printed_page": 407,
+      "visual_order": 16,
+      "role_hint": "content"
+    },
+    {
+      "title": "La science pense-t-elle ?",
+      "depth": 1,
+      "printed_page": 411,
+      "visual_order": 17,
+      "role_hint": "content"
+    },
+    {
+      "title": "Haro sur la technique ?",
+      "depth": 1,
+      "printed_page": 421,
+      "visual_order": 18,
+      "role_hint": "content"
+    },
+    {
+      "title": "L’exception qui confirme la règle ?",
+      "depth": 1,
+      "printed_page": 429,
+      "visual_order": 19,
+      "role_hint": "content"
+    },
+    {
+      "title": "Épilogue VII",
+      "depth": 1,
+      "printed_page": 439,
+      "visual_order": 20,
+      "role_hint": "content"
+    },
+    {
+      "title": "12. La croisée des chemins",
+      "depth": 0,
+      "printed_page": 445,
+      "visual_order": 21,
+      "role_hint": "content"
+    },
+    {
+      "title": "Quelle phénoménologie ?",
+      "depth": 1,
+      "printed_page": 446,
+      "visual_order": 22,
+      "role_hint": "content"
+    },
+    {
+      "title": "D’une dette impensée à une éthique neuve",
+      "depth": 1,
+      "printed_page": 453,
+      "visual_order": 23,
+      "role_hint": "content"
+    },
+    {
+      "title": "La part de l’herméneutique",
+      "depth": 1,
+      "printed_page": 464,
+      "visual_order": 24,
+      "role_hint": "content"
+    },
+    {
+      "title": "Le débat théologique",
+      "depth": 1,
+      "printed_page": 478,
+      "visual_order": 25,
+      "role_hint": "content"
+    },
+    {
+      "title": "Un legs incontesté en histoire de la philosophie ?",
+      "depth": 1,
+      "printed_page": 489,
+      "visual_order": 26,
+      "role_hint": "content"
+    },
+    {
+      "title": "Conclusion",
+      "depth": 0,
+      "printed_page": 501,
+      "visual_order": 27,
+      "role_hint": "content"
+    },
+    {
+      "title": "Pensée et poésie : un dialogue au sommet",
+      "depth": 1,
+      "printed_page": 507,
+      "visual_order": 28,
+      "role_hint": "content"
+    },
+    {
+      "title": "La fin de l’exception française ?",
+      "depth": 1,
+      "printed_page": 518,
+      "visual_order": 29,
+      "role_hint": "content"
+    },
+    {
+      "title": "L’hapax de la philosophie et son avenir",
+      "depth": 1,
+      "printed_page": 536,
+      "visual_order": 30,
+      "role_hint": "content"
+    }
+  ],
   "derived_truth": {
-    "items": []
+    "items": [
+      {
+        "title": "9. La lettre et l’esprit",
+        "depth": 0,
+        "printed_page": 317,
+        "visual_order": 1,
+        "role_hint": "content"
+      },
+      {
+        "title": "Soixante ans après !",
+        "depth": 1,
+        "printed_page": 317,
+        "visual_order": 2,
+        "role_hint": "content"
+      },
+      {
+        "title": "Du tollé aux enjeux",
+        "depth": 1,
+        "printed_page": 326,
+        "visual_order": 3,
+        "role_hint": "content"
+      },
+      {
+        "title": "L’esprit souffle où il veut",
+        "depth": 1,
+        "printed_page": 334,
+        "visual_order": 4,
+        "role_hint": "content"
+      },
+      {
+        "title": "Épilogue V",
+        "depth": 1,
+        "printed_page": 343,
+        "visual_order": 5,
+        "role_hint": "content"
+      },
+      {
+        "title": "10. Le retour du refoulé ?",
+        "depth": 0,
+        "printed_page": 347,
+        "visual_order": 6,
+        "role_hint": "content"
+      },
+      {
+        "title": "Le feu aux poudres",
+        "depth": 1,
+        "printed_page": 348,
+        "visual_order": 7,
+        "role_hint": "content"
+      },
+      {
+        "title": "Une tornade",
+        "depth": 1,
+        "printed_page": 351,
+        "visual_order": 8,
+        "role_hint": "content"
+      },
+      {
+        "title": "Du sérieux !",
+        "depth": 1,
+        "printed_page": 356,
+        "visual_order": 9,
+        "role_hint": "content"
+      },
+      {
+        "title": "Défenseurs et attaquants à la rescousse",
+        "depth": 1,
+        "printed_page": 365,
+        "visual_order": 10,
+        "role_hint": "content"
+      },
+      {
+        "title": "En quête d’interprétations philosophiques",
+        "depth": 1,
+        "printed_page": 370,
+        "visual_order": 11,
+        "role_hint": "content"
+      },
+      {
+        "title": "Dramaturgie révélatrice ou vaine querelle ?",
+        "depth": 1,
+        "printed_page": 378,
+        "visual_order": 12,
+        "role_hint": "content"
+      },
+      {
+        "title": "Épilogue VI",
+        "depth": 1,
+        "printed_page": 386,
+        "visual_order": 13,
+        "role_hint": "content"
+      },
+      {
+        "title": "11. Entre érudition et techno-science",
+        "depth": 0,
+        "printed_page": 391,
+        "visual_order": 14,
+        "role_hint": "content"
+      },
+      {
+        "title": "Le « tournant » : l’aval et l’amont d’Être et temps",
+        "depth": 1,
+        "printed_page": 401,
+        "visual_order": 15,
+        "role_hint": "content"
+      },
+      {
+        "title": "Un entre-deux fragile : les souvenirs d’un voyage en Grèce",
+        "depth": 1,
+        "printed_page": 407,
+        "visual_order": 16,
+        "role_hint": "content"
+      },
+      {
+        "title": "La science pense-t-elle ?",
+        "depth": 1,
+        "printed_page": 411,
+        "visual_order": 17,
+        "role_hint": "content"
+      },
+      {
+        "title": "Haro sur la technique ?",
+        "depth": 1,
+        "printed_page": 421,
+        "visual_order": 18,
+        "role_hint": "content"
+      },
+      {
+        "title": "L’exception qui confirme la règle ?",
+        "depth": 1,
+        "printed_page": 429,
+        "visual_order": 19,
+        "role_hint": "content"
+      },
+      {
+        "title": "Épilogue VII",
+        "depth": 1,
+        "printed_page": 439,
+        "visual_order": 20,
+        "role_hint": "content"
+      },
+      {
+        "title": "12. La croisée des chemins",
+        "depth": 0,
+        "printed_page": 445,
+        "visual_order": 21,
+        "role_hint": "content"
+      },
+      {
+        "title": "Quelle phénoménologie ?",
+        "depth": 1,
+        "printed_page": 446,
+        "visual_order": 22,
+        "role_hint": "content"
+      },
+      {
+        "title": "D’une dette impensée à une éthique neuve",
+        "depth": 1,
+        "printed_page": 453,
+        "visual_order": 23,
+        "role_hint": "content"
+      },
+      {
+        "title": "La part de l’herméneutique",
+        "depth": 1,
+        "printed_page": 464,
+        "visual_order": 24,
+        "role_hint": "content"
+      },
+      {
+        "title": "Le débat théologique",
+        "depth": 1,
+        "printed_page": 478,
+        "visual_order": 25,
+        "role_hint": "content"
+      },
+      {
+        "title": "Un legs incontesté en histoire de la philosophie ?",
+        "depth": 1,
+        "printed_page": 489,
+        "visual_order": 26,
+        "role_hint": "content"
+      },
+      {
+        "title": "Conclusion",
+        "depth": 0,
+        "printed_page": 501,
+        "visual_order": 27,
+        "role_hint": "content"
+      },
+      {
+        "title": "Pensée et poésie : un dialogue au sommet",
+        "depth": 1,
+        "printed_page": 507,
+        "visual_order": 28,
+        "role_hint": "content"
+      },
+      {
+        "title": "La fin de l’exception française ?",
+        "depth": 1,
+        "printed_page": 518,
+        "visual_order": 29,
+        "role_hint": "content"
+      },
+      {
+        "title": "L’hapax de la philosophie et son avenir",
+        "depth": 1,
+        "printed_page": 536,
+        "visual_order": 30,
+        "role_hint": "content"
+      }
+    ]
   },
   "usage": {
     "stage": "visual_toc.manual_input_extract",
@@ -42,8 +456,8 @@
     "model_id": "qwen3.5-plus",
     "request_count": 1,
     "prompt_tokens": 966,
-    "completion_tokens": 2200,
-    "total_tokens": 3166,
+    "completion_tokens": 1761,
+    "total_tokens": 2727,
     "doc_id": "a5d9a08d6871",
     "slug": "",
     "context": {
@@ -52,6 +466,6 @@
     }
   },
   "timing": {
-    "duration_ms": 40988
+    "duration_ms": 32976
   }
 }

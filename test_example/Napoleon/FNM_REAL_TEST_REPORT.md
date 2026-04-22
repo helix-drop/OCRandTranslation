@@ -1,9 +1,9 @@
 # FNM Real Test Report — Napoleon
 
 - doc_id: `5df1d3d7f9c1`
-- 状态: `blocked`
-- 导出可用: `False`
-- 阻塞原因: `["export_audit_blocking", "structure_review_required"]`
+- 状态: `ready`
+- 导出可用: `True`
+- 阻塞原因: `[]`
 - translation_mode: `placeholder`
 - translation_api_called: `False`
 - current_stage: `report_write`
@@ -18,20 +18,20 @@
 - manual_toc_pdf: exists=`True` path=`/Users/hao/OCRandTranslation/test_example/Napoleon/目录.pdf` size=`663298` sha256=`a885078f02b66c5cd98968b1e06ecf1a7805d63affd61afb332df7f628dd9c1e`
 
 ## 清理结果
-- removed_count: `3`
-- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Napoleon/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Napoleon/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Napoleon/FNM_REAL_TEST_REPORT.md"]`
+- removed_count: `8`
+- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces", "/Users/hao/OCRandTranslation/test_example/Napoleon/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Napoleon/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Napoleon/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Napoleon/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.Napoleon.test.zip", "/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.test.zip", "/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.zip"]`
 
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `1097`
+- translated_paras: `1098`
 
 ## Token by Stage
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=3, prompt=4119, completion=4619, total=8738
-- llm_repair.cluster_request: request=12, prompt=25794, completion=2497, total=28291
+- visual_toc.manual_input_extract: request=3, prompt=4119, completion=4620, total=8739
+- llm_repair.cluster_request: request=12, prompt=25858, completion=2729, total=28587
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
@@ -54,8 +54,8 @@
 - `{"container": 6, "endnotes": 0, "chapter": 19, "section": 0, "post_body": 1, "back_matter": 5, "front_matter": 0}`
 
 ## Export
-- slug zip: `/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.Napoleon.blocked.test.zip`
-- alias zip: `/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.blocked.test.zip`
+- slug zip: `/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.Napoleon.test.zip`
+- alias zip: `/Users/hao/OCRandTranslation/test_example/Napoleon/latest.fnm.obsidian.test.zip`
 
 ## LLM 交互摘要
 - trace_count: `15`
@@ -76,25 +76,3 @@
 - llm_repair.cluster_request: 根据 unresolved cluster 请求 LLM 给出注释链接修补建议 -> `/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.012.json`
 
 ## 阻塞定位明细
-- structure_verify / note_link_orphan_anchor: `原书 p.100 ¶4 — la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la ca...` | `la tête»: «Démence furieuse. Il demande à être guillotiné ou de lui mettre la camisole $ ^{86} $.»`
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- export_verify / structure_review_required: `` | `["export_audit_blocking"]`

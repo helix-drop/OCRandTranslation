@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 25507,
+          "row_id": 30587,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00197",
           "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         },
         {
-          "row_id": 25508,
+          "row_id": 30588,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00198",
           "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
@@ -59,11 +59,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         },
         {
-          "row_id": 25512,
+          "row_id": 30592,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00202",
           "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
@@ -76,8 +76,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes.",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         }
       ],
       "rebind_candidates": []
@@ -147,7 +147,7 @@
     "page_context_count": 7,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00197\",\n    \"marker\": \"21\",\n    \"note_text\": \"Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00198\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate anchor for footnote 21 (same marker and source text as anchor-00197).\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00202\",\n    \"marker\": \"25\",\n    \"note_text\": \"V. Hugo, Les Misérables, op. cit., p. 848-849.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182.\"\n  }\n]\n```",
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00197\",\n    \"marker\": \"21\",\n    \"note_text\": \"Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR/structured data missing this footnote item; screenshot on page 176 clearly shows the full text of footnote 21.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00198\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate anchor for marker 21 on the same page (178), likely an OCR or segmentation artifact; only one footnote 21 exists on page 176.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00202\",\n    \"marker\": \"25\",\n    \"note_text\": \"V. Hugo, Les Misérables, op. cit., p. 848-849.\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR/structured data missing this footnote item; screenshot on page 180 clearly shows the full text of footnote 25.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -156,8 +156,8 @@
       "anchor_phrase": "",
       "marker": "21",
       "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
-      "confidence": 0.98,
-      "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+      "confidence": 0.95,
+      "reason": "OCR/structured data missing this footnote item; screenshot on page 176 clearly shows the full text of footnote 21."
     },
     {
       "action": "ignore_ref",
@@ -167,7 +167,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+      "reason": "Duplicate anchor for marker 21 on the same page (178), likely an OCR or segmentation artifact; only one footnote 21 exists on page 176."
     },
     {
       "action": "synthesize_note_item",
@@ -176,8 +176,8 @@
       "anchor_phrase": "",
       "marker": "25",
       "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
-      "confidence": 0.98,
-      "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+      "confidence": 0.95,
+      "reason": "OCR/structured data missing this footnote item; screenshot on page 180 clearly shows the full text of footnote 25."
     }
   ],
   "derived_truth": {
@@ -192,8 +192,8 @@
         "anchor_phrase": "",
         "marker": "21",
         "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
-        "confidence": 0.98,
-        "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing this footnote item; screenshot on page 176 clearly shows the full text of footnote 21."
       },
       {
         "action": "ignore_ref",
@@ -203,7 +203,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+        "reason": "Duplicate anchor for marker 21 on the same page (178), likely an OCR or segmentation artifact; only one footnote 21 exists on page 176."
       },
       {
         "action": "synthesize_note_item",
@@ -212,8 +212,8 @@
         "anchor_phrase": "",
         "marker": "25",
         "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
-        "confidence": 0.98,
-        "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing this footnote item; screenshot on page 180 clearly shows the full text of footnote 25."
       }
     ],
     "auto_selected_actions": [
@@ -224,8 +224,8 @@
         "anchor_phrase": "",
         "marker": "21",
         "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
-        "confidence": 0.98,
-        "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing this footnote item; screenshot on page 176 clearly shows the full text of footnote 21."
       },
       {
         "action": "ignore_ref",
@@ -235,7 +235,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+        "reason": "Duplicate anchor for marker 21 on the same page (178), likely an OCR or segmentation artifact; only one footnote 21 exists on page 176."
       },
       {
         "action": "synthesize_note_item",
@@ -244,8 +244,8 @@
         "anchor_phrase": "",
         "marker": "25",
         "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
-        "confidence": 0.98,
-        "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing this footnote item; screenshot on page 180 clearly shows the full text of footnote 25."
       }
     ],
     "auto_applied_actions": [
@@ -256,8 +256,8 @@
         "anchor_phrase": "",
         "marker": "21",
         "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
-        "confidence": 0.98,
-        "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing this footnote item; screenshot on page 176 clearly shows the full text of footnote 21."
       },
       {
         "link_id": "link-00478",
@@ -268,7 +268,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+        "reason": "Duplicate anchor for marker 21 on the same page (178), likely an OCR or segmentation artifact; only one footnote 21 exists on page 176."
       },
       {
         "note_item_id": "",
@@ -277,18 +277,18 @@
         "anchor_phrase": "",
         "marker": "25",
         "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
-        "confidence": 0.98,
-        "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing this footnote item; screenshot on page 180 clearly shows the full text of footnote 25."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 5457,
-    "completion_tokens": 308,
-    "total_tokens": 5765,
+    "completion_tokens": 320,
+    "total_tokens": 5777,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 7338
+    "duration_ms": 7663
   }
 }

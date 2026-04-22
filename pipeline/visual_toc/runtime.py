@@ -802,8 +802,6 @@ def _generate_visual_toc_from_manual_inputs(
                 if organization._should_prefer_manual_outline_nodes(organization_nodes, outline_nodes):
                     organization_nodes = outline_nodes
                     prefer_outline_as_primary_items = True
-                else:
-                    organization_nodes = manual_inputs_mod._merge_manual_toc_organization_nodes(organization_nodes, outline_nodes)
             else:
                 organization_nodes = outline_nodes
                 prefer_outline_as_primary_items = True

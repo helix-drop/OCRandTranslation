@@ -8,374 +8,367 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote\",\n  \"chapter_title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n  \"page_range\": [\n    19,\n    32\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 19,\n      \"ocr_excerpt\": \"# Mad acts, mad words, and mad people in Chinese medicine and law I have a two-phrase saying: “At first you’re crazy. Past the immortals’ peak, you’re a divine immortal.” $ ^{1} $ 我有兩句俗話 初頭是瘋癲 過了仙嶺是神仙 Lin Shiyuan 林時元, 1763 Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest officials in the province interrogated Lin to assess whether these were treasonous words in disguise, he spoke of dragon mothers and dream revelations, and claimed to be “the prime teacher-worthy” (第一師賢). The saying that Lin cited to prove he was not insane may have swayed listeners in other circumstances, but Lin’s relatives and neighbors insisted he was mad. $ ^{2} $ When asked what illness he suffered from, he replied: “In the third month of last year, I had a bit of a dizziness illness; they all said I was crazy and they invited a Taoist master to treat\"\n    },\n    {\n      \"page_no\": 21,\n      \"ocr_excerpt\": \"### 1.1 Historiography: insights and oversights Madness has just begun to attract the attention of historians of China. Vivien Ng's Madness in Late Imperial China (1990), until recently the only book on this topic, examined the way mad people were handled in Qing society and how their treatment changed over time. Ng was the first scholar to dissect a number of legal cases in which madness played a role, but the book's main thesis—that madness was transformed \\\"from an illness to a form of criminal deviance\\\" in the eighteenth century—is unpersuasive. Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe sentences upon those who killed someone in a fit of madness. Ng argued that these measures, which she attributed to a more-assumed-than-argued Manchu obsession with social control, represented a sea change in Chinese attitudes toward madness. But the “from illness to deviance” thesis is largely an artifact of the way Ng staged her documents. $ ^{4} $ When Ng claims that legal views replaced medical ones, ...\"\n    },\n    {\n      \"page_no\": 27,\n      \"ocr_excerpt\": \"of madness” (expériences de la folie) that appeared so often in Foucault’s book also seemed to imply a common object to all these experiences. “Madness” in History of Madness thus meant at least three things: a) the “notions, institutions, juridical and police measures, and scientific concepts” that created historically shifting experiences of madness; b) the Ding an sich (“madness itself”)—carefully black-boxed by Foucault—that tied this ensemble together; and c) (crucially for Foucault’s Kantian critique of subject-centered philosophies) the entity the silencing of which was the transcendental condition of possibility of all the “experiences” discussed in the book. This tension is probably part of what still makes Foucault’s book uniquely attractive. I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, ...\"\n    },\n    {\n      \"page_no\": 28,\n      \"ocr_excerpt\": \"into an intelligible research object. Throughout, I shall retain Foucault's sensitivity to how specific historical objects emerge, and to how discourses take roots in social practices. ### 1.3 Substances and their referents: “what is madness?” and what is “madness”? Meaning and referentiality are immensely difficult philosophical issues that I will not attempt to solve. But deflecting metaphysical questions is a pre-condition for understanding how referents emerge historically—that is, how practices attach words to specific realities. Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and hand ...\"\n    },\n    {\n      \"page_no\": 29,\n      \"ocr_excerpt\": \"“acts, words, or people” because documents rarely problematized madness as a whole, and because making such a distinction sidesteps the distracting question of what madness is. “Madness” did not precede the representations that people made of “it” (remember the longhand). And what held together demonic possession, postpartum confusion, and furious fits occasioned by high fevers was not a common ontological substrate, but notions that Qing people found intelligibly related: mainly kuang 狂, feng 瘋, and dian 顛／癲. None of these terms was exclusive to any field. Ritual specialists used them; so did doctors and legislators. And most texts used these words to label similar symptoms. What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The legal and medical practices I study often relied on this self-evidence, on people’s intuition that some acts naturally deserved to be called kuang, dian, or feng, three words that usually meant “mad” or “acting madly” in the same vague sense as the English words I just tran ...\"\n    },\n    {\n      \"page_no\": 30,\n      \"ocr_excerpt\": \"statements meaningful and consequential. A “script” is a scenario according to which a process—e.g., the course of an illness or a crime—was understood or expected to unfold. These scripts were templates for describing reality, but also interpretive frameworks that guided people’s interventions in fluid processes. Physicians deployed such scripts when they treated patients, judicial officials when they sentenced crimes. To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“tables,” “burrowing animals”). Categories contain more than prototypes, but their members gradually radiate away from the prototypical hub. A three-legged chair is thus a less prototypical chair than a four-legged one, the platypus a less prototypical mammal than the elephant. Since prototypes also apply to the way we interpret events, I will call “prototypical scripts” the recurring scenarios by which experts explained how illnesses or crimes took place. The script “internal depletion occurs → Wind intrudes → illness ensues,” for ...\"\n    },\n    {\n      \"page_no\": 32,\n      \"ocr_excerpt\": \"evidence also exists about how madness was handled in less literate social circles, often but not always through religious ritual. In the interrelated ways in which they explained and handled madness, the three contemporaneous fields of homicide law, medicine, and trials for sedition form a manifold cultural formation, a network of discourses and practices that is most profitably studied as a whole if we want to appreciate what any of them meant. $ ^{23} $ To understand why Qing law discussed insanity and handled “mad criminals” the way it did, we need to compare it to the medical and religious approaches that were also current at the time. And we shall appreciate the nature of medical treatments all the better if we grasp the ways in which other fields handled mad behavior. Since madness was never an important focus of medical reflections, changes in medical views of madness are difficult to study. Kuang was the object of no specialized literature, and no debate concerning it had any major impact on doctrinal developments. But since late imperial physicians were expected to treat all disorders—from furor to furuncles—the way they handled any illness usually depended on how they un ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00002\",\n      \"marker\": \"2\",\n      \"page_no\": 19,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest off ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00005\",\n      \"marker\": \"4\",\n      \"page_no\": 21,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe se ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00018\",\n      \"marker\": \"17\",\n      \"page_no\": 27,\n      \"paragraph_index\": 2,\n      \"source_text\": \"I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writ ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00019\",\n      \"marker\": \"18\",\n      \"page_no\": 27,\n      \"paragraph_index\": 2,\n      \"source_text\": \"I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writ ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00020\",\n      \"marker\": \"19\",\n      \"page_no\": 28,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fic ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00021\",\n      \"marker\": \"20\",\n      \"page_no\": 28,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fic ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00022\",\n      \"marker\": \"21\",\n      \"page_no\": 29,\n      \"paragraph_index\": 2,\n      \"source_text\": \"What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00023\",\n      \"marker\": \"22\",\n      \"page_no\": 30,\n      \"paragraph_index\": 1,\n      \"source_text\": \"To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“ ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-010-prologue:toc-ch-010-prologue:footnote\",\n  \"chapter_title\": \"Prologue\",\n  \"page_range\": [\n    426,\n    436\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 426,\n      \"ocr_excerpt\": \"# 10 ## Prologue to Part Two Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} $ Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts. In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \\\"madness illness\\\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dynasties prior to the Qing dealt ...\"\n    },\n    {\n      \"page_no\": 427,\n      \"ocr_excerpt\": \"designated madness, but I reject the possibility that feng bing referred to another kind of madness than dian 癲 and kuang 狂. ## The Qing judicial system and the documents it produced Criminal investigations usually began when someone brought an illegal act to the attention of the local magistrate, who, in addition to being the highest-ranked local administrator, was also in charge of judicial matters. When a suspicious death occurred, the magistrate brought a coroner with him to examine the corpse and ascertain the cause of death. If necessary, the magistrate also sent deputies to apprehend the killer. Although the magistrate could start to interrogate witnesses at once, the formal trial only started when the “criminal”—as a person under trial was called—and the witnesses had all been assembled. In Chinese imperial law, no indictment told a person what charges he or she faced. Instead, the magistrate investigated the “circumstances” (qing 情) of a criminal act and then decided under what law that crime should be sentenced. He then composed a report (xiang 詳) recounting the entire affair and specifying the sentence (ni 擬) that went with the law that covered this particular act. $ ^{4 ...\"\n    },\n    {\n      \"page_no\": 428,\n      \"ocr_excerpt\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions. But routine memorials have limits as sources of information. Since they were written only after a sentence had been meted out, the information they presented was designed to lead seamlessly to the proposed verdict. These highly structured reports left no room for debate, unless an official from the Ministry of Punishments had raised a point that required debate. When doubts were expressed ...\"\n    },\n    {\n      \"page_no\": 429,\n      \"ocr_excerpt\": \"Created in the late seventeenth century, palace memorials exploded in numbers after the creation of the Grand Council during the Yongzheng reign (1723-1735). The Grand Council, which unlike the Grand Secretariat worked in direct collaboration with the monarch, became the most important agency in the central government from the 1730s until the end of the Qing. Legal cases judged grave (like parricide or sedition) had to be reported to the Grand Council by palace memorial. Such cases were processed more quickly than those reported through routine memorials, because palace memorials were considered more urgent, and because the sentences meted out in them necessitated no repeated reviews. Unlike tiben, palace memorials could also contain documentary attachments, such as seized texts or more detailed transcriptions of depositions. The cases I discuss in Chapters 14 and 15 were all brought to the attention of the throne through palace memorials. Besides “routine” and “palace” memorials, I also found information on Qing official views of madness in successive editions of the Qing Code (called Dai Qing liü 大清律, Dai Qing liü jijie fuli 大清律集解附例, or Dai Qing lüli 大清律例 depending on when they w ...\"\n    },\n    {\n      \"page_no\": 430,\n      \"ocr_excerpt\": \"Lingering Doubts contained neither the diagrams (on family relations, legal instruments of punishment, technical terms, table of monetary redemption, etc.) included at the beginning of the official editions of the Code, nor the running commentaries that topped each page in both private and state-sponsored editions of the Code. It is Huang Jingjia's inclusion of these tables and his numbering of all the statutes and sub-statutes that make his edition (not a \\\"reprint\\\") of Lingering Doubts so convenient. Xue's analyses themselves are invaluable for tracing the origin of most sub-statutes, though he was imprecise about Kangxi-era (1662-1722) legislation. ## The pre-Qing handling of mad homicides Let me now discuss pre-Qing legal treatments of mad homicides and trace at the same time the emergence of the character feng 瘋, by which Qing law officially referred to insanity. The terms by which \\\"madness\\\" was designated in Chinese imperial law changed through time, yet no word in particular implied either distance from or closeness with medical approaches. The legal treatment of mad people under dynasties that used medical terms like diankuang 顛狂 and fengkuang 風狂 seems to have been no more ( ...\"\n    },\n    {\n      \"page_no\": 431,\n      \"ocr_excerpt\": \"were mad killers granted an unspecified reduction of punishment (狂易殺人 待減重論). $ ^{11} $ No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) who committed crimes. When mad persons committed a homicide that deserved the death penalty, their sentence (decapitation or strangulation) had to be set forth in a special memorial to the emperor to petition for his decision. $ ^{12} $ How the emperor treated such cases is unknown. The Song dynasty (960-1279) adopted the Tang approach wholesale. $ ^{13} $\"\n    },\n    {\n      \"page_no\": 432,\n      \"ocr_excerpt\": \"Unlike the Tang and Song, the Yuan dynasty (1260-1368) promulgated several explicit laws concerning homicides committed by mad people. Yuan courts were instructed to diminish the sentence of mad killers, but not to absolve them from penalties entirely. For instance, a man who killed one of his parents or grand-parents in a state of insanity (風狂) was to be simply “executed” (處死) rather than put to death by dismemberment. $ ^{14} $ In 1269 a man killed four people in a fit of “Heart Wind” (心風). $ ^{15} $ Legal officials petitioned his case to the emperor (上請) “in accordance with the old precedent” (照依舊例) that instructed to do so in cases of killing because of insanity (顛狂殺人). $ ^{16} $ Khubilai Khan eventually absolved the killer from the death penalty by imperial edict (敕裁) and condemned him to paying 50 ounces of silver (per person?) in “cremation or burial fees” (燒埋銀) to the family of his victims, the same amount as for people who committed a regular homicide. $ ^{17} $ Khubilai's reasoning may have been the same as the one behind another Yuan law stating that someone who, in a state of madness (病風狂), injured another person during a fight, leading to that person's death (毆傷人致死), s ...\"\n    },\n    {\n      \"page_no\": 433,\n      \"ocr_excerpt\": \"though cremation or burial fees should still be collected (徵燒埋銀) from the culprit (History of the Yuan 105: 2678). Early Qing laws handled mad homicides in a similar fashion, though the legal reasoning that justified monetary compensation differed. $ ^{18} $ Another Yuan law absolved those who “spoke inappropriately” (失口亂言) as long as they had done so while “suffering from Wind madness” (害風狂疾) and if there was nothing else behind their words. $ ^{19} $ As I will show in Chapters 14 and 15, the Qing attitude toward seditious words pronounced by mad people would be much harsher. Yuan legal documents referred to madness as xin feng 心風 (“Heart Wind”), feng kuang 風狂 (“Wind kuang”), dian kuang 顛狂 (“insanity”), and perhaps even feng bing 瘋病, the term that Qing law would officially adopt to discuss insanity. $ ^{20} $ Despite their different origins, these names did not have different legal implications. $ ^{21} $\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01201\",\n      \"marker\": \"3\",\n      \"page_no\": 426,\n      \"paragraph_index\": 1,\n      \"source_text\": \"In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain ho ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01203\",\n      \"marker\": \"5\",\n      \"page_no\": 427,\n      \"paragraph_index\": 3,\n      \"source_text\": \"In a “re-trial” (覆審), the prefect reviewed the entire case and could go as far as to re-interrogate the accused and all the witnesses. $ ^{5} $ Even when he agreed with the magistrate’s verdict, the prefect still had to write his own report ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01206\",\n      \"marker\": \"8\",\n      \"page_no\": 428,\n      \"paragraph_index\": 8,\n      \"source_text\": \"who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.\"\n    },\n    {\n      \"anchor_id\": \"anchor-01207\",\n      \"marker\": \"6\",\n      \"page_no\": 428,\n      \"paragraph_index\": 11,\n      \"source_text\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01209\",\n      \"marker\": \"8\",\n      \"page_no\": 428,\n      \"paragraph_index\": 11,\n      \"source_text\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01210\",\n      \"marker\": \"9\",\n      \"page_no\": 429,\n      \"paragraph_index\": 2,\n      \"source_text\": \"As has become customary in English-language scholarship, I will refer to Qing legal articles by their numbers in Huang Jingjia's 黄靜嘉 1970 re-edition of Xue Yunsheng's 薛允升 Lingering Doubts in the Study of the Sub-Statutes (Duli cunyi 讀例存疑; 1 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01211\",\n      \"marker\": \"10\",\n      \"page_no\": 430,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Whereas in English law acts committed because of insanity did not count as crimes, Chinese imperial law sentenced killings committed because of madness differently depending on the circumstances. $ ^{10} $ For the larger part of the Han dyn ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01214\",\n      \"marker\": \"13\",\n      \"page_no\": 431,\n      \"paragraph_index\": 1,\n      \"source_text\": \"No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) wh ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00320\",\n      \"note_item_id\": \"fn-00237\",\n      \"current_anchor_id\": \"anchor-01204\",\n      \"marker\": \"7\",\n      \"note_page_no\": 430,\n      \"anchor_page_no\": 428,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Xhe0following0paragraphs0contradict0 arl0FPngerWs0claim01 @ 7A0?4@20that Xthe0exemption0of0lunatics0from punishment0_Z50has0been`0a0principle0of0the0Ghinese0law0from0the0^hou0dynasty0until0nowadays5Y\",\n      \"anchor_excerpt\": \"confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments”\"\n    },\n    {\n      \"link_id\": \"link-00325\",\n      \"note_item_id\": \"fn-00242\",\n      \"current_anchor_id\": \"anchor-01230\",\n      \"marker\": \"4\",\n      \"note_page_no\": 436,\n      \"anchor_page_no\": 434,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"4. *#)!%\\u0001 $1 *# À \\u0003 @C\\u0001=6AC@DJ \\u0002) \\\"!*#\\u0001 %*# ¾¿» \\u0003\\u0006\\u001b@C\\u0001>@C6\\u0001@? E96\\u0001\\u00189:?6D6\\u0001>65:42=\\u00016IA=2?2E:@?D\\u0001@7\\u0001=6AC@DJ\\u00012?5\\u0001E96\\u0001=2?8F286\\u0001FD65\\u0001E@\\u0001C676C\\u0001E@\\u0001E9:D\\u00015:D62D6\\u0004\\u0001D66\\u0001!6F?8\\u0001 \\b\\b\\u0011\\u0012\\u0001 \\u000f\\u0005 \\u0011\\u0006\\u0001)96\\u000162C=:6DE\\u0001:?DE2?46\\u0001@7\\\"!*# \\u000192G6\\u00017@F?5\\u0001:?\\u0001E96\\u0001>65:42=\\u0001=:E6C2E ...\",\n      \"anchor_excerpt\": \"The key to the widening use of feng 瘋 to mean “madness” was its phonetic equivalence with feng 風 (“Wind”) and the age-old association of the sound feng with madness in expressions like fengkuang (風狂, “Wind madness”), fengdian (風癲, “Wind dia ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
-      "chapter_title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-010-prologue:toc-ch-010-prologue:footnote",
+      "chapter_title": "Prologue",
+      "request_mode": "anchor_rebind",
       "allowed_actions": [
+        "match",
         "ignore_ref",
         "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        19,
-        32
+        426,
+        436
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 77411,
+          "row_id": 97263,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00002",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 19,
+          "anchor_id": "anchor-01201",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 426,
+          "paragraph_index": 1,
+          "char_start": 549,
+          "char_end": 557,
+          "source_marker": "$ ^{3} $",
+          "normalized_marker": "3",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \"madness illness\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dynasties prior to the Qing dealt with homicides committed in a fit of insanity. $ ^{3} $ Then I probe the origin of the term \"madness illness\" by which Qing law",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97265,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01203",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 427,
           "paragraph_index": 3,
-          "char_start": 600,
-          "char_end": 608,
-          "source_marker": "$ ^{2} $",
-          "normalized_marker": "2",
+          "char_start": 135,
+          "char_end": 143,
+          "source_marker": "$ ^{5} $",
+          "normalized_marker": "5",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest officials in the province interrogated Lin to assess whether these were treasonous words in disguise, he spoke of dragon mothers and dream revelations, and claimed to be “the prime teacher-worthy” (第一師賢). The saying that Lin cited to prove he was not insane may have swayed listeners in other circumstances, but Lin’s relatives and neighbors insisted he was mad. $ ^{2} $ When asked what illness he suffered from, he replied: “In the third month of last year, I had a bit of a dizziness illness; they all said I was crazy and they invited a Taoist master to treat",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "source_text": "In a “re-trial” (覆審), the prefect reviewed the entire case and could go as far as to re-interrogate the accused and all the witnesses. $ ^{5} $ Even when he agreed with the magistrate’s verdict, the prefect still had to write his own report and send it to the provincial judge, the highest legal official in the province. After having made sure that the sentence meted out was consistent with the evidence presented, the judge passed the case to the governor or",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 77414,
+          "row_id": 97268,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00005",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 21,
+          "anchor_id": "anchor-01206",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 428,
+          "paragraph_index": 8,
+          "char_start": 22,
+          "char_end": 30,
+          "source_marker": "$ ^{8} $",
+          "normalized_marker": "8",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97269,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01207",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 428,
+          "paragraph_index": 11,
+          "char_start": 276,
+          "char_end": 284,
+          "source_marker": "$ ^{6} $",
+          "normalized_marker": "6",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97271,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01209",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 428,
+          "paragraph_index": 11,
+          "char_start": 742,
+          "char_end": 750,
+          "source_marker": "$ ^{8} $",
+          "normalized_marker": "8",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97272,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01210",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 429,
+          "paragraph_index": 2,
+          "char_start": 438,
+          "char_end": 446,
+          "source_marker": "$ ^{9} $",
+          "normalized_marker": "9",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "As has become customary in English-language scholarship, I will refer to Qing legal articles by their numbers in Huang Jingjia's 黄靜嘉 1970 re-edition of Xue Yunsheng's 薛允升 Lingering Doubts in the Study of the Sub-Statutes (Duli cunyi 讀例存疑; 1905). Xue's work was originally not an edition of the code, but an unpublished critical commentary on the \"sub-statutes\" (例) as they existed after 1870, when the Qing Code had last been overhauled. $ ^{9} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97273,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01211",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 430,
+          "paragraph_index": 2,
+          "char_start": 196,
+          "char_end": 205,
+          "source_marker": "$ ^{10} $",
+          "normalized_marker": "10",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Whereas in English law acts committed because of insanity did not count as crimes, Chinese imperial law sentenced killings committed because of madness differently depending on the circumstances. $ ^{10} $ For the larger part of the Han dynasty (206 BCE – 220 CE), people who killed in a state of insanity were sentenced to death. Only in the early second century CE",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97277,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01214",
+          "chapter_id": "toc-ch-010-prologue",
+          "page_no": 431,
           "paragraph_index": 1,
-          "char_start": 582,
-          "char_end": 590,
-          "source_marker": "$ ^{4} $",
-          "normalized_marker": "4",
+          "char_start": 587,
+          "char_end": 596,
+          "source_marker": "$ ^{13} $",
+          "normalized_marker": "13",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe sentences upon those who killed someone in a fit of madness. Ng argued that these measures, which she attributed to a more-assumed-than-argued Manchu obsession with social control, represented a sea change in Chinese attitudes toward madness. But the “from illness to deviance” thesis is largely an artifact of the way Ng staged her documents. $ ^{4} $ When Ng claims that legal views replaced medical ones, it is in fact her analytical gaze that leaps from medical to legal documents, never to look back. As I shall show in chapters 11 to 15, medical, legal, religious, and popular views often overlapped, and they kept interacting in concrete social contexts throughout Qing times. Even Qing law consistently treated insanity as an illness.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77428,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00018",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 27,
-          "paragraph_index": 2,
-          "char_start": 485,
-          "char_end": 487,
-          "source_marker": "¹⁷",
-          "normalized_marker": "17",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, people, ways of speaking, and forms of behavior.¹⁷ I also find these words by Foucault suggestive: “I have personally never written that madness does not exist, but this could be written, because, for phenomenology, madness exists but it is not a thing, whereas we should say on the contrary that madness does not exist, but that it is not nothing for that reason (mais qu’elle n’est pas rien pour autant).”¹⁸ Words have referents even if these are not natural objects. One of my aims will be to highlight this artificial unity of “madness” and to refashion the resulting dispersion",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77429,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00019",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 27,
-          "paragraph_index": 2,
-          "char_start": 844,
-          "char_end": 846,
-          "source_marker": "¹⁸",
-          "normalized_marker": "18",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, people, ways of speaking, and forms of behavior.¹⁷ I also find these words by Foucault suggestive: “I have personally never written that madness does not exist, but this could be written, because, for phenomenology, madness exists but it is not a thing, whereas we should say on the contrary that madness does not exist, but that it is not nothing for that reason (mais qu’elle n’est pas rien pour autant).”¹⁸ Words have referents even if these are not natural objects. One of my aims will be to highlight this artificial unity of “madness” and to refashion the resulting dispersion",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77430,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00020",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 28,
-          "paragraph_index": 2,
-          "char_start": 271,
-          "char_end": 280,
-          "source_marker": "$ ^{19} $",
-          "normalized_marker": "19",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and handled in culturally meaningful fashion. No timeless and pre-cultural “madness” (were we even able to pinpoint such a thing) would suffice to make these representations and practices intelligible. $ ^{20} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77431,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00021",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 28,
-          "paragraph_index": 2,
-          "char_start": 853,
-          "char_end": 862,
-          "source_marker": "$ ^{20} $",
-          "normalized_marker": "20",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and handled in culturally meaningful fashion. No timeless and pre-cultural “madness” (were we even able to pinpoint such a thing) would suffice to make these representations and practices intelligible. $ ^{20} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77432,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00022",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 29,
-          "paragraph_index": 2,
-          "char_start": 227,
-          "char_end": 236,
-          "source_marker": "$ ^{21} $",
-          "normalized_marker": "21",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The legal and medical practices I study often relied on this self-evidence, on people’s intuition that some acts naturally deserved to be called kuang, dian, or feng, three words that usually meant “mad” or “acting madly” in the same vague sense as the English words I just translated them by.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77433,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00023",
-          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
-          "page_no": 30,
-          "paragraph_index": 1,
-          "char_start": 127,
-          "char_end": 136,
-          "source_marker": "$ ^{22} $",
-          "normalized_marker": "22",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“tables,” “burrowing animals”). Categories contain more than prototypes, but their members gradually radiate away from the prototypical hub. A three-legged chair is thus a less prototypical chair than a four-legged one, the platypus a less prototypical mammal than the elephant.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "source_text": "No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) who committed crimes. When mad persons committed a homicide that deserved the death penalty, their sentence (decapitation or strangulation) had to be set forth in a special memorial to the emperor to petition for his decision. $ ^{12} $ How the emperor treated such cases is unknown. The Song dynasty (960-1279) adopted the Tang approach wholesale. $ ^{13} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         }
       ],
-      "rebind_candidates": []
+      "rebind_candidates": [
+        {
+          "link_id": "link-00320",
+          "note_item_id": "fn-00237",
+          "current_anchor_id": "anchor-01204",
+          "marker": "7",
+          "note_page_no": 430,
+          "anchor_page_no": 428,
+          "current_anchor_marker": "7",
+          "note_excerpt": "Xhe0following0paragraphs0contradict0 arl0FPngerWs0claim01 @ 7A0?4@20that Xthe0exemption0of0lunatics0from punishment0_Z50has0been`0a0principle0of0the0Ghinese0law0from0the0^hou0dynasty0until0nowadays5Y",
+          "anchor_excerpt": "confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments”",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00325",
+          "note_item_id": "fn-00242",
+          "current_anchor_id": "anchor-01230",
+          "marker": "4",
+          "note_page_no": 436,
+          "anchor_page_no": 434,
+          "current_anchor_marker": "4",
+          "note_excerpt": "4. *#)!%\u0001 $1 *# À \u0003 @C\u0001=6AC@DJ \u0002) \"!*#\u0001 %*# ¾¿» \u0003\u0006\u001b@C\u0001>@C6\u0001@? E96\u0001\u00189:?6D6\u0001>65:42=\u00016IA=2?2E:@?D\u0001@7\u0001=6AC@DJ\u00012?5\u0001E96\u0001=2?8F286\u0001FD65\u0001E@\u0001C676C\u0001E@\u0001E9:D\u00015:D62D6\u0004\u0001D66\u0001!6F?8\u0001 \b\b\u0011\u0012\u0001 \u000f\u0005 \u0011\u0006\u0001)96\u000162C=:6DE\u0001:?DE2?46\u0001@7\"!*# \u000192G6\u00017@F?5\u0001:?\u0001E96\u0001>65:42=\u0001=:E6C2EFC6 H2D\u0001:?\u00012\u00015:D4FDD:@?\u0001@7X>25\u00015@8DY\u0001\u0002¿¯ \u0013 D66\u00141&%\u0001\" *# ¨ 0 \b\u000e1\u0004\u0001 \b\u000e\u0006 2\u0005 3\u0004 X/9F\u000149@?8D9@F\u0001D92?8\u0001>6?Y öéµ\u0019Đ \u0004 X/9:BF2? ?:6Y³¯: \u0003\u0006 - )\u0017\u0004 >6>@C:2=D 52E65\u0001 \u0001 F=J\u0001 \u000f \u000e\u0001\u0002&! \u0006\u000e\u0006 \u00032?5 \u000f\u0001\"2C49\u0001 \u0010 \u000e \u0002 & \u0006 \u0006\u0011\u0003\u0006 #2E92?\u0001(:G:?\u0001\u0002 \u0011\u0011 \u0012\u0001 \u000e \u0017\u0003\u0001>256\u00012\u0001D:>:=2C\u0001DF886DE:@?\u0001:?\u00012\u0001C6G:6H\u0001@7\u0001#8\u0001 \u0011\u0011\b\u0006",
+          "anchor_excerpt": "The key to the widening use of feng 瘋 to mean “madness” was its phonetic equivalence with feng 風 (“Wind”) and the age-old association of the sound feng with madness in expressions like fengkuang (風狂, “Wind madness”), fengdian (風癲, “Wind dian”), and xin feng 心風 (“Heart Wind”). By the twelfth century the sound feng (“Wind”) had been associated with madness for so long that it had come to mean madness even when it was not followed by either kuang or dian nor disambiguated by the addition of the “illness radical” (疒) to yield the form 瘋. $ ^{22} $ One “crazy monk brother” (風僧哥) was mentioned in a twelfth-century collection of anecdotes. $ ^{23} $ The term fa feng 發風 (“fit of Wind” = “fit of madness”) also appeared in a Yuan play titled A Pair of Battling Quacks (Shuang dou yi 雙鬥醫). $ ^{24} $",
+          "current_anchor_synthetic": false
+        }
+      ]
     },
     "page_contexts": [
       {
-        "page_no": 19,
-        "file_idx": 18,
+        "page_no": 426,
+        "file_idx": 425,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "# Mad acts, mad words, and mad people in Chinese medicine and law I have a two-phrase saying: “At first you’re crazy. Past the immortals’ peak, you’re a divine immortal.” $ ^{1} $ 我有兩句俗話 初頭是瘋癲 過了仙嶺是神仙 Lin Shiyuan 林時元, 1763 Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest officials in the province interrogated Lin to assess whether these were treasonous words in disguise, he spoke of dragon mothers and dream revelations, and claimed to be “the prime teacher-worthy” (第一師賢). The saying that Lin cited to prove he was not insane may have swayed listeners in other circumstances, but Lin’s relatives and neighbors insisted he was mad. $ ^{2} $ When asked what illness he suffered from, he replied: “In the third month of last year, I had a bit of a dizziness illness; they all said I was crazy and they invited a Taoist master to treat",
-        "byte_size": 136277,
-        "sha256": "a8b77d28e78197c997a11b96479547357fcd39742be66c9d6af6cacf5e6429cd"
+        "ocr_excerpt": "# 10 ## Prologue to Part Two Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} $ Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts. In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \"madness illness\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dynasties prior to the Qing dealt with homicides committed in a fit of insanity. $ ^{3} $ Then I probe the origin of the term \"madness illness\" by which Qing law",
+        "byte_size": 126369,
+        "sha256": "ca1fe2a7c8d1d30a8ee8ba032461320bd8f14b57a0eac362321ae38b883347e4"
       },
       {
-        "page_no": 21,
-        "file_idx": 20,
+        "page_no": 427,
+        "file_idx": 426,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "### 1.1 Historiography: insights and oversights Madness has just begun to attract the attention of historians of China. Vivien Ng's Madness in Late Imperial China (1990), until recently the only book on this topic, examined the way mad people were handled in Qing society and how their treatment changed over time. Ng was the first scholar to dissect a number of legal cases in which madness played a role, but the book's main thesis—that madness was transformed \"from an illness to a form of criminal deviance\" in the eighteenth century—is unpersuasive. Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe sentences upon those who killed someone in a fit of madness. Ng argued that these measures, which she attributed to a more-assumed-than-argued Manchu obsession with social control, represented a sea change in Chinese attitudes toward madness. But the “from illness to deviance” thesis is largely an artifact of the way Ng staged her documents. $ ^{4} $ When Ng claims that legal views replaced medical ones, it is in fact her analytical gaze that leaps from medical to legal documents, never to look back. As I shall show in chapters 11 to 15, medical, legal, religious, and popular views often overlapped, ...",
-        "byte_size": 137119,
-        "sha256": "99e913c66f890e6901ac077043606fb9bc24afe8778c89f609008c879d7f8bd9"
+        "ocr_excerpt": "designated madness, but I reject the possibility that feng bing referred to another kind of madness than dian 癲 and kuang 狂. ## The Qing judicial system and the documents it produced Criminal investigations usually began when someone brought an illegal act to the attention of the local magistrate, who, in addition to being the highest-ranked local administrator, was also in charge of judicial matters. When a suspicious death occurred, the magistrate brought a coroner with him to examine the corpse and ascertain the cause of death. If necessary, the magistrate also sent deputies to apprehend the killer. Although the magistrate could start to interrogate witnesses at once, the formal trial only started when the “criminal”—as a person under trial was called—and the witnesses had all been assembled. In Chinese imperial law, no indictment told a person what charges he or she faced. Instead, the magistrate investigated the “circumstances” (qing 情) of a criminal act and then decided under what law that crime should be sentenced. He then composed a report (xiang 詳) recounting the entire affair and specifying the sentence (ni 擬) that went with the law that covered this particular act. $ ^{4} $ He sent this report to his immediate superior the prefect. In a “re-trial” (覆審), the prefect reviewed the entire case and could go as far as to re-interrogate the accused and all the witnesses. $ ...",
+        "byte_size": 126430,
+        "sha256": "52f29c2dd6552c9a00862382c2757a1b0c929d325d61d01983b7b7863f20157e"
       },
       {
-        "page_no": 27,
-        "file_idx": 26,
+        "page_no": 428,
+        "file_idx": 427,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "of madness” (expériences de la folie) that appeared so often in Foucault’s book also seemed to imply a common object to all these experiences. “Madness” in History of Madness thus meant at least three things: a) the “notions, institutions, juridical and police measures, and scientific concepts” that created historically shifting experiences of madness; b) the Ding an sich (“madness itself”)—carefully black-boxed by Foucault—that tied this ensemble together; and c) (crucially for Foucault’s Kantian critique of subject-centered philosophies) the entity the silencing of which was the transcendental condition of possibility of all the “experiences” discussed in the book. This tension is probably part of what still makes Foucault’s book uniquely attractive. I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, people, ways of speaking, and forms of behavior.¹⁷ I also find these words by Foucault suggestive: “I have personally never written that madness does not exist, but this could be written, because, for ...",
-        "byte_size": 143556,
-        "sha256": "6ae6b0cbf8e2a2b14e12491fd896b813b4614ac75874a17a80d404631e054d09"
+        "ocr_excerpt": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions. But routine memorials have limits as sources of information. Since they were written only after a sentence had been meted out, the information they presented was designed to lead seamlessly to the proposed verdict. These highly structured reports left no room for debate, unless an official from the Ministry of Punishments had raised a point that required debate. When doubts were expressed, it was usually to show that they had already been resolved. The limits of these documents depend on the information we seek from them. They may provide little information on the daily life of “ordin ...",
+        "byte_size": 149857,
+        "sha256": "d55034ea3469a2833646953cef157c93acc492ce562b1f9cf819e0644a291c94"
       },
       {
-        "page_no": 28,
-        "file_idx": 27,
+        "page_no": 429,
+        "file_idx": 428,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "into an intelligible research object. Throughout, I shall retain Foucault's sensitivity to how specific historical objects emerge, and to how discourses take roots in social practices. ### 1.3 Substances and their referents: “what is madness?” and what is “madness”? Meaning and referentiality are immensely difficult philosophical issues that I will not attempt to solve. But deflecting metaphysical questions is a pre-condition for understanding how referents emerge historically—that is, how practices attach words to specific realities. Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and handled in culturally meaningful fashion. No timeless and pre-cultural “madness” (were we even able to pinpoint such a thing) would suffice to make these representations and practices intelligible. $ ^{20 ...",
-        "byte_size": 128688,
-        "sha256": "387709597b969b0f082b61207092b26cdf7fc4db1335b0308af5c86afe635d0b"
+        "ocr_excerpt": "Created in the late seventeenth century, palace memorials exploded in numbers after the creation of the Grand Council during the Yongzheng reign (1723-1735). The Grand Council, which unlike the Grand Secretariat worked in direct collaboration with the monarch, became the most important agency in the central government from the 1730s until the end of the Qing. Legal cases judged grave (like parricide or sedition) had to be reported to the Grand Council by palace memorial. Such cases were processed more quickly than those reported through routine memorials, because palace memorials were considered more urgent, and because the sentences meted out in them necessitated no repeated reviews. Unlike tiben, palace memorials could also contain documentary attachments, such as seized texts or more detailed transcriptions of depositions. The cases I discuss in Chapters 14 and 15 were all brought to the attention of the throne through palace memorials. Besides “routine” and “palace” memorials, I also found information on Qing official views of madness in successive editions of the Qing Code (called Dai Qing liü 大清律, Dai Qing liü jijie fuli 大清律集解附例, or Dai Qing lüli 大清律例 depending on when they were published), commentaries on the Code, imperial edicts, memorials on policy issues, as well as several collections of legal cases. As has become customary in English-language scholarship, I will re ...",
+        "byte_size": 133958,
+        "sha256": "f276062a215ffa4c8bbbe94e59d9d956ad0aa0d5fbff94609cafcf474bfa79d2"
       },
       {
-        "page_no": 29,
-        "file_idx": 28,
+        "page_no": 430,
+        "file_idx": 429,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "“acts, words, or people” because documents rarely problematized madness as a whole, and because making such a distinction sidesteps the distracting question of what madness is. “Madness” did not precede the representations that people made of “it” (remember the longhand). And what held together demonic possession, postpartum confusion, and furious fits occasioned by high fevers was not a common ontological substrate, but notions that Qing people found intelligibly related: mainly kuang 狂, feng 瘋, and dian 顛／癲. None of these terms was exclusive to any field. Ritual specialists used them; so did doctors and legislators. And most texts used these words to label similar symptoms. What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The legal and medical practices I study often relied on this self-evidence, on people’s intuition that some acts naturally deserved to be called kuang, dian, or feng, three words that usually meant “mad” or “acting madly” in the same vague sense as the English words I just translated them by. I will still strive to understand what each of these terms meant, but I will not do so in the abstract. We could apply to “madness” what Ludwig Wittgenstein said about “time”: “If I kn ...",
-        "byte_size": 133966,
-        "sha256": "a32a0dc5f4cdd3d79cd291c54dece8ceefc12e4705cbb41c8be111217f63cf50"
+        "ocr_excerpt": "Lingering Doubts contained neither the diagrams (on family relations, legal instruments of punishment, technical terms, table of monetary redemption, etc.) included at the beginning of the official editions of the Code, nor the running commentaries that topped each page in both private and state-sponsored editions of the Code. It is Huang Jingjia's inclusion of these tables and his numbering of all the statutes and sub-statutes that make his edition (not a \"reprint\") of Lingering Doubts so convenient. Xue's analyses themselves are invaluable for tracing the origin of most sub-statutes, though he was imprecise about Kangxi-era (1662-1722) legislation. ## The pre-Qing handling of mad homicides Let me now discuss pre-Qing legal treatments of mad homicides and trace at the same time the emergence of the character feng 瘋, by which Qing law officially referred to insanity. The terms by which \"madness\" was designated in Chinese imperial law changed through time, yet no word in particular implied either distance from or closeness with medical approaches. The legal treatment of mad people under dynasties that used medical terms like diankuang 顛狂 and fengkuang 風狂 seems to have been no more (or less) compatible with medical approaches than that of eras that used less medical concepts like xinfeng 心風 or kuangyi 狂易. Whereas in English law acts committed because of insanity did not count as ...",
+        "byte_size": 123030,
+        "sha256": "3196288c9a2d9d6fb9aa6e0b4224c50eccd8870dfa979f26694aa28b4f2f1619"
       },
       {
-        "page_no": 30,
-        "file_idx": 29,
+        "page_no": 431,
+        "file_idx": 430,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "statements meaningful and consequential. A “script” is a scenario according to which a process—e.g., the course of an illness or a crime—was understood or expected to unfold. These scripts were templates for describing reality, but also interpretive frameworks that guided people’s interventions in fluid processes. Physicians deployed such scripts when they treated patients, judicial officials when they sentenced crimes. To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“tables,” “burrowing animals”). Categories contain more than prototypes, but their members gradually radiate away from the prototypical hub. A three-legged chair is thus a less prototypical chair than a four-legged one, the platypus a less prototypical mammal than the elephant. Since prototypes also apply to the way we interpret events, I will call “prototypical scripts” the recurring scenarios by which experts explained how illnesses or crimes took place. The script “internal depletion occurs → Wind intrudes → illness ensues,” for instance, was omnipresent in medical treatises from the seventh and eighth centuries (see 3.3). New scripts emphasizing the pathology of mucus gradually replaced Wind-based ones and came to dominate ...",
-        "byte_size": 130758,
-        "sha256": "70c2666e3bc215bc903489442a48206499f72106da7f1d24fac7ff0e5d6c1bc2"
+        "ocr_excerpt": "were mad killers granted an unspecified reduction of punishment (狂易殺人 待減重論). $ ^{11} $ No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) who committed crimes. When mad persons committed a homicide that deserved the death penalty, their sentence (decapitation or strangulation) had to be set forth in a special memorial to the emperor to petition for his decision. $ ^{12} $ How the emperor treated such cases is unknown. The Song dynasty (960-1279) adopted the Tang approach wholesale. $ ^{13} $",
+        "byte_size": 205652,
+        "sha256": "9e668a4db0f7e776d003bf4df3d08e7b08a4442b768094629fe7dc092e002f1b"
       },
       {
-        "page_no": 32,
-        "file_idx": 31,
+        "page_no": 432,
+        "file_idx": 431,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "evidence also exists about how madness was handled in less literate social circles, often but not always through religious ritual. In the interrelated ways in which they explained and handled madness, the three contemporaneous fields of homicide law, medicine, and trials for sedition form a manifold cultural formation, a network of discourses and practices that is most profitably studied as a whole if we want to appreciate what any of them meant. $ ^{23} $ To understand why Qing law discussed insanity and handled “mad criminals” the way it did, we need to compare it to the medical and religious approaches that were also current at the time. And we shall appreciate the nature of medical treatments all the better if we grasp the ways in which other fields handled mad behavior. Since madness was never an important focus of medical reflections, changes in medical views of madness are difficult to study. Kuang was the object of no specialized literature, and no debate concerning it had any major impact on doctrinal developments. But since late imperial physicians were expected to treat all disorders—from furor to furuncles—the way they handled any illness usually depended on how they understood pathogenesis, vitality, and general therapeutic principles. I posit that changes in approaches to kuang can be explained only if we understand broader transformations in medical thinking. The ...",
-        "byte_size": 130422,
-        "sha256": "2b9aecbff9241cccef95355745d9a3b6a979b3bc85bbb4d9d406f0473822714e"
+        "ocr_excerpt": "Unlike the Tang and Song, the Yuan dynasty (1260-1368) promulgated several explicit laws concerning homicides committed by mad people. Yuan courts were instructed to diminish the sentence of mad killers, but not to absolve them from penalties entirely. For instance, a man who killed one of his parents or grand-parents in a state of insanity (風狂) was to be simply “executed” (處死) rather than put to death by dismemberment. $ ^{14} $ In 1269 a man killed four people in a fit of “Heart Wind” (心風). $ ^{15} $ Legal officials petitioned his case to the emperor (上請) “in accordance with the old precedent” (照依舊例) that instructed to do so in cases of killing because of insanity (顛狂殺人). $ ^{16} $ Khubilai Khan eventually absolved the killer from the death penalty by imperial edict (敕裁) and condemned him to paying 50 ounces of silver (per person?) in “cremation or burial fees” (燒埋銀) to the family of his victims, the same amount as for people who committed a regular homicide. $ ^{17} $ Khubilai's reasoning may have been the same as the one behind another Yuan law stating that someone who, in a state of madness (病風狂), injured another person during a fight, leading to that person's death (毆傷人致死), should be \"absolved of crime\" (免罪),",
+        "byte_size": 171722,
+        "sha256": "b0460622fa5d255c8e38637596a5a44bf98eae820684a9c77c9cfa2485b1179c"
+      },
+      {
+        "page_no": 433,
+        "file_idx": 432,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "though cremation or burial fees should still be collected (徵燒埋銀) from the culprit (History of the Yuan 105: 2678). Early Qing laws handled mad homicides in a similar fashion, though the legal reasoning that justified monetary compensation differed. $ ^{18} $ Another Yuan law absolved those who “spoke inappropriately” (失口亂言) as long as they had done so while “suffering from Wind madness” (害風狂疾) and if there was nothing else behind their words. $ ^{19} $ As I will show in Chapters 14 and 15, the Qing attitude toward seditious words pronounced by mad people would be much harsher. Yuan legal documents referred to madness as xin feng 心風 (“Heart Wind”), feng kuang 風狂 (“Wind kuang”), dian kuang 顛狂 (“insanity”), and perhaps even feng bing 瘋病, the term that Qing law would officially adopt to discuss insanity. $ ^{20} $ Despite their different origins, these names did not have different legal implications. $ ^{21} $",
+        "byte_size": 185361,
+        "sha256": "04fb70ba4bc0878d532d9bfe9ac1f86f3d85d625519ee71ce72c5389fb02c5f0"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 7,
+    "cluster_id": "toc-ch-010-prologue:toc-ch-010-prologue:footnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00018\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00019\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00021\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00237\",\n    \"anchor_id\": \"anchor-01207\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 7 (fn-00237) on page 410 corresponds to the marker '7' in the text on page 410 (OCR p. 428). The anchor-01207 is correctly located at this marker ('governor-general...'). The current binding to anchor-01204 (page 428/410 context mismatch in data or synthetic) is incorrect; it should bind to the explicit anchor-01207.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00242\",\n    \"anchor_id\": \"anchor-01210\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 9 (fn-00242) on page 411 corresponds to the marker '9' in the text on page 411 (OCR p. 429). The anchor-01210 is correctly located at this marker ('Huang Jingjia...'). The current binding to anchor-01230 (page 434) is a cross-page error; it should bind to the explicit anchor-01210 on the same page.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00018",
+      "action": "match",
+      "note_item_id": "fn-00237",
+      "anchor_id": "anchor-01207",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+      "reason": "Footnote 7 (fn-00237) on page 410 corresponds to the marker '7' in the text on page 410 (OCR p. 428). The anchor-01207 is correctly located at this marker ('governor-general...'). The current binding to anchor-01204 (page 428/410 context mismatch in data or synthetic) is incorrect; it should bind to the explicit anchor-01207."
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00019",
+      "action": "match",
+      "note_item_id": "fn-00242",
+      "anchor_id": "anchor-01210",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00021",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+      "reason": "Footnote 9 (fn-00242) on page 411 corresponds to the marker '9' in the text on page 411 (OCR p. 429). The anchor-01210 is correctly located at this marker ('Huang Jingjia...'). The current binding to anchor-01230 (page 434) is a cross-page error; it should bind to the explicit anchor-01210 on the same page."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
-    "chapter_title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
-    "request_mode": "ref_only_visual",
+    "cluster_id": "toc-ch-010-prologue:toc-ch-010-prologue:footnote",
+    "chapter_title": "Prologue",
+    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00018",
+        "action": "match",
+        "note_item_id": "fn-00237",
+        "anchor_id": "anchor-01207",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+        "reason": "Footnote 7 (fn-00237) on page 410 corresponds to the marker '7' in the text on page 410 (OCR p. 428). The anchor-01207 is correctly located at this marker ('governor-general...'). The current binding to anchor-01204 (page 428/410 context mismatch in data or synthetic) is incorrect; it should bind to the explicit anchor-01207."
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00019",
+        "action": "match",
+        "note_item_id": "fn-00242",
+        "anchor_id": "anchor-01210",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00021",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+        "reason": "Footnote 9 (fn-00242) on page 411 corresponds to the marker '9' in the text on page 411 (OCR p. 429). The anchor-01210 is correctly located at this marker ('Huang Jingjia...'). The current binding to anchor-01230 (page 434) is a cross-page error; it should bind to the explicit anchor-01210 on the same page."
       }
     ],
     "auto_selected_actions": [
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00018",
+        "action": "match",
+        "note_item_id": "fn-00237",
+        "anchor_id": "anchor-01207",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+        "reason": "Footnote 7 (fn-00237) on page 410 corresponds to the marker '7' in the text on page 410 (OCR p. 428). The anchor-01207 is correctly located at this marker ('governor-general...'). The current binding to anchor-01204 (page 428/410 context mismatch in data or synthetic) is incorrect; it should bind to the explicit anchor-01207."
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00019",
+        "action": "match",
+        "note_item_id": "fn-00242",
+        "anchor_id": "anchor-01210",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00021",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+        "reason": "Footnote 9 (fn-00242) on page 411 corresponds to the marker '9' in the text on page 411 (OCR p. 429). The anchor-01210 is correctly located at this marker ('Huang Jingjia...'). The current binding to anchor-01230 (page 434) is a cross-page error; it should bind to the explicit anchor-01210 on the same page."
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-00508",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00018",
+        "link_id": "link-00320",
+        "action": "match",
+        "note_item_id": "fn-00237",
+        "anchor_id": "anchor-01207",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+        "reason": "Footnote 7 (fn-00237) on page 410 corresponds to the marker '7' in the text on page 410 (OCR p. 428). The anchor-01207 is correctly located at this marker ('governor-general...'). The current binding to anchor-01204 (page 428/410 context mismatch in data or synthetic) is incorrect; it should bind to the explicit anchor-01207."
       },
       {
-        "link_id": "link-00509",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00019",
+        "link_id": "link-00325",
+        "action": "match",
+        "note_item_id": "fn-00242",
+        "anchor_id": "anchor-01210",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
-      },
-      {
-        "link_id": "link-00511",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00021",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+        "reason": "Footnote 9 (fn-00242) on page 411 corresponds to the marker '9' in the text on page 411 (OCR p. 429). The anchor-01210 is correctly located at this marker ('Huang Jingjia...'). The current binding to anchor-01230 (page 434) is a cross-page error; it should bind to the explicit anchor-01210 on the same page."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 9000,
-    "completion_tokens": 304,
-    "total_tokens": 9304,
+    "prompt_tokens": 10933,
+    "completion_tokens": 351,
+    "total_tokens": 11284,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 7828
+    "duration_ms": 9778
   }
 }

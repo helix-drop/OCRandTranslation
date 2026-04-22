@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 25479,
+          "row_id": 30559,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00174",
           "chapter_id": "toc-ch-009-cethommenestpasaliénésad",
@@ -42,8 +42,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "temps en calculs, comptes et décomptes, énumération des jours de détention, mais aussi à une réverie superlative autour de dates et de nombres symboliques. Chiffré, car le journal est codé, par crainte (justifiée) que la police, l'ayant déjà soumis à des perquisitions, ne lui arrache et ne décrypte ses dernières notes. Il est « Moïse », Coulmier est réduit à un « C » ou un « M. de Coul » transparent. Le sigle ∅ signifie sodomie, qu'il pratique avec la jeune Magdeleine moyennant quelques « figures ». L'éducation libertine prévoit aussi l'apprentissage du chant et de la lecture, auquel se prête la jeune fille, dont il compte scrupuleusement les visites — quatre-vingt-seize en tout $ ^{59} $.",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         }
       ],
       "rebind_candidates": []
@@ -65,7 +65,7 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00174\",\n    \"marker\": \"59\",\n    \"note_text\": \"Sade, Journal inédit, op. cit.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Screenshot clearly shows footnote text '59. Sade, Journal inédit, op. cit.' at the bottom of page 153 (context matches OCR). No note item exists in data, so synthesizing it to bind to anchor-00174.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00174\",\n    \"marker\": \"59\",\n    \"note_text\": \"Sade, Journal inédit, op. cit.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR failed to extract the footnote item at the bottom of page 153 (shown in screenshot). The image clearly shows marker '59' and the corresponding text 'Sade, Journal inédit, op. cit.'. The anchor exists in the body text.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -75,7 +75,7 @@
       "marker": "59",
       "note_text": "Sade, Journal inédit, op. cit.",
       "confidence": 0.98,
-      "reason": "Screenshot clearly shows footnote text '59. Sade, Journal inédit, op. cit.' at the bottom of page 153 (context matches OCR). No note item exists in data, so synthesizing it to bind to anchor-00174."
+      "reason": "OCR failed to extract the footnote item at the bottom of page 153 (shown in screenshot). The image clearly shows marker '59' and the corresponding text 'Sade, Journal inédit, op. cit.'. The anchor exists in the body text."
     }
   ],
   "derived_truth": {
@@ -91,7 +91,7 @@
         "marker": "59",
         "note_text": "Sade, Journal inédit, op. cit.",
         "confidence": 0.98,
-        "reason": "Screenshot clearly shows footnote text '59. Sade, Journal inédit, op. cit.' at the bottom of page 153 (context matches OCR). No note item exists in data, so synthesizing it to bind to anchor-00174."
+        "reason": "OCR failed to extract the footnote item at the bottom of page 153 (shown in screenshot). The image clearly shows marker '59' and the corresponding text 'Sade, Journal inédit, op. cit.'. The anchor exists in the body text."
       }
     ],
     "auto_selected_actions": [
@@ -103,7 +103,7 @@
         "marker": "59",
         "note_text": "Sade, Journal inédit, op. cit.",
         "confidence": 0.98,
-        "reason": "Screenshot clearly shows footnote text '59. Sade, Journal inédit, op. cit.' at the bottom of page 153 (context matches OCR). No note item exists in data, so synthesizing it to bind to anchor-00174."
+        "reason": "OCR failed to extract the footnote item at the bottom of page 153 (shown in screenshot). The image clearly shows marker '59' and the corresponding text 'Sade, Journal inédit, op. cit.'. The anchor exists in the body text."
       }
     ],
     "auto_applied_actions": [
@@ -115,17 +115,17 @@
         "marker": "59",
         "note_text": "Sade, Journal inédit, op. cit.",
         "confidence": 0.98,
-        "reason": "Screenshot clearly shows footnote text '59. Sade, Journal inédit, op. cit.' at the bottom of page 153 (context matches OCR). No note item exists in data, so synthesizing it to bind to anchor-00174."
+        "reason": "OCR failed to extract the footnote item at the bottom of page 153 (shown in screenshot). The image clearly shows marker '59' and the corresponding text 'Sade, Journal inédit, op. cit.'. The anchor exists in the body text."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 1364,
-    "completion_tokens": 140,
-    "total_tokens": 1504,
+    "completion_tokens": 138,
+    "total_tokens": 1502,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 3848
+    "duration_ms": 3939
   }
 }

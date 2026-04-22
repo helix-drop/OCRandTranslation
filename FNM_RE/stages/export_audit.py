@@ -32,7 +32,11 @@ LEGACY_NOTE_TOKEN_RE = re.compile(r"\{\{(?:NOTE_REF|FN_REF|EN_REF):[^}]+\}\}", r
 TOC_LINE_RE = re.compile(r"(?im)^\s*.+\.{3,}\s*\d+\s*$")
 TOC_HEADING_RE = re.compile(r"(?im)^\s*(?:table of contents|contents|table des mati[eè]res|sommaire|目录)\b")
 FRONT_MATTER_TEXT_RE = re.compile(
-    r"\b(?:copyright|all rights reserved|printed in|library of congress|isbn|gallimard|seuil|routledge introductions?)\b",
+    r"\b(?:copyright|all rights reserved|printed in|library of congress|isbn|published by|code de la propriété intellectuelle)\b",
+    re.IGNORECASE,
+)
+FRONT_MATTER_IMPRINT_RE = re.compile(
+    r"\b(?:gallimard|seuil|routledge introductions?)\b",
     re.IGNORECASE,
 )
 BACK_MATTER_TEXT_RE = re.compile(
@@ -114,6 +118,47 @@ def body_paragraphs(content: str) -> list[str]:
 def definition_lines(content: str) -> list[str]:
     _body, definition = split_body_and_definitions(content)
     return [line.rstrip() for line in definition.splitlines() if line.strip()]
+
+
+def _opening_lines(paragraphs: list[str], *, limit: int = 2) -> list[str]:
+    lines: list[str] = []
+    for paragraph in list(paragraphs or [])[:limit]:
+        for raw_line in str(paragraph or "").splitlines():
+            line = re.sub(r"\s+", " ", str(raw_line or "").strip())
+            if line:
+                lines.append(line)
+    return lines
+
+
+def _looks_like_running_prose(paragraph: str) -> bool:
+    text = re.sub(r"\s+", " ", str(paragraph or "").strip())
+    if len(text) < 120:
+        return False
+    if text.isupper():
+        return False
+    if not re.search(r"[.!?。！？]", text):
+        return False
+    words = re.findall(r"[0-9A-Za-zÀ-ÿ][0-9A-Za-zÀ-ÿ'’\-]*", text)
+    return len(words) >= 18
+
+
+def _looks_like_front_matter_opening(paragraphs: list[str]) -> bool:
+    window = [str(paragraph or "").strip() for paragraph in list(paragraphs or [])[:2] if str(paragraph or "").strip()]
+    if not window:
+        return False
+    joined = "\n".join(window)
+    lines = _opening_lines(window, limit=2)
+    if not lines:
+        return False
+    explicit_meta_lines = sum(1 for line in lines if FRONT_MATTER_TEXT_RE.search(line))
+    imprint_lines = sum(1 for line in lines if FRONT_MATTER_IMPRINT_RE.search(line))
+    prose_like_paragraphs = sum(1 for paragraph in window if _looks_like_running_prose(paragraph))
+    mostly_short_lines = sum(1 for line in lines if len(line) <= 80) >= max(2, len(lines) - 1)
+    if explicit_meta_lines > 0:
+        return bool(explicit_meta_lines >= 2 or prose_like_paragraphs == 0 or mostly_short_lines)
+    if FRONT_MATTER_IMPRINT_RE.search(joined):
+        return bool(prose_like_paragraphs == 0 and (imprint_lines >= 2 or mostly_short_lines))
+    return False
 
 
 def _file_title_from_content(content: str) -> str:
@@ -364,7 +409,7 @@ def audit_markdown_file(
             _add_issue(issue_codes, issue_summary, "manual_toc_mismatch", expected_title)
     if paragraphs and _looks_like_mid_sentence_opening(paragraphs[0]):
         _add_issue(issue_codes, issue_summary, "mid_sentence_opening", paragraphs[0][:120])
-    if FRONT_MATTER_TEXT_RE.search("\n".join(paragraphs[:2])) and normalized_role == "chapter":
+    if normalized_role == "chapter" and _looks_like_front_matter_opening(paragraphs):
         _add_issue(issue_codes, issue_summary, "front_matter_leak", paragraphs[0][:120] if paragraphs else "")
     if BACK_MATTER_TEXT_RE.search("\n".join(paragraphs[:2])) and normalized_role == "chapter":
         _add_issue(issue_codes, issue_summary, "back_matter_leak", paragraphs[0][:120] if paragraphs else "")
@@ -624,6 +669,7 @@ def audit_phase6_export(
         slug=str(slug or "").strip(),
         doc_id=str(slug or "").strip(),
         zip_path=f"{str(slug or 'phase6_export').strip()}.zip",
+        applicable=True,
         structure_state=str(phase6.status.structure_state or "").strip(),
         blocking_reasons=[str(reason).strip() for reason in phase6.status.blocking_reasons if str(reason).strip()],
         manual_toc_summary=dict(phase6.status.manual_toc_summary or {}),

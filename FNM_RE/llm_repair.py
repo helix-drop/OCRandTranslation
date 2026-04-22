@@ -1199,6 +1199,11 @@ def run_llm_repair(
         for anchor in body_anchors or []
         if str(anchor.get("anchor_id") or "").strip()
     }
+    note_item_by_id = {
+        str(item.get("note_item_id") or ""): dict(item)
+        for item in note_items or []
+        if str(item.get("note_item_id") or "").strip()
+    }
     suggestions: list[dict] = []
     auto_applied: list[dict] = []
     request_metrics: list[dict] = []
@@ -1282,14 +1287,49 @@ def run_llm_repair(
                     )
                     if not link_id:
                         continue
+                    # 防线：anchor marker vs note item marker 一致性校验
+                    # 防止 LLM 幻觉把 note item marker N 错误绑到 anchor marker M
+                    _match_anchor_id = str(action.get("anchor_id") or "").strip()
+                    _match_note_id = str(action.get("note_item_id") or "").strip()
+                    _match_anchor = body_anchor_by_id.get(_match_anchor_id) or {}
+                    _match_note = note_item_by_id.get(_match_note_id) or {}
+                    _anchor_marker = normalize_note_marker(
+                        str(_match_anchor.get("normalized_marker") or _match_anchor.get("source_marker") or "")
+                    )
+                    _note_marker = normalize_note_marker(
+                        str(_match_note.get("marker") or _match_note.get("normalized_marker") or "")
+                    )
+                    if (
+                        _anchor_marker
+                        and _note_marker
+                        and _anchor_marker != _note_marker
+                        and _anchor_marker.isdigit()
+                        and _note_marker.isdigit()
+                    ):
+                        # anchor marker 与 note item marker 不一致时，
+                        # 检查同章节是否存在 marker 完全匹配的其他 anchor。
+                        # 若存在，说明 LLM 幻觉选错了 anchor，应拒绝自动应用。
+                        # 例：Biopolitics ch-004 有 anchor-00063(marker=1)，
+                        #     LLM 错误地建议把 en-00001(marker=1) 绑到 anchor-00065(marker=19)。
+                        _match_chapter = str(_match_anchor.get("chapter_id") or "").strip()
+                        _has_exact_marker_anchor = any(
+                            normalize_note_marker(str(a.get("normalized_marker") or "")) == _note_marker
+                            and str(a.get("chapter_id") or "").strip() == _match_chapter
+                            and str(a.get("anchor_id") or "") != _match_anchor_id
+                            and not bool(a.get("synthetic"))
+                            and not str(a.get("anchor_id") or "").startswith("synthetic-")
+                            for a in (body_anchors or [])
+                        )
+                        if _has_exact_marker_anchor:
+                            continue
                     repo.save_fnm_review_override(
                         doc_id,
                         "link",
                         link_id,
                         {
                             "action": "match",
-                            "note_item_id": str(action.get("note_item_id") or "").strip(),
-                            "anchor_id": str(action.get("anchor_id") or "").strip(),
+                            "note_item_id": _match_note_id,
+                            "anchor_id": _match_anchor_id,
                         },
                     )
                     auto_applied.append({"link_id": link_id, **action})

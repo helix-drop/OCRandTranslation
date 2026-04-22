@@ -1,15 +1,15 @@
 {
-  "cleaned_at": "2026-04-22T11:28:43",
+  "cleaned_at": "2026-04-22T17:14:22",
   "example_dir": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction",
   "removed": [
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_progress.json",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_result.json",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/FNM_REAL_TEST_REPORT.md",
-    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/auto_visual_toc.json",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json",
-    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip"
+    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip",
+    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip",
+    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.zip"
   ],
   "removed_count": 8,
   "failed": [],

@@ -8,7 +8,7 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-15-15-madmen-talking:toc-manual-2-15-15-madmen-talking:footnote\",\n  \"chapter_title\": \"15. Madmen talking?\",\n  \"page_range\": [\n    594,\n    630\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 594,\n      \"ocr_excerpt\": \"past. A flurry of articles on that subject appeared in the first year of publication of several academic or semi-academic journals in 1979 and 1980, soon after the Third Plenum of the Eleventh Central Committee of the Chinese Communist Party in late 1978 had confirmed the fall of the Gang of Four and modified conditions of scholarship. $ ^{5} $ An even more recent wave of scholarship on wenziyu has by and large retained the view that the Qing indiscriminately repressed young Chinese thinkers and intellectuals. $ ^{6} $ Anecdotal accounts and emphasis on the unfairness of the condemnations are still the chief aspects of this scholarship. Now that the anti-Manchu sentiment has disappeared (since the Manchus are now retrospectively presented as a “minority nationality” within the broad Chinese nation), the fault for wenziyu is rejected on “feudal government” in general. There may be issues that partisan debates and anecdotal accounts have kept us from noticing in these trials. What kinds of words or writings were considered seditious enough to deserve death even as those who uttered them were recognized as crazy? What type of political regime could feel threatened by such words? In wh ...\"\n    },\n    {\n      \"page_no\": 596,\n      \"ocr_excerpt\": \"his friends and shop-keeping neighbors in the 1740s and 1750s until he came to the attention of the government. Wang Qi 王琦 made enormous efforts to find an official who would accept his brother Xun's 珣 text until an illiterate military official agreed to receive it. $ ^{7} $ In the rest of this chapter, I examine the writing practices of men who were not classically literate but shared dreams of achieving something through writing. Belief in the power of writing can be observed both in their naive hope that a text would bring rewards when presented to imperial administrators, and in the often frenzied reaction of officials to these text-bearers. Presenting letters and petitions (tou shu 投書, tou ci 投詞) This truly is something he did because his madness flared up. It he had been lucid, would he have dared to burst into a yamen carrying a rebellious note, throwing himself to his death? 這實是他因瘋發做出來的事 若是明白 還敢執持逆帖 闖入衙門投死嗎 Chai Shilu 柴世祿, 1762 As many of the men I discuss in this chapter, Chai Shilu's brother Shijin 世進 came to official attention while trying to present a text to an imperial administrator. Donations of letters and texts were not always illegal, but the Qing code contained a ...\"\n    },\n    {\n      \"page_no\": 597,\n      \"ocr_excerpt\": \"Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to voice grievances, to express praise for the emperor, or to seek advice or employment. $ ^{10} $ Education commissioners’ (學證) constant travels, their proximity to licentiates, and their moral reputation made them favorite targets for grievance bearers and letter writers. $ ^{11} $ Offerings of dubious texts were matters serious enough to be discussed in palace memorials, a form of document designed for reporting on important state matters. Governors and Governors-general usually conducted interrogations in person and were responsible for mobilizing lower officials for swift and thorough investigations. Officials scrutinized the family background and network of relations of the “criminals,” their possible involvement in unlawful activities, and whether they were concealing more “illicit writings.” $ ^{12} $ Official suspicion about these texts contrasted with the hopes of those who presented them. Wang Zhaoji 王肇基 presented a poem in praise of the e ...\"\n    },\n    {\n      \"page_no\": 598,\n      \"ocr_excerpt\": \"Majesty”(我獻詩恭祝皇太后萬歲 不過盡我小民之心 欲求皇上喜歡的意思). He was sentenced to death by beating, a heavy punishment considering that officials admitted he did it “without awareness”(無知).¹⁴ The use of this irregular punishment indicates that Wang’s “crime” was considered serious enough to justify disregard for penal denominations, but that it was not completely on a par with treason or sedition, which would have led to the execution of all of Wang’s male relatives and the enslavement of his female kin. For officials who were concerned with sedition (or advancement), one issue was how to prevent commoners from presenting “seditious petitions.” Chen Hongmou 陳宏謀 (1696-1771), activist official par excellence, noted in a 1763 memorial that non-violent madmen were rarely confined, because they were unlikely to commit a homicide. $ ^{15} $ Expressing his fear that some men would exploit this “weakness” of the policy of preventive confinement to foster disorder, Chen proposed to imprison as strictly as violent madmen those insane people who were meek but literate. They should also be denied access to writing implements. We know of Chen’s memorial through an appreciative edict by the Qianlong emperor: $ ^{16} ...\"\n    },\n    {\n      \"page_no\": 599,\n      \"ocr_excerpt\": \"truly lost their heart and become sickly mad also turn to writing and [pretend to suffer from] madness illness, hoping to bend the law. $ ^{19} $ This [matter] has to do with local mores and people's hearts. $ ^{20} $ The original memorial has been copied and sent to every Governor and Governor-general for their perusal, so that they can more easily report [on the current situation in their province?]. They have been ordered to instruct their subordinates immediately that when they encounter such people suffering from madness illness, they should take strict preventive measures of guard and precaution, and that no slackness and idleness will be allowed. 陳宏謀請鎖錮瘋人一摺 所奏亦有所見 向來此等瘋人病發 原定有嚴加約束之例 但行之日久 地方官不能實力奉行 以致旋鎖旋釋 甚至任其播弄筆墨 滋生事端 而匪人中實系喪心病狂者亦轉藉詞瘋病 冀為骫法 與風俗人心甚有關係 著於各督撫奏事之便 將原摺抄寄閱看 令其即飭所屬遇有此等瘋病之人 應預為嚴行看守防範 毋得稍有弛懈 Chen knew that the mix of madness with a brush had already led to sedition cases, but the measures he proposed were not very concrete. Indeed, as far as I know, his proposal was never implemented. His claim that some criminals pretended to be mad in order to escape punishment made little sense, since, as we shall see, men who were recognized as mad were commonly executed when th ...\"\n    },\n    {\n      \"page_no\": 600,\n      \"ocr_excerpt\": \"Chinese)—was so grieved by his conduct that she had committed suicide. $ ^{21} $ Ula Nara was born in 1718 and had become Empress in 1750. She had indeed accompanied the emperor on his fourth Southern Tour in early 1765, but for reasons that are still unclear, the monarch suddenly had ordered her to return to Beijing. She either died of grief or committed suicide in the palace the following year, after she had obviously fallen out of favor. $ ^{22} $ Yan presented his message to a Shanxi official in 1777. Written in the form of a palace memorial, it was a sympathetic reproof of the sovereign's alleged misconduct: Empress Na[la] was plain and excellent, principled and chaste, and had been blessed with much doting. Seeing that His Majesty, despite being over five-decades old and busy with numerous and complicated matters of state, still showed special favor to ladies as in the past, she was afraid this was not a good way of nurturing the Sagely imperial body. For this reason, and because she had to endure such an offense, she made light of her own life. 納皇后質美節烈 多蒙寵愛 見皇上年過五旬 國事紛繁 若仍如前寵幸 恐非善養聖體 是以故加挺觸輕生 Yan was sentenced to death by dismemberment, probably as much for his unbecoming ad ...\"\n    },\n    {\n      \"page_no\": 601,\n      \"ocr_excerpt\": \"second father also died of illness, leaving him and his mother without means. For years he was unable to find work or to progress further in the examination system. In 1781, however, he moved to a school attached to the military garrison of Pingyang, where he made a living copying documents (借住平陽營子識文 在茲家學堂抄寫文冊餬口). There, he kept a crumbling copy of the Four Books, an Old-Text version of the Classic of Poetry, and a copy of the well-liked Romance of the Western Chamber (Xixiang ji 西廂記). Despite having found employment, Feng grew so impoverished that he became depressed and restless (贫苦難度 憂鬱無聊) and his despondency eventually turned into an illness (抑鬱成病). $ ^{24} $ In 1782, after he caught what later reports called “mucus-confusion disorder” (痰迷之症), he hurt his legs trying to commit suicide by jumping from the Pingyang city wall. A few months later, just after the lunar New Year, he left for Beijing, planning to rejoin the Zhao line (意欲歸宗) and to study trade (學習買賣). He arrived 15 days later, carrying commentaries he had written on the Classic of Poetry and the Book of Changes. Since Feng had been a student for his entire life, his Beijing relatives urged him to abandon his commercial ...\"\n    },\n    {\n      \"page_no\": 603,\n      \"ocr_excerpt\": \"Some of the doubts that officials expressed about the madness (or “besottedness”) of text bearers probably resulted from bureaucratic necessity. When reporting on a case, they could not assume that one who looked or sounded crazy was crazy. This “institutionalized strategy” (Bourdieu 1990: 138) on the part of officials was the object of no specific rule, but it was strongly encouraged in bureaucratic practice. Those officials who embodied this fear of mad-sounding speech were praised, whereas officials who simply assumed that the authors of these texts were mad were punished if their negligence was later discovered. $ ^{25} $ But even when officials had found no illegal activities behind a suspicious text, they were not necessarily clement. Although Feng Qiyan was eventually recognized to have suffered from “mucus confusion,” his punishment was not lenient. Feng Qiyan’s having illicitly written a petition for a trifling marriage matter and intended to present it in front of the imperial convoy was truly stupid, reckless, and illegal. Though his planning to marry someone’s daughters resembles besotted confusion, it remains that his words are clear. And how can we know that he is not ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01664\",\n      \"marker\": \"5\",\n      \"page_no\": 594,\n      \"paragraph_index\": 0,\n      \"source_text\": \"past. A flurry of articles on that subject appeared in the first year of publication of several academic or semi-academic journals in 1979 and 1980, soon after the Third Plenum of the Eleventh Central Committee of the Chinese Communist Part ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01665\",\n      \"marker\": \"6\",\n      \"page_no\": 594,\n      \"paragraph_index\": 1,\n      \"source_text\": \"An even more recent wave of scholarship on wenziyu has by and large retained the view that the Qing indiscriminately repressed young Chinese thinkers and intellectuals. $ ^{6} $ Anecdotal accounts and emphasis on the unfairness of the conde ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01667\",\n      \"marker\": \"9\",\n      \"page_no\": 596,\n      \"paragraph_index\": 6,\n      \"source_text\": \"As many of the men I discuss in this chapter, Chai Shilu's brother Shijin 世進 came to official attention while trying to present a text to an imperial administrator. Donations of letters and texts were not always illegal, but the Qing code c ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01668\",\n      \"marker\": \"10\",\n      \"page_no\": 597,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to v ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01669\",\n      \"marker\": \"11\",\n      \"page_no\": 597,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to v ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01670\",\n      \"marker\": \"12\",\n      \"page_no\": 597,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Offerings of dubious texts were matters serious enough to be discussed in palace memorials, a form of document designed for reporting on important state matters. Governors and Governors-general usually conducted interrogations in person and ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01671\",\n      \"marker\": \"13\",\n      \"page_no\": 597,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Official suspicion about these texts contrasted with the hopes of those who presented them. Wang Zhaoji 王肇基 presented a poem in praise of the emperor to a Shanxi prefect in 1751, but his eulogy was found to include \\\"recklessly seditious pas ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01672\",\n      \"marker\": \"14\",\n      \"page_no\": 598,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Majesty”(我獻詩恭祝皇太后萬歲 不過盡我小民之心 欲求皇上喜歡的意思). He was sentenced to death by beating, a heavy punishment considering that officials admitted he did it “without awareness”(無知).¹⁴ The use of this irregular punishment indicates that Wang’s “crime” wa ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00496\",\n      \"note_item_id\": \"fn-00413\",\n      \"current_anchor_id\": \"anchor-01673\",\n      \"marker\": \"15\",\n      \"note_page_no\": 597,\n      \"anchor_page_no\": 598,\n      \"current_anchor_marker\": \"15\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Oct. 1751 (QL16.8.27); QWD: 7.\",\n      \"anchor_excerpt\": \"For officials who were concerned with sedition (or advancement), one issue was how to prevent commoners from presenting “seditious petitions.” Chen Hongmou 陳宏謀 (1696-1771), activist official par excellence, noted in a 1763 memorial that non ...\"\n    },\n    {\n      \"link_id\": \"link-00497\",\n      \"note_item_id\": \"fn-00414\",\n      \"current_anchor_id\": \"synthetic-footnote-00282\",\n      \"marker\": \"3\",\n      \"note_page_no\": 603,\n      \"anchor_page_no\": 603,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"?39;EFD3F7\\u0005 ;>>GEFD3F7EI:3F A88;5;3>E:36\\u0001FA6A\\u0001;@\\u0001EG5:\\u000153E7E\\u0007 *:7\\u0001 \\u0010\\u0010 \\u000153E7\\u0001A8\\u0001-3@9\\u0001.G@\\u0001\\u0003'-\\u001a\\u0013\\u0001\\u000f\\u0010 \\u0006\\u0011\\u0012\\u0004E:AIE :AI A88;5;3>E\\u0001E:AG>6*+0 :3@6>7\\u0001EGEB;5;AGE\\u0001F7JFE\\u0007 )77\\u00013>EA\\u0001F:753E7A8\\u00010:G3@9\\u0001/AG9A@9\\u000147>AI\\u0001\\u0003BB\\u0007 \\u000e\\u0012 \\u00013@6\\u0001\\u000e\\u0012\\u000f\\u0006\\u0012\\u0010\\u0004\\u0007 \\u000f AD\\u0001?AD7\\u0001A@P\\u0018D735:;@9; ...\",\n      \"anchor_excerpt\": \"?39;EFD3F7\\u0005 ;>>GEFD3F7EI:3F A88;5;3>E:36\\u0001FA6A\\u0001;@\\u0001EG5:\\u000153E7E\\u0007 *:7\\u0001 \\u0010\\u0010 \\u000153E7\\u0001A8\\u0001-3@9\\u0001.G@\\u0001\\u0003'-\\u001a\\u0013\\u0001\\u000f\\u0010 \\u0006\\u0011\\u0012\\u0004E:AIE :AI A88;5;3>E\\u0001E:AG>6*+0 :3@6>7\\u0001EGEB;5;AGE\\u0001F7JFE\\u0007 )77\\u00013>EA\\u0001F:753E7A8\\u00010:G3@9\\u0001/AG9A@9\\u000147>AI\\u0001\\u0003BB\\u0007 \\u000e\\u0012 \\u00013@6\\u0001\\u000e\\u0012\\u000f\\u0006\\u0012\\u0010\\u0004\\u0007 \\u000f AD\\u0001?AD7\\u0001A@P\\u0018D735:;@9; ...\"\n    },\n    {\n      \"link_id\": \"link-00501\",\n      \"note_item_id\": \"fn-00418\",\n      \"current_anchor_id\": \"anchor-01721\",\n      \"marker\": \"0\",\n      \"note_page_no\": 622,\n      \"anchor_page_no\": 624,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0007 \\u0017\\u0001B3>357 ?7?AD;3>\\u00014K\\u0001\\u0019:7@\\u0001 G;LG˥ʮȇ \\u000363F76 \\u0012\\u0001#3D\\u0007\\u0001 \\u0010\\u0011 \\u00011'\\\" \\u000e\\u0007 \\u0007 2\\u0004 5A@57D@;@9\\u0001F:;E\\u000153E7\\u000153@\\u00013>EA\\u000147\\u00018AG@6\\u00013F\\u0001F:7\\u0001&3>357\\u0001#GE7G?\\u0001\\u0017D5:;H7E\\u0001;@\\u0001*3;47;\\u0001\\u00034AJ\\u0001 \\u0010 \\u000e\\u0005\\u0001B35=\\u0001 \\u0006\\u000e\\u0004\\u0001\\u0003+\\u0019\\u001a\\u0017 :FFB\\u0013\\b\\b53F3>A9\\u00076;9;F3>3D5:;H7E\\u0007FI\\b\\u0016+($\\u0015 \\u0012 \\u0011\",\n      \"anchor_excerpt\": \"Qianlong Emperor $ ^{60} $\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-15-15-madmen-talking:toc-manual-2-15-15-madmen-talking:footnote\",\n  \"chapter_title\": \"15. Madmen talking?\",\n  \"page_range\": [\n    596,\n    630\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 594,\n      \"ocr_excerpt\": \"past. A flurry of articles on that subject appeared in the first year of publication of several academic or semi-academic journals in 1979 and 1980, soon after the Third Plenum of the Eleventh Central Committee of the Chinese Communist Party in late 1978 had confirmed the fall of the Gang of Four and modified conditions of scholarship. $ ^{5} $ An even more recent wave of scholarship on wenziyu has by and large retained the view that the Qing indiscriminately repressed young Chinese thinkers and intellectuals. $ ^{6} $ Anecdotal accounts and emphasis on the unfairness of the condemnations are still the chief aspects of this scholarship. Now that the anti-Manchu sentiment has disappeared (since the Manchus are now retrospectively presented as a “minority nationality” within the broad Chinese nation), the fault for wenziyu is rejected on “feudal government” in general. There may be issues that partisan debates and anecdotal accounts have kept us from noticing in these trials. What kinds of words or writings were considered seditious enough to deserve death even as those who uttered them were recognized as crazy? What type of political regime could feel threatened by such words? In wh ...\"\n    },\n    {\n      \"page_no\": 596,\n      \"ocr_excerpt\": \"his friends and shop-keeping neighbors in the 1740s and 1750s until he came to the attention of the government. Wang Qi 王琦 made enormous efforts to find an official who would accept his brother Xun's 珣 text until an illiterate military official agreed to receive it. $ ^{7} $ In the rest of this chapter, I examine the writing practices of men who were not classically literate but shared dreams of achieving something through writing. Belief in the power of writing can be observed both in their naive hope that a text would bring rewards when presented to imperial administrators, and in the often frenzied reaction of officials to these text-bearers. Presenting letters and petitions (tou shu 投書, tou ci 投詞) This truly is something he did because his madness flared up. It he had been lucid, would he have dared to burst into a yamen carrying a rebellious note, throwing himself to his death? 這實是他因瘋發做出來的事 若是明白 還敢執持逆帖 闖入衙門投死嗎 Chai Shilu 柴世祿, 1762 As many of the men I discuss in this chapter, Chai Shilu's brother Shijin 世進 came to official attention while trying to present a text to an imperial administrator. Donations of letters and texts were not always illegal, but the Qing code contained a ...\"\n    },\n    {\n      \"page_no\": 597,\n      \"ocr_excerpt\": \"Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to voice grievances, to express praise for the emperor, or to seek advice or employment. $ ^{10} $ Education commissioners’ (學證) constant travels, their proximity to licentiates, and their moral reputation made them favorite targets for grievance bearers and letter writers. $ ^{11} $ Offerings of dubious texts were matters serious enough to be discussed in palace memorials, a form of document designed for reporting on important state matters. Governors and Governors-general usually conducted interrogations in person and were responsible for mobilizing lower officials for swift and thorough investigations. Officials scrutinized the family background and network of relations of the “criminals,” their possible involvement in unlawful activities, and whether they were concealing more “illicit writings.” $ ^{12} $ Official suspicion about these texts contrasted with the hopes of those who presented them. Wang Zhaoji 王肇基 presented a poem in praise of the e ...\"\n    },\n    {\n      \"page_no\": 598,\n      \"ocr_excerpt\": \"Majesty”(我獻詩恭祝皇太后萬歲 不過盡我小民之心 欲求皇上喜歡的意思). He was sentenced to death by beating, a heavy punishment considering that officials admitted he did it “without awareness”(無知).¹⁴ The use of this irregular punishment indicates that Wang’s “crime” was considered serious enough to justify disregard for penal denominations, but that it was not completely on a par with treason or sedition, which would have led to the execution of all of Wang’s male relatives and the enslavement of his female kin. For officials who were concerned with sedition (or advancement), one issue was how to prevent commoners from presenting “seditious petitions.” Chen Hongmou 陳宏謀 (1696-1771), activist official par excellence, noted in a 1763 memorial that non-violent madmen were rarely confined, because they were unlikely to commit a homicide. $ ^{15} $ Expressing his fear that some men would exploit this “weakness” of the policy of preventive confinement to foster disorder, Chen proposed to imprison as strictly as violent madmen those insane people who were meek but literate. They should also be denied access to writing implements. We know of Chen’s memorial through an appreciative edict by the Qianlong emperor: $ ^{16} ...\"\n    },\n    {\n      \"page_no\": 599,\n      \"ocr_excerpt\": \"truly lost their heart and become sickly mad also turn to writing and [pretend to suffer from] madness illness, hoping to bend the law. $ ^{19} $ This [matter] has to do with local mores and people's hearts. $ ^{20} $ The original memorial has been copied and sent to every Governor and Governor-general for their perusal, so that they can more easily report [on the current situation in their province?]. They have been ordered to instruct their subordinates immediately that when they encounter such people suffering from madness illness, they should take strict preventive measures of guard and precaution, and that no slackness and idleness will be allowed. 陳宏謀請鎖錮瘋人一摺 所奏亦有所見 向來此等瘋人病發 原定有嚴加約束之例 但行之日久 地方官不能實力奉行 以致旋鎖旋釋 甚至任其播弄筆墨 滋生事端 而匪人中實系喪心病狂者亦轉藉詞瘋病 冀為骫法 與風俗人心甚有關係 著於各督撫奏事之便 將原摺抄寄閱看 令其即飭所屬遇有此等瘋病之人 應預為嚴行看守防範 毋得稍有弛懈 Chen knew that the mix of madness with a brush had already led to sedition cases, but the measures he proposed were not very concrete. Indeed, as far as I know, his proposal was never implemented. His claim that some criminals pretended to be mad in order to escape punishment made little sense, since, as we shall see, men who were recognized as mad were commonly executed when th ...\"\n    },\n    {\n      \"page_no\": 600,\n      \"ocr_excerpt\": \"Chinese)—was so grieved by his conduct that she had committed suicide. $ ^{21} $ Ula Nara was born in 1718 and had become Empress in 1750. She had indeed accompanied the emperor on his fourth Southern Tour in early 1765, but for reasons that are still unclear, the monarch suddenly had ordered her to return to Beijing. She either died of grief or committed suicide in the palace the following year, after she had obviously fallen out of favor. $ ^{22} $ Yan presented his message to a Shanxi official in 1777. Written in the form of a palace memorial, it was a sympathetic reproof of the sovereign's alleged misconduct: Empress Na[la] was plain and excellent, principled and chaste, and had been blessed with much doting. Seeing that His Majesty, despite being over five-decades old and busy with numerous and complicated matters of state, still showed special favor to ladies as in the past, she was afraid this was not a good way of nurturing the Sagely imperial body. For this reason, and because she had to endure such an offense, she made light of her own life. 納皇后質美節烈 多蒙寵愛 見皇上年過五旬 國事紛繁 若仍如前寵幸 恐非善養聖體 是以故加挺觸輕生 Yan was sentenced to death by dismemberment, probably as much for his unbecoming ad ...\"\n    },\n    {\n      \"page_no\": 603,\n      \"ocr_excerpt\": \"Some of the doubts that officials expressed about the madness (or “besottedness”) of text bearers probably resulted from bureaucratic necessity. When reporting on a case, they could not assume that one who looked or sounded crazy was crazy. This “institutionalized strategy” (Bourdieu 1990: 138) on the part of officials was the object of no specific rule, but it was strongly encouraged in bureaucratic practice. Those officials who embodied this fear of mad-sounding speech were praised, whereas officials who simply assumed that the authors of these texts were mad were punished if their negligence was later discovered. $ ^{25} $ But even when officials had found no illegal activities behind a suspicious text, they were not necessarily clement. Although Feng Qiyan was eventually recognized to have suffered from “mucus confusion,” his punishment was not lenient. Feng Qiyan’s having illicitly written a petition for a trifling marriage matter and intended to present it in front of the imperial convoy was truly stupid, reckless, and illegal. Though his planning to marry someone’s daughters resembles besotted confusion, it remains that his words are clear. And how can we know that he is not ...\"\n    },\n    {\n      \"page_no\": 604,\n      \"ocr_excerpt\": \"查馮起炎以婚姻細故 私寫呈詞 欲於儀仗前呈遞 實屬蚩妄不法 其圖娶人女 雖係跡類癡迷 而語言尚屬清楚 又安知非色令智昏肆其狂吠 自未便稍為寬貸 且閱其呈首 膽敢於聖主之前混講經書而呈尾措詞 猶屬狂妄核其情罪較衝突儀仗為更重 馮起炎一犯應從重發往黑龍江等處 給披甲人為奴 Life exile to Manchuria for service as a slave was the highest form of military exile (充軍), the most severe penalty below death. Before being sent away, Feng was to be tattooed on the forearm (Bodde and Morris 1967: 97) and dealt 100 strokes of the heavy stick. Though both Yan Zeng's and Feng Qiyan's cases appeared in the Qingdai wenziyu dang, it is difficult to consider them as \\\"literary trials.\\\" Yan and Feng were punished harshly because they had addressed the emperor in an unsuitable manner, in both form and content. Symbolically less grave actions could be punished more lightly. For now, I analyze cases in which the main suspects were executed for sedition. ## ‘Record of Nianquan’s Singular Grievances’ Liang Nianquan 梁念泉 (1738-1781) was a licentiate who became “confused by mucus” (患痰迷病症) in 1773 while working as a teacher at someone’s house. $ ^{27} $ He “claimed he had already become a provincial or metropolitan graduate, and that his parents and neighbors wanted to harm him in revenge; he constantly squabbled with people” (自稱已中舉人、進士 親鄰皆要仇害 不時與 ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01666\",\n      \"marker\": \"7\",\n      \"page_no\": 596,\n      \"paragraph_index\": 0,\n      \"source_text\": \"his friends and shop-keeping neighbors in the 1740s and 1750s until he came to the attention of the government. Wang Qi 王琦 made enormous efforts to find an official who would accept his brother Xun's 珣 text until an illiterate military offi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01667\",\n      \"marker\": \"9\",\n      \"page_no\": 596,\n      \"paragraph_index\": 6,\n      \"source_text\": \"As many of the men I discuss in this chapter, Chai Shilu's brother Shijin 世進 came to official attention while trying to present a text to an imperial administrator. Donations of letters and texts were not always illegal, but the Qing code c ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01668\",\n      \"marker\": \"10\",\n      \"page_no\": 597,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to v ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01669\",\n      \"marker\": \"11\",\n      \"page_no\": 597,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to v ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01670\",\n      \"marker\": \"12\",\n      \"page_no\": 597,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Offerings of dubious texts were matters serious enough to be discussed in palace memorials, a form of document designed for reporting on important state matters. Governors and Governors-general usually conducted interrogations in person and ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01672\",\n      \"marker\": \"14\",\n      \"page_no\": 598,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Majesty”(我獻詩恭祝皇太后萬歲 不過盡我小民之心 欲求皇上喜歡的意思). He was sentenced to death by beating, a heavy punishment considering that officials admitted he did it “without awareness”(無知).¹⁴ The use of this irregular punishment indicates that Wang’s “crime” wa ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01675\",\n      \"marker\": \"17\",\n      \"page_no\": 598,\n      \"paragraph_index\": 2,\n      \"source_text\": \"There is some vision in what is reported in Chen Hongmou's memorial requesting the locking up of mad people. A sub-statute was once established [that imposed] strict restrictions on mad people whose illness had flared up, but its has been i ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01676\",\n      \"marker\": \"18\",\n      \"page_no\": 598,\n      \"paragraph_index\": 2,\n      \"source_text\": \"There is some vision in what is reported in Chen Hongmou's memorial requesting the locking up of mad people. A sub-statute was once established [that imposed] strict restrictions on mad people whose illness had flared up, but its has been i ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00436\",\n      \"note_item_id\": \"fn-00353\",\n      \"current_anchor_id\": \"anchor-01665\",\n      \"marker\": \"2\",\n      \"note_page_no\": 596,\n      \"anchor_page_no\": 594,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5/ tsfourth/entrystatedA ~ f/an/unruly/person3/under/the/pretext/of/presenting/a/memorial3/uses clever/words/and/_a/calculatedly`/amiable/appearance/with/the/hope/of/seeking/employment3/_sentence/to`/ blows/of/the/heavy/stickQɑȮƔ@ĐoT6ż îɵSɐ ...\",\n      \"anchor_excerpt\": \"An even more recent wave of scholarship on wenziyu has by and large retained the view that the Qing indiscriminately repressed young Chinese thinkers and intellectuals. $ ^{6} $ Anecdotal accounts and emphasis on the unfairness of the conde ...\"\n    },\n    {\n      \"link_id\": \"link-00438\",\n      \"note_item_id\": \"fn-00355\",\n      \"current_anchor_id\": \"synthetic-footnote-00303\",\n      \"marker\": \"5\",\n      \"note_page_no\": 598,\n      \"anchor_page_no\": 598,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"foster/disorder3 Ghen proposed to/imprison/asstrictlyas/violent madmen/those insane > amilies/had/had/to/keep/watch/over/their/mad/relatives/since/ =?@5/E/law/that/was/promulgated/in/ > ordered/families/to/declare/their/mad/members/to/the/l ...\",\n      \"anchor_excerpt\": \"foster/disorder3 Ghen proposed to/imprison/asstrictlyas/violent madmen/those insane > amilies/had/had/to/keep/watch/over/their/mad/relatives/since/ =?@5/E/law/that/was/promulgated/in/ > ordered/families/to/declare/their/mad/members/to/the/l ...\"\n    },\n    {\n      \"link_id\": \"link-00439\",\n      \"note_item_id\": \"fn-00356\",\n      \"current_anchor_id\": \"synthetic-footnote-00304\",\n      \"marker\": \"5\",\n      \"note_page_no\": 600,\n      \"anchor_page_no\": 600,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"and/UP ?5 5 =`2/and/one/byWhanxi/governor Rong/Ui ʱʢ 1=/Epr5/ >? /_UP ?5 5<`25/Xhese/documentsappear/in/U[HA/? >4= 5\",\n      \"anchor_excerpt\": \"and/UP ?5 5 =`2/and/one/byWhanxi/governor Rong/Ui ʱʢ 1=/Epr5/ >? /_UP ?5 5<`25/Xhese/documentsappear/in/U[HA/? >4= 5\"\n    },\n    {\n      \"link_id\": \"link-00441\",\n      \"note_item_id\": \"fn-00358\",\n      \"current_anchor_id\": \"synthetic-footnote-00306\",\n      \"marker\": \"5\",\n      \"note_page_no\": 604,\n      \"anchor_page_no\": 604,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"5. 2by/ uangdong governor Pi/ u the most/severe penaltybelow/death5/Fefore/being/sentaway3/ eng/was/to/be/tattooed on ƃƹ 1U[HA/> <4 @B also/in/P ^^3 mf/=?@5 4=25\",\n      \"anchor_excerpt\": \"5. 2by/ uangdong governor Pi/ u the most/severe penaltybelow/death5/Fefore/being/sentaway3/ eng/was/to/be/tattooed on ƃƹ 1U[HA/> <4 @B also/in/P ^^3 mf/=?@5 4=25\"\n    },\n    {\n      \"link_id\": \"link-00445\",\n      \"note_item_id\": \"fn-00362\",\n      \"current_anchor_id\": \"anchor-01713\",\n      \"marker\": \"1\",\n      \"note_page_no\": 615,\n      \"anchor_page_no\": 617,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. </Hec5/ >= { // an5/ >= 2A < ?5 4 5 E/memorial/by/the Qinistry of/Tersonnel/on/this/subject/dates/the/edict/of/grace/to/>/ an5/ >= /1UP >5 5 B/see/YGHE3httpA66catalog5digitalarchives5tw6DYVRC => > B/retrieved/on/ /Wept5/ @25/Xhe/amount o ...\",\n      \"anchor_excerpt\": \"In any case, as we saw in the case of Liang Nianquan, the fact that someone was recognized as crazy did not make his words any less seditious. Da ni (“sedition” or “great defiance”), the crime for which Ding was executed, was one of the “Te ...\"\n    },\n    {\n      \"link_id\": \"link-00448\",\n      \"note_item_id\": \"fn-00365\",\n      \"current_anchor_id\": \"synthetic-footnote-00312\",\n      \"marker\": \"5\",\n      \"note_page_no\": 622,\n      \"anchor_page_no\": 622,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"5=`2/and/[ang/Xieshan}s/attached/confession3/respectively/mf/=?@5 ? <4 /and/mf =?@5 ? 4 </inP ^^ 5 E/palace memorial/by/Ghen/ uizu˥ʮȇ 1dated @/Qar5/ >? /_UP <5 5 `2 concerning/this/case/can/also/be/found/at/the/Talace/Quseum/Erchives/in/Xai ...\",\n      \"anchor_excerpt\": \"5=`2/and/[ang/Xieshan}s/attached/confession3/respectively/mf/=?@5 ? <4 /and/mf =?@5 ? 4 </inP ^^ 5 E/palace memorial/by/Ghen/ uizu˥ʮȇ 1dated @/Qar5/ >? /_UP <5 5 `2 concerning/this/case/can/also/be/found/at/the/Talace/Quseum/Erchives/in/Xai ...\"\n    },\n    {\n      \"link_id\": \"link-00449\",\n      \"note_item_id\": \"fn-00366\",\n      \"current_anchor_id\": \"anchor-01722\",\n      \"marker\": \"1\",\n      \"note_page_no\": 623,\n      \"anchor_page_no\": 624,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. 5=25 ˑÒ 2/from/the\",\n      \"anchor_excerpt\": \"One of the unique responsibilities the imperial Chinese state gave itself was the transformation of “people’s hearts and local mores” (人心風俗). Rectifying “local mores” meant reforming practice and fostering certain types of behavior, prefera ...\"\n    },\n    {\n      \"link_id\": \"link-00453\",\n      \"note_item_id\": \"fn-00370\",\n      \"current_anchor_id\": \"synthetic-footnote-00316\",\n      \"marker\": \"5\",\n      \"note_page_no\": 630,\n      \"anchor_page_no\": 630,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"5 < 1ʯƀ 2A/ =/ ebruary ? 5 Xhe/emperor specified/that/his/decision/should/not/be/cited/as/a/precedent/for/judging/future/cases/1Âď đőTǃb 25\",\n      \"anchor_excerpt\": \"5 < 1ʯƀ 2A/ =/ ebruary ? 5 Xhe/emperor specified/that/his/decision/should/not/be/cited/as/a/precedent/for/judging/future/cases/1Âď đőTǃb 25\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -22,48 +22,31 @@
       ],
       "note_system": "footnote",
       "page_range": [
-        594,
+        596,
         630
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 79271,
+          "row_id": 97780,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01664",
+          "anchor_id": "anchor-01666",
           "chapter_id": "toc-manual-2-15-15-madmen-talking",
-          "page_no": 594,
+          "page_no": 596,
           "paragraph_index": 0,
-          "char_start": 338,
-          "char_end": 346,
-          "source_marker": "$ ^{5} $",
-          "normalized_marker": "5",
+          "char_start": 267,
+          "char_end": 275,
+          "source_marker": "$ ^{7} $",
+          "normalized_marker": "7",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "past. A flurry of articles on that subject appeared in the first year of publication of several academic or semi-academic journals in 1979 and 1980, soon after the Third Plenum of the Eleventh Central Committee of the Chinese Communist Party in late 1978 had confirmed the fall of the Gang of Four and modified conditions of scholarship. $ ^{5} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "source_text": "his friends and shop-keeping neighbors in the 1740s and 1750s until he came to the attention of the government. Wang Qi 王琦 made enormous efforts to find an official who would accept his brother Xun's 珣 text until an illiterate military official agreed to receive it. $ ^{7} $ In the rest of this chapter, I examine the writing practices of men who were not classically literate but shared dreams of achieving something through writing. Belief in the power of writing can be observed both in their naive hope that a text would bring rewards when presented to imperial administrators, and in the often frenzied reaction of officials to these text-bearers.",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79272,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01665",
-          "chapter_id": "toc-manual-2-15-15-madmen-talking",
-          "page_no": 594,
-          "paragraph_index": 1,
-          "char_start": 169,
-          "char_end": 177,
-          "source_marker": "$ ^{6} $",
-          "normalized_marker": "6",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "An even more recent wave of scholarship on wenziyu has by and large retained the view that the Qing indiscriminately repressed young Chinese thinkers and intellectuals. $ ^{6} $ Anecdotal accounts and emphasis on the unfairness of the condemnations are still the chief aspects of this scholarship. Now that the anti-Manchu sentiment has disappeared (since the Manchus are now retrospectively presented as a “minority nationality” within the broad Chinese nation), the fault for wenziyu is rejected on “feudal government” in general.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 79274,
+          "row_id": 97781,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01667",
           "chapter_id": "toc-manual-2-15-15-madmen-talking",
@@ -76,11 +59,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "As many of the men I discuss in this chapter, Chai Shilu's brother Shijin 世進 came to official attention while trying to present a text to an imperial administrator. Donations of letters and texts were not always illegal, but the Qing code contained a law that forbade the presentation of texts in order to gain recognition or employment: seeking advancement under a false pretense was to be punished with 100 strokes of the heavy stick. $ ^{9} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79275,
+          "row_id": 97783,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01668",
           "chapter_id": "toc-manual-2-15-15-madmen-talking",
@@ -93,11 +76,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to voice grievances, to express praise for the emperor, or to seek advice or employment. $ ^{10} $ Education commissioners’ (學證) constant travels, their proximity to licentiates, and their moral reputation made them favorite targets for grievance bearers and letter writers. $ ^{11} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79276,
+          "row_id": 97784,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01669",
           "chapter_id": "toc-manual-2-15-15-madmen-talking",
@@ -110,11 +93,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Despite the heavy punishment incurred, all sorts of people presented texts to officials to attract their attention. Many of the cases I discuss in this chapter commenced in a similar fashion, when “mad people” contacted the officialdom to voice grievances, to express praise for the emperor, or to seek advice or employment. $ ^{10} $ Education commissioners’ (學證) constant travels, their proximity to licentiates, and their moral reputation made them favorite targets for grievance bearers and letter writers. $ ^{11} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79277,
+          "row_id": 97785,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01670",
           "chapter_id": "toc-manual-2-15-15-madmen-talking",
@@ -127,28 +110,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Offerings of dubious texts were matters serious enough to be discussed in palace memorials, a form of document designed for reporting on important state matters. Governors and Governors-general usually conducted interrogations in person and were responsible for mobilizing lower officials for swift and thorough investigations. Officials scrutinized the family background and network of relations of the “criminals,” their possible involvement in unlawful activities, and whether they were concealing more “illicit writings.” $ ^{12} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79278,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01671",
-          "chapter_id": "toc-manual-2-15-15-madmen-talking",
-          "page_no": 597,
-          "paragraph_index": 2,
-          "char_start": 301,
-          "char_end": 310,
-          "source_marker": "$ ^{13} $",
-          "normalized_marker": "13",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Official suspicion about these texts contrasted with the hopes of those who presented them. Wang Zhaoji 王肇基 presented a poem in praise of the emperor to a Shanxi prefect in 1751, but his eulogy was found to include \"recklessly seditious passages\" (狂妄悖逆之處) and words that \"slandered the sages\" (毀謗聖賢). $ ^{13} $ As he confessed, \"In offering a poem respectfully wishing ten thousand years to the Empress Dowager, I was only doing my utmost as a small commoner. All I wanted was to please His Imperial",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 79279,
+          "row_id": 97788,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01672",
           "chapter_id": "toc-manual-2-15-15-madmen-talking",
@@ -161,46 +127,140 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Majesty”(我獻詩恭祝皇太后萬歲 不過盡我小民之心 欲求皇上喜歡的意思). He was sentenced to death by beating, a heavy punishment considering that officials admitted he did it “without awareness”(無知).¹⁴ The use of this irregular punishment indicates that Wang’s “crime” was considered serious enough to justify disregard for penal denominations, but that it was not completely on a par with treason or sedition, which would have led to the execution of all of Wang’s male relatives and the enslavement of his female kin.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97791,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01675",
+          "chapter_id": "toc-manual-2-15-15-madmen-talking",
+          "page_no": 598,
+          "paragraph_index": 2,
+          "char_start": 323,
+          "char_end": 332,
+          "source_marker": "$ ^{17} $",
+          "normalized_marker": "17",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "There is some vision in what is reported in Chen Hongmou's memorial requesting the locking up of mad people. A sub-statute was once established [that imposed] strict restrictions on mad people whose illness had flared up, but its has been in effect for a long time and local officials are unable to enforce it effectively, $ ^{17} $ so that [mad people] are [now] freed as soon as they are detained, and even permitted to mess about with brushes and ink to stir trouble. $ ^{18} $ Those among bandits who have",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97792,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01676",
+          "chapter_id": "toc-manual-2-15-15-madmen-talking",
+          "page_no": 598,
+          "paragraph_index": 2,
+          "char_start": 471,
+          "char_end": 480,
+          "source_marker": "$ ^{18} $",
+          "normalized_marker": "18",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "There is some vision in what is reported in Chen Hongmou's memorial requesting the locking up of mad people. A sub-statute was once established [that imposed] strict restrictions on mad people whose illness had flared up, but its has been in effect for a long time and local officials are unable to enforce it effectively, $ ^{17} $ so that [mad people] are [now] freed as soon as they are detained, and even permitted to mess about with brushes and ink to stir trouble. $ ^{18} $ Those among bandits who have",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00496",
-          "note_item_id": "fn-00413",
-          "current_anchor_id": "anchor-01673",
-          "marker": "15",
-          "note_page_no": 597,
-          "anchor_page_no": 598,
-          "current_anchor_marker": "15",
-          "note_excerpt": "Oct. 1751 (QL16.8.27); QWD: 7.",
-          "anchor_excerpt": "For officials who were concerned with sedition (or advancement), one issue was how to prevent commoners from presenting “seditious petitions.” Chen Hongmou 陳宏謀 (1696-1771), activist official par excellence, noted in a 1763 memorial that non-violent madmen were rarely confined, because they were unlikely to commit a homicide. $ ^{15} $ Expressing his fear that some men would exploit this “weakness” of the policy of preventive confinement to foster disorder, Chen proposed to imprison as strictly as violent madmen those insane people who were meek but literate. They should also be denied access to writing implements. We know of Chen’s memorial through an appreciative edict by the Qianlong emperor: $ ^{16} $",
+          "link_id": "link-00436",
+          "note_item_id": "fn-00353",
+          "current_anchor_id": "anchor-01665",
+          "marker": "2",
+          "note_page_no": 596,
+          "anchor_page_no": 594,
+          "current_anchor_marker": "2",
+          "note_excerpt": "5/ tsfourth/entrystatedA ~ f/an/unruly/person3/under/the/pretext/of/presenting/a/memorial3/uses clever/words/and/_a/calculatedly`/amiable/appearance/with/the/hope/of/seeking/employment3/_sentence/to`/ blows/of/the/heavy/stickQɑȮƔ@ĐoT6ż îɵSɐ òƧʽǤȸ Ƅ4Ƕ 1my/translationB/cf5 ones/ @@ A/ >?25",
+          "anchor_excerpt": "An even more recent wave of scholarship on wenziyu has by and large retained the view that the Qing indiscriminately repressed young Chinese thinkers and intellectuals. $ ^{6} $ Anecdotal accounts and emphasis on the unfairness of the condemnations are still the chief aspects of this scholarship. Now that the anti-Manchu sentiment has disappeared (since the Manchus are now retrospectively presented as a “minority nationality” within the broad Chinese nation), the fault for wenziyu is rejected on “feudal government” in general.",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00497",
-          "note_item_id": "fn-00414",
-          "current_anchor_id": "synthetic-footnote-00282",
-          "marker": "3",
-          "note_page_no": 603,
-          "anchor_page_no": 603,
-          "current_anchor_marker": "3",
-          "note_excerpt": "?39;EFD3F7\u0005 ;>>GEFD3F7EI:3F A88;5;3>E:36\u0001FA6A\u0001;@\u0001EG5:\u000153E7E\u0007 *:7\u0001 \u0010\u0010 \u000153E7\u0001A8\u0001-3@9\u0001.G@\u0001\u0003'-\u001a\u0013\u0001\u000f\u0010 \u0006\u0011\u0012\u0004E:AIE :AI A88;5;3>E\u0001E:AG>6*+0 :3@6>7\u0001EGEB;5;AGE\u0001F7JFE\u0007 )77\u00013>EA\u0001F:753E7A8\u00010:G3@9\u0001/AG9A@9\u000147>AI\u0001\u0003BB\u0007 \u000e\u0012 \u00013@6\u0001\u000e\u0012\u000f\u0006\u0012\u0010\u0004\u0007 \u000f AD\u0001?AD7\u0001A@P\u0018D735:;@9;@FA\u0001F:7\u0001;?B7D;3>\u0001BDA57EE;A@Q \u0003ɨȓE# \u0014 \u0017DF\u0007\u0001 \u0012\u000e\u0014 \u001a\"\u0019/\u0001 \u0013 \u000e\u000e\u0004\u0005E77 \u0007\u000e\u0007",
-          "anchor_excerpt": "?39;EFD3F7\u0005 ;>>GEFD3F7EI:3F A88;5;3>E:36\u0001FA6A\u0001;@\u0001EG5:\u000153E7E\u0007 *:7\u0001 \u0010\u0010 \u000153E7\u0001A8\u0001-3@9\u0001.G@\u0001\u0003'-\u001a\u0013\u0001\u000f\u0010 \u0006\u0011\u0012\u0004E:AIE :AI A88;5;3>E\u0001E:AG>6*+0 :3@6>7\u0001EGEB;5;AGE\u0001F7JFE\u0007 )77\u00013>EA\u0001F:753E7A8\u00010:G3@9\u0001/AG9A@9\u000147>AI\u0001\u0003BB\u0007 \u000e\u0012 \u00013@6\u0001\u000e\u0012\u000f\u0006\u0012\u0010\u0004\u0007 \u000f AD\u0001?AD7\u0001A@P\u0018D735:;@9;@FA\u0001F:7\u0001;?B7D;3>\u0001BDA57EE;A@Q \u0003ɨȓE# \u0014 \u0017DF\u0007\u0001 \u0012\u000e\u0014 \u001a\"\u0019/\u0001 \u0013 \u000e\u000e\u0004\u0005E77 \u0007\u000e\u0007",
+          "link_id": "link-00438",
+          "note_item_id": "fn-00355",
+          "current_anchor_id": "synthetic-footnote-00303",
+          "marker": "5",
+          "note_page_no": 598,
+          "anchor_page_no": 598,
+          "current_anchor_marker": "5",
+          "note_excerpt": "foster/disorder3 Ghen proposed to/imprison/asstrictlyas/violent madmen/those insane > amilies/had/had/to/keep/watch/over/their/mad/relatives/since/ =?@5/E/law/that/was/promulgated/in/ > ordered/families/to/declare/their/mad/members/to/the/local/government/and/to/confine/them/at/home5 Wee/ 5 5 people/who/were/meek/but/literate5/Xhey/shouldalsobe/denied/access/to/writing/implements5 ? Ghen}s/assessment/of/the/preventive/confinement/policy/was/probably/accurate1see 5 25",
+          "anchor_excerpt": "foster/disorder3 Ghen proposed to/imprison/asstrictlyas/violent madmen/those insane > amilies/had/had/to/keep/watch/over/their/mad/relatives/since/ =?@5/E/law/that/was/promulgated/in/ > ordered/families/to/declare/their/mad/members/to/the/local/government/and/to/confine/them/at/home5 Wee/ 5 5 people/who/were/meek/but/literate5/Xhey/shouldalsobe/denied/access/to/writing/implements5 ? Ghen}s/assessment/of/the/preventive/confinement/policy/was/probably/accurate1see 5 25",
           "current_anchor_synthetic": true
         },
         {
-          "link_id": "link-00501",
-          "note_item_id": "fn-00418",
-          "current_anchor_id": "anchor-01721",
-          "marker": "0",
-          "note_page_no": 622,
-          "anchor_page_no": 624,
-          "current_anchor_marker": "0",
-          "note_excerpt": "\u0007 \u0017\u0001B3>357 ?7?AD;3>\u00014K\u0001\u0019:7@\u0001 G;LG˥ʮȇ \u000363F76 \u0012\u0001#3D\u0007\u0001 \u0010\u0011 \u00011'\" \u000e\u0007 \u0007 2\u0004 5A@57D@;@9\u0001F:;E\u000153E7\u000153@\u00013>EA\u000147\u00018AG@6\u00013F\u0001F:7\u0001&3>357\u0001#GE7G?\u0001\u0017D5:;H7E\u0001;@\u0001*3;47;\u0001\u00034AJ\u0001 \u0010 \u000e\u0005\u0001B35=\u0001 \u0006\u000e\u0004\u0001\u0003+\u0019\u001a\u0017 :FFB\u0013\b\b53F3>A9\u00076;9;F3>3D5:;H7E\u0007FI\b\u0016+($\u0015 \u0012 \u0011",
-          "anchor_excerpt": "Qianlong Emperor $ ^{60} $",
+          "link_id": "link-00439",
+          "note_item_id": "fn-00356",
+          "current_anchor_id": "synthetic-footnote-00304",
+          "marker": "5",
+          "note_page_no": 600,
+          "anchor_page_no": 600,
+          "current_anchor_marker": "5",
+          "note_excerpt": "and/UP ?5 5 =`2/and/one/byWhanxi/governor Rong/Ui ʱʢ 1=/Epr5/ >? /_UP ?5 5<`25/Xhese/documentsappear/in/U[HA/? >4= 5",
+          "anchor_excerpt": "and/UP ?5 5 =`2/and/one/byWhanxi/governor Rong/Ui ʱʢ 1=/Epr5/ >? /_UP ?5 5<`25/Xhese/documentsappear/in/U[HA/? >4= 5",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-00441",
+          "note_item_id": "fn-00358",
+          "current_anchor_id": "synthetic-footnote-00306",
+          "marker": "5",
+          "note_page_no": 604,
+          "anchor_page_no": 604,
+          "current_anchor_marker": "5",
+          "note_excerpt": "5. 2by/ uangdong governor Pi/ u the most/severe penaltybelow/death5/Fefore/being/sentaway3/ eng/was/to/be/tattooed on ƃƹ 1U[HA/> <4 @B also/in/P ^^3 mf/=?@5 4=25",
+          "anchor_excerpt": "5. 2by/ uangdong governor Pi/ u the most/severe penaltybelow/death5/Fefore/being/sentaway3/ eng/was/to/be/tattooed on ƃƹ 1U[HA/> <4 @B also/in/P ^^3 mf/=?@5 4=25",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-00445",
+          "note_item_id": "fn-00362",
+          "current_anchor_id": "anchor-01713",
+          "marker": "1",
+          "note_page_no": 615,
+          "anchor_page_no": 617,
+          "current_anchor_marker": "1",
+          "note_excerpt": "1. </Hec5/ >= { // an5/ >= 2A < ?5 4 5 E/memorial/by/the Qinistry of/Tersonnel/on/this/subject/dates/the/edict/of/grace/to/>/ an5/ >= /1UP >5 5 B/see/YGHE3httpA66catalog5digitalarchives5tw6DYVRC => > B/retrieved/on/ /Wept5/ @25/Xhe/amount of/the/fine/was/noted in^huang }s biography/inCSXQ]RS/Q Y 1 A/ ? 25 ^huang/was/also/reprimanded/in/ ><= for/his/mishandling/of/a/corruption/case/when/he/was/serving/as/governor/of/ iangsu/1Ouhn/ @?>A/@<4@=25 @ n/ >= 3 ^huang/]ougong/came/upon/a/similar/case/andspared/noefforts/toinvestigatethe/accused5/Wee/the case/of/Pin/^higong/in/ 5 5",
+          "anchor_excerpt": "In any case, as we saw in the case of Liang Nianquan, the fact that someone was recognized as crazy did not make his words any less seditious. Da ni (“sedition” or “great defiance”), the crime for which Ding was executed, was one of the “Ten abominations” (十惡). Ni did not mean putting together a full-scale rebellion; $ ^{51} $ it meant “going against,” with the additional sense of going in the wrong direction, against the flow of a river, for instance. Ding’s writings were transgressive not in the sense of having “gone too far,” but of having “gone against.” He “went against” because he played on the same symbolic field as the emperor. Ding was not seen as an inoffensive parody of imperial symbolic prestige, because he challenged the reigning dynasty by recuperating its main symbols of legitimacy. But these “public symbols” were for public view, not for public use.",
           "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00448",
+          "note_item_id": "fn-00365",
+          "current_anchor_id": "synthetic-footnote-00312",
+          "marker": "5",
+          "note_page_no": 622,
+          "anchor_page_no": 622,
+          "current_anchor_marker": "5",
+          "note_excerpt": "5=`2/and/[ang/Xieshan}s/attached/confession3/respectively/mf/=?@5 ? <4 /and/mf =?@5 ? 4 </inP ^^ 5 E/palace memorial/by/Ghen/ uizu˥ʮȇ 1dated @/Qar5/ >? /_UP <5 5 `2 concerning/this/case/can/also/be/found/at/the/Talace/Quseum/Erchives/in/Xaibei/1box/ > <3/pack/ 4<2/1YGHE httpA66catalog5digitalarchives5tw6DYVRC @ ?",
+          "anchor_excerpt": "5=`2/and/[ang/Xieshan}s/attached/confession3/respectively/mf/=?@5 ? <4 /and/mf =?@5 ? 4 </inP ^^ 5 E/palace memorial/by/Ghen/ uizu˥ʮȇ 1dated @/Qar5/ >? /_UP <5 5 `2 concerning/this/case/can/also/be/found/at/the/Talace/Quseum/Erchives/in/Xaibei/1box/ > <3/pack/ 4<2/1YGHE httpA66catalog5digitalarchives5tw6DYVRC @ ?",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-00449",
+          "note_item_id": "fn-00366",
+          "current_anchor_id": "anchor-01722",
+          "marker": "1",
+          "note_page_no": 623,
+          "anchor_page_no": 624,
+          "current_anchor_marker": "1",
+          "note_excerpt": "1. 5=25 ˑÒ 2/from/the",
+          "anchor_excerpt": "One of the unique responsibilities the imperial Chinese state gave itself was the transformation of “people’s hearts and local mores” (人心風俗). Rectifying “local mores” meant reforming practice and fostering certain types of behavior, preferably as permanent dispositions through the transformation of “people’s hearts.” $ ^{61} $ But as Gu Yanwu 顧炎武 (1613-1682) had emphasized in a letter to a friend, transformative moral education was a",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00453",
+          "note_item_id": "fn-00370",
+          "current_anchor_id": "synthetic-footnote-00316",
+          "marker": "5",
+          "note_page_no": 630,
+          "anchor_page_no": 630,
+          "current_anchor_marker": "5",
+          "note_excerpt": "5 < 1ʯƀ 2A/ =/ ebruary ? 5 Xhe/emperor specified/that/his/decision/should/not/be/cited/as/a/precedent/for/judging/future/cases/1Âď đőTǃb 25",
+          "anchor_excerpt": "5 < 1ʯƀ 2A/ =/ ebruary ? 5 Xhe/emperor specified/that/his/decision/should/not/be/cited/as/a/precedent/for/judging/future/cases/1Âď đőTǃb 25",
+          "current_anchor_synthetic": true
         }
       ]
     },
@@ -254,20 +314,20 @@
         "sha256": "ff04ab0f8e137ec762732451c1b775ca6f1a0a262167a607a53d12eda3fb769a"
       },
       {
-        "page_no": 601,
-        "file_idx": 600,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "second father also died of illness, leaving him and his mother without means. For years he was unable to find work or to progress further in the examination system. In 1781, however, he moved to a school attached to the military garrison of Pingyang, where he made a living copying documents (借住平陽營子識文 在茲家學堂抄寫文冊餬口). There, he kept a crumbling copy of the Four Books, an Old-Text version of the Classic of Poetry, and a copy of the well-liked Romance of the Western Chamber (Xixiang ji 西廂記). Despite having found employment, Feng grew so impoverished that he became depressed and restless (贫苦難度 憂鬱無聊) and his despondency eventually turned into an illness (抑鬱成病). $ ^{24} $ In 1782, after he caught what later reports called “mucus-confusion disorder” (痰迷之症), he hurt his legs trying to commit suicide by jumping from the Pingyang city wall. A few months later, just after the lunar New Year, he left for Beijing, planning to rejoin the Zhao line (意欲歸宗) and to study trade (學習買賣). He arrived 15 days later, carrying commentaries he had written on the Classic of Poetry and the Book of Changes. Since Feng had been a student for his entire life, his Beijing relatives urged him to abandon his commercial plans. His uncle gave him 1000 in copper cash and his younger brother 500 in Beijing currency (大錢). In an inn on the way back home, Feng Qiyan heard that the imperial carriage was coming hither to vi ...",
-        "byte_size": 145423,
-        "sha256": "3f834679e2c1f4ddce2cc4215da2b71b180b399040079acd07d153b312b8b76a"
-      },
-      {
         "page_no": 603,
         "file_idx": 602,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
         "ocr_excerpt": "Some of the doubts that officials expressed about the madness (or “besottedness”) of text bearers probably resulted from bureaucratic necessity. When reporting on a case, they could not assume that one who looked or sounded crazy was crazy. This “institutionalized strategy” (Bourdieu 1990: 138) on the part of officials was the object of no specific rule, but it was strongly encouraged in bureaucratic practice. Those officials who embodied this fear of mad-sounding speech were praised, whereas officials who simply assumed that the authors of these texts were mad were punished if their negligence was later discovered. $ ^{25} $ But even when officials had found no illegal activities behind a suspicious text, they were not necessarily clement. Although Feng Qiyan was eventually recognized to have suffered from “mucus confusion,” his punishment was not lenient. Feng Qiyan’s having illicitly written a petition for a trifling marriage matter and intended to present it in front of the imperial convoy was truly stupid, reckless, and illegal. Though his planning to marry someone’s daughters resembles besotted confusion, it remains that his words are clear. And how can we know that he is not cunningly pretending to be confused in order to unleash his mad barking? It would thus be unsuitable to be even slightly indulgent. At the beginning of his petition, he also dared to lecture on the c ...",
         "byte_size": 136242,
         "sha256": "3c8726a1add5c9103e2c3d81940e5737bbfa93cdab5e6bed585aedaa6ba5c0c7"
+      },
+      {
+        "page_no": 604,
+        "file_idx": 603,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "查馮起炎以婚姻細故 私寫呈詞 欲於儀仗前呈遞 實屬蚩妄不法 其圖娶人女 雖係跡類癡迷 而語言尚屬清楚 又安知非色令智昏肆其狂吠 自未便稍為寬貸 且閱其呈首 膽敢於聖主之前混講經書而呈尾措詞 猶屬狂妄核其情罪較衝突儀仗為更重 馮起炎一犯應從重發往黑龍江等處 給披甲人為奴 Life exile to Manchuria for service as a slave was the highest form of military exile (充軍), the most severe penalty below death. Before being sent away, Feng was to be tattooed on the forearm (Bodde and Morris 1967: 97) and dealt 100 strokes of the heavy stick. Though both Yan Zeng's and Feng Qiyan's cases appeared in the Qingdai wenziyu dang, it is difficult to consider them as \"literary trials.\" Yan and Feng were punished harshly because they had addressed the emperor in an unsuitable manner, in both form and content. Symbolically less grave actions could be punished more lightly. For now, I analyze cases in which the main suspects were executed for sedition. ## ‘Record of Nianquan’s Singular Grievances’ Liang Nianquan 梁念泉 (1738-1781) was a licentiate who became “confused by mucus” (患痰迷病症) in 1773 while working as a teacher at someone’s house. $ ^{27} $ He “claimed he had already become a provincial or metropolitan graduate, and that his parents and neighbors wanted to harm him in revenge; he constantly squabbled with people” (自稱已中舉人、進士 親鄰皆要仇害 不時與人吵鬧). His father Liang Xuewen confined him to a room, but Nianquan escaped and went to a yamen to lodge a complaint. He was caught, registered as a mad man, and sent back home for confinement. In earl ...",
+        "byte_size": 138961,
+        "sha256": "056d6e21f266c5944dcfb04029c49a9ad8b30a13c4f7e893bfce3ef30612a3bf"
       }
     ]
   },
@@ -277,27 +337,97 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00413\",\n    \"anchor_id\": \"anchor-01672\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note item fn-00413 (marker '15') is currently bound to anchor-01673 on page 598. The screenshot for page 598 clearly shows the superscript '15' at the end of the sentence ending with '...unlikely to commit a homicide.' This text matches the excerpt for anchor-01672 ('...unlikely to commit a homicide'). Therefore, the note should be re-bound to anchor-01672.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01667\",\n    \"confidence\": 1.0,\n    \"reason\": \"The OCR excerpt for this anchor contains '$ ^{9} $', but the corresponding screenshot (page 578) clearly shows the marker as a superscript '8'. Since there is no footnote 9 in the image and the marker is a clear OCR error for '8', this anchor reference should be ignored.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00353\",\n    \"anchor_id\": \"anchor-01665\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 2 on p. 576 matches the text and citation of fn-00353.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00354\",\n    \"anchor_id\": \"anchor-01666\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 7 on p. 578 matches the text of fn-00354 (Case of Wang Xun).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00355\",\n    \"anchor_id\": \"anchor-01667\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 9 on p. 578 matches the text of fn-00355 (Law called 'Sending memorials...').\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00356\",\n    \"anchor_id\": \"anchor-01668\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 10 on p. 579 matches the text of fn-00356 (The Zeng Jing case).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00357\",\n    \"anchor_id\": \"anchor-01669\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 11 on p. 579 matches the text of fn-00357 (List of criminals).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00358\",\n    \"anchor_id\": \"anchor-01670\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 12 on p. 579 matches the text of fn-00358 (Statute concerning forbidden texts).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00359\",\n    \"anchor_id\": \"anchor-01672\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 14 on p. 580 matches the text of fn-00359 (Lack of awareness criterion).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00360\",\n    \"anchor_id\": \"anchor-01675\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 17 on p. 580 matches the text of fn-00360 (Families had to keep watch...).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00361\",\n    \"anchor_id\": \"anchor-01676\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 18 on p. 580 matches the text of fn-00361 (Chen's assessment...).\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-00413",
-      "anchor_id": "anchor-01672",
+      "note_item_id": "fn-00353",
+      "anchor_id": "anchor-01665",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 2 on p. 576 matches the text and citation of fn-00353."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00354",
+      "anchor_id": "anchor-01666",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Note item fn-00413 (marker '15') is currently bound to anchor-01673 on page 598. The screenshot for page 598 clearly shows the superscript '15' at the end of the sentence ending with '...unlikely to commit a homicide.' This text matches the excerpt for anchor-01672 ('...unlikely to commit a homicide'). Therefore, the note should be re-bound to anchor-01672."
+      "reason": "Footnote 7 on p. 578 matches the text of fn-00354 (Case of Wang Xun)."
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-00355",
       "anchor_id": "anchor-01667",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "The OCR excerpt for this anchor contains '$ ^{9} $', but the corresponding screenshot (page 578) clearly shows the marker as a superscript '8'. Since there is no footnote 9 in the image and the marker is a clear OCR error for '8', this anchor reference should be ignored."
+      "reason": "Footnote 9 on p. 578 matches the text of fn-00355 (Law called 'Sending memorials...')."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00356",
+      "anchor_id": "anchor-01668",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Footnote 10 on p. 579 matches the text of fn-00356 (The Zeng Jing case)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00357",
+      "anchor_id": "anchor-01669",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Footnote 11 on p. 579 matches the text of fn-00357 (List of criminals)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00358",
+      "anchor_id": "anchor-01670",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Footnote 12 on p. 579 matches the text of fn-00358 (Statute concerning forbidden texts)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00359",
+      "anchor_id": "anchor-01672",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Footnote 14 on p. 580 matches the text of fn-00359 (Lack of awareness criterion)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00360",
+      "anchor_id": "anchor-01675",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Footnote 17 on p. 580 matches the text of fn-00360 (Families had to keep watch...)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00361",
+      "anchor_id": "anchor-01676",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Footnote 18 on p. 580 matches the text of fn-00361 (Chen's assessment...)."
     }
   ],
   "derived_truth": {
@@ -307,79 +437,296 @@
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00413",
-        "anchor_id": "anchor-01672",
+        "note_item_id": "fn-00353",
+        "anchor_id": "anchor-01665",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 2 on p. 576 matches the text and citation of fn-00353."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00354",
+        "anchor_id": "anchor-01666",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Note item fn-00413 (marker '15') is currently bound to anchor-01673 on page 598. The screenshot for page 598 clearly shows the superscript '15' at the end of the sentence ending with '...unlikely to commit a homicide.' This text matches the excerpt for anchor-01672 ('...unlikely to commit a homicide'). Therefore, the note should be re-bound to anchor-01672."
+        "reason": "Footnote 7 on p. 578 matches the text of fn-00354 (Case of Wang Xun)."
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-00355",
         "anchor_id": "anchor-01667",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "The OCR excerpt for this anchor contains '$ ^{9} $', but the corresponding screenshot (page 578) clearly shows the marker as a superscript '8'. Since there is no footnote 9 in the image and the marker is a clear OCR error for '8', this anchor reference should be ignored."
+        "reason": "Footnote 9 on p. 578 matches the text of fn-00355 (Law called 'Sending memorials...')."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00356",
+        "anchor_id": "anchor-01668",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 10 on p. 579 matches the text of fn-00356 (The Zeng Jing case)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00357",
+        "anchor_id": "anchor-01669",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 11 on p. 579 matches the text of fn-00357 (List of criminals)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00358",
+        "anchor_id": "anchor-01670",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 12 on p. 579 matches the text of fn-00358 (Statute concerning forbidden texts)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00359",
+        "anchor_id": "anchor-01672",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 14 on p. 580 matches the text of fn-00359 (Lack of awareness criterion)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00360",
+        "anchor_id": "anchor-01675",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 17 on p. 580 matches the text of fn-00360 (Families had to keep watch...)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00361",
+        "anchor_id": "anchor-01676",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 18 on p. 580 matches the text of fn-00361 (Chen's assessment...)."
       }
     ],
     "auto_selected_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00413",
-        "anchor_id": "anchor-01672",
+        "note_item_id": "fn-00353",
+        "anchor_id": "anchor-01665",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 2 on p. 576 matches the text and citation of fn-00353."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00354",
+        "anchor_id": "anchor-01666",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Note item fn-00413 (marker '15') is currently bound to anchor-01673 on page 598. The screenshot for page 598 clearly shows the superscript '15' at the end of the sentence ending with '...unlikely to commit a homicide.' This text matches the excerpt for anchor-01672 ('...unlikely to commit a homicide'). Therefore, the note should be re-bound to anchor-01672."
+        "reason": "Footnote 7 on p. 578 matches the text of fn-00354 (Case of Wang Xun)."
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-00355",
         "anchor_id": "anchor-01667",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "The OCR excerpt for this anchor contains '$ ^{9} $', but the corresponding screenshot (page 578) clearly shows the marker as a superscript '8'. Since there is no footnote 9 in the image and the marker is a clear OCR error for '8', this anchor reference should be ignored."
+        "reason": "Footnote 9 on p. 578 matches the text of fn-00355 (Law called 'Sending memorials...')."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00356",
+        "anchor_id": "anchor-01668",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 10 on p. 579 matches the text of fn-00356 (The Zeng Jing case)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00357",
+        "anchor_id": "anchor-01669",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 11 on p. 579 matches the text of fn-00357 (List of criminals)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00358",
+        "anchor_id": "anchor-01670",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 12 on p. 579 matches the text of fn-00358 (Statute concerning forbidden texts)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00359",
+        "anchor_id": "anchor-01672",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 14 on p. 580 matches the text of fn-00359 (Lack of awareness criterion)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00360",
+        "anchor_id": "anchor-01675",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 17 on p. 580 matches the text of fn-00360 (Families had to keep watch...)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00361",
+        "anchor_id": "anchor-01676",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 18 on p. 580 matches the text of fn-00361 (Chen's assessment...)."
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-00496",
+        "link_id": "link-00436",
         "action": "match",
-        "note_item_id": "fn-00413",
-        "anchor_id": "anchor-01672",
+        "note_item_id": "fn-00353",
+        "anchor_id": "anchor-01665",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 2 on p. 576 matches the text and citation of fn-00353."
+      },
+      {
+        "link_id": "link-00437",
+        "action": "match",
+        "note_item_id": "fn-00354",
+        "anchor_id": "anchor-01666",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Note item fn-00413 (marker '15') is currently bound to anchor-01673 on page 598. The screenshot for page 598 clearly shows the superscript '15' at the end of the sentence ending with '...unlikely to commit a homicide.' This text matches the excerpt for anchor-01672 ('...unlikely to commit a homicide'). Therefore, the note should be re-bound to anchor-01672."
+        "reason": "Footnote 7 on p. 578 matches the text of fn-00354 (Case of Wang Xun)."
       },
       {
-        "link_id": "link-01804",
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "link_id": "link-00438",
+        "action": "match",
+        "note_item_id": "fn-00355",
         "anchor_id": "anchor-01667",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "The OCR excerpt for this anchor contains '$ ^{9} $', but the corresponding screenshot (page 578) clearly shows the marker as a superscript '8'. Since there is no footnote 9 in the image and the marker is a clear OCR error for '8', this anchor reference should be ignored."
+        "reason": "Footnote 9 on p. 578 matches the text of fn-00355 (Law called 'Sending memorials...')."
+      },
+      {
+        "link_id": "link-00439",
+        "action": "match",
+        "note_item_id": "fn-00356",
+        "anchor_id": "anchor-01668",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 10 on p. 579 matches the text of fn-00356 (The Zeng Jing case)."
+      },
+      {
+        "link_id": "link-00440",
+        "action": "match",
+        "note_item_id": "fn-00357",
+        "anchor_id": "anchor-01669",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 11 on p. 579 matches the text of fn-00357 (List of criminals)."
+      },
+      {
+        "link_id": "link-00441",
+        "action": "match",
+        "note_item_id": "fn-00358",
+        "anchor_id": "anchor-01670",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 12 on p. 579 matches the text of fn-00358 (Statute concerning forbidden texts)."
+      },
+      {
+        "link_id": "link-00442",
+        "action": "match",
+        "note_item_id": "fn-00359",
+        "anchor_id": "anchor-01672",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 14 on p. 580 matches the text of fn-00359 (Lack of awareness criterion)."
+      },
+      {
+        "link_id": "link-00443",
+        "action": "match",
+        "note_item_id": "fn-00360",
+        "anchor_id": "anchor-01675",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 17 on p. 580 matches the text of fn-00360 (Families had to keep watch...)."
+      },
+      {
+        "link_id": "link-00444",
+        "action": "match",
+        "note_item_id": "fn-00361",
+        "anchor_id": "anchor-01676",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Footnote 18 on p. 580 matches the text of fn-00361 (Chen's assessment...)."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 12050,
-    "completion_tokens": 285,
-    "total_tokens": 12335,
+    "prompt_tokens": 12565,
+    "completion_tokens": 823,
+    "total_tokens": 13388,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 7910
+    "duration_ms": 17919
   }
 }

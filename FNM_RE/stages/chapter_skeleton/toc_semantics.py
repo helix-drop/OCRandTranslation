@@ -69,6 +69,14 @@ _TOC_LEADING_NUMBER_PREFIX_RE = re.compile(
     re.IGNORECASE,
 )
 _TOC_PURE_NUMBER_TITLE_RE = re.compile(r"^\s*(?:\d+|[ivxlcm]+)\s*$", re.IGNORECASE)
+_ENDNOTE_NAMED_SUBENTRY_RE = re.compile(
+    r"^\s*(?:chapter|chapitre|part|partie|book|livre|lecture|lesson|le[cç]on|section|introduction|conclusion|prologue|epilogue)\b",
+    re.IGNORECASE,
+)
+_ENDNOTE_NUMBERED_SUBENTRY_RE = re.compile(
+    r"^\s*(?:\d+|[ivxlcm]+)[\.\):\-]\s+\S+",
+    re.IGNORECASE,
+)
 _LECTURE_COLLECTION_EXCLUDED_TITLE_RE = re.compile(
     r"^\s*(?:cours,\s*ann[eé]e\s*1978-1979|avertissement|situation du cours)\s*$",
     re.IGNORECASE,
@@ -1596,6 +1604,17 @@ def _build_visual_toc_chapters_and_section_heads(
             int(row.get("order") or 0),
         )
     )
+    exported_title_keys = {
+        _semantic_visual_toc_title_key(str(row.get("title") or ""))
+        for row in exportable_chapter_rows
+        if _semantic_visual_toc_title_key(str(row.get("title") or ""))
+    }
+    if exported_title_keys:
+        container_titles = [
+            title
+            for title in container_titles
+            if _semantic_visual_toc_title_key(title) not in exported_title_keys
+        ]
     heading_graph_rows, heading_graph_summary = build_heading_graph(
         exportable_rows=exportable_chapter_rows,
         heading_candidates=heading_candidates,

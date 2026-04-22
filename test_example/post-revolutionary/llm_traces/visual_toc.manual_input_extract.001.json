@@ -23,7 +23,7 @@
     "source": "pdf",
     "file_idx": 0
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": \"ix\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": \"1\",\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": \"21\",\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": \"60\",\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"II THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": \"103\",\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\",\n    \"depth\": 2,\n    \"printed_page\": \"139\",\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"5 Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": \"182\",\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": \"233\",\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": \"269\",\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": \"316\",\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 0,\n    \"printed_page\": \"331\",\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 0,\n    \"printed_page\": \"399\",\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": \"403\",\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": \"ix\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": 21,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": 60,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": 103,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n    \"depth\": 2,\n    \"printed_page\": 139,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": 182,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": 233,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": 269,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": 316,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 0,\n    \"printed_page\": 331,\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 0,\n    \"printed_page\": 399,\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 403,\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
   "response_parsed": [
     {
       "title": "List of Illustrations",
@@ -46,14 +46,14 @@
     {
       "title": "Introduction: Psychological Interiority versus Self-Talk",
       "depth": 0,
-      "printed_page": "1",
+      "printed_page": 1,
       "visual_order": 3,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+      "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
       "depth": 1,
       "printed_page": null,
       "visual_order": 4,
@@ -62,25 +62,25 @@
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "1 The Perils of Imagination at the End of the Old Regime",
+      "title": "The Perils of Imagination at the End of the Old Regime",
       "depth": 2,
-      "printed_page": "21",
+      "printed_page": 21,
       "visual_order": 5,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "2 The Revolutionary Schooling of Imagination",
+      "title": "The Revolutionary Schooling of Imagination",
       "depth": 2,
-      "printed_page": "60",
+      "printed_page": 60,
       "visual_order": 6,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "II THE POLITICS OF SELFHOOD",
+      "title": "THE POLITICS OF SELFHOOD",
       "depth": 1,
       "printed_page": null,
       "visual_order": 7,
@@ -89,45 +89,45 @@
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "3 Is There a Self in This Mental Apparatus?",
+      "title": "Is There a Self in This Mental Apparatus?",
       "depth": 2,
-      "printed_page": "103",
+      "printed_page": 103,
       "visual_order": 8,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+      "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
       "depth": 2,
-      "printed_page": "139",
+      "printed_page": 139,
       "visual_order": 9,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "5 Cousinian Hegemony",
+      "title": "Cousinian Hegemony",
       "depth": 2,
-      "printed_page": "182",
+      "printed_page": 182,
       "visual_order": 10,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+      "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
       "depth": 2,
-      "printed_page": "233",
+      "printed_page": 233,
       "visual_order": 11,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+      "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
       "depth": 2,
-      "printed_page": "269",
+      "printed_page": 269,
       "visual_order": 12,
       "role_hint": "content",
       "endnotes_candidate": false,
@@ -136,7 +136,7 @@
     {
       "title": "Epilogue",
       "depth": 0,
-      "printed_page": "316",
+      "printed_page": 316,
       "visual_order": 13,
       "role_hint": "content",
       "endnotes_candidate": false,
@@ -145,7 +145,7 @@
     {
       "title": "Notes",
       "depth": 0,
-      "printed_page": "331",
+      "printed_page": 331,
       "visual_order": 14,
       "role_hint": "back_matter",
       "endnotes_candidate": true,
@@ -154,7 +154,7 @@
     {
       "title": "Note on Sources",
       "depth": 0,
-      "printed_page": "399",
+      "printed_page": 399,
       "visual_order": 15,
       "role_hint": "back_matter",
       "endnotes_candidate": false,
@@ -163,7 +163,7 @@
     {
       "title": "Index",
       "depth": 0,
-      "printed_page": "403",
+      "printed_page": 403,
       "visual_order": 16,
       "role_hint": "back_matter",
       "endnotes_candidate": false,
@@ -200,7 +200,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
         "depth": 1,
         "printed_page": null,
         "visual_order": 4,
@@ -209,7 +209,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "1 The Perils of Imagination at the End of the Old Regime",
+        "title": "The Perils of Imagination at the End of the Old Regime",
         "depth": 2,
         "printed_page": 21,
         "visual_order": 5,
@@ -218,7 +218,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "2 The Revolutionary Schooling of Imagination",
+        "title": "The Revolutionary Schooling of Imagination",
         "depth": 2,
         "printed_page": 60,
         "visual_order": 6,
@@ -227,7 +227,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "II THE POLITICS OF SELFHOOD",
+        "title": "THE POLITICS OF SELFHOOD",
         "depth": 1,
         "printed_page": null,
         "visual_order": 7,
@@ -236,7 +236,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "3 Is There a Self in This Mental Apparatus?",
+        "title": "Is There a Self in This Mental Apparatus?",
         "depth": 2,
         "printed_page": 103,
         "visual_order": 8,
@@ -245,7 +245,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
         "depth": 2,
         "printed_page": 139,
         "visual_order": 9,
@@ -254,7 +254,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "5 Cousinian Hegemony",
+        "title": "Cousinian Hegemony",
         "depth": 2,
         "printed_page": 182,
         "visual_order": 10,
@@ -263,7 +263,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
         "depth": 2,
         "printed_page": 233,
         "visual_order": 11,
@@ -272,7 +272,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
         "depth": 2,
         "printed_page": 269,
         "visual_order": 12,
@@ -324,8 +324,8 @@
     "model_id": "qwen3.5-plus",
     "request_count": 1,
     "prompt_tokens": 1553,
-    "completion_tokens": 1248,
-    "total_tokens": 2801,
+    "completion_tokens": 1241,
+    "total_tokens": 2794,
     "doc_id": "7ba9bca783fd",
     "slug": "",
     "context": {
@@ -334,6 +334,6 @@
     }
   },
   "timing": {
-    "duration_ms": 23479
+    "duration_ms": 23594
   }
 }

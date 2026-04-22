@@ -1347,9 +1347,15 @@ def _chapter_contracts(
     *,
     chapter_layers: ChapterLayers,
     effective_links: list[NoteLinkRecord],
+    body_anchors: list[BodyAnchorRecord],
 ) -> tuple[list[ChapterLinkContract], dict[str, Any]]:
     contracts: list[ChapterLinkContract] = []
     contract_evidence: dict[str, Any] = {}
+    anchor_by_id = {
+        str(anchor.anchor_id or ""): anchor
+        for anchor in body_anchors
+        if str(anchor.anchor_id or "").strip()
+    }
     for chapter in chapter_layers.chapters:
         chapter_id = str(chapter.chapter_id or "")
         raw_has_endnote_signal = bool(chapter.endnote_items or chapter.endnote_regions)
@@ -1433,15 +1439,40 @@ def _chapter_contracts(
             and (not expected_markers or normalize_note_marker(str(row.marker or "")) in expected_markers)
         ]
 
-        non_ignored_numeric_markers: list[int] = []
-        for row in sorted(chapter_links, key=lambda link_row: (int(link_row.page_no_start or 0), str(link_row.link_id or ""))):
+        ordered_numeric_markers: list[tuple[tuple[int, int, int, int, str], int]] = []
+        for row in chapter_links:
             if str(row.status or "") != "matched":
                 continue
             if target_item_ids and str(row.note_item_id or "").strip() not in target_item_ids:
                 continue
             marker_value = _safe_int(str(row.marker or "").strip())
             if marker_value > 0:
-                non_ignored_numeric_markers.append(marker_value)
+                anchor = anchor_by_id.get(str(row.anchor_id or "").strip())
+                anchor_page_no = int(getattr(anchor, "page_no", 0) or 0) if anchor is not None else 0
+                anchor_chapter_id = str(getattr(anchor, "chapter_id", "") or "").strip() if anchor is not None else ""
+                if (
+                    anchor is not None
+                    and anchor_page_no > 0
+                    and anchor_chapter_id == chapter_id
+                ):
+                    sort_key = (
+                        0,
+                        anchor_page_no,
+                        int(anchor.paragraph_index or 0),
+                        int(anchor.char_start or 0),
+                        str(row.link_id or ""),
+                    )
+                else:
+                    sort_key = (
+                        1,
+                        int(row.page_no_start or 0),
+                        int(row.page_no_end or 0),
+                        0,
+                        str(row.link_id or ""),
+                    )
+                ordered_numeric_markers.append((sort_key, marker_value))
+        ordered_numeric_markers.sort(key=lambda item: item[0])
+        non_ignored_numeric_markers = [marker for _sort_key, marker in ordered_numeric_markers]
         first_marker_is_one = (
             (non_ignored_numeric_markers[0] == 1)
             if non_ignored_numeric_markers
@@ -1570,6 +1601,7 @@ def build_note_link_table(
     contracts, contract_evidence = _chapter_contracts(
         chapter_layers=chapter_layers,
         effective_links=effective_links,
+        body_anchors=materialized_anchors,
     )
     applicable_contracts = [row for row in contracts if bool(row.requires_endnote_contract)]
     hard_first_marker_is_one = all(row.first_marker_is_one for row in applicable_contracts)

@@ -8,7 +8,7 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-13-13-life-trials:toc-manual-2-13-13-life-trials:footnote\",\n  \"chapter_title\": \"13. Life trials\",\n  \"page_range\": [\n    529,\n    559\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 529,\n      \"ocr_excerpt\": \"### 13.1 Discussions of madness in legal reports Judicial depositions and their biases Much of what we know about the kinds of behavior Qing people called “mad” comes from “routine memorials of the Office of Scrutiny for the Ministry of Punishments” (刑科题本). $ ^{1} $ These reports were written by the highest officials in the provincial bureaucracy (governors and governors-general) as the final step in the sentencing of a crime, or by the Ministry of Punishments in response to these reports. $ ^{2} $ Each memorial gave a detailed account of an entire case and of the way the judicial system had processed it. Most cited the “depositions” (gong 供) of the people involved: the “criminal” (as a person under trial was usually called), his or her relatives and neighbors, local leaders, and anyone the magistrate found relevant to interrogate. $ ^{3} $ These statements illustrate how common people spoke of madness and dealt with it, but they should be used with great circumspection. Depositions were not neutrally collected “representations of madness.” As we have seen, Qing law accepted as “mad” only acts that were entirely devoid of awareness. This extreme definition and the law’s narrow inte ...\"\n    },\n    {\n      \"page_no\": 530,\n      \"ocr_excerpt\": \"irrelevant to a homicide investigation, legal reports usually said little about what may have constituted mad language, but this vagueness about mad speech does not mean that the people under trial were always unable to speak coherently, or that only the utterly delirious were identified as mad in village communities. Legal documents also tell us little about the non-violent gestures and words that may have characterized local madmen, and about the daily interactions between them and their relatives, even when the depositions purported to be precisely about that. Certain derangements that people may have called “mad” (unmotivated sorrow, love-sickness, flights of fancy, etc.) were rarely recorded in legal sources because they were not seen as having led to the killings, or when they were, the cases in question were not sentenced as if they had been committed “because of madness.” Finally, these documents give no access to the “discourse processes through which social and emotional realities are constituted in ordinary talk and interaction” (White 1992: 38). These are external limits to what “routine memorials” (tiben) will tell us. Even more important, the content of the deposition ...\"\n    },\n    {\n      \"page_no\": 531,\n      \"ocr_excerpt\": \"The magistrate composed a summary of the entire affair and proposed a temporary sentence according to the relevant laws. He sent his report to his immediate superior the prefect, along with the formal depositions (招狀) of the criminal and of all the witnesses, reconstituted from the clerk's notes. I have already discussed the several reviews this preliminary sentencing had to go through before it could be confirmed (see 10). The depositions we read in these provincial reports were thus several times removed from the words that the parties had originally uttered. Yasuhiko Karasawa (2007) has noticed broad discrepancies between draft depositions and the way they were cited in later reports. $ ^{5} $ He has shown that during the course of the Qing the legal secretaries who composed the final drafts of tiben increasingly tended to edit testimonies so as to confirm the magistrate’s (and the governor’s) findings, removing from the depositions lies, smokescreens, gaps or contradictions in evidence, and all the possibly truthful details that did not appear in the official narrative of the case (which in turn purported to be based on the confessions). In some madness cases, all the witnesses ...\"\n    },\n    {\n      \"page_no\": 532,\n      \"ocr_excerpt\": \"Depositions were edited translations of orality rather than direct transcriptions. Conventions of legal reporting such as the use of the written style and the selective editing of depositions make it difficult to assess what terms common people used to describe madness. Very specific depositions and those that “sound oral” were probably closer to the original words of the witnesses than the conventionally formulated ones. The memorials that quoted the witnesses as having said different things with different words in two different trial sessions are also more likely to have been authentic. The fact that these depositions consistently sounded more oral seems to confirm this view. It remains possible, however, that in many cases some seemingly oral usage reflected a secretary’s use of a vernacular style of writing as a device to enhance the authenticity of the depositions. Even when depositions recorded people’s voices accurately, however, they did not necessarily reflect what commoners would have said about the people under trial if they had been interacting with them or talking about them in a daily context. Since we have no access to the words that the witnesses actually pronounced ...\"\n    },\n    {\n      \"page_no\": 533,\n      \"ocr_excerpt\": \"the reports. Interestingly, all made their way into depositions. $ ^{8} $ Bureaucratic jargon is particularly important because it appeared everywhere. Only good knowledge of legal texts and the reading of numerous tiben allow to separate the formulaic from words that the witnesses would have been more likely to recognize as their own. Before I turn to the depositions themselves, let me survey the main set phrases that punctuated legal reports and how we can use them to some profit despite their seemingly opaque uniformity. The concepts we see in documents were more than “background noise” that should be reduced before we can get to the undistorted facts. These objects were precisely those that institutions and practitioners purported to discuss and act upon. Formulaic phrases may have given little idea of what the person they described looked and sounded like, but they spoke eloquently of what the legal field expected madness to sound and look like. Judicial reports almost invariably noted that the eyes of killers who had just been arrested “were staring straight” (兩目直瞪 or 兩目直視) and that their “words were incoherent” (語無論次). These words described the stereotypically stupefied-and- ...\"\n    },\n    {\n      \"page_no\": 534,\n      \"ocr_excerpt\": \"recognized by these outward signs would be putting the result (an ex post facto report phrased in unequivocal terms) before the process of identification. This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language of a recovered person were said to be “sober” or “clear” (清爽). $ ^{12} $ A longer set phrase specified that the recovered killer’s “facial expression was sober and his speech clear” (神清色爽 語言明晰). $ ^{13} $ Since officials knew that legal madness was all or nothing: the reports they wrote therefore made as strong a distinction as possible between the normal and the mad: a dumb-struck expression contrasted with a sober one; incoherent speech with clear language. Tiben often cast the events that had led to a killing into the predetermined script of how the law expected madness cases to unfold. Because most mad killings were committed during sudden fits and because the law defined madness as utter unawareness of one's own actions, the vast majority of memorials specified that on such-and-such a date ...\"\n    },\n    {\n      \"page_no\": 536,\n      \"ocr_excerpt\": \"The confession was not an admission of guilt doubled with repentance (though depositions sometimes contained statements of regret, dismay, or contrition), but the killer's formulation of the crime for which he would be sentenced—his act as it was characterized by the law. Since by definition he did not remember his acts, his confession could only be the ratification of the version of the crime that officials had settled upon after investigation. Medical case files also contained formulaic turns of phrase, but they tended to be more flexible, perhaps because they recorded symptoms that physicians had observed (by contrast with both writers of medical treatises, who were trying to present general arguments, and legal officials or secretaries, who had not witnessed the acts of the people they were describing) and because these symptoms could be important to the establishment of a therapy. $ ^{16} $ The readers of medical case files also differed from those of legal reports. Whereas legal reports were meant to be assessed by superiors or equals, medical records were written for the relatives of patients or for readers of collections of case files. Although physicians occasionally used ...\"\n    },\n    {\n      \"page_no\": 537,\n      \"ocr_excerpt\": \"affliction by nine different terms. $ ^{17} $ Putting aside those related to “mucus” for the moment, they were “madness illness” (the official term for madness), fengbing 風病 (lit. “Wind illness,” but homophonous with the term that meant “madness illness”), fengdian 風顛 (“madness”; lit. Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $ fengkuang bing 風狂病 (“madness illness”), fengkuang bingzheng 風狂病症 (“madness disorder”), and fengdian bingzheng 風顛病症 (“madness disorder”). $ ^{20} $ We cannot assume that people used the term “madness illness” orally. Considering that fengdian and fengkuang were intelligible on their own and were widely used in non-judicial contexts, we should probably interpret the compounds fengkuang bing, fengkuang bingzheng, and fengdian bingzheng—which were clearly not oral—as bureaucratic jargon. The suffixes bing and bingzheng may have been used to make clear that the law considered madness to be an illness. $ ^{21} $ Apart from the pair-turned-compound diankuang, all the above terms contain the sound feng. A clerk or official who wanted to transcribe the sound feng could choose between the homophonous 瘋 and 風. T ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01488\",\n      \"marker\": \"2\",\n      \"page_no\": 529,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Much of what we know about the kinds of behavior Qing people called “mad” comes from “routine memorials of the Office of Scrutiny for the Ministry of Punishments” (刑科题本). $ ^{1} $ These reports were written by the highest officials in the p ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01490\",\n      \"marker\": \"4\",\n      \"page_no\": 530,\n      \"paragraph_index\": 1,\n      \"source_text\": \"These are external limits to what “routine memorials” (tiben) will tell us. Even more important, the content of the depositions recorded in the reports was also pre-oriented. Statements found their way into tiben by a complex process. Durin ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01491\",\n      \"marker\": \"5\",\n      \"page_no\": 531,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Yasuhiko Karasawa (2007) has noticed broad discrepancies between draft depositions and the way they were cited in later reports. $ ^{5} $ He has shown that during the course of the Qing the legal secretaries who composed the final drafts of ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01494\",\n      \"marker\": \"8\",\n      \"page_no\": 533,\n      \"paragraph_index\": 0,\n      \"source_text\": \"the reports. Interestingly, all made their way into depositions. $ ^{8} $ Bureaucratic jargon is particularly important because it appeared everywhere. Only good knowledge of legal texts and the reading of numerous tiben allow to separate t ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01495\",\n      \"marker\": \"11\",\n      \"page_no\": 534,\n      \"paragraph_index\": 1,\n      \"source_text\": \"This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01498\",\n      \"marker\": \"14\",\n      \"page_no\": 534,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Tiben often cast the events that had led to a killing into the predetermined script of how the law expected madness cases to unfold. Because most mad killings were committed during sudden fits and because the law defined madness as utter un ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01500\",\n      \"marker\": \"16\",\n      \"page_no\": 536,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Medical case files also contained formulaic turns of phrase, but they tended to be more flexible, perhaps because they recorded symptoms that physicians had observed (by contrast with both writers of medical treatises, who were trying to pr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01501\",\n      \"marker\": \"17\",\n      \"page_no\": 537,\n      \"paragraph_index\": 0,\n      \"source_text\": \"affliction by nine different terms. $ ^{17} $ Putting aside those related to “mucus” for the moment,\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00459\",\n      \"note_item_id\": \"fn-00376\",\n      \"current_anchor_id\": \"anchor-01493\",\n      \"marker\": \"1\",\n      \"note_page_no\": 534,\n      \"anchor_page_no\": 532,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0011\\u0012 2\\u0004\\u00013@6 ,! ', \\u0001#\\\"\\u001a'*\\\"' ƭǭŬŧ \\u0003\\\"G\\u0001\\u0018;@9<;3@ ɞ ¸ 1 \\u0011\\u0012\\u00102\\u0004\\u0007 *:7\\u0001B:D3E7\\u0001A@\\u0001;@F7D?;FF7@F\\u00018;FE\\u00015AG>6\\u000147,!\\\"\\u0001 \\u001a\\u0001,!\\\"\\u00012. ĦƛĦö \\u0005,!\\\"\\u0001 \\u001a\\u0001,!\\\"\\u0001!\\u001a(  \\u0005\\u0001AD,!\\\"\\u0001 \\u001a\\u0001,!\\\"\\u00013!\\\" Ŏ \\u0005\\u0001;@\\u0001I:;5: \\u001a ƛ \\u0003VFA35FGBW\\u0004\\u0001I3E\\u0001A@\\u0001F:7\\u0001A66\\u0001A553E;A@\\u0001D7B>3576\\u00014K \\u001a' ž \\u0007\\u0001\\u001bJBD7EE;A@E\\u0001>;=7 ...\",\n      \"anchor_excerpt\": \"Even when depositions recorded people’s voices accurately, however, they did not necessarily reflect what commoners would have said about the people under trial if they had been interacting with them or talking about them in a daily context ...\"\n    },\n    {\n      \"link_id\": \"link-00460\",\n      \"note_item_id\": \"fn-00377\",\n      \"current_anchor_id\": \"anchor-01497\",\n      \"marker\": \"3\",\n      \"note_page_no\": 536,\n      \"anchor_page_no\": 534,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"BD35F;53>9A3>SSEFD73?>;@;@9\\u00017H7@FE\\u0001;@FA\\u0001BD7\\u0006678;@76\\u0001E5D;BFE\\u0001F:3F\\u00015ADD7EBA@676\\u0001I;F:\\u0001B7@3>\\u000167@A?;@3F;A@E\\u0007\",\n      \"anchor_excerpt\": \"This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language ...\"\n    },\n    {\n      \"link_id\": \"link-00461\",\n      \"note_item_id\": \"fn-00378\",\n      \"current_anchor_id\": \"synthetic-footnote-00272\",\n      \"marker\": \"12\",\n      \"note_page_no\": 541,\n      \"anchor_page_no\": 541,\n      \"current_anchor_marker\": \"12\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. \\u0012 \\u0017E\\u0001 \\u0001:3H7\\u00013>D736K\\u0001?367\\u00015>73D\\u0005\\u0001A88;5;3>E\\u0001I7D7\\u0001;@F7D7EF76\\u0001;@\\u000135FE\\u0001F:3F\\u0001?3K\\u0001:3H7\\u00018AD7E:36AI76\\u00013\\u0001:A?;5;67\\u0005\\u00013@6\\u0001;@ 67F3;>E\\u0001F:3F\\u00015AG>6\\u0001:7>B\\u0001FA\\u000167F7D?;@7\\u0001I:7F:7D\\u0001EA?7A@7\\u0001: ...\",\n      \"anchor_excerpt\": \"Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. \\u0012 \\u0017E\\u0001 \\u0001:3H7\\u00013>D736K\\u0001?367\\u00015>73D\\u0005\\u0001A88;5;3>E\\u0001I7D7\\u0001;@F7D7EF76\\u0001;@\\u000135FE\\u0001F:3F\\u0001?3K\\u0001:3H7\\u00018AD7E:36AI76\\u00013\\u0001:A?;5;67\\u0005\\u00013@6\\u0001;@ 67F3;>E\\u0001F:3F\\u00015AG>6\\u0001:7>B\\u0001FA\\u000167F7D?;@7\\u0001I:7F:7D\\u0001EA?7A@7\\u0001: ...\"\n    },\n    {\n      \"link_id\": \"link-00479\",\n      \"note_item_id\": \"fn-00396\",\n      \"current_anchor_id\": \"anchor-01539\",\n      \"marker\": \"0\",\n      \"note_page_no\": 547,\n      \"anchor_page_no\": 545,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"0. ?8 \\u0012\\u0010\\u0007 \\u000f\\u0006\\u0011\\u00073@6\\u00013E=76\\u0001:;E\\u00013EEA5;3F7FA 8;@;E:\\u0001F:7\\u0001355AG@FE\\u00018AD\\u0001:;?\\u0001\\u0003!´ÇƠǀƍ \\u0004\\u0007\\u0017E\\u0001:7\\u0001I3E\\u0001D7EF;@9\\u0005\",\n      \"anchor_excerpt\": \"In contrast with medical texts, which usually focused on organic processes, most people cited in legal reports attributed madness to an extreme emotional experience. Some became crazy from fright, Men Fa 門發 (1816) because he had almost drow ...\"\n    },\n    {\n      \"link_id\": \"link-00480\",\n      \"note_item_id\": \"fn-00397\",\n      \"current_anchor_id\": \"synthetic-footnote-00275\",\n      \"marker\": \"19\",\n      \"note_page_no\": 549,\n      \"anchor_page_no\": 549,\n      \"current_anchor_marker\": \"19\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Aug. 1768 (QL33.7.8).\",\n      \"anchor_excerpt\": \"Aug. 1768 (QL33.7.8).\"\n    },\n    {\n      \"link_id\": \"link-00484\",\n      \"note_item_id\": \"fn-00401\",\n      \"current_anchor_id\": \"synthetic-footnote-00276\",\n      \"marker\": \"6\",\n      \"note_page_no\": 553,\n      \"anchor_page_no\": 553,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Dec. 1816 (JQ21.10.18). Hua was eventually sentenced to strangulation after the Assizes for “killing in an affray.” The madman remained unidentified.\",\n      \"anchor_excerpt\": \"Dec. 1816 (JQ21.10.18). Hua was eventually sentenced to strangulation after the Assizes for “killing in an affray.” The madman remained unidentified.\"\n    },\n    {\n      \"link_id\": \"link-00485\",\n      \"note_item_id\": \"fn-00402\",\n      \"current_anchor_id\": \"anchor-01573\",\n      \"marker\": \"6\",\n      \"note_page_no\": 558,\n      \"anchor_page_no\": 556,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Apr. 1783 (QL48.3.5), in QWD: 861. \\u0012 \\u001a)\\\" #.\\u001a' \\u0012 \\u0005 V#;@;EFDK\\u0001A8\\u0001(;F7EWưɆ \\u0005V)5:AA>EW ¨ŀ \\u000e\\u0005 V*3=;@9\\u0001F:7\\u00017J3?;@3F;A@E\\u0001I;F:\\u0001A@7UE AD;9;@3>\\u0001@3?7Wbsüȓ \\u0007 $ ^{91} $ Palace memorial by Guangdong governor Li Hu 李湖, dated 13 Apr. 1781 (QL46.3.20) (QWD: ...\",\n      \"anchor_excerpt\": \"Disorders that caused discomfort in the chest (including cardio-vascular disorders) were easily experienced as the doing of mucus. The Jiaqing Emperor (r. 1796-1820) died on the evening of September 2, 1820 at the age of fifty-nine, one day ...\"\n    },\n    {\n      \"link_id\": \"link-00486\",\n      \"note_item_id\": \"fn-00403\",\n      \"current_anchor_id\": \"anchor-01578\",\n      \"marker\": \"0\",\n      \"note_page_no\": 559,\n      \"anchor_page_no\": 558,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"0. \\u0005\\u0001?8\\u0001 \\u0011\\u000f\\u0007 \\u0007 \\u0001:3H7 *:7\\u0001A88;5;3>\\u0001I:A\\u0001?367\\u0001EG5:\\u00013\\u00015>73D\\u00016;EF;@5F;A@\\u000147FI77@\\u0001I;>6\\u000135FE\\u00013@6\\u0001@A@E7@E;53>\\u0001EB775:\\u0001\\u00033 6;E5GEE76\\u0001 ;3@9UE\\u0001BDABAE3> VFA\\u000143>3@57\\u0001F:7\\u0001EG4\\u0006EF3FGF7\\u0001A@\\u0001=;>>;@9\\u00014753GE7\\u0001A8\\u0001?36@7EEW\\u0001\\u0003ËƖƐŒ\\u001b\\u0010, \\u0004 ;@ \\u0007 \\u0005\\u0001BB\\u0007 \\u0010\\u001088\\u0007\",\n      \"anchor_excerpt\": \"criminal became poorer and more troubled day by day. His stasis [\\\"depression\\\"] turned into an illness and he contracted 'confusion by mucus.' In the seventh month of Qianlong 47 [1782], he jumped from the city wall and hurt his leg falling. ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-13-13-life-trials:toc-manual-2-13-13-life-trials:footnote\",\n  \"chapter_title\": \"13. Life trials\",\n  \"page_range\": [\n    533,\n    559\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 531,\n      \"ocr_excerpt\": \"The magistrate composed a summary of the entire affair and proposed a temporary sentence according to the relevant laws. He sent his report to his immediate superior the prefect, along with the formal depositions (招狀) of the criminal and of all the witnesses, reconstituted from the clerk's notes. I have already discussed the several reviews this preliminary sentencing had to go through before it could be confirmed (see 10). The depositions we read in these provincial reports were thus several times removed from the words that the parties had originally uttered. Yasuhiko Karasawa (2007) has noticed broad discrepancies between draft depositions and the way they were cited in later reports. $ ^{5} $ He has shown that during the course of the Qing the legal secretaries who composed the final drafts of tiben increasingly tended to edit testimonies so as to confirm the magistrate’s (and the governor’s) findings, removing from the depositions lies, smokescreens, gaps or contradictions in evidence, and all the possibly truthful details that did not appear in the official narrative of the case (which in turn purported to be based on the confessions). In some madness cases, all the witnesses ...\"\n    },\n    {\n      \"page_no\": 532,\n      \"ocr_excerpt\": \"Depositions were edited translations of orality rather than direct transcriptions. Conventions of legal reporting such as the use of the written style and the selective editing of depositions make it difficult to assess what terms common people used to describe madness. Very specific depositions and those that “sound oral” were probably closer to the original words of the witnesses than the conventionally formulated ones. The memorials that quoted the witnesses as having said different things with different words in two different trial sessions are also more likely to have been authentic. The fact that these depositions consistently sounded more oral seems to confirm this view. It remains possible, however, that in many cases some seemingly oral usage reflected a secretary’s use of a vernacular style of writing as a device to enhance the authenticity of the depositions. Even when depositions recorded people’s voices accurately, however, they did not necessarily reflect what commoners would have said about the people under trial if they had been interacting with them or talking about them in a daily context. Since we have no access to the words that the witnesses actually pronounced ...\"\n    },\n    {\n      \"page_no\": 533,\n      \"ocr_excerpt\": \"the reports. Interestingly, all made their way into depositions. $ ^{8} $ Bureaucratic jargon is particularly important because it appeared everywhere. Only good knowledge of legal texts and the reading of numerous tiben allow to separate the formulaic from words that the witnesses would have been more likely to recognize as their own. Before I turn to the depositions themselves, let me survey the main set phrases that punctuated legal reports and how we can use them to some profit despite their seemingly opaque uniformity. The concepts we see in documents were more than “background noise” that should be reduced before we can get to the undistorted facts. These objects were precisely those that institutions and practitioners purported to discuss and act upon. Formulaic phrases may have given little idea of what the person they described looked and sounded like, but they spoke eloquently of what the legal field expected madness to sound and look like. Judicial reports almost invariably noted that the eyes of killers who had just been arrested “were staring straight” (兩目直瞪 or 兩目直視) and that their “words were incoherent” (語無論次). These words described the stereotypically stupefied-and- ...\"\n    },\n    {\n      \"page_no\": 534,\n      \"ocr_excerpt\": \"recognized by these outward signs would be putting the result (an ex post facto report phrased in unequivocal terms) before the process of identification. This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language of a recovered person were said to be “sober” or “clear” (清爽). $ ^{12} $ A longer set phrase specified that the recovered killer’s “facial expression was sober and his speech clear” (神清色爽 語言明晰). $ ^{13} $ Since officials knew that legal madness was all or nothing: the reports they wrote therefore made as strong a distinction as possible between the normal and the mad: a dumb-struck expression contrasted with a sober one; incoherent speech with clear language. Tiben often cast the events that had led to a killing into the predetermined script of how the law expected madness cases to unfold. Because most mad killings were committed during sudden fits and because the law defined madness as utter unawareness of one's own actions, the vast majority of memorials specified that on such-and-such a date ...\"\n    },\n    {\n      \"page_no\": 535,\n      \"ocr_excerpt\": \"Since only absolute insanity was legally recognized, it is possible that many people whom trials determined were mad probably looked the way set phrases described them. But these formulaic expressions were meant to attest more than to describe. By establishing a seamless correspondence between specific events and a general scenario, officials used these phrases to make the choice of the penal denomination “killing because of madness” appear as indisputable as possible. This “fool-proofing” of judicial sentences was important, because officials could be imposed administrative sanctions if they sentenced a crime too lightly, too heavily, or according to the wrong legal article. Concrete observations funneled into a few turns of phrase aimed to convince reviewers that the madness of the “criminal” under trial was indeed as extreme as the law mandated. $ ^{15} $ The criminal's recovery from his incoherence made it possible to extract a confession. In most reports from the late Qing, when testimonies were rewritten to confirm the final verdict, few words were the criminal's own. The killer and most of the witnesses were reported to have said about the same thing in about the same words. ...\"\n    },\n    {\n      \"page_no\": 536,\n      \"ocr_excerpt\": \"The confession was not an admission of guilt doubled with repentance (though depositions sometimes contained statements of regret, dismay, or contrition), but the killer's formulation of the crime for which he would be sentenced—his act as it was characterized by the law. Since by definition he did not remember his acts, his confession could only be the ratification of the version of the crime that officials had settled upon after investigation. Medical case files also contained formulaic turns of phrase, but they tended to be more flexible, perhaps because they recorded symptoms that physicians had observed (by contrast with both writers of medical treatises, who were trying to present general arguments, and legal officials or secretaries, who had not witnessed the acts of the people they were describing) and because these symptoms could be important to the establishment of a therapy. $ ^{16} $ The readers of medical case files also differed from those of legal reports. Whereas legal reports were meant to be assessed by superiors or equals, medical records were written for the relatives of patients or for readers of collections of case files. Although physicians occasionally used ...\"\n    },\n    {\n      \"page_no\": 537,\n      \"ocr_excerpt\": \"affliction by nine different terms. $ ^{17} $ Putting aside those related to “mucus” for the moment, they were “madness illness” (the official term for madness), fengbing 風病 (lit. “Wind illness,” but homophonous with the term that meant “madness illness”), fengdian 風顛 (“madness”; lit. Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $ fengkuang bing 風狂病 (“madness illness”), fengkuang bingzheng 風狂病症 (“madness disorder”), and fengdian bingzheng 風顛病症 (“madness disorder”). $ ^{20} $ We cannot assume that people used the term “madness illness” orally. Considering that fengdian and fengkuang were intelligible on their own and were widely used in non-judicial contexts, we should probably interpret the compounds fengkuang bing, fengkuang bingzheng, and fengdian bingzheng—which were clearly not oral—as bureaucratic jargon. The suffixes bing and bingzheng may have been used to make clear that the law considered madness to be an illness. $ ^{21} $ Apart from the pair-turned-compound diankuang, all the above terms contain the sound feng. A clerk or official who wanted to transcribe the sound feng could choose between the homophonous 瘋 and 風. T ...\"\n    },\n    {\n      \"page_no\": 538,\n      \"ocr_excerpt\": \"(“Wind-mucus blocking the openings [of the Heart]”). In accord with medical conceptions I have already analyzed, tanmi xinqiao identified mucus as the cause of madness and the Heart as the seat of cognitive and perceptive activities. $ ^{23} $ “Wind-mucus blocking the openings” was a variant specifying that mucus had been caused by Wind. $ ^{24} $ This Wind etiology, which had become exceptional in Qing medicine, was reflected in the way the report explained the onset of Deng’s madness. Whereas most memorials said that the would-be killer “got madness” (得了瘋病), the 1736 memorial claimed Deng “contracted” (run 染) it, a term usually reserved for illnesses caught by contact with some kind of pathogenic Qi. $ ^{25} $ Although not all these terms for madness were technical medical categories, most of them had equivalents in the medical literature. The use of medically acceptable terminology by commoners and legal specialists alike does not imply that these people embraced medical conceptions. It confirms instead that the same set of terms could accommodate many different conceptions. The non-technical medical words used in legal depositions differed from expressions like “Liver stasis” ( ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01494\",\n      \"marker\": \"8\",\n      \"page_no\": 533,\n      \"paragraph_index\": 0,\n      \"source_text\": \"the reports. Interestingly, all made their way into depositions. $ ^{8} $ Bureaucratic jargon is particularly important because it appeared everywhere. Only good knowledge of legal texts and the reading of numerous tiben allow to separate t ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01495\",\n      \"marker\": \"11\",\n      \"page_no\": 534,\n      \"paragraph_index\": 1,\n      \"source_text\": \"This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01498\",\n      \"marker\": \"14\",\n      \"page_no\": 534,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Tiben often cast the events that had led to a killing into the predetermined script of how the law expected madness cases to unfold. Because most mad killings were committed during sudden fits and because the law defined madness as utter un ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01500\",\n      \"marker\": \"16\",\n      \"page_no\": 536,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Medical case files also contained formulaic turns of phrase, but they tended to be more flexible, perhaps because they recorded symptoms that physicians had observed (by contrast with both writers of medical treatises, who were trying to pr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01501\",\n      \"marker\": \"17\",\n      \"page_no\": 537,\n      \"paragraph_index\": 0,\n      \"source_text\": \"affliction by nine different terms. $ ^{17} $ Putting aside those related to “mucus” for the moment,\"\n    },\n    {\n      \"anchor_id\": \"anchor-01502\",\n      \"marker\": \"18\",\n      \"page_no\": 537,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $\"\n    },\n    {\n      \"anchor_id\": \"anchor-01503\",\n      \"marker\": \"19\",\n      \"page_no\": 537,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $\"\n    },\n    {\n      \"anchor_id\": \"anchor-01504\",\n      \"marker\": \"20\",\n      \"page_no\": 537,\n      \"paragraph_index\": 5,\n      \"source_text\": \"and fengdian bingzheng 風顛病症 (“madness disorder”). $ ^{20} $\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00389\",\n      \"note_item_id\": \"fn-00306\",\n      \"current_anchor_id\": \"anchor-01492\",\n      \"marker\": \"1\",\n      \"note_page_no\": 533,\n      \"anchor_page_no\": 531,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"?@>23/who/was/found Vstanding/_next/to/his/victim`3/smiling/1laughingD2/stupidlyW/1ƺƹƘƼ 25 reports almost/invariably/noted that/the eyes/of/killers who/had/just/beenarrestedVwere Xhe/typical/sentence/stated/that/the/killerUs/Veyes/were/star ...\",\n      \"anchor_excerpt\": \"In some madness cases, all the witnesses were cited as having used the same words in the same order to describe what happened on the day of a crime. Even the killer used the same words despite claiming that he had no memory of what had happ ...\"\n    },\n    {\n      \"link_id\": \"link-00390\",\n      \"note_item_id\": \"fn-00307\",\n      \"current_anchor_id\": \"anchor-01493\",\n      \"marker\": \"3\",\n      \"note_page_no\": 534,\n      \"anchor_page_no\": 532,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"case/of/Pi/ ongķŢ 5 Sther/common/formulas/wereZO UXP/XPU ZO\\\\HU ƭŗŧ ź 1Wong/]an Øȝ _ ?@ `2/and ZO UZ /QPHUXPU ƭǭŬŧ 1Pu/Fingjian ɞ æ _ ?@>`25 Xhe/phrase/on/intermittent/fits/could/beZOP/ H/ZOP/`\\\\ ĦƛĦö 3ZOP/ H/ZOP/OHV Í 3/orZOP/ H/ZOP/aOP Ŏ 3/ ...\",\n      \"anchor_excerpt\": \"Even when depositions recorded people’s voices accurately, however, they did not necessarily reflect what commoners would have said about the people under trial if they had been interacting with them or talking about them in a daily context ...\"\n    },\n    {\n      \"link_id\": \"link-00391\",\n      \"note_item_id\": \"fn-00308\",\n      \"current_anchor_id\": \"anchor-01497\",\n      \"marker\": \"3\",\n      \"note_page_no\": 536,\n      \"anchor_page_no\": 534,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"3. BD35F;53>9A3>SSEFD73?>;@;@9\\u00017H7@FE\\u0001;@FA\\u0001BD7\\u0006678;@76\\u0001E5D;BFE\\u0001F:3F\\u00015ADD7EBA@676\\u0001I;F:\\u0001B7@3>\\u000167@A?;@3F;A@E\\u0007\",\n      \"anchor_excerpt\": \"This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language ...\"\n    },\n    {\n      \"link_id\": \"link-00392\",\n      \"note_item_id\": \"fn-00309\",\n      \"current_anchor_id\": \"anchor-01499\",\n      \"marker\": \"5\",\n      \"note_page_no\": 537,\n      \"anchor_page_no\": 535,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"/1pp5/ 4 <2/to exemplify/Uing/legal/reasoning/concerning/mad/acts5 ? U PHU could/be/written/in/one/of/four/waysAɮɬ 3ɮƙ 3Ɩɬ 3/andƖƙ 5/Ell/four/forms/appeared/inthe @PU ZOP Ġn 3/which/was/compiled/around/the/same/time/as/the/memorial/ /am/exa ...\",\n      \"anchor_excerpt\": \"Since only absolute insanity was legally recognized, it is possible that many people whom trials determined were mad probably looked the way set phrases described them. But these formulaic expressions were meant to attest more than to descr ...\"\n    },\n    {\n      \"link_id\": \"link-00393\",\n      \"note_item_id\": \"fn-00310\",\n      \"current_anchor_id\": \"synthetic-footnote-00288\",\n      \"marker\": \"12\",\n      \"note_page_no\": 541,\n      \"anchor_page_no\": 541,\n      \"current_anchor_marker\": \"12\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. E :3H7 3>D736K ?367 5>73D A88;5;3>E I7D7 ;@F7D7EF76 ;@ 35FE F:3F ?3K :3H7 8AD7E:36AI76 3 :A?;5;67 3@6 ;@ 67F3;>E F:3F 5AG>6 :7>B FA 67F7D?;@7 I:7F:7D EA?7A@7 :36 477@ ...\",\n      \"anchor_excerpt\": \"Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. E :3H7 3>D736K ?367 5>73D A88;5;3>E I7D7 ;@F7D7EF76 ;@ 35FE F:3F ?3K :3H7 8AD7E:36AI76 3 :A?;5;67 3@6 ;@ 67F3;>E F:3F 5AG>6 :7>B FA 67F7D?;@7 I:7F:7D EA?7A@7 :36 477@ ...\"\n    },\n    {\n      \"link_id\": \"link-00410\",\n      \"note_item_id\": \"fn-00327\",\n      \"current_anchor_id\": \"anchor-01544\",\n      \"marker\": \"5\",\n      \"note_page_no\": 545,\n      \"anchor_page_no\": 546,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5. 5=25/Fai/WhengqiA/memorial/by/Whaanxi/governor/^hong not/always attribute/madness/to/possession5 ]in ɒɩ datedUP =5@5 ?B/P ^^3 mf/=?@5 < 4?5/ or/more/on/FaiUs/case3/see/ 5 5 < ^hang/Pu Õƈ 3FP[VU ɌȺ 3Q\\\\HU =3/VWhenzhi/menW ƭãɖ 3/VOuangWƀ 3/ ...\",\n      \"anchor_excerpt\": \"就得了痰迷病症). $ ^{52} $ Han Chun (1816) was 48 sui and worked as a hired laborer when his young daughter died in 1814. His grief was so profound that it turned into madness (悲痛過切 得了瘋迷病症). $ ^{53} $ Lin Zhigong 林志功 started acting strangely after ...\"\n    },\n    {\n      \"link_id\": \"link-00414\",\n      \"note_item_id\": \"fn-00331\",\n      \"current_anchor_id\": \"anchor-01539\",\n      \"marker\": \"0\",\n      \"note_page_no\": 547,\n      \"anchor_page_no\": 545,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"0. ?8 \\u0012\\u0010\\u0007 \\u000f\\u0006\\u0011\\u00073@6\\u00013E=76\\u0001:;E\\u00013EEA5;3F7FA 8;@;E:\\u0001F:7\\u0001355AG@FE\\u00018AD\\u0001:;?\\u0001\\u0003!´ÇƠǀƍ \\u0004\\u0007\\u0017E\\u0001:7\\u0001I3E\\u0001D7EF;@9\\u0005\",\n      \"anchor_excerpt\": \"In contrast with medical texts, which usually focused on organic processes, most people cited in legal reports attributed madness to an extreme emotional experience. Some became crazy from fright, Men Fa 門發 (1816) because he had almost drow ...\"\n    },\n    {\n      \"link_id\": \"link-00415\",\n      \"note_item_id\": \"fn-00332\",\n      \"current_anchor_id\": \"anchor-01559\",\n      \"marker\": \"1\",\n      \"note_page_no\": 548,\n      \"anchor_page_no\": 550,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. ujian/bureau23/case/?5/Goolants1attacking/drugs2/were/among/the/most/common remedies/for/madness/in/late/imperial/times3/when/physicians/often/attributed insanity/to/inner/ ire5/ or/more on/the/dispute/between/purging/with/cooling/drugs/ ...\",\n      \"anchor_excerpt\": \"But a fairly large number of ordinary people also consulted physicians or simply bought drugs. $ ^{71} $ A woman from Guizhou used the service of a “passing doctor” (過路醫生) to treat her son. $ ^{72} $ A woman from Liaodong sent her eldest so ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -22,65 +22,14 @@
       ],
       "note_system": "footnote",
       "page_range": [
-        529,
+        533,
         559
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 79083,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01488",
-          "chapter_id": "toc-manual-2-13-13-life-trials",
-          "page_no": 529,
-          "paragraph_index": 1,
-          "char_start": 408,
-          "char_end": 416,
-          "source_marker": "$ ^{2} $",
-          "normalized_marker": "2",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Much of what we know about the kinds of behavior Qing people called “mad” comes from “routine memorials of the Office of Scrutiny for the Ministry of Punishments” (刑科题本). $ ^{1} $ These reports were written by the highest officials in the provincial bureaucracy (governors and governors-general) as the final step in the sentencing of a crime, or by the Ministry of Punishments in response to these reports. $ ^{2} $ Each memorial gave a detailed account of an entire case and of the way the judicial system had processed it. Most cited the “depositions” (gong 供) of the people involved: the “criminal” (as a person under trial was usually called), his or her relatives and neighbors, local leaders, and anyone the magistrate found relevant to interrogate. $ ^{3} $ These statements illustrate how common people spoke of madness and dealt with it, but they should be used with great circumspection.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 79085,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01490",
-          "chapter_id": "toc-manual-2-13-13-life-trials",
-          "page_no": 530,
-          "paragraph_index": 1,
-          "char_start": 439,
-          "char_end": 447,
-          "source_marker": "$ ^{4} $",
-          "normalized_marker": "4",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "These are external limits to what “routine memorials” (tiben) will tell us. Even more important, the content of the depositions recorded in the reports was also pre-oriented. Statements found their way into tiben by a complex process. During an official interrogation, the “criminal” and the witnesses gave “oral depositions” (□供), which a clerk recorded “in a mixture of spoken and written style corresponding to what was actually said.” $ ^{4} $ If witnesses disagreed or if there were discrepancies between their depositions and the material evidence, the magistrate would press everyone to tell the true story. Once all doubts and contradictions were cleared, he “ordered a clerk to write down for the criminal a formal confession of his offense, including key-points in the story and composed in a particular style.” For a condemnation to be acceptable, the criminal had to endorse this version of events.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 79086,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01491",
-          "chapter_id": "toc-manual-2-13-13-life-trials",
-          "page_no": 531,
-          "paragraph_index": 1,
-          "char_start": 129,
-          "char_end": 137,
-          "source_marker": "$ ^{5} $",
-          "normalized_marker": "5",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Yasuhiko Karasawa (2007) has noticed broad discrepancies between draft depositions and the way they were cited in later reports. $ ^{5} $ He has shown that during the course of the Qing the legal secretaries who composed the final drafts of tiben increasingly tended to edit testimonies so as to confirm the magistrate’s (and the governor’s) findings, removing from the depositions lies, smokescreens, gaps or contradictions in evidence, and all the possibly truthful details that did not appear in the official narrative of the case (which in turn purported to be based on the confessions).",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 79089,
+          "row_id": 97591,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01494",
           "chapter_id": "toc-manual-2-13-13-life-trials",
@@ -93,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "the reports. Interestingly, all made their way into depositions. $ ^{8} $ Bureaucratic jargon is particularly important because it appeared everywhere. Only good knowledge of legal texts and the reading of numerous tiben allow to separate the formulaic from words that the witnesses would have been more likely to recognize as their own. Before I turn to the depositions themselves, let me survey the main set phrases that punctuated legal reports and how we can use them to some profit despite their seemingly opaque uniformity.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79090,
+          "row_id": 97593,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01495",
           "chapter_id": "toc-manual-2-13-13-life-trials",
@@ -110,11 +59,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language of a recovered person were said to be “sober” or “clear” (清爽). $ ^{12} $ A longer set phrase specified that the recovered killer’s “facial expression was sober and his speech clear” (神清色爽 語言明晰). $ ^{13} $ Since officials knew that legal madness was all or nothing: the reports they wrote therefore made as strong a distinction as possible between the normal and the mad: a dumb-struck expression contrasted with a sober one; incoherent speech with clear language.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79093,
+          "row_id": 97596,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01498",
           "chapter_id": "toc-manual-2-13-13-life-trials",
@@ -127,11 +76,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Tiben often cast the events that had led to a killing into the predetermined script of how the law expected madness cases to unfold. Because most mad killings were committed during sudden fits and because the law defined madness as utter unawareness of one's own actions, the vast majority of memorials specified that on such-and-such a date, the would-be killer \"got madness illness, with intermittent fits; when it flares up, he is unaware of people and things\" (得了瘋病 時發時止 發時不醒人事). $ ^{14} $ This was how the prototypical scenario of a mad homicide started.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79096,
+          "row_id": 97599,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01500",
           "chapter_id": "toc-manual-2-13-13-life-trials",
@@ -144,11 +93,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Medical case files also contained formulaic turns of phrase, but they tended to be more flexible, perhaps because they recorded symptoms that physicians had observed (by contrast with both writers of medical treatises, who were trying to present general arguments, and legal officials or secretaries, who had not witnessed the acts of the people they were describing) and because these symptoms could be important to the establishment of a therapy. $ ^{16} $ The readers of medical case files also differed from those of legal reports. Whereas legal reports were meant to be assessed by superiors or equals, medical records were written for the relatives of patients or for readers of collections of case files. Although physicians occasionally used formulaic phrases (often descriptions of symptoms drawn from the Yellow Emperor's Inner Canon) in their case files, they had nothing to gain from channeling all their cases into the same convenient mold when the uniqueness of each treatment was precisely what brought them distinction.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79098,
+          "row_id": 97601,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01501",
           "chapter_id": "toc-manual-2-13-13-life-trials",
@@ -161,50 +110,137 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "affliction by nine different terms. $ ^{17} $ Putting aside those related to “mucus” for the moment,",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97602,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01502",
+          "chapter_id": "toc-manual-2-13-13-life-trials",
+          "page_no": 537,
+          "paragraph_index": 3,
+          "char_start": 12,
+          "char_end": 21,
+          "source_marker": "$ ^{18} $",
+          "normalized_marker": "18",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97603,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01503",
+          "chapter_id": "toc-manual-2-13-13-life-trials",
+          "page_no": 537,
+          "paragraph_index": 3,
+          "char_start": 92,
+          "char_end": 101,
+          "source_marker": "$ ^{19} $",
+          "normalized_marker": "19",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97604,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01504",
+          "chapter_id": "toc-manual-2-13-13-life-trials",
+          "page_no": 537,
+          "paragraph_index": 5,
+          "char_start": 50,
+          "char_end": 59,
+          "source_marker": "$ ^{20} $",
+          "normalized_marker": "20",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "and fengdian bingzheng 風顛病症 (“madness disorder”). $ ^{20} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00459",
-          "note_item_id": "fn-00376",
-          "current_anchor_id": "anchor-01493",
+          "link_id": "link-00389",
+          "note_item_id": "fn-00306",
+          "current_anchor_id": "anchor-01492",
           "marker": "1",
+          "note_page_no": 533,
+          "anchor_page_no": 531,
+          "current_anchor_marker": "1",
+          "note_excerpt": "?@>23/who/was/found Vstanding/_next/to/his/victim`3/smiling/1laughingD2/stupidlyW/1ƺƹƘƼ 25 reports almost/invariably/noted that/the eyes/of/killers who/had/just/beenarrestedVwere Xhe/typical/sentence/stated/that/the/killerUs/Veyes/were/staring/blankly/and/his/words/were/incoherentA/no confession/can/be/extractedW/15Ǡg\\ 25/Xhis/is/a/good/example/of/how/the/functioning/of/legal/operations shaped/what/was/said/about/madness5/ or/more/on/this/theme/of/the/emergence/of/the/legal/object/Vmadness staring/straightW 1tƠơƧ or tƠơȌ 2 and that their Vwords/were/incoherentW 1Ȗųț illnessW/from/the/concerns/and/procedures/of/the/judicial/system3/see/Ghapters/ /and/ 5",
+          "anchor_excerpt": "In some madness cases, all the witnesses were cited as having used the same words in the same order to describe what happened on the day of a crime. Even the killer used the same words despite claiming that he had no memory of what had happened. Most people who had not declared a mad person to the authorities explained their decision by claiming that their mad relative or neighbor \"was not inciting trouble\" (並不滋事). $ ^{6} $ However, when a father explained that he did not declare his son \"because he is my only son,\" we may presume that the report was not citing a legal secretary playing ventriloquist. The language itself may not have been authentic, but the content probably was.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00390",
+          "note_item_id": "fn-00307",
+          "current_anchor_id": "anchor-01493",
+          "marker": "3",
           "note_page_no": 534,
           "anchor_page_no": 532,
-          "current_anchor_marker": "1",
-          "note_excerpt": "\u0011\u0012 2\u0004\u00013@6 ,! ', \u0001#\"\u001a'*\"' ƭǭŬŧ \u0003\"G\u0001\u0018;@9<;3@ ɞ ¸ 1 \u0011\u0012\u00102\u0004\u0007 *:7\u0001B:D3E7\u0001A@\u0001;@F7D?;FF7@F\u00018;FE\u00015AG>6\u000147,!\"\u0001 \u001a\u0001,!\"\u00012. ĦƛĦö \u0005,!\"\u0001 \u001a\u0001,!\"\u0001!\u001a(  \u0005\u0001AD,!\"\u0001 \u001a\u0001,!\"\u00013!\" Ŏ \u0005\u0001;@\u0001I:;5: \u001a ƛ \u0003VFA35FGBW\u0004\u0001I3E\u0001A@\u0001F:7\u0001A66\u0001A553E;A@\u0001D7B>3576\u00014K \u001a' ž \u0007\u0001\u001bJBD7EE;A@E\u0001>;=7,.\"\u0001 \u001a\u0001,.\"\u00012. ɠƛɠö \u0003.!*\u0018\u0005 ?7?AD;3>\u000163F76\u0001 \u000f\u0001 3@\u0007\u0001 \u0011 \u0010\u0005\u000153E7\u0001A8 G\u0001)3@ \u0002\u0001 \u0004\u00013@6\u001b.\u0001,!\"\u0001 \u001a\u00013.( \u0007Ħƛ) \u0003.!*\u0018\u0005\u0001?7?AD;3> 63F76 \u0001\u0017G9\u0007 \u0010 \u000f\u0001\u0003'\" \u0007\u0010\u0007\u000f\u0004\u0005\u000153E7\u0001A8 ;3\u0001\u0019:3@6AG iĞĖ \u0004I7D7\u0001?AD7\u0001G@GEG3>\u0007",
+          "current_anchor_marker": "3",
+          "note_excerpt": "case/of/Pi/ ongķŢ 5 Sther/common/formulas/wereZO UXP/XPU ZO\\HU ƭŗŧ ź 1Wong/]an Øȝ _ ?@ `2/and ZO UZ /QPHUXPU ƭǭŬŧ 1Pu/Fingjian ɞ æ _ ?@>`25 Xhe/phrase/on/intermittent/fits/could/beZOP/ H/ZOP/`\\ ĦƛĦö 3ZOP/ H/ZOP/OHV Í 3/orZOP/ H/ZOP/aOP Ŏ 3/in/which H ƛ 1VtoactupW2/was/on/the/odd/occasion/replaced/by HU ž 5/Ixpressions/likeZ\\P/ H/Z\\P/`\\ ɠƛɠö 1\\OXF3 memorial/dated/ =/ an5/ ? >3/case/of u/Wan 0/ 2/andI\\/ZOP/ H/a\\V 5ĦƛW 1\\OXF3/memorial dated /Eug5 > =/1UP 5>5=23/case/of ia/Ghandou iĞĖ 2were/more/unusual5",
           "anchor_excerpt": "Even when depositions recorded people’s voices accurately, however, they did not necessarily reflect what commoners would have said about the people under trial if they had been interacting with them or talking about them in a daily context. Since we have no access to the words that the witnesses actually pronounced, the best we can do is to assess each memorial on an individual basis while keeping in mind all the caveats I have just outlined. $ ^{7} $",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00460",
-          "note_item_id": "fn-00377",
+          "link_id": "link-00391",
+          "note_item_id": "fn-00308",
           "current_anchor_id": "anchor-01497",
           "marker": "3",
           "note_page_no": 536,
           "anchor_page_no": 534,
           "current_anchor_marker": "3",
-          "note_excerpt": "BD35F;53>9A3>SSEFD73?>;@;@9\u00017H7@FE\u0001;@FA\u0001BD7\u0006678;@76\u0001E5D;BFE\u0001F:3F\u00015ADD7EBA@676\u0001I;F:\u0001B7@3>\u000167@A?;@3F;A@E\u0007",
+          "note_excerpt": "3. BD35F;53>9A3>SSEFD73?>;@;@9\u00017H7@FE\u0001;@FA\u0001BD7\u0006678;@76\u0001E5D;BFE\u0001F:3F\u00015ADD7EBA@676\u0001I;F:\u0001B7@3>\u000167@A?;@3F;A@E\u0007",
           "anchor_excerpt": "This being said, the language of reports suggests that madness could be discerned in one’s facial expression or countenance (神色). The visage of many mad men was described as “confused” (神色昏迷). $ ^{11} $ By contrast, the aspect and language of a recovered person were said to be “sober” or “clear” (清爽). $ ^{12} $ A longer set phrase specified that the recovered killer’s “facial expression was sober and his speech clear” (神清色爽 語言明晰). $ ^{13} $ Since officials knew that legal madness was all or nothing: the reports they wrote therefore made as strong a distinction as possible between the normal and the mad: a dumb-struck expression contrasted with a sober one; incoherent speech with clear language.",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00461",
-          "note_item_id": "fn-00378",
-          "current_anchor_id": "synthetic-footnote-00272",
+          "link_id": "link-00392",
+          "note_item_id": "fn-00309",
+          "current_anchor_id": "anchor-01499",
+          "marker": "5",
+          "note_page_no": 537,
+          "anchor_page_no": 535,
+          "current_anchor_marker": "5",
+          "note_excerpt": "/1pp5/ 4 <2/to exemplify/Uing/legal/reasoning/concerning/mad/acts5 ? U PHU could/be/written/in/one/of/four/waysAɮɬ 3ɮƙ 3Ɩɬ 3/andƖƙ 5/Ell/four/forms/appeared/inthe @PU ZOP Ġn 3/which/was/compiled/around/the/same/time/as/the/memorial/ /am/examining5 @ Wome/treatises/distinguished PHU and R\\HU as/two/different/types/of/madness/1=5=23/but/even/physicians/could have/difficulty/defining/what/distinguished PHU from R \\HU 1=5<25/ n/both/common/parlance/and/educated/talk3 U PHU 3 U R\\HU 3/and PHUR\\HU were/used/as/equivalents5 /translateIPU aO U as/VdisorderW/to/distinguish/it/fromIPU 1VillnessW23/but/the/two/were/synonyms5/ n/legal documents3IPU was/usedmostly/in/two4character/compounds3IPU aO U always/in/four4character/ones5 Es/ /pointed/out/in/the/Trologue/to/Tart/Xwo/1 23/the/law/used/common/illness/names/like U R\\HU and U PHU 3/as/well/as/terms/like/VgettingW/or/VcatchingW/madness3/and/legal officials/accepted/the/testimonies/of physicians/to/establish/whether/someone/under/trial/was/indeed/crazy5 /briefly/traced/the/emergence/of/the/legal/uses/ofƖ in/ 5",
+          "anchor_excerpt": "Since only absolute insanity was legally recognized, it is possible that many people whom trials determined were mad probably looked the way set phrases described them. But these formulaic expressions were meant to attest more than to describe. By establishing a seamless correspondence between specific events and a general scenario, officials used these phrases to make the choice of the penal denomination “killing because of madness” appear as indisputable as possible. This “fool-proofing” of judicial sentences was important, because officials could be imposed administrative sanctions if they sentenced a crime too lightly, too heavily, or according to the wrong legal article. Concrete observations funneled into a few turns of phrase aimed to convince reviewers that the madness of the “criminal” under trial was indeed as extreme as the law mandated. $ ^{15} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00393",
+          "note_item_id": "fn-00310",
+          "current_anchor_id": "synthetic-footnote-00288",
           "marker": "12",
           "note_page_no": 541,
           "anchor_page_no": 541,
           "current_anchor_marker": "12",
-          "note_excerpt": "Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. \u0012 \u0017E\u0001 \u0001:3H7\u00013>D736K\u0001?367\u00015>73D\u0005\u0001A88;5;3>E\u0001I7D7\u0001;@F7D7EF76\u0001;@\u000135FE\u0001F:3F\u0001?3K\u0001:3H7\u00018AD7E:36AI76\u00013\u0001:A?;5;67\u0005\u00013@6\u0001;@ 67F3;>E\u0001F:3F\u00015AG>6\u0001:7>B\u0001FA\u000167F7D?;@7\u0001I:7F:7D\u0001EA?7A@7\u0001:36\u0001477@\u0001?36\u00013F\u0001F:7\u0001?A?7@F\u0001A8\u00015A??;FF;@9\u0001F:7\u0001=;>>;@9\u0007 .!*\u0018\u0005\u0001?7?AD;3>\u000163F76\u0001 \u0001 74\u0007\u0001 \u0011 \u0010\u0001\u0003 ' \u0007 \u0007 \u000f\u0004\u0007 $ ^{31} $ XKTB, memorial dated 2 Sept. 1816 (JQ21.7.11).",
-          "anchor_excerpt": "Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. \u0012 \u0017E\u0001 \u0001:3H7\u00013>D736K\u0001?367\u00015>73D\u0005\u0001A88;5;3>E\u0001I7D7\u0001;@F7D7EF76\u0001;@\u000135FE\u0001F:3F\u0001?3K\u0001:3H7\u00018AD7E:36AI76\u00013\u0001:A?;5;67\u0005\u00013@6\u0001;@ 67F3;>E\u0001F:3F\u00015AG>6\u0001:7>B\u0001FA\u000167F7D?;@7\u0001I:7F:7D\u0001EA?7A@7\u0001:36\u0001477@\u0001?36\u00013F\u0001F:7\u0001?A?7@F\u0001A8\u00015A??;FF;@9\u0001F:7\u0001=;>>;@9\u0007 .!*\u0018\u0005\u0001?7?AD;3>\u000163F76\u0001 \u0001 74\u0007\u0001 \u0011 \u0010\u0001\u0003 ' \u0007 \u0007 \u000f\u0004\u0007 $ ^{31} $ XKTB, memorial dated 2 Sept. 1816 (JQ21.7.11).",
+          "note_excerpt": "Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. E :3H7 3>D736K ?367 5>73D A88;5;3>E I7D7 ;@F7D7EF76 ;@ 35FE F:3F ?3K :3H7 8AD7E:36AI76 3 :A?;5;67 3@6 ;@ 67F3;>E F:3F 5AG>6 :7>B FA 67F7D?;@7 I:7F:7D EA?7A@7 :36 477@ ?36 3F F:7 ?A?7@F A8 5A??;FF;@9 F:7 =;>>;@9 .!* ?7?AD;3> 63F76 74 ' $ ^{31} $ XKTB, memorial dated 2 Sept. 1816 (JQ21.7.11).",
+          "anchor_excerpt": "Aug. 1736 (QL1.7.6). For more on Jia Chandou's case, see 11.3, pp. 435ff. E :3H7 3>D736K ?367 5>73D A88;5;3>E I7D7 ;@F7D7EF76 ;@ 35FE F:3F ?3K :3H7 8AD7E:36AI76 3 :A?;5;67 3@6 ;@ 67F3;>E F:3F 5AG>6 :7>B FA 67F7D?;@7 I:7F:7D EA?7A@7 :36 477@ ?36 3F F:7 ?A?7@F A8 5A??;FF;@9 F:7 =;>>;@9 .!* ?7?AD;3> 63F76 74 ' $ ^{31} $ XKTB, memorial dated 2 Sept. 1816 (JQ21.7.11).",
           "current_anchor_synthetic": true
         },
         {
-          "link_id": "link-00479",
-          "note_item_id": "fn-00396",
+          "link_id": "link-00410",
+          "note_item_id": "fn-00327",
+          "current_anchor_id": "anchor-01544",
+          "marker": "5",
+          "note_page_no": 545,
+          "anchor_page_no": 546,
+          "current_anchor_marker": "5",
+          "note_excerpt": "5. 5=25/Fai/WhengqiA/memorial/by/Whaanxi/governor/^hong not/always attribute/madness/to/possession5 ]in ɒɩ datedUP =5@5 ?B/P ^^3 mf/=?@5 < 4?5/ or/more/on/FaiUs/case3/see/ 5 5 < ^hang/Pu Õƈ 3FP[VU ɌȺ 3Q\\HU =3/VWhenzhi/menW ƭãɖ 3/VOuangWƀ 3/last/entry/1^hangP]UA/ 25 n/contrast/with/medical/texts3/whichusuallyfocused/on/organic/processes3/most Enother/common/social/strain/that/could/lead/to/madness/was/failure/in/the official examination/system5",
+          "anchor_excerpt": "就得了痰迷病症). $ ^{52} $ Han Chun (1816) was 48 sui and worked as a hired laborer when his young daughter died in 1814. His grief was so profound that it turned into madness (悲痛過切 得了瘋迷病症). $ ^{53} $ Lin Zhigong 林志功 started acting strangely after his wife and young son both died of illness in 1735. $ ^{54} $ Jia Chandou's son died in 1730. As his father explained, Chandou's son \"had poxes and died. [The] Qi [of grief] confused his heart and he got a feng [madness] illness\" (出痘死了 氣迷了心 就得了一個瘋病). $ ^{55} $ In 1760, a few years after Chai Shijin's 柴世進 wife had died, his only surviving son fell into a river and drowned. He \"missed his son so much that [his grief] turned into madness illness\" (他想念兒子 致成瘋病). $ ^{56} $ Liu Yuhou's 劉裕後 father and younger brother made a living operating a wooden raft on the Yellow River (在黃河運放木筏營生). In 1738 their raft was crushed by the current and they drowned. Liu, who could not even find the bodies, cried day and night until he \"got madness illness, with intermittent fits\" (得了瘋病 時發時止). $ ^{57} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00414",
+          "note_item_id": "fn-00331",
           "current_anchor_id": "anchor-01539",
           "marker": "0",
           "note_page_no": 547,
@@ -215,72 +251,20 @@
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00480",
-          "note_item_id": "fn-00397",
-          "current_anchor_id": "synthetic-footnote-00275",
-          "marker": "19",
-          "note_page_no": 549,
-          "anchor_page_no": 549,
-          "current_anchor_marker": "19",
-          "note_excerpt": "Aug. 1768 (QL33.7.8).",
-          "anchor_excerpt": "Aug. 1768 (QL33.7.8).",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00484",
-          "note_item_id": "fn-00401",
-          "current_anchor_id": "synthetic-footnote-00276",
-          "marker": "6",
-          "note_page_no": 553,
-          "anchor_page_no": 553,
-          "current_anchor_marker": "6",
-          "note_excerpt": "Dec. 1816 (JQ21.10.18). Hua was eventually sentenced to strangulation after the Assizes for “killing in an affray.” The madman remained unidentified.",
-          "anchor_excerpt": "Dec. 1816 (JQ21.10.18). Hua was eventually sentenced to strangulation after the Assizes for “killing in an affray.” The madman remained unidentified.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00485",
-          "note_item_id": "fn-00402",
-          "current_anchor_id": "anchor-01573",
-          "marker": "6",
-          "note_page_no": 558,
-          "anchor_page_no": 556,
-          "current_anchor_marker": "6",
-          "note_excerpt": "Apr. 1783 (QL48.3.5), in QWD: 861. \u0012 \u001a)\" #.\u001a' \u0012 \u0005 V#;@;EFDK\u0001A8\u0001(;F7EWưɆ \u0005V)5:AA>EW ¨ŀ \u000e\u0005 V*3=;@9\u0001F:7\u00017J3?;@3F;A@E\u0001I;F:\u0001A@7UE AD;9;@3>\u0001@3?7Wbsüȓ \u0007 $ ^{91} $ Palace memorial by Guangdong governor Li Hu 李湖, dated 13 Apr. 1781 (QL46.3.20) (QWD: 715-19). \u0012 \u0011\"4\u001a'\u00011.3 ' \u0001*.\u001a'#\" ,łǏEɡ \u0003 \u0010\u000e\u0012\u0004\u0005 #.\u001a' \u0005\u00015;F76\u0001;@\u0001$3=3?GD3\u0001):;97A \u0012\u0010 6\u0013\u0001 @\u0011\u0007\u0001 AD\u0001?AD7\u0001A@F:7 7?7D97@57\u0001A8\u0001V=;>>;@9\u00014753GE7\u0001A8\u0001?36@7EEW\u00013@6\u0001F:7\u00017HA>GF;A@\u0001A8\u0001F:7\u0001B7@3>F;7E\u00018AD\u0001=;>>;@9\u0001;@\u00013\u0001EF3F7\u0001A8\u0001;@E3@;FK\u0005 E77\u0019 :3BF7DE \u00013@6\u0001 \u0007",
-          "anchor_excerpt": "Disorders that caused discomfort in the chest (including cardio-vascular disorders) were easily experienced as the doing of mucus. The Jiaqing Emperor (r. 1796-1820) died on the evening of September 2, 1820 at the age of fifty-nine, one day after he had felt “discomforted” (不豫) upon arriving in the imperial summer residence of Rehe. $ ^{86} $ A",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00486",
-          "note_item_id": "fn-00403",
-          "current_anchor_id": "anchor-01578",
-          "marker": "0",
-          "note_page_no": 559,
-          "anchor_page_no": 558,
-          "current_anchor_marker": "0",
-          "note_excerpt": "0. \u0005\u0001?8\u0001 \u0011\u000f\u0007 \u0007 \u0001:3H7 *:7\u0001A88;5;3>\u0001I:A\u0001?367\u0001EG5:\u00013\u00015>73D\u00016;EF;@5F;A@\u000147FI77@\u0001I;>6\u000135FE\u00013@6\u0001@A@E7@E;53>\u0001EB775:\u0001\u00033 6;E5GEE76\u0001 ;3@9UE\u0001BDABAE3> VFA\u000143>3@57\u0001F:7\u0001EG4\u0006EF3FGF7\u0001A@\u0001=;>>;@9\u00014753GE7\u0001A8\u0001?36@7EEW\u0001\u0003ËƖƐŒ\u001b\u0010, \u0004 ;@ \u0007 \u0005\u0001BB\u0007 \u0010\u001088\u0007",
-          "anchor_excerpt": "criminal became poorer and more troubled day by day. His stasis [\"depression\"] turned into an illness and he contracted 'confusion by mucus.' In the seventh month of Qianlong 47 [1782], he jumped from the city wall and hurt his leg falling. $ ^{89} $ (該犯日益貧難 抑鬱成病得有痰迷之症 曾於四十七年七月間 跳墮城牆 將腿跌傷) Finally, a terse entry in a body of administrative regulations explained that since the conduct of an unnamed juren 舉人 was caused by \"mucus confusion,\" he should not be deprived of his degree. $ ^{90} $",
+          "link_id": "link-00415",
+          "note_item_id": "fn-00332",
+          "current_anchor_id": "anchor-01559",
+          "marker": "1",
+          "note_page_no": 548,
+          "anchor_page_no": 550,
+          "current_anchor_marker": "1",
+          "note_excerpt": "1. ujian/bureau23/case/?5/Goolants1attacking/drugs2/were/among/the/most/common remedies/for/madness/in/late/imperial/times3/when/physicians/often/attributed insanity/to/inner/ ire5/ or/more on/the/dispute/between/purging/with/cooling/drugs/and/the/advocates/of/calorific/replenishing3/seeGhapter/=5 = \\OXF3/memorial/dated/@/ an5/ ? >5 =< n/almost/all/the/medical/and/legal/cases/ /have/seen3/relatives/were/mentioned/as/caretakers5",
+          "anchor_excerpt": "But a fairly large number of ordinary people also consulted physicians or simply bought drugs. $ ^{71} $ A woman from Guizhou used the service of a “passing doctor” (過路醫生) to treat her son. $ ^{72} $ A woman from Liaodong sent her eldest son (who was 17 sui and lived in his employer’s place 8 li away from his parents’ house) to a nearby settlement to fetch a",
           "current_anchor_synthetic": false
         }
       ]
     },
     "page_contexts": [
-      {
-        "page_no": 529,
-        "file_idx": 528,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "### 13.1 Discussions of madness in legal reports Judicial depositions and their biases Much of what we know about the kinds of behavior Qing people called “mad” comes from “routine memorials of the Office of Scrutiny for the Ministry of Punishments” (刑科题本). $ ^{1} $ These reports were written by the highest officials in the provincial bureaucracy (governors and governors-general) as the final step in the sentencing of a crime, or by the Ministry of Punishments in response to these reports. $ ^{2} $ Each memorial gave a detailed account of an entire case and of the way the judicial system had processed it. Most cited the “depositions” (gong 供) of the people involved: the “criminal” (as a person under trial was usually called), his or her relatives and neighbors, local leaders, and anyone the magistrate found relevant to interrogate. $ ^{3} $ These statements illustrate how common people spoke of madness and dealt with it, but they should be used with great circumspection. Depositions were not neutrally collected “representations of madness.” As we have seen, Qing law accepted as “mad” only acts that were entirely devoid of awareness. This extreme definition and the law’s narrow interest in killings explain why depositions focused disproportionately on fits of furor. Because the content of a mad killer’s words was usually",
-        "byte_size": 160643,
-        "sha256": "ebec28f7c32d830acac42fc53a1470e8c6b9ebd7d161378efbe9a94f74e4a3ed"
-      },
-      {
-        "page_no": 530,
-        "file_idx": 529,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "irrelevant to a homicide investigation, legal reports usually said little about what may have constituted mad language, but this vagueness about mad speech does not mean that the people under trial were always unable to speak coherently, or that only the utterly delirious were identified as mad in village communities. Legal documents also tell us little about the non-violent gestures and words that may have characterized local madmen, and about the daily interactions between them and their relatives, even when the depositions purported to be precisely about that. Certain derangements that people may have called “mad” (unmotivated sorrow, love-sickness, flights of fancy, etc.) were rarely recorded in legal sources because they were not seen as having led to the killings, or when they were, the cases in question were not sentenced as if they had been committed “because of madness.” Finally, these documents give no access to the “discourse processes through which social and emotional realities are constituted in ordinary talk and interaction” (White 1992: 38). These are external limits to what “routine memorials” (tiben) will tell us. Even more important, the content of the depositions recorded in the reports was also pre-oriented. Statements found their way into tiben by a complex process. During an official interrogation, the “criminal” and the witnesses gave “oral depositions” ...",
-        "byte_size": 137945,
-        "sha256": "3accf1ba7ba94632185fd36b1cc5ade9f3d105656c898dd5eb78f40eba865596"
-      },
       {
         "page_no": 531,
         "file_idx": 530,
@@ -314,6 +298,14 @@
         "sha256": "ccd1d31ef3a75dcaaa4866a775dbc2b19f7456b081f190bf6fbfd754e8ee1f86"
       },
       {
+        "page_no": 535,
+        "file_idx": 534,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Since only absolute insanity was legally recognized, it is possible that many people whom trials determined were mad probably looked the way set phrases described them. But these formulaic expressions were meant to attest more than to describe. By establishing a seamless correspondence between specific events and a general scenario, officials used these phrases to make the choice of the penal denomination “killing because of madness” appear as indisputable as possible. This “fool-proofing” of judicial sentences was important, because officials could be imposed administrative sanctions if they sentenced a crime too lightly, too heavily, or according to the wrong legal article. Concrete observations funneled into a few turns of phrase aimed to convince reviewers that the madness of the “criminal” under trial was indeed as extreme as the law mandated. $ ^{15} $ The criminal's recovery from his incoherence made it possible to extract a confession. In most reports from the late Qing, when testimonies were rewritten to confirm the final verdict, few words were the criminal's own. The killer and most of the witnesses were reported to have said about the same thing in about the same words. The killer insisted that he \"did not know how\" (不知怎樣), he had grabbed an object – a club, a vegetable knife (菜刀, very common), a carrying pole, a staff, an axe, a sickle, a stool, a cane, a knife to ...",
+        "byte_size": 121032,
+        "sha256": "8d98d7eeeedd1af26f1ae06cadf75f6f8a0a42c6de96567485b7fc96435aaf65"
+      },
+      {
         "page_no": 536,
         "file_idx": 535,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
@@ -328,6 +320,14 @@
         "ocr_excerpt": "affliction by nine different terms. $ ^{17} $ Putting aside those related to “mucus” for the moment, they were “madness illness” (the official term for madness), fengbing 風病 (lit. “Wind illness,” but homophonous with the term that meant “madness illness”), fengdian 風顛 (“madness”; lit. Wind dian), $ ^{18} $ fengkuang 風狂 (“madness”; lit. Wind kuang), diankuang 顛狂 (“insanity”), $ ^{19} $ fengkuang bing 風狂病 (“madness illness”), fengkuang bingzheng 風狂病症 (“madness disorder”), and fengdian bingzheng 風顛病症 (“madness disorder”). $ ^{20} $ We cannot assume that people used the term “madness illness” orally. Considering that fengdian and fengkuang were intelligible on their own and were widely used in non-judicial contexts, we should probably interpret the compounds fengkuang bing, fengkuang bingzheng, and fengdian bingzheng—which were clearly not oral—as bureaucratic jargon. The suffixes bing and bingzheng may have been used to make clear that the law considered madness to be an illness. $ ^{21} $ Apart from the pair-turned-compound diankuang, all the above terms contain the sound feng. A clerk or official who wanted to transcribe the sound feng could choose between the homophonous 瘋 and 風. The fact that the report on Deng Tingmei’s case used 瘋 only when quoting the letter of the law suggests that the 瘋 usage was still marginal at the time. $ ^{22} $ The last two “terms for madness” emplo ...",
         "byte_size": 160371,
         "sha256": "ff43d2c3fb8b74d0428ee417549ad120888098b4548e7637148317750069dcb5"
+      },
+      {
+        "page_no": 538,
+        "file_idx": 537,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "(“Wind-mucus blocking the openings [of the Heart]”). In accord with medical conceptions I have already analyzed, tanmi xinqiao identified mucus as the cause of madness and the Heart as the seat of cognitive and perceptive activities. $ ^{23} $ “Wind-mucus blocking the openings” was a variant specifying that mucus had been caused by Wind. $ ^{24} $ This Wind etiology, which had become exceptional in Qing medicine, was reflected in the way the report explained the onset of Deng’s madness. Whereas most memorials said that the would-be killer “got madness” (得了瘋病), the 1736 memorial claimed Deng “contracted” (run 染) it, a term usually reserved for illnesses caught by contact with some kind of pathogenic Qi. $ ^{25} $ Although not all these terms for madness were technical medical categories, most of them had equivalents in the medical literature. The use of medically acceptable terminology by commoners and legal specialists alike does not imply that these people embraced medical conceptions. It confirms instead that the same set of terms could accommodate many different conceptions. The non-technical medical words used in legal depositions differed from expressions like “Liver stasis” (肝鬱), which referred to a specifically medical understanding of pathology rather than to a general kind of behavior like fengkuang. $ ^{26} $ In the same 1736 memorial, several people described the ons ...",
+        "byte_size": 163461,
+        "sha256": "c5a11bb045619ff1ac6484bd305cf62a710cf89f8881d299961767229956bfdb"
       }
     ]
   },
@@ -337,23 +337,232 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00376\",\n    \"anchor_id\": \"anchor-01488\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 1 in the rebind candidates is OCR garbage for footnote 2 on page 511. The unmatched anchor 'anchor-01488' corresponds to marker '2' on page 529 (image 1). The text matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00377\",\n    \"anchor_id\": \"anchor-01490\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 3 in the rebind candidates is OCR garbage for footnote 4 on page 512. The unmatched anchor 'anchor-01490' corresponds to marker '4' on page 530 (image 2). The text matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00378\",\n    \"anchor_id\": \"anchor-01491\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 12 in the rebind candidates is OCR garbage for footnote 5 on page 513. The unmatched anchor 'anchor-01491' corresponds to marker '5' on page 531 (image 3). The text matches perfectly.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01494\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker 8 appears on page 533 (image 5), but there is no corresponding footnote 8 on that page or subsequent pages in the provided context. It is likely a false positive from OCR or a missing note.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00396\",\n    \"anchor_id\": \"anchor-01495\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 0 in the rebind candidates is OCR garbage for footnote 11 on page 516. The unmatched anchor 'anchor-01495' corresponds to marker '11' on page 534 (image 6). The text matches perfectly.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01498\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker 14 appears on page 534 (image 6), but there is no corresponding footnote 14 on that page or subsequent pages in the provided context. It is likely a false positive from OCR or a missing note.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00397\",\n    \"anchor_id\": \"anchor-01500\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 19 in the rebind candidates is OCR garbage for footnote 16 on page 518. The unmatched anchor 'anchor-01500' corresponds to marker '",
-  "response_parsed": [],
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00306\",\n    \"anchor_id\": \"anchor-01492\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note excerpt in fn-00306 contains the phrase 'standing next to his victim smiling laughing stupidly', which matches the content of footnote 8 on page 515 (image 3) describing Zhou Youlin's case ('standing [next to his victim], smiling (laughing?) stupidly'). The current binding to anchor-01492 is incorrect as that text does not relate to this specific description.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00307\",\n    \"anchor_id\": \"anchor-01493\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note excerpt in fn-00307 mentions 'intermittent fits' and Chinese characters corresponding to the formulas discussed in footnote 7 on page 514 (image 2). The current binding to anchor-01493 is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00308\",\n    \"anchor_id\": \"anchor-01497\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note excerpt in fn-00308 discusses casting events into 'predefined scripts'. This corresponds to the context of footnote 14 on page 516 (image 4), which discusses the script of how law expected madness cases to unfold. The current binding to anchor-01497 is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00309\",\n    \"anchor_id\": \"anchor-01499\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note excerpt in fn-00309 explicitly mentions 'to exemplify Qing legal reasoning concerning mad acts' and refers to a memorial compiled around the same time. This matches the content of footnote 15 on page 517 (image 5), which references Section 12.4 and discusses the evolution toward formulaic medical testimonies. The current binding to anchor-01499 is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00310\",\n    \"anchor_id\": \"synthetic-footnote-00288\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note excerpt in fn-00310 mentions 'Jia Chandou's case' and 'Aug. 1736'. This matches the content of footnote 14 on page 516 (image 4), which cites a memorial dated 12 Aug. 1736 regarding the case of Jia Chandou. The current binding to a synthetic anchor is incorrect; it should be bound to the explicit anchor for marker 14.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-00306",
+      "anchor_id": "anchor-01492",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note excerpt in fn-00306 contains the phrase 'standing next to his victim smiling laughing stupidly', which matches the content of footnote 8 on page 515 (image 3) describing Zhou Youlin's case ('standing [next to his victim], smiling (laughing?) stupidly'). The current binding to anchor-01492 is incorrect as that text does not relate to this specific description."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00307",
+      "anchor_id": "anchor-01493",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note excerpt in fn-00307 mentions 'intermittent fits' and Chinese characters corresponding to the formulas discussed in footnote 7 on page 514 (image 2). The current binding to anchor-01493 is incorrect."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00308",
+      "anchor_id": "anchor-01497",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note excerpt in fn-00308 discusses casting events into 'predefined scripts'. This corresponds to the context of footnote 14 on page 516 (image 4), which discusses the script of how law expected madness cases to unfold. The current binding to anchor-01497 is incorrect."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00309",
+      "anchor_id": "anchor-01499",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note excerpt in fn-00309 explicitly mentions 'to exemplify Qing legal reasoning concerning mad acts' and refers to a memorial compiled around the same time. This matches the content of footnote 15 on page 517 (image 5), which references Section 12.4 and discusses the evolution toward formulaic medical testimonies. The current binding to anchor-01499 is incorrect."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00310",
+      "anchor_id": "synthetic-footnote-00288",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note excerpt in fn-00310 mentions 'Jia Chandou's case' and 'Aug. 1736'. This matches the content of footnote 14 on page 516 (image 4), which cites a memorial dated 12 Aug. 1736 regarding the case of Jia Chandou. The current binding to a synthetic anchor is incorrect; it should be bound to the explicit anchor for marker 14."
+    }
+  ],
   "derived_truth": {
     "cluster_id": "toc-manual-2-13-13-life-trials:toc-manual-2-13-13-life-trials:footnote",
     "chapter_title": "13. Life trials",
     "request_mode": "anchor_rebind",
-    "parsed_actions": [],
-    "auto_selected_actions": [],
-    "auto_applied_actions": []
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00306",
+        "anchor_id": "anchor-01492",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00306 contains the phrase 'standing next to his victim smiling laughing stupidly', which matches the content of footnote 8 on page 515 (image 3) describing Zhou Youlin's case ('standing [next to his victim], smiling (laughing?) stupidly'). The current binding to anchor-01492 is incorrect as that text does not relate to this specific description."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00307",
+        "anchor_id": "anchor-01493",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00307 mentions 'intermittent fits' and Chinese characters corresponding to the formulas discussed in footnote 7 on page 514 (image 2). The current binding to anchor-01493 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00308",
+        "anchor_id": "anchor-01497",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00308 discusses casting events into 'predefined scripts'. This corresponds to the context of footnote 14 on page 516 (image 4), which discusses the script of how law expected madness cases to unfold. The current binding to anchor-01497 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00309",
+        "anchor_id": "anchor-01499",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00309 explicitly mentions 'to exemplify Qing legal reasoning concerning mad acts' and refers to a memorial compiled around the same time. This matches the content of footnote 15 on page 517 (image 5), which references Section 12.4 and discusses the evolution toward formulaic medical testimonies. The current binding to anchor-01499 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00310",
+        "anchor_id": "synthetic-footnote-00288",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00310 mentions 'Jia Chandou's case' and 'Aug. 1736'. This matches the content of footnote 14 on page 516 (image 4), which cites a memorial dated 12 Aug. 1736 regarding the case of Jia Chandou. The current binding to a synthetic anchor is incorrect; it should be bound to the explicit anchor for marker 14."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00306",
+        "anchor_id": "anchor-01492",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00306 contains the phrase 'standing next to his victim smiling laughing stupidly', which matches the content of footnote 8 on page 515 (image 3) describing Zhou Youlin's case ('standing [next to his victim], smiling (laughing?) stupidly'). The current binding to anchor-01492 is incorrect as that text does not relate to this specific description."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00307",
+        "anchor_id": "anchor-01493",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00307 mentions 'intermittent fits' and Chinese characters corresponding to the formulas discussed in footnote 7 on page 514 (image 2). The current binding to anchor-01493 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00308",
+        "anchor_id": "anchor-01497",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00308 discusses casting events into 'predefined scripts'. This corresponds to the context of footnote 14 on page 516 (image 4), which discusses the script of how law expected madness cases to unfold. The current binding to anchor-01497 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00309",
+        "anchor_id": "anchor-01499",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00309 explicitly mentions 'to exemplify Qing legal reasoning concerning mad acts' and refers to a memorial compiled around the same time. This matches the content of footnote 15 on page 517 (image 5), which references Section 12.4 and discusses the evolution toward formulaic medical testimonies. The current binding to anchor-01499 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00310",
+        "anchor_id": "synthetic-footnote-00288",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00310 mentions 'Jia Chandou's case' and 'Aug. 1736'. This matches the content of footnote 14 on page 516 (image 4), which cites a memorial dated 12 Aug. 1736 regarding the case of Jia Chandou. The current binding to a synthetic anchor is incorrect; it should be bound to the explicit anchor for marker 14."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00389",
+        "action": "match",
+        "note_item_id": "fn-00306",
+        "anchor_id": "anchor-01492",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00306 contains the phrase 'standing next to his victim smiling laughing stupidly', which matches the content of footnote 8 on page 515 (image 3) describing Zhou Youlin's case ('standing [next to his victim], smiling (laughing?) stupidly'). The current binding to anchor-01492 is incorrect as that text does not relate to this specific description."
+      },
+      {
+        "link_id": "link-00390",
+        "action": "match",
+        "note_item_id": "fn-00307",
+        "anchor_id": "anchor-01493",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00307 mentions 'intermittent fits' and Chinese characters corresponding to the formulas discussed in footnote 7 on page 514 (image 2). The current binding to anchor-01493 is incorrect."
+      },
+      {
+        "link_id": "link-00391",
+        "action": "match",
+        "note_item_id": "fn-00308",
+        "anchor_id": "anchor-01497",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00308 discusses casting events into 'predefined scripts'. This corresponds to the context of footnote 14 on page 516 (image 4), which discusses the script of how law expected madness cases to unfold. The current binding to anchor-01497 is incorrect."
+      },
+      {
+        "link_id": "link-00392",
+        "action": "match",
+        "note_item_id": "fn-00309",
+        "anchor_id": "anchor-01499",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00309 explicitly mentions 'to exemplify Qing legal reasoning concerning mad acts' and refers to a memorial compiled around the same time. This matches the content of footnote 15 on page 517 (image 5), which references Section 12.4 and discusses the evolution toward formulaic medical testimonies. The current binding to anchor-01499 is incorrect."
+      },
+      {
+        "link_id": "link-00393",
+        "action": "match",
+        "note_item_id": "fn-00310",
+        "anchor_id": "synthetic-footnote-00288",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note excerpt in fn-00310 mentions 'Jia Chandou's case' and 'Aug. 1736'. This matches the content of footnote 14 on page 516 (image 4), which cites a memorial dated 12 Aug. 1736 regarding the case of Jia Chandou. The current binding to a synthetic anchor is incorrect; it should be bound to the explicit anchor for marker 14."
+      }
+    ]
   },
   "usage": {
-    "prompt_tokens": 13437,
-    "completion_tokens": 768,
-    "total_tokens": 14205,
+    "prompt_tokens": 12572,
+    "completion_tokens": 722,
+    "total_tokens": 13294,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 17055
+    "duration_ms": 16369
   }
 }

@@ -23,7 +23,7 @@
     "source": "pdf",
     "file_idx": 1
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"V. La raison insurgée\",\n    \"depth\": 0,\n    \"printed_page\": 295,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Jeanne d’Arc et les panophobes gémisseurs\",\n    \"depth\": 1,\n    \"printed_page\": 298,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Des chacals, des pies, des singes et du pétrole\",\n    \"depth\": 1,\n    \"printed_page\": 304,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Les bégaiements de l’Histoire\",\n    \"depth\": 1,\n    \"printed_page\": 321,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Postambule\",\n    \"depth\": 0,\n    \"printed_page\": 333,\n    \"visual_order\": 5,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"APPENDICES\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 6,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Liste des abréviations\",\n    \"depth\": 2,\n    \"printed_page\": 343,\n    \"visual_order\": 7,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Bibliographie\",\n    \"depth\": 2,\n    \"printed_page\": 344,\n    \"visual_order\": 8,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 2,\n    \"printed_page\": 363,\n    \"visual_order\": 9,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Remerciements\",\n    \"depth\": 2,\n    \"printed_page\": 375,\n    \"visual_order\": 10,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Liste des illustrations\",\n    \"depth\": 2,\n    \"printed_page\": 377,\n    \"visual_order\": 11,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"V. La raison insurgée\",\n    \"depth\": 0,\n    \"printed_page\": 295,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Jeanne d’Arc et les panophobes gémisseurs\",\n    \"depth\": 1,\n    \"printed_page\": 298,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Des chacals, des pies, des singes et du pétrole\",\n    \"depth\": 1,\n    \"printed_page\": 304,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Les bégaiements de l’Histoire\",\n    \"depth\": 1,\n    \"printed_page\": 321,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Postambule\",\n    \"depth\": 0,\n    \"printed_page\": 333,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"APPENDICES\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 6,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Liste des abréviations\",\n    \"depth\": 2,\n    \"printed_page\": 343,\n    \"visual_order\": 7,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Bibliographie\",\n    \"depth\": 2,\n    \"printed_page\": 344,\n    \"visual_order\": 8,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 2,\n    \"printed_page\": 363,\n    \"visual_order\": 9,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Remerciements\",\n    \"depth\": 2,\n    \"printed_page\": 375,\n    \"visual_order\": 10,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Liste des illustrations\",\n    \"depth\": 2,\n    \"printed_page\": 377,\n    \"visual_order\": 11,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
   "response_parsed": [
     {
       "title": "V. La raison insurgée",
@@ -66,7 +66,7 @@
       "depth": 0,
       "printed_page": 333,
       "visual_order": 5,
-      "role_hint": "back_matter",
+      "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
@@ -168,7 +168,7 @@
         "depth": 0,
         "printed_page": 333,
         "visual_order": 5,
-        "role_hint": "back_matter",
+        "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
       },
@@ -234,8 +234,8 @@
     "model_id": "qwen3.5-plus",
     "request_count": 1,
     "prompt_tokens": 1147,
-    "completion_tokens": 846,
-    "total_tokens": 1993,
+    "completion_tokens": 844,
+    "total_tokens": 1991,
     "doc_id": "5df1d3d7f9c1",
     "slug": "",
     "context": {
@@ -244,6 +244,6 @@
     }
   },
   "timing": {
-    "duration_ms": 16589
+    "duration_ms": 17191
   }
 }

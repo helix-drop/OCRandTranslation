@@ -8,7 +8,7 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-14-14-distress-and-power:toc-manual-2-14-14-distress-and-power:footnote\",\n  \"chapter_title\": \"14. Distress and power\",\n  \"page_range\": [\n    564,\n    590\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 564,\n      \"ocr_excerpt\": \"### 14.1 Grievances and reproaches As we have seen, some individuals in Chinese villages were identified as madmen (瘋子) or fools (痴子). More than a simple act of naming, this identification was a diagnosis sustained by the community—close relatives, neighbors, classmates, etc., who probably thought they were simply stating the obvious. \\\"The local community called [Yang Huaizhen] a madman and stopped interacting with him\\\" (鄉黨呼為瘋子 不與往來). $ ^{2} $ Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. The commonest grievance I found in mad people's statements was a disagreement with this informal but persistent identification as mad or idiotic. Some people emphasized that this diagnosis came from others. Deng Tingmei 鄧廷梅 (1736): \\\"My son had poxes and died. At once I became so angry that my mind became confused. My ears also became deaf. They said I had gone mad.\\\" $ ^{3} $ (出痘死了 一時把心氣成昏迷 耳朵也氣韜了 他們說我瘋了) Ding Wenbin 丁文彬 (1753), whose trial I discuss in 15.4, claimed to have been designated the Son of Heaven ...\"\n    },\n    {\n      \"page_no\": 565,\n      \"ocr_excerpt\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 (1762): \\\"everybody says I am a fool and nobody believes me\\\" (人人說我是痴子都不信我). $ ^{6} $ The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\\\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it. People whom others considered mad often objected to the way their relatives beat them, ignored them, wronged them, locked them up, and (maybe above all else) called them what they insisted they were not: mad. Any rough treatment received under the pretext that they were insane probably intens ...\"\n    },\n    {\n      \"page_no\": 567,\n      \"ocr_excerpt\": \"Many people who were identified as mad constructed a superlative persona that made them glorious and excellent. Either before they were socially diagnosed as crazy or as a reaction to this label, they spoke of their dreams and visions and often sought official or imperial recognition for their mission or their virtue. Here I use a few cases to illustrate what a “crazy” persona could be like. Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $ Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \\\"abandoned books for commerce\\\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documented, let me recount at some length what happened to him and what compell ...\"\n    },\n    {\n      \"page_no\": 569,\n      \"ocr_excerpt\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵ It turned out that Bai's motives for presenting the slips were far from those of a rebel. Asked what his intentions were (究屬何心), he answered as follows: I lost my clothes and things in the Han River and no one pursued [this matter]. I have also been locked up for many years, which has been ghastly and difficult to bear. I wrote the names of people I know on bamboo strips and paper slips, and filled out the official posts, hoping ...\"\n    },\n    {\n      \"page_no\": 571,\n      \"ocr_excerpt\": \"to emperorship or if the self-aggrandizing “fifth year of Liqi” only sounded comforting in distressing times. $ ^{16} $ Zhang Tingyong 張廷用 also managed to sound politically subversive even as he constructed his \\\"delirium\\\" from daily objects and local names of people and organizations. $ ^{17} $ Of course his words were also designed to sound politically meaningful. As a youth, \\\"Zhang Tingyong had participated in a [semi-annual local] examination to become a licentiate but had not been admitted. $ ^{18} $ This turned into madness/idiocy: he would constantly chant the Buddha's name; [the illness was] intermittent\\\" (張廷用曾考試式童未能進取 染成瘋癡隨口念佛 時發時止). In 1748, having shaved his hair and queue (自剃髮辦), he went to Wutai Mountain to become a monk, but the bonzes in charge (當處僧人) made him return home. In 1756, when Zhang's illness became more serious, his family declared him to the county office through the head of the local community compact (經鄉約報官). The county issued chains and locks and delivered Zhang to his relatives, who were instructed to lock him up and keep watch over him (發給鎖封 交伊親屬鎖錮看守). $ ^{19} $ In 1760, he twisted his locks open and managed to flee to the city (扭鎖脫身 奔入城市), where he w ...\"\n    },\n    {\n      \"page_no\": 572,\n      \"ocr_excerpt\": \"manuscript notes that he may have written over the years or along the road (the report did not tell). He was caught again. As the magistrate in charge of his case reported: The text is mediocre and pedestrian, preposterous and confused, constantly redundant and not forming full sentences. But among the words we find \\\"White-rain dragon-king association,\\\" \\\"Society of the Ten Buddhas,\\\" and the names of people in those associations, such as \\\"Liu Guangrong,\\\" \\\"Association Leader Cao,\\\" and \\\"Association Leader Wang.\\\" I am very afraid that [these names] hide something else, such as [sutra?] reading associations. 閱其鄙俚誕妄迷係重複雷同 不成語句 惟字內載有白雨龍王會、十佛會及會中人劉光榮 曹會長 王會長名 甚恐有念□會別情 Symbolically loaded language made officials apprehensive. Zhang Tingyong's slips seemed to mention the kind of religious association that was often banned under the label of “devious cult” (邪教). Such religious groups were common in Qing China, but the state feared they might develop into large-scale organizations that could rival the state in their sway over “people’s hearts.” $ ^{20} $ The officials who interrogated the local leaders and the people Zhang Tingyong named in his notes soon found that there was no rebellion in t ...\"\n    },\n    {\n      \"page_no\": 573,\n      \"ocr_excerpt\": \"who sought his services and chose auspicious days for marriages and funerals (代人酹神祈禱 并選擇婚葬日期), but practiced no occult arts. The lofty-sounding “dragon-king association” turned out to be an agricultural cult and “white rain” the name local peasants gave to hailstones (冰雹). From the fourth to the eighth lunar month, the villagers went to the neighboring temple of the dragon spirit.... to burn incense and paper to [?] and pray (村農至附近龍神廟內□帶香褚靼流祈禱) that the hail would not harm the crops: “there are in fact no such things as gatherings of crowds to read sutras or the establishment of devious cults” (實無聚眾念經、創立邪教情事). The practice of presenting incense at the local dragon-god temple was in fact consistent with what the Code called “charitable societies that conduct prayers in the spring and fall” (在本村神龍廟靼月進香 與律載春秋義社以行祈报者相同 似無庸置議). $ ^{21} $ The Governor of Shanxi clarified small details: under interrogation in Zhili soon after he was caught, Zhang Tingyong had mentioned the existence of “one effortless knife kept by xianzi [i.e., a sage]” (顺刀一把是賢子收著). The “knife kept by the sage” was not the fantastic weapon or religious object that officials feared it might be. The Shanxi Governor, who ha ...\"\n    },\n    {\n      \"page_no\": 574,\n      \"ocr_excerpt\": \"Because Zhang had not impinged on the sanctity of imperial symbols, he was not physically punished. As the 1767 report concluded, “it has been established that this criminal Zhang Tingyong is indeed mad; according to the [1762] sub-statute [on those who have committed a killing because of madness], the Yingzhou magistrate shall be ordered to confine him and take the proper precautions, so that [Zhang] will not be allowed to break out and stir up trouble again” (该犯张廷用實屬瘋癲 應飭令應州知州照例嚴加鎖禁防範 毋使再以出境滋事). We know of Bai Shengqi and Zhang Tingyong through third-person reports on their words and acts. We now turn to someone who left his own writings, and whose view on life we therefore know much more about than Bai’s and Zhang’s. ### 14.3 “Idle steed” Lin Zhigong and his writings Lin Zhigong's 林志功 case is one of the most interesting to have survived in the records. $ ^{22} $ Lin was born in 1708 in Changshan 常山 county in Quzhou 衢州, the westernmost prefecture of Zhejiang, near the border of Jiangxi province. He became mad with grief after his wife and one of his two sons died of disease early in 1735. His relatives tried to have him exorcized, but without success. A new marriage was nonethele ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01587\",\n      \"marker\": \"4\",\n      \"page_no\": 564,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. T ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01588\",\n      \"marker\": \"5\",\n      \"page_no\": 565,\n      \"paragraph_index\": 0,\n      \"source_text\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 ( ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01590\",\n      \"marker\": \"7\",\n      \"page_no\": 565,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01591\",\n      \"marker\": \"8\",\n      \"page_no\": 565,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01594\",\n      \"marker\": \"11\",\n      \"page_no\": 567,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01596\",\n      \"marker\": \"13\",\n      \"page_no\": 567,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \\\"abandoned books for commerce\\\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documente ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01597\",\n      \"marker\": \"14\",\n      \"page_no\": 569,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01598\",\n      \"marker\": \"15\",\n      \"page_no\": 569,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00491\",\n      \"note_item_id\": \"fn-00408\",\n      \"current_anchor_id\": \"anchor-01617\",\n      \"marker\": \"2\",\n      \"note_page_no\": 579,\n      \"anchor_page_no\": 578,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0017\\u000192=36C5\\u00013FC:65\\u0001724:?8\\u0001E96\\u0001>@F?E2:?\\u0013\\u0001 F2?OD\\u00014=@F5D\\u00012C6\\u0001=@?8Üd Ęʒʟʎ ?2>6\\u0001\\\":?\\u00014=2:>65\\u0001D9@F=5\\u000136\\u0001C625\\u00012D P,6DE\\u0001C:G6CQ \\u0003ȶŽ \\u0004\\u0007\\u0001 \\u00012>\\u0001?@E\\u000146CE2:?\\u0001H9J P,6DE\\u0001(:G6CQ C676CC65\\u0001E@\\u0001\\\":?OD A=246\\u0001@7\\u0001@C:8:?\\u0005\\u0001H9:49\\u0001\\\":?OD\\u0001E6IED\\u00012=D@\\u000156D:8?2E65\\u00012D\\u0001,6DE\\u0001#@F?E2 ...\",\n      \"anchor_excerpt\": \"逐句註解出來), as one would a canonical book or a sacred text. Lin worked on the text of this revelation on many occasions, rewriting and re-annotating it at least three times. $ ^{32} $ Here is a translation of the main text, which was written i ...\"\n    },\n    {\n      \"link_id\": \"link-00492\",\n      \"note_item_id\": \"fn-00409\",\n      \"current_anchor_id\": \"anchor-01618\",\n      \"marker\": \"3\",\n      \"note_page_no\": 579,\n      \"anchor_page_no\": 578,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0010 *96\\u0001AC6DE:8:@FD\\u0001E:E=6\\u0001@7\\u0001P@AE:>FDQ\\u0001\\u0003ơH \\u0004\\u0001H2D\\u00018:G6?\\u0001E@\\u0001E96\\u000142?5:52E6\\u0001H9@\\u00017:?:D965\\u00017:CDE\\u0001:?\\u0001E96\\u0001A2=246 6I2>:?2E:@?D\\u00016G6CJ\\u0001E9C66\\u0001J62CD\\u0007\",\n      \"anchor_excerpt\": \"Dense drizzle, the fields cannot be seen $ ^{33} $ 細雨霏霏不見田\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-manual-2-14-14-distress-and-power:toc-manual-2-14-14-distress-and-power:footnote\",\n  \"chapter_title\": \"14. Distress and power\",\n  \"page_range\": [\n    565,\n    590\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 564,\n      \"ocr_excerpt\": \"### 14.1 Grievances and reproaches As we have seen, some individuals in Chinese villages were identified as madmen (瘋子) or fools (痴子). More than a simple act of naming, this identification was a diagnosis sustained by the community—close relatives, neighbors, classmates, etc., who probably thought they were simply stating the obvious. \\\"The local community called [Yang Huaizhen] a madman and stopped interacting with him\\\" (鄉黨呼為瘋子 不與往來). $ ^{2} $ Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. The commonest grievance I found in mad people's statements was a disagreement with this informal but persistent identification as mad or idiotic. Some people emphasized that this diagnosis came from others. Deng Tingmei 鄧廷梅 (1736): \\\"My son had poxes and died. At once I became so angry that my mind became confused. My ears also became deaf. They said I had gone mad.\\\" $ ^{3} $ (出痘死了 一時把心氣成昏迷 耳朵也氣韜了 他們說我瘋了) Ding Wenbin 丁文彬 (1753), whose trial I discuss in 15.4, claimed to have been designated the Son of Heaven ...\"\n    },\n    {\n      \"page_no\": 565,\n      \"ocr_excerpt\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 (1762): \\\"everybody says I am a fool and nobody believes me\\\" (人人說我是痴子都不信我). $ ^{6} $ The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\\\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it. People whom others considered mad often objected to the way their relatives beat them, ignored them, wronged them, locked them up, and (maybe above all else) called them what they insisted they were not: mad. Any rough treatment received under the pretext that they were insane probably intens ...\"\n    },\n    {\n      \"page_no\": 567,\n      \"ocr_excerpt\": \"Many people who were identified as mad constructed a superlative persona that made them glorious and excellent. Either before they were socially diagnosed as crazy or as a reaction to this label, they spoke of their dreams and visions and often sought official or imperial recognition for their mission or their virtue. Here I use a few cases to illustrate what a “crazy” persona could be like. Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $ Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \\\"abandoned books for commerce\\\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documented, let me recount at some length what happened to him and what compell ...\"\n    },\n    {\n      \"page_no\": 569,\n      \"ocr_excerpt\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵ It turned out that Bai's motives for presenting the slips were far from those of a rebel. Asked what his intentions were (究屬何心), he answered as follows: I lost my clothes and things in the Han River and no one pursued [this matter]. I have also been locked up for many years, which has been ghastly and difficult to bear. I wrote the names of people I know on bamboo strips and paper slips, and filled out the official posts, hoping ...\"\n    },\n    {\n      \"page_no\": 571,\n      \"ocr_excerpt\": \"to emperorship or if the self-aggrandizing “fifth year of Liqi” only sounded comforting in distressing times. $ ^{16} $ Zhang Tingyong 張廷用 also managed to sound politically subversive even as he constructed his \\\"delirium\\\" from daily objects and local names of people and organizations. $ ^{17} $ Of course his words were also designed to sound politically meaningful. As a youth, \\\"Zhang Tingyong had participated in a [semi-annual local] examination to become a licentiate but had not been admitted. $ ^{18} $ This turned into madness/idiocy: he would constantly chant the Buddha's name; [the illness was] intermittent\\\" (張廷用曾考試式童未能進取 染成瘋癡隨口念佛 時發時止). In 1748, having shaved his hair and queue (自剃髮辦), he went to Wutai Mountain to become a monk, but the bonzes in charge (當處僧人) made him return home. In 1756, when Zhang's illness became more serious, his family declared him to the county office through the head of the local community compact (經鄉約報官). The county issued chains and locks and delivered Zhang to his relatives, who were instructed to lock him up and keep watch over him (發給鎖封 交伊親屬鎖錮看守). $ ^{19} $ In 1760, he twisted his locks open and managed to flee to the city (扭鎖脫身 奔入城市), where he w ...\"\n    },\n    {\n      \"page_no\": 572,\n      \"ocr_excerpt\": \"manuscript notes that he may have written over the years or along the road (the report did not tell). He was caught again. As the magistrate in charge of his case reported: The text is mediocre and pedestrian, preposterous and confused, constantly redundant and not forming full sentences. But among the words we find \\\"White-rain dragon-king association,\\\" \\\"Society of the Ten Buddhas,\\\" and the names of people in those associations, such as \\\"Liu Guangrong,\\\" \\\"Association Leader Cao,\\\" and \\\"Association Leader Wang.\\\" I am very afraid that [these names] hide something else, such as [sutra?] reading associations. 閱其鄙俚誕妄迷係重複雷同 不成語句 惟字內載有白雨龍王會、十佛會及會中人劉光榮 曹會長 王會長名 甚恐有念□會別情 Symbolically loaded language made officials apprehensive. Zhang Tingyong's slips seemed to mention the kind of religious association that was often banned under the label of “devious cult” (邪教). Such religious groups were common in Qing China, but the state feared they might develop into large-scale organizations that could rival the state in their sway over “people’s hearts.” $ ^{20} $ The officials who interrogated the local leaders and the people Zhang Tingyong named in his notes soon found that there was no rebellion in t ...\"\n    },\n    {\n      \"page_no\": 573,\n      \"ocr_excerpt\": \"who sought his services and chose auspicious days for marriages and funerals (代人酹神祈禱 并選擇婚葬日期), but practiced no occult arts. The lofty-sounding “dragon-king association” turned out to be an agricultural cult and “white rain” the name local peasants gave to hailstones (冰雹). From the fourth to the eighth lunar month, the villagers went to the neighboring temple of the dragon spirit.... to burn incense and paper to [?] and pray (村農至附近龍神廟內□帶香褚靼流祈禱) that the hail would not harm the crops: “there are in fact no such things as gatherings of crowds to read sutras or the establishment of devious cults” (實無聚眾念經、創立邪教情事). The practice of presenting incense at the local dragon-god temple was in fact consistent with what the Code called “charitable societies that conduct prayers in the spring and fall” (在本村神龍廟靼月進香 與律載春秋義社以行祈报者相同 似無庸置議). $ ^{21} $ The Governor of Shanxi clarified small details: under interrogation in Zhili soon after he was caught, Zhang Tingyong had mentioned the existence of “one effortless knife kept by xianzi [i.e., a sage]” (顺刀一把是賢子收著). The “knife kept by the sage” was not the fantastic weapon or religious object that officials feared it might be. The Shanxi Governor, who ha ...\"\n    },\n    {\n      \"page_no\": 574,\n      \"ocr_excerpt\": \"Because Zhang had not impinged on the sanctity of imperial symbols, he was not physically punished. As the 1767 report concluded, “it has been established that this criminal Zhang Tingyong is indeed mad; according to the [1762] sub-statute [on those who have committed a killing because of madness], the Yingzhou magistrate shall be ordered to confine him and take the proper precautions, so that [Zhang] will not be allowed to break out and stir up trouble again” (该犯张廷用實屬瘋癲 應飭令應州知州照例嚴加鎖禁防範 毋使再以出境滋事). We know of Bai Shengqi and Zhang Tingyong through third-person reports on their words and acts. We now turn to someone who left his own writings, and whose view on life we therefore know much more about than Bai’s and Zhang’s. ### 14.3 “Idle steed” Lin Zhigong and his writings Lin Zhigong's 林志功 case is one of the most interesting to have survived in the records. $ ^{22} $ Lin was born in 1708 in Changshan 常山 county in Quzhou 衢州, the westernmost prefecture of Zhejiang, near the border of Jiangxi province. He became mad with grief after his wife and one of his two sons died of disease early in 1735. His relatives tried to have him exorcized, but without success. A new marriage was nonethele ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01588\",\n      \"marker\": \"5\",\n      \"page_no\": 565,\n      \"paragraph_index\": 0,\n      \"source_text\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 ( ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01590\",\n      \"marker\": \"7\",\n      \"page_no\": 565,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01591\",\n      \"marker\": \"8\",\n      \"page_no\": 565,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01594\",\n      \"marker\": \"11\",\n      \"page_no\": 567,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01595\",\n      \"marker\": \"12\",\n      \"page_no\": 567,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01596\",\n      \"marker\": \"13\",\n      \"page_no\": 567,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \\\"abandoned books for commerce\\\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documente ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01597\",\n      \"marker\": \"14\",\n      \"page_no\": 569,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01598\",\n      \"marker\": \"15\",\n      \"page_no\": 569,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00426\",\n      \"note_item_id\": \"fn-00343\",\n      \"current_anchor_id\": \"anchor-01589\",\n      \"marker\": \"6\",\n      \"note_page_no\": 564,\n      \"anchor_page_no\": 565,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6 A3by Fcting0Xhandong0 overnor Gai0^hongshanƾʋÜ and Xhandong0Jducation0commissioner \\\\ie0WongshengɑƎƯ 2V[I B0?> 36 S ^ªb¬ S XzTq[ memo¡ial da£ed `a p¤g] `fbe WQ{`]f]eX] rom0Iing~s0confession02V[IB 36\",\n      \"anchor_excerpt\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 ( ...\"\n    },\n    {\n      \"link_id\": \"link-00430\",\n      \"note_item_id\": \"fn-00347\",\n      \"current_anchor_id\": \"synthetic-footnote-00297\",\n      \"marker\": \"3\",\n      \"note_page_no\": 572,\n      \"anchor_page_no\": 572,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfillin ...\",\n      \"anchor_excerpt\": \"3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfillin ...\"\n    },\n    {\n      \"link_id\": \"link-00431\",\n      \"note_item_id\": \"fn-00348\",\n      \"current_anchor_id\": \"anchor-01617\",\n      \"marker\": \"2\",\n      \"note_page_no\": 579,\n      \"anchor_page_no\": 578,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. \\u0017\\u000192=36C5\\u00013FC:65\\u0001724:?8\\u0001E96\\u0001>@F?E2:?\\u0013\\u0001 F2?OD\\u00014=@F5D\\u00012C6\\u0001=@?8Üd Ęʒʟʎ ?2>6\\u0001\\\":?\\u00014=2:>65\\u0001D9@F=5\\u000136\\u0001C625\\u00012D P,6DE\\u0001C:G6CQ \\u0003ȶŽ \\u0004\\u0007\\u0001 \\u00012>\\u0001?@E\\u000146CE2:?\\u0001H9J P,6DE\\u0001(:G6CQ C676CC65\\u0001E@\\u0001\\\":?OD A=246\\u0001@7\\u0001@C:8:?\\u0005\\u0001H9:49\\u0001\\\":?OD\\u0001E6IED\\u00012=D@\\u000156D:8?2E65\\u00012D\\u0001,6DE\\u0001#@F ...\",\n      \"anchor_excerpt\": \"逐句註解出來), as one would a canonical book or a sacred text. Lin worked on the text of this revelation on many occasions, rewriting and re-annotating it at least three times. $ ^{32} $ Here is a translation of the main text, which was written i ...\"\n    },\n    {\n      \"link_id\": \"link-00432\",\n      \"note_item_id\": \"fn-00349\",\n      \"current_anchor_id\": \"anchor-01638\",\n      \"marker\": \"3\",\n      \"note_page_no\": 582,\n      \"anchor_page_no\": 581,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"claimsthatby @ 0they0had0become PubiquitousQ even in0\\\\injiang cities0on0the0northwestern0reaches0of0the0Ving0empire6 Fround0 ? =40the0Ving0government0also0started0to0integrate0 uandi0into0the0official0state0cult02see0Iuara0 A@@36 =@ F WRQJ] ...\",\n      \"anchor_excerpt\": \"The flames and oil fire kept coming at me $ ^{53} $ 炎 \\\" 油火不離身\"\n    },\n    {\n      \"link_id\": \"link-00433\",\n      \"note_item_id\": \"fn-00350\",\n      \"current_anchor_id\": \"anchor-01641\",\n      \"marker\": \"6\",\n      \"note_page_no\": 584,\n      \"anchor_page_no\": 582,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"> 0suggested0in 6 thatcommon0people~s depositions0aboutthe0words0or0acts0ofmad0people0must0be understood0in0the0context0of0the0case0under0investigation60Yhe0fact0that0Qin~s0case partly0concerned0his fantasies about officialdomprodded invest ...\",\n      \"anchor_excerpt\": \"In the first month of yimao my relatives believed words $ ^{56} $ 乙卯正月親信言\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -18,35 +18,19 @@
       "allowed_actions": [
         "match",
         "ignore_ref",
+        "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        564,
+        565,
         590
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 79191,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01587",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power",
-          "page_no": 564,
-          "paragraph_index": 1,
-          "char_start": 957,
-          "char_end": 965,
-          "source_marker": "$ ^{4} $",
-          "normalized_marker": "4",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. The commonest grievance I found in mad people's statements was a disagreement with this informal but persistent identification as mad or idiotic. Some people emphasized that this diagnosis came from others. Deng Tingmei 鄧廷梅 (1736): \"My son had poxes and died. At once I became so angry that my mind became confused. My ears also became deaf. They said I had gone mad.\" $ ^{3} $ (出痘死了 一時把心氣成昏迷 耳朵也氣韜了 他們說我瘋了) Ding Wenbin 丁文彬 (1753), whose trial I discuss in 15.4, claimed to have been designated the Son of Heaven by the descendant of Confucius on orders of Shangdi the Lord on High, a title Ding's relatives did not recognize: \"[My older brother] is an unreasonable person; he often calls me a fool\" (他是不明道理的人 常罵我癡子). $ ^{4} $ And elsewhere: \"I am not a fool, damn it! At home everybody says I'm a fool.\" (並不是癡子 可恨 家裏人人說我是癡子) \"Fools\" (癡子) were not necessarily persons of low intelligence. Those called \"fools\"",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 79192,
+          "row_id": 97697,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01588",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -59,11 +43,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \"the fool who speaks his dream\" 痴人說夢). $ ^{5} $ This was the case of \"Great King of Shanxi\" Lin Zhigong 林志功 (1762): \"everybody says I am a fool and nobody believes me\" (人人說我是痴子都不信我). $ ^{6} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79194,
+          "row_id": 97699,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01590",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -76,11 +60,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79195,
+          "row_id": 97700,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01591",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -93,11 +77,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79198,
+          "row_id": 97703,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01594",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -110,11 +94,28 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79200,
+          "row_id": 97704,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01595",
+          "chapter_id": "toc-manual-2-14-14-distress-and-power",
+          "page_no": 567,
+          "paragraph_index": 1,
+          "char_start": 485,
+          "char_end": 494,
+          "source_marker": "$ ^{12} $",
+          "normalized_marker": "12",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 97705,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01596",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -127,11 +128,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \"abandoned books for commerce\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documented, let me recount at some length what happened to him and what compelled him to seek the help of Qing officials to justify himself. On his way south to Sichuan to sell pottery (販賣瓷器) in 1751, his boat had capsized and he had been greatly frightened. While traveling back home on the Han river, he had lost his belongings and his luggage (將衣物行李遺失). This loss was either the first sign of his madness or the event that triggered it. When Bai returned, his father confined him at home because he thought his son was mad.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79201,
+          "row_id": 97706,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01597",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -144,11 +145,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 79202,
+          "row_id": 97707,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01598",
           "chapter_id": "toc-manual-2-14-14-distress-and-power",
@@ -161,33 +162,69 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00491",
-          "note_item_id": "fn-00408",
+          "link_id": "link-00426",
+          "note_item_id": "fn-00343",
+          "current_anchor_id": "anchor-01589",
+          "marker": "6",
+          "note_page_no": 564,
+          "anchor_page_no": 565,
+          "current_anchor_marker": "6",
+          "note_excerpt": "6 A3by Fcting0Xhandong0 overnor Gai0^hongshanƾʋÜ and Xhandong0Jducation0commissioner \\ie0WongshengɑƎƯ 2V[I B0?> 36 S ^ªb¬ S XzTq[ memo¡ial da£ed `a p¤g] `fbe WQ{`]f]eX] rom0Iing~s0confession02V[IB 36",
+          "anchor_excerpt": "were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \"the fool who speaks his dream\" 痴人說夢). $ ^{5} $ This was the case of \"Great King of Shanxi\" Lin Zhigong 林志功 (1762): \"everybody says I am a fool and nobody believes me\" (人人說我是痴子都不信我). $ ^{6} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00430",
+          "note_item_id": "fn-00347",
+          "current_anchor_id": "synthetic-footnote-00297",
+          "marker": "3",
+          "note_page_no": 572,
+          "anchor_page_no": 572,
+          "current_anchor_marker": "3",
+          "note_excerpt": "3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfilling6 Iavid0Twnby 2 AA>3 has arguedthat0some0rebellions0started0only0after0the0statehad bann ed organizationsIRU IHDU0W H\\0ZRX G0UHEH 6 or0explanations0of0why0the0Ving0state0saw0it0as0its0duty0to Prectify0people~s0heartsQ in ordinary0times0and Pawe0people~s0heartsQ in0cases0of0sedition40see0 =6>6",
+          "anchor_excerpt": "3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfilling6 Iavid0Twnby 2 AA>3 has arguedthat0some0rebellions0started0only0after0the0statehad bann ed organizationsIRU IHDU0W H\\0ZRX G0UHEH 6 or0explanations0of0why0the0Ving0state0saw0it0as0its0duty0to Prectify0people~s0heartsQ in ordinary0times0and Pawe0people~s0heartsQ in0cases0of0sedition40see0 =6>6",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-00431",
+          "note_item_id": "fn-00348",
           "current_anchor_id": "anchor-01617",
           "marker": "2",
           "note_page_no": 579,
           "anchor_page_no": 578,
           "current_anchor_marker": "2",
-          "note_excerpt": "\u0017\u000192=36C5\u00013FC:65\u0001724:?8\u0001E96\u0001>@F?E2:?\u0013\u0001 F2?OD\u00014=@F5D\u00012C6\u0001=@?8Üd Ęʒʟʎ ?2>6\u0001\":?\u00014=2:>65\u0001D9@F=5\u000136\u0001C625\u00012D P,6DE\u0001C:G6CQ \u0003ȶŽ \u0004\u0007\u0001 \u00012>\u0001?@E\u000146CE2:?\u0001H9J P,6DE\u0001(:G6CQ C676CC65\u0001E@\u0001\":?OD A=246\u0001@7\u0001@C:8:?\u0005\u0001H9:49\u0001\":?OD\u0001E6IED\u00012=D@\u000156D:8?2E65\u00012D\u0001,6DE\u0001#@F?E2:?\u0001\u0003D66\u0001?@E6\u0001 \u0012 23@G6\u0004\u0007\u0017=E9@F89\u0001E96C6\u0001:D\u00012?#$( ! )' 2E\u00016G6CJ\u0001D6DD:@?",
+          "note_excerpt": "2. \u0017\u000192=36C5\u00013FC:65\u0001724:?8\u0001E96\u0001>@F?E2:?\u0013\u0001 F2?OD\u00014=@F5D\u00012C6\u0001=@?8Üd Ęʒʟʎ ?2>6\u0001\":?\u00014=2:>65\u0001D9@F=5\u000136\u0001C625\u00012D P,6DE\u0001C:G6CQ \u0003ȶŽ \u0004\u0007\u0001 \u00012>\u0001?@E\u000146CE2:?\u0001H9J P,6DE\u0001(:G6CQ C676CC65\u0001E@\u0001\":?OD A=246\u0001@7\u0001@C:8:?\u0005\u0001H9:49\u0001\":?OD\u0001E6IED\u00012=D@\u000156D:8?2E65\u00012D\u0001,6DE\u0001#@F?E2:?\u0001\u0003D66\u0001?@E6\u0001 \u0012 23@G6\u0004\u0007\u0017=E9@F89\u0001E96C6\u0001:D\u00012?#$( ! )' 2E\u00016G6CJ\u0001D6DD:@?",
           "anchor_excerpt": "逐句註解出來), as one would a canonical book or a sacred text. Lin worked on the text of this revelation on many occasions, rewriting and re-annotating it at least three times. $ ^{32} $ Here is a translation of the main text, which was written in rhymed seven-character stanzas, with explanations of how Lin thought the prophecy was about himself:",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00492",
-          "note_item_id": "fn-00409",
-          "current_anchor_id": "anchor-01618",
+          "link_id": "link-00432",
+          "note_item_id": "fn-00349",
+          "current_anchor_id": "anchor-01638",
           "marker": "3",
-          "note_page_no": 579,
-          "anchor_page_no": 578,
+          "note_page_no": 582,
+          "anchor_page_no": 581,
           "current_anchor_marker": "3",
-          "note_excerpt": "\u0010 *96\u0001AC6DE:8:@FD\u0001E:E=6\u0001@7\u0001P@AE:>FDQ\u0001\u0003ơH \u0004\u0001H2D\u00018:G6?\u0001E@\u0001E96\u000142?5:52E6\u0001H9@\u00017:?:D965\u00017:CDE\u0001:?\u0001E96\u0001A2=246 6I2>:?2E:@?D\u00016G6CJ\u0001E9C66\u0001J62CD\u0007",
-          "anchor_excerpt": "Dense drizzle, the fields cannot be seen $ ^{33} $ 細雨霏霏不見田",
+          "note_excerpt": "claimsthatby @ 0they0had0become PubiquitousQ even in0\\injiang cities0on0the0northwestern0reaches0of0the0Ving0empire6 Fround0 ? =40the0Ving0government0also0started0to0integrate0 uandi0into0the0official0state0cult02see0Iuara0 A@@36 =@ F WRQJ] Ǧò was0the0young0servant0of0a0deity0who0could0channel0this0deity~s0words6 or0more0on0their0roles in0local0religion40with0a0focus0on0exorcistic0ceremonies0in0the0Xong0dynasty4 see0Iavis0 B0@?5 ? 6 =A Haoping0was0a0mountain0village0west0of0Hhangshan on0the0border0of0^hejiang0and0 iangxi6",
+          "anchor_excerpt": "The flames and oil fire kept coming at me $ ^{53} $ 炎 \" 油火不離身",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00433",
+          "note_item_id": "fn-00350",
+          "current_anchor_id": "anchor-01641",
+          "marker": "6",
+          "note_page_no": 584,
+          "anchor_page_no": 582,
+          "current_anchor_marker": "6",
+          "note_excerpt": "> 0suggested0in 6 thatcommon0people~s depositions0aboutthe0words0or0acts0ofmad0people0must0be understood0in0the0context0of0the0case0under0investigation60Yhe0fact0that0Qin~s0case partly0concerned0his fantasies about officialdomprodded investigatorsto record0pastbehavior0that0appeared0to0adumbrate the0case0at0hand6",
+          "anchor_excerpt": "In the first month of yimao my relatives believed words $ ^{56} $ 乙卯正月親信言",
           "current_anchor_synthetic": false
         }
       ]
@@ -265,27 +302,97 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00408\",\n    \"anchor_id\": \"anchor-01587\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '2' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00409\",\n    \"anchor_id\": \"anchor-01588\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '3' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00343\",\n    \"anchor_id\": \"anchor-01589\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00343 (marker '6') contains the text for footnote 6 found on page 547. The current anchor is synthetic and incorrect; the correct explicit anchor is anchor-01589 (marker '6' on page 565).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01588\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '5' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01590\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '7' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01591\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '8' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01594\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '11' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01595\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '12' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01596\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '13' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01597\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '14' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01598\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '15' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-00408",
-      "anchor_id": "anchor-01587",
+      "note_item_id": "fn-00343",
+      "anchor_id": "anchor-01589",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Footnote marker '2' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+      "reason": "The note item fn-00343 (marker '6') contains the text for footnote 6 found on page 547. The current anchor is synthetic and incorrect; the correct explicit anchor is anchor-01589 (marker '6' on page 565)."
     },
     {
-      "action": "match",
-      "note_item_id": "fn-00409",
+      "action": "ignore_ref",
+      "note_item_id": "",
       "anchor_id": "anchor-01588",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Footnote marker '3' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+      "reason": "Footnote marker '5' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01590",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '7' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01591",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '8' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01594",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '11' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01595",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '12' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01596",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '13' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01597",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '14' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01598",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote marker '15' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
     }
   ],
   "derived_truth": {
@@ -295,79 +402,296 @@
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00408",
-        "anchor_id": "anchor-01587",
+        "note_item_id": "fn-00343",
+        "anchor_id": "anchor-01589",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '2' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+        "reason": "The note item fn-00343 (marker '6') contains the text for footnote 6 found on page 547. The current anchor is synthetic and incorrect; the correct explicit anchor is anchor-01589 (marker '6' on page 565)."
       },
       {
-        "action": "match",
-        "note_item_id": "fn-00409",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-01588",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '3' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+        "reason": "Footnote marker '5' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01590",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '7' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01591",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '8' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01594",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '11' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01595",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '12' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01596",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '13' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01597",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '14' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01598",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '15' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
       }
     ],
     "auto_selected_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00408",
-        "anchor_id": "anchor-01587",
+        "note_item_id": "fn-00343",
+        "anchor_id": "anchor-01589",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '2' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+        "reason": "The note item fn-00343 (marker '6') contains the text for footnote 6 found on page 547. The current anchor is synthetic and incorrect; the correct explicit anchor is anchor-01589 (marker '6' on page 565)."
       },
       {
-        "action": "match",
-        "note_item_id": "fn-00409",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-01588",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '3' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+        "reason": "Footnote marker '5' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01590",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '7' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01591",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '8' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01594",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '11' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01595",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '12' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01596",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '13' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01597",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '14' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01598",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '15' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-00491",
+        "link_id": "link-00426",
         "action": "match",
-        "note_item_id": "fn-00408",
-        "anchor_id": "anchor-01587",
+        "note_item_id": "fn-00343",
+        "anchor_id": "anchor-01589",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '2' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+        "reason": "The note item fn-00343 (marker '6') contains the text for footnote 6 found on page 547. The current anchor is synthetic and incorrect; the correct explicit anchor is anchor-01589 (marker '6' on page 565)."
       },
       {
-        "link_id": "link-00492",
-        "action": "match",
-        "note_item_id": "fn-00409",
+        "link_id": "link-01693",
+        "action": "ignore_ref",
+        "note_item_id": "",
         "anchor_id": "anchor-01588",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '3' on page 564 (image 1) corresponds to footnote text on page 564 (image 1). The current link points to a synthetic anchor on page 578 with the same marker; this is an incorrect cross-page binding that should be corrected to the explicit local anchor."
+        "reason": "Footnote marker '5' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01694",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01590",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '7' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01695",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01591",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '8' on page 547 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01696",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01594",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '11' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01697",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01595",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '12' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01698",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01596",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '13' on page 549 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01699",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01597",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '14' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
+      },
+      {
+        "link_id": "link-01700",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01598",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote marker '15' on page 551 refers to a source not present in the provided unmatched note items or rebind candidates."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 11518,
-    "completion_tokens": 269,
-    "total_tokens": 11787,
+    "prompt_tokens": 12335,
+    "completion_tokens": 746,
+    "total_tokens": 13081,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 7337
+    "duration_ms": 16164
   }
 }

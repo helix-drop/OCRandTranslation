@@ -8,11 +8,11 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-007-fromwindtomucusandfire:toc-ch-007-fromwindtomucusandfire:endnote\",\n  \"chapter_title\": \"From Wind to mucus and Fire\",\n  \"page_range\": [\n    94,\n    152\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 38,\n      \"ocr_excerpt\": \"## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters ...\"\n    },\n    {\n      \"page_no\": 41,\n      \"ocr_excerpt\": \"task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity ...\"\n    },\n    {\n      \"page_no\": 93,\n      \"ocr_excerpt\": \"recommendations occupied a central place in Zhu Zhenheng's fourteenth-century medical synthesis, which in turn shaped later medical doctrines. Liu's discussions also contributed to making dian and kuang two quasi identical illnesses. Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ From his mid-twenties, Liu pored through Wang Bing's annotated version of the Basic Questions and became engrossed in the complexity of its immensely influential cosmological chapters. $ ^{2} $ To those tenacious enough to decipher them, these chapters explained the convoluted workings of the “five circulatory phases and six seasonal influences” (wuyun liuqi 五運六氣; often referred to as yunqi) as they applied to medicine. $ ^{3} $ The “five circulatory phases” were Wood, Fire, Earth, Metal, and Water, the Five Agents familiar to those who have studied any aspect of Chinese thought. The six types of climatic Qi were Wind 風, Heat 熱, Dampness 濕, Fire 火 (or Summer Heat 署), Dryness 燥, and Cold 寒. The problem of change had f ...\"\n    },\n    {\n      \"page_no\": 94,\n      \"ocr_excerpt\": \"processes and to intervene effectively in these processes. Doctors claimed that yunqi schemes helped them to understand the infinite transformations of illness and to know how to reestablish the dynamic balance that defined good health. Yunqi doctrines became the rage in medical circles soon after the imperial edition of the Basic Questions appeared in the late 11 $ ^{th} $ century, and reached a golden age when they were patronized by Huizong, who considered these cosmic cycles as key to health, government, and cosmic harmony (Yan Liang 2000). $ ^{4} $ Like so many practitioners from the late eleventh century onwards, Liu Wansu treated the yunqi chapters as the most important in the Basic Questions. He even claimed that \\\"the essential of medical teachings lies in the wnyun liuqi\\\" (醫教要乎五運六氣), and made this emphasis evident in his Treatise on the Essential Purport of Yunqi in the Inner Canon (Neijing yunqi yaozhi lun 內經運氣要旨論). $ ^{5} $ Liu's preface (Liu WYQ: 195) to this book stressed how subtle and confounding this system of transformations could be to the non-initiated. Few indeed could awaken to its meaning (悟得其意者鮮矣). In several of his works, Liu called wuyun liuqi a “Mysterious ...\"\n    },\n    {\n      \"page_no\": 95,\n      \"ocr_excerpt\": \"became the mainstay of Liu's most influential book: the Method for Tracing Illnesses to their Origins with the Mysterious Mechanism of the Basic Questions (Suwen xuanji yuanbing shi 素問玄機原 病式; hereafter Yuanbing shi).⁷ There, Liu alleged that “in the method for distinguishing illnesses, it can be seen clearly that the Qi of [all] illnesses can be reduced to transformations of the five phases and six Qi” (識病之法 以其病氣歸於五運六氣之化 明可見矣). Liu Wansu used the fluid interactions between the Five Agents as a guide for scripting both physiological and pathological processes. $ ^{8} $ The Five Agents and the five Yin viscera (五臟) interacted in a way illustrated synoptically in Figure 4.1 (next page). This system was homeostatic (it had an inherent tendency to equilibrium) but dynamic. Since all of its elements were inter-related, a slight imbalance (be it excess or deficiency) in any of the Five Agents or organs led to illnesses that could affect the entire organism. By a sequence of effects predicted by the model, an excess of emotions could, for instance, lead to hemiplegia: Hemiplegia caused by Wind strokes [occurs] because Cardiac Fire abruptly becomes excessive, and [Kidney] Water decays and i ...\"\n    },\n    {\n      \"page_no\": 96,\n      \"ocr_excerpt\": \"By explaining illness on the plane of the Five Agents, Liu severed the causal chain from the organs themselves. <div style=\\\"text-align: center;\\\"><img src=\\\"imgs/img_in_image_box_293_375_944_941.jpg\\\" alt=\\\"Image\\\" width=\\\"53%\\\" /></div> <div style=\\\"text-align: center;\\\">Fig. 4.1 Mutual conquest and mutual production cycles of the Five Agents and their associated viscera. (This diagram represents the system in a balanced state.)</div> Using the compelling conceptual architecture of the wuyun liuqi, the Yuanbing shi seemed to make sense of everything: why vomit is acidic, why we have runny noses, why plump persons suffer from more strokes, why some people speak in their sleep, why we laugh when we are tickled, and even why we don't laugh when we tickle ourselves. $ ^{10} $ Liu's ambitious treatise was in fact an extensive commentary on a passage from chapter 74 of the Basic Questions (one of the seven \\\"Grand treatises\\\") where Qibo explained the origins of 19 disorders to satisfy the Yellow Emperor's wish to \\\"hear about the\"\n    },\n    {\n      \"page_no\": 97,\n      \"ocr_excerpt\": \"mechanisms of illness”聞病機何如. $ ^{11} $ Qibo traced one illness each to the five Yin viscera, one each to the lower and upper body, and twelve to various aspects of Qi: five (including kuang) to Fire, four to Heat, and one each to Wind, Dampness, and Cold. Extrapolating that the five illnesses the canonical excerpt attributed to the viscera actually originated in the movements of Fire, Liu Wansu took this passage as authoritative proof of the pathological power of Heat and Fire, which now represented 14 out of the original 19 entries—five from the viscera, four from Heat, and five from Fire. The short first section on “the five circulatory phases [as they] govern illness” (五運主病) (1a-3b) discussed the Five Agents as they succeeded each other during the year (Wood, Fire, Earth, Metal, and Water). The rest of the work was devoted to “the six Qi [as they] bring about illness” (六氣為病). Heat (4b-31a) and Fire (33a-57b) made up almost three quarters of the entire book. $ ^{12} $ Liu took the six Qi not as climatic influences (their traditional meaning), but largely as manifestations of internal imbalances. The close attention he paid to internal pathological processes makes him representati ...\"\n    },\n    {\n      \"page_no\": 98,\n      \"ocr_excerpt\": \"was not air, but an internal form of Qi that appeared mostly because of internally generated Heat and acted in concert with Heat to produce morbid symptoms. As he would state in a later work, “what we speak of as ‘Wind’ is [in fact] ‘Heat’” (凡言風者熱也), because “Wind originally is born from Heat; Heat is the root, Wind the top branch [the superficial manifestation]” (風本生於熱 以熱為本 以風為標). $ ^{14} $ Liu Wansu's descriptions of the pathogenesis of a large number of illnesses gave a central place to internal Fire and Heat (instead of Wind). Liu's focus on Heat also explains his predilection for the use of cooling drugs, many of which he drew from the Treatise on Cold Injury. Liu's reinterpretation of Wind as inner Heat contributed to the collapse of the notion of \\\"Wind illnesses\\\" (see sections 4.2, 4.4, and 4.7 below), which in turn helped kuang to become one among many \\\"miscellaneous illnesses\\\" (雜病) that could be discussed independently. A reader of Liu's treatise would have had no inkling that madness had once been classified as a \\\"Wind illness.\\\" Following the passage from the Basic Questions that he was commenting upon, Liu discussed madness under the \\\"Fire\\\" section, where he gave kuang a ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00181\",\n      \"marker\": \"4\",\n      \"page_no\": 94,\n      \"paragraph_index\": 0,\n      \"source_text\": \"processes and to intervene effectively in these processes. Doctors claimed that yunqi schemes helped them to understand the infinite transformations of illness and to know how to reestablish the dynamic balance that defined good health. Yun ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00182\",\n      \"marker\": \"5\",\n      \"page_no\": 94,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Like so many practitioners from the late eleventh century onwards, Liu Wansu treated the yunqi chapters as the most important in the Basic Questions. He even claimed that \\\"the essential of medical teachings lies in the wnyun liuqi\\\" (醫教要乎五運六 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00188\",\n      \"marker\": \"10\",\n      \"page_no\": 96,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Using the compelling conceptual architecture of the wuyun liuqi, the Yuanbing shi seemed to make sense of everything: why vomit is acidic, why we have runny noses, why plump persons suffer from more strokes, why some people speak in their s ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00189\",\n      \"marker\": \"11\",\n      \"page_no\": 97,\n      \"paragraph_index\": 0,\n      \"source_text\": \"mechanisms of illness”聞病機何如. $ ^{11} $ Qibo traced one illness each to the five Yin viscera, one each to the lower and upper body, and twelve to various aspects of Qi: five (including kuang) to Fire, four to Heat, and one each to Wind, Damp ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00191\",\n      \"marker\": \"13\",\n      \"page_no\": 97,\n      \"paragraph_index\": 3,\n      \"source_text\": \"The Wind section of the Yuanbing shi contained only one entry, and it made no mention of Wind as a real gale that swirled inside the body. $ ^{13} $ Liu argued instead that Wind\"\n    },\n    {\n      \"anchor_id\": \"anchor-00192\",\n      \"marker\": \"14\",\n      \"page_no\": 98,\n      \"paragraph_index\": 0,\n      \"source_text\": \"was not air, but an internal form of Qi that appeared mostly because of internally generated Heat and acted in concert with Heat to produce morbid symptoms. As he would state in a later work, “what we speak of as ‘Wind’ is [in fact] ‘Heat’” ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00193\",\n      \"marker\": \"15\",\n      \"page_no\": 98,\n      \"paragraph_index\": 2,\n      \"source_text\": \"A reader of Liu's treatise would have had no inkling that madness had once been classified as a \\\"Wind illness.\\\" Following the passage from the Basic Questions that he was commenting upon, Liu discussed madness under the \\\"Fire\\\" section, wher ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00194\",\n      \"marker\": \"16\",\n      \"page_no\": 99,\n      \"paragraph_index\": 0,\n      \"source_text\": \"onset of madness as follows: “Kidney-Water governs the Will, and Water and Fire are opposed to each other. Therefore when Cardiac Fire is overabundant, Renal Water decays: one thus ‘loses one’s Will’ and becomes crazy” (臀水主志而水火相反 故心火旺則腎水衰 乃 ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00017\",\n      \"note_item_id\": \"fn-00035\",\n      \"current_anchor_id\": \"anchor-00032\",\n      \"marker\": \"6\",\n      \"note_page_no\": 94,\n      \"anchor_page_no\": 41,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6. DA64:2=:DED\\u0001@7\\u0001E96\\u000f);1+\\u0001 =-;<176; \\u0007 0-6/21\\u0001B76/4= ʬȑʚ͙ \\u0005 H9:49\\u0001H2D 4@>A:=65\\u0001F?56C\\u00019:D\\u0001C6:8?\\u0005\\u0001@A6?65\\u0001H:E9\\u0001EH@\\u000172D4:4=6D\\u0001@?A=691 \\u0007\\u0001\\u00196DA6FI\\u0001\\u0003 \\u0013\\u0001 \\u000e\\u00012?5\\u0001 \\u0011\\u0006 \\u0004 D9@H 65 9@H\\u0001>65:42=\\u0001:562D\\u0001FD:?8?=A=6\\u000141=91 3642>6\\u0001:?7=F6?E:2=\\u00012E\\u0001E96\\u00014@FCE\\u00012C@F?5\\u0001E ...\",\n      \"anchor_excerpt\": \"task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $\"\n    },\n    {\n      \"link_id\": \"link-00019\",\n      \"note_item_id\": \"fn-00037\",\n      \"current_anchor_id\": \"anchor-00179\",\n      \"marker\": \"2\",\n      \"note_page_no\": 96,\n      \"anchor_page_no\": 93,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0003 \\u0016\\u0004\\u0014 S\\u00196=:C:F>T̤ \\u0013\\u0001 3 \\u0003\\u0012\\u0010\\u0017\\u0004\\u0014S!2F89E6CTʆ \\u0013\\u0001 3 \\u0003\\u0012\\u0010\\u0016 \\u0004\\u0007\",\n      \"anchor_excerpt\": \"Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ ...\"\n    },\n    {\n      \"link_id\": \"link-00021\",\n      \"note_item_id\": \"fn-00044\",\n      \"current_anchor_id\": \"anchor-00389\",\n      \"marker\": \"2\",\n      \"note_page_no\": 99,\n      \"anchor_page_no\": 156,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"C676C6?46\\u0001E@\\u0001E96\\u00012FE9@C:EJ\\u0001@7\\u0001E96\\u001666-:\\u0001\\u0010)676 E@ 2\\u00014:E2E:@? @7,2?8\\u0001\\u0017:?8RD 2??@E2E:@?DE@\\u0001E96\\u0010)676 \\u0007\",\n      \"anchor_excerpt\": \"The diffusion of medical ideas took place in ways more complex than we can ever document. Knowledge and skills were transmitted through local teaching networks, some hereditary, others informal, and yet others based on strict ritual relatio ...\"\n    },\n    {\n      \"link_id\": \"link-00023\",\n      \"note_item_id\": \"fn-00048\",\n      \"current_anchor_id\": \"anchor-00026\",\n      \"marker\": \"2\",\n      \"note_page_no\": 105,\n      \"anchor_page_no\": 38,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"77\\u0005 &10-\\u0001A121 \\u0013\\u0001 \\u000f 77\\u0004\\u0007\\u0001(66\\u00012=D@ &01*16/\\u0001B)4=6 \\u0005\\u0001S49:=5C6?RD\\u0001,:?5T ĂZ΂͝ \\u0003'\\\"(&\\u0001 \\u0007 2\\u00063\\u0005 &10-\\u0001A121 \\u0013\\u0001 \\u0010 \\u0006\\u0010\\u000e\\u0004 7@C\\u00012\\u0001=:DE\\u0001@7\\u000149:=5C6?RD\\u0001:==?6DD6D E92E\\u0001/92?8\\u0001C64@>>6?565\\u0001EC62E:?8\\u0001H:E9\\u0001S+@>:E:?8\\u0006D2=:G2\\u0001A@H56CT\\u0001\\u0003ǲƃ \\u0004\\u0007 \\u0011 &01*16/\\u0001B)4=6 Ǥɇ̛ͯ \\u0005\\u0001S\\u001b:C6T ...\",\n      \"anchor_excerpt\": \"Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts w ...\"\n    },\n    {\n      \"link_id\": \"link-00029\",\n      \"note_item_id\": \"fn-00060\",\n      \"current_anchor_id\": \"anchor-00574\",\n      \"marker\": \"2\",\n      \"note_page_no\": 117,\n      \"anchor_page_no\": 224,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0003!: .&\\u0013\\u0001\\u000f\\u0017\\u0006\\u0010\\u0016\\u0004\\u0007\\u0001\\u0016\\u0001D:>:=2C 244@F?E\\u0001:?\\u0001E96\\u00151;<7:A\\u00017.\\u0001<0-\\u0001\\u001716 \\u0003 \\u0004\\u0001AC@323=J\\u00013@CC@H65\\u00017C@>\\u0001!:RD\\u0001E6IE\\u0007\\u0001)96\\u00016IE2?E\\u0001 \\u00062=)6 G6CD:@?\\u0001@7 \\u000f1)60=7\\u00014=6 :D 2?\\u00012DD6>3=286\\u0001@7\\u0001D9@CE6C\\u0001E6IED\\u0001H9@D6\\u0001AF3=:42E:@?\\u00019:DE@CJ\\u0001:D\\u0001F?4=62C\\u0007\\u0001!:RD\\u0001 \\u0010\\u0001AC67246\\u00014=2:>65\\u0001E92E\\u00019 ...\",\n      \"anchor_excerpt\": \"The notion that illnesses were constantly changing started to emerge in the late eleventh century when a few physicians applied to other disorders models that had been designed to understand Cold Injury. A prototypical case of Cold Injury u ...\"\n    },\n    {\n      \"link_id\": \"link-00030\",\n      \"note_item_id\": \"fn-00062\",\n      \"current_anchor_id\": \"anchor-00178\",\n      \"marker\": \"1\",\n      \"note_page_no\": 122,\n      \"anchor_page_no\": 93,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ù 96C6\\u000142?\\u00012=D@\\u000136\\u0001:?E6CAC6E65\\u00012D.)6/ Ƌ @C 6)1 \\u0010 \\u0003>@56C?\\u0001\\u00189:?6D6 +)1 Ũ \\u0004\\u0007 \\\"2\\u0001 6RDE9@C@F89=J\\u00010>65:42=1\\u00013@@<D\\u00013J\\u0001E96\\u0001>2?J\\u0001DA64:2=:DED\\u0001D:?46\\u0001E96\\u0001.6==@H\\u0001\\u001a>A6C@C\\u00012?5 Ιͺ \\u0001AC67246\\u0001E@ %16B0-6/\\u00014=-41 ̡ͤɀ9 \\u0003,2?8 .&\\u0013\\u0001\\u0010 \\u0004\\u0007\",\n      \"anchor_excerpt\": \"Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ ...\"\n    },\n    {\n      \"link_id\": \"link-00035\",\n      \"note_item_id\": \"fn-00072\",\n      \"current_anchor_id\": \"anchor-00753\",\n      \"marker\": \"2\",\n      \"note_page_no\": 129,\n      \"anchor_page_no\": 282,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"A2DD286\\u00017C@>\\u0001492AE6C\\u0001 \\u0011\\u0001@7\\u0001E96\\u000f);1+\\u0001 =-;<176; \\u0013 S)96\\u0001.6==@H\\u0001\\u001a>A6C@C\\u00012D<65\\u0001H92E C6A=6E:@?\\u00012?5\\u000156A=6E:@?\\u0001H6C6\\u0005\\u0001E@\\u0001H9:49\\u0001&:3@\\u0001C6A=:65\\u0013\\u0001Q'6A=6E:@?\\u0001:D\\u0001H96?\\u000156G:2?E&: :D\\u0001:?\\u000123F?52?46\\u0005\\u000156A=6E:@? H96?\\u00016DD6?E:2=&: 92D\\u0001366?\\u000156DA@:=65RT\\u0001\\u0003ΚĕªƢ 4̝˰ù ĉ0Ā ...\",\n      \"anchor_excerpt\": \"By the early seventeenth century, “Danxi”—the label by which doctors referred to precepts and methods they attributed to Zhu Zhenheng 朱震亨 (1282-1358; 4.4)—was no longer the awe-inspiring name it had been a hundred years earlier, and the “Da ...\"\n    },\n    {\n      \"link_id\": \"link-00039\",\n      \"note_item_id\": \"fn-00078\",\n      \"current_anchor_id\": \"anchor-00184\",\n      \"marker\": \"7\",\n      \"note_page_no\": 136,\n      \"anchor_page_no\": 95,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"7. 3=) 6/ 0C6DF=ED\\u00017C@>1\\u0001E96\\u0001@G6C\\u00067=@FC:D9:?8\\u0001@7\\u0001&:\\u0001:?\\u00012\\u000156A=6E65 A6CD@?T'˰ǘɜȨʨ \\u0003 2=)6 \\u0005\\u0001S\\u001b:C6T\\u0014\\u0001 , \\u0006\\u000e\\u0013\\u0001 \\u000f\\u0012\\u0004\\u0007\",\n      \"anchor_excerpt\": \"病式; hereafter Yuanbing shi).⁷ There, Liu alleged that “in the method for distinguishing\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-004-fromwindtomucusandfire:toc-ch-004-fromwindtomucusandfire:footnote\",\n  \"chapter_title\": \"From Wind to mucus and Fire\",\n  \"page_range\": [\n    95,\n    152\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 94,\n      \"ocr_excerpt\": \"processes and to intervene effectively in these processes. Doctors claimed that yunqi schemes helped them to understand the infinite transformations of illness and to know how to reestablish the dynamic balance that defined good health. Yunqi doctrines became the rage in medical circles soon after the imperial edition of the Basic Questions appeared in the late 11 $ ^{th} $ century, and reached a golden age when they were patronized by Huizong, who considered these cosmic cycles as key to health, government, and cosmic harmony (Yan Liang 2000). $ ^{4} $ Like so many practitioners from the late eleventh century onwards, Liu Wansu treated the yunqi chapters as the most important in the Basic Questions. He even claimed that \\\"the essential of medical teachings lies in the wnyun liuqi\\\" (醫教要乎五運六氣), and made this emphasis evident in his Treatise on the Essential Purport of Yunqi in the Inner Canon (Neijing yunqi yaozhi lun 內經運氣要旨論). $ ^{5} $ Liu's preface (Liu WYQ: 195) to this book stressed how subtle and confounding this system of transformations could be to the non-initiated. Few indeed could awaken to its meaning (悟得其意者鮮矣). In several of his works, Liu called wuyun liuqi a “Mysterious ...\"\n    },\n    {\n      \"page_no\": 95,\n      \"ocr_excerpt\": \"became the mainstay of Liu's most influential book: the Method for Tracing Illnesses to their Origins with the Mysterious Mechanism of the Basic Questions (Suwen xuanji yuanbing shi 素問玄機原 病式; hereafter Yuanbing shi).⁷ There, Liu alleged that “in the method for distinguishing illnesses, it can be seen clearly that the Qi of [all] illnesses can be reduced to transformations of the five phases and six Qi” (識病之法 以其病氣歸於五運六氣之化 明可見矣). Liu Wansu used the fluid interactions between the Five Agents as a guide for scripting both physiological and pathological processes. $ ^{8} $ The Five Agents and the five Yin viscera (五臟) interacted in a way illustrated synoptically in Figure 4.1 (next page). This system was homeostatic (it had an inherent tendency to equilibrium) but dynamic. Since all of its elements were inter-related, a slight imbalance (be it excess or deficiency) in any of the Five Agents or organs led to illnesses that could affect the entire organism. By a sequence of effects predicted by the model, an excess of emotions could, for instance, lead to hemiplegia: Hemiplegia caused by Wind strokes [occurs] because Cardiac Fire abruptly becomes excessive, and [Kidney] Water decays and i ...\"\n    },\n    {\n      \"page_no\": 96,\n      \"ocr_excerpt\": \"By explaining illness on the plane of the Five Agents, Liu severed the causal chain from the organs themselves. <div style=\\\"text-align: center;\\\"><img src=\\\"imgs/img_in_image_box_293_375_944_941.jpg\\\" alt=\\\"Image\\\" width=\\\"53%\\\" /></div> <div style=\\\"text-align: center;\\\">Fig. 4.1 Mutual conquest and mutual production cycles of the Five Agents and their associated viscera. (This diagram represents the system in a balanced state.)</div> Using the compelling conceptual architecture of the wuyun liuqi, the Yuanbing shi seemed to make sense of everything: why vomit is acidic, why we have runny noses, why plump persons suffer from more strokes, why some people speak in their sleep, why we laugh when we are tickled, and even why we don't laugh when we tickle ourselves. $ ^{10} $ Liu's ambitious treatise was in fact an extensive commentary on a passage from chapter 74 of the Basic Questions (one of the seven \\\"Grand treatises\\\") where Qibo explained the origins of 19 disorders to satisfy the Yellow Emperor's wish to \\\"hear about the\"\n    },\n    {\n      \"page_no\": 97,\n      \"ocr_excerpt\": \"mechanisms of illness”聞病機何如. $ ^{11} $ Qibo traced one illness each to the five Yin viscera, one each to the lower and upper body, and twelve to various aspects of Qi: five (including kuang) to Fire, four to Heat, and one each to Wind, Dampness, and Cold. Extrapolating that the five illnesses the canonical excerpt attributed to the viscera actually originated in the movements of Fire, Liu Wansu took this passage as authoritative proof of the pathological power of Heat and Fire, which now represented 14 out of the original 19 entries—five from the viscera, four from Heat, and five from Fire. The short first section on “the five circulatory phases [as they] govern illness” (五運主病) (1a-3b) discussed the Five Agents as they succeeded each other during the year (Wood, Fire, Earth, Metal, and Water). The rest of the work was devoted to “the six Qi [as they] bring about illness” (六氣為病). Heat (4b-31a) and Fire (33a-57b) made up almost three quarters of the entire book. $ ^{12} $ Liu took the six Qi not as climatic influences (their traditional meaning), but largely as manifestations of internal imbalances. The close attention he paid to internal pathological processes makes him representati ...\"\n    },\n    {\n      \"page_no\": 98,\n      \"ocr_excerpt\": \"was not air, but an internal form of Qi that appeared mostly because of internally generated Heat and acted in concert with Heat to produce morbid symptoms. As he would state in a later work, “what we speak of as ‘Wind’ is [in fact] ‘Heat’” (凡言風者熱也), because “Wind originally is born from Heat; Heat is the root, Wind the top branch [the superficial manifestation]” (風本生於熱 以熱為本 以風為標). $ ^{14} $ Liu Wansu's descriptions of the pathogenesis of a large number of illnesses gave a central place to internal Fire and Heat (instead of Wind). Liu's focus on Heat also explains his predilection for the use of cooling drugs, many of which he drew from the Treatise on Cold Injury. Liu's reinterpretation of Wind as inner Heat contributed to the collapse of the notion of \\\"Wind illnesses\\\" (see sections 4.2, 4.4, and 4.7 below), which in turn helped kuang to become one among many \\\"miscellaneous illnesses\\\" (雜病) that could be discussed independently. A reader of Liu's treatise would have had no inkling that madness had once been classified as a \\\"Wind illness.\\\" Following the passage from the Basic Questions that he was commenting upon, Liu discussed madness under the \\\"Fire\\\" section, where he gave kuang a ...\"\n    },\n    {\n      \"page_no\": 99,\n      \"ocr_excerpt\": \"onset of madness as follows: “Kidney-Water governs the Will, and Water and Fire are opposed to each other. Therefore when Cardiac Fire is overabundant, Renal Water decays: one thus ‘loses one’s Will’ and becomes crazy” (臀水主志而水火相反 故心火旺則腎水衰 乃失志而狂越). $ ^{16} $ Liu also thought that excessive emotions caused by Heat or Fire could trigger madness. $ ^{17} $ Liu Wansu evaluated at some length two sources that disagreed on the nature of the association of dian and kuang: the $ 20^{th} $ problem of the Canon of Problems, and one of Wang Bing's annotations to the Basic Questions (see 3.4). $ ^{18} $ Since neither the $ 20^{th} $ problem nor Wang Bing's commentary mentioned the symptoms of dian and kuang, Liu Wansu could adduce or dispute either passage no matter what meaning he gave to dian. His interpretation of dian and kuang as two similar disorders was widely adopted in Ming medicine, when the great seventh- and eighth-century treatises that had described dian as an epileptiform illness had stopped being reprinted. It is said that ‘the doubling of Yang is kuang and the doubling of Yin is dian’, but this differs from the explanation found in the Basic Questions. The Canon’s annotations s ...\"\n    },\n    {\n      \"page_no\": 100,\n      \"ocr_excerpt\": \"kuang. Since all five emotions generate Heat, kuang is triggered by any of the five emotions. It is simply that anger is [a] more common [cause]. $ ^{20} $ 或云重陽者狂 重陰者癲 則素問之說不同也 經注曰 多喜為癲 多怒為狂 然喜為心志 故心熱甚則多喜而為癲也 怒為肝志 火實制金不能平木故肝實則多怒而為狂也 況五志所發皆為熱 故狂者五志間發 但怒多爾 After having cited many passages from the Basic Questions that were compatible with his own view of emotions as manifestations of Fire and of madness as caused by inner Heat, Liu concluded with a rhetorical question aimed to refute the Canon of Problems: “Can it really be, then, that dian is the doubling of Yin?” (夫豈癲為重陰者歟) Liu Wansu's interpretations were not grounded in his (or anybody's) observation of patients. His reasoning relied on textual authority and on deduction following the association of the five viscera with the Five Agents and the emotions. Bypassing the entire \\\"Wind illness\\\" tradition, Liu confirmed his Heat etiology by citing passages from the Treatise on Cold Injury—another work he greatly admired—that attributed disorders of the Yang-brilliance tract to Heat. $ ^{21} $ I know of no major medical work after Liu's Yuanbing shi 原病式 that attributed madness to Wind, whereas Heat and Fire remained important identified ...\"\n    },\n    {\n      \"page_no\": 101,\n      \"ocr_excerpt\": \"kuang in symptoms (instead of an epileptiform illness) took place only in the fifteenth and sixteenth centuries, a process I shall describe in more detail in sections 6.5 and 6.6. $ ^{22} $ ### 4.2 Zhang Congzheng: convergences and crystallizations Zhang Congzheng 張從正 (1156-1228), from Kaocheng 考城 in Suizhou 睢州 (Henan), was the first Chinese physician to attribute madness to Heat and mucus explicitly and to treat it consistently with purgatives and emetics. He also systematized counter-affect therapy, a kind of treatment that came to be discussed next to madness in the sixteenth century (6.4). Zhang's doctrines were inspired by Liu Wansu, but also by the Basic Questions, the Treatise on Cold Injury, and a variety of Song physicians whose books Zhang had read. Aggressive therapies and the mucus etiology of madness Like Liu Wansu, Zhang Congzheng gave pride of place to the precepts of the Inner Canon. $ ^{23} $ He pushed even further than Liu his reliance on the Treatise on Cold Injury, from which he borrowed a number of recipes and three therapeutic methods that he used to treat all illnesses: sweating (ban 汗), vomiting (tu 吐), and purging (xia 下). $ ^{24} $ As Zhang explained,\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00186\",\n      \"marker\": \"9\",\n      \"page_no\": 95,\n      \"paragraph_index\": 6,\n      \"source_text\": \"Hemiplegia caused by Wind strokes [occurs] because Cardiac Fire abruptly becomes excessive, and [Kidney] Water decays and is unable to curb it. Fire can thus overcome Metal, as a result of which Metal can no longer overcome Wood: Liver Wood ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00188\",\n      \"marker\": \"10\",\n      \"page_no\": 96,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Using the compelling conceptual architecture of the wuyun liuqi, the Yuanbing shi seemed to make sense of everything: why vomit is acidic, why we have runny noses, why plump persons suffer from more strokes, why some people speak in their s ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00189\",\n      \"marker\": \"11\",\n      \"page_no\": 97,\n      \"paragraph_index\": 0,\n      \"source_text\": \"mechanisms of illness”聞病機何如. $ ^{11} $ Qibo traced one illness each to the five Yin viscera, one each to the lower and upper body, and twelve to various aspects of Qi: five (including kuang) to Fire, four to Heat, and one each to Wind, Damp ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00192\",\n      \"marker\": \"14\",\n      \"page_no\": 98,\n      \"paragraph_index\": 0,\n      \"source_text\": \"was not air, but an internal form of Qi that appeared mostly because of internally generated Heat and acted in concert with Heat to produce morbid symptoms. As he would state in a later work, “what we speak of as ‘Wind’ is [in fact] ‘Heat’” ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00193\",\n      \"marker\": \"15\",\n      \"page_no\": 98,\n      \"paragraph_index\": 2,\n      \"source_text\": \"A reader of Liu's treatise would have had no inkling that madness had once been classified as a \\\"Wind illness.\\\" Following the passage from the Basic Questions that he was commenting upon, Liu discussed madness under the \\\"Fire\\\" section, wher ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00195\",\n      \"marker\": \"17\",\n      \"page_no\": 99,\n      \"paragraph_index\": 0,\n      \"source_text\": \"onset of madness as follows: “Kidney-Water governs the Will, and Water and Fire are opposed to each other. Therefore when Cardiac Fire is overabundant, Renal Water decays: one thus ‘loses one’s Will’ and becomes crazy” (臀水主志而水火相反 故心火旺則腎水衰 乃 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00196\",\n      \"marker\": \"18\",\n      \"page_no\": 99,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Liu Wansu evaluated at some length two sources that disagreed on the nature of the association of dian and kuang: the $ 20^{th} $ problem of the Canon of Problems, and one of Wang Bing's annotations to the Basic Questions (see 3.4). $ ^{18} ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00197\",\n      \"marker\": \"19\",\n      \"page_no\": 99,\n      \"paragraph_index\": 2,\n      \"source_text\": \"It is said that ‘the doubling of Yang is kuang and the doubling of Yin is dian’, but this differs from the explanation found in the Basic Questions. The Canon’s annotations say:¹⁹ ‘excessive joy makes dian, excessive anger makes kuang.’ Joy ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00110\",\n      \"note_item_id\": \"fn-00027\",\n      \"current_anchor_id\": \"anchor-00182\",\n      \"marker\": \"5\",\n      \"note_page_no\": 95,\n      \"anchor_page_no\": 94,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"36 S ^ªh¬ S Y¤anbing ¢hi 原病式 ahb W{i¤WYQi hfpX]\",\n      \"anchor_excerpt\": \"Like so many practitioners from the late eleventh century onwards, Liu Wansu treated the yunqi chapters as the most important in the Basic Questions. He even claimed that \\\"the essential of medical teachings lies in the wnyun liuqi\\\" (醫教要乎五運六 ...\"\n    },\n    {\n      \"link_id\": \"link-00111\",\n      \"note_item_id\": \"fn-00028\",\n      \"current_anchor_id\": \"anchor-00191\",\n      \"marker\": \"3\",\n      \"note_page_no\": 96,\n      \"anchor_page_no\": 97,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"3. \\u0003\\u0012 \\u0016\\u0017\\u0004\\u0014\",\n      \"anchor_excerpt\": \"The Wind section of the Yuanbing shi contained only one entry, and it made no mention of Wind as a real gale that swirled inside the body. $ ^{13} $ Liu argued instead that Wind\"\n    },\n    {\n      \"link_id\": \"link-00112\",\n      \"note_item_id\": \"fn-00029\",\n      \"current_anchor_id\": \"synthetic-footnote-00102\",\n      \"marker\": \"2\",\n      \"note_page_no\": 96,\n      \"anchor_page_no\": 96,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"2. \\u0003 \\u0016\\u0004\\u0014 S\\u00196=:C:F>T̤ \\u0013\\u0001 3 \\u0003\\u0012\\u0010\\u0017\\u0004\\u0014S!2F89E6CTʆ \\u0013\\u0001 3 \\u0003\\u0012\\u0010\\u0016 \\u0004\\u0007\",\n      \"anchor_excerpt\": \"2. \\u0003 \\u0016\\u0004\\u0014 S\\u00196=:C:F>T̤ \\u0013\\u0001 3 \\u0003\\u0012\\u0010\\u0017\\u0004\\u0014S!2F89E6CTʆ \\u0013\\u0001 3 \\u0003\\u0012\\u0010\\u0016 \\u0004\\u0007\"\n    },\n    {\n      \"link_id\": \"link-00114\",\n      \"note_item_id\": \"fn-00031\",\n      \"current_anchor_id\": \"synthetic-footnote-00103\",\n      \"marker\": \"6\",\n      \"note_page_no\": 98,\n      \"anchor_page_no\": 98,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"a4 Piu[]UB0 E 36Wee0also PiuRsgloss 2TlXeY`e^0j_` ¶ɇĥ a5b4 Piu[]UB0@AE3 on the0line0S̜΂Ŵɣ ɘć ʲƫ T02fromg`Xe ? 0of0the >Xj`Z0 l\\\\jk`fej 34 where0he0explained0how0inner0[ind0could0act0in0concert with0inner eat0to0produce0a0spinning0effectPPone ...\",\n      \"anchor_excerpt\": \"a4 Piu[]UB0 E 36Wee0also PiuRsgloss 2TlXeY`e^0j_` ¶ɇĥ a5b4 Piu[]UB0@AE3 on the0line0S̜΂Ŵɣ ɘć ʲƫ T02fromg`Xe ? 0of0the >Xj`Z0 l\\\\jk`fej 34 where0he0explained0how0inner0[ind0could0act0in0concert with0inner eat0to0produce0a0spinning0effectPPone ...\"\n    },\n    {\n      \"link_id\": \"link-00116\",\n      \"note_item_id\": \"fn-00033\",\n      \"current_anchor_id\": \"anchor-00200\",\n      \"marker\": \"21\",\n      \"note_page_no\": 103,\n      \"anchor_page_no\": 101,\n      \"current_anchor_marker\": \"21\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"ld\\\\e0j_`h`e S͝ ̃ 4alXe 4entry 02VQWU0 6 bC U`_\\\\0p`a` B0> 3 0\",\n      \"anchor_excerpt\": \"kuang in symptoms (instead of an epileptiform illness) took place only in the fifteenth and sixteenth centuries, a process I shall describe in more detail in sections 6.5 and 6.6. $ ^{22} $\"\n    },\n    {\n      \"link_id\": \"link-00119\",\n      \"note_item_id\": \"fn-00036\",\n      \"current_anchor_id\": \"anchor-00242\",\n      \"marker\": \"6\",\n      \"note_page_no\": 110,\n      \"anchor_page_no\": 111,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Qutual0conquest0and0mutual0production0of0the0Jive0Egents40with0their g`e^Z_Xe^ _common40ordinary`60Sne0is0frightened0because0one0suddenly0comes0upon0something60Qake0one0see and0hear0this0thing0habitually40and0one0will0no0longer0be0frightene ...\",\n      \"anchor_excerpt\": \"Three Therapies (Shixing sanliao 十形三療), a selection of medical files compiled by Zhang's disciples shortly after his death. Four of the six cases under “the inner-harm configuration” (内傷形) showed Zhang using counter-affect therapy. $ ^{54} ...\"\n    },\n    {\n      \"link_id\": \"link-00120\",\n      \"note_item_id\": \"fn-00037\",\n      \"current_anchor_id\": \"anchor-00238\",\n      \"marker\": \"2\",\n      \"note_page_no\": 111,\n      \"anchor_page_no\": 110,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. @ 5 = 3C0see 6 below6 == _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SfrightT΍ 2VQWU0?6 a6 aCU`_\\\\0p`a` B0 ?5@360Sther0physicians0had treated0this0case0asan Sillness0of0the0 eartTĹɇ 40and0ineffectively0prescribed0Sginseng40pearls40and0[ill5 settling0pi ...\",\n      \"anchor_excerpt\": \"Treatment acted along the same vector. Anger could thus overcome excessive pensiveness, the affect associated with the Spleen. $ ^{52} $ Anger could itself be assuaged by sorrow, the emotion correlated with the Lungs and Metal (the agent th ...\"\n    },\n    {\n      \"link_id\": \"link-00123\",\n      \"note_item_id\": \"fn-00040\",\n      \"current_anchor_id\": \"anchor-00257\",\n      \"marker\": \"0\",\n      \"note_page_no\": 115,\n      \"anchor_page_no\": 114,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"0. %1.)6/ ͓Ƌ 1\\u0001H96?\\u000196\\u00017=65 2:76?8\\u0001:?\\u0001 \\u0007\",\n      \"anchor_excerpt\": \"What Charlotte Furth has called the “art of diagnosis” is best understood as the art of designing prescriptions on the basis of case-specific diagnoses. $ ^{67} $ The flexible articulation of a prescription to a diagnosis is so often treate ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-007-fromwindtomucusandfire:toc-ch-007-fromwindtomucusandfire:endnote",
+      "cluster_id": "toc-ch-004-fromwindtomucusandfire:toc-ch-004-fromwindtomucusandfire:footnote",
       "chapter_title": "From Wind to mucus and Fire",
       "request_mode": "anchor_rebind",
       "allowed_actions": [
@@ -20,275 +20,251 @@
         "ignore_ref",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
-        94,
+        95,
         152
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 77607,
+          "row_id": 96100,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00181",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
-          "page_no": 94,
-          "paragraph_index": 0,
-          "char_start": 551,
-          "char_end": 559,
-          "source_marker": "$ ^{4} $",
-          "normalized_marker": "4",
-          "anchor_kind": "endnote",
+          "anchor_id": "anchor-00186",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "page_no": 95,
+          "paragraph_index": 6,
+          "char_start": 478,
+          "char_end": 486,
+          "source_marker": "$ ^{9} $",
+          "normalized_marker": "9",
+          "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "processes and to intervene effectively in these processes. Doctors claimed that yunqi schemes helped them to understand the infinite transformations of illness and to know how to reestablish the dynamic balance that defined good health. Yunqi doctrines became the rage in medical circles soon after the imperial edition of the Basic Questions appeared in the late 11 $ ^{th} $ century, and reached a golden age when they were patronized by Huizong, who considered these cosmic cycles as key to health, government, and cosmic harmony (Yan Liang 2000). $ ^{4} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "source_text": "Hemiplegia caused by Wind strokes [occurs] because Cardiac Fire abruptly becomes excessive, and [Kidney] Water decays and is unable to curb it. Fire can thus overcome Metal, as a result of which Metal can no longer overcome Wood: Liver Wood thus becomes excessive of its own and joins with the heat of the Fire, causing [the] sudden and violent collapse [that is characteristic of Wind strokes]. Sudden illnesses often result from excesses in the Five Wills and Seven Emotions. $ ^{9} $",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 77608,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00182",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
-          "page_no": 94,
-          "paragraph_index": 1,
-          "char_start": 380,
-          "char_end": 388,
-          "source_marker": "$ ^{5} $",
-          "normalized_marker": "5",
-          "anchor_kind": "endnote",
-          "certainty": 1.0,
-          "source_text": "Like so many practitioners from the late eleventh century onwards, Liu Wansu treated the yunqi chapters as the most important in the Basic Questions. He even claimed that \"the essential of medical teachings lies in the wnyun liuqi\" (醫教要乎五運六氣), and made this emphasis evident in his Treatise on the Essential Purport of Yunqi in the Inner Canon (Neijing yunqi yaozhi lun 內經運氣要旨論). $ ^{5} $ Liu's preface (Liu WYQ: 195) to this book stressed how subtle and confounding this system of transformations could be to the non-initiated. Few indeed could awaken to its meaning (悟得其意者鮮矣).",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77616,
+          "row_id": 96102,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00188",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
           "page_no": 96,
           "paragraph_index": 3,
           "char_start": 334,
           "char_end": 343,
           "source_marker": "$ ^{10} $",
           "normalized_marker": "10",
-          "anchor_kind": "endnote",
+          "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Using the compelling conceptual architecture of the wuyun liuqi, the Yuanbing shi seemed to make sense of everything: why vomit is acidic, why we have runny noses, why plump persons suffer from more strokes, why some people speak in their sleep, why we laugh when we are tickled, and even why we don't laugh when we tickle ourselves. $ ^{10} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 77618,
+          "row_id": 96105,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00189",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
           "page_no": 97,
           "paragraph_index": 0,
           "char_start": 29,
           "char_end": 38,
           "source_marker": "$ ^{11} $",
           "normalized_marker": "11",
-          "anchor_kind": "endnote",
+          "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "mechanisms of illness”聞病機何如. $ ^{11} $ Qibo traced one illness each to the five Yin viscera, one each to the lower and upper body, and twelve to various aspects of Qi: five (including kuang) to Fire, four to Heat, and one each to Wind, Dampness, and Cold.",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 77620,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00191",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
-          "page_no": 97,
-          "paragraph_index": 3,
-          "char_start": 139,
-          "char_end": 148,
-          "source_marker": "$ ^{13} $",
-          "normalized_marker": "13",
-          "anchor_kind": "endnote",
-          "certainty": 1.0,
-          "source_text": "The Wind section of the Yuanbing shi contained only one entry, and it made no mention of Wind as a real gale that swirled inside the body. $ ^{13} $ Liu argued instead that Wind",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
-        },
-        {
-          "row_id": 77622,
+          "row_id": 96108,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00192",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
           "page_no": 98,
           "paragraph_index": 0,
           "char_start": 385,
           "char_end": 394,
           "source_marker": "$ ^{14} $",
           "normalized_marker": "14",
-          "anchor_kind": "endnote",
+          "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "was not air, but an internal form of Qi that appeared mostly because of internally generated Heat and acted in concert with Heat to produce morbid symptoms. As he would state in a later work, “what we speak of as ‘Wind’ is [in fact] ‘Heat’” (凡言風者熱也), because “Wind originally is born from Heat; Heat is the root, Wind the top branch [the superficial manifestation]” (風本生於熱 以熱為本 以風為標). $ ^{14} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 77623,
+          "row_id": 96109,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00193",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
           "page_no": 98,
           "paragraph_index": 2,
           "char_start": 446,
           "char_end": 455,
           "source_marker": "$ ^{15} $",
           "normalized_marker": "15",
-          "anchor_kind": "endnote",
+          "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "A reader of Liu's treatise would have had no inkling that madness had once been classified as a \"Wind illness.\" Following the passage from the Basic Questions that he was commenting upon, Liu discussed madness under the \"Fire\" section, where he gave kuang a strong moral meaning: \"kuang' means wild unruliness, with no correct or fixed [behavior]; 'yuè' means violating rites and laws and having lost one's normal state\" (狂者 狂亂而無正定 越者 乖越禮法而失常也). $ ^{15} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         },
         {
-          "row_id": 77624,
+          "row_id": 96112,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00194",
-          "chapter_id": "toc-ch-007-fromwindtomucusandfire",
+          "anchor_id": "anchor-00195",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
           "page_no": 99,
           "paragraph_index": 0,
-          "char_start": 248,
-          "char_end": 257,
-          "source_marker": "$ ^{16} $",
-          "normalized_marker": "16",
-          "anchor_kind": "endnote",
+          "char_start": 345,
+          "char_end": 354,
+          "source_marker": "$ ^{17} $",
+          "normalized_marker": "17",
+          "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "onset of madness as follows: “Kidney-Water governs the Will, and Water and Fire are opposed to each other. Therefore when Cardiac Fire is overabundant, Renal Water decays: one thus ‘loses one’s Will’ and becomes crazy” (臀水主志而水火相反 故心火旺則腎水衰 乃失志而狂越). $ ^{16} $ Liu also thought that excessive emotions caused by Heat or Fire could trigger madness. $ ^{17} $",
-          "created_at": 1776827814,
-          "updated_at": 1776827814
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 96113,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00196",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "page_no": 99,
+          "paragraph_index": 1,
+          "char_start": 233,
+          "char_end": 242,
+          "source_marker": "$ ^{18} $",
+          "normalized_marker": "18",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Liu Wansu evaluated at some length two sources that disagreed on the nature of the association of dian and kuang: the $ 20^{th} $ problem of the Canon of Problems, and one of Wang Bing's annotations to the Basic Questions (see 3.4). $ ^{18} $ Since neither the $ 20^{th} $ problem nor Wang Bing's commentary mentioned the symptoms of dian and kuang, Liu Wansu could adduce or dispute either passage no matter what meaning he gave to dian. His interpretation of dian and kuang as two similar disorders was widely adopted in Ming medicine, when the great seventh- and eighth-century treatises that had described dian as an epileptiform illness had stopped being reprinted.",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
+        },
+        {
+          "row_id": 96114,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00197",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "page_no": 99,
+          "paragraph_index": 2,
+          "char_start": 177,
+          "char_end": 179,
+          "source_marker": "¹⁹",
+          "normalized_marker": "19",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "It is said that ‘the doubling of Yang is kuang and the doubling of Yin is dian’, but this differs from the explanation found in the Basic Questions. The Canon’s annotations say:¹⁹ ‘excessive joy makes dian, excessive anger makes kuang.’ Joy is the emotion associated with the Heart: when Heat in the Heart is overabundant, there is excessive joy, creating dian. Anger is the emotion associated with the Liver. When Fire is overreplete it curbs Metal, which cannot appease Wood [the Agent associated with the Liver]. Therefore the Liver becomes over-replete: one is excessively angry, creating",
+          "created_at": 1776848408,
+          "updated_at": 1776848408
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00017",
-          "note_item_id": "fn-00035",
-          "current_anchor_id": "anchor-00032",
-          "marker": "6",
-          "note_page_no": 94,
-          "anchor_page_no": 41,
-          "current_anchor_marker": "6",
-          "note_excerpt": "6. DA64:2=:DED\u0001@7\u0001E96\u000f);1+\u0001 =-;<176; \u0007 0-6/21\u0001B76/4= ʬȑʚ͙ \u0005 H9:49\u0001H2D 4@>A:=65\u0001F?56C\u00019:D\u0001C6:8?\u0005\u0001@A6?65\u0001H:E9\u0001EH@\u000172D4:4=6D\u0001@?A=691 \u0007\u0001\u00196DA6FI\u0001\u0003 \u0013\u0001 \u000e\u00012?5\u0001 \u0011\u0006 \u0004 D9@H 65 9@H\u0001>65:42=\u0001:562D\u0001FD:?8?=A=6\u000141=91 3642>6\u0001:?7=F6?E:2=\u00012E\u0001E96\u00014@FCE\u00012C@F?5\u0001E96\u0001E:>6\u0001E96\u000f);1+\u0001 =-;<176; H6C6\u000136:?8\u000165:E65\u0005\u00012?5 A@DEF=2E65E92E E96\u00014@FCE@77:4:2==J\u000125@AE65A=691 5@4EC:?6D36EH66?\u0001 \u000e \u00012?5\u0001 \u0010\u000f\u0001\u00031*1, \u0007\u0013 \u0011\u0004\u0007\u0001\u001b@C\u0001EC246D\u0001@7\u0001E96\u0001=:?86C:?8\u0001AC6D6?46\u0001@7\u0001E96\u000f);1+\u0001 =-;<176; R\u00014@D>@=@8:42=\u0001492AE6CD\u0001:?\u0001D@FE96C? (@?8\u0001>65:42= 6I2>:?2E:@?D\u0005\u0001D66!)1A12=\u0001B0=3-\u0001+0-6/?-6\u0001/- Í͓ą̜ɸɺƆƺ \u0003 \u0004\u0007\u0001\u001b@C\u0001>@C6\u0001@?\u0001(@?8\u0001>65:42=\u000165F42E:@? 2?5\u00016I2>:?2E:@?D\u0005\u0001D66\u0001#66592>\u00012?5\u0001!F\u0001 \u00010 \u0012\u0010 1\u0013\u0001 \u000e\u0006 \u0005\u0001!:2?8\u0001 F?\u0001 \u0013\u0001 \u000f\u0006 \u0012\u0005\u00012?5\u0001 @=5D49>:5E\u0001 \u0010\u0007 \u000e !:FRD\u00014=2:>23@FE E96\u0001:>A@CE2?46\u0001@7?=A=6\u000141=91 2AA62C65\u0001:?\u00019:D\u0001AC67246\u0001E@ %=)6*16/\u0001;01 ɇĥ \u0003!:F,.&\u0013\u0001\u0011 \u0004\u0005 H96C6\u000196\u00014@>A2C65\u0001S>65:42=\u0001E6249:?8DT\u0001\u0003͓Ɓ \u0004\u0001E@\u0001S\u0018@?7F4:2?\u0001E6249:?8DT\u0001\u0003SƁ \u0004\u00012?5 E@SE96\u0001E6249:?8D\u0001@7\u0001E96 \u00100)6/-; T\u0001\u0003 ƕƁ \u0004\u0005\u00014=2:>:?8\u0001E92E\u0001E96\u0001E9C66\u00017@C>65\u0001@?6\u0001\u00192@\u0001H:E9\u00014@>>@?\u00017@F?52E:@?D\u0007\u0001\"J\u00016?ECJ\u0001@?\u0001!:FRD\u001b-1216/ A=691\u0001A)7B01\u00014=6 :?\u0001S\u0017:3=:@8C2A9J\u0001\u0016T\u0001D@=G6D\u00012 76H\u0001AC@3=6>D\u0001>6?E:@?65\u0001:?\u0001,F\u0001.:J:\u0001 \u0012\u0012 \u0006\u0012 \u0013\u0001 ? \u000e\u0007 \u000f \u000125@AE\u0001\u00196DA6FIRD\u0001EC2?D=2E:@?\u0001@7@=)621 \u0003 \u0013\u0001 \u000e\u0011\u0004\u0007\u0001)96\u0001A2DD2867C@>\u0001E96\u000f);1+\u0001 =-;<176; @?\u0001H9:49 %=)6*16/\u0001;01 ɇĥ H2D\u000132D65\u00015:D4FDD65\u0001SE96\u0001>6492?:D>0D1\u0001@7\u0001:==?6DDTɇǇ \u0007\u0001!:FRD\u00012?5\u0001\"2\u0001/@?8DFRD\u0001AC67246D\u0001E@\u001b-1216/ A=691\u0001A)7B01\u00014=6 \\ʕͅǘ̀Ƒ̛ >6?E:@?65\u0001E96\u0001S\"JDE6C:@FD\u0001\"6492?:D>T\u0007\u0001!:FRD\u0001 \u0011\u000f\u0001AC67246\u0001E@ \u000f)7516/\u000121 ? ¥ͬ \u0003!:F,.&\u0013\u0001 \u0004 4=2:>65\u0001E92E\u0001>65:42=\u0001D<:==D\u00012==\u000142>6\u00017C@>\u0001E96\u0001S\"JDE6C:@FD\u0001\"6492?:D>T\u0001@7\u0001E96\u001666-:\u0001\u0010)676 \u0007",
-          "anchor_excerpt": "task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $",
+          "link_id": "link-00110",
+          "note_item_id": "fn-00027",
+          "current_anchor_id": "anchor-00182",
+          "marker": "5",
+          "note_page_no": 95,
+          "anchor_page_no": 94,
+          "current_anchor_marker": "5",
+          "note_excerpt": "36 S ^ªh¬ S Y¤anbing ¢hi 原病式 ahb W{i¤WYQi hfpX]",
+          "anchor_excerpt": "Like so many practitioners from the late eleventh century onwards, Liu Wansu treated the yunqi chapters as the most important in the Basic Questions. He even claimed that \"the essential of medical teachings lies in the wnyun liuqi\" (醫教要乎五運六氣), and made this emphasis evident in his Treatise on the Essential Purport of Yunqi in the Inner Canon (Neijing yunqi yaozhi lun 內經運氣要旨論). $ ^{5} $ Liu's preface (Liu WYQ: 195) to this book stressed how subtle and confounding this system of transformations could be to the non-initiated. Few indeed could awaken to its meaning (悟得其意者鮮矣).",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00019",
-          "note_item_id": "fn-00037",
-          "current_anchor_id": "anchor-00179",
+          "link_id": "link-00111",
+          "note_item_id": "fn-00028",
+          "current_anchor_id": "anchor-00191",
+          "marker": "3",
+          "note_page_no": 96,
+          "anchor_page_no": 97,
+          "current_anchor_marker": "3",
+          "note_excerpt": "3. \u0003\u0012 \u0016\u0017\u0004\u0014",
+          "anchor_excerpt": "The Wind section of the Yuanbing shi contained only one entry, and it made no mention of Wind as a real gale that swirled inside the body. $ ^{13} $ Liu argued instead that Wind",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00112",
+          "note_item_id": "fn-00029",
+          "current_anchor_id": "synthetic-footnote-00102",
           "marker": "2",
           "note_page_no": 96,
-          "anchor_page_no": 93,
+          "anchor_page_no": 96,
           "current_anchor_marker": "2",
-          "note_excerpt": "\u0003 \u0016\u0004\u0014 S\u00196=:C:F>T̤ \u0013\u0001 3 \u0003\u0012\u0010\u0017\u0004\u0014S!2F89E6CTʆ \u0013\u0001 3 \u0003\u0012\u0010\u0016 \u0004\u0007",
-          "anchor_excerpt": "Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ From his mid-twenties, Liu pored through Wang Bing's annotated version of the Basic Questions and became engrossed in the complexity of its immensely influential cosmological chapters. $ ^{2} $ To those tenacious enough to decipher them, these chapters explained the convoluted workings of the “five circulatory phases and six seasonal influences” (wuyun liuqi 五運六氣; often referred to as yunqi) as they applied to medicine. $ ^{3} $ The “five circulatory phases” were Wood, Fire, Earth, Metal, and Water, the Five Agents familiar to those who have studied any aspect of Chinese thought. The six types of climatic Qi were Wind 風, Heat 熱, Dampness 濕, Fire 火 (or Summer Heat 署), Dryness 燥, and Cold 寒.",
+          "note_excerpt": "2. \u0003 \u0016\u0004\u0014 S\u00196=:C:F>T̤ \u0013\u0001 3 \u0003\u0012\u0010\u0017\u0004\u0014S!2F89E6CTʆ \u0013\u0001 3 \u0003\u0012\u0010\u0016 \u0004\u0007",
+          "anchor_excerpt": "2. \u0003 \u0016\u0004\u0014 S\u00196=:C:F>T̤ \u0013\u0001 3 \u0003\u0012\u0010\u0017\u0004\u0014S!2F89E6CTʆ \u0013\u0001 3 \u0003\u0012\u0010\u0016 \u0004\u0007",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-00114",
+          "note_item_id": "fn-00031",
+          "current_anchor_id": "synthetic-footnote-00103",
+          "marker": "6",
+          "note_page_no": 98,
+          "anchor_page_no": 98,
+          "current_anchor_marker": "6",
+          "note_excerpt": "a4 Piu[]UB0 E 36Wee0also PiuRsgloss 2TlXeY`e^0j_` ¶ɇĥ a5b4 Piu[]UB0@AE3 on the0line0S̜΂Ŵɣ ɘć ʲƫ T02fromg`Xe ? 0of0the >Xj`Z0 l\\jk`fej 34 where0he0explained0how0inner0[ind0could0act0in0concert with0inner eat0to0produce0a0spinning0effectPPone0of0themanifestationsof \\ok\\ieXc [ind0in0earlier0medicine6 = TlXeY`e^0j_` ¶ɇĥ a 2Piu[]UB0A@F360Piu0wascommenting on a0passage0from>Xj`Z0 l\\jk`fej ? BSthe various0_forms0of`0agitation0and0madness0all0belong0to0JireT02̜̲Ȩ̯ ɘćƌȖ 36",
+          "anchor_excerpt": "a4 Piu[]UB0 E 36Wee0also PiuRsgloss 2TlXeY`e^0j_` ¶ɇĥ a5b4 Piu[]UB0@AE3 on the0line0S̜΂Ŵɣ ɘć ʲƫ T02fromg`Xe ? 0of0the >Xj`Z0 l\\jk`fej 34 where0he0explained0how0inner0[ind0could0act0in0concert with0inner eat0to0produce0a0spinning0effectPPone0of0themanifestationsof \\ok\\ieXc [ind0in0earlier0medicine6 = TlXeY`e^0j_` ¶ɇĥ a 2Piu[]UB0A@F360Piu0wascommenting on a0passage0from>Xj`Z0 l\\jk`fej ? BSthe various0_forms0of`0agitation0and0madness0all0belong0to0JireT02̜̲Ȩ̯ ɘćƌȖ 36",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-00116",
+          "note_item_id": "fn-00033",
+          "current_anchor_id": "anchor-00200",
+          "marker": "21",
+          "note_page_no": 103,
+          "anchor_page_no": 101,
+          "current_anchor_marker": "21",
+          "note_excerpt": "ld\\e0j_`h`e S͝ ̃ 4alXe 4entry 02VQWU0 6 bC U`_\\0p`a` B0> 3 0",
+          "anchor_excerpt": "kuang in symptoms (instead of an epileptiform illness) took place only in the fifteenth and sixteenth centuries, a process I shall describe in more detail in sections 6.5 and 6.6. $ ^{22} $",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00021",
-          "note_item_id": "fn-00044",
-          "current_anchor_id": "anchor-00389",
+          "link_id": "link-00119",
+          "note_item_id": "fn-00036",
+          "current_anchor_id": "anchor-00242",
+          "marker": "6",
+          "note_page_no": 110,
+          "anchor_page_no": 111,
+          "current_anchor_marker": "6",
+          "note_excerpt": "Qutual0conquest0and0mutual0production0of0the0Jive0Egents40with0their g`e^Z_Xe^ _common40ordinary`60Sne0is0frightened0because0one0suddenly0comes0upon0something60Qake0one0see and0hear0this0thing0habitually40and0one0will0no0longer0be0frightened6T02associated0organs0and0emotions ʕƢ ΍ʨěA _W[? ` ě̝ěĘH ý΍[bĽȝʪ̈́AH fʤ́ʤʮ¡7΍ɨ 3",
+          "anchor_excerpt": "Three Therapies (Shixing sanliao 十形三療), a selection of medical files compiled by Zhang's disciples shortly after his death. Four of the six cases under “the inner-harm configuration” (内傷形) showed Zhang using counter-affect therapy. $ ^{54} $ Applying his idea that fright would disappear if the patient became accustomed to what scared her, Zhang arranged for people to hit the windows and door of a woman who fell unconscious every time she heard a big noise. $ ^{55} $ After diagnosing that a different woman's two years of insomnia originated in her pensiveness, Zhang did everything he could to infuriate her: he charged more fees than usual, came drunk to the consultation, and departed without making a prescription, leaving his patient sweating with outrage. $ ^{56} $ That night and for several days in a row, she slept soundly and eventually recovered. Anger had overcome pensiveness.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00120",
+          "note_item_id": "fn-00037",
+          "current_anchor_id": "anchor-00238",
           "marker": "2",
-          "note_page_no": 99,
-          "anchor_page_no": 156,
+          "note_page_no": 111,
+          "anchor_page_no": 110,
           "current_anchor_marker": "2",
-          "note_excerpt": "C676C6?46\u0001E@\u0001E96\u00012FE9@C:EJ\u0001@7\u0001E96\u001666-:\u0001\u0010)676 E@ 2\u00014:E2E:@? @7,2?8\u0001\u0017:?8RD 2??@E2E:@?DE@\u0001E96\u0010)676 \u0007",
-          "anchor_excerpt": "The diffusion of medical ideas took place in ways more complex than we can ever document. Knowledge and skills were transmitted through local teaching networks, some hereditary, others informal, and yet others based on strict ritual relations between a master and his (rarely her) disciples. $ ^{2} $ The vast majority of teachers remain undocumented. We know almost nothing about the routes by which medical books circulated throughout the empire, carried by traders, officials en route to their posts, or wandering physicians. The role of manuscripts and hand copies of printed books can only be surmised from notes made en passant in various writings, and the private letters that contributed to spreading new medical conceptions have almost all disappeared. $ ^{3} $ Finally we know too little about the oral teachings",
+          "note_excerpt": "2. @ 5 = 3C0see 6 below6 == _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SfrightT΍ 2VQWU0?6 a6 aCU`_\\0p`a` B0 ?5@360Sther0physicians0had treated0this0case0asan Sillness0of0the0 eartTĹɇ 40and0ineffectively0prescribed0Sginseng40pearls40and0[ill5 settling0pillT02V¹Ȱȱ»îĻ 360Xhe0[ill5settling0pill0was0a0typical0treatment0for0fright6 => _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SinsomniaT7÷ 2VQWU0?6 a4 U`_\\0p`a` B0 ?360^hangRs0version0claimed patient0sweating0with0outrage6 that0heonly Sfeigned0drunkennessT02w͒ 302 ld\\e0j_`h`e S͝ ̃ 40entry0 >C0VQWU0 6 ?b4U`_\\0p`a` B0 36 =? _`o`e^ jXec`Xf ¬Ĭ4ɐ 40case0 40SPumps0caused0by0sorrowT âřʔî 2VQWU0?6 aC U`_\\0p`a` B0 >36 =@ t0is0unclear0whether0the0exorcist0was0in0collusion6 =A Es0^hang0was0quoted0to0have0said40theEee\\i0?Xefe already0contained0information0on0this0method0when0it said0that0Swhen0one0is0sorrowful4Ui congeals0into0knotsT02ř¡ǘʔ 340that0Swhen0one0is0joyous40all0the0vessels are0in0harmonyT02Ü¡ɖʽ˔Õ 34and0that0Sjoy0overcomes0sorrowT02Ü¦ō 36Xhe0third0phrase0was0taken directly0fromg`Xe =02and0>?30of0the>Xj`Z0 l\\jk`fej 60E0sentence0toward0the0end0of >Xj`Z0 l\\jk`fej A gave0a0slightly different0version0of0the0effect0on0Ui0of0various0emotions60S[hen0one0is0joyous40all0the0vessels0are0in0harmonyT appeared0verbatim0in0^hangRs0entry0on0the0nine0types0of Ui and0explained0why0joy0rarelyproduced illness 2 ld\\e0j_`h`e S͝ ̃ 40entry0 >CVQWU0 6 ?b5 @a4U`_\\0p`a` B0 36",
+          "anchor_excerpt": "Treatment acted along the same vector. Anger could thus overcome excessive pensiveness, the affect associated with the Spleen. $ ^{52} $ Anger could itself be assuaged by sorrow, the emotion correlated with the Lungs and Metal (the agent that was said to conquer Wood). The two forms of Qi that did not fit into this scheme were fatigue, which should be soothed with idleness (yi 逸), and fright, which was countered by habit (xi 習). $ ^{53} $",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00023",
-          "note_item_id": "fn-00048",
-          "current_anchor_id": "anchor-00026",
-          "marker": "2",
-          "note_page_no": 105,
-          "anchor_page_no": 38,
-          "current_anchor_marker": "2",
-          "note_excerpt": "77\u0005 &10-\u0001A121 \u0013\u0001 \u000f 77\u0004\u0007\u0001(66\u00012=D@ &01*16/\u0001B)4=6 \u0005\u0001S49:=5C6?RD\u0001,:?5T ĂZ΂͝ \u0003'\"(&\u0001 \u0007 2\u00063\u0005 &10-\u0001A121 \u0013\u0001 \u0010 \u0006\u0010\u000e\u0004 7@C\u00012\u0001=:DE\u0001@7\u000149:=5C6?RD\u0001:==?6DD6D E92E\u0001/92?8\u0001C64@>>6?565\u0001EC62E:?8\u0001H:E9\u0001S+@>:E:?8\u0006D2=:G2\u0001A@H56CT\u0001\u0003ǲƃ \u0004\u0007 \u0011 &01*16/\u0001B)4=6 Ǥɇ̛ͯ \u0005\u0001S\u001b:C6TȖ΁͝ \u0003'\"(&\u0001 \u0007 2\u0014 &10-\u0001A121 \u0013\u0001 \u0010 \u0004\u0007 \u0012 01@16/\u0001;)641)7 }Ĭ\u0005ɐ \u0005\u00016?ECJ\u0001 \u0010\u0005\u0001S\u001b:E\u0001@7\u0001>25?6DD\u000142FD65\u00013J\u000172==:?8\u0001@77\u00012\u00019@CD6T ˤΉɔȨ \u0014\u0001'\"(&\u0001\u0010 \u0007 2\u00063\u0014 &10-\u0001A121 \u0013\u0001 \u0007 \u001a=D6H96C6\u0005\u0001/92?8\u00016IA=2:?65\u0001E92E\u0001S7@C\u0001>6?\u00012?5\u0001H@>6?\u0001H9@ 4@==2AD63642FD6\u0001E96J72==\u0001@77\u00012\u00019@CD6 @C 5C@A :?E@\u00012\u0001H6==\u0005 8:G:?8 C:D6\u0001E@\u00012\u0001>6?E2=\u0001277=:4E:@?\u0005\u0001:E\u0001:D\u0001>F4FD\u0006D2=:G2\u0001E92E\u0001:D\u000124E:?8\u0001FA\u0001:?\u0001E96\u0001FAA6C\u00013@5J\u0013\u0001E96 :==?6DD\u0001@44FCD\u00017C@>\u0001@FED:56\u0005\u0001?@E\u00013642FD6\u0001@7 2?\u00010:??6C1\u0001>@G6>6?E\u0001@7\u0001&:T\u0001\u0003Î\u0002jȽßÝ' ˤΉÂ\" ³ʪ",
-          "anchor_excerpt": "Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00029",
-          "note_item_id": "fn-00060",
-          "current_anchor_id": "anchor-00574",
-          "marker": "2",
-          "note_page_no": 117,
-          "anchor_page_no": 224,
-          "current_anchor_marker": "2",
-          "note_excerpt": "\u0003!: .&\u0013\u0001\u000f\u0017\u0006\u0010\u0016\u0004\u0007\u0001\u0016\u0001D:>:=2C 244@F?E\u0001:?\u0001E96\u00151;<7:A\u00017.\u0001<0-\u0001\u001716 \u0003 \u0004\u0001AC@323=J\u00013@CC@H65\u00017C@>\u0001!:RD\u0001E6IE\u0007\u0001)96\u00016IE2?E\u0001 \u00062=)6 G6CD:@?\u0001@7 \u000f1)60=7\u00014=6 :D 2?\u00012DD6>3=286\u0001@7\u0001D9@CE6C\u0001E6IED\u0001H9@D6\u0001AF3=:42E:@?\u00019:DE@CJ\u0001:D\u0001F?4=62C\u0007\u0001!:RD\u0001 \u0010\u0001AC67246\u00014=2:>65\u0001E92E\u000196\u0001S@?46 244@F?E\u00017@C\u0001E96\u00014@?46?EC2E65\u000142DF2=E:6D\u00012?5\u00012D<65\u0001:?DE625\u00019@H\u0001D@\u0001>2?J\u0001A6@A=6\u00014@F=5\u000192G6 HC@E6\u00012\u0001EC62E:D6\u0001@?\u00015:DA6==:?8\u0001A6CA=6I:E:6D\u0001@?\u0001:??6C\u00012?5\u0001@FE6C\u000192C>\u0005\u0001:?\u0001@?681)6 T\u0001\u0003 ƥź\\ÈP̺ơ̆\u0002ʊ \u0004\u00012?5 E92E\u000196\u0001AFE\u0001:E\u00012H2J\u00017@C\u0001 \u000f\u0001J62CD\u0001\u0003 2\u0001@7\u0001AC672E@CJ\u0001>2E6C:2=\u0014\u0001!: .&\u0013\u0001\u000e\u0004\u0007\u0001)9:D\u0001H@F=5\u0001A=246\u0001E96\u0001@C:8:?2=\u00012C@F?5\u0001 \u0005 E96\u0001J62C\u0001@7\u0001E96\u00016A:56>:4\u0007\u0001\u0017FE\u0001D:?46\u0001E96\u0001C646:G65\u0001E:E=6\u00012AA62C65\u0001@?=J :?\u0001!:\u0001 2@RD\u0001AC67246\u0005\u0001E96\u0001A:646\u0001!:\u0001>6?E:@?65 E96C6:? >2J\u0001H6== 92G6366? E96\u00017:CDE2=)6 @7\u0001E96\u0001H@C<2D\u0001H6\u0001?@H\u0001<?@H\u0001:E\u0007\u0001)96C6\u00012C6\u0001D:8?D\u0001E92E\u0001@E96C\u0001E:E=6D\u0001H6C6 FD65\u00012D\u0001H6==\u0007\u0001.F2?\u0001 2@H6?RD\u0001 \u0012\u0001AC67246\u0001E@\u0001E96!:-)<1;-\u000176\u0001<0-\u0001 84--6\u0001)6,\u0001 <75)+0 0 1?-1\u00014=6 ˀʵ̛ 1\u0003!: .&\u0013\u0001 \u0014 2=D@\u0001:?\u0001( &(\u000165\u0007\u0004\u0001>6?E:@?65\u0001SE96EC62E:D6\u0001@?\u00015:DE:?8F:D9:?8\u000136EH66?\u0001:??6C\u00012?5\u0001@FE6C\u000192C>\u00012?5\u0001@?\u000192C>\u00013J 7@@5\u00062?5\u00065C:?<\u00012?5\u00016I92FDE:@?T\u0001\u0003̺\\ÈP΄΃xP\u0002̛ \u0014\u0001!: .&\u0013\u0001 \u0004\u0007\u0001)9:D\u000156D:8?2E:@?\u0001D66>D\u0001E@\u000192G6 :?4=F565\u0001E96\u00017:CDE<?7 72D4:4=6D\u0001@7\u0001E96\u0001C646:G65\u0001G6CD:@?\u0001@7\u0001E96\u000f1)60=7\u00014=6 \u0003D:?46\u0001E96\u0001D64@?5 2=)6 DE2CED\u0001H:E9\u00012 D64E:@?\u0001S$?\u00017@@5\u00062?5\u00065C:?<\u00012?5\u00016I92FDE:@?T\u0001\u0003΄΃xE̛ \u0004\u0007\u0001\u001b:?2==J\u00012\u0001=:DE\u0001@7\u0001!:RD\u0001H@C<D\u0001:?\u0001(9F@\u0001 :2?RDɯ¾ \u000f\u000f\u0001AC67246\u0001E@\u001176/A=)6\u0001;01@1)7\u0001.)6/ Ʋ»̏ſƋ >6?E:@?65\u00012 \u00111;<16/=1;016/\u0001\u000f-<?--6\u0001\u001666-:\u0001)6,\u0001 =<-: \u0015):5 5CF?<\u0001C68F=2C=J\u00012?5\u0001925\u0001366?\u000192C>65\u00013J\u00016I92FDE:@?\u0001\u0003΄΃\bʉxįŦP \u0004\u0007\u0001\u0017@CC@H:?8\u00012 \u0003\u001b-1?)1\u0001;0)6/\u0001*1)6 \\ÈP̺ \u0014\u0001! .&\u0013\u0001 \u0004\u0007 \u0011 !:\u0001 2@\u0001\u0003\u001b-1?)1\u0001;0)6/\u0001*1)60=7\u00014=6 \\ÈP̺ơ̆ \u00052=)6 \u0005\u0001S3:2?\u0001J:?K96?8\u0001J2?8K96?8T̡̡̺ͤͨ \u0014\u0001 \u0007 3\u0014 !: .&\u0013\u0001\u000f\u0017\u0004\u0001>6?E:@?65\u0001E9C66\u00014:E:6D\u0013\u0001)2:JF2?E6C>\u0001E92E\u0001/92?8\u0001.F2?DF\u00012?5\u0001!:F\u0001,2?DF\u0001925\u0001FD65\u0001367@C6\u00019:>\u0005\u000196\u000142==65\u0001E9:D\u0001:?E6C?2= Í \u0003(92?I:\u0004\u0005\u0001\u0019@?8A:?8 Ʋě \u0003(92?5@?8\u0004\u0005\u00012?5\u0001\u001b6?8I:2?8Ηʥ \u00034@?7:?6D\u0001@7\u0001(922?I:\u00012?5\u0001 2?DF\u0004\u0007\u0001)96\u000152E6D\u0001!:\u0001>6?E:@?65\u0001H6C6\u0001E96\u0001/96?J@F̩ɲ \u0003 \u0006 \u0010\u0004\u00012?5\u0001-:?85:?8 ˏ î \u0003 \u0010\u0006 \u0004\u0001C6:8?D\u0001@7\u0001 :?\u0001-F2?K@?8òì \u0003C\u0007\u0001 \u0006 \u0004\u0007\u0001\"@?8@=\u0001EC@@AD\u000142>A2:8?65\u0001:?\u0001?@CE96C?\u0001\u00189:?2\u000136EH66? \u00012?5\u0001 \u000e\u0005\u00012?5\u0001282:?\u00017C@>\u0001 \u0010\u0001E@\u0001 \u0007\u0001\u001b@C\u00012\u0001D9@CE\u00012?5\u00012446DD:3=6\u0001?2CC2E:G6 @7\u0001E96D6\u000142>A2:8?D\u00012?5\u0001E96 72==\u0001@7\u0001E96\u0001 :?\u0005\u0001D66\u0001\"@E6\u0001 \u0012\u0012\u0012\u0013\u0001 \u0006 \u0011\u0007",
-          "anchor_excerpt": "The notion that illnesses were constantly changing started to emerge in the late eleventh century when a few physicians applied to other disorders models that had been designed to understand Cold Injury. A prototypical case of Cold Injury unfolded in distinct stages that each called for a different treatment. Xu Shuwei's 許叔微 (1079-1154) Ninety Discussions on Cold Injury (Shanghan jiushi lun 傷寒九十論), written at the turn in the twelfth century but only printed for the first time in the nineteenth century, were early accounts of successful treatments based on unique diagnoses. $ ^{2} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00030",
-          "note_item_id": "fn-00062",
-          "current_anchor_id": "anchor-00178",
-          "marker": "1",
-          "note_page_no": 122,
-          "anchor_page_no": 93,
-          "current_anchor_marker": "1",
-          "note_excerpt": "Ù 96C6\u000142?\u00012=D@\u000136\u0001:?E6CAC6E65\u00012D.)6/ Ƌ @C 6)1 \u0010 \u0003>@56C?\u0001\u00189:?6D6 +)1 Ũ \u0004\u0007 \"2\u0001 6RDE9@C@F89=J\u00010>65:42=1\u00013@@<D\u00013J\u0001E96\u0001>2?J\u0001DA64:2=:DED\u0001D:?46\u0001E96\u0001.6==@H\u0001\u001a>A6C@C\u00012?5 Ιͺ \u0001AC67246\u0001E@ %16B0-6/\u00014=-41 ̡ͤɀ9 \u0003,2?8 .&\u0013\u0001\u0010 \u0004\u0007",
-          "anchor_excerpt": "Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ From his mid-twenties, Liu pored through Wang Bing's annotated version of the Basic Questions and became engrossed in the complexity of its immensely influential cosmological chapters. $ ^{2} $ To those tenacious enough to decipher them, these chapters explained the convoluted workings of the “five circulatory phases and six seasonal influences” (wuyun liuqi 五運六氣; often referred to as yunqi) as they applied to medicine. $ ^{3} $ The “five circulatory phases” were Wood, Fire, Earth, Metal, and Water, the Five Agents familiar to those who have studied any aspect of Chinese thought. The six types of climatic Qi were Wind 風, Heat 熱, Dampness 濕, Fire 火 (or Summer Heat 署), Dryness 燥, and Cold 寒.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00035",
-          "note_item_id": "fn-00072",
-          "current_anchor_id": "anchor-00753",
-          "marker": "2",
-          "note_page_no": 129,
-          "anchor_page_no": 282,
-          "current_anchor_marker": "2",
-          "note_excerpt": "A2DD286\u00017C@>\u0001492AE6C\u0001 \u0011\u0001@7\u0001E96\u000f);1+\u0001 =-;<176; \u0013 S)96\u0001.6==@H\u0001\u001a>A6C@C\u00012D<65\u0001H92E C6A=6E:@?\u00012?5\u000156A=6E:@?\u0001H6C6\u0005\u0001E@\u0001H9:49\u0001&:3@\u0001C6A=:65\u0013\u0001Q'6A=6E:@?\u0001:D\u0001H96?\u000156G:2?E&: :D\u0001:?\u000123F?52?46\u0005\u000156A=6E:@? H96?\u00016DD6?E:2=&: 92D\u0001366?\u000156DA@:=65RT\u0001\u0003ΚĕªƢ 4̝˰ù ĉ0ĀƢ ͋ǘɜrù ʎǘÑr˰ \u0004\u0007 \u0012 /92?8\u000124EF2==J\u0001925\u00019:D\u0001@H? 5@4EC:?6D\u00014@?46C?:?8 C6A=6?:D9:?8\u0005\u0001H9:49\u000196\u00015:D4FDD65\u0001:?\u00012\u0001A2CE\u0001@7 =5-6\u0001;01916 S͝ ̃ E92E\u0001D49@=2CD\u000128C66\u000196\u00012FE9@C65\u0001\u0003 =5-6\u0001;01916 \u0005\u00016?ECJ\u0001 \u0012\u0005\u0001S\u0017F\u0001=F?T ˼̛ 0$?\u0001C6A=6?:D9:?81\u0014\u0001'\"(& \u0007 \u00122\u0006 3\u0005&10-\u0001A121 \u0013\u0001 \u0006 \u000e\u0004\u0007 )96 &0=*16/\u0001A=)607=\u00014=6 ̜ɇǾ;̛ \u0003\u000f \u0018\u001a \u0004 925\u0001E2<6?\u00017@C\u00018C2?E65\u0001E92E\u0001,:?5 :?G2D:@?\u00014@F=5\u0001@?=J\u0001E2<6\u0001A=246\u0001:7 E96\u00013@5J\u0001H2D\u000156A=6E65\u0001\u0003D66 \u0007 \u0004\u00053FE E9:D\u0001AC646AE\u0001>2J ?@E\u000192G6\u0001366?\u0001@3G:@FD 7@C/9F\u0005 H9@ 925 DE2CE65\u00019:D\u0001>65:42= EC2:?:?8 @?\u00019:D\u0001@H?3J C625:?8 /92?8\u0001\u0018@?8K96?8RD\u0001H@C<D\u0005\u0001E96 -+18-;\u00017. <0-\u0001 0):5)+A\u0001 -:>1+- \u00052?5\u0001E96 \u000f);1+\u0001 =-;<176; \u0007",
-          "anchor_excerpt": "By the early seventeenth century, “Danxi”—the label by which doctors referred to precepts and methods they attributed to Zhu Zhenheng 朱震亨 (1282-1358; 4.4)—was no longer the awe-inspiring name it had been a hundred years earlier, and the “Danxi corpus” no longer shaped medical debates. $ ^{2} $ Physicians gave less credence to Danxi’s views of vitality.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00039",
-          "note_item_id": "fn-00078",
-          "current_anchor_id": "anchor-00184",
-          "marker": "7",
-          "note_page_no": 136,
-          "anchor_page_no": 95,
-          "current_anchor_marker": "7",
-          "note_excerpt": "7. 3=) 6/ 0C6DF=ED\u00017C@>1\u0001E96\u0001@G6C\u00067=@FC:D9:?8\u0001@7\u0001&:\u0001:?\u00012\u000156A=6E65 A6CD@?T'˰ǘɜȨʨ \u0003 2=)6 \u0005\u0001S\u001b:C6T\u0014\u0001 , \u0006\u000e\u0013\u0001 \u000f\u0012\u0004\u0007",
-          "anchor_excerpt": "病式; hereafter Yuanbing shi).⁷ There, Liu alleged that “in the method for distinguishing",
+          "link_id": "link-00123",
+          "note_item_id": "fn-00040",
+          "current_anchor_id": "anchor-00257",
+          "marker": "0",
+          "note_page_no": 115,
+          "anchor_page_no": 114,
+          "current_anchor_marker": "0",
+          "note_excerpt": "0. %1.)6/ ͓Ƌ 1\u0001H96?\u000196\u00017=65 2:76?8\u0001:?\u0001 \u0007",
+          "anchor_excerpt": "What Charlotte Furth has called the “art of diagnosis” is best understood as the art of designing prescriptions on the basis of case-specific diagnoses. $ ^{67} $ The flexible articulation of a prescription to a diagnosis is so often treated as a natural feature of “traditional Chinese medicine” that its historical origins are usually ignored. $ ^{68} $ Zhang and his disciples were in fact among the first to put this principle at the center of their doctrines. $ ^{69} $ Before them, the default mode of prescription (typified by the Song formularies that became their favorite foils) had been to prescribe ready-made remedies for predefined illnesses. Zhang Yuansu and his followers criticized contemporaries for not distinguishing between Cold and Heat or between depletion and repletion, and for consequently failing to prescribe the right remedies in specific illness cases. $ ^{70} $ They also criticized books like the Recipes of the Pharmacy Service,",
           "current_anchor_synthetic": false
         }
       ]
     },
     "page_contexts": [
-      {
-        "page_no": 38,
-        "file_idx": 37,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters and famous doctors, but also to writings that epitomized their age more than they marked it: $ ^{3} $ primers, florilegia of medical oddities, unpublished collections of medical cases, etc. In additio ...",
-        "byte_size": 106140,
-        "sha256": "20a718b8de82e5fceaf0ea167b88bd57134583ab8802ea8951948a17e73b1daa"
-      },
-      {
-        "page_no": 41,
-        "file_idx": 40,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity often borrowed from the prototypical scenarios of other illnesses or from contemporaneous interpretations of human vitality rather than from the observation of mad patients. A formal analysis would sh ...",
-        "byte_size": 135861,
-        "sha256": "66c785c3b66a9d86a351df4fd465a9e3b6f86832ff8122029eec88be2d0954ef"
-      },
-      {
-        "page_no": 93,
-        "file_idx": 92,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "recommendations occupied a central place in Zhu Zhenheng's fourteenth-century medical synthesis, which in turn shaped later medical doctrines. Liu's discussions also contributed to making dian and kuang two quasi identical illnesses. Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ From his mid-twenties, Liu pored through Wang Bing's annotated version of the Basic Questions and became engrossed in the complexity of its immensely influential cosmological chapters. $ ^{2} $ To those tenacious enough to decipher them, these chapters explained the convoluted workings of the “five circulatory phases and six seasonal influences” (wuyun liuqi 五運六氣; often referred to as yunqi) as they applied to medicine. $ ^{3} $ The “five circulatory phases” were Wood, Fire, Earth, Metal, and Water, the Five Agents familiar to those who have studied any aspect of Chinese thought. The six types of climatic Qi were Wind 風, Heat 熱, Dampness 濕, Fire 火 (or Summer Heat 署), Dryness 燥, and Cold 寒. The problem of change had fascinated Chinese thinkers since at least the beginning of the written tradition. Wuyun liuqi provided tools to detect regularities within unfolding",
-        "byte_size": 178762,
-        "sha256": "ced0dbedbfb1c3647e2528680e1600c43e00850174757d6f6f9305593146c265"
-      },
       {
         "page_no": 94,
         "file_idx": 93,
@@ -328,200 +304,388 @@
         "ocr_excerpt": "was not air, but an internal form of Qi that appeared mostly because of internally generated Heat and acted in concert with Heat to produce morbid symptoms. As he would state in a later work, “what we speak of as ‘Wind’ is [in fact] ‘Heat’” (凡言風者熱也), because “Wind originally is born from Heat; Heat is the root, Wind the top branch [the superficial manifestation]” (風本生於熱 以熱為本 以風為標). $ ^{14} $ Liu Wansu's descriptions of the pathogenesis of a large number of illnesses gave a central place to internal Fire and Heat (instead of Wind). Liu's focus on Heat also explains his predilection for the use of cooling drugs, many of which he drew from the Treatise on Cold Injury. Liu's reinterpretation of Wind as inner Heat contributed to the collapse of the notion of \"Wind illnesses\" (see sections 4.2, 4.4, and 4.7 below), which in turn helped kuang to become one among many \"miscellaneous illnesses\" (雜病) that could be discussed independently. A reader of Liu's treatise would have had no inkling that madness had once been classified as a \"Wind illness.\" Following the passage from the Basic Questions that he was commenting upon, Liu discussed madness under the \"Fire\" section, where he gave kuang a strong moral meaning: \"kuang' means wild unruliness, with no correct or fixed [behavior]; 'yuè' means violating rites and laws and having lost one's normal state\" (狂者 狂亂而無正定 越者 乖越禮法而失常也). $ ^{15} $ I ...",
         "byte_size": 144317,
         "sha256": "72c1a87aaf57b189a8860f9adaab5694b87f055a63205d92d59f094b68d0d2ea"
+      },
+      {
+        "page_no": 99,
+        "file_idx": 98,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "onset of madness as follows: “Kidney-Water governs the Will, and Water and Fire are opposed to each other. Therefore when Cardiac Fire is overabundant, Renal Water decays: one thus ‘loses one’s Will’ and becomes crazy” (臀水主志而水火相反 故心火旺則腎水衰 乃失志而狂越). $ ^{16} $ Liu also thought that excessive emotions caused by Heat or Fire could trigger madness. $ ^{17} $ Liu Wansu evaluated at some length two sources that disagreed on the nature of the association of dian and kuang: the $ 20^{th} $ problem of the Canon of Problems, and one of Wang Bing's annotations to the Basic Questions (see 3.4). $ ^{18} $ Since neither the $ 20^{th} $ problem nor Wang Bing's commentary mentioned the symptoms of dian and kuang, Liu Wansu could adduce or dispute either passage no matter what meaning he gave to dian. His interpretation of dian and kuang as two similar disorders was widely adopted in Ming medicine, when the great seventh- and eighth-century treatises that had described dian as an epileptiform illness had stopped being reprinted. It is said that ‘the doubling of Yang is kuang and the doubling of Yin is dian’, but this differs from the explanation found in the Basic Questions. The Canon’s annotations say:¹⁹ ‘excessive joy makes dian, excessive anger makes kuang.’ Joy is the emotion associated with the Heart: when Heat in the Heart is overabundant, there is excessive joy, creating dian. Anger is the ...",
+        "byte_size": 135479,
+        "sha256": "374b00186010f250a4756a5818da664f122ad827468a4352646994f72b21c0e0"
+      },
+      {
+        "page_no": 100,
+        "file_idx": 99,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "kuang. Since all five emotions generate Heat, kuang is triggered by any of the five emotions. It is simply that anger is [a] more common [cause]. $ ^{20} $ 或云重陽者狂 重陰者癲 則素問之說不同也 經注曰 多喜為癲 多怒為狂 然喜為心志 故心熱甚則多喜而為癲也 怒為肝志 火實制金不能平木故肝實則多怒而為狂也 況五志所發皆為熱 故狂者五志間發 但怒多爾 After having cited many passages from the Basic Questions that were compatible with his own view of emotions as manifestations of Fire and of madness as caused by inner Heat, Liu concluded with a rhetorical question aimed to refute the Canon of Problems: “Can it really be, then, that dian is the doubling of Yin?” (夫豈癲為重陰者歟) Liu Wansu's interpretations were not grounded in his (or anybody's) observation of patients. His reasoning relied on textual authority and on deduction following the association of the five viscera with the Five Agents and the emotions. Bypassing the entire \"Wind illness\" tradition, Liu confirmed his Heat etiology by citing passages from the Treatise on Cold Injury—another work he greatly admired—that attributed disorders of the Yang-brilliance tract to Heat. $ ^{21} $ I know of no major medical work after Liu's Yuanbing shi 原病式 that attributed madness to Wind, whereas Heat and Fire remained important identified causes of psycho-behavioral disorders until the end of imperial history. Later physicians also took Liu Wansu's comparison of the Canon of Problems with Wang Bing's later annotation as an argument fo ...",
+        "byte_size": 142660,
+        "sha256": "bc1aa9d8f7dd05ff514cb5f16ca5a103ea21dd59cff13d2619862c52352b1065"
+      },
+      {
+        "page_no": 101,
+        "file_idx": 100,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "kuang in symptoms (instead of an epileptiform illness) took place only in the fifteenth and sixteenth centuries, a process I shall describe in more detail in sections 6.5 and 6.6. $ ^{22} $ ### 4.2 Zhang Congzheng: convergences and crystallizations Zhang Congzheng 張從正 (1156-1228), from Kaocheng 考城 in Suizhou 睢州 (Henan), was the first Chinese physician to attribute madness to Heat and mucus explicitly and to treat it consistently with purgatives and emetics. He also systematized counter-affect therapy, a kind of treatment that came to be discussed next to madness in the sixteenth century (6.4). Zhang's doctrines were inspired by Liu Wansu, but also by the Basic Questions, the Treatise on Cold Injury, and a variety of Song physicians whose books Zhang had read. Aggressive therapies and the mucus etiology of madness Like Liu Wansu, Zhang Congzheng gave pride of place to the precepts of the Inner Canon. $ ^{23} $ He pushed even further than Liu his reliance on the Treatise on Cold Injury, from which he borrowed a number of recipes and three therapeutic methods that he used to treat all illnesses: sweating (ban 汗), vomiting (tu 吐), and purging (xia 下). $ ^{24} $ As Zhang explained,",
+        "byte_size": 160735,
+        "sha256": "62d8dddb2e2f35b659f0f90e0cce2f8c9679a4aa1105ae2169828dd1974ea24e"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-007-fromwindtomucusandfire:toc-ch-007-fromwindtomucusandfire:endnote",
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:toc-ch-004-fromwindtomucusandfire:footnote",
     "request_mode": "anchor_rebind",
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00035\",\n    \"anchor_id\": \"anchor-00187\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker 6 on page 41 (OCR p. 23) matches note 6 in the screenshot footer. The current binding to anchor-00032 is incorrect as that anchor is marker 6 on page 20.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00037\",\n    \"anchor_id\": \"anchor-00180\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker 2 on page 93 (OCR p. 75) matches note 2 in the screenshot footer. The current binding to anchor-00179 is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00048\",\n    \"anchor_id\": \"anchor-00177\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker 2 on page 38 (OCR p. 20) matches note 2 in the screenshot footer. The current binding to anchor-00026 is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00078\",\n    \"anchor_id\": \"anchor-00185\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker 7 on page 95 (OCR p. 77) matches note 7 in the screenshot footer. The current binding to anchor-00184 is incorrect.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00027\",\n    \"anchor_id\": \"anchor-00186\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00027 (marker 9) matches the footnote content on page 77 (image 2). The anchor-00186 is correctly identified at marker 9 on page 77 (OCR page 95).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00028\",\n    \"anchor_id\": \"anchor-00188\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00028 (marker 10) matches the footnote content on page 78 (image 3). The anchor-00188 is correctly identified at marker 10 on page 78 (OCR page 96).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00029\",\n    \"anchor_id\": \"anchor-00189\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00029 (marker 11) matches the footnote content on page 79 (image 4). The anchor-00189 is correctly identified at marker 11 on page 79 (OCR page 97).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00031\",\n    \"anchor_id\": \"anchor-00192\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00031 (marker 14) matches the footnote content on page 80 (image 5). The anchor-00192 is correctly identified at marker 14 on page 80 (OCR page 98).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00033\",\n    \"anchor_id\": \"anchor-00195\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00033 (marker 17) matches the footnote content on page 81 (image 6). The anchor-00195 is correctly identified at marker 17 on page 81 (OCR page 99).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00036\",\n    \"anchor_id\": \"anchor-00196\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00036 (marker 18) matches the footnote content on page 81 (image 6). The anchor-00196 is correctly identified at marker 18 on page 81 (OCR page 99).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00037\",\n    \"anchor_id\": \"anchor-00197\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00037 (marker 19) matches the footnote content on page 81 (image 6). The anchor-00197 is correctly identified at marker 19 on page 81 (OCR page 99).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00040\",\n    \"anchor_id\": \"anchor-00200\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note text for fn-00040 (marker 21) matches the footnote content on page 82 (image 7). The anchor-00200 is correctly identified at marker 21 on page 82 (OCR page 100).\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-00035",
-      "anchor_id": "anchor-00187",
+      "note_item_id": "fn-00027",
+      "anchor_id": "anchor-00186",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Marker 6 on page 41 (OCR p. 23) matches note 6 in the screenshot footer. The current binding to anchor-00032 is incorrect as that anchor is marker 6 on page 20."
+      "reason": "The note text for fn-00027 (marker 9) matches the footnote content on page 77 (image 2). The anchor-00186 is correctly identified at marker 9 on page 77 (OCR page 95)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00028",
+      "anchor_id": "anchor-00188",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note text for fn-00028 (marker 10) matches the footnote content on page 78 (image 3). The anchor-00188 is correctly identified at marker 10 on page 78 (OCR page 96)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00029",
+      "anchor_id": "anchor-00189",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note text for fn-00029 (marker 11) matches the footnote content on page 79 (image 4). The anchor-00189 is correctly identified at marker 11 on page 79 (OCR page 97)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00031",
+      "anchor_id": "anchor-00192",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note text for fn-00031 (marker 14) matches the footnote content on page 80 (image 5). The anchor-00192 is correctly identified at marker 14 on page 80 (OCR page 98)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00033",
+      "anchor_id": "anchor-00195",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note text for fn-00033 (marker 17) matches the footnote content on page 81 (image 6). The anchor-00195 is correctly identified at marker 17 on page 81 (OCR page 99)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00036",
+      "anchor_id": "anchor-00196",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "The note text for fn-00036 (marker 18) matches the footnote content on page 81 (image 6). The anchor-00196 is correctly identified at marker 18 on page 81 (OCR page 99)."
     },
     {
       "action": "match",
       "note_item_id": "fn-00037",
-      "anchor_id": "anchor-00180",
+      "anchor_id": "anchor-00197",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Marker 2 on page 93 (OCR p. 75) matches note 2 in the screenshot footer. The current binding to anchor-00179 is incorrect."
+      "reason": "The note text for fn-00037 (marker 19) matches the footnote content on page 81 (image 6). The anchor-00197 is correctly identified at marker 19 on page 81 (OCR page 99)."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00048",
-      "anchor_id": "anchor-00177",
+      "note_item_id": "fn-00040",
+      "anchor_id": "anchor-00200",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Marker 2 on page 38 (OCR p. 20) matches note 2 in the screenshot footer. The current binding to anchor-00026 is incorrect."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00078",
-      "anchor_id": "anchor-00185",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Marker 7 on page 95 (OCR p. 77) matches note 7 in the screenshot footer. The current binding to anchor-00184 is incorrect."
+      "reason": "The note text for fn-00040 (marker 21) matches the footnote content on page 82 (image 7). The anchor-00200 is correctly identified at marker 21 on page 82 (OCR page 100)."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-007-fromwindtomucusandfire:toc-ch-007-fromwindtomucusandfire:endnote",
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:toc-ch-004-fromwindtomucusandfire:footnote",
     "chapter_title": "From Wind to mucus and Fire",
     "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00035",
-        "anchor_id": "anchor-00187",
+        "note_item_id": "fn-00027",
+        "anchor_id": "anchor-00186",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 6 on page 41 (OCR p. 23) matches note 6 in the screenshot footer. The current binding to anchor-00032 is incorrect as that anchor is marker 6 on page 20."
+        "reason": "The note text for fn-00027 (marker 9) matches the footnote content on page 77 (image 2). The anchor-00186 is correctly identified at marker 9 on page 77 (OCR page 95)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00028",
+        "anchor_id": "anchor-00188",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00028 (marker 10) matches the footnote content on page 78 (image 3). The anchor-00188 is correctly identified at marker 10 on page 78 (OCR page 96)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00029",
+        "anchor_id": "anchor-00189",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00029 (marker 11) matches the footnote content on page 79 (image 4). The anchor-00189 is correctly identified at marker 11 on page 79 (OCR page 97)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00031",
+        "anchor_id": "anchor-00192",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00031 (marker 14) matches the footnote content on page 80 (image 5). The anchor-00192 is correctly identified at marker 14 on page 80 (OCR page 98)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00033",
+        "anchor_id": "anchor-00195",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00033 (marker 17) matches the footnote content on page 81 (image 6). The anchor-00195 is correctly identified at marker 17 on page 81 (OCR page 99)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00036",
+        "anchor_id": "anchor-00196",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00036 (marker 18) matches the footnote content on page 81 (image 6). The anchor-00196 is correctly identified at marker 18 on page 81 (OCR page 99)."
       },
       {
         "action": "match",
         "note_item_id": "fn-00037",
-        "anchor_id": "anchor-00180",
+        "anchor_id": "anchor-00197",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 2 on page 93 (OCR p. 75) matches note 2 in the screenshot footer. The current binding to anchor-00179 is incorrect."
+        "reason": "The note text for fn-00037 (marker 19) matches the footnote content on page 81 (image 6). The anchor-00197 is correctly identified at marker 19 on page 81 (OCR page 99)."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00048",
-        "anchor_id": "anchor-00177",
+        "note_item_id": "fn-00040",
+        "anchor_id": "anchor-00200",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 2 on page 38 (OCR p. 20) matches note 2 in the screenshot footer. The current binding to anchor-00026 is incorrect."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00078",
-        "anchor_id": "anchor-00185",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker 7 on page 95 (OCR p. 77) matches note 7 in the screenshot footer. The current binding to anchor-00184 is incorrect."
+        "reason": "The note text for fn-00040 (marker 21) matches the footnote content on page 82 (image 7). The anchor-00200 is correctly identified at marker 21 on page 82 (OCR page 100)."
       }
     ],
     "auto_selected_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00035",
-        "anchor_id": "anchor-00187",
+        "note_item_id": "fn-00027",
+        "anchor_id": "anchor-00186",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 6 on page 41 (OCR p. 23) matches note 6 in the screenshot footer. The current binding to anchor-00032 is incorrect as that anchor is marker 6 on page 20."
+        "reason": "The note text for fn-00027 (marker 9) matches the footnote content on page 77 (image 2). The anchor-00186 is correctly identified at marker 9 on page 77 (OCR page 95)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00028",
+        "anchor_id": "anchor-00188",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00028 (marker 10) matches the footnote content on page 78 (image 3). The anchor-00188 is correctly identified at marker 10 on page 78 (OCR page 96)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00029",
+        "anchor_id": "anchor-00189",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00029 (marker 11) matches the footnote content on page 79 (image 4). The anchor-00189 is correctly identified at marker 11 on page 79 (OCR page 97)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00031",
+        "anchor_id": "anchor-00192",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00031 (marker 14) matches the footnote content on page 80 (image 5). The anchor-00192 is correctly identified at marker 14 on page 80 (OCR page 98)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00033",
+        "anchor_id": "anchor-00195",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00033 (marker 17) matches the footnote content on page 81 (image 6). The anchor-00195 is correctly identified at marker 17 on page 81 (OCR page 99)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00036",
+        "anchor_id": "anchor-00196",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00036 (marker 18) matches the footnote content on page 81 (image 6). The anchor-00196 is correctly identified at marker 18 on page 81 (OCR page 99)."
       },
       {
         "action": "match",
         "note_item_id": "fn-00037",
-        "anchor_id": "anchor-00180",
+        "anchor_id": "anchor-00197",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 2 on page 93 (OCR p. 75) matches note 2 in the screenshot footer. The current binding to anchor-00179 is incorrect."
+        "reason": "The note text for fn-00037 (marker 19) matches the footnote content on page 81 (image 6). The anchor-00197 is correctly identified at marker 19 on page 81 (OCR page 99)."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00048",
-        "anchor_id": "anchor-00177",
+        "note_item_id": "fn-00040",
+        "anchor_id": "anchor-00200",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 2 on page 38 (OCR p. 20) matches note 2 in the screenshot footer. The current binding to anchor-00026 is incorrect."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00078",
-        "anchor_id": "anchor-00185",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker 7 on page 95 (OCR p. 77) matches note 7 in the screenshot footer. The current binding to anchor-00184 is incorrect."
+        "reason": "The note text for fn-00040 (marker 21) matches the footnote content on page 82 (image 7). The anchor-00200 is correctly identified at marker 21 on page 82 (OCR page 100)."
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-00017",
+        "link_id": "link-00110",
         "action": "match",
-        "note_item_id": "fn-00035",
-        "anchor_id": "anchor-00187",
+        "note_item_id": "fn-00027",
+        "anchor_id": "anchor-00186",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 6 on page 41 (OCR p. 23) matches note 6 in the screenshot footer. The current binding to anchor-00032 is incorrect as that anchor is marker 6 on page 20."
+        "reason": "The note text for fn-00027 (marker 9) matches the footnote content on page 77 (image 2). The anchor-00186 is correctly identified at marker 9 on page 77 (OCR page 95)."
       },
       {
-        "link_id": "link-00019",
+        "link_id": "link-00111",
+        "action": "match",
+        "note_item_id": "fn-00028",
+        "anchor_id": "anchor-00188",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00028 (marker 10) matches the footnote content on page 78 (image 3). The anchor-00188 is correctly identified at marker 10 on page 78 (OCR page 96)."
+      },
+      {
+        "link_id": "link-00112",
+        "action": "match",
+        "note_item_id": "fn-00029",
+        "anchor_id": "anchor-00189",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00029 (marker 11) matches the footnote content on page 79 (image 4). The anchor-00189 is correctly identified at marker 11 on page 79 (OCR page 97)."
+      },
+      {
+        "link_id": "link-00114",
+        "action": "match",
+        "note_item_id": "fn-00031",
+        "anchor_id": "anchor-00192",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00031 (marker 14) matches the footnote content on page 80 (image 5). The anchor-00192 is correctly identified at marker 14 on page 80 (OCR page 98)."
+      },
+      {
+        "link_id": "link-00116",
+        "action": "match",
+        "note_item_id": "fn-00033",
+        "anchor_id": "anchor-00195",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00033 (marker 17) matches the footnote content on page 81 (image 6). The anchor-00195 is correctly identified at marker 17 on page 81 (OCR page 99)."
+      },
+      {
+        "link_id": "link-00119",
+        "action": "match",
+        "note_item_id": "fn-00036",
+        "anchor_id": "anchor-00196",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The note text for fn-00036 (marker 18) matches the footnote content on page 81 (image 6). The anchor-00196 is correctly identified at marker 18 on page 81 (OCR page 99)."
+      },
+      {
+        "link_id": "link-00120",
         "action": "match",
         "note_item_id": "fn-00037",
-        "anchor_id": "anchor-00180",
+        "anchor_id": "anchor-00197",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 2 on page 93 (OCR p. 75) matches note 2 in the screenshot footer. The current binding to anchor-00179 is incorrect."
+        "reason": "The note text for fn-00037 (marker 19) matches the footnote content on page 81 (image 6). The anchor-00197 is correctly identified at marker 19 on page 81 (OCR page 99)."
       },
       {
-        "link_id": "link-00023",
+        "link_id": "link-00123",
         "action": "match",
-        "note_item_id": "fn-00048",
-        "anchor_id": "anchor-00177",
+        "note_item_id": "fn-00040",
+        "anchor_id": "anchor-00200",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Marker 2 on page 38 (OCR p. 20) matches note 2 in the screenshot footer. The current binding to anchor-00026 is incorrect."
-      },
-      {
-        "link_id": "link-00039",
-        "action": "match",
-        "note_item_id": "fn-00078",
-        "anchor_id": "anchor-00185",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker 7 on page 95 (OCR p. 77) matches note 7 in the screenshot footer. The current binding to anchor-00184 is incorrect."
+        "reason": "The note text for fn-00040 (marker 21) matches the footnote content on page 82 (image 7). The anchor-00200 is correctly identified at marker 21 on page 82 (OCR page 100)."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 13968,
-    "completion_tokens": 425,
-    "total_tokens": 14393,
+    "prompt_tokens": 12725,
+    "completion_tokens": 976,
+    "total_tokens": 13701,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 10697
+    "duration_ms": 20706
   }
 }

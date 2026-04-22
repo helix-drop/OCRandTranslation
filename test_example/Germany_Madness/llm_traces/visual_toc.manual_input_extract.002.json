@@ -23,7 +23,7 @@
     "source": "organization",
     "images_count": 1
   },
-  "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Tables and Maps\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"xii\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xiv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Abbreviations\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"xv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Historical Problems: Sin, St. Vitus, and the Devil\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 25,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 80,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Academic “Psychiatry” and the Rise of Galenic Observation\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 140,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Witchcraft and the Melancholy Interpretation of the Insanity Defense\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 182,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Court Fools and Their Folly: Image and Social Reality\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 228,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Pilgrims in Search of Their Reason\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 277,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Madness as Helplessness: Two Hospitals in the Age of the Reformations\",\n      \"depth\": 0,\n      \"visual_order\": 11,\n      \"printed_page\": 322,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 12,\n      \"printed_page\": 385,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Bibliography\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": 391,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": 427,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+  "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Tables and Maps\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"xii\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xiv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Abbreviations\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"xv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Historical Problems: Sin, St. Vitus, and the Devil\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 25,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 80,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Academic “Psychiatry” and the Rise of Galenic Observation\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 140,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Witchcraft and the Melancholy Interpretation of the Insanity Defense\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 182,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Court Fools and Their Folly: Image and Social Reality\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 228,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Pilgrims in Search of Their Reason\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 277,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Madness as Helplessness: Two Hospitals in the Age of the Reformations\",\n      \"depth\": 0,\n      \"visual_order\": 11,\n      \"printed_page\": 322,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 12,\n      \"printed_page\": 385,\n      \"role_hint\": \"post_body\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Bibliography\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": 391,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": 427,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
   "response_parsed": {
     "endnotes_summary": {
       "present": false,
@@ -127,7 +127,7 @@
         "depth": 0,
         "visual_order": 12,
         "printed_page": 385,
-        "role_hint": "chapter",
+        "role_hint": "post_body",
         "parent_title": ""
       },
       {
@@ -244,7 +244,7 @@
         "printed_page": 385,
         "file_idx": null,
         "visual_order": 12,
-        "role_hint": "chapter"
+        "role_hint": "post_body"
       },
       {
         "title": "Bibliography",
@@ -278,8 +278,8 @@
     "model_id": "qwen3.5-plus",
     "request_count": 1,
     "prompt_tokens": 3162,
-    "completion_tokens": 1000,
-    "total_tokens": 4162,
+    "completion_tokens": 1001,
+    "total_tokens": 4163,
     "doc_id": "67356d1f7d9a",
     "slug": "",
     "context": {
@@ -288,6 +288,6 @@
     }
   },
   "timing": {
-    "duration_ms": 20269
+    "duration_ms": 19942
   }
 }

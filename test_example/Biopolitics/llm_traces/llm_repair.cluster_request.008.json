@@ -27,7 +27,7 @@
       "matched_examples": [],
       "unmatched_note_items": [
         {
-          "row_id": 17295,
+          "row_id": 21027,
           "doc_id": "0d285c0800db",
           "note_item_id": "fn-00014",
           "note_kind": "footnote",
@@ -41,11 +41,11 @@
           "display_marker": "1",
           "source_marker": "1",
           "title_hint": "",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 17296,
+          "row_id": 21028,
           "doc_id": "0d285c0800db",
           "note_item_id": "fn-00015",
           "note_kind": "footnote",
@@ -59,8 +59,8 @@
           "display_marker": "2",
           "source_marker": "2",
           "title_hint": "",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         }
       ],
       "unmatched_anchors": [],
@@ -83,39 +83,39 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00014\",\n    \"anchor_phrase\": \"MICHEL SENELLART\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote marked with '*' in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The OCR excerpt contains this phrase, but no structured anchor exists for it.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00015\",\n    \"anchor_phrase\": \"Situation du cours\",\n    \"confidence\": 0.95,\n    \"reason\": \"The second footnote (marker 2) in the image provides context for the section titled 'Situation du cours'. This phrase appears in the OCR excerpt and serves as the logical anchor, though no structured anchor record exists.\"\n  }\n]\n```",
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00014\",\n    \"anchor_phrase\": \"Michel Senellart est professeur de Philosophie politique\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '*' in the screenshot corresponds to the author's name 'MICHEL SENELLART'. The OCR body text missed the marker symbol next to the name, but the footnote content clearly describes Michel Senellart. This phrase is unique and identifies the anchor location.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00015\",\n    \"anchor_phrase\": \"Les pages qui suivent sont extraites\",\n    \"confidence\": 0.95,\n    \"reason\": \"The second footnote in the screenshot explains the source of the following text ('Situation du cours'). Although there is no explicit marker in the title line in the OCR, the content of the note refers to the section itself. Synthesizing an anchor based on the unique phrase describing the excerpt status is appropriate here as it functions as a headnote for the section.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "synthesize_anchor",
       "note_item_id": "fn-00014",
       "anchor_id": "",
-      "anchor_phrase": "MICHEL SENELLART",
+      "anchor_phrase": "Michel Senellart est professeur de Philosophie politique",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "The footnote marked with '*' in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The OCR excerpt contains this phrase, but no structured anchor exists for it.",
-      "fuzzy_score": 100.0,
+      "reason": "Footnote marker '*' in the screenshot corresponds to the author's name 'MICHEL SENELLART'. The OCR body text missed the marker symbol next to the name, but the footnote content clearly describes Michel Senellart. This phrase is unique and identifies the anchor location.",
+      "fuzzy_score": 51.78571428571428,
       "ambiguous": false,
-      "char_start": -1,
-      "char_end": 16,
-      "matched_text": "MICHEL SENELLART",
-      "fuzzy_hit": true
+      "char_start": 2052,
+      "char_end": 2108,
+      "matched_text": "éricaine, puis en venir au problème de la politique de l",
+      "fuzzy_hit": false
     },
     {
       "action": "synthesize_anchor",
       "note_item_id": "fn-00015",
       "anchor_id": "",
-      "anchor_phrase": "Situation du cours",
+      "anchor_phrase": "Les pages qui suivent sont extraites",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "The second footnote (marker 2) in the image provides context for the section titled 'Situation du cours'. This phrase appears in the OCR excerpt and serves as the logical anchor, though no structured anchor record exists.",
-      "fuzzy_score": 100.0,
+      "reason": "The second footnote in the screenshot explains the source of the following text ('Situation du cours'). Although there is no explicit marker in the title line in the OCR, the content of the note refers to the section itself. Synthesizing an anchor based on the unique phrase describing the excerpt status is appropriate here as it functions as a headnote for the section.",
+      "fuzzy_score": 52.77777777777778,
       "ambiguous": false,
-      "char_start": 29,
-      "char_end": 47,
-      "matched_text": "Situation du cours",
-      "fuzzy_hit": true
+      "char_start": 1601,
+      "char_end": 1637,
+      "matched_text": "'est la que trouve son point de dépa",
+      "fuzzy_hit": false
     }
   ],
   "derived_truth": {
@@ -127,113 +127,45 @@
         "action": "synthesize_anchor",
         "note_item_id": "fn-00014",
         "anchor_id": "",
-        "anchor_phrase": "MICHEL SENELLART",
+        "anchor_phrase": "Michel Senellart est professeur de Philosophie politique",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The footnote marked with '*' in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The OCR excerpt contains this phrase, but no structured anchor exists for it.",
-        "fuzzy_score": 100.0,
+        "reason": "Footnote marker '*' in the screenshot corresponds to the author's name 'MICHEL SENELLART'. The OCR body text missed the marker symbol next to the name, but the footnote content clearly describes Michel Senellart. This phrase is unique and identifies the anchor location.",
+        "fuzzy_score": 51.78571428571428,
         "ambiguous": false,
-        "char_start": -1,
-        "char_end": 16,
-        "matched_text": "MICHEL SENELLART",
-        "fuzzy_hit": true
+        "char_start": 2052,
+        "char_end": 2108,
+        "matched_text": "éricaine, puis en venir au problème de la politique de l",
+        "fuzzy_hit": false
       },
       {
         "action": "synthesize_anchor",
         "note_item_id": "fn-00015",
         "anchor_id": "",
-        "anchor_phrase": "Situation du cours",
+        "anchor_phrase": "Les pages qui suivent sont extraites",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The second footnote (marker 2) in the image provides context for the section titled 'Situation du cours'. This phrase appears in the OCR excerpt and serves as the logical anchor, though no structured anchor record exists.",
-        "fuzzy_score": 100.0,
+        "reason": "The second footnote in the screenshot explains the source of the following text ('Situation du cours'). Although there is no explicit marker in the title line in the OCR, the content of the note refers to the section itself. Synthesizing an anchor based on the unique phrase describing the excerpt status is appropriate here as it functions as a headnote for the section.",
+        "fuzzy_score": 52.77777777777778,
         "ambiguous": false,
-        "char_start": 29,
-        "char_end": 47,
-        "matched_text": "Situation du cours",
-        "fuzzy_hit": true
+        "char_start": 1601,
+        "char_end": 1637,
+        "matched_text": "'est la que trouve son point de dépa",
+        "fuzzy_hit": false
       }
     ],
-    "auto_selected_actions": [
-      {
-        "action": "synthesize_anchor",
-        "note_item_id": "fn-00014",
-        "anchor_id": "",
-        "anchor_phrase": "MICHEL SENELLART",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote marked with '*' in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The OCR excerpt contains this phrase, but no structured anchor exists for it.",
-        "fuzzy_score": 100.0,
-        "ambiguous": false,
-        "char_start": -1,
-        "char_end": 16,
-        "matched_text": "MICHEL SENELLART",
-        "fuzzy_hit": true
-      },
-      {
-        "action": "synthesize_anchor",
-        "note_item_id": "fn-00015",
-        "anchor_id": "",
-        "anchor_phrase": "Situation du cours",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The second footnote (marker 2) in the image provides context for the section titled 'Situation du cours'. This phrase appears in the OCR excerpt and serves as the logical anchor, though no structured anchor record exists.",
-        "fuzzy_score": 100.0,
-        "ambiguous": false,
-        "char_start": 29,
-        "char_end": 47,
-        "matched_text": "Situation du cours",
-        "fuzzy_hit": true
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-00252",
-        "anchor_id": "",
-        "action": "synthesize_anchor",
-        "note_item_id": "fn-00014",
-        "anchor_phrase": "MICHEL SENELLART",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote marked with '*' in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The OCR excerpt contains this phrase, but no structured anchor exists for it.",
-        "fuzzy_score": 100.0,
-        "ambiguous": false,
-        "char_start": -1,
-        "char_end": 16,
-        "matched_text": "MICHEL SENELLART",
-        "fuzzy_hit": true
-      },
-      {
-        "link_id": "link-00253",
-        "anchor_id": "",
-        "action": "synthesize_anchor",
-        "note_item_id": "fn-00015",
-        "anchor_phrase": "Situation du cours",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The second footnote (marker 2) in the image provides context for the section titled 'Situation du cours'. This phrase appears in the OCR excerpt and serves as the logical anchor, though no structured anchor record exists.",
-        "fuzzy_score": 100.0,
-        "ambiguous": false,
-        "char_start": 29,
-        "char_end": 47,
-        "matched_text": "Situation du cours",
-        "fuzzy_hit": true
-      }
-    ]
+    "auto_selected_actions": [],
+    "auto_applied_actions": []
   },
   "usage": {
     "prompt_tokens": 1655,
-    "completion_tokens": 217,
-    "total_tokens": 1872,
+    "completion_tokens": 259,
+    "total_tokens": 1914,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 5345
+    "duration_ms": 7889
   }
 }

@@ -24,23 +24,23 @@
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `2266`
+- translated_paras: `2276`
 
 ## Token by Stage
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=2, prompt=6019, completion=2084, total=8103
-- llm_repair.cluster_request: request=6, prompt=89989, completion=3409, total=93398
+- visual_toc.manual_input_extract: request=2, prompt=6019, completion=2085, total=8104
+- llm_repair.cluster_request: request=6, prompt=90117, completion=3572, total=93689
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
-- optimized_anchor_count: `8`
+- optimized_anchor_count: `7`
 - residual_provisional_count: `0`
 - expanded_window_hit_count: `0`
 - composite_heading_count: `1`
 - residual_provisional_titles_preview: `[]`
-- `{"toc_body_item_count": 8, "resolved_anchor_count": 8, "provisional_anchor_count": 0, "section_node_count": 123, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": [], "demoted_chapter_titles_preview": ["History of Madness in Sixteenth-Century Germany", "Psychoanalytic and Feminist Approaches: The Problem of Hysteria", "The Contribution of Michel Foucault", "the invidious labeling of disproportionately more men or more women.", "Madness as Cerebral Disorder", "people from a new angle.", "the hallmark of this new social science, one of whose earliest discoveries", "Madness and Culture"], "optimized_anchor_count": 8, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 1}`
+- `{"toc_body_item_count": 8, "resolved_anchor_count": 8, "provisional_anchor_count": 0, "section_node_count": 123, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": [], "demoted_chapter_titles_preview": ["History of Madness in Sixteenth-Century Germany", "Psychoanalytic and Feminist Approaches: The Problem of Hysteria", "The Contribution of Michel Foucault", "the invidious labeling of disproportionately more men or more women.", "Madness as Cerebral Disorder", "people from a new angle.", "the hallmark of this new social science, one of whose earliest discoveries", "Madness and Culture"], "optimized_anchor_count": 7, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 1}`
 
 ## Endnotes Summary
 - present: `False`
@@ -51,7 +51,7 @@
 - subentry_pattern: ``
 
 ## TOC Role Summary
-- `{"container": 0, "endnotes": 0, "chapter": 8, "section": 0, "post_body": 0, "back_matter": 2, "front_matter": 3}`
+- `{"container": 0, "endnotes": 0, "chapter": 7, "section": 0, "post_body": 1, "back_matter": 2, "front_matter": 3}`
 
 ## Export
 - slug zip: `/Users/hao/OCRandTranslation/test_example/Germany_Madness/latest.fnm.obsidian.Germany_Madness.test.zip`

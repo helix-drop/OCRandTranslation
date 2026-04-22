@@ -578,6 +578,7 @@ class ExportAuditReportRecord:
     slug: str = ""
     doc_id: str = ""
     zip_path: str = ""
+    applicable: bool = True
     structure_state: str = "idle"
     blocking_reasons: list[str] = field(default_factory=list)
     manual_toc_summary: dict[str, Any] = field(default_factory=dict)

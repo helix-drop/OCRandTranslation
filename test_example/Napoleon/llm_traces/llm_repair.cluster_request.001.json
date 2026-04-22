@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 25351,
+          "row_id": 30431,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00064",
           "chapter_id": "toc-ch-003-unmédecinauchevetducorps",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "La première consiste dans une certaine extase de prospérité publique, & un amour de la patrie porté jusqu'au délire, comme les visions de ce fou qui s'est fait annoncer à l'Assemblée nationale, à titre de Député du Père Éternel, pour la relever de ses fonctions & donner de nouvelles loix à la France ; ce qui constitue l'autre espèce de folie ou plutôt le dernier degré de mélancolie est un sombre abattement de l'âme avec des alternatives de terreur, ou une fureur emportée avec des imprécations violentes contre les ennemis de l'État. L'Auteur d'une brochure qui vient de paraître m'a assuré, d'après des recherches faites dans les Paroisses, qu'on compte à Paris un grand nombre de fous de plus qu'à l'ordinaire $ ^{31} $.",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         },
         {
-          "row_id": 25359,
+          "row_id": 30439,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00072",
           "chapter_id": "toc-ch-003-unmédecinauchevetducorps",
@@ -59,11 +59,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "ne prévois qu'anarchie, que factions, que guerres désastreuses, même pour les vainqueurs, et certainement je connais bien maintenant ce pays-ci [Paris], et toute la valeur de tant de pygmées qui font un si grand bruit $ ^{39} $.",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         },
         {
-          "row_id": 25364,
+          "row_id": 30444,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00077",
           "chapter_id": "toc-ch-003-unmédecinauchevetducorps",
@@ -76,8 +76,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Il existe un autre texte de Pinel à cette époque, intitulé « Observations sur l’hospice des insensés de Bicêtre ». Il est, pour ainsi dire, en tout point identiques au mémoire sus-cité, hormis quelques infimes variantes. La plus importante est la suivante. Pinel a remplacé la phrase : « C’est le plus souvent en outrepassant les vertus et en exagérant les penchants généraux et magnanimes que l’homme est conduit du libre exercice de la raison à la folie » par : « Chaque contrecoup de la révolution amène à l’hospice des insensés, des patriotes purs qui on été poussés en sens contraire par le choc des partis et c’est ainsi qu’on y a vu arriver après le neuf thermidor un des chefs de l’artillerie parisienne $ ^{44} $. » Le patriotisme de Pinel, lui, s’accorde avec une lecture de l’asile comme modèle du jacobinisme centralisé, où les aliénés sont gouvernés et l’ordre maintenu par une police intérieure, sous la direction d’un seul homme qui concentre tous les pouvoirs.",
-          "created_at": 1776828178,
-          "updated_at": 1776828178
+          "created_at": 1776848881,
+          "updated_at": 1776848881
         }
       ],
       "rebind_candidates": []
@@ -115,7 +115,7 @@
     "page_context_count": 3,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00064\",\n    \"marker\": \"31\",\n    \"note_text\": \"Philippe Pinel, «Variété», Journal de Paris, 18 janvier 1790, p. 70-72.\",\n    \"confidence\": 1.0,\n    \"reason\": \"Screenshot of page 64 clearly shows footnote 31 at the bottom, which was missing from OCR/structured data.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00072\",\n    \"marker\": \"39\",\n    \"note_text\": \"Ibid., p. 12. Lettre du 21 janvier 1793.\",\n    \"confidence\": 1.0,\n    \"reason\": \"Screenshot of page 72 clearly shows footnote 39 at the bottom, which was missing from OCR/structured data.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00077\",\n    \"marker\": \"44\",\n    \"note_text\": \"Philippe Pinel, «Observations sur l'hospice des insensés de Bicêtre», cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.\",\n    \"confidence\": 1.0,\n    \"reason\": \"Screenshot of page 77 clearly shows footnote 44 at the bottom, which was missing from OCR/structured data.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00064\",\n    \"marker\": \"31\",\n    \"note_text\": \"Philippe Pinel, « Variété », Journal de Paris, 18 janvier 1790, p. 70-72.\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR/structured data missing note item for footnote 31 on page 64 (in range 58-71). Screenshot clearly shows the full text of the footnote.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00072\",\n    \"marker\": \"39\",\n    \"note_text\": \"Ibid., p. 12. Lettre du 21 janvier 1793.\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR/structured data missing note item for footnote 39 on page 72 (in range 58-71). Screenshot clearly shows the full text of the footnote.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00077\",\n    \"marker\": \"44\",\n    \"note_text\": \"Philippe Pinel, « Observations sur l'hospice des insensés de Bicêtre », cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR/structured data missing note item for footnote 44 on page 77 (in range 58-71). Screenshot clearly shows the full text of the footnote.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -123,9 +123,9 @@
       "anchor_id": "anchor-00064",
       "anchor_phrase": "",
       "marker": "31",
-      "note_text": "Philippe Pinel, «Variété», Journal de Paris, 18 janvier 1790, p. 70-72.",
-      "confidence": 1.0,
-      "reason": "Screenshot of page 64 clearly shows footnote 31 at the bottom, which was missing from OCR/structured data."
+      "note_text": "Philippe Pinel, « Variété », Journal de Paris, 18 janvier 1790, p. 70-72.",
+      "confidence": 0.95,
+      "reason": "OCR/structured data missing note item for footnote 31 on page 64 (in range 58-71). Screenshot clearly shows the full text of the footnote."
     },
     {
       "action": "synthesize_note_item",
@@ -134,8 +134,8 @@
       "anchor_phrase": "",
       "marker": "39",
       "note_text": "Ibid., p. 12. Lettre du 21 janvier 1793.",
-      "confidence": 1.0,
-      "reason": "Screenshot of page 72 clearly shows footnote 39 at the bottom, which was missing from OCR/structured data."
+      "confidence": 0.95,
+      "reason": "OCR/structured data missing note item for footnote 39 on page 72 (in range 58-71). Screenshot clearly shows the full text of the footnote."
     },
     {
       "action": "synthesize_note_item",
@@ -143,9 +143,9 @@
       "anchor_id": "anchor-00077",
       "anchor_phrase": "",
       "marker": "44",
-      "note_text": "Philippe Pinel, «Observations sur l'hospice des insensés de Bicêtre», cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
-      "confidence": 1.0,
-      "reason": "Screenshot of page 77 clearly shows footnote 44 at the bottom, which was missing from OCR/structured data."
+      "note_text": "Philippe Pinel, « Observations sur l'hospice des insensés de Bicêtre », cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
+      "confidence": 0.95,
+      "reason": "OCR/structured data missing note item for footnote 44 on page 77 (in range 58-71). Screenshot clearly shows the full text of the footnote."
     }
   ],
   "derived_truth": {
@@ -159,9 +159,9 @@
         "anchor_id": "anchor-00064",
         "anchor_phrase": "",
         "marker": "31",
-        "note_text": "Philippe Pinel, «Variété», Journal de Paris, 18 janvier 1790, p. 70-72.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 64 clearly shows footnote 31 at the bottom, which was missing from OCR/structured data."
+        "note_text": "Philippe Pinel, « Variété », Journal de Paris, 18 janvier 1790, p. 70-72.",
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 31 on page 64 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       },
       {
         "action": "synthesize_note_item",
@@ -170,8 +170,8 @@
         "anchor_phrase": "",
         "marker": "39",
         "note_text": "Ibid., p. 12. Lettre du 21 janvier 1793.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 72 clearly shows footnote 39 at the bottom, which was missing from OCR/structured data."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 39 on page 72 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       },
       {
         "action": "synthesize_note_item",
@@ -179,9 +179,9 @@
         "anchor_id": "anchor-00077",
         "anchor_phrase": "",
         "marker": "44",
-        "note_text": "Philippe Pinel, «Observations sur l'hospice des insensés de Bicêtre», cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 77 clearly shows footnote 44 at the bottom, which was missing from OCR/structured data."
+        "note_text": "Philippe Pinel, « Observations sur l'hospice des insensés de Bicêtre », cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 44 on page 77 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       }
     ],
     "auto_selected_actions": [
@@ -191,9 +191,9 @@
         "anchor_id": "anchor-00064",
         "anchor_phrase": "",
         "marker": "31",
-        "note_text": "Philippe Pinel, «Variété», Journal de Paris, 18 janvier 1790, p. 70-72.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 64 clearly shows footnote 31 at the bottom, which was missing from OCR/structured data."
+        "note_text": "Philippe Pinel, « Variété », Journal de Paris, 18 janvier 1790, p. 70-72.",
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 31 on page 64 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       },
       {
         "action": "synthesize_note_item",
@@ -202,8 +202,8 @@
         "anchor_phrase": "",
         "marker": "39",
         "note_text": "Ibid., p. 12. Lettre du 21 janvier 1793.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 72 clearly shows footnote 39 at the bottom, which was missing from OCR/structured data."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 39 on page 72 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       },
       {
         "action": "synthesize_note_item",
@@ -211,9 +211,9 @@
         "anchor_id": "anchor-00077",
         "anchor_phrase": "",
         "marker": "44",
-        "note_text": "Philippe Pinel, «Observations sur l'hospice des insensés de Bicêtre», cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 77 clearly shows footnote 44 at the bottom, which was missing from OCR/structured data."
+        "note_text": "Philippe Pinel, « Observations sur l'hospice des insensés de Bicêtre », cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 44 on page 77 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       }
     ],
     "auto_applied_actions": [
@@ -223,9 +223,9 @@
         "action": "synthesize_note_item",
         "anchor_phrase": "",
         "marker": "31",
-        "note_text": "Philippe Pinel, «Variété», Journal de Paris, 18 janvier 1790, p. 70-72.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 64 clearly shows footnote 31 at the bottom, which was missing from OCR/structured data."
+        "note_text": "Philippe Pinel, « Variété », Journal de Paris, 18 janvier 1790, p. 70-72.",
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 31 on page 64 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       },
       {
         "note_item_id": "",
@@ -234,8 +234,8 @@
         "anchor_phrase": "",
         "marker": "39",
         "note_text": "Ibid., p. 12. Lettre du 21 janvier 1793.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 72 clearly shows footnote 39 at the bottom, which was missing from OCR/structured data."
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 39 on page 72 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       },
       {
         "note_item_id": "",
@@ -243,19 +243,19 @@
         "action": "synthesize_note_item",
         "anchor_phrase": "",
         "marker": "44",
-        "note_text": "Philippe Pinel, «Observations sur l'hospice des insensés de Bicêtre», cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
-        "confidence": 1.0,
-        "reason": "Screenshot of page 77 clearly shows footnote 44 at the bottom, which was missing from OCR/structured data."
+        "note_text": "Philippe Pinel, « Observations sur l'hospice des insensés de Bicêtre », cité par J. Postel, Genèse de la psychiatrie, op. cit., p. 232. C'est moi qui souligne.",
+        "confidence": 0.95,
+        "reason": "OCR/structured data missing note item for footnote 44 on page 77 (in range 58-71). Screenshot clearly shows the full text of the footnote."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 2867,
-    "completion_tokens": 381,
-    "total_tokens": 3248,
+    "completion_tokens": 423,
+    "total_tokens": 3290,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 8445
+    "duration_ms": 12291
   }
 }

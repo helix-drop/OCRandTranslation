@@ -403,5 +403,106 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
         self.assertEqual(payload["chapter_id"], "ch-1")
 
 
+    def test_run_llm_repair_rejects_match_when_exact_marker_anchor_exists(self):
+        """Biopolitics 回归：LLM 把 note marker=1 错误绑到 anchor marker=19，
+        但同章节已有 anchor marker=1。auto-apply 应拒绝。"""
+
+        class _MarkerMismatchRepo(_RepoStub):
+            def list_fnm_note_items(self, _doc_id):
+                return [
+                    {
+                        "note_item_id": "en-00001",
+                        "chapter_id": "ch-1",
+                        "region_id": "r-1",
+                        "marker": "1",
+                        "normalized_marker": "1",
+                        "page_no": 111,
+                        "source_text": "endnote 1 text",
+                    }
+                ]
+
+            def list_fnm_body_anchors(self, _doc_id):
+                return [
+                    {
+                        "anchor_id": "anchor-00063",
+                        "chapter_id": "ch-1",
+                        "page_no": 91,
+                        "normalized_marker": "1",
+                        "source_marker": "¹",
+                        "anchor_kind": "endnote",
+                    },
+                    {
+                        "anchor_id": "anchor-00065",
+                        "chapter_id": "ch-1",
+                        "page_no": 91,
+                        "normalized_marker": "19",
+                        "source_marker": "[19]",
+                        "anchor_kind": "endnote",
+                    },
+                ]
+
+            def list_fnm_note_links(self, _doc_id):
+                return [
+                    {
+                        "link_id": "link-00001",
+                        "chapter_id": "ch-1",
+                        "region_id": "r-1",
+                        "note_kind": "endnote",
+                        "status": "orphan_note",
+                        "note_item_id": "en-00001",
+                        "anchor_id": "",
+                        "marker": "1",
+                    },
+                    {
+                        "link_id": "link-00281",
+                        "chapter_id": "ch-1",
+                        "region_id": "",
+                        "note_kind": "endnote",
+                        "status": "orphan_anchor",
+                        "note_item_id": "",
+                        "anchor_id": "anchor-00065",
+                        "marker": "19",
+                    },
+                ]
+
+        repo = _MarkerMismatchRepo()
+        with (
+            patch("FNM_RE.llm_repair._build_cluster_page_contexts", return_value=[]),
+            patch("FNM_RE.llm_repair._build_chapter_body_text", return_value=("", [])),
+            patch(
+                "FNM_RE.llm_repair.request_llm_repair_actions",
+                return_value={
+                    "actions": [
+                        {
+                            "action": "match",
+                            "note_item_id": "en-00001",
+                            "anchor_id": "anchor-00065",
+                            "confidence": 0.98,
+                            "reason": "LLM hallucination: claims marker 1 at anchor-00065",
+                        }
+                    ],
+                    "request_metrics": {"cluster_id": "ch-1:ch-1:endnote"},
+                    "usage_event": {},
+                    "llm_trace": {
+                        "stage": "llm_repair.cluster_request",
+                        "reason_for_request": "cluster unresolved repair",
+                        "request_prompt": {"system": "sys", "user": "user"},
+                        "request_content": {"page_contexts": []},
+                        "response_raw_text": "[]",
+                        "response_parsed": [],
+                        "derived_truth": {"parsed_actions": []},
+                    },
+                },
+            ),
+        ):
+            result = run_llm_repair("doc-1", repo=repo, slug="book-1", auto_apply=True)
+
+        # 建议应该被记录（llm_suggestion），但 link override 不应被自动应用
+        link_overrides = [row for row in repo.saved_overrides if row[0] == "link"]
+        self.assertEqual(link_overrides, [], "marker 不一致且存在精确匹配 anchor 时不应自动应用")
+        self.assertGreaterEqual(result["suggestion_count"], 1, "建议仍应被记录")
+        self.assertEqual(result["auto_applied_count"], 0, "不应有自动应用")
+
+
 if __name__ == "__main__":
     unittest.main()

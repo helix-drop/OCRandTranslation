@@ -1,9 +1,9 @@
 # FNM Real Test Report — Heidegger_en_France
 
 - doc_id: `a5d9a08d6871`
-- 状态: `blocked`
-- 导出可用: `False`
-- 阻塞原因: `["export_audit_blocking", "structure_review_required"]`
+- 状态: `ready`
+- 导出可用: `True`
+- 阻塞原因: `[]`
 - translation_mode: `placeholder`
 - translation_api_called: `False`
 - current_stage: `report_write`
@@ -18,8 +18,8 @@
 - manual_toc_pdf: exists=`True` path=`/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/目录.pdf` size=`300363` sha256=`4f3c6bcc1194dae90f51963841064d191d103186576aa4bd1e6a2970ccf6e599`
 
 ## 清理结果
-- removed_count: `7`
-- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.Heidegger_en_France.blocked.test.zip", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.blocked.test.zip"]`
+- removed_count: `8`
+- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.Heidegger_en_France.test.zip", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.test.zip", "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.zip"]`
 
 ## 占位翻译
 - translation_mode: `placeholder`
@@ -30,8 +30,8 @@
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=4, prompt=3864, completion=6638, total=10502
-- llm_repair.cluster_request: request=3, prompt=11262, completion=1549, total=12811
+- visual_toc.manual_input_extract: request=4, prompt=3864, completion=6193, total=10057
+- llm_repair.cluster_request: request=3, prompt=11262, completion=1784, total=13046
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
@@ -54,8 +54,8 @@
 - `{"container": 0, "endnotes": 0, "chapter": 18, "section": 69, "post_body": 0, "back_matter": 5, "front_matter": 0}`
 
 ## Export
-- slug zip: `/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.Heidegger_en_France.blocked.test.zip`
-- alias zip: `/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.blocked.test.zip`
+- slug zip: `/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.Heidegger_en_France.test.zip`
+- alias zip: `/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.test.zip`
 
 ## LLM 交互摘要
 - trace_count: `7`
@@ -68,22 +68,3 @@
 - llm_repair.cluster_request: 根据 unresolved cluster 请求 LLM 给出注释链接修补建议 -> `/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/llm_repair.cluster_request.003.json`
 
 ## 阻塞定位明细
-- structure_verify / note_link_orphan_anchor: `原书 p.420 ¶0 — formelles qui prennent en charge les difficultés et les fatigues de la pensée, t...` | `formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent...`
-- structure_verify / note_link_orphan_anchor: `原书 p.436 ¶0 — rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67...` | `rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n...`
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- structure_verify / chapter_issue: `` | ``
-- export_verify / structure_review_required: `` | `["export_audit_blocking"]`

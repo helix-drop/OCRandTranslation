@@ -33,6 +33,7 @@ _IMAGE_ONLY_PARAGRAPH_RE = re.compile(
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 _CJK_CHAR_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 _SUSPECT_ASCII_GARBLED_RE = re.compile(r"[A-Z0-9@;:<>=?]{12,}")
+_SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([?!:;,])")
 _MARKDOWN_PREFIX_PATTERNS = (
     re.compile(r"^(\s*\[\^[^\]]+\]:\s+)(.*)$"),
     re.compile(r"^(\s*#{1,6}\s+)(.*)$"),
@@ -40,6 +41,12 @@ _MARKDOWN_PREFIX_PATTERNS = (
     re.compile(r"^(\s*\d+\.\s+)(.*)$"),
     re.compile(r"^(\s*>\s+)(.*)$"),
 )
+
+
+def _summary_title_key(value: str) -> str:
+    text = re.sub(r"\s+", " ", str(value or "").strip())
+    text = _SPACE_BEFORE_PUNCT_RE.sub(r"\1", text)
+    return text.casefold()
 
 
 def _toc_titles_and_summary(toc_structure: TocStructure) -> tuple[list[str], list[str], list[str], dict[str, int]]:
@@ -58,6 +65,17 @@ def _toc_titles_and_summary(toc_structure: TocStructure) -> tuple[list[str], lis
         for row in toc_structure.toc_tree
         if str(row.role or "") == "back_matter" and str(row.title or "").strip()
     ]
+    exported_title_keys = {
+        _summary_title_key(row.title)
+        for row in toc_structure.chapters
+        if str(row.role or "") in {"chapter", "post_body"} and _summary_title_key(str(row.title or ""))
+    }
+    if exported_title_keys:
+        container_titles = [
+            title
+            for title in container_titles
+            if _summary_title_key(title) not in exported_title_keys
+        ]
     toc_role_summary = {
         "container": len(container_titles),
         "chapter": sum(1 for row in toc_structure.chapters if str(row.role or "") == "chapter"),

@@ -24,14 +24,14 @@
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `1628`
+- translated_paras: `859`
 
 ## Token by Stage
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=2, prompt=2983, completion=2463, total=5446
-- llm_repair.cluster_request: request=0, prompt=0, completion=0, total=0
+- visual_toc.manual_input_extract: request=2, prompt=2969, completion=2443, total=5412
+- llm_repair.cluster_request: request=1, prompt=7549, completion=592, total=8141
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
@@ -43,23 +43,24 @@
 - `{"toc_body_item_count": 9, "resolved_anchor_count": 9, "provisional_anchor_count": 0, "section_node_count": 177, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": ["Epilogue"], "demoted_chapter_titles_preview": ["to the", "Imagination in Socioeconomic Discourse (1): The Trade Corporation", "The Worker's Imagination Further Scrutinized", "tices and", "Imagination in Socioeconomic Discourse (2): Credit", "Self-Contained Persons: The Odd Trio", "anxiety for which the discourse on imagination typically served as", "restraints."], "optimized_anchor_count": 2, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 143}`
 
 ## Endnotes Summary
-- present: `True`
-- container_title: `Notes`
-- container_printed_page: `331`
-- container_visual_order: `58`
+- present: `False`
+- container_title: ``
+- container_printed_page: ``
+- container_visual_order: ``
 - has_chapter_keyed_subentries_in_toc: `False`
 - subentry_pattern: ``
 
 ## TOC Role Summary
-- `{"container": 2, "endnotes": 1, "chapter": 10, "section": 7, "post_body": 0, "back_matter": 2, "front_matter": 2}`
+- `{"container": 2, "endnotes": 0, "chapter": 8, "section": 0, "post_body": 1, "back_matter": 3, "front_matter": 2}`
 
 ## Export
 - slug zip: `/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.Goldstein.test.zip`
 - alias zip: `/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.test.zip`
 
 ## LLM 交互摘要
-- trace_count: `2`
+- trace_count: `3`
 - visual_toc.manual_input_extract: 从目录页截图中抽取单页原子目录项 -> `/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.001.json`
 - visual_toc.manual_input_extract: 根据整份目录页重建目录树，并识别尾注容器与子项 -> `/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.002.json`
+- llm_repair.cluster_request: 根据 unresolved cluster 请求 LLM 给出注释链接修补建议 -> `/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/llm_repair.cluster_request.001.json`
 
 ## 阻塞定位明细

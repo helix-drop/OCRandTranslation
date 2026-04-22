@@ -552,6 +552,21 @@ class FnmRePhase1Test(unittest.TestCase):
         self.assertLess(last_exported_chapter.end_page, rear_back_matter_page)
         self.assertNotIn(rear_back_matter_page, last_exported_chapter.pages)
 
+    def test_napoleon_exported_roman_root_is_not_left_in_container_titles(self):
+        structure = build_phase1_structure(
+            _load_pages("Napoleon"),
+            toc_items=_load_auto_visual_toc("Napoleon"),
+            toc_offset=0,
+            pdf_path=_load_pdf_path("Napoleon"),
+            visual_toc_bundle=_load_auto_visual_toc_bundle("Napoleon"),
+        )
+
+        exported_titles = [str(chapter.title or "") for chapter in structure.chapters]
+        container_titles = [str(title or "") for title in structure.summary.container_titles]
+
+        self.assertTrue(any(title.startswith("II. L’asile, prison politique") for title in exported_titles))
+        self.assertFalse(any(title.startswith("II. L’asile, prison politique") for title in container_titles))
+
     def test_nip_manual_outline_keeps_part_i_to_iv_container_semantics(self):
         structure = build_phase1_structure(
             _load_pages("Neuropsychoanalysis_in_Practice"),

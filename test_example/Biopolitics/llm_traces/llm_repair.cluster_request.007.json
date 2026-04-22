@@ -8,7 +8,7 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-003-leçondu24janvier1979:toc-ch-003-leçondu24janvier1979:footnote\",\n  \"chapter_title\": \"Leçon du 24 janvier 1979\",\n  \"page_range\": [\n    72,\n    72\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 70,\n      \"ocr_excerpt\": \"mon voisin sera riche dans la mesure même où je m'enrichirai par mon commerce et mon commerce mutuel avec lui. Enrichissement par conséquent corrélatif, enrichissement en bloc, enrichissement régional : ou l'Europe tout entière sera riche, ou l'Europe tout entière sera pauvre. Il n'y a plus de gâteau à partager. On entre dans l'âge d'une historicité économique qui va être commandée par l'enrichissement sinon indéfini, du moins réciproque par le jeu même de la concurrence. Je crois que commence à se dessiner là quelque chose de très important et dont les conséquences, vous le savez bien, sont loin d'être épuisées. Se dessine là quelque chose qui est une nouvelle idée de l'Europe, une Europe qui n'est plus du tout l'Europe impériale et carolingienne héritant plus ou moins de l'Empire romain et se référant à des structures politiques bien particulières. Ce n'est pas non plus, ce n'est déjà plus l'Europe classique de la balance, de l'équilibre entre les forces établies de telle manière que jamais la force de l'un ne l'emporte d'une façon qui serait trop déterminante sur l'autre. C'est une Europe de l'enrichissement collectif, c'est une Europe comme sujet économique collectif qui a, que ...\"\n    },\n    {\n      \"page_no\": 71,\n      \"ocr_excerpt\": \"tence par conséquent d'un jeu à somme non nulle implique, bien entendu, que le monde tout entier soit convoqué autour de l'Europe pour échanger, dans un marché qui sera le marché européen, ses propres produits et les produits de l'Europe. Bien entendu, je ne veux pas dire par là que c'est la première fois que l'Europe pense au monde ou que l'Europe pense le monde. Je veux dire, simplement, que c'est peut-être la première fois que l'Europe en tant qu'unité économique, que sujet économique se présente ainsi au monde ou réfléchit le monde comme pouvant et devant être son domaine économique. C'est la première fois que l'Europe, me semble-t-il, apparaît à ses propres yeux comme devant avoir le monde pour marché indéfini. L'Europe n'est plus simplement en état de convoitise par rapport à toutes les richesses du monde qui miroitaient dans ses rêves ou dans ses perceptions. L'Europe est maintenant en état d'enrichissement permanent et collectif par sa propre concurrence, à condition que ce soit le monde entier qui constitue son marché. Bref, le calcul d'une balance européenne, à l'époque du mercantilisme, à l'époque de la raison d'État, à l'époque de l'État de police, etc., était ce qui pe ...\"\n    },\n    {\n      \"page_no\": 72,\n      \"ocr_excerpt\": \"Cette apparition d'une nouvelle forme de rationalité planétaire, cette apparition d'un nouveau calcul aux dimensions du monde, je pense qu'on pourrait en trouver bien des signes. J'en cite simplement quelques-uns. Prenez, par exemple, l'histoire du droit de la mer au xvi\\\\textsuperscript{e} siècle, la manière dont, en termes de droit international, on a essayé de penser le monde ou du moins la mer comme un espace de libre concurrence, de libre circulation maritime, par conséquent comme une des conditions nécessaires à l'organisation d'un marché mondial. Toute l'histoire de la piraterie, la manière dont elle a été à la fois utilisée, encouragée, combattue, supprimée, etc., pourrait apparaître également comme un des aspects de cette élaboration d'un espace planétaire en fonction d'un certain nombre de principes de droit. Disons qu'il y a eu une juridification du monde qui est à penser en termes d'organisation d'un marché. Autre exemple encore de cette apparition d'une rationalité gouvernementale qui a pour horizon la planète toute entière, eh bien les projets de paix et d'organisation internationale au XVIII<sup>e</sup> siècle. Si vous prenez ceux qui existaient, car il en a existé dè ...\"\n    },\n    {\n      \"page_no\": 73,\n      \"ocr_excerpt\": \"perpétuelle ? Eh bien, dit Kant, c'est très simple. La nature a tout de même fait des choses absolument merveilleuses, puisqu'elle est arrivée, par exemple, à faire vivre non seulement des animaux, mais même des gens dans des pays pas possibles, complètement brûlés par le soleil ou gelés par des glaces éternelles 7. Eh bien, il y a des gens qui y vivent malgré tout, ce qui prouve qu'il n'y a pas une seule partie du monde où les hommes ne puissent vivre 8. Mais pour que les hommes puissent vivre, encore faut-il qu'ils puissent se nourrir, qu'ils puissent produire leur nourriture, qu'ils aient entre eux une organisation sociale [et] qu'ils puissent échanger entre eux ou avec les hommes d'autres régions leurs produits. La nature a voulu que le monde tout entier et sur toute sa surface soit livré à l'activité économique qui est celle de la production et de l'échange. Et à partir de là, la nature a prescrit à l'homme un certain nombre d'obligations qui sont à la fois pour l'homme des obligations juridiques 9, mais que la nature [lui] a en quelque sorte dictées en sous-main, qu'elle a en quelque sorte marquées en creux dans la disposition même des choses, de la géographie, du climat, etc ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00037\",\n      \"marker\": \"6\",\n      \"page_no\": 72,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la p ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00039\",\n      \"marker\": \"6\",\n      \"page_no\": 72,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la p ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00059\",\n      \"note_item_id\": \"fn-00007\",\n      \"current_anchor_id\": \"anchor-00038\",\n      \"marker\": \"5\",\n      \"note_page_no\": 71,\n      \"anchor_page_no\": 72,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \": «en arrêtant la partie lorsque les pertes et les gains des différents partenaires s’écartent trop de la situation de départ (problème pascalien de l'interruption de la partie) ».\",\n      \"anchor_excerpt\": \"Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la p ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-003-leçondu24janvier1979:toc-ch-003-leçondu24janvier1979:footnote\",\n  \"chapter_title\": \"Leçon du 24 janvier 1979\",\n  \"page_range\": [\n    72,\n    72\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 70,\n      \"ocr_excerpt\": \"mon voisin sera riche dans la mesure même où je m'enrichirai par mon commerce et mon commerce mutuel avec lui. Enrichissement par conséquent corrélatif, enrichissement en bloc, enrichissement régional : ou l'Europe tout entière sera riche, ou l'Europe tout entière sera pauvre. Il n'y a plus de gâteau à partager. On entre dans l'âge d'une historicité économique qui va être commandée par l'enrichissement sinon indéfini, du moins réciproque par le jeu même de la concurrence. Je crois que commence à se dessiner là quelque chose de très important et dont les conséquences, vous le savez bien, sont loin d'être épuisées. Se dessine là quelque chose qui est une nouvelle idée de l'Europe, une Europe qui n'est plus du tout l'Europe impériale et carolingienne héritant plus ou moins de l'Empire romain et se référant à des structures politiques bien particulières. Ce n'est pas non plus, ce n'est déjà plus l'Europe classique de la balance, de l'équilibre entre les forces établies de telle manière que jamais la force de l'un ne l'emporte d'une façon qui serait trop déterminante sur l'autre. C'est une Europe de l'enrichissement collectif, c'est une Europe comme sujet économique collectif qui a, que ...\"\n    },\n    {\n      \"page_no\": 71,\n      \"ocr_excerpt\": \"tence par conséquent d'un jeu à somme non nulle implique, bien entendu, que le monde tout entier soit convoqué autour de l'Europe pour échanger, dans un marché qui sera le marché européen, ses propres produits et les produits de l'Europe. Bien entendu, je ne veux pas dire par là que c'est la première fois que l'Europe pense au monde ou que l'Europe pense le monde. Je veux dire, simplement, que c'est peut-être la première fois que l'Europe en tant qu'unité économique, que sujet économique se présente ainsi au monde ou réfléchit le monde comme pouvant et devant être son domaine économique. C'est la première fois que l'Europe, me semble-t-il, apparaît à ses propres yeux comme devant avoir le monde pour marché indéfini. L'Europe n'est plus simplement en état de convoitise par rapport à toutes les richesses du monde qui miroitaient dans ses rêves ou dans ses perceptions. L'Europe est maintenant en état d'enrichissement permanent et collectif par sa propre concurrence, à condition que ce soit le monde entier qui constitue son marché. Bref, le calcul d'une balance européenne, à l'époque du mercantilisme, à l'époque de la raison d'État, à l'époque de l'État de police, etc., était ce qui pe ...\"\n    },\n    {\n      \"page_no\": 72,\n      \"ocr_excerpt\": \"Cette apparition d'une nouvelle forme de rationalité planétaire, cette apparition d'un nouveau calcul aux dimensions du monde, je pense qu'on pourrait en trouver bien des signes. J'en cite simplement quelques-uns. Prenez, par exemple, l'histoire du droit de la mer au xvi\\\\textsuperscript{e} siècle, la manière dont, en termes de droit international, on a essayé de penser le monde ou du moins la mer comme un espace de libre concurrence, de libre circulation maritime, par conséquent comme une des conditions nécessaires à l'organisation d'un marché mondial. Toute l'histoire de la piraterie, la manière dont elle a été à la fois utilisée, encouragée, combattue, supprimée, etc., pourrait apparaître également comme un des aspects de cette élaboration d'un espace planétaire en fonction d'un certain nombre de principes de droit. Disons qu'il y a eu une juridification du monde qui est à penser en termes d'organisation d'un marché. Autre exemple encore de cette apparition d'une rationalité gouvernementale qui a pour horizon la planète toute entière, eh bien les projets de paix et d'organisation internationale au XVIII<sup>e</sup> siècle. Si vous prenez ceux qui existaient, car il en a existé dè ...\"\n    },\n    {\n      \"page_no\": 73,\n      \"ocr_excerpt\": \"perpétuelle ? Eh bien, dit Kant, c'est très simple. La nature a tout de même fait des choses absolument merveilleuses, puisqu'elle est arrivée, par exemple, à faire vivre non seulement des animaux, mais même des gens dans des pays pas possibles, complètement brûlés par le soleil ou gelés par des glaces éternelles 7. Eh bien, il y a des gens qui y vivent malgré tout, ce qui prouve qu'il n'y a pas une seule partie du monde où les hommes ne puissent vivre 8. Mais pour que les hommes puissent vivre, encore faut-il qu'ils puissent se nourrir, qu'ils puissent produire leur nourriture, qu'ils aient entre eux une organisation sociale [et] qu'ils puissent échanger entre eux ou avec les hommes d'autres régions leurs produits. La nature a voulu que le monde tout entier et sur toute sa surface soit livré à l'activité économique qui est celle de la production et de l'échange. Et à partir de là, la nature a prescrit à l'homme un certain nombre d'obligations qui sont à la fois pour l'homme des obligations juridiques 9, mais que la nature [lui] a en quelque sorte dictées en sous-main, qu'elle a en quelque sorte marquées en creux dans la disposition même des choses, de la géographie, du climat, etc ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00037\",\n      \"marker\": \"6\",\n      \"page_no\": 72,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la p ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00039\",\n      \"marker\": \"6\",\n      \"page_no\": 72,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la p ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00059\",\n      \"note_item_id\": \"fn-00007\",\n      \"current_anchor_id\": \"anchor-00038\",\n      \"marker\": \"5\",\n      \"note_page_no\": 71,\n      \"anchor_page_no\": 72,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \": «en arrêtant la partie lorsque les pertes et les gains des différents partenaires s’écartent trop de la situation de départ (problème pascalien de l'interruption de la partie) ».\",\n      \"anchor_excerpt\": \"Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la p ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -18,6 +18,7 @@
       "allowed_actions": [
         "match",
         "ignore_ref",
+        "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
@@ -29,7 +30,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 36643,
+          "row_id": 46039,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00037",
           "chapter_id": "toc-ch-003-leçondu24janvier1979",
@@ -42,11 +43,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la paix perpétuelle, comment est-ce que Kant la conçoit ? Eh bien, il dit : au fond, cette paix perpétuelle, ce qui la garantit à travers l'histoire et ce qui nous promet qu'elle pourra effectivement un jour prendre figure et forme à l'intérieur de l'histoire, qu'est-ce que c'est ? La volonté des hommes, leur entente entre eux, les combinaisons politiques et diplomatiques qu'ils auront pu échafauder, l'organisation de droits qu'ils auront mis sur place entre eux ? Pas du tout. C'est la nature⁶, tout comme chez les physiocrates c'était la nature qui garantissait la bonne régulation du marché. Et comment est-ce que la nature garantit la paix",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         },
         {
-          "row_id": 36645,
+          "row_id": 46041,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00039",
           "chapter_id": "toc-ch-003-leçondu24janvier1979",
@@ -59,8 +60,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Si vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la paix perpétuelle, comment est-ce que Kant la conçoit ? Eh bien, il dit : au fond, cette paix perpétuelle, ce qui la garantit à travers l'histoire et ce qui nous promet qu'elle pourra effectivement un jour prendre figure et forme à l'intérieur de l'histoire, qu'est-ce que c'est ? La volonté des hommes, leur entente entre eux, les combinaisons politiques et diplomatiques qu'ils auront pu échafauder, l'organisation de droits qu'ils auront mis sur place entre eux ? Pas du tout. C'est la nature⁶, tout comme chez les physiocrates c'était la nature qui garantissait la bonne régulation du marché. Et comment est-ce que la nature garantit la paix",
-          "created_at": 1776826416,
-          "updated_at": 1776826416
+          "created_at": 1776850867,
+          "updated_at": 1776850867
         }
       ],
       "rebind_candidates": [
@@ -119,7 +120,7 @@
     "page_context_count": 4,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00007\",\n    \"anchor_id\": \"anchor-00039\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote on page 57 (marker *) matches the content of fn-00007 exactly. The text in anchor-00039 ('XVIII⁶ siècle') contains a clear OCR error where '6' should be an asterisk '*', which is confirmed by the correct reading in the screenshot on page 58 ('XVIIIᵉ siècle'). Anchor-00039 represents the true location of the note.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00037\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate anchor entry for the same location as anchor-00039. Since anchor-00039 is being matched to the note, this redundant record should be ignored.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00007\",\n    \"anchor_id\": \"anchor-00039\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text (marker *) in the screenshot matches the note content exactly. The current binding is to a synthetic anchor (anchor-00038) on page 71, but the source text and context clearly indicate it belongs to the explicit marker '5' on page 72 (anchor-00039). Rebinding resolves the cross-page error.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00037\",\n    \"confidence\": 0.9,\n    \"reason\": \"Duplicate anchor record for the same location (page 72, marker 6) as anchor-00039. Ignoring to prevent redundancy.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
@@ -129,7 +130,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "The footnote on page 57 (marker *) matches the content of fn-00007 exactly. The text in anchor-00039 ('XVIII⁶ siècle') contains a clear OCR error where '6' should be an asterisk '*', which is confirmed by the correct reading in the screenshot on page 58 ('XVIIIᵉ siècle'). Anchor-00039 represents the true location of the note."
+      "reason": "The footnote text (marker *) in the screenshot matches the note content exactly. The current binding is to a synthetic anchor (anchor-00038) on page 71, but the source text and context clearly indicate it belongs to the explicit marker '5' on page 72 (anchor-00039). Rebinding resolves the cross-page error."
     },
     {
       "action": "ignore_ref",
@@ -138,8 +139,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate anchor entry for the same location as anchor-00039. Since anchor-00039 is being matched to the note, this redundant record should be ignored."
+      "confidence": 0.9,
+      "reason": "Duplicate anchor record for the same location (page 72, marker 6) as anchor-00039. Ignoring to prevent redundancy."
     }
   ],
   "derived_truth": {
@@ -155,7 +156,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The footnote on page 57 (marker *) matches the content of fn-00007 exactly. The text in anchor-00039 ('XVIII⁶ siècle') contains a clear OCR error where '6' should be an asterisk '*', which is confirmed by the correct reading in the screenshot on page 58 ('XVIIIᵉ siècle'). Anchor-00039 represents the true location of the note."
+        "reason": "The footnote text (marker *) in the screenshot matches the note content exactly. The current binding is to a synthetic anchor (anchor-00038) on page 71, but the source text and context clearly indicate it belongs to the explicit marker '5' on page 72 (anchor-00039). Rebinding resolves the cross-page error."
       },
       {
         "action": "ignore_ref",
@@ -164,8 +165,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor entry for the same location as anchor-00039. Since anchor-00039 is being matched to the note, this redundant record should be ignored."
+        "confidence": 0.9,
+        "reason": "Duplicate anchor record for the same location (page 72, marker 6) as anchor-00039. Ignoring to prevent redundancy."
       }
     ],
     "auto_selected_actions": [
@@ -177,7 +178,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The footnote on page 57 (marker *) matches the content of fn-00007 exactly. The text in anchor-00039 ('XVIII⁶ siècle') contains a clear OCR error where '6' should be an asterisk '*', which is confirmed by the correct reading in the screenshot on page 58 ('XVIIIᵉ siècle'). Anchor-00039 represents the true location of the note."
+        "reason": "The footnote text (marker *) in the screenshot matches the note content exactly. The current binding is to a synthetic anchor (anchor-00038) on page 71, but the source text and context clearly indicate it belongs to the explicit marker '5' on page 72 (anchor-00039). Rebinding resolves the cross-page error."
       },
       {
         "action": "ignore_ref",
@@ -186,22 +187,11 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor entry for the same location as anchor-00039. Since anchor-00039 is being matched to the note, this redundant record should be ignored."
+        "confidence": 0.9,
+        "reason": "Duplicate anchor record for the same location (page 72, marker 6) as anchor-00039. Ignoring to prevent redundancy."
       }
     ],
     "auto_applied_actions": [
-      {
-        "link_id": "link-00059",
-        "action": "match",
-        "note_item_id": "fn-00007",
-        "anchor_id": "anchor-00039",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote on page 57 (marker *) matches the content of fn-00007 exactly. The text in anchor-00039 ('XVIII⁶ siècle') contains a clear OCR error where '6' should be an asterisk '*', which is confirmed by the correct reading in the screenshot on page 58 ('XVIIIᵉ siècle'). Anchor-00039 represents the true location of the note."
-      },
       {
         "link_id": "link-00279",
         "action": "ignore_ref",
@@ -210,18 +200,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor entry for the same location as anchor-00039. Since anchor-00039 is being matched to the note, this redundant record should be ignored."
+        "confidence": 0.9,
+        "reason": "Duplicate anchor record for the same location (page 72, marker 6) as anchor-00039. Ignoring to prevent redundancy."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 3779,
-    "completion_tokens": 248,
-    "total_tokens": 4027,
+    "prompt_tokens": 3843,
+    "completion_tokens": 226,
+    "total_tokens": 4069,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 6721
+    "duration_ms": 7290
   }
 }

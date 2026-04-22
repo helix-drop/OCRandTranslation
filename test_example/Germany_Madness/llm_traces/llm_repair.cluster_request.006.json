@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 56700,
+          "row_id": 63200,
           "doc_id": "67356d1f7d9a",
           "anchor_id": "anchor-01044",
           "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "It was not easy to regulate the fleshpots of Haina. When a survey of food consumption was again conducted in 1591, examining the year 1590, the average intake was still 5,161 calories a day at Haina and 3,994 at Merx-hausen (table 7.7). $ ^{78} $ Eggs, oatmeal, and honey were somewhat more abundant, but meat, cheese, milk, and beer were somewhat less so. The hospitals now diverged even more sharply than they had sixteen years earlier.",
-          "created_at": 1776826762,
-          "updated_at": 1776826762
+          "created_at": 1776847211,
+          "updated_at": 1776847211
         },
         {
-          "row_id": 56712,
+          "row_id": 63212,
           "doc_id": "67356d1f7d9a",
           "anchor_id": "anchor-01054",
           "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Applicants to the hospital emphasized their religious character and their readiness to live “as befits Christian brethren.” $ ^{90} $ The preacher at Haina was to urge the poor to hear God’s Word not only at the regular services but at special services as well and to inculcate an attitude of constant (ohn unterlass) prayer and thankfulness. $ ^{91} $ The hospital seems to have instituted a regular half-hour evening prayer service to balance the one in the morning. The original ordinance of the hospital (1534) required only one sermon a day and stated simply, “after supper and the prayer of thanks, let them rest and have them go to bed at a set time.” $ ^{92} $ Already in the undated “Hospitals-Fundation,” this thanksgiving was explicitly described as a church ser-",
-          "created_at": 1776826762,
-          "updated_at": 1776826762
+          "created_at": 1776847211,
+          "updated_at": 1776847211
         }
       ],
       "rebind_candidates": [
@@ -211,7 +211,7 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01105\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01106\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '79' in the rebind candidate is a clear OCR error for '29'. The note text matches exactly with footnote 29 visible on page 367 (image 2). Anchor 01044 is the correct parent anchor on page 367.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01112\",\n    \"anchor_id\": \"anchor-01050\",\n    \"confidence\": 1.0,\n    \"reason\": \"The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01116\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01117\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '8' in the rebind candidate is a clear OCR error for '91'. The note text lists names corresponding to footnote 91 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01118\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '30' in the rebind candidate is a clear OCR error for '92'. The note text '1581).' corresponds to the end of footnote 92 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01105\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 0.98,\n    \"reason\": \"The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01106\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 0.98,\n    \"reason\": \"The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
@@ -220,58 +220,18 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+      "confidence": 0.98,
+      "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
     },
     {
       "action": "match",
       "note_item_id": "fn-01106",
-      "anchor_id": "anchor-01044",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Marker '79' in the rebind candidate is a clear OCR error for '29'. The note text matches exactly with footnote 29 visible on page 367 (image 2). Anchor 01044 is the correct parent anchor on page 367."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01112",
-      "anchor_id": "anchor-01050",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01116",
       "anchor_id": "anchor-01054",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01117",
-      "anchor_id": "anchor-01054",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Marker '8' in the rebind candidate is a clear OCR error for '91'. The note text lists names corresponding to footnote 91 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01118",
-      "anchor_id": "anchor-01054",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Marker '30' in the rebind candidate is a clear OCR error for '92'. The note text '1581).' corresponds to the end of footnote 92 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
+      "confidence": 0.98,
+      "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
     }
   ],
   "derived_truth": {
@@ -286,58 +246,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+        "confidence": 0.98,
+        "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
       },
       {
         "action": "match",
         "note_item_id": "fn-01106",
-        "anchor_id": "anchor-01044",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '79' in the rebind candidate is a clear OCR error for '29'. The note text matches exactly with footnote 29 visible on page 367 (image 2). Anchor 01044 is the correct parent anchor on page 367."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01112",
-        "anchor_id": "anchor-01050",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01116",
         "anchor_id": "anchor-01054",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01117",
-        "anchor_id": "anchor-01054",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '8' in the rebind candidate is a clear OCR error for '91'. The note text lists names corresponding to footnote 91 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01118",
-        "anchor_id": "anchor-01054",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '30' in the rebind candidate is a clear OCR error for '92'. The note text '1581).' corresponds to the end of footnote 92 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
+        "confidence": 0.98,
+        "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
       }
     ],
     "auto_selected_actions": [
@@ -348,28 +268,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+        "confidence": 0.98,
+        "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
       },
       {
         "action": "match",
-        "note_item_id": "fn-01112",
-        "anchor_id": "anchor-01050",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01116",
+        "note_item_id": "fn-01106",
         "anchor_id": "anchor-01054",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
+        "confidence": 0.98,
+        "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
       }
     ],
     "auto_applied_actions": [
@@ -381,40 +291,29 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+        "confidence": 0.98,
+        "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
       },
       {
-        "link_id": "link-01134",
+        "link_id": "link-01128",
         "action": "match",
-        "note_item_id": "fn-01112",
-        "anchor_id": "anchor-01050",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
-      },
-      {
-        "link_id": "link-01138",
-        "action": "match",
-        "note_item_id": "fn-01116",
+        "note_item_id": "fn-01106",
         "anchor_id": "anchor-01054",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
+        "confidence": 0.98,
+        "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 24544,
-    "completion_tokens": 742,
-    "total_tokens": 25286,
+    "completion_tokens": 275,
+    "total_tokens": 24819,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 32374
+    "duration_ms": 22766
   }
 }

@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 56066,
+          "row_id": 62566,
           "doc_id": "67356d1f7d9a",
           "anchor_id": "anchor-00488",
           "chapter_id": "toc-ch-003-academicpsychiatryandthe",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "works on melancholy, and once there were enough learned physicians available to deploy this system of diagnosis and treatment. This is nowhere more evident than at the dozens of princely courts of the Holy Roman Empire, where courtiers and anxious family members began increasingly to take the advice of their increasingly influential personal physicians. When Duke Wilhelm II (the Younger) of Braunschweig-Lüneburg (1535–1592) went mad, for example, he was confined to his beautiful new palace at Celle and subjected to an elaborate therapeutic regime that mixed rigorous Galenic remedies for melancholy with daily Lutheran sermons. $ ^{65} $ His court physicians dominated these scenes, but when they failed to obtain results, the pious prince was given adventurous Paracelsan remedies for his sad condition. By the late sixteenth century, every prince who suffered attacks of depression, hallucination, confusion, or insanity was treated in the same way. Duke Albrecht Friedrich of Prussia (1553–1618) and Duke Johann Wilhelm of Jülich-Cleves are only the two best-known examples. But it seemed to some observers a gloomy comment on the state of the declining world that the Holy Roman Emperor himself, the secretive and fearful Rudolf II (1552–1612), was occasionally so afflicted by rage, so frantic with suspicion, so proud in his refusal to marry, that he set his melancholy stamp upon his whole court at Prague. It was indeed the age of the melancholy prince, an age created in large part by the classically trained physicians who diagnosed and treated their mad princes and princesses with the slogans of ancient Greek medicine.",
-          "created_at": 1776826762,
-          "updated_at": 1776826762
+          "created_at": 1776847211,
+          "updated_at": 1776847211
         },
         {
-          "row_id": 56105,
+          "row_id": 62605,
           "doc_id": "67356d1f7d9a",
           "anchor_id": "anchor-00513",
           "chapter_id": "toc-ch-003-academicpsychiatryandthe",
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "This last case bears a suspicious resemblance to a remarkable theory pronounced by Levinus Lemnius, a physician from Zirikzee (1505–1568) whose De miraculis occultis naturae libri iiiii ran through numerous editions. Lemnius made a valiant effort to explain physically and by a Platonic theory of remembrance how it came about that melancholic madmen could sometimes speak foreign languages they had never heard before. $ ^{90} $ We know that Schenck had read Lemnius, for he cited him often, but he claimed to have discovered this case of what we might call “melancholia latinophonia” in Pietro d’Abano’s Commentary on Aristotle’s Problems. Wherever he actually found the case, it is a good example of how far a physical reductionist might be willing to go in order to deny the actual influence of demons and demonic possession, even while conceding, if pushed, that demonic possession was possible.",
-          "created_at": 1776826762,
-          "updated_at": 1776826762
+          "created_at": 1776847211,
+          "updated_at": 1776847211
         }
       ],
       "rebind_candidates": [
@@ -127,7 +127,7 @@
     "page_context_count": 2,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00551\",\n    \"anchor_id\": \"synthetic-footnote-00086\",\n    \"confidence\": 0.9,\n    \"reason\": \"OCR error: anchor marker '236' should be '86'. Note text matches page 171 footnote 86.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00553\",\n    \"anchor_id\": \"synthetic-footnote-00087\",\n    \"confidence\": 0.9,\n    \"reason\": \"OCR error: anchor marker '260' should be '87'. Note text matches page 171 footnote 87.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00555\",\n    \"anchor_id\": \"synthetic-footnote-00088\",\n    \"confidence\": 0.9,\n    \"reason\": \"OCR error: anchor marker '252' should be '88'. Note text matches page 171 footnote 88.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00551\",\n    \"anchor_id\": \"synthetic-footnote-00086\",\n    \"confidence\": 0.95,\n    \"reason\": \"The rebind candidate link-00573 correctly identifies that note fn-00551 (marker 236 in text, but corresponding to footnote 86) belongs to the anchor at 'moist foods' on page 191 (OCR page 171). The current synthetic anchor is a placeholder for this exact location. The marker '236' in the note item refers to the observation number cited in the footnote text, not the footnote index itself, which matches the content of footnote 86.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00553\",\n    \"anchor_id\": \"synthetic-footnote-00087\",\n    \"confidence\": 0.95,\n    \"reason\": \"The rebind candidate link-00575 correctly identifies that note fn-00553 (marker 260, corresponding to footnote 87) belongs to the anchor after 'little doubt' on page 191. The note content matches footnote 87 exactly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00555\",\n    \"anchor_id\": \"synthetic-footnote-00088\",\n    \"confidence\": 0.95,\n    \"reason\": \"The rebind candidate link-00577 correctly identifies that note fn-00555 (marker 252, corresponding to footnote 88) belongs to the anchor after 'funny' on page 191. The note content matches footnote 88 exactly.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
@@ -136,8 +136,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "OCR error: anchor marker '236' should be '86'. Note text matches page 171 footnote 86."
+      "confidence": 0.95,
+      "reason": "The rebind candidate link-00573 correctly identifies that note fn-00551 (marker 236 in text, but corresponding to footnote 86) belongs to the anchor at 'moist foods' on page 191 (OCR page 171). The current synthetic anchor is a placeholder for this exact location. The marker '236' in the note item refers to the observation number cited in the footnote text, not the footnote index itself, which matches the content of footnote 86."
     },
     {
       "action": "match",
@@ -146,8 +146,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "OCR error: anchor marker '260' should be '87'. Note text matches page 171 footnote 87."
+      "confidence": 0.95,
+      "reason": "The rebind candidate link-00575 correctly identifies that note fn-00553 (marker 260, corresponding to footnote 87) belongs to the anchor after 'little doubt' on page 191. The note content matches footnote 87 exactly."
     },
     {
       "action": "match",
@@ -156,8 +156,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "OCR error: anchor marker '252' should be '88'. Note text matches page 171 footnote 88."
+      "confidence": 0.95,
+      "reason": "The rebind candidate link-00577 correctly identifies that note fn-00555 (marker 252, corresponding to footnote 88) belongs to the anchor after 'funny' on page 191. The note content matches footnote 88 exactly."
     }
   ],
   "derived_truth": {
@@ -172,8 +172,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '236' should be '86'. Note text matches page 171 footnote 86."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00573 correctly identifies that note fn-00551 (marker 236 in text, but corresponding to footnote 86) belongs to the anchor at 'moist foods' on page 191 (OCR page 171). The current synthetic anchor is a placeholder for this exact location. The marker '236' in the note item refers to the observation number cited in the footnote text, not the footnote index itself, which matches the content of footnote 86."
       },
       {
         "action": "match",
@@ -182,8 +182,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '260' should be '87'. Note text matches page 171 footnote 87."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00575 correctly identifies that note fn-00553 (marker 260, corresponding to footnote 87) belongs to the anchor after 'little doubt' on page 191. The note content matches footnote 87 exactly."
       },
       {
         "action": "match",
@@ -192,8 +192,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '252' should be '88'. Note text matches page 171 footnote 88."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00577 correctly identifies that note fn-00555 (marker 252, corresponding to footnote 88) belongs to the anchor after 'funny' on page 191. The note content matches footnote 88 exactly."
       }
     ],
     "auto_selected_actions": [
@@ -204,8 +204,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '236' should be '86'. Note text matches page 171 footnote 86."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00573 correctly identifies that note fn-00551 (marker 236 in text, but corresponding to footnote 86) belongs to the anchor at 'moist foods' on page 191 (OCR page 171). The current synthetic anchor is a placeholder for this exact location. The marker '236' in the note item refers to the observation number cited in the footnote text, not the footnote index itself, which matches the content of footnote 86."
       },
       {
         "action": "match",
@@ -214,8 +214,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '260' should be '87'. Note text matches page 171 footnote 87."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00575 correctly identifies that note fn-00553 (marker 260, corresponding to footnote 87) belongs to the anchor after 'little doubt' on page 191. The note content matches footnote 87 exactly."
       },
       {
         "action": "match",
@@ -224,8 +224,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '252' should be '88'. Note text matches page 171 footnote 88."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00577 correctly identifies that note fn-00555 (marker 252, corresponding to footnote 88) belongs to the anchor after 'funny' on page 191. The note content matches footnote 88 exactly."
       }
     ],
     "auto_applied_actions": [
@@ -237,8 +237,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '236' should be '86'. Note text matches page 171 footnote 86."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00573 correctly identifies that note fn-00551 (marker 236 in text, but corresponding to footnote 86) belongs to the anchor at 'moist foods' on page 191 (OCR page 171). The current synthetic anchor is a placeholder for this exact location. The marker '236' in the note item refers to the observation number cited in the footnote text, not the footnote index itself, which matches the content of footnote 86."
       },
       {
         "link_id": "link-00575",
@@ -248,8 +248,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '260' should be '87'. Note text matches page 171 footnote 87."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00575 correctly identifies that note fn-00553 (marker 260, corresponding to footnote 87) belongs to the anchor after 'little doubt' on page 191. The note content matches footnote 87 exactly."
       },
       {
         "link_id": "link-00577",
@@ -259,18 +259,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "OCR error: anchor marker '252' should be '88'. Note text matches page 171 footnote 88."
+        "confidence": 0.95,
+        "reason": "The rebind candidate link-00577 correctly identifies that note fn-00555 (marker 252, corresponding to footnote 88) belongs to the anchor after 'funny' on page 191. The note content matches footnote 88 exactly."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 6757,
-    "completion_tokens": 288,
-    "total_tokens": 7045,
+    "completion_tokens": 441,
+    "total_tokens": 7198,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 9822
+    "duration_ms": 16647
   }
 }

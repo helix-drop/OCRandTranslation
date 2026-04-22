@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 88587,
+          "row_id": 103491,
           "doc_id": "a5d9a08d6871",
           "anchor_id": "anchor-00589",
           "chapter_id": "toc-ch-014-entreéruditionettechnosc",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent relayer et prolonger nos capacités physiques limitées[66. » Cette concession partielle est cependant contrebalancée par un par bien différent de celui de Heidegger : remettre la science « en culture »; y réintroduire la réflexivité critique pour faire pièce à l'hyperspécialisation des disciplines et à la hiérarchisation des fonctions. Ainsi prend forme, grâce au travail sur les grands couples d'antinomies qui sous-tendent la science contemporaine, un « plaidoyer pour la pensée dans la science[67». » entendant illustrer le fait que la pratique de la science — loin d'exclure l'exercice de la pensée — le rend possible et l'appelle[68].",
-          "created_at": 1776827544,
-          "updated_at": 1776827544
+          "created_at": 1776848024,
+          "updated_at": 1776848024
         },
         {
-          "row_id": 88663,
+          "row_id": 103567,
           "doc_id": "a5d9a08d6871",
           "anchor_id": "anchor-00629",
           "chapter_id": "toc-ch-014-entreéruditionettechnosc",
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n'y a pas d'amour chez Heidegger $ ^{68} $»), Mascolo ajoute que rire, jeu, sexe (et femmes !) y sont également exclus et il oppose au chemin heideggerien la grand-route du poète vagabond du 7° art (Charlie Chaplin) $ ^{69} $. Préférence respectable et même sympathique qui ne justifie cependant pas la lecture désinvolte de textes scrupuleux (peut-être trop «sérieux» !) où se révèle un sens du «jeu» peut-être plus grand que ne le croit Mascolo. Surtout, pourquoi avoir confondu Heidegger avec «l'âme; philosophante»? C'est, en voulant trop embrasser, mal étreindre le «modèle» heideggerien, pour finalement méconnaître l'étonnante diversité des philosophies du XX<sup>e</sup> siècle.",
-          "created_at": 1776827544,
-          "updated_at": 1776827544
+          "created_at": 1776848024,
+          "updated_at": 1776848024
         }
       ],
       "rebind_candidates": [
@@ -159,23 +159,149 @@
     "page_context_count": 3,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01299\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"截图显示 p.420 脚注 106 (fn-01299) 的内容与 OCR 片段完全一致。当前 anchor-00589 位于 p.420，marker 为 '68'（实为 OCR 将 '106' 误读），且位置对应正文中引用 Lévy-Leblond 处。应修正绑定关系，忽略错误的 marker 数字。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01300\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"截图显示 p.420 脚注 107 (fn-01300) 内容为 'Ibid., p. 21.'，紧接在注 106 之后。由于这两个注都指向同一段落末尾的同一处引用源，它们共享同一个物理锚点位置。anchor-00589 是该位置的显式锚点。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01301\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"截图显示 p.420 脚注 108 (fn-01301) 内容清晰，位于注 107 之后。同样属于该段落末尾的连续注释群，应绑定到该处的显式锚点 anchor-00589。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01361\",\n    \"anchor_id\": \"anchor-00624\",\n    \"confidence\": 0.9,\n    \"reason\": \"截图显示 p.436 脚注 170 (fn-01361) 内容为 Jeffrey Barash 的书目。虽然当前绑定的 anchor-00624 位于 p.435 (marker 170)，但截图清楚显示注 170 位于 p.436 底部，且对应 p.436 正文中提及 Barash 的部分。鉴于请求模式为 anchor_rebind 且允许 match，且 p.436 有对应的 footnote zone，这里判定为应将 note 保留在当前逻辑链或重新匹配到 p.436 的正确位置。但在提供的 unmatched_anchors 中没有 p.436 的显式锚点。观察 p.436 截图，Barash 名字后有一个上标（可能是 170）。若系统未提取该锚点，通常需 synthesize_anchor。但规则限制只能用 match/ignore/needs_review。考虑到 link-01361 已经存在且 current_anchor_id 是 anchor-00624 (p.435)，而截图显示注 170 在 p.436。这可能是一个跨页注释或者 OCR 锚点提取错误。然而，仔细看 p.435 截图",
-  "response_parsed": [],
+  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01299\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01300\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"Same anchor (marker 106) supports sequential footnote 107; screenshot shows fn-01300 immediately follows fn-01299 on p.420, both tied to same textual location.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01301\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"Third sequential footnote (108) anchored at same location on p.420; screenshot confirms all three notes (106–108) are grouped under single marker position.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01362\",\n    \"anchor_id\": \"anchor-00629\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content.\"\n  }\n]",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-01299",
+      "anchor_id": "anchor-00589",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01300",
+      "anchor_id": "anchor-00589",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Same anchor (marker 106) supports sequential footnote 107; screenshot shows fn-01300 immediately follows fn-01299 on p.420, both tied to same textual location."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01301",
+      "anchor_id": "anchor-00589",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Third sequential footnote (108) anchored at same location on p.420; screenshot confirms all three notes (106–108) are grouped under single marker position."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01362",
+      "anchor_id": "anchor-00629",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+    }
+  ],
   "derived_truth": {
     "cluster_id": "toc-ch-014-entreéruditionettechnosc:toc-ch-014-entreéruditionettechnosc:footnote",
     "chapter_title": "11. Entre érudition et techno-science",
     "request_mode": "anchor_rebind",
-    "parsed_actions": [],
-    "auto_selected_actions": [],
-    "auto_applied_actions": []
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-01299",
+        "anchor_id": "anchor-00589",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01300",
+        "anchor_id": "anchor-00589",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Same anchor (marker 106) supports sequential footnote 107; screenshot shows fn-01300 immediately follows fn-01299 on p.420, both tied to same textual location."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01301",
+        "anchor_id": "anchor-00589",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Third sequential footnote (108) anchored at same location on p.420; screenshot confirms all three notes (106–108) are grouped under single marker position."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01362",
+        "anchor_id": "anchor-00629",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-01299",
+        "anchor_id": "anchor-00589",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01362",
+        "anchor_id": "anchor-00629",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-01299",
+        "action": "match",
+        "note_item_id": "fn-01299",
+        "anchor_id": "anchor-00589",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+      },
+      {
+        "link_id": "link-01362",
+        "action": "match",
+        "note_item_id": "fn-01362",
+        "anchor_id": "anchor-00629",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+      }
+    ]
   },
   "usage": {
     "prompt_tokens": 3547,
-    "completion_tokens": 768,
-    "total_tokens": 4315,
+    "completion_tokens": 452,
+    "total_tokens": 3999,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 15315
+    "duration_ms": 9594
   }
 }

@@ -68,7 +68,7 @@
     }
   },
   "cleanup": {
-    "cleaned_at": "2026-04-22T11:07:06",
+    "cleaned_at": "2026-04-22T16:48:15",
     "example_dir": "/Users/hao/OCRandTranslation/test_example/post-revolutionary",
     "removed": [
       "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces",
@@ -94,14 +94,21 @@
       "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.001.json",
       "reason_for_request": "从目录页截图中抽取单页原子目录项",
       "model_id": "qwen3.5-plus",
-      "total_tokens": 2801
+      "total_tokens": 2794
     },
     {
       "stage": "visual_toc.manual_input_extract",
       "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.002.json",
       "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
       "model_id": "qwen3.5-plus",
-      "total_tokens": 2645
+      "total_tokens": 2618
+    },
+    {
+      "stage": "llm_repair.cluster_request",
+      "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/llm_repair.cluster_request.001.json",
+      "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+      "model_id": "qwen3.5-plus",
+      "total_tokens": 8141
     }
   ],
   "translation_mode": "placeholder",
@@ -115,68 +122,68 @@
   "progress": {
     "status": "done",
     "current_stage": "report_write",
-    "started_at": "2026-04-22T11:07:06",
-    "updated_at": "2026-04-22T11:08:29",
+    "started_at": "2026-04-22T16:48:16",
+    "updated_at": "2026-04-22T16:49:55",
     "stage_history": [
       {
         "stage": "reingest",
         "status": "done",
         "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-        "at": "2026-04-22T11:07:06"
+        "at": "2026-04-22T16:48:16"
       },
       {
         "stage": "visual_toc",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T11:07:56"
+        "at": "2026-04-22T16:49:03"
       },
       {
         "stage": "fnm_pipeline",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T11:08:02"
+        "at": "2026-04-22T16:49:09"
       },
       {
         "stage": "llm_repair",
         "status": "done",
-        "detail": "auto_applied=0",
-        "at": "2026-04-22T11:08:02"
+        "detail": "auto_applied=8",
+        "at": "2026-04-22T16:49:24"
       },
       {
         "stage": "fnm_pipeline_rebuild",
         "status": "done",
-        "detail": "skipped",
-        "at": "2026-04-22T11:08:02"
+        "detail": "ready",
+        "at": "2026-04-22T16:49:30"
       },
       {
         "stage": "structure_verify",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T11:08:08"
+        "at": "2026-04-22T16:49:36"
       },
       {
         "stage": "placeholder_translate",
         "status": "done",
-        "detail": "translated_paras=1628",
-        "at": "2026-04-22T11:08:16"
+        "detail": "translated_paras=859",
+        "at": "2026-04-22T16:49:42"
       },
       {
         "stage": "export_verify",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T11:08:29"
+        "at": "2026-04-22T16:49:55"
       },
       {
         "stage": "zip_finalize",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T11:08:29"
+        "at": "2026-04-22T16:49:55"
       },
       {
         "stage": "report_write",
         "status": "done",
         "detail": "单书结果、报告、进度均已写入",
-        "at": "2026-04-22T11:08:29"
+        "at": "2026-04-22T16:49:55"
       }
     ]
   },
@@ -202,15 +209,15 @@
       },
       "visual_toc.manual_input_extract": {
         "request_count": 2,
-        "prompt_tokens": 2983,
-        "completion_tokens": 2463,
-        "total_tokens": 5446
+        "prompt_tokens": 2969,
+        "completion_tokens": 2443,
+        "total_tokens": 5412
       },
       "llm_repair.cluster_request": {
-        "request_count": 0,
-        "prompt_tokens": 0,
-        "completion_tokens": 0,
-        "total_tokens": 0
+        "request_count": 1,
+        "prompt_tokens": 7549,
+        "completion_tokens": 592,
+        "total_tokens": 8141
       },
       "translation_test": {
         "request_count": 0,
@@ -221,17 +228,17 @@
     },
     "by_model": {
       "qwen3.5-plus": {
-        "request_count": 2,
-        "prompt_tokens": 2983,
-        "completion_tokens": 2463,
-        "total_tokens": 5446
+        "request_count": 3,
+        "prompt_tokens": 10518,
+        "completion_tokens": 3035,
+        "total_tokens": 13553
       }
     },
     "total": {
-      "request_count": 2,
-      "prompt_tokens": 2983,
-      "completion_tokens": 2463,
-      "total_tokens": 5446
+      "request_count": 3,
+      "prompt_tokens": 10518,
+      "completion_tokens": 3035,
+      "total_tokens": 13553
     }
   },
   "reingest": {
@@ -248,7 +255,7 @@
   },
   "visual_toc": {
     "status": "ready",
-    "count": 23,
+    "count": 16,
     "scan_mode": "manual_pdf",
     "candidate_source": "manual_toc_upload",
     "candidate_indices": [],
@@ -262,32 +269,29 @@
         "start_file_idx": 0,
         "end_file_idx": 0,
         "page_count": 1,
-        "score": 23.0,
+        "score": 16.0,
         "selected_as": "primary_run"
       }
     ],
     "organization_summary": {
-      "max_body_depth": 3,
+      "max_body_depth": 2,
       "has_containers": true,
-      "has_post_body": false,
+      "has_post_body": true,
       "has_back_matter": true,
       "body_root_titles": [
         "Introduction: Psychological Interiority versus Self-Talk",
-        "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
-        "II THE POLITICS OF SELFHOOD",
-        "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
-        "4A n A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
-        "5C ousinian Hegemony",
-        "6R eligious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
-        "7A Palpable Self for the Socially Marginal: The Phrenological Alternative",
-        "Epilogue"
+        "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "THE POLITICS OF SELFHOOD"
       ],
       "container_titles": [
-        "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
-        "II THE POLITICS OF SELFHOOD"
+        "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "THE POLITICS OF SELFHOOD"
       ],
-      "post_body_titles": [],
+      "post_body_titles": [
+        "Epilogue"
+      ],
       "back_matter_titles": [
+        "Notes",
         "Note on Sources",
         "Index"
       ]
@@ -298,7 +302,7 @@
         "depth": 0,
         "printed_page": null,
         "file_idx": null,
-        "visual_order": 38,
+        "visual_order": 17,
         "role_hint": "front_matter",
         "parent_title": "",
         "body_candidate": false,
@@ -309,7 +313,7 @@
         "depth": 0,
         "printed_page": null,
         "file_idx": null,
-        "visual_order": 39,
+        "visual_order": 18,
         "role_hint": "front_matter",
         "parent_title": "",
         "body_candidate": false,
@@ -320,206 +324,129 @@
         "depth": 0,
         "printed_page": 1,
         "file_idx": 17,
-        "visual_order": 40,
+        "visual_order": 19,
         "role_hint": "chapter",
         "parent_title": "",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
         "depth": 1,
         "printed_page": null,
         "file_idx": null,
-        "visual_order": 41,
+        "visual_order": 20,
         "role_hint": "container",
         "parent_title": "",
         "body_candidate": false,
         "export_candidate": false
       },
       {
-        "title": "1 The Perils of Imagination at the End of the Old Regime",
+        "title": "The Perils of Imagination at the End of the Old Regime",
         "depth": 0,
         "printed_page": 21,
         "file_idx": 37,
-        "visual_order": 42,
+        "visual_order": 21,
         "role_hint": "chapter",
-        "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "2 The Revolutionary Schooling of Imagination",
+        "title": "The Revolutionary Schooling of Imagination",
         "depth": 0,
         "printed_page": 60,
         "file_idx": 76,
-        "visual_order": 43,
+        "visual_order": 22,
         "role_hint": "chapter",
-        "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "II THE POLITICS OF SELFHOOD",
+        "title": "THE POLITICS OF SELFHOOD",
         "depth": 1,
         "printed_page": null,
         "file_idx": null,
-        "visual_order": 44,
+        "visual_order": 23,
         "role_hint": "container",
         "parent_title": "",
         "body_candidate": false,
         "export_candidate": false
       },
       {
-        "title": "3 Is There a Self in This Mental Apparatus?",
+        "title": "Is There a Self in This Mental Apparatus?",
         "depth": 0,
         "printed_page": 103,
         "file_idx": 119,
-        "visual_order": 45,
+        "visual_order": 24,
         "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "parent_title": "THE POLITICS OF SELFHOOD",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
         "depth": 0,
         "printed_page": 139,
         "file_idx": 155,
-        "visual_order": 46,
+        "visual_order": 25,
         "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "parent_title": "THE POLITICS OF SELFHOOD",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "5 Cousinian Hegemony",
+        "title": "Cousinian Hegemony",
         "depth": 0,
         "printed_page": 182,
         "file_idx": 198,
-        "visual_order": 47,
+        "visual_order": 26,
         "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "parent_title": "THE POLITICS OF SELFHOOD",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
         "depth": 0,
         "printed_page": 233,
         "file_idx": 249,
-        "visual_order": 48,
+        "visual_order": 27,
         "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "parent_title": "THE POLITICS OF SELFHOOD",
         "body_candidate": true,
         "export_candidate": true
       },
       {
-        "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
         "depth": 0,
         "printed_page": 269,
         "file_idx": 285,
-        "visual_order": 49,
+        "visual_order": 28,
         "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "parent_title": "THE POLITICS OF SELFHOOD",
         "body_candidate": true,
         "export_candidate": true
-      },
-      {
-        "title": "IT HE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION 1T h e P erils of Imagination at the End of the Old Regime",
-        "depth": 2,
-        "printed_page": 21,
-        "file_idx": 37,
-        "visual_order": 50,
-        "role_hint": "section",
-        "parent_title": "Introduction: Psychological Interiority versus Self-Talk",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "2T he Revolutionary Schooling of Imagination",
-        "depth": 2,
-        "printed_page": 60,
-        "file_idx": 76,
-        "visual_order": 51,
-        "role_hint": "section",
-        "parent_title": "Introduction: Psychological Interiority versus Self-Talk",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
-        "depth": 0,
-        "printed_page": 103,
-        "file_idx": 119,
-        "visual_order": 52,
-        "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
-        "body_candidate": true,
-        "export_candidate": true
-      },
-      {
-        "title": "4A n A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
-        "depth": 2,
-        "printed_page": 139,
-        "file_idx": 155,
-        "visual_order": 53,
-        "role_hint": "section",
-        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "5C ousinian Hegemony",
-        "depth": 2,
-        "printed_page": 182,
-        "file_idx": 198,
-        "visual_order": 54,
-        "role_hint": "section",
-        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "6R eligious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
-        "depth": 2,
-        "printed_page": 233,
-        "file_idx": 249,
-        "visual_order": 55,
-        "role_hint": "section",
-        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
-        "body_candidate": true,
-        "export_candidate": false
-      },
-      {
-        "title": "7A Palpable Self for the Socially Marginal: The Phrenological Alternative",
-        "depth": 2,
-        "printed_page": 269,
-        "file_idx": 285,
-        "visual_order": 56,
-        "role_hint": "section",
-        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
-        "body_candidate": true,
-        "export_candidate": false
       },
       {
         "title": "Epilogue",
         "depth": 0,
         "printed_page": 316,
         "file_idx": 332,
-        "visual_order": 57,
-        "role_hint": "chapter",
-        "parent_title": "II THE POLITICS OF SELFHOOD",
-        "body_candidate": true,
+        "visual_order": 29,
+        "role_hint": "post_body",
+        "parent_title": "",
+        "body_candidate": false,
         "export_candidate": true
       },
       {
         "title": "Notes",
-        "depth": 1,
+        "depth": 0,
         "printed_page": 331,
         "file_idx": 347,
-        "visual_order": 58,
-        "role_hint": "endnotes",
+        "visual_order": 30,
+        "role_hint": "back_matter",
         "parent_title": "",
         "body_candidate": false,
         "export_candidate": false
@@ -529,7 +456,7 @@
         "depth": 0,
         "printed_page": 399,
         "file_idx": 415,
-        "visual_order": 59,
+        "visual_order": 31,
         "role_hint": "back_matter",
         "parent_title": "",
         "body_candidate": false,
@@ -540,7 +467,7 @@
         "depth": 0,
         "printed_page": 403,
         "file_idx": 419,
-        "visual_order": 60,
+        "visual_order": 32,
         "role_hint": "back_matter",
         "parent_title": "",
         "body_candidate": false,
@@ -548,10 +475,10 @@
       }
     ],
     "endnotes_summary": {
-      "present": true,
-      "container_title": "Notes",
-      "container_printed_page": 331,
-      "container_visual_order": 58,
+      "present": false,
+      "container_title": null,
+      "container_printed_page": null,
+      "container_visual_order": null,
       "has_chapter_keyed_subentries_in_toc": false,
       "subentry_pattern": null
     },
@@ -588,7 +515,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+          "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
           "depth": 1,
           "printed_page": null,
           "visual_order": 4,
@@ -597,7 +524,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "1 The Perils of Imagination at the End of the Old Regime",
+          "title": "The Perils of Imagination at the End of the Old Regime",
           "depth": 2,
           "printed_page": 21,
           "visual_order": 5,
@@ -606,7 +533,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "2 The Revolutionary Schooling of Imagination",
+          "title": "The Revolutionary Schooling of Imagination",
           "depth": 2,
           "printed_page": 60,
           "visual_order": 6,
@@ -615,7 +542,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "II THE POLITICS OF SELFHOOD",
+          "title": "THE POLITICS OF SELFHOOD",
           "depth": 1,
           "printed_page": null,
           "visual_order": 7,
@@ -624,7 +551,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "3 Is There a Self in This Mental Apparatus?",
+          "title": "Is There a Self in This Mental Apparatus?",
           "depth": 2,
           "printed_page": 103,
           "visual_order": 8,
@@ -633,7 +560,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+          "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
           "depth": 2,
           "printed_page": 139,
           "visual_order": 9,
@@ -642,7 +569,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "5 Cousinian Hegemony",
+          "title": "Cousinian Hegemony",
           "depth": 2,
           "printed_page": 182,
           "visual_order": 10,
@@ -651,7 +578,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+          "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
           "depth": 2,
           "printed_page": 233,
           "visual_order": 11,
@@ -660,7 +587,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+          "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
           "depth": 2,
           "printed_page": 269,
           "visual_order": 12,
@@ -733,7 +660,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+          "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
           "depth": 0,
           "printed_page": null,
           "file_idx": null,
@@ -741,25 +668,25 @@
           "role_hint": "container"
         },
         {
-          "title": "1 The Perils of Imagination at the End of the Old Regime",
+          "title": "The Perils of Imagination at the End of the Old Regime",
           "depth": 1,
           "printed_page": 21,
           "file_idx": null,
           "visual_order": 5,
           "role_hint": "chapter",
-          "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+          "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
         },
         {
-          "title": "2 The Revolutionary Schooling of Imagination",
+          "title": "The Revolutionary Schooling of Imagination",
           "depth": 1,
           "printed_page": 60,
           "file_idx": null,
           "visual_order": 6,
           "role_hint": "chapter",
-          "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+          "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
         },
         {
-          "title": "II THE POLITICS OF SELFHOOD",
+          "title": "THE POLITICS OF SELFHOOD",
           "depth": 0,
           "printed_page": null,
           "file_idx": null,
@@ -767,49 +694,49 @@
           "role_hint": "container"
         },
         {
-          "title": "3 Is There a Self in This Mental Apparatus?",
+          "title": "Is There a Self in This Mental Apparatus?",
           "depth": 1,
           "printed_page": 103,
           "file_idx": null,
           "visual_order": 8,
           "role_hint": "chapter",
-          "parent_title": "II THE POLITICS OF SELFHOOD"
+          "parent_title": "THE POLITICS OF SELFHOOD"
         },
         {
-          "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+          "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
           "depth": 1,
           "printed_page": 139,
           "file_idx": null,
           "visual_order": 9,
           "role_hint": "chapter",
-          "parent_title": "II THE POLITICS OF SELFHOOD"
+          "parent_title": "THE POLITICS OF SELFHOOD"
         },
         {
-          "title": "5 Cousinian Hegemony",
+          "title": "Cousinian Hegemony",
           "depth": 1,
           "printed_page": 182,
           "file_idx": null,
           "visual_order": 10,
           "role_hint": "chapter",
-          "parent_title": "II THE POLITICS OF SELFHOOD"
+          "parent_title": "THE POLITICS OF SELFHOOD"
         },
         {
-          "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+          "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
           "depth": 1,
           "printed_page": 233,
           "file_idx": null,
           "visual_order": 11,
           "role_hint": "chapter",
-          "parent_title": "II THE POLITICS OF SELFHOOD"
+          "parent_title": "THE POLITICS OF SELFHOOD"
         },
         {
-          "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+          "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
           "depth": 1,
           "printed_page": 269,
           "file_idx": null,
           "visual_order": 12,
           "role_hint": "chapter",
-          "parent_title": "II THE POLITICS OF SELFHOOD"
+          "parent_title": "THE POLITICS OF SELFHOOD"
         },
         {
           "title": "Epilogue",
@@ -817,7 +744,7 @@
           "printed_page": 316,
           "file_idx": null,
           "visual_order": 13,
-          "role_hint": "chapter"
+          "role_hint": "post_body"
         },
         {
           "title": "Notes",
@@ -853,14 +780,14 @@
         "subentry_pattern": null
       }
     },
-    "resolved_item_count": 23,
+    "resolved_item_count": 16,
     "unresolved_item_count": 0,
     "selected_page_count": 1,
     "selected_run_count": 1,
     "suspected_partial_capture": true,
     "coverage_quality": "partial",
-    "navigable_item_count": 16,
-    "navigable_ready_count": 16,
+    "navigable_item_count": 9,
+    "navigable_ready_count": 9,
     "unresolved_navigable_count": 0,
     "usage_events": [
       {
@@ -869,8 +796,8 @@
         "model_id": "qwen3.5-plus",
         "request_count": 1,
         "prompt_tokens": 1553,
-        "completion_tokens": 1248,
-        "total_tokens": 2801,
+        "completion_tokens": 1241,
+        "total_tokens": 2794,
         "doc_id": "7ba9bca783fd",
         "slug": "",
         "context": {
@@ -883,9 +810,9 @@
         "provider": "qwen",
         "model_id": "qwen3.5-plus",
         "request_count": 1,
-        "prompt_tokens": 1430,
-        "completion_tokens": 1215,
-        "total_tokens": 2645,
+        "prompt_tokens": 1416,
+        "completion_tokens": 1202,
+        "total_tokens": 2618,
         "doc_id": "7ba9bca783fd",
         "slug": "",
         "context": {
@@ -898,9 +825,9 @@
       "by_stage": {
         "visual_toc.manual_input_extract": {
           "request_count": 2,
-          "prompt_tokens": 2983,
-          "completion_tokens": 2463,
-          "total_tokens": 5446
+          "prompt_tokens": 2969,
+          "completion_tokens": 2443,
+          "total_tokens": 5412
         },
         "visual_toc.preflight": {
           "request_count": 0,
@@ -924,16 +851,16 @@
       "by_model": {
         "qwen3.5-plus": {
           "request_count": 2,
-          "prompt_tokens": 2983,
-          "completion_tokens": 2463,
-          "total_tokens": 5446
+          "prompt_tokens": 2969,
+          "completion_tokens": 2443,
+          "total_tokens": 5412
         }
       },
       "total": {
         "request_count": 2,
-        "prompt_tokens": 2983,
-        "completion_tokens": 2463,
-        "total_tokens": 5446
+        "prompt_tokens": 2969,
+        "completion_tokens": 2443,
+        "total_tokens": 5412
       }
     },
     "llm_traces": [
@@ -962,7 +889,7 @@
           "source": "pdf",
           "file_idx": 0
         },
-        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": \"ix\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": \"1\",\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": \"21\",\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": \"60\",\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"II THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": \"103\",\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\",\n    \"depth\": 2,\n    \"printed_page\": \"139\",\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"5 Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": \"182\",\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": \"233\",\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": \"269\",\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": \"316\",\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 0,\n    \"printed_page\": \"331\",\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 0,\n    \"printed_page\": \"399\",\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": \"403\",\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": \"ix\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": 21,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": 60,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": 103,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n    \"depth\": 2,\n    \"printed_page\": 139,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": 182,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": 233,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": 269,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": 316,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 0,\n    \"printed_page\": 331,\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 0,\n    \"printed_page\": 399,\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 403,\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
         "response_parsed": [
           {
             "title": "List of Illustrations",
@@ -985,14 +912,14 @@
           {
             "title": "Introduction: Psychological Interiority versus Self-Talk",
             "depth": 0,
-            "printed_page": "1",
+            "printed_page": 1,
             "visual_order": 3,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+            "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
             "depth": 1,
             "printed_page": null,
             "visual_order": 4,
@@ -1001,25 +928,25 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "1 The Perils of Imagination at the End of the Old Regime",
+            "title": "The Perils of Imagination at the End of the Old Regime",
             "depth": 2,
-            "printed_page": "21",
+            "printed_page": 21,
             "visual_order": 5,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "2 The Revolutionary Schooling of Imagination",
+            "title": "The Revolutionary Schooling of Imagination",
             "depth": 2,
-            "printed_page": "60",
+            "printed_page": 60,
             "visual_order": 6,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "II THE POLITICS OF SELFHOOD",
+            "title": "THE POLITICS OF SELFHOOD",
             "depth": 1,
             "printed_page": null,
             "visual_order": 7,
@@ -1028,45 +955,45 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "3 Is There a Self in This Mental Apparatus?",
+            "title": "Is There a Self in This Mental Apparatus?",
             "depth": 2,
-            "printed_page": "103",
+            "printed_page": 103,
             "visual_order": 8,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+            "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
             "depth": 2,
-            "printed_page": "139",
+            "printed_page": 139,
             "visual_order": 9,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "5 Cousinian Hegemony",
+            "title": "Cousinian Hegemony",
             "depth": 2,
-            "printed_page": "182",
+            "printed_page": 182,
             "visual_order": 10,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+            "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
             "depth": 2,
-            "printed_page": "233",
+            "printed_page": 233,
             "visual_order": 11,
             "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+            "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
             "depth": 2,
-            "printed_page": "269",
+            "printed_page": 269,
             "visual_order": 12,
             "role_hint": "content",
             "endnotes_candidate": false,
@@ -1075,7 +1002,7 @@
           {
             "title": "Epilogue",
             "depth": 0,
-            "printed_page": "316",
+            "printed_page": 316,
             "visual_order": 13,
             "role_hint": "content",
             "endnotes_candidate": false,
@@ -1084,7 +1011,7 @@
           {
             "title": "Notes",
             "depth": 0,
-            "printed_page": "331",
+            "printed_page": 331,
             "visual_order": 14,
             "role_hint": "back_matter",
             "endnotes_candidate": true,
@@ -1093,7 +1020,7 @@
           {
             "title": "Note on Sources",
             "depth": 0,
-            "printed_page": "399",
+            "printed_page": 399,
             "visual_order": 15,
             "role_hint": "back_matter",
             "endnotes_candidate": false,
@@ -1102,7 +1029,7 @@
           {
             "title": "Index",
             "depth": 0,
-            "printed_page": "403",
+            "printed_page": 403,
             "visual_order": 16,
             "role_hint": "back_matter",
             "endnotes_candidate": false,
@@ -1139,7 +1066,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+              "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
               "depth": 1,
               "printed_page": null,
               "visual_order": 4,
@@ -1148,7 +1075,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "1 The Perils of Imagination at the End of the Old Regime",
+              "title": "The Perils of Imagination at the End of the Old Regime",
               "depth": 2,
               "printed_page": 21,
               "visual_order": 5,
@@ -1157,7 +1084,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "2 The Revolutionary Schooling of Imagination",
+              "title": "The Revolutionary Schooling of Imagination",
               "depth": 2,
               "printed_page": 60,
               "visual_order": 6,
@@ -1166,7 +1093,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "II THE POLITICS OF SELFHOOD",
+              "title": "THE POLITICS OF SELFHOOD",
               "depth": 1,
               "printed_page": null,
               "visual_order": 7,
@@ -1175,7 +1102,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "3 Is There a Self in This Mental Apparatus?",
+              "title": "Is There a Self in This Mental Apparatus?",
               "depth": 2,
               "printed_page": 103,
               "visual_order": 8,
@@ -1184,7 +1111,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+              "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
               "depth": 2,
               "printed_page": 139,
               "visual_order": 9,
@@ -1193,7 +1120,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "5 Cousinian Hegemony",
+              "title": "Cousinian Hegemony",
               "depth": 2,
               "printed_page": 182,
               "visual_order": 10,
@@ -1202,7 +1129,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+              "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
               "depth": 2,
               "printed_page": 233,
               "visual_order": 11,
@@ -1211,7 +1138,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+              "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
               "depth": 2,
               "printed_page": 269,
               "visual_order": 12,
@@ -1263,8 +1190,8 @@
           "model_id": "qwen3.5-plus",
           "request_count": 1,
           "prompt_tokens": 1553,
-          "completion_tokens": 1248,
-          "total_tokens": 2801,
+          "completion_tokens": 1241,
+          "total_tokens": 2794,
           "doc_id": "7ba9bca783fd",
           "slug": "",
           "context": {
@@ -1273,7 +1200,7 @@
           }
         },
         "timing": {
-          "duration_ms": 23479
+          "duration_ms": 23594
         }
       },
       {
@@ -1284,7 +1211,7 @@
           "model_id": "qwen3.5-plus",
           "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
         },
-        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction: Psychological Interiority versus Self-Talk\n- 1 The Perils of Imagination at the End of the Old Regime\n- 2 The Revolutionary Schooling of Imagination\n- 3 Is There a Self in This Mental Apparatus?\n- 4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\n- 5 Cousinian Hegemony\n- 6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\n- 7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\n- Epilogue\n- Notes\n- Note on Sources\n- Index",
+        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction: Psychological Interiority versus Self-Talk\n- The Perils of Imagination at the End of the Old Regime\n- The Revolutionary Schooling of Imagination\n- Is There a Self in This Mental Apparatus?\n- An A Priori Self for the Bourgeois Male: Victor Cousin's Project\n- Cousinian Hegemony\n- Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\n- A Palpable Self for the Socially Marginal: The Phrenological Alternative\n- Epilogue\n- Notes\n- Note on Sources\n- Index",
         "request_content": {
           "images": [
             {
@@ -1301,7 +1228,7 @@
           "source": "organization",
           "images_count": 1
         },
-        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"List of Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"ix\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Preface\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xi\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"1\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n      \"depth\": 1,\n      \"visual_order\": 5,\n      \"printed_page\": \"21\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"2 The Revolutionary Schooling of Imagination\",\n      \"depth\": 1,\n      \"visual_order\": 6,\n      \"printed_page\": \"60\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"II THE POLITICS OF SELFHOOD\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n      \"depth\": 1,\n      \"visual_order\": 8,\n      \"printed_page\": \"103\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\",\n      \"depth\": 1,\n      \"visual_order\": 9,\n      \"printed_page\": \"139\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"5 Cousinian Hegemony\",\n      \"depth\": 1,\n      \"visual_order\": 10,\n      \"printed_page\": \"182\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n      \"depth\": 1,\n      \"visual_order\": 11,\n      \"printed_page\": \"233\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n      \"depth\": 1,\n      \"visual_order\": 12,\n      \"printed_page\": \"269\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": \"316\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Notes\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": \"331\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Note on Sources\",\n      \"depth\": 0,\n      \"visual_order\": 15,\n      \"printed_page\": \"399\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 16,\n      \"printed_page\": \"403\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"List of Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"ix\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Preface\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xi\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"1\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"The Perils of Imagination at the End of the Old Regime\",\n      \"depth\": 1,\n      \"visual_order\": 5,\n      \"printed_page\": \"21\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"The Revolutionary Schooling of Imagination\",\n      \"depth\": 1,\n      \"visual_order\": 6,\n      \"printed_page\": \"60\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"THE POLITICS OF SELFHOOD\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Is There a Self in This Mental Apparatus?\",\n      \"depth\": 1,\n      \"visual_order\": 8,\n      \"printed_page\": \"103\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n      \"depth\": 1,\n      \"visual_order\": 9,\n      \"printed_page\": \"139\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Cousinian Hegemony\",\n      \"depth\": 1,\n      \"visual_order\": 10,\n      \"printed_page\": \"182\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n      \"depth\": 1,\n      \"visual_order\": 11,\n      \"printed_page\": \"233\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n      \"depth\": 1,\n      \"visual_order\": 12,\n      \"printed_page\": \"269\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": \"316\",\n      \"role_hint\": \"post_body\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Notes\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": \"331\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Note on Sources\",\n      \"depth\": 0,\n      \"visual_order\": 15,\n      \"printed_page\": \"399\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 16,\n      \"printed_page\": \"403\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
         "response_parsed": {
           "endnotes_summary": {
             "present": false,
@@ -1337,7 +1264,7 @@
               "parent_title": ""
             },
             {
-              "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+              "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
               "depth": 0,
               "visual_order": 4,
               "printed_page": null,
@@ -1345,23 +1272,23 @@
               "parent_title": ""
             },
             {
-              "title": "1 The Perils of Imagination at the End of the Old Regime",
+              "title": "The Perils of Imagination at the End of the Old Regime",
               "depth": 1,
               "visual_order": 5,
               "printed_page": "21",
               "role_hint": "chapter",
-              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+              "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
             },
             {
-              "title": "2 The Revolutionary Schooling of Imagination",
+              "title": "The Revolutionary Schooling of Imagination",
               "depth": 1,
               "visual_order": 6,
               "printed_page": "60",
               "role_hint": "chapter",
-              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+              "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
             },
             {
-              "title": "II THE POLITICS OF SELFHOOD",
+              "title": "THE POLITICS OF SELFHOOD",
               "depth": 0,
               "visual_order": 7,
               "printed_page": null,
@@ -1369,51 +1296,51 @@
               "parent_title": ""
             },
             {
-              "title": "3 Is There a Self in This Mental Apparatus?",
+              "title": "Is There a Self in This Mental Apparatus?",
               "depth": 1,
               "visual_order": 8,
               "printed_page": "103",
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+              "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
               "depth": 1,
               "visual_order": 9,
               "printed_page": "139",
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "5 Cousinian Hegemony",
+              "title": "Cousinian Hegemony",
               "depth": 1,
               "visual_order": 10,
               "printed_page": "182",
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+              "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
               "depth": 1,
               "visual_order": 11,
               "printed_page": "233",
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+              "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
               "depth": 1,
               "visual_order": 12,
               "printed_page": "269",
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
               "title": "Epilogue",
               "depth": 0,
               "visual_order": 13,
               "printed_page": "316",
-              "role_hint": "chapter",
+              "role_hint": "post_body",
               "parent_title": ""
             },
             {
@@ -1469,7 +1396,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+              "title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
               "depth": 0,
               "printed_page": null,
               "file_idx": null,
@@ -1477,25 +1404,25 @@
               "role_hint": "container"
             },
             {
-              "title": "1 The Perils of Imagination at the End of the Old Regime",
+              "title": "The Perils of Imagination at the End of the Old Regime",
               "depth": 1,
               "printed_page": 21,
               "file_idx": null,
               "visual_order": 5,
               "role_hint": "chapter",
-              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+              "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
             },
             {
-              "title": "2 The Revolutionary Schooling of Imagination",
+              "title": "The Revolutionary Schooling of Imagination",
               "depth": 1,
               "printed_page": 60,
               "file_idx": null,
               "visual_order": 6,
               "role_hint": "chapter",
-              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+              "parent_title": "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
             },
             {
-              "title": "II THE POLITICS OF SELFHOOD",
+              "title": "THE POLITICS OF SELFHOOD",
               "depth": 0,
               "printed_page": null,
               "file_idx": null,
@@ -1503,49 +1430,49 @@
               "role_hint": "container"
             },
             {
-              "title": "3 Is There a Self in This Mental Apparatus?",
+              "title": "Is There a Self in This Mental Apparatus?",
               "depth": 1,
               "printed_page": 103,
               "file_idx": null,
               "visual_order": 8,
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+              "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
               "depth": 1,
               "printed_page": 139,
               "file_idx": null,
               "visual_order": 9,
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "5 Cousinian Hegemony",
+              "title": "Cousinian Hegemony",
               "depth": 1,
               "printed_page": 182,
               "file_idx": null,
               "visual_order": 10,
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+              "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
               "depth": 1,
               "printed_page": 233,
               "file_idx": null,
               "visual_order": 11,
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
-              "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+              "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
               "depth": 1,
               "printed_page": 269,
               "file_idx": null,
               "visual_order": 12,
               "role_hint": "chapter",
-              "parent_title": "II THE POLITICS OF SELFHOOD"
+              "parent_title": "THE POLITICS OF SELFHOOD"
             },
             {
               "title": "Epilogue",
@@ -1553,7 +1480,7 @@
               "printed_page": 316,
               "file_idx": null,
               "visual_order": 13,
-              "role_hint": "chapter"
+              "role_hint": "post_body"
             },
             {
               "title": "Notes",
@@ -1594,9 +1521,9 @@
           "provider": "qwen",
           "model_id": "qwen3.5-plus",
           "request_count": 1,
-          "prompt_tokens": 1430,
-          "completion_tokens": 1215,
-          "total_tokens": 2645,
+          "prompt_tokens": 1416,
+          "completion_tokens": 1202,
+          "total_tokens": 2618,
           "doc_id": "7ba9bca783fd",
           "slug": "",
           "context": {
@@ -1605,18 +1532,18 @@
           }
         },
         "timing": {
-          "duration_ms": 25448
+          "duration_ms": 23110
         }
       }
     ]
   },
   "pipeline": {
     "ok": true,
-    "run_id": 50,
+    "run_id": 53,
     "page_count": 431,
     "section_count": 9,
-    "note_count": 778,
-    "unit_count": 821,
+    "note_count": 6,
+    "unit_count": 48,
     "structure_state": "ready",
     "manual_toc_required": false,
     "blocking_reasons": [],
@@ -1624,33 +1551,902 @@
     "export_ready_real": true
   },
   "llm_repair": {
-    "cluster_count": 0,
-    "suggestion_count": 0,
-    "auto_applied_count": 0,
-    "suggestions": [],
-    "auto_applied": [],
-    "request_metrics": [],
-    "usage_events": [],
-    "llm_traces": [],
+    "cluster_count": 1,
+    "suggestion_count": 8,
+    "auto_applied_count": 8,
+    "suggestions": [
+      {
+        "suggestion_id": "llm-01-001",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00874",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-002",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00875",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '2' on page 318 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-003",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00876",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '3' on page 318 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-004",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00877",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '4' on page 318 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-005",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00878",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '5' on page 318 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-006",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00879",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '6' on page 319 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-007",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00880",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '7' on page 319 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-008",
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "chapter_id": "toc-ch-009-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00881",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '8' on page 319 is a footnote reference. It should be ignored.",
+        "auto_selected": true
+      }
+    ],
+    "auto_applied": [
+      {
+        "link_id": "link-00854",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00874",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context."
+      },
+      {
+        "link_id": "link-00855",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00875",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '2' on page 318 is a footnote reference. It should be ignored."
+      },
+      {
+        "link_id": "link-00856",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00876",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '3' on page 318 is a footnote reference. It should be ignored."
+      },
+      {
+        "link_id": "link-00857",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00877",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '4' on page 318 is a footnote reference. It should be ignored."
+      },
+      {
+        "link_id": "link-00858",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00878",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '5' on page 318 is a footnote reference. It should be ignored."
+      },
+      {
+        "link_id": "link-00859",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00879",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '6' on page 319 is a footnote reference. It should be ignored."
+      },
+      {
+        "link_id": "link-00860",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00880",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '7' on page 319 is a footnote reference. It should be ignored."
+      },
+      {
+        "link_id": "link-00861",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00881",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "The anchor marker '8' on page 319 is a footnote reference. It should be ignored."
+      }
+    ],
+    "request_metrics": [
+      {
+        "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+        "request_mode": "ref_only_visual",
+        "allowed_actions": [
+          "ignore_ref",
+          "synthesize_note_item",
+          "needs_review"
+        ],
+        "chars": 14656,
+        "estimated_prompt_tokens": 4456,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 8,
+        "page_context_count": 8,
+        "image_refused": false,
+        "truncated": true
+      }
+    ],
+    "usage_events": [
+      {
+        "stage": "llm_repair.cluster_request",
+        "provider": "qwen",
+        "model_id": "qwen3.5-plus",
+        "request_count": 1,
+        "prompt_tokens": 7549,
+        "completion_tokens": 592,
+        "total_tokens": 8141,
+        "doc_id": "7ba9bca783fd",
+        "slug": "Goldstein",
+        "context": {
+          "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+          "request_mode": "ref_only_visual"
+        }
+      }
+    ],
+    "llm_traces": [
+      {
+        "stage": "llm_repair.cluster_request",
+        "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+        "model": {
+          "provider": "qwen",
+          "model_id": "qwen3.5-plus",
+          "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        },
+        "request_prompt": {
+          "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+          "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-009-epilogue:toc-ch-009-epilogue:endnote\",\n  \"chapter_title\": \"Epilogue\",\n  \"page_range\": [\n    334,\n    346\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 334,\n      \"ocr_excerpt\": \"the three primordially fused elements of consciousness (sensation, reason, and will) and to appropriate the will for and as one's self. That exclusion, stated often and unapologetically in Cousin's public rhetoric, was rather an independent policy choice. Stemming from the Doctrinaire vision of the class and gender hierarchies required in a fragile, post-Revolutionary society, it was subsequently overlaid on a psychological theory not especially well suited to support it. Another Doctrinaire desideratum—an unimpregnably unified and morally accountable self—did, to be sure, flow inexorably from Cousin's spiritualist postulates. But criteria for human difference did not. Cousin, however, presented the exclusion of workers and women from selfhood as if it were a logically necessary corollary of his psychological theory. He then reinforced that exclusion by inserting training in psychology into a state system of lycées where attendance was restricted to the male bourgeoisie. Among Cousin's regiment, it was Amédée Jacques who, in the standard philosophy manual that he coauthored with two other Cousinian disciples in 1846, came closest to exposing the internal contradiction thinly papere ...\"\n    },\n    {\n      \"page_no\": 335,\n      \"ocr_excerpt\": \"Sorbonne in 1843. At the time of that latter triumph, Cousin's published account of the concours (which he proudly likened in intellectual quality to the philosophical disputations of the seventeenth century and Middle Ages!) indicated that, of the seven candidates, the two winners—Jacques and his classmate Emile Saisset—had consistently outshone the others. All the candidates, Cousin observed in passing, were doctrinally correct, a remark that would no doubt come back to haunt him. $ ^{2} $ Failing a vacancy at the Sorbonne after the concours, Jacques was promoted from the lycée in Versailles to the prestigious Lycée Louis-le-Grand in Paris, where the inspectors noted the excellence of his pedagogy and his capacity to attract the brightest pupils to his classes. $ ^{3} $ Exactly what happened in 1847 and 1848 to derail the apparently conformist, prudent, and career-oriented Jacques can only be surmised from the various textual remains of his activities. In the waning days of the July Monarchy, as demands for the expansion of the suffrage intensified, Jacques founded a journal, La Liberté de penser, sympathetic to the left-wing opposition to the regime but without more precise poli ...\"\n    },\n    {\n      \"page_no\": 336,\n      \"ocr_excerpt\": \"With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the clergy a larger voice in the public secondary education administered by the state. At this juncture, the politics of La Liberté de penser became more strident and more risky, for the journal, always suspicious of Catholic influence, now found itself on the wrong side of the regime. In April Jules Simon, a future founder of the Third Republic and Jacques' collaborator both on the Cousinian Manuel de philosophie and on the journal, cautiously quit the journal's editorial board for political reasons. $ ^{6} $ Continuing on his collision course with the regime, Jacques began to write and to publish in the journal a series of \\\"Essays in Popular Philosophy.\\\" The first two installments, which served as the introduction to the whole, were rabidly anticlerical, attempting, for example, to prove that the standard Catholic catechism, far from providing wholesome pedagogy for children, stupefied and ultimately corrupted them. $ ^{7} $ In February and March 1851, ...\"\n    },\n    {\n      \"page_no\": 337,\n      \"ocr_excerpt\": \"mood of the people (see Chapter 4). Cousin's point had been that the popular classes had a native, intuitive philosophy, rather like the natural religion of Rousseau's Savoyard vicar, that provided all they needed to know about morality, God, and the immortality of the soul; they did not require the specialized vocabulary and arcane techniques of academic philosophy. Without mentioning Cousin's pamphlet, Jacques made precisely the opposite point early in 1851: the people needed to be taught philosophy because cultivated rationality was an indispensable accoutrement of freedom. Withholding such instruction, he implied, was an intentional strategy to keep the people in their place and to mark them as inferior. His \\\"Essays\\\" would thus draw up, on the basis of his \\\"eighteen years ... of practice of secondary instruction,\\\" a formal philosophy curriculum geared to an audience of workers and peasants. It would not replicate the Cousinian curriculum neither because Cousinianism was too difficult for the popular classes nor intrinsically rotten—\\\"one can take this word [eclecticism] in a good sense\\\"—but because its own founder had, over time, corrupted it: I detest and I reject with all my f ...\"\n    },\n    {\n      \"page_no\": 338,\n      \"ocr_excerpt\": \"to the bourgeoisie. In the substantive installments of his “Essays,” Jacques reiterated, almost verbatim, the argument for the equality of wills he had inconspicuously tucked away in his 1846 Manuel. But now, by its presence in a philosophy course addressed to le peuple, that same argument took on the attributes of fiery political rhetoric. “The liberty to will,” wrote Jacques, “that is our true property. Only that do we absolutely possess; but that, at least, we possess entirely, without reserve, without limit.” Furthermore, he continued, “that liberty is equal in all men; only in that [dimension] are men scrupulously equal among themselves.” Wealth was the most unequally distributed of human resources; physical strength also varied considerably from one person to another, as did intelligence. “But all are equal by an equal liberty to will.” Finally, the equality of wills meant for Jacques the equal accessibility of selfhood to all. “The will, the free force that produces [our resolutions], is not only ours, it is us, and it alone is us. It is what we designate when we say ‘I’ or ‘me’ (moi).” $ ^{11} $ In these journal articles Jacques developed a model philosophy curriculum for t ...\"\n    },\n    {\n      \"page_no\": 339,\n      \"ocr_excerpt\": \"she requested instruction in philosophical psychology only for herself, not for women in general. If a public vindication of the female capacity for Cousinian-style self-hood was ever going to occur, surely the opportune moment for it would be the founding of the national system of lycées for girls under the early Third Republic. Since the lycée class in philosophy had, by the 1880s, already been the locus of training in the moi for several generations of young Frenchmen, it is easy to imagine a republican educator speaking out on the importance of providing comparable training for their female counterparts. Even if these educators made no direct connection between academic philosophy and selfhood, they were certainly aware of the incomparable prestige that philosophy enjoyed in the secondary school curriculum and some, at least, must have been eager to see young women partake of its intellectual riches and even its cachet. But in fact, far from being spokesmen for female selfhood, or even for female training in philosophy, the educators of the early Third Republic took pains to keep the philosophy class out of the reach of their newly invented creature, the lycéenne. The parliamen ...\"\n    },\n    {\n      \"page_no\": 340,\n      \"ocr_excerpt\": \"the phrase “religious instruction” would send to parents and clerics the entirely accurate message that the Third Republic, committed to laicization, intended to remove religious training from the state schools and relegate it to voluntary, extra-curricular settings. But he also apparently believed that replacing “religious instruction” with “philosophy” would be an excessive provocation. Because the clergy and its sympathizers had long alleged philosophy to be a subject matter corrosive of religious faith, such nomenclature would identify the new curriculum not merely as religiously neutral but as actively antireligious. The female lycées would thus certainly attract a barrage of clerical hostility. In other words, lycéennes were to be deprived of a philosophy class in part because a prudent anticlerical politics dictated that the state accord a measure of respect to the long-standing bond between the Church and the female sex and that it not appear to be embarking upon the aggressive dechristianization of women. The conflation of the commissioners' two meanings tempered the discriminatory nature of the policy: girls were to be taught only a smattering of philosophy not because th ...\"\n    },\n    {\n      \"page_no\": 341,\n      \"ocr_excerpt\": \"other forms of “activity” as the “instinctive” and the “gymnastic.” There was no mention of the moi or of introspective technique. $ ^{15} $ Nor can the omission of the moi be regarded as accidental. More than a decade after the creation of the new curriculum, one philosopher-educator regarded as a champion of women felt obliged to state—it was apparently not obvious to his audience—that women were persons. \\\"Whatever history, physiology, and psychology can teach us about the weaknesses and miseries of women,\\\" said Henri Marion, \\\"nothing will prevent her from being, in our eyes, a person (italics in the original)—that is, a being responsible in the same way a man is, having a destiny to fulfill freely.\\\"¹⁶ Truncating the philosophy curriculum in the female lycées may have been a prudent way to navigate the treacherous political shoals of the early Third Republic. But we can only conclude that what, in particular, was removed faithfully reflected the fact that, in the discourse of the Université at the end of the nineteenth century, female selfhood was far from axiomatic. Throughout the nineteenth century the Cousinian-style moi thus preserved the exclusively masculine character that, ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00874\",\n      \"marker\": \"1\",\n      \"page_no\": 334,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Jacques had always been something of a fair-haired boy of the Cousinian regiment. Admitted to the Ecole normale supérieure in 1832, $ ^{1} $ the young Parisian, the son of a painter of miniatures, passed the agrégation qualifying him to tea ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00875\",\n      \"marker\": \"2\",\n      \"page_no\": 335,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Sorbonne in 1843. At the time of that latter triumph, Cousin's published account of the concours (which he proudly likened in intellectual quality to the philosophical disputations of the seventeenth century and Middle Ages!) indicated that ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00876\",\n      \"marker\": \"3\",\n      \"page_no\": 335,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Sorbonne in 1843. At the time of that latter triumph, Cousin's published account of the concours (which he proudly likened in intellectual quality to the philosophical disputations of the seventeenth century and Middle Ages!) indicated that ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00877\",\n      \"marker\": \"4\",\n      \"page_no\": 335,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Exactly what happened in 1847 and 1848 to derail the apparently conformist, prudent, and career-oriented Jacques can only be surmised from the various textual remains of his activities. In the waning days of the July Monarchy, as demands fo ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00878\",\n      \"marker\": \"5\",\n      \"page_no\": 335,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Exactly what happened in 1847 and 1848 to derail the apparently conformist, prudent, and career-oriented Jacques can only be surmised from the various textual remains of his activities. In the waning days of the July Monarchy, as demands fo ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00879\",\n      \"marker\": \"6\",\n      \"page_no\": 336,\n      \"paragraph_index\": 0,\n      \"source_text\": \"With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the cler ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00880\",\n      \"marker\": \"7\",\n      \"page_no\": 336,\n      \"paragraph_index\": 0,\n      \"source_text\": \"With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the cler ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00881\",\n      \"marker\": \"8\",\n      \"page_no\": 336,\n      \"paragraph_index\": 0,\n      \"source_text\": \"With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the cler ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+        },
+        "request_content": {
+          "cluster": {
+            "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+            "chapter_title": "Epilogue",
+            "request_mode": "ref_only_visual",
+            "allowed_actions": [
+              "ignore_ref",
+              "synthesize_note_item",
+              "needs_review"
+            ],
+            "note_system": "endnote",
+            "page_range": [
+              334,
+              346
+            ],
+            "matched_examples": [],
+            "unmatched_note_items": [],
+            "unmatched_anchors": [
+              {
+                "row_id": 47836,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00874",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 334,
+                "paragraph_index": 2,
+                "char_start": 132,
+                "char_end": 140,
+                "source_marker": "$ ^{1} $",
+                "normalized_marker": "1",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Jacques had always been something of a fair-haired boy of the Cousinian regiment. Admitted to the Ecole normale supérieure in 1832, $ ^{1} $ the young Parisian, the son of a painter of miniatures, passed the agrégation qualifying him to teach philosophy in the lycée in 1835 and the much more selective agrégation qualifying him to teach philosophy at the",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47837,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00875",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 335,
+                "paragraph_index": 0,
+                "char_start": 488,
+                "char_end": 496,
+                "source_marker": "$ ^{2} $",
+                "normalized_marker": "2",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Sorbonne in 1843. At the time of that latter triumph, Cousin's published account of the concours (which he proudly likened in intellectual quality to the philosophical disputations of the seventeenth century and Middle Ages!) indicated that, of the seven candidates, the two winners—Jacques and his classmate Emile Saisset—had consistently outshone the others. All the candidates, Cousin observed in passing, were doctrinally correct, a remark that would no doubt come back to haunt him. $ ^{2} $ Failing a vacancy at the Sorbonne after the concours, Jacques was promoted from the lycée in Versailles to the prestigious Lycée Louis-le-Grand in Paris, where the inspectors noted the excellence of his pedagogy and his capacity to attract the brightest pupils to his classes. $ ^{3} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47838,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00876",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 335,
+                "paragraph_index": 0,
+                "char_start": 774,
+                "char_end": 782,
+                "source_marker": "$ ^{3} $",
+                "normalized_marker": "3",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Sorbonne in 1843. At the time of that latter triumph, Cousin's published account of the concours (which he proudly likened in intellectual quality to the philosophical disputations of the seventeenth century and Middle Ages!) indicated that, of the seven candidates, the two winners—Jacques and his classmate Emile Saisset—had consistently outshone the others. All the candidates, Cousin observed in passing, were doctrinally correct, a remark that would no doubt come back to haunt him. $ ^{2} $ Failing a vacancy at the Sorbonne after the concours, Jacques was promoted from the lycée in Versailles to the prestigious Lycée Louis-le-Grand in Paris, where the inspectors noted the excellence of his pedagogy and his capacity to attract the brightest pupils to his classes. $ ^{3} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47839,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00877",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 335,
+                "paragraph_index": 1,
+                "char_start": 568,
+                "char_end": 576,
+                "source_marker": "$ ^{4} $",
+                "normalized_marker": "4",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Exactly what happened in 1847 and 1848 to derail the apparently conformist, prudent, and career-oriented Jacques can only be surmised from the various textual remains of his activities. In the waning days of the July Monarchy, as demands for the expansion of the suffrage intensified, Jacques founded a journal, La Liberté de penser, sympathetic to the left-wing opposition to the regime but without more precise political affiliation, leery of clerical intervention in the public sphere, and primarily concerned to ensure the free circulation of philosophical ideas. $ ^{4} $ After the February Revolution, the journal declared its democratic republicanism. At this stage, its attitude toward Cousinianism was quite benign, even moderately favorable. Jacques did not think that philosophy instruction should “belong to” anyone, “neither to Plato, Aristotle, Descartes, Locke, Laromiguière, nor to Monsieur Cousin.” Nonetheless, he regarded as an unambiguous good the “stamp of spiritualism and elevation” that Cousin had placed on that instruction. He waxed eloquent about the “inviolability” of the “free personality.” He warned against charging religion exclusively with the task of inculcating morality. (“The obligatory teaching of moral philosophy in the institutions of secondary education must and can be one of the foundations of the moral unity of the society of the nineteenth century.”) He believed in the fundamentally mind-altering power of philosophy. (“We call on anyone who has attentively followed an officially sanctioned philosophy course. Has he not felt his intelligence created, so to speak, for a second time?”) Apart from denying Cousin ownership of academic philosophy, Jacques’ initial platform had only one plank to which the maître could object: a commitment to democracy—always Cousin’s nemesis—including an assertion that philosophy was its natural ally. $ ^{5} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47840,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00878",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 335,
+                "paragraph_index": 1,
+                "char_start": 1886,
+                "char_end": 1894,
+                "source_marker": "$ ^{5} $",
+                "normalized_marker": "5",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Exactly what happened in 1847 and 1848 to derail the apparently conformist, prudent, and career-oriented Jacques can only be surmised from the various textual remains of his activities. In the waning days of the July Monarchy, as demands for the expansion of the suffrage intensified, Jacques founded a journal, La Liberté de penser, sympathetic to the left-wing opposition to the regime but without more precise political affiliation, leery of clerical intervention in the public sphere, and primarily concerned to ensure the free circulation of philosophical ideas. $ ^{4} $ After the February Revolution, the journal declared its democratic republicanism. At this stage, its attitude toward Cousinianism was quite benign, even moderately favorable. Jacques did not think that philosophy instruction should “belong to” anyone, “neither to Plato, Aristotle, Descartes, Locke, Laromiguière, nor to Monsieur Cousin.” Nonetheless, he regarded as an unambiguous good the “stamp of spiritualism and elevation” that Cousin had placed on that instruction. He waxed eloquent about the “inviolability” of the “free personality.” He warned against charging religion exclusively with the task of inculcating morality. (“The obligatory teaching of moral philosophy in the institutions of secondary education must and can be one of the foundations of the moral unity of the society of the nineteenth century.”) He believed in the fundamentally mind-altering power of philosophy. (“We call on anyone who has attentively followed an officially sanctioned philosophy course. Has he not felt his intelligence created, so to speak, for a second time?”) Apart from denying Cousin ownership of academic philosophy, Jacques’ initial platform had only one plank to which the maître could object: a commitment to democracy—always Cousin’s nemesis—including an assertion that philosophy was its natural ally. $ ^{5} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47841,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00879",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 336,
+                "paragraph_index": 0,
+                "char_start": 739,
+                "char_end": 747,
+                "source_marker": "$ ^{6} $",
+                "normalized_marker": "6",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the clergy a larger voice in the public secondary education administered by the state. At this juncture, the politics of La Liberté de penser became more strident and more risky, for the journal, always suspicious of Catholic influence, now found itself on the wrong side of the regime. In April Jules Simon, a future founder of the Third Republic and Jacques' collaborator both on the Cousinian Manuel de philosophie and on the journal, cautiously quit the journal's editorial board for political reasons. $ ^{6} $ Continuing on his collision course with the regime, Jacques began to write and to publish in the journal a series of \"Essays in Popular Philosophy.\" The first two installments, which served as the introduction to the whole, were rabidly anticlerical, attempting, for example, to prove that the standard Catholic catechism, far from providing wholesome pedagogy for children, stupefied and ultimately corrupted them. $ ^{7} $ In February and March 1851, the Council of Public Instruction, citing these two articles, removed Jacques from his teaching post at Louis-le-Grand and barred him from all future employment in the state educational system. The membership of the Council that delivered this harsh verdict included two archbishops, a bishop, and two priests; but, much more personally relevant to Jacques, it also included Victor Cousin and Adolphe Franck. $ ^{8} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47842,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00880",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 336,
+                "paragraph_index": 0,
+                "char_start": 1164,
+                "char_end": 1172,
+                "source_marker": "$ ^{7} $",
+                "normalized_marker": "7",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the clergy a larger voice in the public secondary education administered by the state. At this juncture, the politics of La Liberté de penser became more strident and more risky, for the journal, always suspicious of Catholic influence, now found itself on the wrong side of the regime. In April Jules Simon, a future founder of the Third Republic and Jacques' collaborator both on the Cousinian Manuel de philosophie and on the journal, cautiously quit the journal's editorial board for political reasons. $ ^{6} $ Continuing on his collision course with the regime, Jacques began to write and to publish in the journal a series of \"Essays in Popular Philosophy.\" The first two installments, which served as the introduction to the whole, were rabidly anticlerical, attempting, for example, to prove that the standard Catholic catechism, far from providing wholesome pedagogy for children, stupefied and ultimately corrupted them. $ ^{7} $ In February and March 1851, the Council of Public Instruction, citing these two articles, removed Jacques from his teaching post at Louis-le-Grand and barred him from all future employment in the state educational system. The membership of the Council that delivered this harsh verdict included two archbishops, a bishop, and two priests; but, much more personally relevant to Jacques, it also included Victor Cousin and Adolphe Franck. $ ^{8} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              },
+              {
+                "row_id": 47843,
+                "doc_id": "7ba9bca783fd",
+                "anchor_id": "anchor-00881",
+                "chapter_id": "toc-ch-009-epilogue",
+                "page_no": 336,
+                "paragraph_index": 0,
+                "char_start": 1610,
+                "char_end": 1618,
+                "source_marker": "$ ^{8} $",
+                "normalized_marker": "8",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the clergy a larger voice in the public secondary education administered by the state. At this juncture, the politics of La Liberté de penser became more strident and more risky, for the journal, always suspicious of Catholic influence, now found itself on the wrong side of the regime. In April Jules Simon, a future founder of the Third Republic and Jacques' collaborator both on the Cousinian Manuel de philosophie and on the journal, cautiously quit the journal's editorial board for political reasons. $ ^{6} $ Continuing on his collision course with the regime, Jacques began to write and to publish in the journal a series of \"Essays in Popular Philosophy.\" The first two installments, which served as the introduction to the whole, were rabidly anticlerical, attempting, for example, to prove that the standard Catholic catechism, far from providing wholesome pedagogy for children, stupefied and ultimately corrupted them. $ ^{7} $ In February and March 1851, the Council of Public Instruction, citing these two articles, removed Jacques from his teaching post at Louis-le-Grand and barred him from all future employment in the state educational system. The membership of the Council that delivered this harsh verdict included two archbishops, a bishop, and two priests; but, much more personally relevant to Jacques, it also included Victor Cousin and Adolphe Franck. $ ^{8} $",
+                "created_at": 1776847749,
+                "updated_at": 1776847749
+              }
+            ],
+            "rebind_candidates": []
+          },
+          "page_contexts": [
+            {
+              "page_no": 334,
+              "file_idx": 333,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "the three primordially fused elements of consciousness (sensation, reason, and will) and to appropriate the will for and as one's self. That exclusion, stated often and unapologetically in Cousin's public rhetoric, was rather an independent policy choice. Stemming from the Doctrinaire vision of the class and gender hierarchies required in a fragile, post-Revolutionary society, it was subsequently overlaid on a psychological theory not especially well suited to support it. Another Doctrinaire desideratum—an unimpregnably unified and morally accountable self—did, to be sure, flow inexorably from Cousin's spiritualist postulates. But criteria for human difference did not. Cousin, however, presented the exclusion of workers and women from selfhood as if it were a logically necessary corollary of his psychological theory. He then reinforced that exclusion by inserting training in psychology into a state system of lycées where attendance was restricted to the male bourgeoisie. Among Cousin's regiment, it was Amédée Jacques who, in the standard philosophy manual that he coauthored with two other Cousinian disciples in 1846, came closest to exposing the internal contradiction thinly papered over by the maître. As indicated in Chapter 5, Jacques argued for the \"scrupulous\" equality of the power of volition in everyone and furthermore insinuated that the individual appropriation of that ...",
+              "byte_size": 97184,
+              "sha256": "b2799e97041b6689225b8bd2ef373ee11d8bca8971792c244248afdf92c49a32"
+            },
+            {
+              "page_no": 335,
+              "file_idx": 334,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "Sorbonne in 1843. At the time of that latter triumph, Cousin's published account of the concours (which he proudly likened in intellectual quality to the philosophical disputations of the seventeenth century and Middle Ages!) indicated that, of the seven candidates, the two winners—Jacques and his classmate Emile Saisset—had consistently outshone the others. All the candidates, Cousin observed in passing, were doctrinally correct, a remark that would no doubt come back to haunt him. $ ^{2} $ Failing a vacancy at the Sorbonne after the concours, Jacques was promoted from the lycée in Versailles to the prestigious Lycée Louis-le-Grand in Paris, where the inspectors noted the excellence of his pedagogy and his capacity to attract the brightest pupils to his classes. $ ^{3} $ Exactly what happened in 1847 and 1848 to derail the apparently conformist, prudent, and career-oriented Jacques can only be surmised from the various textual remains of his activities. In the waning days of the July Monarchy, as demands for the expansion of the suffrage intensified, Jacques founded a journal, La Liberté de penser, sympathetic to the left-wing opposition to the regime but without more precise political affiliation, leery of clerical intervention in the public sphere, and primarily concerned to ensure the free circulation of philosophical ideas. $ ^{4} $ After the February Revolution, the journ ...",
+              "byte_size": 96644,
+              "sha256": "0db088a583679d4e23f5f5e02ae0b45b69b5e977f8953241b5c0fea31a2dd5f1"
+            },
+            {
+              "page_no": 336,
+              "file_idx": 335,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "With the passage of the Falloux Law in March 1850, the Second Republic took a sharply conservative, pro-clerical turn. That law ended the monopoly of the Université, facilitated the creation of private, church-run schools, and gave the clergy a larger voice in the public secondary education administered by the state. At this juncture, the politics of La Liberté de penser became more strident and more risky, for the journal, always suspicious of Catholic influence, now found itself on the wrong side of the regime. In April Jules Simon, a future founder of the Third Republic and Jacques' collaborator both on the Cousinian Manuel de philosophie and on the journal, cautiously quit the journal's editorial board for political reasons. $ ^{6} $ Continuing on his collision course with the regime, Jacques began to write and to publish in the journal a series of \"Essays in Popular Philosophy.\" The first two installments, which served as the introduction to the whole, were rabidly anticlerical, attempting, for example, to prove that the standard Catholic catechism, far from providing wholesome pedagogy for children, stupefied and ultimately corrupted them. $ ^{7} $ In February and March 1851, the Council of Public Instruction, citing these two articles, removed Jacques from his teaching post at Louis-le-Grand and barred him from all future employment in the state educational system. The m ...",
+              "byte_size": 100182,
+              "sha256": "9cef41f1bb3002295c4de0623bb5a502b74c6bfeec20e50d3202e18edbd8ee9e"
+            },
+            {
+              "page_no": 337,
+              "file_idx": 336,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "mood of the people (see Chapter 4). Cousin's point had been that the popular classes had a native, intuitive philosophy, rather like the natural religion of Rousseau's Savoyard vicar, that provided all they needed to know about morality, God, and the immortality of the soul; they did not require the specialized vocabulary and arcane techniques of academic philosophy. Without mentioning Cousin's pamphlet, Jacques made precisely the opposite point early in 1851: the people needed to be taught philosophy because cultivated rationality was an indispensable accoutrement of freedom. Withholding such instruction, he implied, was an intentional strategy to keep the people in their place and to mark them as inferior. His \"Essays\" would thus draw up, on the basis of his \"eighteen years ... of practice of secondary instruction,\" a formal philosophy curriculum geared to an audience of workers and peasants. It would not replicate the Cousinian curriculum neither because Cousinianism was too difficult for the popular classes nor intrinsically rotten—\"one can take this word [eclecticism] in a good sense\"—but because its own founder had, over time, corrupted it: I detest and I reject with all my force what the most illustrious representative of contemporary eclecticism has accumulated under that rubric. It has now come to signify ... in politics the preference for expedients over principles, f ...",
+              "byte_size": 92199,
+              "sha256": "ee7d88c26110e8c641c122b55d01732da4214ace46e19f81fedf2da1afeffcc0"
+            },
+            {
+              "page_no": 338,
+              "file_idx": 337,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "to the bourgeoisie. In the substantive installments of his “Essays,” Jacques reiterated, almost verbatim, the argument for the equality of wills he had inconspicuously tucked away in his 1846 Manuel. But now, by its presence in a philosophy course addressed to le peuple, that same argument took on the attributes of fiery political rhetoric. “The liberty to will,” wrote Jacques, “that is our true property. Only that do we absolutely possess; but that, at least, we possess entirely, without reserve, without limit.” Furthermore, he continued, “that liberty is equal in all men; only in that [dimension] are men scrupulously equal among themselves.” Wealth was the most unequally distributed of human resources; physical strength also varied considerably from one person to another, as did intelligence. “But all are equal by an equal liberty to will.” Finally, the equality of wills meant for Jacques the equal accessibility of selfhood to all. “The will, the free force that produces [our resolutions], is not only ours, it is us, and it alone is us. It is what we designate when we say ‘I’ or ‘me’ (moi).” $ ^{11} $ In these journal articles Jacques developed a model philosophy curriculum for the workingman, one that followed generally Cousinian lines with respect to substance but sharply diverged from Cousin's arbitrary practice of excluding the larger part of humanity from the ranks of th ...",
+              "byte_size": 93016,
+              "sha256": "42694c27917f628e1100778225fd1cd69b07dbed16902bef4e1f495a775a5776"
+            },
+            {
+              "page_no": 339,
+              "file_idx": 338,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "she requested instruction in philosophical psychology only for herself, not for women in general. If a public vindication of the female capacity for Cousinian-style self-hood was ever going to occur, surely the opportune moment for it would be the founding of the national system of lycées for girls under the early Third Republic. Since the lycée class in philosophy had, by the 1880s, already been the locus of training in the moi for several generations of young Frenchmen, it is easy to imagine a republican educator speaking out on the importance of providing comparable training for their female counterparts. Even if these educators made no direct connection between academic philosophy and selfhood, they were certainly aware of the incomparable prestige that philosophy enjoyed in the secondary school curriculum and some, at least, must have been eager to see young women partake of its intellectual riches and even its cachet. But in fact, far from being spokesmen for female selfhood, or even for female training in philosophy, the educators of the early Third Republic took pains to keep the philosophy class out of the reach of their newly invented creature, the lycéenne. The parliamentary commission that prepared the legislation on the new lycées excluded philosophy from the curriculum on the grounds that “all the philosophic knowledge usefully taught to girls is already included ...",
+              "byte_size": 94697,
+              "sha256": "f029398d701d1e9ebde2ac4a2269f188ba5adaffc4c225051881e4990e3107ae"
+            },
+            {
+              "page_no": 340,
+              "file_idx": 339,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "the phrase “religious instruction” would send to parents and clerics the entirely accurate message that the Third Republic, committed to laicization, intended to remove religious training from the state schools and relegate it to voluntary, extra-curricular settings. But he also apparently believed that replacing “religious instruction” with “philosophy” would be an excessive provocation. Because the clergy and its sympathizers had long alleged philosophy to be a subject matter corrosive of religious faith, such nomenclature would identify the new curriculum not merely as religiously neutral but as actively antireligious. The female lycées would thus certainly attract a barrage of clerical hostility. In other words, lycéennes were to be deprived of a philosophy class in part because a prudent anticlerical politics dictated that the state accord a measure of respect to the long-standing bond between the Church and the female sex and that it not appear to be embarking upon the aggressive dechristianization of women. The conflation of the commissioners' two meanings tempered the discriminatory nature of the policy: girls were to be taught only a smattering of philosophy not because they were intellectually incapable of absorbing more but because philosophy—and especially philosophy for girls—was a red flag to influential segments of the public. Bert and his colleagues have here pr ...",
+              "byte_size": 94732,
+              "sha256": "8d43a684ce48202cc971d9dc4b1c8f1b040a7f2a8e39a9ea565a3be53309c0fa"
+            },
+            {
+              "page_no": 341,
+              "file_idx": 340,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/source.pdf",
+              "ocr_excerpt": "other forms of “activity” as the “instinctive” and the “gymnastic.” There was no mention of the moi or of introspective technique. $ ^{15} $ Nor can the omission of the moi be regarded as accidental. More than a decade after the creation of the new curriculum, one philosopher-educator regarded as a champion of women felt obliged to state—it was apparently not obvious to his audience—that women were persons. \"Whatever history, physiology, and psychology can teach us about the weaknesses and miseries of women,\" said Henri Marion, \"nothing will prevent her from being, in our eyes, a person (italics in the original)—that is, a being responsible in the same way a man is, having a destiny to fulfill freely.\"¹⁶ Truncating the philosophy curriculum in the female lycées may have been a prudent way to navigate the treacherous political shoals of the early Third Republic. But we can only conclude that what, in particular, was removed faithfully reflected the fact that, in the discourse of the Université at the end of the nineteenth century, female selfhood was far from axiomatic. Throughout the nineteenth century the Cousinian-style moi thus preserved the exclusively masculine character that, according to prevailing stereotypes, suited its core definition as willed activity in the world. ## A Long-Lived Programme As I have often noted in this book, the chief source of the broad cultural i ...",
+              "byte_size": 93905,
+              "sha256": "4fa2af7d746ea561c41763d869540aacb84b4567b6602e69ba3a148068f4edd9"
+            }
+          ]
+        },
+        "request_context_summary": {
+          "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+          "request_mode": "ref_only_visual",
+          "page_context_count": 8,
+          "image_refused": false
+        },
+        "response_raw_text": "[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00874\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00875\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '2' on page 318 is a footnote reference. It should be ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00876\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '3' on page 318 is a footnote reference. It should be ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00877\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '4' on page 318 is a footnote reference. It should be ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00878\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '5' on page 318 is a footnote reference. It should be ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00879\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '6' on page 319 is a footnote reference. It should be ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00880\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '7' on page 319 is a footnote reference. It should be ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00881\",\n    \"confidence\": 0.95,\n    \"reason\": \"The anchor marker '8' on page 319 is a footnote reference. It should be ignored.\"\n  }\n]",
+        "response_parsed": [
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00874",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00875",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '2' on page 318 is a footnote reference. It should be ignored."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00876",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '3' on page 318 is a footnote reference. It should be ignored."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00877",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '4' on page 318 is a footnote reference. It should be ignored."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00878",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '5' on page 318 is a footnote reference. It should be ignored."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00879",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '6' on page 319 is a footnote reference. It should be ignored."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00880",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '7' on page 319 is a footnote reference. It should be ignored."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00881",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 0.95,
+            "reason": "The anchor marker '8' on page 319 is a footnote reference. It should be ignored."
+          }
+        ],
+        "derived_truth": {
+          "cluster_id": "toc-ch-009-epilogue:toc-ch-009-epilogue:endnote",
+          "chapter_title": "Epilogue",
+          "request_mode": "ref_only_visual",
+          "parsed_actions": [
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00874",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00875",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '2' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00876",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '3' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00877",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '4' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00878",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '5' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00879",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '6' on page 319 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00880",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '7' on page 319 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00881",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '8' on page 319 is a footnote reference. It should be ignored."
+            }
+          ],
+          "auto_selected_actions": [
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00874",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00875",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '2' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00876",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '3' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00877",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '4' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00878",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '5' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00879",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '6' on page 319 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00880",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '7' on page 319 is a footnote reference. It should be ignored."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00881",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '8' on page 319 is a footnote reference. It should be ignored."
+            }
+          ],
+          "auto_applied_actions": [
+            {
+              "link_id": "link-00854",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00874",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '1' on page 317 is a footnote reference (indicated by its position at the end of a sentence/paragraph and standard typography), whereas the cluster is defined as an endnote system. Footnotes should be ignored in an endnote-only processing context."
+            },
+            {
+              "link_id": "link-00855",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00875",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '2' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "link_id": "link-00856",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00876",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '3' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "link_id": "link-00857",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00877",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '4' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "link_id": "link-00858",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00878",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '5' on page 318 is a footnote reference. It should be ignored."
+            },
+            {
+              "link_id": "link-00859",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00879",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '6' on page 319 is a footnote reference. It should be ignored."
+            },
+            {
+              "link_id": "link-00860",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00880",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '7' on page 319 is a footnote reference. It should be ignored."
+            },
+            {
+              "link_id": "link-00861",
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00881",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 0.95,
+              "reason": "The anchor marker '8' on page 319 is a footnote reference. It should be ignored."
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 7549,
+          "completion_tokens": 592,
+          "total_tokens": 8141,
+          "request_count": 1
+        },
+        "timing": {
+          "duration_ms": 14474
+        }
+      }
+    ],
     "usage_summary": {
       "by_stage": {
         "llm_repair.cluster_request": {
-          "request_count": 0,
-          "prompt_tokens": 0,
-          "completion_tokens": 0,
-          "total_tokens": 0
+          "request_count": 1,
+          "prompt_tokens": 7549,
+          "completion_tokens": 592,
+          "total_tokens": 8141
         }
       },
-      "by_model": {},
+      "by_model": {
+        "qwen3.5-plus": {
+          "request_count": 1,
+          "prompt_tokens": 7549,
+          "completion_tokens": 592,
+          "total_tokens": 8141
+        }
+      },
       "total": {
-        "request_count": 0,
-        "prompt_tokens": 0,
-        "completion_tokens": 0,
-        "total_tokens": 0
+        "request_count": 1,
+        "prompt_tokens": 7549,
+        "completion_tokens": 592,
+        "total_tokens": 8141
       }
     },
-    "action_counts": {},
-    "auto_action_counts": {},
+    "action_counts": {
+      "ignore_ref": 8
+    },
+    "auto_action_counts": {
+      "ignore_ref": 8
+    },
     "synth_suggestion_count": 0,
     "synth_auto_applied_count": 0,
     "fuzzy_hit_count": 0,
@@ -1662,36 +2458,48 @@
       "cluster_limit": 0
     }
   },
-  "rebuild": {},
+  "rebuild": {
+    "ok": true,
+    "run_id": 54,
+    "page_count": 431,
+    "section_count": 9,
+    "note_count": 6,
+    "unit_count": 48,
+    "structure_state": "ready",
+    "manual_toc_required": false,
+    "blocking_reasons": [],
+    "review_counts": {},
+    "export_ready_real": true
+  },
   "structure": {
     "ok": true,
     "status": "done",
     "page_count": 431,
     "chapter_count": 9,
-    "section_head_count": 56,
-    "note_region_count": 16,
-    "note_item_count": 778,
+    "section_head_count": 55,
+    "note_region_count": 1,
+    "note_item_count": 6,
     "body_anchor_count": 903,
-    "note_link_count": 928,
+    "note_link_count": 883,
     "suppressed_chapter_candidate_count": 0,
     "partition_heading_conflict_count": 0,
     "review_row_count": 0,
     "footnote_count": 0,
-    "endnote_count": 778,
-    "linked_endnote_count": 753,
+    "endnote_count": 6,
+    "linked_endnote_count": 6,
     "structure_state": "ready",
     "review_counts": {},
     "blocking_reasons": [],
     "link_summary": {
-      "matched": 753,
+      "matched": 6,
       "footnote_orphan_note": 0,
       "footnote_orphan_anchor": 0,
       "endnote_orphan_note": 0,
-      "endnote_orphan_anchor": 0,
+      "endnote_orphan_anchor": 22,
       "ambiguous": 0,
-      "ignored": 175,
-      "fallback_count": 636,
-      "repair_count": 292
+      "ignored": 855,
+      "fallback_count": 853,
+      "repair_count": 8
     },
     "page_partition_summary": {
       "total_pages": 431,
@@ -1704,12 +2512,12 @@
     "chapter_mode_summary": {
       "footnote_primary": 0,
       "chapter_endnotes": 0,
-      "book_endnotes": 9,
+      "book_endnotes": 8,
       "body_only": 0,
       "mixed_or_unclear": 0
     },
     "heading_review_summary": {
-      "chapter_candidate_count": 506,
+      "chapter_candidate_count": 504,
       "suppressed_candidate_count": 87,
       "suppressed_reason_counts": {
         "low_score": 67,
@@ -1758,46 +2566,42 @@
       "missing_body_items_preview": []
     },
     "toc_alignment_summary": {
-      "chapter_level_body_items": 9,
+      "chapter_level_body_items": 8,
       "exported_chapter_count": 9,
       "missing_chapter_titles_preview": [],
-      "misleveled_titles_preview": [
-        "IT HE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION 1T h e P erils of Imagination at the End of the Old Regime",
-        "2T he Revolutionary Schooling of Imagination",
-        "4A n A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
-        "5C ousinian Hegemony",
-        "6R eligious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
-        "7A Palpable Self for the Socially Marginal: The Phrenological Alternative"
-      ],
+      "misleveled_titles_preview": [],
       "reanchored_titles_preview": [],
       "missing_section_titles_preview": []
     },
     "toc_semantic_summary": {
-      "body_item_count": 15,
-      "chapter_item_count": 9,
+      "body_item_count": 8,
+      "chapter_item_count": 8,
       "part_item_count": 0,
       "back_matter_item_count": 0,
       "first_body_pdf_page": 18,
-      "last_body_pdf_page": 333,
-      "body_span_ratio": 0.7332,
+      "last_body_pdf_page": 286,
+      "body_span_ratio": 0.6241,
       "nonbody_contamination_count": 0,
       "mixed_level_chapter_count": 0
     },
     "toc_role_summary": {
       "container": 2,
-      "endnotes": 1,
-      "chapter": 10,
-      "section": 7,
-      "post_body": 0,
-      "back_matter": 2,
+      "endnotes": 0,
+      "chapter": 8,
+      "section": 0,
+      "post_body": 1,
+      "back_matter": 3,
       "front_matter": 2
     },
     "container_titles": [
-      "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
-      "II THE POLITICS OF SELFHOOD"
+      "THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+      "THE POLITICS OF SELFHOOD"
     ],
-    "post_body_titles": [],
+    "post_body_titles": [
+      "Epilogue"
+    ],
     "back_matter_titles": [
+      "Notes",
       "Note on Sources",
       "Index"
     ],
@@ -1823,8 +2627,8 @@
       "source_name": "目录.pdf"
     },
     "chapter_binding_summary": {
-      "region_count": 16,
-      "book_scope_region_count": 16,
+      "region_count": 1,
+      "book_scope_region_count": 1,
       "unbound_region_count": 0,
       "unbound_region_ids_preview": [],
       "unassigned_item_count": 0,
@@ -1832,8 +2636,8 @@
     },
     "note_capture_summary": {
       "expected_anchor_count": 3,
-      "captured_note_count": 778,
-      "capture_ratio": 259.3333,
+      "captured_note_count": 6,
+      "capture_ratio": 2.0,
       "sparse_capture_chapter_ids": [],
       "dense_anchor_zero_capture_pages": [],
       "chapters": [
@@ -1845,59 +2649,59 @@
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-002-1theperilsofimaginationa",
+          "chapter_id": "toc-ch-002-theperilsofimaginationat",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 1,
           "captured_note_count": 0,
           "capture_ratio": 0.0
         },
         {
-          "chapter_id": "toc-ch-003-2therevolutionaryschooli",
+          "chapter_id": "toc-ch-003-therevolutionaryschoolin",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 0,
-          "captured_note_count": 86,
+          "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
+          "chapter_id": "toc-ch-004-isthereaselfinthismental",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 0,
-          "captured_note_count": 100,
+          "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
+          "chapter_id": "toc-ch-005-anaprioriselfforthebourg",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 0,
-          "captured_note_count": 134,
+          "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-006-5cousinianhegemony",
+          "chapter_id": "toc-ch-006-cousinianhegemony",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 2,
-          "captured_note_count": 44,
-          "capture_ratio": 22.0
+          "captured_note_count": 0,
+          "capture_ratio": 0.0
         },
         {
-          "chapter_id": "toc-ch-007-6religiousandsecularacce",
+          "chapter_id": "toc-ch-007-religiousandsecularacces",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 0,
-          "captured_note_count": 100,
+          "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
+          "chapter_id": "toc-ch-008-apalpableselfforthesocia",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 0,
-          "captured_note_count": 69,
+          "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
           "chapter_id": "toc-ch-009-epilogue",
-          "note_mode": "book_endnote_bound",
+          "note_mode": "no_notes",
           "expected_anchor_count": 0,
-          "captured_note_count": 239,
+          "captured_note_count": 0,
           "capture_ratio": 1.0
         }
       ]
@@ -1909,27 +2713,15 @@
     },
     "chapter_link_contract_summary": {
       "chapter_count": 9,
-      "contract_required_count": 8,
+      "contract_required_count": 1,
       "failed_chapter_ids": []
     },
     "book_endnote_stream_summary": {
-      "chapter_count": 8,
+      "chapter_count": 1,
       "chapters_with_endnote_stream": [
-        "toc-ch-001-introductionpsychologica",
-        "toc-ch-003-2therevolutionaryschooli",
-        "toc-ch-004-3isthereaselfinthismenta",
-        "toc-ch-005-4anaprioriselfforthebour",
-        "toc-ch-006-5cousinianhegemony",
-        "toc-ch-007-6religiousandsecularacce",
-        "toc-ch-008-7apalpableselfforthesoci",
-        "toc-ch-009-epilogue"
+        "toc-ch-001-introductionpsychologica"
       ],
-      "high_concentration_chapter_ids": [
-        "toc-ch-004-3isthereaselfinthismenta",
-        "toc-ch-005-4anaprioriselfforthebour",
-        "toc-ch-007-6religiousandsecularacce",
-        "toc-ch-009-epilogue"
-      ],
+      "high_concentration_chapter_ids": [],
       "chapters": [
         {
           "chapter_id": "toc-ch-001-introductionpsychologica",
@@ -1937,61 +2729,11 @@
           "projection_mode_counts": {
             "book_fallback_projected": 6
           }
-        },
-        {
-          "chapter_id": "toc-ch-003-2therevolutionaryschooli",
-          "item_count": 86,
-          "projection_mode_counts": {
-            "book_projected": 86
-          }
-        },
-        {
-          "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
-          "item_count": 100,
-          "projection_mode_counts": {
-            "book_projected": 100
-          }
-        },
-        {
-          "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
-          "item_count": 134,
-          "projection_mode_counts": {
-            "book_projected": 134
-          }
-        },
-        {
-          "chapter_id": "toc-ch-006-5cousinianhegemony",
-          "item_count": 44,
-          "projection_mode_counts": {
-            "book_marker_projected": 17,
-            "book_projected": 27
-          }
-        },
-        {
-          "chapter_id": "toc-ch-007-6religiousandsecularacce",
-          "item_count": 100,
-          "projection_mode_counts": {
-            "book_projected": 100
-          }
-        },
-        {
-          "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
-          "item_count": 69,
-          "projection_mode_counts": {
-            "book_projected": 69
-          }
-        },
-        {
-          "chapter_id": "toc-ch-009-epilogue",
-          "item_count": 239,
-          "projection_mode_counts": {
-            "book_projected": 239
-          }
         }
       ]
     },
     "freeze_note_unit_summary": {
-      "chapter_view_note_unit_count": 778,
+      "chapter_view_note_unit_count": 6,
       "owner_fallback_note_unit_count": 0,
       "unresolved_note_item_count": 0,
       "unresolved_note_item_ids_preview": []
@@ -2014,9 +2756,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-002-1theperilsofimaginationa",
-        "title": "1 The Perils of Imagination at the End of the Old Regime",
-        "path": "chapters/002-1 The Perils of Imagination at the End of the Old Regime.md",
+        "chapter_id": "toc-ch-002-theperilsofimaginationat",
+        "title": "The Perils of Imagination at the End of the Old Regime",
+        "path": "chapters/002-The Perils of Imagination at the End of the Old Regime.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2024,9 +2766,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-003-2therevolutionaryschooli",
-        "title": "2 The Revolutionary Schooling of Imagination",
-        "path": "chapters/003-2 The Revolutionary Schooling of Imagination.md",
+        "chapter_id": "toc-ch-003-therevolutionaryschoolin",
+        "title": "The Revolutionary Schooling of Imagination",
+        "path": "chapters/003-The Revolutionary Schooling of Imagination.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2034,9 +2776,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
-        "title": "3 Is There a Self in This Mental Apparatus?",
-        "path": "chapters/004-3 Is There a Self in This Mental Apparatus.md",
+        "chapter_id": "toc-ch-004-isthereaselfinthismental",
+        "title": "Is There a Self in This Mental Apparatus?",
+        "path": "chapters/004-Is There a Self in This Mental Apparatus.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2044,9 +2786,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
-        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
-        "path": "chapters/005-4 An A Priori Self for the Bourgeois Male Victor Cousin’s Project.md",
+        "chapter_id": "toc-ch-005-anaprioriselfforthebourg",
+        "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
+        "path": "chapters/005-An A Priori Self for the Bourgeois Male Victor Cousin's Project.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2054,9 +2796,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-006-5cousinianhegemony",
-        "title": "5 Cousinian Hegemony",
-        "path": "chapters/006-5 Cousinian Hegemony.md",
+        "chapter_id": "toc-ch-006-cousinianhegemony",
+        "title": "Cousinian Hegemony",
+        "path": "chapters/006-Cousinian Hegemony.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2064,9 +2806,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-007-6religiousandsecularacce",
-        "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
-        "path": "chapters/007-6 Religious and Secular Access to the Vie Intérieure Renan at the Crossroads.md",
+        "chapter_id": "toc-ch-007-religiousandsecularacces",
+        "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "path": "chapters/007-Religious and Secular Access to the Vie Intérieure Renan at the Crossroads.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2074,9 +2816,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
-        "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
-        "path": "chapters/008-7 A Palpable Self for the Socially Marginal The Phrenological Alternative.md",
+        "chapter_id": "toc-ch-008-apalpableselfforthesocia",
+        "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "path": "chapters/008-A Palpable Self for the Socially Marginal The Phrenological Alternative.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -2110,11 +2852,11 @@
   },
   "placeholders": {
     "ok": true,
-    "body_unit_count": 43,
-    "note_unit_count": 778,
+    "body_unit_count": 42,
+    "note_unit_count": 6,
     "changed_page_count": 326,
-    "translated_chars": 1015039,
-    "translated_paras": 1628,
+    "translated_chars": 872742,
+    "translated_paras": 859,
     "retry_summary": {
       "execution_mode": "test",
       "retry_progress": {
@@ -2130,16 +2872,16 @@
     }
   },
   "export": {
-    "ok": false,
+    "ok": true,
     "blocked": false,
     "file_count": 10,
     "chapter_count": 9,
-    "zip_size": 355432,
+    "zip_size": 316423,
     "execution_mode": "test",
-    "local_ref_total": 667,
-    "local_def_total": 531,
-    "unique_local_ref_count": 127,
-    "unique_local_def_count": 127,
+    "local_ref_total": 6,
+    "local_def_total": 6,
+    "unique_local_ref_count": 6,
+    "unique_local_def_count": 6,
     "orphan_local_definition_count": 0,
     "orphan_local_ref_count": 0,
     "orphan_local_definitions_preview": [],
@@ -2151,7 +2893,7 @@
     "legacy_en_bracket_ref_count": 0,
     "legacy_note_token_count": 0,
     "forbidden_section_heading_count": 0,
-    "expected_note_count": 778,
+    "expected_note_count": 6,
     "chapter_local_endnote_contract_ok": true,
     "export_semantic_contract_ok": true,
     "front_matter_leak_detected": false,
@@ -2181,10 +2923,10 @@
     "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest_export_status.json",
     "chapters": [
       "Introduction: Psychological Interiority versus Self-Talk",
-      "1 The Perils of Imagination at the End of the Old Regime",
-      "2 The Revolutionary Schooling of Imagination",
-      "3 Is There a Self in This Mental Apparatus?",
-      "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project"
+      "The Perils of Imagination at the End of the Old Regime",
+      "The Revolutionary Schooling of Imagination",
+      "Is There a Self in This Mental Apparatus?",
+      "An A Priori Self for the Bourgeois Male: Victor Cousin's Project"
     ],
     "chapter_stats_preview": [
       {
@@ -2224,8 +2966,8 @@
         "forbidden_section_heading_preview": []
       },
       {
-        "title": "1 The Perils of Imagination at the End of the Old Regime",
-        "path": "chapters/002-1 The Perils of Imagination at the End of the Old Regime.md",
+        "title": "The Perils of Imagination at the End of the Old Regime",
+        "path": "chapters/002-The Perils of Imagination at the End of the Old Regime.md",
         "first_local_def_marker": "",
         "chapter_local_contract_ok": true,
         "orphan_local_definitions": [],
@@ -2246,186 +2988,16 @@
         "forbidden_section_heading_preview": []
       },
       {
-        "title": "2 The Revolutionary Schooling of Imagination",
-        "path": "chapters/003-2 The Revolutionary Schooling of Imagination.md",
-        "first_local_def_marker": "1",
+        "title": "The Revolutionary Schooling of Imagination",
+        "path": "chapters/003-The Revolutionary Schooling of Imagination.md",
+        "first_local_def_marker": "",
         "chapter_local_contract_ok": true,
         "orphan_local_definitions": [],
         "orphan_local_refs": [],
-        "local_ref_total": 108,
-        "local_def_total": 84,
-        "unique_local_refs": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-          "26",
-          "27",
-          "28",
-          "29",
-          "30",
-          "31",
-          "32",
-          "33",
-          "34",
-          "35",
-          "36",
-          "37",
-          "38",
-          "39",
-          "40",
-          "41",
-          "42",
-          "43",
-          "44",
-          "45",
-          "46",
-          "47",
-          "48",
-          "49",
-          "50",
-          "51",
-          "52",
-          "53",
-          "54",
-          "55",
-          "56",
-          "57",
-          "58",
-          "59",
-          "60",
-          "61",
-          "62",
-          "63",
-          "64",
-          "65",
-          "66",
-          "67",
-          "68",
-          "69",
-          "70",
-          "71",
-          "72",
-          "73",
-          "74",
-          "75",
-          "76",
-          "77",
-          "78",
-          "79",
-          "80",
-          "81",
-          "82",
-          "83",
-          "84"
-        ],
-        "unique_local_defs": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-          "26",
-          "27",
-          "28",
-          "29",
-          "30",
-          "31",
-          "32",
-          "33",
-          "34",
-          "35",
-          "36",
-          "37",
-          "38",
-          "39",
-          "40",
-          "41",
-          "42",
-          "43",
-          "44",
-          "45",
-          "46",
-          "47",
-          "48",
-          "49",
-          "50",
-          "51",
-          "52",
-          "53",
-          "54",
-          "55",
-          "56",
-          "57",
-          "58",
-          "59",
-          "60",
-          "61",
-          "62",
-          "63",
-          "64",
-          "65",
-          "66",
-          "67",
-          "68",
-          "69",
-          "70",
-          "71",
-          "72",
-          "73",
-          "74",
-          "75",
-          "76",
-          "77",
-          "78",
-          "79",
-          "80",
-          "81",
-          "82",
-          "83",
-          "84"
-        ],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
         "local_numbering_starts_at_one": true,
         "legacy_footnote_ref_count": 0,
         "legacy_endnote_ref_count": 0,
@@ -2438,212 +3010,16 @@
         "forbidden_section_heading_preview": []
       },
       {
-        "title": "3 Is There a Self in This Mental Apparatus?",
-        "path": "chapters/004-3 Is There a Self in This Mental Apparatus.md",
-        "first_local_def_marker": "1",
+        "title": "Is There a Self in This Mental Apparatus?",
+        "path": "chapters/004-Is There a Self in This Mental Apparatus.md",
+        "first_local_def_marker": "",
         "chapter_local_contract_ok": true,
         "orphan_local_definitions": [],
         "orphan_local_refs": [],
-        "local_ref_total": 104,
-        "local_def_total": 97,
-        "unique_local_refs": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-          "26",
-          "27",
-          "28",
-          "29",
-          "30",
-          "31",
-          "32",
-          "33",
-          "34",
-          "35",
-          "36",
-          "37",
-          "38",
-          "39",
-          "40",
-          "41",
-          "42",
-          "43",
-          "44",
-          "45",
-          "46",
-          "47",
-          "48",
-          "49",
-          "50",
-          "51",
-          "52",
-          "53",
-          "54",
-          "55",
-          "56",
-          "57",
-          "58",
-          "59",
-          "60",
-          "61",
-          "62",
-          "63",
-          "64",
-          "65",
-          "66",
-          "67",
-          "68",
-          "69",
-          "70",
-          "71",
-          "72",
-          "73",
-          "74",
-          "75",
-          "76",
-          "77",
-          "78",
-          "79",
-          "80",
-          "81",
-          "82",
-          "83",
-          "84",
-          "85",
-          "86",
-          "87",
-          "88",
-          "89",
-          "90",
-          "91",
-          "92",
-          "93",
-          "94",
-          "95",
-          "96",
-          "97"
-        ],
-        "unique_local_defs": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-          "26",
-          "27",
-          "28",
-          "29",
-          "30",
-          "31",
-          "32",
-          "33",
-          "34",
-          "35",
-          "36",
-          "37",
-          "38",
-          "39",
-          "40",
-          "41",
-          "42",
-          "43",
-          "44",
-          "45",
-          "46",
-          "47",
-          "48",
-          "49",
-          "50",
-          "51",
-          "52",
-          "53",
-          "54",
-          "55",
-          "56",
-          "57",
-          "58",
-          "59",
-          "60",
-          "61",
-          "62",
-          "63",
-          "64",
-          "65",
-          "66",
-          "67",
-          "68",
-          "69",
-          "70",
-          "71",
-          "72",
-          "73",
-          "74",
-          "75",
-          "76",
-          "77",
-          "78",
-          "79",
-          "80",
-          "81",
-          "82",
-          "83",
-          "84",
-          "85",
-          "86",
-          "87",
-          "88",
-          "89",
-          "90",
-          "91",
-          "92",
-          "93",
-          "94",
-          "95",
-          "96",
-          "97"
-        ],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
         "local_numbering_starts_at_one": true,
         "legacy_footnote_ref_count": 0,
         "legacy_endnote_ref_count": 0,
@@ -2656,272 +3032,16 @@
         "forbidden_section_heading_preview": []
       },
       {
-        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
-        "path": "chapters/005-4 An A Priori Self for the Bourgeois Male Victor Cousin’s Project.md",
-        "first_local_def_marker": "1",
+        "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
+        "path": "chapters/005-An A Priori Self for the Bourgeois Male Victor Cousin's Project.md",
+        "first_local_def_marker": "",
         "chapter_local_contract_ok": true,
         "orphan_local_definitions": [],
         "orphan_local_refs": [],
-        "local_ref_total": 143,
-        "local_def_total": 127,
-        "unique_local_refs": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-          "26",
-          "27",
-          "28",
-          "29",
-          "30",
-          "31",
-          "32",
-          "33",
-          "34",
-          "35",
-          "36",
-          "37",
-          "38",
-          "39",
-          "40",
-          "41",
-          "42",
-          "43",
-          "44",
-          "45",
-          "46",
-          "47",
-          "48",
-          "49",
-          "50",
-          "51",
-          "52",
-          "53",
-          "54",
-          "55",
-          "56",
-          "57",
-          "58",
-          "59",
-          "60",
-          "61",
-          "62",
-          "63",
-          "64",
-          "65",
-          "66",
-          "67",
-          "68",
-          "69",
-          "70",
-          "71",
-          "72",
-          "73",
-          "74",
-          "75",
-          "76",
-          "77",
-          "78",
-          "79",
-          "80",
-          "81",
-          "82",
-          "83",
-          "84",
-          "85",
-          "86",
-          "87",
-          "88",
-          "89",
-          "90",
-          "91",
-          "92",
-          "93",
-          "94",
-          "95",
-          "96",
-          "97",
-          "98",
-          "99",
-          "100",
-          "101",
-          "102",
-          "103",
-          "104",
-          "105",
-          "106",
-          "107",
-          "108",
-          "109",
-          "110",
-          "111",
-          "112",
-          "113",
-          "114",
-          "115",
-          "116",
-          "117",
-          "118",
-          "119",
-          "120",
-          "121",
-          "122",
-          "123",
-          "124",
-          "125",
-          "126",
-          "127"
-        ],
-        "unique_local_defs": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-          "26",
-          "27",
-          "28",
-          "29",
-          "30",
-          "31",
-          "32",
-          "33",
-          "34",
-          "35",
-          "36",
-          "37",
-          "38",
-          "39",
-          "40",
-          "41",
-          "42",
-          "43",
-          "44",
-          "45",
-          "46",
-          "47",
-          "48",
-          "49",
-          "50",
-          "51",
-          "52",
-          "53",
-          "54",
-          "55",
-          "56",
-          "57",
-          "58",
-          "59",
-          "60",
-          "61",
-          "62",
-          "63",
-          "64",
-          "65",
-          "66",
-          "67",
-          "68",
-          "69",
-          "70",
-          "71",
-          "72",
-          "73",
-          "74",
-          "75",
-          "76",
-          "77",
-          "78",
-          "79",
-          "80",
-          "81",
-          "82",
-          "83",
-          "84",
-          "85",
-          "86",
-          "87",
-          "88",
-          "89",
-          "90",
-          "91",
-          "92",
-          "93",
-          "94",
-          "95",
-          "96",
-          "97",
-          "98",
-          "99",
-          "100",
-          "101",
-          "102",
-          "103",
-          "104",
-          "105",
-          "106",
-          "107",
-          "108",
-          "109",
-          "110",
-          "111",
-          "112",
-          "113",
-          "114",
-          "115",
-          "116",
-          "117",
-          "118",
-          "119",
-          "120",
-          "121",
-          "122",
-          "123",
-          "124",
-          "125",
-          "126",
-          "127"
-        ],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
         "local_numbering_starts_at_one": true,
         "legacy_footnote_ref_count": 0,
         "legacy_endnote_ref_count": 0,
@@ -2934,30 +3054,14 @@
         "forbidden_section_heading_preview": []
       }
     ],
-    "full_audit_can_ship": false,
-    "full_audit_blocking_issue_count": 1,
+    "full_audit_can_ship": true,
+    "full_audit_blocking_issue_count": 0,
     "full_audit_report_path": "/Users/hao/OCRandTranslation/output/fnm_book_audits/Goldstein.json",
     "full_audit_summary": {
-      "must_fix_before_next_book": [
-        {
-          "path": "__book__/organization_depth",
-          "issue_codes": [
-            "export_depth_too_shallow",
-            "toc_organization_mismatch"
-          ]
-        }
-      ],
+      "must_fix_before_next_book": [],
       "recommended_followups": [
         {
           "issue_code": "chapter_boundary_missing_tail",
-          "count": 1
-        },
-        {
-          "issue_code": "export_depth_too_shallow",
-          "count": 1
-        },
-        {
-          "issue_code": "toc_organization_mismatch",
           "count": 1
         }
       ]
