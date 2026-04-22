@@ -1,0 +1,384 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote\",\n  \"chapter_title\": \"16. Madness multiple\",\n  \"page_range\": [\n    632,\n    638\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 631,\n      \"ocr_excerpt\": \"## 16 ## Madness multiple $ ^{1} $ Language, illness, and behavior in law and medicine Madness is not an entity or an essence, but an ascribed characteristic of various acts, words, or people. In practice—while treating an illness, judging a legal case, or taking care of a sick relative at home—people could label specific men or women, acts or words, as being diankuang 癫狂, fengdian 風顛, or fengbing 瘋病. But these labels were contextual. Several different words could thus be used to refer to the same person. Depending on what they wanted to emphasize, villagers could call a man's manic behavior kuang 狂, the oddness of his deportment dian 顛, his unrealistic aspirations chi 癡, or his more uncanny acts guai 怪. Conversely, two different terms did not have to refer to mutually exclusive realities. A woman in rural Henan, for instance, could easily accept that the legal category fengbing (“madness illness”) applied to her son even if she labeled him dian and considered him possessed. Even judicial reports used fengbing side by side with non-technical terms like fengdian 風癲 or medical expressions like “mucus confusing the openings of the Heart” 痰迷心竅 as if they were all equivalent. My focus o ...\"\n    },\n    {\n      \"page_no\": 632,\n      \"ocr_excerpt\": \"of labels to be recognizable from one field to another, but it also suggests that most people agreed about what madness was. Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials. I tried to develop an approach that would allow me to understand both the obviousness of village madmen and the complexities of technical objects like legal fenghing and medical kuang. For this purpose, I tried to show how th ...\"\n    },\n    {\n      \"page_no\": 633,\n      \"ocr_excerpt\": \"rigor in observation or as a response to the supposedly universal problem of what to do with violent mad people. “Killing because of madness” was created in the 1660s when some officials started considering as legally relevant the fact that some killings were committed in a state of madness. Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $ When the Ministry of Punishments ordered all families to confine “people with madness illness” preventively (first in 1689, and then more rigorously in the 1730s and 1760s), it was thinking of madness from the point of view of its occasional outcome—a homicide committed during a fit (see 11.4). The ...\"\n    },\n    {\n      \"page_no\": 638,\n      \"ocr_excerpt\": \"probably find more information in fiction—Katz did mention some eighteenth-century stories—on how families treated their mad relatives, in the same way as Edward Davis (2001) used a collection of stories to reconstruct the nature of Song local religion. Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $ Another issue I barely addressed is how educated people dealt with their own mental torments. What did men who resorted to neither medicine nor exorcism do when they felt themselves becoming crazy or saw their peers lose sanity? We could probably find several cases like that of Xu Nianzu 許念祖 (1655-1698), a scholar who committed suicide after repeated bouts of despair that his friends and cor ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01732\",\n      \"marker\": \"3\",\n      \"page_no\": 632,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01733\",\n      \"marker\": \"4\",\n      \"page_no\": 633,\n      \"paragraph_index\": 4,\n      \"source_text\": \"Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01734\",\n      \"marker\": \"5\",\n      \"page_no\": 633,\n      \"paragraph_index\": 4,\n      \"source_text\": \"Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01735\",\n      \"marker\": \"6\",\n      \"page_no\": 638,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stor ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00505\",\n      \"note_item_id\": \"fn-00422\",\n      \"current_anchor_id\": \"anchor-01731\",\n      \"marker\": \"1\",\n      \"note_page_no\": 631,\n      \"anchor_page_no\": 632,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. This title is inspired by Annemarie Mol's book The Body Multiple: Ontology in Medical Practice (2002).\",\n      \"anchor_excerpt\": \"Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote",
+      "chapter_title": "16. Madness multiple",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        632,
+        638
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 79346,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01732",
+          "chapter_id": "toc-manual-2-16-16-madness-multiple",
+          "page_no": 632,
+          "paragraph_index": 1,
+          "char_start": 774,
+          "char_end": 782,
+          "source_marker": "$ ^{3} $",
+          "normalized_marker": "3",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 79347,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01733",
+          "chapter_id": "toc-manual-2-16-16-madness-multiple",
+          "page_no": 633,
+          "paragraph_index": 4,
+          "char_start": 475,
+          "char_end": 483,
+          "source_marker": "$ ^{4} $",
+          "normalized_marker": "4",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 79348,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01734",
+          "chapter_id": "toc-manual-2-16-16-madness-multiple",
+          "page_no": 633,
+          "paragraph_index": 4,
+          "char_start": 599,
+          "char_end": 607,
+          "source_marker": "$ ^{5} $",
+          "normalized_marker": "5",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 79349,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01735",
+          "chapter_id": "toc-manual-2-16-16-madness-multiple",
+          "page_no": 638,
+          "paragraph_index": 1,
+          "char_start": 543,
+          "char_end": 551,
+          "source_marker": "$ ^{6} $",
+          "normalized_marker": "6",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00505",
+          "note_item_id": "fn-00422",
+          "current_anchor_id": "anchor-01731",
+          "marker": "1",
+          "note_page_no": 631,
+          "anchor_page_no": 632,
+          "current_anchor_marker": "1",
+          "note_excerpt": "1. This title is inspired by Annemarie Mol's book The Body Multiple: Ontology in Medical Practice (2002).",
+          "anchor_excerpt": "Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials.",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 631,
+        "file_idx": 630,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "## 16 ## Madness multiple $ ^{1} $ Language, illness, and behavior in law and medicine Madness is not an entity or an essence, but an ascribed characteristic of various acts, words, or people. In practice—while treating an illness, judging a legal case, or taking care of a sick relative at home—people could label specific men or women, acts or words, as being diankuang 癫狂, fengdian 風顛, or fengbing 瘋病. But these labels were contextual. Several different words could thus be used to refer to the same person. Depending on what they wanted to emphasize, villagers could call a man's manic behavior kuang 狂, the oddness of his deportment dian 顛, his unrealistic aspirations chi 癡, or his more uncanny acts guai 怪. Conversely, two different terms did not have to refer to mutually exclusive realities. A woman in rural Henan, for instance, could easily accept that the legal category fengbing (“madness illness”) applied to her son even if she labeled him dian and considered him possessed. Even judicial reports used fengbing side by side with non-technical terms like fengdian 風癲 or medical expressions like “mucus confusing the openings of the Heart” 痰迷心竅 as if they were all equivalent. My focus on practical usage eased the problem of definitions, but even as I tried not to base my investigations on a universal, I had to struggle with how swiftly and easily Qing people—be it a man who sought m ...",
+        "byte_size": 110384,
+        "sha256": "ece33c5d5ed1074236bf95176f117affc3ed8e81613a9d254f88289da9440333"
+      },
+      {
+        "page_no": 632,
+        "file_idx": 631,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "of labels to be recognizable from one field to another, but it also suggests that most people agreed about what madness was. Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials. I tried to develop an approach that would allow me to understand both the obviousness of village madmen and the complexities of technical objects like legal fenghing and medical kuang. For this purpose, I tried to show how these common words acquired specific referents through medical and legal practices. This meant showing how, despite the common equivalence of terms like kuang and fengdian in daily contexts, some fields ...",
+        "byte_size": 134918,
+        "sha256": "b9de22f40b602c0720251d1611a8e6dadf3ead6563bfb88cf3ccae4c19ba270b"
+      },
+      {
+        "page_no": 633,
+        "file_idx": 632,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "rigor in observation or as a response to the supposedly universal problem of what to do with violent mad people. “Killing because of madness” was created in the 1660s when some officials started considering as legally relevant the fact that some killings were committed in a state of madness. Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $ When the Ministry of Punishments ordered all families to confine “people with madness illness” preventively (first in 1689, and then more rigorously in the 1730s and 1760s), it was thinking of madness from the point of view of its occasional outcome—a homicide committed during a fit (see 11.4). The apparent danger of insanity had been made obvious by the very law that treated mad killers leniently, because each application of this law showed that someone had killed “because of madness,” and bec ...",
+        "byte_size": 137924,
+        "sha256": "7cf94c6e4b6361b6aa6e38ffd36eb99333dc5d4bae60654a3b5784b96a3e996d"
+      },
+      {
+        "page_no": 638,
+        "file_idx": 637,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "probably find more information in fiction—Katz did mention some eighteenth-century stories—on how families treated their mad relatives, in the same way as Edward Davis (2001) used a collection of stories to reconstruct the nature of Song local religion. Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $ Another issue I barely addressed is how educated people dealt with their own mental torments. What did men who resorted to neither medicine nor exorcism do when they felt themselves becoming crazy or saw their peers lose sanity? We could probably find several cases like that of Xu Nianzu 許念祖 (1655-1698), a scholar who committed suicide after repeated bouts of despair that his friends and correspondents referred to as madness (for references, see 8.5, p. 344n50). This inventory of ignorance could linger. It reminds us that we are only beginning to understand how late imperial Chinese of v ...",
+        "byte_size": 107757,
+        "sha256": "80a20b6ccd30a3b13c71767e9f542819218b7cd5494bb081b4855156641bf421"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 4,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00422\",\n    \"anchor_id\": \"anchor-01731\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 1 is correctly bound to the title anchor (anchor-01731) on page 631. The rebind candidate in the input data suggests an incorrect cross-page binding which should be rejected by keeping the correct existing match.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01732\",\n    \"confidence\": 0.95,\n    \"reason\": \"Anchor 3 on page 632 corresponds to a footnote visible in the screenshot of page 634, but there is no corresponding unmatched note item provided in the cluster data to bind it to.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01733\",\n    \"confidence\": 0.95,\n    \"reason\": \"Anchor 4 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01734\",\n    \"confidence\": 0.95,\n    \"reason\": \"Anchor 5 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01735\",\n    \"confidence\": 0.95,\n    \"reason\": \"Anchor 6 on page 638 corresponds to a footnote visible in the screenshot of page 620, but there is no corresponding unmatched note item provided in the cluster data to bind it to.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-00422",
+      "anchor_id": "anchor-01731",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Footnote 1 is correctly bound to the title anchor (anchor-01731) on page 631. The rebind candidate in the input data suggests an incorrect cross-page binding which should be rejected by keeping the correct existing match."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01732",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Anchor 3 on page 632 corresponds to a footnote visible in the screenshot of page 634, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01733",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Anchor 4 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01734",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Anchor 5 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01735",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Anchor 6 on page 638 corresponds to a footnote visible in the screenshot of page 620, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote",
+    "chapter_title": "16. Madness multiple",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00422",
+        "anchor_id": "anchor-01731",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote 1 is correctly bound to the title anchor (anchor-01731) on page 631. The rebind candidate in the input data suggests an incorrect cross-page binding which should be rejected by keeping the correct existing match."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01732",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 3 on page 632 corresponds to a footnote visible in the screenshot of page 634, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01733",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 4 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01734",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 5 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01735",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 6 on page 638 corresponds to a footnote visible in the screenshot of page 620, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00422",
+        "anchor_id": "anchor-01731",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote 1 is correctly bound to the title anchor (anchor-01731) on page 631. The rebind candidate in the input data suggests an incorrect cross-page binding which should be rejected by keeping the correct existing match."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01732",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 3 on page 632 corresponds to a footnote visible in the screenshot of page 634, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01733",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 4 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01734",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 5 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01735",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 6 on page 638 corresponds to a footnote visible in the screenshot of page 620, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00505",
+        "action": "match",
+        "note_item_id": "fn-00422",
+        "anchor_id": "anchor-01731",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Footnote 1 is correctly bound to the title anchor (anchor-01731) on page 631. The rebind candidate in the input data suggests an incorrect cross-page binding which should be rejected by keeping the correct existing match."
+      },
+      {
+        "link_id": "link-01865",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01732",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 3 on page 632 corresponds to a footnote visible in the screenshot of page 634, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "link_id": "link-01866",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01733",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 4 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "link_id": "link-01867",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01734",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 5 on page 633 corresponds to a footnote visible in the screenshot of page 635, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      },
+      {
+        "link_id": "link-01868",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01735",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Anchor 6 on page 638 corresponds to a footnote visible in the screenshot of page 620, but there is no corresponding unmatched note item provided in the cluster data to bind it to."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 5481,
+    "completion_tokens": 479,
+    "total_tokens": 5960,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 10332
+  }
+}

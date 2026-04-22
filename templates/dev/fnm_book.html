@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='dev/fnm.css') }}">
+  <title>FNM 开发者模式 · {{ doc_id }}</title>
+{% endblock %}
+{% block content %}
+<body class="fnm-dev">
+  <div class="fnm-book-detail">
+    <a class="back-link" href="/dev/fnm">← 返回书列表</a>
+    <h1>Phase 明细</h1>
+    <div class="hint">
+      doc_id: <code>{{ doc_id }}</code>
+      · <button id="refresh-btn" style="font-size:12px;">刷新</button>
+    </div>
+    <div id="phases"></div>
+  </div>
+
+  <div class="fnm-drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="fnm-drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <span class="title" id="drawer-title">诊断</span>
+      <button class="close-btn" id="drawer-close" aria-label="关闭">×</button>
+    </div>
+    <div class="drawer-body">
+      <div class="pane" id="pane-pdf">
+        <div class="pane-header"><span>PDF</span><span id="pane-pdf-meta"></span></div>
+        <div class="pane-body"><div class="empty">（选择页面证据后加载 PDF）</div></div>
+      </div>
+      <div class="pane" id="pane-artifact">
+        <div class="pane-header"><span>中间产物</span><span id="pane-artifact-meta"></span></div>
+        <div class="pane-body"><div class="empty">（选择产物证据后加载）</div></div>
+      </div>
+      <div class="pane" id="pane-export">
+        <div class="pane-header"><span>导出</span></div>
+        <div class="pane-body"><div class="empty">（Phase 6 未接入）</div></div>
+      </div>
+    </div>
+  </aside>
+</body>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='dev/fnm.js') }}"></script>
+  <script>window.fnmDevBook.init({{ doc_id|tojson }});</script>
+{% endblock %}

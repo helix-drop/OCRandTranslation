@@ -1,0 +1,420 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote\",\n  \"chapter_title\": \"Madness as Helplessness: Two Hospitals in the Age of the Reformations\",\n  \"page_range\": [\n    367,\n    372\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 366,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.5</div> <div style=\\\"text-align: center;\\\">Corn Tests at Haina and Merxhausen, 1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Grain</td><td style='text-align: center; word-wrap: break-word;'>Quantity</td><td style='text-align: center; word-wrap: break-word;'>Yield in Flour</td><td style='text-align: center; word-wrap: break-word;'>Yield in Bread</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Haina rye</td><td style='text-align: center; word-wrap: break-word;'>552 lb.</td><td style='text-align: center; word-wrap: break-word;'>478 lb.</td><td style='text-align: center; word-wrap: break-word;'>649 lb.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>March 9, 1621</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Index</td><td style='text-align: center; word-wrap: break-word;'>100</td><td style='text-align: center; word-wrap: break ...\"\n    },\n    {\n      \"page_no\": 367,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.6</div> <div style=\\\"text-align: center;\\\">Estimates of Food for 500 Poor Persons at Haina and Merxhausen, 1575</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td colspan=\\\"2\\\">grams/person/day</td><td style='text-align: center; word-wrap: break-word;'>calories/day</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat (6 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>124</td><td style='text-align: center; word-wrap: break-word;'>@ 2.73 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>339</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Fish (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>83</td><td style='text-align: center; word-wrap: break-word;'>@ 1.75 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>145</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Cheese (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: br ...\"\n    },\n    {\n      \"page_no\": 368,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.7</div> <div style=\\\"text-align: center;\\\">Daily Food Consumption at Haina and Merxhausen, 1590</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td style='text-align: center; word-wrap: break-word;'>Haina</td><td style='text-align: center; word-wrap: break-word;'>Merxhausen</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Grains</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Rye bread $ ^{a} $</td><td style='text-align: center; word-wrap: break-word;'>1,282g.</td><td style='text-align: center; word-wrap: break-word;'>916 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 240 cal.</td><td style='text-align: center; word-wrap: break-word;'>(3,077 cal.)</td><td style='text-align: center; word-wrap: break-word;'>(2,198 cal.)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Other grains</td><td style='text-align: center; word-wrap: break-word;'>25 ...\"\n    },\n    {\n      \"page_no\": 369,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.8</div> <div style=\\\"text-align: center;\\\">Recommended Diet at Haina, 1620-1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td rowspan=\\\"2\\\"></td><td colspan=\\\"5\\\">Hospital Classes</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>I</td><td style='text-align: center; word-wrap: break-word;'>II</td><td style='text-align: center; word-wrap: break-word;'>III</td><td style='text-align: center; word-wrap: break-word;'>IV</td><td style='text-align: center; word-wrap: break-word;'>V</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat</td><td style='text-align: center; word-wrap: break-word;'>463 g.</td><td style='text-align: center; word-wrap: break-word;'>231 g.</td><td style='text-align: center; word-wrap: break-word;'>159 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 273 cal.</td><td style='text-align: center; word-wrap: break-word;'>1,264 cal.</td><td style='text-align: center; word-wrap: break-word;'>631 cal.</td><td styl ...\"\n    },\n    {\n      \"page_no\": 370,\n      \"ocr_excerpt\": \"“prebenderies,” who had been granted entry to the hospital despite their elevated social station, persons for whom the hospitals had never been intended: a schoolmaster, a doctor’s widow and child, and educated men with latinate names (“Hartman Scaevola” and “M. Agricola”). They received decidedly more meat than the bottom two classes, averaging one-third of a pound a day. The fourth class comprised 49 hospital servants (including 20 poor brothers and sisters). Their daily work must have been arduous, and in return they received over 5,000 calories daily; but since their social status was poor, they obtained an average of only one pound of meat a week and made up for this meager allotment with cheese and huge amounts of bread. $ ^{82} $ At the bottom of the five classes were 220 poor persons, who ate less than the servants because they were usually elderly and not hired for hard work. From surviving records, we cannot tell when this classification began, but up to the 1590s, the records do not even hint at a class of Pröbner, even though some Hessian officials and pastors had been granted retirement in the hospital as a reward for faithful service. $ ^{83} $ In allowing such a visi ...\"\n    },\n    {\n      \"page_no\": 371,\n      \"ocr_excerpt\": \"## STRAINING FOR A MORAL ORDER The food consumed at Haina and Merxhausen guaranteed a higher standard of living for these sixteenth-century \\\"welfare recipients\\\" than many working families enjoyed. This fact made hospital officials touchy or even defensive when it came to explaining the existence of the hospital. The obligation to be (and to appear) worthy of charity put residents of the hospitals under a code of behavior much stricter than that imposed on persons living normal lives. Before one can estimate how hard the hospital tried to meet a higher moral standard than that imposed on the world, one needs to know what standard was imposed upon the world. Fortunately for us, the Haina Hospital Archive has preserved an ordinance issued by Landgrave Philipp for the common inhabitants of Haina and the neighboring lands subject to the jurisdiction of the hospital. The very first clause shows that religious rules played a large role in the outside world as well as in the hospital: First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead ...\"\n    },\n    {\n      \"page_no\": 372,\n      \"ocr_excerpt\": \"cost from six alber (i.e., $ \\\\frac{1}{4} $ gulden) to five gulden. No man or woman, for example, could slander another \\\"with immoral, gross words or with any kind of libel or insult\\\" without running the risk of a one-gulden fine. During a fire, all must help in fighting it or pay a ten-gulden fine. Failure to attend a village court or assembly meeting might trigger a fine of one gulden. Dances of certain sorts were forbidden: \\\"Sunday dancing and other suspect evening dances are herewith completely forbidden; and if this is disobeyed, the men shall pay a fine of one gulden and the woman a fine of thirteen alber.\\\"86 Such ordinances obviously tried to set a general standard of Christian conduct and communal responsibility, but it is noteworthy that the punishments for false measures, adultery, and fornication were far less severe than those imposed by the imperial criminal code, the Carolina. $ ^{87} $ Although this set of village regulations tried to establish the Christian community as an ideal, there can be little doubt that the hospital, with its regular daily religious observances, strained to maintain a higher moral order. A prayer used at Merxhausen asked God for help in obeyin ...\"\n    },\n    {\n      \"page_no\": 373,\n      \"ocr_excerpt\": \"vice set for 6:00 P.M. in the summer, and directly after supper in the large common room during the winter; the prayers were to include special thanks to the territorial prince for his benevolence. And in 1573, Schenck's ordinance described this evening service as a half-hour service with Bible reading and preaching as well as prayers of thanks. $ ^{93} $ Perhaps this was merely a case of ordinary practice becoming more and more explicit in the records, but it seems to indicate an intensified religious life for residents of the hospital, with two services on normal weekdays in addition to special holiday services, the two Sunday sermons, and the extra services on Wednesday and Friday mentioned by Letzener in 1588. The privileged life of semimonasticism also demanded a higher standard of social behavior. This is why residents of the hospital were not allowed to leave the institution to visit nearby villages. The rule was just as hard to enforce as it had been in the days when Haina was a monastery. In 1573, the superintendent, Reinhard Schenck zu Schweinsberg, observed that some of the brethren at Haina were “involved in all kinds of crafts, commerce, and trading, even on Sundays; a ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01044\",\n      \"marker\": \"78\",\n      \"page_no\": 367,\n      \"paragraph_index\": 6,\n      \"source_text\": \"It was not easy to regulate the fleshpots of Haina. When a survey of food consumption was again conducted in 1591, examining the year 1590, the average intake was still 5,161 calories a day at Haina and 3,994 at Merx-hausen (table 7.7). $ ^ ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01054\",\n      \"marker\": \"90\",\n      \"page_no\": 372,\n      \"paragraph_index\": 4,\n      \"source_text\": \"Applicants to the hospital emphasized their religious character and their readiness to live “as befits Christian brethren.” $ ^{90} $ The preacher at Haina was to urge the poor to hear God’s Word not only at the regular services but at spec ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-01127\",\n      \"note_item_id\": \"fn-01105\",\n      \"current_anchor_id\": \"synthetic-footnote-00150\",\n      \"marker\": \"28\",\n      \"note_page_no\": 367,\n      \"anchor_page_no\": 367,\n      \"current_anchor_marker\": \"28\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals e ...\",\n      \"anchor_excerpt\": \"StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals e ...\"\n    },\n    {\n      \"link_id\": \"link-01128\",\n      \"note_item_id\": \"fn-01106\",\n      \"current_anchor_id\": \"synthetic-footnote-00151\",\n      \"marker\": \"79\",\n      \"note_page_no\": 367,\n      \"anchor_page_no\": 367,\n      \"current_anchor_marker\": \"79\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.\",\n      \"anchor_excerpt\": \"StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.\"\n    },\n    {\n      \"link_id\": \"link-01134\",\n      \"note_item_id\": \"fn-01112\",\n      \"current_anchor_id\": \"anchor-01050\",\n      \"marker\": \"86\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 371,\n      \"current_anchor_marker\": \"86\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ibid., articles 1, 2, 3, 4, 5, 6, 7, 12, 38, 40, 45, 46.\",\n      \"anchor_excerpt\": \"First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead they are to be notorious like t ...\"\n    },\n    {\n      \"link_id\": \"link-01138\",\n      \"note_item_id\": \"fn-01116\",\n      \"current_anchor_id\": \"synthetic-footnote-00153\",\n      \"marker\": \"19\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 372,\n      \"current_anchor_marker\": \"19\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1564), Valtin Niphudt (Nov.\",\n      \"anchor_excerpt\": \"1564), Valtin Niphudt (Nov.\"\n    },\n    {\n      \"link_id\": \"link-01139\",\n      \"note_item_id\": \"fn-01117\",\n      \"current_anchor_id\": \"synthetic-footnote-00154\",\n      \"marker\": \"8\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 372,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.\",\n      \"anchor_excerpt\": \"1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.\"\n    },\n    {\n      \"link_id\": \"link-01140\",\n      \"note_item_id\": \"fn-01118\",\n      \"current_anchor_id\": \"synthetic-footnote-00155\",\n      \"marker\": \"30\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 372,\n      \"current_anchor_marker\": \"30\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1581).\",\n      \"anchor_excerpt\": \"1581).\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote",
+      "chapter_title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        367,
+        372
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 56700,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-01044",
+          "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+          "page_no": 367,
+          "paragraph_index": 6,
+          "char_start": 237,
+          "char_end": 246,
+          "source_marker": "$ ^{78} $",
+          "normalized_marker": "78",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "It was not easy to regulate the fleshpots of Haina. When a survey of food consumption was again conducted in 1591, examining the year 1590, the average intake was still 5,161 calories a day at Haina and 3,994 at Merx-hausen (table 7.7). $ ^{78} $ Eggs, oatmeal, and honey were somewhat more abundant, but meat, cheese, milk, and beer were somewhat less so. The hospitals now diverged even more sharply than they had sixteen years earlier.",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        },
+        {
+          "row_id": 56712,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-01054",
+          "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+          "page_no": 372,
+          "paragraph_index": 4,
+          "char_start": 124,
+          "char_end": 133,
+          "source_marker": "$ ^{90} $",
+          "normalized_marker": "90",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Applicants to the hospital emphasized their religious character and their readiness to live “as befits Christian brethren.” $ ^{90} $ The preacher at Haina was to urge the poor to hear God’s Word not only at the regular services but at special services as well and to inculcate an attitude of constant (ohn unterlass) prayer and thankfulness. $ ^{91} $ The hospital seems to have instituted a regular half-hour evening prayer service to balance the one in the morning. The original ordinance of the hospital (1534) required only one sermon a day and stated simply, “after supper and the prayer of thanks, let them rest and have them go to bed at a set time.” $ ^{92} $ Already in the undated “Hospitals-Fundation,” this thanksgiving was explicitly described as a church ser-",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-01127",
+          "note_item_id": "fn-01105",
+          "current_anchor_id": "synthetic-footnote-00150",
+          "marker": "28",
+          "note_page_no": 367,
+          "anchor_page_no": 367,
+          "current_anchor_marker": "28",
+          "note_excerpt": "StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals elsewhere also served huge amounts of food. See, e.g., Helmut Freiherr Haller von Hallerstein and Ernst Eichhorn, Das Pilgrimspital zum Heiligen Kreuz vor Niirnberg (Nuremberg, 1969), pp. 44-50.",
+          "anchor_excerpt": "StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals elsewhere also served huge amounts of food. See, e.g., Helmut Freiherr Haller von Hallerstein and Ernst Eichhorn, Das Pilgrimspital zum Heiligen Kreuz vor Niirnberg (Nuremberg, 1969), pp. 44-50.",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-01128",
+          "note_item_id": "fn-01106",
+          "current_anchor_id": "synthetic-footnote-00151",
+          "marker": "79",
+          "note_page_no": 367,
+          "anchor_page_no": 367,
+          "current_anchor_marker": "79",
+          "note_excerpt": "StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.",
+          "anchor_excerpt": "StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-01134",
+          "note_item_id": "fn-01112",
+          "current_anchor_id": "anchor-01050",
+          "marker": "86",
+          "note_page_no": 372,
+          "anchor_page_no": 371,
+          "current_anchor_marker": "86",
+          "note_excerpt": "Ibid., articles 1, 2, 3, 4, 5, 6, 7, 12, 38, 40, 45, 46.",
+          "anchor_excerpt": "First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead they are to be notorious like those involved in magic, witchcraft, and other works of the devil; and after being publicly rebuked, they may be punished according to the seriousness of their offense. $ ^{85} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-01138",
+          "note_item_id": "fn-01116",
+          "current_anchor_id": "synthetic-footnote-00153",
+          "marker": "19",
+          "note_page_no": 372,
+          "anchor_page_no": 372,
+          "current_anchor_marker": "19",
+          "note_excerpt": "1564), Valtin Niphudt (Nov.",
+          "anchor_excerpt": "1564), Valtin Niphudt (Nov.",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-01139",
+          "note_item_id": "fn-01117",
+          "current_anchor_id": "synthetic-footnote-00154",
+          "marker": "8",
+          "note_page_no": 372,
+          "anchor_page_no": 372,
+          "current_anchor_marker": "8",
+          "note_excerpt": "1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.",
+          "anchor_excerpt": "1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.",
+          "current_anchor_synthetic": true
+        },
+        {
+          "link_id": "link-01140",
+          "note_item_id": "fn-01118",
+          "current_anchor_id": "synthetic-footnote-00155",
+          "marker": "30",
+          "note_page_no": 372,
+          "anchor_page_no": 372,
+          "current_anchor_marker": "30",
+          "note_excerpt": "1581).",
+          "anchor_excerpt": "1581).",
+          "current_anchor_synthetic": true
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 366,
+        "file_idx": 365,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.5</div> <div style=\"text-align: center;\">Corn Tests at Haina and Merxhausen, 1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Grain</td><td style='text-align: center; word-wrap: break-word;'>Quantity</td><td style='text-align: center; word-wrap: break-word;'>Yield in Flour</td><td style='text-align: center; word-wrap: break-word;'>Yield in Bread</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Haina rye</td><td style='text-align: center; word-wrap: break-word;'>552 lb.</td><td style='text-align: center; word-wrap: break-word;'>478 lb.</td><td style='text-align: center; word-wrap: break-word;'>649 lb.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>March 9, 1621</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Index</td><td style='text-align: center; word-wrap: break-word;'>100</td><td style='text-align: center; word-wrap: break-word;'>86.6</td><td style='text-align: center; word-wrap: break-word;'>117.6</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Haina rye</td><td style='text-align: center; word-wrap ...",
+        "byte_size": 6367189,
+        "sha256": "86d6a23268a7aec51f25f7debdb9050bb883c66745410cd9991a5be2ab7b886e"
+      },
+      {
+        "page_no": 367,
+        "file_idx": 366,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.6</div> <div style=\"text-align: center;\">Estimates of Food for 500 Poor Persons at Haina and Merxhausen, 1575</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td colspan=\"2\">grams/person/day</td><td style='text-align: center; word-wrap: break-word;'>calories/day</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat (6 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>124</td><td style='text-align: center; word-wrap: break-word;'>@ 2.73 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>339</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Fish (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>83</td><td style='text-align: center; word-wrap: break-word;'>@ 1.75 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>145</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Cheese (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>28</td><td style='text-align: center; word-wrap: break-word;'>@ 4.25 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>119</td></tr><tr><td style='text-align: center; wor ...",
+        "byte_size": 8534072,
+        "sha256": "0c5065b08b7945dad93f9ff06b959b953979bf5615e421a43297c7d0ed52f451"
+      },
+      {
+        "page_no": 368,
+        "file_idx": 367,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.7</div> <div style=\"text-align: center;\">Daily Food Consumption at Haina and Merxhausen, 1590</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td style='text-align: center; word-wrap: break-word;'>Haina</td><td style='text-align: center; word-wrap: break-word;'>Merxhausen</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Grains</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Rye bread $ ^{a} $</td><td style='text-align: center; word-wrap: break-word;'>1,282g.</td><td style='text-align: center; word-wrap: break-word;'>916 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 240 cal.</td><td style='text-align: center; word-wrap: break-word;'>(3,077 cal.)</td><td style='text-align: center; word-wrap: break-word;'>(2,198 cal.)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Other grains</td><td style='text-align: center; word-wrap: break-word;'>257 g.</td><td style='text-align: center; word-wrap: break-word;'>235 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 340 cal.</td><td style='text-align: center; word-wr ...",
+        "byte_size": 3388053,
+        "sha256": "f3126ed633e7a7a2d4f62a28a0dd9920f04a546f07967f2a34e4cfe87a897d8d"
+      },
+      {
+        "page_no": 369,
+        "file_idx": 368,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.8</div> <div style=\"text-align: center;\">Recommended Diet at Haina, 1620-1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td rowspan=\"2\"></td><td colspan=\"5\">Hospital Classes</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>I</td><td style='text-align: center; word-wrap: break-word;'>II</td><td style='text-align: center; word-wrap: break-word;'>III</td><td style='text-align: center; word-wrap: break-word;'>IV</td><td style='text-align: center; word-wrap: break-word;'>V</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat</td><td style='text-align: center; word-wrap: break-word;'>463 g.</td><td style='text-align: center; word-wrap: break-word;'>231 g.</td><td style='text-align: center; word-wrap: break-word;'>159 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 273 cal.</td><td style='text-align: center; word-wrap: break-word;'>1,264 cal.</td><td style='text-align: center; word-wrap: break-word;'>631 cal.</td><td style='text-align: center; word-wrap: break-word;'>434 cal.</td><td style='text-align: center; word-wrap: break-word;'>197 cal.</td><td style='text-align: center; word-wrap: break-word;'>197 cal.</td></tr ...",
+        "byte_size": 6866696,
+        "sha256": "7f1fddcb26f8de29a035e1ff8e7b754d165715d515bca70035e8fda67db51758"
+      },
+      {
+        "page_no": 370,
+        "file_idx": 369,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "“prebenderies,” who had been granted entry to the hospital despite their elevated social station, persons for whom the hospitals had never been intended: a schoolmaster, a doctor’s widow and child, and educated men with latinate names (“Hartman Scaevola” and “M. Agricola”). They received decidedly more meat than the bottom two classes, averaging one-third of a pound a day. The fourth class comprised 49 hospital servants (including 20 poor brothers and sisters). Their daily work must have been arduous, and in return they received over 5,000 calories daily; but since their social status was poor, they obtained an average of only one pound of meat a week and made up for this meager allotment with cheese and huge amounts of bread. $ ^{82} $ At the bottom of the five classes were 220 poor persons, who ate less than the servants because they were usually elderly and not hired for hard work. From surviving records, we cannot tell when this classification began, but up to the 1590s, the records do not even hint at a class of Pröbner, even though some Hessian officials and pastors had been granted retirement in the hospital as a reward for faithful service. $ ^{83} $ In allowing such a visible and officially sanctioned class system to develop, hospital officials were accommodating social needs never imagined by Philipp of Hesse. Established with a monastic ideal, they fell into a patter ...",
+        "byte_size": 8164431,
+        "sha256": "41f74cb2409c241a73b8158de06d6f7fae1b596827b6539a99caa0e499833a7e"
+      },
+      {
+        "page_no": 371,
+        "file_idx": 370,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "## STRAINING FOR A MORAL ORDER The food consumed at Haina and Merxhausen guaranteed a higher standard of living for these sixteenth-century \"welfare recipients\" than many working families enjoyed. This fact made hospital officials touchy or even defensive when it came to explaining the existence of the hospital. The obligation to be (and to appear) worthy of charity put residents of the hospitals under a code of behavior much stricter than that imposed on persons living normal lives. Before one can estimate how hard the hospital tried to meet a higher moral standard than that imposed on the world, one needs to know what standard was imposed upon the world. Fortunately for us, the Haina Hospital Archive has preserved an ordinance issued by Landgrave Philipp for the common inhabitants of Haina and the neighboring lands subject to the jurisdiction of the hospital. The very first clause shows that religious rules played a large role in the outside world as well as in the hospital: First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead they are to be notorious like those involved in magic, witchcraft, and other works of the devil; and after being publicly rebuked, they may be punished according to the seriousness of their offense. ...",
+        "byte_size": 8971987,
+        "sha256": "e0515b396106784d876a0969a715e3c0515685b6b696a9bcf8753168c84d50da"
+      },
+      {
+        "page_no": 372,
+        "file_idx": 371,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "cost from six alber (i.e., $ \\frac{1}{4} $ gulden) to five gulden. No man or woman, for example, could slander another \"with immoral, gross words or with any kind of libel or insult\" without running the risk of a one-gulden fine. During a fire, all must help in fighting it or pay a ten-gulden fine. Failure to attend a village court or assembly meeting might trigger a fine of one gulden. Dances of certain sorts were forbidden: \"Sunday dancing and other suspect evening dances are herewith completely forbidden; and if this is disobeyed, the men shall pay a fine of one gulden and the woman a fine of thirteen alber.\"86 Such ordinances obviously tried to set a general standard of Christian conduct and communal responsibility, but it is noteworthy that the punishments for false measures, adultery, and fornication were far less severe than those imposed by the imperial criminal code, the Carolina. $ ^{87} $ Although this set of village regulations tried to establish the Christian community as an ideal, there can be little doubt that the hospital, with its regular daily religious observances, strained to maintain a higher moral order. A prayer used at Merxhausen asked God for help in obeying the hospital officials, \"and let us not misuse these alms in laziness, lechery, or in other scandalous vices resulting in our eternal damnation.\" $ ^{88} $ The original ordinance of 1534 read: \"And ...",
+        "byte_size": 7897210,
+        "sha256": "89b5c2678ed264c3f044935f4d42747d25c20bc82479ae717e38abf811473b62"
+      },
+      {
+        "page_no": 373,
+        "file_idx": 372,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "vice set for 6:00 P.M. in the summer, and directly after supper in the large common room during the winter; the prayers were to include special thanks to the territorial prince for his benevolence. And in 1573, Schenck's ordinance described this evening service as a half-hour service with Bible reading and preaching as well as prayers of thanks. $ ^{93} $ Perhaps this was merely a case of ordinary practice becoming more and more explicit in the records, but it seems to indicate an intensified religious life for residents of the hospital, with two services on normal weekdays in addition to special holiday services, the two Sunday sermons, and the extra services on Wednesday and Friday mentioned by Letzener in 1588. The privileged life of semimonasticism also demanded a higher standard of social behavior. This is why residents of the hospital were not allowed to leave the institution to visit nearby villages. The rule was just as hard to enforce as it had been in the days when Haina was a monastery. In 1573, the superintendent, Reinhard Schenck zu Schweinsberg, observed that some of the brethren at Haina were “involved in all kinds of crafts, commerce, and trading, even on Sundays; and they go out weekly to the villages and attend church fairs and weddings, where they obtain wine and beer and pass the time in drunkenness, immorality [fornication], and wantonness; all of which mig ...",
+        "byte_size": 9359269,
+        "sha256": "f87c89993c4ae404de86d26cd04a3a3ad993daa1e0ddbc43c974588aedfd0ff3"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01105\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01106\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '79' in the rebind candidate is a clear OCR error for '29'. The note text matches exactly with footnote 29 visible on page 367 (image 2). Anchor 01044 is the correct parent anchor on page 367.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01112\",\n    \"anchor_id\": \"anchor-01050\",\n    \"confidence\": 1.0,\n    \"reason\": \"The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01116\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01117\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '8' in the rebind candidate is a clear OCR error for '91'. The note text lists names corresponding to footnote 91 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01118\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker '30' in the rebind candidate is a clear OCR error for '92'. The note text '1581).' corresponds to the end of footnote 92 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-01105",
+      "anchor_id": "anchor-01044",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01106",
+      "anchor_id": "anchor-01044",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker '79' in the rebind candidate is a clear OCR error for '29'. The note text matches exactly with footnote 29 visible on page 367 (image 2). Anchor 01044 is the correct parent anchor on page 367."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01112",
+      "anchor_id": "anchor-01050",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01116",
+      "anchor_id": "anchor-01054",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01117",
+      "anchor_id": "anchor-01054",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker '8' in the rebind candidate is a clear OCR error for '91'. The note text lists names corresponding to footnote 91 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01118",
+      "anchor_id": "anchor-01054",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker '30' in the rebind candidate is a clear OCR error for '92'. The note text '1581).' corresponds to the end of footnote 92 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote",
+    "chapter_title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-01105",
+        "anchor_id": "anchor-01044",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01106",
+        "anchor_id": "anchor-01044",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '79' in the rebind candidate is a clear OCR error for '29'. The note text matches exactly with footnote 29 visible on page 367 (image 2). Anchor 01044 is the correct parent anchor on page 367."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01112",
+        "anchor_id": "anchor-01050",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01116",
+        "anchor_id": "anchor-01054",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01117",
+        "anchor_id": "anchor-01054",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '8' in the rebind candidate is a clear OCR error for '91'. The note text lists names corresponding to footnote 91 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01118",
+        "anchor_id": "anchor-01054",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '30' in the rebind candidate is a clear OCR error for '92'. The note text '1581).' corresponds to the end of footnote 92 on page 372 (image 7). Anchor 01054 is the correct parent anchor on page 372."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-01105",
+        "anchor_id": "anchor-01044",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01112",
+        "anchor_id": "anchor-01050",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01116",
+        "anchor_id": "anchor-01054",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-01127",
+        "action": "match",
+        "note_item_id": "fn-01105",
+        "anchor_id": "anchor-01044",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '78' in the rebind candidate is a clear OCR error for '28'. The note text matches exactly with footnote 28 visible on page 367 (image 2). Anchor 01044 is at the correct location on page 367."
+      },
+      {
+        "link_id": "link-01134",
+        "action": "match",
+        "note_item_id": "fn-01112",
+        "anchor_id": "anchor-01050",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The current binding is already correct. Footnote 86 corresponds to the text ending with 'thirteen alber.' on page 372 (image 7), which is linked to anchor 01050 on page 371 (image 6)."
+      },
+      {
+        "link_id": "link-01138",
+        "action": "match",
+        "note_item_id": "fn-01116",
+        "anchor_id": "anchor-01054",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker '19' in the rebind candidate is a clear OCR error for '90'. The note text lists names corresponding to footnote 90 on page 372 (image 7). Anchor 01054 is at the correct location on page 372."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 24544,
+    "completion_tokens": 742,
+    "total_tokens": 25286,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 32374
+  }
+}

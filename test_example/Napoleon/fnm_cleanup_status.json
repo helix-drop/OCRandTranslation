@@ -1,0 +1,12 @@
+{
+  "cleaned_at": "2026-04-22T11:21:21",
+  "example_dir": "/Users/hao/OCRandTranslation/test_example/Napoleon",
+  "removed": [
+    "/Users/hao/OCRandTranslation/test_example/Napoleon/fnm_real_test_progress.json",
+    "/Users/hao/OCRandTranslation/test_example/Napoleon/fnm_real_test_result.json",
+    "/Users/hao/OCRandTranslation/test_example/Napoleon/FNM_REAL_TEST_REPORT.md"
+  ],
+  "removed_count": 3,
+  "failed": [],
+  "failed_count": 0
+}

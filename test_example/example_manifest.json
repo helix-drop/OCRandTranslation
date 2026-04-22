@@ -1,0 +1,84 @@
+{
+  "books": [
+    {
+      "slug": "Biopolitics",
+      "folder": "Biopolitics",
+      "group": "baseline",
+      "doc_name": "Foucault和Foucault - 2004 - Naissance de la biopolitique.pdf",
+      "source_pdf_path": "/Users/hao/OCRandTranslation/test_example/Biopolitics/Foucault和Foucault - 2004 - Naissance de la biopolitique.pdf",
+      "doc_id": "0d285c0800db",
+      "include_in_default_batch": true,
+      "expected_page_count": 370
+    },
+    {
+      "slug": "Germany_Madness",
+      "folder": "Germany_Madness",
+      "group": "baseline",
+      "doc_name": "Bell - 2000 - A History of Madness in Sixteenth-Century Germa.pdf",
+      "source_pdf_path": "/Users/hao/OCRandTranslation/test_example/Germany_Madness/Bell - 2000 - A History of Madness in Sixteenth-Century Germa.pdf",
+      "doc_id": "67356d1f7d9a",
+      "include_in_default_batch": true,
+      "expected_page_count": 464
+    },
+    {
+      "slug": "Goldstein",
+      "folder": "post-revolutionary",
+      "group": "baseline",
+      "doc_name": "Goldstein - 2005 - The post-revolutionary self politics and psyche i.pdf",
+      "source_pdf_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/Goldstein - 2005 - The post-revolutionary self politics and psyche i.pdf",
+      "doc_id": "7ba9bca783fd",
+      "include_in_default_batch": true,
+      "expected_page_count": 431
+    },
+    {
+      "slug": "Heidegger_en_France",
+      "folder": "Heidegger_en_France",
+      "group": "baseline",
+      "doc_name": "Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+      "source_pdf_path": "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+      "doc_id": "a5d9a08d6871",
+      "include_in_default_batch": true,
+      "expected_page_count": 608
+    },
+    {
+      "slug": "Mad_Act",
+      "folder": "Mad_Act",
+      "group": "baseline",
+      "doc_name": "Mad_acts_mad_speech_and_mad_people_in_la.pdf",
+      "source_pdf_path": "/Users/hao/OCRandTranslation/test_example/Mad_Act/Mad_acts_mad_speech_and_mad_people_in_la.pdf",
+      "doc_id": "bd05138cd773",
+      "include_in_default_batch": true,
+      "expected_page_count": 824
+    },
+    {
+      "slug": "Napoleon",
+      "folder": "Napoleon",
+      "group": "extension",
+      "doc_name": "把自己当成是拿破仑的人L'homme qui se prenait pour Napoléon_ Pour une histoire -- Laure Murat; Gallimard -- NRF (Series), Paris, ©2011 -- Gallimard.pdf",
+      "source_pdf_path": "/Users/hao/Desktop/Lingua翻译/把自己当做拿破仑的人.md_译文/把自己当成是拿破仑的人L'homme qui se prenait pour Napoléon_ Pour une histoire -- Laure Murat; Gallimard -- NRF (Series), Paris, ©2011 -- Gallimard.pdf",
+      "doc_id": "5df1d3d7f9c1",
+      "include_in_default_batch": true,
+      "expected_page_count": 396
+    },
+    {
+      "slug": "Neuropsychoanalysis_in_Practice",
+      "folder": "Neuropsychoanalysis_in_Practice",
+      "group": "extension",
+      "doc_name": "1_Georg Northoff - Neuropsychoanalysis in Practice_ Brain, Self and Objects  -Oxford University Press, USA (2011).pdf",
+      "source_pdf_path": "/Users/hao/Desktop/论文相关材料/3论文：神经精神分析/1_Georg Northoff - Neuropsychoanalysis in Practice_ Brain, Self and Objects  -Oxford University Press, USA (2011).pdf",
+      "doc_id": "e7f8a1b6c2d3",
+      "include_in_default_batch": true,
+      "expected_page_count": 386
+    },
+    {
+      "slug": "Neuropsychoanalysis_Introduction",
+      "folder": "Neuropsychoanalysis_Introduction",
+      "group": "extension",
+      "doc_name": "Neuropsychoanalysis A Contemporary Introduction (Georg Northoff) (Z-Library).pdf",
+      "source_pdf_path": "/Users/hao/Desktop/论文相关材料/3论文：神经精神分析/Neuropsychoanalysis A Contemporary Introduction (Georg Northoff) (Z-Library).pdf",
+      "doc_id": "a3c9e1f7b284",
+      "include_in_default_batch": true,
+      "expected_page_count": 168
+    }
+  ]
+}

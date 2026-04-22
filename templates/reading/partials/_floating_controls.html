@@ -1,0 +1,21 @@
+{% set reading_layout = request.args.get('layout', 'stack') %}
+
+{% if page_total > 1 %}
+<div class="floating-page-nav" id="floatingPageNav">
+  {% if prev_bp %}
+  <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) }}{{ '&view=' ~ current_view if current_view != 'standard' else '' }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="floating-page-nav-btn prev" title="上一页">&larr; 上一页</a>
+  {% else %}
+  <span class="floating-page-nav-btn prev disabled">已到第一页</span>
+  {% endif %}
+  {% if next_bp %}
+  <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) }}{{ '&view=' ~ current_view if current_view != 'standard' else '' }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="floating-page-nav-btn next" title="下一页">下一页 &rarr;</a>
+  {% else %}
+  <span class="floating-page-nav-btn next disabled">已到最后一页</span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if has_pdf %}
+<!-- Collapsed PDF toggle button -->
+<button class="pdf-toggle-btn{{ ' hidden' if pdf_visible else '' }}" id="pdfToggleBtn" onclick="togglePdfPanel()" title="显示 PDF 原文">📄</button>
+{% endif %}

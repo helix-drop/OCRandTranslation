@@ -1,0 +1,16 @@
+{
+  "cleaned_at": "2026-04-22T11:08:29",
+  "example_dir": "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France",
+  "removed": [
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces",
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/fnm_real_test_progress.json",
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/fnm_real_test_result.json",
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/FNM_REAL_TEST_REPORT.md",
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest_export_status.json",
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.Heidegger_en_France.blocked.test.zip",
+    "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest.fnm.obsidian.blocked.test.zip"
+  ],
+  "removed_count": 7,
+  "failed": [],
+  "failed_count": 0
+}

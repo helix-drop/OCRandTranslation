@@ -179,11 +179,24 @@ python app.py
 所有用户数据保存在项目目录的 `local_data/` 下，不写入系统级目录：
 
 - `local_data/user_data/config.json` — API Key、模型偏好、术语表等设置
-- `local_data/user_data/data/app.db` — SQLite 主库（文档、页面、翻译结果）
+- `local_data/user_data/data/catalog.db` — SQLite 目录库（文档索引、全局状态）
+- `local_data/user_data/data/documents/{doc_id}/doc.db` — 文档私有 SQLite（页面、翻译、FNM、文档级状态）
+- `local_data/user_data/data/app.db` — 旧单库（仅迁移来源/备份，不再作为运行时主链）
 - `local_data/user_data/data/documents/{doc_id}/source.pdf` — 每份文档的 PDF 副本
 - `local_data/user_data/data/documents/{doc_id}/toc_source.xlsx` 或 `.csv` — 当前目录文件（如有）
 
 这些内容默认不会提交到 Git 仓库。
+
+## 当前代码规模（2026-04-21）
+
+统计口径：按 `*.py` 逐行统计，忽略运行产物目录（如 `.venv/`、`local_data/`、`logs/`、`output/`）。
+
+| 范围 | 文件数 | 总行数 |
+|---|---:|---:|
+| 主链运行代码（`app/config/logging/launcher/model/ocr` + `document/` + `persistence/` + `pipeline/` + `translation/` + `web/`） | 72 | 31,247 |
+| FNM_RE 模块链路（`FNM_RE/**/*.py`） | 51 | 25,960 |
+| 自动化测试（`tests/**/*.py`） | 80 | 30,147 |
+| 工程脚本（`scripts/**/*.py`） | 16 | 6,730 |
 
 ## 常见问题
 
@@ -206,5 +219,5 @@ python app.py
 ## 相关文档
 
 - [DEV.md](DEV.md) — 开发架构与技术说明
-- [PROGRESS.md](PROGRESS.md) — 用户反馈与开发计划
+- [PROGRESS.md](PROGRESS.md) — 用户反馈与当前进展
 - [verification.md](verification.md) — 已执行的验证记录

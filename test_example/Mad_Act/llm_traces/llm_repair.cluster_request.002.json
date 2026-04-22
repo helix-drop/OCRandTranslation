@@ -1,0 +1,527 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-009-danxisaid:toc-ch-009-danxisaid:endnote\",\n  \"chapter_title\": \"“Danxi said…”\",\n  \"page_range\": [\n    157,\n    214\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 156,\n      \"ocr_excerpt\": \"passages were bundled together in increasingly sophisticated sections on madness in the Danxi corpus, as well as in the works of the physicians who admired Danxi's works. For my argument to be convincing, I must therefore demonstrate the ascendancy of Danxi precepts. Discursive dominance requires a certain density of social diffusion. Through texts and people (notably Zhu's own disciples), Zhu Zhenheng's medicine first spread like a rhizome along arteries such as the Grand Canal, feeding on social connections and networks of teachers and readers, growing more densely in some places than others, and presenting different faces in the many areas where it flourished. The Danxi corpus became dominant insofar as many important debates between medical specialists concerned the way in which Danxi's legacy should be interpreted. Physicians appropriated the name \\\"Danxi\\\" as a symbol of authority or used it as a foil to make their own doctrinal emphases appear more distinctive. The diffusion of medical ideas took place in ways more complex than we can ever document. Knowledge and skills were transmitted through local teaching networks, some hereditary, others informal, and yet others based on ...\"\n    },\n    {\n      \"page_no\": 157,\n      \"ocr_excerpt\": \"that made texts meaningful in particular teaching traditions, and about the process by which practitioners developed their skills through a mix of readings, instruction by one or several masters or seniors, and interaction with real patients. All these caveats make our understanding of received texts all the more important. Intertextuality, zhezhong hermeneutics, and deliberate syncretism To understand how the Danxi corpus was formed, we need to identify the textual provenance of the statements found therein. Different levels of inter-textuality can be distinguished. “Interdiscursivity” is the unwitting yet inevitable “intertext” that literary critiques identify even in the works of the most original authors. $ ^{4} $ Some consider it to be constitutive of any discourse, spoken or written. “Manifest intertextuality” occurs when writers explicitly attribute a passage to another source. The Ming medical tradition was intertextual in both of these senses, but here I pay particular attention to a third and somewhat different kind of intertextuality, not only in the way texts deployed common cultural motifs or overtly referred to previous works, but in the very way texts were produced—i ...\"\n    },\n    {\n      \"page_no\": 159,\n      \"ocr_excerpt\": \"own writings. I will also show that $ \\\\underline{\\\\text{zhezhong}} $ hermeneutics and textual composition rested on the notion that illness was constantly changing. Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $ The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also ...\"\n    },\n    {\n      \"page_no\": 160,\n      \"ocr_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), ...\"\n    },\n    {\n      \"page_no\": 161,\n      \"ocr_excerpt\": \"### 5.2 Madness in Lou Ying's 樓英 (1320-1400) $ ^{12} $ Yixue gangmu 醫學綱目 (1396) The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \\\"Immortals' crag\\\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $ Lou Ying started to collect materials for his summa of current medical doctrine and healing methods in the 1360s and completed a first version in 1380; he achieved the final version in 1396. Lou did not ha ...\"\n    },\n    {\n      \"page_no\": 162,\n      \"ocr_excerpt\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $ Textual montages like Lou's Systematic Outline of Medical Learning were not amateurish endeavors. Composite texts professing to cover all aspects of illness and medicine were actually a new genre of medical writing at which Zhu Zhenheng's disciples excelled. $ ^{18} $ Many books claiming to be for beginners were sophisticated digests of complex medical teachings; they were not easy “primers,” but points of entry into the intricate traditions they summarized. Students of medicine found these compilations all the more useful since readers could not easily access all the texts these works cited. Lou Ying's compilation was concerned ...\"\n    },\n    {\n      \"page_no\": 163,\n      \"ocr_excerpt\": \"Zhongjing [Zhang Ji] is detailed on external contamination that affects the interior and the surface or Yin and Yang; Danxi distinguishes himself on inner harm of Blood or Qi [that causes] depletion or repletion; Dongyuan [Li Gao] supports and protects central Qi; Hejian [Liu Wansu] removes the old to create the new; Mr. Qian [Yi] distinguishes clearly between the five Yin viscera; Dairen [Zhang Congzheng] is well versed in the three methods [vomiting, purging, and sweating]. Formularies from past ages are abundant: we can simply say that each has its strengths. 仲景詳外感於表裡陰陽 丹溪獨內傷於血氣虛實 東垣扶護中氣 河間推陳 致新 錢氏分明五臟 戴人熟施三法 凡歷代方書甚衆 皆各有所長耳 Since the same symptoms could occur for different reasons, it was plausible that many texts could contain useful methods of treatment. $ ^{19} $ “The benighted fail to appreciate this principle: their reckless trying [of recipes] on approximate illnesses has led many to an unjust and premature death” (昧者不悟是理 妄試疑似之病 每致夭橫者不少矣). Armed with a definition of illness as a multifaceted and ever-changing entity that was typical of Zhu Zhenheng's followers, $ ^{20} $ Lou proposed an elegant solution to the controversial issue of whether “old recipes” could cure “curren ...\"\n    },\n    {\n      \"page_no\": 164,\n      \"ocr_excerpt\": \"from the Treatise on Cold Injury (or any other source), for instance, were effective when they were used to treat the kinds of illness they cured best. In typical zbezbong fashion, Lou also used this flexible conception of illness and therapy to justify a syncretic approach to the textual past and to clinical practice. His book counted forty fascicles or chapters. The first nine—all part of a large section called “Yin-Yang and the viscera” 陰陽臟腑部—explained general principles on pathomechanisms, diagnosis, and treatments. Followed twenty fascicles (10-29) describing various illnesses and methods to treat them, four fascicles on Cold Injury (30-3), two on the illnesses of women (34-5), four on those of children (36-9), and one with commentaries on the five periods and six Qi in the Inner Canon (40). $ ^{21} $ In the twenty chapters on disorders other than Cold Injury, Lou Ying classified illnesses into five sections (bu 部) named after the pairs of Yin and Yang viscera with which he associated them. There were six fascicles on the Liver and Gallbladder (肝膽), five on the Heart and Small Intestine (心小腸), five on the Spleen and Stomach (脾胃), two on the Lungs and Large Intestine (肺大腸), and ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00392\",\n      \"marker\": \"5\",\n      \"page_no\": 157,\n      \"paragraph_index\": 2,\n      \"source_text\": \"To understand how the Danxi corpus was formed, we need to identify the textual provenance of the statements found therein. Different levels of inter-textuality can be distinguished. “Interdiscursivity” is the unwitting yet inevitable “inter ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00393\",\n      \"marker\": \"6\",\n      \"page_no\": 159,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00394\",\n      \"marker\": \"7\",\n      \"page_no\": 159,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00396\",\n      \"marker\": \"9\",\n      \"page_no\": 159,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00397\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. Thes ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00398\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 4,\n      \"source_text\": \"The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the int ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00399\",\n      \"marker\": \"11\",\n      \"page_no\": 160,\n      \"paragraph_index\": 0,\n      \"source_text\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00400\",\n      \"marker\": \"13\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00047\",\n      \"note_item_id\": \"fn-00096\",\n      \"current_anchor_id\": \"anchor-00752\",\n      \"marker\": \"1\",\n      \"note_page_no\": 169,\n      \"anchor_page_no\": 281,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"H\\u000104AK<H\\u0001L<\\u0001@B\\u0001;BHW͓ƀą2̕©Ĉ 4A7 V*BA:\\u0001\\u001b4<\\u00010H4A?<\\u0001;H4A\\u0001'H=<4A:\\u0001KHW ̌ısȺ̗ǄƱú \\u0004F88 \\u0019<5?\\b\\u0001\\u0018\\u0005\\b \\u001b4<\\u0001*<:BA:UF\\u0001@BFG\\u000194@BHF\\u0001E8?4G<I8\\u0001J4F\\u0001;<F HA6?8 \\u001b4<\\u0001#<4A:ıʚ \\u0004 \\u0011\\u0007\\u0012 \\u0005\\b \\u000f V/<A:M;H4A:W \\u0004F88\\u0001CE8I<BHF\\u0001ABG8\\u0005 FCB>8\\u0001B9\\u0001@BE8\\u0001G;4A\\u0001 \\u0001EBHA7\\u0001GE<CF\\u00018I8EL\\u0001L84E\\b \\u0010 ...\",\n      \"anchor_excerpt\": \"I first present a few important trends in Chinese medical thinking and practice from the seventeenth to the nineteenth century. After showing that the mucus etiology remained dominant over that period, I show how resilient and ubiquitous th ...\"\n    },\n    {\n      \"link_id\": \"link-00048\",\n      \"note_item_id\": \"fn-00097\",\n      \"current_anchor_id\": \"anchor-01093\",\n      \"marker\": \"2\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 387,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"$1;,\\u0001<,-, \\u0014 \\u00103\\u0005\\b G\\u0001J4F\\u00016B@@BA\\u00019BE\\u00017<F6<C?8F B9\\u0001G;8\\u00017LA4FGLW\\u0001\\u0004GB G4>8 ABG8F\\u0001J;<?8\\u0001G;8<E\\u0001@4FG8EF\\u0001J8E8\\u0001GE84G<A:\\u0001C4G<8AGF\\b1;4A: \\u001aBA:M; 8A:UF̳Řʑ\\u0011͝ \\u0015\\u0016,1*6+, \\u0012\\u0014\\u0001 \\u0011\\u0012\\u0011\\u0007\\u0012\\u0012\\u0005\\u0006\\u0001J4F G;8A 4G\\u0001G;8 4C8K B9\\u0001;<F\\u0001CBJ8E\\b +,;,1*\\u00016$1/,$2 gĄ\\u0006Ȝ \\u000464\\b\\u0001 \\u0012\\u0015 -8$1 \\u0010\\u0007\\u0012\\u0001B9 ...\",\n      \"anchor_excerpt\": \"average of 4 cases per century and barely more than 2 if we exclude the last hundred years I cover. I found only two relevant cases between 1588 and 1821. The 35 cases represent the way elite doctors (mostly from the Lower Yangzi region) ex ...\"\n    },\n    {\n      \"link_id\": \"link-00049\",\n      \"note_item_id\": \"fn-00100\",\n      \"current_anchor_id\": \"anchor-01200\",\n      \"marker\": \"2\",\n      \"note_page_no\": 173,\n      \"anchor_page_no\": 426,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u000e \\u00123\\u0006\\u00014CC8A787\\u0001GB !$%,1*\\u0001=+,/, 2 \\u000e\\u0011\\u00133\\u0015 #<H\\u001a;0(\\u0014\\u0001\\u000e\\u0010\\u0013\\u0005\\b\\u0001*B@8\\u0001<78AG<9L\\u0001.H?<A:\\u00014F\\u0001+4<M;BHƼî <A\\u0001!<4A:FH\\u0001\\u0004#<H\\u0006\\u0001#<A\\u0006\\u00014A7\\u000104A:\\u0001 \\u000e\\u0014\\u0001\\u000f\\u0011\\u0005\\u0006\\u0001BG;8EF\\u00014F 4<@8A ǆ̲ \\u0006\\u00014?FB\\u0001<A\\u0001!<4A:FH\\u0001\\u0004 HB\\u0001'8A:LHA \\u000e\\u00012 \\u0013\\u0012 3\\u0014\\u0001\\u000e \\u0010\\u0005\\b\\u0001)868AG\\u000187<GBEF\\u0001B9\\u0001#<HUF\\u0001JBE>F\\u0001F4L\\u0001G;4G\\u0001.H?<A: ...\",\n      \"anchor_excerpt\": \"Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} ...\"\n    },\n    {\n      \"link_id\": \"link-00050\",\n      \"note_item_id\": \"fn-00102\",\n      \"current_anchor_id\": \"anchor-01237\",\n      \"marker\": \"2\",\n      \"note_page_no\": 178,\n      \"anchor_page_no\": 435,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"*$1*08 žʢɠȫ 2 \\u000f\\u0011\\u00123 \\u0018\\b 4\\u0006 V#<74<\\u0001M;H=<4\\u000158A64BWƢ(˨Òžʢ \\u0006 V (1&$2\\u0001)$+8, W\\u0005\\b\\u0001/HJ4 F\\u0001ABG\\u0001@8AG<BA87\\u0001<A\\u00014\\u0001E868AG\\u00014EG<6?8\\u0001BA 94@BHF *;4BK<A: C;LF<6<4AF \\u00041;H\\u0001/<4BL<A: \\u0013\\u0013\\u0012\\u0005\\b \\u0010 #<H\\u0001<AGEB7H687 ;<F\\u0001BJAABG8FJ<G; $1 ń 4A7\\u0001477<G<BA4?\\u0001F86G<BAFJ<G;;87,$1 ɨ¦ ...\",\n      \"anchor_excerpt\": \"http://catalog.digitalarchives.tw/?URN=2627716; retrieved on 27 May 2009; I discuss the parricide case found in this memorial in 11.2). For fenghing, see memorial by Tuhai 圖海 dated 6 June 1656 (SZ13.5.14) (UCDA, http://catalog.digitalarchiv ...\"\n    },\n    {\n      \"link_id\": \"link-00051\",\n      \"note_item_id\": \"fn-00103\",\n      \"current_anchor_id\": \"anchor-00395\",\n      \"marker\": \"8\",\n      \"note_page_no\": 179,\n      \"anchor_page_no\": 159,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"8. GBB>\\u0001G;<F\\u00014F\\u00014A\\u00018K68CG<BA4?\\u000164F8\\u0001B9\\u0001C8BC?8\\u00017L<A:\\u00019EB@ 4GG46>\\u00015L\\u0001E84?\\u0001.<A7\\u0004 \\b \\u000e4\\u0006 V.<A7\\u0001FGEB>8F\\u0006W V%8<L<A\\u0001F<\\u0001M;BA:98A:\\u0001?HAWC+ ͘˧ \\u0015\\u0001#<H\\u001a;0(\\u0014\\u0001 \\u0011\\u0018\\u0005\\b \\u0010\\u000e &A8\\u0001C4FF4:8\\u00015L\\u0001/H\\u000104A6;HA\\u0001FH::8FGF\\u0001G;4G\\u0001;8\\u0001;47\\u0001C?4AA87\\u0001GB\\u0001JE<G8\\u0001@BE8\\u0001BA.8$1* \\u0014 V ,$1 <?? ...\",\n      \"anchor_excerpt\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"link_id\": \"link-00053\",\n      \"note_item_id\": \"fn-00107\",\n      \"current_anchor_id\": \"anchor-00390\",\n      \"marker\": \"3\",\n      \"note_page_no\": 185,\n      \"anchor_page_no\": 156,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u001b4AK<UF\\u0001FHEI<I<A:\\u0001G846;<A:F\\b\\u0001+;8\\u00018AG<E8\\u0001G8KG\\u000164A\\u000158\\u00019BHA7\\u0001<A\\u0001#<H\\u00014A7\\u0001/H8\\u0001\\u0004 \\u000f\\u0005\\b\\u0001 BE\\u0001G;8\\u0001GE4AF?4G<BA\\u0001B9;,1)$ 4F ;47 E8\\u000787<G87\\u0001#<H\\u0001\\u001a;HAUF\\u0001JBE>F\\u0006\\u00014\\u0001@4A 9EB@\\u0001*;44AK< A4@87\\u000104A:\\u0001/HAƑȂ 6B@C?8G87\\u00014 V@8AG4?\\u00016H?G<I4G<BA\\u0006W\\u0001F88\\u0001 ?@4A \\u0014\\u0001\\u000e \\b +;<F\\u00014A7\\u0001G;8 ...\",\n      \"anchor_excerpt\": \"The diffusion of medical ideas took place in ways more complex than we can ever document. Knowledge and skills were transmitted through local teaching networks, some hereditary, others informal, and yet others based on strict ritual relatio ...\"\n    },\n    {\n      \"link_id\": \"link-00054\",\n      \"note_item_id\": \"fn-00110\",\n      \"current_anchor_id\": \"anchor-00391\",\n      \"marker\": \"4\",\n      \"note_page_no\": 189,\n      \"anchor_page_no\": 157,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"V@8G;B7\\u00019BE\\u000164HG8E<M<A:\\u00012V@BK<\\u00075HFG<A:W\\u00173\\u0001:;BFGFW\\u0001\\u0004ǣͦƺ \\u0005\\b\",\n      \"anchor_excerpt\": \"To understand how the Danxi corpus was formed, we need to identify the textual provenance of the statements found therein. Different levels of inter-textuality can be distinguished. “Interdiscursivity” is the unwitting yet inevitable “inter ...\"\n    },\n    {\n      \"link_id\": \"link-00056\",\n      \"note_item_id\": \"fn-00114\",\n      \"current_anchor_id\": \"anchor-00575\",\n      \"marker\": \"3\",\n      \"note_page_no\": 200,\n      \"anchor_page_no\": 225,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"4E8\\u0001@BFG?L B664F<BA87 5L\\u0001@H6HF\\u00016BA:84?<A:\\u0001<A\\u0001G;8\\u00016;8FG\\b\\u0001\\u0018F\\u00014\\u0001GE84G@8AG\\u0006\\u0001BA8\\u0001F;BH?7 C46<9L G;8\\u0001 84EGUF\\u0001*C<E<G 2;BA8L?B6HFG\\u00173\\u0001\\u0004BA8/,$1* 846;\\u0005\\u0006\\u00014A7\\u0001GHE@8E<6\\u0001\\u0004;4?9\\u00014/,$1* \\u0005\\b\\u0001$4>8\\u0001G;8\\u000145BI8 4A7 BC8A @H6HF\\u0001>ABGF\\b\\u0001*GE<>8\\u00015L\\u00018I<?\\u000164A\\u00014?FB\\u0001?847\\u0001GB\\u0001G ...\",\n      \"anchor_excerpt\": \"The emergence of case files as a distinct genre partly stemmed from this flexible conception of illness. Yet even the best English-language histories of Chinese case records usually leap straight from Xu Shuwei to Wang Ji's Stone-Mountain's ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-009-danxisaid:toc-ch-009-danxisaid:endnote",
+      "chapter_title": "“Danxi said…”",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        157,
+        214
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 77847,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00392",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 157,
+          "paragraph_index": 2,
+          "char_start": 857,
+          "char_end": 865,
+          "source_marker": "$ ^{5} $",
+          "normalized_marker": "5",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "To understand how the Danxi corpus was formed, we need to identify the textual provenance of the statements found therein. Different levels of inter-textuality can be distinguished. “Interdiscursivity” is the unwitting yet inevitable “intertext” that literary critiques identify even in the works of the most original authors. $ ^{4} $ Some consider it to be constitutive of any discourse, spoken or written. “Manifest intertextuality” occurs when writers explicitly attribute a passage to another source. The Ming medical tradition was intertextual in both of these senses, but here I pay particular attention to a third and somewhat different kind of intertextuality, not only in the way texts deployed common cultural motifs or overtly referred to previous works, but in the very way texts were produced—intertextuality as a method for assembling texts. $ ^{5} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77848,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00393",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 159,
+          "paragraph_index": 1,
+          "char_start": 182,
+          "char_end": 190,
+          "source_marker": "$ ^{6} $",
+          "normalized_marker": "6",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77849,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00394",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 159,
+          "paragraph_index": 1,
+          "char_start": 285,
+          "char_end": 293,
+          "source_marker": "$ ^{7} $",
+          "normalized_marker": "7",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77851,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00396",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 159,
+          "paragraph_index": 1,
+          "char_start": 538,
+          "char_end": 546,
+          "source_marker": "$ ^{9} $",
+          "normalized_marker": "9",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77852,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00397",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 159,
+          "paragraph_index": 3,
+          "char_start": 443,
+          "char_end": 452,
+          "source_marker": "$ ^{10} $",
+          "normalized_marker": "10",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. These scripts also emerged and developed intertextually. Finally, the zbezzhong mode of interpreting the past largely explains why Chinese medical thinking often appears so “syncretistic” and “integrative.” $ ^{10} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77853,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00398",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 159,
+          "paragraph_index": 4,
+          "char_start": 906,
+          "char_end": 915,
+          "source_marker": "$ ^{10} $",
+          "normalized_marker": "10",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. These scripts also emerged and developed intertextually. Finally, the zbezzhong mode of interpreting the past largely explains why Chinese medical thinking often appears so “syncretistic” and “integrative.” $ ^{10} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77854,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00399",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 160,
+          "paragraph_index": 0,
+          "char_start": 1556,
+          "char_end": 1565,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), from Ningbo, and Yu Tuan 虞搏 (1438-1517), from the same locale as Zhu in Zhejiang. Though I focus on individual writers, I insist that they were responding to each other and explain how each of them proposed different interpretations of a common body of texts that included the Danxi corpus, but also the Inner Canon and the works of Liu Wansu and Li Gao. $ ^{11} $ Throughout, I try to recreate the doctrinal debates that make changes in their approaches to madness intelligible.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77855,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00400",
+          "chapter_id": "toc-ch-009-danxisaid",
+          "page_no": 161,
+          "paragraph_index": 0,
+          "char_start": 563,
+          "char_end": 572,
+          "source_marker": "$ ^{13} $",
+          "normalized_marker": "13",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00047",
+          "note_item_id": "fn-00096",
+          "current_anchor_id": "anchor-00752",
+          "marker": "1",
+          "note_page_no": 169,
+          "anchor_page_no": 281,
+          "current_anchor_marker": "1",
+          "note_excerpt": "H\u000104AK<H\u0001L<\u0001@B\u0001;BHW͓ƀą2̕©Ĉ 4A7 V*BA:\u0001\u001b4<\u00010H4A?<\u0001;H4A\u0001'H=<4A:\u0001KHW ̌ısȺ̗ǄƱú \u0004F88 \u0019<5?\b\u0001\u0018\u0005\b \u001b4<\u0001*<:BA:UF\u0001@BFG\u000194@BHF\u0001E8?4G<I8\u0001J4F\u0001;<F HA6?8 \u001b4<\u0001#<4A:ıʚ \u0004 \u0011\u0007\u0012 \u0005\b \u000f V/<A:M;H4A:W \u0004F88\u0001CE8I<BHF\u0001ABG8\u0005 FCB>8\u0001B9\u0001@BE8\u0001G;4A\u0001 \u0001EBHA7\u0001GE<CF\u00018I8EL\u0001L84E\b \u0010 +;<F\u00014A7\u0001G;8\u00019B??BJ<A:\u00016<G4G<BA\u00014E8\u00019EB@\u0001\u001a4B\u0001\u001a;4A:UFŴţ V/<4AL<\u00019H=HA\u0001@HM;<@<A:W ͗\u0004û§ˠ̩ \u0006 \u001b4<UF\u00018C<G4C;\b\u0001#<4AǞ 4A7\u0001#HB ƾ FGBB79BE\u00011;BH\u0001\u001bHAL<\u0001\u0004J;B\u0001?<I87\u0001<A\u0001#<4AK<Ǟǔ \u0006\u0001CE8F8AG\u000774L\u0001 HA4A\u0005\u0006\u00014A7 G;8\u00015EBG;8EF\u0001\u001a;8A:\u0001 4Bȿ͖ 4A7\u0001\u001a;8A:\u00010< ͑ \u0004J;B\u0001G4H:;G\u0001<A\u0001#HBL4A:ƾ́ \u0005\b \u0011 \u00138)$1*\u0001)$+8, äŜȠň \u0004 \u000e\u0011\u0005 4\u0001\u0004 $1;,\u0001<,-, \u0014\u0001\u000e\u000e \u0003\u0006\u00014??H7<A:\u0001GB 4 C4FF4:8\u00019EB@\u000104A:\u0001/<BA:UFƑ͂ \u0004\u000f \u0019\u001a S \u0012 \u001a \u0005 \u000f$<$1 ƺ˖ \u0014ʦǳɖ̬Wĭ˨° ˃˖ǃ\u0016Wļ˨ɺ \u0004F88\u0001%L?4A \u0013\u0013 4A7 %L?4A\u00014A7\u0001*<I<A \u0013\u0013\u000f\u0005\b \u0012 \u001b4<UF 8C<G4C; 6?4<@87 G;4G\u0001\u001b4<\u00014A7\u00011;H;47 8K6;4A:87\u0001?8A:G;L\u0001?8GG8EF\u0001\u0004ćĎųɯƨĵȔȔhȢ˖ \u0005\b\u00011;HUF 8C<G4C;\u0001<A7<64G87\u0001G;4G\u0001V;,$16+(1* UF\u0001G;8E4C<8F\u0001JBE>87\u0001JBA78E9H??L\u0015\u0001G;8E8\u00014E8\u0001F6BE8F\u0001B9\u0001FH6;\u0001264F8F3\u0015\u00012;<F3\u00017<F6<C?8F",
+          "anchor_excerpt": "I first present a few important trends in Chinese medical thinking and practice from the seventeenth to the nineteenth century. After showing that the mucus etiology remained dominant over that period, I show how resilient and ubiquitous the script of blockage of the Heart by mucus was. I map the vivid “imagination of mucus” $ ^{1} $ through which physicians—from treatise writers to village healers—continued to envision madness from the seventeenth to the nineteenth century. I then turn to a pivotal figure in eighteenth-century medicine—Ye Gui 葉桂 (1667-1746)—and to what an influential work attributed to him said about",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00048",
+          "note_item_id": "fn-00097",
+          "current_anchor_id": "anchor-01093",
+          "marker": "2",
+          "note_page_no": 170,
+          "anchor_page_no": 387,
+          "current_anchor_marker": "2",
+          "note_excerpt": "$1;,\u0001<,-, \u0014 \u00103\u0005\b G\u0001J4F\u00016B@@BA\u00019BE\u00017<F6<C?8F B9\u0001G;8\u00017LA4FGLW\u0001\u0004GB G4>8 ABG8F\u0001J;<?8\u0001G;8<E\u0001@4FG8EF\u0001J8E8\u0001GE84G<A:\u0001C4G<8AGF\b1;4A: \u001aBA:M; 8A:UF̳Řʑ\u0011͝ \u0015\u0016,1*6+, \u0012\u0014\u0001 \u0011\u0012\u0011\u0007\u0012\u0012\u0005\u0006\u0001J4F G;8A 4G\u0001G;8 4C8K B9\u0001;<F\u0001CBJ8E\b +,;,1*\u00016$1/,$2 gĄ\u0006Ȝ \u000464\b\u0001 \u0012\u0015 -8$1 \u0010\u0007\u0012\u0001B9\u0001G;8\u0001E868<I87\u001b80(1\u00016+,4,1 ;̲\u0019˓ \u0005\u0001J4F\u00014\u00016B??86G<BA\u0001B9\u000164F8\u0001E86BE7F$9$17\u0001/$\u0001/(775( \b #HB\u0001+<4AL<UF ɬ° ȧ (,6+(1*\u0001%$2-,$1 ˇȉÜ̯ \u0004 \u0012 \u0005\u00014A7 21*<8$1\u00016+,;,$2\u0001)$1* Ƅ¢˝őŜ \u00044\u00015BB>BA #<\u0001 4BUF\u0001@87<6<A8G;4G .;8A\u0001\u001b4<\u0001E8GHEA87\u0001;B@8 G;4G\u0001L84E49G8E;4I<A:\u0001786?<A87 E86B@@8A74G<BA\u0001GB\u0001586B@8\u00014\u00016BHEG #HB\u0001+<4AL<\u000187<G87\u0001<A\u0001 \u0012 \u0005\u0006\u00014?FB\u00016BAG4<A87\u0001@4AL\u000164F8F\u00015L\u0001#HBUF\u0001@4FG8E\u0001#<\u0001 4B\u0001G;4G\u0001#HB\u0001;47\u0001JE<GG8A\u00017BJA\b \u0013 A\u0001;<F\u0001BA?L\u0001FHEI<I<A:\u0001?8GG8E\u0001\u0004JE<GG8A\u0001<A\u0001 \u000f \u0001GB\u00014\u0001@<ABE\u0001 7H64G<BA\u0001B99<6<4?\u0001A4@87\u0001#BH\u0001#<Ɨq <A\u0001A8<:;5BE<A: C;LF<6<4A\u0006\u0001*BA:\u0001#<4A 6B@CBF87 4 ?BA:\u0001C<868 64??87\u0001V,CBA\u0001*8A7<A:\u0001&99\u0001\u001b4<\u00010H4A?<\u0001BA\u0001;<F \u001a;HM;BH\u0001)BHG8 ʸî˿ \u0005\u0006\u00011;H\u00014AFJ8E87\u0001;<F\u00016BEE8FCBA78AGUF\u0001DH8FG<BAF\u0001BA\u0001@87<64?\u00017B6GE<A8\u0001\u00046<G<A:\u0001;<F\u0001BJA \u0010(=+,\u0001<8/81 Ɖʕ͜˧ 4F\u0001J8??\u00014F\u0001G;8 \u001211(5\u0001 $121 \u0005\u0006\u0001BA\u0001G;8\u000189986GF\u0001B9\u0001I4E<BHF\u00017EH:F\u0006\u0001BA\u00017<8G\u0001\u00048FC86<4??L\u0001@84G\u0005\u0006\u0001BA ;BJ\u0001GB\u0001@4>8\u0001 <E8\u000178F68A7\u0006\u00014A7\u0001BA\u0001;BJ\u0001GB\u0001GE84G\u000145F68FF8F\u0006\u0001CE4<F<A:\u0001#<\u0001 4BUF\u0001@8G;B7F\u0001BA\u0001G;8\u0001?4GG8E\u0001<FFH8\b BHA7 <A\u0001G;8\u00011;H\u00016?4AUF\u0001:8A84?B:L\u0001\u0004 +,B$1\u0001!+86+,\u0001=21*38 ˹ëƀƪÌˮ \u0005\u0006\u0001G;8\u0001?8GG8E\u0001<F\u0001E8CEB7H687\u0001<A $1;,\u0001<,-, \u0004 \u0014 \u0011 \u0005\b\u0001 A\u00014\u00016B?BC;BA\u0001GB\u0001G;<F\u0001?8GG8E\u0006\u0001#BH\u0001#<UF\u0001FBA\u00016?4<@87\u0001G;4G\u0001;<F\u000194G;8E\u0001;47\u00018K6;4A:87\u0001@BE8\u0001G;4A\u00019BEGL\u0001?8GG8EF J<G;\u00011;H\b\u0001\u001aBAF<78E<A:\u0001G;8\u0001IB?H@8 B9\u0001G;8\u00016BEE8FCBA78A68\u00011;H\u00018K6;4A:87\u0001J<G;\u0001\u001b4<\u0001*<:BA:\u0006\u0001#BH\u0001#<\u0006\u00014A7 CEB545?L\u0001@4AL\u0001BG;8EF\u0006\u0001?8GG8EF\u0001@HFG\u0001;4I8\u0001588A\u0001<@CBEG4AG\u00016;4AA8?F\u0001<A\u0001G;8\u00017<FF8@<A4G<BA\u0001B9\u0001@87<64?\u00017B6GE<A8F\b \u000e V+<\u00011;H\u000104AK<H\u0001L<\u0001@B\u0001;BHW͓ƀą2̕©Ĉ \u0004 (1;,$1\u0001-, Řī̈́ \b \u00104\u0005\b\u0001\u001b4<8A=B<A87\u0001*BA:\u0001#<4AGB\u0001JE<G8 G;<F\u0001G8KG49G8E\u001b4< ;47\u0001F;BJA *BA:\u00019<I8\u0001<AF6E<587\u0001F;88GF\u0001G;4G\u00011;H1;8A;8A: ;47\u0001:<I8A\u001b4<\b",
+          "anchor_excerpt": "average of 4 cases per century and barely more than 2 if we exclude the last hundred years I cover. I found only two relevant cases between 1588 and 1821. The 35 cases represent the way elite doctors (mostly from the Lower Yangzi region) explained the way they understood and treated mad women. They give only a small glimpse of how society handled women who were called mad. Indeed, the main treatment for manic women may not have been medical. There is too little evidence to tell, but home confinement was certainly an option, though it may have come only after the failure of medical or exorcistic treatments. Since the documents tell us precious little about the way female patients experienced their own condition, we are also deprived of the “first-person” data that have informed recent studies of women in Chinese history. $ ^{2} $ I will remind the reader of these limits when I propose tentative conclusions or try to point to possible trends.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00049",
+          "note_item_id": "fn-00100",
+          "current_anchor_id": "anchor-01200",
+          "marker": "2",
+          "note_page_no": 173,
+          "anchor_page_no": 426,
+          "current_anchor_marker": "2",
+          "note_excerpt": "\u000e \u00123\u0006\u00014CC8A787\u0001GB !$%,1*\u0001=+,/, 2 \u000e\u0011\u00133\u0015 #<H\u001a;0(\u0014\u0001\u000e\u0010\u0013\u0005\b\u0001*B@8\u0001<78AG<9L\u0001.H?<A:\u00014F\u0001+4<M;BHƼî <A\u0001!<4A:FH\u0001\u0004#<H\u0006\u0001#<A\u0006\u00014A7\u000104A:\u0001 \u000e\u0014\u0001\u000f\u0011\u0005\u0006\u0001BG;8EF\u00014F 4<@8A ǆ̲ \u0006\u00014?FB\u0001<A\u0001!<4A:FH\u0001\u0004 HB\u0001'8A:LHA \u000e\u00012 \u0013\u0012 3\u0014\u0001\u000e \u0010\u0005\b\u0001)868AG\u000187<GBEF\u0001B9\u0001#<HUF\u0001JBE>F\u0001F4L\u0001G;4G\u0001.H?<A: E898EE87\u0001GB\u0001+4<\u00016BHAGLƼɥ 4A7\u0001)H:4B »Ȧ \u0004#<H\u001a;0(\u0014\u0001\u000f \u0005\u0006\u0001J;8E84F\u0001#<H\u0001*;<=H8 @4<AG4<AF \u0004#<H\u0006\u0001#<A\u0006\u00014A7 04A:\u0001 \u000e\u0014\u0001\u000f \u0005\u0001G;4G\u0001#<HUF\u000194G;8E\u0001J4F\u00019EB@\u0001\u001a;4A:M;BHõî \b#<H \u001a;HA 8KC?4<A87 G;4G\u0001V1;H;,$16+(1* B9\u0001\u001b4AK< J4F\u0001E8ABJA87\u00019BE\u0001;<F\u0001@87<6<A8 <A\u0001G;8\u0001#BJ8E\u000104A:M< )<I8E \u0004ƱƄ \u0005\u0015\u0001@L\u000194G;8E\u0001J8AG\u0001GB\u0001FGH7L\u0001J<G;\u0001;<@ C8EFBA4??LW\u0001\u0004ŧ\u000eǔƀ@ȉ)̡ͩƱƄ Ò˓Č\u0011Ǎ \u0005\u0001\u0004CE89468\u0001GB ,-,1*\u0001;,$2;8( ̡ɞàÇ \u0015\u0001#<H\u001a;0(\u0014\u0001\u000e\u0015 V#4AF;<\u0001F;<=<8WʶÏˡį F4<7\u0001FB@8G;<A:\u0001F<@<?4E\u0005\b\u0001 A\u0001;<F\u0001 \u000e\u0012 \u0001CE89468\u0001GB\u0001G;8 $1;,\u0001;,1)$ \u000eǔĒƺ \u0006\u0001\u001a;8A: \u001a;BA: ȿ> 6?4<@87\u0001G;4G\u0001#<HUF\u000194G;8E\u0001J4F\u0001BA8\u0001B9\u0001G;E88\u00017<F6<C?8F\u0001J;B;47 GE4AF@<GG87\u0001G8KGF\u00015L\u00011;H\u0006\u00015HG ABJ;8E8\u00017<7\u0001#<H\u0001@8AG<BA\u0001G;4G\u0001;8;47 E868<I87\u0001G8KGF\u00019EB@\u0001;<F\u000194G;8E\b \u000e\u0013 #<HUF\u0001<AGEB7H6GBEL\u00016B@@8AGF\u0001GB ,-,1*\u0001;,$2;8( ̡ɞàÇ \u0004 \u0012\u0012\u0005\u0001<78AG<9<87 (<H\u0001\"8EBA:\u00014F\u000158<A:\u00019EB@ 04A:M;BH\u0001\u0004 H4A:?<A:þ̀ \u0005\u0001\u0004#<H\u001a;0(\u0014\u0001\u0012\u0005\b\u0001#<HUF\u0001 \u0013\u0010\u0001CE89468\u0001GB 8-,\u0001:(,<, <78AG<9<87\u0001 8A:\u00014F\u000158<A:\u00019EB@\u0001G;8 #BJ8E\u000104A:M<\u00014E84\u0001\u0004#<H\u001a;0(\u0014\u0001\u0011\u000f\u0005\b\u0001+;8\u0001G8E@\u0001#<H\u0001HF87\u0001J4F\u0001!<4A:MHBƱð \u0006\u0001G;8\u00018DH<I4?8AG\u0001B9\u0001!<4A:7BA:ƱƄ \u0006\u00014 G8E@\u0001G;4G\u0001E898EE87\u0001GB\u0001G;8\u0001?BJ8E\u0001E846;8F\u0001\u000458?BJ\u0001%4A=<A:\u0005\u0001B9\u0001G;8\u000104A:M<\u0001)<I8E\b",
+          "anchor_excerpt": "Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} $ Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00050",
+          "note_item_id": "fn-00102",
+          "current_anchor_id": "anchor-01237",
+          "marker": "2",
+          "note_page_no": 178,
+          "anchor_page_no": 435,
+          "current_anchor_marker": "2",
+          "note_excerpt": "*$1*08 žʢɠȫ 2 \u000f\u0011\u00123 \u0018\b 4\u0006 V#<74<\u0001M;H=<4\u000158A64BWƢ(˨Òžʢ \u0006 V (1&$2\u0001)$+8, W\u0005\b\u0001/HJ4 F\u0001ABG\u0001@8AG<BA87\u0001<A\u00014\u0001E868AG\u00014EG<6?8\u0001BA 94@BHF *;4BK<A: C;LF<6<4AF \u00041;H\u0001/<4BL<A: \u0013\u0013\u0012\u0005\b \u0010 #<H\u0001<AGEB7H687 ;<F\u0001BJAABG8FJ<G; $1 ń 4A7\u0001477<G<BA4?\u0001F86G<BAFJ<G;;87,$1 ɨ¦ \b \u0010 +;8\u0001G<G?8 ,;8(\u0001=+(=+21* ̡Çļˋ 5L\u0001J;<6;@BFG F6;B?4EFABJ E898E\u0001GB\u0001/HUF\u00015BB><F4A\u00018KGE4CB?4G<BA\u00019EB@ #<H\u0001\u001a;HAUF\u000178F6E<CG<BA\u0001B9\u0001/HUF\u0001@8G;B7\u0001B9\u0001F8?86G<BA\b \u0004+;8\u000184E?<8FG\u0001B66HEE8A68 \u0001;4I8\u00019BHA7 B9\u0001<G\u00014F\u00014\u00015BB>\u0001G<G?8 <F 4\u0001 \u000f \u0010\u0001CE89468\u0001GB 8-,\u0001:(,<, Ǿƚďɭ \u0015\u0001#<H\u001a;0(\u0014\u0001\u0011\u0010\b\u0005 1+(=+21* @84A G F8?86G<A:\u0001@4G8E<4?\u00019EB@\u00017<998E8AG FBHE68F\u0001<A\u0001BE78E\u0001GB\u00016E84G8\u00014\u00017B6GE<A4?\u00014@4?:4@\b\u0001/H 4?FB47BCG87\u0001G;4G4CCEB46;\u0001<A\u00016B@C<?<A:;<F (1&$2\u0001)$+8, ž ʢȠň \u0006\u0001J;<6;\u0001J4F\u0001?4G8E\u00016E<G<6<M87\u00015864HF8\u0001<G\u0001VF<@C?L\u0001F8?86G87\u0001CE868CGF\u00019EB@\u0001@4AL\u0001@4FG8EF\u0001FH6;\u00014F\u00011;4A:\u0001!<8:H G;8\u00010H4A\u0006\u00012/H3=+(=+21* U7\u0001G;8<E\u00018FF8AG<4?F\u0001BA\u0001G;8\u000154F<F\u0001B9\u0001G;8 @4<A\u0001CE868CGF B9\u0001G;8 2\u001211(5 3 20H4AFH3\u0006\u0001#<\u0001\u001bBA:LH4A\u00012 4B3\u0006\u0001.4A:\u0001 4<64A:\u00012 4B:H3\u0006\u00011;H\u0001\u001b4AK<\u000121;8A;8A:3\u0006\u00014A7\u0001\u001a;8A:\u0001.H=<\u00014A7\u00016B@5<A87 G;8@\u0001<AGB\u0001BA8\u00015BB>\u0001J<G;BHG\u00019HEG;8E\u0001477<G<BAFW\u0001\u0004zăǜ| ƂƄ¢ ǿǆʳ ƀ\u000eǔ ĮǧñŗÒ\u0011˥ $121 W\u0001\u0004 ŋ̥[Èȯ =ƂŤ\u0011 ƀą2ƀƪ˧̈́ ž\u0012ɞšɶļˋIˑ \u0005\b Į\u0004ųǱ Uǧ¨ȧ \u0005\u0001\u0004#<\u0001*;<M;8A ƂȳȀ \u0006 (1&$2\u0001*$1*08 žʢɠȫ \u0006\u00018AGEL\u0001BA (1&$2\u0001)$+8, \u0005\b",
+          "anchor_excerpt": "http://catalog.digitalarchives.tw/?URN=2627716; retrieved on 27 May 2009; I discuss the parricide case found in this memorial in 11.2). For fenghing, see memorial by Tuhai 圖海 dated 6 June 1656 (SZ13.5.14) (UCDA, http://catalog.digitalarchives.tw/?URN=2516751, retrieved on 27 May 2009). The term fengji 瘋疾 also appeared in Qing codified law; see Appendix 7 under \"1725 [2].\"",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00051",
+          "note_item_id": "fn-00103",
+          "current_anchor_id": "anchor-00395",
+          "marker": "8",
+          "note_page_no": 179,
+          "anchor_page_no": 159,
+          "current_anchor_marker": "8",
+          "note_excerpt": "8. GBB>\u0001G;<F\u00014F\u00014A\u00018K68CG<BA4?\u000164F8\u0001B9\u0001C8BC?8\u00017L<A:\u00019EB@ 4GG46>\u00015L\u0001E84?\u0001.<A7\u0004 \b \u000e4\u0006 V.<A7\u0001FGEB>8F\u0006W V%8<L<A\u0001F<\u0001M;BA:98A:\u0001?HAWC+ ͘˧ \u0015\u0001#<H\u001a;0(\u0014\u0001 \u0011\u0018\u0005\b \u0010\u000e &A8\u0001C4FF4:8\u00015L\u0001/H\u000104A6;HA\u0001FH::8FGF\u0001G;4G\u0001;8\u0001;47\u0001C?4AA87\u0001GB\u0001JE<G8\u0001@BE8\u0001BA.8$1* \u0014 V ,$1 <??A8FF\u000158?BA:F\u0001GB G;8\u00019<I8\u0001BE:4AF\u0006\u0001J;8E84F',$1 <??A8FF\u000158?BA:F\u0001GB\u0001G;8 84EG\u0015\u0001G;8E89BE8\u0001 \u0001;8E8\u000178IBG8\u00014\u0001F86G<BA\u0001GB\u0001.<A7;,$1 4A7\u0001 CHG ',$1 4A7 .8$1* GB:8G;8E\u0001<A\u0001G;8<E\u0001BJA\u0001F86G<BAW\u0001\u0004ʩȝȘƣŝ ʐ ȟȘç\u0011ŝĒ Ő$)͘ȝ}Ɉ\u0004 ̲ɶȟǵǥ\u0004̲\u0014 \u0005\b 8-,\u0001:(,<, \u000e \b 5\u0001\u0004V.<A7\u0001K<4AW ͘ȝ̲ \u0006\u0001F86BA7\u0001ABG8\u0001GB\u0001G;8\u00018AGEL\u000164??87\u0001V/<4A\u000198A\u0001@4< L4B\u0001;4A\u0001J8A\u00015H<\u0001GBA:WȝPʆʴÖǕ  \u0005\u0015\u0001#<H\u001a;0(\u0014\u0001 \u0013 \b G\u00014CC84EF\u0001G;4G\u0001G;<F\u0001F86G<BA\u0001J4F\u0001A8I8E\u0001JE<GG8A\b \u0010\u000f B??BJ87 4\u0001?BA:\u0001ABG8\u0001BA\u0001#<H\u0001.4AFHUF\u0001E8<AG8ECE8G4G<BA\u0001B9 <E8\u0006\u00014\u0001F;BEGBA8 IB<6<A:\u0001#<H\u0001.4AFHUF\u0001CBF<G<BA J<G;BHG\u0001A4@<A:\u0001;<@\u0006\u0001BA8\u0001ABG8\u00015L\u0001.4A:\u0001#Rǿæ \u0006\u00014A7\u00014ABG;8E\u0001?BA:\u0001ABG8\u00015L\u0001#<H\u0001.4AFH\b\u0001.4A:\u0001#R\u0001J4F\u00014ABG;8E 7<F6<C?8\u0001B9\u00011;H\u00011;8A;8A:\u0001J;B\u0001?<I87\u0001<A\u0001/<U4A\u0001<A\u0001G;8\u000184E?L\u0001$<A:\b'8E;4CF#<H\u00016BAFH?G87\u0001;<@\u0001C8EFBA4??LBE\u00017E8J 9EB@\u0001;<F ,-,1*\u000168+8,\u0001-, ̡ɞǖƽ̈́ \b\u0001+;8 8-,\u0001:(,<, UF Ǿƚďɭ 94F6<6?8\u0001BA <E8 \u0004 -8$1 \u0005E898EE87G;8\u0001E8478E\u0001GB G;8\u00016;4CG8E\u0001BA(< \u0004-8$1 \u0010\u0015\u0001J;8E8\u0001J8\u00019<A7\u0001@BE8\u00015L\u0001#<H\u0001.4AFH\u0005\u00014A7\u0001GB\u00014\u00017<F6HFF<BA\u0001B9\u0001G;8\u0001@BI8@8AGF\u0001B9 <E8 64HF87\u00015L\u00010<A\u000178C?8G<BA 6?BF8\u0001GB\u0001#<\u0001 4BUF\u00014A7\u00011;H\u00011;8A;8A:UF\u0001CBF<G<BAF \u0004<A\u0001G;8 F86G<BABA\u0001 84G\u0006-8$1 \u0013\u0005\b \u0010\u0010 +;8 CHE:4G<I8F\u00014A7\u00018@8G<6F\u0001<G\u0001CE8F8AG87\u0001J8E8 <AFC<E87\u00015LBE 7E4JA\u00019EB@\u0001G;8 5($7,6(\u000121\u0001 2/'\u0001\u00121-85< \b @8G<6F <A6?H787 $8?BA\u0007C87<6?8\u0001CBJ78E\u0006\u0001+;E88\u0007F4<AG\u0001CBJ78E\u0006 *4?<I4\u0007G;<AA<A:\u0001CBJ78E\u0006\u00014A7$H6HF \u0007EB<?<A:\u0001CBJ78E\b",
+          "anchor_excerpt": "Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00053",
+          "note_item_id": "fn-00107",
+          "current_anchor_id": "anchor-00390",
+          "marker": "3",
+          "note_page_no": 185,
+          "anchor_page_no": 156,
+          "current_anchor_marker": "3",
+          "note_excerpt": "\u001b4AK<UF\u0001FHEI<I<A:\u0001G846;<A:F\b\u0001+;8\u00018AG<E8\u0001G8KG\u000164A\u000158\u00019BHA7\u0001<A\u0001#<H\u00014A7\u0001/H8\u0001\u0004 \u000f\u0005\b\u0001 BE\u0001G;8\u0001GE4AF?4G<BA\u0001B9;,1)$ 4F ;47 E8\u000787<G87\u0001#<H\u0001\u001a;HAUF\u0001JBE>F\u0006\u00014\u0001@4A 9EB@\u0001*;44AK< A4@87\u000104A:\u0001/HAƑȂ 6B@C?8G87\u00014 V@8AG4?\u00016H?G<I4G<BA\u0006W\u0001F88\u0001 ?@4A \u0014\u0001\u000e \b +;<F\u00014A7\u0001G;8\u0001A8KG\u0001C4E4:E4C;\u00014E8\u000154F87\u0001BA\u0001#<H\u0001*;<=H8\u0001 \u0013\u0013\u000f\u0014\u0001 \u0015\u0001#<H\u0006 #<A\u0006\u00014A7\u000104A:\u0001 \u000e\u0014\u0001\u0012\u0011\u0007\u0012\u0015\u00014A7\u0001#<H\u00014A7\u0001/H8\u0001 \u000f\u0014\u0001 \u0010\u0007 \u0013\b",
+          "anchor_excerpt": "The diffusion of medical ideas took place in ways more complex than we can ever document. Knowledge and skills were transmitted through local teaching networks, some hereditary, others informal, and yet others based on strict ritual relations between a master and his (rarely her) disciples. $ ^{2} $ The vast majority of teachers remain undocumented. We know almost nothing about the routes by which medical books circulated throughout the empire, carried by traders, officials en route to their posts, or wandering physicians. The role of manuscripts and hand copies of printed books can only be surmised from notes made en passant in various writings, and the private letters that contributed to spreading new medical conceptions have almost all disappeared. $ ^{3} $ Finally we know too little about the oral teachings",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00054",
+          "note_item_id": "fn-00110",
+          "current_anchor_id": "anchor-00391",
+          "marker": "4",
+          "note_page_no": 189,
+          "anchor_page_no": 157,
+          "current_anchor_marker": "4",
+          "note_excerpt": "V@8G;B7\u00019BE\u000164HG8E<M<A:\u00012V@BK<\u00075HFG<A:W\u00173\u0001:;BFGFW\u0001\u0004ǣͦƺ \u0005\b",
+          "anchor_excerpt": "To understand how the Danxi corpus was formed, we need to identify the textual provenance of the statements found therein. Different levels of inter-textuality can be distinguished. “Interdiscursivity” is the unwitting yet inevitable “intertext” that literary critiques identify even in the works of the most original authors. $ ^{4} $ Some consider it to be constitutive of any discourse, spoken or written. “Manifest intertextuality” occurs when writers explicitly attribute a passage to another source. The Ming medical tradition was intertextual in both of these senses, but here I pay particular attention to a third and somewhat different kind of intertextuality, not only in the way texts deployed common cultural motifs or overtly referred to previous works, but in the very way texts were produced—intertextuality as a method for assembling texts. $ ^{5} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00056",
+          "note_item_id": "fn-00114",
+          "current_anchor_id": "anchor-00575",
+          "marker": "3",
+          "note_page_no": 200,
+          "anchor_page_no": 225,
+          "current_anchor_marker": "3",
+          "note_excerpt": "4E8\u0001@BFG?L B664F<BA87 5L\u0001@H6HF\u00016BA:84?<A:\u0001<A\u0001G;8\u00016;8FG\b\u0001\u0018F\u00014\u0001GE84G@8AG\u0006\u0001BA8\u0001F;BH?7 C46<9L G;8\u0001 84EGUF\u0001*C<E<G 2;BA8L?B6HFG\u00173\u0001\u0004BA8/,$1* 846;\u0005\u0006\u00014A7\u0001GHE@8E<6\u0001\u0004;4?9\u00014/,$1* \u0005\b\u0001$4>8\u0001G;8\u000145BI8 4A7 BC8A @H6HF\u0001>ABGF\b\u0001*GE<>8\u00015L\u00018I<?\u000164A\u00014?FB\u0001?847\u0001GB\u0001G;8\u00019BE@4G<BA\u0001B9\u0001G;<F\u00017<FBE78E\u0014\u0001GE84G\u0001<G\u0001J<G;\u0001@8G;B7F\u00019BE",
+          "anchor_excerpt": "The emergence of case files as a distinct genre partly stemmed from this flexible conception of illness. Yet even the best English-language histories of Chinese case records usually leap straight from Xu Shuwei to Wang Ji's Stone-Mountain's Medical Case Files (Shishan yian 石山醫案 [1531]; see 6.2) without discussing the dominance of this conception of illness and style of prescription among Jin and Yuan physicians. $ ^{3} $ This omission introduces inaccuracies in accounts of the development of “medical case files” and obscures the process by which they emerged as an independent genre in the sixteenth century.",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 156,
+        "file_idx": 155,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "passages were bundled together in increasingly sophisticated sections on madness in the Danxi corpus, as well as in the works of the physicians who admired Danxi's works. For my argument to be convincing, I must therefore demonstrate the ascendancy of Danxi precepts. Discursive dominance requires a certain density of social diffusion. Through texts and people (notably Zhu's own disciples), Zhu Zhenheng's medicine first spread like a rhizome along arteries such as the Grand Canal, feeding on social connections and networks of teachers and readers, growing more densely in some places than others, and presenting different faces in the many areas where it flourished. The Danxi corpus became dominant insofar as many important debates between medical specialists concerned the way in which Danxi's legacy should be interpreted. Physicians appropriated the name \"Danxi\" as a symbol of authority or used it as a foil to make their own doctrinal emphases appear more distinctive. The diffusion of medical ideas took place in ways more complex than we can ever document. Knowledge and skills were transmitted through local teaching networks, some hereditary, others informal, and yet others based on strict ritual relations between a master and his (rarely her) disciples. $ ^{2} $ The vast majority of teachers remain undocumented. We know almost nothing about the routes by which medical books circ ...",
+        "byte_size": 147146,
+        "sha256": "21bdd8d84a1b07e81d6679dc085c71c38b9f0dcde6546d7b309881cc85d4b736"
+      },
+      {
+        "page_no": 157,
+        "file_idx": 156,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "that made texts meaningful in particular teaching traditions, and about the process by which practitioners developed their skills through a mix of readings, instruction by one or several masters or seniors, and interaction with real patients. All these caveats make our understanding of received texts all the more important. Intertextuality, zhezhong hermeneutics, and deliberate syncretism To understand how the Danxi corpus was formed, we need to identify the textual provenance of the statements found therein. Different levels of inter-textuality can be distinguished. “Interdiscursivity” is the unwitting yet inevitable “intertext” that literary critiques identify even in the works of the most original authors. $ ^{4} $ Some consider it to be constitutive of any discourse, spoken or written. “Manifest intertextuality” occurs when writers explicitly attribute a passage to another source. The Ming medical tradition was intertextual in both of these senses, but here I pay particular attention to a third and somewhat different kind of intertextuality, not only in the way texts deployed common cultural motifs or overtly referred to previous works, but in the very way texts were produced—intertextuality as a method for assembling texts. $ ^{5} $ Trying to prove the intertextuality of the Chinese medical literature may seem like laboring the obvious. After all, all texts everywhere are ...",
+        "byte_size": 134822,
+        "sha256": "51fc6294e72f59989aef02d01a741c677f7f1122aa971bfe94f6d27231f16faf"
+      },
+      {
+        "page_no": 159,
+        "file_idx": 158,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "own writings. I will also show that $ \\underline{\\text{zhezhong}} $ hermeneutics and textual composition rested on the notion that illness was constantly changing. Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $ The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed ...",
+        "byte_size": 150039,
+        "sha256": "ea280b9381e4914bee3f6a3b37429f0c2b94651809f05e7dcef4c98807b8d1dd"
+      },
+      {
+        "page_no": 160,
+        "file_idx": 159,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), from Ningbo, and Yu Tuan 虞搏 (1438-1517), from the same locale as Zhu in Zhejiang. Though I focus on individual writers, I insist that they were responding to each other and explain how each of them p ...",
+        "byte_size": 121419,
+        "sha256": "2114a19beeb86c21feb258f0fe9521469615bdf1fbcb828f74f6c1a939398e08"
+      },
+      {
+        "page_no": 161,
+        "file_idx": 160,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "### 5.2 Madness in Lou Ying's 樓英 (1320-1400) $ ^{12} $ Yixue gangmu 醫學綱目 (1396) The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $ Lou Ying started to collect materials for his summa of current medical doctrine and healing methods in the 1360s and completed a first version in 1380; he achieved the final version in 1396. Lou did not have all the books he consulted at hand at any given time. He probably kept adding to his text as he consulted more and more works, something that was made more convenient by the proximity of Hangzhou ( ...",
+        "byte_size": 152135,
+        "sha256": "9f65abec479720bca7f3a8e8d76935b0a9abe51f42ca2ba5685cb0a21c43d70d"
+      },
+      {
+        "page_no": 162,
+        "file_idx": 161,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $ Textual montages like Lou's Systematic Outline of Medical Learning were not amateurish endeavors. Composite texts professing to cover all aspects of illness and medicine were actually a new genre of medical writing at which Zhu Zhenheng's disciples excelled. $ ^{18} $ Many books claiming to be for beginners were sophisticated digests of complex medical teachings; they were not easy “primers,” but points of entry into the intricate traditions they summarized. Students of medicine found these compilations all the more useful since readers could not easily access all the texts these works cited. Lou Ying's compilation was concerned with medical practice, not abstract doctrine. As a reasoned anthology of citations, the point of the Systematic Outline of Medical Learning was not to reconcile all medical approaches into a perfectly ...",
+        "byte_size": 142014,
+        "sha256": "e08df324a4ee3f62f98cec5bc497ba75c716dc5285d7b8c1f778cd8372af4737"
+      },
+      {
+        "page_no": 163,
+        "file_idx": 162,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Zhongjing [Zhang Ji] is detailed on external contamination that affects the interior and the surface or Yin and Yang; Danxi distinguishes himself on inner harm of Blood or Qi [that causes] depletion or repletion; Dongyuan [Li Gao] supports and protects central Qi; Hejian [Liu Wansu] removes the old to create the new; Mr. Qian [Yi] distinguishes clearly between the five Yin viscera; Dairen [Zhang Congzheng] is well versed in the three methods [vomiting, purging, and sweating]. Formularies from past ages are abundant: we can simply say that each has its strengths. 仲景詳外感於表裡陰陽 丹溪獨內傷於血氣虛實 東垣扶護中氣 河間推陳 致新 錢氏分明五臟 戴人熟施三法 凡歷代方書甚衆 皆各有所長耳 Since the same symptoms could occur for different reasons, it was plausible that many texts could contain useful methods of treatment. $ ^{19} $ “The benighted fail to appreciate this principle: their reckless trying [of recipes] on approximate illnesses has led many to an unjust and premature death” (昧者不悟是理 妄試疑似之病 每致夭橫者不少矣). Armed with a definition of illness as a multifaceted and ever-changing entity that was typical of Zhu Zhenheng's followers, $ ^{20} $ Lou proposed an elegant solution to the controversial issue of whether “old recipes” could cure “current illnesses.” “Given that an illness with a single name [can require] different methods of treatment, when people use recipes from past ages to treat illness, their success or failure depends on wheth ...",
+        "byte_size": 152477,
+        "sha256": "c1106889dd0e04c816b7751d59a280b5908c209a2a6726e77d65807f9dcc3b57"
+      },
+      {
+        "page_no": 164,
+        "file_idx": 163,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "from the Treatise on Cold Injury (or any other source), for instance, were effective when they were used to treat the kinds of illness they cured best. In typical zbezbong fashion, Lou also used this flexible conception of illness and therapy to justify a syncretic approach to the textual past and to clinical practice. His book counted forty fascicles or chapters. The first nine—all part of a large section called “Yin-Yang and the viscera” 陰陽臟腑部—explained general principles on pathomechanisms, diagnosis, and treatments. Followed twenty fascicles (10-29) describing various illnesses and methods to treat them, four fascicles on Cold Injury (30-3), two on the illnesses of women (34-5), four on those of children (36-9), and one with commentaries on the five periods and six Qi in the Inner Canon (40). $ ^{21} $ In the twenty chapters on disorders other than Cold Injury, Lou Ying classified illnesses into five sections (bu 部) named after the pairs of Yin and Yang viscera with which he associated them. There were six fascicles on the Liver and Gallbladder (肝膽), five on the Heart and Small Intestine (心小腸), five on the Spleen and Stomach (脾胃), two on the Lungs and Large Intestine (肺大腸), and two on the Kidneys and Bladder (腎膀胱). These sections did not present the anatomy of these viscera: they discussed illnesses that occurred when these organs failed to fulfil their functions. The secti ...",
+        "byte_size": 136365,
+        "sha256": "6f0c47ef24a084eb503bf8e23b2b5c322d84e6cb6563e7080d6c847a0bce26f6"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-009-danxisaid:toc-ch-009-danxisaid:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00107\",\n    \"anchor_id\": \"anchor-00390\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note text in the screenshot on page 138 matches the content of fn-00107 (discussing teaching networks and Angela Leung). The anchor is correctly located at the end of the paragraph on page 156.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00110\",\n    \"anchor_id\": \"anchor-00391\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note text in the screenshot on page 139 matches the content of fn-00110 (referencing Norman Fairclough and Julia Kristeva). The anchor is correctly located at the end of the paragraph on page 157.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00102\",\n    \"anchor_id\": \"anchor-00392\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note text in the screenshot on page 141 matches the content of fn-00102 (discussing 'Zhe yu' and legal decisions). The current binding to anchor-01237 is incorrect; it should be re-bound to the explicit marker 5 on page 159.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00103\",\n    \"anchor_id\": \"anchor-00395\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note text in the screenshot on page 141 matches the content of fn-00103 (discussing 'wind strokes' and Lu Wanchun). The anchor is correctly located at marker 8 on page 159.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-00107",
+      "anchor_id": "anchor-00390",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The note text in the screenshot on page 138 matches the content of fn-00107 (discussing teaching networks and Angela Leung). The anchor is correctly located at the end of the paragraph on page 156."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00110",
+      "anchor_id": "anchor-00391",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The note text in the screenshot on page 139 matches the content of fn-00110 (referencing Norman Fairclough and Julia Kristeva). The anchor is correctly located at the end of the paragraph on page 157."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00102",
+      "anchor_id": "anchor-00392",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The note text in the screenshot on page 141 matches the content of fn-00102 (discussing 'Zhe yu' and legal decisions). The current binding to anchor-01237 is incorrect; it should be re-bound to the explicit marker 5 on page 159."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00103",
+      "anchor_id": "anchor-00395",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The note text in the screenshot on page 141 matches the content of fn-00103 (discussing 'wind strokes' and Lu Wanchun). The anchor is correctly located at marker 8 on page 159."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-009-danxisaid:toc-ch-009-danxisaid:endnote",
+    "chapter_title": "“Danxi said…”",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00107",
+        "anchor_id": "anchor-00390",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 138 matches the content of fn-00107 (discussing teaching networks and Angela Leung). The anchor is correctly located at the end of the paragraph on page 156."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00110",
+        "anchor_id": "anchor-00391",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 139 matches the content of fn-00110 (referencing Norman Fairclough and Julia Kristeva). The anchor is correctly located at the end of the paragraph on page 157."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00102",
+        "anchor_id": "anchor-00392",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 141 matches the content of fn-00102 (discussing 'Zhe yu' and legal decisions). The current binding to anchor-01237 is incorrect; it should be re-bound to the explicit marker 5 on page 159."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00103",
+        "anchor_id": "anchor-00395",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 141 matches the content of fn-00103 (discussing 'wind strokes' and Lu Wanchun). The anchor is correctly located at marker 8 on page 159."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00107",
+        "anchor_id": "anchor-00390",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 138 matches the content of fn-00107 (discussing teaching networks and Angela Leung). The anchor is correctly located at the end of the paragraph on page 156."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00110",
+        "anchor_id": "anchor-00391",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 139 matches the content of fn-00110 (referencing Norman Fairclough and Julia Kristeva). The anchor is correctly located at the end of the paragraph on page 157."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00102",
+        "anchor_id": "anchor-00392",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 141 matches the content of fn-00102 (discussing 'Zhe yu' and legal decisions). The current binding to anchor-01237 is incorrect; it should be re-bound to the explicit marker 5 on page 159."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00103",
+        "anchor_id": "anchor-00395",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 141 matches the content of fn-00103 (discussing 'wind strokes' and Lu Wanchun). The anchor is correctly located at marker 8 on page 159."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00053",
+        "action": "match",
+        "note_item_id": "fn-00107",
+        "anchor_id": "anchor-00390",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 138 matches the content of fn-00107 (discussing teaching networks and Angela Leung). The anchor is correctly located at the end of the paragraph on page 156."
+      },
+      {
+        "link_id": "link-00054",
+        "action": "match",
+        "note_item_id": "fn-00110",
+        "anchor_id": "anchor-00391",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 139 matches the content of fn-00110 (referencing Norman Fairclough and Julia Kristeva). The anchor is correctly located at the end of the paragraph on page 157."
+      },
+      {
+        "link_id": "link-00050",
+        "action": "match",
+        "note_item_id": "fn-00102",
+        "anchor_id": "anchor-00392",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 141 matches the content of fn-00102 (discussing 'Zhe yu' and legal decisions). The current binding to anchor-01237 is incorrect; it should be re-bound to the explicit marker 5 on page 159."
+      },
+      {
+        "link_id": "link-00051",
+        "action": "match",
+        "note_item_id": "fn-00103",
+        "anchor_id": "anchor-00395",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note text in the screenshot on page 141 matches the content of fn-00103 (discussing 'wind strokes' and Lu Wanchun). The anchor is correctly located at marker 8 on page 159."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 14523,
+    "completion_tokens": 480,
+    "total_tokens": 15003,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 11391
+  }
+}

@@ -895,6 +895,12 @@ body.hide-original .original-card {
 .doc-item.doc-active {
   box-shadow: 0 10px 24px rgba(77, 62, 28, 0.08);
 }
+.doc-item-select { flex-shrink: 0; align-self: flex-start; padding-top: 4px; margin-right: 10px; }
+.doc-item-select input { width: 16px; height: 16px; cursor: pointer; }
+.doc-doc-list-toolbar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--bdrL);
+}
 .doc-info { flex: 1; min-width: 0; }
 .doc-current-banner {
   display: inline-flex;

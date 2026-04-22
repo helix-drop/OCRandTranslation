@@ -1,0 +1,10 @@
+{
+  "doc_id": "a3c9e1f7b284",
+  "status": "blocked",
+  "reason": "semantic_export_blocked",
+  "blocking_reasons": [
+    "toc_role_semantics_invalid",
+    "export_audit_blocking"
+  ],
+  "generated_at": 1776828560
+}

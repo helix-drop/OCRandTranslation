@@ -1,0 +1,397 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-015-ghostsormucus:toc-ch-015-ghostsormucus:endnote\",\n  \"chapter_title\": \"Ghosts or mucus?\",\n  \"page_range\": [\n    345,\n    384\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 345,\n      \"ocr_excerpt\": \"In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposedly control the thoughts, acts, and speech of their victim. Possession was expressed by verbs like ping 憑, yi 依, or fu 附, which meant “attaching to” or “relying upon” a person. Ghosts were also often said to “enter” (ru 入) the body of their victims. All these terms were not part of specialized medical terminology, but physicians used them when they discussed cases of “possession.” Regardless of whether they believed in ghosts, most scholarly healers included sections on “demonic affliction” (鬼祟), “affliction by evil” (邪祟), “spectral illnesses” (祟病), or “evil demons” (邪鬼) in their treatises or case collections. Ancient texts had attributed all kinds of ailments to spirits, from toothaches to painful childbirth. $ ^{4} $ Most late-imperial doctors, however, attributed to ghostly possession chiefly a cluster of symptoms that looked like those of madness. These “possession symptoms” included delirium, strange speech, unprovoked grief, extreme apathy, ...\"\n    },\n    {\n      \"page_no\": 347,\n      \"ocr_excerpt\": \"Zhu Zhenheng's 朱震亨 (1282-1358) influential view that possession symptoms were commonly triggered by mucus. $ ^{7} $ The third section tries to interpret the dramatic decrease in mentions of exorcistic healers in late-imperial cases that physicians or their patients' relatives explicitly attributed to \\\"evil ghosts\\\" or designated as \\\"spectral affliction.\\\" I suggest that shamans and elite physicians no longer competed for the same patients. Yet, as I show in the fourth section, even in the late nineteenth century many elite physicians still ascribed illness to the action of various kinds of ghosts. The \\\"medical exorcisms\\\" they performed often borrowed from ritual therapies that today we associate more readily with Daoism than with scholarly medicine. $ ^{8} $ The final section explains how some physicians explained and treated hallucinations, a special type of possession symptom. ### 8.2 The ambiguous closeness of madness and possession symptoms People from the times and places I study often found resemblances between what they called dian or kuang and what they called “spectral affliction” (sui). These categories were not equivalent, but both specialists and commoners found them mean ...\"\n    },\n    {\n      \"page_no\": 348,\n      \"ocr_excerpt\": \"could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $ Others called “mad words and blithe speech” kinds of “spectral afflictions” (狂言妄语… 此等之祟) and said that “specters with a form… render people mad” (諸有形之祟…令人 顛狂). $ ^{11} $ If these texts did not assert that madness was always caused by demons, at least they implied that specters could cause some cases of mad behavior. What is crucial is that religious, medical, and legal texts alike could use terms like diankuang to refer a similar set of symptoms. Medical texts expressed the similarity between the symptoms of possession and those of medical madness in several ways. Many late-imperial physicians discussed “spectral affliction” under the same treatise entry as insanity. The second half of the madness section in Li Chan’s 李梴 Introduction to Medical Learning (Yixue rumen 醫學入門, 1575), for instance, analyzed the origin of “afflictions by evil” (邪祟). $ ^{12} $ Others doctors proposed explicit similes, as when Zhang Lu 張璐 (1615-1699) noted that one of his insane patients looked “as if he were possessed by a specter” (似祟憑依) or when Gong Tingxian 龔廷賢 (ca. 1538-1635) claimed that one vaunte ...\"\n    },\n    {\n      \"page_no\": 349,\n      \"ocr_excerpt\": \"Yongcui 李用粹 wrote an entry called “Madness resembles spectral affliction” (癫狂似祟) in his Collected Supplements on Symptoms and Treatments (Zhengzhi buibu 證治匯補; 1687). Another sign of the ambiguous meaning of possession symptoms was that many physicians treated as the result of organic imbalances symptoms that patients attributed to possession. $ ^{14} $ In non-medical contexts, mad behavior was often understood and handled as if it resulted from possession. When Lin Shiyuan started to “speak and dance madly” (狂言跳舞) in 1762, his mother thought he had been “struck by evil” (中邪); she sent a relative to invite a Taoist master (道師) to chant scriptures and implore deities (誦經祇禳) on his behalf. $ ^{15} $ The Kangxi emperor (r. 1662-1722) was so perplexed by his son Yinren’s reckless behavior that he first attributed it to sorcery and evil spirits. $ ^{16} $ When in 1713 he decided to remove Yinren as heir-apparent after decades of trouble, he had resigned himself that his son’s madness was an illness (瘋狂成疾 and 狂疾) and that Yinren would never recover. $ ^{17} $ The attribution of madness to possession seemed natural in literature as well, as when the son of a corrupt official in a story by ...\"\n    },\n    {\n      \"page_no\": 350,\n      \"ocr_excerpt\": \"###### 8.3 Possession... or mucus? Considering the resemblance between the symptoms of mania and possession, it is not surprising that physicians devised ways to strengthen their interpretive claims on such symptoms. By arguing that disorders that looked as if they were caused by demons could in fact be caused by either mucus or depletion, Zhu Zhenheng 朱震亨 (1282-1358) managed to discuss possession symptoms without discussing ghosts (4.4). Zhu's argument started its rise to textual dominance in the writings of his disciples and intellectual followers. The sections on \\\"mucus\\\" and \\\"depletion and wasting disorders\\\" (虚損) of Liu Chun's Yuji weiji 玉機微義 (1396) discussed the idea that mucus caused possession-like symptoms. $ ^{19} $ Dai Liang's \\\"Biography of the Old Man of Cinnabar Creek\\\" (\\\"Danxi weng zhuan\\\" 丹溪翁傳), which contained one of the mucus-possession cases I translated in 4.4, was appended to the widely circulated Huizhou version of the Danxi xinfā 丹溪心法 (1482). Wang Ao's 王鏊 Gu danfang 古單方 (completed in 1496) contained the earliest section on \\\"affliction by evil\\\" that I have found. $ ^{20} $ In it, Wang acknowledged Zhu's view that the symptoms of such afflictions could indeed be cau ...\"\n    },\n    {\n      \"page_no\": 351,\n      \"ocr_excerpt\": \"虞搏 Yixue zhengzhuan 醫學正傳 (1515; 5.7), the composite Danxi xiansheng zhifa xinyao 丹溪先生治法心要 (1536; 5.5), Li Chan's Introduction to Medical Learning (1575), Zhang Siwei's 張四維 Yimen mizhi 醫門秘旨 (ca. 1576), Zhang Sanxi's 張三錫 Yixue liuyao 醫學六要 (1585), and most of Gong Tingxian's popular books (7.3) probably enhanced the dominance of Zhu's idea in medical circles. $ ^{21} $ The claim that mucus could create strange disorders had thus became part of mainstream medical discourse by the sixteenth century, and it became such commonsense in the Qing period that it no longer needed attribution. An Anthology of Strange Illnesses (Qizheng bui 奇症匯) compiled in 1786 recounted the case of a man who saw lions in front of him. Without further remarks his illness was attributed to mucus and treated with emetics. $ ^{22} $ About a case of “demonic infestation” (鬼疰) included in his Medical Case Files Ancient and Present, With Commentaries (Guijin yian an 古今醫案按; 1778), Yu Zhen remarked that “This is what is called ‘mucus [causes] many strange symptoms’; it is not something to be marveled at” (此所謂痰多怪證亦不為奇). $ ^{23} $ He commented elsewhere that the commonest treatment for possession-like symptoms in his tim ...\"\n    },\n    {\n      \"page_no\": 352,\n      \"ocr_excerpt\": \"disorders was to attack mucus: “when mucus and saliva make a demonic affliction and Cold and Heat go back and forth, the methods of guiding or vomiting [mucus] will be the only ones to work” (痰涎為祟 寒熱往來 非用導吐法不行). $ ^{25} $ ### 8.4 Diminished competition between physicians and shamans? Even if Zhu Zhenheng was never part of an organized campaign to root out popular practices and did not speak in the name of a profession, he clearly aimed to reject exorcism as a treatment for possession symptoms. His understanding of body and illness disqualified shamanic healers to the benefit of people who—like himself—claimed they could reestablish organic balance with herbal or mineral drugs. Though there is no reason to doubt that he was genuinely concerned with his patients' well-being, his interpretation of possession symptoms can also be understood as a move in a competition with other kinds of healers. Ascribing mad symptoms to mucus was a way of saying they were not caused by ghosts and thus of invalidating any recourse to ritual specialists. One of Zhu's cases explicitly mentioned this contest between healers. $ ^{26} $ An adult woman surnamed Jin. During the hot summer months, she went to ...\"\n    },\n    {\n      \"page_no\": 354,\n      \"ocr_excerpt\": \"Almost all the Jin and Yuan physicians who recorded madness cases alluded to this rivalry. Zhang Congzheng 張從正 (1156-1228) explained that the relatives of a man had burned paper talismans (燒符), organized Taoist rituals (作醮), and hired a dancing medium to exorcise the ghost (問鬼跳誣) they thought had crazed him after he had fallen off a horse. $ ^{27} $ Wang Haogu 王好古 (fl. first half of the 13 $ ^{th} $ century) noted that the relatives of a woman who had become crazy “all thought it was a ghost’s making” (人皆以為鬼魔). $ ^{28} $ His younger contemporary Luo Tianyi 羅天益 (ca. 1220-1290) similarly reported that people around his mad patient all said that Wind demons were causing the problem (時人皆言風魔了), though the entreaties of an exorcistic master (巫師) had failed to cure him. $ ^{29} $ Whereas most Jin-Yuan physicians invited to treat mad behavior noted that their patients had previously sought the help of shamanic healers, Ming and Qing doctors almost never mentioned exorcists as their competitors. A complete lack of medical case files between the late fourteenth century and approximately 1515 makes me unable to follow this trend in the documents. All we see is an end result: after 1500, demon ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00983\",\n      \"marker\": \"3\",\n      \"page_no\": 345,\n      \"paragraph_index\": 0,\n      \"source_text\": \"In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposed ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00988\",\n      \"marker\": \"8\",\n      \"page_no\": 347,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Zhu Zhenheng's 朱震亨 (1282-1358) influential view that possession symptoms were commonly triggered by mucus. $ ^{7} $ The third section tries to interpret the dramatic decrease in mentions of exorcistic healers in late-imperial cases that phy ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00991\",\n      \"marker\": \"11\",\n      \"page_no\": 348,\n      \"paragraph_index\": 3,\n      \"source_text\": \"顛狂). $ ^{11} $ If these texts did not assert that madness was always caused by demons, at least they\"\n    },\n    {\n      \"anchor_id\": \"anchor-00992\",\n      \"marker\": \"12\",\n      \"page_no\": 348,\n      \"paragraph_index\": 6,\n      \"source_text\": \"Medical texts expressed the similarity between the symptoms of possession and those of medical madness in several ways. Many late-imperial physicians discussed “spectral affliction” under the same treatise entry as insanity. The second half ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00993\",\n      \"marker\": \"13\",\n      \"page_no\": 348,\n      \"paragraph_index\": 6,\n      \"source_text\": \"Medical texts expressed the similarity between the symptoms of possession and those of medical madness in several ways. Many late-imperial physicians discussed “spectral affliction” under the same treatise entry as insanity. The second half ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00994\",\n      \"marker\": \"9\",\n      \"page_no\": 348,\n      \"paragraph_index\": 7,\n      \"source_text\": \"could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $ Others called “mad words and blithe speech” kinds of “spectral afflictions” (狂言妄语… 此等之祟) and said that “specters with a form… render pe ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00996\",\n      \"marker\": \"11\",\n      \"page_no\": 348,\n      \"paragraph_index\": 7,\n      \"source_text\": \"could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $ Others called “mad words and blithe speech” kinds of “spectral afflictions” (狂言妄语… 此等之祟) and said that “specters with a form… render pe ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00997\",\n      \"marker\": \"11\",\n      \"page_no\": 348,\n      \"paragraph_index\": 8,\n      \"source_text\": \"which presents methods to “treat evil madness demons that have $ ^{11} $ See Daofa huiyuan 道法會元, respectively juan 59 (Shangqing yushu wulei zhenwen 上清玉樞五雷真文), “Li yu shou xie” 立獄收邪; and juan 267 (Taixuan Fengdu beili yige 泰玄酆都黑律儀格), “Xie j ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00121\",\n      \"note_item_id\": \"fn-00244\",\n      \"current_anchor_id\": \"anchor-00984\",\n      \"marker\": \"4\",\n      \"note_page_no\": 354,\n      \"anchor_page_no\": 345,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"&0% +$ 5&+$ ¶Gď \\u0004\\u0014:?\\u0001/92?8TD\\u00172*\\\"+\\u00010%&.&+ Ĵ ʓ \\u0010\\u0007 2\\u00063\\u0014 &%\\\"\\u00016&'& \\u0013\\u0001 \\u0007 \\u0011 \\u00015:D4FDD65 E9:D\\u000142D6\\u0001:? \\u0007 \\u0007,2?8 5:5?@E C64@C5H96E96C\\u0001E96\\u000172>:=J 925\\u00017:CDE 9:C65\\u00012\\u0001C:EF2=\\u0001DA64:2=:DE\\u0007 \\u0012 \\u001a\\\"&0%\\\"+$\\u0001 ,'& + ʄǤè˾ \\u0003 \\u0011 \\u0004\\u0005 '2 + \\u000f\\u0005\\u0001U-:6C6\\u0001>6?V ƿǈ̂ \\u0005\\u0001U\\u001b2<F2?8\\u00013:2? ...\",\n      \"anchor_excerpt\": \"Regardless of whether they believed in ghosts, most scholarly healers included sections on “demonic affliction” (鬼祟), “affliction by evil” (邪祟), “spectral illnesses” (祟病), or “evil demons” (邪鬼) in their treatises or case collections. Ancien ...\"\n    },\n    {\n      \"link_id\": \"link-00125\",\n      \"note_item_id\": \"fn-00251\",\n      \"current_anchor_id\": \"anchor-00990\",\n      \"marker\": \"10\",\n      \"note_page_no\": 365,\n      \"anchor_page_no\": 348,\n      \"current_anchor_marker\": \"10\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"H2D\\u0001A2CE\\u0001@7\\u00012\\u00013C@256C\\u00012C8F>6?E\\u0001@?\\u0001<?@H=6586 2?5\\u0001C:EF2=\\u0005\\u00013FE\\u0001:E\\u0001H2D\\u0001@7E6?\\u00014:E65\\u0001:?\\u0001:D@=2E:@?\\u0007 \\u000f /92@ TD &*\\\"+\\u0001 26 , ˯̂ʋʏ \\u0003 '2 + \\u0005 U\\\"65:42=\\u000142D6\\u00017:=6DV˯ƃ \\u0004\\u00012=D@ DA@<6\\u0001@7\\u00012\\u0001H@>2?\\u0001H9@\\u0001H2D\\u0001=:7E65\\u0001:? E96\\u00012:C\\u00013J\\u0001E96\\u0001 @5\\u0001@7\\u0001)9F?56C\\u00013642FD6\\u0001D96\\u0001@7E6? ...\",\n      \"anchor_excerpt\": \"could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $\"\n    },\n    {\n      \"link_id\": \"link-00135\",\n      \"note_item_id\": \"fn-00261\",\n      \"current_anchor_id\": \"anchor-01097\",\n      \"marker\": \"6\",\n      \"note_page_no\": 369,\n      \"anchor_page_no\": 389,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6. 3642>6\\u00014C2KJ\\u0001\\u0003\\u0010\\u0012 U\\u001b@?5\\u0001@7\\u00019:D\\u0001H:76V AC@323=J 925\\u0001D6IF2=\\u00014@??@E2E:@?D\\u0007\\u0001\\\"@C6\\u000136=@H\\u000123@FE\\u0001!:\\u0001\\u00196?8>:?8TD\\u0001H:76\\u0007#\\\"+$ \\u0004 E92E\\u0001?:89E\\u0005\",\n      \"anchor_excerpt\": \"Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), whi ...\"\n    },\n    {\n      \"link_id\": \"link-00136\",\n      \"note_item_id\": \"fn-00274\",\n      \"current_anchor_id\": \"anchor-01208\",\n      \"marker\": \"7\",\n      \"note_page_no\": 371,\n      \"anchor_page_no\": 428,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"+$ \\u0005\\u0001E96\\u0001 2==3=2556C\\u00012#2 \\u0007 \\u0011 \\u001bC2?L@:D\\u0001 F==:6? \\u0012\\u0012\\u000e\\u00010 \\u0012\\u0012 1 :D\\u00012\\u00013@@<\\u0006=6?8E9\\u0001A9:=@D@A9:42=\\u0001C67=64E:@?\\u0001@? 0%& m \\u0003UE96AC@A6?D:EJ @7\\u00012 ,:?5 2?5\\u0001,:?5\\u00014C62E6D\\u0001\\u001b:C6\\u0005\\u0001H9:49\\u00014C62E6D\\u0001>F4FD\\u0007 \\u0016D\\u0001>F4FD\\u00012?5\\u0001\\u001b:C6\\u0001HC6DE=6\\u0001H:E9 D:EF2E:@?V\\u0015\\u0004\\u0005 2E6C>\\u0001E92E\\u0001:D?@E@ ...\",\n      \"anchor_excerpt\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-015-ghostsormucus:toc-ch-015-ghostsormucus:endnote",
+      "chapter_title": "Ghosts or mucus?",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        345,
+        384
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 78511,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00983",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 345,
+          "paragraph_index": 0,
+          "char_start": 135,
+          "char_end": 143,
+          "source_marker": "$ ^{3} $",
+          "normalized_marker": "3",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposedly control the thoughts, acts, and speech of their victim. Possession was expressed by verbs like ping 憑, yi 依, or fu 附, which meant “attaching to” or “relying upon” a person. Ghosts were also often said to “enter” (ru 入) the body of their victims. All these terms were not part of specialized medical terminology, but physicians used them when they discussed cases of “possession.”",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78516,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00988",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 347,
+          "paragraph_index": 0,
+          "char_start": 758,
+          "char_end": 766,
+          "source_marker": "$ ^{8} $",
+          "normalized_marker": "8",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Zhu Zhenheng's 朱震亨 (1282-1358) influential view that possession symptoms were commonly triggered by mucus. $ ^{7} $ The third section tries to interpret the dramatic decrease in mentions of exorcistic healers in late-imperial cases that physicians or their patients' relatives explicitly attributed to \"evil ghosts\" or designated as \"spectral affliction.\" I suggest that shamans and elite physicians no longer competed for the same patients. Yet, as I show in the fourth section, even in the late nineteenth century many elite physicians still ascribed illness to the action of various kinds of ghosts. The \"medical exorcisms\" they performed often borrowed from ritual therapies that today we associate more readily with Daoism than with scholarly medicine. $ ^{8} $ The final section explains how some physicians explained and treated hallucinations, a special type of possession symptom.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78519,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00991",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 348,
+          "paragraph_index": 3,
+          "char_start": 5,
+          "char_end": 14,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "顛狂). $ ^{11} $ If these texts did not assert that madness was always caused by demons, at least they",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78520,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00992",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 348,
+          "paragraph_index": 6,
+          "char_start": 404,
+          "char_end": 413,
+          "source_marker": "$ ^{12} $",
+          "normalized_marker": "12",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Medical texts expressed the similarity between the symptoms of possession and those of medical madness in several ways. Many late-imperial physicians discussed “spectral affliction” under the same treatise entry as insanity. The second half of the madness section in Li Chan’s 李梴 Introduction to Medical Learning (Yixue rumen 醫學入門, 1575), for instance, analyzed the origin of “afflictions by evil” (邪祟). $ ^{12} $ Others doctors proposed explicit similes, as when Zhang Lu 張璐 (1615-1699) noted that one of his insane patients looked “as if he were possessed by a specter” (似祟憑依) or when Gong Tingxian 龔廷賢 (ca. 1538-1635) claimed that one vaunted recipe “treats fits of madness in which one jumps and screams as though one had incurred a demonic affliction” (治發狂跳叫如著了鬼祟一般者). $ ^{13} $ Li",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78521,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00993",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 348,
+          "paragraph_index": 6,
+          "char_start": 774,
+          "char_end": 783,
+          "source_marker": "$ ^{13} $",
+          "normalized_marker": "13",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Medical texts expressed the similarity between the symptoms of possession and those of medical madness in several ways. Many late-imperial physicians discussed “spectral affliction” under the same treatise entry as insanity. The second half of the madness section in Li Chan’s 李梴 Introduction to Medical Learning (Yixue rumen 醫學入門, 1575), for instance, analyzed the origin of “afflictions by evil” (邪祟). $ ^{12} $ Others doctors proposed explicit similes, as when Zhang Lu 張璐 (1615-1699) noted that one of his insane patients looked “as if he were possessed by a specter” (似祟憑依) or when Gong Tingxian 龔廷賢 (ca. 1538-1635) claimed that one vaunted recipe “treats fits of madness in which one jumps and screams as though one had incurred a demonic affliction” (治發狂跳叫如著了鬼祟一般者). $ ^{13} $ Li",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78522,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00994",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 348,
+          "paragraph_index": 7,
+          "char_start": 13,
+          "char_end": 21,
+          "source_marker": "$ ^{9} $",
+          "normalized_marker": "9",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $ Others called “mad words and blithe speech” kinds of “spectral afflictions” (狂言妄语… 此等之祟) and said that “specters with a form… render people mad” (諸有形之祟…令人 顛狂). $ ^{11} $ If these texts did not assert that madness was always caused by demons, at least they implied that specters could cause some cases of mad behavior. What is crucial is that religious, medical, and legal texts alike could use terms like diankuang to refer a similar set of symptoms.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78524,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00996",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 348,
+          "paragraph_index": 7,
+          "char_start": 265,
+          "char_end": 274,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $ Others called “mad words and blithe speech” kinds of “spectral afflictions” (狂言妄语… 此等之祟) and said that “specters with a form… render people mad” (諸有形之祟…令人 顛狂). $ ^{11} $ If these texts did not assert that madness was always caused by demons, at least they implied that specters could cause some cases of mad behavior. What is crucial is that religious, medical, and legal texts alike could use terms like diankuang to refer a similar set of symptoms.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78525,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00997",
+          "chapter_id": "toc-ch-015-ghostsormucus",
+          "page_no": 348,
+          "paragraph_index": 8,
+          "char_start": 63,
+          "char_end": 72,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "which presents methods to “treat evil madness demons that have $ ^{11} $ See Daofa huiyuan 道法會元, respectively juan 59 (Shangqing yushu wulei zhenwen 上清玉樞五雷真文), “Li yu shou xie” 立獄收邪; and juan 267 (Taixuan Fengdu beili yige 泰玄酆都黑律儀格), “Xie jing pin” 邪精品. $ ^{12} $ Yixue rumen, juan 4, “Zabing fenlei” 雜病分類, “Neishang lei” 内傷類, “Tanlei” 痰類, “Diankuang” 癲狂 (1995 [1575]: 395B). Descriptions of possession also appeared in the madness sections of Zhang Siwei’s Yimen mizhu 醫門秘旨 (ca. 1576; 6.19a; RBXC: 703) and Li Zhongzi’s Bingji shazhuan 病機沙篆 (1667; juan 2, sec. 6, “Madness” 癲狂; Li ZhYQ: 468B). An entry in the madness section of the anonymous Yifang biannan dacheng 醫方辨難大成 (1850) was devoted to possession (juan 92, “Diankuang biannan” 顛狂辨難, “Are some manic symptoms caused by harm done by evil spirits?” 狂證果有邪祟為害否; 2005 [1850]: 534-35).",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00121",
+          "note_item_id": "fn-00244",
+          "current_anchor_id": "anchor-00984",
+          "marker": "4",
+          "note_page_no": 354,
+          "anchor_page_no": 345,
+          "current_anchor_marker": "4",
+          "note_excerpt": "&0% +$ 5&+$ ¶Gď \u0004\u0014:?\u0001/92?8TD\u00172*\"+\u00010%&.&+ Ĵ ʓ \u0010\u0007 2\u00063\u0014 &%\"\u00016&'& \u0013\u0001 \u0007 \u0011 \u00015:D4FDD65 E9:D\u000142D6\u0001:? \u0007 \u0007,2?8 5:5?@E C64@C5H96E96C\u0001E96\u000172>:=J 925\u00017:CDE 9:C65\u00012\u0001C:EF2=\u0001DA64:2=:DE\u0007 \u0012 \u001a\"&0%\"+$\u0001 ,'& + ʄǤè˾ \u0003 \u0011 \u0004\u0005 '2 + \u000f\u0005\u0001U-:6C6\u0001>6?V ƿǈ̂ \u0005\u0001U\u001b2<F2?8\u00013:2?VǷǓˍ \u0003!F@.&\u0013\u0001\u000e\u0012\u0016\u0004\u0007",
+          "anchor_excerpt": "Regardless of whether they believed in ghosts, most scholarly healers included sections on “demonic affliction” (鬼祟), “affliction by evil” (邪祟), “spectral illnesses” (祟病), or “evil demons” (邪鬼) in their treatises or case collections. Ancient texts had attributed all kinds of ailments to spirits, from toothaches to painful childbirth. $ ^{4} $ Most late-imperial doctors, however, attributed to ghostly possession chiefly a cluster of symptoms that looked like those of madness. These “possession symptoms” included delirium, strange speech, unprovoked grief, extreme apathy, hallucinations and the desire to injure oneself.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00125",
+          "note_item_id": "fn-00251",
+          "current_anchor_id": "anchor-00990",
+          "marker": "10",
+          "note_page_no": 365,
+          "anchor_page_no": 348,
+          "current_anchor_marker": "10",
+          "note_excerpt": "H2D\u0001A2CE\u0001@7\u00012\u00013C@256C\u00012C8F>6?E\u0001@?\u0001<?@H=6586 2?5\u0001C:EF2=\u0005\u00013FE\u0001:E\u0001H2D\u0001@7E6?\u00014:E65\u0001:?\u0001:D@=2E:@?\u0007 \u000f /92@ TD &*\"+\u0001 26 , ˯̂ʋʏ \u0003 '2 + \u0005 U\"65:42=\u000142D6\u00017:=6DV˯ƃ \u0004\u00012=D@ DA@<6\u0001@7\u00012\u0001H@>2?\u0001H9@\u0001H2D\u0001=:7E65\u0001:? E96\u00012:C\u00013J\u0001E96\u0001 @5\u0001@7\u0001)9F?56C\u00013642FD6\u0001D96\u0001@7E6?\u000136C2E65\u0001A6@A=6\u0001G:@=6?E=J\u0001\u0003/. \u0006 \u0013\u0001 \u0012\u0012\u0017\u0004\u0007\u0001/92@4=2:>65\u0001E92E 96 4FC65\u000196C\u0001H:E9\u00015CF8D\u0007",
+          "anchor_excerpt": "could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00135",
+          "note_item_id": "fn-00261",
+          "current_anchor_id": "anchor-01097",
+          "marker": "6",
+          "note_page_no": 369,
+          "anchor_page_no": 389,
+          "current_anchor_marker": "6",
+          "note_excerpt": "6. 3642>6\u00014C2KJ\u0001\u0003\u0010\u0012 U\u001b@?5\u0001@7\u00019:D\u0001H:76V AC@323=J 925\u0001D6IF2=\u00014@??@E2E:@?D\u0007\u0001\"@C6\u000136=@H\u000123@FE\u0001!:\u0001\u00196?8>:?8TD\u0001H:76\u0007#\"+$ \u0004 E92E\u0001?:89E\u0005",
+          "anchor_excerpt": "Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\" (夫婦人顛狂病者 由血氣虛受風邪所為也). $ ^{7} $ Despite the mention of Blood depletion, this etiology was not gendered, because it corresponded with the traditional etiology of most Wind disorders. $ ^{8} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00136",
+          "note_item_id": "fn-00274",
+          "current_anchor_id": "anchor-01208",
+          "marker": "7",
+          "note_page_no": 371,
+          "anchor_page_no": 428,
+          "current_anchor_marker": "7",
+          "note_excerpt": "+$ \u0005\u0001E96\u0001 2==3=2556C\u00012#2 \u0007 \u0011 \u001bC2?L@:D\u0001 F==:6? \u0012\u0012\u000e\u00010 \u0012\u0012 1 :D\u00012\u00013@@<\u0006=6?8E9\u0001A9:=@D@A9:42=\u0001C67=64E:@?\u0001@? 0%& m \u0003UE96AC@A6?D:EJ @7\u00012 ,:?5 2?5\u0001,:?5\u00014C62E6D\u0001\u001b:C6\u0005\u0001H9:49\u00014C62E6D\u0001>F4FD\u0007 \u0016D\u0001>F4FD\u00012?5\u0001\u001b:C6\u0001HC6DE=6\u0001H:E9 D:EF2E:@?V\u0015\u0004\u0005 2E6C>\u0001E92E\u0001:D?@E@C:@FD=J\u00015:77:4F=E\u0001E@\u0001EC2?D=2E6\u0007",
+          "anchor_excerpt": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 345,
+        "file_idx": 344,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposedly control the thoughts, acts, and speech of their victim. Possession was expressed by verbs like ping 憑, yi 依, or fu 附, which meant “attaching to” or “relying upon” a person. Ghosts were also often said to “enter” (ru 入) the body of their victims. All these terms were not part of specialized medical terminology, but physicians used them when they discussed cases of “possession.” Regardless of whether they believed in ghosts, most scholarly healers included sections on “demonic affliction” (鬼祟), “affliction by evil” (邪祟), “spectral illnesses” (祟病), or “evil demons” (邪鬼) in their treatises or case collections. Ancient texts had attributed all kinds of ailments to spirits, from toothaches to painful childbirth. $ ^{4} $ Most late-imperial doctors, however, attributed to ghostly possession chiefly a cluster of symptoms that looked like those of madness. These “possession symptoms” included delirium, strange speech, unprovoked grief, extreme apathy, hallucinations and the desire to injure oneself. The concept of sui 崇 is almost as old as the Chinese writing system itself. Donald Harper has glossed sui (in ancient usage) as a calamity brought abou ...",
+        "byte_size": 144676,
+        "sha256": "53f42d8883376ad51c5759cbd021b78c11345067f97ddc5c3627ccb943145999"
+      },
+      {
+        "page_no": 347,
+        "file_idx": 346,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Zhu Zhenheng's 朱震亨 (1282-1358) influential view that possession symptoms were commonly triggered by mucus. $ ^{7} $ The third section tries to interpret the dramatic decrease in mentions of exorcistic healers in late-imperial cases that physicians or their patients' relatives explicitly attributed to \"evil ghosts\" or designated as \"spectral affliction.\" I suggest that shamans and elite physicians no longer competed for the same patients. Yet, as I show in the fourth section, even in the late nineteenth century many elite physicians still ascribed illness to the action of various kinds of ghosts. The \"medical exorcisms\" they performed often borrowed from ritual therapies that today we associate more readily with Daoism than with scholarly medicine. $ ^{8} $ The final section explains how some physicians explained and treated hallucinations, a special type of possession symptom. ### 8.2 The ambiguous closeness of madness and possession symptoms People from the times and places I study often found resemblances between what they called dian or kuang and what they called “spectral affliction” (sui). These categories were not equivalent, but both specialists and commoners found them meaningfully related in a number of contexts. First, acts designated as “mad” could be attributed to possession, because the terms that meant “madness” did not necessarily entail a medical explanation. Ev ...",
+        "byte_size": 129172,
+        "sha256": "6323c6176b8daa5a378b7897771b4a28897e0271ff8dac1e6479a01d463e591a"
+      },
+      {
+        "page_no": 348,
+        "file_idx": 347,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "could treat. $ ^{9} $ Some passages warned that many kinds of spirits could make people crazy. $ ^{10} $ Others called “mad words and blithe speech” kinds of “spectral afflictions” (狂言妄语… 此等之祟) and said that “specters with a form… render people mad” (諸有形之祟…令人 顛狂). $ ^{11} $ If these texts did not assert that madness was always caused by demons, at least they implied that specters could cause some cases of mad behavior. What is crucial is that religious, medical, and legal texts alike could use terms like diankuang to refer a similar set of symptoms. Medical texts expressed the similarity between the symptoms of possession and those of medical madness in several ways. Many late-imperial physicians discussed “spectral affliction” under the same treatise entry as insanity. The second half of the madness section in Li Chan’s 李梴 Introduction to Medical Learning (Yixue rumen 醫學入門, 1575), for instance, analyzed the origin of “afflictions by evil” (邪祟). $ ^{12} $ Others doctors proposed explicit similes, as when Zhang Lu 張璐 (1615-1699) noted that one of his insane patients looked “as if he were possessed by a specter” (似祟憑依) or when Gong Tingxian 龔廷賢 (ca. 1538-1635) claimed that one vaunted recipe “treats fits of madness in which one jumps and screams as though one had incurred a demonic affliction” (治發狂跳叫如著了鬼祟一般者). $ ^{13} $ Li",
+        "byte_size": 177018,
+        "sha256": "a052a34aea5e41a096d463c8022de9422d992ad131fca35d7c4452014f113125"
+      },
+      {
+        "page_no": 349,
+        "file_idx": 348,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Yongcui 李用粹 wrote an entry called “Madness resembles spectral affliction” (癫狂似祟) in his Collected Supplements on Symptoms and Treatments (Zhengzhi buibu 證治匯補; 1687). Another sign of the ambiguous meaning of possession symptoms was that many physicians treated as the result of organic imbalances symptoms that patients attributed to possession. $ ^{14} $ In non-medical contexts, mad behavior was often understood and handled as if it resulted from possession. When Lin Shiyuan started to “speak and dance madly” (狂言跳舞) in 1762, his mother thought he had been “struck by evil” (中邪); she sent a relative to invite a Taoist master (道師) to chant scriptures and implore deities (誦經祇禳) on his behalf. $ ^{15} $ The Kangxi emperor (r. 1662-1722) was so perplexed by his son Yinren’s reckless behavior that he first attributed it to sorcery and evil spirits. $ ^{16} $ When in 1713 he decided to remove Yinren as heir-apparent after decades of trouble, he had resigned himself that his son’s madness was an illness (瘋狂成疾 and 狂疾) and that Yinren would never recover. $ ^{17} $ The attribution of madness to possession seemed natural in literature as well, as when the son of a corrupt official in a story by Yuan Mei 袁枚 (1716-1797) was said to have “suddenly caught madness” (忽得瘋疾) and it later turned out that the young man was being possessed. $ ^{18} $",
+        "byte_size": 153229,
+        "sha256": "42a45b31bc4d3c2f3d6070bb331666b6666a0953989e72015a27f980f5c5c054"
+      },
+      {
+        "page_no": 350,
+        "file_idx": 349,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "###### 8.3 Possession... or mucus? Considering the resemblance between the symptoms of mania and possession, it is not surprising that physicians devised ways to strengthen their interpretive claims on such symptoms. By arguing that disorders that looked as if they were caused by demons could in fact be caused by either mucus or depletion, Zhu Zhenheng 朱震亨 (1282-1358) managed to discuss possession symptoms without discussing ghosts (4.4). Zhu's argument started its rise to textual dominance in the writings of his disciples and intellectual followers. The sections on \"mucus\" and \"depletion and wasting disorders\" (虚損) of Liu Chun's Yuji weiji 玉機微義 (1396) discussed the idea that mucus caused possession-like symptoms. $ ^{19} $ Dai Liang's \"Biography of the Old Man of Cinnabar Creek\" (\"Danxi weng zhuan\" 丹溪翁傳), which contained one of the mucus-possession cases I translated in 4.4, was appended to the widely circulated Huizhou version of the Danxi xinfā 丹溪心法 (1482). Wang Ao's 王鏊 Gu danfang 古單方 (completed in 1496) contained the earliest section on \"affliction by evil\" that I have found. $ ^{20} $ In it, Wang acknowledged Zhu's view that the symptoms of such afflictions could indeed be caused by mucus, and cited Zhu's warning that those afflicted by mucus possession might die if they were treated by exorcism. At the beginning of their sections on spectral afflictions, many late-imperia ...",
+        "byte_size": 134420,
+        "sha256": "506e57f8ff74f852fc9fa5c2219d9c73ac48a6dbba4d6aa2c0f5659f6d073618"
+      },
+      {
+        "page_no": 351,
+        "file_idx": 350,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "虞搏 Yixue zhengzhuan 醫學正傳 (1515; 5.7), the composite Danxi xiansheng zhifa xinyao 丹溪先生治法心要 (1536; 5.5), Li Chan's Introduction to Medical Learning (1575), Zhang Siwei's 張四維 Yimen mizhi 醫門秘旨 (ca. 1576), Zhang Sanxi's 張三錫 Yixue liuyao 醫學六要 (1585), and most of Gong Tingxian's popular books (7.3) probably enhanced the dominance of Zhu's idea in medical circles. $ ^{21} $ The claim that mucus could create strange disorders had thus became part of mainstream medical discourse by the sixteenth century, and it became such commonsense in the Qing period that it no longer needed attribution. An Anthology of Strange Illnesses (Qizheng bui 奇症匯) compiled in 1786 recounted the case of a man who saw lions in front of him. Without further remarks his illness was attributed to mucus and treated with emetics. $ ^{22} $ About a case of “demonic infestation” (鬼疰) included in his Medical Case Files Ancient and Present, With Commentaries (Guijin yian an 古今醫案按; 1778), Yu Zhen remarked that “This is what is called ‘mucus [causes] many strange symptoms’; it is not something to be marveled at” (此所謂痰多怪證亦不為奇). $ ^{23} $ He commented elsewhere that the commonest treatment for possession-like symptoms in his time was “clearing Heat and guiding mucus” (清熱導痰). $ ^{24} $ Medicine for Sots (Chunzi yi 蠢子醫), a book that one man wrote for his grandchildren in the late nineteenth century, observed twice that the mai ...",
+        "byte_size": 160941,
+        "sha256": "2c25c712cbc450a02adf7bfa7eff626d60d43d89eef121a338e5e0e6a4d60487"
+      },
+      {
+        "page_no": 352,
+        "file_idx": 351,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "disorders was to attack mucus: “when mucus and saliva make a demonic affliction and Cold and Heat go back and forth, the methods of guiding or vomiting [mucus] will be the only ones to work” (痰涎為祟 寒熱往來 非用導吐法不行). $ ^{25} $ ### 8.4 Diminished competition between physicians and shamans? Even if Zhu Zhenheng was never part of an organized campaign to root out popular practices and did not speak in the name of a profession, he clearly aimed to reject exorcism as a treatment for possession symptoms. His understanding of body and illness disqualified shamanic healers to the benefit of people who—like himself—claimed they could reestablish organic balance with herbal or mineral drugs. Though there is no reason to doubt that he was genuinely concerned with his patients' well-being, his interpretation of possession symptoms can also be understood as a move in a competition with other kinds of healers. Ascribing mad symptoms to mucus was a way of saying they were not caused by ghosts and thus of invalidating any recourse to ritual specialists. One of Zhu's cases explicitly mentioned this contest between healers. $ ^{26} $ An adult woman surnamed Jin. During the hot summer months, she went to a banquet. When she returned, her mother-in-law reprimanded her for not sitting at the proper place. She then felt so ashamed that she contracted this illness. In the midst of incoherent words, she of ...",
+        "byte_size": 130083,
+        "sha256": "ae667284d712c2f10c41e4960832de6565b4bec754311e10869e523a15d773b0"
+      },
+      {
+        "page_no": 354,
+        "file_idx": 353,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Almost all the Jin and Yuan physicians who recorded madness cases alluded to this rivalry. Zhang Congzheng 張從正 (1156-1228) explained that the relatives of a man had burned paper talismans (燒符), organized Taoist rituals (作醮), and hired a dancing medium to exorcise the ghost (問鬼跳誣) they thought had crazed him after he had fallen off a horse. $ ^{27} $ Wang Haogu 王好古 (fl. first half of the 13 $ ^{th} $ century) noted that the relatives of a woman who had become crazy “all thought it was a ghost’s making” (人皆以為鬼魔). $ ^{28} $ His younger contemporary Luo Tianyi 羅天益 (ca. 1220-1290) similarly reported that people around his mad patient all said that Wind demons were causing the problem (時人皆言風魔了), though the entreaties of an exorcistic master (巫師) had failed to cure him. $ ^{29} $ Whereas most Jin-Yuan physicians invited to treat mad behavior noted that their patients had previously sought the help of shamanic healers, Ming and Qing doctors almost never mentioned exorcists as their competitors. A complete lack of medical case files between the late fourteenth century and approximately 1515 makes me unable to follow this trend in the documents. All we see is an end result: after 1500, demonology was no longer the most criticized approach to mad symptoms in medical treatises and case collections. Instead, medical writers almost always contrasted their own approach with that of other phys ...",
+        "byte_size": 137638,
+        "sha256": "44ecf7b613f075482ae672559f7edf163482d9c1e03f60810d586c2cc5bf89a8"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-015-ghostsormucus:toc-ch-015-ghostsormucus:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00244\",\n    \"anchor_id\": \"anchor-00983\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker 3 in the text on page 327 (screenshot) clearly corresponds to footnote 3 at the bottom of the same page. The current binding is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00251\",\n    \"anchor_id\": \"anchor-00994\",\n    \"confidence\": 1.0,\n    \"reason\": \"Marker 10 in the text on page 330 (screenshot) clearly corresponds to footnote 10 at the bottom of the same page. The current binding is incorrect.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-00244",
+      "anchor_id": "anchor-00983",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker 3 in the text on page 327 (screenshot) clearly corresponds to footnote 3 at the bottom of the same page. The current binding is incorrect."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00251",
+      "anchor_id": "anchor-00994",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Marker 10 in the text on page 330 (screenshot) clearly corresponds to footnote 10 at the bottom of the same page. The current binding is incorrect."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-015-ghostsormucus:toc-ch-015-ghostsormucus:endnote",
+    "chapter_title": "Ghosts or mucus?",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00244",
+        "anchor_id": "anchor-00983",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker 3 in the text on page 327 (screenshot) clearly corresponds to footnote 3 at the bottom of the same page. The current binding is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00251",
+        "anchor_id": "anchor-00994",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker 10 in the text on page 330 (screenshot) clearly corresponds to footnote 10 at the bottom of the same page. The current binding is incorrect."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00244",
+        "anchor_id": "anchor-00983",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker 3 in the text on page 327 (screenshot) clearly corresponds to footnote 3 at the bottom of the same page. The current binding is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00251",
+        "anchor_id": "anchor-00994",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker 10 in the text on page 330 (screenshot) clearly corresponds to footnote 10 at the bottom of the same page. The current binding is incorrect."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00121",
+        "action": "match",
+        "note_item_id": "fn-00244",
+        "anchor_id": "anchor-00983",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker 3 in the text on page 327 (screenshot) clearly corresponds to footnote 3 at the bottom of the same page. The current binding is incorrect."
+      },
+      {
+        "link_id": "link-00125",
+        "action": "match",
+        "note_item_id": "fn-00251",
+        "anchor_id": "anchor-00994",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Marker 10 in the text on page 330 (screenshot) clearly corresponds to footnote 10 at the bottom of the same page. The current binding is incorrect."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 12588,
+    "completion_tokens": 205,
+    "total_tokens": 12793,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 6391
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "stage": "visual_toc.manual_input_extract",
+  "reason_for_request": "从目录页截图中抽取单页原子目录项",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
+  "request_content": {
+    "images": [
+      {
+        "label": "image-1",
+        "file_idx": 0,
+        "byte_size": 42256,
+        "sha256": "badb3363e97a4f09434337c3763d3df6a5859eda55f0fd0eadde20b63cfdcc4a",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a3c9e1f7b284/toc_visual_source.pdf",
+        "source": "pdf_page"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "source": "pdf",
+    "file_idx": 0
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self and narcissism\",\n    \"depth\": 0,\n    \"printed_page\": 13,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Attachment and trauma\",\n    \"depth\": 0,\n    \"printed_page\": 33,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Defense mechanisms and dissociation\",\n    \"depth\": 0,\n    \"printed_page\": 49,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Cathexis and free energy\",\n    \"depth\": 0,\n    \"printed_page\": 68,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Unconscious and conscious\",\n    \"depth\": 0,\n    \"printed_page\": 88,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Dreams\",\n    \"depth\": 0,\n    \"printed_page\": 105,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Schizophrenia and depression\",\n    \"depth\": 0,\n    \"printed_page\": 126,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conclusion\",\n    \"depth\": 0,\n    \"printed_page\": 146,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 155,\n    \"visual_order\": 10,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "title": "Introduction",
+      "depth": 0,
+      "printed_page": 1,
+      "visual_order": 1,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Self and narcissism",
+      "depth": 0,
+      "printed_page": 13,
+      "visual_order": 2,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Attachment and trauma",
+      "depth": 0,
+      "printed_page": 33,
+      "visual_order": 3,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Defense mechanisms and dissociation",
+      "depth": 0,
+      "printed_page": 49,
+      "visual_order": 4,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Cathexis and free energy",
+      "depth": 0,
+      "printed_page": 68,
+      "visual_order": 5,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Unconscious and conscious",
+      "depth": 0,
+      "printed_page": 88,
+      "visual_order": 6,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Dreams",
+      "depth": 0,
+      "printed_page": 105,
+      "visual_order": 7,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Schizophrenia and depression",
+      "depth": 0,
+      "printed_page": 126,
+      "visual_order": 8,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Conclusion",
+      "depth": 0,
+      "printed_page": 146,
+      "visual_order": 9,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Index",
+      "depth": 0,
+      "printed_page": 155,
+      "visual_order": 10,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    }
+  ],
+  "derived_truth": {
+    "items": [
+      {
+        "title": "Introduction",
+        "depth": 0,
+        "printed_page": 1,
+        "visual_order": 1,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Self and narcissism",
+        "depth": 0,
+        "printed_page": 13,
+        "visual_order": 2,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Attachment and trauma",
+        "depth": 0,
+        "printed_page": 33,
+        "visual_order": 3,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Defense mechanisms and dissociation",
+        "depth": 0,
+        "printed_page": 49,
+        "visual_order": 4,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Cathexis and free energy",
+        "depth": 0,
+        "printed_page": 68,
+        "visual_order": 5,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Unconscious and conscious",
+        "depth": 0,
+        "printed_page": 88,
+        "visual_order": 6,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Dreams",
+        "depth": 0,
+        "printed_page": 105,
+        "visual_order": 7,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Schizophrenia and depression",
+        "depth": 0,
+        "printed_page": 126,
+        "visual_order": 8,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Conclusion",
+        "depth": 0,
+        "printed_page": 146,
+        "visual_order": 9,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Index",
+        "depth": 0,
+        "printed_page": 155,
+        "visual_order": 10,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      }
+    ]
+  },
+  "usage": {
+    "stage": "visual_toc.manual_input_extract",
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "request_count": 1,
+    "prompt_tokens": 1182,
+    "completion_tokens": 728,
+    "total_tokens": 1910,
+    "doc_id": "a3c9e1f7b284",
+    "slug": "",
+    "context": {
+      "source": "pdf",
+      "file_idx": 0
+    }
+  },
+  "timing": {
+    "duration_ms": 14639
+  }
+}

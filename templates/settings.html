@@ -68,7 +68,7 @@
     <div class="settings-section">
       <h3>翻译模型</h3>
       <div class="model-picker">
-        {% for key, m in models.items() %}
+        {% for key, m in translation_models.items() %}
         <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
@@ -104,13 +104,14 @@
           <label for="customModelProvider" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">Provider</label>
           <select id="customModelProvider" name="provider_type" class="inp" onchange="toggleCustomModelProviderFields(this.value)">
             <option value="qwen"{% if custom_model.provider_type == 'qwen' %} selected{% endif %}>Qwen (DashScope)</option>
+            <option value="qwen_mt"{% if custom_model.provider_type == 'qwen_mt' %} selected{% endif %}>Qwen-MT (DashScope)</option>
             <option value="deepseek"{% if custom_model.provider_type == 'deepseek' %} selected{% endif %}>DeepSeek</option>
             <option value="openai_compatible"{% if custom_model.provider_type == 'openai_compatible' %} selected{% endif %}>OpenAI Compatible</option>
           </select>
           <label for="customModelId" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">模型 ID</label>
           <input id="customModelId" name="model_id" class="inp" type="text" value="{{ custom_model.model_id }}"
                  placeholder="例如：qwen3.5-plus">
-          <div id="qwenRegionWrap" style="margin-top:12px;{% if custom_model.provider_type != 'qwen' %}display:none;{% endif %}">
+          <div id="qwenRegionWrap" style="margin-top:12px;{% if custom_model.provider_type not in ['qwen', 'qwen_mt'] %}display:none;{% endif %}">
             <label for="customModelQwenRegion" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Qwen 地域</label>
             <select id="customModelQwenRegion" name="qwen_region" class="inp">
               <option value="cn"{% if custom_model.qwen_region == 'cn' %} selected{% endif %}>中国内地</option>
@@ -146,6 +147,94 @@
       </div>
     </div>
   </div>
+
+  <!-- Visual TOC model (independent from translation) -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>视觉目录模型</h3>
+      <p class="hint" style="margin-bottom:12px;line-height:1.6;">
+        仅用于「自动视觉目录」等需要读 PDF 页面图像的能力，与上方「翻译模型」互不影响。仍使用同一 DashScope / DeepSeek 等 Key。
+      </p>
+      <div class="model-picker">
+        {% for key, m in visual_models.items() %}
+        <form method="POST" action="{{ url_for('set_visual_model', key=key) }}" class="inline-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <input type="hidden" name="next" value="settings">
+          <button type="submit" class="btn {{ 'active' if (not visual_custom_model_enabled and key == visual_model_key) else '' }}">{{ m.label }}</button>
+        </form>
+        {% endfor %}
+        <button type="button" class="btn {{ 'active' if visual_custom_model_enabled else '' }}" onclick="toggleVisualCustomModelPanel();">
+          {{ ('自定义: ' ~ visual_custom_model_name) if visual_custom_model_name else '自定义视觉模型' }}
+        </button>
+      </div>
+      <div id="visualCustomModelPanel" class="custom-model-panel{% if not visual_custom_model_panel_open %} hidden{% endif %}"{% if not visual_custom_model_panel_open %} hidden{% endif %}>
+        {% if visual_custom_model.model_id %}
+        <div class="custom-model-actions">
+          <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="section" value="visual_custom_model_enable">
+            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+            <button type="submit" class="btn {{ 'active' if visual_custom_model_enabled else '' }}">启用此自定义模型：{{ visual_custom_model.display_name or visual_custom_model.model_id }}</button>
+          </form>
+          <span class="custom-model-bound">
+            Provider：{{ visual_custom_model.provider_type }}{% if visual_custom_model.provider_type == 'qwen' %} · 地域：{{ visual_custom_model.qwen_region }}{% endif %}
+          </span>
+        </div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('save_settings') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="section" value="visual_custom_model_save">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <label for="visualModelDisplayName" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">展示名</label>
+          <input id="visualModelDisplayName" name="display_name" class="inp" type="text" value="{{ visual_custom_model.display_name }}"
+                 placeholder="例如：qwen-vl-plus">
+          <label for="visualModelProvider" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">Provider</label>
+          <select id="visualModelProvider" name="provider_type" class="inp" onchange="toggleVisualCustomModelProviderFields(this.value)">
+            <option value="qwen"{% if visual_custom_model.provider_type == 'qwen' %} selected{% endif %}>Qwen (DashScope)</option>
+            <option value="deepseek"{% if visual_custom_model.provider_type == 'deepseek' %} selected{% endif %}>DeepSeek</option>
+            <option value="openai_compatible"{% if visual_custom_model.provider_type == 'openai_compatible' %} selected{% endif %}>OpenAI Compatible</option>
+          </select>
+          <label for="visualModelId" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">模型 ID</label>
+          <input id="visualModelId" name="model_id" class="inp" type="text" value="{{ visual_custom_model.model_id }}"
+                 placeholder="例如：qwen-vl-plus">
+          <div id="visualQwenRegionWrap" style="margin-top:12px;{% if visual_custom_model.provider_type != 'qwen' %}display:none;{% endif %}">
+            <label for="visualModelQwenRegion" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Qwen 地域</label>
+            <select id="visualModelQwenRegion" name="qwen_region" class="inp">
+              <option value="cn"{% if visual_custom_model.qwen_region == 'cn' %} selected{% endif %}>中国内地</option>
+              <option value="sg"{% if visual_custom_model.qwen_region == 'sg' %} selected{% endif %}>新加坡</option>
+              <option value="us"{% if visual_custom_model.qwen_region == 'us' %} selected{% endif %}>美国</option>
+            </select>
+          </div>
+          <div id="visualOpenaiCompatWrap" style="margin-top:12px;{% if visual_custom_model.provider_type != 'openai_compatible' %}display:none;{% endif %}">
+            <label for="visualModelBaseUrl" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Base URL</label>
+            <input id="visualModelBaseUrl" name="base_url" class="inp" type="text" value="{{ visual_custom_model.base_url }}"
+                   placeholder="例如：https://example.com/v1">
+            <label for="visualModelApiKey" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">专用 API Key</label>
+            <input id="visualModelApiKey" name="custom_api_key" class="inp" type="password" value="{{ visual_custom_model.custom_api_key }}"
+                   placeholder="输入该 OpenAI 兼容服务的 API Key">
+          </div>
+          <div class="hint" style="margin-top:8px;">
+            当前生效视觉模型 ID：
+            <code>{{ current_visual_model_id }}</code>
+          </div>
+          <div class="hint" style="margin-top:6px;">
+            保存只更新配置，不会自动切换。确认无误后，再点上方「启用此自定义模型」。
+          </div>
+          <button type="submit" class="btn btn-pri mt-10">保存视觉目录模型配置</button>
+        </form>
+        {% if visual_custom_model.model_id %}
+        <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form" style="margin-top:10px;">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="section" value="visual_custom_model_clear">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <button type="submit" class="btn btn-sec">清空视觉目录自定义配置</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
 
   <!-- Parallel Translation -->
   <div class="card">
@@ -326,9 +415,29 @@ function toggleCustomModelPanel(forceOpen) {
 function toggleCustomModelProviderFields(providerType) {
   var qwenWrap = document.getElementById('qwenRegionWrap');
   var openaiWrap = document.getElementById('openaiCompatWrap');
+  if (qwenWrap) qwenWrap.style.display = (providerType === 'qwen' || providerType === 'qwen_mt') ? '' : 'none';
+  if (openaiWrap) openaiWrap.style.display = providerType === 'openai_compatible' ? '' : 'none';
+}
+
+function toggleVisualCustomModelPanel(forceOpen) {
+  var panel = document.getElementById('visualCustomModelPanel');
+  if (!panel) return;
+  var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : panel.hidden;
+  panel.hidden = !shouldOpen;
+  panel.classList.toggle('hidden', !shouldOpen);
+  if (shouldOpen) {
+    var input = document.getElementById('visualModelId');
+    if (input) input.focus();
+  }
+}
+
+function toggleVisualCustomModelProviderFields(providerType) {
+  var qwenWrap = document.getElementById('visualQwenRegionWrap');
+  var openaiWrap = document.getElementById('visualOpenaiCompatWrap');
   if (qwenWrap) qwenWrap.style.display = providerType === 'qwen' ? '' : 'none';
   if (openaiWrap) openaiWrap.style.display = providerType === 'openai_compatible' ? '' : 'none';
 }
+
 
 function setSettingsTocMsg(msg, type) {
   var el = document.getElementById('settingsTocImportMsg');
@@ -381,7 +490,11 @@ function replaceTocFileFromSettings() {
 {% if custom_model_panel_open %}
 toggleCustomModelPanel(true);
 {% endif %}
+{% if visual_custom_model_panel_open %}
+toggleVisualCustomModelPanel(true);
+{% endif %}
 toggleCustomModelProviderFields('{{ custom_model.provider_type }}');
+toggleVisualCustomModelProviderFields('{{ visual_custom_model.provider_type }}');
 
 {% if toc_source == 'user' %}
 function saveTocOffset() {

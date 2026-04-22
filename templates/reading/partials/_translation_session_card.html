@@ -1,0 +1,21 @@
+<div class="translation-session-card" id="translationSessionCard">
+  <div class="translation-session-head">
+    <div>
+      <div class="translation-session-title">后台翻译任务</div>
+      <div class="translation-session-subtitle" id="translationSessionSubtitle">当前无任务，可从这里启动普通翻译或词典补重译。</div>
+    </div>
+    <button type="button" class="tb" id="translationSessionToggleBtn" onclick="toggleTaskSessionDetails();">展开详情</button>
+  </div>
+  <div class="translation-session-progress">
+    <div class="translation-session-bar-track">
+      <div class="translation-session-bar-fill" id="translationSessionBar"></div>
+    </div>
+    <div class="translation-session-progress-meta">
+      <span id="translationSessionPhase">空闲</span>
+      <span id="translationSessionPct">0%</span>
+    </div>
+  </div>
+  <div class="translation-session-summary" id="translationSessionSummary"></div>
+  <div class="translation-session-actions" id="translationSessionActions"></div>
+  <div class="translation-session-details{{ '' if usage_open else ' hidden' }}" id="translationSessionDetails"></div>
+</div>

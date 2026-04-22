@@ -36,28 +36,52 @@
       <div id="uploadCard" style="padding:16px;border:1px solid var(--bdrL);border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,241,231,0.84));">
         <div class="upload-area" style="padding:20px;display:block;" id="uploadArea">
           <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.bmp,.tiff,.tif" style="display:none;">
+          <input type="file" id="tocPdfInput" accept=".pdf" style="display:none;">
+          <input type="file" id="tocScreenshotInput" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif" multiple style="display:none;">
+          <input type="file" id="glossaryInput" accept=".csv,.xlsx,.xls" style="display:none;">
           <div class="icon" id="uploadIcon">📄</div>
-          <div class="title" id="uploadTitle">上传 PDF / 图片</div>
-          <div class="subtitle" id="uploadSubtitle">调用 PaddleOCR 解析版面，PDF文字层自动优先</div>
+          <div class="title" id="uploadTitle">选择或拖拽 PDF / 图片</div>
+          <div class="subtitle" id="uploadSubtitle">选好主文件后，可附带目录和词典，然后在下方点「开始解析」</div>
+        </div>
+        <div id="pendingMainFileInfo" style="margin-top:10px;font-size:12px;color:var(--txS);line-height:1.6;">
+          尚未选择主文件。
+        </div>
+        <div id="uploadAttachRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button type="button" class="btn btn-sec btn-sm" id="pickTocPdfBtn">附带目录 PDF</button>
+          <button type="button" class="btn btn-sec btn-sm" id="pickTocScreenshotBtn">附带目录截图</button>
+          <button type="button" class="btn btn-sec btn-sm" id="pickGlossaryBtn">附带词典（CSV/XLSX）</button>
+          <button type="button" class="btn btn-sec btn-sm" id="clearPendingMainBtn" style="display:none;">清除主文件</button>
+          <button type="button" class="btn btn-sec btn-sm" id="clearPendingTocBtn" style="display:none;">清除目录附件</button>
+          <button type="button" class="btn btn-sec btn-sm" id="clearPendingGlossaryBtn" style="display:none;">清除词典附件</button>
+        </div>
+        <div id="pendingManualTocInfo" style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+          未附带目录文件；自动视觉目录将回退到整本 PDF 的候选页选择。
+        </div>
+        <div id="pendingGlossaryInfo" style="margin-top:4px;font-size:11px;color:var(--txL);line-height:1.6;">
+          未附带词典；若当前文档已有词典仍会继续使用。
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
           <label for="cleanupHeaderFooterToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
             <input type="checkbox" id="cleanupHeaderFooterToggle" {% if upload_cleanup_default_enabled %}checked{% endif %} style="margin-top:3px;">
             <span style="display:block;">
-              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">开启页眉页脚清理</span>
-              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">更慢，但脚注/尾注标记通常更准。默认关闭，方便先尽快开始阅读。</span>
+              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">开启 FNM 模式</span>
+              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">更慢，但会自动串起页眉页脚清理、自动视觉目录和 FNM 注释分类。视觉目录失败时，这条 FNM 链路会直接停止，不会偷偷降级。</span>
             </span>
           </label>
-          <label for="autoVisualTocToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
-            <input type="checkbox" id="autoVisualTocToggle" {% if upload_auto_visual_toc_default_enabled %}checked{% endif %} style="margin-top:3px;">
+          <label for="autoTranslateToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
+            <input type="checkbox" id="autoTranslateToggle" checked style="margin-top:3px;">
             <span style="display:block;">
-              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">开启自动视觉目录</span>
-              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">仅对 PDF 生效。解析完成后继续后台生成目录，目录标题和层级只依赖视觉识别。</span>
+              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">解析完成后自动开始翻译</span>
+              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">默认勾选。取消后会停在首页/阅读页，由你手动点「开始翻译」。</span>
             </span>
           </label>
         </div>
+        <div id="uploadRouteHint" style="margin-top:10px;font-size:12px;color:var(--txS);line-height:1.7;">
+          当前为快速模式：解析完成后会直接进入标准阅读视图，并自动开始普通翻译。
+        </div>
+        <button type="button" class="btn btn-pri btn-lg" id="startParseBtn" style="margin-top:12px;width:100%;justify-content:center;" disabled>开始解析</button>
         <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
-          目录通常可以在解析完成后再上传；上传后会立即影响阅读导航、导出章节层级和尾注按章分组，不需要重新 OCR。
+          文档页里仍然保留“生成/重新生成自动视觉目录”高级入口；首页上传区现在只决定是否走完整 FNM 链路。FNM 模式不再提供预览视图。
         </div>
       </div>
     </div>
@@ -115,6 +139,19 @@
         <button type="button" id="reparseBtn" class="btn btn-sm btn-sec" onclick="startReparse()">🔄 重新解析</button>
         <span style="font-size:11px;color:var(--txL);line-height:1.4;">若原文/脚注显示异常，可重新解析（保留已有翻译，沿用当前解析模式）</span>
       </div>
+      <div style="margin-top:10px;padding:10px 12px;border:1px solid var(--bdrL);border-radius:10px;background:var(--bg2);">
+        <div style="font-size:12px;font-weight:600;color:var(--txt);">手动目录输入</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--txS);line-height:1.6;">
+          当前状态：{{ manual_toc_label }}{% if manual_toc_enabled and manual_toc_page_count %} · {{ manual_toc_page_count }}页/张{% endif %}
+          {% if manual_toc_source_name %}<br>来源：{{ manual_toc_source_name }}{% endif %}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          <input type="file" id="docTocPdfInput" accept=".pdf" style="display:none;">
+          <input type="file" id="docTocScreenshotInput" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif" multiple style="display:none;">
+          <button type="button" class="btn btn-sec btn-sm" id="docPickTocPdfBtn">为当前文档上传目录 PDF</button>
+          <button type="button" class="btn btn-sec btn-sm" id="docPickTocScreenshotBtn">为当前文档上传目录截图</button>
+        </div>
+      </div>
       {% endif %}
       <div id="backgroundDocStatus" style="display:{% if visual_toc_status == 'running' %}block{% else %}none{% endif %};margin-top:10px;padding:10px 12px;border:1px solid var(--bdrL);border-radius:10px;background:var(--bg2);">
         <div id="backgroundDocStatusLabel" style="font-size:12px;font-weight:600;color:var(--txt);">{{ visual_toc_progress_label or visual_toc_status_label }}</div>
@@ -127,7 +164,7 @@
       <h3 style="font-size:16px;color:var(--txt);margin-bottom:8px;">还没有解析任何文档</h3>
       <p style="font-size:13px;color:var(--txS);line-height:1.8;max-width:400px;margin:0 auto;">
         请在上方<strong>上传PDF或图片</strong>。<br>
-        <span style="font-size:12px;color:var(--txL);">支持自动调用 PaddleOCR 进行高精度版面解析；可选页眉页脚清理和自动视觉目录，以平衡速度、目录质量与脚注/尾注精度。</span>
+        <span style="font-size:12px;color:var(--txL);">支持快速模式直接开始阅读，也支持 FNM 模式一次完成清理、视觉目录和注释结构化。</span>
       </p>
     </div>
     {% endif %}
@@ -150,17 +187,47 @@
     </div>
   </div>
 
-  <!-- Action Buttons -->
+  <!-- Action Buttons / FNM Workflow -->
   {% if has_entries %}
   {% set safe_entry_idx = entry_idx if entry_idx < entries|length else (entries|length - 1) %}
   {% set resume_entry = entries[safe_entry_idx] %}
   {% set resume_bp = resume_entry.get('_pageBP', first_page) %}
   {% endif %}
+  {% if has_pages and cleanup_headers_footers_enabled %}
+  <div class="card" id="fnmWorkflowCard" style="margin-top:16px;padding:16px 18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:15px;font-weight:600;color:var(--txt);">FNM 翻译工作流</div>
+        <div style="margin-top:4px;font-size:12px;color:var(--txS);line-height:1.7;" id="fnmWorkflowSummary">
+          FNM 模式不再提供预览视图；请在首页直接继续 FNM、开始/继续翻译、暂停翻译并导出章节包。
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--txL);" id="fnmWorkflowMeta">读取当前文档已存储状态…</div>
+    </div>
+    <div style="margin-top:12px;background:var(--bg2);border-radius:6px;height:8px;overflow:hidden;">
+      <div id="fnmWorkflowBar" style="background:var(--acc);height:100%;width:0%;border-radius:6px;transition:width 0.3s;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--txS);">
+      <span id="fnmWorkflowPhase">状态读取中…</span>
+      <span id="fnmWorkflowPct">0%</span>
+    </div>
+    <div id="fnmWorkflowDetail" style="margin-top:6px;font-size:11px;color:var(--txL);line-height:1.7;">
+      首页会显示已存储的 FNM 状态、可翻译 unit 数、阻塞原因和导出状态。
+    </div>
+    <div id="fnmWorkflowBlockers" style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.7;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <button type="button" class="btn btn-pri btn-lg" id="fnmStartTranslateBtn" style="flex:1;justify-content:center;" onclick="startFnmWorkflowTranslate();">开始翻译</button>
+      <button type="button" class="btn btn-sec btn-lg" id="fnmContinueProcessBtn" style="flex:1;justify-content:center;" onclick="continueFnmWorkflowProcessing();">继续 FNM 处理</button>
+      <button type="button" class="btn btn-sec btn-lg" id="fnmPauseTranslateBtn" style="flex:1;justify-content:center;" onclick="pauseFnmWorkflowTranslate();">暂停翻译</button>
+      <button type="button" class="btn btn-grn btn-lg" id="fnmExportBundleBtn" style="flex:1;justify-content:center;" onclick="downloadFnmWorkflowExport();">导出章节包</button>
+    </div>
+  </div>
+  {% else %}
   <div class="flex gap-12 flex-wrap mt-16">
     {% if has_pages %}
     <a href="{{ url_for('reading', bp=first_page, auto=1, start_bp=first_page, doc_id=current_doc_id) }}" class="btn btn-pri btn-lg" style="flex:1;justify-content:center;"
        data-reading-entry="1"
-       onclick="return guardReadingEntrance(event, this);">从 PDF 第{{ first_page }}页开始读</a>
+       onclick="return guardReadingEntrance(event, this);">{{ '从 PDF 第' ~ first_page ~ '页开始读' }}</a>
     <a href="{{ url_for('input_page', doc_id=current_doc_id) }}" class="btn btn-sec btn-lg" style="flex:1;justify-content:center;">跳到指定页</a>
     {% else %}
     <span class="btn btn-pri btn-lg" style="flex:1;justify-content:center;opacity:0.4;cursor:not-allowed;">从 PDF 第1页开始读</span>
@@ -168,13 +235,16 @@
     {% endif %}
 
     {% if has_entries %}
-    <a href="{{ url_for('reading', doc_id=current_doc_id) }}" class="btn btn-grn btn-lg" style="flex:1;justify-content:center;" data-reading-entry="1"
-       onclick="return guardReadingEntrance(event, this);">继续读 PDF 第{{ resume_bp }}页</a>
+    <a href="{{ url_for('reading', bp=resume_bp, auto=1, start_bp=resume_bp, doc_id=current_doc_id) }}" class="btn btn-grn btn-lg" style="flex:1;justify-content:center;" data-reading-entry="1"
+       onclick="return guardReadingEntrance(event, this);">{{ '继续读 PDF 第' ~ resume_bp ~ '页' }}</a>
     {% endif %}
   </div>
+  {% endif %}
   {% if has_pages %}
   <div class="home-action-note">
-    {% if has_entries %}
+    {% if cleanup_headers_footers_enabled %}
+    当前文档按 FNM 模式处理；FNM 模式不再提供预览视图，请在首页查看处理状态、启动翻译、暂停和导出。
+    {% elif has_entries %}
     当前文档可从 PDF 第{{ resume_bp }}页继续，也可以重新从 PDF 第{{ first_page }}页开始进入阅读。
     {% else %}
     第一次进入建议先从 PDF 第{{ first_page }}页开始，再按页继续往后读。
@@ -189,10 +259,24 @@
   <!-- 文档列表 -->
   {% if docs %}
   <div class="card" style="margin-top:20px;">
-    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">OCR-JSON解析成功文档</div>
+    <div class="doc-doc-list-toolbar">
+      <div style="font-size:15px;font-weight:600;">OCR-JSON解析成功文档</div>
+      <form id="batchDeleteForm" method="POST" action="{{ url_for('delete_docs_batch') }}" class="inline-form"
+            onsubmit="return confirmBatchDelete();" style="display:flex;align-items:center;gap:12px;margin-left:auto;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        <label style="font-size:13px;color:var(--txS);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="selectAllDocs" title="全选"> 全选
+        </label>
+        <button type="submit" class="btn btn-sm btn-red-ghost" id="batchDeleteBtn" disabled>批量删除选中</button>
+      </form>
+    </div>
     <div class="doc-list">
       {% for doc in docs %}
       <div class="doc-item {{ 'doc-active' if doc.id == current_doc_id else '' }}">
+        <div class="doc-item-select" title="加入批量删除">
+          <input type="checkbox" name="doc_ids" value="{{ doc.id }}" form="batchDeleteForm" class="doc-select-cb"
+                 aria-label="选择 {{ doc.name }}">
+        </div>
         <div class="doc-info">
           {% set translated_pages = doc.entry_count or 0 %}
           {% set total_pages = doc.page_count or 0 %}
@@ -435,9 +519,23 @@
 {% block scripts %}
 <script>
 var fileInput = document.getElementById('fileInput');
+var tocPdfInput = document.getElementById('tocPdfInput');
+var tocScreenshotInput = document.getElementById('tocScreenshotInput');
+var glossaryInput = document.getElementById('glossaryInput');
+var pendingMainFileInfo = document.getElementById('pendingMainFileInfo');
+var pendingManualTocInfo = document.getElementById('pendingManualTocInfo');
+var pendingGlossaryInfo = document.getElementById('pendingGlossaryInfo');
+var clearPendingMainBtn = document.getElementById('clearPendingMainBtn');
+var clearPendingTocBtn = document.getElementById('clearPendingTocBtn');
+var clearPendingGlossaryBtn = document.getElementById('clearPendingGlossaryBtn');
+var uploadAttachRow = document.getElementById('uploadAttachRow');
+var startParseBtn = document.getElementById('startParseBtn');
+var docTocPdfInput = document.getElementById('docTocPdfInput');
+var docTocScreenshotInput = document.getElementById('docTocScreenshotInput');
 var uploadArea = document.getElementById('uploadArea');
 var cleanupHeaderFooterToggle = document.getElementById('cleanupHeaderFooterToggle');
-var autoVisualTocToggle = document.getElementById('autoVisualTocToggle');
+var autoTranslateToggle = document.getElementById('autoTranslateToggle');
+var uploadRouteHint = document.getElementById('uploadRouteHint');
 var progressSection = document.getElementById('progressSection');
 var progressBar = document.getElementById('progressBar');
 var progressLabel = document.getElementById('progressLabel');
@@ -447,9 +545,15 @@ var liveLogPanel = document.getElementById('liveLogPanel');
 var liveLog = document.getElementById('liveLog');
 var readingEntrancesDisabled = false;
 var docStatusPollTimer = null;
+var fnmStatusPollTimer = null;
+var pendingMainFile = null;
+var pendingManualToc = { mode: '', files: [] };
+var pendingGlossary = null;
+var uploadInFlight = false;
+var pendingAutoTranslate = true;
 
 function syncUploadPreferences() {
-  if (!cleanupHeaderFooterToggle || !autoVisualTocToggle) return Promise.resolve();
+  if (!cleanupHeaderFooterToggle) return Promise.resolve();
   return fetch('{{ url_for("api_upload_preferences") }}', {
     method: 'POST',
     headers: {
@@ -457,12 +561,92 @@ function syncUploadPreferences() {
       'X-CSRF-Token': getCsrfToken(),
     },
     body: JSON.stringify({
-      clean_header_footer: !!cleanupHeaderFooterToggle.checked,
-      auto_visual_toc: !!autoVisualTocToggle.checked,
+      fnm_mode: !!cleanupHeaderFooterToggle.checked,
     }),
   }).catch(function() {
     return null;
   });
+}
+
+function updateUploadRouteHint() {
+  if (!uploadRouteHint) return;
+  var cleanupEnabled = !!(cleanupHeaderFooterToggle && cleanupHeaderFooterToggle.checked);
+  uploadRouteHint.textContent = cleanupEnabled
+      ? '当前为 FNM 模式：会先生成自动视觉目录和 FNM 分类，完成后请留在首页点击“开始翻译”。'
+    : '当前为快速模式：解析完成后会直接进入标准阅读视图，并自动开始普通翻译。';
+}
+
+function clearPendingManualToc() {
+  pendingManualToc = { mode: '', files: [] };
+  if (tocPdfInput) tocPdfInput.value = '';
+  if (tocScreenshotInput) tocScreenshotInput.value = '';
+  updatePendingManualTocInfo();
+}
+
+function updatePendingManualTocInfo() {
+  if (!pendingManualTocInfo) return;
+  if (!pendingManualToc.mode || !pendingManualToc.files.length) {
+    pendingManualTocInfo.textContent = '未附带目录文件；自动视觉目录将回退到整本 PDF 的候选页选择。';
+    if (clearPendingTocBtn) clearPendingTocBtn.style.display = 'none';
+    return;
+  }
+  var names = pendingManualToc.files.map(function(file) { return file.name; }).join('、');
+  var label = pendingManualToc.mode === 'manual_pdf'
+    ? ('已附带目录 PDF：' + names)
+    : ('已附带 ' + pendingManualToc.files.length + ' 张目录截图：' + names);
+  pendingManualTocInfo.textContent = label;
+  if (clearPendingTocBtn) clearPendingTocBtn.style.display = '';
+}
+
+function clearPendingGlossary() {
+  pendingGlossary = null;
+  if (glossaryInput) glossaryInput.value = '';
+  updatePendingGlossaryInfo();
+}
+
+function updatePendingGlossaryInfo() {
+  if (!pendingGlossaryInfo) return;
+  if (!pendingGlossary) {
+    pendingGlossaryInfo.textContent = '未附带词典；若当前文档已有词典仍会继续使用。';
+    if (clearPendingGlossaryBtn) clearPendingGlossaryBtn.style.display = 'none';
+    return;
+  }
+  pendingGlossaryInfo.textContent = '已附带词典文件：' + pendingGlossary.name;
+  if (clearPendingGlossaryBtn) clearPendingGlossaryBtn.style.display = '';
+}
+
+function clearPendingMainFile() {
+  pendingMainFile = null;
+  if (fileInput) fileInput.value = '';
+  updatePendingMainFileInfo();
+}
+
+function updatePendingMainFileInfo() {
+  if (pendingMainFileInfo) {
+    if (pendingMainFile) {
+      var sizeMB = (pendingMainFile.size / 1024 / 1024);
+      var sizeTxt = sizeMB >= 1 ? sizeMB.toFixed(1) + 'MB' : Math.round(pendingMainFile.size / 1024) + 'KB';
+      pendingMainFileInfo.textContent = '已选择主文件：' + pendingMainFile.name + '（' + sizeTxt + '）';
+    } else {
+      pendingMainFileInfo.textContent = '尚未选择主文件。';
+    }
+  }
+  if (clearPendingMainBtn) {
+    clearPendingMainBtn.style.display = pendingMainFile ? '' : 'none';
+  }
+  updateStartParseBtnState();
+}
+
+function updateStartParseBtnState() {
+  if (!startParseBtn) return;
+  startParseBtn.disabled = !pendingMainFile || uploadInFlight;
+}
+
+function setAttachRowVisible(visible) {
+  if (uploadAttachRow) uploadAttachRow.style.display = visible ? '' : 'none';
+  if (pendingManualTocInfo) pendingManualTocInfo.style.display = visible ? '' : 'none';
+  if (pendingGlossaryInfo) pendingGlossaryInfo.style.display = visible ? '' : 'none';
+  if (pendingMainFileInfo) pendingMainFileInfo.style.display = visible ? '' : 'none';
 }
 
 function preventDragDefaults(e) {
@@ -474,20 +658,97 @@ function setDragActive(active) {
   uploadArea.classList.toggle('dragover', active);
 }
 
-uploadArea.addEventListener('click', function() {
+function stagePickedMainFile(file) {
+  if (!file) return;
+  pendingMainFile = file;
+  document.getElementById('uploadIcon').textContent = '📄';
+  document.getElementById('uploadTitle').textContent = file.name;
+  document.getElementById('uploadSubtitle').textContent = '已选好主文件，点下方「开始解析」即可开始上传。';
+  updatePendingMainFileInfo();
+}
+
+function shouldOpenMainFilePickerFromUploadArea(target) {
+  if (!target) return true;
+  if (
+    target === fileInput
+    || target === tocPdfInput
+    || target === tocScreenshotInput
+    || target === glossaryInput
+  ) {
+    return false;
+  }
+  return true;
+}
+
+uploadArea.addEventListener('click', function(e) {
+  if (uploadInFlight) return;
+  if (!shouldOpenMainFilePickerFromUploadArea(e && e.target)) return;
   fileInput.click();
 });
 
+var pickTocPdfBtn = document.getElementById('pickTocPdfBtn');
+if (pickTocPdfBtn && tocPdfInput) {
+  pickTocPdfBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    tocPdfInput.click();
+  });
+}
+
+var pickTocScreenshotBtn = document.getElementById('pickTocScreenshotBtn');
+if (pickTocScreenshotBtn && tocScreenshotInput) {
+  pickTocScreenshotBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    tocScreenshotInput.click();
+  });
+}
+
+var pickGlossaryBtn = document.getElementById('pickGlossaryBtn');
+if (pickGlossaryBtn && glossaryInput) {
+  pickGlossaryBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    glossaryInput.click();
+  });
+}
+
+if (clearPendingMainBtn) {
+  clearPendingMainBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    clearPendingMainFile();
+    document.getElementById('uploadIcon').textContent = '📄';
+    document.getElementById('uploadTitle').textContent = '选择或拖拽 PDF / 图片';
+    document.getElementById('uploadSubtitle').textContent = '选好主文件后，可附带目录和词典，然后在下方点「开始解析」';
+  });
+}
+
+if (clearPendingTocBtn) {
+  clearPendingTocBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    clearPendingManualToc();
+  });
+}
+
+if (clearPendingGlossaryBtn) {
+  clearPendingGlossaryBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    clearPendingGlossary();
+  });
+}
+
 if (cleanupHeaderFooterToggle) {
-  cleanupHeaderFooterToggle.addEventListener('change', syncUploadPreferences);
+  cleanupHeaderFooterToggle.addEventListener('change', function() {
+    updateUploadRouteHint();
+    syncUploadPreferences();
+  });
 }
-if (autoVisualTocToggle) {
-  autoVisualTocToggle.addEventListener('change', syncUploadPreferences);
-}
+updateUploadRouteHint();
 
 ['dragenter', 'dragover'].forEach(function(evtName) {
   uploadArea.addEventListener(evtName, function(e) {
     preventDragDefaults(e);
+    if (uploadInFlight) return;
     setDragActive(true);
   });
 });
@@ -504,8 +765,9 @@ if (autoVisualTocToggle) {
 uploadArea.addEventListener('drop', function(e) {
   preventDragDefaults(e);
   setDragActive(false);
+  if (uploadInFlight) return;
   if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
-  startUpload(e.dataTransfer.files[0]);
+  stagePickedMainFile(e.dataTransfer.files[0]);
 });
 
 ['dragenter', 'dragover', 'drop'].forEach(function(evtName) {
@@ -514,8 +776,53 @@ uploadArea.addEventListener('drop', function(e) {
 
 fileInput.addEventListener('change', function() {
   if (!fileInput.files.length) return;
-  startUpload(fileInput.files[0]);
+  stagePickedMainFile(fileInput.files[0]);
 });
+
+if (tocPdfInput) {
+  tocPdfInput.addEventListener('change', function() {
+    if (!tocPdfInput.files || !tocPdfInput.files.length) return;
+    pendingManualToc = { mode: 'manual_pdf', files: [tocPdfInput.files[0]] };
+    if (tocScreenshotInput) tocScreenshotInput.value = '';
+    updatePendingManualTocInfo();
+  });
+}
+
+if (tocScreenshotInput) {
+  tocScreenshotInput.addEventListener('change', function() {
+    if (!tocScreenshotInput.files || !tocScreenshotInput.files.length) return;
+    pendingManualToc = { mode: 'manual_images', files: Array.prototype.slice.call(tocScreenshotInput.files) };
+    if (tocPdfInput) tocPdfInput.value = '';
+    updatePendingManualTocInfo();
+  });
+}
+
+if (glossaryInput) {
+  glossaryInput.addEventListener('change', function() {
+    if (!glossaryInput.files || !glossaryInput.files.length) return;
+    var file = glossaryInput.files[0];
+    var name = String(file.name || '').toLowerCase();
+    if (!/\.(csv|xlsx|xls)$/.test(name)) {
+      alert('词典文件仅支持 .csv / .xlsx 格式。');
+      glossaryInput.value = '';
+      return;
+    }
+    pendingGlossary = file;
+    updatePendingGlossaryInfo();
+  });
+}
+
+if (startParseBtn) {
+  startParseBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (!pendingMainFile || uploadInFlight) return;
+    startUpload(pendingMainFile);
+  });
+}
+
+updatePendingMainFileInfo();
+updatePendingManualTocInfo();
+updatePendingGlossaryInfo();
 
 function setProgress(pct, label, detail) {
   progressBar.style.width = pct + '%';
@@ -558,8 +865,11 @@ function addLog(msg, cls) {
 
 function startUpload(file) {
   setDragActive(false);
+  uploadInFlight = true;
+  pendingAutoTranslate = !!(autoTranslateToggle && autoTranslateToggle.checked);
+  updateStartParseBtnState();
+  setAttachRowVisible(false);
   var cleanupEnabled = !!(cleanupHeaderFooterToggle && cleanupHeaderFooterToggle.checked);
-  var autoVisualEnabled = !!(autoVisualTocToggle && autoVisualTocToggle.checked);
   // Show progress, hide upload area interactivity
   progressSection.style.display = '';
   setReadingEntrancesDisabled(true);
@@ -567,8 +877,8 @@ function startUpload(file) {
   document.getElementById('uploadTitle').textContent = file.name;
   document.getElementById('uploadSubtitle').textContent =
     cleanupEnabled
-      ? (autoVisualEnabled ? '上传中…（增强脚注/尾注 + 自动视觉目录）' : '上传中…（增强脚注/尾注模式）')
-      : (autoVisualEnabled ? '上传中…（快速模式 + 自动视觉目录）' : '上传中…（快速模式）');
+      ? '上传中…（FNM 模式）'
+      : '上传中…（快速模式）';
   uploadArea.style.pointerEvents = 'none';
   uploadArea.style.opacity = '0.6';
   liveLog.innerHTML = '';
@@ -578,11 +888,18 @@ function startUpload(file) {
   var xhr = new XMLHttpRequest();
   var formData = new FormData();
   formData.append('file', file);
-  if (cleanupEnabled) {
-    formData.append('clean_header_footer', '1');
+  if (pendingManualToc.mode === 'manual_pdf' && pendingManualToc.files.length) {
+    formData.append('toc_pdf', pendingManualToc.files[0]);
+  } else if (pendingManualToc.mode === 'manual_images' && pendingManualToc.files.length) {
+    pendingManualToc.files.forEach(function(image) {
+      formData.append('toc_screenshots', image);
+    });
   }
-  if (autoVisualEnabled) {
-    formData.append('auto_visual_toc', '1');
+  if (pendingGlossary) {
+    formData.append('glossary_file', pendingGlossary);
+  }
+  if (cleanupEnabled) {
+    formData.append('fnm_mode', '1');
   }
 
   // Upload progress
@@ -597,23 +914,30 @@ function startUpload(file) {
     if (xhr.status === 200) {
       var resp = JSON.parse(xhr.responseText);
       if (resp.task_id) {
-        var uploadDetail = cleanupEnabled ? '已开启页眉页脚清理' : '快速模式：跳过页眉页脚清理';
-        if (autoVisualEnabled) {
-          uploadDetail += '；解析后会继续后台生成自动视觉目录';
+        var uploadDetail = (cleanupEnabled
+          ? 'FNM 模式：会先清理页眉页脚、同步生成自动视觉目录，再执行 FNM 分类'
+          : '快速模式：跳过 FNM 链路，完成后可选自动开始普通翻译');
+        if (!pendingAutoTranslate) {
+          uploadDetail += '（已取消自动翻译，解析后需手动触发）';
         }
         setProgress(30, '文件已上传，开始解析…', uploadDetail);
         addLog('文件上传完成');
+        clearPendingManualToc();
+        clearPendingGlossary();
+        clearPendingMainFile();
         startSSE(resp.task_id);
       } else if (resp.error) {
         setProgress(0, '上传失败', resp.error);
         progressBar.style.background = 'var(--red)';
         setReadingEntrancesDisabled(false);
+        uploadInFlight = false;
         resetUploadArea();
       }
     } else {
       setProgress(0, '上传失败', 'HTTP ' + xhr.status);
       progressBar.style.background = 'var(--red)';
       setReadingEntrancesDisabled(false);
+      uploadInFlight = false;
       resetUploadArea();
     }
   });
@@ -622,6 +946,7 @@ function startUpload(file) {
     setProgress(0, '上传失败', '网络错误');
     progressBar.style.background = 'var(--red)';
     setReadingEntrancesDisabled(false);
+    uploadInFlight = false;
     resetUploadArea();
   });
 
@@ -649,11 +974,83 @@ function startSSE(taskId) {
   es.addEventListener('done', function(e) {
     es.close();
     var d = JSON.parse(e.data);
+    if (d.log_relpath) {
+      addLog('独立日志已写入：' + d.log_relpath, 'success');
+    }
+    var autoTranslate = !!pendingAutoTranslate;
+    if (d.redirect_allowed && d.doc_id && d.start_bp) {
+      if (String(d.route_mode || 'standard') === 'fnm') {
+        setProgress(100, '解析完成，即将进入 FNM 视图', d.summary || '');
+        addLog(d.redirect_message || 'FNM 分类完成，准备进入 FNM 阅读。', 'success');
+        setTimeout(function() {
+          window.location.href = '{{ url_for("reading") }}?doc_id=' + encodeURIComponent(d.doc_id) + '&bp=' + encodeURIComponent(d.start_bp) + '&view=fnm';
+        }, 500);
+        return;
+      }
+      setProgress(100, '解析完成，即将进入标准阅读', d.summary || '');
+      var readingUrl;
+      if (autoTranslate) {
+        addLog(d.redirect_message || '准备进入标准阅读，并自动开始普通翻译。', 'success');
+        readingUrl = '{{ url_for("reading") }}?doc_id=' + encodeURIComponent(d.doc_id) + '&bp=' + encodeURIComponent(d.start_bp) + '&auto=1&start_bp=' + encodeURIComponent(d.start_bp);
+      } else {
+        addLog('解析完成，已取消自动翻译——进入阅读页后请手动启动翻译。', 'success');
+        readingUrl = '{{ url_for("reading") }}?doc_id=' + encodeURIComponent(d.doc_id) + '&bp=' + encodeURIComponent(d.start_bp);
+      }
+      setTimeout(function() { window.location.href = readingUrl; }, 500);
+      return;
+    }
+    if (String(d.route_mode || '') === 'fnm_progress') {
+      setProgress(100, autoTranslate ? '解析完成，正在启动翻译…' : '解析完成，等待首页启动翻译', d.summary || '');
+      progressBar.style.background = 'var(--grn)';
+      addLog(d.summary || '完成', 'success');
+      if (d.redirect_message) {
+        addLog(d.redirect_message, 'success');
+      }
+      setReadingEntrancesDisabled(false);
+      uploadInFlight = false;
+      resetUploadArea();
+      var targetDocId = d.doc_id || '';
+      var afterTrigger = function() {
+        if (targetDocId) {
+          setTimeout(function() {
+            window.location.href = '{{ url_for("home") }}?doc_id=' + encodeURIComponent(targetDocId);
+          }, 500);
+        } else {
+          refreshFnmWorkflowStatus();
+        }
+      };
+      if (autoTranslate && targetDocId) {
+        fetch('/api/doc/' + encodeURIComponent(targetDocId) + '/fnm/translate', {
+          method: 'POST',
+          headers: withCsrfHeaders({ 'Content-Type': 'application/json' }),
+          body: '{}',
+        })
+          .then(function(r) { return r.json().catch(function() { return {}; }); })
+          .then(function(result) {
+            if (result && result.ok === false) {
+              addLog('FNM 自动翻译启动失败：' + (result.error || result.message || '未知错误'), 'error');
+            } else {
+              addLog('FNM 翻译任务已启动。', 'success');
+            }
+          })
+          .catch(function(err) {
+            addLog('FNM 自动翻译请求失败：' + String(err || ''), 'error');
+          })
+          .finally(afterTrigger);
+      } else {
+        afterTrigger();
+      }
+      return;
+    }
     setProgress(100, '解析完成', d.summary || '');
     progressBar.style.background = 'var(--grn)';
     addLog(d.summary || '完成', 'success');
-    // Reload page after short delay
-    setTimeout(function() { window.location.reload(); }, 800);
+    if (d.redirect_message) {
+      addLog(d.redirect_message, 'error');
+    }
+    setReadingEntrancesDisabled(false);
+    uploadInFlight = false;
+    resetUploadArea();
   });
 
   es.addEventListener('error_msg', function(e) {
@@ -663,6 +1060,7 @@ function startSSE(taskId) {
     progressBar.style.background = 'var(--red)';
     addLog(d.error || '未知错误', 'error');
     setReadingEntrancesDisabled(false);
+    uploadInFlight = false;
     resetUploadArea();
   });
 
@@ -671,6 +1069,7 @@ function startSSE(taskId) {
     setProgress(0, '连接中断', '');
     progressBar.style.background = 'var(--red)';
     setReadingEntrancesDisabled(false);
+    uploadInFlight = false;
     resetUploadArea();
   };
 }
@@ -738,7 +1137,7 @@ function renderDocProcessingStatus(data) {
 
   var enhancementMeta = document.getElementById('enhancementMeta');
   if (enhancementMeta) {
-    var modeLabel = data.cleanup_headers_footers_enabled ? '增强脚注/尾注模式（已清理）' : '快速模式（未清理）';
+    var modeLabel = data.cleanup_headers_footers_enabled ? 'FNM 模式（清理 + 视觉目录）' : '快速模式';
     var translationLabel = data.has_translation_history ? '已有翻译数据' : '暂未生成翻译数据';
     enhancementMeta.textContent = '当前解析模式：' + modeLabel + ' · 自动视觉目录：' + (data.visual_toc_status_label || '-') + ' · ' + translationLabel;
   }
@@ -774,6 +1173,314 @@ function startDocStatusPolling(docId) {
   }, 3000);
 }
 
+function setFnmWorkflowDisabled(btn, disabled) {
+  if (!btn) return;
+  btn.disabled = !!disabled;
+  btn.style.opacity = disabled ? '0.45' : '';
+  btn.style.cursor = disabled ? 'not-allowed' : '';
+}
+
+function renderFnmWorkflowStatus(data) {
+  var card = document.getElementById('fnmWorkflowCard');
+  if (!card) return;
+  var summaryEl = document.getElementById('fnmWorkflowSummary');
+  var metaEl = document.getElementById('fnmWorkflowMeta');
+  var barEl = document.getElementById('fnmWorkflowBar');
+  var phaseEl = document.getElementById('fnmWorkflowPhase');
+  var pctEl = document.getElementById('fnmWorkflowPct');
+  var detailEl = document.getElementById('fnmWorkflowDetail');
+  var blockersEl = document.getElementById('fnmWorkflowBlockers');
+  var startBtn = document.getElementById('fnmStartTranslateBtn');
+  var continueBtn = document.getElementById('fnmContinueProcessBtn');
+  var pauseBtn = document.getElementById('fnmPauseTranslateBtn');
+  var exportBtn = document.getElementById('fnmExportBundleBtn');
+  if (!data || data.ok === false) {
+    if (summaryEl) summaryEl.textContent = 'FNM 状态读取失败，请稍后刷新页面重试。';
+    if (metaEl) metaEl.textContent = '';
+    if (phaseEl) phaseEl.textContent = '状态未知';
+    if (pctEl) pctEl.textContent = '0%';
+    if (detailEl) detailEl.textContent = data && (data.message || data.error) ? String(data.message || data.error) : '无法读取当前文档的 FNM 状态。';
+    if (blockersEl) blockersEl.textContent = '';
+    if (barEl) barEl.style.width = '0%';
+    setFnmWorkflowDisabled(startBtn, true);
+    setFnmWorkflowDisabled(continueBtn, true);
+    setFnmWorkflowDisabled(pauseBtn, true);
+    setFnmWorkflowDisabled(exportBtn, true);
+    return;
+  }
+
+  var totalUnits = Number(data.total_units || data.unit_count || 0);
+  var processedUnits = Number(data.processed_units || data.done_units || 0);
+  var runStatus = String(data.run_status || 'idle');
+  var translateRunning = !!data.translate_running;
+  var gatePassCount = Number(data.gate_pass_count || 0);
+  var gateFailCount = Number(data.gate_fail_count || 0);
+  var gateTotalCount = Number(data.gate_total_count || 0);
+  var gatePassRate = Number(data.gate_pass_rate || 0);
+  var workflowStateLabel = String(data.workflow_state_label || '').trim();
+  var pct = totalUnits > 0 ? Math.min(100, Math.round((processedUnits / totalUnits) * 100)) : (runStatus === 'done' ? 100 : 0);
+  var phaseLabel = workflowStateLabel || String(data.run_phase_label || '').trim();
+  if (!phaseLabel) {
+    phaseLabel = '等待 FNM 处理';
+    if (translateRunning) {
+      phaseLabel = 'FNM 翻译中';
+    } else if (data.can_translate) {
+      phaseLabel = '可开始翻译';
+    } else if (data.export_ready_real) {
+      phaseLabel = '可导出';
+    } else if (runStatus === 'done') {
+      phaseLabel = '等待结构通过';
+    } else if (runStatus === 'running') {
+      phaseLabel = 'FNM 处理中';
+    } else if (runStatus === 'error' || runStatus === 'failed') {
+      phaseLabel = 'FNM 处理失败';
+    }
+  }
+
+  var detail = [];
+  detail.push('结构状态：' + String(data.structure_state || '-'));
+  detail.push('unit：' + processedUnits + '/' + totalUnits);
+  if (data.translate_phase) {
+    detail.push('翻译态：' + String(data.translate_phase));
+  }
+  if (gateTotalCount > 0) {
+    detail.push('通过项：' + gatePassCount + '/' + gateTotalCount + '（失败 ' + gateFailCount + '）');
+  }
+  if (data.current_unit_label) {
+    detail.push('当前：' + String(data.current_unit_label));
+  }
+  if (data.execution_mode) {
+    detail.push('模式：' + String(data.execution_mode));
+  }
+  var draftTotal = Number(data.draft_para_total || 0);
+  if (draftTotal > 0) {
+    var draftDone = Number(data.draft_para_done || 0);
+    detail.push('段落完成：' + draftDone + '/' + draftTotal);
+    if (data.draft_para_idx !== null && data.draft_para_idx !== undefined && Number(data.draft_para_idx) >= 0) {
+      detail.push('当前段：' + (Number(data.draft_para_idx) + 1) + '/' + draftTotal);
+    }
+  }
+  if (data.draft_status) {
+    detail.push('流状态：' + String(data.draft_status));
+  }
+  if (data.state_hint) {
+    detail.push(String(data.state_hint));
+  }
+  if (data.translate_log_relpath) {
+    detail.push('日志：' + String(data.translate_log_relpath));
+  }
+
+  var blockerTexts = [];
+  if (data.translate_last_error) {
+    blockerTexts.push('最近错误：' + String(data.translate_last_error));
+  }
+  if (data.draft_last_error) {
+    blockerTexts.push('段落错误：' + String(data.draft_last_error));
+  }
+  if (data.draft_note) {
+    blockerTexts.push('实时状态：' + String(data.draft_note));
+  }
+  if (data.manual_toc_required) {
+    blockerTexts.push('需要先补充手动目录。');
+  }
+  if (Array.isArray(data.blocking_reasons) && data.blocking_reasons.length) {
+    blockerTexts.push('阻塞项：' + data.blocking_reasons.join('、'));
+  }
+  if (Array.isArray(data.gate_failed_labels) && data.gate_failed_labels.length) {
+    blockerTexts.push('未通过检查：' + data.gate_failed_labels.join('、'));
+  }
+  if (!blockerTexts.length && data.export_ready_real) {
+    blockerTexts.push('章节包已可导出。');
+  } else if (!blockerTexts.length && data.can_translate) {
+    blockerTexts.push('FNM 已处理完成，可以直接开始翻译。');
+  }
+
+  if (summaryEl) {
+    if (translateRunning) {
+      summaryEl.textContent = data.draft_note
+        ? ('当前正在首页执行翻译：' + String(data.draft_note))
+        : 'FNM 模式不再提供预览视图；当前正在首页执行翻译。';
+    } else if (data.fnm_fullflow_running) {
+      summaryEl.textContent = '正在执行 FNM 一体化流程（结构处理 → 分段翻译），请稍候。';
+    } else if (data.fnm_continue_running) {
+      summaryEl.textContent = '正在继续执行 FNM 处理，完成后会自动刷新到最新状态。';
+    } else if (data.state_persisted) {
+      summaryEl.textContent = '当前显示的是已存储 FNM 状态；重启应用不会自动重跑。';
+    } else {
+      summaryEl.textContent = 'FNM 模式不再提供预览视图；请在首页直接继续 FNM、开始/继续翻译、暂停翻译并导出章节包。';
+    }
+  }
+  if (metaEl) {
+    var gateText = gateTotalCount > 0
+      ? ('gate=' + gatePassCount + '/' + gateTotalCount + ' (' + Math.round(gatePassRate * 100) + '%)')
+      : 'gate=-';
+    metaEl.textContent = 'run=' + runStatus + ' · note=' + Number(data.note_count || 0) + ' · chapter=' + Number(data.chapter_count || 0) + ' · ' + gateText;
+  }
+  if (barEl) barEl.style.width = pct + '%';
+  if (phaseEl) phaseEl.textContent = phaseLabel;
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (detailEl) detailEl.textContent = detail.join(' · ');
+  if (blockersEl) blockersEl.textContent = blockerTexts.join(' ');
+
+  if (startBtn) {
+    if (data.fnm_fullflow_running) {
+      startBtn.textContent = '流程处理中…';
+    } else if (data.resume_translate_available) {
+      startBtn.textContent = '继续翻译';
+    } else if (data.can_translate) {
+      startBtn.textContent = '开始翻译';
+    } else {
+      startBtn.textContent = '开始一体化流程';
+    }
+  }
+  setFnmWorkflowDisabled(startBtn, !data.full_flow_available && !data.can_translate || translateRunning || !!data.fnm_fullflow_running);
+  setFnmWorkflowDisabled(continueBtn, !data.continue_fnm_available || !!data.fnm_fullflow_running);
+  setFnmWorkflowDisabled(pauseBtn, !translateRunning);
+  setFnmWorkflowDisabled(exportBtn, !data.export_ready_real);
+}
+
+function refreshFnmWorkflowStatus() {
+  var card = document.getElementById('fnmWorkflowCard');
+  var docId = '{{ current_doc_id or "" }}';
+  if (!card || !docId) return Promise.resolve(null);
+  return fetch('/api/doc/' + encodeURIComponent(docId) + '/fnm/status', {
+    headers: withCsrfHeaders()
+  })
+    .then(function(r) {
+      return r.text().then(function(text) {
+        var payload = null;
+        try {
+          payload = text ? JSON.parse(text) : {};
+        } catch (_err) {
+          payload = null;
+        }
+        if (!r.ok) {
+          if (!payload || typeof payload !== 'object') payload = {};
+          payload.ok = false;
+          if (!payload.message) {
+            payload.message = 'FNM 状态接口返回 HTTP ' + r.status;
+          }
+          return payload;
+        }
+        if (!payload || typeof payload !== 'object') {
+          return { ok: false, message: 'FNM 状态接口返回了非 JSON 响应。' };
+        }
+        return payload;
+      });
+    })
+    .then(function(data) {
+      renderFnmWorkflowStatus(data);
+      return data;
+    })
+    .catch(function(err) {
+      renderFnmWorkflowStatus({ ok: false, message: String(err || 'fnm_status_error') });
+      return null;
+    });
+}
+
+function startFnmWorkflowTranslate(forceRestart) {
+  var docId = '{{ current_doc_id or "" }}';
+  if (!docId) return;
+  var startBtn = document.getElementById('fnmStartTranslateBtn');
+  setFnmWorkflowDisabled(startBtn, true);
+  fetch('/api/doc/' + encodeURIComponent(docId) + '/fnm/full-flow', {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+    body: (function() {
+      var form = new FormData();
+      if (forceRestart) form.append('force_restart', '1');
+      return form;
+    })(),
+  })
+    .then(function(r) { return r.json().then(function(data) { return { status: r.status, data: data }; }); })
+    .then(function(result) {
+      if (result.status >= 400 || result.data.error) {
+        renderFnmWorkflowStatus({
+          ok: false,
+          message: result.data.message || result.data.error || 'FNM 一体化流程启动失败',
+        });
+        refreshFnmWorkflowStatus();
+        return;
+      }
+      refreshFnmWorkflowStatus();
+    })
+    .catch(function(err) {
+      renderFnmWorkflowStatus({ ok: false, message: String(err || 'FNM 翻译启动失败') });
+      refreshFnmWorkflowStatus();
+    });
+}
+
+function pauseFnmWorkflowTranslate() {
+  var docId = '{{ current_doc_id or "" }}';
+  if (!docId) return;
+  fetch('{{ url_for("stop_translate") }}', {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+    body: (function() {
+      var form = new FormData();
+      form.append('doc_id', docId);
+      return form;
+    })(),
+  })
+    .then(function() {
+      setTimeout(refreshFnmWorkflowStatus, 200);
+    })
+    .catch(function() {
+      refreshFnmWorkflowStatus();
+    });
+}
+
+function continueFnmWorkflowProcessing() {
+  var docId = '{{ current_doc_id or "" }}';
+  if (!docId) return;
+  var btn = document.getElementById('fnmContinueProcessBtn');
+  setFnmWorkflowDisabled(btn, true);
+  fetch('/api/doc/' + encodeURIComponent(docId) + '/fnm/continue', {
+    method: 'POST',
+    headers: withCsrfHeaders(),
+  })
+    .then(function(r) { return r.json().then(function(data) { return { status: r.status, data: data }; }); })
+    .then(function(result) {
+      if (result.status >= 400 || !result.data || result.data.ok === false) {
+        renderFnmWorkflowStatus({
+          ok: false,
+          message: (result.data && (result.data.message || result.data.error)) || '继续 FNM 处理失败',
+        });
+        refreshFnmWorkflowStatus();
+        return;
+      }
+      refreshFnmWorkflowStatus();
+    })
+    .catch(function(err) {
+      renderFnmWorkflowStatus({ ok: false, message: String(err || '继续 FNM 处理失败') });
+      refreshFnmWorkflowStatus();
+    });
+}
+
+function downloadFnmWorkflowExport() {
+  var docId = '{{ current_doc_id or "" }}';
+  if (!docId) return;
+  window.location.href = '{{ url_for("download_md") }}?doc_id=' + encodeURIComponent(docId) + '&format=fnm_obsidian';
+}
+
+function stopFnmWorkflowPolling() {
+  if (fnmStatusPollTimer) {
+    clearInterval(fnmStatusPollTimer);
+    fnmStatusPollTimer = null;
+  }
+}
+
+function startFnmWorkflowPolling(docId) {
+  stopFnmWorkflowPolling();
+  if (!document.getElementById('fnmWorkflowCard')) return;
+  var targetDocId = docId || '{{ current_doc_id or "" }}';
+  if (!targetDocId) return;
+  refreshFnmWorkflowStatus();
+  fnmStatusPollTimer = setInterval(function() {
+    refreshFnmWorkflowStatus();
+  }, 2500);
+}
+
 function stopDocStatusPolling() {
   if (docStatusPollTimer) {
     clearInterval(docStatusPollTimer);
@@ -786,10 +1493,73 @@ function resetUploadArea() {
   uploadArea.style.opacity = '';
   setDragActive(false);
   setReadingEntrancesDisabled(false);
+  uploadInFlight = false;
   document.getElementById('uploadIcon').textContent = '📄';
-  document.getElementById('uploadTitle').textContent = '上传 PDF / 图片';
-  document.getElementById('uploadSubtitle').textContent = '调用 PaddleOCR 解析版面，PDF文字层自动优先';
+  document.getElementById('uploadTitle').textContent = '选择或拖拽 PDF / 图片';
+  document.getElementById('uploadSubtitle').textContent = '选好主文件后，可附带目录和词典，然后在下方点「开始解析」';
   fileInput.value = '';
+  pendingMainFile = null;
+  updatePendingMainFileInfo();
+  setAttachRowVisible(true);
+}
+
+function uploadManualTocForCurrentDoc(mode, files) {
+  if (!files || !files.length) return;
+  var fd = new FormData();
+  fd.append('doc_id', '{{ current_doc_id or "" }}');
+  if (mode === 'manual_pdf') {
+    fd.append('toc_pdf', files[0]);
+  } else {
+    Array.prototype.forEach.call(files, function(file) {
+      fd.append('toc_screenshots', file);
+    });
+  }
+  fetch('{{ url_for("api_doc_upload_toc_visual_source") }}', {
+    method: 'POST',
+    headers: { 'X-CSRF-Token': getCsrfToken() },
+    body: fd,
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.ok) {
+        alert(data.error || '目录文件上传失败');
+        return;
+      }
+      refreshDocProcessingStatus('{{ current_doc_id or "" }}');
+      startDocStatusPolling('{{ current_doc_id or "" }}');
+      alert('目录文件已保存，自动视觉目录正在重跑。');
+    })
+    .catch(function() {
+      alert('目录文件上传失败');
+    });
+}
+
+var docPickTocPdfBtn = document.getElementById('docPickTocPdfBtn');
+if (docPickTocPdfBtn && docTocPdfInput) {
+  docPickTocPdfBtn.addEventListener('click', function() {
+    docTocPdfInput.click();
+  });
+}
+if (docTocPdfInput) {
+  docTocPdfInput.addEventListener('change', function() {
+    if (!docTocPdfInput.files || !docTocPdfInput.files.length) return;
+    uploadManualTocForCurrentDoc('manual_pdf', docTocPdfInput.files);
+    docTocPdfInput.value = '';
+  });
+}
+
+var docPickTocScreenshotBtn = document.getElementById('docPickTocScreenshotBtn');
+if (docPickTocScreenshotBtn && docTocScreenshotInput) {
+  docPickTocScreenshotBtn.addEventListener('click', function() {
+    docTocScreenshotInput.click();
+  });
+}
+if (docTocScreenshotInput) {
+  docTocScreenshotInput.addEventListener('change', function() {
+    if (!docTocScreenshotInput.files || !docTocScreenshotInput.files.length) return;
+    uploadManualTocForCurrentDoc('manual_images', docTocScreenshotInput.files);
+    docTocScreenshotInput.value = '';
+  });
 }
 
 // ---- 词典与目录 Modal ----
@@ -2066,12 +2836,19 @@ function renderGlossaryRetranslatePreview(preview) {
   if (startBp > 0) {
     summaryParts.push('起点：PDF 第' + startBp + '页。');
   }
-  summaryParts.push('预计影响 ' + affectedPages + ' 页、' + affectedSegments + ' 段机器译文。');
+  summaryParts.push('预计影响 ' + affectedPages + ' 页、' + affectedSegments + ' 段词典未生效的机器译文。');
   if (skippedManual > 0) {
     summaryParts.push('其中 ' + skippedManual + ' 段人工修订会被跳过，不会覆盖。');
   }
   summary.textContent = summaryParts.join(' ');
-  reason.textContent = _glossaryRetranslatePreview.can_start ? '' : (_glossaryRetranslatePreview.reason || '');
+  var detailLines = buildGlossaryProblemLines(_glossaryRetranslatePreview, 5);
+  if (_glossaryRetranslatePreview.problem_list_truncated) {
+    detailLines.push('其余问题段将在后台按同样规则定向处理。');
+  }
+  if (!_glossaryRetranslatePreview.can_start && _glossaryRetranslatePreview.reason) {
+    detailLines.unshift(_glossaryRetranslatePreview.reason);
+  }
+  reason.textContent = detailLines.join(' ');
   btn.disabled = !_glossaryRetranslatePreview.can_start;
 }
 
@@ -2092,13 +2869,37 @@ function refreshGlossaryRetranslatePreview() {
 }
 
 function buildGlossaryRetranslateConfirmText(preview) {
-  var parts = ['预计影响 ' + Number(preview.affected_pages || 0) + ' 页、' + Number(preview.affected_segments || 0) + ' 段。'];
+  var parts = ['预计影响 ' + Number(preview.affected_pages || 0) + ' 页、' + Number(preview.affected_segments || 0) + ' 段词典未生效的机器译文。'];
   var skippedManual = Number(preview.skipped_manual_segments || 0);
   if (skippedManual > 0) {
     parts.push('其中 ' + skippedManual + ' 段人工修订会被跳过，不会覆盖。');
   }
+  var detailLines = buildGlossaryProblemLines(preview, 5);
+  if (detailLines.length) {
+    parts.push('将处理这些问题段：\n' + detailLines.join('\n'));
+  }
+  if (preview && preview.problem_list_truncated) {
+    parts.push('其余问题段将在后台按同样规则定向处理。');
+  }
   parts.push('确认按当前词典开始补重译？');
   return parts.join('\n\n');
+}
+
+function buildGlossaryProblemLines(preview, limit) {
+  var items = Array.isArray(preview && preview.problem_segments) ? preview.problem_segments.slice(0, limit) : [];
+  return items.map(function(item) {
+    var missing = Array.isArray(item.missing_terms) ? item.missing_terms.map(function(term) {
+      return String(term.defn || term.term || '').trim();
+    }).filter(Boolean) : [];
+    var pageLabel = String(item.pages || '').trim() || ('PDF 第' + Number(item.bp || 0) + '页');
+    return (
+      pageLabel
+      + ' 第' + (Number(item.segment_index || 0) + 1) + '段缺少术语：'
+      + (missing.join('、') || '未指定')
+      + '。原文：' + String(item.source_excerpt || '').trim()
+      + '；现译：' + String(item.translation_excerpt || '').trim()
+    );
+  });
 }
 
 function startGlossaryRetranslateFromModal() {
@@ -2315,8 +3116,42 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeGlossaryModal();
 });
 
+function initBatchDocDelete() {
+  var form = document.getElementById('batchDeleteForm');
+  if (!form) return;
+  var selectAll = document.getElementById('selectAllDocs');
+  var cbs = document.querySelectorAll('.doc-select-cb');
+  var btn = document.getElementById('batchDeleteBtn');
+  function sync() {
+    var n = 0;
+    cbs.forEach(function(cb) { if (cb.checked) n++; });
+    if (btn) btn.disabled = n === 0;
+    if (selectAll && cbs.length) {
+      selectAll.indeterminate = n > 0 && n < cbs.length;
+      selectAll.checked = n === cbs.length;
+    }
+  }
+  cbs.forEach(function(cb) { cb.addEventListener('change', sync); });
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      cbs.forEach(function(cb) { cb.checked = selectAll.checked; });
+      sync();
+    });
+  }
+  sync();
+}
+window.confirmBatchDelete = function() {
+  var cbs = document.querySelectorAll('.doc-select-cb:checked');
+  if (!cbs.length) return false;
+  return confirm('确定删除选中的 ' + cbs.length + ' 个文档？此操作不可恢复。');
+};
+initBatchDocDelete();
+
 {% if current_doc_id and has_pages %}
 startDocStatusPolling('{{ current_doc_id }}');
+{% if cleanup_headers_footers_enabled %}
+startFnmWorkflowPolling('{{ current_doc_id }}');
+{% endif %}
 {% endif %}
 </script>
 {% endblock %}

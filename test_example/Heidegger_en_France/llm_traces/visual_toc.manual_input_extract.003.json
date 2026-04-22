@@ -1,0 +1,57 @@
+{
+  "stage": "visual_toc.manual_input_extract",
+  "reason_for_request": "从目录页截图中抽取单页原子目录项",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
+  "request_content": {
+    "images": [
+      {
+        "label": "image-1",
+        "file_idx": 2,
+        "byte_size": 171437,
+        "sha256": "4f3f98288174750e5d148e92d033d2e54508202e60009368d6eb8b107266db3e",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a5d9a08d6871/toc_visual_source.pdf",
+        "source": "pdf_page"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "source": "pdf",
+    "file_idx": 2
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"9. La lettre et l’esprit\",\n    \"depth\": 0,\n    \"printed_page\": 317,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Soixante ans après !\",\n    \"depth\": 1,\n    \"printed_page\": 317,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Du tollé aux enjeux\",\n    \"depth\": 1,\n    \"printed_page\": 326,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"L’esprit souffle où il veut\",\n    \"depth\": 1,\n    \"printed_page\": 334,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Épilogue V\",\n    \"depth\": 1,\n    \"printed_page\": 343,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"10. Le retour du refoulé ?\",\n    \"depth\": 0,\n    \"printed_page\": 347,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Le feu aux poudres\",\n    \"depth\": 1,\n    \"printed_page\": 348,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Une tornade\",\n    \"depth\": 1,\n    \"printed_page\": 351,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Du sérieux !\",\n    \"depth\": 1,\n    \"printed_page\": 356,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Défenseurs et attaquants à la rescousse\",\n    \"depth\": 1,\n    \"printed_page\": 365,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"En quête d’interprétations philosophiques\",\n    \"depth\": 1,\n    \"printed_page\": 370,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Dramaturgie révélatrice ou vaine querelle ?\",\n    \"depth\": 1,\n    \"printed_page\": 378,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Épilogue VI\",\n    \"depth\": 1,\n    \"printed_page\": 386,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"11. Entre érudition et techno-science\",\n    \"depth\": 0,\n    \"printed_page\": 391,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Le « tournant » : l’aval et l’amont d’Être et temps\",\n    \"depth\": 1,\n    \"printed_page\": 401,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Un entre-deux fragile : les souvenirs d’un voyage en Grèce\",\n    \"depth\": 1,\n    \"printed_page\": 407,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"La science pense-t-elle ?\",\n    \"depth\": 1,\n    \"printed_page\": 411,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Haro sur la technique ?\",\n    \"depth\": 1,\n    \"printed_page\": 421,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"L’exception qui confirme la règle ?\",\n    \"depth\": 1,\n    \"printed_page\": 429,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Épilogue VII\",\n    \"depth\": 1,\n    \"printed_page\": 439,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"12. La croisée des chemins\",\n    \"depth\": 0,\n    \"printed_page\": 445,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Quelle phénoménologie ?\",\n    \"depth\": 1,\n    \"printed_page\": 446,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"D’une dette impensée à une éthique neuve\",\n    \"depth\": 1,\n    \"printed_page\": 453,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"La part de l’herméneutique\",\n    \"depth\": 1,\n    \"printed_page\": 464,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Le débat théologique\",\n    \"depth\": 1,\n    \"printed_page\": 478,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Un legs incontesté en histoire de la philosophie ?\",\n    \"depth\": 1,\n    \"printed_page\": 489,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conclusion\",\n    \"depth\": 0,\n    \"printed_page\": 501,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Pensée et poésie : un dialogue au sommet\",\n    \"depth\": 1,\n    \"printed_page\": 507,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"La fin de l’exception française ?\",\n    \"depth\": 1,\n    \"printed_page\":",
+  "response_parsed": {
+    "title": "9. La lettre et l’esprit",
+    "depth": 0,
+    "printed_page": 317,
+    "visual_order": 1,
+    "role_hint": "content",
+    "endnotes_candidate": false,
+    "endnotes_subentry_candidate": false
+  },
+  "derived_truth": {
+    "items": []
+  },
+  "usage": {
+    "stage": "visual_toc.manual_input_extract",
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "request_count": 1,
+    "prompt_tokens": 966,
+    "completion_tokens": 2200,
+    "total_tokens": 3166,
+    "doc_id": "a5d9a08d6871",
+    "slug": "",
+    "context": {
+      "source": "pdf",
+      "file_idx": 2
+    }
+  },
+  "timing": {
+    "duration_ms": 40988
+  }
+}

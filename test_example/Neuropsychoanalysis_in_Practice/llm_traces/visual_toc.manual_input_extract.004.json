@@ -1,0 +1,465 @@
+{
+  "stage": "visual_toc.manual_input_extract",
+  "reason_for_request": "从目录页截图中抽取单页原子目录项",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
+  "request_content": {
+    "images": [
+      {
+        "label": "image-1",
+        "file_idx": 3,
+        "byte_size": 114670,
+        "sha256": "c38cc91171390a352923db2e5ca7e7bd355fd46a0b7deecb16ab521ea76c7f6b",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/e7f8a1b6c2d3/toc_visual_source.pdf",
+        "source": "pdf_page"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "source": "pdf",
+    "file_idx": 3
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Psychosis II: Neuropsychodynamic Hypotheses\",\n    \"depth\": 0,\n    \"printed_page\": 283,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of object relations and altered neural processing in the sensory cortex\",\n    \"depth\": 1,\n    \"printed_page\": 283,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of inner self–object boundaries and abnormal rest–rest interaction in the sensory cortex\",\n    \"depth\": 1,\n    \"printed_page\": 288,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Lack of self-objects and confusion of neural differences in interoceptive, sensory, and cognitive regions\",\n    \"depth\": 1,\n    \"printed_page\": 297,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Fragmentation of the self and bilateral neural interaction in anterior cortical midline regions\",\n    \"depth\": 1,\n    \"printed_page\": 301,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Existential dilemma” and abnormal cortico-cortical neural coupling\",\n    \"depth\": 1,\n    \"printed_page\": 307,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Volatile self–object boundaries and unstable neural differences in difference-based coding\",\n    \"depth\": 1,\n    \"printed_page\": 312,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Appendix: What Can We Learn From Depression and Psychosis? A Transdisciplinary and Neuroexistential Account\",\n    \"depth\": 0,\n    \"printed_page\": 319,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Background\",\n    \"depth\": 1,\n    \"printed_page\": 319,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Depression\",\n    \"depth\": 1,\n    \"printed_page\": 319,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psychosis\",\n    \"depth\": 1,\n    \"printed_page\": 321,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuroexistential account\",\n    \"depth\": 1,\n    \"printed_page\": 323,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue: The Beauty of Transdisciplinary Failure—A Trialogue\",\n    \"depth\": 0,\n    \"printed_page\": 325,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental and empirical views of the brain\",\n    \"depth\": 1,\n    \"printed_page\": 325,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain, mind, and the psychic apparatus\",\n    \"depth\": 1,\n    \"printed_page\": 326,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Knowledge of the brain\",\n    \"depth\": 1,\n    \"printed_page\": 328,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subjectivity and the brain\",\n    \"depth\": 1,\n    \"printed_page\": 330,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Localization and the brain\",\n    \"depth\": 1,\n    \"printed_page\": 332,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain and environment\",\n    \"depth\": 1,\n    \"printed_page\": 333,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neural predisposition and difference-based coding\",\n    \"depth\": 1,\n    \"printed_page\": 334,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": 336,\n    \"visual_order\": 21,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"References\",\n    \"depth\": 0,\n    \"printed_page\": 337,\n    \"visual_order\": 22,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 361,\n    \"visual_order\": 23,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "title": "Psychosis II: Neuropsychodynamic Hypotheses",
+      "depth": 0,
+      "printed_page": 283,
+      "visual_order": 1,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Loss of object relations and altered neural processing in the sensory cortex",
+      "depth": 1,
+      "printed_page": 283,
+      "visual_order": 2,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Loss of inner self–object boundaries and abnormal rest–rest interaction in the sensory cortex",
+      "depth": 1,
+      "printed_page": 288,
+      "visual_order": 3,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Lack of self-objects and confusion of neural differences in interoceptive, sensory, and cognitive regions",
+      "depth": 1,
+      "printed_page": 297,
+      "visual_order": 4,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Fragmentation of the self and bilateral neural interaction in anterior cortical midline regions",
+      "depth": 1,
+      "printed_page": 301,
+      "visual_order": 5,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "“Existential dilemma” and abnormal cortico-cortical neural coupling",
+      "depth": 1,
+      "printed_page": 307,
+      "visual_order": 6,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Volatile self–object boundaries and unstable neural differences in difference-based coding",
+      "depth": 1,
+      "printed_page": 312,
+      "visual_order": 7,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Appendix: What Can We Learn From Depression and Psychosis? A Transdisciplinary and Neuroexistential Account",
+      "depth": 0,
+      "printed_page": 319,
+      "visual_order": 8,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Background",
+      "depth": 1,
+      "printed_page": 319,
+      "visual_order": 9,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Depression",
+      "depth": 1,
+      "printed_page": 319,
+      "visual_order": 10,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Psychosis",
+      "depth": 1,
+      "printed_page": 321,
+      "visual_order": 11,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Neuroexistential account",
+      "depth": 1,
+      "printed_page": 323,
+      "visual_order": 12,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Epilogue: The Beauty of Transdisciplinary Failure—A Trialogue",
+      "depth": 0,
+      "printed_page": 325,
+      "visual_order": 13,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Transcendental and empirical views of the brain",
+      "depth": 1,
+      "printed_page": 325,
+      "visual_order": 14,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Brain, mind, and the psychic apparatus",
+      "depth": 1,
+      "printed_page": 326,
+      "visual_order": 15,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Knowledge of the brain",
+      "depth": 1,
+      "printed_page": 328,
+      "visual_order": 16,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Subjectivity and the brain",
+      "depth": 1,
+      "printed_page": 330,
+      "visual_order": 17,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Localization and the brain",
+      "depth": 1,
+      "printed_page": 332,
+      "visual_order": 18,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Brain and environment",
+      "depth": 1,
+      "printed_page": 333,
+      "visual_order": 19,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Neural predisposition and difference-based coding",
+      "depth": 1,
+      "printed_page": 334,
+      "visual_order": 20,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Acknowledgments",
+      "depth": 0,
+      "printed_page": 336,
+      "visual_order": 21,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "References",
+      "depth": 0,
+      "printed_page": 337,
+      "visual_order": 22,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Index",
+      "depth": 0,
+      "printed_page": 361,
+      "visual_order": 23,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    }
+  ],
+  "derived_truth": {
+    "items": [
+      {
+        "title": "Psychosis II: Neuropsychodynamic Hypotheses",
+        "depth": 0,
+        "printed_page": 283,
+        "visual_order": 1,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Loss of object relations and altered neural processing in the sensory cortex",
+        "depth": 1,
+        "printed_page": 283,
+        "visual_order": 2,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Loss of inner self–object boundaries and abnormal rest–rest interaction in the sensory cortex",
+        "depth": 1,
+        "printed_page": 288,
+        "visual_order": 3,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Lack of self-objects and confusion of neural differences in interoceptive, sensory, and cognitive regions",
+        "depth": 1,
+        "printed_page": 297,
+        "visual_order": 4,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Fragmentation of the self and bilateral neural interaction in anterior cortical midline regions",
+        "depth": 1,
+        "printed_page": 301,
+        "visual_order": 5,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "“Existential dilemma” and abnormal cortico-cortical neural coupling",
+        "depth": 1,
+        "printed_page": 307,
+        "visual_order": 6,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Volatile self–object boundaries and unstable neural differences in difference-based coding",
+        "depth": 1,
+        "printed_page": 312,
+        "visual_order": 7,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Appendix: What Can We Learn From Depression and Psychosis? A Transdisciplinary and Neuroexistential Account",
+        "depth": 0,
+        "printed_page": 319,
+        "visual_order": 8,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Background",
+        "depth": 1,
+        "printed_page": 319,
+        "visual_order": 9,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Depression",
+        "depth": 1,
+        "printed_page": 319,
+        "visual_order": 10,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Psychosis",
+        "depth": 1,
+        "printed_page": 321,
+        "visual_order": 11,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Neuroexistential account",
+        "depth": 1,
+        "printed_page": 323,
+        "visual_order": 12,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Epilogue: The Beauty of Transdisciplinary Failure—A Trialogue",
+        "depth": 0,
+        "printed_page": 325,
+        "visual_order": 13,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Transcendental and empirical views of the brain",
+        "depth": 1,
+        "printed_page": 325,
+        "visual_order": 14,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Brain, mind, and the psychic apparatus",
+        "depth": 1,
+        "printed_page": 326,
+        "visual_order": 15,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Knowledge of the brain",
+        "depth": 1,
+        "printed_page": 328,
+        "visual_order": 16,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Subjectivity and the brain",
+        "depth": 1,
+        "printed_page": 330,
+        "visual_order": 17,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Localization and the brain",
+        "depth": 1,
+        "printed_page": 332,
+        "visual_order": 18,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Brain and environment",
+        "depth": 1,
+        "printed_page": 333,
+        "visual_order": 19,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Neural predisposition and difference-based coding",
+        "depth": 1,
+        "printed_page": 334,
+        "visual_order": 20,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Acknowledgments",
+        "depth": 0,
+        "printed_page": 336,
+        "visual_order": 21,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "References",
+        "depth": 0,
+        "printed_page": 337,
+        "visual_order": 22,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Index",
+        "depth": 0,
+        "printed_page": 361,
+        "visual_order": 23,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      }
+    ]
+  },
+  "usage": {
+    "stage": "visual_toc.manual_input_extract",
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "request_count": 1,
+    "prompt_tokens": 1538,
+    "completion_tokens": 1808,
+    "total_tokens": 3346,
+    "doc_id": "e7f8a1b6c2d3",
+    "slug": "",
+    "context": {
+      "source": "pdf",
+      "file_idx": 3
+    }
+  },
+  "timing": {
+    "duration_ms": 35472
+  }
+}

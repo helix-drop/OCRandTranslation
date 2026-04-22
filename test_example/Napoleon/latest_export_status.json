@@ -1,0 +1,9 @@
+{
+  "doc_id": "5df1d3d7f9c1",
+  "status": "blocked",
+  "reason": "structure_review_required",
+  "blocking_reasons": [
+    "export_audit_blocking"
+  ],
+  "generated_at": 1776828268
+}

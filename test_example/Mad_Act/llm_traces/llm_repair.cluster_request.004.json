@@ -1,0 +1,335 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-011-replenishorattack:toc-ch-011-replenishorattack:endnote\",\n  \"chapter_title\": \"Replenish or attack?\",\n  \"page_range\": [\n    227,\n    272\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 38,\n      \"ocr_excerpt\": \"## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters ...\"\n    },\n    {\n      \"page_no\": 226,\n      \"ocr_excerpt\": \"Dai Liang 戴良 and the author of his epitaph Song Lian 宋濂 concurred that Zhu kept detailed records of his clinical encounters. As Dai explained in a text written in 1358 or 1359: For the illnesses [Zhu] treated, what the illness looked like, what excellent remedy he applied, and the drinking of what drugs led to healing [were recorded]. From the past until now, for the efficacious [cases]: who [his patient] was, from what village in what county [he or she came], the names of the interested party, and what [Zhu] had witnessed and heard are clearly documented. $ ^{7} $ 其所治病凡機病之狀何如 施何良方 飲何藥而愈 自前至今 驗者何人 何縣里 主名 得諸見聞 班班可紀 Song Lian even claimed that Zhu's \\\"disciples possess books [of these records], classified by illnesses\\\" (門人類證有書). $ ^{8} $ It is no coincidence that Zhu Zhenheng's disciples and admirers were the leading transmitters of this flexible art of prescription during the early Ming dynasty. Zhu's own case files played a role. Wang Xing's 王行 preface (dated 1377, less than 20 years after Zhu's death) to a compendium of Zhu's cases explained how unusual Zhu's approach had been. $ ^{9} $ Most physicians, Wang claimed, instructed \\\"to treat such-and-such an illness with this remedy, a ...\"\n    },\n    {\n      \"page_no\": 227,\n      \"ocr_excerpt\": \"“respond to inconstant illnesses with limited recipes”(以有限之方應無常之病)? $ ^{10} $ Wang Xing attributed these singular doctrines (殊不類常聞也) to the aptly styled Wang Lifang 王 立方 (Wang “Establish-a-prescription”), who owed his distinctive ideas to having been taught by Zhu’s pupil Dai Sigong 戴思恭 (1324-1405; see 5.3). Wang Lifang had allegedly received from Dai himself the cases by Zhu that Wang Xing was prefacing. $ ^{11} $ The success of other practitioners in the “Zhu Danxi” line was also explained by their distinctive refusal to stick to set recipes. Wang Xing attributed the “extraordinary efficacy” (奇驗) of Dai Sigong’s cures to his adoption of Danxi’s flexible methods. According to one of Jiang Wusheng’s 蔣武生 (1351-1424) biographers, Jiang “did not hold to the old recipes, but investigated the root of illnesses and made his own recipes; therefore his treatments were always successful” (不執古方而究病所本 自為方 故所治恆十全). $ ^{12} $ The spread of case records would be difficult to understand without the notion that every instance of illness deserved a unique treatment, and without the prestige associated with this flexible style of prescription. Christopher Cullen’s argument (2001) that case collection ...\"\n    },\n    {\n      \"page_no\": 228,\n      \"ocr_excerpt\": \"collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Leian 名醫類案 [1591], a florilegium of cases by many doctors) $ ^{13} $ and of Sun Yikui's 孫一奎 large collection (6.6), which his disciples collated in the 1590s. $ ^{14} $ Sun was himself a second-generation disciple of Wang Ji. Both Wang and Sun had recorded their cures long before they had planned to publish them, and published them too late in their lives to compete for clients. $ ^{15} $ And since the editors of the Categorized Case Files did not include cases of their own in their compilation, they could not have published this book to attract customers. Since only two men – both from Huizhou and in the same intellectual lineage – published a collection of their own cases in the sixteenth century, no wave of yian was unleashed that would require a sociological explanation. $ ^{16} $ Before we inscribe the “rise of case files” within broad social trends, it may be more prudent to understand the motivations of the individuals who published such work ...\"\n    },\n    {\n      \"page_no\": 229,\n      \"ocr_excerpt\": \"which had enjoyed a strong reputation for medical studies since at least the Song, was where the prominent third edition of the Danxi xinfa 丹溪心法 had been published in 1482 and a sequel called Danxi xinfa fuyu 丹溪心法附語 appeared in 1536. In 1556, Huizhou man Xu Chunfu 徐春甫 completed a compendium called Gujin yitong daquan 古今醫統大全, a mosaic of short texts or excerpts, and had it printed in Suzhou the following year. $ ^{17} $ Two editions of Wu Kun's 吴崑 Yifang kao 醫方考 (with a 1584 preface by Wu) were also printed in 1586, whereas Sun Yikui's works came out in the 1580s and 1590s. These Huizhou physicians were supported by a strong intellectual tradition, a network of active printers, and a growing commercial wealth that facilitated the sponsoring of medical books. $ ^{18} $ If we stop focusing on autonomous case collections, we also realize that Wang Ji was not the only man of his time to record his clinical encounters. Han Mao 韓懋 (fl. 1520s), Wu Qiu 吳球 (fl. 1520-30s), Xue Ji 薛己 (1487-1559), and certainly many others whose names are no longer remembered also did. $ ^{19} $ Although these men did not publish their own collections, their records circulated among specialists. Xue Ji interspe ...\"\n    },\n    {\n      \"page_no\": 230,\n      \"ocr_excerpt\": \"shall see in the next section, Wang Ji, just like both his predecessors (Zhu Zhenheng) and his contemporaries (Xue Ji), used his cases to support broader medical arguments. I would say the “case files” genre emerged because an increasing number of doctors kept records of their clinical encounters, both for their patients and for their own reference. Their record-keeping depended on the notion that each bout of illness potentially required a unique therapy. It would thus seem that the sixteenth-century “bureaucratization” of case files that Cullen documented—and the common likening of medical intervention to judicial reasoning and judgment—was simply the repackaging along new metaphorical lines of a kind of record that had become increasingly important since approximately the thirteenth century, when some elite physicians adopted the flexible conception of illness I just mentioned. $ ^{21} $ Charlotte Furth (2007a: 19) has interpreted the case form (in medicine as well as other fields) as a “strategy of modernists in an intellectual tradition that gave awesome weight to the authority of antiquity,” and medical cases as tools to “negotiate the gap between… medical canon and therapeut ...\"\n    },\n    {\n      \"page_no\": 232,\n      \"ocr_excerpt\": \"### 6.2 Replenishing madness: Wang Ji's case-based reasoning Wang Ji 汪機 (1463-1540), from Qimen 祁門 county in Huizhou, was one of a handful of sixteenth-century physicians who attributed a case of mad behavior to depletion and treated it accordingly. $ ^{23} $ This section outlines the emergence, in the works of Wang and a few more doctors, of a conception of madness caused by depletion that would become more prominent later in the sixteenth century. I first explain the doctrinal background of Wang's predilection for treating patients with ginseng and astragalus root (黄芪), then I present two of his madness cases in light of his broader orientations. Finally I describe the replenishing therapies that other contemporary physicians deployed to treat madness symptoms. Both in his approach to madness and in his general doctrinal discussions, Wang often tackled issues that were discussed in the contemporary medical literature. The larger community of experts of which he was part tackled issues defined by the Danxi corpus (see Chapter 5) and discussed the writings of illustrious authors like Wang Lun 王綸 (1453-1510; see 5.6). In his work on poxes (Douzhi libian 痘治理辨; preface from 1531), Wan ...\"\n    },\n    {\n      \"page_no\": 233,\n      \"ocr_excerpt\": \"earliest case collections in Chinese medical history, $ ^{25} $ but it also served Wang Ji to make an array of doctrinal points on pathology and human vitality, and to defend his singular clinical approaches. The most distinctive and controversial aspect of Wang's medical practice was his use of calorific drugs (chiefly ginseng and astragalus) to treat cases of depletion that other physicians (following Wang Lun) would have treated with coolants. $ ^{26} $ Wang Lun had attributed visible emissions of Blood to \\\"Fire\\\" resulting from Blood/Yin deficiency, and argued that warming drugs only exacerbated this destructive Fire, and should therefore be proscribed when treating such cases (5.6). Strongly opposing this admonition, Wang Ji tried to show that calorific replenishers could treat not only cases of Qi depletion (as everyone agreed), but also illnesses that were caused by Blood depletion. Wang Ji had to dispute Wang Lun’s authority in his daily medical practice. Not only did rival physicians routinely use coolants to replenish Yin and Blood, it appears that even patients cited Wang Lun’s Miscellaneous Writings of Enlightened Physicians (1502) to challenge Wang Ji’s prescriptions. $ ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00583\",\n      \"marker\": \"11\",\n      \"page_no\": 227,\n      \"paragraph_index\": 4,\n      \"source_text\": \"received from Dai himself the cases by Zhu that Wang Xing was prefacing. $ ^{11} $\"\n    },\n    {\n      \"anchor_id\": \"anchor-00584\",\n      \"marker\": \"12\",\n      \"page_no\": 227,\n      \"paragraph_index\": 5,\n      \"source_text\": \"The success of other practitioners in the “Zhu Danxi” line was also explained by their distinctive refusal to stick to set recipes. Wang Xing attributed the “extraordinary efficacy” (奇驗) of Dai Sigong’s cures to his adoption of Danxi’s flex ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00586\",\n      \"marker\": \"11\",\n      \"page_no\": 227,\n      \"paragraph_index\": 7,\n      \"source_text\": \"“respond to inconstant illnesses with limited recipes”(以有限之方應無常之病)? $ ^{10} $ Wang Xing attributed these singular doctrines (殊不類常聞也) to the aptly styled Wang Lifang 王 立方 (Wang “Establish-a-prescription”), who owed his distinctive ideas to h ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00587\",\n      \"marker\": \"13\",\n      \"page_no\": 228,\n      \"paragraph_index\": 0,\n      \"source_text\": \"collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Lei ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00588\",\n      \"marker\": \"14\",\n      \"page_no\": 228,\n      \"paragraph_index\": 0,\n      \"source_text\": \"collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Lei ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00589\",\n      \"marker\": \"15\",\n      \"page_no\": 228,\n      \"paragraph_index\": 0,\n      \"source_text\": \"collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Lei ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00590\",\n      \"marker\": \"16\",\n      \"page_no\": 228,\n      \"paragraph_index\": 0,\n      \"source_text\": \"collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Lei ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00591\",\n      \"marker\": \"17\",\n      \"page_no\": 229,\n      \"paragraph_index\": 0,\n      \"source_text\": \"which had enjoyed a strong reputation for medical studies since at least the Song, was where the prominent third edition of the Danxi xinfa 丹溪心法 had been published in 1482 and a sequel called Danxi xinfa fuyu 丹溪心法附語 appeared in 1536. In 155 ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00065\",\n      \"note_item_id\": \"fn-00132\",\n      \"current_anchor_id\": \"anchor-01092\",\n      \"marker\": \"1\",\n      \"note_page_no\": 233,\n      \"anchor_page_no\": 385,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \",*' - hõ\\u0003ȍ \\u0003EAA@\\u000138F7D\\u0001 \\u0011\\u0004\\u00013@6\\u00010:G\\u00010:7@:7@9UE ,6'\\u00017' , ƽ̕ŵ \\u00033F\\u0001>3F7EF\\u0001 \\u0010\\u0010\\u0004\\u0007 \\u000f A3@@3 D3@FUE5>3;?\\u0001F:3F -3@9\\u0001 ;UEGE7\\u0001A8\\u0001F:7E7FIA\\u00016DG9E\\u0001V;@\\u0001F:7\\u0001FD73F?7@F\\u0001A8\\u000167B>7F;A@\\u00016;EAD67DE\\u0001I3E\\u00013F A66E\\u0001I;F:\\u0001F:3F\\u0001A8\\u0001:;E\\u00015A@F7?BAD3D;7EW\\u0001\\u0003 \\u0012\\u0012\\u0011\\u0013\\u0001\\u000f\\u000e\\u0004 ;E\\u0001@AF\\u0001EB75 ...\",\n      \"anchor_excerpt\": \"A notorious adage circulating in late imperial medical circles declared that the women's illnesses were more difficult to cure than men's. $ ^{1} $ Two other sayings claimed that women's bodies were \\\"governed by Blood\\\" (以血為主 or a variant) a ...\"\n    },\n    {\n      \"link_id\": \"link-00066\",\n      \"note_item_id\": \"fn-00134\",\n      \"current_anchor_id\": \"anchor-01199\",\n      \"marker\": \"1\",\n      \"note_page_no\": 235,\n      \"anchor_page_no\": 426,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0010\\u0010\\u00112\\u0013\\u0001 \\u0011 \\u0004\\u0007 \\u0017\\u0001EA8F\\u0001BG>E7\\u0001;E\\u0001V>;=7\\u00015AFFA@\\u00068>AEE\\u0001;@\\u0001I3F7D\\u0005\\u0001;F\\u0001?3K\\u000147\\u00018AG@6\\u00014K\\u0001BD7EE;@9\\u0001>;9:F>K\\u0005\\u00014GF\\u0001;E\\u0001>AEF\\u0001G@67D\\u0001:73HK BD7EEGD7W\\u0001\\u0003);H;@\\u0001 \\u0012\\u0011\\u0010\\u0013\\u0001 \\u0004\\u0007\\u0001V#A67D3F7W\\u0001D787DD76 FA\\u0001F:7\\u0001D3F7\\u0007\\u0001\\u0017\\u000167B>7F76\\u0001BG>E7\\u0001;E\\u0001F7@GAGE\\u0001G@67D\\u0001F:7\\u00018;@97DE\\u0007\",\n      \"anchor_excerpt\": \"Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} ...\"\n    },\n    {\n      \"link_id\": \"link-00067\",\n      \"note_item_id\": \"fn-00136\",\n      \"current_anchor_id\": \"anchor-00025\",\n      \"marker\": \"1\",\n      \"note_page_no\": 238,\n      \"anchor_page_no\": 38,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \",6 '\\u00017'(' \\u0013\\u0001 2\\u0007\",\n      \"anchor_excerpt\": \"Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts w ...\"\n    },\n    {\n      \"link_id\": \"link-00070\",\n      \"note_item_id\": \"fn-00141\",\n      \"current_anchor_id\": \"anchor-00624\",\n      \"marker\": \"49\",\n      \"note_page_no\": 242,\n      \"anchor_page_no\": 240,\n      \"current_anchor_marker\": \"49\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"in juan 5 (WuKYQ: 117). More on Wu below, 6.5.\",\n      \"anchor_excerpt\": \"Wang Ji was not the only physician of his time who devised new replenishing cures for madness manifested or occasioned by emotional excesses. Wu Qiu 吳球 (fl. 1520-30s), from Taizhou in Zhejiang, cured a woman who had lost her mind and suffer ...\"\n    },\n    {\n      \"link_id\": \"link-00076\",\n      \"note_item_id\": \"fn-00154\",\n      \"current_anchor_id\": \"anchor-00579\",\n      \"marker\": \"7\",\n      \"note_page_no\": 255,\n      \"anchor_page_no\": 226,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"D753>>76 :;E\\u00013BBD7@F;57E:;B\\u0001;@\\u0001F:7 ;@\\u0001F:7\\u00018A>>AI;@9\\u000157@FGD;7E\\u0007 BD78357\\u0001FA\\b&'1&3'\\u000163 ,8&3\\u0001/3 ,(' ˨ƙǨŧI̷ \\u0003)G@/'\\u0013\\u0001 \\u0004\\u0007\\u0001*3;L:AG\\u0001;E\\u0001I:7D7)G@UE A>67D\\u00014DAF:7D\\u0001\\u0003 &A \\u0004\\u0001I3E BAEF76\\u0001\\u0003?AD7\\u0001A@\\u0001)G@UE\\u00014DAF:7DE\\u0001;@ @7JF@AF7\\u0004\\u0007\\u0001\\u0017@AF:7D\\u0001EAGD57\\u000136676 F:3F\\u0001)G@\\u0001I3E ...\",\n      \"anchor_excerpt\": \"For the illnesses [Zhu] treated, what the illness looked like, what excellent remedy he applied, and the drinking of what drugs led to healing [were recorded]. From the past until now, for the efficacious [cases]: who [his patient] was, fro ...\"\n    },\n    {\n      \"link_id\": \"link-00086\",\n      \"note_item_id\": \"fn-00173\",\n      \"current_anchor_id\": \"anchor-00691\",\n      \"marker\": \"112\",\n      \"note_page_no\": 269,\n      \"anchor_page_no\": 261,\n      \"current_anchor_marker\": \"112\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"D74GFF3>\\u0001A8\\u0001-3@9\\u0001\\\"G@UE Ǫɕ \\u0003 \\u000e \\u0006 \\u000e \\u0014\\u0001E77\\u0001\\u000e\\u0007\\u000f\\u0004 5A@H7DE7\\u00015>3;? ;@\\u0012',%7'\\u00018 8&3 Ő̕ ̹ʢ \\u0003 \\u000e \\u0004\\u0005 (3 , \\u0005 V%@\\u0001F:7\\u0001/;@\\u0006D7B>7@;E:;@9\\u0001B;>>Wʿ̰ ˔ \\u0003;@ \\u001a3#1&'\\u00017' , ʫƗ̕Ŵ \\u0005\\u0001)!')\\u000176\\u0007\\u0005\\u0001 \\u0007 4\\u0014 \\u0012\\u0012\\u000f\\u0013\\u0001 \\u000f\\u0018\\u0004\\u0007\",\n      \"anchor_excerpt\": \"Some books speak of “diankuang,” $ ^{109} $ some of “dianxian,” $ ^{110} $ some of “Wind xian,” $ ^{111} $ some of “Wind dian,” some of “fright xian,” whereas some place dian and xian in two [separate] sections. There is no set [way of] dis ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-011-replenishorattack:toc-ch-011-replenishorattack:endnote",
+      "chapter_title": "Replenish or attack?",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        227,
+        272
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 78056,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00583",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 227,
+          "paragraph_index": 4,
+          "char_start": 73,
+          "char_end": 82,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "received from Dai himself the cases by Zhu that Wang Xing was prefacing. $ ^{11} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78057,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00584",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 227,
+          "paragraph_index": 5,
+          "char_start": 497,
+          "char_end": 506,
+          "source_marker": "$ ^{12} $",
+          "normalized_marker": "12",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "The success of other practitioners in the “Zhu Danxi” line was also explained by their distinctive refusal to stick to set recipes. Wang Xing attributed the “extraordinary efficacy” (奇驗) of Dai Sigong’s cures to his adoption of Danxi’s flexible methods. According to one of Jiang Wusheng’s 蔣武生 (1351-1424) biographers, Jiang “did not hold to the old recipes, but investigated the root of illnesses and made his own recipes; therefore his treatments were always successful” (不執古方而究病所本 自為方 故所治恆十全). $ ^{12} $ The spread of case records would be difficult to understand without the notion that every instance of illness deserved a unique treatment, and without the prestige associated with this flexible style of prescription.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78059,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00586",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 227,
+          "paragraph_index": 7,
+          "char_start": 409,
+          "char_end": 418,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "“respond to inconstant illnesses with limited recipes”(以有限之方應無常之病)? $ ^{10} $ Wang Xing attributed these singular doctrines (殊不類常聞也) to the aptly styled Wang Lifang 王 立方 (Wang “Establish-a-prescription”), who owed his distinctive ideas to having been taught by Zhu’s pupil Dai Sigong 戴思恭 (1324-1405; see 5.3). Wang Lifang had allegedly received from Dai himself the cases by Zhu that Wang Xing was prefacing. $ ^{11} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78061,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00587",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 228,
+          "paragraph_index": 0,
+          "char_start": 296,
+          "char_end": 305,
+          "source_marker": "$ ^{13} $",
+          "normalized_marker": "13",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Leian 名醫類案 [1591], a florilegium of cases by many doctors) $ ^{13} $ and of Sun Yikui's 孫一奎 large collection (6.6), which his disciples collated in the 1590s. $ ^{14} $ Sun was himself a second-generation disciple of Wang Ji. Both Wang and Sun had recorded their cures long before they had planned to publish them, and published them too late in their lives to compete for clients. $ ^{15} $ And since the editors of the Categorized Case Files did not include cases of their own in their compilation, they could not have published this book to attract customers. Since only two men – both from Huizhou and in the same intellectual lineage – published a collection of their own cases in the sixteenth century, no wave of yian was unleashed that would require a sociological explanation. $ ^{16} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78062,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00588",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 228,
+          "paragraph_index": 0,
+          "char_start": 396,
+          "char_end": 405,
+          "source_marker": "$ ^{14} $",
+          "normalized_marker": "14",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Leian 名醫類案 [1591], a florilegium of cases by many doctors) $ ^{13} $ and of Sun Yikui's 孫一奎 large collection (6.6), which his disciples collated in the 1590s. $ ^{14} $ Sun was himself a second-generation disciple of Wang Ji. Both Wang and Sun had recorded their cures long before they had planned to publish them, and published them too late in their lives to compete for clients. $ ^{15} $ And since the editors of the Categorized Case Files did not include cases of their own in their compilation, they could not have published this book to attract customers. Since only two men – both from Huizhou and in the same intellectual lineage – published a collection of their own cases in the sixteenth century, no wave of yian was unleashed that would require a sociological explanation. $ ^{16} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78063,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00589",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 228,
+          "paragraph_index": 0,
+          "char_start": 619,
+          "char_end": 628,
+          "source_marker": "$ ^{15} $",
+          "normalized_marker": "15",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Leian 名醫類案 [1591], a florilegium of cases by many doctors) $ ^{13} $ and of Sun Yikui's 孫一奎 large collection (6.6), which his disciples collated in the 1590s. $ ^{14} $ Sun was himself a second-generation disciple of Wang Ji. Both Wang and Sun had recorded their cures long before they had planned to publish them, and published them too late in their lives to compete for clients. $ ^{15} $ And since the editors of the Categorized Case Files did not include cases of their own in their compilation, they could not have published this book to attract customers. Since only two men – both from Huizhou and in the same intellectual lineage – published a collection of their own cases in the sixteenth century, no wave of yian was unleashed that would require a sociological explanation. $ ^{16} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78064,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00590",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 228,
+          "paragraph_index": 0,
+          "char_start": 1023,
+          "char_end": 1032,
+          "source_marker": "$ ^{16} $",
+          "normalized_marker": "16",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Leian 名醫類案 [1591], a florilegium of cases by many doctors) $ ^{13} $ and of Sun Yikui's 孫一奎 large collection (6.6), which his disciples collated in the 1590s. $ ^{14} $ Sun was himself a second-generation disciple of Wang Ji. Both Wang and Sun had recorded their cures long before they had planned to publish them, and published them too late in their lives to compete for clients. $ ^{15} $ And since the editors of the Categorized Case Files did not include cases of their own in their compilation, they could not have published this book to attract customers. Since only two men – both from Huizhou and in the same intellectual lineage – published a collection of their own cases in the sixteenth century, no wave of yian was unleashed that would require a sociological explanation. $ ^{16} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78065,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00591",
+          "chapter_id": "toc-ch-011-replenishorattack",
+          "page_no": 229,
+          "paragraph_index": 0,
+          "char_start": 413,
+          "char_end": 422,
+          "source_marker": "$ ^{17} $",
+          "normalized_marker": "17",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "which had enjoyed a strong reputation for medical studies since at least the Song, was where the prominent third edition of the Danxi xinfa 丹溪心法 had been published in 1482 and a sequel called Danxi xinfa fuyu 丹溪心法附語 appeared in 1536. In 1556, Huizhou man Xu Chunfu 徐春甫 completed a compendium called Gujin yitong daquan 古今醫統大全, a mosaic of short texts or excerpts, and had it printed in Suzhou the following year. $ ^{17} $ Two editions of Wu Kun's 吴崑 Yifang kao 醫方考 (with a 1584 preface by Wu) were also printed in 1586, whereas Sun Yikui's works came out in the 1580s and 1590s. These Huizhou physicians were supported by a strong intellectual tradition, a network of active printers, and a growing commercial wealth that facilitated the sponsoring of medical books. $ ^{18} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00065",
+          "note_item_id": "fn-00132",
+          "current_anchor_id": "anchor-01092",
+          "marker": "1",
+          "note_page_no": 233,
+          "anchor_page_no": 385,
+          "current_anchor_marker": "1",
+          "note_excerpt": ",*' - hõ\u0003ȍ \u0003EAA@\u000138F7D\u0001 \u0011\u0004\u00013@6\u00010:G\u00010:7@:7@9UE ,6'\u00017' , ƽ̕ŵ \u00033F\u0001>3F7EF\u0001 \u0010\u0010\u0004\u0007 \u000f A3@@3 D3@FUE5>3;?\u0001F:3F -3@9\u0001 ;UEGE7\u0001A8\u0001F:7E7FIA\u00016DG9E\u0001V;@\u0001F:7\u0001FD73F?7@F\u0001A8\u000167B>7F;A@\u00016;EAD67DE\u0001I3E\u00013F A66E\u0001I;F:\u0001F:3F\u0001A8\u0001:;E\u00015A@F7?BAD3D;7EW\u0001\u0003 \u0012\u0012\u0011\u0013\u0001\u000f\u000e\u0004 ;E\u0001@AF\u0001EB75;8;5\u00017@AG9:\u0007\u0001#3DF3 3@EA@UE\u00018AD?G>3F;A@\u0001\u0003 \u000e\u0013 \u0012 \u0004\u0001;E\u00013>EA\u0001?;E>736;@9\u0013\u0001V-3@9\u00013@6\u0001:;E\u00016;E5;B>7E\u00015:AE7\u000153E7E\u0001F:3F\u000167?A@EFD3F76\u0001F:7\u0001788;535K\u0001A8\u0001:;E\u0001BD787D7@57 8AD\u0001D7B>7@;E:;@9\u0001FA@;5E\u0001FA\u0001FD73F\u000153E7E\u0001A8/' Ƙ 67B>7F;A@\u0007W\u0018GF\u0001D7B>7@;E:;@9\u0001';\u0001I3EF:7\u0001?AEF5A@H7@F;A@3> 8G@5F;A@\u0001A8\u00019;@E7@9\u00013@6\u00013EFD393>GE\u00013F\u0001F:7\u0001F;?7\u0007\u0001*:7\u00015A@FDAH7DEK\u0001I3E\u000134AGF\u0001I:7F:7D /;@3@6 \u0018>AA6 67B>7F;A@ 5AG>6\u000147\u0001D7B>7@;E:76\u0001I;F:\u0001I3D?;@9\u00016DG9E\u0001\u0003 3@EA@UE\u0001GE7\u0001A8 VD7B>7@;E:;@9\u0001FA@;5EW\u0001FA\u0001D787D\u0001FA I3D?;@9\u00013@6 D7B>7@;E:;@9\u00016DG9E 3>EA\u0001F7@6E FA\u0001A4E5GD7\u0001F:;E\u0001BA;@F\u0004\u0007 \u0010 \u0018AF:\u0001 3@\u0001#3A ͂ģ 3@6\u0001-3@9\u0001 ;\u0001@AF76\u0001F:3F\u0001B3F;7@FE\u0001D78GE76\u0001FA\u0001GE7\u0001I3D?;@9\u00016DG9E\u0001FA\u0001FD73F\u0001\u0018>AA6\u00016;EAD67DE\u0005 3@6\u0001F:3F:73>7DE BD7E5D;476\u0001V5AA>3@FEW\u00013E\u00013\u0001?3FF7D\u0001A8\u00015AGDE7\u0001I:7@\u0001FD73F;@9 EG5:\u00016;EAD67DE\u0007 %@7\u0001A8 3@ UE B3F;7@FE D78GE76\u0001FA\u0001F3=7\u0001I3D?;@9\u00016DG9E\u00014753GE7\u0001F:7\u0012',%7'\u00018 8&3 Ő̹̕ʢ 8AD4367\u0001F:7;D\u0001GE7\u0001\u0003 ,1&'\u00017'2-,% ͂ Ɨ́̕ 1 \u000e 2\u0005 (3 , \u0005 8& ,% Ȼ \u000f\u0004\u0007\u0017@ G@@3?76 VEA?7A@7W Ĩ I:A 5;F76 F:7\u0012',%7'\u00018 8&3 ;@\u0001A@7\u0001A8\u0001-3@9 ;UE 53E7E\u0003\u0017&'1& ,\u00017' , ȤØ̕Ŵ \u0005 V\u0017BB7@6;JW̛̬ 4\u0005\u0001-3@9 /'\u0013\u0001 \u000e\u0017\u0004 I3E\u00017;F:7D\u00013\u0001D73>\u0001B7DEA@\u0001I:A\u0001D7E;EF76 -3@9UE\u00016;39@AE;E\u0005\u0001AD-3@9 :;?E7>8\u0001HA;5;@9 3\u00016;E39D77?7@F\u0001:;E\u0001D7367DE\u0001?;9:F\u0001E7F\u00018ADF:\u0007",
+          "anchor_excerpt": "A notorious adage circulating in late imperial medical circles declared that the women's illnesses were more difficult to cure than men's. $ ^{1} $ Two other sayings claimed that women's bodies were \"governed by Blood\" (以血為主 or a variant) and that treating women necessitated \"separate prescriptions\" (别方). Ming and Qing physicians cited these sayings to set up concurring arguments, to introduce objections or qualifications, or to clinch points with the help of a well-formulated piece of common knowledge.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00066",
+          "note_item_id": "fn-00134",
+          "current_anchor_id": "anchor-01199",
+          "marker": "1",
+          "note_page_no": 235,
+          "anchor_page_no": 426,
+          "current_anchor_marker": "1",
+          "note_excerpt": "\u0010\u0010\u00112\u0013\u0001 \u0011 \u0004\u0007 \u0017\u0001EA8F\u0001BG>E7\u0001;E\u0001V>;=7\u00015AFFA@\u00068>AEE\u0001;@\u0001I3F7D\u0005\u0001;F\u0001?3K\u000147\u00018AG@6\u00014K\u0001BD7EE;@9\u0001>;9:F>K\u0005\u00014GF\u0001;E\u0001>AEF\u0001G@67D\u0001:73HK BD7EEGD7W\u0001\u0003);H;@\u0001 \u0012\u0011\u0010\u0013\u0001 \u0004\u0007\u0001V#A67D3F7W\u0001D787DD76 FA\u0001F:7\u0001D3F7\u0007\u0001\u0017\u000167B>7F76\u0001BG>E7\u0001;E\u0001F7@GAGE\u0001G@67D\u0001F:7\u00018;@97DE\u0007",
+          "anchor_excerpt": "Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} $ Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00067",
+          "note_item_id": "fn-00136",
+          "current_anchor_id": "anchor-00025",
+          "marker": "1",
+          "note_page_no": 238,
+          "anchor_page_no": 38,
+          "current_anchor_marker": "1",
+          "note_excerpt": ",6 '\u00017'(' \u0013\u0001 2\u0007",
+          "anchor_excerpt": "Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00070",
+          "note_item_id": "fn-00141",
+          "current_anchor_id": "anchor-00624",
+          "marker": "49",
+          "note_page_no": 242,
+          "anchor_page_no": 240,
+          "current_anchor_marker": "49",
+          "note_excerpt": "in juan 5 (WuKYQ: 117). More on Wu below, 6.5.",
+          "anchor_excerpt": "Wang Ji was not the only physician of his time who devised new replenishing cures for madness manifested or occasioned by emotional excesses. Wu Qiu 吳球 (fl. 1520-30s), from Taizhou in Zhejiang, cured a woman who had lost her mind and suffered from dian (失志顛疾), an illness Wu defined as a “disorderly heart (or mind)” (亂心).⁴⁷ She would either sob or laugh, wander around naked, or shut the door and speak a lot (或哭或笑 或裸體而走 或閉戶而多言). She was “emaciated and of an anxious nature, and excessive worry had consumed and harmed her Cardiac blood” (瘦弱性急 因思過度 耗傷心血), making the Spirit unable to hold to its lodging.⁴⁸ Wu replenished her with human placenta, which he called “Purple river-chariot” (紫河車) because the best placentas were purportedly purple.⁴⁹ The patient ate the boiled placenta and became well after Wu gave her “Will-fixing pill” (定志丸) and “Heart-replenishing decoction” (補心湯) for 100 days.⁵⁰",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00076",
+          "note_item_id": "fn-00154",
+          "current_anchor_id": "anchor-00579",
+          "marker": "7",
+          "note_page_no": 255,
+          "anchor_page_no": 226,
+          "current_anchor_marker": "7",
+          "note_excerpt": "D753>>76 :;E\u00013BBD7@F;57E:;B\u0001;@\u0001F:7 ;@\u0001F:7\u00018A>>AI;@9\u000157@FGD;7E\u0007 BD78357\u0001FA\b&'1&3'\u000163 ,8&3\u0001/3 ,(' ˨ƙǨŧI̷ \u0003)G@/'\u0013\u0001 \u0004\u0007\u0001*3;L:AG\u0001;E\u0001I:7D7)G@UE A>67D\u00014DAF:7D\u0001\u0003 &A \u0004\u0001I3E BAEF76\u0001\u0003?AD7\u0001A@\u0001)G@UE\u00014DAF:7DE\u0001;@ @7JF@AF7\u0004\u0007\u0001\u0017@AF:7D\u0001EAGD57\u000136676 F:3F\u0001)G@\u0001I3E\u0001F:7@\u000147FI77@\u0001 \u000e\u00013@6\u0001 \u001213' \u0003ʑˠ\u0010Ɛ \u0004\u0001\u0003)G@UE\u00016;E5;B>7\u0001\u0019:7@9\u0001 G3@UEȴư G@63F76\u0001BD78357\u0001FA\u0001)G@UE\u001b'8&'\u00016373 ̕ŏɖ͓ 1)G@/'\u0013\u0001\u000f 2\u0004\u0007 )G@UE\u0001?GEF\u0001F:GE\u0001:3H7\u0001EF3K76\u0001;@\u0001*3;L:AG\u0001EA?7F;?7\u000147FI77@\u0001 \u000e \u000f\u00013@6\u0001 \u000e \u0007",
+          "anchor_excerpt": "For the illnesses [Zhu] treated, what the illness looked like, what excellent remedy he applied, and the drinking of what drugs led to healing [were recorded]. From the past until now, for the efficacious [cases]: who [his patient] was, from what village in what county [he or she came], the names of the interested party, and what [Zhu] had witnessed and heard are clearly documented. $ ^{7} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00086",
+          "note_item_id": "fn-00173",
+          "current_anchor_id": "anchor-00691",
+          "marker": "112",
+          "note_page_no": 269,
+          "anchor_page_no": 261,
+          "current_anchor_marker": "112",
+          "note_excerpt": "D74GFF3>\u0001A8\u0001-3@9\u0001\"G@UE Ǫɕ \u0003 \u000e \u0006 \u000e \u0014\u0001E77\u0001\u000e\u0007\u000f\u0004 5A@H7DE7\u00015>3;? ;@\u0012',%7'\u00018 8&3 Ő̕ ̹ʢ \u0003 \u000e \u0004\u0005 (3 , \u0005 V%@\u0001F:7\u0001/;@\u0006D7B>7@;E:;@9\u0001B;>>Wʿ̰ ˔ \u0003;@ \u001a3#1&'\u00017' , ʫƗ̕Ŵ \u0005\u0001)!')\u000176\u0007\u0005\u0001 \u0007 4\u0014 \u0012\u0012\u000f\u0013\u0001 \u000f\u0018\u0004\u0007",
+          "anchor_excerpt": "Some books speak of “diankuang,” $ ^{109} $ some of “dianxian,” $ ^{110} $ some of “Wind xian,” $ ^{111} $ some of “Wind dian,” some of “fright xian,” whereas some place dian and xian in two [separate] sections. There is no set [way of] discussing [these disorders]. This is because those who speak of dian on its own follow the Inner Canon [Basic Questions], whereas those who speak of dian-xian and dian-kuang follow the Divine Pivot. $ ^{112} $",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 38,
+        "file_idx": 37,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters and famous doctors, but also to writings that epitomized their age more than they marked it: $ ^{3} $ primers, florilegia of medical oddities, unpublished collections of medical cases, etc. In additio ...",
+        "byte_size": 106140,
+        "sha256": "20a718b8de82e5fceaf0ea167b88bd57134583ab8802ea8951948a17e73b1daa"
+      },
+      {
+        "page_no": 226,
+        "file_idx": 225,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Dai Liang 戴良 and the author of his epitaph Song Lian 宋濂 concurred that Zhu kept detailed records of his clinical encounters. As Dai explained in a text written in 1358 or 1359: For the illnesses [Zhu] treated, what the illness looked like, what excellent remedy he applied, and the drinking of what drugs led to healing [were recorded]. From the past until now, for the efficacious [cases]: who [his patient] was, from what village in what county [he or she came], the names of the interested party, and what [Zhu] had witnessed and heard are clearly documented. $ ^{7} $ 其所治病凡機病之狀何如 施何良方 飲何藥而愈 自前至今 驗者何人 何縣里 主名 得諸見聞 班班可紀 Song Lian even claimed that Zhu's \"disciples possess books [of these records], classified by illnesses\" (門人類證有書). $ ^{8} $ It is no coincidence that Zhu Zhenheng's disciples and admirers were the leading transmitters of this flexible art of prescription during the early Ming dynasty. Zhu's own case files played a role. Wang Xing's 王行 preface (dated 1377, less than 20 years after Zhu's death) to a compendium of Zhu's cases explained how unusual Zhu's approach had been. $ ^{9} $ Most physicians, Wang claimed, instructed \"to treat such-and-such an illness with this remedy, and that such-and-such a remedy treats such-and-such an illness\" (治某病以某方以某方治某病而已). But \"illnesses change greatly and are without constancy, whereas recipes are fixed and limited\" (病多變而無常 方一定而有限). And h ...",
+        "byte_size": 136085,
+        "sha256": "9c04c8d7f5f515eed3ecd19dd20ebdffbfe26a860785e6404c0dcef9e6d79bcc"
+      },
+      {
+        "page_no": 227,
+        "file_idx": 226,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "“respond to inconstant illnesses with limited recipes”(以有限之方應無常之病)? $ ^{10} $ Wang Xing attributed these singular doctrines (殊不類常聞也) to the aptly styled Wang Lifang 王 立方 (Wang “Establish-a-prescription”), who owed his distinctive ideas to having been taught by Zhu’s pupil Dai Sigong 戴思恭 (1324-1405; see 5.3). Wang Lifang had allegedly received from Dai himself the cases by Zhu that Wang Xing was prefacing. $ ^{11} $ The success of other practitioners in the “Zhu Danxi” line was also explained by their distinctive refusal to stick to set recipes. Wang Xing attributed the “extraordinary efficacy” (奇驗) of Dai Sigong’s cures to his adoption of Danxi’s flexible methods. According to one of Jiang Wusheng’s 蔣武生 (1351-1424) biographers, Jiang “did not hold to the old recipes, but investigated the root of illnesses and made his own recipes; therefore his treatments were always successful” (不執古方而究病所本 自為方 故所治恆十全). $ ^{12} $ The spread of case records would be difficult to understand without the notion that every instance of illness deserved a unique treatment, and without the prestige associated with this flexible style of prescription. Christopher Cullen’s argument (2001) that case collections started to flourish as a printed genre in the sixteenth century because an increasing number of educated men sought distinctive ways to foster their medical careers after they had failed the civil e ...",
+        "byte_size": 153367,
+        "sha256": "416aedfb36a0b610e2829987633ae9043b1fdf99cc4b0d16d5bb0890982a3b66"
+      },
+      {
+        "page_no": 228,
+        "file_idx": 227,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "collections were actually published in the sixteenth century, and all three of them were the work of men from Huizhou in Anhui. Apart from Wang Ji's book (6.2), I know only of the Categorized Case Files of Illustrious Physicians (Mingyi Leian 名醫類案 [1591], a florilegium of cases by many doctors) $ ^{13} $ and of Sun Yikui's 孫一奎 large collection (6.6), which his disciples collated in the 1590s. $ ^{14} $ Sun was himself a second-generation disciple of Wang Ji. Both Wang and Sun had recorded their cures long before they had planned to publish them, and published them too late in their lives to compete for clients. $ ^{15} $ And since the editors of the Categorized Case Files did not include cases of their own in their compilation, they could not have published this book to attract customers. Since only two men – both from Huizhou and in the same intellectual lineage – published a collection of their own cases in the sixteenth century, no wave of yian was unleashed that would require a sociological explanation. $ ^{16} $ Before we inscribe the “rise of case files” within broad social trends, it may be more prudent to understand the motivations of the individuals who published such works, and to situate their case records in the broader context of their other medical works and of their contemporaries’ use of case files. Stone Mountain’s Medical Case Files was one of as many as eleve ...",
+        "byte_size": 159863,
+        "sha256": "50655ed5d60fbb492808fbcac702dd606cd2cc9c28336fd0ae610ddca005c565"
+      },
+      {
+        "page_no": 229,
+        "file_idx": 228,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "which had enjoyed a strong reputation for medical studies since at least the Song, was where the prominent third edition of the Danxi xinfa 丹溪心法 had been published in 1482 and a sequel called Danxi xinfa fuyu 丹溪心法附語 appeared in 1536. In 1556, Huizhou man Xu Chunfu 徐春甫 completed a compendium called Gujin yitong daquan 古今醫統大全, a mosaic of short texts or excerpts, and had it printed in Suzhou the following year. $ ^{17} $ Two editions of Wu Kun's 吴崑 Yifang kao 醫方考 (with a 1584 preface by Wu) were also printed in 1586, whereas Sun Yikui's works came out in the 1580s and 1590s. These Huizhou physicians were supported by a strong intellectual tradition, a network of active printers, and a growing commercial wealth that facilitated the sponsoring of medical books. $ ^{18} $ If we stop focusing on autonomous case collections, we also realize that Wang Ji was not the only man of his time to record his clinical encounters. Han Mao 韓懋 (fl. 1520s), Wu Qiu 吳球 (fl. 1520-30s), Xue Ji 薛己 (1487-1559), and certainly many others whose names are no longer remembered also did. $ ^{19} $ Although these men did not publish their own collections, their records circulated among specialists. Xue Ji interspersed his editions of earlier texts with cases of his own. $ ^{20} $ The practice of writing case files was thus fairly widespread in the most prosperous region of the empire. Wang Ji's decision to pub ...",
+        "byte_size": 155196,
+        "sha256": "29037a1bf0d991c0ace29cdc99c39bdef63660471d175204c63c8e9a12a8ba4d"
+      },
+      {
+        "page_no": 230,
+        "file_idx": 229,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "shall see in the next section, Wang Ji, just like both his predecessors (Zhu Zhenheng) and his contemporaries (Xue Ji), used his cases to support broader medical arguments. I would say the “case files” genre emerged because an increasing number of doctors kept records of their clinical encounters, both for their patients and for their own reference. Their record-keeping depended on the notion that each bout of illness potentially required a unique therapy. It would thus seem that the sixteenth-century “bureaucratization” of case files that Cullen documented—and the common likening of medical intervention to judicial reasoning and judgment—was simply the repackaging along new metaphorical lines of a kind of record that had become increasingly important since approximately the thirteenth century, when some elite physicians adopted the flexible conception of illness I just mentioned. $ ^{21} $ Charlotte Furth (2007a: 19) has interpreted the case form (in medicine as well as other fields) as a “strategy of modernists in an intellectual tradition that gave awesome weight to the authority of antiquity,” and medical cases as tools to “negotiate the gap between… medical canon and therapeutic strategy.” $ ^{22} $ Without downplaying the freedom allowed by case files to go beyond canonical formulations, I would contend that, at least in the sixteenth century when they came into widesprea ...",
+        "byte_size": 148470,
+        "sha256": "1f5ac3825b63e236bf1772d5cb8ea8d879a6ab9b7aa49d3c3a5bbb40598d8179"
+      },
+      {
+        "page_no": 232,
+        "file_idx": 231,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "### 6.2 Replenishing madness: Wang Ji's case-based reasoning Wang Ji 汪機 (1463-1540), from Qimen 祁門 county in Huizhou, was one of a handful of sixteenth-century physicians who attributed a case of mad behavior to depletion and treated it accordingly. $ ^{23} $ This section outlines the emergence, in the works of Wang and a few more doctors, of a conception of madness caused by depletion that would become more prominent later in the sixteenth century. I first explain the doctrinal background of Wang's predilection for treating patients with ginseng and astragalus root (黄芪), then I present two of his madness cases in light of his broader orientations. Finally I describe the replenishing therapies that other contemporary physicians deployed to treat madness symptoms. Both in his approach to madness and in his general doctrinal discussions, Wang often tackled issues that were discussed in the contemporary medical literature. The larger community of experts of which he was part tackled issues defined by the Danxi corpus (see Chapter 5) and discussed the writings of illustrious authors like Wang Lun 王綸 (1453-1510; see 5.6). In his work on poxes (Douzhi libian 痘治理辨; preface from 1531), Wang Ji had addressed Wei Zhi's 衛直 recently published Boai xinjian 博愛心鑒 (1525), whereas Wang's work on \"external medicine\" (Waike lili 外科理例; 1531 preface) integrated arguments he had found in Waike fabui ...",
+        "byte_size": 142785,
+        "sha256": "a5be2fdd2db4821d29dc209a8944349a351b6ca91668b4c85bf36176d16be15c"
+      },
+      {
+        "page_no": 233,
+        "file_idx": 232,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "earliest case collections in Chinese medical history, $ ^{25} $ but it also served Wang Ji to make an array of doctrinal points on pathology and human vitality, and to defend his singular clinical approaches. The most distinctive and controversial aspect of Wang's medical practice was his use of calorific drugs (chiefly ginseng and astragalus) to treat cases of depletion that other physicians (following Wang Lun) would have treated with coolants. $ ^{26} $ Wang Lun had attributed visible emissions of Blood to \"Fire\" resulting from Blood/Yin deficiency, and argued that warming drugs only exacerbated this destructive Fire, and should therefore be proscribed when treating such cases (5.6). Strongly opposing this admonition, Wang Ji tried to show that calorific replenishers could treat not only cases of Qi depletion (as everyone agreed), but also illnesses that were caused by Blood depletion. Wang Ji had to dispute Wang Lun’s authority in his daily medical practice. Not only did rival physicians routinely use coolants to replenish Yin and Blood, it appears that even patients cited Wang Lun’s Miscellaneous Writings of Enlightened Physicians (1502) to challenge Wang Ji’s prescriptions. $ ^{27} $ When he disagreed with a rival’s diagnosis in front of patients and their relatives, Wang Ji sometimes argued that loss of blood, a symptom commonly attributed to Yin/Blood depletion, was in ...",
+        "byte_size": 177403,
+        "sha256": "939d1288fd76b5db552c3ee8712e892bd9a138d2159f95870d0d67eef92927b2"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-011-replenishorattack:toc-ch-011-replenishorattack:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00136\",\n    \"anchor_id\": \"anchor-00583\",\n    \"confidence\": 0.9,\n    \"reason\": \"The note item fn-00136 (marker '1') is currently bound to an anchor on page 385. However, the screenshot for page 20 shows a footnote '1' at the bottom of the page corresponding to the text 'medical kuang 狂'. The OCR excerpt for page 38 confirms the presence of marker '1' in the body text ('...within individual works. $ ^{1} $'). The unmatched anchor-00583 is also marker '1' but on page 227, which seems to be a mis-segmentation or duplication in the data, but the visual evidence on page 20 clearly links the footnote '1' to the text on that page. Given the cluster context and the clear visual match on page 20, this is the correct rebind target for the note content visible in the screenshot.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00584\",\n    \"confidence\": 0.95,\n    \"reason\": \"The screenshot for page 209 clearly shows footnote marker '12' attached to the phrase 'always successful'. The unmatched anchor-00584 has marker '12' but its source text ('The success of other practitioners...') is the beginning of the paragraph, not the location of the marker. The marker is physically located after the quote ending in 'successful'. Thus, the existing anchor record is spatially incorrect relative to the marker position shown in the screenshot.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00586\",\n    \"confidence\": 0.95,\n    \"reason\": \"The screenshot for page 209 shows marker '11' at the end of the sentence '...Wang Xing was prefacing.' The unmatched anchor-00586 has marker '11' but points to the beginning of the paragraph ('respond to inconstant illnesses...'). This is a clear mismatch between the anchor's source text and the actual marker location in the image.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00587\",\n    \"confidence\": 0.95,\n    \"reason\": \"The screenshot for page 210 shows marker '13' after 'many doctors'. The unmatched anchor-00587 has marker '13' but its source text starts at the beginning of the paragraph ('collections were actually published...'). The anchor does not correspond to the specific location of the superscript.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00588\",\n    \"confidence\": 0.95,\n    \"reason\": \"The screenshot for page 210 shows marker '14' after '1590s'. The unmatched anchor-00588 has marker '14' but points to the start of the paragraph. Mismatched location.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0",
+  "response_parsed": [],
+  "derived_truth": {
+    "cluster_id": "toc-ch-011-replenishorattack:toc-ch-011-replenishorattack:endnote",
+    "chapter_title": "Replenish or attack?",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [],
+    "auto_selected_actions": [],
+    "auto_applied_actions": []
+  },
+  "usage": {
+    "prompt_tokens": 13055,
+    "completion_tokens": 768,
+    "total_tokens": 13823,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 17133
+  }
+}

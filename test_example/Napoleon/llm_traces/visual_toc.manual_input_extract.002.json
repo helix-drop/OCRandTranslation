@@ -1,0 +1,249 @@
+{
+  "stage": "visual_toc.manual_input_extract",
+  "reason_for_request": "从目录页截图中抽取单页原子目录项",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
+  "request_content": {
+    "images": [
+      {
+        "label": "image-1",
+        "file_idx": 1,
+        "byte_size": 213817,
+        "sha256": "120fe20f1eeef0bc8fe1cf5eda9203a9fbaeb4fea89475d905a1de5d624e0a02",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/toc_visual_source.pdf",
+        "source": "pdf_page"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "source": "pdf",
+    "file_idx": 1
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"V. La raison insurgée\",\n    \"depth\": 0,\n    \"printed_page\": 295,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Jeanne d’Arc et les panophobes gémisseurs\",\n    \"depth\": 1,\n    \"printed_page\": 298,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Des chacals, des pies, des singes et du pétrole\",\n    \"depth\": 1,\n    \"printed_page\": 304,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Les bégaiements de l’Histoire\",\n    \"depth\": 1,\n    \"printed_page\": 321,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Postambule\",\n    \"depth\": 0,\n    \"printed_page\": 333,\n    \"visual_order\": 5,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"APPENDICES\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 6,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Liste des abréviations\",\n    \"depth\": 2,\n    \"printed_page\": 343,\n    \"visual_order\": 7,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Bibliographie\",\n    \"depth\": 2,\n    \"printed_page\": 344,\n    \"visual_order\": 8,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 2,\n    \"printed_page\": 363,\n    \"visual_order\": 9,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Remerciements\",\n    \"depth\": 2,\n    \"printed_page\": 375,\n    \"visual_order\": 10,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Liste des illustrations\",\n    \"depth\": 2,\n    \"printed_page\": 377,\n    \"visual_order\": 11,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "title": "V. La raison insurgée",
+      "depth": 0,
+      "printed_page": 295,
+      "visual_order": 1,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Jeanne d’Arc et les panophobes gémisseurs",
+      "depth": 1,
+      "printed_page": 298,
+      "visual_order": 2,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Des chacals, des pies, des singes et du pétrole",
+      "depth": 1,
+      "printed_page": 304,
+      "visual_order": 3,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Les bégaiements de l’Histoire",
+      "depth": 1,
+      "printed_page": 321,
+      "visual_order": 4,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Postambule",
+      "depth": 0,
+      "printed_page": 333,
+      "visual_order": 5,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "APPENDICES",
+      "depth": 1,
+      "printed_page": null,
+      "visual_order": 6,
+      "role_hint": "container",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Liste des abréviations",
+      "depth": 2,
+      "printed_page": 343,
+      "visual_order": 7,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Bibliographie",
+      "depth": 2,
+      "printed_page": 344,
+      "visual_order": 8,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Index",
+      "depth": 2,
+      "printed_page": 363,
+      "visual_order": 9,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Remerciements",
+      "depth": 2,
+      "printed_page": 375,
+      "visual_order": 10,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Liste des illustrations",
+      "depth": 2,
+      "printed_page": 377,
+      "visual_order": 11,
+      "role_hint": "back_matter",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    }
+  ],
+  "derived_truth": {
+    "items": [
+      {
+        "title": "V. La raison insurgée",
+        "depth": 0,
+        "printed_page": 295,
+        "visual_order": 1,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Jeanne d’Arc et les panophobes gémisseurs",
+        "depth": 1,
+        "printed_page": 298,
+        "visual_order": 2,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Des chacals, des pies, des singes et du pétrole",
+        "depth": 1,
+        "printed_page": 304,
+        "visual_order": 3,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Les bégaiements de l’Histoire",
+        "depth": 1,
+        "printed_page": 321,
+        "visual_order": 4,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Postambule",
+        "depth": 0,
+        "printed_page": 333,
+        "visual_order": 5,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "APPENDICES",
+        "depth": 1,
+        "printed_page": null,
+        "visual_order": 6,
+        "role_hint": "container",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Liste des abréviations",
+        "depth": 2,
+        "printed_page": 343,
+        "visual_order": 7,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Bibliographie",
+        "depth": 2,
+        "printed_page": 344,
+        "visual_order": 8,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Index",
+        "depth": 2,
+        "printed_page": 363,
+        "visual_order": 9,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Remerciements",
+        "depth": 2,
+        "printed_page": 375,
+        "visual_order": 10,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Liste des illustrations",
+        "depth": 2,
+        "printed_page": 377,
+        "visual_order": 11,
+        "role_hint": "back_matter",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      }
+    ]
+  },
+  "usage": {
+    "stage": "visual_toc.manual_input_extract",
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "request_count": 1,
+    "prompt_tokens": 1147,
+    "completion_tokens": 846,
+    "total_tokens": 1993,
+    "doc_id": "5df1d3d7f9c1",
+    "slug": "",
+    "context": {
+      "source": "pdf",
+      "file_idx": 1
+    }
+  },
+  "timing": {
+    "duration_ms": 16589
+  }
+}

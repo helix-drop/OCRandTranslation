@@ -1,0 +1,189 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-manual-1-7-shapes-of-practices-medi:toc-manual-1-7-shapes-of-practices-medi:footnote\",\n  \"chapter_title\": \"Shapes of practices Medical trends surrounding dian and kuang, 1650-1911\",\n  \"page_range\": [\n    344,\n    344\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 344,\n      \"ocr_excerpt\": \"## 8 ## Ghosts or mucus? Possession symptoms and their treatments in Ming and Qing medicine I also saw a bearded figure lifting my oilcloth screen, but he suddenly disappeared. I was startled and I started to feel befuddled inside: I wanted to seek death. 又見一鬍子將油簾揭起 倏忽不見 吃了一驚 心內恍 惚起來 自欲尋死 Licentiate Xu Ding 徐鼎, recounting a vision (1768) $ ^{1} $ How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $ ### 8.1 Spectral affliction in late-imperial medicine Qing men and women often caught sight of “ghosts” and felt the result of their malicious actions. To banish these demons, the relatives of afflicted people could hire rituals specialist, doctors who claimed they could oust specters with drugs, or physicians like Yu Zhen who denied the demonic etiology altogether, but claimed they knew methods to cure possession symptoms. Chapter 13 will explain in more detail the ways in which common people tried to cure their mad-acting relatives, including cases in which they sought the help of both exorcists and physicians.\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00981\",\n      \"marker\": \"2\",\n      \"page_no\": 344,\n      \"paragraph_index\": 7,\n      \"source_text\": \"Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $\"\n    },\n    {\n      \"anchor_id\": \"anchor-00982\",\n      \"marker\": \"2\",\n      \"page_no\": 344,\n      \"paragraph_index\": 10,\n      \"source_text\": \"How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-manual-1-7-shapes-of-practices-medi:toc-manual-1-7-shapes-of-practices-medi:footnote",
+      "chapter_title": "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        344,
+        344
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 78509,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00981",
+          "chapter_id": "toc-manual-1-7-shapes-of-practices-medi",
+          "page_no": 344,
+          "paragraph_index": 7,
+          "char_start": 51,
+          "char_end": 59,
+          "source_marker": "$ ^{2} $",
+          "normalized_marker": "2",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78510,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00982",
+          "chapter_id": "toc-manual-1-7-shapes-of-practices-medi",
+          "page_no": 344,
+          "paragraph_index": 10,
+          "char_start": 172,
+          "char_end": 180,
+          "source_marker": "$ ^{2} $",
+          "normalized_marker": "2",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 344,
+        "file_idx": 343,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "## 8 ## Ghosts or mucus? Possession symptoms and their treatments in Ming and Qing medicine I also saw a bearded figure lifting my oilcloth screen, but he suddenly disappeared. I was startled and I started to feel befuddled inside: I wanted to seek death. 又見一鬍子將油簾揭起 倏忽不見 吃了一驚 心內恍 惚起來 自欲尋死 Licentiate Xu Ding 徐鼎, recounting a vision (1768) $ ^{1} $ How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $ ### 8.1 Spectral affliction in late-imperial medicine Qing men and women often caught sight of “ghosts” and felt the result of their malicious actions. To banish these demons, the relatives of afflicted people could hire rituals specialist, doctors who claimed they could oust specters with drugs, or physicians like Yu Zhen who denied the demonic etiology altogether, but claimed they knew methods to cure possession symptoms. Chapter 13 will explain in more detail the ways in which common people tried to cure their mad-acting relatives, including cases in which they sought the help of both exorcists and physicians.",
+        "byte_size": 110206,
+        "sha256": "8f22543946954b7360f13e7ed285af0f718d74bff287f599503850879e2e0e83"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-manual-1-7-shapes-of-practices-medi:toc-manual-1-7-shapes-of-practices-medi:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 1,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00981\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate OCR artifact: The source text shows the marker '$ ^{2} $' is physically located after 'Yu Zhen... (1778)', which corresponds to anchor-00982. Anchor-00981 appears to be a fragmentation error where the OCR engine incorrectly associated the superscript with the preceding paragraph or line break. The visual evidence confirms only one footnote marker '2' on this page block.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00982\",\n    \"marker\": \"2\",\n    \"note_text\": \"Yu Zhen, Gujin yian an 古今醫案按，juan 6, “Xiesui”邪祟，note to the last case (1959 [1778]: 186).\",\n    \"confidence\": 0.98,\n    \"reason\": \"The footnote text for marker '2' is clearly visible at the bottom of the page in the screenshot but is missing from the structured data (unmatched_note_items is empty). Synthesizing the note item allows it to be matched to the valid anchor.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00981",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Duplicate OCR artifact: The source text shows the marker '$ ^{2} $' is physically located after 'Yu Zhen... (1778)', which corresponds to anchor-00982. Anchor-00981 appears to be a fragmentation error where the OCR engine incorrectly associated the superscript with the preceding paragraph or line break. The visual evidence confirms only one footnote marker '2' on this page block."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00982",
+      "anchor_phrase": "",
+      "marker": "2",
+      "note_text": "Yu Zhen, Gujin yian an 古今醫案按，juan 6, “Xiesui”邪祟，note to the last case (1959 [1778]: 186).",
+      "confidence": 0.98,
+      "reason": "The footnote text for marker '2' is clearly visible at the bottom of the page in the screenshot but is missing from the structured data (unmatched_note_items is empty). Synthesizing the note item allows it to be matched to the valid anchor."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-manual-1-7-shapes-of-practices-medi:toc-manual-1-7-shapes-of-practices-medi:footnote",
+    "chapter_title": "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+    "request_mode": "ref_only_visual",
+    "parsed_actions": [
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00981",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate OCR artifact: The source text shows the marker '$ ^{2} $' is physically located after 'Yu Zhen... (1778)', which corresponds to anchor-00982. Anchor-00981 appears to be a fragmentation error where the OCR engine incorrectly associated the superscript with the preceding paragraph or line break. The visual evidence confirms only one footnote marker '2' on this page block."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00982",
+        "anchor_phrase": "",
+        "marker": "2",
+        "note_text": "Yu Zhen, Gujin yian an 古今醫案按，juan 6, “Xiesui”邪祟，note to the last case (1959 [1778]: 186).",
+        "confidence": 0.98,
+        "reason": "The footnote text for marker '2' is clearly visible at the bottom of the page in the screenshot but is missing from the structured data (unmatched_note_items is empty). Synthesizing the note item allows it to be matched to the valid anchor."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00981",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate OCR artifact: The source text shows the marker '$ ^{2} $' is physically located after 'Yu Zhen... (1778)', which corresponds to anchor-00982. Anchor-00981 appears to be a fragmentation error where the OCR engine incorrectly associated the superscript with the preceding paragraph or line break. The visual evidence confirms only one footnote marker '2' on this page block."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00982",
+        "anchor_phrase": "",
+        "marker": "2",
+        "note_text": "Yu Zhen, Gujin yian an 古今醫案按，juan 6, “Xiesui”邪祟，note to the last case (1959 [1778]: 186).",
+        "confidence": 0.98,
+        "reason": "The footnote text for marker '2' is clearly visible at the bottom of the page in the screenshot but is missing from the structured data (unmatched_note_items is empty). Synthesizing the note item allows it to be matched to the valid anchor."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-01270",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00981",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate OCR artifact: The source text shows the marker '$ ^{2} $' is physically located after 'Yu Zhen... (1778)', which corresponds to anchor-00982. Anchor-00981 appears to be a fragmentation error where the OCR engine incorrectly associated the superscript with the preceding paragraph or line break. The visual evidence confirms only one footnote marker '2' on this page block."
+      },
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00982",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "2",
+        "note_text": "Yu Zhen, Gujin yian an 古今醫案按，juan 6, “Xiesui”邪祟，note to the last case (1959 [1778]: 186).",
+        "confidence": 0.98,
+        "reason": "The footnote text for marker '2' is clearly visible at the bottom of the page in the screenshot but is missing from the structured data (unmatched_note_items is empty). Synthesizing the note item allows it to be matched to the valid anchor."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1919,
+    "completion_tokens": 308,
+    "total_tokens": 2227,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 6611
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "doc_id": "0d285c0800db",
+  "status": "blocked",
+  "reason": "structure_review_required",
+  "blocking_reasons": [
+    "link_first_marker_not_one",
+    "export_audit_blocking"
+  ],
+  "generated_at": 1776826654
+}

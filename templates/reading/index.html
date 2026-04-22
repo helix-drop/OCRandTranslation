@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='reading/reading.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{% include "reading/partials/_top_controls.html" %}
+
+<div class="reading-main-layout {{ 'with-pdf' if pdf_visible else '' }}" id="readingLayout">
+  {% if has_pdf %}
+  <div class="pdf-panel" id="pdfPanel" style="{{ '' if pdf_visible else 'display:none;' }}">
+    <div class="pdf-panel-header">
+      <div class="pdf-panel-title">
+        <span style="font-weight:600;font-size:13px;">PDF 原文</span>
+        <span class="pdf-panel-subtitle">支持双击放大、Ctrl/Cmd + 滚轮连续缩放，并可切换紧凑 / 平衡 / 核对宽度。</span>
+      </div>
+      <div class="pdf-panel-controls">
+        <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfPrevPage()">◀</button>
+        <span id="pdfPageInfo" style="font-size:11px;color:var(--txL);">PDF 第{{ cur_page_bp }}页</span>
+        <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="pdfNextPage()">▶</button>
+        <button type="button" class="btn btn-gho" id="pdfPanelModeBtn" style="font-size:11px;padding:3px 8px;" onclick="cyclePdfPanelMode()">平衡</button>
+        <div class="pdf-zoom-controls">
+          <button type="button" class="btn btn-gho" id="pdfZoomOutBtn" style="font-size:11px;padding:3px 8px;" onclick="stepPdfZoom(-0.2)">－</button>
+          <span class="pdf-zoom-info" id="pdfZoomInfo">100%</span>
+          <button type="button" class="btn btn-gho" id="pdfZoomInBtn" style="font-size:11px;padding:3px 8px;" onclick="stepPdfZoom(0.2)">＋</button>
+          <button type="button" class="btn btn-gho" id="pdfZoomResetBtn" style="font-size:11px;padding:3px 8px;" onclick="resetPdfZoom()">适中</button>
+        </div>
+        <button class="btn btn-gho" style="font-size:11px;padding:3px 8px;" onclick="togglePdfPanel()" title="收起">✕</button>
+      </div>
+    </div>
+    <div class="pdf-img-container" id="pdfScrollContainer">
+      {% for bp in page_bps %}
+      <div class="pdf-page-item" data-pdf-bp="{{ bp }}" data-pdf-src="{{ url_for('pdf_page', file_idx=page_map.get(bp, 0), doc_id=current_doc_id) }}" data-pdf-alt="PDF p.{{ bp }}">
+        {% if bp in pdf_initial_mounted_bps %}
+        <img class="pdf-img" loading="lazy" alt="PDF p.{{ bp }}">
+        {% endif %}
+        <div class="pdf-highlights" data-pdf-highlight-bp="{{ bp }}"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="resizer" id="pdfResizer" style="{{ '' if pdf_visible else 'display:none;' }}"></div>
+  {% endif %}
+
+  <div class="content-panel" id="contentPanel">
+    <div class="container-wide">
+      <div class="page-shell">
+        {% include "reading/partials/_translation_session_card.html" %}
+
+        {% if fnm_run_status == 'error' %}
+        <div style="margin:-2px 0 12px;font-size:12px;color:var(--txL);line-height:1.7;">
+          FNM 注释分类不可用，当前文档继续使用标准视图即可。
+        </div>
+        {% endif %}
+
+        {% if current_view == 'fnm' and fnm_unresolved_here %}
+        <div class="fnm-validation-banner" style="margin:0 0 14px;padding:10px 12px;border:1px solid var(--bdrL);border-radius:8px;background:var(--bg2);font-size:12px;line-height:1.65;">
+          <div style="font-weight:600;margin-bottom:6px;">脚注/尾注校验：以下编号需人工核对</div>
+          <ul style="margin:0;padding-left:18px;">
+            {% for u in fnm_unresolved_here %}
+            <li>节 {{ u.section_id }} · {{ u.kind }} · 标记 {{ u.marker }} · {{ u.reason }}
+              {% if u.suggested_pages %}（建议查看页: {{ u.suggested_pages|join(', ') }}）{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if display_entries %}
+        <div class="reading-page-meta">
+          {% if cur_model_label %}
+          <span class="reading-page-chip">{{ cur_model_label }}</span>
+          {% endif %}
+          <span class="reading-page-chip">PDF 第{{ cur_page_bp }}页</span>
+          <span class="reading-page-chip">{{ 'FNM 视图' if current_view == 'fnm' else '标准视图' }}</span>
+          {% if cur_page_print_display %}
+          <span class="reading-page-chip">{{ cur_page_print_display }}</span>
+          {% endif %}
+          <span class="reading-page-chip">{{ display_entries|length }} 段</span>
+        </div>
+
+        {% include "reading/partials/_entry_list.html" %}
+        {% include "reading/partials/_page_action_bar.html" %}
+        {% include "reading/partials/_page_notes_panel.html" %}
+        {% else %}
+        {% set draft_bp = task_snapshot.draft.bp|default(0)|int %}
+        {% set draft_status = task_snapshot.draft.status|default('idle') %}
+        {% set resume_bp = task_snapshot.resume_bp|default(0)|int %}
+        {% set has_stopped_draft = draft_bp == cur_page_bp and draft_status == 'aborted' %}
+        {% set has_error_draft = draft_bp == cur_page_bp and draft_status == 'error' %}
+        {% set placeholder_title = 'PDF 第' ~ cur_page_bp ~ '页需要重试' if current_page_failed else ('PDF 第' ~ cur_page_bp ~ '页可以继续' if has_stopped_draft or has_error_draft or resume_bp == cur_page_bp else 'PDF 第' ~ cur_page_bp ~ '页可直接开始阅读') %}
+        {% set placeholder_action = '重试 PDF 第' ~ cur_page_bp ~ '页' if current_page_failed or has_error_draft else ('从 PDF 第' ~ cur_page_bp ~ '页继续' if has_stopped_draft or resume_bp == cur_page_bp else '从 PDF 第' ~ cur_page_bp ~ '页开始翻译') %}
+        <div class="page-placeholder">
+          <div class="page-placeholder-title">{{ placeholder_title }}</div>
+          <div class="page-placeholder-subtitle">
+            {% if current_page_failed and current_page_failure %}
+            你正在查看 PDF 第{{ cur_page_bp }}页。最近一次失败原因：{{ current_page_failure.error }}。处理完后可以直接重试这一页。
+            {% elif has_error_draft %}
+            你正在查看 PDF 第{{ cur_page_bp }}页。这一页保留了失败草稿，可以直接重试。
+            {% elif has_stopped_draft or resume_bp == cur_page_bp %}
+            你正在查看 PDF 第{{ cur_page_bp }}页。这一页有已停止的草稿，可以直接继续。
+            {% else %}
+            你正在查看 PDF 第{{ cur_page_bp }}页。下面先给你这一页的 OCR 原文预览；需要正式阅读稿时，再从这一页开始翻译。
+            {% endif %}
+          </div>
+          <div class="page-preview-meta">
+            <span class="page-preview-chip">
+              {% if current_page_failed %}
+              失败页
+              {% elif has_error_draft %}
+              失败草稿已保留
+              {% elif has_stopped_draft or resume_bp == cur_page_bp %}
+              可从当前页继续
+              {% else %}
+              OCR 原文已就绪
+              {% endif %}
+            </span>
+            {% if current_page_markdown %}
+            <span class="page-preview-chip">可先读原文再决定是否翻译</span>
+            {% endif %}
+            {% if current_page_footnotes %}
+            <span class="page-preview-chip">本页含脚注</span>
+            {% endif %}
+          </div>
+          <div class="flex gap-8 mt-12 flex-wrap page-placeholder-actions">
+            <button type="button" class="btn btn-pri" onclick="startTranslateAll({{ cur_page_bp }});">{{ placeholder_action }}</button>
+            {% if resume_bp and resume_bp != cur_page_bp %}
+            <button type="button" class="btn btn-gho" onclick="startTranslateAll({{ resume_bp }});">继续到 PDF 第{{ resume_bp }}页</button>
+            {% endif %}
+            {% if has_pdf %}
+            <button type="button" class="btn btn-gho" id="reparsePageBtn" onclick="startReparsePage({{ cur_page_bp }});">强制 OCR 重解析本页</button>
+            <button type="button" class="btn btn-gho" onclick="togglePdfPanel();">查看 PDF 原页</button>
+            {% endif %}
+          </div>
+          {% if has_pdf %}
+          <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
+            如果这一页版面识别明显不对，可直接强制 OCR 重解析本页，不走 PDF 文字层。完成后会自动重译本页。
+          </div>
+          {% endif %}
+          <div class="page-placeholder-hint">建议先看下面的 OCR 预览，确认这一页内容和脚注都正常，再决定要不要立刻发起整页翻译。</div>
+          {% if current_page_markdown %}
+          <div class="page-preview-card">
+            <div class="page-preview-label">OCR 原文预览</div>
+            <div class="page-preview-text preview-paragraphs" id="pagePreviewText" data-preview-role="ocr-original">
+              {% for part in current_page_markdown_paragraphs %}
+              <p class="page-preview-paragraph {{ 'is-lead' if loop.first else '' }}">{{ part }}</p>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          {% if current_page_footnotes %}
+          <div class="page-preview-card">
+            <div class="page-preview-label">本页脚注预览</div>
+            <div class="page-preview-text page-preview-footnotes">{{ current_page_footnotes }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="mt-28">
+          <div class="progress-dots">
+            {% for bp in page_bps %}
+            {% if current_view == 'fnm' %}
+            {% set dot_state = 'done' if bp in translated_bps else 'pending' %}
+            {% set dot_label = '已投影' if bp in translated_bps else '仅 source' %}
+            {% else %}
+            {% set dot_state = 'failed' if bp in failed_bps or bp in partial_failed_bps else ('done' if bp in translated_bps else 'pending') %}
+            {% set dot_label = '部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else ('已译' if bp in translated_bps else '待译')) %}
+            {% endif %}
+            <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}{% if current_view != 'standard' %}&view={{ current_view }}{% endif %}"
+               data-page-bp="{{ bp }}"
+               data-reading-bp="{{ bp }}"
+               onclick="return handleReadingNavClick(event, {{ bp }});"
+               class="progress-dot {{ 'current' if bp == cur_page_bp else dot_state }}"
+               title="PDF 第{{ bp }}页 · {{ dot_label }}"></a>
+            {% endfor %}
+          </div>
+          <div style="font-size:11px;color:var(--txL);margin-top:6px;">
+            <span id="readingProgressStats">{{ reading_view_summary_text }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "reading/partials/_page_editor_modal.html" %}
+{% include "reading/partials/_floating_controls.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.READING_BOOTSTRAP = {
+  currentView: {{ current_view|tojson }},
+  currentDocId: {{ current_doc_id|tojson }},
+  docTitle: {{ doc_title|tojson }},
+  csrfToken: {{ csrf_token|tojson }},
+  currentBp: {{ cur_page_bp|int }},
+  autoStart: {{ request.args.get("auto", "0")|tojson }},
+  startBp: {{ request.args.get("start_bp", "")|tojson }},
+  showOriginal: {{ show_original|tojson }},
+  pdfVisible: {{ pdf_visible|tojson }},
+  taskDetailsOpen: {{ usage_open|tojson }},
+  hasCurrentEntry: {{ has_current_entry|tojson }},
+  tocOffset: {{ toc_offset|default(0)|int }},
+  currentModelTarget: {{ ("custom" if custom_model_enabled else ("builtin:" ~ model_key))|tojson }},
+  currentPageFallbackBp: {{ cur_page_bp|int }},
+  showInitialTaskSnapshot: {{ show_initial_translate_snapshot|tojson }},
+  pageMap: {{ page_map|tojson }},
+  pageBps: {{ page_bps|tojson }},
+  translatedBps: {{ translated_bps|tojson }},
+  failedBps: {{ failed_bps|tojson }},
+  partialFailedBps: {{ partial_failed_bps|tojson }},
+  pageDimensions: {
+    {% for page in pages %}
+    "{{ page.bookPage }}": {imgW: {{ page.imgW|default(0, true)|tojson }}, imgH: {{ page.imgH|default(0, true)|tojson }}}{% if not loop.last %},{% endif %}
+    {% endfor %}
+  },
+  pdfVirtualWindowRadius: {{ pdf_virtual_window_radius|int }},
+  pdfVirtualScrollMinPages: {{ pdf_virtual_scroll_min_pages|int }},
+  initialMountedPdfBps: {{ pdf_initial_mounted_bps|tojson }},
+  taskSnapshot: {{ task_snapshot|tojson }},
+  readingViewState: {{ reading_view_state|tojson }},
+  routes: {
+    reading: {{ url_for('reading', _external=False)|tojson }},
+    translateStatus: {{ url_for('translate_status')|tojson }},
+    readingViewState: {{ url_for('api_reading_view_state')|tojson }},
+    startTranslateAll: {{ url_for('start_translate_all')|tojson }},
+    fnmTranslate: {{ url_for('api_doc_fnm_translate', doc_id=current_doc_id)|tojson }},
+    translateSse: {{ url_for('translate_all_sse')|tojson }},
+    stopTranslate: {{ url_for('stop_translate')|tojson }},
+    glossaryPreview: {{ url_for('api_glossary_retranslate_preview')|tojson }},
+    startGlossaryRetranslate: {{ url_for('start_glossary_retranslate')|tojson }},
+    checkRetranslateWarnings: {{ url_for('check_retranslate_warnings')|tojson }},
+    reparsePageBase: {{ url_for('reparse_page', page_bp=0)|tojson }},
+    processSse: {{ url_for('process_sse')|tojson }},
+    tocSetOffset: {{ url_for('api_toc_set_offset')|tojson }},
+    tocResolveVisualItem: {{ url_for('api_toc_resolve_visual_item')|tojson }},
+    tocChapters: {{ url_for('api_toc_chapters')|tojson }},
+    exportMd: {{ url_for('export_md')|tojson }},
+    downloadMd: {{ url_for('download_md')|tojson }},
+    pageEditor: {{ url_for('api_page_editor')|tojson }},
+    pageEditorHistory: {{ url_for('api_page_editor_history')|tojson }}
+  }
+};
+</script>
+<script src="{{ url_for('static', filename='reading/core.js') }}"></script>
+<script src="{{ url_for('static', filename='reading/navigation.js') }}"></script>
+<script src="{{ url_for('static', filename='reading/page_editor.js') }}"></script>
+<script src="{{ url_for('static', filename='reading/task_session.js') }}"></script>
+<script src="{{ url_for('static', filename='reading/index.js') }}"></script>
+{% endblock %}

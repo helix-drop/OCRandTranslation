@@ -1,0 +1,375 @@
+{
+  "stage": "visual_toc.manual_input_extract",
+  "reason_for_request": "从目录页截图中抽取单页原子目录项",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
+  "request_content": {
+    "images": [
+      {
+        "label": "image-1",
+        "file_idx": 0,
+        "byte_size": 158589,
+        "sha256": "6ef9681c97078de3fa597be4f5d85c0339ddec3b9c86e883b4955e96aa31fd7d",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/toc_visual_source.pdf",
+        "source": "pdf_page"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "source": "pdf",
+    "file_idx": 0
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Abstract\",\n    \"depth\": 0,\n    \"printed_page\": \"iii\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Contents\",\n    \"depth\": 0,\n    \"printed_page\": \"iv\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Contents (detailed)\",\n    \"depth\": 0,\n    \"printed_page\": \"vi\",\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Figures and tables\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conventions\",\n    \"depth\": 0,\n    \"printed_page\": \"xii\",\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": \"xv\",\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 8,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Prologue Diversity, coherence, and scheme transfers\",\n    \"depth\": 0,\n    \"printed_page\": 20,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca. 1150\",\n    \"depth\": 0,\n    \"printed_page\": 26,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360\",\n    \"depth\": 0,\n    \"printed_page\": 73,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Danxi said…” The textual life of medical ideas, 1360-1530\",\n    \"depth\": 0,\n    \"printed_page\": 136,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Replenish or attack? Competing etiologies and therapies of madness, 1530-1650\",\n    \"depth\": 0,\n    \"printed_page\": 202,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Shapes of practices Medical trends surrounding dian and kuang, 1650-1911\",\n    \"depth\": 0,\n    \"printed_page\": 263,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Ghosts or mucus? Possession symptoms and their treatment in Ming and Qing medicine\",\n    \"depth\": 0,\n    \"printed_page\": 326,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Gendered mania Women’s madness in late-imperial medicine\",\n    \"depth\": 0,\n    \"printed_page\": 367,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part Two LEGAL AND POPULAR PRACTICES (Qing)\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 17,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Prologue Language, objects, and practices\",\n    \"depth\": 0,\n    \"printed_page\": 408,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "title": "Abstract",
+      "depth": 0,
+      "printed_page": "iii",
+      "visual_order": 1,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Contents",
+      "depth": 0,
+      "printed_page": "iv",
+      "visual_order": 2,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Contents (detailed)",
+      "depth": 0,
+      "printed_page": "vi",
+      "visual_order": 3,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Figures and tables",
+      "depth": 0,
+      "printed_page": "xi",
+      "visual_order": 4,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Conventions",
+      "depth": 0,
+      "printed_page": "xii",
+      "visual_order": 5,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Acknowledgments",
+      "depth": 0,
+      "printed_page": "xv",
+      "visual_order": 6,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+      "depth": 0,
+      "printed_page": 1,
+      "visual_order": 7,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
+      "depth": 1,
+      "printed_page": null,
+      "visual_order": 8,
+      "role_hint": "container",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Prologue Diversity, coherence, and scheme transfers",
+      "depth": 0,
+      "printed_page": 20,
+      "visual_order": 9,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca. 1150",
+      "depth": 0,
+      "printed_page": 26,
+      "visual_order": 10,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360",
+      "depth": 0,
+      "printed_page": 73,
+      "visual_order": 11,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "“Danxi said…” The textual life of medical ideas, 1360-1530",
+      "depth": 0,
+      "printed_page": 136,
+      "visual_order": 12,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Replenish or attack? Competing etiologies and therapies of madness, 1530-1650",
+      "depth": 0,
+      "printed_page": 202,
+      "visual_order": 13,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+      "depth": 0,
+      "printed_page": 263,
+      "visual_order": 14,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Ghosts or mucus? Possession symptoms and their treatment in Ming and Qing medicine",
+      "depth": 0,
+      "printed_page": 326,
+      "visual_order": 15,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Gendered mania Women’s madness in late-imperial medicine",
+      "depth": 0,
+      "printed_page": 367,
+      "visual_order": 16,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Part Two LEGAL AND POPULAR PRACTICES (Qing)",
+      "depth": 1,
+      "printed_page": null,
+      "visual_order": 17,
+      "role_hint": "container",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
+      "title": "Prologue Language, objects, and practices",
+      "depth": 0,
+      "printed_page": 408,
+      "visual_order": 18,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    }
+  ],
+  "derived_truth": {
+    "items": [
+      {
+        "title": "Abstract",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 1,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Contents",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 2,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Contents (detailed)",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 3,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Figures and tables",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 4,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Conventions",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 5,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Acknowledgments",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 6,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+        "depth": 0,
+        "printed_page": 1,
+        "visual_order": 7,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
+        "depth": 1,
+        "printed_page": null,
+        "visual_order": 8,
+        "role_hint": "container",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Prologue Diversity, coherence, and scheme transfers",
+        "depth": 0,
+        "printed_page": 20,
+        "visual_order": 9,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca. 1150",
+        "depth": 0,
+        "printed_page": 26,
+        "visual_order": 10,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360",
+        "depth": 0,
+        "printed_page": 73,
+        "visual_order": 11,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "“Danxi said…” The textual life of medical ideas, 1360-1530",
+        "depth": 0,
+        "printed_page": 136,
+        "visual_order": 12,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Replenish or attack? Competing etiologies and therapies of madness, 1530-1650",
+        "depth": 0,
+        "printed_page": 202,
+        "visual_order": 13,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+        "depth": 0,
+        "printed_page": 263,
+        "visual_order": 14,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Ghosts or mucus? Possession symptoms and their treatment in Ming and Qing medicine",
+        "depth": 0,
+        "printed_page": 326,
+        "visual_order": 15,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Gendered mania Women’s madness in late-imperial medicine",
+        "depth": 0,
+        "printed_page": 367,
+        "visual_order": 16,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Part Two LEGAL AND POPULAR PRACTICES (Qing)",
+        "depth": 1,
+        "printed_page": null,
+        "visual_order": 17,
+        "role_hint": "container",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
+        "title": "Prologue Language, objects, and practices",
+        "depth": 0,
+        "printed_page": 408,
+        "visual_order": 18,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      }
+    ]
+  },
+  "usage": {
+    "stage": "visual_toc.manual_input_extract",
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "request_count": 1,
+    "prompt_tokens": 2277,
+    "completion_tokens": 1465,
+    "total_tokens": 3742,
+    "doc_id": "bd05138cd773",
+    "slug": "",
+    "context": {
+      "source": "pdf",
+      "file_idx": 0
+    }
+  },
+  "timing": {
+    "duration_ms": 27806
+  }
+}

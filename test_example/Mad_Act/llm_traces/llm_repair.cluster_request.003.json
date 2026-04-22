@@ -1,0 +1,679 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-013-shapesofpractices:toc-ch-013-shapesofpractices:endnote\",\n  \"chapter_title\": \"Shapes of practices\",\n  \"page_range\": [\n    286,\n    331\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 225,\n      \"ocr_excerpt\": \"Most elite physicians from the twelfth century onward, while recognizing that there was “constancy” (chang 常) to illnesses, emphasized that the best healers should also react to “transformations” (bian 變), the events that diverged from the regular ways in which reality was supposed to unfold. “Constancy” itself referred not to unchanging essences but to the regular and predictable way in which processes developed. The emergence of case files as a distinct genre partly stemmed from this flexible conception of illness. Yet even the best English-language histories of Chinese case records usually leap straight from Xu Shuwei to Wang Ji's Stone-Mountain's Medical Case Files (Shishan yian 石山醫案 [1531]; see 6.2) without discussing the dominance of this conception of illness and style of prescription among Jin and Yuan physicians. $ ^{3} $ This omission introduces inaccuracies in accounts of the development of “medical case files” and obscures the process by which they emerged as an independent genre in the sixteenth century. First, despite many claims to the contrary, Wang Ji's work was not the first autonomous work to contain the cases of a single physician. $ ^{4} $ Zhang Congzheng's Ten ...\"\n    },\n    {\n      \"page_no\": 286,\n      \"ocr_excerpt\": \"with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that another doctor’s attacking of mucus and Fire in a case of insanity had “helped the bandits do harm” (助賊為虐). $ ^{11} $ Medical writing also remained profoundly intertextual. Several treatises from the seventeenth and eighteenth centuries included long and increasingly complex sections on madness. They were longer and denser partly because they could borrow from a larger number of texts, but also because they applied to more disorders than ever the old claim that any illness could be caused by multiple factors. Two representative examples are Feng Zhaozhang's 馮兆張 (from Haiyan 海鹽 in Zhejiang) Jinnang milu zazheng daxiao becan 錦囊祕錄雜證大小合參 (in 20 juan; 1694) and Shen Jin'ao's 沈金鰲 (1717-1776; from Wuxi 無錫 in Jiangsu) Zabing yuanliu xizhu 雜病源流犀燭 (in 30 juan; 1773), both of which concentrated on explaining miscellaneous illnesses. Besides these exhaustive accounts of manifold etiologies, we find attempts to simplify—even unify—medical doctrines, books with ti ...\"\n    },\n    {\n      \"page_no\": 287,\n      \"ocr_excerpt\": \"### 7.2 The continued dominance of the mucus etiology In earlier chapters, I examined the rise of mucus in Chinese medical thinking and its eventual use in explanations of madness. I also showed how the Danxi corpus had given pride of place to the mucus etiology in general. On the basis of these now mature theories, seventeenth-century physicians continued to discuss how mucus emerged, what disorders it caused, and how these illnesses should be treated. Some did so in special sections on this viscous intruder, others in commentaries on the notion of “mucus and rheum” (痰飲; 3.5) in Zhang Ji’s Essentials of the Golden Casket (3 $ ^{rd} $ century CE). Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire ...\"\n    },\n    {\n      \"page_no\": 288,\n      \"ocr_excerpt\": \"During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $ This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $\"\n    },\n    {\n      \"page_no\": 289,\n      \"ocr_excerpt\": \"### 7.3 Shapes of practice: the scope of mucus therapies of madness The above section showed that mucus played an important role in Qing medical discussions of many illnesses. Starting with an examination of seventeenth-century medical primers that were popular under the Qing, let me now demonstrate from many different angles that mucus conceptions also dominated the way doctors thought about insanity. Since the practice of medicine was not regulated, virtually anyone could take it up. All that was needed was a medical primer and a few patients willing to pay for a cure. Physicians who sought a more elite clientele usually needed to claim a teacher and to be able to couch their arguments in classical terms drawn from the medical canons or the Yijing, but the success of medical primers suggests that medicine was easily learned outside of teacher-student relations. The large number of surviving editions of books like Huangfu Zhong's 皇甫中 Enlightened Physician Pointing to His Palm (Mingyi zhizhang 明醫指掌) or Gong Tingxian's Shoushi baoyuan 壽世保元, and the fact that other books lamented their excessive influence, suggest that they guided the practice of more physicians than the treatises mo ...\"\n    },\n    {\n      \"page_no\": 290,\n      \"ocr_excerpt\": \"# is limitless and the impoverished roam the markets; $ ^{22} $ [moreover] the meanings and principles [expressed in these books] are profound and subtle, so that the ignorant have failed to examine them. 薄海内外 雅不乏人 而千里之間 博綜淹貫者 僅得一二 何能濟八方之老幼 即曰醫籍在也 卷帙浩淼 貧者弗遑市 意理淵微 愚者未及察 Xu Shirou 許士柔, 1622 preface to Shao Da's 邵達 re-edition of Huangfu Zhong's 皇甫中 Mingyi zhizhang 明醫指掌 $ ^{23} $ As its title indicates, the Enlightened Physician Pointing to His Palm (Mingyi zhi-bang 明醫指掌, 1579), which was re-edited and augmented in 1622, purported to be a digest of authentic medical doctrines and techniques. $ ^{24} $ Compiled in a format that put the way of medicine “in front of one’s eyes” (所謂道在目前; Xu preface), this manual sought to remedy the two problems Xu lamented in his preface: the dispersion of knowledge over too many books, and the difficulty of mastering these convoluted doctrines. In the Enlightened Physician, short and memorable “songs” (ge 歌) on individual illnesses were followed by discussions (lun 論), information on the pulses (mai 脈) most characteristic of these illnesses, and the recipes for recommended formulas. We owe the book's design to a man named Shao Da 邵達, a Suzhou physician w ...\"\n    },\n    {\n      \"page_no\": 291,\n      \"ocr_excerpt\": \"to study Huangfu Zhong's original Enlightened Physician (1579) in order to understand Zhang Ji's Cold-Injury medicine, Li Gao's notion of inner harm, Liu Wansu's Heat disorders, and Zhu Zhenheng's miscellaneous illnesses. $ ^{26} $ As Shao recalled, he learned as much as he could from Huangfu's work, but deplored that it relied on illustrations (圖) at the expense of discussions (論), described the symptoms clearly but said little about pulses, and gave detailed recipes but neglected to explain the therapeutic methods that justified this choice of remedies. $ ^{27} $ Shao also found inconvenient that the recipes appeared in a volume separate from the descriptions and illustrations. $ ^{28} $ In his 1622 edition, Shao eliminated the pictures, regrouped the descriptions of illnesses with the recommended recipes, and added distinctions between the many possible origins of every illness he discussed. Shao Da's version of the Enlightened Physician (in 10 juan) was republished many times throughout the Qing, testifying to its popularity among practitioners, as well as among amateurs who sought a digest of medical knowledge for use at home. A catalog of medical books extant in Chinese libra ...\"\n    },\n    {\n      \"page_no\": 292,\n      \"ocr_excerpt\": \"Blithely calling oneself venerable: this is called kuang. 妄自稱尊號曰狂 Dian is a stiff body and an unhappy mind. 癲者身僵心不樂 You should know these two illnesses are Yin and Yang. 须知二證有陰陽 These verses squeezed together the symptoms of dian and kuang as explained in the Basic Questions and the Canon of Problems (problem 59). More focused on current usage, the discussion that followed cited the same passages at more length before quoting an excerpt from the \\\"diankuang\\\" section of the Danxi xinfa and the Canon of Problems' claim that dian was the doubling of Yin and kuang the doubling of Yang. $ ^{30} $ Two sections on the respective symptoms of dian and kuang cited more of the Danxi xinfa, but added two recipes to those that this book had recommended. $ ^{31} $ To this unsystematic rehashing of Danxi medicine, Shao Da added “notes” (an 按) where he attributed madness to the pathological action of Fire and mucus. These two illnesses [dian and kuang] necessarily arise from something. It can be great anger stirring Hepatic Wind or great fright stirring Cardiac Fire, making Fire rise suddenly. When [Fire] arises but fails to descend, it obstructs the openings of the Heart and makes Spiritual-clarit ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00759\",\n      \"marker\": \"11\",\n      \"page_no\": 286,\n      \"paragraph_index\": 0,\n      \"source_text\": \"with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that anot ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00760\",\n      \"marker\": \"12\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00761\",\n      \"marker\": \"13\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00762\",\n      \"marker\": \"14\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00763\",\n      \"marker\": \"15\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00765\",\n      \"marker\": \"17\",\n      \"page_no\": 288,\n      \"paragraph_index\": 0,\n      \"source_text\": \"During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00767\",\n      \"marker\": \"19\",\n      \"page_no\": 288,\n      \"paragraph_index\": 1,\n      \"source_text\": \"This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-17 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00768\",\n      \"marker\": \"20\",\n      \"page_no\": 288,\n      \"paragraph_index\": 1,\n      \"source_text\": \"This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-17 ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00095\",\n      \"note_item_id\": \"fn-00191\",\n      \"current_anchor_id\": \"anchor-00985\",\n      \"marker\": \"5\",\n      \"note_page_no\": 288,\n      \"anchor_page_no\": 345,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"14b-15a, “Diankuang genyuan” 顛狂根源 (SKCM 54: 185-86; Huang YQ: 824).\",\n      \"anchor_excerpt\": \"The concept of sui 崇 is almost as old as the Chinese writing system itself. Donald Harper has glossed sui (in ancient usage) as a calamity brought about by spirits in response to human conduct of which they disapproved. $ ^{5} $ Because of ...\"\n    },\n    {\n      \"link_id\": \"link-00096\",\n      \"note_item_id\": \"fn-00192\",\n      \"current_anchor_id\": \"anchor-00986\",\n      \"marker\": \"6\",\n      \"note_page_no\": 288,\n      \"anchor_page_no\": 346,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"#/>;+\\u00019./@'/\\u0001?/ ·òăÂƣ \\u0004 \\u0012\\u000e\\u000e\\u00011 \\u0012 \\u00122\\u0005\\u0006 0;'4 \\u0006\\u0001AB7@;@9\\u0001>;@7\\u0001A8\\u0001E75F;A@\\u0001A@ V#G5GE\\u00013@6\\u0001D:7G?W ɡύ 38F7D3 V&A7?\\u0001A@\\u000153D6;35\\u0006\\u0001346A?;@3>\\u0006\\u00013@6\\u0001AF:7D\\u0001B3;@EW \\u0004ņˠ̾ɟ̲ \\u0005\\u0015\\u0001\\u0019:7@./'\\u0014\\u0001\\u000f\\u0011 \\b \\u0019:7@\\u00017JB>3;@76\\u00017>E7I:7D7\\u0001F:3F 8D;9:F\\u0006\\u0001-;@6\\u0006\\u0001\\u0019A>6\\u0006\\u00013@6\\u00017H7@\\u00018AA6\\u0001355G?G> ...\",\n      \"anchor_excerpt\": \"Whereas ritual texts that proposed methods to remove these beings gave little detail about how they affected the body, medical sources often described ghosts as entering the body of their victims and occupying specific organs. As such, late ...\"\n    },\n    {\n      \"link_id\": \"link-00097\",\n      \"note_item_id\": \"fn-00196\",\n      \"current_anchor_id\": \"anchor-00578\",\n      \"marker\": \"6\",\n      \"note_page_no\": 291,\n      \"anchor_page_no\": 225,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"EF;@5F;A@E\\u000147FI77@\\u0001F:7\\u0001?3@K\\u0001BAEE;4>7\\u0001AD;9;@E A8\\u00017H7DK ;>>@7EE :7 6;E5GEE76\\b \\u0010 -3@9\\u0001\\\"G@ Ƀʸ :36\\u0001E;@9>76\\u0001F:7E78AGD\\u00013EB75FE\\u0001A8\\u0001?76;5;@7\\u0001;@\\u0001 \\u000f \\u0001;@\\u0001:;E\\u0001;@8>G7@F;3>\\u0017/9)+22'4+5;9\\u0001!8/:/4-9\\u00015, \\u000f42/-.:+4+*\\u0001\\u001a.?9/)/'49 \\u0004 \\u0017/4-?/\\u0001@'@.; ·ά \\u0015E77\\u000f\\b\\u0010\\u0005\\b \\u0011 ): ...\",\n      \"anchor_excerpt\": \"First, despite many claims to the contrary, Wang Ji's work was not the first autonomous work to contain the cases of a single physician. $ ^{4} $ Zhang Congzheng's Ten Configurations and Three Therapies (Shixing sanliao 十形三療), an anthology ...\"\n    },\n    {\n      \"link_id\": \"link-00101\",\n      \"note_item_id\": \"fn-00204\",\n      \"current_anchor_id\": \"anchor-00766\",\n      \"marker\": \"18\",\n      \"note_page_no\": 303,\n      \"anchor_page_no\": 288,\n      \"current_anchor_marker\": \"18\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Jan. 1817 (JQ21.12.2). \\u0010\\u0012 *:7\\u0001>3@9G397\\u0001A8\\u0001F:7\\u0001>793>\\u0001D7BADF?3K @AF :3H7 5ADD7EBA@676I;F: F:7\\u0001B:KE;5;3@UE\\u00017J35F\\u0001IAD6E\\b \\u00013D9G7\\u0001;@\\u0001 \\b F:3F(/4- @.+4- ɜɝ ;@\\u0001>793>\\u000167BAE;F;A@E\\u0001I3E\\u0001BDA434>K\\u00014GD73G5D3F;5\\u0001<3D9A@\\u000136676\\u00014K\\u0001F:7\\u0001A88;5;3>E\\u0001I:A\\u0001IDAF7 D7BAD ...\",\n      \"anchor_excerpt\": \"This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-17 ...\"\n    },\n    {\n      \"link_id\": \"link-00106\",\n      \"note_item_id\": \"fn-00213\",\n      \"current_anchor_id\": \"anchor-01205\",\n      \"marker\": \"7\",\n      \"note_page_no\": 315,\n      \"anchor_page_no\": 428,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"3E\\u0001D7H7DE7\\u00018>AI\\u0001\\u00043E\\u0001;@ F:7\\u0001D7H7DE7\\u00018>AI\\u0001A8\\u0001\\\";H7D\\u0001 ;D7 ;@FA\\u0001F:7\\u00015:7EF\\u0005 I;F: ;FE\\u0001>793>\\u00013@6\\u0001BA>;F;53>\\u0001?73@;@9\\u00013E\\u0001VE76;F;A@W\\u0001AD\\u0001D7HA>F\\b\\u0001 AD\\u0001?AD7\\u0001A@\\u0001F:7\\u0001>793>\\u0001?73@;@9\\u0001A84/ \\u0006 E77\\u0001 \\u000f\\b\\u000e\\b *:7\\u0001E75F;A@\\u0001A@*/'41;'4- A8 \\\";@\\u0001&7;C;@UEI3E\\u00018G>>\\u0001A8\\u0001D787D7@57E ...\",\n      \"anchor_excerpt\": \"the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the\"\n    },\n    {\n      \"link_id\": \"link-00117\",\n      \"note_item_id\": \"fn-00236\",\n      \"current_anchor_id\": \"anchor-00929\",\n      \"marker\": \"3\",\n      \"note_page_no\": 336,\n      \"anchor_page_no\": 331,\n      \"current_anchor_marker\": \"171\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6;E5GEE;A@\\u0001A8:AI\\u0001BD35F;F;A@7DE\\u0001BDA?AF76\\u0001F:7?E7>H7E\\u00013E\\u0001788;5;7@F\\u0001:73>7DE;@\\u000197@7D3>\\b):7 ƺć˅Ûɍˢ\\u0001ƓˊÛÕ \\u0006ʎʚ ɽ BGDEG76\\u0001F:;E\\u0001BDA4>7?\\u00018GDF:7D\\u0001;@\\u00013\\u0001>3F7D\\u00013DF;5>7\\u0001\\u0004 \\u0014\\u0001\\u000e\\u0012\\u0007\\u000f \\u0005\\u0006\\u00014GF\\u0001EF;>>\\u00016;6\\u0001@AF\\u00013@3>KL7\\u0001EB75;8;5\\u000153E7E\\b \\u0013 )77\\u0001!>7;@?3@\\u0001 \\u0013\\u0012\\u0012\\u0006\\u00015:3BF7D\\u0001F;F>7 ...\",\n      \"anchor_excerpt\": \"I examined his pulse: the Six Sections were strung, extended, and sturdy. I said: “This is a manifestation of over-repletion, not depletion.” $ ^{171} $ Therefore I used extremely bitter medicine $ ^{172} $ to drain Fire from the two tracts ...\"\n    },\n    {\n      \"link_id\": \"link-00118\",\n      \"note_item_id\": \"fn-00238\",\n      \"current_anchor_id\": \"anchor-00930\",\n      \"marker\": \"1\",\n      \"note_page_no\": 339,\n      \"anchor_page_no\": 331,\n      \"current_anchor_marker\": \"172\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u0013\\u0010 2\\u0014\\u0001 \\u0013\\u0005\\u0001FD3@E>3F76@.;?5; 3E\\u0001V3BAFDAB3;5E\\bW \\u000f *:;E\\u0001I3D@;@9\\u0001:36\\u00013BB73D76\\u0001;@ F:7\\u00014;A9D3B:K\\u0001A8 \\u0018;3@\\u0001'G7ŰϢ ;@\\u0001F:7 ./0/ 0 \\u0004 \\u000f\\u0014\\u0001 \\u0011\\u0013\\u000e\\u0005\\b \\u0010 0:3@9\\u0001 ;74;@Ĵ$͑ \\u0004 \\u000f\\u0010 \\u0007 \\u0010\\u000e \\u0015\\u0001\\u0010\\b\\u0012\\u0005 :36\\u00013>EA\\u0001FD;76FA 9;H7F:7\\u0001F7D?@.;?5; 3\\u0001E75G>3D\\u0001?73@;@9\\u0014\\u0001V @\\u000153E7E EG5:\\u00013E\\u0001F: ...\",\n      \"anchor_excerpt\": \"I examined his pulse: the Six Sections were strung, extended, and sturdy. I said: “This is a manifestation of over-repletion, not depletion.” $ ^{171} $ Therefore I used extremely bitter medicine $ ^{172} $ to drain Fire from the two tracts ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-013-shapesofpractices:toc-ch-013-shapesofpractices:endnote",
+      "chapter_title": "Shapes of practices",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        286,
+        331
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 78262,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00759",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 286,
+          "paragraph_index": 0,
+          "char_start": 344,
+          "char_end": 353,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that another doctor’s attacking of mucus and Fire in a case of insanity had “helped the bandits do harm” (助賊為虐). $ ^{11} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78263,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00760",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 181,
+          "char_end": 190,
+          "source_marker": "$ ^{12} $",
+          "normalized_marker": "12",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78264,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00761",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 277,
+          "char_end": 286,
+          "source_marker": "$ ^{13} $",
+          "normalized_marker": "13",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78265,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00762",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 554,
+          "char_end": 563,
+          "source_marker": "$ ^{14} $",
+          "normalized_marker": "14",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78266,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00763",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 759,
+          "char_end": 768,
+          "source_marker": "$ ^{15} $",
+          "normalized_marker": "15",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78268,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00765",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 288,
+          "paragraph_index": 0,
+          "char_start": 406,
+          "char_end": 415,
+          "source_marker": "$ ^{17} $",
+          "normalized_marker": "17",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78270,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00767",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 288,
+          "paragraph_index": 1,
+          "char_start": 329,
+          "char_end": 338,
+          "source_marker": "$ ^{19} $",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78271,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00768",
+          "chapter_id": "toc-ch-013-shapesofpractices",
+          "page_no": 288,
+          "paragraph_index": 1,
+          "char_start": 678,
+          "char_end": 687,
+          "source_marker": "$ ^{20} $",
+          "normalized_marker": "20",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00095",
+          "note_item_id": "fn-00191",
+          "current_anchor_id": "anchor-00985",
+          "marker": "5",
+          "note_page_no": 288,
+          "anchor_page_no": 345,
+          "current_anchor_marker": "5",
+          "note_excerpt": "14b-15a, “Diankuang genyuan” 顛狂根源 (SKCM 54: 185-86; Huang YQ: 824).",
+          "anchor_excerpt": "The concept of sui 崇 is almost as old as the Chinese writing system itself. Donald Harper has glossed sui (in ancient usage) as a calamity brought about by spirits in response to human conduct of which they disapproved. $ ^{5} $ Because of the several layers of meaning it acquired through time, sui is difficult to translate, but for late imperial times I shall gloss it as “specter” or “spectral affliction,” or as “affliction” when it occurs in compounds like xiesui 邪祟 (“affliction by evil”) and guisui 鬼祟 (“demonic affliction”).",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00096",
+          "note_item_id": "fn-00192",
+          "current_anchor_id": "anchor-00986",
+          "marker": "6",
+          "note_page_no": 288,
+          "anchor_page_no": 346,
+          "current_anchor_marker": "6",
+          "note_excerpt": "#/>;+\u00019./@'/\u0001?/ ·òăÂƣ \u0004 \u0012\u000e\u000e\u00011 \u0012 \u00122\u0005\u0006 0;'4 \u0006\u0001AB7@;@9\u0001>;@7\u0001A8\u0001E75F;A@\u0001A@ V#G5GE\u00013@6\u0001D:7G?W ɡύ 38F7D3 V&A7?\u0001A@\u000153D6;35\u0006\u0001346A?;@3>\u0006\u00013@6\u0001AF:7D\u0001B3;@EW \u0004ņˠ̾ɟ̲ \u0005\u0015\u0001\u0019:7@./'\u0014\u0001\u000f\u0011 \b \u0019:7@\u00017JB>3;@76\u00017>E7I:7D7\u0001F:3F 8D;9:F\u0006\u0001-;@6\u0006\u0001\u0019A>6\u0006\u00013@6\u00017H7@\u00018AA6\u0001355G?G>3F;A@E\u00015AG>6\u00013>>\u000197@7D3F7\u0001?G5GE\u00013@6\u00019;H7\u0001D;E7FA\u0001V?G5GE\u0007 ;D7 EK@6DA?7W\u0001\u0004ɡȥ\u000eɝ \u0005\u00013\u0001B76;3FD;5\u0001;>>@7EE\u000147FF7D\u0001=@AI@\u00013E\u0001V35GF7\u00018D;9:F\u0007-;@6W\u0001\u0004ŏϖω \u0005\u0001\u0004#/?/\u00015;2; ··HΑ \u0004 \u0012\u0011\u000e\u00011 \u0012 2\u0005\u0015\u0001;@\u00010/ \u0007\u000e\u0014 \u0012\u0011 \u0018\u0005\b\u0001\u0017@AF:7D\u0001BDA57EEF:3F\u00015AG>6\u0001FKB;53>>K >736\u0001FA\u0001F:7\u0001BDA6G5F;A@\u0001A8\u0001?G5GE\u0014\u0001VF:7 73DF\u0006\u0001)B>77@\u0006\u00013@6\u0001\";H7D\u00013D7\u0001;@\u0001EF3E;E 3@6\u0001@AF\u00018>AI;@9\u0014\u0001';\u0001FGD@E\u0001;@FA ;D7\u0006\u0001F:7\u00018>G;6E\u00013D7\u0001FD3@E8AD?76\u0001;@FA\u0001?G5GE\u0006 ?G5GE\u00013@6 ;D7\u0001D;E7\u0006\u00013@6\u0001F:7\u0001?;@6\u0001;E\u0001A553E;A@3>>K\u0001G@5>73DW\u0001\u0004ņ˜ːϚ\u0007͵ ǲ|Ȧȥ ȉ͇Ȧɡ ɡȥ\u0005  ʉŉƹƨ\u0007ȑ \u0005\u0001\u000453E7\u00018DA?#3\u0001-7@L:; UE ϑƒǕ 1 \u0012 \u0007 \u0013 2 \u0017'\u0001\u001a+/@./\u0001?/'4 ϑÈ\u000e·ǌ 1>3F7 \u0013 F: AD 73D>K F: 57@FGDK2\u0006\u00015;F76\u0001;@ .#/\"\u0017\u0014 \u000f\u0011\u0011\u0018\u0015\u00018AD\u0001?AD7\u0001A@\u0001#3\u0006\u0001E77\u0001)5:7;6\u0001 \u0011\u0014\u0001\u0013\u000e\u0007\u0013\u0013\u0005\b",
+          "anchor_excerpt": "Whereas ritual texts that proposed methods to remove these beings gave little detail about how they affected the body, medical sources often described ghosts as entering the body of their victims and occupying specific organs. As such, late-imperial sui (“spectral afflictions”) thus differed from the sui (“calamities”) of the Shang era, which did not depend on control over the body of the victim. $ ^{6} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00097",
+          "note_item_id": "fn-00196",
+          "current_anchor_id": "anchor-00578",
+          "marker": "6",
+          "note_page_no": 291,
+          "anchor_page_no": 225,
+          "current_anchor_marker": "6",
+          "note_excerpt": "EF;@5F;A@E\u000147FI77@\u0001F:7\u0001?3@K\u0001BAEE;4>7\u0001AD;9;@E A8\u00017H7DK ;>>@7EE :7 6;E5GEE76\b \u0010 -3@9\u0001\"G@ Ƀʸ :36\u0001E;@9>76\u0001F:7E78AGD\u00013EB75FE\u0001A8\u0001?76;5;@7\u0001;@\u0001 \u000f \u0001;@\u0001:;E\u0001;@8>G7@F;3>\u0017/9)+22'4+5;9\u0001!8/:/4-9\u00015, \u000f42/-.:+4+*\u0001\u001a.?9/)/'49 \u0004 \u0017/4-?/\u0001@'@.; ·ά \u0015E77\u000f\b\u0010\u0005\b \u0011 ):3A\u0001\u001a3\u0006\u0001V)7>8\u0007355AG@FW˨̪ \u0004#'.\u0019\u000176\b\u0014\u0001\u000f\u0005\u0014 ůŃŨˉ ŹƘÀˊĐƘ̽ ψƘ͂ˊƫƘ˙ ̵ƘƗ ):3A\u0001\u001a3UE\u0001H7DE;A@\u0001A8\u0001F:7\u000f42/-.:+4+*\u0001\u001a.?9/)/'4 \u0004;@\u0001 0;'4 \u0005 I3E\u0001D7BG4>;E:76\u0001?3@K\u0001F;?7E ˊɔƘǾ ˆǟčƹʫ» \b \u0012 ):3A\u00017JB>3;@76\u0001F:7\u00018AD?3F\u0001A8\u0001F:7\u0001AD;9;@3>\u00013@6\u0001:;E\u00016;EE3F;E835F;A@\u0001I;F:\u0001;F\u0001;@\u0001F:7\u0001V\u001b6;FAD;3>\u00019G;67>;@7EW\u0001\u0004b8 \u0005 F:DAG9:AGF F:7\u0001';@9\u0006\u0001F7EF;8K;@9\u0001FA\u0001;FE\u0001BABG>3D;FK\u00013?A@9\u0001BD35F;F;A@7DE\u0006\u00013E\u0001I7>>\u00013E\u00013?A@9 3@6\u0001;@\u0001F:7\u0001V)7>8\u0007355AG@FW˨̪ F:3F\u00013BB73D76\u00013F\u0001F:7\u0001479;@@;@9\u0001A8\u0001:;E\u0001 \u0010 \u0001D7\u000776;F;A@\u0001\u0004E77\u0001#.'\u0019\u000176\b\u0014\u0001 \u00013@6\u0001\u000f\u0005\b \u0013 )77\u0001.G7\u0001';@9>G\u0001 \u0013\u0013 \u0014\u00017@FDK\u0001 \u000e\u0013 \u0010\u0006\u0001I:;5:\u00019;H7E\u0001;@8AD?3F;A@\u0001A@ 76;F;A@E\u00018DA?\u0001 \u0010\u000f\u0011\u0006\u0001 \u0010\u0013\u0013\u0006\u0001 \u0011\u000f\u000f\u0006\u0001 \u0011\u0011\u0013\u0006\u0001 \u0011\u0013\u000e\u0006 3?3F7GDE\u0001I:A\u0001EAG9:F\u00013\u00016;97EF\u0001A8\u0001?76;53>\u0001=@AI>7697 8AD\u0001GE7\u00013F\u0001:A?7\b \u0017 53F3>A9\u0001A8\u0001?76;53> ';3@>A@9\u0006\u0001 \u0012 \u0006\u0001 \u0012 \u000e\u0006\u0001 \u0012 \u0012\u0006\u0001 \u0012 \u0006\u0001 ;3C;@9\u0006\u0001 \u0012\u000e \u0006\u0001 \u0012\u000f\u0012\u0001\u0004 \u0005\u0006\u0001 \u0012\u0013\u000f\u0006\u0001 \u0013 \u000e\u0006\u0001 G3@9JG\u0006\u0001 \u0013 \u0006\u0001';@9\b",
+          "anchor_excerpt": "First, despite many claims to the contrary, Wang Ji's work was not the first autonomous work to contain the cases of a single physician. $ ^{4} $ Zhang Congzheng's Ten Configurations and Three Therapies (Shixing sanliao 十形三療), an anthology of Zhang's cases, was edited soon after his death (1228) by his disciples, and was circulating on its own by the fourteenth century. $ ^{5} $ Case records were also an important part of Zhu Zhenheng's medical practice even if he did not collate them into a book during his lifetime. $ ^{6} $ Both his biographer",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00101",
+          "note_item_id": "fn-00204",
+          "current_anchor_id": "anchor-00766",
+          "marker": "18",
+          "note_page_no": 303,
+          "anchor_page_no": 288,
+          "current_anchor_marker": "18",
+          "note_excerpt": "Jan. 1817 (JQ21.12.2). \u0010\u0012 *:7\u0001>3@9G397\u0001A8\u0001F:7\u0001>793>\u0001D7BADF?3K @AF :3H7 5ADD7EBA@676I;F: F:7\u0001B:KE;5;3@UE\u00017J35F\u0001IAD6E\b \u00013D9G7\u0001;@\u0001 \b F:3F(/4- @.+4- ɜɝ ;@\u0001>793>\u000167BAE;F;A@E\u0001I3E\u0001BDA434>K\u00014GD73G5D3F;5\u0001<3D9A@\u000136676\u00014K\u0001F:7\u0001A88;5;3>E\u0001I:A\u0001IDAF7 D7BADFE\b \u0010\u0013 $AF7\u0001F:3F\u0001F:7\u0001BD7E5D;BF;A@I3 E\u000153>>76\u0001V9'2/<' \u0007FD3@E8AD?;@9\u0006W\u00013\u0001EGDH;H3>\u00018DA?\u000173D>;7D F;?7E\u0001I:7@\u0001?G5GE\u0001I3E ?G5GE\u00013@6\u0001E3>;H3\u0001I7D7\u00015>AE7\u00015A@E;67D76\u00013E\u00015>AE7\u00017CG;H3>7@FE\u0001\u0004 \b\u000f\u0005\b $ ^{70} $ XKTB, memorial dated 1 Feb. 1817 (JQ21.12.16). \u0011 *:7\u0001F:D77\u0007.;'4- 675A5F;A@\u0001I3E\u0001?367\u0001I;F:\u0001F:D77\u0001;@9D76;7@FE\u0001I:AE7\u0001@3?7\u0001EF3DF76\u0001I;F:\u0001F:7\u00015:3D35F7D.;'4- A \b",
+          "anchor_excerpt": "This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00106",
+          "note_item_id": "fn-00213",
+          "current_anchor_id": "anchor-01205",
+          "marker": "7",
+          "note_page_no": 315,
+          "anchor_page_no": 428,
+          "current_anchor_marker": "7",
+          "note_excerpt": "3E\u0001D7H7DE7\u00018>AI\u0001\u00043E\u0001;@ F:7\u0001D7H7DE7\u00018>AI\u0001A8\u0001\";H7D\u0001 ;D7 ;@FA\u0001F:7\u00015:7EF\u0005 I;F: ;FE\u0001>793>\u00013@6\u0001BA>;F;53>\u0001?73@;@9\u00013E\u0001VE76;F;A@W\u0001AD\u0001D7HA>F\b\u0001 AD\u0001?AD7\u0001A@\u0001F:7\u0001>793>\u0001?73@;@9\u0001A84/ \u0006 E77\u0001 \u000f\b\u000e\b *:7\u0001E75F;A@\u0001A@*/'41;'4- A8 \";@\u0001&7;C;@UEI3E\u00018G>>\u0001A8\u0001D787D7@57E\u0001FA\u0001?G5GE\u00013@6 ;D7\u0006\u00013@6\u0001A8\u0001F:7\u0001E;J 53E7\u00018;>7E\u0001:7 3BB7@676\u0001FA\u0001:;E\u0001E75F;A@\u0001A@ȥͰ ɷȼˤ ʉơ͵ȦɡȈů̆ ʵ̀ːˉ ̿Ŧůc ˥ˉǷƖůc */'41;'4- \u0006\u00018;H7\u000193H7\u00013\u000157@FD3>\u0001DA>7\u0001FA\u0001?G5GE\b \";@\u0001&7;C;@9\u0006\u0016+/@.+4-\u0001@./)'/ ?4 / \u0004 \u0012 \u0013\u0005\u00060;'4 \u000e\u0006\u0001V\u001a;3@=G3@9W ɨȾ \u0006 V#76;53>\u000153E7\u00018;>7EW·ǌ \u0004#'.\u0019\u000176\b\u0014\u0001 \u000e \u0007\u000e \u0005\b",
+          "anchor_excerpt": "the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00117",
+          "note_item_id": "fn-00236",
+          "current_anchor_id": "anchor-00929",
+          "marker": "3",
+          "note_page_no": 336,
+          "anchor_page_no": 331,
+          "current_anchor_marker": "171",
+          "note_excerpt": "6;E5GEE;A@\u0001A8:AI\u0001BD35F;F;A@7DE\u0001BDA?AF76\u0001F:7?E7>H7E\u00013E\u0001788;5;7@F\u0001:73>7DE;@\u000197@7D3>\b):7 ƺć˅Ûɍˢ\u0001ƓˊÛÕ \u0006ʎʚ ɽ BGDEG76\u0001F:;E\u0001BDA4>7?\u00018GDF:7D\u0001;@\u00013\u0001>3F7D\u00013DF;5>7\u0001\u0004 \u0014\u0001\u000e\u0012\u0007\u000f \u0005\u0006\u00014GF\u0001EF;>>\u00016;6\u0001@AF\u00013@3>KL7\u0001EB75;8;5\u000153E7E\b \u0013 )77\u0001!>7;@?3@\u0001 \u0013\u0012\u0012\u0006\u00015:3BF7D\u0001F;F>76\u0001V AI\u0001\u001aA7E\u0001&EK5:;3FDK\u0001 73>\u0016W $ ^{193} $ See Kleinman 1988, chapter titled “How Does Psychiatry Heal?”",
+          "anchor_excerpt": "I examined his pulse: the Six Sections were strung, extended, and sturdy. I said: “This is a manifestation of over-repletion, not depletion.” $ ^{171} $ Therefore I used extremely bitter medicine $ ^{172} $ to drain Fire from the two tracts of the Heart and the Gallbladder. $ ^{173} $ When draining the Heart [tract], it is necessary to drain the Small Intestine [tract] as well, $ ^{174} $ because “when the disorder is in a Yin visceral system, regulate its [corresponding] Yang visceral system.” $ ^{175} $ [Moreover,] because the Gallbladder has no outlet, $ ^{176} $ I borrow the Small Intestine as an outlet: [this is] also [a reason] for draining the Small Intestine. $ ^{177} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00118",
+          "note_item_id": "fn-00238",
+          "current_anchor_id": "anchor-00930",
+          "marker": "1",
+          "note_page_no": 339,
+          "anchor_page_no": 331,
+          "current_anchor_marker": "172",
+          "note_excerpt": "\u0013\u0010 2\u0014\u0001 \u0013\u0005\u0001FD3@E>3F76@.;?5; 3E\u0001V3BAFDAB3;5E\bW \u000f *:;E\u0001I3D@;@9\u0001:36\u00013BB73D76\u0001;@ F:7\u00014;A9D3B:K\u0001A8 \u0018;3@\u0001'G7ŰϢ ;@\u0001F:7 ./0/ 0 \u0004 \u000f\u0014\u0001 \u0011\u0013\u000e\u0005\b \u0010 0:3@9\u0001 ;74;@Ĵ$͑ \u0004 \u000f\u0010 \u0007 \u0010\u000e \u0015\u0001\u0010\b\u0012\u0005 :36\u00013>EA\u0001FD;76FA 9;H7F:7\u0001F7D?@.;?5; 3\u0001E75G>3D\u0001?73@;@9\u0014\u0001V @\u000153E7E EG5:\u00013E\u0001F:7E7\u00011E77\u0012\b\u00102\u0006\u0001F:7\u00019:AEFE\u00013D;E7\u00018DA?\u0001F:7\u0001 73DF\u0006\u00013@6\u00013D7\u0001;@\u0001835F\u0001@AF\u0001F:7\u00016A;@9\u0001A8\u00019:AEFE\u00013@6\u0001EB;D;FEX\b :AI7H7D\u0006\u0001A@57\u0001F:7\u00019:AEF\u0001;E\u0001;@\u0001F:7\u0001 73DF\u0006\u0001;F\u0001;E\u00016;88;5G>F\u00018AD\u00016DG9E\u0001FA\u000147\u0001788;535;AGE\u0006\u00013@6\u0001;F\u0001475A?7E\u0001@757EE3DK\u0001FA",
+          "anchor_excerpt": "I examined his pulse: the Six Sections were strung, extended, and sturdy. I said: “This is a manifestation of over-repletion, not depletion.” $ ^{171} $ Therefore I used extremely bitter medicine $ ^{172} $ to drain Fire from the two tracts of the Heart and the Gallbladder. $ ^{173} $ When draining the Heart [tract], it is necessary to drain the Small Intestine [tract] as well, $ ^{174} $ because “when the disorder is in a Yin visceral system, regulate its [corresponding] Yang visceral system.” $ ^{175} $ [Moreover,] because the Gallbladder has no outlet, $ ^{176} $ I borrow the Small Intestine as an outlet: [this is] also [a reason] for draining the Small Intestine. $ ^{177} $",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 225,
+        "file_idx": 224,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Most elite physicians from the twelfth century onward, while recognizing that there was “constancy” (chang 常) to illnesses, emphasized that the best healers should also react to “transformations” (bian 變), the events that diverged from the regular ways in which reality was supposed to unfold. “Constancy” itself referred not to unchanging essences but to the regular and predictable way in which processes developed. The emergence of case files as a distinct genre partly stemmed from this flexible conception of illness. Yet even the best English-language histories of Chinese case records usually leap straight from Xu Shuwei to Wang Ji's Stone-Mountain's Medical Case Files (Shishan yian 石山醫案 [1531]; see 6.2) without discussing the dominance of this conception of illness and style of prescription among Jin and Yuan physicians. $ ^{3} $ This omission introduces inaccuracies in accounts of the development of “medical case files” and obscures the process by which they emerged as an independent genre in the sixteenth century. First, despite many claims to the contrary, Wang Ji's work was not the first autonomous work to contain the cases of a single physician. $ ^{4} $ Zhang Congzheng's Ten Configurations and Three Therapies (Shixing sanliao 十形三療), an anthology of Zhang's cases, was edited soon after his death (1228) by his disciples, and was circulating on its own by the fourteenth cen ...",
+        "byte_size": 151688,
+        "sha256": "715a0aaaf7ec73568fd946caac22bd9e858bbd688e210a00c44d481df9ed9582"
+      },
+      {
+        "page_no": 286,
+        "file_idx": 285,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that another doctor’s attacking of mucus and Fire in a case of insanity had “helped the bandits do harm” (助賊為虐). $ ^{11} $ Medical writing also remained profoundly intertextual. Several treatises from the seventeenth and eighteenth centuries included long and increasingly complex sections on madness. They were longer and denser partly because they could borrow from a larger number of texts, but also because they applied to more disorders than ever the old claim that any illness could be caused by multiple factors. Two representative examples are Feng Zhaozhang's 馮兆張 (from Haiyan 海鹽 in Zhejiang) Jinnang milu zazheng daxiao becan 錦囊祕錄雜證大小合參 (in 20 juan; 1694) and Shen Jin'ao's 沈金鰲 (1717-1776; from Wuxi 無錫 in Jiangsu) Zabing yuanliu xizhu 雜病源流犀燭 (in 30 juan; 1773), both of which concentrated on explaining miscellaneous illnesses. Besides these exhaustive accounts of manifold etiologies, we find attempts to simplify—even unify—medical doctrines, books with titles like Unity in the Forest of Medicine (Luo Denggao's 駱登高 Yilin yizhi 醫林一致; 1703), Knowing Medicine in One Glance (Zhu Shijin's 朱時進 Yijian nengyi 一見能醫; 1769), and Medicine for Sots (Long Huitang's ...",
+        "byte_size": 148554,
+        "sha256": "6d90e55039ada0783729f15b48cee3647162ce97fefa24737c7a8cb984253c6b"
+      },
+      {
+        "page_no": 287,
+        "file_idx": 286,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "### 7.2 The continued dominance of the mucus etiology In earlier chapters, I examined the rise of mucus in Chinese medical thinking and its eventual use in explanations of madness. I also showed how the Danxi corpus had given pride of place to the mucus etiology in general. On the basis of these now mature theories, seventeenth-century physicians continued to discuss how mucus emerged, what disorders it caused, and how these illnesses should be treated. Some did so in special sections on this viscous intruder, others in commentaries on the notion of “mucus and rheum” (痰飲; 3.5) in Zhang Ji’s Essentials of the Golden Casket (3 $ ^{rd} $ century CE). Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰 ...",
+        "byte_size": 148029,
+        "sha256": "d4fdd7c5e098c2dc90face1876e23d2a5844ed308b420c5ae1190a5b0576cb8f"
+      },
+      {
+        "page_no": 288,
+        "file_idx": 287,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $ This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $",
+        "byte_size": 179127,
+        "sha256": "8b39b12179d53dbabac4b31c83a3cb10867f3760425a5fa71e1e8468e63dec35"
+      },
+      {
+        "page_no": 289,
+        "file_idx": 288,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "### 7.3 Shapes of practice: the scope of mucus therapies of madness The above section showed that mucus played an important role in Qing medical discussions of many illnesses. Starting with an examination of seventeenth-century medical primers that were popular under the Qing, let me now demonstrate from many different angles that mucus conceptions also dominated the way doctors thought about insanity. Since the practice of medicine was not regulated, virtually anyone could take it up. All that was needed was a medical primer and a few patients willing to pay for a cure. Physicians who sought a more elite clientele usually needed to claim a teacher and to be able to couch their arguments in classical terms drawn from the medical canons or the Yijing, but the success of medical primers suggests that medicine was easily learned outside of teacher-student relations. The large number of surviving editions of books like Huangfu Zhong's 皇甫中 Enlightened Physician Pointing to His Palm (Mingyi zhizhang 明醫指掌) or Gong Tingxian's Shoushi baoyuan 壽世保元, and the fact that other books lamented their excessive influence, suggest that they guided the practice of more physicians than the treatises modern historians rely on in their studies of Chinese medical thinking. $ ^{21} $ ## Shapers of practice? What seventeenth-century medical manuals said about madness There is no lack of people within an ...",
+        "byte_size": 122579,
+        "sha256": "720c29459d2ee519e01e847c3110649d855d3ab2774a77abc30c077112f0e041"
+      },
+      {
+        "page_no": 290,
+        "file_idx": 289,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "# is limitless and the impoverished roam the markets; $ ^{22} $ [moreover] the meanings and principles [expressed in these books] are profound and subtle, so that the ignorant have failed to examine them. 薄海内外 雅不乏人 而千里之間 博綜淹貫者 僅得一二 何能濟八方之老幼 即曰醫籍在也 卷帙浩淼 貧者弗遑市 意理淵微 愚者未及察 Xu Shirou 許士柔, 1622 preface to Shao Da's 邵達 re-edition of Huangfu Zhong's 皇甫中 Mingyi zhizhang 明醫指掌 $ ^{23} $ As its title indicates, the Enlightened Physician Pointing to His Palm (Mingyi zhi-bang 明醫指掌, 1579), which was re-edited and augmented in 1622, purported to be a digest of authentic medical doctrines and techniques. $ ^{24} $ Compiled in a format that put the way of medicine “in front of one’s eyes” (所謂道在目前; Xu preface), this manual sought to remedy the two problems Xu lamented in his preface: the dispersion of knowledge over too many books, and the difficulty of mastering these convoluted doctrines. In the Enlightened Physician, short and memorable “songs” (ge 歌) on individual illnesses were followed by discussions (lun 論), information on the pulses (mai 脈) most characteristic of these illnesses, and the recipes for recommended formulas. We owe the book's design to a man named Shao Da 邵達, a Suzhou physician whose father had also practiced medicine. $ ^{25} $ Shao recounted how his father had enjoined him",
+        "byte_size": 149727,
+        "sha256": "823f7fd498d8cf8700e055e9e715dbae25a5ddef02311266433beddfbc772903"
+      },
+      {
+        "page_no": 291,
+        "file_idx": 290,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "to study Huangfu Zhong's original Enlightened Physician (1579) in order to understand Zhang Ji's Cold-Injury medicine, Li Gao's notion of inner harm, Liu Wansu's Heat disorders, and Zhu Zhenheng's miscellaneous illnesses. $ ^{26} $ As Shao recalled, he learned as much as he could from Huangfu's work, but deplored that it relied on illustrations (圖) at the expense of discussions (論), described the symptoms clearly but said little about pulses, and gave detailed recipes but neglected to explain the therapeutic methods that justified this choice of remedies. $ ^{27} $ Shao also found inconvenient that the recipes appeared in a volume separate from the descriptions and illustrations. $ ^{28} $ In his 1622 edition, Shao eliminated the pictures, regrouped the descriptions of illnesses with the recommended recipes, and added distinctions between the many possible origins of every illness he discussed. Shao Da's version of the Enlightened Physician (in 10 juan) was republished many times throughout the Qing, testifying to its popularity among practitioners, as well as among amateurs who sought a digest of medical knowledge for use at home. A catalog of medical books extant in Chinese libraries indicates that at least 19 Qing editions of Shao Da's work have survived: 2 from the seventeenth century after 1644, 4 from the eighteenth, 10 from the nineteenth, 2 from the early twentieth, and ...",
+        "byte_size": 144921,
+        "sha256": "de91d1ec6b7b35fac1671f533074bf1bdba55830190dd3e66522202d25dbfc11"
+      },
+      {
+        "page_no": 292,
+        "file_idx": 291,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "Blithely calling oneself venerable: this is called kuang. 妄自稱尊號曰狂 Dian is a stiff body and an unhappy mind. 癲者身僵心不樂 You should know these two illnesses are Yin and Yang. 须知二證有陰陽 These verses squeezed together the symptoms of dian and kuang as explained in the Basic Questions and the Canon of Problems (problem 59). More focused on current usage, the discussion that followed cited the same passages at more length before quoting an excerpt from the \"diankuang\" section of the Danxi xinfa and the Canon of Problems' claim that dian was the doubling of Yin and kuang the doubling of Yang. $ ^{30} $ Two sections on the respective symptoms of dian and kuang cited more of the Danxi xinfa, but added two recipes to those that this book had recommended. $ ^{31} $ To this unsystematic rehashing of Danxi medicine, Shao Da added “notes” (an 按) where he attributed madness to the pathological action of Fire and mucus. These two illnesses [dian and kuang] necessarily arise from something. It can be great anger stirring Hepatic Wind or great fright stirring Cardiac Fire, making Fire rise suddenly. When [Fire] arises but fails to descend, it obstructs the openings of the Heart and makes Spiritual-clarity $ ^{32} $ unable to circulate in and out; the sovereign loses his [power to] issue commands and the Heart is instead conscripted by mucus; [this process] immediately [makes the illness] manifest its ...",
+        "byte_size": 152003,
+        "sha256": "8f6b2702a7e3f8aa36173cdd9fa9abab76cb35cdefe30c3ad812b557aab7295f"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-013-shapesofpractices:toc-ch-013-shapesofpractices:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00191\",\n    \"anchor_id\": \"anchor-00762\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 14 content ('Zhangshi yitong...') matches the text following anchor 14 on page 287 (visible in screenshot). The current binding to page 345 is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00192\",\n    \"anchor_id\": \"anchor-00763\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 15 content ('Yanling dizhi jiyao...') matches the text following anchor 15 on page 287 (visible in screenshot). The current binding to page 346 is incorrect.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00759\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 11 is visible on page 286 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00760\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 12 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00761\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 13 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00765\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 17 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00767\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 19 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00768\",\n    \"confidence\": 0.9,\n    \"reason\": \"Footnote 20 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "fn-00191",
+      "anchor_id": "anchor-00762",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Note 14 content ('Zhangshi yitong...') matches the text following anchor 14 on page 287 (visible in screenshot). The current binding to page 345 is incorrect."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00192",
+      "anchor_id": "anchor-00763",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Note 15 content ('Yanling dizhi jiyao...') matches the text following anchor 15 on page 287 (visible in screenshot). The current binding to page 346 is incorrect."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00759",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 11 is visible on page 286 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00760",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 12 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00761",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 13 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00765",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 17 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00767",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 19 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00768",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Footnote 20 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-013-shapesofpractices:toc-ch-013-shapesofpractices:endnote",
+    "chapter_title": "Shapes of practices",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00191",
+        "anchor_id": "anchor-00762",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 14 content ('Zhangshi yitong...') matches the text following anchor 14 on page 287 (visible in screenshot). The current binding to page 345 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00192",
+        "anchor_id": "anchor-00763",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 15 content ('Yanling dizhi jiyao...') matches the text following anchor 15 on page 287 (visible in screenshot). The current binding to page 346 is incorrect."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00759",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 11 is visible on page 286 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00760",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 12 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00761",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 13 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00765",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 17 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00767",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 19 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00768",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 20 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "fn-00191",
+        "anchor_id": "anchor-00762",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 14 content ('Zhangshi yitong...') matches the text following anchor 14 on page 287 (visible in screenshot). The current binding to page 345 is incorrect."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-00192",
+        "anchor_id": "anchor-00763",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 15 content ('Yanling dizhi jiyao...') matches the text following anchor 15 on page 287 (visible in screenshot). The current binding to page 346 is incorrect."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00759",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 11 is visible on page 286 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00760",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 12 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00761",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 13 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00765",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 17 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00767",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 19 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00768",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 20 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00095",
+        "action": "match",
+        "note_item_id": "fn-00191",
+        "anchor_id": "anchor-00762",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 14 content ('Zhangshi yitong...') matches the text following anchor 14 on page 287 (visible in screenshot). The current binding to page 345 is incorrect."
+      },
+      {
+        "link_id": "link-00096",
+        "action": "match",
+        "note_item_id": "fn-00192",
+        "anchor_id": "anchor-00763",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 15 content ('Yanling dizhi jiyao...') matches the text following anchor 15 on page 287 (visible in screenshot). The current binding to page 346 is incorrect."
+      },
+      {
+        "link_id": "link-01103",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00759",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 11 is visible on page 286 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "link_id": "link-01104",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00760",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 12 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "link_id": "link-01105",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00761",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 13 is visible on page 287 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "link_id": "link-01109",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00765",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 17 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "link_id": "link-01110",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00767",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 19 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      },
+      {
+        "link_id": "link-01111",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00768",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Footnote 20 is visible on page 288 in the screenshot, but the corresponding note item is not present in the provided rebind_candidates list."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 14131,
+    "completion_tokens": 699,
+    "total_tokens": 14830,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 15254
+  }
+}

@@ -1,0 +1,2970 @@
+{
+  "slug": "Goldstein",
+  "doc_id": "7ba9bca783fd",
+  "folder": "post-revolutionary",
+  "asset_check": {
+    "ok": true,
+    "missing": [],
+    "manual_toc_exists": true,
+    "paths": {
+      "folder": "/Users/hao/OCRandTranslation/test_example/post-revolutionary",
+      "pdf": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/Goldstein - 2005 - The post-revolutionary self politics and psyche i.pdf",
+      "raw_pages": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/raw_pages.json",
+      "raw_source_markdown": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/raw_source_markdown.md",
+      "manual_toc_pdf": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/目录.pdf"
+    }
+  },
+  "input_assets": {
+    "pdf": {
+      "key": "pdf",
+      "path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/Goldstein - 2005 - The post-revolutionary self politics and psyche i.pdf",
+      "exists": true,
+      "required": true,
+      "used_by": [
+        "reingest",
+        "visual_toc",
+        "llm_repair"
+      ],
+      "size_bytes": 1319017,
+      "sha256": "d7c0294be9e87365e48e3bab9d0de4302061f9cb789322e0d0dae08a8f97e762"
+    },
+    "raw_pages": {
+      "key": "raw_pages",
+      "path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/raw_pages.json",
+      "exists": true,
+      "required": true,
+      "used_by": [
+        "reingest",
+        "fnm_pipeline"
+      ],
+      "size_bytes": 9337867,
+      "sha256": "1f9905e5025a9d7776f43933f247dffaa4fcf82d2cce19477ed4c0d5ea07abaa",
+      "page_count": 431
+    },
+    "raw_source_markdown": {
+      "key": "raw_source_markdown",
+      "path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/raw_source_markdown.md",
+      "exists": true,
+      "required": true,
+      "used_by": [
+        "asset_check",
+        "report_evidence"
+      ],
+      "size_bytes": 1055399,
+      "sha256": "4786dbcdb1f36f166450891c8882d3450a0efd16effa88ea1d15bef4323819c4",
+      "preview": "# Goldstein - 2005 - The post-revolutionary self politics and psyche i.pdf ## PDF第1页 <div style=\"text-align: center;\"><img src=\"imgs/img_in_image_box_234_10_893_941.jpg\" alt=\"Image\" width=\"73%\" /></div> <div style=\"text-...",
+      "usage_note": "本轮只作为输入资产校验与报告证据，不回灌数据库。"
+    },
+    "manual_toc_pdf": {
+      "key": "manual_toc_pdf",
+      "path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/目录.pdf",
+      "exists": true,
+      "required": false,
+      "used_by": [
+        "visual_toc"
+      ],
+      "size_bytes": 22357,
+      "sha256": "d39c01f87f4d1976e373c25939cdc6c9f7a52b42167a915fb6d2a59c1c45622f"
+    }
+  },
+  "cleanup": {
+    "cleaned_at": "2026-04-22T11:07:06",
+    "example_dir": "/Users/hao/OCRandTranslation/test_example/post-revolutionary",
+    "removed": [
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/fnm_real_test_progress.json",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/fnm_real_test_result.json",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/FNM_REAL_TEST_REPORT.md",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest_export_status.json",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.Goldstein.test.zip",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.test.zip",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.zip"
+    ],
+    "removed_count": 8,
+    "failed": [],
+    "failed_count": 0
+  },
+  "all_ok": true,
+  "blocked": false,
+  "blocking_reasons": [],
+  "blocking_details": [],
+  "trace_index": [
+    {
+      "stage": "visual_toc.manual_input_extract",
+      "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.001.json",
+      "reason_for_request": "从目录页截图中抽取单页原子目录项",
+      "model_id": "qwen3.5-plus",
+      "total_tokens": 2801
+    },
+    {
+      "stage": "visual_toc.manual_input_extract",
+      "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.002.json",
+      "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
+      "model_id": "qwen3.5-plus",
+      "total_tokens": 2645
+    }
+  ],
+  "translation_mode": "placeholder",
+  "translation_api_called": false,
+  "final_zip": {
+    "written": true,
+    "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.Goldstein.test.zip",
+    "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.test.zip",
+    "reason": ""
+  },
+  "progress": {
+    "status": "done",
+    "current_stage": "report_write",
+    "started_at": "2026-04-22T11:07:06",
+    "updated_at": "2026-04-22T11:08:29",
+    "stage_history": [
+      {
+        "stage": "reingest",
+        "status": "done",
+        "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
+        "at": "2026-04-22T11:07:06"
+      },
+      {
+        "stage": "visual_toc",
+        "status": "done",
+        "detail": "ready",
+        "at": "2026-04-22T11:07:56"
+      },
+      {
+        "stage": "fnm_pipeline",
+        "status": "done",
+        "detail": "ready",
+        "at": "2026-04-22T11:08:02"
+      },
+      {
+        "stage": "llm_repair",
+        "status": "done",
+        "detail": "auto_applied=0",
+        "at": "2026-04-22T11:08:02"
+      },
+      {
+        "stage": "fnm_pipeline_rebuild",
+        "status": "done",
+        "detail": "skipped",
+        "at": "2026-04-22T11:08:02"
+      },
+      {
+        "stage": "structure_verify",
+        "status": "done",
+        "detail": "ready",
+        "at": "2026-04-22T11:08:08"
+      },
+      {
+        "stage": "placeholder_translate",
+        "status": "done",
+        "detail": "translated_paras=1628",
+        "at": "2026-04-22T11:08:16"
+      },
+      {
+        "stage": "export_verify",
+        "status": "done",
+        "detail": "ok",
+        "at": "2026-04-22T11:08:29"
+      },
+      {
+        "stage": "zip_finalize",
+        "status": "done",
+        "detail": "ok",
+        "at": "2026-04-22T11:08:29"
+      },
+      {
+        "stage": "report_write",
+        "status": "done",
+        "detail": "单书结果、报告、进度均已写入",
+        "at": "2026-04-22T11:08:29"
+      }
+    ]
+  },
+  "usage_summary": {
+    "by_stage": {
+      "visual_toc.preflight": {
+        "request_count": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "visual_toc.classify_candidates": {
+        "request_count": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "visual_toc.extract_page_items": {
+        "request_count": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "visual_toc.manual_input_extract": {
+        "request_count": 2,
+        "prompt_tokens": 2983,
+        "completion_tokens": 2463,
+        "total_tokens": 5446
+      },
+      "llm_repair.cluster_request": {
+        "request_count": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "translation_test": {
+        "request_count": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "by_model": {
+      "qwen3.5-plus": {
+        "request_count": 2,
+        "prompt_tokens": 2983,
+        "completion_tokens": 2463,
+        "total_tokens": 5446
+      }
+    },
+    "total": {
+      "request_count": 2,
+      "prompt_tokens": 2983,
+      "completion_tokens": 2463,
+      "total_tokens": 5446
+    }
+  },
+  "reingest": {
+    "slug": "Goldstein",
+    "doc_id": "7ba9bca783fd",
+    "page_count": 431,
+    "visual_toc_count": 0,
+    "manual_toc_bound": true,
+    "restore_auto_visual_toc": false,
+    "rebuild_fnm": false,
+    "fnm_ok": false,
+    "fnm_state": null,
+    "blocking_reasons": []
+  },
+  "visual_toc": {
+    "status": "ready",
+    "count": 23,
+    "scan_mode": "manual_pdf",
+    "candidate_source": "manual_toc_upload",
+    "candidate_indices": [],
+    "candidate_pdf_pages": [],
+    "primary_run_pages": [],
+    "context_pages": [],
+    "retry_indices": [],
+    "retry_pdf_pages": [],
+    "run_summaries": [
+      {
+        "start_file_idx": 0,
+        "end_file_idx": 0,
+        "page_count": 1,
+        "score": 23.0,
+        "selected_as": "primary_run"
+      }
+    ],
+    "organization_summary": {
+      "max_body_depth": 3,
+      "has_containers": true,
+      "has_post_body": false,
+      "has_back_matter": true,
+      "body_root_titles": [
+        "Introduction: Psychological Interiority versus Self-Talk",
+        "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "II THE POLITICS OF SELFHOOD",
+        "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
+        "4A n A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "5C ousinian Hegemony",
+        "6R eligious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "7A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "Epilogue"
+      ],
+      "container_titles": [
+        "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "II THE POLITICS OF SELFHOOD"
+      ],
+      "post_body_titles": [],
+      "back_matter_titles": [
+        "Note on Sources",
+        "Index"
+      ]
+    },
+    "organization_nodes": [
+      {
+        "title": "List of Illustrations",
+        "depth": 0,
+        "printed_page": null,
+        "file_idx": null,
+        "visual_order": 38,
+        "role_hint": "front_matter",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      },
+      {
+        "title": "Preface",
+        "depth": 0,
+        "printed_page": null,
+        "file_idx": null,
+        "visual_order": 39,
+        "role_hint": "front_matter",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      },
+      {
+        "title": "Introduction: Psychological Interiority versus Self-Talk",
+        "depth": 0,
+        "printed_page": 1,
+        "file_idx": 17,
+        "visual_order": 40,
+        "role_hint": "chapter",
+        "parent_title": "",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "depth": 1,
+        "printed_page": null,
+        "file_idx": null,
+        "visual_order": 41,
+        "role_hint": "container",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      },
+      {
+        "title": "1 The Perils of Imagination at the End of the Old Regime",
+        "depth": 0,
+        "printed_page": 21,
+        "file_idx": 37,
+        "visual_order": 42,
+        "role_hint": "chapter",
+        "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "2 The Revolutionary Schooling of Imagination",
+        "depth": 0,
+        "printed_page": 60,
+        "file_idx": 76,
+        "visual_order": 43,
+        "role_hint": "chapter",
+        "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "II THE POLITICS OF SELFHOOD",
+        "depth": 1,
+        "printed_page": null,
+        "file_idx": null,
+        "visual_order": 44,
+        "role_hint": "container",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      },
+      {
+        "title": "3 Is There a Self in This Mental Apparatus?",
+        "depth": 0,
+        "printed_page": 103,
+        "file_idx": 119,
+        "visual_order": 45,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "depth": 0,
+        "printed_page": 139,
+        "file_idx": 155,
+        "visual_order": 46,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "5 Cousinian Hegemony",
+        "depth": 0,
+        "printed_page": 182,
+        "file_idx": 198,
+        "visual_order": 47,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "depth": 0,
+        "printed_page": 233,
+        "file_idx": 249,
+        "visual_order": 48,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "depth": 0,
+        "printed_page": 269,
+        "file_idx": 285,
+        "visual_order": 49,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "IT HE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION 1T h e P erils of Imagination at the End of the Old Regime",
+        "depth": 2,
+        "printed_page": 21,
+        "file_idx": 37,
+        "visual_order": 50,
+        "role_hint": "section",
+        "parent_title": "Introduction: Psychological Interiority versus Self-Talk",
+        "body_candidate": true,
+        "export_candidate": false
+      },
+      {
+        "title": "2T he Revolutionary Schooling of Imagination",
+        "depth": 2,
+        "printed_page": 60,
+        "file_idx": 76,
+        "visual_order": 51,
+        "role_hint": "section",
+        "parent_title": "Introduction: Psychological Interiority versus Self-Talk",
+        "body_candidate": true,
+        "export_candidate": false
+      },
+      {
+        "title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
+        "depth": 0,
+        "printed_page": 103,
+        "file_idx": 119,
+        "visual_order": 52,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "4A n A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "depth": 2,
+        "printed_page": 139,
+        "file_idx": 155,
+        "visual_order": 53,
+        "role_hint": "section",
+        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
+        "body_candidate": true,
+        "export_candidate": false
+      },
+      {
+        "title": "5C ousinian Hegemony",
+        "depth": 2,
+        "printed_page": 182,
+        "file_idx": 198,
+        "visual_order": 54,
+        "role_hint": "section",
+        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
+        "body_candidate": true,
+        "export_candidate": false
+      },
+      {
+        "title": "6R eligious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "depth": 2,
+        "printed_page": 233,
+        "file_idx": 249,
+        "visual_order": 55,
+        "role_hint": "section",
+        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
+        "body_candidate": true,
+        "export_candidate": false
+      },
+      {
+        "title": "7A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "depth": 2,
+        "printed_page": 269,
+        "file_idx": 285,
+        "visual_order": 56,
+        "role_hint": "section",
+        "parent_title": "II THE POLITICS OF SELFHOOD 3I s There a Self in This Mental Apparatus?",
+        "body_candidate": true,
+        "export_candidate": false
+      },
+      {
+        "title": "Epilogue",
+        "depth": 0,
+        "printed_page": 316,
+        "file_idx": 332,
+        "visual_order": 57,
+        "role_hint": "chapter",
+        "parent_title": "II THE POLITICS OF SELFHOOD",
+        "body_candidate": true,
+        "export_candidate": true
+      },
+      {
+        "title": "Notes",
+        "depth": 1,
+        "printed_page": 331,
+        "file_idx": 347,
+        "visual_order": 58,
+        "role_hint": "endnotes",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      },
+      {
+        "title": "Note on Sources",
+        "depth": 0,
+        "printed_page": 399,
+        "file_idx": 415,
+        "visual_order": 59,
+        "role_hint": "back_matter",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      },
+      {
+        "title": "Index",
+        "depth": 0,
+        "printed_page": 403,
+        "file_idx": 419,
+        "visual_order": 60,
+        "role_hint": "back_matter",
+        "parent_title": "",
+        "body_candidate": false,
+        "export_candidate": false
+      }
+    ],
+    "endnotes_summary": {
+      "present": true,
+      "container_title": "Notes",
+      "container_printed_page": 331,
+      "container_visual_order": 58,
+      "has_chapter_keyed_subentries_in_toc": false,
+      "subentry_pattern": null
+    },
+    "manual_input_mode": "manual_pdf",
+    "manual_input_page_count": 1,
+    "manual_input_source_name": "目录.pdf",
+    "manual_page_items_debug": [
+      [
+        {
+          "title": "List of Illustrations",
+          "depth": 0,
+          "printed_page": null,
+          "visual_order": 1,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "Preface",
+          "depth": 0,
+          "printed_page": null,
+          "visual_order": 2,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "Introduction: Psychological Interiority versus Self-Talk",
+          "depth": 0,
+          "printed_page": 1,
+          "visual_order": 3,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+          "depth": 1,
+          "printed_page": null,
+          "visual_order": 4,
+          "role_hint": "container",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "1 The Perils of Imagination at the End of the Old Regime",
+          "depth": 2,
+          "printed_page": 21,
+          "visual_order": 5,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "2 The Revolutionary Schooling of Imagination",
+          "depth": 2,
+          "printed_page": 60,
+          "visual_order": 6,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "II THE POLITICS OF SELFHOOD",
+          "depth": 1,
+          "printed_page": null,
+          "visual_order": 7,
+          "role_hint": "container",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "3 Is There a Self in This Mental Apparatus?",
+          "depth": 2,
+          "printed_page": 103,
+          "visual_order": 8,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+          "depth": 2,
+          "printed_page": 139,
+          "visual_order": 9,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "5 Cousinian Hegemony",
+          "depth": 2,
+          "printed_page": 182,
+          "visual_order": 10,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+          "depth": 2,
+          "printed_page": 233,
+          "visual_order": 11,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+          "depth": 2,
+          "printed_page": 269,
+          "visual_order": 12,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "Epilogue",
+          "depth": 0,
+          "printed_page": 316,
+          "visual_order": 13,
+          "role_hint": "content",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "Notes",
+          "depth": 0,
+          "printed_page": 331,
+          "visual_order": 14,
+          "role_hint": "back_matter",
+          "endnotes_candidate": true,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "Note on Sources",
+          "depth": 0,
+          "printed_page": 399,
+          "visual_order": 15,
+          "role_hint": "back_matter",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        },
+        {
+          "title": "Index",
+          "depth": 0,
+          "printed_page": 403,
+          "visual_order": 16,
+          "role_hint": "back_matter",
+          "endnotes_candidate": false,
+          "endnotes_subentry_candidate": false
+        }
+      ]
+    ],
+    "organization_bundle_debug": {
+      "items": [
+        {
+          "title": "List of Illustrations",
+          "depth": 0,
+          "printed_page": null,
+          "file_idx": null,
+          "visual_order": 1,
+          "role_hint": "front_matter"
+        },
+        {
+          "title": "Preface",
+          "depth": 0,
+          "printed_page": null,
+          "file_idx": null,
+          "visual_order": 2,
+          "role_hint": "front_matter"
+        },
+        {
+          "title": "Introduction: Psychological Interiority versus Self-Talk",
+          "depth": 0,
+          "printed_page": 1,
+          "file_idx": null,
+          "visual_order": 3,
+          "role_hint": "chapter"
+        },
+        {
+          "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+          "depth": 0,
+          "printed_page": null,
+          "file_idx": null,
+          "visual_order": 4,
+          "role_hint": "container"
+        },
+        {
+          "title": "1 The Perils of Imagination at the End of the Old Regime",
+          "depth": 1,
+          "printed_page": 21,
+          "file_idx": null,
+          "visual_order": 5,
+          "role_hint": "chapter",
+          "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+        },
+        {
+          "title": "2 The Revolutionary Schooling of Imagination",
+          "depth": 1,
+          "printed_page": 60,
+          "file_idx": null,
+          "visual_order": 6,
+          "role_hint": "chapter",
+          "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+        },
+        {
+          "title": "II THE POLITICS OF SELFHOOD",
+          "depth": 0,
+          "printed_page": null,
+          "file_idx": null,
+          "visual_order": 7,
+          "role_hint": "container"
+        },
+        {
+          "title": "3 Is There a Self in This Mental Apparatus?",
+          "depth": 1,
+          "printed_page": 103,
+          "file_idx": null,
+          "visual_order": 8,
+          "role_hint": "chapter",
+          "parent_title": "II THE POLITICS OF SELFHOOD"
+        },
+        {
+          "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+          "depth": 1,
+          "printed_page": 139,
+          "file_idx": null,
+          "visual_order": 9,
+          "role_hint": "chapter",
+          "parent_title": "II THE POLITICS OF SELFHOOD"
+        },
+        {
+          "title": "5 Cousinian Hegemony",
+          "depth": 1,
+          "printed_page": 182,
+          "file_idx": null,
+          "visual_order": 10,
+          "role_hint": "chapter",
+          "parent_title": "II THE POLITICS OF SELFHOOD"
+        },
+        {
+          "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+          "depth": 1,
+          "printed_page": 233,
+          "file_idx": null,
+          "visual_order": 11,
+          "role_hint": "chapter",
+          "parent_title": "II THE POLITICS OF SELFHOOD"
+        },
+        {
+          "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+          "depth": 1,
+          "printed_page": 269,
+          "file_idx": null,
+          "visual_order": 12,
+          "role_hint": "chapter",
+          "parent_title": "II THE POLITICS OF SELFHOOD"
+        },
+        {
+          "title": "Epilogue",
+          "depth": 0,
+          "printed_page": 316,
+          "file_idx": null,
+          "visual_order": 13,
+          "role_hint": "chapter"
+        },
+        {
+          "title": "Notes",
+          "depth": 0,
+          "printed_page": 331,
+          "file_idx": null,
+          "visual_order": 14,
+          "role_hint": "back_matter"
+        },
+        {
+          "title": "Note on Sources",
+          "depth": 0,
+          "printed_page": 399,
+          "file_idx": null,
+          "visual_order": 15,
+          "role_hint": "back_matter"
+        },
+        {
+          "title": "Index",
+          "depth": 0,
+          "printed_page": 403,
+          "file_idx": null,
+          "visual_order": 16,
+          "role_hint": "back_matter"
+        }
+      ],
+      "endnotes_summary": {
+        "present": false,
+        "container_title": null,
+        "container_printed_page": null,
+        "container_visual_order": null,
+        "has_chapter_keyed_subentries_in_toc": false,
+        "subentry_pattern": null
+      }
+    },
+    "resolved_item_count": 23,
+    "unresolved_item_count": 0,
+    "selected_page_count": 1,
+    "selected_run_count": 1,
+    "suspected_partial_capture": true,
+    "coverage_quality": "partial",
+    "navigable_item_count": 16,
+    "navigable_ready_count": 16,
+    "unresolved_navigable_count": 0,
+    "usage_events": [
+      {
+        "stage": "visual_toc.manual_input_extract",
+        "provider": "qwen",
+        "model_id": "qwen3.5-plus",
+        "request_count": 1,
+        "prompt_tokens": 1553,
+        "completion_tokens": 1248,
+        "total_tokens": 2801,
+        "doc_id": "7ba9bca783fd",
+        "slug": "",
+        "context": {
+          "source": "pdf",
+          "file_idx": 0
+        }
+      },
+      {
+        "stage": "visual_toc.manual_input_extract",
+        "provider": "qwen",
+        "model_id": "qwen3.5-plus",
+        "request_count": 1,
+        "prompt_tokens": 1430,
+        "completion_tokens": 1215,
+        "total_tokens": 2645,
+        "doc_id": "7ba9bca783fd",
+        "slug": "",
+        "context": {
+          "source": "organization",
+          "images_count": 1
+        }
+      }
+    ],
+    "usage_summary": {
+      "by_stage": {
+        "visual_toc.manual_input_extract": {
+          "request_count": 2,
+          "prompt_tokens": 2983,
+          "completion_tokens": 2463,
+          "total_tokens": 5446
+        },
+        "visual_toc.preflight": {
+          "request_count": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "visual_toc.classify_candidates": {
+          "request_count": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "visual_toc.extract_page_items": {
+          "request_count": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "by_model": {
+        "qwen3.5-plus": {
+          "request_count": 2,
+          "prompt_tokens": 2983,
+          "completion_tokens": 2463,
+          "total_tokens": 5446
+        }
+      },
+      "total": {
+        "request_count": 2,
+        "prompt_tokens": 2983,
+        "completion_tokens": 2463,
+        "total_tokens": 5446
+      }
+    },
+    "llm_traces": [
+      {
+        "stage": "visual_toc.manual_input_extract",
+        "reason_for_request": "从目录页截图中抽取单页原子目录项",
+        "model": {
+          "provider": "qwen",
+          "model_id": "qwen3.5-plus",
+          "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        },
+        "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
+        "request_content": {
+          "images": [
+            {
+              "label": "image-1",
+              "file_idx": 0,
+              "byte_size": 87090,
+              "sha256": "a9c49602cd324424f588a121fc70379fa2dce6e9b94bbf39ffd53a1ceffe40b7",
+              "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/toc_visual_source.pdf",
+              "source": "pdf_page"
+            }
+          ]
+        },
+        "request_context_summary": {
+          "source": "pdf",
+          "file_idx": 0
+        },
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": \"ix\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": \"1\",\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": \"21\",\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": \"60\",\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"II THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": \"103\",\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\",\n    \"depth\": 2,\n    \"printed_page\": \"139\",\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"5 Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": \"182\",\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": \"233\",\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": \"269\",\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": \"316\",\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 0,\n    \"printed_page\": \"331\",\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 0,\n    \"printed_page\": \"399\",\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": \"403\",\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+        "response_parsed": [
+          {
+            "title": "List of Illustrations",
+            "depth": 0,
+            "printed_page": "ix",
+            "visual_order": 1,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "Preface",
+            "depth": 0,
+            "printed_page": "xi",
+            "visual_order": 2,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "Introduction: Psychological Interiority versus Self-Talk",
+            "depth": 0,
+            "printed_page": "1",
+            "visual_order": 3,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+            "depth": 1,
+            "printed_page": null,
+            "visual_order": 4,
+            "role_hint": "container",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "1 The Perils of Imagination at the End of the Old Regime",
+            "depth": 2,
+            "printed_page": "21",
+            "visual_order": 5,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "2 The Revolutionary Schooling of Imagination",
+            "depth": 2,
+            "printed_page": "60",
+            "visual_order": 6,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "II THE POLITICS OF SELFHOOD",
+            "depth": 1,
+            "printed_page": null,
+            "visual_order": 7,
+            "role_hint": "container",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "3 Is There a Self in This Mental Apparatus?",
+            "depth": 2,
+            "printed_page": "103",
+            "visual_order": 8,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+            "depth": 2,
+            "printed_page": "139",
+            "visual_order": 9,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "5 Cousinian Hegemony",
+            "depth": 2,
+            "printed_page": "182",
+            "visual_order": 10,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+            "depth": 2,
+            "printed_page": "233",
+            "visual_order": 11,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+            "depth": 2,
+            "printed_page": "269",
+            "visual_order": 12,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "Epilogue",
+            "depth": 0,
+            "printed_page": "316",
+            "visual_order": 13,
+            "role_hint": "content",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "Notes",
+            "depth": 0,
+            "printed_page": "331",
+            "visual_order": 14,
+            "role_hint": "back_matter",
+            "endnotes_candidate": true,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "Note on Sources",
+            "depth": 0,
+            "printed_page": "399",
+            "visual_order": 15,
+            "role_hint": "back_matter",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          },
+          {
+            "title": "Index",
+            "depth": 0,
+            "printed_page": "403",
+            "visual_order": 16,
+            "role_hint": "back_matter",
+            "endnotes_candidate": false,
+            "endnotes_subentry_candidate": false
+          }
+        ],
+        "derived_truth": {
+          "items": [
+            {
+              "title": "List of Illustrations",
+              "depth": 0,
+              "printed_page": null,
+              "visual_order": 1,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "Preface",
+              "depth": 0,
+              "printed_page": null,
+              "visual_order": 2,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "Introduction: Psychological Interiority versus Self-Talk",
+              "depth": 0,
+              "printed_page": 1,
+              "visual_order": 3,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+              "depth": 1,
+              "printed_page": null,
+              "visual_order": 4,
+              "role_hint": "container",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "1 The Perils of Imagination at the End of the Old Regime",
+              "depth": 2,
+              "printed_page": 21,
+              "visual_order": 5,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "2 The Revolutionary Schooling of Imagination",
+              "depth": 2,
+              "printed_page": 60,
+              "visual_order": 6,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "II THE POLITICS OF SELFHOOD",
+              "depth": 1,
+              "printed_page": null,
+              "visual_order": 7,
+              "role_hint": "container",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "3 Is There a Self in This Mental Apparatus?",
+              "depth": 2,
+              "printed_page": 103,
+              "visual_order": 8,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+              "depth": 2,
+              "printed_page": 139,
+              "visual_order": 9,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "5 Cousinian Hegemony",
+              "depth": 2,
+              "printed_page": 182,
+              "visual_order": 10,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+              "depth": 2,
+              "printed_page": 233,
+              "visual_order": 11,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+              "depth": 2,
+              "printed_page": 269,
+              "visual_order": 12,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "Epilogue",
+              "depth": 0,
+              "printed_page": 316,
+              "visual_order": 13,
+              "role_hint": "content",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "Notes",
+              "depth": 0,
+              "printed_page": 331,
+              "visual_order": 14,
+              "role_hint": "back_matter",
+              "endnotes_candidate": true,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "Note on Sources",
+              "depth": 0,
+              "printed_page": 399,
+              "visual_order": 15,
+              "role_hint": "back_matter",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            },
+            {
+              "title": "Index",
+              "depth": 0,
+              "printed_page": 403,
+              "visual_order": 16,
+              "role_hint": "back_matter",
+              "endnotes_candidate": false,
+              "endnotes_subentry_candidate": false
+            }
+          ]
+        },
+        "usage": {
+          "stage": "visual_toc.manual_input_extract",
+          "provider": "qwen",
+          "model_id": "qwen3.5-plus",
+          "request_count": 1,
+          "prompt_tokens": 1553,
+          "completion_tokens": 1248,
+          "total_tokens": 2801,
+          "doc_id": "7ba9bca783fd",
+          "slug": "",
+          "context": {
+            "source": "pdf",
+            "file_idx": 0
+          }
+        },
+        "timing": {
+          "duration_ms": 23479
+        }
+      },
+      {
+        "stage": "visual_toc.manual_input_extract",
+        "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
+        "model": {
+          "provider": "qwen",
+          "model_id": "qwen3.5-plus",
+          "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        },
+        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction: Psychological Interiority versus Self-Talk\n- 1 The Perils of Imagination at the End of the Old Regime\n- 2 The Revolutionary Schooling of Imagination\n- 3 Is There a Self in This Mental Apparatus?\n- 4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\n- 5 Cousinian Hegemony\n- 6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\n- 7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\n- Epilogue\n- Notes\n- Note on Sources\n- Index",
+        "request_content": {
+          "images": [
+            {
+              "label": "image-1",
+              "file_idx": 0,
+              "byte_size": 66282,
+              "sha256": "acfc479c7450ee1a46be992c757f6766786f6cd60ac175f6a8ac9e8c7a5c6ae0",
+              "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/7ba9bca783fd/toc_visual_source.pdf",
+              "source": "pdf_page"
+            }
+          ]
+        },
+        "request_context_summary": {
+          "source": "organization",
+          "images_count": 1
+        },
+        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"List of Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"ix\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Preface\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xi\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"1\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n      \"depth\": 1,\n      \"visual_order\": 5,\n      \"printed_page\": \"21\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"2 The Revolutionary Schooling of Imagination\",\n      \"depth\": 1,\n      \"visual_order\": 6,\n      \"printed_page\": \"60\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"II THE POLITICS OF SELFHOOD\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n      \"depth\": 1,\n      \"visual_order\": 8,\n      \"printed_page\": \"103\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project\",\n      \"depth\": 1,\n      \"visual_order\": 9,\n      \"printed_page\": \"139\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"5 Cousinian Hegemony\",\n      \"depth\": 1,\n      \"visual_order\": 10,\n      \"printed_page\": \"182\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n      \"depth\": 1,\n      \"visual_order\": 11,\n      \"printed_page\": \"233\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n      \"depth\": 1,\n      \"visual_order\": 12,\n      \"printed_page\": \"269\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": \"316\",\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Notes\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": \"331\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Note on Sources\",\n      \"depth\": 0,\n      \"visual_order\": 15,\n      \"printed_page\": \"399\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 16,\n      \"printed_page\": \"403\",\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+        "response_parsed": {
+          "endnotes_summary": {
+            "present": false,
+            "container_title": null,
+            "container_printed_page": null,
+            "container_visual_order": null,
+            "has_chapter_keyed_subentries_in_toc": false,
+            "subentry_pattern": null
+          },
+          "items": [
+            {
+              "title": "List of Illustrations",
+              "depth": 0,
+              "visual_order": 1,
+              "printed_page": "ix",
+              "role_hint": "front_matter",
+              "parent_title": ""
+            },
+            {
+              "title": "Preface",
+              "depth": 0,
+              "visual_order": 2,
+              "printed_page": "xi",
+              "role_hint": "front_matter",
+              "parent_title": ""
+            },
+            {
+              "title": "Introduction: Psychological Interiority versus Self-Talk",
+              "depth": 0,
+              "visual_order": 3,
+              "printed_page": "1",
+              "role_hint": "chapter",
+              "parent_title": ""
+            },
+            {
+              "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+              "depth": 0,
+              "visual_order": 4,
+              "printed_page": null,
+              "role_hint": "container",
+              "parent_title": ""
+            },
+            {
+              "title": "1 The Perils of Imagination at the End of the Old Regime",
+              "depth": 1,
+              "visual_order": 5,
+              "printed_page": "21",
+              "role_hint": "chapter",
+              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+            },
+            {
+              "title": "2 The Revolutionary Schooling of Imagination",
+              "depth": 1,
+              "visual_order": 6,
+              "printed_page": "60",
+              "role_hint": "chapter",
+              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+            },
+            {
+              "title": "II THE POLITICS OF SELFHOOD",
+              "depth": 0,
+              "visual_order": 7,
+              "printed_page": null,
+              "role_hint": "container",
+              "parent_title": ""
+            },
+            {
+              "title": "3 Is There a Self in This Mental Apparatus?",
+              "depth": 1,
+              "visual_order": 8,
+              "printed_page": "103",
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+              "depth": 1,
+              "visual_order": 9,
+              "printed_page": "139",
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "5 Cousinian Hegemony",
+              "depth": 1,
+              "visual_order": 10,
+              "printed_page": "182",
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+              "depth": 1,
+              "visual_order": 11,
+              "printed_page": "233",
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+              "depth": 1,
+              "visual_order": 12,
+              "printed_page": "269",
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "Epilogue",
+              "depth": 0,
+              "visual_order": 13,
+              "printed_page": "316",
+              "role_hint": "chapter",
+              "parent_title": ""
+            },
+            {
+              "title": "Notes",
+              "depth": 0,
+              "visual_order": 14,
+              "printed_page": "331",
+              "role_hint": "back_matter",
+              "parent_title": ""
+            },
+            {
+              "title": "Note on Sources",
+              "depth": 0,
+              "visual_order": 15,
+              "printed_page": "399",
+              "role_hint": "back_matter",
+              "parent_title": ""
+            },
+            {
+              "title": "Index",
+              "depth": 0,
+              "visual_order": 16,
+              "printed_page": "403",
+              "role_hint": "back_matter",
+              "parent_title": ""
+            }
+          ]
+        },
+        "derived_truth": {
+          "items": [
+            {
+              "title": "List of Illustrations",
+              "depth": 0,
+              "printed_page": null,
+              "file_idx": null,
+              "visual_order": 1,
+              "role_hint": "front_matter"
+            },
+            {
+              "title": "Preface",
+              "depth": 0,
+              "printed_page": null,
+              "file_idx": null,
+              "visual_order": 2,
+              "role_hint": "front_matter"
+            },
+            {
+              "title": "Introduction: Psychological Interiority versus Self-Talk",
+              "depth": 0,
+              "printed_page": 1,
+              "file_idx": null,
+              "visual_order": 3,
+              "role_hint": "chapter"
+            },
+            {
+              "title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+              "depth": 0,
+              "printed_page": null,
+              "file_idx": null,
+              "visual_order": 4,
+              "role_hint": "container"
+            },
+            {
+              "title": "1 The Perils of Imagination at the End of the Old Regime",
+              "depth": 1,
+              "printed_page": 21,
+              "file_idx": null,
+              "visual_order": 5,
+              "role_hint": "chapter",
+              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+            },
+            {
+              "title": "2 The Revolutionary Schooling of Imagination",
+              "depth": 1,
+              "printed_page": 60,
+              "file_idx": null,
+              "visual_order": 6,
+              "role_hint": "chapter",
+              "parent_title": "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
+            },
+            {
+              "title": "II THE POLITICS OF SELFHOOD",
+              "depth": 0,
+              "printed_page": null,
+              "file_idx": null,
+              "visual_order": 7,
+              "role_hint": "container"
+            },
+            {
+              "title": "3 Is There a Self in This Mental Apparatus?",
+              "depth": 1,
+              "printed_page": 103,
+              "file_idx": null,
+              "visual_order": 8,
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+              "depth": 1,
+              "printed_page": 139,
+              "file_idx": null,
+              "visual_order": 9,
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "5 Cousinian Hegemony",
+              "depth": 1,
+              "printed_page": 182,
+              "file_idx": null,
+              "visual_order": 10,
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+              "depth": 1,
+              "printed_page": 233,
+              "file_idx": null,
+              "visual_order": 11,
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+              "depth": 1,
+              "printed_page": 269,
+              "file_idx": null,
+              "visual_order": 12,
+              "role_hint": "chapter",
+              "parent_title": "II THE POLITICS OF SELFHOOD"
+            },
+            {
+              "title": "Epilogue",
+              "depth": 0,
+              "printed_page": 316,
+              "file_idx": null,
+              "visual_order": 13,
+              "role_hint": "chapter"
+            },
+            {
+              "title": "Notes",
+              "depth": 0,
+              "printed_page": 331,
+              "file_idx": null,
+              "visual_order": 14,
+              "role_hint": "back_matter"
+            },
+            {
+              "title": "Note on Sources",
+              "depth": 0,
+              "printed_page": 399,
+              "file_idx": null,
+              "visual_order": 15,
+              "role_hint": "back_matter"
+            },
+            {
+              "title": "Index",
+              "depth": 0,
+              "printed_page": 403,
+              "file_idx": null,
+              "visual_order": 16,
+              "role_hint": "back_matter"
+            }
+          ],
+          "endnotes_summary": {
+            "present": false,
+            "container_title": null,
+            "container_printed_page": null,
+            "container_visual_order": null,
+            "has_chapter_keyed_subentries_in_toc": false,
+            "subentry_pattern": null
+          }
+        },
+        "usage": {
+          "stage": "visual_toc.manual_input_extract",
+          "provider": "qwen",
+          "model_id": "qwen3.5-plus",
+          "request_count": 1,
+          "prompt_tokens": 1430,
+          "completion_tokens": 1215,
+          "total_tokens": 2645,
+          "doc_id": "7ba9bca783fd",
+          "slug": "",
+          "context": {
+            "source": "organization",
+            "images_count": 1
+          }
+        },
+        "timing": {
+          "duration_ms": 25448
+        }
+      }
+    ]
+  },
+  "pipeline": {
+    "ok": true,
+    "run_id": 50,
+    "page_count": 431,
+    "section_count": 9,
+    "note_count": 778,
+    "unit_count": 821,
+    "structure_state": "ready",
+    "manual_toc_required": false,
+    "blocking_reasons": [],
+    "review_counts": {},
+    "export_ready_real": true
+  },
+  "llm_repair": {
+    "cluster_count": 0,
+    "suggestion_count": 0,
+    "auto_applied_count": 0,
+    "suggestions": [],
+    "auto_applied": [],
+    "request_metrics": [],
+    "usage_events": [],
+    "llm_traces": [],
+    "usage_summary": {
+      "by_stage": {
+        "llm_repair.cluster_request": {
+          "request_count": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "by_model": {},
+      "total": {
+        "request_count": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "action_counts": {},
+    "auto_action_counts": {},
+    "synth_suggestion_count": 0,
+    "synth_auto_applied_count": 0,
+    "fuzzy_hit_count": 0,
+    "fuzzy_ambiguous_count": 0,
+    "caps": {
+      "matched_examples": 2,
+      "unmatched_note_items": 8,
+      "unmatched_anchors": 8,
+      "cluster_limit": 0
+    }
+  },
+  "rebuild": {},
+  "structure": {
+    "ok": true,
+    "status": "done",
+    "page_count": 431,
+    "chapter_count": 9,
+    "section_head_count": 56,
+    "note_region_count": 16,
+    "note_item_count": 778,
+    "body_anchor_count": 903,
+    "note_link_count": 928,
+    "suppressed_chapter_candidate_count": 0,
+    "partition_heading_conflict_count": 0,
+    "review_row_count": 0,
+    "footnote_count": 0,
+    "endnote_count": 778,
+    "linked_endnote_count": 753,
+    "structure_state": "ready",
+    "review_counts": {},
+    "blocking_reasons": [],
+    "link_summary": {
+      "matched": 753,
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 0,
+      "endnote_orphan_anchor": 0,
+      "ambiguous": 0,
+      "ignored": 175,
+      "fallback_count": 636,
+      "repair_count": 292
+    },
+    "page_partition_summary": {
+      "total_pages": 431,
+      "noise": 0,
+      "front_matter": 11,
+      "body": 337,
+      "note": 67,
+      "other": 16
+    },
+    "chapter_mode_summary": {
+      "footnote_primary": 0,
+      "chapter_endnotes": 0,
+      "book_endnotes": 9,
+      "body_only": 0,
+      "mixed_or_unclear": 0
+    },
+    "heading_review_summary": {
+      "chapter_candidate_count": 506,
+      "suppressed_candidate_count": 87,
+      "suppressed_reason_counts": {
+        "low_score": 67,
+        "sentence_like": 18,
+        "non_body_family": 2
+      },
+      "partition_conflict_count": 0
+    },
+    "heading_graph_summary": {
+      "toc_body_item_count": 9,
+      "resolved_anchor_count": 9,
+      "provisional_anchor_count": 0,
+      "section_node_count": 177,
+      "unresolved_titles_preview": [],
+      "boundary_conflict_titles_preview": [],
+      "promoted_section_titles_preview": [
+        "Epilogue"
+      ],
+      "demoted_chapter_titles_preview": [
+        "to the",
+        "Imagination in Socioeconomic Discourse (1): The Trade Corporation",
+        "The Worker's Imagination Further Scrutinized",
+        "tices and",
+        "Imagination in Socioeconomic Discourse (2): Credit",
+        "Self-Contained Persons: The Odd Trio",
+        "anxiety for which the discourse on imagination typically served as",
+        "restraints."
+      ],
+      "optimized_anchor_count": 2,
+      "residual_provisional_count": 0,
+      "residual_provisional_titles_preview": [],
+      "expanded_window_hit_count": 0,
+      "composite_heading_count": 143
+    },
+    "chapter_source_summary": {
+      "source": "visual_toc",
+      "chapter_level": 2,
+      "visual_toc_chapter_count": 9,
+      "legacy_chapter_count": 0,
+      "fallback_used": false
+    },
+    "visual_toc_conflict_count": 0,
+    "toc_export_coverage_summary": {
+      "resolved_body_items": 0,
+      "exported_body_items": 0,
+      "missing_body_items_preview": []
+    },
+    "toc_alignment_summary": {
+      "chapter_level_body_items": 9,
+      "exported_chapter_count": 9,
+      "missing_chapter_titles_preview": [],
+      "misleveled_titles_preview": [
+        "IT HE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION 1T h e P erils of Imagination at the End of the Old Regime",
+        "2T he Revolutionary Schooling of Imagination",
+        "4A n A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "5C ousinian Hegemony",
+        "6R eligious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "7A Palpable Self for the Socially Marginal: The Phrenological Alternative"
+      ],
+      "reanchored_titles_preview": [],
+      "missing_section_titles_preview": []
+    },
+    "toc_semantic_summary": {
+      "body_item_count": 15,
+      "chapter_item_count": 9,
+      "part_item_count": 0,
+      "back_matter_item_count": 0,
+      "first_body_pdf_page": 18,
+      "last_body_pdf_page": 333,
+      "body_span_ratio": 0.7332,
+      "nonbody_contamination_count": 0,
+      "mixed_level_chapter_count": 0
+    },
+    "toc_role_summary": {
+      "container": 2,
+      "endnotes": 1,
+      "chapter": 10,
+      "section": 7,
+      "post_body": 0,
+      "back_matter": 2,
+      "front_matter": 2
+    },
+    "container_titles": [
+      "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION",
+      "II THE POLITICS OF SELFHOOD"
+    ],
+    "post_body_titles": [],
+    "back_matter_titles": [
+      "Note on Sources",
+      "Index"
+    ],
+    "visual_toc_endnotes_summary": {},
+    "toc_semantic_contract_ok": true,
+    "toc_semantic_blocking_reasons": [],
+    "toc_export_coverage_ok": true,
+    "chapter_title_alignment_ok": true,
+    "chapter_section_alignment_ok": true,
+    "chapter_endnote_region_alignment_ok": true,
+    "chapter_endnote_region_alignment_summary": {},
+    "chapter_endnote_region_boundary_ok": true,
+    "chapter_endnote_region_cross_next_chapter_count": 0,
+    "chapter_endnote_region_cross_next_chapter_preview": [],
+    "chapter_endnote_region_audit_rows": [],
+    "manual_toc_required": false,
+    "manual_toc_ready": true,
+    "manual_toc_summary": {
+      "mode": "manual_pdf",
+      "page_count": 1,
+      "file_count": 1,
+      "image_count": 0,
+      "source_name": "目录.pdf"
+    },
+    "chapter_binding_summary": {
+      "region_count": 16,
+      "book_scope_region_count": 16,
+      "unbound_region_count": 0,
+      "unbound_region_ids_preview": [],
+      "unassigned_item_count": 0,
+      "unassigned_item_ids_preview": []
+    },
+    "note_capture_summary": {
+      "expected_anchor_count": 3,
+      "captured_note_count": 778,
+      "capture_ratio": 259.3333,
+      "sparse_capture_chapter_ids": [],
+      "dense_anchor_zero_capture_pages": [],
+      "chapters": [
+        {
+          "chapter_id": "toc-ch-001-introductionpsychologica",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 6,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-002-1theperilsofimaginationa",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 1,
+          "captured_note_count": 0,
+          "capture_ratio": 0.0
+        },
+        {
+          "chapter_id": "toc-ch-003-2therevolutionaryschooli",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 86,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 100,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 134,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-006-5cousinianhegemony",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 2,
+          "captured_note_count": 44,
+          "capture_ratio": 22.0
+        },
+        {
+          "chapter_id": "toc-ch-007-6religiousandsecularacce",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 100,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 69,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-009-epilogue",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 239,
+          "capture_ratio": 1.0
+        }
+      ]
+    },
+    "footnote_synthesis_summary": {
+      "book_type": "endnote_only",
+      "status": "not_applicable",
+      "reason": "book_type=endnote_only"
+    },
+    "chapter_link_contract_summary": {
+      "chapter_count": 9,
+      "contract_required_count": 8,
+      "failed_chapter_ids": []
+    },
+    "book_endnote_stream_summary": {
+      "chapter_count": 8,
+      "chapters_with_endnote_stream": [
+        "toc-ch-001-introductionpsychologica",
+        "toc-ch-003-2therevolutionaryschooli",
+        "toc-ch-004-3isthereaselfinthismenta",
+        "toc-ch-005-4anaprioriselfforthebour",
+        "toc-ch-006-5cousinianhegemony",
+        "toc-ch-007-6religiousandsecularacce",
+        "toc-ch-008-7apalpableselfforthesoci",
+        "toc-ch-009-epilogue"
+      ],
+      "high_concentration_chapter_ids": [
+        "toc-ch-004-3isthereaselfinthismenta",
+        "toc-ch-005-4anaprioriselfforthebour",
+        "toc-ch-007-6religiousandsecularacce",
+        "toc-ch-009-epilogue"
+      ],
+      "chapters": [
+        {
+          "chapter_id": "toc-ch-001-introductionpsychologica",
+          "item_count": 6,
+          "projection_mode_counts": {
+            "book_fallback_projected": 6
+          }
+        },
+        {
+          "chapter_id": "toc-ch-003-2therevolutionaryschooli",
+          "item_count": 86,
+          "projection_mode_counts": {
+            "book_projected": 86
+          }
+        },
+        {
+          "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
+          "item_count": 100,
+          "projection_mode_counts": {
+            "book_projected": 100
+          }
+        },
+        {
+          "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
+          "item_count": 134,
+          "projection_mode_counts": {
+            "book_projected": 134
+          }
+        },
+        {
+          "chapter_id": "toc-ch-006-5cousinianhegemony",
+          "item_count": 44,
+          "projection_mode_counts": {
+            "book_marker_projected": 17,
+            "book_projected": 27
+          }
+        },
+        {
+          "chapter_id": "toc-ch-007-6religiousandsecularacce",
+          "item_count": 100,
+          "projection_mode_counts": {
+            "book_projected": 100
+          }
+        },
+        {
+          "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
+          "item_count": 69,
+          "projection_mode_counts": {
+            "book_projected": 69
+          }
+        },
+        {
+          "chapter_id": "toc-ch-009-epilogue",
+          "item_count": 239,
+          "projection_mode_counts": {
+            "book_projected": 239
+          }
+        }
+      ]
+    },
+    "freeze_note_unit_summary": {
+      "chapter_view_note_unit_count": 778,
+      "owner_fallback_note_unit_count": 0,
+      "unresolved_note_item_count": 0,
+      "unresolved_note_item_ids_preview": []
+    },
+    "chapter_issue_counts": {
+      "chapter_issue_count": 0,
+      "frozen_ref_leak_chapter_count": 0,
+      "raw_marker_leak_chapter_count": 0,
+      "local_ref_contract_broken_chapter_count": 0
+    },
+    "chapter_issue_summary": [
+      {
+        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "title": "Introduction: Psychological Interiority versus Self-Talk",
+        "path": "chapters/001-Introduction Psychological Interiority versus Self-Talk.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-002-1theperilsofimaginationa",
+        "title": "1 The Perils of Imagination at the End of the Old Regime",
+        "path": "chapters/002-1 The Perils of Imagination at the End of the Old Regime.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-003-2therevolutionaryschooli",
+        "title": "2 The Revolutionary Schooling of Imagination",
+        "path": "chapters/003-2 The Revolutionary Schooling of Imagination.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
+        "title": "3 Is There a Self in This Mental Apparatus?",
+        "path": "chapters/004-3 Is There a Self in This Mental Apparatus.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
+        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "path": "chapters/005-4 An A Priori Self for the Bourgeois Male Victor Cousin’s Project.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-006-5cousinianhegemony",
+        "title": "5 Cousinian Hegemony",
+        "path": "chapters/006-5 Cousinian Hegemony.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-007-6religiousandsecularacce",
+        "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "path": "chapters/007-6 Religious and Secular Access to the Vie Intérieure Renan at the Crossroads.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
+        "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "path": "chapters/008-7 A Palpable Self for the Socially Marginal The Phrenological Alternative.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      },
+      {
+        "chapter_id": "toc-ch-009-epilogue",
+        "title": "Epilogue",
+        "path": "chapters/009-Epilogue.md",
+        "frozen_ref_leak": false,
+        "raw_marker_leak": false,
+        "missing_definition_count": 0,
+        "orphan_definition_count": 0,
+        "local_refs_closed": true
+      }
+    ],
+    "export_drift_summary": {
+      "legacy_footnote_ref_count": 0,
+      "legacy_endnote_ref_count": 0,
+      "legacy_en_bracket_ref_count": 0,
+      "legacy_note_token_count": 0,
+      "orphan_local_definition_count": 0,
+      "orphan_local_ref_count": 0
+    },
+    "chapter_local_endnote_contract_ok": true,
+    "export_ready_test": true,
+    "export_ready_real": true,
+    "validation_needs_human_review": false,
+    "validation_reason_counts": {}
+  },
+  "placeholders": {
+    "ok": true,
+    "body_unit_count": 43,
+    "note_unit_count": 778,
+    "changed_page_count": 326,
+    "translated_chars": 1015039,
+    "translated_paras": 1628,
+    "retry_summary": {
+      "execution_mode": "test",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      },
+      "failed_locations": [],
+      "manual_required_locations": [],
+      "next_failed_location": null,
+      "blocking_export": false,
+      "blocking_reason": ""
+    }
+  },
+  "export": {
+    "ok": false,
+    "blocked": false,
+    "file_count": 10,
+    "chapter_count": 9,
+    "zip_size": 355432,
+    "execution_mode": "test",
+    "local_ref_total": 667,
+    "local_def_total": 531,
+    "unique_local_ref_count": 127,
+    "unique_local_def_count": 127,
+    "orphan_local_definition_count": 0,
+    "orphan_local_ref_count": 0,
+    "orphan_local_definitions_preview": [],
+    "orphan_local_refs_preview": [],
+    "pending_placeholder_count": 0,
+    "raw_note_heading_leak_count": 0,
+    "legacy_footnote_ref_count": 0,
+    "legacy_endnote_ref_count": 0,
+    "legacy_en_bracket_ref_count": 0,
+    "legacy_note_token_count": 0,
+    "forbidden_section_heading_count": 0,
+    "expected_note_count": 778,
+    "chapter_local_endnote_contract_ok": true,
+    "export_semantic_contract_ok": true,
+    "front_matter_leak_detected": false,
+    "toc_residue_detected": false,
+    "mid_paragraph_heading_detected": false,
+    "duplicate_paragraph_detected": false,
+    "preliminary_export_ok": true,
+    "biopolitics_export_contract_ok": true,
+    "biopolitics_export_audit": {
+      "applicable": false,
+      "ok": true
+    },
+    "export_drift_summary": {
+      "legacy_footnote_ref_count": 0,
+      "legacy_endnote_ref_count": 0,
+      "legacy_en_bracket_ref_count": 0,
+      "legacy_note_token_count": 0,
+      "orphan_local_definition_count": 0,
+      "orphan_local_ref_count": 0
+    },
+    "latest_export_zip_saved": true,
+    "latest_export_zip_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.zip",
+    "latest_export_zip_folder": "post-revolutionary",
+    "latest_export_zip_reason": "",
+    "stale_export_artifact_detected": false,
+    "export_artifact_status": "ready",
+    "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest_export_status.json",
+    "chapters": [
+      "Introduction: Psychological Interiority versus Self-Talk",
+      "1 The Perils of Imagination at the End of the Old Regime",
+      "2 The Revolutionary Schooling of Imagination",
+      "3 Is There a Self in This Mental Apparatus?",
+      "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project"
+    ],
+    "chapter_stats_preview": [
+      {
+        "title": "Introduction: Psychological Interiority versus Self-Talk",
+        "path": "chapters/001-Introduction Psychological Interiority versus Self-Talk.md",
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 6,
+        "local_def_total": 6,
+        "unique_local_refs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "unique_local_defs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "1 The Perils of Imagination at the End of the Old Regime",
+        "path": "chapters/002-1 The Perils of Imagination at the End of the Old Regime.md",
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_refs": [],
+        "unique_local_defs": [],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "2 The Revolutionary Schooling of Imagination",
+        "path": "chapters/003-2 The Revolutionary Schooling of Imagination.md",
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 108,
+        "local_def_total": 84,
+        "unique_local_refs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50",
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84"
+        ],
+        "unique_local_defs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50",
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84"
+        ],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "3 Is There a Self in This Mental Apparatus?",
+        "path": "chapters/004-3 Is There a Self in This Mental Apparatus.md",
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 104,
+        "local_def_total": 97,
+        "unique_local_refs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50",
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "97"
+        ],
+        "unique_local_defs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50",
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "97"
+        ],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      },
+      {
+        "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "path": "chapters/005-4 An A Priori Self for the Bourgeois Male Victor Cousin’s Project.md",
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [],
+        "local_ref_total": 143,
+        "local_def_total": 127,
+        "unique_local_refs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50",
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108",
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116",
+          "117",
+          "118",
+          "119",
+          "120",
+          "121",
+          "122",
+          "123",
+          "124",
+          "125",
+          "126",
+          "127"
+        ],
+        "unique_local_defs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50",
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108",
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116",
+          "117",
+          "118",
+          "119",
+          "120",
+          "121",
+          "122",
+          "123",
+          "124",
+          "125",
+          "126",
+          "127"
+        ],
+        "local_numbering_starts_at_one": true,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "section_heading_total": 0,
+        "forbidden_section_heading_count": 0,
+        "forbidden_section_heading_preview": []
+      }
+    ],
+    "full_audit_can_ship": false,
+    "full_audit_blocking_issue_count": 1,
+    "full_audit_report_path": "/Users/hao/OCRandTranslation/output/fnm_book_audits/Goldstein.json",
+    "full_audit_summary": {
+      "must_fix_before_next_book": [
+        {
+          "path": "__book__/organization_depth",
+          "issue_codes": [
+            "export_depth_too_shallow",
+            "toc_organization_mismatch"
+          ]
+        }
+      ],
+      "recommended_followups": [
+        {
+          "issue_code": "chapter_boundary_missing_tail",
+          "count": 1
+        },
+        {
+          "issue_code": "export_depth_too_shallow",
+          "count": 1
+        },
+        {
+          "issue_code": "toc_organization_mismatch",
+          "count": 1
+        }
+      ]
+    }
+  },
+  "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.Goldstein.test.zip",
+  "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.test.zip",
+  "zip_written": true,
+  "zip_reason": ""
+}

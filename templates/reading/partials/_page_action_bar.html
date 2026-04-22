@@ -1,0 +1,48 @@
+<div class="page-action-bar" id="pageActionBar">
+  <div class="page-action-bar-main">
+    {% if current_view == 'fnm' %}
+    <button type="button" class="btn btn-pri" id="pageEditorOpenBtn" disabled title="FNM 诊断页为只读视图">
+      FNM 诊断页只读
+    </button>
+    {% else %}
+    <button type="button" class="btn btn-pri" id="pageEditorOpenBtn" onclick="openPageEditor();">
+      编辑本页段落
+    </button>
+    <button type="button" class="btn btn-gho"
+            onclick="triggerGlossaryRetranslatePreview({{ cur_page_bp }}, 0, this);"
+            {% if glossary_retranslate_blocked %}disabled title="{{ glossary_retranslate_block_reason }}"{% endif %}>
+      从本页起按当前词典补重译
+    </button>
+    <button type="button" class="btn btn-gho"
+            onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, target=('custom' if custom_model_enabled else ('builtin:' ~ model_key))) }}', this);">
+      {% if custom_model_enabled %}
+      用自定义模型（{{ current_model_label }}）重译本页
+      {% else %}
+      用{{ current_model_label }}重译本页
+      {% endif %}
+    </button>
+    {% if has_pdf %}
+    <button type="button" class="btn btn-gho" id="reparsePageBtn" onclick="confirmReparsePage({{ cur_page_bp }});">
+      强制 OCR 重解析本页
+    </button>
+    {% endif %}
+    {% endif %}
+  </div>
+  <div class="page-action-bar-note">
+    {% if current_view == 'fnm' %}
+      {% if fnm_section %}
+      当前节：{{ fnm_section.section_title or fnm_section.section_id }}。
+      {% endif %}
+      当前页来自 FNM 诊断投影；此视图只用于核对结构、脚注和导出结果，不支持整页编辑。
+    {% else %}
+      {% if page_manual_segment_count %}
+      当前页已有 {{ page_manual_segment_count }} 段人工维护内容。重译、强制 OCR 重解析都会覆盖本页人工结构与文本。
+      {% elif has_pdf %}
+      强制 OCR 重解析会重做这一页版面解析，并用新的页面结构覆盖当前页译文。
+      {% endif %}
+      {% if glossary_retranslate_blocked %}
+      {{ glossary_retranslate_block_reason }}
+      {% endif %}
+    {% endif %}
+  </div>
+</div>

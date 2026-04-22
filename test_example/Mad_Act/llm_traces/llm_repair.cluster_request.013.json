@@ -1,0 +1,381 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote\",\n  \"chapter_title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n  \"page_range\": [\n    19,\n    32\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 19,\n      \"ocr_excerpt\": \"# Mad acts, mad words, and mad people in Chinese medicine and law I have a two-phrase saying: “At first you’re crazy. Past the immortals’ peak, you’re a divine immortal.” $ ^{1} $ 我有兩句俗話 初頭是瘋癲 過了仙嶺是神仙 Lin Shiyuan 林時元, 1763 Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest officials in the province interrogated Lin to assess whether these were treasonous words in disguise, he spoke of dragon mothers and dream revelations, and claimed to be “the prime teacher-worthy” (第一師賢). The saying that Lin cited to prove he was not insane may have swayed listeners in other circumstances, but Lin’s relatives and neighbors insisted he was mad. $ ^{2} $ When asked what illness he suffered from, he replied: “In the third month of last year, I had a bit of a dizziness illness; they all said I was crazy and they invited a Taoist master to treat\"\n    },\n    {\n      \"page_no\": 21,\n      \"ocr_excerpt\": \"### 1.1 Historiography: insights and oversights Madness has just begun to attract the attention of historians of China. Vivien Ng's Madness in Late Imperial China (1990), until recently the only book on this topic, examined the way mad people were handled in Qing society and how their treatment changed over time. Ng was the first scholar to dissect a number of legal cases in which madness played a role, but the book's main thesis—that madness was transformed \\\"from an illness to a form of criminal deviance\\\" in the eighteenth century—is unpersuasive. Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe sentences upon those who killed someone in a fit of madness. Ng argued that these measures, which she attributed to a more-assumed-than-argued Manchu obsession with social control, represented a sea change in Chinese attitudes toward madness. But the “from illness to deviance” thesis is largely an artifact of the way Ng staged her documents. $ ^{4} $ When Ng claims that legal views replaced medical ones, ...\"\n    },\n    {\n      \"page_no\": 27,\n      \"ocr_excerpt\": \"of madness” (expériences de la folie) that appeared so often in Foucault’s book also seemed to imply a common object to all these experiences. “Madness” in History of Madness thus meant at least three things: a) the “notions, institutions, juridical and police measures, and scientific concepts” that created historically shifting experiences of madness; b) the Ding an sich (“madness itself”)—carefully black-boxed by Foucault—that tied this ensemble together; and c) (crucially for Foucault’s Kantian critique of subject-centered philosophies) the entity the silencing of which was the transcendental condition of possibility of all the “experiences” discussed in the book. This tension is probably part of what still makes Foucault’s book uniquely attractive. I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, ...\"\n    },\n    {\n      \"page_no\": 28,\n      \"ocr_excerpt\": \"into an intelligible research object. Throughout, I shall retain Foucault's sensitivity to how specific historical objects emerge, and to how discourses take roots in social practices. ### 1.3 Substances and their referents: “what is madness?” and what is “madness”? Meaning and referentiality are immensely difficult philosophical issues that I will not attempt to solve. But deflecting metaphysical questions is a pre-condition for understanding how referents emerge historically—that is, how practices attach words to specific realities. Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and hand ...\"\n    },\n    {\n      \"page_no\": 29,\n      \"ocr_excerpt\": \"“acts, words, or people” because documents rarely problematized madness as a whole, and because making such a distinction sidesteps the distracting question of what madness is. “Madness” did not precede the representations that people made of “it” (remember the longhand). And what held together demonic possession, postpartum confusion, and furious fits occasioned by high fevers was not a common ontological substrate, but notions that Qing people found intelligibly related: mainly kuang 狂, feng 瘋, and dian 顛／癲. None of these terms was exclusive to any field. Ritual specialists used them; so did doctors and legislators. And most texts used these words to label similar symptoms. What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The legal and medical practices I study often relied on this self-evidence, on people’s intuition that some acts naturally deserved to be called kuang, dian, or feng, three words that usually meant “mad” or “acting madly” in the same vague sense as the English words I just tran ...\"\n    },\n    {\n      \"page_no\": 30,\n      \"ocr_excerpt\": \"statements meaningful and consequential. A “script” is a scenario according to which a process—e.g., the course of an illness or a crime—was understood or expected to unfold. These scripts were templates for describing reality, but also interpretive frameworks that guided people’s interventions in fluid processes. Physicians deployed such scripts when they treated patients, judicial officials when they sentenced crimes. To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“tables,” “burrowing animals”). Categories contain more than prototypes, but their members gradually radiate away from the prototypical hub. A three-legged chair is thus a less prototypical chair than a four-legged one, the platypus a less prototypical mammal than the elephant. Since prototypes also apply to the way we interpret events, I will call “prototypical scripts” the recurring scenarios by which experts explained how illnesses or crimes took place. The script “internal depletion occurs → Wind intrudes → illness ensues,” for ...\"\n    },\n    {\n      \"page_no\": 32,\n      \"ocr_excerpt\": \"evidence also exists about how madness was handled in less literate social circles, often but not always through religious ritual. In the interrelated ways in which they explained and handled madness, the three contemporaneous fields of homicide law, medicine, and trials for sedition form a manifold cultural formation, a network of discourses and practices that is most profitably studied as a whole if we want to appreciate what any of them meant. $ ^{23} $ To understand why Qing law discussed insanity and handled “mad criminals” the way it did, we need to compare it to the medical and religious approaches that were also current at the time. And we shall appreciate the nature of medical treatments all the better if we grasp the ways in which other fields handled mad behavior. Since madness was never an important focus of medical reflections, changes in medical views of madness are difficult to study. Kuang was the object of no specialized literature, and no debate concerning it had any major impact on doctrinal developments. But since late imperial physicians were expected to treat all disorders—from furor to furuncles—the way they handled any illness usually depended on how they un ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00002\",\n      \"marker\": \"2\",\n      \"page_no\": 19,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest off ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00005\",\n      \"marker\": \"4\",\n      \"page_no\": 21,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe se ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00018\",\n      \"marker\": \"17\",\n      \"page_no\": 27,\n      \"paragraph_index\": 2,\n      \"source_text\": \"I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writ ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00019\",\n      \"marker\": \"18\",\n      \"page_no\": 27,\n      \"paragraph_index\": 2,\n      \"source_text\": \"I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writ ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00020\",\n      \"marker\": \"19\",\n      \"page_no\": 28,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fic ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00021\",\n      \"marker\": \"20\",\n      \"page_no\": 28,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fic ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00022\",\n      \"marker\": \"21\",\n      \"page_no\": 29,\n      \"paragraph_index\": 2,\n      \"source_text\": \"What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00023\",\n      \"marker\": \"22\",\n      \"page_no\": 30,\n      \"paragraph_index\": 1,\n      \"source_text\": \"To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“ ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
+      "chapter_title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        19,
+        32
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 77411,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00002",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 19,
+          "paragraph_index": 3,
+          "char_start": 600,
+          "char_end": 608,
+          "source_marker": "$ ^{2} $",
+          "normalized_marker": "2",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest officials in the province interrogated Lin to assess whether these were treasonous words in disguise, he spoke of dragon mothers and dream revelations, and claimed to be “the prime teacher-worthy” (第一師賢). The saying that Lin cited to prove he was not insane may have swayed listeners in other circumstances, but Lin’s relatives and neighbors insisted he was mad. $ ^{2} $ When asked what illness he suffered from, he replied: “In the third month of last year, I had a bit of a dizziness illness; they all said I was crazy and they invited a Taoist master to treat",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77414,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00005",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 21,
+          "paragraph_index": 1,
+          "char_start": 582,
+          "char_end": 590,
+          "source_marker": "$ ^{4} $",
+          "normalized_marker": "4",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe sentences upon those who killed someone in a fit of madness. Ng argued that these measures, which she attributed to a more-assumed-than-argued Manchu obsession with social control, represented a sea change in Chinese attitudes toward madness. But the “from illness to deviance” thesis is largely an artifact of the way Ng staged her documents. $ ^{4} $ When Ng claims that legal views replaced medical ones, it is in fact her analytical gaze that leaps from medical to legal documents, never to look back. As I shall show in chapters 11 to 15, medical, legal, religious, and popular views often overlapped, and they kept interacting in concrete social contexts throughout Qing times. Even Qing law consistently treated insanity as an illness.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77428,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00018",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 27,
+          "paragraph_index": 2,
+          "char_start": 485,
+          "char_end": 487,
+          "source_marker": "¹⁷",
+          "normalized_marker": "17",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, people, ways of speaking, and forms of behavior.¹⁷ I also find these words by Foucault suggestive: “I have personally never written that madness does not exist, but this could be written, because, for phenomenology, madness exists but it is not a thing, whereas we should say on the contrary that madness does not exist, but that it is not nothing for that reason (mais qu’elle n’est pas rien pour autant).”¹⁸ Words have referents even if these are not natural objects. One of my aims will be to highlight this artificial unity of “madness” and to refashion the resulting dispersion",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77429,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00019",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 27,
+          "paragraph_index": 2,
+          "char_start": 844,
+          "char_end": 846,
+          "source_marker": "¹⁸",
+          "normalized_marker": "18",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, people, ways of speaking, and forms of behavior.¹⁷ I also find these words by Foucault suggestive: “I have personally never written that madness does not exist, but this could be written, because, for phenomenology, madness exists but it is not a thing, whereas we should say on the contrary that madness does not exist, but that it is not nothing for that reason (mais qu’elle n’est pas rien pour autant).”¹⁸ Words have referents even if these are not natural objects. One of my aims will be to highlight this artificial unity of “madness” and to refashion the resulting dispersion",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77430,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00020",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 28,
+          "paragraph_index": 2,
+          "char_start": 271,
+          "char_end": 280,
+          "source_marker": "$ ^{19} $",
+          "normalized_marker": "19",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and handled in culturally meaningful fashion. No timeless and pre-cultural “madness” (were we even able to pinpoint such a thing) would suffice to make these representations and practices intelligible. $ ^{20} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77431,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00021",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 28,
+          "paragraph_index": 2,
+          "char_start": 853,
+          "char_end": 862,
+          "source_marker": "$ ^{20} $",
+          "normalized_marker": "20",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and handled in culturally meaningful fashion. No timeless and pre-cultural “madness” (were we even able to pinpoint such a thing) would suffice to make these representations and practices intelligible. $ ^{20} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77432,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00022",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 29,
+          "paragraph_index": 2,
+          "char_start": 227,
+          "char_end": 236,
+          "source_marker": "$ ^{21} $",
+          "normalized_marker": "21",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The legal and medical practices I study often relied on this self-evidence, on people’s intuition that some acts naturally deserved to be called kuang, dian, or feng, three words that usually meant “mad” or “acting madly” in the same vague sense as the English words I just translated them by.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77433,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00023",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 30,
+          "paragraph_index": 1,
+          "char_start": 127,
+          "char_end": 136,
+          "source_marker": "$ ^{22} $",
+          "normalized_marker": "22",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“tables,” “burrowing animals”). Categories contain more than prototypes, but their members gradually radiate away from the prototypical hub. A three-legged chair is thus a less prototypical chair than a four-legged one, the platypus a less prototypical mammal than the elephant.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 19,
+        "file_idx": 18,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "# Mad acts, mad words, and mad people in Chinese medicine and law I have a two-phrase saying: “At first you’re crazy. Past the immortals’ peak, you’re a divine immortal.” $ ^{1} $ 我有兩句俗話 初頭是瘋癲 過了仙嶺是神仙 Lin Shiyuan 林時元, 1763 Lin Shiyuan was captured after he threw a roof tile to the governor of Fujian. Two slips of red paper attached to the tile were covered with “crazy and nonsensical words that are difficult to understand” (狂謬難解之詞). When the three highest officials in the province interrogated Lin to assess whether these were treasonous words in disguise, he spoke of dragon mothers and dream revelations, and claimed to be “the prime teacher-worthy” (第一師賢). The saying that Lin cited to prove he was not insane may have swayed listeners in other circumstances, but Lin’s relatives and neighbors insisted he was mad. $ ^{2} $ When asked what illness he suffered from, he replied: “In the third month of last year, I had a bit of a dizziness illness; they all said I was crazy and they invited a Taoist master to treat",
+        "byte_size": 136277,
+        "sha256": "a8b77d28e78197c997a11b96479547357fcd39742be66c9d6af6cacf5e6429cd"
+      },
+      {
+        "page_no": 21,
+        "file_idx": 20,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "### 1.1 Historiography: insights and oversights Madness has just begun to attract the attention of historians of China. Vivien Ng's Madness in Late Imperial China (1990), until recently the only book on this topic, examined the way mad people were handled in Qing society and how their treatment changed over time. Ng was the first scholar to dissect a number of legal cases in which madness played a role, but the book's main thesis—that madness was transformed \"from an illness to a form of criminal deviance\" in the eighteenth century—is unpersuasive. Ng’s reasoning rests on two Qing developments: 1) in the 1730s, the government ordered families to confine their mad relatives even when they had committed no crime; 2) in the eighteenth century, legislators meted out increasingly severe sentences upon those who killed someone in a fit of madness. Ng argued that these measures, which she attributed to a more-assumed-than-argued Manchu obsession with social control, represented a sea change in Chinese attitudes toward madness. But the “from illness to deviance” thesis is largely an artifact of the way Ng staged her documents. $ ^{4} $ When Ng claims that legal views replaced medical ones, it is in fact her analytical gaze that leaps from medical to legal documents, never to look back. As I shall show in chapters 11 to 15, medical, legal, religious, and popular views often overlapped, ...",
+        "byte_size": 137119,
+        "sha256": "99e913c66f890e6901ac077043606fb9bc24afe8778c89f609008c879d7f8bd9"
+      },
+      {
+        "page_no": 27,
+        "file_idx": 26,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "of madness” (expériences de la folie) that appeared so often in Foucault’s book also seemed to imply a common object to all these experiences. “Madness” in History of Madness thus meant at least three things: a) the “notions, institutions, juridical and police measures, and scientific concepts” that created historically shifting experiences of madness; b) the Ding an sich (“madness itself”)—carefully black-boxed by Foucault—that tied this ensemble together; and c) (crucially for Foucault’s Kantian critique of subject-centered philosophies) the entity the silencing of which was the transcendental condition of possibility of all the “experiences” discussed in the book. This tension is probably part of what still makes Foucault’s book uniquely attractive. I would like to study shifting conceptions and practices without presuming that they were hemmed around any kind of “madness in itself,” however ungrasable. But without an ontological coagulant, what are we studying when we claim to be writing the history of “madness”?¹⁶ Harnessing Foucault’s (1976) critique of the notion of “sexuality,” we could say that “madness” brings together in an artificial unity a disparate array of notions, people, ways of speaking, and forms of behavior.¹⁷ I also find these words by Foucault suggestive: “I have personally never written that madness does not exist, but this could be written, because, for ...",
+        "byte_size": 143556,
+        "sha256": "6ae6b0cbf8e2a2b14e12491fd896b813b4614ac75874a17a80d404631e054d09"
+      },
+      {
+        "page_no": 28,
+        "file_idx": 27,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "into an intelligible research object. Throughout, I shall retain Foucault's sensitivity to how specific historical objects emerge, and to how discourses take roots in social practices. ### 1.3 Substances and their referents: “what is madness?” and what is “madness”? Meaning and referentiality are immensely difficult philosophical issues that I will not attempt to solve. But deflecting metaphysical questions is a pre-condition for understanding how referents emerge historically—that is, how practices attach words to specific realities. Nouns are the Trojan horses of ontology. “A substantive misleads one into looking for a substance. One populates the world with ethereal beings, the shadowy companions of the substantive. One could legitimately call the science of these fictitious entities metaphysics.” $ ^{19} $ Speaking of “representations of madness,” for instance, implies that people observed something called “madness” and then created representations of “it.” But there is no need to identify a “shadowy companion”—a substance—behind the substantive “madness” before we go further. What counts as madness in any culture is defined socially, expressed through cultural idioms, and handled in culturally meaningful fashion. No timeless and pre-cultural “madness” (were we even able to pinpoint such a thing) would suffice to make these representations and practices intelligible. $ ^{20 ...",
+        "byte_size": 128688,
+        "sha256": "387709597b969b0f082b61207092b26cdf7fc4db1335b0308af5c86afe635d0b"
+      },
+      {
+        "page_no": 29,
+        "file_idx": 28,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "“acts, words, or people” because documents rarely problematized madness as a whole, and because making such a distinction sidesteps the distracting question of what madness is. “Madness” did not precede the representations that people made of “it” (remember the longhand). And what held together demonic possession, postpartum confusion, and furious fits occasioned by high fevers was not a common ontological substrate, but notions that Qing people found intelligibly related: mainly kuang 狂, feng 瘋, and dian 顛／癲. None of these terms was exclusive to any field. Ritual specialists used them; so did doctors and legislators. And most texts used these words to label similar symptoms. What makes comparisons possible is that Chinese people—experts and commoners alike—identified as mad the same disorders of behavior, speech, affect, and perception that we usually include in an intuitive category of “madness.” $ ^{21} $ The legal and medical practices I study often relied on this self-evidence, on people’s intuition that some acts naturally deserved to be called kuang, dian, or feng, three words that usually meant “mad” or “acting madly” in the same vague sense as the English words I just translated them by. I will still strive to understand what each of these terms meant, but I will not do so in the abstract. We could apply to “madness” what Ludwig Wittgenstein said about “time”: “If I kn ...",
+        "byte_size": 133966,
+        "sha256": "a32a0dc5f4cdd3d79cd291c54dece8ceefc12e4705cbb41c8be111217f63cf50"
+      },
+      {
+        "page_no": 30,
+        "file_idx": 29,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "statements meaningful and consequential. A “script” is a scenario according to which a process—e.g., the course of an illness or a crime—was understood or expected to unfold. These scripts were templates for describing reality, but also interpretive frameworks that guided people’s interventions in fluid processes. Physicians deployed such scripts when they treated patients, judicial officials when they sentenced crimes. To avoid making generalizations that will predictably not apply to all people of all periods, I use the notion of “prototype.” $ ^{22} $ Most definitions are prototypical in that they mark out the most typical members of a given category (“tables,” “burrowing animals”). Categories contain more than prototypes, but their members gradually radiate away from the prototypical hub. A three-legged chair is thus a less prototypical chair than a four-legged one, the platypus a less prototypical mammal than the elephant. Since prototypes also apply to the way we interpret events, I will call “prototypical scripts” the recurring scenarios by which experts explained how illnesses or crimes took place. The script “internal depletion occurs → Wind intrudes → illness ensues,” for instance, was omnipresent in medical treatises from the seventh and eighth centuries (see 3.3). New scripts emphasizing the pathology of mucus gradually replaced Wind-based ones and came to dominate ...",
+        "byte_size": 130758,
+        "sha256": "70c2666e3bc215bc903489442a48206499f72106da7f1d24fac7ff0e5d6c1bc2"
+      },
+      {
+        "page_no": 32,
+        "file_idx": 31,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "evidence also exists about how madness was handled in less literate social circles, often but not always through religious ritual. In the interrelated ways in which they explained and handled madness, the three contemporaneous fields of homicide law, medicine, and trials for sedition form a manifold cultural formation, a network of discourses and practices that is most profitably studied as a whole if we want to appreciate what any of them meant. $ ^{23} $ To understand why Qing law discussed insanity and handled “mad criminals” the way it did, we need to compare it to the medical and religious approaches that were also current at the time. And we shall appreciate the nature of medical treatments all the better if we grasp the ways in which other fields handled mad behavior. Since madness was never an important focus of medical reflections, changes in medical views of madness are difficult to study. Kuang was the object of no specialized literature, and no debate concerning it had any major impact on doctrinal developments. But since late imperial physicians were expected to treat all disorders—from furor to furuncles—the way they handled any illness usually depended on how they understood pathogenesis, vitality, and general therapeutic principles. I posit that changes in approaches to kuang can be explained only if we understand broader transformations in medical thinking. The ...",
+        "byte_size": 130422,
+        "sha256": "2b9aecbff9241cccef95355745d9a3b6a979b3bc85bbb4d9d406f0473822714e"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 7,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00018\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00019\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00021\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00018",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00019",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00021",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
+    "chapter_title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+    "request_mode": "ref_only_visual",
+    "parsed_actions": [
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00018",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00019",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00021",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00018",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00019",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00021",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00508",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00018",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 27 clearly shows superscript '16', but the anchor data incorrectly identifies it as marker '17'. This is a duplicate of the correct anchor (likely anchor-00017)."
+      },
+      {
+        "link_id": "link-00509",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00019",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 27 clearly shows superscript '17' at the end of the paragraph, but the anchor data incorrectly identifies it as marker '18'. This is a duplicate of the correct anchor (likely anchor-00018)."
+      },
+      {
+        "link_id": "link-00511",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00021",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR error: The text on page 28 clearly shows superscript '19' and '20', but the anchor data incorrectly identifies them as markers '20' and '21'. These are duplicates of the correct anchors."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 9000,
+    "completion_tokens": 304,
+    "total_tokens": 9304,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 7828
+  }
+}

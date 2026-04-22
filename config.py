@@ -3,11 +3,15 @@
 数据存储路径：项目目录下的 local_data/user_data/
 便于应用分发和便携使用。
 """
+import copy
 import json
+import logging
 import os
 import tempfile
+import threading
 import time
 import uuid as _uuid
+from model_capabilities import MODELS, normalize_builtin_model_key
 
 # 项目根目录（config.py 所在目录的父目录）
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -60,22 +64,16 @@ def normalize_doc_id(doc_id: str | None) -> str:
         return ""
     return raw
 
-MODELS = {
-    "deepseek-chat": {"id": "deepseek-chat", "label": "DeepSeek-Chat", "provider": "deepseek"},
-    "deepseek-reasoner": {"id": "deepseek-reasoner", "label": "DeepSeek-Reasoner", "provider": "deepseek"},
-    "qwen-plus": {"id": "qwen-plus", "label": "Qwen-Plus", "provider": "qwen"},
-    "qwen-max": {"id": "qwen-max", "label": "Qwen-Max", "provider": "qwen"},
-    "qwen-turbo": {"id": "qwen-turbo", "label": "Qwen-Turbo", "provider": "qwen"},
-}
-
 QWEN_BASE_URLS = {
     "cn": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "sg": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
     "us": "https://dashscope-us.aliyuncs.com/compatible-mode/v1",
 }
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-CUSTOM_MODEL_PROVIDER_TYPES = {"qwen", "deepseek", "openai_compatible"}
+CUSTOM_MODEL_PROVIDER_TYPES = {"qwen", "qwen_mt", "deepseek", "openai_compatible"}
 CUSTOM_MODEL_API_KEY_MODES = {"builtin_dashscope", "builtin_deepseek", "custom"}
+
+logger = logging.getLogger(__name__)
 
 
 def _default_custom_model_config() -> dict:
@@ -83,8 +81,7 @@ def _default_custom_model_config() -> dict:
 
 
 def _normalize_builtin_model_key(key) -> str:
-    normalized = str(key or "").strip()
-    return normalized if normalized in MODELS else ACTIVE_BUILTIN_MODEL_KEY_DEFAULT
+    return normalize_builtin_model_key(str(key or "").strip(), capability="translation")
 
 
 def _normalize_active_model_mode(value) -> str:
@@ -115,6 +112,11 @@ def _normalize_custom_model_config(value) -> dict:
             cfg["extra_body"]["enable_thinking"] = False
         cfg["base_url"] = ""
         cfg["custom_api_key"] = ""
+    elif cfg["provider_type"] == "qwen_mt":
+        cfg["api_key_mode"] = "builtin_dashscope"
+        cfg["base_url"] = ""
+        cfg["custom_api_key"] = ""
+        cfg["extra_body"] = {}
     elif cfg["provider_type"] == "deepseek":
         cfg["api_key_mode"] = "builtin_deepseek"
         cfg["base_url"] = ""
@@ -154,13 +156,15 @@ def _migrate_legacy_model_config(cfg: dict) -> tuple[dict, bool]:
         custom_model.update({
             "enabled": bool(legacy_name and legacy_enabled),
             "display_name": legacy_name,
-            "provider_type": provider_type if provider_type in {"qwen", "deepseek"} else "qwen",
+            "provider_type": provider_type if provider_type in {"qwen", "qwen_mt", "deepseek"} else "qwen",
             "model_id": legacy_name,
             "qwen_region": "cn",
-            "api_key_mode": "builtin_dashscope" if provider_type == "qwen" else "builtin_deepseek",
+            "api_key_mode": "builtin_dashscope" if provider_type in {"qwen", "qwen_mt"} else "builtin_deepseek",
         })
         if provider_type == "qwen":
             custom_model["extra_body"] = {"enable_thinking": False}
+        elif provider_type == "qwen_mt":
+            custom_model["extra_body"] = {}
         normalized["custom_model"] = custom_model
         changed = True
     normalized["custom_model"] = _normalize_custom_model_config(normalized.get("custom_model"))
@@ -358,6 +362,54 @@ def migrate_from_old_location():
         pass  # 迁移失败不影响使用
 
 
+
+def _migrate_visual_model_config(cfg: dict) -> tuple[dict, bool]:
+    """为自动视觉目录增加独立模型配置；首次迁移时与当前翻译模型对齐。"""
+    changed = False
+    normalized = dict(cfg or {})
+    if "active_visual_model_mode" not in normalized:
+        normalized["active_visual_model_mode"] = _normalize_active_model_mode(
+            normalized.get("active_model_mode", ACTIVE_MODEL_MODE_DEFAULT)
+        )
+        changed = True
+    else:
+        normalized["active_visual_model_mode"] = _normalize_active_model_mode(
+            normalized.get("active_visual_model_mode")
+        )
+
+    if "active_builtin_visual_model_key" not in normalized:
+        normalized["active_builtin_visual_model_key"] = normalize_builtin_model_key(
+            normalized.get("active_builtin_model_key"),
+            capability="vision",
+        )
+        changed = True
+    else:
+        normalized["active_builtin_visual_model_key"] = normalize_builtin_model_key(
+            normalized.get("active_builtin_visual_model_key"),
+            capability="vision",
+        )
+
+    if "visual_custom_model" not in normalized:
+        base = normalized.get("custom_model")
+        if isinstance(base, dict):
+            normalized["visual_custom_model"] = _normalize_custom_model_config(copy.deepcopy(base))
+        else:
+            normalized["visual_custom_model"] = _default_custom_model_config()
+        changed = True
+    else:
+        normalized["visual_custom_model"] = _normalize_custom_model_config(normalized.get("visual_custom_model"))
+
+    if (
+        normalized["active_visual_model_mode"] == "custom"
+        and not normalized["visual_custom_model"].get("enabled")
+    ):
+        normalized["active_visual_model_mode"] = "builtin"
+        changed = True
+
+    return normalized, changed
+
+
+
 def load_config() -> dict:
     """加载配置，自动迁移旧数据。"""
     # 首次加载时尝试从旧位置迁移
@@ -365,6 +417,8 @@ def load_config() -> dict:
     ensure_dirs()
     cfg = _safe_read_json(CONFIG_FILE, {})
     normalized, changed = _migrate_legacy_model_config(cfg)
+    normalized, v_changed = _migrate_visual_model_config(normalized)
+    changed = changed or v_changed
     if changed or normalized != cfg:
         save_config(normalized)
         return normalized
@@ -374,6 +428,7 @@ def load_config() -> dict:
 def save_config(cfg: dict):
     ensure_dirs()
     normalized, _changed = _migrate_legacy_model_config(cfg)
+    normalized, _v_changed = _migrate_visual_model_config(normalized)
     _atomic_write_json(CONFIG_FILE, normalized)
 
 
@@ -419,9 +474,9 @@ def get_glossary(doc_id: str = "") -> list:
     target_doc_id = (doc_id or get_current_doc_id() or "").strip()
     if not target_doc_id:
         return list(GLOSSARY_INIT)
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
-    raw = SQLiteRepository().get_app_state(_glossary_state_key(target_doc_id))
+    raw = SQLiteRepository().get_glossary_state(target_doc_id)
     if not raw:
         return list(GLOSSARY_INIT)
     try:
@@ -442,15 +497,15 @@ def set_glossary(glossary: list, doc_id: str = ""):
     target_doc_id = (doc_id or get_current_doc_id() or "").strip()
     if not target_doc_id:
         return
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     normalized = []
     for item in glossary or []:
         if not isinstance(item, (list, tuple)) or len(item) < 2:
             continue
         normalized.append([str(item[0] or ""), str(item[1] or "")])
-    SQLiteRepository().set_app_state(
-        _glossary_state_key(target_doc_id),
+    SQLiteRepository().set_glossary_state(
+        target_doc_id,
         json.dumps(normalized, ensure_ascii=False),
     )
 
@@ -607,6 +662,77 @@ def disable_custom_model():
     save_config(cfg)
 
 
+def get_active_visual_model_mode() -> str:
+    cfg = load_config()
+    return _normalize_active_model_mode(cfg.get("active_visual_model_mode"))
+
+
+def set_active_visual_model_mode(mode: str):
+    cfg = load_config()
+    cfg["active_visual_model_mode"] = _normalize_active_model_mode(mode)
+    save_config(cfg)
+
+
+def get_active_builtin_visual_model_key() -> str:
+    cfg = load_config()
+    return normalize_builtin_model_key(cfg.get("active_builtin_visual_model_key"), capability="vision")
+
+
+def set_active_builtin_visual_model_key(key: str):
+    cfg = load_config()
+    cfg["active_builtin_visual_model_key"] = normalize_builtin_model_key(key, capability="vision")
+    save_config(cfg)
+
+
+def get_visual_custom_model_config() -> dict:
+    cfg = load_config()
+    return _normalize_custom_model_config(cfg.get("visual_custom_model"))
+
+
+def save_visual_custom_model_config(visual_custom_model: dict):
+    cfg = load_config()
+    cfg["visual_custom_model"] = _normalize_custom_model_config(visual_custom_model)
+    save_config(cfg)
+
+
+def clear_visual_custom_model_config():
+    cfg = load_config()
+    cfg["visual_custom_model"] = _default_custom_model_config()
+    if _normalize_active_model_mode(cfg.get("active_visual_model_mode")) == "custom":
+        cfg["active_visual_model_mode"] = "builtin"
+    save_config(cfg)
+
+
+def enable_visual_custom_model():
+    cfg = load_config()
+    vcm = _normalize_custom_model_config(cfg.get("visual_custom_model"))
+    if vcm.get("enabled") and vcm.get("model_id"):
+        cfg["active_visual_model_mode"] = "custom"
+    save_config(cfg)
+
+
+def disable_visual_custom_model():
+    cfg = load_config()
+    cfg["active_visual_model_mode"] = "builtin"
+    save_config(cfg)
+
+
+def get_visual_model_key() -> str:
+    return get_active_builtin_visual_model_key()
+
+
+def set_visual_model_key(key: str):
+    set_active_builtin_visual_model_key(key)
+
+
+def get_visual_custom_model_name() -> str:
+    return str(get_visual_custom_model_config().get("model_id", "") or "").strip()
+
+
+def get_visual_custom_model_enabled() -> bool:
+    return get_active_visual_model_mode() == "custom"
+
+
 def get_model_key() -> str:
     return get_active_builtin_model_key()
 
@@ -653,11 +779,11 @@ def save_custom_model_selection(name: str, enabled: bool, base_key: str):
     custom_model = {
         "enabled": bool(str(name or "").strip() and _coerce_bool(enabled, False)),
         "display_name": str(name or "").strip(),
-        "provider_type": provider_type if provider_type in {"qwen", "deepseek"} else "qwen",
+        "provider_type": provider_type if provider_type in {"qwen", "qwen_mt", "deepseek"} else "qwen",
         "model_id": str(name or "").strip(),
         "base_url": "",
         "qwen_region": "cn",
-        "api_key_mode": "builtin_dashscope" if provider_type == "qwen" else "builtin_deepseek",
+        "api_key_mode": "builtin_dashscope" if provider_type in {"qwen", "qwen_mt"} else "builtin_deepseek",
         "custom_api_key": "",
         "extra_body": {"enable_thinking": False} if provider_type == "qwen" else {},
     }
@@ -677,7 +803,7 @@ def create_doc(
 ) -> str:
     """创建新文档目录，返回 doc_id。"""
     ensure_dirs()
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     doc_id = _uuid.uuid4().hex[:12]
     doc_dir = os.path.join(DOCS_DIR, doc_id)
@@ -705,7 +831,7 @@ def create_doc(
 
 def get_current_doc_id() -> str:
     """返回当前活跃文档 ID，无则返回空字符串。"""
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     doc_id = normalize_doc_id(SQLiteRepository().get_app_state("current_doc_id"))
     if doc_id and os.path.isdir(os.path.join(DOCS_DIR, doc_id)):
@@ -716,7 +842,7 @@ def get_current_doc_id() -> str:
 def set_current_doc(doc_id: str):
     """设置当前活跃文档。"""
     ensure_dirs()
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     normalized_doc_id = normalize_doc_id(doc_id)
     if not normalized_doc_id:
@@ -738,7 +864,7 @@ def get_doc_dir(doc_id: str = "") -> str:
 def list_docs() -> list[dict]:
     """列出所有文档的元数据，按创建时间倒序。"""
     ensure_dirs()
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     docs = SQLiteRepository().list_documents()
     for meta in docs:
@@ -752,7 +878,7 @@ def update_doc_meta(doc_id: str, **kwargs):
     doc_dir = get_doc_dir(doc_id)
     if not doc_dir:
         return
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     meta = get_doc_meta(doc_id)
     if not meta:
@@ -792,7 +918,7 @@ def get_doc_meta(doc_id: str = "") -> dict:
     doc_dir = get_doc_dir(doc_id)
     if not doc_dir:
         return {}
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     meta = SQLiteRepository().get_document(doc_id)
     return meta if isinstance(meta, dict) else {}
@@ -849,13 +975,42 @@ def set_upload_processing_preferences(
 def delete_doc(doc_id: str):
     """删除文档目录。"""
     import shutil
-    from sqlite_store import SQLiteRepository
+    from persistence.sqlite_store import SQLiteRepository
 
     is_current = get_current_doc_id() == doc_id
     doc_dir = os.path.join(DOCS_DIR, doc_id)
-    if os.path.isdir(doc_dir):
-        shutil.rmtree(doc_dir)
+
+    # 先做数据库清理（此时 doc.db 仍在原路径，级联删除可正常执行）
     SQLiteRepository().delete_document(doc_id)
+
     # 如果删除的是当前文档，清除 current
     if is_current:
         SQLiteRepository().set_app_state("current_doc_id", "")
+
+    # 再做文件系统清理：重命名后交给后台线程删除
+    if os.path.isdir(doc_dir):
+        cleanup_dir = os.path.join(DOCS_DIR, f".deleting-{doc_id}-{int(time.time() * 1000)}")
+        renamed = False
+        try:
+            os.replace(doc_dir, cleanup_dir)
+            renamed = True
+        except OSError:
+            cleanup_dir = doc_dir
+
+        if renamed:
+            def _cleanup_worker(path: str):
+                try:
+                    shutil.rmtree(path)
+                except Exception:
+                    logger.exception("后台清理文档目录失败 path=%s", path)
+
+            thread = threading.Thread(
+                target=_cleanup_worker,
+                args=(cleanup_dir,),
+                daemon=True,
+                name=f"doc-delete-{doc_id}",
+            )
+            thread.start()
+        elif os.path.isdir(cleanup_dir):
+            shutil.rmtree(cleanup_dir)
+

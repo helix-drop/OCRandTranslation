@@ -1,0 +1,655 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-004-leçondu31janvier1979:toc-ch-004-leçondu31janvier1979:endnote\",\n  \"chapter_title\": \"Leçon du 31 janvier 1979\",\n  \"page_range\": [\n    91,\n    106\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 91,\n      \"ocr_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement ...\"\n    },\n    {\n      \"page_no\": 96,\n      \"ocr_excerpt\": \"ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu deman ...\"\n    },\n    {\n      \"page_no\": 102,\n      \"ocr_excerpt\": \"qu'on a là le contraire d'un État commercial fermé. On a une ouverture commerciale étatisante. D'État économique, radicalement économique, est-ce que c'est le premier exemple dans l'histoire? Il faudrait le demander à des historiens qui comprennent l'histoire toujours encore mieux que moi. Mais, après tout, est-ce que Venise était un État radicalement économique? Est-ce qu'on peut dire que les Provinces-Unies au XVI $ ^{e} $ siècle, au XVII $ ^{e} $ encore, étaient un État économique? En tout cas, il me semble que par rapport à tout ce qui a été, depuis le XVIII $ ^{e} $ siècle, à la fois le fonctionnement, la justification et la programmation de la gouvernementalité, on a là quelque chose de nouveau. Et s'il est vrai que l'on reste bien dans une gouvernementalité de type libéral, vous voyez quel déplacement s'est opéré par rapport à ce qu'était le libéralisme programmé par les physiocrates, par Turgot, par les économistes du XVIII $ ^{e} $ siècle dont le problème était exactement inverse, puisqu'au XVIII $ ^{e} $ siècle ils avaient la tâche suivante à résoudre : soit un État qui existe, soit un État légitime, soit un État qui fonctionne déjà dans le style de la plénitude, de la co ...\"\n    },\n    {\n      \"page_no\": 104,\n      \"ocr_excerpt\": \"la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès de Bad Dürkheim encore en 1949, le Parti socialiste allemand reconnaît la validité historique et politique du principe de la lutte des classes et se fixe toujours comme objectif la socialisation des moyens de production<sup>36</sup>. Bon. [19]49, [19]50 on en est encore là. En 1955, Karl Schiller<sup>37</sup>, qui va devenir plus tard ministre de l'Économie et des Finances en Allemagne fédérale<sup>38</sup>, écrit un livre appelé bien sûr à un grand retentissement, puisqu'il porte le titre tout de même significatif de Socialisme et Concurrence<sup>39</sup>, c'est-à-dire non pas socialisme ou concurrence, mais socialisme et concurrence, dans lequel il pose, je ne sais pas si c'est la première fois, mais en tout cas c'est lui qui a donné le plus d'écho à cette formule qui va être désormais celle du socialisme allemand : « concurrence autant que possible et planification dans la mesure juste et nécessaire<sup>40</sup> ». Ça, c'est en 1955. En 1959, congrès de Bad Godesberg<sup>41</sup> dans lequel la social-démocratie allemande, premièrement, renonce au principe du passage à la socialisation des moyens de ...\"\n    },\n    {\n      \"page_no\": 106,\n      \"ocr_excerpt\": \"Godesberg, ce fameux congrès de la renonciation absolue aux thèmes les plus traditionnels de la social-démocratie, c'était bien sûr la rupture avec la théorie marxiste, c'était la rupture avec le socialisme marxiste, mais c'était en même temps, – et c'est en ceci que ce n'était pas simplement une trahison, ça ne peut l'être qu'en termes historiques généraux, si vous voulez, – l'acceptation de ce qui était en train de fonctionner déjà comme le consensus économique-politique du libéralisme allemand. C'était moins renoncer à telle ou telle partie du programme commun à la plupart des partis socialistes qu'entrer enfin dans le jeu de la gouvernementalité. Il ne restait plus qu'un pas à faire à la social-démocratie, c'était la rupture avec le modèle anglais et avec toutes les références à l'économie keynésienne. La chose est faite par Karl Schiller, encore lui, en 1963 puisque, là, il abandonne même la formule : « concurrence autant que possible et plani- fication dans la mesure où c'est nécessaire ». En [19]63, il pose le principe que toute planification même souple est dangereuse pour l'économie libérale $ ^{45} $. Alors ça y est. La social-démocratie est entrée entièrement dans le typ ...\"\n    },\n    {\n      \"page_no\": 111,\n      \"ocr_excerpt\": \"## NOTES 1. Bernard Berenson (1865-1959), collectionneur, expert et critique d'art américain d'origine lithuanienne, spécialiste de la peinture de la Renaissance italienne. Auteur de : The Italian Painters of the Renaissance, Londres, Phaidon Press, 1953; Drawings of the Florentine Painters, Chicago, University of Chicago Press, 1970; et d'un livre de souvenirs, Sketch for a Self-Portrait, New York, Pantheon, 1949. 2. La citation, comme le précise M. Foucault, présente un caractère assez libre. Le manuscrit porte simplement : « Berenson : destruction atomique, invasion étatique ». 3. Ceux-ci sont nommés plus bas dans la leçon : von Mises, Hayek (cf. infra, note 11). 4. Cf. Sécurité, Territoire, Population, leçon du 1er février 1978, p. 105. 5. M. Foucault, finalement, ne traitera que les deux premiers points dans la suite de ce cours. Cf. supra, leçon du 10 janvier 1979. p. 24-25, les raisons qu’il invoque pour justifier leur analyse, condition d’intelligibilité du troisième point (« c’est une fois qu’on aura su ce que c’était que ce régime gouvernemental appelé libéralisme qu’on pourra, me semble-t-il, saisir ce qu’est la biopolitique ») et sa remarque, au tout début de la leçon d ...\"\n    },\n    {\n      \"page_no\": 112,\n      \"ocr_excerpt\": \"11. Ludwig Edler von Mises (1881-1973). Après des études de droit à l'Université de Vienne, il se tourna vers l'économie politique sous l'influence de C. Menger et de ses disciples, F. von Wieser et E. von Böhm-Bawerk (1° École autrichienne «). Il fonde avec Hayek, en 1927, l'Österreichisches Institut für Konjunkturforschung à Vienne. Nommé en 1934 à l'Institut universitaire des hautes études internationales à Genève, il partira pour New York en 1940. Il enseigne comme « visiting professor » à l'Université de New York de 1945 à 1973. Principaux ouvrages : Die Gemeinwirtschaft, Untersuchungen über den Sozialismus, Iéna, G. Fischer, 1922 / Le Socialisme. Étude économique et sociologique, trad. de l'allemand par P. Bastier, A. Terrasse & F. Terrasse, préface de F. Perroux, Paris, Librairie de Médicis, 1938, dans lequel il démontre « qu'en l'absence d'un marché pour les facteurs de production, ceux-ci ne pouvaient être rationnellement distribués aux établissements industriels et que, par suite, une économie planifiée ne pouvait fonctionner » (M. Polanyi, La Logique de la liberté, introd. et trad. de Ph. Nemo, Paris, PUF, « Libre échange », 1989, p. 161); Liberalismus, Iéna, G. Fischer, ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00065\",\n      \"marker\": \"19\",\n      \"page_no\": 91,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00079\",\n      \"marker\": \"17\",\n      \"page_no\": 96,\n      \"paragraph_index\": 0,\n      \"source_text\": \"ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizo ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00083\",\n      \"marker\": \"21\",\n      \"page_no\": 96,\n      \"paragraph_index\": 0,\n      \"source_text\": \"ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizo ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00088\",\n      \"marker\": \"19\",\n      \"page_no\": 102,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00089\",\n      \"marker\": \"19\",\n      \"page_no\": 102,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00090\",\n      \"marker\": \"19\",\n      \"page_no\": 102,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00091\",\n      \"marker\": \"19\",\n      \"page_no\": 102,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00100\",\n      \"marker\": \"19\",\n      \"page_no\": 104,\n      \"paragraph_index\": 0,\n      \"source_text\": \"la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès de Bad Dürkheim encore en 1949, le Parti socialiste allemand reconnaît la validité historique et politique du principe de la lutte des classes et se fixe toujo ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00001\",\n      \"note_item_id\": \"en-00001\",\n      \"current_anchor_id\": \"anchor-00063\",\n      \"marker\": \"1\",\n      \"note_page_no\": 111,\n      \"anchor_page_no\": 91,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Bernard Berenson (1865-1959), collectionneur, expert et critique d'art américain d'origine lithuanienne, spécialiste de la peinture de la Renaissance italienne. Auteur de : The Italian Painters of the Renaissance, Londres, Phaidon Press, 19 ...\",\n      \"anchor_excerpt\": \"Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe a ...\"\n    },\n    {\n      \"link_id\": \"link-00002\",\n      \"note_item_id\": \"en-00002\",\n      \"current_anchor_id\": \"anchor-00064\",\n      \"marker\": \"2\",\n      \"note_page_no\": 111,\n      \"anchor_page_no\": 91,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"La citation, comme le précise M. Foucault, présente un caractère assez libre. Le manuscrit porte simplement : « Berenson : destruction atomique, invasion étatique ».\",\n      \"anchor_excerpt\": \"Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe a ...\"\n    },\n    {\n      \"link_id\": \"link-00006\",\n      \"note_item_id\": \"en-00006\",\n      \"current_anchor_id\": \"anchor-00080\",\n      \"marker\": \"6\",\n      \"note_page_no\": 111,\n      \"anchor_page_no\": 96,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. supra, p. 69.\",\n      \"anchor_excerpt\": \"ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizo ...\"\n    },\n    {\n      \"link_id\": \"link-00016\",\n      \"note_item_id\": \"en-00016\",\n      \"current_anchor_id\": \"anchor-00078\",\n      \"marker\": \"16\",\n      \"note_page_no\": 112,\n      \"anchor_page_no\": 96,\n      \"current_anchor_marker\": \"16\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Constitué dès le 19 décembre 1947, ce Conseil scientifique (wissenschaftliche Beirat) était composé, pour moitié, des représentants de l'École de Fribourg (W. Eucken, F. Böhm, A. Müller-Armack, L. Miksch, A. Lampe, O. Veit,…), et pour l'aut ...\",\n      \"anchor_excerpt\": \"ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizo ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-004-leçondu31janvier1979:toc-ch-004-leçondu31janvier1979:endnote",
+      "chapter_title": "Leçon du 31 janvier 1979",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        91,
+        106
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 36672,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00065",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 91,
+          "paragraph_index": 1,
+          "char_start": 888,
+          "char_end": 892,
+          "source_marker": "[19]",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36686,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00079",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 96,
+          "paragraph_index": 0,
+          "char_start": 535,
+          "char_end": 537,
+          "source_marker": "¹⁷",
+          "normalized_marker": "17",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36690,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00083",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 96,
+          "paragraph_index": 0,
+          "char_start": 2177,
+          "char_end": 2179,
+          "source_marker": "²¹",
+          "normalized_marker": "21",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36695,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00088",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 102,
+          "paragraph_index": 2,
+          "char_start": 88,
+          "char_end": 92,
+          "source_marker": "[19]",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36696,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00089",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 102,
+          "paragraph_index": 2,
+          "char_start": 240,
+          "char_end": 244,
+          "source_marker": "[19]",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36697,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00090",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 102,
+          "paragraph_index": 2,
+          "char_start": 398,
+          "char_end": 402,
+          "source_marker": "[19]",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36698,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00091",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 102,
+          "paragraph_index": 2,
+          "char_start": 543,
+          "char_end": 547,
+          "source_marker": "[19]",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36707,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00100",
+          "chapter_id": "toc-ch-004-leçondu31janvier1979",
+          "page_no": 104,
+          "paragraph_index": 0,
+          "char_start": 320,
+          "char_end": 324,
+          "source_marker": "[19]",
+          "normalized_marker": "19",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès de Bad Dürkheim encore en 1949, le Parti socialiste allemand reconnaît la validité historique et politique du principe de la lutte des classes et se fixe toujours comme objectif la socialisation des moyens de production<sup>36</sup>. Bon. [19]49, [19]50 on en est encore là. En 1955, Karl Schiller<sup>37</sup>, qui va devenir plus tard ministre de l'Économie et des Finances en Allemagne fédérale<sup>38</sup>, écrit un livre appelé bien sûr à un grand retentissement, puisqu'il porte le titre tout de même significatif de Socialisme et Concurrence<sup>39</sup>, c'est-à-dire non pas socialisme ou concurrence, mais socialisme et concurrence, dans lequel il pose, je ne sais pas si c'est la première fois, mais en tout cas c'est lui qui a donné le plus d'écho à cette formule qui va être désormais celle du socialisme allemand : « concurrence autant que possible et planification dans la mesure juste et nécessaire<sup>40</sup> ». Ça, c'est en 1955. En 1959, congrès de Bad Godesberg<sup>41</sup> dans lequel la social-démocratie allemande, premièrement, renonce au principe du passage à la socialisation des moyens de production, deuxièmement et corrélativement reconnaît que la propriété privée des moyens de production, non seulement est parfaitement légitime, mais a droit à la protection et à l'encouragement de l'État<sup>42</sup>. C'est-à-dire que l'une des tâches essentielles et fondamentales de l'État, c'est donc de protéger non seulement la propriété privée en général, mais la propriété privée des moyens de production, sous réserve, ajoute la motion du congrès, de compatibilité avec « un ordre social équitable ». Enfin, troisièmement, le congrès de Bad Godesberg approuve le principe d'une économie de marché partout – là encore, restriction –, partout du moins « où règnent les conditions d'une véritable concurrence<sup>43</sup> ».",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00001",
+          "note_item_id": "en-00001",
+          "current_anchor_id": "anchor-00063",
+          "marker": "1",
+          "note_page_no": 111,
+          "anchor_page_no": 91,
+          "current_anchor_marker": "1",
+          "note_excerpt": "Bernard Berenson (1865-1959), collectionneur, expert et critique d'art américain d'origine lithuanienne, spécialiste de la peinture de la Renaissance italienne. Auteur de : The Italian Painters of the Renaissance, Londres, Phaidon Press, 1953; Drawings of the Florentine Painters, Chicago, University of Chicago Press, 1970; et d'un livre de souvenirs, Sketch for a Self-Portrait, New York, Pantheon, 1949.",
+          "anchor_excerpt": "Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00002",
+          "note_item_id": "en-00002",
+          "current_anchor_id": "anchor-00064",
+          "marker": "2",
+          "note_page_no": 111,
+          "anchor_page_no": 91,
+          "current_anchor_marker": "2",
+          "note_excerpt": "La citation, comme le précise M. Foucault, présente un caractère assez libre. Le manuscrit porte simplement : « Berenson : destruction atomique, invasion étatique ».",
+          "anchor_excerpt": "Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00006",
+          "note_item_id": "en-00006",
+          "current_anchor_id": "anchor-00080",
+          "marker": "6",
+          "note_page_no": 111,
+          "anchor_page_no": 96,
+          "current_anchor_marker": "6",
+          "note_excerpt": "Cf. supra, p. 69.",
+          "anchor_excerpt": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00016",
+          "note_item_id": "en-00016",
+          "current_anchor_id": "anchor-00078",
+          "marker": "16",
+          "note_page_no": 112,
+          "anchor_page_no": 96,
+          "current_anchor_marker": "16",
+          "note_excerpt": "Constitué dès le 19 décembre 1947, ce Conseil scientifique (wissenschaftliche Beirat) était composé, pour moitié, des représentants de l'École de Fribourg (W. Eucken, F. Böhm, A. Müller-Armack, L. Miksch, A. Lampe, O. Veit,…), et pour l'autre de représentants des doctrines chrétienne-sociale, tel le jésuite O. von Nell-Breuning, et socialiste, tels K. Schiller, G. Weisser, H. Peter.",
+          "anchor_excerpt": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 91,
+        "file_idx": 90,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste. Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mou ...",
+        "byte_size": 335348,
+        "sha256": "5130b2b93e173496cbdf1e8d537c36c96f0cdd6127b5481d0fb8de124d5e6b89"
+      },
+      {
+        "page_no": 96,
+        "file_idx": 95,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait ...",
+        "byte_size": 497309,
+        "sha256": "d267bb5c329a15a0f2928a75da17750d2ccccaa4063202b7a1eec671069687c4"
+      },
+      {
+        "page_no": 102,
+        "file_idx": 101,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "qu'on a là le contraire d'un État commercial fermé. On a une ouverture commerciale étatisante. D'État économique, radicalement économique, est-ce que c'est le premier exemple dans l'histoire? Il faudrait le demander à des historiens qui comprennent l'histoire toujours encore mieux que moi. Mais, après tout, est-ce que Venise était un État radicalement économique? Est-ce qu'on peut dire que les Provinces-Unies au XVI $ ^{e} $ siècle, au XVII $ ^{e} $ encore, étaient un État économique? En tout cas, il me semble que par rapport à tout ce qui a été, depuis le XVIII $ ^{e} $ siècle, à la fois le fonctionnement, la justification et la programmation de la gouvernementalité, on a là quelque chose de nouveau. Et s'il est vrai que l'on reste bien dans une gouvernementalité de type libéral, vous voyez quel déplacement s'est opéré par rapport à ce qu'était le libéralisme programmé par les physiocrates, par Turgot, par les économistes du XVIII $ ^{e} $ siècle dont le problème était exactement inverse, puisqu'au XVIII $ ^{e} $ siècle ils avaient la tâche suivante à résoudre : soit un État qui existe, soit un État légitime, soit un État qui fonctionne déjà dans le style de la plénitude, de la complétude administrative sous forme d'État de police. Le problème était : soit cet État, comment est-ce que nous allons pouvoir le limiter et surtout faire place à la nécessaire liberté économique à l' ...",
+        "byte_size": 423186,
+        "sha256": "be6895a9b084d3aa8f9fd76228714841786d1042789da96e62129c62c2c44c20"
+      },
+      {
+        "page_no": 104,
+        "file_idx": 103,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès de Bad Dürkheim encore en 1949, le Parti socialiste allemand reconnaît la validité historique et politique du principe de la lutte des classes et se fixe toujours comme objectif la socialisation des moyens de production<sup>36</sup>. Bon. [19]49, [19]50 on en est encore là. En 1955, Karl Schiller<sup>37</sup>, qui va devenir plus tard ministre de l'Économie et des Finances en Allemagne fédérale<sup>38</sup>, écrit un livre appelé bien sûr à un grand retentissement, puisqu'il porte le titre tout de même significatif de Socialisme et Concurrence<sup>39</sup>, c'est-à-dire non pas socialisme ou concurrence, mais socialisme et concurrence, dans lequel il pose, je ne sais pas si c'est la première fois, mais en tout cas c'est lui qui a donné le plus d'écho à cette formule qui va être désormais celle du socialisme allemand : « concurrence autant que possible et planification dans la mesure juste et nécessaire<sup>40</sup> ». Ça, c'est en 1955. En 1959, congrès de Bad Godesberg<sup>41</sup> dans lequel la social-démocratie allemande, premièrement, renonce au principe du passage à la socialisation des moyens de production, deuxièmement et corrélativement reconnaît que la propriété privée des moyens de production, non seulement est parfaitement légitime, mais a droit à la protection et à l'encouragement de l ...",
+        "byte_size": 404276,
+        "sha256": "9760a799c1a11b6225fc6dcf6399c91826d18a554114b5f60c47f83e6b2b72dc"
+      },
+      {
+        "page_no": 106,
+        "file_idx": 105,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "Godesberg, ce fameux congrès de la renonciation absolue aux thèmes les plus traditionnels de la social-démocratie, c'était bien sûr la rupture avec la théorie marxiste, c'était la rupture avec le socialisme marxiste, mais c'était en même temps, – et c'est en ceci que ce n'était pas simplement une trahison, ça ne peut l'être qu'en termes historiques généraux, si vous voulez, – l'acceptation de ce qui était en train de fonctionner déjà comme le consensus économique-politique du libéralisme allemand. C'était moins renoncer à telle ou telle partie du programme commun à la plupart des partis socialistes qu'entrer enfin dans le jeu de la gouvernementalité. Il ne restait plus qu'un pas à faire à la social-démocratie, c'était la rupture avec le modèle anglais et avec toutes les références à l'économie keynésienne. La chose est faite par Karl Schiller, encore lui, en 1963 puisque, là, il abandonne même la formule : « concurrence autant que possible et plani- fication dans la mesure où c'est nécessaire ». En [19]63, il pose le principe que toute planification même souple est dangereuse pour l'économie libérale $ ^{45} $. Alors ça y est. La social-démocratie est entrée entièrement dans le type de gouvernementalité économico-politique que l'Allemagne s'était donnée depuis 1948. Elle entre si bien dans le jeu que, six ans après, Willy Brandt $ ^{46} $ devient chancelier de l'Allemagne fédér ...",
+        "byte_size": 417166,
+        "sha256": "3dba29d81186ec752144b75c7ab53aaef998f594bc72cfddf34381adb0aa6970"
+      },
+      {
+        "page_no": 111,
+        "file_idx": 110,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "## NOTES 1. Bernard Berenson (1865-1959), collectionneur, expert et critique d'art américain d'origine lithuanienne, spécialiste de la peinture de la Renaissance italienne. Auteur de : The Italian Painters of the Renaissance, Londres, Phaidon Press, 1953; Drawings of the Florentine Painters, Chicago, University of Chicago Press, 1970; et d'un livre de souvenirs, Sketch for a Self-Portrait, New York, Pantheon, 1949. 2. La citation, comme le précise M. Foucault, présente un caractère assez libre. Le manuscrit porte simplement : « Berenson : destruction atomique, invasion étatique ». 3. Ceux-ci sont nommés plus bas dans la leçon : von Mises, Hayek (cf. infra, note 11). 4. Cf. Sécurité, Territoire, Population, leçon du 1er février 1978, p. 105. 5. M. Foucault, finalement, ne traitera que les deux premiers points dans la suite de ce cours. Cf. supra, leçon du 10 janvier 1979. p. 24-25, les raisons qu’il invoque pour justifier leur analyse, condition d’intelligibilité du troisième point (« c’est une fois qu’on aura su ce que c’était que ce régime gouvernemental appelé libéralisme qu’on pourra, me semble-t-il, saisir ce qu’est la biopolitique ») et sa remarque, au tout début de la leçon du 7 mars 1979 (infra. p. 191) : « Je voudrais vous assurer malgré tout que j’avais bien l’intention au départ de vous parler de biopolitique et puis, les choses étant ce qu’elles sont, voilà que j’en ...",
+        "byte_size": 398636,
+        "sha256": "b816b4460a7b3976d9189f638117bc47aeda7805902cebeeb94b4caeb3eb74c9"
+      },
+      {
+        "page_no": 112,
+        "file_idx": 111,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "11. Ludwig Edler von Mises (1881-1973). Après des études de droit à l'Université de Vienne, il se tourna vers l'économie politique sous l'influence de C. Menger et de ses disciples, F. von Wieser et E. von Böhm-Bawerk (1° École autrichienne «). Il fonde avec Hayek, en 1927, l'Österreichisches Institut für Konjunkturforschung à Vienne. Nommé en 1934 à l'Institut universitaire des hautes études internationales à Genève, il partira pour New York en 1940. Il enseigne comme « visiting professor » à l'Université de New York de 1945 à 1973. Principaux ouvrages : Die Gemeinwirtschaft, Untersuchungen über den Sozialismus, Iéna, G. Fischer, 1922 / Le Socialisme. Étude économique et sociologique, trad. de l'allemand par P. Bastier, A. Terrasse & F. Terrasse, préface de F. Perroux, Paris, Librairie de Médicis, 1938, dans lequel il démontre « qu'en l'absence d'un marché pour les facteurs de production, ceux-ci ne pouvaient être rationnellement distribués aux établissements industriels et que, par suite, une économie planifiée ne pouvait fonctionner » (M. Polanyi, La Logique de la liberté, introd. et trad. de Ph. Nemo, Paris, PUF, « Libre échange », 1989, p. 161); Liberalismus, Iéna, G. Fischer, 1927; Nationalökonomie, Theorie des Handels und Wirtschäftens, [s.l.], Éditions Union, 1940; Human Action : A treatise on economics, Yale University Press, 1949; 3° éd. revue et corrigée, Chicago, Co ...",
+        "byte_size": 409628,
+        "sha256": "da42de3772b1bd985f6efbc6a0c696600d084fbccdd57cd0fe6552f3d3630677"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-004-leçondu31janvier1979:toc-ch-004-leçondu31janvier1979:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 7,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00001\",\n    \"anchor_id\": \"anchor-00065\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR misread '¹' as '19'. Screenshot clearly shows marker '1' after 'l'historien de l'art'. Note content matches Berenson.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00002\",\n    \"anchor_id\": \"anchor-00065\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR misread '²' as '19'. Screenshot clearly shows marker '2' after 'bombe atomique'. Note content matches the quote about atomic destruction.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00016\",\n    \"anchor_id\": \"anchor-00079\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR misread '¹⁶' as '17'. Screenshot clearly shows marker '16' after 'économie'. Note content matches the Scientific Council context.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00083\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate/phantom anchor for marker 21 in a paragraph that only contains markers 16 and 17 (misread). No corresponding note or visual marker exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00088\",\n    \"confidence\": 0.95,\n    \"reason\": \"Phantom anchor for marker 19 on page 102. The text '[19]48' is a year, not a footnote reference. No marker 19 exists in the screenshot for this page range.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00089\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate phantom anchor for marker 19 on page 102.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00090\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate phantom anchor for marker 19 on page 102.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00091\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate phantom anchor for marker 19 on page 102.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00100\",\n    \"confidence\": 0.95,\n    \"reason\": \"Phantom anchor for marker 19 on page 104. The text does not contain a footnote marker 19 at this location; likely OCR noise from nearby numbers like 1949.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "en-00001",
+      "anchor_id": "anchor-00065",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR misread '¹' as '19'. Screenshot clearly shows marker '1' after 'l'historien de l'art'. Note content matches Berenson."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00002",
+      "anchor_id": "anchor-00065",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR misread '²' as '19'. Screenshot clearly shows marker '2' after 'bombe atomique'. Note content matches the quote about atomic destruction."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00016",
+      "anchor_id": "anchor-00079",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR misread '¹⁶' as '17'. Screenshot clearly shows marker '16' after 'économie'. Note content matches the Scientific Council context."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00083",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Duplicate/phantom anchor for marker 21 in a paragraph that only contains markers 16 and 17 (misread). No corresponding note or visual marker exists."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00088",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Phantom anchor for marker 19 on page 102. The text '[19]48' is a year, not a footnote reference. No marker 19 exists in the screenshot for this page range."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00089",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Duplicate phantom anchor for marker 19 on page 102."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00090",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Duplicate phantom anchor for marker 19 on page 102."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00091",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Duplicate phantom anchor for marker 19 on page 102."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00100",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Phantom anchor for marker 19 on page 104. The text does not contain a footnote marker 19 at this location; likely OCR noise from nearby numbers like 1949."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-004-leçondu31janvier1979:toc-ch-004-leçondu31janvier1979:endnote",
+    "chapter_title": "Leçon du 31 janvier 1979",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "en-00001",
+        "anchor_id": "anchor-00065",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '¹' as '19'. Screenshot clearly shows marker '1' after 'l'historien de l'art'. Note content matches Berenson."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00002",
+        "anchor_id": "anchor-00065",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '²' as '19'. Screenshot clearly shows marker '2' after 'bombe atomique'. Note content matches the quote about atomic destruction."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00016",
+        "anchor_id": "anchor-00079",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '¹⁶' as '17'. Screenshot clearly shows marker '16' after 'économie'. Note content matches the Scientific Council context."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00083",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate/phantom anchor for marker 21 in a paragraph that only contains markers 16 and 17 (misread). No corresponding note or visual marker exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00088",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Phantom anchor for marker 19 on page 102. The text '[19]48' is a year, not a footnote reference. No marker 19 exists in the screenshot for this page range."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00089",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00090",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00091",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00100",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Phantom anchor for marker 19 on page 104. The text does not contain a footnote marker 19 at this location; likely OCR noise from nearby numbers like 1949."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "en-00001",
+        "anchor_id": "anchor-00065",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '¹' as '19'. Screenshot clearly shows marker '1' after 'l'historien de l'art'. Note content matches Berenson."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00016",
+        "anchor_id": "anchor-00079",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '¹⁶' as '17'. Screenshot clearly shows marker '16' after 'économie'. Note content matches the Scientific Council context."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00083",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate/phantom anchor for marker 21 in a paragraph that only contains markers 16 and 17 (misread). No corresponding note or visual marker exists."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00088",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Phantom anchor for marker 19 on page 102. The text '[19]48' is a year, not a footnote reference. No marker 19 exists in the screenshot for this page range."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00089",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00090",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00091",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00100",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Phantom anchor for marker 19 on page 104. The text does not contain a footnote marker 19 at this location; likely OCR noise from nearby numbers like 1949."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00001",
+        "action": "match",
+        "note_item_id": "en-00001",
+        "anchor_id": "anchor-00065",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '¹' as '19'. Screenshot clearly shows marker '1' after 'l'historien de l'art'. Note content matches Berenson."
+      },
+      {
+        "link_id": "link-00016",
+        "action": "match",
+        "note_item_id": "en-00016",
+        "anchor_id": "anchor-00079",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR misread '¹⁶' as '17'. Screenshot clearly shows marker '16' after 'économie'. Note content matches the Scientific Council context."
+      },
+      {
+        "link_id": "link-00283",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00083",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate/phantom anchor for marker 21 in a paragraph that only contains markers 16 and 17 (misread). No corresponding note or visual marker exists."
+      },
+      {
+        "link_id": "link-00284",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00088",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Phantom anchor for marker 19 on page 102. The text '[19]48' is a year, not a footnote reference. No marker 19 exists in the screenshot for this page range."
+      },
+      {
+        "link_id": "link-00285",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00089",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "link_id": "link-00286",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00090",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "link_id": "link-00287",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00091",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate phantom anchor for marker 19 on page 102."
+      },
+      {
+        "link_id": "link-00288",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00100",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Phantom anchor for marker 19 on page 104. The text does not contain a footnote marker 19 at this location; likely OCR noise from nearby numbers like 1949."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 7640,
+    "completion_tokens": 753,
+    "total_tokens": 8393,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 15976
+  }
+}

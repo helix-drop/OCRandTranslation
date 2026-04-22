@@ -1,0 +1,650 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-006-leçondu14février1979:toc-ch-006-leçondu14février1979:endnote\",\n  \"chapter_title\": \"Leçon du 14 février 1979\",\n  \"page_range\": [\n    152,\n    161\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 152,\n      \"ocr_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un ...\"\n    },\n    {\n      \"page_no\": 153,\n      \"ocr_excerpt\": \"« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernement vigilant, est un gouvernement intervenant, et avec des formules que ni le libéralisme classique du XIX<sup>e</sup> siècle ni l’anarcho-capitalisme américain contemporain ne pourraient accepter. Eucken, par exemple, dit : « L’État est responsable du résultat de l’activité économique<sup>17</sup>. » Franz Böhm dit : « L’État doit dominer le devenir économique<sup>18</sup>. » Miksch dit : « Dans cette politique libérale » – là, la phrase est importante –, « il se peut bien que dans cette politique libérale le nombre des interventions économiques soit aussi grand que dans une politique planificatrice, mais c’est leur nature qui est différente<sup>19</sup> ». Eh bien, je crois qu’on a là, dans ce problème de la nature des interventions, un point à partir duquel on va pouvoir aborder ce qu’il y a de spécifique dans la politique néolibérale. Le problème, en gros, du libéralisme du XVIII<sup>e</sup> - début du XIX<sup>e</sup> siècle, c’était, vous le ...\"\n    },\n    {\n      \"page_no\": 154,\n      \"ocr_excerpt\": \"est considéré comme étant une conséquence mi-naturelle mi-nécessaire de la concurrence en régime capitaliste, c'est-à-dire que l'on ne peut pas laisser se développer la concurrence sans voir apparaître, en même temps, des phénomènes monopolistiques qui ont précisément pour effet de limiter, d'atténuer, à la limite même d'annuler la concurrence. Il serait donc dans la logique historico-économique de la concurrence de se supprimer elle-même, cette thèse impliquant, bien entendu, que tout libéral qui veut assurer le fonctionnement de la libre concurrence doit bien intervenir à l'intérieur même des mécanismes économiques, sur ceux qui précisément facilitent, portent en eux et déterminent le phénomène monopolistique. C'est-à-dire que si l'on veut sauver la concurrence de ses propres effets, il faut intervenir sur les mécanismes économiques, quel-quefois. C'est là le paradoxe du monopole pour une économie libérale qui pose le problème de la concurrence et qui accepte, en même temps, cette idée que le monopole fait effectivement partie de la logique de la concurrence. Bien entendu, vous l'imaginez, la position des néolibéraux va être tout à fait différente, et leur problème sera de démont ...\"\n    },\n    {\n      \"page_no\": 155,\n      \"ocr_excerpt\": \"en quoi l'existence d'un droit des sociétés par action, en quoi aussi le problème des droits de brevet, etc., ont pu, à cause même d'un fonctionnement juridique et pas du tout [pour des] raisons économiques, engendrer les phénomènes de monopole ? Et là, les néolibéraux ont posé toute une série de problèmes plus historiques et plus institutionnels que proprement économiques, mais qui ont ouvert la voie à toute une série de recherches très intéressantes sur le cadre politico-institutionnel de développement du capitalisme, et les Américains, les néolibéraux américains en feront leur profit. Les idées de North $ ^{23} $, par exemple, sur le développement du capitalisme, c'est exactement dans cette ligne qui a été ouverte par les néolibéraux et dont la problématique apparaît clairement dans plusieurs interventions du colloque Lippmann. Autre argument pour montrer que le phénomène monopolistique n'appartient pas de plein droit et en pleine logique à l'économie de la concurrence : ce sont les analyses politiques sur le lien qu'il y a entre l'existence d'une économie nationale, le protectionnisme douanier et le monopole. Von Mises, par exemple, fait toute une série d'analyses là-dessus $ ^ ...\"\n    },\n    {\n      \"page_no\": 156,\n      \"ocr_excerpt\": \"prédatoire pour passer de l'optimum de concentration au maximum monopolistique. Et puis, dit Röpke, de toute façon, un phénomène monopolistique, même s'il existe, n'est pas en lui-même stable $ ^{28} $. C'est-à-dire qu'à moyen terme, si ce n'est pas à court terme, il se produit toujours, dans le processus économique, soit des modifications de forces productives, soit des modifications techniques, soit des croissances massives de productivité, soit encore des apparitions de nouveaux marchés. Et tous font que l'évolution vers le monopole ne peut être qu'une variable qui joue, pendant un certain temps, parmi d'autres variables qui, elles, seront, à d'autres moments, dominantes. Dans sa dynamique d'ensemble, l'économie de concurrence comporte toute une série de variables dans laquelle la tendance à la concentration est toujours contrebattue par d'autres tendances. Enfin – et c'est toujours von Mises qui raisonne ainsi $ ^{29} $ –, au fond, qu'est-ce qu'il y a d'important, ou plutôt qu'est-ce qu'il y a de perturbant dans le phénomène monopolistique par rapport au jeu de l'économie? Est-ce que c'est le fait qu'il n'y a qu'un producteur? Absolument pas. Est-ce que c'est le fait qu'il n'y ...\"\n    },\n    {\n      \"page_no\": 157,\n      \"ocr_excerpt\": \"à intervenir directement dans le processus économique, puisque le processus économique, porteur en lui, si on le laisse jouer pleinement, d'une structure régulatrice qui est celle de la concurrence, ne se déréglera jamais. Ce qui fait le propre de la concurrence, c'est la rigueur formelle de son processus. Mais ce qui garantit que ce processus formel ne se déréglera pas c'est que dans la réalité, si on le laisse jouer, il n'y aura rien venant de la concurrence, venant du processus économique lui-même, qui sera de nature à en changer le cours. Par conséquent, la non-intervention à ce niveau-là est nécessaire. Non-intervention sous la réserve qu'il faut, bien entendu, établir un cadre institutionnel qui aura à empêcher que des gens, soit des pouvoirs individuels soit des pouvoirs publics, interviennent pour créer le monopole. Et c'est ainsi que vous trouvez dans la législation allemande tout un énorme cadre institutionnel anti-monopolistique, mais qui n'a pas du tout pour fonction d'intervenir dans le champ économique pour empêcher l'économie elle-même de produire le monopole. C'est pour empêcher que les processus externes n'interviennent et ne créent le phénomène monopolistique.* De ...\"\n    },\n    {\n      \"page_no\": 159,\n      \"ocr_excerpt\": \"quel que soit le taux de chômage, à intervenir directement ou en premier lieu sur le chômage, comme si le plein emploi devait être un idéal politique et un principe économique à sauver en tout état de cause. Ce qui est à sauver, et qui est à sauver d'abord et avant tout, c'est la stabilité des prix. Cette stabilité des prix permettra effectivement, sans doute, par la suite, et le maintien du pouvoir d'achat et l'existence d'un niveau d'emploi plus élevé qu'en crise de chômage, mais le plein emploi n'est pas un objectif, et il peut même se trouver qu'un volant de chômage soit absolument nécessaire pour l'économie. Comme le dit, je crois, Röpke, qu'est-ce que c'est que le chômeur ? Ce n'est pas un handicapé économique. Le chômeur, ce n'est pas une victime sociale. Qu'est-ce que c'est que le chômeur ? C'est un travailleur en transit. C'est un travailleur en transit entre une activité non rentable et une activité plus rentable $ ^{39} $. Voilà pour les actions régulatrices. Plus intéressantes, parce qu'elles nous rapprochent tout de même davantage de l'objet propre, les actions ordonnatrices. Les actions ordonnatrices, qu'est-ce que c'est ? Eh bien, [ce sont] des actions qui ont pour f ...\"\n    },\n    {\n      \"page_no\": 160,\n      \"ocr_excerpt\": \"différences techniques et, d'une façon générale, l'insuffisance technique de chacune des agricultures. Différences et insuffisances qui étaient toutes liées à l'existence d'une surpopulation qui rendait inutile, et à vrai dire pas souhaitable, l'intervention, l'insertion de ces perfectionnements techniques. Si l'on veut par conséquent — le texte date de 1952 — faire fonctionner l'agriculture européenne dans une économie de marché, qu'est-ce qu'il va falloir faire? Il va falloir agir sur des données qui ne sont pas directement des données économiques, mais qui sont des données conditionnantes pour une éventuelle économie de marché. Il va donc falloir agir sur quoi? Non pas sur les prix, non pas sur tel secteur en assurant le soutien de ce secteur peu rentable — tout ça, ce sont de mauvaises interventions. Les bonnes interventions agiront sur quoi? Eh bien, sur le cadre. C'est-à-dire, primo, sur la population. La population agricole est trop nombreuse — eh bien, il faut la faire diminuer par des interventions qui permettront des transferts de population, qui permettront une migration, etc. Il va falloir intervenir aussi au niveau des techniques, par la mise à la disposition des gens ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00192\",\n      \"marker\": \"15\",\n      \"page_no\": 152,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00193\",\n      \"marker\": \"17\",\n      \"page_no\": 153,\n      \"paragraph_index\": 0,\n      \"source_text\": \"« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernem ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00194\",\n      \"marker\": \"18\",\n      \"page_no\": 153,\n      \"paragraph_index\": 0,\n      \"source_text\": \"« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernem ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00196\",\n      \"marker\": \"20\",\n      \"page_no\": 153,\n      \"paragraph_index\": 0,\n      \"source_text\": \"« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernem ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00197\",\n      \"marker\": \"21\",\n      \"page_no\": 154,\n      \"paragraph_index\": 0,\n      \"source_text\": \"est considéré comme étant une conséquence mi-naturelle mi-nécessaire de la concurrence en régime capitaliste, c'est-à-dire que l'on ne peut pas laisser se développer la concurrence sans voir apparaître, en même temps, des phénomènes monopol ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00198\",\n      \"marker\": \"22\",\n      \"page_no\": 154,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Premièrement, des arguments de type historique, à savoir qu'en fait le monopole, loin d'être un phénomène en quelque sorte ultime et dernier dans l'histoire de l'économie libérale, est un phénomène archaïque, et un phénomène archaïque qui a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00199\",\n      \"marker\": \"23\",\n      \"page_no\": 155,\n      \"paragraph_index\": 0,\n      \"source_text\": \"en quoi l'existence d'un droit des sociétés par action, en quoi aussi le problème des droits de brevet, etc., ont pu, à cause même d'un fonctionnement juridique et pas du tout [pour des] raisons économiques, engendrer les phénomènes de mono ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00200\",\n      \"marker\": \"24\",\n      \"page_no\": 155,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Autre argument pour montrer que le phénomène monopolistique n'appartient pas de plein droit et en pleine logique à l'économie de la concurrence : ce sont les analyses politiques sur le lien qu'il y a entre l'existence d'une économie nationa ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00026\",\n      \"note_item_id\": \"en-00053\",\n      \"current_anchor_id\": \"anchor-00179\",\n      \"marker\": \"2\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Fondé en 1894, afin de réunir livres, brochures et périodiques utiles à la connaissance de la « question sociale », le Musée social réunit des collections couvrant le domaine social, au sens le plus large du terme. Il se trouve 5, rue Las C ...\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00027\",\n      \"note_item_id\": \"en-00054\",\n      \"current_anchor_id\": \"anchor-00180\",\n      \"marker\": \"3\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Compte rendu des séances du colloque Walter Lippmann (26-30 août 1938), Travaux du Centre international d'études pour la rénovation du libéralisme, cahier n° 1, avant-propos de L. Rougier, Paris, Librairie de Médicis, 1939. Cf. P.-A. Kunz, ...\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00029\",\n      \"note_item_id\": \"en-00056\",\n      \"current_anchor_id\": \"anchor-00182\",\n      \"marker\": \"5\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Walter Lippmann (1889-1974), An Inquiry into the Principles of the Good Society, Boston, Little, Brown, 1937 / La Cité libre, trad. G. Blumberg, préface de A. Maurois, Paris, Librairie de Médecis, 1938. Dans un article publié plus de vingt ...\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00030\",\n      \"note_item_id\": \"en-00057\",\n      \"current_anchor_id\": \"anchor-00183\",\n      \"marker\": \"6\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Louis Baudin (1887-1964) : économiste français, directeur de la collection des « Grands Économistes », auteur de La Monnaie. Ce que tout le monde devrait en savoir, Paris, Librairie de Médicis, 1938; La Monnaie et la Formaticn des prix,\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00031\",\n      \"note_item_id\": \"en-00058\",\n      \"current_anchor_id\": \"anchor-00184\",\n      \"marker\": \"7\",\n      \"note_page_no\": 171,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Les autres membres français du colloque, hormis ceux cités ci-dessous, étaient R. Auboin, M. Bourgeois, A. Detœuf, B. Lavergne (auteur de Essor et Décadence du capitalisme, Paris, Payot, 1938, et de La Crise et ses remèdes, Paris, Librairie ...\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00032\",\n      \"note_item_id\": \"en-00059\",\n      \"current_anchor_id\": \"anchor-00185\",\n      \"marker\": \"8\",\n      \"note_page_no\": 171,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. supra, leçon du 7 février 1979, p. 128, notes 16 et 21.\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00033\",\n      \"note_item_id\": \"en-00060\",\n      \"current_anchor_id\": \"anchor-00186\",\n      \"marker\": \"9\",\n      \"note_page_no\": 171,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"9\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. supra, leçon du 31 janvier 1979, p. 98, note\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    },\n    {\n      \"link_id\": \"link-00034\",\n      \"note_item_id\": \"en-00061\",\n      \"current_anchor_id\": \"anchor-00188\",\n      \"marker\": \"11\",\n      \"note_page_no\": 171,\n      \"anchor_page_no\": 152,\n      \"current_anchor_marker\": \"11\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"La traduction du livre de von Mises, Le Socialisme, venait de paraître à la Librairie de Médicis (éditeur du livre de W. Lippmann).\",\n      \"anchor_excerpt\": \"Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, ma ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-leçondu14février1979:toc-ch-006-leçondu14février1979:endnote",
+      "chapter_title": "Leçon du 14 février 1979",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        152,
+        161
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 36826,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00192",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 152,
+          "paragraph_index": 0,
+          "char_start": 2514,
+          "char_end": 2523,
+          "source_marker": "$ ^{15} $",
+          "normalized_marker": "15",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36827,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00193",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 153,
+          "paragraph_index": 0,
+          "char_start": 526,
+          "char_end": 539,
+          "source_marker": "<sup>17</sup>",
+          "normalized_marker": "17",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernement vigilant, est un gouvernement intervenant, et avec des formules que ni le libéralisme classique du XIX<sup>e</sup> siècle ni l’anarcho-capitalisme américain contemporain ne pourraient accepter. Eucken, par exemple, dit : « L’État est responsable du résultat de l’activité économique<sup>17</sup>. » Franz Böhm dit : « L’État doit dominer le devenir économique<sup>18</sup>. » Miksch dit : « Dans cette politique libérale » – là, la phrase est importante –, « il se peut bien que dans cette politique libérale le nombre des interventions économiques soit aussi grand que dans une politique planificatrice, mais c’est leur nature qui est différente<sup>19</sup> ». Eh bien, je crois qu’on a là, dans ce problème de la nature des interventions, un point à partir duquel on va pouvoir aborder ce qu’il y a de spécifique dans la politique néolibérale. Le problème, en gros, du libéralisme du XVIII<sup>e</sup> - début du XIX<sup>e</sup> siècle, c’était, vous le savez, de faire le partage entre les actions qu’il fallait faire et les actions qu’il ne fallait pas faire, entre les domaines où on pouvait intervenir et les domaines où on ne pouvait pas intervenir. C’était le partage des agenda/non agenda<sup>20</sup>. Position naïve aux yeux des néolibéraux, dont le problème n’est pas de savoir s’il y a des choses auxquelles on ne peut pas toucher et d’autres auxquelles on a le droit de toucher. Le problème, c’est de savoir comment on y touche. C’est le problème de la manière de faire, c’est le problème, si vous voulez, du style gouvernemental.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36828,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00194",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 153,
+          "paragraph_index": 0,
+          "char_start": 603,
+          "char_end": 616,
+          "source_marker": "<sup>18</sup>",
+          "normalized_marker": "18",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernement vigilant, est un gouvernement intervenant, et avec des formules que ni le libéralisme classique du XIX<sup>e</sup> siècle ni l’anarcho-capitalisme américain contemporain ne pourraient accepter. Eucken, par exemple, dit : « L’État est responsable du résultat de l’activité économique<sup>17</sup>. » Franz Böhm dit : « L’État doit dominer le devenir économique<sup>18</sup>. » Miksch dit : « Dans cette politique libérale » – là, la phrase est importante –, « il se peut bien que dans cette politique libérale le nombre des interventions économiques soit aussi grand que dans une politique planificatrice, mais c’est leur nature qui est différente<sup>19</sup> ». Eh bien, je crois qu’on a là, dans ce problème de la nature des interventions, un point à partir duquel on va pouvoir aborder ce qu’il y a de spécifique dans la politique néolibérale. Le problème, en gros, du libéralisme du XVIII<sup>e</sup> - début du XIX<sup>e</sup> siècle, c’était, vous le savez, de faire le partage entre les actions qu’il fallait faire et les actions qu’il ne fallait pas faire, entre les domaines où on pouvait intervenir et les domaines où on ne pouvait pas intervenir. C’était le partage des agenda/non agenda<sup>20</sup>. Position naïve aux yeux des néolibéraux, dont le problème n’est pas de savoir s’il y a des choses auxquelles on ne peut pas toucher et d’autres auxquelles on a le droit de toucher. Le problème, c’est de savoir comment on y touche. C’est le problème de la manière de faire, c’est le problème, si vous voulez, du style gouvernemental.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36830,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00196",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 153,
+          "paragraph_index": 0,
+          "char_start": 1442,
+          "char_end": 1455,
+          "source_marker": "<sup>20</sup>",
+          "normalized_marker": "20",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernement vigilant, est un gouvernement intervenant, et avec des formules que ni le libéralisme classique du XIX<sup>e</sup> siècle ni l’anarcho-capitalisme américain contemporain ne pourraient accepter. Eucken, par exemple, dit : « L’État est responsable du résultat de l’activité économique<sup>17</sup>. » Franz Böhm dit : « L’État doit dominer le devenir économique<sup>18</sup>. » Miksch dit : « Dans cette politique libérale » – là, la phrase est importante –, « il se peut bien que dans cette politique libérale le nombre des interventions économiques soit aussi grand que dans une politique planificatrice, mais c’est leur nature qui est différente<sup>19</sup> ». Eh bien, je crois qu’on a là, dans ce problème de la nature des interventions, un point à partir duquel on va pouvoir aborder ce qu’il y a de spécifique dans la politique néolibérale. Le problème, en gros, du libéralisme du XVIII<sup>e</sup> - début du XIX<sup>e</sup> siècle, c’était, vous le savez, de faire le partage entre les actions qu’il fallait faire et les actions qu’il ne fallait pas faire, entre les domaines où on pouvait intervenir et les domaines où on ne pouvait pas intervenir. C’était le partage des agenda/non agenda<sup>20</sup>. Position naïve aux yeux des néolibéraux, dont le problème n’est pas de savoir s’il y a des choses auxquelles on ne peut pas toucher et d’autres auxquelles on a le droit de toucher. Le problème, c’est de savoir comment on y touche. C’est le problème de la manière de faire, c’est le problème, si vous voulez, du style gouvernemental.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36831,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00197",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 154,
+          "paragraph_index": 0,
+          "char_start": 1482,
+          "char_end": 1491,
+          "source_marker": "$ ^{21} $",
+          "normalized_marker": "21",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "est considéré comme étant une conséquence mi-naturelle mi-nécessaire de la concurrence en régime capitaliste, c'est-à-dire que l'on ne peut pas laisser se développer la concurrence sans voir apparaître, en même temps, des phénomènes monopolistiques qui ont précisément pour effet de limiter, d'atténuer, à la limite même d'annuler la concurrence. Il serait donc dans la logique historico-économique de la concurrence de se supprimer elle-même, cette thèse impliquant, bien entendu, que tout libéral qui veut assurer le fonctionnement de la libre concurrence doit bien intervenir à l'intérieur même des mécanismes économiques, sur ceux qui précisément facilitent, portent en eux et déterminent le phénomène monopolistique. C'est-à-dire que si l'on veut sauver la concurrence de ses propres effets, il faut intervenir sur les mécanismes économiques, quel-quefois. C'est là le paradoxe du monopole pour une économie libérale qui pose le problème de la concurrence et qui accepte, en même temps, cette idée que le monopole fait effectivement partie de la logique de la concurrence. Bien entendu, vous l'imaginez, la position des néolibéraux va être tout à fait différente, et leur problème sera de démontrer qu'en fait le monopole, la tendance monopolistique ne fait pas partie de la logique économique et historique de la concurrence. Röpke, dans la Gesellschaftskrisis, dit que le monopole est « un corps étranger dans le processus économique » et qu'il ne s'y forme pas spontanément $ ^{21} $. Pour appuyer cette thèse, les néolibéraux apportent un certain nombre d'arguments que je vous situe uniquement à titre indicatif.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36832,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00198",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 154,
+          "paragraph_index": 1,
+          "char_start": 864,
+          "char_end": 873,
+          "source_marker": "$ ^{22} $",
+          "normalized_marker": "22",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Premièrement, des arguments de type historique, à savoir qu'en fait le monopole, loin d'être un phénomène en quelque sorte ultime et dernier dans l'histoire de l'économie libérale, est un phénomène archaïque, et un phénomène archaïque qui a essentiellement pour principe l'intervention des pouvoirs publics dans l'économie. Après tout, s'il y a monopole, c'est bien parce que les pouvoirs publics, ou ceux qui assuraient à ce moment-là les fonctions, l'exercice du pouvoir public, ont accordé aux corporations et aux ateliers des privilèges, c'est parce que les États ou les souverains ont accordé à des individus, ou à des familles, des monopoles en échange d'un certain nombre de services financiers sous forme d'une sorte de fiscalité dérivée ou masquée. Ça a été, par exemple, le monopole des Fugger donné par Maximilien l'er en échange de services financiers $ ^{22} $. Bref, le développement, au cours du Moyen Âge, d'une fiscalité elle-même condition de la croissance d'un pouvoir centralisé, a entraîné la création de monopoles. Le monopole, phénomène archaïque et phénomène d'intervention.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36833,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00199",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 155,
+          "paragraph_index": 0,
+          "char_start": 614,
+          "char_end": 623,
+          "source_marker": "$ ^{23} $",
+          "normalized_marker": "23",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "en quoi l'existence d'un droit des sociétés par action, en quoi aussi le problème des droits de brevet, etc., ont pu, à cause même d'un fonctionnement juridique et pas du tout [pour des] raisons économiques, engendrer les phénomènes de monopole ? Et là, les néolibéraux ont posé toute une série de problèmes plus historiques et plus institutionnels que proprement économiques, mais qui ont ouvert la voie à toute une série de recherches très intéressantes sur le cadre politico-institutionnel de développement du capitalisme, et les Américains, les néolibéraux américains en feront leur profit. Les idées de North $ ^{23} $, par exemple, sur le développement du capitalisme, c'est exactement dans cette ligne qui a été ouverte par les néolibéraux et dont la problématique apparaît clairement dans plusieurs interventions du colloque Lippmann.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        },
+        {
+          "row_id": 36834,
+          "doc_id": "0d285c0800db",
+          "anchor_id": "anchor-00200",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "page_no": 155,
+          "paragraph_index": 1,
+          "char_start": 354,
+          "char_end": 363,
+          "source_marker": "$ ^{24} $",
+          "normalized_marker": "24",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Autre argument pour montrer que le phénomène monopolistique n'appartient pas de plein droit et en pleine logique à l'économie de la concurrence : ce sont les analyses politiques sur le lien qu'il y a entre l'existence d'une économie nationale, le protectionnisme douanier et le monopole. Von Mises, par exemple, fait toute une série d'analyses là-dessus $ ^{24} $. Il montre que, d'une part, il y a facilitation du phénomène monopolistique par le morcellement en marchés nationaux qui, réduisant les unités économiques à des tailles relativement petites, permet effectivement l'existence, à l'intérieur de ce cadre, de phénomènes de monopole qui ne subsisteraient pas dans une économie mondiale $ ^{25} $. Il montre, plus positivement, plus directement, comment le protectionnisme, en fait décidé par un État, ne peut être efficace que dans la mesure où on crée, on appelle à l'existence des cartels ou des monopoles qui sont susceptibles de contrôler la production, la vente à l'étranger, le niveau des prix, etc. $ ^{26} $. C'était, en gros, la politique bismarckienne.",
+          "created_at": 1776826416,
+          "updated_at": 1776826416
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00026",
+          "note_item_id": "en-00053",
+          "current_anchor_id": "anchor-00179",
+          "marker": "2",
+          "note_page_no": 170,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "2",
+          "note_excerpt": "Fondé en 1894, afin de réunir livres, brochures et périodiques utiles à la connaissance de la « question sociale », le Musée social réunit des collections couvrant le domaine social, au sens le plus large du terme. Il se trouve 5, rue Las Cases, à Paris, dans le 7° arrondissement. C'est cette adresse que le Centre d'études créé à l'issue du colloque (cf. infra, note 14) avait choisie comme siège social.",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00027",
+          "note_item_id": "en-00054",
+          "current_anchor_id": "anchor-00180",
+          "marker": "3",
+          "note_page_no": 170,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "3",
+          "note_excerpt": "Compte rendu des séances du colloque Walter Lippmann (26-30 août 1938), Travaux du Centre international d'études pour la rénovation du libéralisme, cahier n° 1, avant-propos de L. Rougier, Paris, Librairie de Médicis, 1939. Cf. P.-A. Kunz, L'Expérience néo-libérale allemande, op. cit. [supra, p. 98, n.13], p. 32-33.",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00029",
+          "note_item_id": "en-00056",
+          "current_anchor_id": "anchor-00182",
+          "marker": "5",
+          "note_page_no": 170,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "5",
+          "note_excerpt": "Walter Lippmann (1889-1974), An Inquiry into the Principles of the Good Society, Boston, Little, Brown, 1937 / La Cité libre, trad. G. Blumberg, préface de A. Maurois, Paris, Librairie de Médecis, 1938. Dans un article publié plus de vingt ans après le colloque, L. Rougier présente ainsi le livre du « grand columniste américain » (il assura, pendant trente ans, la rubrique « Today and Tomorrow » du Herald Tribune) : « Cet ouvrage rejetait l'identification posée entre le libéralisme et la doctrine physiocratique et manchesterienne du laisser-faire, laisser-passer. Il établissait que l'économie de marché n'était pas le résultat spontané d'un ordre naturel, comme le croyaient les économistes classiques, mais qu'elle était le résultat d'un ordre légal postulant un interventionnisme juridique de l'État » (« Le libéralisme économique et politique », Les Essais, 11, 1961, p. 47). Cf. la citation de W. Lippmann mise en épigraphe au tome 2 de K. Popper, La Société ouverte et ses ennemis (1962), Paris, Le Seuil, 1979 : « La déroute de la science libérale est à l'origine du schisme moral du monde moderne qui divise si tragiquement les esprits éclairés. »",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00030",
+          "note_item_id": "en-00057",
+          "current_anchor_id": "anchor-00183",
+          "marker": "6",
+          "note_page_no": 170,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "6",
+          "note_excerpt": "Louis Baudin (1887-1964) : économiste français, directeur de la collection des « Grands Économistes », auteur de La Monnaie. Ce que tout le monde devrait en savoir, Paris, Librairie de Médicis, 1938; La Monnaie et la Formaticn des prix,",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00031",
+          "note_item_id": "en-00058",
+          "current_anchor_id": "anchor-00184",
+          "marker": "7",
+          "note_page_no": 171,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "7",
+          "note_excerpt": "Les autres membres français du colloque, hormis ceux cités ci-dessous, étaient R. Auboin, M. Bourgeois, A. Detœuf, B. Lavergne (auteur de Essor et Décadence du capitalisme, Paris, Payot, 1938, et de La Crise et ses remèdes, Paris, Librairie de Médicis, 1938), E. Mantoux, L. Marlio (auteur de Le Sort du capitalisme, Paris, Flammarion, 1938), [?] Mercier et A. Piatier. W. Eucken, invité, n'avait pas obtenu l'autorisation de quitter l'Allemagne.",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00032",
+          "note_item_id": "en-00059",
+          "current_anchor_id": "anchor-00185",
+          "marker": "8",
+          "note_page_no": 171,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "8",
+          "note_excerpt": "Cf. supra, leçon du 7 février 1979, p. 128, notes 16 et 21.",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00033",
+          "note_item_id": "en-00060",
+          "current_anchor_id": "anchor-00186",
+          "marker": "9",
+          "note_page_no": 171,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "9",
+          "note_excerpt": "Cf. supra, leçon du 31 janvier 1979, p. 98, note",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00034",
+          "note_item_id": "en-00061",
+          "current_anchor_id": "anchor-00188",
+          "marker": "11",
+          "note_page_no": 171,
+          "anchor_page_no": 152,
+          "current_anchor_marker": "11",
+          "note_excerpt": "La traduction du livre de von Mises, Le Socialisme, venait de paraître à la Librairie de Médicis (éditeur du livre de W. Lippmann).",
+          "anchor_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Allemagne, et qui trouvent là l'occasion de s'exprimer. Et c'est dans ce colloque qu'il y a Röpke $ ^{8} $, qu'il y a Rüstow, qu'il y a Hayek, qu'il y a von Mises $ ^{9} $. Et puis des gens intermédiaires : il y a Jacques Rueff $ ^{10} $, il y a Marjolin $ ^{11} $, qui est tout de même important dans l'économie française de l'après-guerre, et le secrétaire général de ce congrès est quelqu'un qui ne prend pas la parole, ou en tout cas ça n'apparaît pas dans les actes, et c'est Raymond Aron $ ^{12} $. C'est à la suite de ce colloque – enfin, je vous signale ça, parce qu'il y a des gens qui s'intéressent particulièrement aux structures du signifiant – que l'on décide, en juillet 1939 $ ^{13} $, de former un comité permanent qui s'appellera « Comité international d'étude pour le renouveau du libéralisme », CIERL $ ^{14} $. C'est au cours de ce colloque que, alors, on définit – tout cela, vous le trouverez dans le résumé, parsemé d'autres thèses et de thèmes du libéralisme classique – les propositions spécifiques et propres au néolibéralisme. Et c'est là que l'un des intervenants, je ne sais plus lequel $ ^{15} $, propose comme nom à ce néolibéralisme qu'on était en train d'essayer de formuler, l'expression très significative de « libéralisme positif ». Ce libéralisme positif, c'est donc un libéralisme intervenant. C'est un libéralisme dont Röpke, dans la Gesellschaftskrisis qu'il va publier peu de temps d'ailleurs après le colloque Lippmann, dit :",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 152,
+        "file_idx": 151,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "Ceci apparaît clairement dans la plupart des textes des néolibéraux*, et il y a un texte auquel je vous renvoie (si vous pouvez le trouver, car il n'est pas très facile à trouver. Il s'était bizarrement égaré à la Bibliothèque nationale, mais vous le trouverez à coup sûr au Musée social $ ^{2} $). Ce texte, c'est le résumé des interventions qui ont été faites en 1939, juste à la veille de la guerre, au cours d'un colloque qui s'appelle le « Colloque Walter Lippmann $ ^{3} $ ». Ce colloque avait été réuni en France $ ^{4} $ à la suite de la publication du livre de Lippmann qui venait d'être traduit en français sous le titre de La Cité [libre] $ ^{**} $ $ ^{5} $. Livre curieux, parce que c'était un livre qui, d'une part, reprend en effet, sous la forme d'une pure et simple réactivation, les thèmes du libéralisme classique, mais aussi, par un certain nombre de côtés, présente des éléments qui font partie du néolibéralisme. Ce livre venait de paraître aux États-Unis, avait été traduit en français, et on a réuni à Paris un colloque où figurent Walter Lippmann lui-même, les vieux libéraux de la tradition classique, des gens français comme Baudin $ ^{6} $ par exemple $ ^{7} $, et puis un certain nombre de néolibéraux allemands et autrichiens, ceux précisément qui faisaient partie de l'École de Fribourg et qui avaient été les uns chassés d'Allemagne, les autres réduits au silence en Al ...",
+        "byte_size": 401728,
+        "sha256": "56c18782745554c87a9eb3b0722064b7d0891ef9d59114065e039c1d8896bbde"
+      },
+      {
+        "page_no": 153,
+        "file_idx": 152,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "« La liberté du marché nécessite une politique active et extrêmement vigilante१६. » Et vous trouvez dans tous les textes des néolibéraux cette même thèse que le gouvernement dans un régime libéral est un gouvernement actif, est un gouvernement vigilant, est un gouvernement intervenant, et avec des formules que ni le libéralisme classique du XIX<sup>e</sup> siècle ni l’anarcho-capitalisme américain contemporain ne pourraient accepter. Eucken, par exemple, dit : « L’État est responsable du résultat de l’activité économique<sup>17</sup>. » Franz Böhm dit : « L’État doit dominer le devenir économique<sup>18</sup>. » Miksch dit : « Dans cette politique libérale » – là, la phrase est importante –, « il se peut bien que dans cette politique libérale le nombre des interventions économiques soit aussi grand que dans une politique planificatrice, mais c’est leur nature qui est différente<sup>19</sup> ». Eh bien, je crois qu’on a là, dans ce problème de la nature des interventions, un point à partir duquel on va pouvoir aborder ce qu’il y a de spécifique dans la politique néolibérale. Le problème, en gros, du libéralisme du XVIII<sup>e</sup> - début du XIX<sup>e</sup> siècle, c’était, vous le savez, de faire le partage entre les actions qu’il fallait faire et les actions qu’il ne fallait pas faire, entre les domaines où on pouvait intervenir et les domaines où on ne pouvait pas intervenir ...",
+        "byte_size": 425458,
+        "sha256": "7f06882f9688c26f2ab4dba376f7c4b1a226c6e8383f3bd7ddd50818a6ad5947"
+      },
+      {
+        "page_no": 154,
+        "file_idx": 153,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "est considéré comme étant une conséquence mi-naturelle mi-nécessaire de la concurrence en régime capitaliste, c'est-à-dire que l'on ne peut pas laisser se développer la concurrence sans voir apparaître, en même temps, des phénomènes monopolistiques qui ont précisément pour effet de limiter, d'atténuer, à la limite même d'annuler la concurrence. Il serait donc dans la logique historico-économique de la concurrence de se supprimer elle-même, cette thèse impliquant, bien entendu, que tout libéral qui veut assurer le fonctionnement de la libre concurrence doit bien intervenir à l'intérieur même des mécanismes économiques, sur ceux qui précisément facilitent, portent en eux et déterminent le phénomène monopolistique. C'est-à-dire que si l'on veut sauver la concurrence de ses propres effets, il faut intervenir sur les mécanismes économiques, quel-quefois. C'est là le paradoxe du monopole pour une économie libérale qui pose le problème de la concurrence et qui accepte, en même temps, cette idée que le monopole fait effectivement partie de la logique de la concurrence. Bien entendu, vous l'imaginez, la position des néolibéraux va être tout à fait différente, et leur problème sera de démontrer qu'en fait le monopole, la tendance monopolistique ne fait pas partie de la logique économique et historique de la concurrence. Röpke, dans la Gesellschaftskrisis, dit que le monopole est « un cor ...",
+        "byte_size": 420386,
+        "sha256": "05b04f2188beaa24a1faa191c5b941073d78c5751c3b6a3402e0631646fcb8c5"
+      },
+      {
+        "page_no": 155,
+        "file_idx": 154,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "en quoi l'existence d'un droit des sociétés par action, en quoi aussi le problème des droits de brevet, etc., ont pu, à cause même d'un fonctionnement juridique et pas du tout [pour des] raisons économiques, engendrer les phénomènes de monopole ? Et là, les néolibéraux ont posé toute une série de problèmes plus historiques et plus institutionnels que proprement économiques, mais qui ont ouvert la voie à toute une série de recherches très intéressantes sur le cadre politico-institutionnel de développement du capitalisme, et les Américains, les néolibéraux américains en feront leur profit. Les idées de North $ ^{23} $, par exemple, sur le développement du capitalisme, c'est exactement dans cette ligne qui a été ouverte par les néolibéraux et dont la problématique apparaît clairement dans plusieurs interventions du colloque Lippmann. Autre argument pour montrer que le phénomène monopolistique n'appartient pas de plein droit et en pleine logique à l'économie de la concurrence : ce sont les analyses politiques sur le lien qu'il y a entre l'existence d'une économie nationale, le protectionnisme douanier et le monopole. Von Mises, par exemple, fait toute une série d'analyses là-dessus $ ^{24} $. Il montre que, d'une part, il y a facilitation du phénomène monopolistique par le morcellement en marchés nationaux qui, réduisant les unités économiques à des tailles relativement petites, pe ...",
+        "byte_size": 427401,
+        "sha256": "dd5e36f0675fe10f33f16e36dbc16ed1b115821f2a832b7babdf3b8353ce161c"
+      },
+      {
+        "page_no": 156,
+        "file_idx": 155,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "prédatoire pour passer de l'optimum de concentration au maximum monopolistique. Et puis, dit Röpke, de toute façon, un phénomène monopolistique, même s'il existe, n'est pas en lui-même stable $ ^{28} $. C'est-à-dire qu'à moyen terme, si ce n'est pas à court terme, il se produit toujours, dans le processus économique, soit des modifications de forces productives, soit des modifications techniques, soit des croissances massives de productivité, soit encore des apparitions de nouveaux marchés. Et tous font que l'évolution vers le monopole ne peut être qu'une variable qui joue, pendant un certain temps, parmi d'autres variables qui, elles, seront, à d'autres moments, dominantes. Dans sa dynamique d'ensemble, l'économie de concurrence comporte toute une série de variables dans laquelle la tendance à la concentration est toujours contrebattue par d'autres tendances. Enfin – et c'est toujours von Mises qui raisonne ainsi $ ^{29} $ –, au fond, qu'est-ce qu'il y a d'important, ou plutôt qu'est-ce qu'il y a de perturbant dans le phénomène monopolistique par rapport au jeu de l'économie? Est-ce que c'est le fait qu'il n'y a qu'un producteur? Absolument pas. Est-ce que c'est le fait qu'il n'y a qu'une seule entreprise qui ait le droit de vente? Absolument pas. Ce qui fait que le monopole peut avoir un effet perturbateur, c'est dans la mesure où il agit sur les prix, c'est-à-dire dans la me ...",
+        "byte_size": 414936,
+        "sha256": "0c5c55aceace0457bd3e2af2fbb1d6e03353862d0cea0fc1a83a7ca0e4d6e257"
+      },
+      {
+        "page_no": 157,
+        "file_idx": 156,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "à intervenir directement dans le processus économique, puisque le processus économique, porteur en lui, si on le laisse jouer pleinement, d'une structure régulatrice qui est celle de la concurrence, ne se déréglera jamais. Ce qui fait le propre de la concurrence, c'est la rigueur formelle de son processus. Mais ce qui garantit que ce processus formel ne se déréglera pas c'est que dans la réalité, si on le laisse jouer, il n'y aura rien venant de la concurrence, venant du processus économique lui-même, qui sera de nature à en changer le cours. Par conséquent, la non-intervention à ce niveau-là est nécessaire. Non-intervention sous la réserve qu'il faut, bien entendu, établir un cadre institutionnel qui aura à empêcher que des gens, soit des pouvoirs individuels soit des pouvoirs publics, interviennent pour créer le monopole. Et c'est ainsi que vous trouvez dans la législation allemande tout un énorme cadre institutionnel anti-monopolistique, mais qui n'a pas du tout pour fonction d'intervenir dans le champ économique pour empêcher l'économie elle-même de produire le monopole. C'est pour empêcher que les processus externes n'interviennent et ne créent le phénomène monopolistique.* Deuxième point important dans ce programme néolibéral, c'est la question des actions conformes $ ^{31} $. Cette théorie des actions conformes, cette programmation des actions conformes, on la trouve ess ...",
+        "byte_size": 413938,
+        "sha256": "bdbb6308c736410916cd8f6b93f17588f3a93ff278d8d0acb9cbcf16219e3d5d"
+      },
+      {
+        "page_no": 159,
+        "file_idx": 158,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "quel que soit le taux de chômage, à intervenir directement ou en premier lieu sur le chômage, comme si le plein emploi devait être un idéal politique et un principe économique à sauver en tout état de cause. Ce qui est à sauver, et qui est à sauver d'abord et avant tout, c'est la stabilité des prix. Cette stabilité des prix permettra effectivement, sans doute, par la suite, et le maintien du pouvoir d'achat et l'existence d'un niveau d'emploi plus élevé qu'en crise de chômage, mais le plein emploi n'est pas un objectif, et il peut même se trouver qu'un volant de chômage soit absolument nécessaire pour l'économie. Comme le dit, je crois, Röpke, qu'est-ce que c'est que le chômeur ? Ce n'est pas un handicapé économique. Le chômeur, ce n'est pas une victime sociale. Qu'est-ce que c'est que le chômeur ? C'est un travailleur en transit. C'est un travailleur en transit entre une activité non rentable et une activité plus rentable $ ^{39} $. Voilà pour les actions régulatrices. Plus intéressantes, parce qu'elles nous rapprochent tout de même davantage de l'objet propre, les actions ordonnatrices. Les actions ordonnatrices, qu'est-ce que c'est ? Eh bien, [ce sont] des actions qui ont pour fonction d'intervenir sur les conditions du marché mais sur des conditions plus fondamentales, plus structurales, plus générales que celles dont je viens de vous parler. En effet, il ne faut pas oublie ...",
+        "byte_size": 417018,
+        "sha256": "205d729be187789629e36db3df47bbe4bdace1c5df923ea4a933fa78ff02d04a"
+      },
+      {
+        "page_no": 160,
+        "file_idx": 159,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "différences techniques et, d'une façon générale, l'insuffisance technique de chacune des agricultures. Différences et insuffisances qui étaient toutes liées à l'existence d'une surpopulation qui rendait inutile, et à vrai dire pas souhaitable, l'intervention, l'insertion de ces perfectionnements techniques. Si l'on veut par conséquent — le texte date de 1952 — faire fonctionner l'agriculture européenne dans une économie de marché, qu'est-ce qu'il va falloir faire? Il va falloir agir sur des données qui ne sont pas directement des données économiques, mais qui sont des données conditionnantes pour une éventuelle économie de marché. Il va donc falloir agir sur quoi? Non pas sur les prix, non pas sur tel secteur en assurant le soutien de ce secteur peu rentable — tout ça, ce sont de mauvaises interventions. Les bonnes interventions agiront sur quoi? Eh bien, sur le cadre. C'est-à-dire, primo, sur la population. La population agricole est trop nombreuse — eh bien, il faut la faire diminuer par des interventions qui permettront des transferts de population, qui permettront une migration, etc. Il va falloir intervenir aussi au niveau des techniques, par la mise à la disposition des gens d'un certain nombre d'outillages, par le perfectionnement technique d'un certain nombre d'éléments concernant les engrais, etc.; intervenir sur la technique aussi par la formation des agriculteurs et ...",
+        "byte_size": 415289,
+        "sha256": "8f1aab4b9819a368047e144cb03814ef91b640fb0a20b81c2a3af8e864ee0bd4"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-leçondu14février1979:toc-ch-006-leçondu14février1979:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00053\",\n    \"anchor_id\": \"anchor-00192\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '15' is a misread of the superscript '2'. The note content (Musée social) matches the text context on page 152.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00054\",\n    \"anchor_id\": \"anchor-00193\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '17' is a misread of the superscript '3'. The note content (Colloque Walter Lippmann) matches the text context on page 152.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00056\",\n    \"anchor_id\": \"anchor-00196\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '20' is a misread of the superscript '5'. The note content (La Cité libre) matches the text context on page 152.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00057\",\n    \"anchor_id\": \"anchor-00197\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '21' is a misread of the superscript '6'. The note content (Baudin) matches the text context on page 152.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00058\",\n    \"anchor_id\": \"anchor-00198\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '22' is a misread of the superscript '7'. The note content (French members of the colloquium) matches the text context on page 152.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00059\",\n    \"anchor_id\": \"anchor-00199\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '23' is a misread of the superscript '8'. The note content (Röpke) matches the text context on page 152.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00060\",\n    \"anchor_id\": \"anchor-00200\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR '24' is a misread of the superscript '9'. The note content (von Mises) matches the text context on page 152.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "en-00053",
+      "anchor_id": "anchor-00192",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '15' is a misread of the superscript '2'. The note content (Musée social) matches the text context on page 152."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00054",
+      "anchor_id": "anchor-00193",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '17' is a misread of the superscript '3'. The note content (Colloque Walter Lippmann) matches the text context on page 152."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00056",
+      "anchor_id": "anchor-00196",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '20' is a misread of the superscript '5'. The note content (La Cité libre) matches the text context on page 152."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00057",
+      "anchor_id": "anchor-00197",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '21' is a misread of the superscript '6'. The note content (Baudin) matches the text context on page 152."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00058",
+      "anchor_id": "anchor-00198",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '22' is a misread of the superscript '7'. The note content (French members of the colloquium) matches the text context on page 152."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00059",
+      "anchor_id": "anchor-00199",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '23' is a misread of the superscript '8'. The note content (Röpke) matches the text context on page 152."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00060",
+      "anchor_id": "anchor-00200",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.98,
+      "reason": "OCR '24' is a misread of the superscript '9'. The note content (von Mises) matches the text context on page 152."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-006-leçondu14février1979:toc-ch-006-leçondu14février1979:endnote",
+    "chapter_title": "Leçon du 14 février 1979",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [
+      {
+        "action": "match",
+        "note_item_id": "en-00053",
+        "anchor_id": "anchor-00192",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '15' is a misread of the superscript '2'. The note content (Musée social) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00054",
+        "anchor_id": "anchor-00193",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '17' is a misread of the superscript '3'. The note content (Colloque Walter Lippmann) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00056",
+        "anchor_id": "anchor-00196",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '20' is a misread of the superscript '5'. The note content (La Cité libre) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00057",
+        "anchor_id": "anchor-00197",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '21' is a misread of the superscript '6'. The note content (Baudin) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00058",
+        "anchor_id": "anchor-00198",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '22' is a misread of the superscript '7'. The note content (French members of the colloquium) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00059",
+        "anchor_id": "anchor-00199",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '23' is a misread of the superscript '8'. The note content (Röpke) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00060",
+        "anchor_id": "anchor-00200",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '24' is a misread of the superscript '9'. The note content (von Mises) matches the text context on page 152."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "match",
+        "note_item_id": "en-00053",
+        "anchor_id": "anchor-00192",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '15' is a misread of the superscript '2'. The note content (Musée social) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00054",
+        "anchor_id": "anchor-00193",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '17' is a misread of the superscript '3'. The note content (Colloque Walter Lippmann) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00056",
+        "anchor_id": "anchor-00196",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '20' is a misread of the superscript '5'. The note content (La Cité libre) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00057",
+        "anchor_id": "anchor-00197",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '21' is a misread of the superscript '6'. The note content (Baudin) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00058",
+        "anchor_id": "anchor-00198",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '22' is a misread of the superscript '7'. The note content (French members of the colloquium) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00059",
+        "anchor_id": "anchor-00199",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '23' is a misread of the superscript '8'. The note content (Röpke) matches the text context on page 152."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00060",
+        "anchor_id": "anchor-00200",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '24' is a misread of the superscript '9'. The note content (von Mises) matches the text context on page 152."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00026",
+        "action": "match",
+        "note_item_id": "en-00053",
+        "anchor_id": "anchor-00192",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '15' is a misread of the superscript '2'. The note content (Musée social) matches the text context on page 152."
+      },
+      {
+        "link_id": "link-00027",
+        "action": "match",
+        "note_item_id": "en-00054",
+        "anchor_id": "anchor-00193",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '17' is a misread of the superscript '3'. The note content (Colloque Walter Lippmann) matches the text context on page 152."
+      },
+      {
+        "link_id": "link-00029",
+        "action": "match",
+        "note_item_id": "en-00056",
+        "anchor_id": "anchor-00196",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '20' is a misread of the superscript '5'. The note content (La Cité libre) matches the text context on page 152."
+      },
+      {
+        "link_id": "link-00030",
+        "action": "match",
+        "note_item_id": "en-00057",
+        "anchor_id": "anchor-00197",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '21' is a misread of the superscript '6'. The note content (Baudin) matches the text context on page 152."
+      },
+      {
+        "link_id": "link-00031",
+        "action": "match",
+        "note_item_id": "en-00058",
+        "anchor_id": "anchor-00198",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '22' is a misread of the superscript '7'. The note content (French members of the colloquium) matches the text context on page 152."
+      },
+      {
+        "link_id": "link-00032",
+        "action": "match",
+        "note_item_id": "en-00059",
+        "anchor_id": "anchor-00199",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '23' is a misread of the superscript '8'. The note content (Röpke) matches the text context on page 152."
+      },
+      {
+        "link_id": "link-00033",
+        "action": "match",
+        "note_item_id": "en-00060",
+        "anchor_id": "anchor-00200",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.98,
+        "reason": "OCR '24' is a misread of the superscript '9'. The note content (von Mises) matches the text context on page 152."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 8908,
+    "completion_tokens": 696,
+    "total_tokens": 9604,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 15243
+  }
+}

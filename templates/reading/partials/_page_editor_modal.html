@@ -1,0 +1,24 @@
+<div class="modal-overlay hidden" id="pageEditorModal" onclick="if(event.target===this)closePageEditor();">
+  <div class="modal-box page-editor-modal">
+    <div class="page-editor-head">
+      <div>
+        <div class="page-editor-title">编辑本页段落</div>
+        <div class="page-editor-subtitle" id="pageEditorSubtitle">整页原子保存。新增段落需要同时填写原文与译文。</div>
+      </div>
+      <div class="page-editor-head-actions">
+        <button type="button" class="tb" onclick="togglePageEditorHistory();">本页历史</button>
+        <button type="button" class="tb" onclick="closePageEditor();">关闭</button>
+      </div>
+    </div>
+    <div class="page-editor-toolbar">
+      <button type="button" class="btn btn-gho" onclick="insertPageEditorRow(-1);">在末尾新增段落</button>
+      <span class="page-editor-status" id="pageEditorStatus"></span>
+    </div>
+    <div class="page-editor-history hidden" id="pageEditorHistoryPanel"></div>
+    <div class="page-editor-rows" id="pageEditorRows"></div>
+    <div class="page-editor-footer">
+      <button type="button" class="btn btn-pri" id="pageEditorSaveBtn" onclick="savePageEditor();">保存本页</button>
+      <button type="button" class="btn btn-sec" onclick="closePageEditor();">取消</button>
+    </div>
+  </div>
+</div>

@@ -6,6 +6,7 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>外文文献阅读器</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block extra_head %}{% endblock %}
   <style>
     /* Inline flash messages */
     .flash { padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }

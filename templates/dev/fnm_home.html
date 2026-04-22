@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='dev/fnm.css') }}">
+  <title>FNM 开发者模式</title>
+{% endblock %}
+{% block content %}
+<body class="fnm-dev">
+  <h1>FNM 开发者模式</h1>
+  <p class="hint">
+    仅在 <code>app.debug</code> 或环境变量 <code>FNM_DEV_MODE=1</code> 时启用。
+    支持按阶段跑 / 重置 / 强制跳过；当前后端执行器仅 Phase 1/2，3~6 按钮占位但未接入。
+  </p>
+
+  <h2>从现有 doc 导入</h2>
+  <form id="import-form" class="toolbar">
+    <input type="text" id="doc-id" placeholder="doc_id（在首页任选一本已 OCR 过的书）" required style="flex:1;min-width:280px;">
+    <button type="submit" class="primary">导入</button>
+  </form>
+  <pre id="import-result" style="min-height:0;"></pre>
+
+  <h2>书列表 <button id="refresh-btn" style="font-size:12px;">刷新</button></h2>
+  <div id="books"></div>
+</body>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='dev/fnm.js') }}"></script>
+  <script>window.fnmDevHome.init();</script>
+{% endblock %}

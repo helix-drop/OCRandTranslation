@@ -1,0 +1,412 @@
+{
+  "stage": "visual_toc.manual_input_extract",
+  "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Mad acts, mad speech, and mad people in Chinese medicine and law\n- Prologue Diversity, coherence, and scheme transfers\n- Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca. 1150\n- From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360\n- “Danxi said…” The textual life of medical ideas, 1360-1530\n- Replenish or attack? Competing etiologies and therapies of madness, 1530-1650\n- Shapes of practices Medical trends surrounding dian and kuang, 1650-1911\n- Ghosts or mucus? Possession symptoms and their treatment in Ming and Qing medicine\n- Gendered mania Women’s madness in late-imperial medicine\n- Prologue Language, objects, and practices\n- 11. Errors and projections\n- 12. Punish, but how?\n- 13. Life trials\n- 14. Distress and power\n- 15. Madmen talking?\n- 16. Madness multiple\n- Bibliographies\n- Appendices",
+  "request_content": {
+    "images": [
+      {
+        "label": "image-1",
+        "file_idx": 0,
+        "byte_size": 116413,
+        "sha256": "e60103280443299f69103797cef11aeedfab338d584732b766c627711ac2e3e8",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/toc_visual_source.pdf",
+        "source": "pdf_page"
+      },
+      {
+        "label": "image-2",
+        "file_idx": 1,
+        "byte_size": 61060,
+        "sha256": "b28440069dfff15d11ab3904aa4c9aebd80034de02eaadfe04fda00427fe0b5d",
+        "source_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/toc_visual_source.pdf",
+        "source": "pdf_page"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "source": "organization",
+    "images_count": 2
+  },
+  "response_raw_text": "```json\n{\n\"endnotes_summary\": {\n\"present\": false,\n\"container_title\": null,\n\"container_printed_page\": null,\n\"container_visual_order\": null,\n\"has_chapter_keyed_subentries_in_toc\": false,\n\"subentry_pattern\": null\n},\n\"items\": [\n{\n\"title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n\"depth\": 0,\n\"visual_order\": 1,\n\"printed_page\": 1,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"\"\n},\n{\n\"title\": \"Part One\",\n\"depth\": 0,\n\"visual_order\": 2,\n\"printed_page\": null,\n\"role_hint\": \"container\",\n\"parent_title\": \"\"\n},\n{\n\"title\": \"Prologue\",\n\"depth\": 0,\n\"visual_order\": 3,\n\"printed_page\": 20,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"Psycho-behavioral pathology in Chinese medicine\",\n\"depth\": 0,\n\"visual_order\": 4,\n\"printed_page\": 26,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"From Wind to mucus and Fire\",\n\"depth\": 0,\n\"visual_order\": 5,\n\"printed_page\": 73,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"“Danxi said…”\",\n\"depth\": 0,\n\"visual_order\": 6,\n\"printed_page\": 136,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"Replenish or attack?\",\n\"depth\": 0,\n\"visual_order\": 7,\n\"printed_page\": 202,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"Shapes of practices\",\n\"depth\": 0,\n\"visual_order\": 8,\n\"printed_page\": 263,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"Ghosts or mucus?\",\n\"depth\": 0,\n\"visual_order\": 9,\n\"printed_page\": 326,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"Gendered mania\",\n\"depth\": 0,\n\"visual_order\": 10,\n\"printed_page\": 367,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part One\"\n},\n{\n\"title\": \"Part Two\",\n\"depth\": 0,\n\"visual_order\": 11,\n\"printed_page\": null,\n\"role_hint\": \"container\",\n\"parent_title\": \"\"\n},\n{\n\"title\": \"Prologue\",\n\"depth\": 0,\n\"visual_order\": 12,\n\"printed_page\": 408,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Errors and projections\",\n\"depth\": 0,\n\"visual_order\": 13,\n\"printed_page\": 421,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Punish, but how?\",\n\"depth\": 0,\n\"visual_order\": 14,\n\"printed_page\": 470,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Life trials\",\n\"depth\": 0,\n\"visual_order\": 15,\n\"printed_page\": 509,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Distress and power\",\n\"depth\": 0,\n\"visual_order\": 16,\n\"printed_page\": 544,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Madmen talking?\",\n\"depth\": 0,\n\"visual_order\": 17,\n\"printed_page\": 572,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Madness multiple\",\n\"depth\": 0,\n\"visual_order\": 18,\n\"printed_page\": 613,\n\"role_hint\": \"chapter\",\n\"parent_title\": \"Part Two\"\n},\n{\n\"title\": \"Bibliographies\",\n\"depth\": 0,\n\"visual_order\": 19,\n\"printed_page\": 621,\n\"role_hint\": \"back_matter\",\n\"parent_title\": \"\"\n},\n{\n\"title\": \"Appendices\",\n\"depth\": 0,\n\"visual_order\": 20,\n\"printed_page\": 706,\n\"role_hint\": \"back_matter\",\n\"parent_title\": \"\"\n}\n]\n}\n```",
+  "response_parsed": {
+    "endnotes_summary": {
+      "present": false,
+      "container_title": null,
+      "container_printed_page": null,
+      "container_visual_order": null,
+      "has_chapter_keyed_subentries_in_toc": false,
+      "subentry_pattern": null
+    },
+    "items": [
+      {
+        "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+        "depth": 0,
+        "visual_order": 1,
+        "printed_page": 1,
+        "role_hint": "chapter",
+        "parent_title": ""
+      },
+      {
+        "title": "Part One",
+        "depth": 0,
+        "visual_order": 2,
+        "printed_page": null,
+        "role_hint": "container",
+        "parent_title": ""
+      },
+      {
+        "title": "Prologue",
+        "depth": 0,
+        "visual_order": 3,
+        "printed_page": 20,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Psycho-behavioral pathology in Chinese medicine",
+        "depth": 0,
+        "visual_order": 4,
+        "printed_page": 26,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "From Wind to mucus and Fire",
+        "depth": 0,
+        "visual_order": 5,
+        "printed_page": 73,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "“Danxi said…”",
+        "depth": 0,
+        "visual_order": 6,
+        "printed_page": 136,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Replenish or attack?",
+        "depth": 0,
+        "visual_order": 7,
+        "printed_page": 202,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Shapes of practices",
+        "depth": 0,
+        "visual_order": 8,
+        "printed_page": 263,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Ghosts or mucus?",
+        "depth": 0,
+        "visual_order": 9,
+        "printed_page": 326,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Gendered mania",
+        "depth": 0,
+        "visual_order": 10,
+        "printed_page": 367,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Part Two",
+        "depth": 0,
+        "visual_order": 11,
+        "printed_page": null,
+        "role_hint": "container",
+        "parent_title": ""
+      },
+      {
+        "title": "Prologue",
+        "depth": 0,
+        "visual_order": 12,
+        "printed_page": 408,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Errors and projections",
+        "depth": 0,
+        "visual_order": 13,
+        "printed_page": 421,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Punish, but how?",
+        "depth": 0,
+        "visual_order": 14,
+        "printed_page": 470,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Life trials",
+        "depth": 0,
+        "visual_order": 15,
+        "printed_page": 509,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Distress and power",
+        "depth": 0,
+        "visual_order": 16,
+        "printed_page": 544,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Madmen talking?",
+        "depth": 0,
+        "visual_order": 17,
+        "printed_page": 572,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Madness multiple",
+        "depth": 0,
+        "visual_order": 18,
+        "printed_page": 613,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Bibliographies",
+        "depth": 0,
+        "visual_order": 19,
+        "printed_page": 621,
+        "role_hint": "back_matter",
+        "parent_title": ""
+      },
+      {
+        "title": "Appendices",
+        "depth": 0,
+        "visual_order": 20,
+        "printed_page": 706,
+        "role_hint": "back_matter",
+        "parent_title": ""
+      }
+    ]
+  },
+  "derived_truth": {
+    "items": [
+      {
+        "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+        "depth": 0,
+        "printed_page": 1,
+        "file_idx": null,
+        "visual_order": 1,
+        "role_hint": "chapter"
+      },
+      {
+        "title": "Part One",
+        "depth": 0,
+        "printed_page": null,
+        "file_idx": null,
+        "visual_order": 2,
+        "role_hint": "container"
+      },
+      {
+        "title": "Prologue",
+        "depth": 0,
+        "printed_page": 20,
+        "file_idx": null,
+        "visual_order": 3,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Psycho-behavioral pathology in Chinese medicine",
+        "depth": 0,
+        "printed_page": 26,
+        "file_idx": null,
+        "visual_order": 4,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "From Wind to mucus and Fire",
+        "depth": 0,
+        "printed_page": 73,
+        "file_idx": null,
+        "visual_order": 5,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "“Danxi said…”",
+        "depth": 0,
+        "printed_page": 136,
+        "file_idx": null,
+        "visual_order": 6,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Replenish or attack?",
+        "depth": 0,
+        "printed_page": 202,
+        "file_idx": null,
+        "visual_order": 7,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Shapes of practices",
+        "depth": 0,
+        "printed_page": 263,
+        "file_idx": null,
+        "visual_order": 8,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Ghosts or mucus?",
+        "depth": 0,
+        "printed_page": 326,
+        "file_idx": null,
+        "visual_order": 9,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Gendered mania",
+        "depth": 0,
+        "printed_page": 367,
+        "file_idx": null,
+        "visual_order": 10,
+        "role_hint": "chapter",
+        "parent_title": "Part One"
+      },
+      {
+        "title": "Part Two",
+        "depth": 0,
+        "printed_page": null,
+        "file_idx": null,
+        "visual_order": 11,
+        "role_hint": "container"
+      },
+      {
+        "title": "Prologue",
+        "depth": 0,
+        "printed_page": 408,
+        "file_idx": null,
+        "visual_order": 12,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Errors and projections",
+        "depth": 0,
+        "printed_page": 421,
+        "file_idx": null,
+        "visual_order": 13,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Punish, but how?",
+        "depth": 0,
+        "printed_page": 470,
+        "file_idx": null,
+        "visual_order": 14,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Life trials",
+        "depth": 0,
+        "printed_page": 509,
+        "file_idx": null,
+        "visual_order": 15,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Distress and power",
+        "depth": 0,
+        "printed_page": 544,
+        "file_idx": null,
+        "visual_order": 16,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Madmen talking?",
+        "depth": 0,
+        "printed_page": 572,
+        "file_idx": null,
+        "visual_order": 17,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Madness multiple",
+        "depth": 0,
+        "printed_page": 613,
+        "file_idx": null,
+        "visual_order": 18,
+        "role_hint": "chapter",
+        "parent_title": "Part Two"
+      },
+      {
+        "title": "Bibliographies",
+        "depth": 0,
+        "printed_page": 621,
+        "file_idx": null,
+        "visual_order": 19,
+        "role_hint": "back_matter"
+      },
+      {
+        "title": "Appendices",
+        "depth": 0,
+        "printed_page": 706,
+        "file_idx": null,
+        "visual_order": 20,
+        "role_hint": "back_matter"
+      }
+    ],
+    "endnotes_summary": {
+      "present": false,
+      "container_title": null,
+      "container_printed_page": null,
+      "container_visual_order": null,
+      "has_chapter_keyed_subentries_in_toc": false,
+      "subentry_pattern": null
+    }
+  },
+  "usage": {
+    "stage": "visual_toc.manual_input_extract",
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "request_count": 1,
+    "prompt_tokens": 3314,
+    "completion_tokens": 1173,
+    "total_tokens": 4487,
+    "doc_id": "bd05138cd773",
+    "slug": "",
+    "context": {
+      "source": "organization",
+      "images_count": 2
+    }
+  },
+  "timing": {
+    "duration_ms": 22535
+  }
+}

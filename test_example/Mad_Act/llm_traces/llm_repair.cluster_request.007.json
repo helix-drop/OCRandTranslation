@@ -1,0 +1,323 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-017-genderedmania:toc-ch-017-genderedmania:endnote\",\n  \"chapter_title\": \"Gendered mania\",\n  \"page_range\": [\n    389,\n    422\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 388,\n      \"ocr_excerpt\": \"whether postpartum insanity was “really madness,” since late-imperial physicians tied it explicitly to what they called madness. ### 9.1 Non-gendered bodies, gendered etiologies Medical explanations of mad behavior in treatises purported to apply to both men and women. But in practice, did doctors consistently trace cases of women's mad behavior to the roots they identified in their treatises? Did their descriptions and treatments apply to the \\\"androgynous body\\\" (Furth 1999: 25-29, 44-48 and 56-57)—a body without anatomical sex—that characterized elite Chinese medicine? Charlotte Furth has indeed argued that late-imperial physicians focused increasingly less on the uniqueness of women, and tended to understand the women's illnesses in the same way as they understood men's. I shall agree with Furth in general, but I will also show that the etiology of madness was already ungendered in the Song dynasty (960-1279), and that glimpses of gendered etiologies only appeared in late-imperial times, especially in the nineteenth century. In recorded symptoms, identified etiology, and adopted therapy, a spectrum of more or less gendered solutions were available. Some symptoms (notably nudity a ...\"\n    },\n    {\n      \"page_no\": 389,\n      \"ocr_excerpt\": \"In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files. Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \\\"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\\\" (夫婦人顛狂病者 ...\"\n    },\n    {\n      \"page_no\": 390,\n      \"ocr_excerpt\": \"In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $ A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's strange behavior (she \\\"would cry or laugh, or run around naked, or shut the doors and speak a lot\\\" (或哭或笑 或裸體而走 或閉戶而多言) to \\\"harm caused by excessive ratiocination, [which made] the spiri ...\"\n    },\n    {\n      \"page_no\": 391,\n      \"ocr_excerpt\": \"1593) maintained, placenta could “treat all cases of wasting disorders and extreme fatigue as well as loss of mind and bewilderment caused by dian and xian, in both men and women” (治男女一切虚損勞極 癲癇失志恍惚). $ ^{12} $ Wu also gave his patient the “Will-fixing pill” (定志丸) and a daily regimen of “Heart-replenishing decoction” (補心湯), a treatment that he recommended elsewhere in a general explanation of therapies for dian. $ ^{13} $ The way he handled his female patient was thus not significantly gendered. After 100 days of treatment, the young woman was married, and one year later she had a child. Although this outcome had been enabled by drugs that were designed to act on the body’s inner dynamics, the proof of the cure was social, and therefore gendered. Xue Ji's 薛己 (1487-1559) treatment of a young woman typified his \\\"calorific-replenishing\\\" (6.3) approach to many disorders. $ ^{14} $ His remark that other physicians had attempted to give her \\\"Wind-mucus\\\" drugs is another sign that gender-specific treatments may not have been common at the time, since, as we have seen, these drugs then represented the most conventional medical treatment for insanity. I can also find no meaningful gender dis ...\"\n    },\n    {\n      \"page_no\": 392,\n      \"ocr_excerpt\": \"flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 血氣迷心 或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was among the first to ascribe mad symptoms to pathological menses, but the text explained how one specific imbalance could lead to insanity, not how mad symptoms should be interpreted in general. In other words, he was locking one etiology and some symptoms together in a contextually limited script. Li probably believed that the general explanation of insanity as caused by the action of Fire and mucus still applied to women who did not suffer from menorrhagia and whose symptoms did not occur postpartum. Although the rare sources we have are difficult to bind into a single narrative, dispersed writings indicate that at least some physicians thought that women suffered from madness for reasons particular to them. Zhuang Lüyan's 莊履嚴 Fuke baibian 婦科百辨 (early 17 $ ^{th} $ century?) claimed that the mucus that made women mad (顛狂) by encroaching on their Heart was brought about by extreme fr ...\"\n    },\n    {\n      \"page_no\": 393,\n      \"ocr_excerpt\": \"薹憤 遂成此疾). $ ^{17} $ Sorrow appeared in both Zhuang's and Chen's accounts, but neither said much more about it than the lines I just cited. It is tempting to speculate that women isolated from their kin by patrilocal marriage and with limited social relations because of the necessity to stay at home were more likely than men to suffer from “sorrow.” Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in ...\"\n    },\n    {\n      \"page_no\": 394,\n      \"ocr_excerpt\": \"imperial times. $ ^{21} $ Gong recommended treating such a disorder with an enhanced version of the “Carefree powder” (加味逍遥散), which was often used to redress Liver imbalances, but he did not record ever using this treatment in a clinical case. I found only one case of a “mad” woman between 1615 and 1822: a file by Suzhou physician Zhang Lu 張璐 (1617-1699). A woman spoke madly, screaming and scolding. She would sing and laugh unusually, as if she were possessed. Her eye and the corner of her mouth on one side were raised in a stupid grin. Some treated her as if these were convulsive fits, others as if these were fits of Heart Wind, all to no avail. It turns out that she had long had a Head-Wind illness, and that it was the acting up of Wind mucus that had made her this way. I used [Sichuan-] lovage-and-wild-ginger decoction with an addition of avert-wind, and she quickly became better after a few doses. $ ^{22} $ 一婦人狂言叫罵 歌笑非常 似崇憑依 一邊眼與口角呆起 或作癎治 成作心風治 皆不效 乃是舊有頭風之疾 風痰作之使然 用芎辛湯加防風 數服頓愈 This way to treat madness symptoms was unusual, but not obviously gendered. The record also indicates that previous physicians had used methods that could have applied to men. Following a disappointing l ...\"\n    },\n    {\n      \"page_no\": 395,\n      \"ocr_excerpt\": \"and left several case files to supplement their general explanations. $ ^{24} $ His long survey of causes of insanity included a claim that “women suffer from dian because of Blood imbalances” (婦人患癲 由血不調), $ ^{25} $ but none of his three cases of “mad women” mentioned Blood. He diagnosed that a woman who spoke and laughed to herself was suffering from “abundance of mucus, and Qi in stasis” (痰多氣鬱), and attributed to fright the dian case of a despondent and emaciated (神衰肌削) patient who had been “sitting and lying as if stupid” (坐臥如癡) for more than ten years. $ ^{26} $ Lin noted that “only the massive replenishing of primordial Qi will bring results” (非大補元氣不為功), but since many physicians considered that prolonged disorders led to general depletion, Lin’s approach did not apply solely to women. In another case by Lin, a woman surnamed Zhang was “confused and manic” (恍惚狂妄). In addition to “seeing her husband as an enemy” (视夫若仇), she menacingly “held an instrument and shed her clothes, so that no one dared to approach her” (持械棄衣 莫之敢近). Lin adopted the conventional remedy for such acute crises: an emetic. Pure melon pedicle “removed a lot of viscous saliva and lodged sputum” (去粘涎宿沫頗多), bu ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01095\",\n      \"marker\": \"4\",\n      \"page_no\": 389,\n      \"paragraph_index\": 0,\n      \"source_text\": \"In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01099\",\n      \"marker\": \"8\",\n      \"page_no\": 389,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), whi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01101\",\n      \"marker\": \"10\",\n      \"page_no\": 390,\n      \"paragraph_index\": 0,\n      \"source_text\": \"In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01102\",\n      \"marker\": \"11\",\n      \"page_no\": 390,\n      \"paragraph_index\": 1,\n      \"source_text\": \"A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's stran ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01103\",\n      \"marker\": \"15\",\n      \"page_no\": 392,\n      \"paragraph_index\": 3,\n      \"source_text\": \"或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was\"\n    },\n    {\n      \"anchor_id\": \"anchor-01104\",\n      \"marker\": \"16\",\n      \"page_no\": 392,\n      \"paragraph_index\": 15,\n      \"source_text\": \"致), $ ^{16} $ an emotional theory of mucus that was still relatively rare at the time. In the late\"\n    },\n    {\n      \"anchor_id\": \"anchor-01105\",\n      \"marker\": \"15\",\n      \"page_no\": 392,\n      \"paragraph_index\": 20,\n      \"source_text\": \"flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01106\",\n      \"marker\": \"16\",\n      \"page_no\": 392,\n      \"paragraph_index\": 21,\n      \"source_text\": \"Although the rare sources we have are difficult to bind into a single narrative, dispersed writings indicate that at least some physicians thought that women suffered from madness for reasons particular to them. Zhuang Lüyan's 莊履嚴 Fuke baib ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00141\",\n      \"note_item_id\": \"fn-00284\",\n      \"current_anchor_id\": \"anchor-01100\",\n      \"marker\": \"1\",\n      \"note_page_no\": 391,\n      \"anchor_page_no\": 390,\n      \"current_anchor_marker\": \"9\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"\\u000e \\u00122\\u0005 ,7#0 \\u0005\\u0001R\\u001a;3@ J;3@SǣǠ \\u0005\\u0001;@\\u0001 - \\u0001\\u000e\\u0013\\u0001 \\u0010\\u0007 .G7\\u0001;@E7DF76\\u0001F:;E\\u000153E7\\u0001;@\\u0001F:7\\u0001E75F;A@\\u0001A@\\u0001?36@7EE\\u0001A8\\u0001:;E\\u0001 \\u000e \\u0010\\u000176;F;A@\\u0001A8\\u0001\\u0019:7@\\u00010;?;@9QE :%'..'06\\u0001\\u0018'%+2'5 \\u0007\",\n      \"anchor_excerpt\": \"In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for ...\"\n    },\n    {\n      \"link_id\": \"link-00142\",\n      \"note_item_id\": \"fn-00285\",\n      \"current_anchor_id\": \"anchor-01204\",\n      \"marker\": \"6\",\n      \"note_page_no\": 392,\n      \"anchor_page_no\": 428,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"EB7DE76\\u0001ID;F;@9E\\u0001;@6;53F7\\u0001F:3F\\u00013F\\u0001>73EF\\u0001EA?7\\u0001B:KE;5;3@E\\u0001F:AG9:F\\u0001F:3F\\u0001IA?7@\\u0001EG887D76\\u00018DA? \\u000e +:7'\\u000147/'0 ˀ»Eˊ \\u0005,7#0 \\u0005\\u0001R034;@9\\u000187@>7;S˙ǙU˧ \\u0005\\u0001R$7;E:3@9\\u0001>7;SF@˧ \\u0005\\u0001R*3@\\u0001>7;Sǜ˧ \\u0005 R\\u001a;3@=G3@9S ǣǀ \\u0003 \\u0012\\u0012\\u000e\\u00011 \\u000e\\u0010\\u000e2\\u0013 \\u0012\\u000e\\u0018\\u0004\\u0007 ?36@7EE\\u00018AD\\u0001D73EA@E\\u0001B3DF;5G>3D\\u0001FA\\u0001 ...\",\n      \"anchor_excerpt\": \"confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments”\"\n    },\n    {\n      \"link_id\": \"link-00149\",\n      \"note_item_id\": \"fn-00297\",\n      \"current_anchor_id\": \"anchor-01139\",\n      \"marker\": \"49\",\n      \"note_page_no\": 414,\n      \"anchor_page_no\": 403,\n      \"current_anchor_marker\": \"49\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"52a, “Women’s section” 婦人門, “Miscellaneous recipes for postpartum [disorders]” 產後雜方 (LiuChYQ: 434B). With “in a blanket manner,” I try to reflect the double meaning of shuai 率 as “comprehensively” and “haphazardly.”\",\n      \"anchor_excerpt\": \"A woman who has a fit of dian does not know shame: she becomes candy-like $ ^{46} $ when she sees a man and very angry when she sees a woman. She will go as far as going naked and exposing her body. In such situations, Liver Fire is ardent ...\"\n    },\n    {\n      \"link_id\": \"link-00151\",\n      \"note_item_id\": \"fn-00299\",\n      \"current_anchor_id\": \"anchor-01108\",\n      \"marker\": \"18\",\n      \"note_page_no\": 414,\n      \"anchor_page_no\": 393,\n      \"current_anchor_marker\": \"18\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"8b, “Methods for balancing and replenishing” 調補法 (Chen YYQ: 211A).\",\n      \"anchor_excerpt\": \"Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published i ...\"\n    },\n    {\n      \"link_id\": \"link-00157\",\n      \"note_item_id\": \"fn-00316\",\n      \"current_anchor_id\": \"anchor-01094\",\n      \"marker\": \"3\",\n      \"note_page_no\": 421,\n      \"anchor_page_no\": 388,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"(ZGZC-17: 169).\",\n      \"anchor_excerpt\": \"I shall agree with Furth in general, but I will also show that the etiology of madness was already ungendered in the Song dynasty (960-1279), and that glimpses of gendered etiologies only appeared in late-imperial times, especially in the n ...\"\n    }\n  ]\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-017-genderedmania:toc-ch-017-genderedmania:endnote",
+      "chapter_title": "Gendered mania",
+      "request_mode": "anchor_rebind",
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        389,
+        422
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 78645,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01095",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 389,
+          "paragraph_index": 0,
+          "char_start": 421,
+          "char_end": 429,
+          "source_marker": "$ ^{4} $",
+          "normalized_marker": "4",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78649,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01099",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 389,
+          "paragraph_index": 1,
+          "char_start": 757,
+          "char_end": 765,
+          "source_marker": "$ ^{8} $",
+          "normalized_marker": "8",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\" (夫婦人顛狂病者 由血氣虛受風邪所為也). $ ^{7} $ Despite the mention of Blood depletion, this etiology was not gendered, because it corresponded with the traditional etiology of most Wind disorders. $ ^{8} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78651,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01101",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 390,
+          "paragraph_index": 0,
+          "char_start": 770,
+          "char_end": 779,
+          "source_marker": "$ ^{10} $",
+          "normalized_marker": "10",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78652,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01102",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 390,
+          "paragraph_index": 1,
+          "char_start": 467,
+          "char_end": 476,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's strange behavior (she \"would cry or laugh, or run around naked, or shut the doors and speak a lot\" (或哭或笑 或裸體而走 或閉戶而多言) to \"harm caused by excessive ratiocination, [which made] the spirit unable to hold to its lodging\" (思慮過傷 神不守舍也). $ ^{11} $ In the sixteenth century, this etiology typified medicine's increasing focus on \"inner harm\"—a category that included exhaustion, food scarcity or excesses, and emotional imbalances—and the devising of new ways to treat it. Wu's therapy based on human placenta differed from those proposed in contemporary books, but, as great specialist of medicinal drugs Li Shizhen 李時珍 (1518-",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78654,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01103",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 392,
+          "paragraph_index": 3,
+          "char_start": 29,
+          "char_end": 38,
+          "source_marker": "$ ^{15} $",
+          "normalized_marker": "15",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78655,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01104",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 392,
+          "paragraph_index": 15,
+          "char_start": 4,
+          "char_end": 13,
+          "source_marker": "$ ^{16} $",
+          "normalized_marker": "16",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "致), $ ^{16} $ an emotional theory of mucus that was still relatively rare at the time. In the late",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78656,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01105",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 392,
+          "paragraph_index": 20,
+          "char_start": 274,
+          "char_end": 283,
+          "source_marker": "$ ^{15} $",
+          "normalized_marker": "15",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 血氣迷心 或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was among the first to ascribe mad symptoms to pathological menses, but the text explained how one specific imbalance could lead to insanity, not how mad symptoms should be interpreted in general. In other words, he was locking one etiology and some symptoms together in a contextually limited script. Li probably believed that the general explanation of insanity as caused by the action of Fire and mucus still applied to women who did not suffer from menorrhagia and whose symptoms did not occur postpartum.",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 78657,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01106",
+          "chapter_id": "toc-ch-017-genderedmania",
+          "page_no": 392,
+          "paragraph_index": 21,
+          "char_start": 419,
+          "char_end": 428,
+          "source_marker": "$ ^{16} $",
+          "normalized_marker": "16",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Although the rare sources we have are difficult to bind into a single narrative, dispersed writings indicate that at least some physicians thought that women suffered from madness for reasons particular to them. Zhuang Lüyan's 莊履嚴 Fuke baibian 婦科百辨 (early 17 $ ^{th} $ century?) claimed that the mucus that made women mad (顛狂) by encroaching on their Heart was brought about by extreme fright or sorrow (驚憂之極 痰犯心胸所 致), $ ^{16} $ an emotional theory of mucus that was still relatively rare at the time. In the late seventeenth century, Chen Shiduo 陳士鐸 argued that fits of madness caused by depletion, a kind of madness “from which women suffer much” (論陰虛而發狂者 此症婦人居多), appeared because “Qi in stasis is not extended [i.e., emotions are not expressed], yearnings are not satisfied, and there is temporary sorrow and anger” (鬱氣不伸 思慕不遂 一時",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00141",
+          "note_item_id": "fn-00284",
+          "current_anchor_id": "anchor-01100",
+          "marker": "1",
+          "note_page_no": 391,
+          "anchor_page_no": 390,
+          "current_anchor_marker": "9",
+          "note_excerpt": "\u000e \u00122\u0005 ,7#0 \u0005\u0001R\u001a;3@ J;3@SǣǠ \u0005\u0001;@\u0001 - \u0001\u000e\u0013\u0001 \u0010\u0007 .G7\u0001;@E7DF76\u0001F:;E\u000153E7\u0001;@\u0001F:7\u0001E75F;A@\u0001A@\u0001?36@7EE\u0001A8\u0001:;E\u0001 \u000e \u0010\u000176;F;A@\u0001A8\u0001\u0019:7@\u00010;?;@9QE :%'..'06\u0001\u0018'%+2'5 \u0007",
+          "anchor_excerpt": "In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00142",
+          "note_item_id": "fn-00285",
+          "current_anchor_id": "anchor-01204",
+          "marker": "6",
+          "note_page_no": 392,
+          "anchor_page_no": 428,
+          "current_anchor_marker": "6",
+          "note_excerpt": "EB7DE76\u0001ID;F;@9E\u0001;@6;53F7\u0001F:3F\u00013F\u0001>73EF\u0001EA?7\u0001B:KE;5;3@E\u0001F:AG9:F\u0001F:3F\u0001IA?7@\u0001EG887D76\u00018DA? \u000e +:7'\u000147/'0 ˀ»Eˊ \u0005,7#0 \u0005\u0001R034;@9\u000187@>7;S˙ǙU˧ \u0005\u0001R$7;E:3@9\u0001>7;SF@˧ \u0005\u0001R*3@\u0001>7;Sǜ˧ \u0005 R\u001a;3@=G3@9S ǣǀ \u0003 \u0012\u0012\u000e\u00011 \u000e\u0010\u000e2\u0013 \u0012\u000e\u0018\u0004\u0007 ?36@7EE\u00018AD\u0001D73EA@E\u0001B3DF;5G>3D\u0001FA\u0001F:7?\u0007\u00010:G3@9\u0001\"MK3@QEɜÕ 7-'\u0001$#+$+#0 ¶ȀǦʦ $ ^{16} $ In ZGZC-7: 9.",
+          "anchor_excerpt": "confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments”",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00149",
+          "note_item_id": "fn-00297",
+          "current_anchor_id": "anchor-01139",
+          "marker": "49",
+          "note_page_no": 414,
+          "anchor_page_no": 403,
+          "current_anchor_marker": "49",
+          "note_excerpt": "52a, “Women’s section” 婦人門, “Miscellaneous recipes for postpartum [disorders]” 產後雜方 (LiuChYQ: 434B). With “in a blanket manner,” I try to reflect the double meaning of shuai 率 as “comprehensively” and “haphazardly.”",
+          "anchor_excerpt": "A woman who has a fit of dian does not know shame: she becomes candy-like $ ^{46} $ when she sees a man and very angry when she sees a woman. She will go as far as going naked and exposing her body. In such situations, Liver Fire is ardent and [the woman] thinks about a man but is unable to get one: this causes stasis and congealing that turn into dian. How does ardent Liver Fire turn into dian? It must be because, in women, Liver-Wood is flourishing: $ ^{47} $ Liver Fire coerces the Heart, causing the Heart’s ruler to descend from the palace. But the Heart’s Envelope keeps guard on the outside, so how can it let [the Heart, i.e. the ruler] be intimidated? $ ^{48} $ It is little known that Liver Fire is none other than depletion Fire. $ ^{49} $ Depletion Fire and Ministerial Fire are of the same sort. When [Fire?] associates with brigands, $ ^{50} $ it forgets [the ruler’s] sagely brilliance $ ^{51} $ and it directly sets the palace ablaze. But once the Heart-ruler walks out, why is there only dian and not death? This must be because Kidney Water comes to the rescue. Thinking of a man and being unable to get him is because the Kidneys are flourishing. Although this is Kidney Fire, Kidney Water is actually exhausted. When Liver Fire becomes coercive, the Heart [should be] provided for by Kidney Water: this is why there is only dian and not death. The treatment method is to purge the Liver root and replenish Kidney Water, as well as to channel static Qi. $ ^{52} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00151",
+          "note_item_id": "fn-00299",
+          "current_anchor_id": "anchor-01108",
+          "marker": "18",
+          "note_page_no": 414,
+          "anchor_page_no": 393,
+          "current_anchor_marker": "18",
+          "note_excerpt": "8b, “Methods for balancing and replenishing” 調補法 (Chen YYQ: 211A).",
+          "anchor_excerpt": "Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in the Heart’s Envelope” (營血迷於心包所致也).²⁰ I do not know what Gong Tingxian meant by “constructive Blood,” but it may have been unique to women. As we have seen, however, blockage of the “Heart’s Envelope” was one of the most commonly identified causes of disorders of consciousness for both men and women in late-",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00157",
+          "note_item_id": "fn-00316",
+          "current_anchor_id": "anchor-01094",
+          "marker": "3",
+          "note_page_no": 421,
+          "anchor_page_no": 388,
+          "current_anchor_marker": "3",
+          "note_excerpt": "(ZGZC-17: 169).",
+          "anchor_excerpt": "I shall agree with Furth in general, but I will also show that the etiology of madness was already ungendered in the Song dynasty (960-1279), and that glimpses of gendered etiologies only appeared in late-imperial times, especially in the nineteenth century. In recorded symptoms, identified etiology, and adopted therapy, a spectrum of more or less gendered solutions were available. Some symptoms (notably nudity and grief) were proportionally more common in women's cases, probably because these acts were seen as socially more problematic, and were therefore more likely to be brought to the attention of a physician. But although many nineteenth-century cases of mad women did not conform to what treatises said about insanity, most of them did. $ ^{3} $",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "page_no": 388,
+        "file_idx": 387,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "whether postpartum insanity was “really madness,” since late-imperial physicians tied it explicitly to what they called madness. ### 9.1 Non-gendered bodies, gendered etiologies Medical explanations of mad behavior in treatises purported to apply to both men and women. But in practice, did doctors consistently trace cases of women's mad behavior to the roots they identified in their treatises? Did their descriptions and treatments apply to the \"androgynous body\" (Furth 1999: 25-29, 44-48 and 56-57)—a body without anatomical sex—that characterized elite Chinese medicine? Charlotte Furth has indeed argued that late-imperial physicians focused increasingly less on the uniqueness of women, and tended to understand the women's illnesses in the same way as they understood men's. I shall agree with Furth in general, but I will also show that the etiology of madness was already ungendered in the Song dynasty (960-1279), and that glimpses of gendered etiologies only appeared in late-imperial times, especially in the nineteenth century. In recorded symptoms, identified etiology, and adopted therapy, a spectrum of more or less gendered solutions were available. Some symptoms (notably nudity and grief) were proportionally more common in women's cases, probably because these acts were seen as socially more problematic, and were therefore more likely to be brought to the attention of a physi ...",
+        "byte_size": 121615,
+        "sha256": "55dfec28c238e1e5c0d0cb89fa179ca6723a9270e28beeba299d8a81bc5b055c"
+      },
+      {
+        "page_no": 389,
+        "file_idx": 388,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files. Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\" (夫婦人顛狂病者 由血氣虛受風邪所為也). $ ^{7} $ Despite the mention of Blood depletion, this etiology was not gendered, because it corresponded with the traditional etiology of most Wind disorders. $ ^{8} $",
+        "byte_size": 160334,
+        "sha256": "b1688aca3af88398d468efe35ecac2a956e8aa3757fb9c562395b846f8354da8"
+      },
+      {
+        "page_no": 390,
+        "file_idx": 389,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $ A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's strange behavior (she \"would cry or laugh, or run around naked, or shut the doors and speak a lot\" (或哭或笑 或裸體而走 或閉戶而多言) to \"harm caused by excessive ratiocination, [which made] the spirit unable to hold to its lodging\" (思慮過傷 神不守舍也). $ ^{11} $ In the sixteenth century, this etiology typified medicine's increasing focus on \"inner harm\"—a category that included exhaustion, food scarcity ...",
+        "byte_size": 140210,
+        "sha256": "154890134c594acb86b26a21186d2de91b5fe0a84aadcd45937a0a1a17804165"
+      },
+      {
+        "page_no": 391,
+        "file_idx": 390,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "1593) maintained, placenta could “treat all cases of wasting disorders and extreme fatigue as well as loss of mind and bewilderment caused by dian and xian, in both men and women” (治男女一切虚損勞極 癲癇失志恍惚). $ ^{12} $ Wu also gave his patient the “Will-fixing pill” (定志丸) and a daily regimen of “Heart-replenishing decoction” (補心湯), a treatment that he recommended elsewhere in a general explanation of therapies for dian. $ ^{13} $ The way he handled his female patient was thus not significantly gendered. After 100 days of treatment, the young woman was married, and one year later she had a child. Although this outcome had been enabled by drugs that were designed to act on the body’s inner dynamics, the proof of the cure was social, and therefore gendered. Xue Ji's 薛己 (1487-1559) treatment of a young woman typified his \"calorific-replenishing\" (6.3) approach to many disorders. $ ^{14} $ His remark that other physicians had attempted to give her \"Wind-mucus\" drugs is another sign that gender-specific treatments may not have been common at the time, since, as we have seen, these drugs then represented the most conventional medical treatment for insanity. I can also find no meaningful gender distinctions between Wang Ji's 汪機 (1463-1540; see 6.2) two cases of madness caused by inner harm, one of a man and one of a woman. Wang's contrarian attribution of both cases to depletion of the Yang-bri ...",
+        "byte_size": 135478,
+        "sha256": "16ba9a14b20b835267fe8e8856e9dc7eaed960c9e9e3949ba7dc3d812c1ba823"
+      },
+      {
+        "page_no": 392,
+        "file_idx": 391,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 血氣迷心 或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was among the first to ascribe mad symptoms to pathological menses, but the text explained how one specific imbalance could lead to insanity, not how mad symptoms should be interpreted in general. In other words, he was locking one etiology and some symptoms together in a contextually limited script. Li probably believed that the general explanation of insanity as caused by the action of Fire and mucus still applied to women who did not suffer from menorrhagia and whose symptoms did not occur postpartum. Although the rare sources we have are difficult to bind into a single narrative, dispersed writings indicate that at least some physicians thought that women suffered from madness for reasons particular to them. Zhuang Lüyan's 莊履嚴 Fuke baibian 婦科百辨 (early 17 $ ^{th} $ century?) claimed that the mucus that made women mad (顛狂) by encroaching on their Heart was brought about by extreme fright or sorrow (驚憂之極 痰犯心胸所 致), $ ^{16} $ an emotional theory of mucus that was still relatively rare at the time. In the late seventeenth century, Chen Shiduo 陳士鐸 argued that fits of madness caused by ...",
+        "byte_size": 130458,
+        "sha256": "39c17a064290d1811db45eb043f5431ea09b3a6eb958970db76d89e2106f8bbc"
+      },
+      {
+        "page_no": 393,
+        "file_idx": 392,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "薹憤 遂成此疾). $ ^{17} $ Sorrow appeared in both Zhuang's and Chen's accounts, but neither said much more about it than the lines I just cited. It is tempting to speculate that women isolated from their kin by patrilocal marriage and with limited social relations because of the necessity to stay at home were more likely than men to suffer from “sorrow.” Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in the Heart’s Envelope” (營血迷於心包所致也).²⁰ I do not know what Gong Tingxian meant by “constructive Blood,” but it may have been unique to women. As we have seen, however, blockage of the “Heart’s Envelope” ...",
+        "byte_size": 158825,
+        "sha256": "fce03ffd701df08c8f0833f33da7470fe20a43aa0832d041ead077612f715739"
+      },
+      {
+        "page_no": 394,
+        "file_idx": 393,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "imperial times. $ ^{21} $ Gong recommended treating such a disorder with an enhanced version of the “Carefree powder” (加味逍遥散), which was often used to redress Liver imbalances, but he did not record ever using this treatment in a clinical case. I found only one case of a “mad” woman between 1615 and 1822: a file by Suzhou physician Zhang Lu 張璐 (1617-1699). A woman spoke madly, screaming and scolding. She would sing and laugh unusually, as if she were possessed. Her eye and the corner of her mouth on one side were raised in a stupid grin. Some treated her as if these were convulsive fits, others as if these were fits of Heart Wind, all to no avail. It turns out that she had long had a Head-Wind illness, and that it was the acting up of Wind mucus that had made her this way. I used [Sichuan-] lovage-and-wild-ginger decoction with an addition of avert-wind, and she quickly became better after a few doses. $ ^{22} $ 一婦人狂言叫罵 歌笑非常 似崇憑依 一邊眼與口角呆起 或作癎治 成作心風治 皆不效 乃是舊有頭風之疾 風痰作之使然 用芎辛湯加防風 數服頓愈 This way to treat madness symptoms was unusual, but not obviously gendered. The record also indicates that previous physicians had used methods that could have applied to men. Following a disappointing lack of cases for two centuries after 1615, we have ten cases of “mad women” written by five men between 1822 and 1859. $ ^{23} $ Lin Peiqin 林佩琴 (1772-1839) was one of very few doctors who published ex ...",
+        "byte_size": 135611,
+        "sha256": "bd04765708a50a7a81f6735ca918d340a7f3b2fc05202bb958b1aca2cfdc470c"
+      },
+      {
+        "page_no": 395,
+        "file_idx": 394,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "and left several case files to supplement their general explanations. $ ^{24} $ His long survey of causes of insanity included a claim that “women suffer from dian because of Blood imbalances” (婦人患癲 由血不調), $ ^{25} $ but none of his three cases of “mad women” mentioned Blood. He diagnosed that a woman who spoke and laughed to herself was suffering from “abundance of mucus, and Qi in stasis” (痰多氣鬱), and attributed to fright the dian case of a despondent and emaciated (神衰肌削) patient who had been “sitting and lying as if stupid” (坐臥如癡) for more than ten years. $ ^{26} $ Lin noted that “only the massive replenishing of primordial Qi will bring results” (非大補元氣不為功), but since many physicians considered that prolonged disorders led to general depletion, Lin’s approach did not apply solely to women. In another case by Lin, a woman surnamed Zhang was “confused and manic” (恍惚狂妄). In addition to “seeing her husband as an enemy” (视夫若仇), she menacingly “held an instrument and shed her clothes, so that no one dared to approach her” (持械棄衣 莫之敢近). Lin adopted the conventional remedy for such acute crises: an emetic. Pure melon pedicle “removed a lot of viscous saliva and lodged sputum” (去粘涎宿沫頗多), but the violent vomiting caused the patient chest pains. When he saw that she still “spoke and laughed to herself,” Lin “knew that.... the Heart-lodging was [still] depleted and that the Spirit-souls ha ...",
+        "byte_size": 137268,
+        "sha256": "46c61337d2e6a30c74cc5f397d125554d774372b630f3b2352638314c564e7d3"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-017-genderedmania:toc-ch-017-genderedmania:endnote",
+    "request_mode": "anchor_rebind",
+    "page_context_count": 8,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00284\",\n    \"anchor_id\": \"anchor-01101\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-00284 (marker 9) is currently bound to anchor-01100 (marker 9 on page 390). The screenshot for page 372 confirms that marker 9 appears in the text 'remedy for madness and seizures.⁹'. Anchor-01101 corresponds to this exact location (page 390 in OCR, which matches page 372 in the image sequence provided, likely due to chapter offset or different pagination in source vs images, but the text context 'In a brief case record...' matches perfectly). The current binding is to the correct logical anchor, but the ID might need confirmation. However, looking at the request, it asks to rebind. The current anchor for fn-00284 is anchor-01100. The unmatched anchors list contains anchor-01101 with marker 10? Wait, let's look closer. \\n\\nOCR Page 390: '...seizures. $ ^{9} $ ... Heart. $ ^{10} $'. \\nImage Page 372: '...seizures.⁹ ... Heart.¹⁰'. \\nUnmatched anchors: anchor-01101 is marker 10 on page 390. anchor-01102 is marker 11 on page 390. \\nRebind candidates: link-00141 suggests fn-00284 (marker 1?? No, note says marker 1 but excerpt shows garbage. Let's look at the note content in the candidate: 'I discussed this case in the section on madness of his 1547 edition...'). This content matches footnote 9 on page 372 ('Juan 3, last lines...'). \\nThe candidate link-00141 has note_item_id 'fn-00284' and marker '1'. This seems like an OCR error in the metadata for the note item itself, or the note item is misidentified. However, the note text 'I discussed this case...' clearly belongs to footnote 9 on page 372. \\nAnchor-01100 is marker 9 on page 390 (OCR). Anchor-01101 is marker 10. \\nThe screenshot shows footnote 9 clearly. The text 'In a brief case record...' has marker 9. \\nThe unmatched_anchors list has anchor-01101 as marker 10. It does NOT have an unmatched anchor for marker 9. \\nWait, if anchor-01100 is the current anchor for fn-00284, and it is marker 9, why is it not in unmatched_anchors? Because it is already matched? \\nThe prompt says 'unmatched_anchors' are those available to be matched. \\nIf fn-00284 is currently bound to anchor-01100, and anchor-01100 is NOT in the unmatched list, then I cannot match it again unless I am changing the binding. \\nBut the instruction says 'rebind_candidates'. Link-00141 proposes binding fn-00284 to anchor-01100",
+  "response_parsed": [],
+  "derived_truth": {
+    "cluster_id": "toc-ch-017-genderedmania:toc-ch-017-genderedmania:endnote",
+    "chapter_title": "Gendered mania",
+    "request_mode": "anchor_rebind",
+    "parsed_actions": [],
+    "auto_selected_actions": [],
+    "auto_applied_actions": []
+  },
+  "usage": {
+    "prompt_tokens": 12201,
+    "completion_tokens": 768,
+    "total_tokens": 12969,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 16428
+  }
+}

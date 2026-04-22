@@ -1,0 +1,363 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote\",\n  \"chapter_title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n  \"page_range\": [\n    113,\n    157\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 113,\n      \"ocr_excerpt\": \"and tortured by the devil, and not lunatics, fools, or senseless persons.\\\"⁴⁶ In this passage, Luther distinguished the physically possessed from the mentally ill and the retarded, but more often he spoke of demonic possession as a general condition of willful sin. When Eve was tempted in the garden, for example, she was not rationally persuaded to disobey God; she was deluded: \\\"Because Satan restrains her mind [animum] and eyes, however, she not only does not see death or become aware of it, but gradually she is also more inflamed by her desire for the fruit and delights in this idolatry and sin.\\\"⁴⁷ Indeed, Adam should have warned his descendants about the consequences of sin, for \\\"when he was deprived of his mind by Satan and believed that he would be like God, he became like Satan himself.\\\"⁴⁸ The fall into sin had been a fall into unreason. Sin brought fundamental changes in both man and nature. From then on, man's \\\"will is impaired, his intellect depraved, and his reason entirely corrupt and altogether changed.\\\"⁴⁹ So mankind became sick with a leprosy of the spirit. Human history had thus begun with a lapse into madness. The next major atrocity in history was the killing of Abel ...\"\n    },\n    {\n      \"page_no\": 121,\n      \"ocr_excerpt\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \\\"be a fool, poor, worthless and despised.\\\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \\\"What? Do you, reader, think me insane or drunk?\\\" Echoing St. Paul (Acts 26:25), he asserted: \\\"I am not mad, for I speak words of soberness.\\\"$^{92}$ He admitted that he sometimes acted foolishly, \\\"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\\\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life. Far from admiring the insensate or contented tranquillity of a satisfied mind, Luther held that true wisdom was found among “those who are oppressed and in conflict with ...\"\n    },\n    {\n      \"page_no\": 135,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 2.1</div> <div style=\\\"text-align: center;\\\">Bipartite and Tripartite Divisions of Nature in Paracelsus</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td colspan=\\\"4\\\">I. Bipartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Creation (heaven and earth)</td><td style='text-align: center; word-wrap: break-word;'>God</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Microcosm:</td><td style='text-align: center; word-wrap: break-word;'>Body: tierisch Vernunft</td><td style='text-align: center; word-wrap: break-word;'>Soul: menschlich Vernunft (Bildnus, Image of God)</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td colspan=\\\"4\\\">II. Tripartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Earth</td><td style='text-align: center; word-wrap: break-word;'>Star</td><td style='text-align: center; word-wrap: break-word;'>Go ...\"\n    },\n    {\n      \"page_no\": 157,\n      \"ocr_excerpt\": \"the bestial tendencies that destroyed one's felicity in Christ. This harsh language of rejection did not, however, mean that Paracelsus advocated a program of exile or euthanasia by which his society might rid itself of its subhuman members. For one thing, Paracelsus had no confidence in the spiritual capacities of the state. He thought that Christianity had been in decline ever since the fourth century, when the emperor Constantine had employed Christ as a prop for his state. $ ^{268} $ In addition, true Christians were hard to detect among the mass of hypocrites and anti-Christs who multiplied “in these last days.” Instead of killing or eliminating the subhuman (the mad, the possessed, the sick), one's Christian duty was to love them and to attempt to heal (convert) them to the Way of Life. The physician's calling was a high one precisely because it was so close to that of Christ himself. Referring to the physician's art, Paracelsus declared, \\\"Wo kein lieb ist, do ist keine kunst\\\" (\\\"Where there is no love there is also no art\\\"). $ ^{269} $ Even witches, those hateful creatures who were devoted to the devil body and soul, deserved better from Christian society. Instead of burning ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00217\",\n      \"marker\": \"50\",\n      \"page_no\": 113,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00218\",\n      \"marker\": \"51\",\n      \"page_no\": 113,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00254\",\n      \"marker\": \"90\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00324\",\n      \"marker\": \"162\",\n      \"page_no\": 135,\n      \"paragraph_index\": 4,\n      \"source_text\": \"The triadic scheme of human nature (body, spirit, soul) gave Paracelsus conceptual room in which to elaborate three forms of mental corruption. It was a flexible system, which allowed him to expound physical (cerebral and physiological) dis ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00422\",\n      \"marker\": \"271\",\n      \"page_no\": 157,\n      \"paragraph_index\": 2,\n      \"source_text\": \"We are now in a position to see why two figures so widely, even wildly, divergent as Luther and Paracelsus, could agree on certain fundamentals regarding mental, moral, and spiritual health. Both men were rooted in the Western tradition of ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote",
+      "chapter_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        113,
+        157
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 55771,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00217",
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "page_no": 113,
+          "paragraph_index": 1,
+          "char_start": 372,
+          "char_end": 381,
+          "source_marker": "$ ^{50} $",
+          "normalized_marker": "50",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        },
+        {
+          "row_id": 55772,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00218",
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "page_no": 113,
+          "paragraph_index": 1,
+          "char_start": 577,
+          "char_end": 586,
+          "source_marker": "$ ^{51} $",
+          "normalized_marker": "51",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        },
+        {
+          "row_id": 55811,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00254",
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "page_no": 121,
+          "paragraph_index": 0,
+          "char_start": 115,
+          "char_end": 122,
+          "source_marker": "$^{90}$",
+          "normalized_marker": "90",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life.",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        },
+        {
+          "row_id": 55891,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00324",
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "page_no": 135,
+          "paragraph_index": 4,
+          "char_start": 1060,
+          "char_end": 1068,
+          "source_marker": "$^{162}$",
+          "normalized_marker": "162",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "The triadic scheme of human nature (body, spirit, soul) gave Paracelsus conceptual room in which to elaborate three forms of mental corruption. It was a flexible system, which allowed him to expound physical (cerebral and physiological) diseases and spiritual (mental) illnesses without threatening the essential humanity (imago, biltnus) of man. Its hallmark was an emphasis on the astra and the sidereal body of man. In classic form, we find it in the great work of Paracelsus's last years, the Astronomia magna of 1537 or 1538. Here Paracelsus was mainly interested in the sidereal body of man, his mortal spirit, as it could be understood by the Light of Nature. The basic reason for all mental disease, he argued, was a sinful privileging of the lower parts of human nature. When man ignored or was ignorant of his immortal soul, he was less than perfect, but when he ignored even his sidereal nature, he sank to the level of the beasts, having only a bestial reason. If one acted bestially, it followed that one was indeed \"a beast and not a man at all.\"$^{162}$ Those who did not sink so far were sometimes tempted and torn be-",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        },
+        {
+          "row_id": 55997,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00422",
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "page_no": 157,
+          "paragraph_index": 2,
+          "char_start": 332,
+          "char_end": 342,
+          "source_marker": "$ ^{271} $",
+          "normalized_marker": "271",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "We are now in a position to see why two figures so widely, even wildly, divergent as Luther and Paracelsus, could agree on certain fundamentals regarding mental, moral, and spiritual health. Both men were rooted in the Western tradition of seeing sin as disease, and disease as often a punishment for or the very embodiment of sin. $ ^{271} $ Luther was surely original in the vehement force with which he attacked the enemies of truth (his truth) as demonic fools, madmen, and self-blinded maniacs. And Paracelsus was surely original in his union of the languages of Scripture, chemistry, and astrology, the symbolic and syncretic net with which he hoped to capture the whole man. His use of both dualist and triadic schemes for understanding the microcosm suited his need to find order in the chaos of life as he found it. But both Luther and Paracelsus, for all their originality, were speaking for sixteenth-century Germans when they assumed that divine salvation",
+          "created_at": 1776826762,
+          "updated_at": 1776826762
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 113,
+        "file_idx": 112,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "and tortured by the devil, and not lunatics, fools, or senseless persons.\"⁴⁶ In this passage, Luther distinguished the physically possessed from the mentally ill and the retarded, but more often he spoke of demonic possession as a general condition of willful sin. When Eve was tempted in the garden, for example, she was not rationally persuaded to disobey God; she was deluded: \"Because Satan restrains her mind [animum] and eyes, however, she not only does not see death or become aware of it, but gradually she is also more inflamed by her desire for the fruit and delights in this idolatry and sin.\"⁴⁷ Indeed, Adam should have warned his descendants about the consequences of sin, for \"when he was deprived of his mind by Satan and believed that he would be like God, he became like Satan himself.\"⁴⁸ The fall into sin had been a fall into unreason. Sin brought fundamental changes in both man and nature. From then on, man's \"will is impaired, his intellect depraved, and his reason entirely corrupt and altogether changed.\"⁴⁹ So mankind became sick with a leprosy of the spirit. Human history had thus begun with a lapse into madness. The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolic ...",
+        "byte_size": 8799202,
+        "sha256": "b12007166ac4697273976223a235437248df42cd9a0c732760a1254c5cd969a6"
+      },
+      {
+        "page_no": 121,
+        "file_idx": 120,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life. Far from admiring the insensate or contented tranquillity of a satisfied mind, Luther held that true wisdom was found among “those who are oppressed and in conflict with spiritual trials.” $ ^{94} $ Only they could recognize their need for God’s consolation. In the Last Days, moreover, not all men would suffer the anxiety and terror of knowing that the end was fast ap ...",
+        "byte_size": 8834453,
+        "sha256": "1937b177d7f9fbaf6a33ae4e88e63d95b0ebcf0b0635039f974a7f4d67d72172"
+      },
+      {
+        "page_no": 135,
+        "file_idx": 134,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 2.1</div> <div style=\"text-align: center;\">Bipartite and Tripartite Divisions of Nature in Paracelsus</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td colspan=\"4\">I. Bipartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Creation (heaven and earth)</td><td style='text-align: center; word-wrap: break-word;'>God</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Microcosm:</td><td style='text-align: center; word-wrap: break-word;'>Body: tierisch Vernunft</td><td style='text-align: center; word-wrap: break-word;'>Soul: menschlich Vernunft (Bildnus, Image of God)</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td colspan=\"4\">II. Tripartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Earth</td><td style='text-align: center; word-wrap: break-word;'>Star</td><td style='text-align: center; word-wrap: break-word;'>God</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Microcosm:</td><td style='text-align: center; word-wrap: break-word;'>Flesh (Body)</td><td style='text-align: center; word-wrap: b ...",
+        "byte_size": 7610903,
+        "sha256": "796ffddc6c368c55e6e6158cc0c8af7ebfdf4f66ee267c130e27df4dacafa40f"
+      },
+      {
+        "page_no": 157,
+        "file_idx": 156,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "the bestial tendencies that destroyed one's felicity in Christ. This harsh language of rejection did not, however, mean that Paracelsus advocated a program of exile or euthanasia by which his society might rid itself of its subhuman members. For one thing, Paracelsus had no confidence in the spiritual capacities of the state. He thought that Christianity had been in decline ever since the fourth century, when the emperor Constantine had employed Christ as a prop for his state. $ ^{268} $ In addition, true Christians were hard to detect among the mass of hypocrites and anti-Christs who multiplied “in these last days.” Instead of killing or eliminating the subhuman (the mad, the possessed, the sick), one's Christian duty was to love them and to attempt to heal (convert) them to the Way of Life. The physician's calling was a high one precisely because it was so close to that of Christ himself. Referring to the physician's art, Paracelsus declared, \"Wo kein lieb ist, do ist keine kunst\" (\"Where there is no love there is also no art\"). $ ^{269} $ Even witches, those hateful creatures who were devoted to the devil body and soul, deserved better from Christian society. Instead of burning them to death for their supposed crimes, Paracelsus held, Christians should pray and fast in order to drive out the evil spirit and heal them with Christ. $ ^{270} $ We are now in a position to see wh ...",
+        "byte_size": 9232039,
+        "sha256": "4bab87e34a9f17a19d2a0b3642f87b7580e1eec0275c9c5e43360da1e61dd948"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 4,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00217\",\n    \"marker\": \"50\",\n    \"note_text\": \"Ibid.: WA, 42: 193; LW, 1: 261–62.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 50 text.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00218\",\n    \"marker\": \"51\",\n    \"note_text\": \"Ibid.: WA, 42: 201–2; LW, 1: 272–73.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 51 text.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00254\",\n    \"marker\": \"90\",\n    \"note_text\": \"Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR missed the footnote on page 101 (image 2). Screenshot clearly shows footnote 90 text.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00324\",\n    \"marker\": \"162\",\n    \"note_text\": \"Astronomia magna, SW, pt 1, 12: 58.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR missed the footnote on page 115 (image 3). Screenshot clearly shows footnote 162 text.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Page 137 (image 4) contains footnotes 268, 269, 270, and 271, but there is no corresponding anchor provided for marker 271 in the input data.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00217",
+      "anchor_phrase": "",
+      "marker": "50",
+      "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
+      "confidence": 0.98,
+      "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 50 text."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00218",
+      "anchor_phrase": "",
+      "marker": "51",
+      "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
+      "confidence": 0.98,
+      "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 51 text."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00254",
+      "anchor_phrase": "",
+      "marker": "90",
+      "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
+      "confidence": 0.98,
+      "reason": "OCR missed the footnote on page 101 (image 2). Screenshot clearly shows footnote 90 text."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00324",
+      "anchor_phrase": "",
+      "marker": "162",
+      "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
+      "confidence": 0.98,
+      "reason": "OCR missed the footnote on page 115 (image 3). Screenshot clearly shows footnote 162 text."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.0,
+      "reason": "Page 137 (image 4) contains footnotes 268, 269, 270, and 271, but there is no corresponding anchor provided for marker 271 in the input data."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote",
+    "chapter_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+    "request_mode": "ref_only_visual",
+    "parsed_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00217",
+        "anchor_phrase": "",
+        "marker": "50",
+        "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 50 text."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00218",
+        "anchor_phrase": "",
+        "marker": "51",
+        "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 51 text."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00254",
+        "anchor_phrase": "",
+        "marker": "90",
+        "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 101 (image 2). Screenshot clearly shows footnote 90 text."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00324",
+        "anchor_phrase": "",
+        "marker": "162",
+        "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 115 (image 3). Screenshot clearly shows footnote 162 text."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.0,
+        "reason": "Page 137 (image 4) contains footnotes 268, 269, 270, and 271, but there is no corresponding anchor provided for marker 271 in the input data."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00217",
+        "anchor_phrase": "",
+        "marker": "50",
+        "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 50 text."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00218",
+        "anchor_phrase": "",
+        "marker": "51",
+        "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 51 text."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00254",
+        "anchor_phrase": "",
+        "marker": "90",
+        "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 101 (image 2). Screenshot clearly shows footnote 90 text."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00324",
+        "anchor_phrase": "",
+        "marker": "162",
+        "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 115 (image 3). Screenshot clearly shows footnote 162 text."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00217",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "50",
+        "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 50 text."
+      },
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00218",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "51",
+        "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 93 (image 1). Screenshot clearly shows footnote 51 text."
+      },
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00254",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "90",
+        "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 101 (image 2). Screenshot clearly shows footnote 90 text."
+      },
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00324",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "162",
+        "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
+        "confidence": 0.98,
+        "reason": "OCR missed the footnote on page 115 (image 3). Screenshot clearly shows footnote 162 text."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 12352,
+    "completion_tokens": 542,
+    "total_tokens": 12894,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 23277
+  }
+}

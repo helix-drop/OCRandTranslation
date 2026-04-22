@@ -1,0 +1,196 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-003-prologue:toc-ch-003-prologue:endnote\",\n  \"chapter_title\": \"Prologue\",\n  \"page_range\": [\n    40,\n    41\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 40,\n      \"ocr_excerpt\": \"There were effectively no “types of madness” in Chinese medicine, just one madness—kuang or diankuang—with many symptoms. Historians usually interpret dian as a form of madness distinct from kuang (see 1: 5n9), but I will argue that a clear symptomatic distinction between dian and kuang only crystallized in the nineteenth century. $ ^{5} $ Kuang referred to various disorders of perception, affect, language, and especially behavior. People were labeled kuang when they lost some or all social competence—a woman ran outside naked, a man became delirious or took himself for a god. Physicians may have focused on patent mad behavior because they were only called to treat men and women whom their relatives saw as patently mad. Most feelings of mental discomfort were probably not reported to doctors, and thus rarely appeared in medical documents. I will call the symptoms of kuang “psycho-behavioral.” Although madness was defined socially, physicians usually interpreted insane behavior through categories that drew diagnosis away from the patient's daily context. Armed with notions such as \\\"stasis,\\\" \\\"depletion,\\\" or \\\"Liver Fire,\\\" they reduced to organic imbalances problems that had probably d ...\"\n    },\n    {\n      \"page_no\": 41,\n      \"ocr_excerpt\": \"task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00029\",\n      \"marker\": \"5\",\n      \"page_no\": 40,\n      \"paragraph_index\": 0,\n      \"source_text\": \"There were effectively no “types of madness” in Chinese medicine, just one madness—kuang or diankuang—with many symptoms. Historians usually interpret dian as a form of madness distinct from kuang (see 1: 5n9), but I will argue that a clear ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00031\",\n      \"marker\": \"7\",\n      \"page_no\": 41,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symp ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-prologue:toc-ch-003-prologue:endnote",
+      "chapter_title": "Prologue",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        40,
+        41
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 77440,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00029",
+          "chapter_id": "toc-ch-003-prologue",
+          "page_no": 40,
+          "paragraph_index": 0,
+          "char_start": 333,
+          "char_end": 341,
+          "source_marker": "$ ^{5} $",
+          "normalized_marker": "5",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "There were effectively no “types of madness” in Chinese medicine, just one madness—kuang or diankuang—with many symptoms. Historians usually interpret dian as a form of madness distinct from kuang (see 1: 5n9), but I will argue that a clear symptomatic distinction between dian and kuang only crystallized in the nineteenth century. $ ^{5} $ Kuang referred to various disorders of perception, affect, language, and especially behavior. People were labeled kuang when they lost some or all social competence—a woman ran outside naked, a man became delirious or took himself for a god. Physicians may have focused on patent mad behavior because they were only called to treat men and women whom their relatives saw as patently mad. Most feelings of mental discomfort were probably not reported to doctors, and thus rarely appeared in medical documents. I will call the symptoms of kuang “psycho-behavioral.”",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        },
+        {
+          "row_id": 77442,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00031",
+          "chapter_id": "toc-ch-003-prologue",
+          "page_no": 41,
+          "paragraph_index": 2,
+          "char_start": 372,
+          "char_end": 380,
+          "source_marker": "$ ^{7} $",
+          "normalized_marker": "7",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子).",
+          "created_at": 1776827814,
+          "updated_at": 1776827814
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 40,
+        "file_idx": 39,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "There were effectively no “types of madness” in Chinese medicine, just one madness—kuang or diankuang—with many symptoms. Historians usually interpret dian as a form of madness distinct from kuang (see 1: 5n9), but I will argue that a clear symptomatic distinction between dian and kuang only crystallized in the nineteenth century. $ ^{5} $ Kuang referred to various disorders of perception, affect, language, and especially behavior. People were labeled kuang when they lost some or all social competence—a woman ran outside naked, a man became delirious or took himself for a god. Physicians may have focused on patent mad behavior because they were only called to treat men and women whom their relatives saw as patently mad. Most feelings of mental discomfort were probably not reported to doctors, and thus rarely appeared in medical documents. I will call the symptoms of kuang “psycho-behavioral.” Although madness was defined socially, physicians usually interpreted insane behavior through categories that drew diagnosis away from the patient's daily context. Armed with notions such as \"stasis,\" \"depletion,\" or \"Liver Fire,\" they reduced to organic imbalances problems that had probably developed from social and interpersonal events. Perhaps because of doctors' emphasis on the organic roots of mad behavior, their chief therapeutic goal was usually to stop disabling symptoms rather tha ...",
+        "byte_size": 148974,
+        "sha256": "728674848246297ce58f9cd0195f0604163467992694cfdec2f7f1ae15593b05"
+      },
+      {
+        "page_no": 41,
+        "file_idx": 40,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
+        "ocr_excerpt": "task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity often borrowed from the prototypical scenarios of other illnesses or from contemporaneous interpretations of human vitality rather than from the observation of mad patients. A formal analysis would sh ...",
+        "byte_size": 135861,
+        "sha256": "66c785c3b66a9d86a351df4fd465a9e3b6f86832ff8122029eec88be2d0954ef"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-prologue:toc-ch-003-prologue:endnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 2,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00029\",\n    \"marker\": \"5\",\n    \"note_text\": \"In the Inner Canon and later sources for more than a thousand years, dian 癲/顛 had mostly meant “falling sickness,” an epileptiform disorder characterized by seizures and convulsions. Its frequent use alongside kuang and the common meaning of dian 顛 as “upside-down” progressively transformed dian into “madness.” See 3.4, 5.5, and 7.6 below.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Screenshot clearly shows footnote 5 text at the bottom of page 22 (page_no 40). OCR/structured data lacks this note item.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00031\",\n    \"marker\": \"7\",\n    \"note_text\": \"This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Screenshot clearly shows footnote 7 text at the bottom of page 23 (page_no 41). OCR/structured data lacks this note item.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00029",
+      "anchor_phrase": "",
+      "marker": "5",
+      "note_text": "In the Inner Canon and later sources for more than a thousand years, dian 癲/顛 had mostly meant “falling sickness,” an epileptiform disorder characterized by seizures and convulsions. Its frequent use alongside kuang and the common meaning of dian 顛 as “upside-down” progressively transformed dian into “madness.” See 3.4, 5.5, and 7.6 below.",
+      "confidence": 0.98,
+      "reason": "Screenshot clearly shows footnote 5 text at the bottom of page 22 (page_no 40). OCR/structured data lacks this note item."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00031",
+      "anchor_phrase": "",
+      "marker": "7",
+      "note_text": "This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.",
+      "confidence": 0.98,
+      "reason": "Screenshot clearly shows footnote 7 text at the bottom of page 23 (page_no 41). OCR/structured data lacks this note item."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-003-prologue:toc-ch-003-prologue:endnote",
+    "chapter_title": "Prologue",
+    "request_mode": "ref_only_visual",
+    "parsed_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00029",
+        "anchor_phrase": "",
+        "marker": "5",
+        "note_text": "In the Inner Canon and later sources for more than a thousand years, dian 癲/顛 had mostly meant “falling sickness,” an epileptiform disorder characterized by seizures and convulsions. Its frequent use alongside kuang and the common meaning of dian 顛 as “upside-down” progressively transformed dian into “madness.” See 3.4, 5.5, and 7.6 below.",
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote 5 text at the bottom of page 22 (page_no 40). OCR/structured data lacks this note item."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00031",
+        "anchor_phrase": "",
+        "marker": "7",
+        "note_text": "This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.",
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote 7 text at the bottom of page 23 (page_no 41). OCR/structured data lacks this note item."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00029",
+        "anchor_phrase": "",
+        "marker": "5",
+        "note_text": "In the Inner Canon and later sources for more than a thousand years, dian 癲/顛 had mostly meant “falling sickness,” an epileptiform disorder characterized by seizures and convulsions. Its frequent use alongside kuang and the common meaning of dian 顛 as “upside-down” progressively transformed dian into “madness.” See 3.4, 5.5, and 7.6 below.",
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote 5 text at the bottom of page 22 (page_no 40). OCR/structured data lacks this note item."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00031",
+        "anchor_phrase": "",
+        "marker": "7",
+        "note_text": "This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.",
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote 7 text at the bottom of page 23 (page_no 41). OCR/structured data lacks this note item."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00029",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "5",
+        "note_text": "In the Inner Canon and later sources for more than a thousand years, dian 癲/顛 had mostly meant “falling sickness,” an epileptiform disorder characterized by seizures and convulsions. Its frequent use alongside kuang and the common meaning of dian 顛 as “upside-down” progressively transformed dian into “madness.” See 3.4, 5.5, and 7.6 below.",
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote 5 text at the bottom of page 22 (page_no 40). OCR/structured data lacks this note item."
+      },
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00031",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "7",
+        "note_text": "This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.",
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows footnote 7 text at the bottom of page 23 (page_no 41). OCR/structured data lacks this note item."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 2882,
+    "completion_tokens": 347,
+    "total_tokens": 3229,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 7950
+  }
+}

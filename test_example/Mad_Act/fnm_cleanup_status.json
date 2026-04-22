@@ -1,0 +1,16 @@
+{
+  "cleaned_at": "2026-04-22T11:15:26",
+  "example_dir": "/Users/hao/OCRandTranslation/test_example/Mad_Act",
+  "removed": [
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/llm_traces",
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/fnm_real_test_progress.json",
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/fnm_real_test_result.json",
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/FNM_REAL_TEST_REPORT.md",
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest_export_status.json",
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.Mad_Act.blocked.test.zip",
+    "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.blocked.test.zip"
+  ],
+  "removed_count": 7,
+  "failed": [],
+  "failed_count": 0
+}

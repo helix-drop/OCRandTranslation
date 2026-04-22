@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main style="max-width: 1360px; margin: 24px auto; padding: 0 20px 40px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+    <div>
+      <h1 style="margin:0 0 8px;">FNM 结构复核</h1>
+      <div style="color:#475569;font-size:14px;">{{ (doc_meta or {}).get('name', doc_id) }}</div>
+    </div>
+    <div style="padding:12px 16px;border:1px solid #d1d5db;border-radius:12px;background:#fff;">
+      <div style="font-size:13px;color:#64748b;">结构状态</div>
+      <div style="font-size:18px;font-weight:700;">{{ structure_status.structure_state }}</div>
+      {% set review_reason_counts = structure_status.review_reason_counts or [] %}
+      <div style="margin-top:6px;font-size:13px;color:#475569;">
+        matched={{ structure_status.link_summary.matched or 0 }}
+        {% if review_reason_counts %}
+          , {% for item in review_reason_counts %}{{ item.reason }}={{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}
+        {% else %}
+          , review_reasons=none
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div id="review-status" style="display:none;margin-top:16px;padding:12px 14px;border-radius:12px;font-size:14px;"></div>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">整体概览</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-size:13px;color:#64748b;">页面分区</div>
+        <div style="margin-top:8px;font-size:14px;color:#334155;">
+          noise={{ structure_status.page_partition_summary.noise or 0 }}<br>
+          front_matter={{ structure_status.page_partition_summary.front_matter or 0 }}<br>
+          body={{ structure_status.page_partition_summary.body or 0 }}<br>
+          note={{ structure_status.page_partition_summary.note or 0 }}<br>
+          other={{ structure_status.page_partition_summary.other or 0 }}
+        </div>
+      </div>
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-size:13px;color:#64748b;">章节注释模式</div>
+        <div style="margin-top:8px;font-size:14px;color:#334155;">
+          footnote_primary={{ structure_status.chapter_mode_summary.footnote_primary or 0 }}<br>
+          chapter_endnotes={{ structure_status.chapter_mode_summary.chapter_endnotes or 0 }}<br>
+          book_endnotes={{ structure_status.chapter_mode_summary.book_endnotes or 0 }}<br>
+          body_only={{ structure_status.chapter_mode_summary.body_only or 0 }}<br>
+          mixed_or_unclear={{ structure_status.chapter_mode_summary.mixed_or_unclear or 0 }}
+        </div>
+      </div>
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-size:13px;color:#64748b;">标题层级</div>
+        <div style="margin-top:8px;font-size:14px;color:#334155;">
+          chapter_count={{ structure_status.chapter_count or 0 }}<br>
+          section_head_count={{ structure_status.section_head_count or 0 }}<br>
+          suppressed={{ (structure_status.heading_review_summary or {}).suppressed_candidate_count or 0 }}<br>
+          partition_conflict={{ (structure_status.heading_review_summary or {}).partition_conflict_count or 0 }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">阻塞原因</h2>
+    {% if structure_status.blocking_reasons %}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        {% for reason in structure_status.blocking_reasons %}
+          <span style="padding:6px 10px;border-radius:999px;background:#fee2e2;color:#991b1b;font-size:13px;">{{ reason }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="color:#166534;font-size:14px;">当前没有结构阻塞。</div>
+    {% endif %}
+  </section>
+
+  <section style="margin-top:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div>
+        <h2 style="margin:0;">Qwen 修补</h2>
+        <div style="margin-top:6px;font-size:13px;color:#64748b;">只处理规则链剩下的疑难项。高置信会自动应用，低置信保留为建议。</div>
+      </div>
+      <button type="button" onclick="runLlmRepair('{{ doc_id }}')" style="padding:8px 12px;border:none;border-radius:8px;background:#1d4ed8;color:#fff;cursor:pointer;">运行 Qwen 修补</button>
+    </div>
+    {% if llm_suggestions %}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-top:12px;">
+        {% for item in llm_suggestions %}
+          <div style="padding:14px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff;">
+            <div style="font-weight:700;">{{ item.suggestion_id }}</div>
+            <div style="margin-top:6px;font-size:13px;color:#475569;">
+              action={{ item.action }} · confidence={{ '%.2f'|format(item.confidence or 0) }}{% if item.auto_selected %} · auto-selected{% endif %}
+            </div>
+            <div style="margin-top:6px;font-size:13px;color:#64748b;">
+              note_item={{ item.note_item_id or item.definition_id or '-' }} · anchor={{ item.anchor_id or item.ref_id or '-' }}
+            </div>
+            {% if item.reason %}
+              <div style="margin-top:8px;font-size:13px;color:#334155;">{{ item.reason }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="margin-top:10px;color:#64748b;font-size:14px;">当前还没有 LLM 修补建议。</div>
+    {% endif %}
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">页面分区</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+      {% for page in pages %}
+        <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+          <div style="font-weight:700;">第 {{ page.page_no }} 页</div>
+          <div style="margin-top:6px;font-size:13px;color:#475569;">hint={{ page.section_hint or '-' }}</div>
+          <div style="margin-top:6px;font-size:13px;color:#64748b;">{{ page.role_reason or '-' }} · conf={{ '%.2f'|format(page.role_confidence or 0) }}</div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+            <input id="page-role-{{ page.page_no }}" value="{{ page.page_role }}" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+            <button type="button" onclick="savePage('{{ doc_id }}', {{ page.page_no }})" style="padding:8px 12px;border:none;border-radius:8px;background:#0f766e;color:#fff;cursor:pointer;">保存</button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section style="margin-top:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+      <h2 style="margin:0;">章节</h2>
+      <div style="font-size:13px;color:#64748b;">只改标题和边界；保存后会立即重建结构。</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;margin-top:8px;">
+      <thead>
+        <tr style="background:#f8fafc;">
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">标题</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">起止页</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">来源</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">边界状态</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for chapter in chapters %}
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+              <input id="chapter-title-{{ chapter.chapter_id }}" value="{{ chapter.title }}" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+              <div style="margin-top:6px;font-size:12px;color:#64748b;">{{ chapter.chapter_id }}</div>
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+              <div style="display:flex;gap:8px;">
+                <input id="chapter-start-{{ chapter.chapter_id }}" type="number" value="{{ chapter.start_page }}" style="width:88px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+                <input id="chapter-end-{{ chapter.chapter_id }}" type="number" value="{{ chapter.end_page }}" style="width:88px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+              </div>
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">{{ chapter.source or '-' }}</td>
+            <td style="padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">{{ chapter.boundary_state or '-' }}</td>
+            <td style="padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+              <button type="button" onclick="saveChapter('{{ doc_id }}', '{{ chapter.chapter_id }}')" style="padding:8px 12px;border:none;border-radius:8px;background:#0f766e;color:#fff;cursor:pointer;">保存</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">标题分层对比（只读）</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;">
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-weight:700;margin-bottom:8px;">正式章节</div>
+        <div style="max-height:300px;overflow:auto;font-size:13px;color:#334155;">
+          {% for chapter in chapters %}
+            <div style="padding:6px 0;border-bottom:1px solid #f1f5f9;">
+              <div><strong>{{ chapter.chapter_id }}</strong> · p{{ chapter.start_page }}-{{ chapter.end_page }}</div>
+              <div style="margin-top:4px;color:#475569;">{{ chapter.title }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-weight:700;margin-bottom:8px;">章内标题</div>
+        <div style="max-height:300px;overflow:auto;font-size:13px;color:#334155;">
+          {% for section in section_heads %}
+            <div style="padding:6px 0;border-bottom:1px solid #f1f5f9;">
+              <div><strong>{{ section.section_head_id }}</strong> · p{{ section.page_no }}{% if section.chapter_id %} · {{ section.chapter_id }}{% endif %}</div>
+              <div style="margin-top:4px;color:#475569;">{{ section.text }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-weight:700;margin-bottom:8px;">被压掉的伪章节候选</div>
+        <div style="max-height:300px;overflow:auto;font-size:13px;color:#334155;">
+          {% for candidate in heading_candidates if candidate.suppressed_as_chapter %}
+            <div style="padding:6px 0;border-bottom:1px solid #f1f5f9;">
+              <div><strong>{{ candidate.heading_id }}</strong> · p{{ candidate.page_no }} · {{ candidate.source }}</div>
+              <div style="margin-top:4px;color:#475569;">{{ candidate.text }}</div>
+              <div style="margin-top:4px;color:#64748b;">reason={{ candidate.reject_reason or '-' }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">注释区</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;">
+      {% for region in note_regions %}
+        <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+          <div style="font-weight:700;margin-bottom:8px;">{{ region.region_id }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <input id="region-kind-{{ region.region_id }}" value="{{ region.region_kind }}" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+            <input id="region-chapter-{{ region.region_id }}" value="{{ region.bound_chapter_id or '' }}" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+            <input id="region-start-{{ region.region_id }}" type="number" value="{{ region.start_page }}" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+            <input id="region-end-{{ region.region_id }}" type="number" value="{{ region.end_page }}" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+          </div>
+          <input id="region-title-{{ region.region_id }}" value="{{ region.title_hint or '' }}" style="width:100%;margin-top:8px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button type="button" onclick="saveRegion('{{ doc_id }}', '{{ region.region_id }}')" style="padding:8px 12px;border:none;border-radius:8px;background:#0f766e;color:#fff;cursor:pointer;">保存</button>
+            <button type="button" onclick="disableRegion('{{ doc_id }}', '{{ region.region_id }}')" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;">禁用</button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">未解决链接</h2>
+    {% if review_links %}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;">
+        {% for link in review_links %}
+          <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+            <div style="font-weight:700;">{{ link.link_id }}</div>
+            <div style="margin-top:6px;font-size:13px;color:#475569;">status={{ link.status }}{% if link.review_action %} · review={{ link.review_action }}{% endif %}</div>
+            <div style="margin-top:6px;font-size:13px;color:#475569;">marker={{ link.marker or "-" }} · chapter={{ link.chapter_id or "-" }}</div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr;gap:8px;">
+              <input id="link-note-item-{{ link.link_id }}" value="{{ link.note_item_id or '' }}" placeholder="note_item_id" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+              <input id="link-anchor-{{ link.link_id }}" value="{{ link.anchor_id or '' }}" placeholder="anchor_id" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <button type="button" onclick="ignoreLink('{{ doc_id }}', '{{ link.link_id }}')" style="padding:8px 12px;border:none;border-radius:8px;background:#991b1b;color:#fff;cursor:pointer;">忽略</button>
+              <button type="button" onclick="matchLink('{{ doc_id }}', '{{ link.link_id }}')" style="padding:8px 12px;border:none;border-radius:8px;background:#0f766e;color:#fff;cursor:pointer;">手动匹配</button>
+              <button type="button" onclick="restoreLink('{{ doc_id }}', '{{ link.link_id }}')" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;">恢复自动结果</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="color:#166534;font-size:14px;">当前没有未解决链接。</div>
+    {% endif %}
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">查阅</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;">
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-weight:700;margin-bottom:8px;">注释条目</div>
+        <div style="max-height:320px;overflow:auto;font-size:13px;color:#334155;">
+          {% for note_item in note_items %}
+            <div style="padding:6px 0;border-bottom:1px solid #f1f5f9;">
+              <div><strong>{{ note_item.note_item_id }}</strong> · {{ note_item.note_kind }} · p{{ note_item.page_no }}</div>
+              <div style="color:#64748b;">marker={{ note_item.marker or '-' }} · region={{ note_item.region_id or '-' }}</div>
+              <div style="margin-top:4px;color:#475569;">{{ note_item.source_text }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+        <div style="font-weight:700;margin-bottom:8px;">正文标记</div>
+        <div style="max-height:320px;overflow:auto;font-size:13px;color:#334155;">
+          {% for anchor in body_anchors %}
+            <div style="padding:6px 0;border-bottom:1px solid #f1f5f9;">
+              <div><strong>{{ anchor.anchor_id }}</strong> · {{ anchor.anchor_kind }} · p{{ anchor.page_no }}</div>
+              <div style="color:#64748b;">marker={{ anchor.normalized_marker or anchor.source_marker or '-' }}</div>
+              <div style="margin-top:4px;color:#475569;">{{ anchor.source_text }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-top:24px;">
+    <h2 style="margin-bottom:8px;">复核队列</h2>
+    {% if structure_reviews %}
+      <ul style="margin:0;padding-left:18px;">
+        {% for item in structure_reviews %}
+          <li style="margin-bottom:6px;">{{ item.review_type }}{% if item.chapter_id %} · {{ item.chapter_id }}{% endif %}{% if item.page_range %} · {{ item.page_range }}{% endif %}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div style="color:#166534;font-size:14px;">当前没有额外复核项。</div>
+    {% endif %}
+  </section>
+</main>
+
+<script>
+  function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+  }
+
+  function showReviewStatus(message, ok) {
+    const el = document.getElementById('review-status');
+    if (!el) return;
+    el.style.display = 'block';
+    el.style.background = ok ? '#dcfce7' : '#fee2e2';
+    el.style.color = ok ? '#166534' : '#991b1b';
+    el.textContent = message;
+  }
+
+  async function postReview(url, payload) {
+    showReviewStatus('正在重建 FNM 结构，请稍候…', true);
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken(),
+      },
+      body: JSON.stringify(payload || {}),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      showReviewStatus(data.message || data.error || '保存失败', false);
+      return;
+    }
+    showReviewStatus('保存成功，正在刷新最新结构结果…', true);
+    window.location.reload();
+  }
+
+  function savePage(docId, pageNo) {
+    postReview(`/api/doc/${docId}/fnm/review/page/${pageNo}`, {
+      page_role: document.getElementById(`page-role-${pageNo}`).value,
+    });
+  }
+
+  function saveChapter(docId, chapterId) {
+    postReview(`/api/doc/${docId}/fnm/review/chapter/${chapterId}`, {
+      title: document.getElementById(`chapter-title-${chapterId}`).value,
+      start_page: Number(document.getElementById(`chapter-start-${chapterId}`).value || 0),
+      end_page: Number(document.getElementById(`chapter-end-${chapterId}`).value || 0),
+    });
+  }
+
+  function saveRegion(docId, regionId) {
+    postReview(`/api/doc/${docId}/fnm/review/note-region/${regionId}`, {
+      bound_chapter_id: document.getElementById(`region-chapter-${regionId}`).value,
+      region_kind: document.getElementById(`region-kind-${regionId}`).value,
+      start_page: Number(document.getElementById(`region-start-${regionId}`).value || 0),
+      end_page: Number(document.getElementById(`region-end-${regionId}`).value || 0),
+      title_hint: document.getElementById(`region-title-${regionId}`).value,
+    });
+  }
+
+  function disableRegion(docId, regionId) {
+    postReview(`/api/doc/${docId}/fnm/review/note-region/${regionId}`, {
+      disabled: true,
+    });
+  }
+
+  function ignoreLink(docId, linkId) {
+    postReview(`/api/doc/${docId}/fnm/review/link/${linkId}`, {
+      action: 'ignore',
+    });
+  }
+
+  function restoreLink(docId, linkId) {
+    postReview(`/api/doc/${docId}/fnm/review/link/${linkId}`, {
+      action: 'restore',
+    });
+  }
+
+  function matchLink(docId, linkId) {
+    postReview(`/api/doc/${docId}/fnm/review/link/${linkId}`, {
+      action: 'match',
+      note_item_id: document.getElementById(`link-note-item-${linkId}`).value,
+      anchor_id: document.getElementById(`link-anchor-${linkId}`).value,
+    });
+  }
+
+  function runLlmRepair(docId) {
+    postReview(`/api/doc/${docId}/fnm/review/llm-repair`, {
+      cluster_limit: 1,
+      auto_apply: true,
+    });
+  }
+</script>
+{% endblock %}

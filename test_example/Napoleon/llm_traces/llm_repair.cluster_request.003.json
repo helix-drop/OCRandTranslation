@@ -1,0 +1,294 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote\",\n  \"chapter_title\": \"La monomanie orgueilleuse ou le mal du siècle\",\n  \"page_range\": [\n    178,\n    182\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 177,\n      \"ocr_excerpt\": \"dans Comme il vous plaira. Dans ce siècle lyrique de l'excès et de l'adhésion, où le lecteur s'identifie à des héros qui eux-mêmes s'identifient, la monomanie orgueilleuse, par l'exagération du moi, la projection identitaire et l'obsession de la référence à un modèle historique, est une maladie typiquement romantique. Ce lien métaphorique avec l'univers de la création romanesque excède le simple rapport d'analogie. L'effet de réel produit par les œuvres de fiction inquiète les aliénistes. Parce qu'elle favorise l'illusion et pousse à l'imitation, la littérature a mauvaise presse auprès de la Faculté, qui range la « lecture de romans » sous la rubrique des causes de l'aliénation mentale. Et il n'est pas rare de trouver dans les archives des notations comme celle-ci, à propos d'une femme atteinte de folie des grandeurs et de délire religieux : « On croit devoir attribuer le dérangement de ses facultés à la vie solitaire qu'elle a menée depuis dix-huit mois, ainsi qu'aux lectures romanesques qui l'ont sans cesse occupée. On pense aussi qu'elle a trop cherché à approfondir le livre de l'Apocalypse $ ^{20} $. » Au-delà des méfaits du roman, c'est donc la lecture « approfondie », y compr ...\"\n    },\n    {\n      \"page_no\": 178,\n      \"ocr_excerpt\": \"trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ». La monomanie orgueilleuse, maladie romantique et littéraire? En partie. Sans compter que la pathologie figure aussi au titre de motif dans les récits de l'époque, comme l'illustre une belle nouvelle de Nerval où le thème poétique du double et du reflet se confond avec une véritable description clinique de la monomanie orgueilleuse: « Le Roi de Bicêtre (xvr siècle) : Raoul Spifame », parue dans La Presse en 1839. Raoul Spifame est avocat au parlement de Paris. Lors d'une rentrée des Chambres en présence de Henri II, l'assistance se rend compte que Spifame est le sosie parfait du roi, lequel est lui-même frappé par la ressemblance. Dès lors, dans les couloirs du palais, on ne l'appelle plus en riant que Sire ou Votre Majesté, railleries malheureuses qui finissent par convaincre Spifame qu'il est réellement le souverain. Sa royale attitude, ses harangues et ses projets de réforme finissent par le conduire à la maison des fous. À l'asile, Spifame est plus que jamais persuadé d'être Henri II. Il gouverne, décrète, festoie, convaincu que « ses rêves étaient sa vie et que sa p ...\"\n    },\n    {\n      \"page_no\": 179,\n      \"ocr_excerpt\": \"et honneur infini. Alors il s'élanca dans d'immenses récréinations contre les traitres qui l'avaient mis dans cette situation, l'ayant noirci sans doute près de Sa Majesté. Il pleura même, le pauvre gentilhomme, en protestant de son innocence, et demandant à confondre ses ennemis; ce dont le prince parut singulièrement touché; car une larme brillait en suivant les contours de son nez royal. À cet aspect un éclair de joie illumina les traits de Spifame; le roi souriait déjà d'un air affable; il tendit la main; Spifame avança la sienne, le miroir, rudement frappé, se détacha de la muraille, et roula à terre avec un bruit terrible qui fit accourir les gardiens $ ^{22} $. Que renvoie le miroir sinon l'adéquation parfaite d'une chimère (se croire roi) avec une réalité (lui ressemblerait pour trait, à s'y méprendre), la fusion d'une fonction avec une image ? Être soi et un autre, un seul individu et deux personnages ? Dans ce face-à-face, Nerval pousse aussi loin que possible le paradoxe de l'identité. Lorsqu'il surprend son reflet, Spifame voit le roi. N'est-ce pas une folie de prendre pour un étranger son image dans le miroir ? D'interpréter, dans la symétrie des gestes, une forme d'em ...\"\n    },\n    {\n      \"page_no\": 180,\n      \"ocr_excerpt\": \"par excellence, selon Esquirol, du monomane, dont le délire partiel laisse intact le reste de l'entendement ? Ce qui se traduit chez Nerval par ces mots : « Rien ne saurait prouver mieux que l'histoire de Spifame combien est vraie la peinture de ce caractère, si fameux en Espagne, d'un homme fou par un seul endroit du cerveau, et fort sensé quant au reste de sa logique ; on voit bien qu'il avait conscience de lui-même, contrairement aux insensés vulgaires qui s'oublient et demeurent constamment certains d'être les personnages de leur invention. Spifame, devant un miroir ou dans le sommeil, se retrouvait et se jugeait à part, changeant de rôle et d'individualité tour à tour, être double et distinct pourtant, comme il arrive souvent qu'on se sent exister en rêve $ ^{23} $.» À l'époque désenchantée où Nerval écrit sa nouvelle, qu'en est-il de la réalité de la maladie ? Pour qui se prend-on sous la monarchie de Juillet ? Il faut l'admettre : rarement pour Louis-Philippe. C'est même l'un des traits saillants des archives. On se prend pour « un » roi, mais est-ce pour autant celui qui est sur le trône ? « Retire-toi, grosse bête ; ne vois-tu pas que je suis Roi de France $ ^{24} $ ? » ré ...\"\n    },\n    {\n      \"page_no\": 181,\n      \"ocr_excerpt\": \"systématiquement à ses interlocuteurs une folle internée à la Salpêtrière en 1833, tombée en démence des suites d'une monomanie ambitieuse. Mais ce roi de France, est-ce le roi des Français? D'une façon générale, le roi bourgeois se prête mal aux désirs d'identification; il laisse froides les imaginations et décourage la folie, preuve que la symbolique de la fonction royale nécessite d'être incarnée pour devenir une image délirable. Non pas que le monarque soit absent des registres des asiles. Mais le plus frappant — et, pour tout dire, le plus cocasse —, c'est que les aliénés assimilent le plus souvent Louis-Philippe à un pensionnaire ou au directeur de l'asile. Autrement dit, le rapport s'est inversé : on ne se prend pas pour le roi, on prend le roi pour un personnage ordinaire ou familier. Difficile de ne pas voir dans ce renversement de perspective (humaniser le roi plutôt que de sacrer sa propre personne) un effet de cette extralucidité que l'on prête aux fous, qui jettent ici, par réfraction, une lumière originale sur un trait du règne de Louis-Philippe. « La majesté lui faisait défaut. [...] Sa grande faute, la voici : il a été modeste au nom de la France », résume Victor Hu ...\"\n    },\n    {\n      \"page_no\": 182,\n      \"ocr_excerpt\": \"incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes. Ramené aux dimensions « moyennes » de cette classe qu'il défend, Louis-Philippe devient dans les asiles un homme abordable, même s'il conserve son statut de chef d'État. Cette accessibilité s'étend à sa famille et à son entourage. « Ce fut en nous recommandant le plus grand silence que M. P. nous confia ses secrets », raconte le médecin de Charenton en 1831, au sujet d'un propriétaire de quarante-cinq ans, que Bicêtre a renvoyé sans renseignement sur son cas. « En venant de son pays, il s'est trouvé en diligence avec le roi et son fils, il les connaît beaucoup, a écrit en leur faveur, est reçu au palais-royal &. Pendant son séjour à Bicêtre, il a vu Louis-Philippe déguisé confondu avec les aliénés ; il couchait dans la même chambre que le prince royal qui était également déguisé et qui lui a confié les secrets du ...\"\n    },\n    {\n      \"page_no\": 183,\n      \"ocr_excerpt\": \"voulons le trahir, se fâche et ne veut plus rien dire $ ^{26} $. » Dans un retour de confiance, M. P. avoue qu'il craint d'être assassiné s'il viole son secret et qu'en restant à Charenton il se soumet aux ordres du roi, auquel il est très attaché. Quoique recommandé par le patient qui a écrit des lettres en sa faveur, Louis-Philippe garde donc le pouvoir d'interner qui bon lui semble. Un même mélange de déférence et de familiarité affecte le délire d'un autre patient qui, lui, s'est persuadé que Charenton était l'habitation royale de Louis-Philippe, nom qu'il attribue à un pensionnaire de l'asile, où tous les aliénés seraient des descendants des Bourbons. Trop heureux d'être au service de cette illustre famille, « il se livre à tous les soins du ménage, lave la vaisselle, balaie la salle, ne parle jamais à personne même aux infirmiers sans les appeler mon prince et sans s'incliner jusqu'à terre ». Que le patient confonde les Bourbons et les Orléans n'est pas anodin. Le principe monarchique reste indissolublement lié à la branche aînée, dont le prestige et la légitimité demeurent intacts, même en 1843, époque où l'observation est rédigée, alors que Louis-Philippe l'est depuis treiz ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00197\",\n      \"marker\": \"21\",\n      \"page_no\": 178,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».\"\n    },\n    {\n      \"anchor_id\": \"anchor-00198\",\n      \"marker\": \"21\",\n      \"page_no\": 178,\n      \"paragraph_index\": 5,\n      \"source_text\": \"trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».\"\n    },\n    {\n      \"anchor_id\": \"anchor-00202\",\n      \"marker\": \"25\",\n      \"page_no\": 182,\n      \"paragraph_index\": 0,\n      \"source_text\": \"incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identific ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote",
+      "chapter_title": "La monomanie orgueilleuse ou le mal du siècle",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        178,
+        182
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 25507,
+          "doc_id": "5df1d3d7f9c1",
+          "anchor_id": "anchor-00197",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "page_no": 178,
+          "paragraph_index": 1,
+          "char_start": 44,
+          "char_end": 53,
+          "source_marker": "$ ^{21} $",
+          "normalized_marker": "21",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».",
+          "created_at": 1776828178,
+          "updated_at": 1776828178
+        },
+        {
+          "row_id": 25508,
+          "doc_id": "5df1d3d7f9c1",
+          "anchor_id": "anchor-00198",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "page_no": 178,
+          "paragraph_index": 5,
+          "char_start": 101,
+          "char_end": 110,
+          "source_marker": "$ ^{21} $",
+          "normalized_marker": "21",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».",
+          "created_at": 1776828178,
+          "updated_at": 1776828178
+        },
+        {
+          "row_id": 25512,
+          "doc_id": "5df1d3d7f9c1",
+          "anchor_id": "anchor-00202",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "page_no": 182,
+          "paragraph_index": 0,
+          "char_start": 40,
+          "char_end": 49,
+          "source_marker": "$ ^{25} $",
+          "normalized_marker": "25",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes.",
+          "created_at": 1776828178,
+          "updated_at": 1776828178
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 177,
+        "file_idx": 176,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "dans Comme il vous plaira. Dans ce siècle lyrique de l'excès et de l'adhésion, où le lecteur s'identifie à des héros qui eux-mêmes s'identifient, la monomanie orgueilleuse, par l'exagération du moi, la projection identitaire et l'obsession de la référence à un modèle historique, est une maladie typiquement romantique. Ce lien métaphorique avec l'univers de la création romanesque excède le simple rapport d'analogie. L'effet de réel produit par les œuvres de fiction inquiète les aliénistes. Parce qu'elle favorise l'illusion et pousse à l'imitation, la littérature a mauvaise presse auprès de la Faculté, qui range la « lecture de romans » sous la rubrique des causes de l'aliénation mentale. Et il n'est pas rare de trouver dans les archives des notations comme celle-ci, à propos d'une femme atteinte de folie des grandeurs et de délire religieux : « On croit devoir attribuer le dérangement de ses facultés à la vie solitaire qu'elle a menée depuis dix-huit mois, ainsi qu'aux lectures romanesques qui l'ont sans cesse occupée. On pense aussi qu'elle a trop cherché à approfondir le livre de l'Apocalypse $ ^{20} $. » Au-delà des méfaits du roman, c'est donc la lecture « approfondie », y compris des textes sacrés, qui est globalement déconseillée, en particulier aux femmes, dont on redoute les efforts de réflexion. Selon le docteur Voisin, « l'empreinte des romans modernes » est à la sourc ...",
+        "byte_size": 275754,
+        "sha256": "b2b365dafdce273a03e0d40d99b975bd9446e7ce04842e786fde0ca72f5f8b25"
+      },
+      {
+        "page_no": 178,
+        "file_idx": 177,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ». La monomanie orgueilleuse, maladie romantique et littéraire? En partie. Sans compter que la pathologie figure aussi au titre de motif dans les récits de l'époque, comme l'illustre une belle nouvelle de Nerval où le thème poétique du double et du reflet se confond avec une véritable description clinique de la monomanie orgueilleuse: « Le Roi de Bicêtre (xvr siècle) : Raoul Spifame », parue dans La Presse en 1839. Raoul Spifame est avocat au parlement de Paris. Lors d'une rentrée des Chambres en présence de Henri II, l'assistance se rend compte que Spifame est le sosie parfait du roi, lequel est lui-même frappé par la ressemblance. Dès lors, dans les couloirs du palais, on ne l'appelle plus en riant que Sire ou Votre Majesté, railleries malheureuses qui finissent par convaincre Spifame qu'il est réellement le souverain. Sa royale attitude, ses harangues et ses projets de réforme finissent par le conduire à la maison des fous. À l'asile, Spifame est plus que jamais persuadé d'être Henri II. Il gouverne, décrète, festoie, convaincu que « ses rêves étaient sa vie et que sa prison n'était qu'un rêve ». Jusqu'au jour où le gardien décide d'accrocher au mur de sa cellule un miroir d'acier dépoli. Spifame s'en approche et croit alors voir le roi venir à lui et lui parler, « ...",
+        "byte_size": 291872,
+        "sha256": "c1cf48580746a315dd16320219d4d335c603894ae4bbc7e46dd3a0eacd3920d2"
+      },
+      {
+        "page_no": 179,
+        "file_idx": 178,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "et honneur infini. Alors il s'élanca dans d'immenses récréinations contre les traitres qui l'avaient mis dans cette situation, l'ayant noirci sans doute près de Sa Majesté. Il pleura même, le pauvre gentilhomme, en protestant de son innocence, et demandant à confondre ses ennemis; ce dont le prince parut singulièrement touché; car une larme brillait en suivant les contours de son nez royal. À cet aspect un éclair de joie illumina les traits de Spifame; le roi souriait déjà d'un air affable; il tendit la main; Spifame avança la sienne, le miroir, rudement frappé, se détacha de la muraille, et roula à terre avec un bruit terrible qui fit accourir les gardiens $ ^{22} $. Que renvoie le miroir sinon l'adéquation parfaite d'une chimère (se croire roi) avec une réalité (lui ressemblerait pour trait, à s'y méprendre), la fusion d'une fonction avec une image ? Être soi et un autre, un seul individu et deux personnages ? Dans ce face-à-face, Nerval pousse aussi loin que possible le paradoxe de l'identité. Lorsqu'il surprend son reflet, Spifame voit le roi. N'est-ce pas une folie de prendre pour un étranger son image dans le miroir ? D'interpréter, dans la symétrie des gestes, une forme d'empathie ? Par cette erreur, Raoul Spifame prouve néanmoins, simultanément, qu'il n'est pas fou puisqu'il fait la différence et apporte la preuve qu'il se dissocie du souverain, personnage distinct de l ...",
+        "byte_size": 300642,
+        "sha256": "c9958e11cf71da19f76b482a77f94057ebf6852cebc4f6218b277237dbe7d2f3"
+      },
+      {
+        "page_no": 180,
+        "file_idx": 179,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "par excellence, selon Esquirol, du monomane, dont le délire partiel laisse intact le reste de l'entendement ? Ce qui se traduit chez Nerval par ces mots : « Rien ne saurait prouver mieux que l'histoire de Spifame combien est vraie la peinture de ce caractère, si fameux en Espagne, d'un homme fou par un seul endroit du cerveau, et fort sensé quant au reste de sa logique ; on voit bien qu'il avait conscience de lui-même, contrairement aux insensés vulgaires qui s'oublient et demeurent constamment certains d'être les personnages de leur invention. Spifame, devant un miroir ou dans le sommeil, se retrouvait et se jugeait à part, changeant de rôle et d'individualité tour à tour, être double et distinct pourtant, comme il arrive souvent qu'on se sent exister en rêve $ ^{23} $.» À l'époque désenchantée où Nerval écrit sa nouvelle, qu'en est-il de la réalité de la maladie ? Pour qui se prend-on sous la monarchie de Juillet ? Il faut l'admettre : rarement pour Louis-Philippe. C'est même l'un des traits saillants des archives. On se prend pour « un » roi, mais est-ce pour autant celui qui est sur le trône ? « Retire-toi, grosse bête ; ne vois-tu pas que je suis Roi de France $ ^{24} $ ? » répond",
+        "byte_size": 312992,
+        "sha256": "e77157957ba97436f9fcbcd7275bb860349efb8ad811b6abbf3645f55e977157"
+      },
+      {
+        "page_no": 181,
+        "file_idx": 180,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "systématiquement à ses interlocuteurs une folle internée à la Salpêtrière en 1833, tombée en démence des suites d'une monomanie ambitieuse. Mais ce roi de France, est-ce le roi des Français? D'une façon générale, le roi bourgeois se prête mal aux désirs d'identification; il laisse froides les imaginations et décourage la folie, preuve que la symbolique de la fonction royale nécessite d'être incarnée pour devenir une image délirable. Non pas que le monarque soit absent des registres des asiles. Mais le plus frappant — et, pour tout dire, le plus cocasse —, c'est que les aliénés assimilent le plus souvent Louis-Philippe à un pensionnaire ou au directeur de l'asile. Autrement dit, le rapport s'est inversé : on ne se prend pas pour le roi, on prend le roi pour un personnage ordinaire ou familier. Difficile de ne pas voir dans ce renversement de perspective (humaniser le roi plutôt que de sacrer sa propre personne) un effet de cette extralucidité que l'on prête aux fous, qui jettent ici, par réfraction, une lumière originale sur un trait du règne de Louis-Philippe. « La majesté lui faisait défaut. [...] Sa grande faute, la voici : il a été modeste au nom de la France », résume Victor Hugo, qui brosse le portrait d'un souverain aux qualités réelles mais sans relief, représentant de « la classe moyenne » et",
+        "byte_size": 298605,
+        "sha256": "20afc43c03b712fd0c836ccdc59c5a547d8a203abecabd100451b4b3d677f3eb"
+      },
+      {
+        "page_no": 182,
+        "file_idx": 181,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes. Ramené aux dimensions « moyennes » de cette classe qu'il défend, Louis-Philippe devient dans les asiles un homme abordable, même s'il conserve son statut de chef d'État. Cette accessibilité s'étend à sa famille et à son entourage. « Ce fut en nous recommandant le plus grand silence que M. P. nous confia ses secrets », raconte le médecin de Charenton en 1831, au sujet d'un propriétaire de quarante-cinq ans, que Bicêtre a renvoyé sans renseignement sur son cas. « En venant de son pays, il s'est trouvé en diligence avec le roi et son fils, il les connaît beaucoup, a écrit en leur faveur, est reçu au palais-royal &. Pendant son séjour à Bicêtre, il a vu Louis-Philippe déguisé confondu avec les aliénés ; il couchait dans la même chambre que le prince royal qui était également déguisé et qui lui a confié les secrets du gouvernement. À la messe, il s'est trouvé à côté de la reine qui avait un costume de paysanne, il a vu le préfet de police déguisé en cuisinier. Lafayette et une vingtaine de républicains se trouvaien ...",
+        "byte_size": 304116,
+        "sha256": "6944acbf2ba5b955b67395756da1751d367fe88402059234da5f26a8ae4219f7"
+      },
+      {
+        "page_no": 183,
+        "file_idx": 182,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "voulons le trahir, se fâche et ne veut plus rien dire $ ^{26} $. » Dans un retour de confiance, M. P. avoue qu'il craint d'être assassiné s'il viole son secret et qu'en restant à Charenton il se soumet aux ordres du roi, auquel il est très attaché. Quoique recommandé par le patient qui a écrit des lettres en sa faveur, Louis-Philippe garde donc le pouvoir d'interner qui bon lui semble. Un même mélange de déférence et de familiarité affecte le délire d'un autre patient qui, lui, s'est persuadé que Charenton était l'habitation royale de Louis-Philippe, nom qu'il attribue à un pensionnaire de l'asile, où tous les aliénés seraient des descendants des Bourbons. Trop heureux d'être au service de cette illustre famille, « il se livre à tous les soins du ménage, lave la vaisselle, balaie la salle, ne parle jamais à personne même aux infirmiers sans les appeler mon prince et sans s'incliner jusqu'à terre ». Que le patient confonde les Bourbons et les Orléans n'est pas anodin. Le principe monarchique reste indissolublement lié à la branche aînée, dont le prestige et la légitimité demeurent intacts, même en 1843, époque où l'observation est rédigée, alors que Louis-Philippe l'est depuis treize ans sur le trône. L'aliéniste, d'ailleurs, se préoccupe de ce hiatus historique et tente de pousser son patient dans ses derniers retranchements : « Comme je lui demandais comment il se faisait que ...",
+        "byte_size": 293397,
+        "sha256": "be624b239ba82e0c78d2e0200c6df011d589393f057fd2da4616f810cf808b44"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 7,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00197\",\n    \"marker\": \"21\",\n    \"note_text\": \"Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00198\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate anchor for footnote 21 (same marker and source text as anchor-00197).\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00202\",\n    \"marker\": \"25\",\n    \"note_text\": \"V. Hugo, Les Misérables, op. cit., p. 848-849.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00197",
+      "anchor_phrase": "",
+      "marker": "21",
+      "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
+      "confidence": 0.98,
+      "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00198",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00202",
+      "anchor_phrase": "",
+      "marker": "25",
+      "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
+      "confidence": 0.98,
+      "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+    }
+  ],
+  "derived_truth": {
+    "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote",
+    "chapter_title": "La monomanie orgueilleuse ou le mal du siècle",
+    "request_mode": "ref_only_visual",
+    "parsed_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00197",
+        "anchor_phrase": "",
+        "marker": "21",
+        "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
+        "confidence": 0.98,
+        "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00198",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00202",
+        "anchor_phrase": "",
+        "marker": "25",
+        "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
+        "confidence": 0.98,
+        "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+      }
+    ],
+    "auto_selected_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00197",
+        "anchor_phrase": "",
+        "marker": "21",
+        "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
+        "confidence": 0.98,
+        "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00198",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00202",
+        "anchor_phrase": "",
+        "marker": "25",
+        "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
+        "confidence": 0.98,
+        "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00197",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "21",
+        "note_text": "Al. Esquirol, Paris ou Les Sciences..., op. cit., p. 119-120.",
+        "confidence": 0.98,
+        "reason": "Footnote 21 text is clearly visible on page 176 corresponding to the anchor on page 178."
+      },
+      {
+        "link_id": "link-00478",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00198",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor for footnote 21 (same marker and source text as anchor-00197)."
+      },
+      {
+        "note_item_id": "",
+        "anchor_id": "anchor-00202",
+        "action": "synthesize_note_item",
+        "anchor_phrase": "",
+        "marker": "25",
+        "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
+        "confidence": 0.98,
+        "reason": "Footnote 25 text is clearly visible on page 180 corresponding to the anchor on page 182."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 5457,
+    "completion_tokens": 308,
+    "total_tokens": 5765,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 7338
+  }
+}

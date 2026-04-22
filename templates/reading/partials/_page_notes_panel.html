@@ -1,0 +1,88 @@
+{% if page_notes_panel %}
+<div class="page-footnotes-section" id="pageNotesPanel">
+  <div class="page-footnotes-head">
+    <div class="page-footnotes-title">{{ page_notes_panel.title }}</div>
+    {% if page_notes_panel.subtitle %}
+    <div class="page-footnotes-subtitle">{{ page_notes_panel.subtitle }}</div>
+    {% endif %}
+  </div>
+  {% if page_notes_panel.bridge %}
+  <div class="page-footnotes-bridge">{{ page_notes_panel.bridge }}</div>
+  {% endif %}
+  {% if page_notes_panel.next_bp %}
+  <div class="page-footnotes-next">读完注释后可直接继续 PDF 第{{ page_notes_panel.next_bp }}页，不用回到上面重新找位置。</div>
+  {% endif %}
+
+  {% for group in page_notes_panel.groups %}
+    {% if group.kind == 'standard_page_footnotes' %}
+    <div class="page-footnotes-group">
+      <div class="lbl">{{ group.label }}</div>
+      <div class="reading-layout-stack page-footnotes-stack">
+        {% if group.original_text %}
+        <div class="page-footnotes-card page-footnotes-original-card">
+          <div class="lbl">脚注原文</div>
+          <div class="text-fn" style="font-size:14px;line-height:1.85;white-space:pre-wrap;">{{ group.original_text }}</div>
+        </div>
+        {% endif %}
+        {% if group.translation_text %}
+        <div class="footnote-box-cn page-footnotes-card">
+          <div class="lbl">脚注翻译</div>
+          <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">{{ group.translation_text }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% elif group.kind == 'fnm_diagnostic_notes' %}
+    <div class="page-footnotes-group">
+      <div class="lbl">{{ group.label }}</div>
+      <div class="page-footnotes-card page-footnotes-notes-card">
+        <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">
+          {% for note in group.notes %}
+          [{{ note.original_marker or note.note_id }}] {{ note.translated_text or note.source_text }}
+{% if note.translated_text and note.source_text and note.translated_text != note.source_text %}
+原：{{ note.source_text }}
+{% endif %}
+{% if not loop.last %}
+
+{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% elif group.kind == 'fnm_diagnostic_failures' %}
+    <div class="page-footnotes-group">
+      <div class="lbl">{{ group.label }}</div>
+      <div class="page-footnotes-card page-footnotes-notes-card">
+        <div style="font-size:12px;line-height:1.8;color:var(--txL);margin-bottom:8px;">
+          当前页失败段优先列在下面。若全书还有未解决失败，导出会继续被阻止，直到这些段补齐。
+        </div>
+        {% if group.items %}
+        <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">
+          {% for item in group.items %}
+          [PDF 第{{ item.page_no }}页 / 第{{ item.para_idx + 1 }}段] {{ item.status }}{% if item.error %} · {{ item.error }}{% endif %}
+{% if not loop.last %}
+
+{% endif %}
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-cn" style="font-size:14px;line-height:1.9;white-space:pre-wrap;">
+          当前页没有失败段。
+        </div>
+        {% endif %}
+        {% set manual_required = group.summary.manual_required_locations|default([]) %}
+        {% set all_failed = group.summary.failed_locations|default([]) %}
+        {% if manual_required or all_failed %}
+        <div style="margin-top:8px;font-size:12px;line-height:1.8;color:var(--red);">
+          全书仍有 {{ manual_required|length or all_failed|length }} 处未解决失败。
+          {% if group.summary.next_failed_location %}
+          下一处：PDF 第{{ group.summary.next_failed_location.page_no }}页，第{{ group.summary.next_failed_location.para_idx + 1 }}段。
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
