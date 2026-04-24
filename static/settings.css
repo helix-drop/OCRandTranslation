@@ -96,6 +96,7 @@
 
 /* pills */
 .pill {
+  display: inline-block;
   font-size: 10px;
   padding: 2px 8px;
   border-radius: 10px;
@@ -104,8 +105,8 @@
 }
 .pill.ok   { background: #e6f4ea; color: var(--grn); border: 1px solid #b7e0c4; }
 .pill.no   { background: #fbe9e7; color: var(--red); border: 1px solid #f2c4be; }
-.pill.gray { background: var(--bdrL); color: var(--txS); }
-.pill.dirty { background: #fef3c7; color: #7a5a00; border: 1px solid #f5d87a; }
+.pill.gray { background: var(--bdrL); color: var(--txS); border: 1px solid transparent; }
+.pill.dirty { background: #fef3c7; color: var(--acc); border: 1px solid #f5d87a; }
 
 /* panel visibility — JS toggles .active */
 [data-panel] { display: none; }
@@ -206,10 +207,10 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--acc);
-  background: #faf3e2;
+  background: var(--bdrL);
   padding: 3px 8px;
   border-radius: 10px;
-  border: 1px solid #e6d9b2;
+  border: 1px solid var(--bdr);
 }
 .slot-thinking {
   margin-left: auto;
