@@ -23,7 +23,7 @@
     "source": "pdf",
     "file_idx": 0
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Abstract\",\n    \"depth\": 0,\n    \"printed_page\": \"iii\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Contents (detailed)\",\n    \"depth\": 0,\n    \"printed_page\": \"vi\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Figures and tables\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conventions\",\n    \"depth\": 0,\n    \"printed_page\": \"xii\",\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": \"xv\",\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Prologue\",\n    \"depth\": 0,\n    \"printed_page\": 20,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psycho-behavioral pathology in Chinese medicine\",\n    \"depth\": 0,\n    \"printed_page\": 26,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"From Wind to mucus and Fire\",\n    \"depth\": 0,\n    \"printed_page\": 73,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"\\\"Danxi said...\\\"\",\n    \"depth\": 0,\n    \"printed_page\": 136,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Replenish or attack?\",\n    \"depth\": 0,\n    \"printed_page\": 202,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Shapes of practices\",\n    \"depth\": 0,\n    \"printed_page\": 263,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Ghosts or mucus?\",\n    \"depth\": 0,\n    \"printed_page\": 326,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Gendered mania\",\n    \"depth\": 0,\n    \"printed_page\": 367,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part Two LEGAL AND POPULAR PRACTICES (Qing)\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 16,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Prologue\",\n    \"depth\": 0,\n    \"printed_page\": 408,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Abstract\",\n    \"depth\": 0,\n    \"printed_page\": \"iii\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Contents\",\n    \"depth\": 0,\n    \"printed_page\": \"iv\",\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Contents (detailed)\",\n    \"depth\": 0,\n    \"printed_page\": \"vi\",\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Figures and tables\",\n    \"depth\": 0,\n    \"printed_page\": \"xi\",\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conventions\",\n    \"depth\": 0,\n    \"printed_page\": \"xii\",\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": \"xv\",\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 8,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Prologue\",\n    \"depth\": 0,\n    \"printed_page\": 20,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psycho-behavioral pathology in Chinese medicine\",\n    \"depth\": 0,\n    \"printed_page\": 26,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"From Wind to mucus and Fire\",\n    \"depth\": 0,\n    \"printed_page\": 73,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Danxi said…”\",\n    \"depth\": 0,\n    \"printed_page\": 136,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Replenish or attack?\",\n    \"depth\": 0,\n    \"printed_page\": 202,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Shapes of practices\",\n    \"depth\": 0,\n    \"printed_page\": 263,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Ghosts or mucus?\",\n    \"depth\": 0,\n    \"printed_page\": 326,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Gendered mania\",\n    \"depth\": 0,\n    \"printed_page\": 367,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part Two LEGAL AND POPULAR PRACTICES (Qing)\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 17,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Prologue\",\n    \"depth\": 0,\n    \"printed_page\": 408,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
   "response_parsed": [
     {
       "title": "Abstract",
@@ -35,10 +35,19 @@
       "endnotes_subentry_candidate": false
     },
     {
+      "title": "Contents",
+      "depth": 0,
+      "printed_page": "iv",
+      "visual_order": 2,
+      "role_hint": "content",
+      "endnotes_candidate": false,
+      "endnotes_subentry_candidate": false
+    },
+    {
       "title": "Contents (detailed)",
       "depth": 0,
       "printed_page": "vi",
-      "visual_order": 2,
+      "visual_order": 3,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -47,7 +56,7 @@
       "title": "Figures and tables",
       "depth": 0,
       "printed_page": "xi",
-      "visual_order": 3,
+      "visual_order": 4,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -56,7 +65,7 @@
       "title": "Conventions",
       "depth": 0,
       "printed_page": "xii",
-      "visual_order": 4,
+      "visual_order": 5,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -65,7 +74,7 @@
       "title": "Acknowledgments",
       "depth": 0,
       "printed_page": "xv",
-      "visual_order": 5,
+      "visual_order": 6,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -74,7 +83,7 @@
       "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
       "depth": 0,
       "printed_page": 1,
-      "visual_order": 6,
+      "visual_order": 7,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -83,7 +92,7 @@
       "title": "Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
       "depth": 1,
       "printed_page": null,
-      "visual_order": 7,
+      "visual_order": 8,
       "role_hint": "container",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -92,7 +101,7 @@
       "title": "Prologue",
       "depth": 0,
       "printed_page": 20,
-      "visual_order": 8,
+      "visual_order": 9,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -101,7 +110,7 @@
       "title": "Psycho-behavioral pathology in Chinese medicine",
       "depth": 0,
       "printed_page": 26,
-      "visual_order": 9,
+      "visual_order": 10,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -110,16 +119,16 @@
       "title": "From Wind to mucus and Fire",
       "depth": 0,
       "printed_page": 73,
-      "visual_order": 10,
+      "visual_order": 11,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "\"Danxi said...\"",
+      "title": "“Danxi said…”",
       "depth": 0,
       "printed_page": 136,
-      "visual_order": 11,
+      "visual_order": 12,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -128,7 +137,7 @@
       "title": "Replenish or attack?",
       "depth": 0,
       "printed_page": 202,
-      "visual_order": 12,
+      "visual_order": 13,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -137,7 +146,7 @@
       "title": "Shapes of practices",
       "depth": 0,
       "printed_page": 263,
-      "visual_order": 13,
+      "visual_order": 14,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -146,7 +155,7 @@
       "title": "Ghosts or mucus?",
       "depth": 0,
       "printed_page": 326,
-      "visual_order": 14,
+      "visual_order": 15,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -155,7 +164,7 @@
       "title": "Gendered mania",
       "depth": 0,
       "printed_page": 367,
-      "visual_order": 15,
+      "visual_order": 16,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -164,7 +173,7 @@
       "title": "Part Two LEGAL AND POPULAR PRACTICES (Qing)",
       "depth": 1,
       "printed_page": null,
-      "visual_order": 16,
+      "visual_order": 17,
       "role_hint": "container",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -173,7 +182,7 @@
       "title": "Prologue",
       "depth": 0,
       "printed_page": 408,
-      "visual_order": 17,
+      "visual_order": 18,
       "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
@@ -191,7 +200,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Contents (detailed)",
+        "title": "Contents",
         "depth": 0,
         "printed_page": null,
         "visual_order": 2,
@@ -200,7 +209,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Figures and tables",
+        "title": "Contents (detailed)",
         "depth": 0,
         "printed_page": null,
         "visual_order": 3,
@@ -209,7 +218,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Conventions",
+        "title": "Figures and tables",
         "depth": 0,
         "printed_page": null,
         "visual_order": 4,
@@ -218,7 +227,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Acknowledgments",
+        "title": "Conventions",
         "depth": 0,
         "printed_page": null,
         "visual_order": 5,
@@ -227,10 +236,19 @@
         "endnotes_subentry_candidate": false
       },
       {
+        "title": "Acknowledgments",
+        "depth": 0,
+        "printed_page": null,
+        "visual_order": 6,
+        "role_hint": "content",
+        "endnotes_candidate": false,
+        "endnotes_subentry_candidate": false
+      },
+      {
         "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
         "depth": 0,
         "printed_page": 1,
-        "visual_order": 6,
+        "visual_order": 7,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -239,7 +257,7 @@
         "title": "Part One MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
         "depth": 1,
         "printed_page": null,
-        "visual_order": 7,
+        "visual_order": 8,
         "role_hint": "container",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -248,7 +266,7 @@
         "title": "Prologue",
         "depth": 0,
         "printed_page": 20,
-        "visual_order": 8,
+        "visual_order": 9,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -257,7 +275,7 @@
         "title": "Psycho-behavioral pathology in Chinese medicine",
         "depth": 0,
         "printed_page": 26,
-        "visual_order": 9,
+        "visual_order": 10,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -266,16 +284,16 @@
         "title": "From Wind to mucus and Fire",
         "depth": 0,
         "printed_page": 73,
-        "visual_order": 10,
+        "visual_order": 11,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "\"Danxi said...\"",
+        "title": "“Danxi said…”",
         "depth": 0,
         "printed_page": 136,
-        "visual_order": 11,
+        "visual_order": 12,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -284,7 +302,7 @@
         "title": "Replenish or attack?",
         "depth": 0,
         "printed_page": 202,
-        "visual_order": 12,
+        "visual_order": 13,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -293,7 +311,7 @@
         "title": "Shapes of practices",
         "depth": 0,
         "printed_page": 263,
-        "visual_order": 13,
+        "visual_order": 14,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -302,7 +320,7 @@
         "title": "Ghosts or mucus?",
         "depth": 0,
         "printed_page": 326,
-        "visual_order": 14,
+        "visual_order": 15,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -311,7 +329,7 @@
         "title": "Gendered mania",
         "depth": 0,
         "printed_page": 367,
-        "visual_order": 15,
+        "visual_order": 16,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -320,7 +338,7 @@
         "title": "Part Two LEGAL AND POPULAR PRACTICES (Qing)",
         "depth": 1,
         "printed_page": null,
-        "visual_order": 16,
+        "visual_order": 17,
         "role_hint": "container",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -329,7 +347,7 @@
         "title": "Prologue",
         "depth": 0,
         "printed_page": 408,
-        "visual_order": 17,
+        "visual_order": 18,
         "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
@@ -342,8 +360,8 @@
     "model_id": "qwen3.5-plus",
     "request_count": 1,
     "prompt_tokens": 2277,
-    "completion_tokens": 1269,
-    "total_tokens": 3546,
+    "completion_tokens": 1339,
+    "total_tokens": 3616,
     "doc_id": "bd05138cd773",
     "slug": "",
     "context": {
@@ -352,6 +370,6 @@
     }
   },
   "timing": {
-    "duration_ms": 24340
+    "duration_ms": 25611
   }
 }

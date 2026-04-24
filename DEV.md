@@ -39,7 +39,7 @@
 
 | 路径 | 内容 |
 |---|---|
-| `local_data/user_data/config.json` | API Key、术语表、当前模型模式、预设模型 key、自定义模型配置、部分阅读设置 |
+| `local_data/user_data/config.json` | API Key、术语表、两组三槽模型池、部分阅读设置 |
 | `local_data/user_data/data/catalog.db` | SQLite 目录库（`documents` + 全局 `app_state`） |
 | `local_data/user_data/data/documents/{doc_id}/doc.db` | 文档私有 SQLite（页面、翻译、FNM、文档级状态） |
 | `local_data/user_data/data/app.db` | 旧单库（迁移来源/备份，不再作为运行时主链） |
@@ -53,14 +53,14 @@
 ### SQLite 当前核心表
 
 - `catalog.db`：`documents`、`app_state`
-- `doc.db`：`documents`、`pages`、`translate_runs`、`translation_pages`、`translation_segments`、`translate_failures`、`translation_page_revisions`、`fnm_runs`、`fnm_pages`、`fnm_chapters`、`fnm_heading_candidates`、`fnm_section_heads`、`fnm_note_regions`、`fnm_chapter_note_modes`、`fnm_note_items`、`fnm_body_anchors`、`fnm_note_links`、`fnm_structure_reviews`、`fnm_translation_units`、`app_state`
+- `doc.db`：`documents`、`pages`、`translate_runs`、`translation_pages`、`translation_segments`、`translate_failures`、`translation_page_revisions`、`fnm_runs`、`fnm_pages`、`fnm_chapters`、`fnm_heading_candidates`、`fnm_section_heads`、`fnm_note_regions`、`fnm_chapter_note_modes`、`fnm_note_items`、`fnm_body_anchors`、`fnm_note_links`、`fnm_structure_reviews`、`fnm_translation_units`、`fnm_paragraph_footnotes`、`fnm_chapter_endnotes`、`fnm_chapter_anchor_alignment`、`app_state`
 
 当前稳定约定：
 
 - `translate_runs` 与 `translation_pages` 都会保存 `model_source`、`model_key`、`model_id`、`provider`
 - `translate_runs` 还会保存 `translation_model_label/id` 与 `companion_model_label/id`，供阅读页任务卡展示“正文模型 / 脚注回退模型”
 - `documents` 会保存目录文件元数据：`toc_file_name`、`toc_file_uploaded_at`
-- 当前 SQLite schema 版本是 `19`
+- 当前 SQLite schema 版本是 `24`
 - 旧 FNM 表 `fnm_notes / fnm_page_entries / fnm_page_revisions` 已删除
 - FNM 诊断页所需的页投影与注释摘要改为现算，不再依赖旧持久化页表
 
@@ -143,34 +143,40 @@
 
 ### 模型配置
 
-当前模型配置已经改成“一等公民自定义模型”结构，稳定字段如下：
+当前模型配置已切到“两组三槽模型池”：
 
-- `active_model_mode`：`builtin` 或 `custom`
-- `active_builtin_model_key`：当前启用的预设翻译模型 key
-- `active_visual_model_mode`：`builtin` 或 `custom`
-- `active_builtin_visual_model_key`：当前启用的预设视觉模型 key
-- `custom_model`：单条自定义翻译模型配置
-- `visual_custom_model`：单条自定义视觉模型配置
+- `translation_model_pool`：标准连续翻译与 FNM 文本翻译共用，按 `slot1 -> slot2 -> slot3` 回退。
+- `fnm_model_pool`：自动视觉目录、FNM 视觉判断与 LLM 修补共用，按 `slot1 -> slot2 -> slot3` 回退。
+- `mimo_api_key`：MiMo 按量接口全局 Key；MiMo Token Plan 在槽位内单独填写 `base_url + custom_api_key`。
+- `glm_api_key`：智谱 GLM 全局 Key，固定 OpenAI-compatible Base URL 为 `https://open.bigmodel.cn/api/paas/v4/`。
+- `kimi_api_key`：Kimi / Moonshot 全局 Key，固定 OpenAI-compatible Base URL 为 `https://api.moonshot.ai/v1`。
+- 旧 `active_model_mode/custom_model/visual_custom_model` 只在首次读取旧配置时迁移到新池结构；保存配置时不再长期双写旧字段。
 
 生效模型统一通过 [persistence/storage.py](/Users/hao/OCRandTranslation/persistence/storage.py) 的 `ResolvedModelSpec` 解析：
 
-- 入口目标只允许 `builtin:<key>` 或 `custom`
-- 返回统一字段：`model_source`、`model_key`、`model_id`、`provider`、`base_url`、`api_key`、`display_label`、`api_family`、`supports_translation`、`supports_vision`、`supports_stream`、`stream_mode`、`companion_chat_model_key`、`request_overrides`
-- 翻译模型与视觉模型是两套独立配置；视觉模型列表不会显示 `Qwen-MT`
-- `Qwen-MT` 只接正文翻译；标准页脚注和 FNM `footnote/endnote` unit 会自动回退 companion chat model
+- 返回统一字段：`model_source`、`model_key`、`model_id`、`provider`、`base_url`、`api_key`、`display_label`、`api_family`、`supports_translation`、`supports_vision`、`supports_stream`、`stream_mode`、`companion_chat_model_key`、`request_overrides`、`pool_name`、`slot_index`
+- 翻译池可选 DeepSeek、Qwen、Qwen-MT、MiMo、GLM、Kimi 与 OpenAI Compatible；FNM 池只显示视觉/修补可用模型。
+- 内置候选模型按能力筛选，不再把所有历史模型都显示出来：
+  - 翻译池只显示文本/对话/专用翻译候选，当前主线包括 `qwen3.6-max-preview`、`qwen3.6-plus`、`qwen3.6-flash`、`qwen-mt-*`、`glm-5.1`、`kimi-k2.6/kimi-k2.5`、`mimo-v2.5-pro`、`deepseek-chat/deepseek-reasoner` 等。
+  - FNM 池只显示同时具备视觉输入和文本输出能力的多模态候选，当前主线包括 `qwen3.6-plus`、`qwen3.6-flash`、`qwen3-vl-plus`、`qwen3-vl-flash`、`glm-5v-turbo`、`glm-4.6v`、`kimi-k2.6/kimi-k2.5`、`mimo-v2.5`、`mimo-v2-omni`。
+  - 旧 `qwen-vl-plus/qwen-vl-max`、OCR 专用 `qwen-vl-ocr`、即将下线或旧 preview 模型只作为历史配置识别，不再作为设置页候选推荐。
+- FNM 默认内置主模型是 `qwen3.6-plus`。
+- MiMo 按量接口固定 `https://api.xiaomimimo.com/v1`；Token Plan 使用槽位专属 Base URL。
+- 槽位可勾选 `thinking_enabled`；Qwen 会写入 `extra_body.enable_thinking`，DeepSeek / GLM / Kimi / 已标记支持的 MiMo 会写入 `extra_body.thinking.type=enabled|disabled`。
+- 缺少凭据或能力不匹配的回退槽会被跳过，不参与请求。
+- 设置页模型槽位采用渐进式表单：内置模型只显示模型选择和 thinking；自定义模型才展开 Provider、模型 ID，并按 provider 只显示必要的地域、Base URL 和专用 Key。
 
 ### 阅读页
 
 阅读页现在有这些稳定约定：
 
-- 阅读视图和后台翻译任务已经明确分离：`standard|fnm` 只决定“当前看什么”，`continuous|glossary_retranslate|fnm` 只决定“后台在跑什么”
+- FNM 模式不再提供独立阅读 / 预览视图；`reading?view=fnm` 会回到标准阅读语义，FNM 状态、翻译、收尾和导出统一在首页 FNM 工作流卡片操作。
 - `reading()` 会同时注入 `task_snapshot` 和 `reading_view_state`
-- `/switch_reading_mode` 只做阅读视图切换，不会因为切换视图而停止后台翻译任务
+- `/switch_reading_mode` 不再切到 FNM 视图；请求 `target_mode=fnm` 时会提示回首页 FNM 工作流卡片
 - 阅读页只保留一套统一任务入口 `TranslationSessionCard`
 - 标准视图仍支持整页段落编辑：`GET/POST /api/page_editor` 读取和保存完整有序段落数组，`GET /api/page_editor/history` 读取本页历史
 - 标准页整页保存会写 `translation_page_revisions`
-- `reading?view=fnm` 继续保留，但只作为只读诊断页
-- `GET/POST /api/page_editor?view=fnm` 与 `GET /api/page_editor/history?view=fnm` 现在固定返回只读错误，不再支持 FNM 页编辑或历史保存
+- `GET/POST /api/page_editor?view=fnm` 与 `GET /api/page_editor/history?view=fnm` 仍固定返回只读错误，避免旧 FNM 诊断视图被误当作可编辑入口
 
 ### 首页上传入口与分流
 
@@ -374,14 +380,14 @@ except GarbledTextError as e:
 - `POST /api/toc/update_auto_visual`
 - `POST /api/toc/save_visual_draft`
 - `POST /api/toc/commit_visual_draft`
-- `POST /set_model/<key>`
-- `POST /set_visual_model/<key>`
 - `POST /switch_doc/<doc_id>`
 - `POST /delete_doc/<doc_id>`
 - `POST /delete_docs_batch`
 - `POST /reset_text`
 - `POST /reset_text_action`
 - `POST /reset_all`
+
+旧的单模型切换接口 `POST /set_model/<key>` 与 `POST /set_visual_model/<key>` 已删除；模型选择只通过 `POST /save_settings` 保存两组三槽模型池。
 
 其中 `POST /retranslate/<bp>` 还要求显式目标参数：
 

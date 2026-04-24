@@ -1,0 +1,16 @@
+# Naissance de la biopolitique - translation
+
+- [Leçon du 10 janvier 1979](chapters/001-Leçon du 10 janvier 1979.md)
+- [Leçon du 17 janvier 1979](chapters/002-Leçon du 17 janvier 1979.md)
+- [Leçon du 24 janvier 1979](chapters/003-Leçon du 24 janvier 1979.md)
+- [Leçon du 31 janvier 1979](chapters/004-Leçon du 31 janvier 1979.md)
+- [Leçon du 7 février 1979](chapters/005-Leçon du 7 février 1979.md)
+- [Leçon du 14 février 1979](chapters/006-Leçon du 14 février 1979.md)
+- [Leçon du 21 février 1979](chapters/007-Leçon du 21 février 1979.md)
+- [Leçon du 7 mars 1979](chapters/008-Leçon du 7 mars 1979.md)
+- [Leçon du 14 mars 1979](chapters/009-Leçon du 14 mars 1979.md)
+- [Leçon du 21 mars 1979](chapters/010-Leçon du 21 mars 1979.md)
+- [Leçon du 28 mars 1979](chapters/011-Leçon du 28 mars 1979.md)
+- [Leçon du 4 avril 1979](chapters/012-Leçon du 4 avril 1979.md)
+- [RÉSUMÉ DU COURS](chapters/013-RÉSUMÉ DU COURS.md)
+- [SITUATION DES COURS](chapters/014-SITUATION DES COURS.md)

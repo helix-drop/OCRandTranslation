@@ -4,6 +4,7 @@ import threading
 import time
 
 from config import get_model_key
+from persistence.fnm_export_bundle import clear_fnm_export_bundle
 from persistence.storage import get_translate_args
 from persistence.task_logs import append_doc_task_log, create_doc_task_log
 from translation.translate_runtime import (
@@ -149,6 +150,7 @@ def start_fnm_translate_task(
     if owner_token is None:
         return False
 
+    clear_fnm_export_bundle(doc_id)
     initial_args = get_translate_args()
     log_relpath = create_doc_task_log(
         doc_id,
@@ -186,6 +188,11 @@ def start_fnm_translate_task(
         retry_round=0,
         unresolved_count=0,
         manual_required_count=0,
+        fnm_tail_state="translation_retrying",
+        export_bundle_available=False,
+        export_has_blockers=False,
+        tail_blocking_summary=[],
+        translation_attempt_history=[],
         next_failed_location=None,
         failed_locations=[],
         manual_required_locations=[],

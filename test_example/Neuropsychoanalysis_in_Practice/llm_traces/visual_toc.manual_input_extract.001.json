@@ -23,12 +23,12 @@
     "source": "pdf",
     "file_idx": 0
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of abbreviations\",\n    \"depth\": 0,\n    \"printed_page\": \"xv\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud and the quest for neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Function- and localization-based approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 3,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s search for psychological structure and organization\",\n    \"depth\": 1,\n    \"printed_page\": 4,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Neural correlates” and “neural predispositions”\",\n    \"depth\": 1,\n    \"printed_page\": 6,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The brain’s intrinsic activity as neural predisposition\",\n    \"depth\": 1,\n    \"printed_page\": 7,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain–self and brain–object differentiation\",\n    \"depth\": 1,\n    \"printed_page\": 8,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Metaphorical excursion: brain, self, and objects\",\n    \"depth\": 1,\n    \"printed_page\": 9,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Focus of the book: general aims and hypotheses\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Plan of the book: overview of contents\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Guidance for the reader\",\n    \"depth\": 1,\n    \"printed_page\": 14,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 1,\n    \"printed_page\": 16,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part I Conceptual Equipment\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 14,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental Approach to the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 19,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 19,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental approach\",\n    \"depth\": 1,\n    \"printed_page\": 25,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 31,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Unknowability and the Concept of the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 36,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 36,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Parallelism between inner and outer sense: Freud, Solms, and the “brain–mental apparatus dilemma”\",\n    \"depth\": 1,\n    \"printed_page\": 40,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neurophilosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 43,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity\",\n    \"depth\": 0,\n    \"printed_page\": 57,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s duality between science and hermeneutics of mind: “concept–fact linkage”\",\n    \"depth\": 1,\n    \"printed_page\": 57,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Humanities and science: narrow and wider concepts of neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 60,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Solms’ quest for method: neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 63,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 65,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Method-based neuropsychoanalysis” versus “result-based neuropsychoanalysis”\",\n    \"depth\": 1,\n    \"printed_page\": 82,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of abbreviations\",\n    \"depth\": 0,\n    \"printed_page\": null,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud and the quest for neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Function- and localization-based approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 3,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s search for psychological structure and organization\",\n    \"depth\": 1,\n    \"printed_page\": 4,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Neural correlates” and “neural predispositions”\",\n    \"depth\": 1,\n    \"printed_page\": 6,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The brain’s intrinsic activity as neural predisposition\",\n    \"depth\": 1,\n    \"printed_page\": 7,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain–self and brain–object differentiation\",\n    \"depth\": 1,\n    \"printed_page\": 8,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Metaphorical excursion: brain, self, and objects\",\n    \"depth\": 1,\n    \"printed_page\": 9,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Focus of the book: general aims and hypotheses\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Plan of the book: overview of contents\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Guidance for the reader\",\n    \"depth\": 1,\n    \"printed_page\": 14,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": 16,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part I Conceptual Equipment\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 14,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 Transcendental Approach to the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 19,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 19,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental approach\",\n    \"depth\": 1,\n    \"printed_page\": 25,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 31,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 Unknowability and the Concept of the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 36,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 36,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Parallelism between inner and outer sense: Freud, Solms, and the “brain–mental apparatus dilemma”\",\n    \"depth\": 1,\n    \"printed_page\": 40,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neurophilosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 43,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity\",\n    \"depth\": 0,\n    \"printed_page\": 57,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s duality between science and hermeneutics of mind: “concept–fact linkage”\",\n    \"depth\": 1,\n    \"printed_page\": 57,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Humanities and science: narrow and wider concepts of neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 60,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Solms’ quest for method: neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 63,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 65,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Method-based neuropsychoanalysis” versus “result-based neuropsychoanalysis”\",\n    \"depth\": 1,\n    \"printed_page\": 82,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
   "response_parsed": [
     {
       "title": "List of abbreviations",
       "depth": 0,
-      "printed_page": "xv",
+      "printed_page": null,
       "visual_order": 1,
       "role_hint": "content",
       "endnotes_candidate": false,
@@ -135,7 +135,7 @@
     },
     {
       "title": "Acknowledgments",
-      "depth": 1,
+      "depth": 0,
       "printed_page": 16,
       "visual_order": 13,
       "role_hint": "content",
@@ -152,7 +152,7 @@
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "Transcendental Approach to the Brain",
+      "title": "1 Transcendental Approach to the Brain",
       "depth": 0,
       "printed_page": 19,
       "visual_order": 15,
@@ -188,7 +188,7 @@
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "Unknowability and the Concept of the Brain",
+      "title": "2 Unknowability and the Concept of the Brain",
       "depth": 0,
       "printed_page": 36,
       "visual_order": 19,
@@ -224,7 +224,7 @@
       "endnotes_subentry_candidate": false
     },
     {
-      "title": "Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+      "title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
       "depth": 0,
       "printed_page": 57,
       "visual_order": 23,
@@ -390,7 +390,7 @@
       },
       {
         "title": "Acknowledgments",
-        "depth": 1,
+        "depth": 0,
         "printed_page": 16,
         "visual_order": 13,
         "role_hint": "content",
@@ -407,7 +407,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Transcendental Approach to the Brain",
+        "title": "1 Transcendental Approach to the Brain",
         "depth": 0,
         "printed_page": 19,
         "visual_order": 15,
@@ -443,7 +443,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Unknowability and the Concept of the Brain",
+        "title": "2 Unknowability and the Concept of the Brain",
         "depth": 0,
         "printed_page": 36,
         "visual_order": 19,
@@ -479,7 +479,7 @@
         "endnotes_subentry_candidate": false
       },
       {
-        "title": "Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+        "title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
         "depth": 0,
         "printed_page": 57,
         "visual_order": 23,
@@ -540,8 +540,8 @@
     "model_id": "qwen3.5-plus",
     "request_count": 1,
     "prompt_tokens": 1538,
-    "completion_tokens": 2180,
-    "total_tokens": 3718,
+    "completion_tokens": 2181,
+    "total_tokens": 3719,
     "doc_id": "e7f8a1b6c2d3",
     "slug": "",
     "context": {
@@ -550,6 +550,6 @@
     }
   },
   "timing": {
-    "duration_ms": 43162
+    "duration_ms": 40803
   }
 }

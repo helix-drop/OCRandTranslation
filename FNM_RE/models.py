@@ -207,6 +207,40 @@ class BodyAnchorRecord:
 
 
 @dataclass(slots=True)
+class ChapterEndnoteRecord:
+    doc_id: str = ""
+    chapter_id: str = ""
+    ordinal: int = 0
+    marker: str = ""
+    numbering_scheme: str = "per_chapter"
+    text: str = ""
+    source_page_no: int = 0
+    is_reconstructed: bool = False
+    review_required: bool = True
+
+
+@dataclass(slots=True)
+class ParagraphFootnoteRecord:
+    doc_id: str = ""
+    chapter_id: str = ""
+    page_no: int = 0
+    paragraph_index: int = 0
+    attachment_kind: str = "page_tail"
+    source_marker: str = ""
+    text: str = ""
+
+
+@dataclass(slots=True)
+class ChapterAnchorAlignmentRecord:
+    doc_id: str = ""
+    chapter_id: str = ""
+    alignment_status: str = "misaligned"
+    body_anchor_count: int = 0
+    endnote_count: int = 0
+    mismatch: dict | None = None
+
+
+@dataclass(slots=True)
 class NoteLinkRecord:
     link_id: str
     chapter_id: str
@@ -248,6 +282,9 @@ class Phase3Summary:
     note_link_summary: dict[str, Any] = field(default_factory=dict)
     review_seed_summary: dict[str, Any] = field(default_factory=dict)
     review_flags: list[str] = field(default_factory=list)
+    paragraph_footnote_summary: dict[str, Any] = field(default_factory=dict)
+    paragraph_endnote_summary: dict[str, Any] = field(default_factory=dict)
+    chapter_anchor_alignment_summary: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -261,6 +298,9 @@ class Phase3Structure:
     chapter_note_modes: list[ChapterNoteModeRecord] = field(default_factory=list)
     body_anchors: list[BodyAnchorRecord] = field(default_factory=list)
     note_links: list[NoteLinkRecord] = field(default_factory=list)
+    paragraph_footnotes: list[ParagraphFootnoteRecord] = field(default_factory=list)
+    paragraph_endnotes: list[ChapterEndnoteRecord] = field(default_factory=list)
+    chapter_anchor_alignments: list[ChapterAnchorAlignmentRecord] = field(default_factory=list)
     summary: Phase3Summary = field(default_factory=Phase3Summary)
 
 
@@ -299,7 +339,9 @@ class StructureStatusRecord:
     chapter_title_alignment_ok: bool = True
     chapter_section_alignment_ok: bool = True
     chapter_endnote_region_alignment_ok: bool = True
-    chapter_endnote_region_alignment_summary: dict[str, Any] = field(default_factory=dict)
+    chapter_endnote_region_alignment_summary: dict[str, Any] = field(
+        default_factory=dict
+    )
     manual_toc_ready: bool = True
     manual_toc_required: bool = False
     manual_toc_summary: dict[str, Any] = field(default_factory=dict)
@@ -371,7 +413,9 @@ class Phase4Structure:
     note_links: list[NoteLinkRecord] = field(default_factory=list)
     effective_note_links: list[NoteLinkRecord] = field(default_factory=list)
     structure_reviews: list[StructureReviewRecord] = field(default_factory=list)
-    status: StructureStatusRecord = field(default_factory=lambda: StructureStatusRecord(structure_state="idle"))
+    status: StructureStatusRecord = field(
+        default_factory=lambda: StructureStatusRecord(structure_state="idle")
+    )
     summary: Phase4Summary = field(default_factory=Phase4Summary)
 
 
@@ -529,7 +573,9 @@ class Phase5Structure:
     translation_units: list[TranslationUnitRecord] = field(default_factory=list)
     diagnostic_pages: list[DiagnosticPageRecord] = field(default_factory=list)
     diagnostic_notes: list[DiagnosticNoteRecord] = field(default_factory=list)
-    status: StructureStatusRecord = field(default_factory=lambda: StructureStatusRecord(structure_state="idle"))
+    status: StructureStatusRecord = field(
+        default_factory=lambda: StructureStatusRecord(structure_state="idle")
+    )
     summary: Phase5Summary = field(default_factory=Phase5Summary)
 
 
@@ -566,6 +612,7 @@ class ExportAuditFileRecord:
     page_span: list[int] = field(default_factory=list)
     issue_codes: list[str] = field(default_factory=list)
     issue_summary: list[str] = field(default_factory=list)
+    issue_details: list[dict[str, Any]] = field(default_factory=list)
     severity: str = "minor"
     sample_opening: str = ""
     sample_mid: str = ""
@@ -602,6 +649,10 @@ class Phase6Summary(Phase5Summary):
 class Phase6Structure(Phase5Structure):
     export_chapters: list[ExportChapterRecord] = field(default_factory=list)
     export_bundle: ExportBundleRecord = field(default_factory=ExportBundleRecord)
-    export_audit: ExportAuditReportRecord = field(default_factory=ExportAuditReportRecord)
-    status: StructureStatusRecord = field(default_factory=lambda: StructureStatusRecord(structure_state="idle"))
+    export_audit: ExportAuditReportRecord = field(
+        default_factory=ExportAuditReportRecord
+    )
+    status: StructureStatusRecord = field(
+        default_factory=lambda: StructureStatusRecord(structure_state="idle")
+    )
     summary: Phase6Summary = field(default_factory=Phase6Summary)

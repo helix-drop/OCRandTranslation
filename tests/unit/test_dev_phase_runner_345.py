@@ -23,6 +23,9 @@ from FNM_RE.dev import phase_runner
 class FakeRepo:
     def __init__(self):
         self.phase_runs: dict[tuple[str, int], dict] = {}
+        self.footnotes: dict[str, dict] = {}
+        self.endnotes: dict[str, dict] = {}
+        self.alignments: dict[str, dict] = {}
 
     def upsert_phase_run(
         self,
@@ -57,6 +60,35 @@ class FakeRepo:
 
     def list_phase_runs(self, doc_id):
         return [v for (d, _), v in self.phase_runs.items() if d == doc_id]
+
+    def replace_fnm_paragraph_footnotes(self, doc_id, chapter_id, *, footnotes):
+        key = (doc_id, chapter_id)
+        if key not in self.footnotes:
+            self.footnotes[key] = []
+        self.footnotes[key].extend(dict(fn) for fn in (footnotes or []))
+
+    def replace_fnm_chapter_endnotes(self, doc_id, chapter_id, *, endnotes):
+        key = (doc_id, chapter_id)
+        if key not in self.endnotes:
+            self.endnotes[key] = []
+        self.endnotes[key].extend(dict(en) for en in (endnotes or []))
+
+    def upsert_fnm_chapter_anchor_alignment(
+        self,
+        doc_id,
+        chapter_id,
+        *,
+        alignment_status="misaligned",
+        body_anchor_count=0,
+        endnote_count=0,
+        mismatch=None,
+    ):
+        self.alignments[(doc_id, chapter_id)] = {
+            "alignment_status": alignment_status,
+            "body_anchor_count": body_anchor_count,
+            "endnote_count": endnote_count,
+            "mismatch": mismatch,
+        }
 
 
 # ---------- fixture ----------
@@ -99,6 +131,15 @@ def _fake_phase3():
             "ambiguous": 0,
         },
         body_anchor_summary={"synthetic_anchor_count": 0},
+        chapter_anchor_alignment_summary={
+            "total_chapters": 1,
+            "clean": 1,
+            "mismatches": 0,
+            "misaligned": 0,
+            "chapter_status": {
+                "c1": {"alignment_status": "clean", "body_anchor_count": 0, "endnote_count": 0},
+            },
+        },
     )
     return NS(
         pages=p2.pages,
@@ -110,6 +151,9 @@ def _fake_phase3():
         heading_candidates=[],
         body_anchors=[],
         note_links=[],
+        paragraph_footnotes=[],
+        paragraph_endnotes=[],
+        chapter_anchor_alignments=[],
         summary=summary,
     )
 
@@ -292,6 +336,188 @@ class PhaseRunnerPhase3to6Tests(unittest.TestCase):
         self.assertTrue(os.path.isfile(export_file))
         with open(export_file, encoding="utf-8") as fh:
             self.assertEqual(fh.read(), "# hello")
+
+
+
+
+class Phase3PersistenceTests(unittest.TestCase):
+    """直接测试 _persist_phase3 的写入逻辑。"""
+
+    def test_persist_phase3_empty_lists(self):
+        """空列表不报错、不写入。"""
+        repo = FakeRepo()
+        p3 = NS(
+            paragraph_footnotes=[],
+            paragraph_endnotes=[],
+            chapter_anchor_alignments=[],
+        )
+        phase_runner._persist_phase3(repo, "doc-x", p3)
+        self.assertEqual(len(repo.footnotes), 0)
+        self.assertEqual(len(repo.endnotes), 0)
+        self.assertEqual(len(repo.alignments), 0)
+
+    def test_persist_phase3_footnotes(self):
+        """footnotes 按 chapter_id 分组写入。"""
+        repo = FakeRepo()
+        fn1 = NS(chapter_id="c1", page_no=5, paragraph_index=0, attachment_kind="anchor_matched", source_marker="1", text="fn1")
+        fn2 = NS(chapter_id="c1", page_no=5, paragraph_index=1, attachment_kind="page_tail", source_marker="2", text="fn2")
+        fn3 = NS(chapter_id="c2", page_no=9, paragraph_index=0, attachment_kind="anchor_matched", source_marker="1", text="fn3")
+        p3 = NS(
+            paragraph_footnotes=[fn1, fn2, fn3],
+            paragraph_endnotes=[],
+            chapter_anchor_alignments=[],
+        )
+        phase_runner._persist_phase3(repo, "doc-x", p3)
+        c1_fns = repo.footnotes.get(("doc-x", "c1"), [])
+        c2_fns = repo.footnotes.get(("doc-x", "c2"), [])
+        self.assertEqual(len(c1_fns), 2)
+        self.assertEqual(len(c2_fns), 1)
+        self.assertEqual(c1_fns[0]["source_marker"], "1")
+        self.assertEqual(c1_fns[1]["text"], "fn2")
+
+    def test_persist_phase3_endnotes(self):
+        """endnotes 按 chapter_id 分组写入。"""
+        repo = FakeRepo()
+        en1 = NS(chapter_id="c1", ordinal=1, marker="1", text="First note")
+        en2 = NS(chapter_id="c1", ordinal=2, marker="2", text="Second note")
+        p3 = NS(
+            paragraph_footnotes=[],
+            paragraph_endnotes=[en1, en2],
+            chapter_anchor_alignments=[],
+        )
+        phase_runner._persist_phase3(repo, "doc-x", p3)
+        c1_ens = repo.endnotes.get(("doc-x", "c1"), [])
+        self.assertEqual(len(c1_ens), 2)
+        self.assertEqual(c1_ens[0]["marker"], "1")
+        self.assertEqual(c1_ens[0]["text"], "First note")
+
+    def test_persist_phase3_alignments(self):
+        """anchor alignment 逐章节 upsert。"""
+        repo = FakeRepo()
+        al1 = NS(chapter_id="c1", alignment_status="clean", body_anchor_count=3, endnote_count=3, mismatch=None)
+        al2 = NS(chapter_id="c2", alignment_status="misaligned", body_anchor_count=2, endnote_count=5, mismatch={"body_extra_markers": ["1"]})
+        p3 = NS(
+            paragraph_footnotes=[],
+            paragraph_endnotes=[],
+            chapter_anchor_alignments=[al1, al2],
+        )
+        phase_runner._persist_phase3(repo, "doc-x", p3)
+        self.assertEqual(len(repo.alignments), 2)
+        self.assertEqual(repo.alignments[("doc-x", "c1")]["alignment_status"], "clean")
+        self.assertEqual(repo.alignments[("doc-x", "c2")]["alignment_status"], "misaligned")
+        self.assertIsNotNone(repo.alignments[("doc-x", "c2")]["mismatch"])
+
+    def test_persist_phase3_round_trip(self):
+        """完整写入和通过 gate 验证（使用 PipelineStub）。"""
+        repo = FakeRepo()
+        patchers = [
+            patch.dict(sys.modules, {"FNM_RE.app.pipeline": _PipelineStub()}),
+            patch(
+                "FNM_RE.dev.phase_runner.load_fnm_toc_items",
+                side_effect=_fake_load_toc_items,
+            ),
+        ]
+        for p in patchers:
+            p.start()
+        try:
+            result = phase_runner.execute_phase(
+                "doc-x",
+                3,
+                repo=repo,
+                load_pages_from_disk=_fake_load_pages,
+            )
+            self.assertTrue(result.ok, msg=result.error)
+            self.assertEqual(result.status, "ready")
+            self.assertTrue(repo.phase_runs[("doc-x", 3)]["gate_pass"])
+        finally:
+            for p in patchers:
+                p.stop()
+
+
+class Phase3GateAlignmentTests(unittest.TestCase):
+    """对齐数据在 judge_phase3 中的表现。"""
+
+    def setUp(self) -> None:
+        self.base = _fake_phase3()
+
+    def _summary_with_alignment(self, chapter_status: dict) -> NS:
+        return NS(
+            chapter_title_alignment_ok=True,
+            chapter_section_alignment_ok=True,
+            note_link_summary={
+                "footnote_orphan_anchor": 0, "footnote_orphan_note": 0,
+                "endnote_orphan_anchor": 0, "endnote_orphan_note": 0,
+                "ambiguous": 0,
+            },
+            body_anchor_summary={"synthetic_anchor_count": 0},
+            chapter_anchor_alignment_summary={
+                "total_chapters": len(chapter_status),
+                "chapter_status": chapter_status,
+            },
+        )
+
+    def test_clean_alignment_passes_gate(self):
+        """所有章节 clean → gate pass."""
+        from FNM_RE.dev.gates import judge_phase3
+        p3 = NS(
+            pages=self.base.pages,
+            chapters=self.base.chapters,
+            note_links=[],
+            body_anchors=[],
+            note_items=[],
+            paragraph_footnotes=[],
+            paragraph_endnotes=[],
+            chapter_anchor_alignments=[],
+            summary=self._summary_with_alignment({
+                "c1": {"alignment_status": "clean"},
+            }),
+        )
+        report = judge_phase3(p3)
+        self.assertTrue(report.pass_)
+        codes = [f.code for f in report.failures]
+        self.assertNotIn("phase3.chapter_anchor_misaligned", codes)
+
+    def test_misaligned_fails_gate(self):
+        """misaligned 章节 → gate failure."""
+        from FNM_RE.dev.gates import judge_phase3
+        p3 = NS(
+            pages=self.base.pages,
+            chapters=self.base.chapters,
+            note_links=[],
+            body_anchors=[],
+            note_items=[],
+            paragraph_footnotes=[],
+            paragraph_endnotes=[],
+            chapter_anchor_alignments=[],
+            summary=self._summary_with_alignment({
+                "c1": {"alignment_status": "misaligned", "body_anchor_count": 3, "endnote_count": 1},
+            }),
+        )
+        report = judge_phase3(p3)
+        self.assertFalse(report.pass_)
+        codes = [f.code for f in report.failures]
+        self.assertIn("phase3.chapter_anchor_misaligned", codes)
+
+    def test_mismatches_warns_only(self):
+        """mismatches 只产生 warning，不阻塞 gate."""
+        from FNM_RE.dev.gates import judge_phase3
+        p3 = NS(
+            pages=self.base.pages,
+            chapters=self.base.chapters,
+            note_links=[],
+            body_anchors=[],
+            note_items=[],
+            paragraph_footnotes=[],
+            paragraph_endnotes=[],
+            chapter_anchor_alignments=[],
+            summary=self._summary_with_alignment({
+                "c1": {"alignment_status": "mismatches"},
+            }),
+        )
+        report = judge_phase3(p3)
+        self.assertTrue(report.pass_)
+        warn_codes = [f.code for f in report.warnings]
+        self.assertIn("phase3.chapter_anchor_mismatches_warn", warn_codes)
 
 
 if __name__ == "__main__":

@@ -15,11 +15,7 @@
     </button>
     <button type="button" class="btn btn-gho"
             onclick="confirmRetranslate('{{ url_for('retranslate', bp=cur_page_bp, doc_id=current_doc_id, target=('custom' if custom_model_enabled else ('builtin:' ~ model_key))) }}', this);">
-      {% if custom_model_enabled %}
-      用自定义模型（{{ current_model_label }}）重译本页
-      {% else %}
       用{{ current_model_label }}重译本页
-      {% endif %}
     </button>
     {% if has_pdf %}
     <button type="button" class="btn btn-gho" id="reparsePageBtn" onclick="confirmReparsePage({{ cur_page_bp }});">

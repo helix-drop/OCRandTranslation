@@ -10,7 +10,6 @@ import config as app_config
 import document.pdf_extract as pdf_extract
 import document.text_processing as text_processing
 import document.text_utils as text_utils
-import model_capabilities
 import persistence.sqlite_store as sqlite_store
 import persistence.storage as storage
 import pipeline.document_tasks as document_tasks
@@ -157,25 +156,20 @@ class TranslationServices(_ServiceBag):
 @dataclass(frozen=True)
 class SettingsServices(_ServiceBag):
     _format_unix_ts: Any
-    _redirect_after_model_change: Any
     _redirect_settings: Any
     _request_doc_id: Any
-    _save_custom_model_section: Any
+    _save_model_pool_section: Any
     _save_text_setting: Any
     _save_translate_parallel_section: Any
-    _save_visual_custom_model_section: Any
     _serialize_glossary_retranslate_preview: Any
     _delete_doc_with_verification: Any
     _guard_doc_delete: Any
     build_glossary_retranslate_preview: Any
     clear_entries_from_disk: Any
     delete_glossary_item: Any
-    disable_custom_model: Any
-    disable_visual_custom_model: Any
     get_app_state: Any
     get_current_doc_id: Any
     get_doc_meta: Any
-    get_selectable_models: Any
     get_toc_file_info: Any
     has_active_translate_task: Any
     list_glossary_items: Any
@@ -189,9 +183,10 @@ class SettingsServices(_ServiceBag):
     set_dashscope_key: Any
     set_deepseek_key: Any
     set_glossary: Any
-    set_model_key: Any
+    set_glm_api_key: Any
+    set_kimi_api_key: Any
+    set_mimo_api_key: Any
     set_paddle_token: Any
-    set_visual_model_key: Any
     start_glossary_retranslate_task: Any
     upsert_glossary_item: Any
 
@@ -392,25 +387,20 @@ def build_app_services() -> AppServices:
 
     settings = SettingsServices(
         _format_unix_ts=common.format_unix_ts,
-        _redirect_after_model_change=settings_support.redirect_after_model_change,
         _redirect_settings=settings_support.redirect_settings,
         _request_doc_id=request_doc_id,
-        _save_custom_model_section=settings_support.save_custom_model_section,
+        _save_model_pool_section=settings_support.save_model_pool_section,
         _save_text_setting=settings_support.save_text_setting,
         _save_translate_parallel_section=settings_support.save_translate_parallel_section,
-        _save_visual_custom_model_section=settings_support.save_visual_custom_model_section,
         _serialize_glossary_retranslate_preview=settings_support.serialize_glossary_retranslate_preview,
         _delete_doc_with_verification=document_support.delete_doc_with_verification,
         _guard_doc_delete=document_support.guard_doc_delete,
         build_glossary_retranslate_preview=_proxy(translation_service, "build_glossary_retranslate_preview"),
         clear_entries_from_disk=_proxy(storage, "clear_entries_from_disk"),
         delete_glossary_item=_proxy(app_config, "delete_glossary_item"),
-        disable_custom_model=_proxy(app_config, "disable_custom_model"),
-        disable_visual_custom_model=_proxy(app_config, "disable_visual_custom_model"),
         get_app_state=_proxy(storage, "get_app_state"),
         get_current_doc_id=_proxy(app_config, "get_current_doc_id"),
         get_doc_meta=_proxy(app_config, "get_doc_meta"),
-        get_selectable_models=_proxy(model_capabilities, "get_selectable_models"),
         get_toc_file_info=_proxy(storage, "get_toc_file_info"),
         has_active_translate_task=_proxy(translate_runtime, "has_active_translate_task"),
         list_glossary_items=_proxy(app_config, "list_glossary_items"),
@@ -424,9 +414,10 @@ def build_app_services() -> AppServices:
         set_dashscope_key=_proxy(app_config, "set_dashscope_key"),
         set_deepseek_key=_proxy(app_config, "set_deepseek_key"),
         set_glossary=_proxy(app_config, "set_glossary"),
-        set_model_key=_proxy(app_config, "set_model_key"),
+        set_glm_api_key=_proxy(app_config, "set_glm_api_key"),
+        set_kimi_api_key=_proxy(app_config, "set_kimi_api_key"),
+        set_mimo_api_key=_proxy(app_config, "set_mimo_api_key"),
         set_paddle_token=_proxy(app_config, "set_paddle_token"),
-        set_visual_model_key=_proxy(app_config, "set_visual_model_key"),
         start_glossary_retranslate_task=_proxy(translate_launch, "start_glossary_retranslate_task"),
         upsert_glossary_item=_proxy(app_config, "upsert_glossary_item"),
     )

@@ -26,8 +26,6 @@ def settings(deps: Deps):
     if requested_doc_id and current_doc_id == requested_doc_id:
         deps["set_current_doc"](current_doc_id)
     state = deps["get_app_state"](current_doc_id)
-    custom_model_panel_open = request.args.get("open_custom_model", "0") == "1"
-    visual_custom_model_panel_open = request.args.get("open_visual_custom_model", "0") == "1"
     toc_source, toc_offset = deps["load_toc_source_offset"](current_doc_id)
     toc_items = deps["load_user_toc_from_disk"](current_doc_id) if toc_source == "user" else []
     toc_file = deps["get_toc_file_info"](current_doc_id)
@@ -35,8 +33,6 @@ def settings(deps: Deps):
     return render_template(
         "settings.html",
         current_doc_id=current_doc_id,
-        custom_model_panel_open=custom_model_panel_open,
-        visual_custom_model_panel_open=visual_custom_model_panel_open,
         toc_source=toc_source,
         toc_offset=toc_offset,
         toc_item_count=len(toc_items),
@@ -54,6 +50,9 @@ def save_settings(deps: Deps):
         "paddle": ("paddle_token", deps["set_paddle_token"], "PaddleOCR 令牌已保存"),
         "deepseek": ("deepseek_key", deps["set_deepseek_key"], "DeepSeek API Key 已保存"),
         "dashscope": ("dashscope_key", deps["set_dashscope_key"], "DashScope API Key 已保存"),
+        "mimo": ("mimo_api_key", deps["set_mimo_api_key"], "MiMo API Key 已保存"),
+        "glm": ("glm_api_key", deps["set_glm_api_key"], "智谱 GLM API Key 已保存"),
+        "kimi": ("kimi_api_key", deps["set_kimi_api_key"], "Kimi API Key 已保存"),
     }
     secret_section = secret_sections.get(section)
     if secret_section:
@@ -61,12 +60,9 @@ def save_settings(deps: Deps):
     elif section == "translate_parallel":
         deps["_save_translate_parallel_section"]()
     else:
-        visual_redirect = deps["_save_visual_custom_model_section"](section, current_doc_id)
-        if visual_redirect is not None:
-            return visual_redirect
-        custom_model_redirect = deps["_save_custom_model_section"](section, current_doc_id)
-        if custom_model_redirect is not None:
-            return custom_model_redirect
+        model_pool_redirect = deps["_save_model_pool_section"](section, current_doc_id)
+        if model_pool_redirect is not None:
+            return model_pool_redirect
     return deps["_redirect_settings"](current_doc_id)
 
 
@@ -235,30 +231,6 @@ def start_glossary_retranslate(deps: Deps):
     return jsonify(payload)
 
 
-def set_model(key: str, deps: Deps):
-    if key in deps["get_selectable_models"]("translation"):
-        deps["set_model_key"](key)
-        deps["disable_custom_model"]()
-    next_page = request.values.get("next", "home")
-    doc_id = _request_doc_id(deps)
-    if doc_id:
-        deps["set_current_doc"](doc_id)
-    return deps["_redirect_after_model_change"](next_page, doc_id)
-
-
-def set_visual_model(key: str, deps: Deps):
-    if key in deps["get_selectable_models"]("vision"):
-        deps["set_visual_model_key"](key)
-        deps["disable_visual_custom_model"]()
-    next_page = request.values.get("next", "settings")
-    doc_id = _request_doc_id(deps)
-    if doc_id:
-        deps["set_current_doc"](doc_id)
-    if next_page == "settings":
-        return deps["_redirect_settings"](doc_id)
-    return redirect(url_for("home", doc_id=doc_id))
-
-
 def reset_text(deps: Deps):
     doc_id = _request_doc_id(deps)
     if doc_id:
@@ -314,8 +286,6 @@ def register_settings_routes(app, deps: Deps) -> None:
     app.add_url_rule("/api/glossary/import", endpoint="api_glossary_import", view_func=lambda: api_glossary_import(deps), methods=["POST"])
     app.add_url_rule("/api/glossary_retranslate_preview", endpoint="api_glossary_retranslate_preview", view_func=lambda: api_glossary_retranslate_preview(deps))
     app.add_url_rule("/start_glossary_retranslate", endpoint="start_glossary_retranslate", view_func=lambda: start_glossary_retranslate(deps), methods=["POST"])
-    app.add_url_rule("/set_model/<key>", endpoint="set_model", view_func=lambda key: set_model(key, deps), methods=["POST"])
-    app.add_url_rule("/set_visual_model/<key>", endpoint="set_visual_model", view_func=lambda key: set_visual_model(key, deps), methods=["POST"])
     app.add_url_rule("/reset_text", endpoint="reset_text", view_func=lambda: reset_text(deps), methods=["POST"])
     app.add_url_rule("/reset_text_action", endpoint="reset_text_action", view_func=lambda: reset_text_action(deps), methods=["POST"])
     app.add_url_rule("/reset_all", endpoint="reset_all", view_func=lambda: reset_all(deps), methods=["POST"])

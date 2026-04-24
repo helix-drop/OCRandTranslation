@@ -1,68 +1,68 @@
 {
   "status": "done",
   "current_stage": "report_write",
-  "started_at": "2026-04-22T17:06:24",
-  "updated_at": "2026-04-22T17:10:06",
+  "started_at": "2026-04-22T19:58:10",
+  "updated_at": "2026-04-22T20:01:38",
   "stage_history": [
     {
       "stage": "reingest",
       "status": "done",
       "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-      "at": "2026-04-22T17:06:24"
+      "at": "2026-04-22T19:58:10"
     },
     {
       "stage": "visual_toc",
       "status": "done",
       "detail": "needs_offset",
-      "at": "2026-04-22T17:07:53"
+      "at": "2026-04-22T19:59:39"
     },
     {
       "stage": "fnm_pipeline",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T17:08:02"
+      "at": "2026-04-22T19:59:48"
     },
     {
       "stage": "llm_repair",
       "status": "done",
-      "detail": "auto_applied=19",
-      "at": "2026-04-22T17:09:23"
+      "detail": "auto_applied=18",
+      "at": "2026-04-22T20:00:56"
     },
     {
       "stage": "fnm_pipeline_rebuild",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T17:09:32"
+      "at": "2026-04-22T20:01:04"
     },
     {
       "stage": "structure_verify",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T17:09:40"
+      "at": "2026-04-22T20:01:12"
     },
     {
       "stage": "placeholder_translate",
       "status": "done",
       "detail": "translated_paras=1098",
-      "at": "2026-04-22T17:09:49"
+      "at": "2026-04-22T20:01:22"
     },
     {
       "stage": "export_verify",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T17:10:06"
+      "at": "2026-04-22T20:01:38"
     },
     {
       "stage": "zip_finalize",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T17:10:06"
+      "at": "2026-04-22T20:01:38"
     },
     {
       "stage": "report_write",
       "status": "done",
       "detail": "单书结果、报告、进度均已写入",
-      "at": "2026-04-22T17:10:06"
+      "at": "2026-04-22T20:01:38"
     }
   ]
 }

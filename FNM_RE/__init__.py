@@ -117,6 +117,12 @@ def build_export_zip_for_doc(*args, **kwargs):
     return impl(*args, **kwargs)
 
 
+def run_post_translate_export_checks_for_doc(*args, **kwargs):
+    from FNM_RE.app.mainline import run_post_translate_export_checks_for_doc as impl
+
+    return impl(*args, **kwargs)
+
+
 def audit_export_for_doc(*args, **kwargs):
     from FNM_RE.app.mainline import audit_phase6_export_for_doc as impl
 
@@ -147,6 +153,7 @@ __all__ = [
     "build_doc_status",
     "build_export_bundle_for_doc",
     "build_export_zip_for_doc",
+    "run_post_translate_export_checks_for_doc",
     "audit_export_for_doc",
     "list_diagnostic_entries_for_doc",
     "get_diagnostic_entry_for_page",

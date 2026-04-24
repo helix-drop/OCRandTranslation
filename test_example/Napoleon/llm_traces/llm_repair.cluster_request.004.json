@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 30414,
+          "row_id": 32446,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00049",
           "chapter_id": "toc-ch-002-uneinventionutiledansleg",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "La France n'a pas inventé ce mode d'exécution, elle en a changé l'échelle de production, en faisant entrer la mort dans l'ère technique et sérialisée. Différents modèles de machines à décapiter, dont la Diele en Allemagne au Moyen Âge, la mannaia en Italie au XVIe siècle, la Maiden en Écosse ou le Halifax gibet en Angleterre avaient fait leurs preuves par le passé. L'efficacité de la guillotine la distingue néanmoins de ces prédécesseurs : la mise au point de la « bascule », sur laquelle le condamné est attaché, la création de la « lunette », qui maintient sa tête immobile, enfin la préconisation d'une lame « oblique » mieux qu'en « croissant » rendent son effet « immanquable », selon le rapport remis le 7 mars 1792 par Antoine Louis, son véritable inventeur — ce qui valut à la guillotine d'être un temps surnommée Petite Louison ou Louisette. Comme Guillotin, Louis est médecin. Il est même un chirurgien renommé, secrétaire perpétuel de l'Académie de chirurgie, ce qui fait de lui l'homme tout désigné pour évaluer avec précision les conditions nécessaires à une décollation prompte et assurée $ ^{15} $.",
-          "created_at": 1776848881,
-          "updated_at": 1776848881
+          "created_at": 1776859188,
+          "updated_at": 1776859188
         },
         {
-          "row_id": 30415,
+          "row_id": 32447,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00050",
           "chapter_id": "toc-ch-002-uneinventionutiledansleg",
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "de l’Intérieur lui refusera le brevet qu’il réclame : « Il répu- gne à l’humanité d’accorder un brevet d’invention pour une découverte de cette espèce ; nous n’en sommes pas encore à un tel excès de barbarie. Si M. Schmidt a fait une invention utile dans le genre funeste, comme elle ne peut servir que pour l’exécution des jugements, c’est au gouvernement qu’il doit le proposer $ ^{16} $. » Phrase à double entente : si le pouvoir n’adopte pas la guillotine de gaiété de cœur, il entend bien en faire cette « machine à gouvernement », comme tous les écrits de l’époque la désigneront d’ailleurs. Machine politique donc, œuvrant à une mort réputée indolore mais aussi impersonnelle, où une poulie, une lame en biseau et deux montants tout droit sortis de la talentueuse ingénierie française remplacent la main du bourreau fonctionnaire.",
-          "created_at": 1776848881,
-          "updated_at": 1776848881
+          "created_at": 1776859188,
+          "updated_at": 1776859188
         }
       ],
       "rebind_candidates": []
@@ -106,7 +106,7 @@
     "page_context_count": 4,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00049\",\n    \"marker\": \"15\",\n    \"note_text\": \"Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor on page 46/52. The text is fully legible.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00050\",\n    \"marker\": \"16\",\n    \"note_text\": \"Cité par D. Arasse, op. cit., p. 35-36.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor on page 47/53. The text is fully legible.\"\n  }\n]\n```",
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00049\",\n    \"marker\": \"15\",\n    \"note_text\": \"Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00050\",\n    \"marker\": \"16\",\n    \"note_text\": \"Cité par D. Arasse, op. cit., p. 35-36.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -116,7 +116,7 @@
       "marker": "15",
       "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
       "confidence": 0.98,
-      "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor on page 46/52. The text is fully legible."
+      "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
     },
     {
       "action": "synthesize_note_item",
@@ -126,7 +126,7 @@
       "marker": "16",
       "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
       "confidence": 0.98,
-      "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor on page 47/53. The text is fully legible."
+      "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
     }
   ],
   "derived_truth": {
@@ -142,7 +142,7 @@
         "marker": "15",
         "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
         "confidence": 0.98,
-        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor on page 46/52. The text is fully legible."
+        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
       },
       {
         "action": "synthesize_note_item",
@@ -152,7 +152,7 @@
         "marker": "16",
         "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
         "confidence": 0.98,
-        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor on page 47/53. The text is fully legible."
+        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
       }
     ],
     "auto_selected_actions": [
@@ -164,7 +164,7 @@
         "marker": "15",
         "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
         "confidence": 0.98,
-        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor on page 46/52. The text is fully legible."
+        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
       },
       {
         "action": "synthesize_note_item",
@@ -174,7 +174,7 @@
         "marker": "16",
         "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
         "confidence": 0.98,
-        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor on page 47/53. The text is fully legible."
+        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
       }
     ],
     "auto_applied_actions": [
@@ -186,7 +186,7 @@
         "marker": "15",
         "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
         "confidence": 0.98,
-        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor on page 46/52. The text is fully legible."
+        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
       },
       {
         "note_item_id": "",
@@ -196,17 +196,17 @@
         "marker": "16",
         "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
         "confidence": 0.98,
-        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor on page 47/53. The text is fully legible."
+        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 3489,
-    "completion_tokens": 284,
-    "total_tokens": 3773,
+    "completion_tokens": 271,
+    "total_tokens": 3760,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 11784
+    "duration_ms": 6412
   }
 }

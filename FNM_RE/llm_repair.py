@@ -8,6 +8,7 @@ import json
 import math
 import re
 import signal
+import threading
 import time
 from contextlib import contextmanager
 from typing import Any
@@ -15,12 +16,16 @@ from typing import Any
 from openai import OpenAI
 from rapidfuzz.fuzz import partial_ratio_alignment
 
-from config import QWEN_BASE_URLS, get_dashscope_key, get_visual_custom_model_config
 from document.pdf_extract import render_pdf_page
 from FNM_RE.shared.notes import normalize_note_marker
 from persistence.sqlite_store import SQLiteRepository
-from persistence.storage import get_pdf_path
-from translation.translator import _build_usage, _classify_provider_exception, _extract_openai_message_text
+from persistence.storage import get_pdf_path, resolve_fnm_model_pool_specs
+from translation.translator import (
+    _build_usage,
+    _classify_provider_exception,
+    _extract_openai_message_text,
+    _merge_overrides_into_chat_kwargs,
+)
 
 
 _JSON_BLOCK_RE = re.compile(r"```json\s*(.*?)```", re.IGNORECASE | re.DOTALL)
@@ -124,6 +129,9 @@ def _summarize_usage_events(
 @contextmanager
 def _time_limit(seconds: int):
     if seconds <= 0:
+        yield
+        return
+    if threading.current_thread() is not threading.main_thread():
         yield
         return
 
@@ -687,22 +695,25 @@ def select_auto_applicable_actions(
     return selected
 
 
-def _resolve_qwen_repair_model_args() -> dict:
-    cfg = get_visual_custom_model_config()
-    model_id = str(cfg.get("model_id") or "").strip()
-    provider = str(cfg.get("provider_type") or "").strip().lower()
-    if not model_id or provider != "qwen":
-        raise RuntimeError("未配置可用的 qwen3.5-plus 视觉自定义模型")
-    api_key = get_dashscope_key()
-    if not api_key:
-        raise RuntimeError("未配置 DashScope API Key")
-    region = str(cfg.get("qwen_region") or "cn").strip().lower()
+def _resolved_spec_to_model_args(spec) -> dict:
     return {
-        "provider": "qwen",
-        "model_id": model_id,
-        "api_key": api_key,
-        "base_url": QWEN_BASE_URLS.get(region, QWEN_BASE_URLS["cn"]),
+        "provider": str(spec.provider or "").strip(),
+        "model_id": str(spec.model_id or "").strip(),
+        "api_key": str(spec.api_key or "").strip(),
+        "base_url": str(spec.base_url or "").strip(),
+        "request_overrides": dict(spec.request_overrides or {}),
+        "display_label": str(spec.display_label or spec.model_id or "").strip(),
     }
+
+
+def _resolve_repair_model_args() -> dict:
+    specs = resolve_fnm_model_pool_specs()
+    if not specs:
+        raise RuntimeError("未配置可用的 FNM 视觉与修补模型")
+    spec = specs[0]
+    if not str(spec.api_key or "").strip():
+        raise RuntimeError("当前 FNM 视觉与修补模型缺少 API Key")
+    return _resolved_spec_to_model_args(spec)
 
 
 def _cluster_focus_pages(cluster: dict) -> list[int]:
@@ -892,7 +903,7 @@ def request_llm_repair_actions(
     doc_id: str = "",
     slug: str = "",
 ) -> dict:
-    resolved_args = dict(model_args or _resolve_qwen_repair_model_args())
+    resolved_args = dict(model_args or _resolve_repair_model_args())
     request_cluster = _slice_cluster_for_request(
         cluster,
         max_matched_examples=max_matched_examples,
@@ -947,16 +958,20 @@ def request_llm_repair_actions(
         return rows
 
     def _do_call(content: list[dict[str, Any]]):
+        request_overrides = dict(resolved_args.get("request_overrides") or {})
+        if not request_overrides and str(resolved_args.get("provider") or "").strip().lower() == "qwen":
+            request_overrides = {"extra_body": {"enable_thinking": False}}
+        create_kwargs = {
+            "model": str(resolved_args.get("model_id") or ""),
+            "max_tokens": LLM_REPAIR_MAX_OUTPUT_TOKENS,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": content},
+            ],
+        }
+        _merge_overrides_into_chat_kwargs(create_kwargs, request_overrides)
         with _time_limit(60):
-            return client.chat.completions.create(
-                model=str(resolved_args.get("model_id") or ""),
-                max_tokens=LLM_REPAIR_MAX_OUTPUT_TOKENS,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": content},
-                ],
-                extra_body={"enable_thinking": False},
-            )
+            return client.chat.completions.create(**create_kwargs)
     try:
         response = _do_call(user_content)
     except Exception as exc:
@@ -1165,6 +1180,7 @@ def run_llm_repair(
     max_matched_examples: int | None = None,
     max_unmatched_note_items: int | None = None,
     max_unmatched_anchors: int | None = None,
+    clear_materialized_overrides: bool = True,
 ) -> dict:
     """运行 unresolved cluster 的 LLM 修补。
 
@@ -1189,8 +1205,9 @@ def run_llm_repair(
         clusters = clusters[:limit_value]
 
     repo.clear_fnm_review_overrides(doc_id, scope="llm_suggestion")
-    repo.clear_fnm_review_overrides(doc_id, scope="anchor")
-    repo.clear_fnm_review_overrides(doc_id, scope="note_item")
+    if clear_materialized_overrides:
+        repo.clear_fnm_review_overrides(doc_id, scope="anchor")
+        repo.clear_fnm_review_overrides(doc_id, scope="note_item")
     chapter_by_id = {
         str(chapter.get("chapter_id") or ""): dict(chapter) for chapter in chapters or []
     }
@@ -1399,6 +1416,7 @@ def run_llm_repair(
                         "synthetic": False,
                         "anchor_phrase": str(action.get("anchor_phrase") or ""),
                         "fuzzy_score": float(action.get("fuzzy_score") or 0.0),
+                        "repair_source": "llm_auto_repair",
                     }
                     repo.save_fnm_review_override(doc_id, "anchor", new_anchor_id, anchor_payload)
                     repo.save_fnm_review_override(
@@ -1447,6 +1465,7 @@ def run_llm_repair(
                             "is_reconstructed": False,
                             "review_required": False,
                             "anchor_id": anchor_id,
+                            "repair_source": "llm_auto_repair",
                         },
                     )
                     auto_applied.append(

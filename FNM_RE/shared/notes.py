@@ -56,7 +56,9 @@ def _expand_inline_note_breaks(text: str) -> str:
     def _replace(match: re.Match[str]) -> str:
         prefix = str(match.group("prefix") or "")
         gap = str(match.group("gap") or "")
-        head = raw[max(0, match.start("prefix") - 8):match.start("prefix") + len(prefix)]
+        head = raw[
+            max(0, match.start("prefix") - 8) : match.start("prefix") + len(prefix)
+        ]
         if _PAGE_CITATION_PREFIX_RE.search(head):
             return f"{prefix}{gap}"
         return f"{prefix}\n"
@@ -64,8 +66,26 @@ def _expand_inline_note_breaks(text: str) -> str:
     return _INLINE_NOTE_BREAK_RE.sub(_replace, raw)
 
 
+_UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
+    {
+        "⁰": "0",
+        "¹": "1",
+        "²": "2",
+        "³": "3",
+        "⁴": "4",
+        "⁵": "5",
+        "⁶": "6",
+        "⁷": "7",
+        "⁸": "8",
+        "⁹": "9",
+    }
+)
+
+
 def normalize_note_marker(marker: Any) -> str:
-    digits = re.sub(r"\D+", "", str(marker or ""))
+    raw = str(marker or "")
+    translated = raw.translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
+    digits = re.sub(r"\D+", "", translated)
     if not digits:
         return ""
     return digits.lstrip("0") or "0"
@@ -139,7 +159,9 @@ def _parse_note_definition_line(line: str) -> tuple[str, str, bool] | None:
         return collapsed, body, reconstructed
     match = _NOTE_DEF_RE.match(candidate)
     if match:
-        raw_marker = match.group("bracket") or match.group("num") or match.group("loose") or ""
+        raw_marker = (
+            match.group("bracket") or match.group("num") or match.group("loose") or ""
+        )
         marker = normalize_note_marker(raw_marker)
         body = str(match.group("body") or "").strip()
         if not marker or not body:
@@ -171,7 +193,10 @@ def _parse_embedded_note_definition_line(
     if last_marker_value is None:
         if marker_value > 20:
             return None
-    elif marker_value < int(last_marker_value) or marker_value > int(last_marker_value) + 2:
+    elif (
+        marker_value < int(last_marker_value)
+        or marker_value > int(last_marker_value) + 2
+    ):
         return None
     return marker, body, True
 
@@ -200,7 +225,9 @@ def _split_trailing_marker(
         current_value = int(normalize_note_marker(current_marker))
     except ValueError:
         return candidate, None
-    match = re.match(r"^(?P<body>.+?)\s+(?P<token>(?:\d[\s,\.\-]*){1,4})[\.,\)\]]\s*$", candidate)
+    match = re.match(
+        r"^(?P<body>.+?)\s+(?P<token>(?:\d[\s,\.\-]*){1,4})[\.,\)\]]\s*$", candidate
+    )
     if not match:
         return candidate, None
     next_marker = normalize_note_marker(match.group("token") or "")
@@ -231,8 +258,8 @@ def _split_inline_followup_marker(
     except ValueError:
         return candidate, None, None
     for match in _INLINE_FOLLOWUP_TOKEN_RE.finditer(candidate):
-        body = candidate[:match.start()].rstrip()
-        separator = candidate[match.start():match.start("token")]
+        body = candidate[: match.start()].rstrip()
+        separator = candidate[match.start() : match.start("token")]
         if len(body) < 8:
             continue
         body_tail = body[-1:] if body else ""
@@ -242,7 +269,7 @@ def _split_inline_followup_marker(
                 continue
             if not re.search(r"[.!?;:]", body):
                 continue
-            if _PAGE_CITATION_PREFIX_RE.search(body[max(0, len(body) - 12):]):
+            if _PAGE_CITATION_PREFIX_RE.search(body[max(0, len(body) - 12) :]):
                 continue
         next_marker = normalize_note_marker(match.group("token") or "")
         if not next_marker:
@@ -253,11 +280,13 @@ def _split_inline_followup_marker(
             continue
         if next_value <= current_value or next_value > current_value + 2:
             continue
-        rest = candidate[match.end():].strip()
+        rest = candidate[match.end() :].strip()
         if len(rest) < 8:
             continue
         first_char = rest[:1]
-        if first_char and not (first_char.isupper() or first_char in {'"', "'", "«", "(", "["}):
+        if first_char and not (
+            first_char.isupper() or first_char in {'"', "'", "«", "(", "["}
+        ):
             continue
         return body, next_marker, rest
     return candidate, None, None
@@ -313,8 +342,12 @@ def _split_followup_notes(items: list[dict], current: dict) -> tuple[dict, int |
     return current, marker_state
 
 
-def _append_line_to_current(items: list[dict], current: dict, line: str) -> tuple[dict, int | None]:
-    current["text"] = f"{str(current.get('text') or '').strip()} {str(line or '').strip()}".strip()
+def _append_line_to_current(
+    items: list[dict], current: dict, line: str
+) -> tuple[dict, int | None]:
+    current["text"] = (
+        f"{str(current.get('text') or '').strip()} {str(line or '').strip()}".strip()
+    )
     return _split_followup_notes(items, current)
 
 
@@ -363,14 +396,19 @@ def parse_note_items_from_text(
             marker, body, reconstructed = parsed
             parsed_value = int(marker) if marker.isdigit() else None
             if current:
-                current_value = int(normalize_note_marker(current.get("marker") or "") or "0")
+                current_value = int(
+                    normalize_note_marker(current.get("marker") or "") or "0"
+                )
                 if (
                     pending_gap_lines
                     and parsed_value is not None
                     and parsed_value > current_value + 1
                     and parsed_value - current_value - 1 == len(pending_gap_lines)
                     and _looks_like_complete_note_text(str(current.get("text") or ""))
-                    and all(_looks_like_ocr_missing_note_body_line(candidate) for candidate in pending_gap_lines)
+                    and all(
+                        _looks_like_ocr_missing_note_body_line(candidate)
+                        for candidate in pending_gap_lines
+                    )
                 ):
                     _finalize_current_note(items, current)
                     marker_state = _synthesize_pending_gap_notes(
@@ -380,7 +418,9 @@ def parse_note_items_from_text(
                     )
                 else:
                     for pending_line in pending_gap_lines:
-                        current, split_marker_state = _append_line_to_current(items, current, pending_line)
+                        current, split_marker_state = _append_line_to_current(
+                            items, current, pending_line
+                        )
                         if split_marker_state is not None:
                             marker_state = split_marker_state
                     _finalize_current_note(items, current)
@@ -392,7 +432,10 @@ def parse_note_items_from_text(
                 and marker_state is not None
                 and parsed_value > int(marker_state) + 1
                 and parsed_value - int(marker_state) - 1 == len(pending_gap_lines)
-                and all(_looks_like_ocr_missing_note_body_line(candidate) for candidate in pending_gap_lines)
+                and all(
+                    _looks_like_ocr_missing_note_body_line(candidate)
+                    for candidate in pending_gap_lines
+                )
             ):
                 marker_state = _synthesize_pending_gap_notes(
                     items,
@@ -412,7 +455,9 @@ def parse_note_items_from_text(
             if marker.isdigit():
                 marker_state = int(marker)
             if pending_marker:
-                merged_text = re.sub(r"\s+", " ", str(current.get("text") or "")).strip()
+                merged_text = re.sub(
+                    r"\s+", " ", str(current.get("text") or "")
+                ).strip()
                 if merged_text:
                     items.append({**current, "text": merged_text})
                 current = {
@@ -428,11 +473,15 @@ def parse_note_items_from_text(
             continue
         marker_only = _parse_marker_only_line(line)
         if current is not None and marker_only:
-            current_value = int(normalize_note_marker(current.get("marker") or "") or "0")
+            current_value = int(
+                normalize_note_marker(current.get("marker") or "") or "0"
+            )
             marker_value = int(marker_only)
             if current_value < marker_value <= current_value + 2:
                 for pending_line in pending_gap_lines:
-                    current, split_marker_state = _append_line_to_current(items, current, pending_line)
+                    current, split_marker_state = _append_line_to_current(
+                        items, current, pending_line
+                    )
                     if split_marker_state is not None:
                         marker_state = split_marker_state
                 pending_gap_lines = []
@@ -452,7 +501,9 @@ def parse_note_items_from_text(
             pending_gap_lines.append(line)
             continue
         for pending_line in pending_gap_lines:
-            current, split_marker_state = _append_line_to_current(items, current, pending_line)
+            current, split_marker_state = _append_line_to_current(
+                items, current, pending_line
+            )
             if split_marker_state is not None:
                 marker_state = split_marker_state
         pending_gap_lines = []
@@ -465,7 +516,10 @@ def parse_note_items_from_text(
             pending_gap_lines
             and len(pending_gap_lines) <= 2
             and _looks_like_complete_note_text(str(current.get("text") or ""))
-            and all(_looks_like_ocr_missing_note_body_line(candidate) for candidate in pending_gap_lines)
+            and all(
+                _looks_like_ocr_missing_note_body_line(candidate)
+                for candidate in pending_gap_lines
+            )
         ):
             _finalize_current_note(items, current)
             marker_state = _synthesize_pending_gap_notes(
@@ -475,7 +529,9 @@ def parse_note_items_from_text(
             )
         else:
             for pending_line in pending_gap_lines:
-                current, split_marker_state = _append_line_to_current(items, current, pending_line)
+                current, split_marker_state = _append_line_to_current(
+                    items, current, pending_line
+                )
                 if split_marker_state is not None:
                     marker_state = split_marker_state
             _finalize_current_note(items, current)
@@ -485,7 +541,10 @@ def parse_note_items_from_text(
 def _pdf_page_text(page: Mapping[str, Any]) -> str:
     items = sorted(
         list(page.get("items") or []),
-        key=lambda item: (_safe_float(item.get("y")) or 10**9, _safe_float(item.get("x")) or 10**9),
+        key=lambda item: (
+            _safe_float(item.get("y")) or 10**9,
+            _safe_float(item.get("x")) or 10**9,
+        ),
     )
     lines: list[str] = []
     for item in items:

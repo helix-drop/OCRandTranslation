@@ -18,8 +18,8 @@
 - manual_toc_pdf: exists=`True` path=`/Users/hao/OCRandTranslation/test_example/Mad_Act/目录.pdf` size=`71223` sha256=`54e8fe5fbc8bea8b98501f7c44d71e0fc027ea6fbda97b8b700a76ba57b72804`
 
 ## 清理结果
-- removed_count: `8`
-- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Mad_Act/llm_traces", "/Users/hao/OCRandTranslation/test_example/Mad_Act/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Mad_Act/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Mad_Act/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.Mad_Act.test.zip", "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.test.zip", "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.zip"]`
+- removed_count: `6`
+- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Mad_Act/llm_traces", "/Users/hao/OCRandTranslation/test_example/Mad_Act/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Mad_Act/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Mad_Act/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.zip"]`
 
 ## 占位翻译
 - translation_mode: `placeholder`
@@ -30,8 +30,8 @@
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=3, prompt=7744, completion=3925, total=11669
-- llm_repair.cluster_request: request=16, prompt=187331, completion=11781, total=199112
+- visual_toc.manual_input_extract: request=3, prompt=7744, completion=3835, total=11579
+- llm_repair.cluster_request: request=16, prompt=187332, completion=15114, total=202446
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
@@ -40,7 +40,7 @@
 - expanded_window_hit_count: `1`
 - composite_heading_count: `50`
 - residual_provisional_titles_preview: `[]`
-- `{"toc_body_item_count": 17, "resolved_anchor_count": 17, "provisional_anchor_count": 0, "section_node_count": 264, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": ["From Wind to mucus and Fire", "Ghosts or mucus?", "13. Life trials", "14. Distress and power", "16. Madness multiple", "Psycho-behavioral pathology in Chinese medicine"], "demoted_chapter_titles_preview": ["MAD ACTS, MAD SPEECH, AND MAD PEOPLE IN LATE IMPERIAL CHINESE LAW AND MEDICINE", "Abstract", "Acknowledgments", "Mad acts, mad words, and mad people in Chinese medicine and law", "1.1 Historiography: insights and oversights", "1.2 Michel Foucault and madness", "@B?4E354\u0001D85=\u0007\u0001 9;5\u0001!5CC>5B\u0005\u0001C851<C?@<1354 =?B5\u00015=@81C9C\u0001?>\u00013<1CC96931D9?>\u00011>4 4?3DB9>5", "1.3 Substances and their referents: “what is madness?” and what is “madness”?"], "optimized_anchor_count": 14, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 1, "composite_heading_count": 50}`
+- `{"toc_body_item_count": 17, "resolved_anchor_count": 17, "provisional_anchor_count": 0, "section_node_count": 263, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": ["From Wind to mucus and Fire", "Ghosts or mucus?", "13. Life trials", "14. Distress and power", "16. Madness multiple", "Psycho-behavioral pathology in Chinese medicine"], "demoted_chapter_titles_preview": ["MAD ACTS, MAD SPEECH, AND MAD PEOPLE IN LATE IMPERIAL CHINESE LAW AND MEDICINE", "Abstract", "Acknowledgments", "Mad acts, mad words, and mad people in Chinese medicine and law", "1.1 Historiography: insights and oversights", "1.2 Michel Foucault and madness", "@B?4E354\u0001D85=\u0007\u0001 9;5\u0001!5CC>5B\u0005\u0001C851<C?@<1354 =?B5\u00015=@81C9C\u0001?>\u00013<1CC96931D9?>\u00011>4 4?3DB9>5", "1.3 Substances and their referents: “what is madness?” and what is “madness”?"], "optimized_anchor_count": 14, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 1, "composite_heading_count": 50}`
 
 ## Endnotes Summary
 - present: `False`
@@ -51,7 +51,7 @@
 - subentry_pattern: ``
 
 ## TOC Role Summary
-- `{"container": 4, "endnotes": 0, "chapter": 22, "section": 6, "post_body": 1, "back_matter": 2, "front_matter": 0}`
+- `{"container": 4, "endnotes": 0, "chapter": 22, "section": 6, "post_body": 1, "back_matter": 2, "front_matter": 6}`
 
 ## Export
 - slug zip: `/Users/hao/OCRandTranslation/test_example/Mad_Act/latest.fnm.obsidian.Mad_Act.test.zip`

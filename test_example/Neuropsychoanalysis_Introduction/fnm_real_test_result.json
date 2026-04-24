@@ -68,7 +68,7 @@
     }
   },
   "cleanup": {
-    "cleaned_at": "2026-04-22T17:14:22",
+    "cleaned_at": "2026-04-22T20:05:53",
     "example_dir": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction",
     "removed": [
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces",
@@ -115,68 +115,68 @@
   "progress": {
     "status": "done",
     "current_stage": "report_write",
-    "started_at": "2026-04-22T17:14:22",
-    "updated_at": "2026-04-22T17:15:07",
+    "started_at": "2026-04-22T20:05:53",
+    "updated_at": "2026-04-22T20:06:40",
     "stage_history": [
       {
         "stage": "reingest",
         "status": "done",
         "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-        "at": "2026-04-22T17:14:22"
+        "at": "2026-04-22T20:05:53"
       },
       {
         "stage": "visual_toc",
         "status": "done",
         "detail": "needs_offset",
-        "at": "2026-04-22T17:14:50"
+        "at": "2026-04-22T20:06:23"
       },
       {
         "stage": "fnm_pipeline",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T17:14:54"
+        "at": "2026-04-22T20:06:26"
       },
       {
         "stage": "llm_repair",
         "status": "done",
         "detail": "auto_applied=0",
-        "at": "2026-04-22T17:14:54"
+        "at": "2026-04-22T20:06:26"
       },
       {
         "stage": "fnm_pipeline_rebuild",
         "status": "done",
         "detail": "skipped",
-        "at": "2026-04-22T17:14:54"
+        "at": "2026-04-22T20:06:26"
       },
       {
         "stage": "structure_verify",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T17:14:57"
+        "at": "2026-04-22T20:06:29"
       },
       {
         "stage": "placeholder_translate",
         "status": "done",
         "detail": "translated_paras=735",
-        "at": "2026-04-22T17:15:00"
+        "at": "2026-04-22T20:06:33"
       },
       {
         "stage": "export_verify",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T17:15:07"
+        "at": "2026-04-22T20:06:40"
       },
       {
         "stage": "zip_finalize",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T17:15:07"
+        "at": "2026-04-22T20:06:40"
       },
       {
         "stage": "report_write",
         "status": "done",
         "detail": "单书结果、报告、进度均已写入",
-        "at": "2026-04-22T17:15:07"
+        "at": "2026-04-22T20:06:40"
       }
     ]
   },
@@ -910,7 +910,7 @@
           }
         },
         "timing": {
-          "duration_ms": 14535
+          "duration_ms": 14970
         }
       },
       {
@@ -1139,14 +1139,14 @@
           }
         },
         "timing": {
-          "duration_ms": 13638
+          "duration_ms": 14185
         }
       }
     ]
   },
   "pipeline": {
     "ok": true,
-    "run_id": 39,
+    "run_id": 41,
     "page_count": 168,
     "section_count": 9,
     "note_count": 0,

@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 103223,
+          "row_id": 110675,
           "doc_id": "a5d9a08d6871",
           "anchor_id": "anchor-00490",
           "chapter_id": "toc-ch-012-lalettreetlesprit",
@@ -42,8 +42,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Il fallait aux auditeurs une oreille très fine – et patiente –, il faut aux lecteurs une attention soutenue pour ne pas se méprendre sur De l'esprit. L'ironie du sort a fait que ce livre n'a précédé que de quelques mois le scandale provoqué par la publication du livre de Farias. En un sens, il en a préparé le terrain (sans s'en douter) $ ^{109} $ en reposant « la question » et en suggérant que la pratique « retorse » de Heidegger relevait d'un art consommé pour « l'éviter ». Pourtant, rien de commun entre Derrida et Farias ; le premier sera même accusé par les partisans du second de « couvrir » Heidegger. Avec « l'affaire Heidegger », nous allons descendre vertigineuse-",
-          "created_at": 1776848024,
-          "updated_at": 1776848024
+          "created_at": 1776858144,
+          "updated_at": 1776858144
         }
       ],
       "rebind_candidates": [
@@ -186,87 +186,77 @@
     "page_context_count": 4,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01058\",\n    \"anchor_id\": \"anchor-00490\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00690\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00691\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00692\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00693\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00694\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00695\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00696\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant.\"\n  }\n]",
+  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01059\",\n    \"anchor_id\": \"synthetic-footnote-00690\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [97] 误识别为 '97.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01059。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01060\",\n    \"anchor_id\": \"synthetic-footnote-00691\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [98] 误识别为 '98.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01060。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01061\",\n    \"anchor_id\": \"synthetic-footnote-00692\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [99] 误识别为 '99.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01061。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01062\",\n    \"anchor_id\": \"synthetic-footnote-00693\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [100] 误识别为 '100.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01062。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01063\",\n    \"anchor_id\": \"synthetic-footnote-00694\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [101] 误识别为 '101.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01063。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01064\",\n    \"anchor_id\": \"synthetic-footnote-00695\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [102] 误识别为 '102.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01064。\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01065\",\n    \"anchor_id\": \"synthetic-footnote-00696\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR 将正文中的上标 [103] 误识别为 '103.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01065。\"\n  }\n]",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-01058",
-      "anchor_id": "anchor-00490",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "note_item_id": "fn-01059",
       "anchor_id": "synthetic-footnote-00690",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [97] 误识别为 '97.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01059。"
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-01060",
       "anchor_id": "synthetic-footnote-00691",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [98] 误识别为 '98.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01060。"
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-01061",
       "anchor_id": "synthetic-footnote-00692",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [99] 误识别为 '99.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01061。"
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-01062",
       "anchor_id": "synthetic-footnote-00693",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [100] 误识别为 '100.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01062。"
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-01063",
       "anchor_id": "synthetic-footnote-00694",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [101] 误识别为 '101.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01063。"
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-01064",
       "anchor_id": "synthetic-footnote-00695",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [102] 误识别为 '102.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01064。"
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "fn-01065",
       "anchor_id": "synthetic-footnote-00696",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant."
+      "confidence": 0.95,
+      "reason": "OCR 将正文中的上标 [103] 误识别为 '103.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01065。"
     }
   ],
   "derived_truth": {
@@ -276,188 +266,234 @@
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-01058",
-        "anchor_id": "anchor-00490",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "note_item_id": "fn-01059",
         "anchor_id": "synthetic-footnote-00690",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [97] 误识别为 '97.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01059。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01060",
         "anchor_id": "synthetic-footnote-00691",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [98] 误识别为 '98.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01060。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01061",
         "anchor_id": "synthetic-footnote-00692",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [99] 误识别为 '99.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01061。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01062",
         "anchor_id": "synthetic-footnote-00693",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [100] 误识别为 '100.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01062。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01063",
         "anchor_id": "synthetic-footnote-00694",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [101] 误识别为 '101.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01063。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01064",
         "anchor_id": "synthetic-footnote-00695",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [102] 误识别为 '102.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01064。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01065",
         "anchor_id": "synthetic-footnote-00696",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [103] 误识别为 '103.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01065。"
       }
     ],
     "auto_selected_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-01058",
-        "anchor_id": "anchor-00490",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "note_item_id": "fn-01059",
         "anchor_id": "synthetic-footnote-00690",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 97. The real footnote 97 ('Ibid., p. 110.') exists structurally or will be handled via the valid link. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [97] 误识别为 '97.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01059。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01060",
         "anchor_id": "synthetic-footnote-00691",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 98. The real footnote 98 ('Ibid., p. 111.') exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [98] 误识别为 '98.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01060。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01061",
         "anchor_id": "synthetic-footnote-00692",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 99. The real footnote 99 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [99] 误识别为 '99.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01061。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01062",
         "anchor_id": "synthetic-footnote-00693",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 100. The real footnote 100 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [100] 误识别为 '100.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01062。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01063",
         "anchor_id": "synthetic-footnote-00694",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 101. The real footnote 101 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [101] 误识别为 '101.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01063。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01064",
         "anchor_id": "synthetic-footnote-00695",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 102. The real footnote 102 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [102] 误识别为 '102.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01064。"
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "fn-01065",
         "anchor_id": "synthetic-footnote-00696",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate synthetic anchor for footnote 103. The real footnote 103 exists structurally. This synthetic entry is redundant."
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [103] 误识别为 '103.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01065。"
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-01058",
+        "link_id": "link-01059",
         "action": "match",
-        "note_item_id": "fn-01058",
-        "anchor_id": "anchor-00490",
+        "note_item_id": "fn-01059",
+        "anchor_id": "synthetic-footnote-00690",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote 96 on page 342 (bottom left) matches marker '96' in anchor-00490. The current binding to anchor-00485 is incorrect as that anchor lacks the marker and is on a different context; the visual evidence clearly places note 96 at the bottom of page 342 corresponding to the text in paragraph 1."
+        "reason": "OCR 将正文中的上标 [97] 误识别为 '97.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01059。"
+      },
+      {
+        "link_id": "link-01060",
+        "action": "match",
+        "note_item_id": "fn-01060",
+        "anchor_id": "synthetic-footnote-00691",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [98] 误识别为 '98.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01060。"
+      },
+      {
+        "link_id": "link-01061",
+        "action": "match",
+        "note_item_id": "fn-01061",
+        "anchor_id": "synthetic-footnote-00692",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [99] 误识别为 '99.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01061。"
+      },
+      {
+        "link_id": "link-01062",
+        "action": "match",
+        "note_item_id": "fn-01062",
+        "anchor_id": "synthetic-footnote-00693",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [100] 误识别为 '100.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01062。"
+      },
+      {
+        "link_id": "link-01063",
+        "action": "match",
+        "note_item_id": "fn-01063",
+        "anchor_id": "synthetic-footnote-00694",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [101] 误识别为 '101.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01063。"
+      },
+      {
+        "link_id": "link-01064",
+        "action": "match",
+        "note_item_id": "fn-01064",
+        "anchor_id": "synthetic-footnote-00695",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [102] 误识别为 '102.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01064。"
+      },
+      {
+        "link_id": "link-01065",
+        "action": "match",
+        "note_item_id": "fn-01065",
+        "anchor_id": "synthetic-footnote-00696",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR 将正文中的上标 [103] 误识别为 '103.'，导致生成了 synthetic anchor。截图清楚显示该处为脚注引用，应重绑回 fn-01065。"
       }
     ]
   },
   "usage": {
     "prompt_tokens": 4228,
-    "completion_tokens": 705,
-    "total_tokens": 4933,
+    "completion_tokens": 810,
+    "total_tokens": 5038,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 14818
+    "duration_ms": 17020
   }
 }

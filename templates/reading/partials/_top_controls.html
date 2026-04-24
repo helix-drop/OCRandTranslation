@@ -156,28 +156,13 @@
     <div class="toolbar-more" id="moreMenu">
       <button class="tb" onclick="this.parentElement.classList.toggle('open');">⋯</button>
       <div class="toolbar-dropdown">
-        <div class="toolbar-dropdown-label">翻译模型</div>
-        {% for key, m in models.items() %}
-        <form method="POST" action="{{ url_for('set_model', key=key) }}" class="toolbar-dropdown-form">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <input type="hidden" name="next" value="reading">
-          <input type="hidden" name="bp" value="{{ cur_page_bp }}">
-          <input type="hidden" name="usage" value="{{ 1 if usage_open else 0 }}">
-          <input type="hidden" name="orig" value="{{ 1 if show_original else 0 }}">
-          <input type="hidden" name="layout" value="{{ reading_layout }}">
-          <input type="hidden" name="pdf" value="{{ 1 if pdf_visible else 0 }}">
-          {% if current_view == 'fnm' %}
-          <input type="hidden" name="view" value="fnm">
-          {% endif %}
-          <button type="submit" class="toolbar-dropdown-item {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
-        </form>
-        {% endfor %}
-        <a href="{{ url_for('settings', doc_id=current_doc_id, open_custom_model=1) }}#customModelPanel"
-           class="toolbar-dropdown-item {{ 'active' if custom_model_enabled else '' }}">
-          {{ ('自定义模型（' ~ custom_model_name ~ '）') if custom_model_name else '自定义模型' }}
-        </a>
+        <div class="toolbar-dropdown-label">当前模型</div>
+        <div class="toolbar-dropdown-item" style="cursor:default;white-space:normal;line-height:1.6;">
+          翻译主模型：{{ current_model_label or current_model_id or '-' }}<br>
+          FNM 主模型：{{ current_visual_model_label or current_visual_model_id or '-' }}
+        </div>
         <div class="toolbar-dropdown-sep"></div>
+        <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="toolbar-dropdown-item">模型设置</a>
         <a href="{{ url_for('settings', doc_id=current_doc_id) }}#glossary" class="toolbar-dropdown-item">术语词典</a>
         <form method="POST" action="{{ url_for('reset_text') }}" class="toolbar-dropdown-form"
               onsubmit="return confirm('确定清除翻译数据？');">

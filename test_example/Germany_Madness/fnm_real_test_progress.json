@@ -1,68 +1,68 @@
 {
   "status": "done",
   "current_stage": "report_write",
-  "started_at": "2026-04-22T16:38:26",
-  "updated_at": "2026-04-22T16:48:15",
+  "started_at": "2026-04-22T19:27:28",
+  "updated_at": "2026-04-22T19:36:57",
   "stage_history": [
     {
       "stage": "reingest",
       "status": "done",
       "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-      "at": "2026-04-22T16:38:26"
+      "at": "2026-04-22T19:27:28"
     },
     {
       "stage": "visual_toc",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T16:39:10"
+      "at": "2026-04-22T19:28:15"
     },
     {
       "stage": "fnm_pipeline",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T16:40:11"
+      "at": "2026-04-22T19:29:16"
     },
     {
       "stage": "llm_repair",
       "status": "done",
-      "detail": "auto_applied=27",
-      "at": "2026-04-22T16:43:09"
+      "detail": "auto_applied=19",
+      "at": "2026-04-22T19:31:48"
     },
     {
       "stage": "fnm_pipeline_rebuild",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T16:44:09"
+      "at": "2026-04-22T19:32:49"
     },
     {
       "stage": "structure_verify",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T16:45:10"
+      "at": "2026-04-22T19:33:50"
     },
     {
       "stage": "placeholder_translate",
       "status": "done",
-      "detail": "translated_paras=2276",
-      "at": "2026-04-22T16:46:13"
+      "detail": "translated_paras=2267",
+      "at": "2026-04-22T19:34:54"
     },
     {
       "stage": "export_verify",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T16:48:15"
+      "at": "2026-04-22T19:36:57"
     },
     {
       "stage": "zip_finalize",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T16:48:15"
+      "at": "2026-04-22T19:36:57"
     },
     {
       "stage": "report_write",
       "status": "done",
       "detail": "单书结果、报告、进度均已写入",
-      "at": "2026-04-22T16:48:15"
+      "at": "2026-04-22T19:36:57"
     }
   ]
 }

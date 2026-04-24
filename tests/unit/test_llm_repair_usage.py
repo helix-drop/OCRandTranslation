@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import threading
 import unittest
 from unittest.mock import patch
 
-from FNM_RE.llm_repair import _build_cluster_page_contexts, request_llm_repair_actions, run_llm_repair
+from FNM_RE.llm_repair import _build_cluster_page_contexts, _time_limit, request_llm_repair_actions, run_llm_repair
 
 
 class _RepoStub:
     def __init__(self):
         self.saved_overrides = []
+        self.cleared_scopes = []
 
     def list_fnm_chapters(self, _doc_id):
         return [{"chapter_id": "ch-1", "title": "Chapter 1", "start_page": 1, "end_page": 10}]
@@ -44,6 +46,7 @@ class _RepoStub:
         ]
 
     def clear_fnm_review_overrides(self, _doc_id, scope=""):
+        self.cleared_scopes.append(scope)
         return None
 
     def save_fnm_review_override(self, _doc_id, _scope, _record_id, _payload):
@@ -52,6 +55,23 @@ class _RepoStub:
 
 
 class LlmRepairUsageSummaryTest(unittest.TestCase):
+    def test_time_limit_is_safe_in_background_thread(self):
+        errors: list[str] = []
+
+        def _target():
+            try:
+                with _time_limit(1):
+                    return None
+            except Exception as exc:  # pragma: no cover - assertion reports the exception text
+                errors.append(str(exc))
+
+        thread = threading.Thread(target=_target)
+        thread.start()
+        thread.join(timeout=2)
+
+        self.assertFalse(thread.is_alive())
+        self.assertEqual(errors, [])
+
     def test_build_cluster_page_contexts_includes_file_idx_and_pdf_path(self):
         class _PageRepo:
             def load_pages(self, _doc_id):
@@ -125,6 +145,12 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
             },
         )()
 
+        captured = {}
+
+        def _create(**kwargs):
+            captured.update(kwargs)
+            return response
+
         fake_client = type(
             "_Client",
             (),
@@ -133,7 +159,7 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
                     "_Chat",
                     (),
                     {
-                        "completions": type("_Completions", (), {"create": staticmethod(lambda **_kwargs: response)})()
+                        "completions": type("_Completions", (), {"create": staticmethod(_create)})()
                     },
                 )()
             },
@@ -162,11 +188,18 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
             "chapter_body_text": "body excerpt",
         }
         with (
-            patch("FNM_RE.llm_repair._resolve_qwen_repair_model_args", return_value={"api_key": "k", "base_url": "https://example.invalid/v1", "model_id": "qwen3.5-plus", "provider": "qwen"}),
+            patch("FNM_RE.llm_repair._resolve_repair_model_args", return_value={
+                "api_key": "k",
+                "base_url": "https://example.invalid/v1",
+                "model_id": "glm-5v-turbo",
+                "provider": "glm",
+                "request_overrides": {"extra_body": {"thinking": {"type": "enabled"}}},
+            }),
             patch("FNM_RE.llm_repair.OpenAI", return_value=fake_client),
         ):
             result = request_llm_repair_actions(cluster, doc_id="doc-1", slug="book-1")
 
+        self.assertEqual(captured["extra_body"], {"thinking": {"type": "enabled"}})
         trace = result["llm_trace"]
         self.assertEqual(trace["stage"], "llm_repair.cluster_request")
         self.assertIn("你是 FNM 注释修补助手", trace["request_prompt"]["system"])
@@ -229,6 +262,31 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
         self.assertEqual(result["llm_traces"][0]["stage"], "llm_repair.cluster_request")
         self.assertEqual(result["llm_traces"][0]["derived_truth"]["auto_selected_actions"], [])
         self.assertEqual(result["llm_traces"][0]["derived_truth"]["auto_applied_actions"], [])
+
+    def test_run_llm_repair_can_preserve_materialized_overrides_across_rounds(self):
+        repo = _RepoStub()
+        with (
+            patch("FNM_RE.llm_repair._build_cluster_page_contexts", return_value=[]),
+            patch("FNM_RE.llm_repair._build_chapter_body_text", return_value=("", [])),
+            patch(
+                "FNM_RE.llm_repair.request_llm_repair_actions",
+                return_value={
+                    "actions": [],
+                    "request_metrics": {"cluster_id": "ch-1:r-1:endnote"},
+                    "usage_event": {},
+                    "llm_trace": {},
+                },
+            ),
+        ):
+            run_llm_repair(
+                "doc-1",
+                repo=repo,
+                slug="book-1",
+                auto_apply=False,
+                clear_materialized_overrides=False,
+            )
+
+        self.assertEqual(repo.cleared_scopes, ["llm_suggestion"])
 
     def test_run_llm_repair_can_rebind_currently_matched_link(self):
         class _RebindRepo(_RepoStub):

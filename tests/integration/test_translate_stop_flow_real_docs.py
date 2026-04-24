@@ -941,7 +941,7 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn("startReparse()", html)
         self.assertIn("resetUploadArea()", html)
 
-    def test_input_page_binds_current_doc_id_for_start_and_model_switch(self):
+    def test_input_page_binds_current_doc_id_and_shows_model_settings_entry(self):
         set_current_doc(self.doc_b_id)
 
         resp = self.client.get("/input", query_string={"doc_id": self.doc_a_id})
@@ -949,8 +949,10 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn(f'<input type="hidden" name="doc_id" value="{self.doc_a_id}">', html)
-        self.assertIn('action="/set_model/deepseek-chat"', html)
-        self.assertIn('name="next" value="input"', html)
+        self.assertIn("翻译主模型：DeepSeek-Chat", html)
+        self.assertIn(f'/settings?doc_id={self.doc_a_id}', html)
+        self.assertNotIn('action="/set_model/', html)
+        self.assertNotIn('name="next" value="input"', html)
         self.assertIn(f'name="doc_id" value="{self.doc_a_id}"', html)
         self.assertIn(f'/?doc_id={self.doc_a_id}', html)
         self.assertIn('id="paddleQuotaStatusCard"', html)
@@ -977,41 +979,69 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn("自己查询今日解析页数", html)
         self.assertNotIn("每日可解析 3000 页", html)
 
-    def test_settings_page_hides_custom_model_panel_until_expanded(self):
+    def test_settings_page_renders_two_model_pool_editors_without_legacy_panels(self):
         resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id})
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('id="customModelPanel"', html)
-        self.assertIn("toggleCustomModelPanel", html)
-        self.assertIn("custom-model-panel", html)
-        self.assertIn("hidden", html)
+        self.assertIn('name="section" value="translation_model_pool"', html)
+        self.assertIn('name="section" value="fnm_model_pool"', html)
+        for slot_no in (1, 2, 3):
+            self.assertIn(f'name="translation_model_pool_slot{slot_no}_mode"', html)
+            self.assertIn(f'name="fnm_model_pool_slot{slot_no}_mode"', html)
+        self.assertIn("MiMo Token Plan", html)
+        self.assertIn("智谱 GLM API Key", html)
+        self.assertIn("Kimi API Key", html)
+        self.assertIn("GLM (智谱)", html)
+        self.assertIn("Kimi (Moonshot)", html)
+        self.assertIn("启用 thinking / 深度思考", html)
+        self.assertIn("data-model-slot", html)
+        self.assertIn("syncModelPoolSlotCard", html)
+        self.assertIn('data-slot-mode-panel="custom" style="display:none;"', html)
+        self.assertIn("内置模型会自动使用对应全局 API Key", html)
+        self.assertIn("qwen3.6-max-preview", html)
+        self.assertIn("qwen3.6-plus", html)
+        self.assertIn("qwen3-vl-plus", html)
+        self.assertIn("mimo-v2.5-pro", html)
+        self.assertIn("mimo-v2-omni", html)
+        self.assertNotIn("qwen-vl-ocr", html)
+        self.assertIn("当前模型", html)
+        self.assertIn("翻译主模型：", html)
+        self.assertIn("当前主 FNM 模型", html)
+        self.assertNotIn('id="customModelPanel"', html)
+        self.assertNotIn('id="visualCustomModelPanel"', html)
+        self.assertNotIn("toggleCustomModelPanel", html)
+        self.assertNotIn("toggleVisualCustomModelPanel", html)
+        self.assertNotIn('name="section" value="custom_model_save"', html)
+        self.assertNotIn('name="section" value="visual_custom_model_save"', html)
 
-    def test_settings_page_expands_custom_model_panel_when_requested(self):
+    def test_settings_page_ignores_legacy_custom_panel_query(self):
         resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id, "open_custom_model": "1"})
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('name="provider_type"', html)
-        self.assertIn('name="model_id"', html)
-        self.assertIn('name="section" value="custom_model_save"', html)
-        self.assertIn("保存自定义模型配置", html)
+        self.assertIn('name="section" value="translation_model_pool"', html)
+        self.assertNotIn('id="customModelPanel"', html)
+        self.assertNotIn("toggleCustomModelPanel", html)
+        self.assertNotIn('name="section" value="custom_model_save"', html)
 
-    def test_model_switch_uis_all_expose_custom_model_button(self):
+    def test_model_uis_show_pool_summary_and_settings_entry_without_switch_buttons(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-plus",
-            "custom_model": {
-                "enabled": True,
+            "dashscope_key": "dashscope-test-key",
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "Qwen 3.5 Plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
+            "fnm_model_pool": [{
+                "mode": "builtin",
+                "builtin_key": "qwen3.6-plus",
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         set_current_doc(self.doc_a_id)
         first_bp, _ = get_page_range(self.doc_a_pages)
@@ -1039,64 +1069,62 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         reading_html = self.client.get("/reading", query_string={"bp": first_bp, "doc_id": self.doc_a_id}).get_data(as_text=True)
         settings_html = self.client.get("/settings", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
 
-        self.assertIn("自定义: Qwen 3.5 Plus", home_html)
-        self.assertIn("自定义: Qwen 3.5 Plus", input_html)
-        self.assertIn("自定义模型", reading_html)
+        self.assertIn("翻译主模型：Qwen 3.5 Plus", home_html)
+        self.assertIn("FNM 主模型：Qwen3.6 Plus", home_html)
+        self.assertIn("翻译主模型：Qwen 3.5 Plus", input_html)
+        self.assertIn("翻译主模型：Qwen 3.5 Plus", reading_html)
+        self.assertIn("FNM 主模型：Qwen3.6 Plus", reading_html)
         self.assertIn("重译本页", reading_html)
-        self.assertIn("自定义: Qwen 3.5 Plus", settings_html)
-        self.assertIn('action="/set_model/deepseek-chat"', home_html)
-        self.assertIn('action="/set_model/deepseek-chat"', input_html)
-        self.assertIn('action="/set_model/deepseek-chat"', reading_html)
-        self.assertIn('action="/set_model/deepseek-chat"', settings_html)
-        self.assertIn('/settings?doc_id=' + self.doc_a_id + '&amp;open_custom_model=1#customModelPanel', home_html)
-        self.assertIn('/settings?doc_id=' + self.doc_a_id + '&amp;open_custom_model=1#customModelPanel', input_html)
-        self.assertIn('/settings?doc_id=' + self.doc_a_id + '&amp;open_custom_model=1#customModelPanel', reading_html)
-        self.assertNotIn('class="btn active">DeepSeek-Chat</a>', home_html)
-        self.assertNotIn('class="btn active">DeepSeek-Chat</a>', input_html)
-        self.assertNotIn('class="toolbar-dropdown-item active">DeepSeek-Chat</a>', reading_html)
-        self.assertNotIn('class="btn active">DeepSeek-Chat</a>', settings_html)
+        self.assertIn("当前主翻译模型", settings_html)
+        self.assertIn("Qwen 3.5 Plus", settings_html)
+        for page_html in (home_html, input_html, reading_html, settings_html):
+            self.assertNotIn('action="/set_model/', page_html)
+            self.assertNotIn("open_custom_model=1#customModelPanel", page_html)
 
-    def test_switching_to_preset_model_disables_custom_mode_but_keeps_saved_name(self):
+    def test_removed_single_model_routes_do_not_update_model_pools(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-plus",
-            "custom_model": {
-                "enabled": True,
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "Qwen 3.5 Plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         set_current_doc(self.doc_a_id)
 
         resp = self._post("/set_model/qwen-max", data={"next": "settings", "doc_id": self.doc_a_id})
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 404)
+
+        visual_resp = self._post(
+            "/set_visual_model/qwen-vl-max",
+            data={"next": "settings", "doc_id": self.doc_a_id},
+        )
+        self.assertEqual(visual_resp.status_code, 404)
 
         settings_html = self.client.get("/settings", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
         saved = config.load_config()
-        self.assertEqual(saved.get("active_model_mode"), "builtin")
-        self.assertEqual(saved.get("custom_model", {}).get("model_id"), "qwen3.5-plus")
-        self.assertIn('action="/set_model/qwen-max"', settings_html)
-        self.assertIn('自定义: Qwen 3.5 Plus', settings_html)
+        self.assertEqual(saved["translation_model_pool"][0]["mode"], "custom")
+        self.assertEqual(saved["translation_model_pool"][0]["model_id"], "qwen3.5-plus")
+        self.assertIn("当前主翻译模型", settings_html)
+        self.assertIn("Qwen 3.5 Plus", settings_html)
+        self.assertNotIn('action="/set_model/', settings_html)
 
         t_args = storage.get_translate_args()
-        self.assertEqual(t_args["model_id"], "qwen-max")
+        self.assertEqual(t_args["model_id"], "qwen3.5-plus")
 
     def test_form_route_rejects_missing_csrf_token(self):
-        config.set_model_key("deepseek-chat")
-
-        resp = self.client.post("/set_model/qwen-max", data={
-            "next": "settings",
+        before = config.load_config()
+        resp = self.client.post("/save_settings", data={
+            "section": "translate_parallel",
             "doc_id": self.doc_a_id,
         })
 
         self.assertEqual(resp.status_code, 403)
-        self.assertEqual(config.get_model_key(), "deepseek-chat")
+        self.assertEqual(config.load_config(), before)
 
     def test_retranslate_rejects_invalid_target_instead_of_silent_fallback(self):
         first_bp, _ = get_page_range(self.doc_a_pages)
@@ -1128,7 +1156,7 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("重译目标无效", html)
 
-    def test_reading_model_switch_preserves_current_reading_context(self):
+    def test_reading_page_no_longer_exposes_model_switch_context_form(self):
         first_bp, _ = get_page_range(self.doc_a_pages)
         html = self.client.get("/reading", query_string={
             "bp": first_bp,
@@ -1139,29 +1167,11 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
             "usage": 1,
         }).get_data(as_text=True)
 
-        self.assertIn(f'name="bp" value="{first_bp}"', html)
-        self.assertIn('name="usage" value="1"', html)
-        self.assertIn('name="orig" value="1"', html)
-        self.assertIn('name="layout" value="side"', html)
-        self.assertIn('name="pdf" value="1"', html)
-
-        resp = self._post("/set_model/qwen-max", data={
-            "next": "reading",
-            "doc_id": self.doc_a_id,
-            "bp": first_bp,
-            "usage": "1",
-            "orig": "1",
-            "layout": "side",
-            "pdf": "1",
-        })
-
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn(f"/reading?doc_id={self.doc_a_id}", resp.location)
-        self.assertIn(f"bp={first_bp}", resp.location)
-        self.assertIn("usage=1", resp.location)
-        self.assertIn("orig=1", resp.location)
-        self.assertIn("layout=side", resp.location)
-        self.assertIn("pdf=1", resp.location)
+        self.assertIn("当前模型", html)
+        self.assertIn("翻译主模型：", html)
+        self.assertIn("模型设置", html)
+        self.assertNotIn('action="/set_model/', html)
+        self.assertNotIn('name="next" value="reading"', html)
 
     def test_reading_page_does_not_expose_removed_focus_mode(self):
         first_bp, _ = get_page_range(self.doc_a_pages)
@@ -1187,119 +1197,150 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn('name="pdf" value="1"', html)
         self.assertIn('class="reading-main-layout with-pdf"', html)
 
-    def test_save_settings_accepts_valid_custom_model_config_without_auto_activate(self):
+    def test_save_settings_accepts_valid_translation_model_pool_config(self):
         config.save_config({
-            "active_model_mode": "builtin",
-            "active_builtin_model_key": "qwen-max",
+            "translation_model_pool": [{
+                "mode": "builtin",
+                "builtin_key": "qwen3.6-max-preview",
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         resp = self._post("/save_settings", data={
-            "section": "custom_model_save",
-            "display_name": "Qwen 3.5 Plus",
-            "provider_type": "qwen",
-            "model_id": "qwen3.5-plus",
-            "qwen_region": "sg",
+            "section": "translation_model_pool",
+            "translation_model_pool_slot1_mode": "custom",
+            "translation_model_pool_slot1_display_name": "Qwen 3.5 Plus",
+            "translation_model_pool_slot1_provider_type": "qwen",
+            "translation_model_pool_slot1_model_id": "qwen3.5-plus",
+            "translation_model_pool_slot1_qwen_region": "sg",
+            "translation_model_pool_slot2_mode": "builtin",
+            "translation_model_pool_slot2_builtin_key": "qwen3.6-plus",
+            "translation_model_pool_slot3_mode": "empty",
         }, follow_redirects=True)
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("已保存自定义模型配置", html)
+        self.assertIn("翻译模型池已保存", html)
         saved = config.load_config()
-        self.assertEqual(saved.get("active_model_mode"), "builtin")
-        self.assertEqual(saved.get("custom_model", {}).get("display_name"), "Qwen 3.5 Plus")
-        self.assertEqual(saved.get("custom_model", {}).get("model_id"), "qwen3.5-plus")
-        self.assertEqual(saved.get("custom_model", {}).get("qwen_region"), "sg")
-        self.assertIn('name="model_id"', html)
+        self.assertNotIn("active_model_mode", saved)
+        self.assertEqual(saved["translation_model_pool"][0]["mode"], "custom")
+        self.assertEqual(saved["translation_model_pool"][0]["display_name"], "Qwen 3.5 Plus")
+        self.assertEqual(saved["translation_model_pool"][0]["model_id"], "qwen3.5-plus")
+        self.assertEqual(saved["translation_model_pool"][0]["qwen_region"], "sg")
+        self.assertEqual(saved["translation_model_pool"][1]["builtin_key"], "qwen3.6-plus")
+        self.assertIn('name="translation_model_pool_slot1_model_id"', html)
         self.assertIn('value="qwen3.5-plus"', html)
-        self.assertIn("启用此自定义模型", html)
 
-    def test_activate_saved_custom_model_switches_to_custom_mode(self):
+    def test_save_settings_accepts_valid_fnm_model_pool_token_plan_config(self):
         config.save_config({
-            "active_model_mode": "builtin",
-            "active_builtin_model_key": "deepseek-chat",
-            "deepseek_key": "deepseek-test-key",
-            "dashscope_key": "dashscope-test-key",
-            "custom_model": {
-                "enabled": True,
-                "display_name": "Qwen 3.5 Plus",
-                "provider_type": "qwen",
-                "model_id": "qwen3.5-plus",
-                "base_url": "",
-                "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
-                "custom_api_key": "",
-                "extra_body": {"enable_thinking": False},
-            },
+            "fnm_model_pool": [{
+                "mode": "builtin",
+                "builtin_key": "qwen3.6-plus",
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
-
         resp = self._post("/save_settings", data={
-            "section": "custom_model_enable",
+            "section": "fnm_model_pool",
+            "fnm_model_pool_slot1_mode": "custom",
+            "fnm_model_pool_slot1_display_name": "MiMo Omni Token",
+            "fnm_model_pool_slot1_provider_type": "mimo_token_plan",
+            "fnm_model_pool_slot1_model_id": "mimo-v2-omni",
+            "fnm_model_pool_slot1_base_url": "https://token-plan-cn.xiaomimimo.com/v1",
+            "fnm_model_pool_slot1_custom_api_key": "token-plan-key",
+            "fnm_model_pool_slot2_mode": "builtin",
+            "fnm_model_pool_slot2_builtin_key": "qwen3-vl-plus",
+            "fnm_model_pool_slot3_mode": "empty",
         }, follow_redirects=True)
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
+        self.assertIn("FNM 视觉与修补模型池已保存", html)
         saved = config.load_config()
-        self.assertEqual(saved.get("active_model_mode"), "custom")
-        t_args = storage.get_translate_args()
-        self.assertEqual(t_args["provider"], "qwen")
-        self.assertEqual(t_args["model_id"], "qwen3.5-plus")
-        self.assertEqual(t_args["api_key"], "dashscope-test-key")
-        self.assertIn("已启用自定义模型", html)
+        self.assertEqual(saved["fnm_model_pool"][0]["mode"], "custom")
+        self.assertEqual(saved["fnm_model_pool"][0]["provider_type"], "mimo_token_plan")
+        self.assertEqual(saved["fnm_model_pool"][0]["model_id"], "mimo-v2-omni")
+        self.assertEqual(saved["fnm_model_pool"][0]["base_url"], "https://token-plan-cn.xiaomimimo.com/v1")
+        self.assertEqual(saved["fnm_model_pool"][0]["custom_api_key"], "token-plan-key")
+        self.assertEqual(saved["fnm_model_pool"][1]["builtin_key"], "qwen3-vl-plus")
 
-    def test_save_settings_rejects_openai_compatible_config_without_base_url(self):
-        config.save_config({
-            "active_model_mode": "builtin",
-            "active_builtin_model_key": "qwen-plus",
-            "custom_model": {
-                "enabled": True,
-                "display_name": "Old Name",
-                "provider_type": "qwen",
-                "model_id": "qwen-plus",
-                "base_url": "",
-                "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
-                "custom_api_key": "",
-                "extra_body": {"enable_thinking": False},
-            },
-        })
+    def test_save_settings_accepts_glm_and_kimi_provider_configs_with_thinking(self):
         resp = self._post("/save_settings", data={
-            "section": "custom_model_save",
-            "display_name": "My OpenAI Compat",
-            "provider_type": "openai_compatible",
-            "model_id": "gpt-compat-1",
-            "base_url": "",
-            "custom_api_key": "sk-test",
+            "section": "translation_model_pool",
+            "translation_model_pool_slot1_mode": "custom",
+            "translation_model_pool_slot1_display_name": "GLM Think",
+            "translation_model_pool_slot1_provider_type": "glm",
+            "translation_model_pool_slot1_model_id": "glm-5.1",
+            "translation_model_pool_slot1_thinking_enabled": "on",
+            "translation_model_pool_slot2_mode": "custom",
+            "translation_model_pool_slot2_display_name": "Kimi No Think",
+            "translation_model_pool_slot2_provider_type": "kimi",
+            "translation_model_pool_slot2_model_id": "kimi-k2.6",
+            "translation_model_pool_slot3_mode": "empty",
         }, follow_redirects=True)
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("OpenAI 兼容模型必须填写 Base URL", html)
-        self.assertEqual(config.load_config()["custom_model"]["display_name"], "Old Name")
+        self.assertIn("翻译模型池已保存", html)
+        saved = config.load_config()
+        self.assertEqual(saved["translation_model_pool"][0]["provider_type"], "glm")
+        self.assertEqual(saved["translation_model_pool"][0]["model_id"], "glm-5.1")
+        self.assertEqual(saved["translation_model_pool"][0]["thinking_enabled"], True)
+        self.assertEqual(saved["translation_model_pool"][1]["provider_type"], "kimi")
+        self.assertEqual(saved["translation_model_pool"][1]["model_id"], "kimi-k2.6")
+        self.assertEqual(saved["translation_model_pool"][1]["thinking_enabled"], False)
 
-    def test_reading_retranslate_button_uses_builtin_copy_when_custom_is_saved_but_inactive(self):
+    def test_save_settings_accepts_glm_and_kimi_global_keys(self):
+        resp = self._post("/save_settings", data={
+            "section": "glm",
+            "glm_api_key": "glm-key",
+        }, follow_redirects=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(config.get_glm_api_key(), "glm-key")
+
+        resp = self._post("/save_settings", data={
+            "section": "kimi",
+            "kimi_api_key": "kimi-key",
+        }, follow_redirects=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(config.get_kimi_api_key(), "kimi-key")
+
+    def test_save_settings_rejects_model_pool_openai_compatible_config_without_base_url(self):
         config.save_config({
-            "active_model_mode": "builtin",
-            "active_builtin_model_key": "qwen-max",
-            "custom_model": {
-                "enabled": True,
-                "display_name": "Qwen 3.5 Plus",
-                "provider_type": "qwen",
-                "model_id": "qwen3.5-plus",
-                "base_url": "",
-                "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
-                "custom_api_key": "",
-                "extra_body": {"enable_thinking": False},
-            },
+            "translation_model_pool": [{
+                "mode": "builtin",
+                "builtin_key": "qwen-plus",
+            }, {"mode": "empty"}, {"mode": "empty"}],
+        })
+        resp = self._post("/save_settings", data={
+            "section": "translation_model_pool",
+            "translation_model_pool_slot1_mode": "custom",
+            "translation_model_pool_slot1_display_name": "My OpenAI Compat",
+            "translation_model_pool_slot1_provider_type": "openai_compatible",
+            "translation_model_pool_slot1_model_id": "gpt-compat-1",
+            "translation_model_pool_slot1_base_url": "",
+            "translation_model_pool_slot1_custom_api_key": "sk-test",
+            "translation_model_pool_slot2_mode": "empty",
+            "translation_model_pool_slot3_mode": "empty",
+        }, follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("translation_model_pool 第 1 槽必须填写 Base URL", html)
+        self.assertEqual(config.load_config()["translation_model_pool"][0]["builtin_key"], "qwen-plus")
+
+    def test_reading_retranslate_button_uses_primary_translation_pool_label(self):
+        config.save_config({
+            "translation_model_pool": [{
+                "mode": "builtin",
+                "builtin_key": "qwen3.6-max-preview",
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         first_bp, _ = get_page_range(self.doc_a_pages)
         save_entries_to_disk([{
             "_pageBP": first_bp,
-            "_model": "qwen-max",
+            "_model": "qwen3.6-max-preview",
             "_model_source": "builtin",
-            "_model_key": "qwen-max",
-            "_model_id": "qwen-max",
+            "_model_key": "qwen3.6-max-preview",
+            "_model_id": "qwen3.6-max-preview",
             "_provider": "qwen",
-            "_display_label": "Qwen-Max",
+            "_display_label": "Qwen3.6 Max Preview",
             "_page_entries": [{
                 "original": "Page A",
                 "translation": "翻译 A",
@@ -1313,12 +1354,11 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
 
         html = self.client.get("/reading", query_string={"bp": first_bp, "doc_id": self.doc_a_id}).get_data(as_text=True)
 
-        self.assertIn("用Qwen-Max重译本页", html)
-        self.assertNotIn("用自定义模型（Qwen 3.5 Plus）重译本页", html)
+        self.assertIn("用Qwen3.6 Max Preview重译本页", html)
+        self.assertNotIn("用自定义模型", html)
 
     def test_mutating_get_routes_are_rejected(self):
         routes = [
-            ("/set_model/qwen-max", {"doc_id": self.doc_a_id, "next": "settings"}),
             ("/switch_doc/" + self.doc_b_id, {}),
             ("/delete_doc/" + self.doc_b_id, {}),
             ("/start_from_beginning", {"doc_id": self.doc_a_id}),
@@ -1334,6 +1374,15 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
             with self.subTest(path=path):
                 resp = self.client.get(path, query_string=query)
                 self.assertEqual(resp.status_code, 405)
+
+        removed_routes = [
+            ("/set_model/qwen-max", {"doc_id": self.doc_a_id, "next": "settings"}),
+            ("/set_visual_model/qwen-vl-max", {"doc_id": self.doc_a_id, "next": "settings"}),
+        ]
+        for path, query in removed_routes:
+            with self.subTest(path=path):
+                resp = self.client.get(path, query_string=query)
+                self.assertEqual(resp.status_code, 404)
 
     def test_settings_page_defaults_parallel_translation_to_disabled(self):
         resp = self.client.get("/settings", query_string={"doc_id": self.doc_a_id})

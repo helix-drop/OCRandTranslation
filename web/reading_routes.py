@@ -20,7 +20,7 @@ def reading(deps: Deps):
         else deps["get_current_doc_id"]()
     )
     state = deps["get_app_state"](current_doc_id)
-    current_view = deps["_normalize_reading_view"](request.args.get("view", "standard"))
+    current_view = "standard"
     usage_open = request.args.get("usage", "0") == "1"
     show_original = request.args.get("orig", "0") == "1"
     pdf_requested = request.args.get("pdf", "0") == "1"
@@ -47,9 +47,7 @@ def reading(deps: Deps):
         and fnm_run.get("status") == "done"
         and not bool(fnm_retry_summary.get("blocking_export"))
     )
-    fnm_view_available = bool(fnm_run and fnm_run.get("status") == "done")
-    if current_view == "fnm" and not fnm_view_available:
-        current_view = "standard"
+    fnm_view_available = False
     disk_entries = state["entries"]
     entries = disk_entries
     if current_view == "fnm":
@@ -249,6 +247,9 @@ def reading(deps: Deps):
         current_model_id=state["current_model_id"],
         current_model_label=state["current_model_label"],
         current_model_provider=state["current_model_provider"],
+        current_visual_model_id=state.get("current_visual_model_id", ""),
+        current_visual_model_label=state.get("current_visual_model_label", ""),
+        current_visual_model_provider=state.get("current_visual_model_provider", ""),
         models=deps["MODELS"],
         pages=pages,
         has_pages=state["has_pages"],
@@ -324,12 +325,7 @@ def switch_reading_mode(deps: Deps):
         reading_params["layout"] = layout
 
     if target_mode == "fnm":
-        repo = deps["SQLiteRepository"]()
-        fnm_run = repo.get_latest_fnm_run(doc_id) or {}
-        if str(fnm_run.get("status") or "") != "done":
-            flash("FNM 视图暂不可用（请先完成 FNM 注释分类）。", "error")
-            return redirect(url_for("reading", **reading_params))
-        reading_params["view"] = "fnm"
+        flash("FNM 模式不再提供独立阅读视图，请在首页使用 FNM 工作流卡片。", "info")
     return redirect(url_for("reading", **reading_params))
 
 

@@ -192,6 +192,39 @@ class EndnoteChapterExplorerTest(unittest.TestCase):
         self.assertGreaterEqual(int(summary.get("toc_match_count") or 0), 2)
         self.assertGreaterEqual(int(summary.get("split_count") or 0), 1)
 
+    def test_splits_from_page_heading_with_trailing_note_prose(self):
+        phase1 = Phase1Structure(
+            chapters=[
+                _chapter("intro", "Introduction", 1, 5),
+                _chapter("ch-1", "1 The Perils of Imagination at the End of the Old Regime", 6, 15),
+            ]
+        )
+        regions = [_region(pages=[30, 31, 32])]
+        page_by_no = {
+            30: _page(30, markdown="## Introduction\n1. Intro note."),
+            31: _page(
+                31,
+                markdown=(
+                    "26. Last intro note.\n"
+                    "### 1. The Perils of Imagination at the End of the Old Regime "
+                    "For the source of the epigraph, see note 38.\n"
+                    "1. First chapter note."
+                ),
+            ),
+            32: _page(32, markdown="2. Second chapter note."),
+        }
+
+        rebuilt, summary = explore_endnote_chapter_regions(
+            regions,
+            phase1=phase1,
+            page_by_no=page_by_no,
+        )
+
+        self.assertEqual(len(rebuilt), 2)
+        self.assertEqual([row.chapter_id for row in rebuilt], ["intro", "ch-1"])
+        self.assertEqual([row.pages for row in rebuilt], [[30], [31, 32]])
+        self.assertGreaterEqual(int(summary.get("split_count") or 0), 1)
+
     def test_named_toc_subentries_bind_introduction_and_numbered_chapter(self):
         phase1 = Phase1Structure(
             chapters=[

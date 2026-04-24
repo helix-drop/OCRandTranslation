@@ -172,6 +172,29 @@ def _get_active_translate_args(model_key: str | None = None) -> tuple[str, dict]
     return resolved_model_key, t_args
 
 
+def _get_translation_model_pool_args() -> list[tuple[str, dict]]:
+    specs = storage.resolve_translation_model_pool_specs()
+    candidates: list[tuple[str, dict]] = []
+    for spec in specs:
+        if not spec.supports_translation or not str(spec.api_key or "").strip():
+            continue
+        payload = dict(storage.asdict(spec))
+        payload["model_source"] = payload.pop("source")
+        companion_key = str(spec.companion_chat_model_key or "").strip()
+        if companion_key:
+            companion_spec = storage._resolve_builtin_model_spec(companion_key, capability="translation")
+            companion_payload = dict(storage.asdict(companion_spec))
+            companion_payload["model_source"] = companion_payload.pop("source")
+            payload["companion_chat_model"] = companion_payload
+        candidates.append((spec.model_key or spec.model_id, payload))
+    return candidates
+
+
+def _get_translation_retry_model_args() -> list[tuple[str, dict]]:
+    pool = _get_translation_model_pool_args()
+    return pool[1:] if len(pool) > 1 else []
+
+
 def _provider_request_args(t_args: dict) -> dict:
     """从翻译状态 payload 中筛出真正传给模型 SDK 的请求字段。"""
     if not isinstance(t_args, dict):
@@ -1513,6 +1536,8 @@ def _translate_worker_deps(owner_token: int | None = None) -> dict:
         "load_entries_from_disk": load_entries_from_disk,
         "save_entry_to_disk": save_entry_to_disk,
         "get_active_translate_args": _get_active_translate_args,
+        "get_translation_model_pool_args": _get_translation_model_pool_args,
+        "get_translation_retry_model_args": _get_translation_retry_model_args,
         "build_visible_page_view": build_visible_page_view,
         "resolve_visible_page_bp": resolve_visible_page_bp,
         "collect_target_bps": _collect_target_bps,

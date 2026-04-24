@@ -10,20 +10,27 @@ from pipeline.visual_toc.vision import _call_vision_json, _classify_toc_candidat
 
 class VisualTocUsageTest(unittest.TestCase):
     def test_call_vision_json_returns_parsed_and_usage_event(self):
+        captured = {}
         response = SimpleNamespace(
             usage=SimpleNamespace(prompt_tokens=12, completion_tokens=3, total_tokens=15),
             choices=[SimpleNamespace(message=SimpleNamespace(content='{"ok": true}'))],
         )
+
+        def _create(**kwargs):
+            captured.update(kwargs)
+            return response
+
         fake_client = SimpleNamespace(
             chat=SimpleNamespace(
-                completions=SimpleNamespace(create=lambda **_kwargs: response),
+                completions=SimpleNamespace(create=_create),
             ),
         )
         spec = SimpleNamespace(
             api_key="k",
             base_url="https://example.com",
             provider="qwen",
-            model_id="qwen-vl-plus",
+            model_id="qwen3.6-plus",
+            request_overrides={"extra_body": {"enable_thinking": True}},
         )
         with patch("pipeline.visual_toc.vision.OpenAI", return_value=fake_client):
             result = _call_vision_json(
@@ -37,10 +44,11 @@ class VisualTocUsageTest(unittest.TestCase):
             )
 
         self.assertEqual(result["parsed"]["ok"], True)
+        self.assertEqual(captured["extra_body"], {"enable_thinking": True})
         event = result["usage_event"]
         self.assertEqual(event["stage"], "visual_toc.preflight")
         self.assertEqual(event["provider"], "qwen")
-        self.assertEqual(event["model_id"], "qwen-vl-plus")
+        self.assertEqual(event["model_id"], "qwen3.6-plus")
         self.assertEqual(event["request_count"], 1)
         self.assertEqual(event["prompt_tokens"], 12)
         self.assertEqual(event["completion_tokens"], 3)
@@ -66,7 +74,7 @@ class VisualTocUsageTest(unittest.TestCase):
                     "usage_event": {
                         "stage": "visual_toc.classify_candidates",
                         "provider": "qwen",
-                        "model_id": "qwen-vl-plus",
+                        "model_id": "qwen3.6-plus",
                         "request_count": 1,
                         "prompt_tokens": 20,
                         "completion_tokens": 6,
@@ -79,7 +87,7 @@ class VisualTocUsageTest(unittest.TestCase):
             ),
         ):
             rows = _classify_toc_candidates(
-                SimpleNamespace(provider="qwen", model_id="qwen-vl-plus"),
+                SimpleNamespace(provider="qwen", model_id="qwen3.6-plus"),
                 "/tmp/fake.pdf",
                 [1, 2],
                 usage_events=usage_events,
@@ -98,7 +106,7 @@ class VisualTocUsageTest(unittest.TestCase):
                 {
                     "stage": "visual_toc.preflight",
                     "provider": "qwen",
-                    "model_id": "qwen-vl-plus",
+                    "model_id": "qwen3.6-plus",
                     "request_count": 1,
                     "prompt_tokens": 11,
                     "completion_tokens": 4,

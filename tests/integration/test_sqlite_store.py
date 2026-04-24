@@ -16,7 +16,11 @@ from persistence.sqlite_bootstrap import initialize_runtime_databases
 from persistence.sqlite_db_paths import get_catalog_db_path, get_document_db_path
 from persistence.sqlite_document_store import DocumentRepository
 from persistence.sqlite_schema import _ensure_column
-from persistence.sqlite_store import SQLiteRepository, get_connection, initialize_database
+from persistence.sqlite_store import (
+    SQLiteRepository,
+    get_connection,
+    initialize_database,
+)
 
 
 class SQLiteStoreTest(unittest.TestCase):
@@ -60,7 +64,9 @@ class SQLiteStoreTest(unittest.TestCase):
         retired_v2_tables = {
             name
             for name in tables
-            if name.startswith("fnm_") and name.endswith("_v2") and name != "fnm_review_overrides_v2"
+            if name.startswith("fnm_")
+            and name.endswith("_v2")
+            and name != "fnm_review_overrides_v2"
         }
         self.assertFalse(retired_v2_tables)
         self.assertIn("fnm_chapters", tables)
@@ -68,11 +74,27 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertNotIn("fnm_notes", tables)
         self.assertNotIn("fnm_page_entries", tables)
         self.assertNotIn("fnm_page_revisions", tables)
+        self.assertIn("fnm_chapter_endnotes", tables)
+        self.assertIn("fnm_paragraph_footnotes", tables)
+        self.assertIn("fnm_chapter_anchor_alignment", tables)
+
+        with get_connection(self.db_path) as conn:
+            body_anchor_cols = {
+                row["name"]
+                for row in conn.execute(
+                    "PRAGMA table_info(fnm_body_anchors)"
+                ).fetchall()
+            }
+        self.assertIn("attached_paragraph_key", body_anchor_cols)
+        self.assertIn("resolved_ordinal", body_anchor_cols)
+        self.assertIn("alignment_status", body_anchor_cols)
 
         with get_connection(self.db_path) as conn:
             translation_columns = {
                 row["name"]
-                for row in conn.execute("PRAGMA table_info(translation_pages)").fetchall()
+                for row in conn.execute(
+                    "PRAGMA table_info(translation_pages)"
+                ).fetchall()
             }
             run_columns = {
                 row["name"]
@@ -86,13 +108,122 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertIn("model_id", run_columns)
         self.assertIn("provider", run_columns)
 
-    def test_initialize_database_skips_schema_rewrite_after_current_version_is_ready(self):
+    def test_initialize_database_skips_schema_rewrite_after_current_version_is_ready(
+        self,
+    ):
         initialize_database(self.db_path)
 
-        with patch.object(sqlite_schema, "_create_schema", side_effect=AssertionError("schema should not rewrite")):
+        with patch.object(
+            sqlite_schema,
+            "_create_schema",
+            side_effect=AssertionError("schema should not rewrite"),
+        ):
             journal_mode = initialize_database(self.db_path)
 
         self.assertEqual(journal_mode.lower(), "wal")
+
+    def test_initialize_database_repairs_current_version_missing_translate_tail_columns(
+        self,
+    ):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.executescript(
+                """
+                CREATE TABLE schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+                INSERT INTO schema_meta(key, value) VALUES ('schema_version', '23');
+                CREATE TABLE translate_runs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    doc_id TEXT NOT NULL,
+                    phase TEXT NOT NULL,
+                    running INTEGER NOT NULL DEFAULT 0,
+                    stop_requested INTEGER NOT NULL DEFAULT 0,
+                    failed_bps_json TEXT,
+                    partial_failed_bps_json TEXT,
+                    failed_pages_json TEXT,
+                    retry_round INTEGER NOT NULL DEFAULT 0,
+                    unresolved_count INTEGER NOT NULL DEFAULT 0,
+                    manual_required_count INTEGER NOT NULL DEFAULT 0,
+                    next_failed_location_json TEXT,
+                    failed_locations_json TEXT,
+                    manual_required_locations_json TEXT,
+                    task_json TEXT,
+                    draft_json TEXT,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL
+                );
+                """
+            )
+
+        initialize_database(self.db_path)
+
+        with get_connection(self.db_path) as conn:
+            run_columns = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(translate_runs)").fetchall()
+            }
+
+        self.assertIn("fnm_tail_state", run_columns)
+        self.assertIn("export_bundle_available", run_columns)
+        self.assertIn("export_has_blockers", run_columns)
+        self.assertIn("tail_blocking_summary_json", run_columns)
+        self.assertIn("translation_attempt_history_json", run_columns)
+
+    def test_latest_translate_run_handles_legacy_row_missing_tail_columns(self):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.executescript(
+                """
+                CREATE TABLE schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+                INSERT INTO schema_meta(key, value) VALUES ('schema_version', '23');
+                CREATE TABLE documents (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL
+                );
+                CREATE TABLE translate_runs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    doc_id TEXT NOT NULL,
+                    phase TEXT NOT NULL,
+                    model_key TEXT,
+                    running INTEGER NOT NULL DEFAULT 0,
+                    stop_requested INTEGER NOT NULL DEFAULT 0,
+                    failed_bps_json TEXT,
+                    partial_failed_bps_json TEXT,
+                    failed_pages_json TEXT,
+                    retry_round INTEGER NOT NULL DEFAULT 0,
+                    unresolved_count INTEGER NOT NULL DEFAULT 0,
+                    manual_required_count INTEGER NOT NULL DEFAULT 0,
+                    next_failed_location_json TEXT,
+                    failed_locations_json TEXT,
+                    manual_required_locations_json TEXT,
+                    task_json TEXT,
+                    draft_json TEXT,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL
+                );
+                INSERT INTO documents(id, name, created_at, updated_at)
+                VALUES ('doc-legacy-tail', 'Legacy Tail', 1, 1);
+                INSERT INTO translate_runs(
+                    doc_id, phase, model_key, running, stop_requested,
+                    failed_bps_json, partial_failed_bps_json, failed_pages_json,
+                    next_failed_location_json, failed_locations_json, manual_required_locations_json,
+                    task_json, draft_json, created_at, updated_at
+                )
+                VALUES (
+                    'doc-legacy-tail', 'done', 'deepseek-chat', 0, 0,
+                    '[]', '[]', '[]',
+                    'null', '[]', '[]',
+                    '{}', '{}', 1, 1
+                );
+                """
+            )
+
+        run = SQLiteRepository(self.db_path).get_latest_translate_run("doc-legacy-tail")
+
+        self.assertIsNotNone(run)
+        self.assertEqual(run["phase"], "done")
+        self.assertEqual(run["fnm_tail_state"], "idle")
+        self.assertEqual(run["tail_blocking_summary"], [])
+        self.assertEqual(run["translation_attempt_history"], [])
 
     def test_catalog_repository_uses_catalog_db_path(self):
         expected = get_catalog_db_path()
@@ -139,7 +270,9 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertIn("app_state", catalog_tables)
         self.assertNotIn("pages", catalog_tables)
 
-    def test_initialize_runtime_databases_defaults_to_catalog_without_legacy_app_db(self):
+    def test_initialize_runtime_databases_defaults_to_catalog_without_legacy_app_db(
+        self,
+    ):
         modes = initialize_runtime_databases()
         catalog_path = get_catalog_db_path()
 
@@ -177,7 +310,9 @@ class SQLiteStoreTest(unittest.TestCase):
         os.makedirs(doc_dir, exist_ok=True)
 
         catalog_repo = CatalogRepository()
-        catalog_repo.set_app_state(f"glossary:{doc_id}", json.dumps([["term", "定义"]], ensure_ascii=False))
+        catalog_repo.set_app_state(
+            f"glossary:{doc_id}", json.dumps([["term", "定义"]], ensure_ascii=False)
+        )
 
         config.delete_doc(doc_id)
 
@@ -207,7 +342,9 @@ class SQLiteStoreTest(unittest.TestCase):
         started = []
 
         class ImmediateThread:
-            def __init__(self, target=None, args=(), kwargs=None, daemon=None, name=None):
+            def __init__(
+                self, target=None, args=(), kwargs=None, daemon=None, name=None
+            ):
                 self._target = target
                 self._args = args
                 self._kwargs = kwargs or {}
@@ -231,12 +368,15 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertTrue(started)
         self.assertTrue(all(item["daemon"] for item in started))
         leftovers = [
-            name for name in os.listdir(config.DOCS_DIR)
+            name
+            for name in os.listdir(config.DOCS_DIR)
             if name.startswith(f".deleting-{doc_id}-")
         ]
         self.assertEqual(leftovers, [])
 
-    def test_repository_persists_fnm_data_without_touching_standard_translation_pages(self):
+    def test_repository_persists_fnm_data_without_touching_standard_translation_pages(
+        self,
+    ):
         repo = SQLiteRepository(self.db_path)
         repo.upsert_document("doc-fnm", "FNM Doc", page_count=3)
 
@@ -637,7 +777,9 @@ class SQLiteStoreTest(unittest.TestCase):
         conn = sqlite3.connect(self.db_path)
         try:
             conn.execute("PRAGMA foreign_keys=ON")
-            conn.execute("DELETE FROM translation_pages WHERE id = ?", (translation_page_id,))
+            conn.execute(
+                "DELETE FROM translation_pages WHERE id = ?", (translation_page_id,)
+            )
             rows = conn.execute(
                 "SELECT COUNT(*) FROM translation_segments WHERE translation_page_id = ?",
                 (translation_page_id,),
@@ -787,7 +929,9 @@ class SQLiteStoreTest(unittest.TestCase):
 
     def test_ensure_column_ignores_duplicate_column_race(self):
         with get_connection(self.db_path) as conn:
-            conn.execute("CREATE TABLE IF NOT EXISTS race_demo (id INTEGER PRIMARY KEY)")
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS race_demo (id INTEGER PRIMARY KEY)"
+            )
             conn.execute("ALTER TABLE race_demo ADD COLUMN late_col TEXT")
             _ensure_column(conn, "race_demo", "late_col", "late_col TEXT")
 
@@ -803,7 +947,10 @@ class SQLiteStoreTest(unittest.TestCase):
         conn = FakeConnection()
         with (
             patch("persistence.sqlite_schema.sqlite3.connect", return_value=conn),
-            patch("persistence.sqlite_schema._apply_pragmas", side_effect=RuntimeError("pragma boom")),
+            patch(
+                "persistence.sqlite_schema._apply_pragmas",
+                side_effect=RuntimeError("pragma boom"),
+            ),
         ):
             with self.assertRaisesRegex(RuntimeError, "pragma boom"):
                 get_connection(self.db_path)
@@ -929,6 +1076,167 @@ class SQLiteStoreTest(unittest.TestCase):
 
         loaded = repo.get_document_toc("doc-toc")
         self.assertEqual(loaded, toc)
+
+
+class FnmNewTablesTest(unittest.TestCase):
+    def setUp(self):
+        self.temp_root = tempfile.mkdtemp(prefix="fnm-new-tables-")
+        self._patch_config_dirs(self.temp_root)
+        config.ensure_dirs()
+        self.db_path = config.get_sqlite_db_path()
+        initialize_database(self.db_path)
+        self.repo = SQLiteRepository(self.db_path)
+        self.repo.upsert_document("doc1", "Doc One")
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_root, ignore_errors=True)
+
+    def _patch_config_dirs(self, root: str):
+        config.CONFIG_DIR = root
+        config.CONFIG_FILE = os.path.join(root, "config.json")
+        config.DATA_DIR = os.path.join(root, "data")
+        config.DOCS_DIR = os.path.join(config.DATA_DIR, "documents")
+        config.CURRENT_FILE = os.path.join(config.DATA_DIR, "current.txt")
+
+    def test_chapter_endnotes_crud(self):
+        self.repo.replace_fnm_chapter_endnotes(
+            "doc1",
+            "ch-1",
+            endnotes=[
+                {
+                    "ordinal": 1,
+                    "marker": "1",
+                    "text": "First endnote",
+                    "source_page_no": 10,
+                },
+                {
+                    "ordinal": 2,
+                    "marker": "2",
+                    "text": "Second endnote",
+                    "source_page_no": 11,
+                },
+            ],
+        )
+        items = self.repo.list_fnm_chapter_endnotes("doc1", chapter_id="ch-1")
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]["ordinal"], 1)
+        self.assertEqual(items[0]["marker"], "1")
+        self.assertEqual(items[0]["text"], "First endnote")
+        self.assertEqual(items[1]["ordinal"], 2)
+        self.assertEqual(items[1]["review_required"], 1)
+
+        self.repo.replace_fnm_chapter_endnotes(
+            "doc1",
+            "ch-1",
+            endnotes=[{"ordinal": 1, "marker": "A", "text": "Replaced"}],
+        )
+        items = self.repo.list_fnm_chapter_endnotes("doc1", chapter_id="ch-1")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["text"], "Replaced")
+
+    def test_chapter_endnotes_ordinal_sequence(self):
+        self.repo.replace_fnm_chapter_endnotes(
+            "doc1",
+            "ch-1",
+            endnotes=[
+                {"ordinal": 1, "marker": "1", "text": "Note 1"},
+                {"ordinal": 3, "marker": "3", "text": "Note 3"},
+            ],
+        )
+        items = self.repo.list_fnm_chapter_endnotes("doc1", chapter_id="ch-1")
+        ordinals = [item["ordinal"] for item in items]
+        self.assertNotEqual(ordinals, [1, 2])
+
+    def test_paragraph_footnotes_crud(self):
+        self.repo.replace_fnm_paragraph_footnotes(
+            "doc1",
+            "ch-1",
+            footnotes=[
+                {
+                    "page_no": 5,
+                    "paragraph_index": 0,
+                    "source_marker": "1",
+                    "text": "Fn 1",
+                },
+                {
+                    "page_no": 5,
+                    "paragraph_index": 1,
+                    "source_marker": "2",
+                    "text": "Fn 2",
+                },
+            ],
+        )
+        items = self.repo.list_fnm_paragraph_footnotes("doc1", chapter_id="ch-1")
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]["page_no"], 5)
+        self.assertEqual(items[0]["attachment_kind"], "page_tail")
+
+        items_p5 = self.repo.list_fnm_paragraph_footnotes(
+            "doc1", chapter_id="ch-1", page_no=5
+        )
+        self.assertEqual(len(items_p5), 2)
+
+    def test_chapter_anchor_alignment_upsert(self):
+        self.repo.upsert_fnm_chapter_anchor_alignment(
+            "doc1",
+            "ch-1",
+            alignment_status="clean",
+            body_anchor_count=10,
+            endnote_count=10,
+        )
+        records = self.repo.list_fnm_chapter_anchor_alignment("doc1", chapter_id="ch-1")
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["alignment_status"], "clean")
+        self.assertEqual(records[0]["body_anchor_count"], 10)
+
+        self.repo.upsert_fnm_chapter_anchor_alignment(
+            "doc1",
+            "ch-1",
+            alignment_status="aligned_with_mismatches",
+            body_anchor_count=10,
+            endnote_count=10,
+            mismatch={"issues": ["marker 3 differs"]},
+        )
+        records = self.repo.list_fnm_chapter_anchor_alignment("doc1", chapter_id="ch-1")
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["alignment_status"], "aligned_with_mismatches")
+        self.assertIsNotNone(records[0].get("mismatch"))
+
+    def test_clear_fnm_data_cascades_to_new_tables(self):
+        self.repo.replace_fnm_chapter_endnotes(
+            "doc1",
+            "ch-1",
+            endnotes=[{"ordinal": 1, "marker": "1", "text": "Note"}],
+        )
+        self.repo.replace_fnm_paragraph_footnotes(
+            "doc1",
+            "ch-1",
+            footnotes=[{"page_no": 1, "text": "Fn"}],
+        )
+        self.repo.upsert_fnm_chapter_anchor_alignment(
+            "doc1",
+            "ch-1",
+            alignment_status="clean",
+        )
+
+        self.assertEqual(len(self.repo.list_fnm_chapter_endnotes("doc1")), 1)
+        self.assertEqual(len(self.repo.list_fnm_paragraph_footnotes("doc1")), 1)
+        self.assertEqual(len(self.repo.list_fnm_chapter_anchor_alignment("doc1")), 1)
+
+        self.repo.clear_fnm_data("doc1")
+
+        self.assertEqual(len(self.repo.list_fnm_chapter_endnotes("doc1")), 0)
+        self.assertEqual(len(self.repo.list_fnm_paragraph_footnotes("doc1")), 0)
+        self.assertEqual(len(self.repo.list_fnm_chapter_anchor_alignment("doc1")), 0)
+
+    def test_numbering_scheme_defaults_per_chapter(self):
+        self.repo.replace_fnm_chapter_endnotes(
+            "doc1",
+            "ch-1",
+            endnotes=[{"ordinal": 1, "marker": "1", "text": "Note"}],
+        )
+        items = self.repo.list_fnm_chapter_endnotes("doc1", chapter_id="ch-1")
+        self.assertEqual(items[0]["numbering_scheme"], "per_chapter")
 
 
 if __name__ == "__main__":

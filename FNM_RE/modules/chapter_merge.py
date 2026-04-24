@@ -479,6 +479,34 @@ def _rewrite_residual_raw_markers_for_chapter(
         text = str(match.group(2) or "").strip()
         if number > 0 and text:
             definitions[number] = text
+    def _replace_def_note_refs(def_text: str) -> str:
+        """Replace {{NOTE_REF:<number>}} tokens in fallback definition text with [^N]."""
+        ref_num_to_note_id: dict[int, str] = {v: k for k, v in local_ref_numbers.items()}
+        last_ref_num = 0
+
+        def _replacer(m: re.Match) -> str:
+            nonlocal last_ref_num
+            for idx in range(1, 7):
+                captured = str(m.group(idx) or "").strip()
+                if not captured:
+                    continue
+                if captured.lower() == "ibid":
+                    if last_ref_num > 0:
+                        return f"[^{last_ref_num}]"
+                    return m.group(0)
+                if captured.isdigit():
+                    ref_num = int(captured)
+                    if ref_num in ref_num_to_note_id:
+                        note_id = ref_num_to_note_id[ref_num]
+                        target_num = int(local_ref_numbers[note_id])
+                        if target_num > 0:
+                            last_ref_num = target_num
+                            return f"[^{target_num}]"
+                return m.group(0)
+            return m.group(0)
+
+        return export_stage._ANY_NOTE_REF_RE.sub(_replacer, def_text)
+
     for note_id in ordered_note_ids:
         if note_id.startswith("__reserved_"):
             continue
@@ -487,7 +515,7 @@ def _rewrite_residual_raw_markers_for_chapter(
             continue
         text = str(resolved_note_text_by_id.get(note_id) or "").strip()
         if text:
-            definitions[number] = text
+            definitions[number] = _replace_def_note_refs(text)
 
     lines: list[str] = [str(updated_body or "").strip()]
     if definitions:

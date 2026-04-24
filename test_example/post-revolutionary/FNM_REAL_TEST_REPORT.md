@@ -30,8 +30,8 @@
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=2, prompt=2969, completion=2443, total=5412
-- llm_repair.cluster_request: request=1, prompt=7549, completion=592, total=8141
+- visual_toc.manual_input_extract: request=2, prompt=2983, completion=2464, total=5447
+- llm_repair.cluster_request: request=1, prompt=7549, completion=581, total=8130
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph

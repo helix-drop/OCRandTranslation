@@ -13,10 +13,24 @@ from persistence.sqlite_store import SQLiteRepository
 from web.services import ExportServices
 
 Deps = ExportServices
+_EXPORT_STAGE_REASON_PREFIXES = ("merge_", "export_")
+_EXPORT_STAGE_REASON_EXACT = {"local_note_contract_broken"}
+_FNM_EXPORT_BUNDLE_MISSING_ERROR = "fnm_export_bundle_missing"
+_FNM_EXPORT_BUNDLE_MISSING_REASON = "post_translate_check_required"
+_FNM_EXPORT_PENDING_TAIL_ERROR = "fnm_export_pending_tail"
 
 
 def _request_doc_id(deps: Deps) -> str:
     return deps["_request_doc_id"]()
+
+
+def _is_export_stage_reason(reason_code: str) -> bool:
+    token = str(reason_code or "").strip()
+    if not token:
+        return False
+    if token in _EXPORT_STAGE_REASON_EXACT:
+        return True
+    return token.startswith(_EXPORT_STAGE_REASON_PREFIXES)
 
 
 def _fnm_export_block_response(doc_id: str) -> tuple[dict, int] | None:
@@ -25,24 +39,39 @@ def _fnm_export_block_response(doc_id: str) -> tuple[dict, int] | None:
     repo = SQLiteRepository()
     structure_status = build_doc_status(doc_id, repo=repo)
     retry_summary = build_retry_summary(doc_id, repo=repo)
-    structure_blocked = not bool(structure_status.get("export_ready_test"))
-    retry_blocked = bool(retry_summary.get("blocking_export"))
-    if not structure_blocked and not retry_blocked:
-        return None
     blocking_reasons = [
         str(item).strip()
         for item in list(structure_status.get("blocking_reasons") or [])
         if str(item).strip()
     ]
+    non_export_blocking_reasons = [
+        reason_code
+        for reason_code in blocking_reasons
+        if not _is_export_stage_reason(reason_code)
+    ]
+    structure_state = str(structure_status.get("structure_state") or "").strip().lower()
     manual_toc_required = bool(structure_status.get("manual_toc_required"))
     if not manual_toc_required:
         manual_toc_required = any(
             reason_code in {"toc_manual_toc_required", "manual_toc_required"}
             for reason_code in blocking_reasons
         )
+    structure_pipeline_not_ready = structure_state in {"idle", "running", "error"}
+    structure_blocked = bool(
+        structure_pipeline_not_ready
+        or manual_toc_required
+        or non_export_blocking_reasons
+    )
+    retry_blocked = bool(retry_summary.get("blocking_export"))
+    if not structure_blocked and not retry_blocked:
+        return None
     reason = retry_summary.get("blocking_reason") or ""
     if not reason and manual_toc_required:
         reason = "manual_toc_required"
+    if not reason and non_export_blocking_reasons:
+        reason = non_export_blocking_reasons[0]
+    if not reason and structure_pipeline_not_ready:
+        reason = "structure_not_ready"
     if not reason and blocking_reasons:
         reason = blocking_reasons[0]
     return {
@@ -60,6 +89,38 @@ def _fnm_export_block_response(doc_id: str) -> tuple[dict, int] | None:
     }, 409
 
 
+def _fnm_export_bundle_missing_response(exc: FileNotFoundError) -> tuple[dict, int]:
+    message = str(exc or "").strip() or "FNM 导出包不存在，请先执行最终校验。"
+    return {
+        "error": _FNM_EXPORT_BUNDLE_MISSING_ERROR,
+        "reason": _FNM_EXPORT_BUNDLE_MISSING_REASON,
+        "message": message,
+    }, 409
+
+
+def _fnm_export_pending_tail_response(doc_id: str) -> tuple[dict, int] | None:
+    if not doc_id:
+        return None
+    tail_state = _fnm_export_tail_state(doc_id)
+    if tail_state not in {"translation_retrying", "post_translate_checking", "repairing"}:
+        return None
+    return {
+        "error": _FNM_EXPORT_PENDING_TAIL_ERROR,
+        "reason": f"tail_state_{tail_state}",
+        "message": "FNM 收尾尚未结束，暂时不能导出章节包。",
+        "fnm_tail_state": tail_state,
+    }, 409
+
+
+def _fnm_export_tail_state(doc_id: str) -> str:
+    if not doc_id:
+        return "idle"
+    from translation.translate_store import _load_translate_state
+
+    snapshot = _load_translate_state(doc_id)
+    return str(snapshot.get("fnm_tail_state", "idle") or "idle").strip().lower() or "idle"
+
+
 def api_toc_chapters(deps: Deps):
     doc_id = _request_doc_id(deps)
     if not doc_id:
@@ -72,11 +133,20 @@ def download_md(deps: Deps):
     doc_id = _request_doc_id(deps)
     export_format = request.args.get("format", "").strip().lower()
     if export_format == "fnm_obsidian":
-        blocked = _fnm_export_block_response(doc_id)
-        if blocked is not None:
-            payload, status = blocked
+        pending = _fnm_export_pending_tail_response(doc_id)
+        if pending is not None:
+            payload, status = pending
             return jsonify(payload), status
-        zip_bytes = deps["build_fnm_obsidian_export_zip"](doc_id)
+        if _fnm_export_tail_state(doc_id) != "done":
+            blocked = _fnm_export_block_response(doc_id)
+            if blocked is not None:
+                payload, status = blocked
+                return jsonify(payload), status
+        try:
+            zip_bytes = deps["build_fnm_obsidian_export_zip"](doc_id)
+        except FileNotFoundError as exc:
+            payload, status = _fnm_export_bundle_missing_response(exc)
+            return jsonify(payload), status
         buf = BytesIO(zip_bytes)
         filename = f"{deps['_sanitize_filename']((deps['get_doc_meta'](doc_id) or {}).get('name', 'export') or 'export')}.fnm.obsidian.zip"
         return send_file(buf, as_attachment=True, download_name=filename, mimetype="application/zip")
@@ -123,11 +193,20 @@ def export_md(deps: Deps):
     doc_id = _request_doc_id(deps)
     export_format = request.args.get("format", "").strip().lower()
     if export_format == "fnm_obsidian":
-        blocked = _fnm_export_block_response(doc_id)
-        if blocked is not None:
-            payload, status = blocked
+        pending = _fnm_export_pending_tail_response(doc_id)
+        if pending is not None:
+            payload, status = pending
             return jsonify(payload), status
-        export_payload = deps["build_fnm_obsidian_export"](doc_id)
+        if _fnm_export_tail_state(doc_id) != "done":
+            blocked = _fnm_export_block_response(doc_id)
+            if blocked is not None:
+                payload, status = blocked
+                return jsonify(payload), status
+        try:
+            export_payload = deps["build_fnm_obsidian_export"](doc_id)
+        except FileNotFoundError as exc:
+            payload, status = _fnm_export_bundle_missing_response(exc)
+            return jsonify(payload), status
         if isinstance(export_payload, dict):
             markdown = str(export_payload.get("markdown") or "")
             if not markdown:

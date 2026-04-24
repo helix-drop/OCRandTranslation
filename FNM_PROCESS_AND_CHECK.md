@@ -168,7 +168,13 @@ Phase 2（脚注/尾注区域）：
 - FNM Worker 按 Unit 顺序请求翻译 API，支持：
   - 断点续译（记录 `start_unit_idx`）
   - 失败重试（HTTP 400/401/403/404/422 视为不可重试，立即停止；其他可重试）
+  - 翻译请求走 `translation_model_pool` 的 `slot1 -> slot2 -> slot3`；缺 Key、能力不匹配或请求失败时按槽位顺序回退。
+  - 翻译池只放文本/对话/专用翻译候选；FNM 视觉与修补池只放同时具备视觉输入和文本输出能力的多模态候选。
+  - 当前 FNM 默认主模型为 `qwen3.6-plus`；旧 Qwen-VL 与 OCR 专用模型不再作为推荐候选。
+  - 槽位可开启 `thinking_enabled`；Qwen 写入 `extra_body.enable_thinking`，DeepSeek / GLM / Kimi / 已标记支持的 MiMo 写入 `extra_body.thinking.type`。
   - 运行态字段 `translating / continuing / full_flow_running` 通过 `_resolve_fnm_workflow_state`（[web/translation_routes.py:174-200](web/translation_routes.py:174)）映射到 UI。
+  - **翻译自然结束后立即预跑阶段 6**：Worker 会在收尾时先做章节合成与导出审计，不再等到用户点击导出按钮才第一次发现问题。
+  - **若最终审计仍阻塞**：自动调用 LLM 修补 unresolved cluster，最多 3 轮；每轮内部走 `fnm_model_pool` 的槽位回退，每轮 auto-apply 后都会重建 phase6 并重新审计。
 
 #### 检验点（API 前置，阶段 5 进入翻译之前）
 | # | 检验 | 位置 | 失败状态码 |
@@ -182,12 +188,36 @@ Phase 2（脚注/尾注区域）：
 
 ---
 
-### 阶段 6 —— 导出打包 & 第二道 Gate
+### 阶段 6 —— 合成 / 审计 / 导出打包 & 第二道 Gate
 
 **入口**：`build_phase6_structure` → `build_export_bundle` → `audit_phase6_export`
 **代码**：[FNM_RE/app/pipeline.py:465](FNM_RE/app/pipeline.py:465)、[FNM_RE/stages/export.py](FNM_RE/stages/export.py)、[FNM_RE/stages/export_audit.py](FNM_RE/stages/export_audit.py)
 
-**API**：`web/export_routes.py:79` 调用 `build_fnm_obsidian_export_zip(doc_id)`（注册于 [web/services.py:447](web/services.py:447)）。
+**触发时机**：
+- 主触发：FNM 翻译 worker 收尾时，先生成 phase6 快照、完成导出审计/必要修补，并把章节包落盘到文档目录
+- 导出时：`web/export_routes.py:79` 调用 `build_fnm_obsidian_export_zip(doc_id)`（注册于 [web/services.py:447](web/services.py:447)）只读取已落盘章节包并打 zip，不再现场重跑合成与审计
+
+**收尾状态机**：
+
+```
+idle
+  -> translation_retrying
+  -> post_translate_checking
+  -> repairing
+  -> done
+```
+
+稳定字段：
+- `fnm_tail_state`：当前收尾阶段。
+- `export_ready_real`：纯净可交付，无翻译阻塞、无导出审计阻塞。
+- `export_bundle_available`：收尾结束且章节包已落盘；即使仍有阻塞，也允许导出带说明的 zip。
+- `export_has_blockers` / `tail_blocking_summary`：收尾结束后仍未解决的问题摘要。
+
+导出规则：
+- `fnm_tail_state in {translation_retrying, post_translate_checking, repairing}` 时，`导出章节包` 禁用，导出接口返回 `fnm_export_pending_tail`。
+- `fnm_tail_state == done` 后，导出接口不再被 `manual_required` 或导出审计阻塞项拦住，而是读取已落盘 bundle。
+- `fnm_tail_state == done` 但 bundle 缺失时，才返回 `fnm_export_bundle_missing`，这是异常态。
+- `export_bundle_available=true && export_has_blockers=true` 时，zip 内包含 `logs/fnm_export_validation_issues.log`，记录页面、段落、unit_id、翻译模型尝试顺序、LLM 修补轮次与仍未解决原因。
 
 动作：
 1. 按 TOC 顺序（非页序）合并每章正文译文与脚注，生成 Obsidian 兼容 markdown（`[^n]` 脚注语法）。
@@ -195,7 +225,10 @@ Phase 2（脚注/尾注区域）：
    - `toc_export_coverage`：章节是否完整覆盖 TOC
    - `semantic_contract`：文件内容是否满足语义约定
    - 残留扫描：是否还有 raw marker 或未解冻的 `{{NOTE_REF:*}}`
+   - 若审计失败：记录阻塞文件、页码范围、段落定位，并将自动修补轮次写回 `validation_json`
 3. 产出两个布尔量：`export_ready_test` / `export_ready_real`（[FNM_RE/models.py:302-303](FNM_RE/models.py:302)）。
+4. 若 3 轮 LLM 修补后仍失败：导出的 `.zip` 会额外带 `logs/fnm_export_validation_issues.log`，写明阻塞原因、页码/段落定位与修补记录。
+5. 若文档是旧数据、还没有翻译收尾阶段生成的章节包：导出 API 会直接返回“需先执行最终校验”，不会再偷偷补跑 phase6。
 
 #### 检验点（Gate #2）
 | # | 检验 | 位置 |
@@ -282,7 +315,7 @@ run_status=done
 ## 六、已知疑点（供后续工作参考）
 
 1. **旧依赖遗留**：`chapter_skeleton.py` 仍引用旧 `fnm.fnm_structure._build_visual_toc_chapters_and_section_heads`；`mainline.py` 仍调用 `group_review_overrides()` 等旧接口（见 `FNM_RE/DEV_FNM.md`）。
-2. **Phase 6 与翻译完成度耦合**：`export_ready_real` 同时依赖审计 `can_ship` 与翻译进度，需保证 Unit 翻译全部完成后再调用导出 API。
+2. **Phase 6 与翻译完成度耦合**：`export_ready_real` 同时依赖审计 `can_ship` 与翻译进度；现在 phase6 审计已前移到翻译结束时执行，导出 API 只消费这一步落盘后的章节包与校验结果。
 3. **软告警是否升级为阻塞**：`synthetic_anchor_warn` 目前不阻塞，但大量出现时质量堪忧，是否纳入 Gate #1 值得讨论。
 4. **重解析入口语义差异**：`reparse` 走当前文档的 fnm_mode 旗标；`api_doc_reparse_enhanced` 永远强制 FNM 模式，两者界面入口不同但用户易混淆。
 

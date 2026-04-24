@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 63200,
+          "row_id": 68400,
           "doc_id": "67356d1f7d9a",
           "anchor_id": "anchor-01044",
           "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "It was not easy to regulate the fleshpots of Haina. When a survey of food consumption was again conducted in 1591, examining the year 1590, the average intake was still 5,161 calories a day at Haina and 3,994 at Merx-hausen (table 7.7). $ ^{78} $ Eggs, oatmeal, and honey were somewhat more abundant, but meat, cheese, milk, and beer were somewhat less so. The hospitals now diverged even more sharply than they had sixteen years earlier.",
-          "created_at": 1776847211,
-          "updated_at": 1776847211
+          "created_at": 1776857356,
+          "updated_at": 1776857356
         },
         {
-          "row_id": 63212,
+          "row_id": 68412,
           "doc_id": "67356d1f7d9a",
           "anchor_id": "anchor-01054",
           "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Applicants to the hospital emphasized their religious character and their readiness to live “as befits Christian brethren.” $ ^{90} $ The preacher at Haina was to urge the poor to hear God’s Word not only at the regular services but at special services as well and to inculcate an attitude of constant (ohn unterlass) prayer and thankfulness. $ ^{91} $ The hospital seems to have instituted a regular half-hour evening prayer service to balance the one in the morning. The original ordinance of the hospital (1534) required only one sermon a day and stated simply, “after supper and the prayer of thanks, let them rest and have them go to bed at a set time.” $ ^{92} $ Already in the undated “Hospitals-Fundation,” this thanksgiving was explicitly described as a church ser-",
-          "created_at": 1776847211,
-          "updated_at": 1776847211
+          "created_at": 1776857356,
+          "updated_at": 1776857356
         }
       ],
       "rebind_candidates": [
@@ -211,7 +211,7 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01105\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 0.98,\n    \"reason\": \"The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01106\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 0.98,\n    \"reason\": \"The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01105\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01106\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01106 (marker 79) corresponds to the anchor at page 367 (OCR excerpt shows '...artisans.”$^{79}$'). The screenshot of page 347 confirms footnote 79 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01112\",\n    \"anchor_id\": \"anchor-01050\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01116\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"The rebind candidate list contains synthetic anchors for markers 19, 8, and 30 on page 372. These correspond to fragments of footnote 90 in the screenshot (page 352), which lists multiple cases with dates. Since these are synthetic fragments derived from a single valid footnote already matched (fn-01116), they should be ignored as separate entities.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
@@ -220,18 +220,48 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.98,
-      "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
+      "confidence": 1.0,
+      "reason": "The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item."
     },
     {
       "action": "match",
       "note_item_id": "fn-01106",
+      "anchor_id": "anchor-01044",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The note item fn-01106 (marker 79) corresponds to the anchor at page 367 (OCR excerpt shows '...artisans.”$^{79}$'). The screenshot of page 347 confirms footnote 79 is located there and matches the content in the note item."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01112",
+      "anchor_id": "anchor-01050",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01116",
       "anchor_id": "anchor-01054",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.98,
-      "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
+      "confidence": 1.0,
+      "reason": "The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-01054",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The rebind candidate list contains synthetic anchors for markers 19, 8, and 30 on page 372. These correspond to fragments of footnote 90 in the screenshot (page 352), which lists multiple cases with dates. Since these are synthetic fragments derived from a single valid footnote already matched (fn-01116), they should be ignored as separate entities."
     }
   ],
   "derived_truth": {
@@ -246,18 +276,48 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
+        "confidence": 1.0,
+        "reason": "The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item."
       },
       {
         "action": "match",
         "note_item_id": "fn-01106",
+        "anchor_id": "anchor-01044",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note item fn-01106 (marker 79) corresponds to the anchor at page 367 (OCR excerpt shows '...artisans.”$^{79}$'). The screenshot of page 347 confirms footnote 79 is located there and matches the content in the note item."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01112",
+        "anchor_id": "anchor-01050",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01116",
         "anchor_id": "anchor-01054",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
+        "confidence": 1.0,
+        "reason": "The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-01054",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The rebind candidate list contains synthetic anchors for markers 19, 8, and 30 on page 372. These correspond to fragments of footnote 90 in the screenshot (page 352), which lists multiple cases with dates. Since these are synthetic fragments derived from a single valid footnote already matched (fn-01116), they should be ignored as separate entities."
       }
     ],
     "auto_selected_actions": [
@@ -268,52 +328,51 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
+        "confidence": 1.0,
+        "reason": "The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item."
       },
       {
         "action": "match",
-        "note_item_id": "fn-01106",
+        "note_item_id": "fn-01112",
+        "anchor_id": "anchor-01050",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01116",
         "anchor_id": "anchor-01054",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
+        "confidence": 1.0,
+        "reason": "The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item."
       }
     ],
     "auto_applied_actions": [
       {
-        "link_id": "link-01127",
+        "link_id": "link-01134",
         "action": "match",
-        "note_item_id": "fn-01105",
-        "anchor_id": "anchor-01044",
+        "note_item_id": "fn-01112",
+        "anchor_id": "anchor-01050",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.98,
-        "reason": "The footnote marker '78' in the text on page 347 (OCR page 367) clearly corresponds to footnote 78 at the bottom of the same page. The content matches perfectly ('StAM, 40a XXIV Generalia 2...'). The current binding to a synthetic anchor is incorrect."
-      },
-      {
-        "link_id": "link-01128",
-        "action": "match",
-        "note_item_id": "fn-01106",
-        "anchor_id": "anchor-01054",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.98,
-        "reason": "The footnote marker '79' in the text on page 347 (OCR page 367) clearly corresponds to footnote 79 at the bottom of the same page. The content matches perfectly ('StAM, g40a XXIV Generalia 2: Landgraf Ludwig...'). The current binding to a synthetic anchor is incorrect."
+        "confidence": 1.0,
+        "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 24544,
-    "completion_tokens": 275,
-    "total_tokens": 24819,
+    "completion_tokens": 651,
+    "total_tokens": 25195,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 22766
+    "duration_ms": 28312
   }
 }

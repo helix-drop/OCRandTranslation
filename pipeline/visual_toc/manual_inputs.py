@@ -180,6 +180,10 @@ _VISUAL_TOC_CHAPTER_TITLE_RE = re.compile(
     re.IGNORECASE,
 )
 _VISUAL_TOC_ROMAN_CONTAINER_RE = re.compile(r"^\s*[ivxlcm]+\.\s+\S+", re.IGNORECASE)
+_MANUAL_TOC_SINGLE_WORD_VARIANT_RE = re.compile(
+    r"^\s*(?:prologue|epilogue|introduction|conclusion|preface|foreword|appendix|appendices)\b",
+    re.IGNORECASE,
+)
 _MANUAL_TOC_HEADER_LINE_RE = re.compile(
     r"^\s*(?:(?:[ivxlcdm\d]+\s*)?(?:contents?|table(?:\s+of\s+contents)?|table des mati[eè]res|sommaire)(?:\s*[ivxlcdm\d]+)?|(?:contents?|table(?:\s+of\s+contents)?|table des mati[eè]res|sommaire)(?:\s*[ivxlcdm\d]+)?)\s*$",
     re.IGNORECASE,
@@ -296,6 +300,131 @@ def _sanitize_visual_toc_merge_rows(items: list[dict]) -> list[dict]:
         sanitized.append(clone)
     return sanitized
 
+def _normalize_manual_toc_container_ordinal(value: str) -> str:
+    token = _fold_header_hint(value)
+    aliases = {
+        "1": "1",
+        "i": "1",
+        "one": "1",
+        "premiere": "1",
+        "premier": "1",
+        "2": "2",
+        "ii": "2",
+        "two": "2",
+        "deuxieme": "2",
+        "deuxiemee": "2",
+        "3": "3",
+        "iii": "3",
+        "three": "3",
+        "troisieme": "3",
+        "4": "4",
+        "iv": "4",
+        "four": "4",
+        "quatrieme": "4",
+        "5": "5",
+        "v": "5",
+        "five": "5",
+        "cinquieme": "5",
+        "6": "6",
+        "vi": "6",
+        "six": "6",
+        "sixieme": "6",
+        "7": "7",
+        "vii": "7",
+        "seven": "7",
+        "septieme": "7",
+        "8": "8",
+        "viii": "8",
+        "eight": "8",
+        "huitieme": "8",
+        "9": "9",
+        "ix": "9",
+        "nine": "9",
+        "neuvieme": "9",
+        "10": "10",
+        "x": "10",
+        "ten": "10",
+        "dixieme": "10",
+    }
+    return aliases.get(token, token)
+
+def _manual_toc_container_identity(raw_title: str) -> str:
+    title = _normalize_manual_toc_container_candidate_title(raw_title)
+    folded = _fold_header_hint(title)
+    if not folded:
+        return ""
+    if folded.startswith("appendices"):
+        return "appendices"
+    if folded.startswith("indices"):
+        return "indices"
+    match = re.match(r"^(part|partie|book|livre|section)\s+([a-z0-9ivxlcm]+)\b", folded)
+    if not match:
+        return ""
+    family = match.group(1)
+    ordinal = _normalize_manual_toc_container_ordinal(match.group(2))
+    if not ordinal:
+        return ""
+    return f"{family}:{ordinal}"
+
+def _manual_toc_titles_are_variant(left: str, right: str) -> bool:
+    left_title = _normalize_header_hint(left)
+    right_title = _normalize_header_hint(right)
+    if not left_title or not right_title:
+        return False
+    left_key = _fold_header_hint(left_title)
+    right_key = _fold_header_hint(right_title)
+    if not left_key or not right_key or left_key == right_key:
+        return False
+    if len(left_key) <= len(right_key):
+        short_title, short_key = left_title, left_key
+        long_title, long_key = right_title, right_key
+    else:
+        short_title, short_key = right_title, right_key
+        long_title, long_key = left_title, left_key
+    short_tokens = short_key.split()
+    long_tokens = long_key.split()
+    if len(short_tokens) == 0 or len(long_tokens) <= len(short_tokens):
+        return False
+    if long_tokens[: len(short_tokens)] != short_tokens:
+        return False
+    if len(short_tokens) >= 2:
+        return True
+    return bool(_MANUAL_TOC_SINGLE_WORD_VARIANT_RE.search(short_title) or _MANUAL_TOC_SINGLE_WORD_VARIANT_RE.search(long_title))
+
+def _manual_toc_parent_titles_compatible(left: str, right: str) -> bool:
+    left_title = _normalize_header_hint(left)
+    right_title = _normalize_header_hint(right)
+    if not left_title or not right_title:
+        return True
+    if _fold_header_hint(left_title) == _fold_header_hint(right_title):
+        return True
+    left_identity = _manual_toc_container_identity(left_title)
+    right_identity = _manual_toc_container_identity(right_title)
+    return bool(left_identity and left_identity == right_identity)
+
+def _manual_toc_variant_merge_candidates(
+    row: dict,
+    *,
+    base_page_map: dict[int, list[tuple[int, dict]]],
+    base_file_idx_map: dict[int, list[tuple[int, dict]]],
+) -> list[tuple[int, dict]]:
+    candidates: list[tuple[int, dict]] = []
+    seen_indices: set[int] = set()
+    for field, source_map in (("printed_page", base_page_map), ("file_idx", base_file_idx_map)):
+        raw_value = row.get(field)
+        try:
+            lookup_value = int(raw_value)
+        except (TypeError, ValueError):
+            lookup_value = 0
+        if lookup_value <= 0:
+            continue
+        for base_index, candidate in source_map.get(lookup_value, []):
+            if base_index in seen_indices:
+                continue
+            seen_indices.add(base_index)
+            candidates.append((base_index, candidate))
+    return candidates
+
 def _merge_manual_toc_organization_nodes(base_items: list[dict], organization_nodes: list[dict]) -> list[dict]:
     if not organization_nodes:
         return list(base_items or [])
@@ -307,6 +436,7 @@ def _merge_manual_toc_organization_nodes(base_items: list[dict], organization_no
 
     base_occurrence_map: dict[str, list[tuple[int, dict]]] = {}
     base_page_map: dict[int, list[tuple[int, dict]]] = {}
+    base_file_idx_map: dict[int, list[tuple[int, dict]]] = {}
     for base_index, item in enumerate(normalized_base):
         title = _normalize_header_hint(item.get("title") or "")
         if not title:
@@ -317,6 +447,12 @@ def _merge_manual_toc_organization_nodes(base_items: list[dict], organization_no
         if printed_page is not None:
             try:
                 base_page_map.setdefault(int(printed_page), []).append((base_index, item))
+            except (TypeError, ValueError):
+                pass
+        file_idx = item.get("file_idx")
+        if file_idx is not None:
+            try:
+                base_file_idx_map.setdefault(int(file_idx), []).append((base_index, item))
             except (TypeError, ValueError):
                 pass
 
@@ -359,6 +495,31 @@ def _merge_manual_toc_organization_nodes(base_items: list[dict], organization_no
                     None,
                 )
                 matched_via_page = matched is not None
+        if matched is None:
+            role_hint = _normalize_visual_toc_role_hint(clone.get("role_hint"), title=title)
+            variant_candidates = _manual_toc_variant_merge_candidates(
+                clone,
+                base_page_map=base_page_map,
+                base_file_idx_map=base_file_idx_map,
+            )
+            matched = next(
+                (
+                    (base_index, candidate)
+                    for base_index, candidate in variant_candidates
+                    if base_index not in used_base_indices
+                    and _normalize_visual_toc_role_hint(
+                        candidate.get("role_hint"),
+                        title=_normalize_header_hint(candidate.get("title") or ""),
+                    )
+                    == role_hint
+                    and _manual_toc_titles_are_variant(candidate.get("title") or "", title)
+                    and _manual_toc_parent_titles_compatible(
+                        candidate.get("parent_title") or "",
+                        clone.get("parent_title") or "",
+                    )
+                ),
+                None,
+            )
         if matched is not None:
             matched_base_index, matched_item = matched
             used_base_indices.add(matched_base_index)
@@ -737,6 +898,13 @@ def _augment_manual_toc_organization_with_ocr_containers(
         for item in nodes
         if _normalize_header_hint(item.get("title") or "")
     }
+    existing_container_identities = {
+        _manual_toc_container_identity(item.get("title") or "")
+        for item in nodes
+        if _normalize_visual_toc_role_hint(item.get("role_hint"), title=_normalize_header_hint(item.get("title") or ""))
+        == "container"
+    }
+    existing_container_identities.discard("")
     node_line_positions: list[int] = []
     scan_cursor = 0
     last_matched_position = -1
@@ -757,7 +925,12 @@ def _augment_manual_toc_organization_with_ocr_containers(
     offset = 0
     for candidate_index, title in container_candidates:
         title_key = _fold_header_hint(title)
-        if not title_key or title_key in existing_title_keys:
+        container_identity = _manual_toc_container_identity(title)
+        if (
+            not title_key
+            or title_key in existing_title_keys
+            or (container_identity and container_identity in existing_container_identities)
+        ):
             continue
         next_candidate_index = next(
             (
@@ -799,6 +972,8 @@ def _augment_manual_toc_organization_with_ocr_containers(
             },
         )
         existing_title_keys.add(title_key)
+        if container_identity:
+            existing_container_identities.add(container_identity)
         offset += 1
 
     for index, item in enumerate(augmented, start=1):

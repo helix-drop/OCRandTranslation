@@ -776,7 +776,7 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(quota_events[0]["kind"], "quota")
         self.assertEqual(quota_events[0]["bp"], 1)
 
-    def test_translate_worker_stops_on_non_retryable_provider_error(self):
+    def test_translate_worker_records_non_retryable_provider_error_and_continues(self):
         save_pages_to_disk([
             {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
         ], "Streaming Test", self.doc_id)
@@ -801,14 +801,120 @@ class TasksStreamingTest(unittest.TestCase):
             tasks._translate_all_worker(self.doc_id, 1, "Streaming Test")
 
         snapshot = translate_runtime.get_translate_snapshot(self.doc_id)
-        self.assertEqual(snapshot["phase"], "error")
+        self.assertEqual(snapshot["phase"], "partial_failed")
         self.assertFalse(snapshot["running"])
         self.assertEqual(snapshot["done_pages"], 0)
+        self.assertEqual(snapshot["processed_pages"], 1)
+        self.assertEqual(snapshot["pending_pages"], 0)
         self.assertIn("HTTP 400", snapshot["last_error"])
-        fatal_events = [data for event_type, data in pushed if event_type == "error"]
-        self.assertEqual(len(fatal_events), 1)
-        self.assertEqual(fatal_events[0]["kind"], "fatal_provider")
-        self.assertEqual(fatal_events[0]["bp"], 1)
+        self.assertEqual(snapshot["failed_bps"], [1])
+        event_types = [event_type for event_type, _ in pushed]
+        self.assertIn("page_error", event_types)
+        self.assertEqual(pushed[-1][0], "all_done")
+
+    def test_translate_worker_retries_failed_pages_once_after_main_loop(self):
+        save_pages_to_disk([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+            {"bookPage": 2, "fileIdx": 1, "markdown": "Page 2", "footnotes": ""},
+        ], "Streaming Test", self.doc_id)
+        pushed = []
+        attempt_by_page = {}
+
+        with translate_runtime._translate_lock:
+            translate_runtime._translate_task["running"] = True
+            translate_runtime._translate_task["stop"] = False
+            translate_runtime._translate_task["events"] = []
+            translate_runtime._translate_task["doc_id"] = self.doc_id
+
+        def _fake_translate(_pages, bp, _model_key, t_args, _glossary, **_kwargs):
+            _ = t_args
+            page = int(bp)
+            attempt_by_page[page] = attempt_by_page.get(page, 0) + 1
+            if page == 1 and attempt_by_page[page] == 1:
+                raise NonRetryableProviderError("模型请求失败（HTTP 400）：content_filter", status_code=400)
+            return {
+                "_pageBP": page,
+                "_usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1},
+                "_page_entries": [{"original": f"Page {page}", "translation": f"译文 {page}", "pages": str(page)}],
+                "pages": str(page),
+            }
+
+        with (
+            patch.object(storage, "get_translate_args", return_value={"model_id": "qwen-plus", "model_key": "qwen-plus", "api_key": "fake-key", "provider": "qwen"}),
+            patch.object(tasks, "get_glossary", return_value=[]),
+            patch.object(tasks, "translate_page_stream", side_effect=_fake_translate),
+            patch.object(tasks, "translate_push", side_effect=lambda event_type, data: pushed.append((event_type, data))),
+        ):
+            tasks._translate_all_worker(self.doc_id, 1, "Streaming Test")
+
+        snapshot = translate_runtime.get_translate_snapshot(self.doc_id)
+        self.assertEqual(snapshot["phase"], "done")
+        self.assertEqual(snapshot["done_pages"], 2)
+        self.assertEqual(snapshot["processed_pages"], 2)
+        self.assertEqual(snapshot["pending_pages"], 0)
+        self.assertEqual(snapshot["failed_bps"], [])
+        self.assertGreaterEqual(attempt_by_page.get(1, 0), 2)
+        self.assertEqual(attempt_by_page.get(2, 0), 1)
+        self.assertEqual(pushed[-1][0], "all_done")
+
+    def test_translate_worker_switches_provider_when_failed_pages_still_remain(self):
+        save_pages_to_disk([
+            {"bookPage": 1, "fileIdx": 0, "markdown": "Page 1", "footnotes": ""},
+        ], "Streaming Test", self.doc_id)
+        pushed = []
+        provider_attempts = {"qwen": 0, "deepseek": 0}
+        request_targets = []
+
+        with translate_runtime._translate_lock:
+            translate_runtime._translate_task["running"] = True
+            translate_runtime._translate_task["stop"] = False
+            translate_runtime._translate_task["events"] = []
+            translate_runtime._translate_task["doc_id"] = self.doc_id
+
+        def _fake_get_translate_args(target=None):
+            request_targets.append(target)
+            if target == "builtin:deepseek-chat":
+                return {
+                    "model_id": "deepseek-chat",
+                    "model_key": "deepseek-chat",
+                    "api_key": "deepseek-key",
+                    "provider": "deepseek",
+                }
+            return {
+                "model_id": "qwen-plus",
+                "model_key": "qwen-plus",
+                "api_key": "qwen-key",
+                "provider": "qwen",
+            }
+
+        def _fake_translate(_pages, bp, _model_key, t_args, _glossary, **_kwargs):
+            provider = str((t_args or {}).get("provider") or "")
+            provider_attempts[provider] = provider_attempts.get(provider, 0) + 1
+            if provider == "qwen":
+                raise NonRetryableProviderError("模型请求失败（HTTP 400）：content_filter", status_code=400)
+            return {
+                "_pageBP": int(bp),
+                "_usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2, "request_count": 1},
+                "_page_entries": [{"original": "Page 1", "translation": "deepseek 译文", "pages": "1"}],
+                "pages": "1",
+            }
+
+        with (
+            patch.object(storage, "get_translate_args", side_effect=_fake_get_translate_args),
+            patch.object(tasks, "get_glossary", return_value=[]),
+            patch.object(tasks, "translate_page_stream", side_effect=_fake_translate),
+            patch.object(tasks, "translate_push", side_effect=lambda event_type, data: pushed.append((event_type, data))),
+        ):
+            tasks._translate_all_worker(self.doc_id, 1, "Streaming Test")
+
+        snapshot = translate_runtime.get_translate_snapshot(self.doc_id)
+        self.assertEqual(snapshot["phase"], "done")
+        self.assertEqual(snapshot["done_pages"], 1)
+        self.assertEqual(snapshot["failed_bps"], [])
+        self.assertGreaterEqual(provider_attempts["qwen"], 2)
+        self.assertGreaterEqual(provider_attempts["deepseek"], 1)
+        self.assertIn("builtin:deepseek-chat", request_targets)
+        self.assertEqual(pushed[-1][0], "all_done")
 
     def test_glossary_retranslate_counts_only_targeted_segments(self):
         save_pages_to_disk([
@@ -953,20 +1059,17 @@ class TasksStreamingTest(unittest.TestCase):
 
     def test_get_translate_args_prefers_custom_model_name_when_enabled(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-plus",
             "dashscope_key": "dashscope-test-key",
-            "custom_model": {
-                "enabled": True,
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "Qwen 3.5 Plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "sg",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
 
         spec = resolve_model_spec()
@@ -983,20 +1086,17 @@ class TasksStreamingTest(unittest.TestCase):
 
     def test_get_translate_args_uses_builtin_target_when_explicitly_requested(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-max",
             "dashscope_key": "dashscope-test-key",
-            "custom_model": {
-                "enabled": True,
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "Qwen 3.5 Plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
 
         spec = resolve_model_spec("builtin:qwen-max")
@@ -1009,20 +1109,17 @@ class TasksStreamingTest(unittest.TestCase):
 
     def test_translate_page_stream_accepts_full_translate_args_payload(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-plus",
             "dashscope_key": "dashscope-test-key",
-            "custom_model": {
-                "enabled": True,
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "qwen3.5-plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         t_args = get_translate_args()
         self.assertIn("model_key", t_args)
@@ -1093,20 +1190,17 @@ class TasksStreamingTest(unittest.TestCase):
 
     def test_translate_page_accepts_full_translate_args_payload(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-plus",
             "dashscope_key": "dashscope-test-key",
-            "custom_model": {
-                "enabled": True,
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "qwen3.5-plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "sg",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         t_args = get_translate_args()
         captured = {}
@@ -1559,20 +1653,17 @@ class TasksStreamingTest(unittest.TestCase):
 
     def test_llm_fix_paragraphs_accepts_full_translate_args_payload(self):
         config.save_config({
-            "active_model_mode": "custom",
-            "active_builtin_model_key": "qwen-plus",
             "dashscope_key": "dashscope-test-key",
-            "custom_model": {
-                "enabled": True,
+            "translation_model_pool": [{
+                "mode": "custom",
                 "display_name": "qwen3.5-plus",
                 "provider_type": "qwen",
                 "model_id": "qwen3.5-plus",
                 "base_url": "",
                 "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
-            },
+            }, {"mode": "empty"}, {"mode": "empty"}],
         })
         t_args = get_translate_args()
         captured = {}
@@ -1614,23 +1705,26 @@ class TasksStreamingTest(unittest.TestCase):
         self.assertEqual(captured["request_overrides"], {"extra_body": {"enable_thinking": False}})
 
     def test_load_config_migrates_legacy_custom_model_shape(self):
-        config.save_config({
-            "model_key": "deepseek-chat",
-            "deepseek_key": "deepseek-test-key",
-            "dashscope_key": "dashscope-test-key",
-            "custom_model_name": "qwen3.5-plus",
-            "custom_model_enabled": True,
-            "custom_model_base_key": "qwen-max",
-        })
+        os.makedirs(config.CONFIG_DIR, exist_ok=True)
+        with open(config.CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump({
+                "model_key": "deepseek-chat",
+                "deepseek_key": "deepseek-test-key",
+                "dashscope_key": "dashscope-test-key",
+                "custom_model_name": "qwen3.5-plus",
+                "custom_model_enabled": True,
+                "custom_model_base_key": "qwen-max",
+            }, f, ensure_ascii=False)
 
         migrated = config.load_config()
         spec = resolve_model_spec()
 
-        self.assertEqual(migrated["active_model_mode"], "custom")
-        self.assertEqual(migrated["active_builtin_model_key"], "deepseek-chat")
-        self.assertEqual(migrated["custom_model"]["provider_type"], "qwen")
-        self.assertEqual(migrated["custom_model"]["model_id"], "qwen3.5-plus")
-        self.assertEqual(migrated["custom_model"]["api_key_mode"], "builtin_dashscope")
+        self.assertNotIn("active_model_mode", migrated)
+        self.assertNotIn("custom_model", migrated)
+        self.assertEqual(migrated["translation_model_pool"][0]["mode"], "custom")
+        self.assertEqual(migrated["translation_model_pool"][0]["provider_type"], "qwen")
+        self.assertEqual(migrated["translation_model_pool"][0]["model_id"], "qwen3.5-plus")
+        self.assertEqual(migrated["translation_model_pool"][1]["mode"], "empty")
         self.assertEqual(spec.provider, "qwen")
         self.assertEqual(spec.model_key, "")
         self.assertEqual(spec.model_id, "qwen3.5-plus")

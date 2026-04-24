@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 30670,
+          "row_id": 32702,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00276",
           "chapter_id": "toc-ch-014-1830oulamaladiedelacivil",
@@ -42,8 +42,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "d'Indépendance aux États-Unis, la Révolution française, avivant les passions et déplaçant les hommes, sont autant de troubles pris en exemple qui, sans créer ex abrupto la monomanie, lui permettent selon lui de se révéler et de se développer. Les événements ne jouent pas seulement le rôle de déclencheurs, ils caractérisent la manie: la venue du pape en France voit l'augmentation des monomanies religieuses, la domination de l'Europe par Napoléon distribuant les couronnes multiplie les monomanies ambitieuses. Néanmoins, ces événements ou ces périodes de l'Histoire, agissant sur des tempéraments prédestinés, ne font jamais que catalyser des égarements qui auraient pris corps en d'autres circonstances: « Tel individu, devenu fou par la perte de sa fortune, de son rang, le fût devenu, cinquante ans avant, après avoir perdu sa fortune confiée à la mer, ou après une disgrâce de la cour ; tel individu que les frayeurs révolutionnaires rendirent aliéné, le fût devenu, il y a deux siècles, par la crainte des sorciers et du diable $ ^{16} $. » En d'autres termes, l'Histoire ne produit pas les symptômes de la folie, mais la folie latente se développe en fonction des accidents de l'Histoire.",
-          "created_at": 1776848881,
-          "updated_at": 1776848881
+          "created_at": 1776859188,
+          "updated_at": 1776859188
         }
       ],
       "rebind_candidates": []
@@ -65,7 +65,7 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00276\",\n    \"marker\": \"16\",\n    \"note_text\": \"J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 28-29.\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text is clearly visible at the bottom of page 239 in the screenshot. The OCR/structured data missed this note item, so it must be synthesized. The marker '16' and the full text are transcribed directly from the image.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00276\",\n    \"marker\": \"16\",\n    \"note_text\": \"J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 28-29.\",\n    \"confidence\": 0.95,\n    \"reason\": \"Screenshot clearly shows the footnote text for marker 16 at the bottom of page 239 (displayed as image page 237). The OCR/structured data missed this note item. Text is transcribed directly from the visible image.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -75,7 +75,7 @@
       "marker": "16",
       "note_text": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 28-29.",
       "confidence": 0.95,
-      "reason": "The footnote text is clearly visible at the bottom of page 239 in the screenshot. The OCR/structured data missed this note item, so it must be synthesized. The marker '16' and the full text are transcribed directly from the image."
+      "reason": "Screenshot clearly shows the footnote text for marker 16 at the bottom of page 239 (displayed as image page 237). The OCR/structured data missed this note item. Text is transcribed directly from the visible image."
     }
   ],
   "derived_truth": {
@@ -91,7 +91,7 @@
         "marker": "16",
         "note_text": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 28-29.",
         "confidence": 0.95,
-        "reason": "The footnote text is clearly visible at the bottom of page 239 in the screenshot. The OCR/structured data missed this note item, so it must be synthesized. The marker '16' and the full text are transcribed directly from the image."
+        "reason": "Screenshot clearly shows the footnote text for marker 16 at the bottom of page 239 (displayed as image page 237). The OCR/structured data missed this note item. Text is transcribed directly from the visible image."
       }
     ],
     "auto_selected_actions": [
@@ -103,7 +103,7 @@
         "marker": "16",
         "note_text": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 28-29.",
         "confidence": 0.95,
-        "reason": "The footnote text is clearly visible at the bottom of page 239 in the screenshot. The OCR/structured data missed this note item, so it must be synthesized. The marker '16' and the full text are transcribed directly from the image."
+        "reason": "Screenshot clearly shows the footnote text for marker 16 at the bottom of page 239 (displayed as image page 237). The OCR/structured data missed this note item. Text is transcribed directly from the visible image."
       }
     ],
     "auto_applied_actions": [
@@ -115,17 +115,17 @@
         "marker": "16",
         "note_text": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 28-29.",
         "confidence": 0.95,
-        "reason": "The footnote text is clearly visible at the bottom of page 239 in the screenshot. The OCR/structured data missed this note item, so it must be synthesized. The marker '16' and the full text are transcribed directly from the image."
+        "reason": "Screenshot clearly shows the footnote text for marker 16 at the bottom of page 239 (displayed as image page 237). The OCR/structured data missed this note item. Text is transcribed directly from the visible image."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 1344,
-    "completion_tokens": 158,
-    "total_tokens": 1502,
+    "completion_tokens": 156,
+    "total_tokens": 1500,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 5890
+    "duration_ms": 4054
   }
 }

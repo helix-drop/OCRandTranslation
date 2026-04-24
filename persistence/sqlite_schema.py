@@ -2,6 +2,7 @@
 
 从 sqlite_store.py 提取，保持 schema 版本、表结构、字段迁移和连接工具在一处。
 """
+
 from __future__ import annotations
 
 import logging
@@ -13,7 +14,7 @@ from config import ensure_dirs, get_sqlite_db_path
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 23
+SCHEMA_VERSION = 24
 _schema_init_lock = threading.Lock()
 
 # ---- TOC 来源常量 ----
@@ -51,6 +52,7 @@ class ManagedConnection(sqlite3.Connection):
             return super().__exit__(exc_type, exc_val, exc_tb)
         finally:
             self.close()
+
 
 def _apply_pragmas(conn: sqlite3.Connection) -> None:
     conn.execute("PRAGMA journal_mode=WAL")
@@ -101,7 +103,15 @@ def initialize_database(db_path: str | None = None) -> str:
         try:
             if _read_schema_version(conn) < SCHEMA_VERSION:
                 _create_schema(conn)
-                conn.commit()
+            else:
+                # 旧进程可能已写入最新 schema_version，但中途缺少后续新增列。
+                # 这里保持幂等补迁移，避免现有文档库读取状态时因缺列 500。
+                _create_core_tables(conn)
+                _migrate_documents_schema(conn)
+                _migrate_translation_schema(conn)
+                _migrate_fnm_schema(conn)
+                _write_schema_version(conn)
+            conn.commit()
             row = conn.execute("PRAGMA journal_mode").fetchone()
             return row[0] if row else ""
         finally:
@@ -133,6 +143,7 @@ def read_connection(db_path: str | None = None):
 
 
 # ---- Schema 迁移辅助 ----
+
 
 def _column_exists(conn: sqlite3.Connection, table: str, column: str) -> bool:
     rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
@@ -176,6 +187,7 @@ def _drop_retired_fnm_v2_tables(conn: sqlite3.Connection) -> None:
 
 
 # ---- Schema 创建与迁移 ----
+
 
 def _create_schema(conn: sqlite3.Connection) -> None:
     _create_core_tables(conn)
@@ -326,6 +338,11 @@ def _create_core_tables(conn: sqlite3.Connection) -> None:
             retry_round INTEGER NOT NULL DEFAULT 0,
             unresolved_count INTEGER NOT NULL DEFAULT 0,
             manual_required_count INTEGER NOT NULL DEFAULT 0,
+            fnm_tail_state TEXT,
+            export_bundle_available INTEGER NOT NULL DEFAULT 0,
+            export_has_blockers INTEGER NOT NULL DEFAULT 0,
+            tail_blocking_summary_json TEXT,
+            translation_attempt_history_json TEXT,
             next_failed_location_json TEXT,
             failed_locations_json TEXT,
             manual_required_locations_json TEXT,
@@ -454,16 +471,25 @@ def _migrate_documents_schema(conn: sqlite3.Connection) -> None:
             ("toc_page_offset", "toc_page_offset INTEGER NOT NULL DEFAULT 0"),
             ("toc_file_name", "toc_file_name TEXT"),
             ("toc_file_uploaded_at", "toc_file_uploaded_at INTEGER"),
-            ("cleanup_headers_footers", "cleanup_headers_footers INTEGER NOT NULL DEFAULT 1"),
+            (
+                "cleanup_headers_footers",
+                "cleanup_headers_footers INTEGER NOT NULL DEFAULT 1",
+            ),
             ("toc_user_json", "toc_user_json TEXT"),
             ("toc_auto_pdf_json", "toc_auto_pdf_json TEXT"),
             ("toc_auto_visual_json", "toc_auto_visual_json TEXT"),
-            ("auto_visual_toc_enabled", "auto_visual_toc_enabled INTEGER NOT NULL DEFAULT 0"),
+            (
+                "auto_visual_toc_enabled",
+                "auto_visual_toc_enabled INTEGER NOT NULL DEFAULT 0",
+            ),
             ("toc_visual_status", "toc_visual_status TEXT NOT NULL DEFAULT 'idle'"),
             ("toc_visual_message", "toc_visual_message TEXT"),
             ("toc_visual_model_id", "toc_visual_model_id TEXT"),
             ("toc_visual_phase", "toc_visual_phase TEXT"),
-            ("toc_visual_progress_pct", "toc_visual_progress_pct INTEGER NOT NULL DEFAULT 0"),
+            (
+                "toc_visual_progress_pct",
+                "toc_visual_progress_pct INTEGER NOT NULL DEFAULT 0",
+            ),
             ("toc_visual_progress_label", "toc_visual_progress_label TEXT"),
             ("toc_visual_progress_detail", "toc_visual_progress_detail TEXT"),
         ),
@@ -500,6 +526,7 @@ def _migrate_translation_schema(conn: sqlite3.Connection) -> None:
         "translation_pages",
         (
             ("model_source", "model_source TEXT"),
+            ("model_key", "model_key TEXT"),
             ("model_id", "model_id TEXT"),
             ("provider", "provider TEXT"),
         ),
@@ -510,11 +537,26 @@ def _migrate_translation_schema(conn: sqlite3.Connection) -> None:
         (
             ("execution_mode", "execution_mode TEXT"),
             ("model_source", "model_source TEXT"),
+            ("model_key", "model_key TEXT"),
             ("model_id", "model_id TEXT"),
             ("provider", "provider TEXT"),
             ("retry_round", "retry_round INTEGER NOT NULL DEFAULT 0"),
             ("unresolved_count", "unresolved_count INTEGER NOT NULL DEFAULT 0"),
-            ("manual_required_count", "manual_required_count INTEGER NOT NULL DEFAULT 0"),
+            (
+                "manual_required_count",
+                "manual_required_count INTEGER NOT NULL DEFAULT 0",
+            ),
+            ("fnm_tail_state", "fnm_tail_state TEXT"),
+            (
+                "export_bundle_available",
+                "export_bundle_available INTEGER NOT NULL DEFAULT 0",
+            ),
+            ("export_has_blockers", "export_has_blockers INTEGER NOT NULL DEFAULT 0"),
+            ("tail_blocking_summary_json", "tail_blocking_summary_json TEXT"),
+            (
+                "translation_attempt_history_json",
+                "translation_attempt_history_json TEXT",
+            ),
             ("next_failed_location_json", "next_failed_location_json TEXT"),
             ("failed_locations_json", "failed_locations_json TEXT"),
             ("manual_required_locations_json", "manual_required_locations_json TEXT"),
@@ -873,9 +915,15 @@ def _migrate_fnm_schema(conn: sqlite3.Connection) -> None:
         conn,
         "fnm_note_regions",
         (
-            ("region_start_first_source_marker", "region_start_first_source_marker TEXT"),
+            (
+                "region_start_first_source_marker",
+                "region_start_first_source_marker TEXT",
+            ),
             ("region_first_note_item_marker", "region_first_note_item_marker TEXT"),
-            ("region_marker_alignment_ok", "region_marker_alignment_ok INTEGER NOT NULL DEFAULT 0"),
+            (
+                "region_marker_alignment_ok",
+                "region_marker_alignment_ok INTEGER NOT NULL DEFAULT 0",
+            ),
         ),
     )
     _ensure_columns(
@@ -901,6 +949,55 @@ def _migrate_fnm_schema(conn: sqlite3.Connection) -> None:
         DROP TABLE IF EXISTS fnm_page_revisions;
         DROP TABLE IF EXISTS fnm_page_entries;
         DROP TABLE IF EXISTS fnm_notes;
+
+        CREATE TABLE IF NOT EXISTS fnm_chapter_endnotes (
+            row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            chapter_id TEXT NOT NULL,
+            ordinal INTEGER NOT NULL,
+            marker TEXT,
+            numbering_scheme TEXT NOT NULL DEFAULT 'per_chapter',
+            text TEXT,
+            source_page_no INTEGER,
+            is_reconstructed INTEGER NOT NULL DEFAULT 0,
+            review_required INTEGER NOT NULL DEFAULT 1,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            UNIQUE(doc_id, chapter_id, ordinal),
+            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_fnm_chapter_endnotes_doc_chapter
+            ON fnm_chapter_endnotes(doc_id, chapter_id, ordinal);
+
+        CREATE TABLE IF NOT EXISTS fnm_paragraph_footnotes (
+            row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            chapter_id TEXT NOT NULL,
+            page_no INTEGER NOT NULL,
+            paragraph_index INTEGER NOT NULL DEFAULT 0,
+            attachment_kind TEXT NOT NULL DEFAULT 'page_tail',
+            source_marker TEXT,
+            text TEXT,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_fnm_paragraph_footnotes_doc_chapter
+            ON fnm_paragraph_footnotes(doc_id, chapter_id, page_no);
+
+        CREATE TABLE IF NOT EXISTS fnm_chapter_anchor_alignment (
+            row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            chapter_id TEXT NOT NULL,
+            alignment_status TEXT NOT NULL DEFAULT 'misaligned',
+            body_anchor_count INTEGER NOT NULL DEFAULT 0,
+            endnote_count INTEGER NOT NULL DEFAULT 0,
+            mismatch_json TEXT,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            UNIQUE(doc_id, chapter_id),
+            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
+        );
         """
     )
 

@@ -46,6 +46,30 @@ logger = logging.getLogger(__name__)
 
 
 _VISION_PREFLIGHT_CACHE: dict[tuple[str, str, str], tuple[bool, str]] = {}
+
+
+def _deep_merge_dict(base: dict, incoming: dict) -> dict:
+    merged = dict(base or {})
+    for key, value in dict(incoming or {}).items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge_dict(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def _merge_request_overrides(create_kwargs: dict, request_overrides: dict | None) -> dict:
+    if not isinstance(request_overrides, dict):
+        return create_kwargs
+    merged = dict(create_kwargs)
+    for key, value in request_overrides.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge_dict(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
 _TOC_CONTAINER_RE = re.compile(
     r"^(?:"
     r"table|table of contents|table des mati[eè]res|contents?|sommaire|toc|"
@@ -682,7 +706,7 @@ def _call_vision_json(
     create_kwargs.setdefault("timeout", 90.0)
     request_overrides = getattr(spec, "request_overrides", None)
     if isinstance(request_overrides, dict):
-        create_kwargs.update(request_overrides)
+        create_kwargs = _merge_request_overrides(create_kwargs, request_overrides)
     started = time.time()
     try:
         response = client.chat.completions.create(**create_kwargs)

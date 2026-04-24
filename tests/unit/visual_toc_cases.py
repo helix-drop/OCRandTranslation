@@ -1030,6 +1030,82 @@ class VisualTocLogicTest(unittest.TestCase):
             ],
         )
 
+    def test_merge_manual_toc_organization_nodes_coalesces_same_page_short_and_long_chapter_variants(self):
+        merged = _merge_manual_toc_organization_nodes(
+            [
+                {
+                    "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+                    "depth": 0,
+                    "visual_order": 1,
+                    "printed_page": 1,
+                    "file_idx": 18,
+                    "role_hint": "chapter",
+                },
+                {
+                    "title": "Prologue Diversity, coherence, and scheme transfers",
+                    "depth": 0,
+                    "visual_order": 2,
+                    "file_idx": 37,
+                    "role_hint": "chapter",
+                    "parent_title": "Part One = MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
+                },
+                {
+                    "title": "From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360",
+                    "depth": 0,
+                    "visual_order": 3,
+                    "file_idx": 90,
+                    "role_hint": "chapter",
+                    "parent_title": "Part One = MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
+                },
+            ],
+            [
+                {
+                    "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+                    "depth": 0,
+                    "visual_order": 1,
+                    "printed_page": 1,
+                    "file_idx": 18,
+                    "role_hint": "chapter",
+                },
+                {
+                    "title": "Part One",
+                    "depth": 0,
+                    "visual_order": 2,
+                    "role_hint": "container",
+                },
+                {
+                    "title": "Prologue",
+                    "depth": 1,
+                    "visual_order": 3,
+                    "printed_page": 20,
+                    "file_idx": 37,
+                    "role_hint": "chapter",
+                    "parent_title": "Part One",
+                },
+                {
+                    "title": "From Wind to mucus and Fire",
+                    "depth": 1,
+                    "visual_order": 4,
+                    "printed_page": 73,
+                    "file_idx": 90,
+                    "role_hint": "chapter",
+                    "parent_title": "Part One",
+                },
+            ],
+        )
+
+        self.assertEqual(
+            [row["title"] for row in merged],
+            [
+                "Mad acts, mad speech, and mad people in Chinese medicine and law",
+                "Part One",
+                "Prologue",
+                "From Wind to mucus and Fire",
+            ],
+        )
+        self.assertEqual(merged[2]["file_idx"], 37)
+        self.assertEqual(merged[3]["file_idx"], 90)
+
     def test_annotate_visual_toc_organization_marks_container_post_body_and_export_candidates(self):
         items, summary = _annotate_visual_toc_organization(
             [
@@ -1583,6 +1659,66 @@ class VisualTocLogicTest(unittest.TestCase):
         self.assertIn("Part II Neural Equipment", titles)
         self.assertEqual(titles.count("Part I Conceptual Equipment"), 1)
         self.assertEqual(titles.count("Part II Neural Equipment"), 1)
+
+    def test_augment_manual_toc_organization_with_ocr_containers_skips_equivalent_expanded_part_titles(self):
+        augmented = _augment_manual_toc_organization_with_ocr_containers(
+            [
+                {
+                    "title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+                    "depth": 0,
+                    "visual_order": 1,
+                    "printed_page": 1,
+                    "role_hint": "chapter",
+                },
+                {
+                    "title": "Part One",
+                    "depth": 0,
+                    "visual_order": 2,
+                    "role_hint": "container",
+                },
+                {
+                    "title": "Prologue",
+                    "depth": 1,
+                    "visual_order": 3,
+                    "printed_page": 20,
+                    "role_hint": "chapter",
+                    "parent_title": "Part One",
+                },
+                {
+                    "title": "Part Two",
+                    "depth": 0,
+                    "visual_order": 4,
+                    "role_hint": "container",
+                },
+                {
+                    "title": "Prologue",
+                    "depth": 1,
+                    "visual_order": 5,
+                    "printed_page": 408,
+                    "role_hint": "chapter",
+                    "parent_title": "Part Two",
+                },
+            ],
+            [
+                "Part One = MEDICAL OBJECTS AND PRACTICES (Warring States to Qing)",
+                "Prologue Diversity, coherence, and scheme transfers 20",
+                "Part Two = LEGAL AND POPULAR PRACTICES (Qing)",
+                "Prologue Language, objects, and practices 408",
+            ],
+        )
+
+        self.assertEqual(
+            [row["title"] for row in augmented],
+            [
+                "Mad acts, mad speech, and mad people in Chinese medicine and law",
+                "Part One",
+                "Prologue",
+                "Part Two",
+                "Prologue",
+            ],
+        )
+        self.assertEqual(augmented[2]["parent_title"], "Part One")
+        self.assertEqual(augmented[4]["parent_title"], "Part Two")
 
     def test_extract_manual_toc_outline_nodes_from_pdf_text_recovers_missing_container_and_chapters(self):
         fake_pages = [

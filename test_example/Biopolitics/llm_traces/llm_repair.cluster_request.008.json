@@ -27,7 +27,7 @@
       "matched_examples": [],
       "unmatched_note_items": [
         {
-          "row_id": 21027,
+          "row_id": 22093,
           "doc_id": "0d285c0800db",
           "note_item_id": "fn-00014",
           "note_kind": "footnote",
@@ -41,11 +41,11 @@
           "display_marker": "1",
           "source_marker": "1",
           "title_hint": "",
-          "created_at": 1776850867,
-          "updated_at": 1776850867
+          "created_at": 1776856746,
+          "updated_at": 1776856746
         },
         {
-          "row_id": 21028,
+          "row_id": 22094,
           "doc_id": "0d285c0800db",
           "note_item_id": "fn-00015",
           "note_kind": "footnote",
@@ -59,8 +59,8 @@
           "display_marker": "2",
           "source_marker": "2",
           "title_hint": "",
-          "created_at": 1776850867,
-          "updated_at": 1776850867
+          "created_at": 1776856746,
+          "updated_at": 1776856746
         }
       ],
       "unmatched_anchors": [],
@@ -83,7 +83,7 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00014\",\n    \"anchor_phrase\": \"Michel Senellart est professeur de Philosophie politique\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '*' in the screenshot corresponds to the author's name 'MICHEL SENELLART'. The OCR body text missed the marker symbol next to the name, but the footnote content clearly describes Michel Senellart. This phrase is unique and identifies the anchor location.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00015\",\n    \"anchor_phrase\": \"Les pages qui suivent sont extraites\",\n    \"confidence\": 0.95,\n    \"reason\": \"The second footnote in the screenshot explains the source of the following text ('Situation du cours'). Although there is no explicit marker in the title line in the OCR, the content of the note refers to the section itself. Synthesizing an anchor based on the unique phrase describing the excerpt status is appropriate here as it functions as a headnote for the section.\"\n  }\n]",
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00014\",\n    \"anchor_phrase\": \"Michel Senellart est professeur de Philosophie politique\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote marked with an asterisk (*) in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The text of fn-00014 begins with his biography ('Michel Senellart est professeur...'). Since there is no existing anchor for this footnote, a synthetic anchor is created using the unique biographical phrase found in the note text which identifies the subject.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00015\",\n    \"anchor_phrase\": \"Les pages qui suivent sont extraites\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote marker '2' in the body text (after 'économie') corresponds to fn-00015 in the image, which contains a source attribution starting with '[Les pages qui suivent sont extraites...'. As there is no existing anchor for this reference, a synthetic anchor is created using the unique opening phrase of the note text.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "synthesize_anchor",
@@ -93,7 +93,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Footnote marker '*' in the screenshot corresponds to the author's name 'MICHEL SENELLART'. The OCR body text missed the marker symbol next to the name, but the footnote content clearly describes Michel Senellart. This phrase is unique and identifies the anchor location.",
+      "reason": "The footnote marked with an asterisk (*) in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The text of fn-00014 begins with his biography ('Michel Senellart est professeur...'). Since there is no existing anchor for this footnote, a synthetic anchor is created using the unique biographical phrase found in the note text which identifies the subject.",
       "fuzzy_score": 51.78571428571428,
       "ambiguous": false,
       "char_start": 2052,
@@ -109,7 +109,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "The second footnote in the screenshot explains the source of the following text ('Situation du cours'). Although there is no explicit marker in the title line in the OCR, the content of the note refers to the section itself. Synthesizing an anchor based on the unique phrase describing the excerpt status is appropriate here as it functions as a headnote for the section.",
+      "reason": "The footnote marker '2' in the body text (after 'économie') corresponds to fn-00015 in the image, which contains a source attribution starting with '[Les pages qui suivent sont extraites...'. As there is no existing anchor for this reference, a synthetic anchor is created using the unique opening phrase of the note text.",
       "fuzzy_score": 52.77777777777778,
       "ambiguous": false,
       "char_start": 1601,
@@ -131,7 +131,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '*' in the screenshot corresponds to the author's name 'MICHEL SENELLART'. The OCR body text missed the marker symbol next to the name, but the footnote content clearly describes Michel Senellart. This phrase is unique and identifies the anchor location.",
+        "reason": "The footnote marked with an asterisk (*) in the image corresponds to the author's name 'MICHEL SENELLART' at the top of the page. The text of fn-00014 begins with his biography ('Michel Senellart est professeur...'). Since there is no existing anchor for this footnote, a synthetic anchor is created using the unique biographical phrase found in the note text which identifies the subject.",
         "fuzzy_score": 51.78571428571428,
         "ambiguous": false,
         "char_start": 2052,
@@ -147,7 +147,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The second footnote in the screenshot explains the source of the following text ('Situation du cours'). Although there is no explicit marker in the title line in the OCR, the content of the note refers to the section itself. Synthesizing an anchor based on the unique phrase describing the excerpt status is appropriate here as it functions as a headnote for the section.",
+        "reason": "The footnote marker '2' in the body text (after 'économie') corresponds to fn-00015 in the image, which contains a source attribution starting with '[Les pages qui suivent sont extraites...'. As there is no existing anchor for this reference, a synthetic anchor is created using the unique opening phrase of the note text.",
         "fuzzy_score": 52.77777777777778,
         "ambiguous": false,
         "char_start": 1601,
@@ -161,11 +161,11 @@
   },
   "usage": {
     "prompt_tokens": 1655,
-    "completion_tokens": 259,
-    "total_tokens": 1914,
+    "completion_tokens": 289,
+    "total_tokens": 1944,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 7889
+    "duration_ms": 6626
   }
 }

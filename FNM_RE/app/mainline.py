@@ -14,6 +14,8 @@ from FNM_RE.models import (
     BodyAnchorRecord,
     ChapterNoteModeRecord,
     ChapterRecord,
+    ExportBundleRecord,
+    ExportChapterRecord,
     NoteItemRecord,
     NoteLinkRecord,
     NoteRegionRecord,
@@ -27,6 +29,11 @@ from FNM_RE.models import (
     TranslationUnitRecord,
     UnitPageSegmentRecord,
     UnitParagraphRecord,
+)
+from persistence.fnm_export_bundle import (
+    clear_fnm_export_bundle,
+    load_fnm_export_bundle,
+    save_fnm_export_bundle,
 )
 from FNM_RE.app.persist_helpers import (
     load_fnm_visual_toc_bundle as _load_fnm_visual_toc_bundle,
@@ -55,6 +62,10 @@ _EMPTY_ROLE_SUMMARY = {
     "back_matter": 0,
     "front_matter": 0,
 }
+_EXPORT_VALIDATION_LOG_PATH = "logs/fnm_export_validation_issues.log"
+_EXPORT_STAGE_REASON_PREFIXES = ("merge_", "export_")
+_EXPORT_STAGE_REASON_EXACT = {"local_note_contract_broken"}
+_MISSING_PERSISTED_EXPORT_BUNDLE_MESSAGE = "FNM 导出包不存在，请先执行最终校验。"
 
 
 def _safe_list(callable_obj: Any, *args) -> list[Any]:
@@ -203,6 +214,378 @@ def _effective_max_body_chars(explicit_value: int | None) -> int:
         return max(2000, int(explicit_value))
     model_key = str(get_translate_args().get("model_key") or "")
     return _infer_max_body_chars(model_key)
+
+
+def _is_export_stage_reason(reason_code: str) -> bool:
+    token = str(reason_code or "").strip()
+    if not token:
+        return False
+    if token in _EXPORT_STAGE_REASON_EXACT:
+        return True
+    return token.startswith(_EXPORT_STAGE_REASON_PREFIXES)
+
+
+def _format_issue_page_span(page_span: list[int]) -> str:
+    pages = [int(page_no) for page_no in list(page_span or []) if int(page_no) > 0]
+    if not pages:
+        return "-"
+    if len(pages) == 1:
+        return f"p.{pages[0]}"
+    start = int(pages[0])
+    end = int(pages[1])
+    if end <= 0:
+        end = start
+    if start == end:
+        return f"p.{start}"
+    return f"p.{start}-{end}"
+
+
+def _tail_translation_issue_payloads(
+    doc_id: str,
+    *,
+    repo: SQLiteRepository | None = None,
+    snapshot: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    from FNM_RE.page_translate import build_retry_summary
+
+    summary = build_retry_summary(doc_id, repo=repo, snapshot=snapshot)
+    issues: list[dict[str, Any]] = []
+    seen: set[tuple[str, int, int, str]] = set()
+    for row in list(summary.get("manual_required_locations") or []) + list(summary.get("failed_locations") or []):
+        if not isinstance(row, dict):
+            continue
+        unit_id = str(row.get("unit_id") or "").strip()
+        page_no = int(row.get("page_no") or 0)
+        para_idx = int(row.get("para_idx") or 0)
+        status = str(row.get("status") or "").strip() or "failed"
+        key = (unit_id, page_no, para_idx, status)
+        if key in seen:
+            continue
+        seen.add(key)
+        issues.append(
+            {
+                "unit_id": unit_id,
+                "section_title": str(row.get("section_title") or "").strip(),
+                "page_no": page_no,
+                "para_idx": para_idx,
+                "paragraph_label": para_idx + 1 if para_idx >= 0 else 0,
+                "status": status,
+                "error": str(row.get("error") or "").strip(),
+            }
+        )
+    return issues
+
+
+def _tail_blocking_summary(
+    *,
+    translation_blockers: list[dict[str, Any]],
+    export_blocking_reasons: list[str],
+) -> list[str]:
+    summary: list[str] = []
+    for row in translation_blockers:
+        page_no = int(row.get("page_no") or 0)
+        para_label = int(row.get("paragraph_label") or 0)
+        status = str(row.get("status") or "failed").strip() or "failed"
+        unit_id = str(row.get("unit_id") or "").strip()
+        if page_no > 0 and para_label > 0:
+            summary.append(f"{status}:p.{page_no} ¶{para_label} ({unit_id or 'unit'})")
+        elif page_no > 0:
+            summary.append(f"{status}:p.{page_no} ({unit_id or 'unit'})")
+        else:
+            summary.append(f"{status}:{unit_id or 'unknown_unit'}")
+    for reason in export_blocking_reasons:
+        token = str(reason or "").strip()
+        if token:
+            summary.append(token)
+    return summary[:16]
+
+
+def _build_export_validation_log(
+    *,
+    doc_id: str,
+    phase6: Phase6Structure | None = None,
+    run: dict[str, Any] | None = None,
+) -> str:
+    run = dict(run or {})
+    if not run:
+        repo = SQLiteRepository()
+        run = _safe_dict(getattr(repo, "get_latest_fnm_run", None), doc_id)
+    run_validation = _safe_json_loads(run.get("validation_json"))
+    post_translate_export_check = dict(run_validation.get("post_translate_export_check") or {})
+    translation_blockers = [
+        dict(item or {})
+        for item in list(post_translate_export_check.get("translation_blockers") or [])
+        if isinstance(item, dict)
+    ]
+    translation_attempt_history = [
+        dict(item or {})
+        for item in list(post_translate_export_check.get("translation_attempt_history") or [])
+        if isinstance(item, dict)
+    ]
+    if phase6 is not None:
+        status = phase6.status or StructureStatusRecord(structure_state="idle")
+        structure_state = str(status.structure_state or "").strip()
+        export_stage_reasons = [
+            str(reason).strip()
+            for reason in list(status.blocking_reasons or [])
+            if _is_export_stage_reason(str(reason))
+        ]
+        audit_files = [
+            _phase6_file_issue_payload(row)
+            for row in list((phase6.export_audit.files if phase6.export_audit else []) or [])
+            if list(getattr(row, "issue_codes", []) or [])
+            and str(getattr(row, "severity", "") or "").strip().lower() in {"blocking", "major"}
+        ]
+    else:
+        structure_state = str(run.get("structure_state") or "").strip()
+        export_stage_reasons = [
+            str(reason).strip()
+            for reason in list(run_validation.get("blocking_reasons") or [])
+            if _is_export_stage_reason(str(reason))
+        ]
+        audit_files = [
+            dict(row or {})
+            for row in list(post_translate_export_check.get("final_blocking_files") or [])
+            if isinstance(row, dict)
+            and list(row.get("issue_codes") or [])
+            and str(row.get("severity") or "").strip().lower() in {"blocking", "major"}
+        ]
+    if not export_stage_reasons and not audit_files and not translation_blockers:
+        return ""
+
+    lines = [
+        "FNM 导出校验问题日志",
+        f"doc_id: {str(doc_id or '').strip()}",
+        f"structure_state: {structure_state}",
+        "",
+    ]
+    if export_stage_reasons:
+        lines.append("阻塞原因（导出阶段）:")
+        for reason in export_stage_reasons:
+            lines.append(f"- {reason}")
+        lines.append("")
+
+    if translation_blockers:
+        lines.append("翻译补救后仍未解决:")
+        for row in translation_blockers:
+            page_no = int(row.get("page_no") or 0)
+            para_label = int(row.get("paragraph_label") or 0)
+            status = str(row.get("status") or "failed").strip() or "failed"
+            unit_id = str(row.get("unit_id") or "").strip() or "-"
+            section_title = str(row.get("section_title") or "").strip() or "-"
+            lines.append(
+                f"- 页面: {'p.' + str(page_no) if page_no > 0 else '-'} | 段落: {para_label if para_label > 0 else '-'} | unit_id: {unit_id} | 状态: {status} | 章节: {section_title}"
+            )
+            error = str(row.get("error") or "").strip()
+            if error:
+                lines.append(f"  原因: {error}")
+        lines.append("")
+
+    if translation_attempt_history:
+        lines.append("翻译模型尝试记录:")
+        for row in translation_attempt_history:
+            round_no = int(row.get("round") or 0)
+            unit_id = str(row.get("unit_id") or "").strip() or "-"
+            model_label = str(row.get("model_label") or row.get("model_id") or row.get("model_key") or "-").strip()
+            provider = str(row.get("provider") or "").strip() or "-"
+            result = str(row.get("result") or "").strip() or "-"
+            page_start = int(row.get("page_start") or 0)
+            page_end = int(row.get("page_end") or page_start or 0)
+            page_text = _format_issue_page_span([page_start, page_end]) if page_start > 0 else "-"
+            lines.append(
+                f"- 第 {round_no} 轮 | 页面: {page_text} | unit_id: {unit_id} | 模型: {model_label} | provider: {provider} | 结果: {result}"
+            )
+            error = str(row.get("error") or "").strip()
+            if error:
+                lines.append(f"  原因: {error}")
+        lines.append("")
+
+    if audit_files:
+        lines.append("校验失败明细:")
+        for row in audit_files:
+            path = str(row.get("path") or "").strip()
+            title = str(row.get("title") or "").strip()
+            severity = str(row.get("severity") or "").strip().lower() or "unknown"
+            issue_codes = [str(code).strip() for code in list(row.get("issue_codes") or []) if str(code).strip()]
+            issue_summary = [str(item).strip() for item in list(row.get("issue_summary") or []) if str(item).strip()]
+            issue_details = [
+                dict(item or {})
+                for item in list(row.get("issue_details") or [])
+                if isinstance(item, dict)
+            ]
+            lines.append(
+                f"- 路径: {path or '-'} | 标题: {title or '-'} | 页码: {_format_issue_page_span(list(row.get('page_span') or []))} | 级别: {severity}"
+            )
+            if issue_codes:
+                lines.append(f"  原因代码: {', '.join(issue_codes)}")
+            for summary in issue_summary:
+                lines.append(f"  详情: {summary}")
+            for detail in issue_details[:6]:
+                code = str(detail.get("code") or "").strip() or "-"
+                paragraph_index = int(detail.get("paragraph_index") or 0)
+                paragraph_label = str(paragraph_index) if paragraph_index > 0 else "-"
+                detail_text = str(detail.get("detail") or "").strip() or code
+                lines.append(f"  定位: code={code} | 段落={paragraph_label} | {detail_text}")
+                excerpt = str(detail.get("excerpt") or "").strip()
+                if excerpt:
+                    lines.append(f"  片段: {excerpt}")
+        lines.append("")
+
+    repair_rounds = [
+        dict(item or {})
+        for item in list(post_translate_export_check.get("repair_rounds") or [])
+        if isinstance(item, dict)
+    ]
+    if repair_rounds:
+        lines.append("自动修补记录:")
+        for row in repair_rounds:
+            round_no = int(row.get("round") or 0)
+            error = str(row.get("error") or "").strip()
+            if error:
+                lines.append(f"- 第 {round_no} 轮: 调用失败 | error={error}")
+                continue
+            auto_applied_count = int(row.get("auto_applied_count") or 0)
+            suggestion_count = int(row.get("suggestion_count") or 0)
+            can_ship = bool(row.get("post_round_can_ship"))
+            lines.append(
+                f"- 第 {round_no} 轮: suggestion={suggestion_count} | auto_applied={auto_applied_count} | 结果={'通过' if can_ship else '仍阻塞'}"
+            )
+            auto_action_counts = {
+                str(key): int(value)
+                for key, value in dict(row.get("auto_action_counts") or {}).items()
+                if str(key).strip()
+            }
+            model_attempts = [
+                dict(item or {})
+                for item in list(row.get("model_attempts") or [])
+                if isinstance(item, dict)
+            ]
+            for attempt in model_attempts:
+                lines.append(
+                    "  模型尝试: "
+                    + f"{str(attempt.get('model_label') or attempt.get('model_id') or '-').strip()} "
+                    + f"| provider={str(attempt.get('provider') or '-').strip()} "
+                    + f"| result={str(attempt.get('result') or '-').strip()}"
+                )
+                attempt_error = str(attempt.get("error") or "").strip()
+                if attempt_error:
+                    lines.append(f"    error: {attempt_error}")
+            if auto_action_counts:
+                action_summary = ", ".join(
+                    f"{key}={value}"
+                    for key, value in sorted(auto_action_counts.items(), key=lambda item: item[0])
+                )
+                lines.append(f"  自动应用: {action_summary}")
+            blocking_reasons_after = [
+                str(reason).strip()
+                for reason in list(row.get("post_round_blocking_reasons") or [])
+                if str(reason).strip()
+            ]
+            if blocking_reasons_after and not can_ship:
+                lines.append(f"  仍阻塞: {', '.join(blocking_reasons_after[:8])}")
+        lines.append("")
+
+    return "\n".join(lines).strip()
+
+
+def _bundle_with_export_validation_log(
+    bundle: ExportBundleRecord,
+    *,
+    phase6: Phase6Structure | None = None,
+    doc_id: str,
+    run: dict[str, Any] | None = None,
+) -> ExportBundleRecord:
+    log_text = _build_export_validation_log(doc_id=doc_id, phase6=phase6, run=run)
+    if not log_text:
+        return bundle
+    files = dict(bundle.files or {})
+    files[_EXPORT_VALIDATION_LOG_PATH] = log_text
+    return replace(bundle, files=files)
+
+
+def _phase6_file_issue_payload(row: Any) -> dict[str, Any]:
+    return {
+        "path": str(getattr(row, "path", "") or ""),
+        "title": str(getattr(row, "title", "") or ""),
+        "page_span": [int(page_no) for page_no in list(getattr(row, "page_span", []) or []) if int(page_no) > 0],
+        "issue_codes": [str(code).strip() for code in list(getattr(row, "issue_codes", []) or []) if str(code).strip()],
+        "issue_summary": [str(item).strip() for item in list(getattr(row, "issue_summary", []) or []) if str(item).strip()],
+        "issue_details": [
+            dict(item or {})
+            for item in list(getattr(row, "issue_details", []) or [])
+            if isinstance(item, dict)
+        ],
+        "severity": str(getattr(row, "severity", "") or ""),
+    }
+
+
+def _phase6_blocking_file_payloads(phase6: Phase6Structure) -> list[dict[str, Any]]:
+    return [
+        _phase6_file_issue_payload(row)
+        for row in list((phase6.export_audit.files if phase6.export_audit else []) or [])
+        if str(getattr(row, "severity", "") or "").strip().lower() == "blocking"
+    ]
+
+
+def _update_latest_fnm_run_from_phase6(
+    doc_id: str,
+    phase6: Phase6Structure,
+    *,
+    repo: SQLiteRepository,
+    validation_extra: dict[str, Any] | None = None,
+) -> tuple[int, dict[str, Any], dict[str, Any]]:
+    status_payload = _status_payload(
+        status=phase6.status,
+        summary=phase6.summary,
+        run_validation=None,
+    )
+    latest_run = _safe_dict(getattr(repo, "get_latest_fnm_run", None), doc_id)
+    validation_payload = _safe_json_loads(latest_run.get("validation_json"))
+    validation_payload.update(_build_validation_payload(status_payload))
+    if validation_extra:
+        validation_payload.update(dict(validation_extra))
+
+    run_id = int(latest_run.get("id") or 0)
+    page_count = len(list(phase6.pages or []))
+    section_count = len(list(phase6.chapters or []))
+    note_count = len(list(phase6.note_items or []))
+    unit_count = len(list(phase6.translation_units or []))
+    if run_id <= 0:
+        run_id = int(
+            getattr(repo, "create_fnm_run")(
+                doc_id,
+                status="done",
+                page_count=page_count,
+                section_count=section_count,
+                note_count=note_count,
+                unit_count=unit_count,
+                structure_state=str(status_payload.get("structure_state") or "ready"),
+                review_counts=dict(status_payload.get("review_counts") or {}),
+                blocking_reasons=list(status_payload.get("blocking_reasons") or []),
+                link_summary=dict(status_payload.get("link_summary") or {}),
+                page_partition_summary=dict(status_payload.get("page_partition_summary") or {}),
+                chapter_mode_summary=dict(status_payload.get("chapter_mode_summary") or {}),
+            )
+        )
+
+    repo.update_fnm_run(
+        doc_id,
+        run_id,
+        status="done",
+        error_msg="",
+        page_count=page_count,
+        section_count=section_count,
+        note_count=note_count,
+        unit_count=unit_count,
+        validation_json=json.dumps(validation_payload, ensure_ascii=False),
+        structure_state=str(status_payload.get("structure_state") or "ready"),
+        review_counts=dict(status_payload.get("review_counts") or {}),
+        blocking_reasons=list(status_payload.get("blocking_reasons") or []),
+        link_summary=dict(status_payload.get("link_summary") or {}),
+        page_partition_summary=dict(status_payload.get("page_partition_summary") or {}),
+        chapter_mode_summary=dict(status_payload.get("chapter_mode_summary") or {}),
+    )
+    return run_id, status_payload, validation_payload
 
 
 def _phase_state_from_run(run: dict[str, Any]) -> str:
@@ -701,6 +1084,57 @@ def _export_bundle_payload(phase6: Phase6Structure) -> dict[str, Any]:
     }
 
 
+def _export_bundle_record_from_payload(payload: dict[str, Any]) -> ExportBundleRecord:
+    chapter_files = {
+        str(path): str(content or "")
+        for path, content in dict(payload.get("chapter_files") or {}).items()
+        if str(path).strip()
+    }
+    files = {
+        str(path): str(content or "")
+        for path, content in dict(payload.get("files") or {}).items()
+        if str(path).strip()
+    }
+    chapters: list[ExportChapterRecord] = []
+    for raw_row in list(payload.get("chapters") or []):
+        if not isinstance(raw_row, dict):
+            continue
+        path = str(raw_row.get("path") or "").strip()
+        if not path:
+            continue
+        chapters.append(
+            ExportChapterRecord(
+                order=int(raw_row.get("order") or 0),
+                section_id=str(raw_row.get("section_id") or ""),
+                title=str(raw_row.get("title") or ""),
+                path=path,
+                content=chapter_files.get(path, ""),
+            )
+        )
+    return ExportBundleRecord(
+        index_path=str(payload.get("index_path") or "index.md"),
+        chapters_dir=str(payload.get("chapters_dir") or "chapters"),
+        chapters=chapters,
+        chapter_files=chapter_files,
+        files=files,
+        export_semantic_contract_ok=bool(payload.get("export_semantic_contract_ok", True)),
+        front_matter_leak_detected=bool(payload.get("front_matter_leak_detected")),
+        toc_residue_detected=bool(payload.get("toc_residue_detected")),
+        mid_paragraph_heading_detected=bool(payload.get("mid_paragraph_heading_detected")),
+        duplicate_paragraph_detected=bool(payload.get("duplicate_paragraph_detected")),
+    )
+
+
+def _load_persisted_export_bundle_payload_or_raise(doc_id: str) -> dict[str, Any]:
+    payload = load_fnm_export_bundle(doc_id)
+    if not isinstance(payload, dict):
+        raise FileNotFoundError(_MISSING_PERSISTED_EXPORT_BUNDLE_MESSAGE)
+    files = dict(payload.get("files") or {})
+    if not files:
+        raise FileNotFoundError(_MISSING_PERSISTED_EXPORT_BUNDLE_MESSAGE)
+    return payload
+
+
 def _status_payload(
     *,
     status: StructureStatusRecord,
@@ -953,14 +1387,9 @@ def build_phase6_export_bundle_for_doc(
     snapshot: Any | None = None,
 ) -> dict[str, Any]:
     phase6 = _resolve_phase6_from_snapshot(snapshot)
-    if phase6 is None:
-        phase6 = load_phase6_for_doc(
-            doc_id,
-            include_diagnostic_entries=bool(include_diagnostic_entries),
-            slug=doc_id,
-            repo=repo,
-        )
-    return _export_bundle_payload(phase6)
+    if phase6 is not None:
+        return _export_bundle_payload(phase6)
+    return _load_persisted_export_bundle_payload_or_raise(doc_id)
 
 
 def build_phase6_export_zip_for_doc(
@@ -970,15 +1399,23 @@ def build_phase6_export_zip_for_doc(
     repo: SQLiteRepository | None = None,
     snapshot: Any | None = None,
 ) -> bytes:
+    repo = repo or SQLiteRepository()
     phase6 = _resolve_phase6_from_snapshot(snapshot)
-    if phase6 is None:
-        phase6 = load_phase6_for_doc(
-            doc_id,
-            include_diagnostic_entries=bool(include_diagnostic_entries),
-            slug=doc_id,
-            repo=repo,
+    if phase6 is not None:
+        export_bundle = _bundle_with_export_validation_log(
+            phase6.export_bundle,
+            phase6=phase6,
+            doc_id=doc_id,
         )
-    return build_export_zip(phase6.export_bundle)
+        return build_export_zip(export_bundle)
+    persisted_payload = _load_persisted_export_bundle_payload_or_raise(doc_id)
+    latest_run = _safe_dict(getattr(repo, "get_latest_fnm_run", None), doc_id)
+    export_bundle = _bundle_with_export_validation_log(
+        _export_bundle_record_from_payload(persisted_payload),
+        doc_id=doc_id,
+        run=latest_run,
+    )
+    return build_export_zip(export_bundle)
 
 
 def audit_phase6_export_for_doc(
@@ -1023,7 +1460,13 @@ def audit_phase6_export_for_doc(
     )
 
 
-def _persist_phase6_to_repo(doc_id: str, phase6: Phase6Structure, *, repo: SQLiteRepository) -> None:
+def _persist_phase6_to_repo(
+    doc_id: str,
+    phase6: Phase6Structure,
+    *,
+    repo: SQLiteRepository,
+    clear_translate_state: bool = True,
+) -> None:
     chapter_title_by_id = {
         str(row.chapter_id or ""): str(row.title or "")
         for row in phase6.chapters
@@ -1075,9 +1518,11 @@ def _persist_phase6_to_repo(doc_id: str, phase6: Phase6Structure, *, repo: SQLit
         units=_serialize_units_for_repo(doc_id, list(phase6.translation_units or [])),
         preserve_structure=True,
     )
-    from translation.translate_store import _clear_translate_state
+    if clear_translate_state:
+        clear_fnm_export_bundle(doc_id)
+        from translation.translate_store import _clear_translate_state
 
-    _clear_translate_state(doc_id)
+        _clear_translate_state(doc_id)
 
 
 def run_phase6_pipeline_for_doc(
@@ -1107,33 +1552,15 @@ def run_phase6_pipeline_for_doc(
             progress_callback=progress_callback,
         )
         _persist_phase6_to_repo(doc_id, phase6, repo=repo)
-        status_payload = _status_payload(
-            status=phase6.status,
-            summary=phase6.summary,
-            run_validation=None,
+        _run_id, status_payload, _validation_payload = _update_latest_fnm_run_from_phase6(
+            doc_id,
+            phase6,
+            repo=repo,
         )
-        validation_payload = _build_validation_payload(status_payload)
         note_count = len(phase6.note_items)
         unit_count = len(phase6.translation_units)
         section_count = len(phase6.chapters)
         page_count = len(pages)
-        repo.update_fnm_run(
-            doc_id,
-            run_id,
-            status="done",
-            error_msg="",
-            page_count=page_count,
-            section_count=section_count,
-            note_count=note_count,
-            unit_count=unit_count,
-            validation_json=json.dumps(validation_payload, ensure_ascii=False),
-            structure_state=str(status_payload.get("structure_state") or "ready"),
-            review_counts=dict(status_payload.get("review_counts") or {}),
-            blocking_reasons=list(status_payload.get("blocking_reasons") or []),
-            link_summary=dict(status_payload.get("link_summary") or {}),
-            page_partition_summary=dict(status_payload.get("page_partition_summary") or {}),
-            chapter_mode_summary=dict(status_payload.get("chapter_mode_summary") or {}),
-        )
         return {
             "ok": True,
             "run_id": run_id,
@@ -1150,6 +1577,222 @@ def run_phase6_pipeline_for_doc(
     except Exception as exc:
         repo.update_fnm_run(doc_id, run_id, status="error", error_msg=str(exc))
         return {"ok": False, "error": str(exc), "run_id": run_id}
+
+
+def run_post_translate_export_checks_for_doc(
+    doc_id: str,
+    *,
+    max_repair_rounds: int = 3,
+    repo: SQLiteRepository | None = None,
+) -> dict[str, Any]:
+    repo = repo or SQLiteRepository()
+    pages = _safe_list(getattr(repo, "load_pages", None), doc_id)
+    if not pages:
+        return {"ok": False, "error": "no_pages"}
+    from translation.translate_store import _load_translate_state, _save_translate_state
+
+    max_rounds = max(0, int(max_repair_rounds or 0))
+    clear_fnm_export_bundle(doc_id)
+    precheck_snapshot = _load_translate_state(doc_id)
+    translation_blockers = _tail_translation_issue_payloads(
+        doc_id,
+        repo=repo,
+        snapshot=precheck_snapshot,
+    )
+    translation_attempt_history = [
+        dict(item)
+        for item in list(precheck_snapshot.get("translation_attempt_history") or [])
+        if isinstance(item, dict)
+    ]
+    _save_translate_state(
+        doc_id,
+        running=bool(precheck_snapshot.get("running", False)),
+        stop_requested=bool(precheck_snapshot.get("stop_requested", False)),
+        phase=precheck_snapshot.get("phase", "running"),
+        fnm_tail_state="post_translate_checking",
+        export_bundle_available=False,
+        export_has_blockers=bool(translation_blockers),
+        tail_blocking_summary=_tail_blocking_summary(
+            translation_blockers=translation_blockers,
+            export_blocking_reasons=[],
+        ),
+    )
+
+    def _load_phase6_snapshot() -> Phase6Structure:
+        phase6_snapshot = load_phase6_for_doc(
+            doc_id,
+            include_diagnostic_entries=False,
+            slug=doc_id,
+            repo=repo,
+            pipeline_state_override="done",
+            pages=pages,
+            # 最终校验需要基于当前 repo 中已提交的译文做审计，不能回退到新生成的 pending frozen units。
+            overlay_repo_units=True,
+        )
+        _persist_phase6_to_repo(
+            doc_id,
+            phase6_snapshot,
+            repo=repo,
+            clear_translate_state=False,
+        )
+        return phase6_snapshot
+
+    phase6 = _load_phase6_snapshot()
+    repair_rounds: list[dict[str, Any]] = []
+
+    if not bool(phase6.export_audit.can_ship):
+        from FNM_RE.llm_repair import run_llm_repair
+        from persistence.storage import resolve_fnm_model_pool_specs
+        _save_translate_state(
+            doc_id,
+            running=bool(precheck_snapshot.get("running", False)),
+            stop_requested=bool(precheck_snapshot.get("stop_requested", False)),
+            phase=precheck_snapshot.get("phase", "running"),
+            fnm_tail_state="repairing",
+            export_bundle_available=False,
+            export_has_blockers=True,
+            tail_blocking_summary=_tail_blocking_summary(
+                translation_blockers=translation_blockers,
+                export_blocking_reasons=list(phase6.status.blocking_reasons or []),
+            ),
+        )
+
+        for round_no in range(1, max_rounds + 1):
+            round_record: dict[str, Any] = {"round": round_no}
+            repair_result = None
+            model_attempts: list[dict[str, Any]] = []
+            for spec in resolve_fnm_model_pool_specs():
+                model_args = {
+                    "provider": str(spec.provider or "").strip(),
+                    "model_id": str(spec.model_id or "").strip(),
+                    "api_key": str(spec.api_key or "").strip(),
+                    "base_url": str(spec.base_url or "").strip(),
+                    "request_overrides": dict(spec.request_overrides or {}),
+                    "display_label": str(spec.display_label or spec.model_id or "").strip(),
+                }
+                if not model_args["api_key"]:
+                    model_attempts.append(
+                        {
+                            "model_id": model_args["model_id"],
+                            "model_label": model_args["display_label"],
+                            "provider": model_args["provider"],
+                            "result": "skipped_no_api_key",
+                        }
+                    )
+                    continue
+                try:
+                    repair_result = run_llm_repair(
+                        doc_id,
+                        repo=repo,
+                        cluster_limit=None,
+                        auto_apply=True,
+                        clear_materialized_overrides=(round_no == 1),
+                        model_args=model_args,
+                    )
+                except Exception as exc:
+                    model_attempts.append(
+                        {
+                            "model_id": model_args["model_id"],
+                            "model_label": model_args["display_label"],
+                            "provider": model_args["provider"],
+                            "result": "error",
+                            "error": str(exc),
+                        }
+                    )
+                    continue
+                suggestion_count = int(repair_result.get("suggestion_count") or 0)
+                auto_applied_count = int(repair_result.get("auto_applied_count") or 0)
+                model_attempts.append(
+                    {
+                        "model_id": model_args["model_id"],
+                        "model_label": model_args["display_label"],
+                        "provider": model_args["provider"],
+                        "result": "used",
+                        "suggestion_count": suggestion_count,
+                        "auto_applied_count": auto_applied_count,
+                    }
+                )
+                if suggestion_count > 0 or auto_applied_count > 0:
+                    break
+                repair_result = None
+
+            round_record["model_attempts"] = model_attempts
+            if repair_result is None:
+                round_record["error"] = "no_repair_model_succeeded"
+                round_record["post_round_can_ship"] = bool(phase6.export_audit.can_ship)
+                round_record["post_round_blocking_reasons"] = list(phase6.status.blocking_reasons or [])
+                round_record["post_round_blocking_files"] = _phase6_blocking_file_payloads(phase6)
+                repair_rounds.append(round_record)
+                continue
+
+            round_record.update(
+                {
+                    "suggestion_count": int(repair_result.get("suggestion_count") or 0),
+                    "auto_applied_count": int(repair_result.get("auto_applied_count") or 0),
+                    "action_counts": dict(repair_result.get("action_counts") or {}),
+                    "auto_action_counts": dict(repair_result.get("auto_action_counts") or {}),
+                    "usage_summary": dict(repair_result.get("usage_summary") or {}),
+                }
+            )
+            if int(repair_result.get("auto_applied_count") or 0) > 0:
+                phase6 = _load_phase6_snapshot()
+            round_record["post_round_can_ship"] = bool(phase6.export_audit.can_ship)
+            round_record["post_round_blocking_reasons"] = list(phase6.status.blocking_reasons or [])
+            round_record["post_round_blocking_files"] = _phase6_blocking_file_payloads(phase6)
+            repair_rounds.append(round_record)
+            if bool(phase6.export_audit.can_ship):
+                break
+
+    final_blocking_reasons = list(phase6.status.blocking_reasons or [])
+    final_can_ship = bool(phase6.export_audit.can_ship and not translation_blockers)
+    repair_payload = {
+        "trigger": "after_translate",
+        "max_repair_rounds": max_rounds,
+        "attempted_rounds": len(repair_rounds),
+        "final_can_ship": final_can_ship,
+        "final_blocking_reasons": final_blocking_reasons,
+        "final_blocking_files": _phase6_blocking_file_payloads(phase6),
+        "translation_blockers": translation_blockers,
+        "translation_attempt_history": translation_attempt_history,
+        "repair_rounds": repair_rounds,
+        "updated_at": int(time.time()),
+    }
+    run_id, status_payload, validation_payload = _update_latest_fnm_run_from_phase6(
+        doc_id,
+        phase6,
+        repo=repo,
+        validation_extra={"post_translate_export_check": repair_payload},
+    )
+    save_fnm_export_bundle(doc_id, _export_bundle_payload(phase6))
+    final_tail_blocking_summary = _tail_blocking_summary(
+        translation_blockers=translation_blockers,
+        export_blocking_reasons=final_blocking_reasons,
+    )
+    _save_translate_state(
+        doc_id,
+        running=bool(precheck_snapshot.get("running", False)),
+        stop_requested=bool(precheck_snapshot.get("stop_requested", False)),
+        phase=precheck_snapshot.get("phase", "running"),
+        fnm_tail_state="done",
+        export_bundle_available=True,
+        export_has_blockers=bool(final_tail_blocking_summary),
+        tail_blocking_summary=final_tail_blocking_summary,
+    )
+    return {
+        "ok": True,
+        "run_id": run_id,
+        "export_ready_real": bool(status_payload.get("export_ready_real") and not translation_blockers),
+        "export_bundle_available": True,
+        "export_has_blockers": bool(final_tail_blocking_summary),
+        "tail_blocking_summary": final_tail_blocking_summary,
+        "fnm_tail_state": "done",
+        "structure_state": str(status_payload.get("structure_state") or ""),
+        "blocking_reasons": list(status_payload.get("blocking_reasons") or []),
+        "translation_blockers": translation_blockers,
+        "repair_rounds": repair_rounds,
+        "post_translate_export_check": repair_payload,
+        "validation": validation_payload,
+    }
 
 
 def list_phase6_diagnostic_notes_for_doc(

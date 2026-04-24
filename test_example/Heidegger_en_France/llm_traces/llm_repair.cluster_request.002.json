@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 103491,
+          "row_id": 110943,
           "doc_id": "a5d9a08d6871",
           "anchor_id": "anchor-00589",
           "chapter_id": "toc-ch-014-entreéruditionettechnosc",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent relayer et prolonger nos capacités physiques limitées[66. » Cette concession partielle est cependant contrebalancée par un par bien différent de celui de Heidegger : remettre la science « en culture »; y réintroduire la réflexivité critique pour faire pièce à l'hyperspécialisation des disciplines et à la hiérarchisation des fonctions. Ainsi prend forme, grâce au travail sur les grands couples d'antinomies qui sous-tendent la science contemporaine, un « plaidoyer pour la pensée dans la science[67». » entendant illustrer le fait que la pratique de la science — loin d'exclure l'exercice de la pensée — le rend possible et l'appelle[68].",
-          "created_at": 1776848024,
-          "updated_at": 1776848024
+          "created_at": 1776858144,
+          "updated_at": 1776858144
         },
         {
-          "row_id": 103567,
+          "row_id": 111019,
           "doc_id": "a5d9a08d6871",
           "anchor_id": "anchor-00629",
           "chapter_id": "toc-ch-014-entreéruditionettechnosc",
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n'y a pas d'amour chez Heidegger $ ^{68} $»), Mascolo ajoute que rire, jeu, sexe (et femmes !) y sont également exclus et il oppose au chemin heideggerien la grand-route du poète vagabond du 7° art (Charlie Chaplin) $ ^{69} $. Préférence respectable et même sympathique qui ne justifie cependant pas la lecture désinvolte de textes scrupuleux (peut-être trop «sérieux» !) où se révèle un sens du «jeu» peut-être plus grand que ne le croit Mascolo. Surtout, pourquoi avoir confondu Heidegger avec «l'âme; philosophante»? C'est, en voulant trop embrasser, mal étreindre le «modèle» heideggerien, pour finalement méconnaître l'étonnante diversité des philosophies du XX<sup>e</sup> siècle.",
-          "created_at": 1776848024,
-          "updated_at": 1776848024
+          "created_at": 1776858144,
+          "updated_at": 1776858144
         }
       ],
       "rebind_candidates": [
@@ -159,7 +159,7 @@
     "page_context_count": 3,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01299\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01300\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"Same anchor (marker 106) supports sequential footnote 107; screenshot shows fn-01300 immediately follows fn-01299 on p.420, both tied to same textual location.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01301\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"Third sequential footnote (108) anchored at same location on p.420; screenshot confirms all three notes (106–108) are grouped under single marker position.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01362\",\n    \"anchor_id\": \"anchor-00629\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content.\"\n  }\n]",
+  "response_raw_text": "[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01299\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread the footnote marker '106' as '66'. The note text matches exactly and is on the same page (420).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01300\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread the footnote marker '107' as '67'. The note text 'Ibid., p. 21.' corresponds to the previous note context.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01301\",\n    \"anchor_id\": \"anchor-00589\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread the footnote marker '108' as '68'. The note text regarding the seminar matches the context of the anchor excerpt.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01361\",\n    \"anchor_id\": \"anchor-00624\",\n    \"confidence\": 1.0,\n    \"reason\": \"Existing match is correct; marker 170 is clearly visible in the screenshot at the end of the paragraph about Barash.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01362\",\n    \"anchor_id\": \"anchor-00624\",\n    \"confidence\": 0.95,\n    \"reason\": \"OCR misread the footnote marker '171' as '69' (or similar noise). The note content 'Id., Martin Heidegger...' refers to the Barash work cited in fn-01361, confirming the link to the same anchor location.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "match",
@@ -169,7 +169,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+      "reason": "OCR misread the footnote marker '106' as '66'. The note text matches exactly and is on the same page (420)."
     },
     {
       "action": "match",
@@ -179,7 +179,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Same anchor (marker 106) supports sequential footnote 107; screenshot shows fn-01300 immediately follows fn-01299 on p.420, both tied to same textual location."
+      "reason": "OCR misread the footnote marker '107' as '67'. The note text 'Ibid., p. 21.' corresponds to the previous note context."
     },
     {
       "action": "match",
@@ -189,17 +189,27 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Third sequential footnote (108) anchored at same location on p.420; screenshot confirms all three notes (106–108) are grouped under single marker position."
+      "reason": "OCR misread the footnote marker '108' as '68'. The note text regarding the seminar matches the context of the anchor excerpt."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-01361",
+      "anchor_id": "anchor-00624",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Existing match is correct; marker 170 is clearly visible in the screenshot at the end of the paragraph about Barash."
     },
     {
       "action": "match",
       "note_item_id": "fn-01362",
-      "anchor_id": "anchor-00629",
+      "anchor_id": "anchor-00624",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+      "reason": "OCR misread the footnote marker '171' as '69' (or similar noise). The note content 'Id., Martin Heidegger...' refers to the Barash work cited in fn-01361, confirming the link to the same anchor location."
     }
   ],
   "derived_truth": {
@@ -215,7 +225,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+        "reason": "OCR misread the footnote marker '106' as '66'. The note text matches exactly and is on the same page (420)."
       },
       {
         "action": "match",
@@ -225,7 +235,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Same anchor (marker 106) supports sequential footnote 107; screenshot shows fn-01300 immediately follows fn-01299 on p.420, both tied to same textual location."
+        "reason": "OCR misread the footnote marker '107' as '67'. The note text 'Ibid., p. 21.' corresponds to the previous note context."
       },
       {
         "action": "match",
@@ -235,17 +245,27 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Third sequential footnote (108) anchored at same location on p.420; screenshot confirms all three notes (106–108) are grouped under single marker position."
+        "reason": "OCR misread the footnote marker '108' as '68'. The note text regarding the seminar matches the context of the anchor excerpt."
+      },
+      {
+        "action": "match",
+        "note_item_id": "fn-01361",
+        "anchor_id": "anchor-00624",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Existing match is correct; marker 170 is clearly visible in the screenshot at the end of the paragraph about Barash."
       },
       {
         "action": "match",
         "note_item_id": "fn-01362",
-        "anchor_id": "anchor-00629",
+        "anchor_id": "anchor-00624",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+        "reason": "OCR misread the footnote marker '171' as '69' (or similar noise). The note content 'Id., Martin Heidegger...' refers to the Barash work cited in fn-01361, confirming the link to the same anchor location."
       }
     ],
     "auto_selected_actions": [
@@ -257,17 +277,17 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+        "reason": "OCR misread the footnote marker '106' as '66'. The note text matches exactly and is on the same page (420)."
       },
       {
         "action": "match",
-        "note_item_id": "fn-01362",
-        "anchor_id": "anchor-00629",
+        "note_item_id": "fn-01361",
+        "anchor_id": "anchor-00624",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+        "confidence": 1.0,
+        "reason": "Existing match is correct; marker 170 is clearly visible in the screenshot at the end of the paragraph about Barash."
       }
     ],
     "auto_applied_actions": [
@@ -280,28 +300,28 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "OCR misread footnote marker '66' as '[66.' and failed to parse the note item; screenshot confirms marker 106 at end of paragraph on p.420 matches fn-01299 content."
+        "reason": "OCR misread the footnote marker '106' as '66'. The note text matches exactly and is on the same page (420)."
       },
       {
-        "link_id": "link-01362",
+        "link_id": "link-01361",
         "action": "match",
-        "note_item_id": "fn-01362",
-        "anchor_id": "anchor-00629",
+        "note_item_id": "fn-01361",
+        "anchor_id": "anchor-00624",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "OCR misread marker '68' as '$ ^{68} $' and failed to link to fn-01362; screenshot on p.436 clearly shows marker 171 after 'Heidegger' quote, matching fn-01362 content."
+        "confidence": 1.0,
+        "reason": "Existing match is correct; marker 170 is clearly visible in the screenshot at the end of the paragraph about Barash."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 3547,
-    "completion_tokens": 452,
-    "total_tokens": 3999,
+    "completion_tokens": 494,
+    "total_tokens": 4041,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 9594
+    "duration_ms": 10798
   }
 }

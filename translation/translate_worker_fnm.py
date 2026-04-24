@@ -3,6 +3,7 @@
 from __future__ import annotations
 import logging
 
+from FNM_RE import run_post_translate_export_checks_for_doc
 from FNM_RE.page_translate import (
     apply_body_unit_entry_result,
     apply_body_unit_translations,
@@ -21,7 +22,6 @@ from translation.translate_state import TASK_KIND_FNM, _build_translate_task_met
 from translation.translate_worker_common import run_translate_worker
 
 logger = logging.getLogger(__name__)
-_REAL_MODE_RETRY_LIMIT = 3
 
 
 def _model_label(model_key: str, t_args: dict) -> str:
@@ -172,6 +172,34 @@ def _mark_unit_manual_required(unit: dict) -> dict:
     return unit_payload
 
 
+def _retry_model_candidates(deps: dict) -> list[tuple[str, dict]]:
+    getter = deps.get("get_translation_retry_model_args")
+    if callable(getter):
+        return list(getter() or [])
+    return []
+
+
+def _append_translation_attempt_history(doc_id: str, deps: dict, records: list[dict]) -> None:
+    if not callable(deps.get("load_translate_state")) or not callable(deps.get("save_translate_state")):
+        return
+    if not records:
+        return
+    snapshot = deps["load_translate_state"](doc_id)
+    history = [
+        dict(item)
+        for item in list(snapshot.get("translation_attempt_history") or [])
+        if isinstance(item, dict)
+    ]
+    history.extend(dict(item) for item in records if isinstance(item, dict))
+    deps["save_translate_state"](
+        doc_id,
+        running=bool(snapshot.get("running", False)),
+        stop_requested=bool(snapshot.get("stop_requested", False)),
+        phase=snapshot.get("phase", "idle"),
+        translation_attempt_history=history,
+    )
+
+
 def _save_real_mode_failure_state(doc_id: str, deps: dict, repo: SQLiteRepository, *, retry_round: int | None = None) -> dict:
     snapshot = deps["load_translate_state"](doc_id)
     failed_locations: list[dict] = []
@@ -203,10 +231,49 @@ def _save_real_mode_failure_state(doc_id: str, deps: dict, repo: SQLiteRepositor
     }
 
 
+def _update_tail_state(doc_id: str, deps: dict, **fields) -> None:
+    if not callable(deps.get("load_translate_state")) or not callable(deps.get("save_translate_state")):
+        return
+    snapshot = deps["load_translate_state"](doc_id)
+    deps["save_translate_state"](
+        doc_id,
+        running=bool(snapshot.get("running", False)),
+        stop_requested=bool(snapshot.get("stop_requested", False)),
+        phase=snapshot.get("phase", "running"),
+        **fields,
+    )
+
+
 def _retry_real_mode_failed_units(doc_id: str, deps: dict, repo: SQLiteRepository, *, pages: list[dict]) -> None:
-    model_key, t_args = deps["get_active_translate_args"]()
     glossary = deps["get_glossary"](doc_id)
-    for retry_round in range(1, _REAL_MODE_RETRY_LIMIT + 1):
+    retry_models = _retry_model_candidates(deps)
+    if not retry_models:
+        retry_units = [
+            dict(unit)
+            for unit in repo.list_fnm_translation_units(doc_id)
+            if str(unit.get("kind") or "") == "body"
+            and collect_fnm_unit_failed_locations(unit)
+        ]
+        for unit in retry_units:
+            unit_id = ensure_str(unit.get("unit_id", "")).strip()
+            manual_payload = _mark_unit_manual_required(unit)
+            failed_locations = collect_fnm_unit_failed_locations({
+                **unit,
+                "page_segments": manual_payload["page_segments"],
+            })
+            repo.update_fnm_translation_unit(
+                doc_id,
+                unit_id,
+                translated_text=ensure_str(unit.get("translated_text", "")).strip(),
+                status="error" if failed_locations else "done",
+                error_msg=failed_locations[0]["error"] if failed_locations else "",
+                page_segments=manual_payload["page_segments"],
+            )
+        _rebuild_fnm_diagnostic_page_entries(doc_id, pages=pages, repo=repo)
+        _save_real_mode_failure_state(doc_id, deps, repo, retry_round=0)
+        return
+
+    for retry_round, (model_key, t_args) in enumerate(retry_models, start=1):
         retry_units = [
             dict(unit)
             for unit in repo.list_fnm_translation_units(doc_id)
@@ -216,27 +283,52 @@ def _retry_real_mode_failed_units(doc_id: str, deps: dict, repo: SQLiteRepositor
         if not retry_units:
             _save_real_mode_failure_state(doc_id, deps, repo, retry_round=retry_round - 1)
             return
+        round_records: list[dict] = []
         for unit in retry_units:
             unit_id = ensure_str(unit.get("unit_id", "")).strip()
             ctx, para_jobs = _unit_stream_context(unit, pages)
-            entry = deps["translate_page_stream"](
-                pages,
-                int(unit.get("unit_idx") or unit.get("page_start") or 0),
-                model_key,
-                t_args,
-                glossary,
-                doc_id=doc_id,
-                stop_checker=lambda: deps["is_stop_requested"](doc_id),
-                prepared_ctx=ctx,
-                prepared_para_jobs=para_jobs,
-                prepared_total_usage={
-                    "prompt_tokens": 0,
-                    "completion_tokens": 0,
-                    "total_tokens": 0,
-                    "request_count": 0,
-                },
-                prepared_is_fnm=True,
-            )
+            try:
+                entry = deps["translate_page_stream"](
+                    pages,
+                    int(unit.get("unit_idx") or unit.get("page_start") or 0),
+                    model_key,
+                    t_args,
+                    glossary,
+                    doc_id=doc_id,
+                    stop_checker=lambda: deps["is_stop_requested"](doc_id),
+                    prepared_ctx=ctx,
+                    prepared_para_jobs=para_jobs,
+                    prepared_total_usage={
+                        "prompt_tokens": 0,
+                        "completion_tokens": 0,
+                        "total_tokens": 0,
+                        "request_count": 0,
+                    },
+                    prepared_is_fnm=True,
+                )
+            except Exception as exc:
+                error_text = str(exc) or exc.__class__.__name__
+                repo.update_fnm_translation_unit(
+                    doc_id,
+                    unit_id,
+                    status="error",
+                    error_msg=error_text,
+                )
+                round_records.append(
+                    {
+                        "round": retry_round,
+                        "unit_id": unit_id,
+                        "page_start": int(unit.get("page_start") or 0),
+                        "page_end": int(unit.get("page_end") or unit.get("page_start") or 0),
+                        "model_key": t_args.get("model_key") or model_key,
+                        "model_id": t_args.get("model_id") or model_key,
+                        "model_label": t_args.get("display_label") or t_args.get("model_id") or model_key,
+                        "provider": t_args.get("provider") or "",
+                        "result": "error",
+                        "error": error_text,
+                    }
+                )
+                continue
             latest_unit = _find_unit_by_id(doc_id, unit_id, repo=repo) or unit
             translated_payload = apply_body_unit_entry_result(
                 latest_unit,
@@ -244,25 +336,55 @@ def _retry_real_mode_failed_units(doc_id: str, deps: dict, repo: SQLiteRepositor
                 apply_only_unresolved=True,
             )
             failed_locations = translated_payload["failed_locations"]
-            if retry_round >= _REAL_MODE_RETRY_LIMIT and failed_locations:
-                manual_payload = _mark_unit_manual_required({
-                    **latest_unit,
-                    "page_segments": translated_payload["page_segments"],
-                })
-                translated_payload["page_segments"] = manual_payload["page_segments"]
-                failed_locations = collect_fnm_unit_failed_locations({
-                    **latest_unit,
-                    "page_segments": translated_payload["page_segments"],
-                })
             repo.update_fnm_translation_unit(
+                doc_id,
                 unit_id,
                 translated_text=translated_payload["translated_text"],
                 status="done" if not failed_locations else "error",
                 error_msg=failed_locations[0]["error"] if failed_locations else "",
                 page_segments=translated_payload["page_segments"],
             )
+            round_records.append(
+                {
+                    "round": retry_round,
+                    "unit_id": unit_id,
+                    "page_start": int(unit.get("page_start") or 0),
+                    "page_end": int(unit.get("page_end") or unit.get("page_start") or 0),
+                    "model_key": t_args.get("model_key") or model_key,
+                    "model_id": t_args.get("model_id") or model_key,
+                    "model_label": t_args.get("display_label") or t_args.get("model_id") or model_key,
+                    "provider": t_args.get("provider") or "",
+                    "result": "done" if not failed_locations else "failed",
+                    "error": failed_locations[0]["error"] if failed_locations else "",
+                }
+            )
+        _append_translation_attempt_history(doc_id, deps, round_records)
         _rebuild_fnm_diagnostic_page_entries(doc_id, pages=pages, repo=repo)
         _save_real_mode_failure_state(doc_id, deps, repo, retry_round=retry_round)
+
+    remaining_units = [
+        dict(unit)
+        for unit in repo.list_fnm_translation_units(doc_id)
+        if str(unit.get("kind") or "") == "body"
+        and collect_fnm_unit_failed_locations(unit)
+    ]
+    for unit in remaining_units:
+        unit_id = ensure_str(unit.get("unit_id", "")).strip()
+        manual_payload = _mark_unit_manual_required(unit)
+        failed_locations = collect_fnm_unit_failed_locations({
+            **unit,
+            "page_segments": manual_payload["page_segments"],
+        })
+        repo.update_fnm_translation_unit(
+            doc_id,
+            unit_id,
+            translated_text=ensure_str(unit.get("translated_text", "")).strip(),
+            status="error" if failed_locations else "done",
+            error_msg=failed_locations[0]["error"] if failed_locations else "",
+            page_segments=manual_payload["page_segments"],
+        )
+    _rebuild_fnm_diagnostic_page_entries(doc_id, pages=pages, repo=repo)
+    _save_real_mode_failure_state(doc_id, deps, repo, retry_round=len(retry_models))
 
 
 def _seed_fnm_unit_draft(deps: dict, doc_id: str, unit: dict, repo: SQLiteRepository, *, status: str, note: str, unit_error: str = "") -> None:
@@ -516,7 +638,7 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
             char_count = len(translated_text)
             failed_locations = []
             if execution_mode == "real" and unit_status == "error":
-                failed_locations = [{"error": page_error or "翻译失败"}]
+                failed_locations = [{"error": diagnostic_error or "翻译失败"}]
 
         _seed_fnm_unit_draft(
             deps,
@@ -591,6 +713,14 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
                 repo=repo,
             )
             return
+        _update_tail_state(
+            doc_id,
+            deps,
+            fnm_tail_state="translation_retrying",
+            export_bundle_available=False,
+            export_has_blockers=False,
+            tail_blocking_summary=[],
+        )
         _retry_real_mode_failed_units(
             doc_id,
             deps,
@@ -602,6 +732,19 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
             pages=context.get("pages") or [],
             repo=repo,
         )
+        try:
+            snapshot = deps["load_translate_state"](doc_id) if callable(deps.get("load_translate_state")) else {}
+            _update_tail_state(
+                doc_id,
+                deps,
+                fnm_tail_state="post_translate_checking",
+                export_bundle_available=False,
+                export_has_blockers=bool(snapshot.get("unresolved_count") or snapshot.get("manual_required_count")),
+                tail_blocking_summary=[],
+            )
+            run_post_translate_export_checks_for_doc(doc_id, repo=repo)
+        except Exception:
+            logger.exception("FNM 翻译结束后的导出预检查失败 doc_id=%s", doc_id)
 
     return run_translate_worker(
         doc_id=doc_id,

@@ -118,6 +118,17 @@ FIX_HINTS: dict[str, str] = {
         "（warning）存在 synthetic_anchor：系统根据启发式补了一个原文没有显式编号的锚点。"
         "偶发可以接受；密集出现说明编号识别规则需要加强。"
     ),
+    "phase3.chapter_anchor_misaligned": (
+        "章节正文锚点序列与尾注条目序列长度不一致（misaligned）。常见的两种场景："
+        "（1）尾注页有个别条目被 OCR 切分错误导致漏项，"
+        "（2）正文存在跳号（某编号在正文中没出现但尾注有对应条目）。"
+        "修复入口：查阅 chapter_anchor_alignment 的 mismatch.body_extra_markers 或 "
+        "endnote_extra_markers 定位具体差异。"
+    ),
+    "phase3.chapter_anchor_mismatches_warn": (
+        "（warning）章节正文锚点序列与尾注条目序列等长但部分编号不匹配。"
+        "不阻塞，但建议检查对应章节的锚点与尾注条目编号是否对齐。"
+    ),
     # Phase 4
     "phase4.structure_state_not_ready": (
         "Phase 4 status.structure_state != 'ready'。表示综合审核没有放行。"
@@ -441,6 +452,32 @@ def judge_phase3(structure: Any, *, freeze_summary: Any = None) -> GateReport:
                 evidence={"synthetic_anchor_count": synth},
             )
         )
+
+    # Chapter anchor alignment
+    alignment_summary = dict(getattr(summary, "chapter_anchor_alignment_summary", {}) or {})
+    chapter_status = dict(alignment_summary.get("chapter_status", {}) or {})
+    for cid, st in chapter_status.items():
+        st_str = str(st.get("alignment_status") or "misaligned")
+        if st_str == "misaligned":
+            failures.append(
+                _fail(
+                    "phase3.chapter_anchor_misaligned",
+                    f"章节 {cid} 锚点序列与尾注序列不对齐",
+                    evidence={
+                        "chapter_id": cid,
+                        "body_anchor_count": int(st.get("body_anchor_count", 0) or 0),
+                        "endnote_count": int(st.get("endnote_count", 0) or 0),
+                    },
+                )
+            )
+        elif st_str == "mismatches":
+            warnings.append(
+                _fail(
+                    "phase3.chapter_anchor_mismatches_warn",
+                    f"章节 {cid} 锚点与尾注等长但存在不匹配",
+                    evidence={"chapter_id": cid},
+                )
+            )
 
     return GateReport(phase=3, pass_=not failures, failures=failures, warnings=warnings)
 

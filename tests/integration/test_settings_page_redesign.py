@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import unittest
 
 from web.app_factory import create_app
@@ -56,6 +57,33 @@ class SettingsPageRedesignSmokeTests(unittest.TestCase):
         html = self._get_html()
         self.assertIn("当前主翻译模型", html)
         self.assertIn("当前主 FNM 模型", html)
+
+    def test_builtin_model_candidates_are_grouped_by_provider(self):
+        html = self._get_html()
+        for group in (
+            'data-provider-group="deepseek"',
+            'data-provider-group="dashscope"',
+            'data-provider-group="mimo"',
+            'data-provider-group="glm"',
+            'data-provider-group="kimi"',
+        ):
+            self.assertIn(group, html)
+        self.assertRegex(
+            html,
+            re.compile(
+                r'<optgroup label="DashScope / Qwen" data-provider-group="dashscope">.*'
+                r'<option value="qwen-mt-plus"',
+                re.S,
+            ),
+        )
+        self.assertRegex(
+            html,
+            re.compile(
+                r'<optgroup label="MiMo" data-provider-group="mimo">.*'
+                r'<option value="mimo-v2\.5-pro"',
+                re.S,
+            ),
+        )
 
     def test_loads_new_css_and_js(self):
         html = self._get_html()

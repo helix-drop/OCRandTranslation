@@ -97,6 +97,29 @@ class FnmReModule6MergeTest(unittest.TestCase):
         self.assertIn("[^2]", rewritten)
         self.assertIn("[^2]: Global fallback note.", rewritten)
 
+    def test_rewrite_legacy_en_token_normalizes_fallback_definition_placeholders(self):
+        chapter = ChapterMarkdownEntry(
+            order=1,
+            chapter_id="ch-1",
+            title="Chapter One",
+            path="chapters/001-Chapter-One.md",
+            markdown_text="Body [EN-en-00096] and [^1].\n\n[^1]: Existing note.",
+            start_page=1,
+            end_page=1,
+            pages=[1],
+        )
+
+        rewritten = _rewrite_residual_raw_markers_for_chapter(
+            chapter,
+            note_text_by_id={},
+            marker_note_sequences={},
+            fallback_note_text_by_id={"en-00096": "Global fallback {{NOTE_REF:1}} and {{NOTE_REF:ibid}}."},
+        )
+
+        self.assertNotIn("{{NOTE_REF:", rewritten)
+        self.assertIn("[^2]:", rewritten)
+        self.assertRegex(rewritten, r"\[\^2\]: .*?\[\^1\]")
+
     def test_translation_priority_manual_machine_source_pending(self):
         pages = [
             _make_page(

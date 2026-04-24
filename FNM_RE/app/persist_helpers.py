@@ -278,3 +278,36 @@ def serialize_note_items_for_repo(
             }
         )
     return payload
+
+
+# ---------- Phase 3 新表从 DB 重构加载 ----------
+
+
+def load_paragraph_footnotes_from_repo(
+    doc_id: str, repo: Any
+) -> list[dict[str, Any]]:
+    """从 DB 加载 fnm_paragraph_footnotes。"""
+    getter = getattr(repo, "list_fnm_paragraph_footnotes", None)
+    if not callable(getter):
+        return []
+    return [dict(row) for row in (getter(doc_id) or [])]
+
+
+def load_chapter_endnotes_from_repo(
+    doc_id: str, repo: Any
+) -> list[dict[str, Any]]:
+    """从 DB 加载 fnm_chapter_endnotes。"""
+    getter = getattr(repo, "list_fnm_chapter_endnotes", None)
+    if not callable(getter):
+        return []
+    return [dict(row) for row in (getter(doc_id) or [])]
+
+
+def load_chapter_anchor_alignments_from_repo(
+    doc_id: str, repo: Any
+) -> list[dict[str, Any]]:
+    """从 DB 加载 fnm_chapter_anchor_alignment。"""
+    getter = getattr(repo, "list_fnm_chapter_anchor_alignment", None)
+    if not callable(getter):
+        return []
+    return [dict(row) for row in (getter(doc_id) or [])]

@@ -18,8 +18,7 @@ _NOTE_DEFINITION_LINE_RE = re.compile(
     r"|\$\s*\^\{\d{1,4}\}\s*\$"
     r"|\^\{\d{1,4}\}"
     r"|[⁰¹²³⁴⁵⁶⁷⁸⁹]{1,4}"
-    r")\s*\S+"
-    ,
+    r")\s*\S+",
     re.IGNORECASE,
 )
 _HTML_SUP_RE = re.compile(r"<sup>\s*(\d{1,4})\s*</sup>", re.IGNORECASE)
@@ -47,6 +46,13 @@ _REF_PATTERN_PRIORITY = {
     "html": 2,
     "unicode": 3,
     "bracket": 4,
+}
+_REF_PATTERN_CERTAINTY = {
+    "latex": 1.0,
+    "html": 1.0,
+    "bracket": 1.0,
+    "unicode": 1.0,
+    "plain": 0.4,
 }
 
 
@@ -88,22 +94,30 @@ def _paragraphs_from_markdown(page: Mapping[str, Any] | None) -> list[dict]:
         line = re.sub(r"\s+", " ", str(raw_line or "")).strip()
         if not line:
             if current_lines:
-                paragraphs.append({"text": " ".join(current_lines).strip(), "source": "markdown"})
+                paragraphs.append(
+                    {"text": " ".join(current_lines).strip(), "source": "markdown"}
+                )
                 current_lines = []
             continue
         if _MARKDOWN_HEADING_RE.match(raw_line) or is_notes_heading_line(line):
             if current_lines:
-                paragraphs.append({"text": " ".join(current_lines).strip(), "source": "markdown"})
+                paragraphs.append(
+                    {"text": " ".join(current_lines).strip(), "source": "markdown"}
+                )
                 current_lines = []
             continue
         if _NOTE_DEFINITION_LINE_RE.match(line):
             if current_lines:
-                paragraphs.append({"text": " ".join(current_lines).strip(), "source": "markdown"})
+                paragraphs.append(
+                    {"text": " ".join(current_lines).strip(), "source": "markdown"}
+                )
                 current_lines = []
             continue
         current_lines.append(line)
     if current_lines:
-        paragraphs.append({"text": " ".join(current_lines).strip(), "source": "markdown"})
+        paragraphs.append(
+            {"text": " ".join(current_lines).strip(), "source": "markdown"}
+        )
     return [row for row in paragraphs if str(row.get("text") or "").strip()]
 
 
@@ -163,10 +177,29 @@ def _scan_inline_refs(text: str) -> list[dict]:
                     "char_start": int(match.start()),
                     "char_end": int(match.end()),
                     "pattern": kind,
+                    "certainty": _REF_PATTERN_CERTAINTY.get(kind, 0.4),
                 }
             )
     for match in _UNICODE_SUP_RE.finditer(content):
-        marker = normalize_note_marker(match.group(0).translate(_UNICODE_SUPERSCRIPT_TO_DIGITS))
+        marker = normalize_note_marker(
+            match.group(0).translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
+        )
+        if not marker:
+            continue
+        refs.append(
+            {
+                "source_marker": str(match.group(0) or "").strip(),
+                "normalized_marker": marker,
+                "char_start": int(match.start()),
+                "char_end": int(match.end()),
+                "pattern": "unicode",
+                "certainty": _REF_PATTERN_CERTAINTY.get("unicode", 1.0),
+            }
+        )
+    for match in _UNICODE_SUP_RE.finditer(content):
+        marker = normalize_note_marker(
+            match.group(0).translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
+        )
         if not marker:
             continue
         refs.append(
@@ -213,16 +246,17 @@ def scan_anchor_markers(text: str) -> tuple[list[dict], int]:
             continue
         replaced = False
         for index, existing in enumerate(deduped):
-            if (
-                str(existing.get("normalized_marker") or "") == normalized
-                and _overlap(existing, candidate)
+            if str(existing.get("normalized_marker") or "") == normalized and _overlap(
+                existing, candidate
             ):
                 deduped[index] = _preferred(existing, candidate)
                 replaced = True
                 break
         if not replaced:
             deduped.append({**candidate, "normalized_marker": normalized})
-    deduped.sort(key=lambda row: (int(row.get("char_start") or 0), int(row.get("char_end") or 0)))
+    deduped.sort(
+        key=lambda row: (int(row.get("char_start") or 0), int(row.get("char_end") or 0))
+    )
     return deduped, year_like_filtered
 
 

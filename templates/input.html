@@ -6,20 +6,10 @@
     <a href="{{ url_for('home', doc_id=current_doc_id) }}" class="btn btn-gho" style="font-size:13px;">← 首页</a>
     <div class="flex gap-8 items-center">
       <span class="badge badge-ocr">OCR</span>
-      <div class="model-picker compact">
-        {% for key, m in models.items() %}
-        <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <input type="hidden" name="next" value="input">
-          <button type="submit" class="btn {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
-        </form>
-        {% endfor %}
-        <a href="{{ url_for('settings', doc_id=current_doc_id, open_custom_model=1) }}#customModelPanel"
-           class="btn {{ 'active' if custom_model_enabled else '' }}">
-          {{ ('自定义: ' ~ custom_model_name) if custom_model_name else '自定义模型' }}
-        </a>
-      </div>
+      <span style="font-size:12px;color:var(--txS);line-height:1.5;">
+        翻译主模型：{{ current_model_label or current_model_id or '-' }}
+      </span>
+      <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="btn btn-sec btn-sm">设置</a>
     </div>
   </div>
 
@@ -70,13 +60,29 @@
   {% endif %}
 
   {% set provider = current_model_provider %}
-  {% if provider == 'qwen' and not dashscope_key %}
+  {% if provider in ['qwen', 'qwen_mt'] and not dashscope_key %}
   <div class="card" style="border-color:var(--red);margin-top:16px;">
-    <p style="color:var(--red);font-size:13px;">当前模型为 Qwen，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DashScope API Key。</p>
+    <p style="color:var(--red);font-size:13px;">当前模型为 Qwen / Qwen-MT，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DashScope API Key。</p>
   </div>
 {% elif provider == 'deepseek' and not deepseek_key %}
   <div class="card" style="border-color:var(--red);margin-top:16px;">
   <p style="color:var(--red);font-size:13px;">当前模型为 DeepSeek，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 DeepSeek API Key。</p>
+  </div>
+  {% elif provider == 'glm' and not glm_api_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">当前模型为 GLM，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入智谱 GLM API Key。</p>
+  </div>
+  {% elif provider == 'kimi' and not kimi_api_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">当前模型为 Kimi，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 Kimi API Key。</p>
+  </div>
+  {% elif provider == 'mimo' and not mimo_api_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">当前模型为 MiMo，请先在 <a href="{{ url_for('settings') }}">设置</a> 中输入 MiMo API Key。</p>
+  </div>
+  {% elif provider == 'mimo_token_plan' and not custom_model.custom_api_key %}
+  <div class="card" style="border-color:var(--red);margin-top:16px;">
+    <p style="color:var(--red);font-size:13px;">当前模型为 MiMo Token Plan，请先在 <a href="{{ url_for('settings') }}">设置</a> 中补全该槽位的专用 Base URL 和 API Key。</p>
   </div>
   {% elif provider == 'openai_compatible' and not custom_model.custom_api_key %}
   <div class="card" style="border-color:var(--red);margin-top:16px;">

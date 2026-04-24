@@ -7,6 +7,13 @@
      builtin_models  (dict)   key -> {label, ...}
      providers       (list of (value, label)) custom provider options
 --------------------------------------------------------------- #}
+{% set builtin_provider_groups = [
+  ('deepseek', 'DeepSeek', ['deepseek']),
+  ('dashscope', 'DashScope / Qwen', ['qwen', 'qwen_mt']),
+  ('mimo', 'MiMo', ['mimo']),
+  ('glm', '智谱 GLM', ['glm']),
+  ('kimi', 'Kimi / Moonshot', ['kimi'])
+] %}
 <div class="slot-card" data-slot-card data-model-slot data-slot-prefix="{{ prefix }}" data-mode="{{ slot.mode }}">
   <div class="slot-hd">
     <span class="slot-no">#{{ slot_no }}{% if slot_no == 1 %} 主{% else %} 备{% endif %}</span>
@@ -25,8 +32,22 @@
   <div data-slot-mode-panel="builtin" style="{% if slot.mode != 'builtin' %}display:none;{% endif %}">
     <label class="slot-label">内置模型</label>
     <select name="{{ prefix }}_builtin_key" class="inp" style="width:100%;">
+      {% for group_key, group_label, group_providers in builtin_provider_groups %}
+      {% set group = namespace(has_model=false) %}
       {% for key, model in builtin_models.items() %}
-      <option value="{{ key }}"{% if slot.builtin_key == key %} selected{% endif %}>{{ model.label }}</option>
+      {% if model.provider in group_providers %}
+      {% set group.has_model = true %}
+      {% endif %}
+      {% endfor %}
+      {% if group.has_model %}
+      <optgroup label="{{ group_label }}" data-provider-group="{{ group_key }}">
+        {% for key, model in builtin_models.items() %}
+        {% if model.provider in group_providers %}
+        <option value="{{ key }}"{% if slot.builtin_key == key %} selected{% endif %}>{{ model.label }}</option>
+        {% endif %}
+        {% endfor %}
+      </optgroup>
+      {% endif %}
       {% endfor %}
     </select>
     <div class="hint" style="margin-top:6px;">内置模型会自动使用对应全局 API Key，不需要填写 Base URL 或专用 Key。</div>

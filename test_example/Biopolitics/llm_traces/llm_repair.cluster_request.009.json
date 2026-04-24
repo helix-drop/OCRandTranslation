@@ -44,7 +44,7 @@
       ],
       "unmatched_note_items": [
         {
-          "row_id": 21037,
+          "row_id": 22103,
           "doc_id": "0d285c0800db",
           "note_item_id": "fn-00024",
           "note_kind": "footnote",
@@ -58,8 +58,8 @@
           "display_marker": "9",
           "source_marker": "9",
           "title_hint": "",
-          "created_at": 1776850867,
-          "updated_at": 1776850867
+          "created_at": 1776856746,
+          "updated_at": 1776856746
         }
       ],
       "unmatched_anchors": [],
@@ -82,22 +82,22 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00024\",\n    \"anchor_phrase\": \"signalons la parution récente du colloque L'Ordolibéralisme allemand\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote marker '9' in the OCR text corresponds to the phrase 'signalons la parution récente...' in the body text. The footnote content matches this citation. No structured anchor exists for this location in the provided data, so a synthetic anchor is required to link the orphan note.\"\n  }\n]",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00024\",\n    \"anchor_phrase\": \"hormis la thèse de F. Bilger\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text starting with 'hormis la thèse de F. Bilger' matches the unique phrase found in the chapter body excerpt on page 347. The OCR in the body excerpt missed the footnote marker '9', but the phrase is unique and allows for precise anchoring.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_anchor",
       "note_item_id": "fn-00024",
       "anchor_id": "",
-      "anchor_phrase": "signalons la parution récente du colloque L'Ordolibéralisme allemand",
+      "anchor_phrase": "hormis la thèse de F. Bilger",
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "Footnote marker '9' in the OCR text corresponds to the phrase 'signalons la parution récente...' in the body text. The footnote content matches this citation. No structured anchor exists for this location in the provided data, so a synthetic anchor is required to link the orphan note.",
-      "fuzzy_score": 57.35294117647059,
+      "reason": "The footnote text starting with 'hormis la thèse de F. Bilger' matches the unique phrase found in the chapter body excerpt on page 347. The OCR in the body excerpt missed the footnote marker '9', but the phrase is unique and allows for precise anchoring.",
+      "fuzzy_score": 50.0,
       "ambiguous": false,
-      "char_start": 5520,
-      "char_end": 5588,
-      "matched_text": " des deux grandes écoles néolibérales, l'ordolibéralisme allemand 9 ",
+      "char_start": 765,
+      "char_end": 793,
+      "matched_text": "rs naturel des choses. Elle ",
       "fuzzy_hit": false
     }
   ],
@@ -110,16 +110,16 @@
         "action": "synthesize_anchor",
         "note_item_id": "fn-00024",
         "anchor_id": "",
-        "anchor_phrase": "signalons la parution récente du colloque L'Ordolibéralisme allemand",
+        "anchor_phrase": "hormis la thèse de F. Bilger",
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote marker '9' in the OCR text corresponds to the phrase 'signalons la parution récente...' in the body text. The footnote content matches this citation. No structured anchor exists for this location in the provided data, so a synthetic anchor is required to link the orphan note.",
-        "fuzzy_score": 57.35294117647059,
+        "reason": "The footnote text starting with 'hormis la thèse de F. Bilger' matches the unique phrase found in the chapter body excerpt on page 347. The OCR in the body excerpt missed the footnote marker '9', but the phrase is unique and allows for precise anchoring.",
+        "fuzzy_score": 50.0,
         "ambiguous": false,
-        "char_start": 5520,
-        "char_end": 5588,
-        "matched_text": " des deux grandes écoles néolibérales, l'ordolibéralisme allemand 9 ",
+        "char_start": 765,
+        "char_end": 793,
+        "matched_text": "rs naturel des choses. Elle ",
         "fuzzy_hit": false
       }
     ],
@@ -128,11 +128,11 @@
   },
   "usage": {
     "prompt_tokens": 2167,
-    "completion_tokens": 134,
-    "total_tokens": 2301,
+    "completion_tokens": 136,
+    "total_tokens": 2303,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4065
+    "duration_ms": 4054
   }
 }

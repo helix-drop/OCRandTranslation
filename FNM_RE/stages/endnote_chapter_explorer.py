@@ -125,6 +125,8 @@ def _match_signal_to_chapter(signal_title: str, chapters: list[dict[str, Any]]) 
     signal_key = chapter_title_match_key(normalized_title)
     if not normalized_title or not signal_key:
         return None
+    signal_number, signal_remainder = _extract_number_info(normalized_title)
+    signal_remainder_key = chapter_title_match_key(signal_remainder)
 
     best_row: dict[str, Any] | None = None
     best_score = 0.0
@@ -134,8 +136,19 @@ def _match_signal_to_chapter(signal_title: str, chapters: list[dict[str, Any]]) 
         chapter_title = str(row.get("chapter_title") or "").strip()
         if not chapter_key or not chapter_title:
             continue
+        chapter_number, chapter_remainder = _extract_number_info(chapter_title)
+        chapter_remainder_key = chapter_title_match_key(chapter_remainder)
         if signal_key == chapter_key:
             score = 1.0
+        elif (
+            int(signal_number or 0) > 0
+            and int(chapter_number or 0) == int(signal_number)
+            and len(chapter_remainder_key) >= 12
+            and signal_remainder_key.startswith(chapter_remainder_key)
+        ):
+            score = 0.99
+        elif len(chapter_key) >= 12 and signal_key.startswith(chapter_key):
+            score = 0.98
         elif signal_key in chapter_key or chapter_key in signal_key:
             score = 0.93
         else:

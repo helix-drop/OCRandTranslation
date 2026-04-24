@@ -12,6 +12,91 @@ def _model_label(model_key: str, t_args: dict) -> str:
 
 
 def run_translate_all_worker(doc_id: str, start_bp: int, doc_title: str, deps: dict):
+    def _collect_retry_targets(*, doc_id: str, target_bps: list[int]) -> list[int]:
+        target_bp_set = {int(bp) for bp in (target_bps or []) if bp is not None}
+        if not target_bp_set:
+            return []
+        snapshot = deps["load_translate_state"](doc_id)
+        failed_bps = {
+            int(bp)
+            for bp in (snapshot.get("failed_bps") or [])
+            if bp is not None and int(bp) in target_bp_set
+        }
+        partial_failed_bps = {
+            int(bp)
+            for bp in deps["collect_partial_failed_bps"](doc_id, list(target_bp_set))
+            if bp is not None and int(bp) in target_bp_set
+        }
+        return sorted(failed_bps | partial_failed_bps)
+
+    def _retry_model_candidates() -> list[tuple[str, dict]]:
+        getter = deps.get("get_translation_retry_model_args")
+        if callable(getter):
+            return list(getter() or [])
+        return []
+
+    def _retry_failed_pages(
+        *,
+        doc_id: str,
+        context: dict,
+        retry_bps: list[int],
+        retry_round: int,
+        model_key_override: str | None = None,
+        t_args_override: dict | None = None,
+    ) -> dict:
+        if not retry_bps:
+            return {"model_key": "", "provider": "", "attempted": []}
+        if model_key_override and isinstance(t_args_override, dict):
+            model_key, t_args = model_key_override, dict(t_args_override)
+        else:
+            model_key, t_args = deps["get_active_translate_args"]()
+        provider = str(t_args.get("provider") or "").strip()
+        api_key = str(t_args.get("api_key") or "").strip()
+        if not api_key:
+            deps["translate_push"]("retry_skip", {
+                "retry_round": retry_round,
+                "model": model_key,
+                "provider": provider,
+                "reason": "no_api_key",
+            })
+            return {"model_key": model_key, "provider": provider, "attempted": []}
+
+        glossary = deps["get_glossary"](doc_id)
+        attempted = []
+        for bp in retry_bps:
+            if deps["runtime_stop_requested"](doc_id):
+                break
+            try:
+                entry = deps["translate_page_stream"](
+                    context["pages"],
+                    int(bp),
+                    model_key,
+                    t_args,
+                    glossary,
+                    doc_id=doc_id,
+                    stop_checker=lambda: deps["is_stop_requested"](doc_id),
+                )
+                deps["save_entry_to_disk"](entry, context["doc_title"], doc_id)
+                deps["clear_failed_page_state"](doc_id, int(bp))
+                attempted.append(int(bp))
+                deps["translate_push"]("page_done", {
+                    "bp": int(bp),
+                    "retry_round": retry_round,
+                    "model": model_key,
+                    "provider": provider,
+                    "partial_failed": bool(deps["entry_has_paragraph_error"](entry)),
+                })
+            except Exception as exc:
+                deps["mark_failed_page_state"](doc_id, int(bp), str(exc))
+                deps["translate_push"]("page_error", {
+                    "bp": int(bp),
+                    "error": str(exc),
+                    "retry_round": retry_round,
+                    "model": model_key,
+                    "provider": provider,
+                })
+        return {"model_key": model_key, "provider": provider, "attempted": attempted}
+
     def build_plan():
         if not doc_id or not deps["get_doc_meta"](doc_id):
             return {
@@ -161,10 +246,42 @@ def run_translate_all_worker(doc_id: str, start_bp: int, doc_title: str, deps: d
             "model_key": getattr(exc, "_worker_model_key", _kwargs["worker_plan"].get("model_key", "")),
         }
 
+    def after_target_loop(*, doc_id: str, worker_plan: dict, context: dict, **_kwargs):
+        target_bps = [int(bp) for bp in (worker_plan.get("target_bps") or []) if bp is not None]
+        retry_bps = _collect_retry_targets(doc_id=doc_id, target_bps=target_bps)
+        if not retry_bps:
+            return
+
+        deps["translate_push"]("retry_round_start", {
+            "retry_round": 1,
+            "targets": retry_bps,
+            "provider": worker_plan.get("provider", ""),
+            "model": worker_plan.get("model_key", ""),
+        })
+        retry_models = _retry_model_candidates()
+        for retry_round, (retry_model_key, retry_t_args) in enumerate(retry_models, start=1):
+            remaining = _collect_retry_targets(doc_id=doc_id, target_bps=target_bps)
+            if not remaining:
+                return
+            deps["translate_push"]("retry_round_start", {
+                "retry_round": retry_round,
+                "targets": remaining,
+                "model_target": retry_model_key,
+            })
+            _retry_failed_pages(
+                doc_id=doc_id,
+                context=context,
+                retry_bps=remaining,
+                retry_round=retry_round,
+                model_key_override=retry_model_key,
+                t_args_override=retry_t_args,
+            )
+
     return run_translate_worker(
         doc_id=doc_id,
         build_plan=build_plan,
         run_page=run_page,
         handle_page_exception=handle_page_exception,
         deps=deps,
+        after_target_loop=after_target_loop,
     )

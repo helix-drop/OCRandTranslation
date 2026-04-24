@@ -234,6 +234,7 @@ def execute_phase(
                 pdf_path=pdf_path,
                 visual_toc_bundle=visual_toc_bundle,
             )
+            _persist_phase3(repo, doc_id_s, structure)
         elif phase_n == 4:
             structure = build_phase4_structure(
                 pages,
@@ -436,6 +437,67 @@ def _persist_phase2(repo: Any, doc_id: str, structure: Any) -> None:
         chapter_note_modes=note_mode_rows,
         note_items=note_item_rows,
     )
+
+
+def _persist_phase3(repo: Any, doc_id: str, structure: Any) -> None:
+    """持久化 Phase 3 新增产物：paragraph footnotes、endnotes、anchor alignment。
+
+    注意：Phase 3 的原始产物（body_anchors、note_links 等）由主 pipeline 路径落盘，
+    这里只持久化本次 PR 新增的三个表。调用方确保 doc_id 非空、structure 包含所需字段。
+    """
+    # —— Paragraph footnotes ——
+    footnotes = list(getattr(structure, "paragraph_footnotes", None) or [])
+    _persist_footnotes(repo, doc_id, footnotes)
+
+    # —— Chapter endnotes ——
+    endnotes = list(getattr(structure, "paragraph_endnotes", None) or [])
+    _persist_endnotes(repo, doc_id, endnotes)
+
+    # —— Chapter anchor alignment ——
+    alignments = list(getattr(structure, "chapter_anchor_alignments", None) or [])
+    for rec in alignments:
+        repo.upsert_fnm_chapter_anchor_alignment(
+            doc_id,
+            str(getattr(rec, "chapter_id", "") or ""),
+            alignment_status=str(getattr(rec, "alignment_status", "misaligned") or "misaligned"),
+            body_anchor_count=int(getattr(rec, "body_anchor_count", 0) or 0),
+            endnote_count=int(getattr(rec, "endnote_count", 0) or 0),
+            mismatch=getattr(rec, "mismatch", None),
+        )
+
+
+def _persist_footnotes(repo: Any, doc_id: str, footnotes: list[Any]) -> None:
+    """按 chapter_id 分组写入 fnm_paragraph_footnotes。"""
+    by_chapter: dict[str, list[dict]] = {}
+    for rec in footnotes:
+        cid = str(getattr(rec, "chapter_id", "") or "")
+        by_chapter.setdefault(cid, []).append({
+            "page_no": int(getattr(rec, "page_no", 0) or 0),
+            "paragraph_index": int(getattr(rec, "paragraph_index", 0) or 0),
+            "attachment_kind": str(getattr(rec, "attachment_kind", "page_tail") or "page_tail"),
+            "source_marker": str(getattr(rec, "source_marker", "") or ""),
+            "text": str(getattr(rec, "text", "") or ""),
+        })
+    for cid, rows in by_chapter.items():
+        repo.replace_fnm_paragraph_footnotes(doc_id, cid, footnotes=rows)
+
+
+def _persist_endnotes(repo: Any, doc_id: str, endnotes: list[Any]) -> None:
+    """按 chapter_id 分组写入 fnm_chapter_endnotes。"""
+    by_chapter: dict[str, list[dict]] = {}
+    for rec in endnotes:
+        cid = str(getattr(rec, "chapter_id", "") or "")
+        by_chapter.setdefault(cid, []).append({
+            "ordinal": int(getattr(rec, "ordinal", 0) or 0),
+            "marker": str(getattr(rec, "marker", "") or ""),
+            "numbering_scheme": str(getattr(rec, "numbering_scheme", "per_chapter") or "per_chapter"),
+            "text": str(getattr(rec, "text", "") or ""),
+            "source_page_no": int(getattr(rec, "source_page_no", 0) or 0) if getattr(rec, "source_page_no", None) is not None else None,
+            "is_reconstructed": bool(getattr(rec, "is_reconstructed", False)),
+            "review_required": bool(getattr(rec, "review_required", True)),
+        })
+    for cid, rows in by_chapter.items():
+        repo.replace_fnm_chapter_endnotes(doc_id, cid, endnotes=rows)
 
 
 # ---------- Phase 5/6 辅助 ----------

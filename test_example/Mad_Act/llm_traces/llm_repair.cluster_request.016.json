@@ -30,7 +30,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 97862,
+          "row_id": 108269,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01731",
           "chapter_id": "toc-manual-2-16-16-madness-multiple",
@@ -43,11 +43,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials.",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 97863,
+          "row_id": 108270,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01732",
           "chapter_id": "toc-manual-2-16-16-madness-multiple",
@@ -60,11 +60,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials.",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 97864,
+          "row_id": 108271,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01733",
           "chapter_id": "toc-manual-2-16-16-madness-multiple",
@@ -77,11 +77,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 97865,
+          "row_id": 108272,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01734",
           "chapter_id": "toc-manual-2-16-16-madness-multiple",
@@ -94,11 +94,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 97867,
+          "row_id": 108274,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-01735",
           "chapter_id": "toc-manual-2-16-16-madness-multiple",
@@ -111,8 +111,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         }
       ],
       "rebind_candidates": [
@@ -163,7 +163,7 @@
     "page_context_count": 3,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00372\",\n    \"anchor_id\": \"anchor-01734\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note excerpt 'mad killers could be sentenced to death under other penal denominations' matches the content of footnote 5 on page 615 ('Starting in the 1750s, mad killers could be sentenced to death...'). The current anchor is synthetic and incorrect; it should bind to explicit anchor-01734 (marker 5).\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00372\",\n    \"anchor_id\": \"anchor-01734\",\n    \"confidence\": 0.95,\n    \"reason\": \"The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
@@ -173,7 +173,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 0.95,
-      "reason": "The note excerpt 'mad killers could be sentenced to death under other penal denominations' matches the content of footnote 5 on page 615 ('Starting in the 1750s, mad killers could be sentenced to death...'). The current anchor is synthetic and incorrect; it should bind to explicit anchor-01734 (marker 5)."
+      "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
     }
   ],
   "derived_truth": {
@@ -189,7 +189,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The note excerpt 'mad killers could be sentenced to death under other penal denominations' matches the content of footnote 5 on page 615 ('Starting in the 1750s, mad killers could be sentenced to death...'). The current anchor is synthetic and incorrect; it should bind to explicit anchor-01734 (marker 5)."
+        "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
       }
     ],
     "auto_selected_actions": [
@@ -201,7 +201,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The note excerpt 'mad killers could be sentenced to death under other penal denominations' matches the content of footnote 5 on page 615 ('Starting in the 1750s, mad killers could be sentenced to death...'). The current anchor is synthetic and incorrect; it should bind to explicit anchor-01734 (marker 5)."
+        "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
       }
     ],
     "auto_applied_actions": [
@@ -214,17 +214,17 @@
         "marker": "",
         "note_text": "",
         "confidence": 0.95,
-        "reason": "The note excerpt 'mad killers could be sentenced to death under other penal denominations' matches the content of footnote 5 on page 615 ('Starting in the 1750s, mad killers could be sentenced to death...'). The current anchor is synthetic and incorrect; it should bind to explicit anchor-01734 (marker 5)."
+        "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 4847,
-    "completion_tokens": 146,
-    "total_tokens": 4993,
+    "completion_tokens": 216,
+    "total_tokens": 5063,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 6082
+    "duration_ms": 9805
   }
 }

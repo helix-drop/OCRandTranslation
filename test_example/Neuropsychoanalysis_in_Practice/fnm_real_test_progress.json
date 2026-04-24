@@ -1,68 +1,68 @@
 {
   "status": "done",
   "current_stage": "report_write",
-  "started_at": "2026-04-22T17:10:06",
-  "updated_at": "2026-04-22T17:14:22",
+  "started_at": "2026-04-22T20:01:39",
+  "updated_at": "2026-04-22T20:05:53",
   "stage_history": [
     {
       "stage": "reingest",
       "status": "done",
       "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-      "at": "2026-04-22T17:10:06"
+      "at": "2026-04-22T20:01:39"
     },
     {
       "stage": "visual_toc",
       "status": "done",
       "detail": "needs_offset",
-      "at": "2026-04-22T17:13:47"
+      "at": "2026-04-22T20:05:17"
     },
     {
       "stage": "fnm_pipeline",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T17:13:54"
+      "at": "2026-04-22T20:05:24"
     },
     {
       "stage": "llm_repair",
       "status": "done",
       "detail": "auto_applied=0",
-      "at": "2026-04-22T17:13:54"
+      "at": "2026-04-22T20:05:24"
     },
     {
       "stage": "fnm_pipeline_rebuild",
       "status": "done",
       "detail": "skipped",
-      "at": "2026-04-22T17:13:54"
+      "at": "2026-04-22T20:05:24"
     },
     {
       "stage": "structure_verify",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T17:14:01"
+      "at": "2026-04-22T20:05:32"
     },
     {
       "stage": "placeholder_translate",
       "status": "done",
       "detail": "translated_paras=1807",
-      "at": "2026-04-22T17:14:08"
+      "at": "2026-04-22T20:05:39"
     },
     {
       "stage": "export_verify",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T17:14:22"
+      "at": "2026-04-22T20:05:53"
     },
     {
       "stage": "zip_finalize",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T17:14:22"
+      "at": "2026-04-22T20:05:53"
     },
     {
       "stage": "report_write",
       "status": "done",
       "detail": "单书结果、报告、进度均已写入",
-      "at": "2026-04-22T17:14:22"
+      "at": "2026-04-22T20:05:53"
     }
   ]
 }

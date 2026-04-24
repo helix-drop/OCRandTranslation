@@ -47,7 +47,9 @@ class FnmRepoMixin:
         payload["page_segments"] = json.loads(payload.pop("page_segments_json") or "[]")
         owner_kind = str(payload.get("owner_kind") or "").strip().lower()
         if not owner_kind:
-            owner_kind = "chapter" if str(payload.get("kind") or "") == "body" else "note_region"
+            owner_kind = (
+                "chapter" if str(payload.get("kind") or "") == "body" else "note_region"
+            )
             payload["owner_kind"] = owner_kind
         owner_id = str(payload.get("owner_id") or "").strip()
         if not owner_id:
@@ -64,7 +66,9 @@ class FnmRepoMixin:
             payload = {}
         payload.setdefault("_pageBP", int(row["book_page"]))
         payload.setdefault("pages", row["pages_label"] or str(row["book_page"]))
-        payload["_fnm_source"] = json.loads(row["source_json"] or "{}") if row["source_json"] else {}
+        payload["_fnm_source"] = (
+            json.loads(row["source_json"] or "{}") if row["source_json"] else {}
+        )
         payload["_fnm_section_id"] = row["section_id"]
         payload["_fnm_section_title"] = row["section_title"]
         payload["_fnm_section_start_page"] = row["section_start_page"]
@@ -86,7 +90,9 @@ class FnmRepoMixin:
         if not row:
             return None
         payload = dict(row)
-        payload["payload"] = self._loads_json(payload.pop("payload_json", None), default={})
+        payload["payload"] = self._loads_json(
+            payload.pop("payload_json", None), default={}
+        )
         return payload
 
     def _row_to_fnm_page(self, row: sqlite3.Row | None) -> dict | None:
@@ -94,7 +100,9 @@ class FnmRepoMixin:
             return None
         payload = dict(row)
         payload["has_note_heading"] = bool(payload.get("has_note_heading"))
-        payload["note_scan_summary"] = self._loads_json(payload.pop("note_scan_summary_json", None), default={})
+        payload["note_scan_summary"] = self._loads_json(
+            payload.pop("note_scan_summary_json", None), default={}
+        )
         return payload
 
     def _row_to_fnm_chapter(self, row: sqlite3.Row | None) -> dict | None:
@@ -131,22 +139,31 @@ class FnmRepoMixin:
         if not row:
             return None
         payload = dict(row)
-        payload["sampled_pages"] = self._loads_json(payload.pop("sampled_pages_json", None), default=[])
+        payload["sampled_pages"] = self._loads_json(
+            payload.pop("sampled_pages_json", None), default=[]
+        )
         return payload
 
     def _row_to_fnm_section_head(self, row: sqlite3.Row | None) -> dict | None:
         if not row:
             return None
         payload = dict(row)
-        payload["rejected_chapter_candidate"] = bool(payload.get("rejected_chapter_candidate"))
+        payload["rejected_chapter_candidate"] = bool(
+            payload.get("rejected_chapter_candidate")
+        )
         return payload
 
     def _row_to_fnm_structure_review(self, row: sqlite3.Row | None) -> dict | None:
         if not row:
             return None
         payload = dict(row)
-        payload["page_range"] = [payload.pop("page_start", None), payload.pop("page_end", None)]
-        payload["payload_json"] = self._loads_json(payload.pop("payload_json", None), default={})
+        payload["page_range"] = [
+            payload.pop("page_start", None),
+            payload.pop("page_end", None),
+        ]
+        payload["payload_json"] = self._loads_json(
+            payload.pop("payload_json", None), default={}
+        )
         return payload
 
     def create_fnm_run(self, doc_id: str, **fields) -> int:
@@ -171,10 +188,16 @@ class FnmRepoMixin:
                     int(fields.get("unit_count", 0) or 0),
                     fields.get("structure_state"),
                     json.dumps(fields.get("review_counts") or {}, ensure_ascii=False),
-                    json.dumps(fields.get("blocking_reasons") or [], ensure_ascii=False),
+                    json.dumps(
+                        fields.get("blocking_reasons") or [], ensure_ascii=False
+                    ),
                     json.dumps(fields.get("link_summary") or {}, ensure_ascii=False),
-                    json.dumps(fields.get("page_partition_summary") or {}, ensure_ascii=False),
-                    json.dumps(fields.get("chapter_mode_summary") or {}, ensure_ascii=False),
+                    json.dumps(
+                        fields.get("page_partition_summary") or {}, ensure_ascii=False
+                    ),
+                    json.dumps(
+                        fields.get("chapter_mode_summary") or {}, ensure_ascii=False
+                    ),
                     now,
                     now,
                 ),
@@ -221,11 +244,23 @@ class FnmRepoMixin:
                     int(payload.get("unit_count", 0) or 0),
                     payload.get("validation_json"),
                     payload.get("structure_state"),
-                    json.dumps(payload.get("review_counts"), ensure_ascii=False) if "review_counts" in payload else None,
-                    json.dumps(payload.get("blocking_reasons"), ensure_ascii=False) if "blocking_reasons" in payload else None,
-                    json.dumps(payload.get("link_summary"), ensure_ascii=False) if "link_summary" in payload else None,
-                    json.dumps(payload.get("page_partition_summary"), ensure_ascii=False) if "page_partition_summary" in payload else None,
-                    json.dumps(payload.get("chapter_mode_summary"), ensure_ascii=False) if "chapter_mode_summary" in payload else None,
+                    json.dumps(payload.get("review_counts"), ensure_ascii=False)
+                    if "review_counts" in payload
+                    else None,
+                    json.dumps(payload.get("blocking_reasons"), ensure_ascii=False)
+                    if "blocking_reasons" in payload
+                    else None,
+                    json.dumps(payload.get("link_summary"), ensure_ascii=False)
+                    if "link_summary" in payload
+                    else None,
+                    json.dumps(
+                        payload.get("page_partition_summary"), ensure_ascii=False
+                    )
+                    if "page_partition_summary" in payload
+                    else None,
+                    json.dumps(payload.get("chapter_mode_summary"), ensure_ascii=False)
+                    if "chapter_mode_summary" in payload
+                    else None,
                     now,
                     int(run_id),
                 ),
@@ -254,20 +289,37 @@ class FnmRepoMixin:
         include_review_overrides: bool = False,
     ) -> None:
         if include_review_overrides:
-            conn.execute("DELETE FROM fnm_review_overrides_v2 WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_review_overrides_v2 WHERE doc_id = ?", (doc_id,)
+            )
         if include_structure:
-            conn.execute("DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_note_links WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_body_anchors WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id = ?", (doc_id,)
+            )
+            conn.execute(
+                "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ?", (doc_id,)
+            )
+            conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_note_items WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_section_heads WHERE doc_id = ?", (doc_id,))
-            conn.execute("DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_note_regions WHERE doc_id = ?", (doc_id,))
-            conn.execute("DELETE FROM fnm_heading_candidates WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_heading_candidates WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_chapters WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_pages WHERE doc_id = ?", (doc_id,))
         if include_notes_units:
-            conn.execute("DELETE FROM fnm_translation_units WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_translation_units WHERE doc_id = ?", (doc_id,)
+            )
 
     def clear_fnm_data(self, doc_id: str) -> None:
         with transaction(self.db_path) as conn:
@@ -302,15 +354,28 @@ class FnmRepoMixin:
                         unit.get("unit_id"),
                         doc_id,
                         unit.get("kind"),
-                        unit.get("owner_kind") or ("chapter" if str(unit.get("kind") or "") == "body" else "note_region"),
+                        unit.get("owner_kind")
+                        or (
+                            "chapter"
+                            if str(unit.get("kind") or "") == "body"
+                            else "note_region"
+                        ),
                         unit.get("owner_id") or unit.get("section_id"),
                         unit.get("section_id"),
                         unit.get("section_title"),
-                        int(unit.get("section_start_page")) if unit.get("section_start_page") is not None else None,
-                        int(unit.get("section_end_page")) if unit.get("section_end_page") is not None else None,
+                        int(unit.get("section_start_page"))
+                        if unit.get("section_start_page") is not None
+                        else None,
+                        int(unit.get("section_end_page"))
+                        if unit.get("section_end_page") is not None
+                        else None,
                         unit.get("note_id"),
-                        int(unit.get("page_start")) if unit.get("page_start") is not None else None,
-                        int(unit.get("page_end")) if unit.get("page_end") is not None else None,
+                        int(unit.get("page_start"))
+                        if unit.get("page_start") is not None
+                        else None,
+                        int(unit.get("page_end"))
+                        if unit.get("page_end") is not None
+                        else None,
                         int(unit.get("char_count", 0) or 0),
                         unit.get("source_text"),
                         unit.get("translated_text"),
@@ -340,14 +405,27 @@ class FnmRepoMixin:
     ) -> None:
         now = int(time.time())
         with transaction(self.db_path) as conn:
-            conn.execute("DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_note_links WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_body_anchors WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id = ?", (doc_id,)
+            )
+            conn.execute(
+                "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ?", (doc_id,)
+            )
+            conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_note_items WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_section_heads WHERE doc_id = ?", (doc_id,))
-            conn.execute("DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_note_regions WHERE doc_id = ?", (doc_id,))
-            conn.execute("DELETE FROM fnm_heading_candidates WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_heading_candidates WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_chapters WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_pages WHERE doc_id = ?", (doc_id,))
 
@@ -362,13 +440,17 @@ class FnmRepoMixin:
                     (
                         doc_id,
                         int(row.get("page_no") or 0),
-                        int(row.get("target_pdf_page") or 0) if row.get("target_pdf_page") is not None else None,
+                        int(row.get("target_pdf_page") or 0)
+                        if row.get("target_pdf_page") is not None
+                        else None,
                         row.get("page_role"),
                         float(row.get("role_confidence", 0.0) or 0.0),
                         row.get("role_reason"),
                         row.get("section_hint"),
                         1 if bool(row.get("has_note_heading")) else 0,
-                        json.dumps(row.get("note_scan_summary") or {}, ensure_ascii=False),
+                        json.dumps(
+                            row.get("note_scan_summary") or {}, ensure_ascii=False
+                        ),
                         now,
                         now,
                     ),
@@ -413,14 +495,20 @@ class FnmRepoMixin:
                         row.get("source"),
                         row.get("block_label"),
                         1 if bool(row.get("top_band")) else 0,
-                        float(row.get("font_height")) if row.get("font_height") is not None else None,
+                        float(row.get("font_height"))
+                        if row.get("font_height") is not None
+                        else None,
                         float(row.get("x")) if row.get("x") is not None else None,
                         float(row.get("y")) if row.get("y") is not None else None,
-                        float(row.get("width_estimate")) if row.get("width_estimate") is not None else None,
+                        float(row.get("width_estimate"))
+                        if row.get("width_estimate") is not None
+                        else None,
                         row.get("font_name") or "",
                         row.get("font_weight_hint") or "unknown",
                         row.get("align_hint") or "unknown",
-                        float(row.get("width_ratio")) if row.get("width_ratio") is not None else None,
+                        float(row.get("width_ratio"))
+                        if row.get("width_ratio") is not None
+                        else None,
                         int(row.get("heading_level_hint") or 0),
                         float(row.get("confidence", 0.0) or 0.0),
                         row.get("heading_family_guess") or "unknown",
@@ -573,8 +661,12 @@ class FnmRepoMixin:
                         float(row.get("confidence", 0.0) or 0.0),
                         row.get("note_kind"),
                         row.get("marker"),
-                        int(row.get("page_no_start")) if row.get("page_no_start") is not None else None,
-                        int(row.get("page_no_end")) if row.get("page_no_end") is not None else None,
+                        int(row.get("page_no_start"))
+                        if row.get("page_no_start") is not None
+                        else None,
+                        int(row.get("page_no_end"))
+                        if row.get("page_no_end") is not None
+                        else None,
                         now,
                         now,
                     ),
@@ -593,7 +685,9 @@ class FnmRepoMixin:
                         row.get("review_type"),
                         row.get("chapter_id"),
                         int(page_range[0]) if page_range[0] is not None else None,
-                        int(page_range[1]) if len(page_range) > 1 and page_range[1] is not None else None,
+                        int(page_range[1])
+                        if len(page_range) > 1 and page_range[1] is not None
+                        else None,
                         json.dumps(row.get("payload_json") or {}, ensure_ascii=False),
                         row.get("severity") or "warning",
                         now,
@@ -616,7 +710,9 @@ class FnmRepoMixin:
                 (
                     doc_id,
                     int(row.get("page_no") or 0),
-                    int(row.get("target_pdf_page") or 0) if row.get("target_pdf_page") is not None else None,
+                    int(row.get("target_pdf_page") or 0)
+                    if row.get("target_pdf_page") is not None
+                    else None,
                     row.get("page_role"),
                     float(row.get("role_confidence", 0.0) or 0.0),
                     row.get("role_reason"),
@@ -653,7 +749,9 @@ class FnmRepoMixin:
             )
 
     @staticmethod
-    def _insert_fnm_heading_candidates(conn, doc_id: str, rows: list[dict], now: int) -> None:
+    def _insert_fnm_heading_candidates(
+        conn, doc_id: str, rows: list[dict], now: int
+    ) -> None:
         for row in rows or []:
             conn.execute(
                 """
@@ -673,14 +771,20 @@ class FnmRepoMixin:
                     row.get("source"),
                     row.get("block_label"),
                     1 if bool(row.get("top_band")) else 0,
-                    float(row.get("font_height")) if row.get("font_height") is not None else None,
+                    float(row.get("font_height"))
+                    if row.get("font_height") is not None
+                    else None,
                     float(row.get("x")) if row.get("x") is not None else None,
                     float(row.get("y")) if row.get("y") is not None else None,
-                    float(row.get("width_estimate")) if row.get("width_estimate") is not None else None,
+                    float(row.get("width_estimate"))
+                    if row.get("width_estimate") is not None
+                    else None,
                     row.get("font_name") or "",
                     row.get("font_weight_hint") or "unknown",
                     row.get("align_hint") or "unknown",
-                    float(row.get("width_ratio")) if row.get("width_ratio") is not None else None,
+                    float(row.get("width_ratio"))
+                    if row.get("width_ratio") is not None
+                    else None,
                     int(row.get("heading_level_hint") or 0),
                     float(row.get("confidence", 0.0) or 0.0),
                     row.get("heading_family_guess") or "unknown",
@@ -692,7 +796,9 @@ class FnmRepoMixin:
             )
 
     @staticmethod
-    def _insert_fnm_section_heads(conn, doc_id: str, rows: list[dict], now: int) -> None:
+    def _insert_fnm_section_heads(
+        conn, doc_id: str, rows: list[dict], now: int
+    ) -> None:
         for row in rows or []:
             conn.execute(
                 """
@@ -749,7 +855,9 @@ class FnmRepoMixin:
             )
 
     @staticmethod
-    def _insert_fnm_chapter_note_modes(conn, doc_id: str, rows: list[dict], now: int) -> None:
+    def _insert_fnm_chapter_note_modes(
+        conn, doc_id: str, rows: list[dict], now: int
+    ) -> None:
         for row in rows or []:
             conn.execute(
                 """
@@ -807,22 +915,37 @@ class FnmRepoMixin:
         phase_from = int(phase_from)
         # Phase 4 及下游（含 5、6）：reviews + translation_units
         if phase_from <= 4:
-            conn.execute("DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,)
+            )
         if phase_from <= 5:
-            conn.execute("DELETE FROM fnm_translation_units WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_translation_units WHERE doc_id = ?", (doc_id,)
+            )
         # Phase 3
         if phase_from <= 3:
             conn.execute("DELETE FROM fnm_note_links WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_body_anchors WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id = ?", (doc_id,)
+            )
+            conn.execute(
+                "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ?", (doc_id,)
+            )
+            conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id = ?", (doc_id,))
         # Phase 2
         if phase_from <= 2:
             conn.execute("DELETE FROM fnm_note_items WHERE doc_id = ?", (doc_id,))
-            conn.execute("DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_note_regions WHERE doc_id = ?", (doc_id,))
         # Phase 1
         if phase_from <= 1:
             conn.execute("DELETE FROM fnm_section_heads WHERE doc_id = ?", (doc_id,))
-            conn.execute("DELETE FROM fnm_heading_candidates WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_heading_candidates WHERE doc_id = ?", (doc_id,)
+            )
             conn.execute("DELETE FROM fnm_chapters WHERE doc_id = ?", (doc_id,))
             conn.execute("DELETE FROM fnm_pages WHERE doc_id = ?", (doc_id,))
 
@@ -928,13 +1051,21 @@ class FnmRepoMixin:
                     payload.get("status", "pending"),
                     payload.get("error_msg"),
                     payload.get("target_ref"),
-                    json.dumps(fields.get("page_segments", json.loads(payload.get("page_segments_json") or "[]")), ensure_ascii=False),
+                    json.dumps(
+                        fields.get(
+                            "page_segments",
+                            json.loads(payload.get("page_segments_json") or "[]"),
+                        ),
+                        ensure_ascii=False,
+                    ),
                     now,
                     unit_id,
                 ),
             )
 
-    def update_fnm_note_translation(self, doc_id: str, note_id: str, translated_text: str, *, status: str = "done") -> None:
+    def update_fnm_note_translation(
+        self, doc_id: str, note_id: str, translated_text: str, *, status: str = "done"
+    ) -> None:
         now = int(time.time())
         with transaction(self.db_path) as conn:
             conn.execute(
@@ -1076,7 +1207,9 @@ class FnmRepoMixin:
             ).fetchall()
             return [self._row_to_fnm_structure_review(row) for row in rows]
 
-    def list_fnm_review_overrides(self, doc_id: str, *, scope: str | None = None) -> list[dict]:
+    def list_fnm_review_overrides(
+        self, doc_id: str, *, scope: str | None = None
+    ) -> list[dict]:
         with read_connection(self.db_path) as conn:
             if scope:
                 rows = conn.execute(
@@ -1098,7 +1231,9 @@ class FnmRepoMixin:
                 ).fetchall()
             return [self._row_to_fnm_review_override(row) for row in rows]
 
-    def get_fnm_review_override(self, doc_id: str, scope: str, target_id: str) -> dict | None:
+    def get_fnm_review_override(
+        self, doc_id: str, scope: str, target_id: str
+    ) -> dict | None:
         with read_connection(self.db_path) as conn:
             row = conn.execute(
                 """
@@ -1110,7 +1245,9 @@ class FnmRepoMixin:
             ).fetchone()
             return self._row_to_fnm_review_override(row)
 
-    def save_fnm_review_override(self, doc_id: str, scope: str, target_id: str, payload: dict) -> None:
+    def save_fnm_review_override(
+        self, doc_id: str, scope: str, target_id: str, payload: dict
+    ) -> None:
         now = int(time.time())
         with transaction(self.db_path) as conn:
             conn.execute(
@@ -1132,7 +1269,9 @@ class FnmRepoMixin:
                 ),
             )
 
-    def delete_fnm_review_override(self, doc_id: str, scope: str, target_id: str) -> None:
+    def delete_fnm_review_override(
+        self, doc_id: str, scope: str, target_id: str
+    ) -> None:
         with transaction(self.db_path) as conn:
             conn.execute(
                 """
@@ -1142,7 +1281,9 @@ class FnmRepoMixin:
                 (doc_id, scope, target_id),
             )
 
-    def clear_fnm_review_overrides(self, doc_id: str, *, scope: str | None = None) -> None:
+    def clear_fnm_review_overrides(
+        self, doc_id: str, *, scope: str | None = None
+    ) -> None:
         with transaction(self.db_path) as conn:
             if scope:
                 conn.execute(
@@ -1192,3 +1333,223 @@ class FnmRepoMixin:
                 (doc_id, int(book_page), int(book_page)),
             ).fetchone()
             return dict(row) if row else None
+
+    # ---- 新表：fnm_chapter_endnotes ----
+
+    def list_fnm_chapter_endnotes(
+        self, doc_id: str, *, chapter_id: str | None = None
+    ) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            if chapter_id:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_chapter_endnotes
+                    WHERE doc_id = ? AND chapter_id = ?
+                    ORDER BY ordinal ASC
+                    """,
+                    (doc_id, chapter_id),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_chapter_endnotes
+                    WHERE doc_id = ?
+                    ORDER BY chapter_id ASC, ordinal ASC
+                    """,
+                    (doc_id,),
+                ).fetchall()
+            return [dict(row) for row in rows]
+
+    def replace_fnm_chapter_endnotes(
+        self,
+        doc_id: str,
+        chapter_id: str,
+        *,
+        endnotes: list[dict],
+    ) -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_chapter_endnotes WHERE doc_id = ? AND chapter_id = ?",
+                (doc_id, chapter_id),
+            )
+            for row in endnotes or []:
+                conn.execute(
+                    """
+                    INSERT INTO fnm_chapter_endnotes(
+                        doc_id, chapter_id, ordinal, marker, numbering_scheme, text, source_page_no,
+                        is_reconstructed, review_required, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        doc_id,
+                        chapter_id,
+                        int(row.get("ordinal") or 0),
+                        row.get("marker"),
+                        row.get("numbering_scheme") or "per_chapter",
+                        row.get("text"),
+                        int(row.get("source_page_no"))
+                        if row.get("source_page_no") is not None
+                        else None,
+                        1 if bool(row.get("is_reconstructed")) else 0,
+                        1 if row.get("review_required", True) else 0,
+                        now,
+                        now,
+                    ),
+                )
+
+    def clear_fnm_chapter_endnotes(self, doc_id: str) -> None:
+        with transaction(self.db_path) as conn:
+            conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id = ?", (doc_id,))
+
+    # ---- 新表：fnm_paragraph_footnotes ----
+
+    def list_fnm_paragraph_footnotes(
+        self, doc_id: str, *, chapter_id: str | None = None, page_no: int | None = None
+    ) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            if chapter_id and page_no is not None:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_paragraph_footnotes
+                    WHERE doc_id = ? AND chapter_id = ? AND page_no = ?
+                    ORDER BY paragraph_index ASC, row_id ASC
+                    """,
+                    (doc_id, chapter_id, int(page_no)),
+                ).fetchall()
+            elif chapter_id:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_paragraph_footnotes
+                    WHERE doc_id = ? AND chapter_id = ?
+                    ORDER BY page_no ASC, paragraph_index ASC, row_id ASC
+                    """,
+                    (doc_id, chapter_id),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_paragraph_footnotes
+                    WHERE doc_id = ?
+                    ORDER BY chapter_id ASC, page_no ASC, paragraph_index ASC, row_id ASC
+                    """,
+                    (doc_id,),
+                ).fetchall()
+            return [dict(row) for row in rows]
+
+    def replace_fnm_paragraph_footnotes(
+        self,
+        doc_id: str,
+        chapter_id: str,
+        *,
+        footnotes: list[dict],
+    ) -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ? AND chapter_id = ?",
+                (doc_id, chapter_id),
+            )
+            for row in footnotes or []:
+                conn.execute(
+                    """
+                    INSERT INTO fnm_paragraph_footnotes(
+                        doc_id, chapter_id, page_no, paragraph_index, attachment_kind,
+                        source_marker, text, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        doc_id,
+                        chapter_id,
+                        int(row.get("page_no") or 0),
+                        int(row.get("paragraph_index", 0) or 0),
+                        row.get("attachment_kind") or "page_tail",
+                        row.get("source_marker"),
+                        row.get("text"),
+                        now,
+                        now,
+                    ),
+                )
+
+    def clear_fnm_paragraph_footnotes(self, doc_id: str) -> None:
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ?", (doc_id,)
+            )
+
+    # ---- 新表：fnm_chapter_anchor_alignment ----
+
+    def list_fnm_chapter_anchor_alignment(
+        self, doc_id: str, *, chapter_id: str | None = None
+    ) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            if chapter_id:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_chapter_anchor_alignment
+                    WHERE doc_id = ? AND chapter_id = ?
+                    """,
+                    (doc_id, chapter_id),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM fnm_chapter_anchor_alignment
+                    WHERE doc_id = ?
+                    ORDER BY chapter_id ASC
+                    """,
+                    (doc_id,),
+                ).fetchall()
+            result: list[dict] = []
+            for row in rows:
+                d = dict(row)
+                if d.get("mismatch_json"):
+                    try:
+                        d["mismatch"] = json.loads(d.pop("mismatch_json"))
+                    except Exception:
+                        pass
+                result.append(d)
+            return result
+
+    def upsert_fnm_chapter_anchor_alignment(
+        self,
+        doc_id: str,
+        chapter_id: str,
+        *,
+        alignment_status: str = "misaligned",
+        body_anchor_count: int = 0,
+        endnote_count: int = 0,
+        mismatch: dict | None = None,
+    ) -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO fnm_chapter_anchor_alignment(
+                    doc_id, chapter_id, alignment_status, body_anchor_count, endnote_count,
+                    mismatch_json, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(doc_id, chapter_id) DO UPDATE SET
+                    alignment_status = excluded.alignment_status,
+                    body_anchor_count = excluded.body_anchor_count,
+                    endnote_count = excluded.endnote_count,
+                    mismatch_json = excluded.mismatch_json,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    doc_id,
+                    chapter_id,
+                    alignment_status,
+                    int(body_anchor_count),
+                    int(endnote_count),
+                    json.dumps(mismatch, ensure_ascii=False) if mismatch else None,
+                    now,
+                    now,
+                ),
+            )
+
+    def clear_fnm_chapter_anchor_alignment(self, doc_id: str) -> None:
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id = ?", (doc_id,)
+            )

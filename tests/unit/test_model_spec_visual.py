@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import patch
 
 import translation.translator as translator
-from config import _normalize_custom_model_config, load_config
 
 
 class TestChatKwargsMerge(unittest.TestCase):
@@ -24,31 +23,26 @@ class TestChatKwargsMerge(unittest.TestCase):
 
 
 class TestResolveVisualModelSpec(unittest.TestCase):
-    def test_visual_builtin_matches_translate_when_config_synced(self):
+    def test_visual_resolver_reads_fnm_pool_primary_slot(self):
         from persistence.storage import resolve_model_spec, resolve_visual_model_spec
 
-        disabled_custom = _normalize_custom_model_config({})
-        with patch("persistence.storage.get_active_model_mode", return_value="builtin"), patch(
-            "persistence.storage.get_active_builtin_model_key", return_value="deepseek-chat"
-        ), patch("persistence.storage.get_active_visual_model_mode", return_value="builtin"), patch(
-            "persistence.storage.get_active_builtin_visual_model_key", return_value="deepseek-chat"
-        ), patch("persistence.storage.get_custom_model_config", return_value=disabled_custom), patch(
-            "persistence.storage.get_visual_custom_model_config", return_value=disabled_custom
+        with patch(
+            "persistence.storage.get_translation_model_pool",
+            return_value=[{"mode": "builtin", "builtin_key": "deepseek-chat"}, {"mode": "empty"}, {"mode": "empty"}],
+        ), patch(
+            "persistence.storage.get_fnm_model_pool",
+            return_value=[{"mode": "builtin", "builtin_key": "qwen3.6-plus"}, {"mode": "empty"}, {"mode": "empty"}],
         ):
-            self.assertEqual(
-                resolve_visual_model_spec().model_id,
-                resolve_model_spec().model_id,
-                msg="迁移后视觉默认应与翻译一致",
-            )
-        self.assertIn("active_visual_model_mode", load_config())
+            self.assertEqual(resolve_model_spec().model_id, "deepseek-chat")
+            self.assertEqual(resolve_visual_model_spec().model_id, "qwen3.6-plus")
 
     def test_mt_builtin_exposes_capabilities_and_companion_chat(self):
         from persistence.storage import resolve_model_spec
 
-        disabled_custom = _normalize_custom_model_config({})
-        with patch("persistence.storage.get_active_model_mode", return_value="builtin"), patch(
-            "persistence.storage.get_active_builtin_model_key", return_value="qwen-mt-plus"
-        ), patch("persistence.storage.get_custom_model_config", return_value=disabled_custom):
+        with patch(
+            "persistence.storage.get_translation_model_pool",
+            return_value=[{"mode": "builtin", "builtin_key": "qwen-mt-plus"}, {"mode": "empty"}, {"mode": "empty"}],
+        ):
             spec = resolve_model_spec()
 
         self.assertEqual(spec.model_id, "qwen-mt-plus")
@@ -57,20 +51,20 @@ class TestResolveVisualModelSpec(unittest.TestCase):
         self.assertFalse(spec.supports_vision)
         self.assertTrue(spec.supports_stream)
         self.assertEqual(spec.stream_mode, "mt_cumulative")
-        self.assertEqual(spec.companion_chat_model_key, "qwen-plus")
+        self.assertEqual(spec.companion_chat_model_key, "qwen3.6-plus")
 
     def test_visual_builtin_exposes_vision_capabilities(self):
         from persistence.storage import resolve_visual_model_spec
 
-        disabled_custom = _normalize_custom_model_config({})
-        with patch("persistence.storage.get_active_visual_model_mode", return_value="builtin"), patch(
-            "persistence.storage.get_active_builtin_visual_model_key", return_value="qwen-vl-plus"
-        ), patch("persistence.storage.get_visual_custom_model_config", return_value=disabled_custom):
+        with patch(
+            "persistence.storage.get_fnm_model_pool",
+            return_value=[{"mode": "builtin", "builtin_key": "qwen3.6-plus"}, {"mode": "empty"}, {"mode": "empty"}],
+        ):
             spec = resolve_visual_model_spec()
 
-        self.assertEqual(spec.model_id, "qwen-vl-plus")
+        self.assertEqual(spec.model_id, "qwen3.6-plus")
         self.assertEqual(spec.api_family, "vision")
-        self.assertFalse(spec.supports_translation)
+        self.assertTrue(spec.supports_translation)
         self.assertTrue(spec.supports_vision)
         self.assertTrue(spec.supports_stream)
         self.assertEqual(spec.stream_mode, "chat_json")

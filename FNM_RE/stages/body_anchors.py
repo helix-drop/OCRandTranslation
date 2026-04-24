@@ -18,7 +18,11 @@ def _chapter_id_for_page(phase2: Phase2Structure, page_no: int) -> str:
     for chapter in phase2.chapters:
         if int(page_no) in {int(page) for page in chapter.pages if int(page) > 0}:
             return chapter.chapter_id
-    prior = [chapter for chapter in phase2.chapters if int(chapter.start_page) <= int(page_no)]
+    prior = [
+        chapter
+        for chapter in phase2.chapters
+        if int(chapter.start_page) <= int(page_no)
+    ]
     return prior[-1].chapter_id if prior else ""
 
 
@@ -56,12 +60,20 @@ def _footnote_band_page_keys(phase2: Phase2Structure) -> set[tuple[str, int]]:
     return keys
 
 
-def _build_summary(anchors: list[BodyAnchorRecord], *, year_like_filtered_count: int) -> dict[str, Any]:
+def _build_summary(
+    anchors: list[BodyAnchorRecord], *, year_like_filtered_count: int
+) -> dict[str, Any]:
     kind_counts = Counter(anchor.anchor_kind for anchor in anchors)
     explicit_count = sum(1 for anchor in anchors if not anchor.synthetic)
     synthetic_count = sum(1 for anchor in anchors if anchor.synthetic)
-    uncertain_count = sum(1 for anchor in anchors if anchor.anchor_kind == "unknown" or float(anchor.certainty) < 1.0)
-    ocr_repaired_count = sum(1 for anchor in anchors if str(anchor.ocr_repaired_from_marker or "").strip())
+    uncertain_count = sum(
+        1
+        for anchor in anchors
+        if anchor.anchor_kind == "unknown" or float(anchor.certainty) < 1.0
+    )
+    ocr_repaired_count = sum(
+        1 for anchor in anchors if str(anchor.ocr_repaired_from_marker or "").strip()
+    )
     return {
         "total_count": len(anchors),
         "explicit_count": int(explicit_count),
@@ -99,8 +111,9 @@ def build_body_anchors(
             continue
         note_mode = str(mode_by_chapter.get(chapter_id) or "no_notes")
         has_page_footnote_band = (chapter_id, page_no) in footnote_band_pages
-        anchor_kind = resolve_anchor_kind(note_mode, has_page_footnote_band=has_page_footnote_band)
-        certainty = 1.0 if anchor_kind != "unknown" else 0.6
+        anchor_kind = resolve_anchor_kind(
+            note_mode, has_page_footnote_band=has_page_footnote_band
+        )
         page_payload = page_by_no.get(page_no) or {}
         for paragraph in page_body_paragraphs(page_payload):
             paragraph_text = str(paragraph.get("text") or "").strip()
@@ -137,7 +150,7 @@ def build_body_anchors(
                         source_marker=str(match.get("source_marker") or ""),
                         normalized_marker=normalized_marker,
                         anchor_kind=anchor_kind,  # type: ignore[arg-type]
-                        certainty=float(certainty),
+                        certainty=float(match.get("certainty", 0.4)),
                         source_text=paragraph_text,
                         source=f"{str(paragraph.get('source') or 'markdown')}:{str(match.get('pattern') or 'ref')}",
                         synthetic=False,
@@ -146,7 +159,13 @@ def build_body_anchors(
                 )
                 anchor_counter += 1
 
-    anchors.sort(key=lambda row: (int(row.page_no), int(row.paragraph_index), int(row.char_start), row.anchor_id))
+    anchors.sort(
+        key=lambda row: (
+            int(row.page_no),
+            int(row.paragraph_index),
+            int(row.char_start),
+            row.anchor_id,
+        )
+    )
     summary = _build_summary(anchors, year_like_filtered_count=year_like_filtered_total)
     return anchors, summary
-

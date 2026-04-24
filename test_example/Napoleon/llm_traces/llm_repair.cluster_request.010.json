@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 30725,
+          "row_id": 32757,
           "doc_id": "5df1d3d7f9c1",
           "anchor_id": "anchor-00327",
           "chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
@@ -42,8 +42,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "tuant la figure de l'homme « hors de lui », dont l'Autoportrait de Courbet, dit Le Désespéré (1843), a popularisé l'image. Gestes, cris, regards, visages, attitudes. On n'y insistera jamais assez : ce sont d'abord et avant tout les corps insurgés du « peuple en haillons », corps marqués par la différence sociale formant une classe à part, barbare et hostile, qui provoquent le rejet, la peur, le dégoût, la répulsion, autant d'émotions analogues à celles dont le visiteur des asiles, face à des comportements inhabituels et des physionomies étranges, est assailli. Insurgés et insensés, dans les yeux bourgeois, se ressemblent. Forcenés, enragés, agités, excités, fanatiques, exaltés, frénétiques... Dans la presse, les mots sont les mêmes pour les décrire. Affranchis de la peur sociale, ils effraient la bourgeoisie. Ils n'ont plus rien à perdre. Les uns renversent l'ordre établi, les autres l'ordre de la raison. L'aliéné, rappelle avec effroi le docteur Bergeret, « étale aux yeux de l'observateur son état moral dans toute sa nudité $ ^{71} $ ». Tels, l'homme ou la femme des barricades et des émeutes.",
-          "created_at": 1776848881,
-          "updated_at": 1776848881
+          "created_at": 1776859188,
+          "updated_at": 1776859188
         }
       ],
       "rebind_candidates": []
@@ -65,7 +65,7 @@
     "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00327\",\n    \"marker\": \"71\",\n    \"note_text\": \"Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 71 is clearly visible at the bottom of page 279 in the screenshot, but no note item was produced by OCR/structure. The text is fully legible.\"\n  }\n]",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00327\",\n    \"marker\": \"71\",\n    \"note_text\": \"Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Screenshot clearly shows the footnote text at the bottom of page 269 (OCR context indicates page 279) corresponding to marker 71. The OCR/structured data lacks this note item.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
@@ -74,8 +74,8 @@
       "anchor_phrase": "",
       "marker": "71",
       "note_text": "Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.",
-      "confidence": 0.95,
-      "reason": "Footnote 71 is clearly visible at the bottom of page 279 in the screenshot, but no note item was produced by OCR/structure. The text is fully legible."
+      "confidence": 0.98,
+      "reason": "Screenshot clearly shows the footnote text at the bottom of page 269 (OCR context indicates page 279) corresponding to marker 71. The OCR/structured data lacks this note item."
     }
   ],
   "derived_truth": {
@@ -90,8 +90,8 @@
         "anchor_phrase": "",
         "marker": "71",
         "note_text": "Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.",
-        "confidence": 0.95,
-        "reason": "Footnote 71 is clearly visible at the bottom of page 279 in the screenshot, but no note item was produced by OCR/structure. The text is fully legible."
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows the footnote text at the bottom of page 269 (OCR context indicates page 279) corresponding to marker 71. The OCR/structured data lacks this note item."
       }
     ],
     "auto_selected_actions": [
@@ -102,8 +102,8 @@
         "anchor_phrase": "",
         "marker": "71",
         "note_text": "Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.",
-        "confidence": 0.95,
-        "reason": "Footnote 71 is clearly visible at the bottom of page 279 in the screenshot, but no note item was produced by OCR/structure. The text is fully legible."
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows the footnote text at the bottom of page 269 (OCR context indicates page 279) corresponding to marker 71. The OCR/structured data lacks this note item."
       }
     ],
     "auto_applied_actions": [
@@ -114,18 +114,18 @@
         "anchor_phrase": "",
         "marker": "71",
         "note_text": "Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.",
-        "confidence": 0.95,
-        "reason": "Footnote 71 is clearly visible at the bottom of page 279 in the screenshot, but no note item was produced by OCR/structure. The text is fully legible."
+        "confidence": 0.98,
+        "reason": "Screenshot clearly shows the footnote text at the bottom of page 269 (OCR context indicates page 279) corresponding to marker 71. The OCR/structured data lacks this note item."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 1388,
-    "completion_tokens": 133,
-    "total_tokens": 1521,
+    "completion_tokens": 141,
+    "total_tokens": 1529,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4335
+    "duration_ms": 4015
   }
 }

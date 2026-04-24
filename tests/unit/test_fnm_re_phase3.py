@@ -12,7 +12,8 @@ from FNM_RE.models import (
     PagePartitionRecord,
     Phase2Structure,
 )
-from FNM_RE.shared.anchors import resolve_anchor_kind
+from FNM_RE.shared.anchors import resolve_anchor_kind, scan_anchor_markers
+from FNM_RE.shared.notes import normalize_note_marker
 from FNM_RE.stages.note_links import build_note_links
 
 
@@ -102,7 +103,9 @@ def _region(
     )
 
 
-def _item(note_item_id: str, region_id: str, chapter_id: str, *, page_no: int, marker: str) -> NoteItemRecord:
+def _item(
+    note_item_id: str, region_id: str, chapter_id: str, *, page_no: int, marker: str
+) -> NoteItemRecord:
     return NoteItemRecord(
         note_item_id=note_item_id,
         region_id=region_id,
@@ -149,10 +152,26 @@ def _phase2_fixture(
 def _phase_signature(phase) -> tuple:
     return (
         tuple((row.page_no, row.page_role) for row in phase.pages),
-        tuple((row.chapter_id, row.title, row.start_page, row.end_page) for row in phase.chapters),
+        tuple(
+            (row.chapter_id, row.title, row.start_page, row.end_page)
+            for row in phase.chapters
+        ),
         tuple((row.chapter_id, row.note_mode) for row in phase.chapter_note_modes),
-        tuple((row.region_id, row.chapter_id, row.scope, row.note_kind, row.page_start, row.page_end) for row in phase.note_regions),
-        tuple((row.note_item_id, row.region_id, row.chapter_id, row.page_no, row.marker) for row in phase.note_items),
+        tuple(
+            (
+                row.region_id,
+                row.chapter_id,
+                row.scope,
+                row.note_kind,
+                row.page_start,
+                row.page_end,
+            )
+            for row in phase.note_regions
+        ),
+        tuple(
+            (row.note_item_id, row.region_id, row.chapter_id, row.page_no, row.marker)
+            for row in phase.note_items
+        ),
     )
 
 
@@ -172,7 +191,9 @@ class FnmRePhase3Test(unittest.TestCase):
         markers = [row.normalized_marker for row in structure.body_anchors]
         self.assertIn("12", markers)
         self.assertNotIn("2020", markers)
-        self.assertGreaterEqual(structure.summary.body_anchor_summary.get("year_like_filtered_count", 0), 1)
+        self.assertGreaterEqual(
+            structure.summary.body_anchor_summary.get("year_like_filtered_count", 0), 1
+        )
 
     def test_superscript_note_definition_lines_are_filtered(self):
         pages = [
@@ -202,13 +223,23 @@ class FnmRePhase3Test(unittest.TestCase):
         self.assertEqual(resolve_anchor_kind("chapter_endnote_primary"), "endnote")
         self.assertEqual(resolve_anchor_kind("book_endnote_bound"), "endnote")
         self.assertEqual(resolve_anchor_kind("no_notes"), "unknown")
-        self.assertEqual(resolve_anchor_kind("no_notes", has_page_footnote_band=True), "footnote")
+        self.assertEqual(
+            resolve_anchor_kind("no_notes", has_page_footnote_band=True), "footnote"
+        )
         self.assertEqual(resolve_anchor_kind("review_required"), "unknown")
-        self.assertEqual(resolve_anchor_kind("review_required", has_page_footnote_band=True), "footnote")
+        self.assertEqual(
+            resolve_anchor_kind("review_required", has_page_footnote_band=True),
+            "footnote",
+        )
 
     def test_note_and_other_pages_do_not_generate_body_anchors(self):
         pages = [
-            _make_page(1, markdown="# Chapter One\nBody [1].", block_label="doc_title", block_text="Chapter One"),
+            _make_page(
+                1,
+                markdown="# Chapter One\nBody [1].",
+                block_label="doc_title",
+                block_text="Chapter One",
+            ),
             _make_page(2, markdown="# Notes\n1. note page [2]."),
             _make_page(3, markdown="Advertisement page [3]."),
         ]
@@ -225,24 +256,40 @@ class FnmRePhase3Test(unittest.TestCase):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=1, marker="1")],
             chapter_modes=[_mode("ch-1", "footnote_primary")],
         )
         anchors, links, _summary = build_note_links([], phase2, pages=[])
         self.assertTrue(any(row.synthetic for row in anchors))
-        matched = [row for row in links if row.status == "matched" and row.note_kind == "footnote"]
+        matched = [
+            row
+            for row in links
+            if row.status == "matched" and row.note_kind == "footnote"
+        ]
         self.assertTrue(matched)
         self.assertEqual(matched[0].resolver, "fallback")
         synthetic_ids = {row.anchor_id for row in anchors if row.synthetic}
-        synthetic_orphan = [row for row in links if row.status == "orphan_anchor" and row.anchor_id in synthetic_ids]
+        synthetic_orphan = [
+            row
+            for row in links
+            if row.status == "orphan_anchor" and row.anchor_id in synthetic_ids
+        ]
         self.assertFalse(synthetic_orphan)
 
     def test_explicit_anchor_can_replace_synthetic_match(self):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=1, marker="1")],
             chapter_modes=[_mode("ch-1", "review_required")],
         )
@@ -263,7 +310,11 @@ class FnmRePhase3Test(unittest.TestCase):
             ocr_repaired_from_marker="",
         )
         anchors, links, _summary = build_note_links([explicit_anchor], phase2, pages=[])
-        matched = [row for row in links if row.note_item_id == "fn-1" and row.status == "matched"]
+        matched = [
+            row
+            for row in links
+            if row.note_item_id == "fn-1" and row.status == "matched"
+        ]
         self.assertTrue(matched)
         self.assertEqual(matched[0].anchor_id, "anchor-explicit-1")
         self.assertEqual(matched[0].resolver, "repair")
@@ -273,7 +324,11 @@ class FnmRePhase3Test(unittest.TestCase):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=1, marker="123")],
             chapter_modes=[_mode("ch-1", "footnote_primary")],
         )
@@ -294,20 +349,36 @@ class FnmRePhase3Test(unittest.TestCase):
             ocr_repaired_from_marker="",
         )
         anchors, links, _summary = build_note_links([explicit_anchor], phase2, pages=[])
-        repaired_link = [row for row in links if row.note_item_id == "fn-1" and row.status == "matched"]
+        repaired_link = [
+            row
+            for row in links
+            if row.note_item_id == "fn-1" and row.status == "matched"
+        ]
         self.assertTrue(repaired_link)
         self.assertEqual(repaired_link[0].resolver, "repair")
-        repaired_anchor = next(row for row in anchors if row.anchor_id == "anchor-short-1")
+        repaired_anchor = next(
+            row for row in anchors if row.anchor_id == "anchor-short-1"
+        )
         self.assertEqual(repaired_anchor.normalized_marker, "123")
         self.assertEqual(repaired_anchor.ocr_repaired_from_marker, "12")
 
     def test_chapter_scope_endnote_wont_cross_chapter_match(self):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body"), _partition(2, "body")],
-            chapters=[_chapter("ch-1", "Chapter 1", [1]), _chapter("ch-2", "Chapter 2", [2])],
-            note_regions=[_region("rg-en", "ch-1", page_start=1, note_kind="endnote", scope="chapter")],
+            chapters=[
+                _chapter("ch-1", "Chapter 1", [1]),
+                _chapter("ch-2", "Chapter 2", [2]),
+            ],
+            note_regions=[
+                _region(
+                    "rg-en", "ch-1", page_start=1, note_kind="endnote", scope="chapter"
+                )
+            ],
             note_items=[_item("en-1", "rg-en", "ch-1", page_no=1, marker="5")],
-            chapter_modes=[_mode("ch-1", "chapter_endnote_primary"), _mode("ch-2", "chapter_endnote_primary")],
+            chapter_modes=[
+                _mode("ch-1", "chapter_endnote_primary"),
+                _mode("ch-2", "chapter_endnote_primary"),
+            ],
         )
         anchor = BodyAnchorRecord(
             anchor_id="anchor-end-2",
@@ -333,7 +404,11 @@ class FnmRePhase3Test(unittest.TestCase):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-book", "ch-1", page_start=1, note_kind="endnote", scope="book")],
+            note_regions=[
+                _region(
+                    "rg-book", "ch-1", page_start=1, note_kind="endnote", scope="book"
+                )
+            ],
             note_items=[_item("en-1", "rg-book", "ch-1", page_no=1, marker="7")],
             chapter_modes=[_mode("ch-1", "book_endnote_bound")],
         )
@@ -362,25 +437,65 @@ class FnmRePhase3Test(unittest.TestCase):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=1, marker="1")],
             chapter_modes=[_mode("ch-1", "footnote_primary")],
         )
         anchors = [
-            BodyAnchorRecord("a-1", "ch-1", 1, 0, 1, 3, "[1]", "1", "footnote", 1.0, "A[1]", "markdown:bracket", False, ""),
-            BodyAnchorRecord("a-2", "ch-1", 1, 1, 5, 7, "[1]", "1", "footnote", 1.0, "B[1]", "markdown:bracket", False, ""),
+            BodyAnchorRecord(
+                "a-1",
+                "ch-1",
+                1,
+                0,
+                1,
+                3,
+                "[1]",
+                "1",
+                "footnote",
+                1.0,
+                "A[1]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
+            BodyAnchorRecord(
+                "a-2",
+                "ch-1",
+                1,
+                1,
+                5,
+                7,
+                "[1]",
+                "1",
+                "footnote",
+                1.0,
+                "B[1]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
         ]
         _anchors, links, _summary = build_note_links(anchors, phase2, pages=[])
         target = next(row for row in links if row.note_item_id == "fn-1")
         self.assertEqual(target.status, "ambiguous")
-        orphan_same_marker = [row for row in links if row.status == "orphan_anchor" and row.marker == "1"]
+        orphan_same_marker = [
+            row for row in links if row.status == "orphan_anchor" and row.marker == "1"
+        ]
         self.assertFalse(orphan_same_marker)
 
     def test_nested_duplicate_candidates_prefer_more_local_anchor(self):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=1, marker="1")],
             chapter_modes=[_mode("ch-1", "footnote_primary")],
         )
@@ -427,7 +542,11 @@ class FnmRePhase3Test(unittest.TestCase):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=1, marker="52")],
             chapter_modes=[_mode("ch-1", "footnote_primary")],
         )
@@ -469,26 +588,64 @@ class FnmRePhase3Test(unittest.TestCase):
         target = next(row for row in links if row.note_item_id == "fn-1")
         self.assertEqual(target.status, "matched")
         self.assertEqual(target.anchor_id, "a-plain")
-        orphan_same_marker = [row for row in links if row.status == "orphan_anchor" and row.marker == "52"]
+        orphan_same_marker = [
+            row for row in links if row.status == "orphan_anchor" and row.marker == "52"
+        ]
         self.assertFalse(orphan_same_marker)
 
     def test_footnote_multiple_candidates_choose_unique_nearest(self):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body"), _partition(2, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1, 2])],
-            note_regions=[_region("rg-fn", "ch-1", page_start=2, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=2, note_kind="footnote", scope="chapter"
+                )
+            ],
             note_items=[_item("fn-1", "rg-fn", "ch-1", page_no=2, marker="1")],
             chapter_modes=[_mode("ch-1", "footnote_primary")],
         )
         anchors = [
-            BodyAnchorRecord("a-near", "ch-1", 2, 0, 1, 3, "[1]", "1", "footnote", 1.0, "A[1]", "markdown:bracket", False, ""),
-            BodyAnchorRecord("a-far", "ch-1", 1, 1, 5, 7, "[1]", "1", "footnote", 1.0, "B[1]", "markdown:bracket", False, ""),
+            BodyAnchorRecord(
+                "a-near",
+                "ch-1",
+                2,
+                0,
+                1,
+                3,
+                "[1]",
+                "1",
+                "footnote",
+                1.0,
+                "A[1]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
+            BodyAnchorRecord(
+                "a-far",
+                "ch-1",
+                1,
+                1,
+                5,
+                7,
+                "[1]",
+                "1",
+                "footnote",
+                1.0,
+                "B[1]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
         ]
         _anchors, links, _summary = build_note_links(anchors, phase2, pages=[])
         target = next(row for row in links if row.note_item_id == "fn-1")
         self.assertEqual(target.status, "matched")
         self.assertEqual(target.anchor_id, "a-near")
-        orphan_same_marker = [row for row in links if row.status == "orphan_anchor" and row.marker == "1"]
+        orphan_same_marker = [
+            row for row in links if row.status == "orphan_anchor" and row.marker == "1"
+        ]
         self.assertFalse(orphan_same_marker)
 
     def test_fallback_chapter_endnote_can_repair_with_cross_chapter_anchor(self):
@@ -498,9 +655,22 @@ class FnmRePhase3Test(unittest.TestCase):
                 _chapter("ch-fallback-0001", "Chapter A", [10]),
                 _chapter("ch-fallback-0002", "Chapter B", [9]),
             ],
-            note_regions=[_region("rg-en", "ch-fallback-0001", page_start=10, note_kind="endnote", scope="chapter")],
-            note_items=[_item("en-1", "rg-en", "ch-fallback-0001", page_no=10, marker="5")],
-            chapter_modes=[_mode("ch-fallback-0001", "no_notes"), _mode("ch-fallback-0002", "no_notes")],
+            note_regions=[
+                _region(
+                    "rg-en",
+                    "ch-fallback-0001",
+                    page_start=10,
+                    note_kind="endnote",
+                    scope="chapter",
+                )
+            ],
+            note_items=[
+                _item("en-1", "rg-en", "ch-fallback-0001", page_no=10, marker="5")
+            ],
+            chapter_modes=[
+                _mode("ch-fallback-0001", "no_notes"),
+                _mode("ch-fallback-0002", "no_notes"),
+            ],
         )
         anchor = BodyAnchorRecord(
             anchor_id="anchor-end-2",
@@ -530,9 +700,20 @@ class FnmRePhase3Test(unittest.TestCase):
                 _chapter("toc-ch-002", "Chapter A", [64]),
                 _chapter("toc-ch-003", "Chapter B", [61]),
             ],
-            note_regions=[_region("rg-en", "toc-ch-002", page_start=64, note_kind="endnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-en",
+                    "toc-ch-002",
+                    page_start=64,
+                    note_kind="endnote",
+                    scope="chapter",
+                )
+            ],
             note_items=[_item("en-1", "rg-en", "toc-ch-002", page_no=64, marker="7")],
-            chapter_modes=[_mode("toc-ch-002", "chapter_endnote_primary"), _mode("toc-ch-003", "chapter_endnote_primary")],
+            chapter_modes=[
+                _mode("toc-ch-002", "chapter_endnote_primary"),
+                _mode("toc-ch-003", "chapter_endnote_primary"),
+            ],
         )
         anchor = BodyAnchorRecord(
             anchor_id="anchor-end-3",
@@ -587,7 +768,15 @@ class FnmRePhase3Test(unittest.TestCase):
         phase2 = _phase2_fixture(
             pages=[_partition(1, "body"), _partition(2, "note")],
             chapters=[_chapter("toc-ch-001", "Chapter A", [1, 2])],
-            note_regions=[_region("rg-fn", "toc-ch-001", page_start=2, note_kind="footnote", scope="chapter")],
+            note_regions=[
+                _region(
+                    "rg-fn",
+                    "toc-ch-001",
+                    page_start=2,
+                    note_kind="footnote",
+                    scope="chapter",
+                )
+            ],
             note_items=[
                 _item("fn-10", "rg-fn", "toc-ch-001", page_no=2, marker="10"),
                 _item("fn-12", "rg-fn", "toc-ch-001", page_no=2, marker="12"),
@@ -647,9 +836,23 @@ class FnmRePhase3Test(unittest.TestCase):
             pages=[_partition(1, "body")],
             chapters=[_chapter("ch-1", "Chapter 1", [1])],
             note_regions=[
-                _region("rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"),
-                _region("rg-en-a", "ch-1", page_start=1, note_kind="endnote", scope="chapter"),
-                _region("rg-en-b", "ch-1", page_start=1, note_kind="endnote", scope="chapter"),
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                ),
+                _region(
+                    "rg-en-a",
+                    "ch-1",
+                    page_start=1,
+                    note_kind="endnote",
+                    scope="chapter",
+                ),
+                _region(
+                    "rg-en-b",
+                    "ch-1",
+                    page_start=1,
+                    note_kind="endnote",
+                    scope="chapter",
+                ),
             ],
             note_items=[
                 _item("fn-1", "rg-fn", "ch-1", page_no=1, marker="1"),
@@ -659,9 +862,54 @@ class FnmRePhase3Test(unittest.TestCase):
             chapter_modes=[_mode("ch-1", "review_required")],
         )
         anchors = [
-            BodyAnchorRecord("end-1", "ch-1", 1, 0, 0, 2, "[3]", "3", "endnote", 1.0, "Body [3]", "markdown:bracket", False, ""),
-            BodyAnchorRecord("end-2", "ch-1", 1, 1, 5, 7, "[3]", "3", "endnote", 1.0, "Body [3]", "markdown:bracket", False, ""),
-            BodyAnchorRecord("unk-1", "ch-1", 1, 2, 8, 10, "[9]", "9", "unknown", 0.6, "Body [9]", "markdown:bracket", False, ""),
+            BodyAnchorRecord(
+                "end-1",
+                "ch-1",
+                1,
+                0,
+                0,
+                2,
+                "[3]",
+                "3",
+                "endnote",
+                1.0,
+                "Body [3]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
+            BodyAnchorRecord(
+                "end-2",
+                "ch-1",
+                1,
+                1,
+                5,
+                7,
+                "[3]",
+                "3",
+                "endnote",
+                1.0,
+                "Body [3]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
+            BodyAnchorRecord(
+                "unk-1",
+                "ch-1",
+                1,
+                2,
+                8,
+                10,
+                "[9]",
+                "9",
+                "unknown",
+                0.6,
+                "Body [9]",
+                "markdown:bracket",
+                False,
+                "",
+            ),
         ]
         _anchors, _links, summary = build_note_links(anchors, phase2, pages=[])
         review = summary.get("review_seed_summary") or {}
@@ -673,18 +921,79 @@ class FnmRePhase3Test(unittest.TestCase):
 
     def test_phase3_contains_phase2_fields_without_mutating_phase2(self):
         pages = [
-            _make_page(1, markdown="# Chapter One\nBody [1].", block_label="doc_title", block_text="Chapter One", footnotes="1. footnote"),
-            _make_page(2, markdown="# Chapter Two\nBody.", block_label="doc_title", block_text="Chapter Two"),
+            _make_page(
+                1,
+                markdown="# Chapter One\nBody [1].",
+                block_label="doc_title",
+                block_text="Chapter One",
+                footnotes="1. footnote",
+            ),
+            _make_page(
+                2,
+                markdown="# Chapter Two\nBody.",
+                block_label="doc_title",
+                block_text="Chapter Two",
+            ),
             _make_page(3, markdown="# Notes\n1. endnote"),
         ]
-        phase2 = build_phase2_structure(pages, page_overrides={"3": {"page_role": "note"}})
+        phase2 = build_phase2_structure(
+            pages, page_overrides={"3": {"page_role": "note"}}
+        )
         before = _phase_signature(phase2)
-        phase3 = build_phase3_structure(pages, page_overrides={"3": {"page_role": "note"}})
+        phase3 = build_phase3_structure(
+            pages, page_overrides={"3": {"page_role": "note"}}
+        )
         after = _phase_signature(phase2)
         self.assertEqual(before, after)
         self.assertEqual(_phase_signature(phase3), before)
         self.assertIsNotNone(phase3.summary.body_anchor_summary)
         self.assertIsNotNone(phase3.summary.note_link_summary)
+
+    def test_normalize_note_marker_preserves_all_digits(self):
+        self.assertEqual(normalize_note_marker("$^{13}$"), "13")
+        self.assertEqual(normalize_note_marker("<sup>14</sup>"), "14")
+        self.assertEqual(normalize_note_marker("[47]"), "47")
+        self.assertEqual(normalize_note_marker("¹²³"), "123")
+        self.assertEqual(normalize_note_marker("⁴⁷"), "47")
+        self.assertEqual(normalize_note_marker("^{52}"), "52")
+        self.assertEqual(normalize_note_marker("13."), "13")
+        self.assertEqual(normalize_note_marker("09"), "9")
+        self.assertEqual(normalize_note_marker("0"), "0")
+        self.assertEqual(normalize_note_marker(""), "")
+        self.assertEqual(normalize_note_marker(None), "")
+
+    def test_scan_anchor_markers_certainty_per_pattern(self):
+        matches, _ = scan_anchor_markers("$^{13}$ <sup>14</sup> [47] ¹²³ ^{52}")
+        markers = sorted(matches, key=lambda m: int(m["normalized_marker"]))
+        by_marker = {m["normalized_marker"]: m["certainty"] for m in markers}
+        self.assertEqual(by_marker.get("13"), 1.0)
+        self.assertEqual(by_marker.get("14"), 1.0)
+        self.assertEqual(by_marker.get("47"), 1.0)
+        self.assertEqual(by_marker.get("52"), 0.4)
+        self.assertEqual(by_marker.get("123"), 1.0)
+
+    def test_build_body_anchors_certainty_per_anchor(self):
+        pages = [
+            _make_page(
+                1,
+                markdown=(
+                    "# Chapter One\n"
+                    "Body $^{13}$ and <sup>14</sup> and [47] and ¹²³ and ^{52}."
+                ),
+                block_label="doc_title",
+                block_text="Chapter One",
+                footnotes="13. footnote 13\n14. footnote 14",
+            ),
+        ]
+        structure = build_phase3_structure(pages)
+        by_marker = {
+            row.normalized_marker: row.certainty for row in structure.body_anchors
+        }
+        self.assertAlmostEqual(by_marker.get("13"), 1.0)
+        self.assertAlmostEqual(by_marker.get("14"), 1.0)
+        self.assertAlmostEqual(by_marker.get("47"), 1.0)
+        self.assertAlmostEqual(by_marker.get("52"), 0.4)
+        self.assertAlmostEqual(by_marker.get("123"), 1.0)
 
 
 if __name__ == "__main__":

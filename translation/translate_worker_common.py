@@ -574,23 +574,36 @@ def run_translate_worker(
             except NonRetryableProviderError as exc:
                 snapshot = deps["load_translate_state"](doc_id)
                 deps["mark_failed_page_state"](doc_id, bp, str(exc))
-                _save_quota_error_state(
+                error_patch = handle_page_exception(
+                    exc,
+                    doc_id=doc_id,
+                    bp=bp,
+                    loop_index=loop_index,
+                    current_page_idx=current_page_idx,
+                    worker_plan=worker_plan,
+                    context=context,
+                ) or {}
+                draft_error_patch = error_patch.get("draft_error_patch")
+                if draft_error_patch:
+                    deps["save_stream_draft"](doc_id, **draft_error_patch)
+                _save_page_error_state(
                     deps,
                     doc_id,
                     snapshot,
                     worker_plan=worker_plan,
                     bp=bp,
                     current_page_idx=current_page_idx,
-                    model=getattr(exc, "_worker_model_key", worker_plan.get("model_key", "")),
+                    model=error_patch.get("model_key", getattr(exc, "_worker_model_key", worker_plan.get("model_key", ""))),
                     error=exc,
                 )
-                deps["translate_push"]("error", {
-                    "msg": str(exc),
+                deps["translate_push"]("page_error", {
                     "bp": bp,
+                    "error": str(exc),
+                    "page_idx": current_page_idx,
+                    "total": total_pages,
                     "kind": "fatal_provider",
                     "status_code": getattr(exc, "status_code", None),
                 })
-                return
             except Exception as exc:
                 logger.exception("翻译页面失败 doc_id=%s bp=%s", doc_id, bp)
                 deps["mark_failed_page_state"](doc_id, bp, str(exc))

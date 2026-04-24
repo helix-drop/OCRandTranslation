@@ -19,7 +19,10 @@ from FNM_RE import (
     group_review_overrides,
     run_doc_pipeline as run_fnm_pipeline,
     run_llm_repair,
+    run_post_translate_export_checks_for_doc,
 )
+from FNM_RE.page_translate import collect_fnm_unit_failed_locations
+from persistence.task_logs import append_doc_task_log, create_doc_task_log
 from web.services import TranslationServices
 
 
@@ -29,6 +32,8 @@ _fnm_continue_docs: set[str] = set()
 _fnm_continue_lock = threading.Lock()
 _fnm_fullflow_docs: set[str] = set()
 _fnm_fullflow_lock = threading.Lock()
+_fnm_post_translate_docs: set[str] = set()
+_fnm_post_translate_lock = threading.Lock()
 
 
 def _request_doc_id(deps: Deps) -> str:
@@ -65,6 +70,54 @@ def _set_fnm_fullflow_running(doc_id: str, running: bool) -> None:
             _fnm_fullflow_docs.add(normalized)
         else:
             _fnm_fullflow_docs.discard(normalized)
+
+
+def _is_fnm_post_translate_running(doc_id: str) -> bool:
+    with _fnm_post_translate_lock:
+        return str(doc_id or "") in _fnm_post_translate_docs
+
+
+def _set_fnm_post_translate_running(doc_id: str, running: bool) -> None:
+    normalized = str(doc_id or "").strip()
+    if not normalized:
+        return
+    with _fnm_post_translate_lock:
+        if running:
+            _fnm_post_translate_docs.add(normalized)
+        else:
+            _fnm_post_translate_docs.discard(normalized)
+
+
+def _fnm_unit_needs_translation_followup(unit: dict[str, Any]) -> bool:
+    status = str(unit.get("status") or "").strip().lower()
+    kind = str(unit.get("kind") or "").strip().lower()
+    if status in {"pending", "running", "error", "retry_pending", "retrying", "manual_required"}:
+        return True
+    if status not in {"done", "done_manual"}:
+        return True
+    if kind == "body":
+        if collect_fnm_unit_failed_locations(unit):
+            return True
+        if not str(unit.get("translated_text") or "").strip():
+            return True
+        for segment in unit.get("page_segments") or []:
+            for paragraph in segment.get("paragraphs") or []:
+                if paragraph.get("consumed_by_prev"):
+                    continue
+                paragraph_status = str(paragraph.get("translation_status") or "").strip().lower()
+                translated_text = str(paragraph.get("translated_text") or "").strip()
+                if paragraph_status in {"error", "retry_pending", "retrying", "manual_required"} and not bool(paragraph.get("manual_resolved")):
+                    return True
+                if paragraph_status not in {"done", "done_manual"}:
+                    return True
+                if not translated_text:
+                    return True
+        return False
+    return not str(unit.get("translated_text") or "").strip()
+
+
+def _fnm_has_translation_followup(units: list[dict[str, Any]]) -> bool:
+    return any(_fnm_unit_needs_translation_followup(dict(unit)) for unit in (units or []))
 
 
 def _normalize_reason_counts(raw_counts: Any) -> dict[str, int]:
@@ -176,11 +229,20 @@ def _resolve_fnm_workflow_state(
     run_status: str,
     full_flow_running: bool,
     continue_running: bool,
+    post_translate_running: bool,
+    fnm_tail_state: str,
     translate_running: bool,
     can_translate: bool,
     export_ready_real: bool,
 ) -> tuple[str, str]:
     status = str(run_status or "idle").strip().lower() or "idle"
+    tail_state = str(fnm_tail_state or "idle").strip().lower() or "idle"
+    if post_translate_running:
+        if tail_state == "translation_retrying" and translate_running:
+            return "translating_retrying", "翻译重试中"
+        if tail_state == "repairing":
+            return "post_translate_repairing", "自动修补中"
+        return "post_translate_checking", "最终校验中"
     if full_flow_running:
         return "full_flow_running", "一体化流程处理中"
     if continue_running:
@@ -822,6 +884,48 @@ def api_doc_fnm_full_flow(doc_id: str, deps: Deps):
                 return
             if execution_mode == "real" and str(structure_status.get("structure_state") or "") != "ready":
                 return
+            needs_translation_followup = _fnm_has_translation_followup(units)
+            if execution_mode == "real" and not needs_translation_followup:
+                log_relpath = create_doc_task_log(
+                    doc_id,
+                    "fnm_post_translate",
+                    started_at=time.time(),
+                )
+                append_doc_task_log(
+                    doc_id,
+                    log_relpath,
+                    "FNM 最终校验已启动：执行未翻译检查、导出校验与自动修补。",
+                )
+                _set_fnm_post_translate_running(doc_id, True)
+                try:
+                    try:
+                        check_result = run_post_translate_export_checks_for_doc(doc_id, repo=repo)
+                        blocking_reasons = list(check_result.get("blocking_reasons") or [])
+                        if bool(check_result.get("export_ready_real")):
+                            append_doc_task_log(
+                                doc_id,
+                                log_relpath,
+                                "FNM 最终校验完成：当前章节包已可导出。",
+                            )
+                        else:
+                            append_doc_task_log(
+                                doc_id,
+                                log_relpath,
+                                "FNM 最终校验完成：仍存在阻塞项。"
+                                + (f" blocking_reasons={','.join(blocking_reasons)}" if blocking_reasons else ""),
+                                level="WARNING",
+                            )
+                    except Exception as exc:
+                        append_doc_task_log(
+                            doc_id,
+                            log_relpath,
+                            f"FNM 最终校验失败：{exc}",
+                            level="ERROR",
+                        )
+                        raise
+                finally:
+                    _set_fnm_post_translate_running(doc_id, False)
+                return
             translate_args = deps["get_translate_args"]()
             if execution_mode == "real" and not translate_args["api_key"]:
                 return
@@ -829,6 +933,7 @@ def api_doc_fnm_full_flow(doc_id: str, deps: Deps):
         except Exception:
             deps["logger"].exception("FNM 一体化流程执行失败 doc_id=%s", doc_id)
         finally:
+            _set_fnm_post_translate_running(doc_id, False)
             _set_fnm_fullflow_running(doc_id, False)
 
     thread = threading.Thread(target=_runner, daemon=True, name=f"fnm-fullflow-{doc_id}")
@@ -862,7 +967,7 @@ def api_reading_view_state(deps: Deps):
     doc_id = _request_doc_id(deps)
     if not doc_id or not deps["get_doc_meta"](doc_id):
         return jsonify({"ok": False, "error": "doc_not_found", "message": "文档不存在或已删除"}), 404
-    view = deps["_normalize_reading_view"](request.args.get("view", "standard"))
+    view = "standard"
     pages, visible_page_view, disk_entries, snapshot = _load_reading_snapshot(doc_id, deps)
     state = deps["build_reading_view_state"](
         doc_id=doc_id,
@@ -901,16 +1006,31 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
     snapshot.setdefault("failed_bps", [])
     snapshot.setdefault("partial_failed_bps", [])
     snapshot["reading_stats_done_pages"] = len(snapshot.get("translated_bps") or [])
+    fnm_tail_state = str(snapshot.get("fnm_tail_state", "idle") or "idle").strip().lower() or "idle"
+    export_bundle_available = bool(snapshot.get("export_bundle_available"))
+    export_has_blockers = bool(snapshot.get("export_has_blockers"))
+    tail_blocking_summary = [
+        str(item).strip()
+        for item in list(snapshot.get("tail_blocking_summary") or [])
+        if str(item).strip()
+    ]
     task = dict(snapshot.get("task") or {})
     is_fnm_task = task.get("kind") == "fnm"
     retry_summary = build_fnm_retry_summary(doc_id, snapshot=snapshot, repo=repo)
-    export_ready_real = bool(structure_status["export_ready_real"] and not retry_summary["blocking_export"])
+    export_ready_real = bool(
+        structure_status["export_ready_real"]
+        and export_bundle_available
+        and not export_has_blockers
+    )
     review_counts = _build_module_reason_counts(structure_status)
     review_reason_counts = _to_reason_count_items(review_counts)
     structure_ready = structure_status["structure_state"] == "ready"
     full_flow_running = _is_fnm_fullflow_running(doc_id)
     continue_running = _is_fnm_continue_running(doc_id)
     translate_running = bool(is_fnm_task and snapshot.get("running"))
+    post_translate_running = _is_fnm_post_translate_running(doc_id) or (
+        translate_running and fnm_tail_state in {"translation_retrying", "post_translate_checking", "repairing"}
+    )
     can_translate = bool(
         fnm_run
         and run_status == "done"
@@ -922,6 +1042,8 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
         run_status=run_status,
         full_flow_running=full_flow_running,
         continue_running=continue_running,
+        post_translate_running=post_translate_running,
+        fnm_tail_state=fnm_tail_state,
         translate_running=translate_running,
         can_translate=can_translate,
         export_ready_real=export_ready_real,
@@ -951,6 +1073,8 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
         "run_status": run_status,
         "fnm_fullflow_running": full_flow_running,
         "fnm_continue_running": continue_running,
+        "fnm_post_translate_running": post_translate_running,
+        "fnm_tail_state": fnm_tail_state,
         "workflow_state": workflow_state,
         "workflow_state_label": workflow_state_label,
         "state_persisted": bool(run_status == "done" and not continue_running),
@@ -961,17 +1085,20 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
             not translate_running
             and not full_flow_running
             and not continue_running
+            and not post_translate_running
             and (run_status in {"idle", "error", "failed"} or (run_status == "done" and not can_translate))
         ),
         "full_flow_available": bool(
             not translate_running
             and not full_flow_running
             and not continue_running
+            and not post_translate_running
             and run_status != "running"
         ),
         "resume_translate_available": bool(
             can_translate
             and not translate_running
+            and not post_translate_running
             and (int(snapshot.get("processed_units", 0) or 0) > 0 or int(snapshot.get("done_units", 0) or 0) > 0)
         ),
         "run_updated_at": float(fnm_run.get("updated_at", 0) or 0),
@@ -1025,6 +1152,9 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
         "duplicate_paragraph_detected": bool(structure_status.get("duplicate_paragraph_detected", False)),
         "export_ready_test": structure_status["export_ready_test"],
         "export_ready_real": export_ready_real,
+        "export_bundle_available": export_bundle_available,
+        "export_has_blockers": export_has_blockers,
+        "tail_blocking_summary": tail_blocking_summary,
         "total_units": int(snapshot.get("total_units", len(units)) or 0),
         "done_units": int(snapshot.get("done_units", 0) or 0),
         "processed_units": int(snapshot.get("processed_units", 0) or 0),
@@ -1036,6 +1166,7 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
         "current_unit_pages": snapshot.get("current_unit_pages", ""),
         "unit_items": list(snapshot.get("unit_items") or []),
         "translate_running": translate_running,
+        "pause_translate_available": bool(translate_running),
         "translate_snapshot": snapshot if is_fnm_task else None,
         "translate_phase": str(snapshot.get("phase") or "idle"),
         "translate_last_error": str(snapshot.get("last_error") or ""),
@@ -1051,8 +1182,16 @@ def api_doc_fnm_status(doc_id: str, deps: Deps):
         "draft_last_error": str(draft.get("last_error") or ""),
         "validation": validation,
         "execution_mode": retry_summary["execution_mode"],
-        "blocking_export": bool(retry_summary["blocking_export"] or not structure_status["export_ready_real"]),
-        "blocking_reason": retry_summary["blocking_reason"] or (structure_status["blocking_reasons"][0] if structure_status["blocking_reasons"] else ""),
+        "blocking_export": bool(
+            (fnm_tail_state in {"translation_retrying", "post_translate_checking", "repairing"})
+            or retry_summary["blocking_export"]
+            or not structure_status["export_ready_real"]
+        ),
+        "blocking_reason": (
+            (f"tail_state_{fnm_tail_state}" if fnm_tail_state in {"translation_retrying", "post_translate_checking", "repairing"} else "")
+            or retry_summary["blocking_reason"]
+            or (structure_status["blocking_reasons"][0] if structure_status["blocking_reasons"] else "")
+        ),
         "retry_progress": retry_summary["retry_progress"],
         "next_failed_location": retry_summary["next_failed_location"],
         "failed_locations": retry_summary["failed_locations"],
@@ -1298,13 +1437,8 @@ def translate_api_usage_data(deps: Deps):
     """翻译 API 使用情况数据接口。"""
     doc_id = _request_doc_id(deps)
     pages, visible_page_view, disk_entries, snapshot = _load_reading_snapshot(doc_id, deps)
-    view = deps["_normalize_reading_view"](request.args.get("view", "standard"))
-    entries = (
-        deps["load_fnm_diagnostic_entries"](doc_id, pages=pages)
-        if view == "fnm"
-        else disk_entries
-    )
-    return jsonify(deps["_build_translate_usage_payload"](doc_id, entries=entries, snapshot=snapshot))
+    del pages, visible_page_view
+    return jsonify(deps["_build_translate_usage_payload"](doc_id, entries=disk_entries, snapshot=snapshot))
 
 
 def register_translation_routes(app, deps: Deps) -> None:

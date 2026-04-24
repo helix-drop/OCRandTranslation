@@ -8,12 +8,12 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote\",\n  \"chapter_title\": \"\\\"Danxi said...\\\"\",\n  \"page_range\": [\n    159,\n    214\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 159,\n      \"ocr_excerpt\": \"own writings. I will also show that $ \\\\underline{\\\\text{zhezhong}} $ hermeneutics and textual composition rested on the notion that illness was constantly changing. Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $ The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also ...\"\n    },\n    {\n      \"page_no\": 160,\n      \"ocr_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), ...\"\n    },\n    {\n      \"page_no\": 161,\n      \"ocr_excerpt\": \"### 5.2 Madness in Lou Ying's 樓英 (1320-1400) $ ^{12} $ Yixue gangmu 醫學綱目 (1396) The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \\\"Immortals' crag\\\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $ Lou Ying started to collect materials for his summa of current medical doctrine and healing methods in the 1360s and completed a first version in 1380; he achieved the final version in 1396. Lou did not ha ...\"\n    },\n    {\n      \"page_no\": 162,\n      \"ocr_excerpt\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $ Textual montages like Lou's Systematic Outline of Medical Learning were not amateurish endeavors. Composite texts professing to cover all aspects of illness and medicine were actually a new genre of medical writing at which Zhu Zhenheng's disciples excelled. $ ^{18} $ Many books claiming to be for beginners were sophisticated digests of complex medical teachings; they were not easy “primers,” but points of entry into the intricate traditions they summarized. Students of medicine found these compilations all the more useful since readers could not easily access all the texts these works cited. Lou Ying's compilation was concerned ...\"\n    },\n    {\n      \"page_no\": 163,\n      \"ocr_excerpt\": \"Zhongjing [Zhang Ji] is detailed on external contamination that affects the interior and the surface or Yin and Yang; Danxi distinguishes himself on inner harm of Blood or Qi [that causes] depletion or repletion; Dongyuan [Li Gao] supports and protects central Qi; Hejian [Liu Wansu] removes the old to create the new; Mr. Qian [Yi] distinguishes clearly between the five Yin viscera; Dairen [Zhang Congzheng] is well versed in the three methods [vomiting, purging, and sweating]. Formularies from past ages are abundant: we can simply say that each has its strengths. 仲景詳外感於表裡陰陽 丹溪獨內傷於血氣虛實 東垣扶護中氣 河間推陳 致新 錢氏分明五臟 戴人熟施三法 凡歷代方書甚衆 皆各有所長耳 Since the same symptoms could occur for different reasons, it was plausible that many texts could contain useful methods of treatment. $ ^{19} $ “The benighted fail to appreciate this principle: their reckless trying [of recipes] on approximate illnesses has led many to an unjust and premature death” (昧者不悟是理 妄試疑似之病 每致夭橫者不少矣). Armed with a definition of illness as a multifaceted and ever-changing entity that was typical of Zhu Zhenheng's followers, $ ^{20} $ Lou proposed an elegant solution to the controversial issue of whether “old recipes” could cure “curren ...\"\n    },\n    {\n      \"page_no\": 164,\n      \"ocr_excerpt\": \"from the Treatise on Cold Injury (or any other source), for instance, were effective when they were used to treat the kinds of illness they cured best. In typical zbezbong fashion, Lou also used this flexible conception of illness and therapy to justify a syncretic approach to the textual past and to clinical practice. His book counted forty fascicles or chapters. The first nine—all part of a large section called “Yin-Yang and the viscera” 陰陽臟腑部—explained general principles on pathomechanisms, diagnosis, and treatments. Followed twenty fascicles (10-29) describing various illnesses and methods to treat them, four fascicles on Cold Injury (30-3), two on the illnesses of women (34-5), four on those of children (36-9), and one with commentaries on the five periods and six Qi in the Inner Canon (40). $ ^{21} $ In the twenty chapters on disorders other than Cold Injury, Lou Ying classified illnesses into five sections (bu 部) named after the pairs of Yin and Yang viscera with which he associated them. There were six fascicles on the Liver and Gallbladder (肝膽), five on the Heart and Small Intestine (心小腸), five on the Spleen and Stomach (脾胃), two on the Lungs and Large Intestine (肺大腸), and ...\"\n    },\n    {\n      \"page_no\": 166,\n      \"ocr_excerpt\": \"records from various sources. $ ^{22} $ Lou shortened and slightly modified some passages, but his own utterances were limited to his introduction (translated above), cross-references to other sections for remedies whose recipes were given elsewhere, and very brief (and themselves intertextual) “comments” (批) after some citations. $ ^{23} $ Lou’s section on kuang introduced a mix of approaches to madness, as well as recipes compiled at different periods that aimed to cure various imbalances. What justified this catholicity of approaches was not a theoretical reflection on madness in particular, but one on illness in general: any illness could be caused by a large array of imbalances and could therefore be treated in a variety of ways. Note nonetheless that Lou gave little room to kuang’s older etiologies—Wind was mentioned only in a “comment” on what Lou considered to be an anti-Wind remedy by Zhang Ji 張機. $ ^{24} $ The Wind etiology appeared discreetly in recipes that were once used to counter Wind strokes, but nothing in Lou’s work signaled that madness had once been considered as a Wind illness. $ ^{25} $ The cases of madness that Lou selected deployed mostly aggressive therapie ...\"\n    },\n    {\n      \"page_no\": 167,\n      \"ocr_excerpt\": \"cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late- imperial medicine. Only one case deployed an approach that became marginal: Sun Zhao's 孫兆 (late eleventh century) cure of a monk with a recipe and method designed by Shen Kuo 沈括 (1031-1095). $ ^{29} $ These mostly aggressive recipes and methods contrasted with the general therapeutic orientation of the Systematic Outline. Lou's \\\"General discussion on methods of treatment\\\" (Zhifa tonglun 治法通論, beginning of juan 3) cited 21 passages: eight from Wang Haogu, three from Li Gao, three from the Basic Questions, two each from Zhang Ji and Zhu Zhenheng, and one each from the Divine Pivot, the Majue, and the Canon of Problems. $ ^{30} $ Thirteen of the fifteen passages attributed to specific authors were from physicians whose priority, according to Lou, had been \\\"to help and protect primordial Qi\\\" (扶護元氣為主). $ ^{31} $ The contrast between Lou's general advice and the remedies he recommended for treating madness confirms the strength that the Fire and mucus etiology of madness had acquired by the fourteenth century. Madness was then largely seen as an illness caused by some kind of over-repletion. ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00394\",\n      \"marker\": \"7\",\n      \"page_no\": 159,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00397\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. Thes ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00398\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 4,\n      \"source_text\": \"The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the int ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00400\",\n      \"marker\": \"13\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00401\",\n      \"marker\": \"14\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00402\",\n      \"marker\": \"15\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00403\",\n      \"marker\": \"16\",\n      \"page_no\": 162,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books in ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00404\",\n      \"marker\": \"17\",\n      \"page_no\": 162,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books in ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00148\",\n      \"note_item_id\": \"fn-00065\",\n      \"current_anchor_id\": \"synthetic-footnote-00124\",\n      \"marker\": \"4\",\n      \"note_page_no\": 159,\n      \"anchor_page_no\": 159,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L ...\",\n      \"anchor_excerpt\": \"94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L ...\"\n    },\n    {\n      \"link_id\": \"link-00150\",\n      \"note_item_id\": \"fn-00067\",\n      \"current_anchor_id\": \"synthetic-footnote-00125\",\n      \"marker\": \"4\",\n      \"note_page_no\": 161,\n      \"anchor_page_no\": 161,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6 ...\",\n      \"anchor_excerpt\": \"CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6 ...\"\n    },\n    {\n      \"link_id\": \"link-00151\",\n      \"note_item_id\": \"fn-00068\",\n      \"current_anchor_id\": \"anchor-00399\",\n      \"marker\": \"1\",\n      \"note_page_no\": 162,\n      \"anchor_page_no\": 160,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"C\\\\^X!Vbhag_Xff!:[\\\\aXfX!g[\\\\a^Xef&!Cbh!P\\\\aZ!hfXW!P\\\\a!TaW PTaZ!Tf!T!V_Tff\\\\Y\\\\VTg\\\\ba!WXi\\\\VX!g[TgVbeeXfcbaWXW j\\\\g[!9_bbW!TaWH\\\\&!g[X!\\\\agXe\\\\be!TaW!g[X!fheYTVX!$ˉˌ %&!g[X!hccXe!TaW!_bjXe!UbWl!$'( %&!WXc_Xg\\\\ba!TaW eXc_Xg\\\\ba&XgV5!g[X! \\\\iX!8ZXagf!jXeX! ...\",\n      \"anchor_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of ...\"\n    },\n    {\n      \"link_id\": \"link-00152\",\n      \"note_item_id\": \"fn-00069\",\n      \"current_anchor_id\": \"synthetic-footnote-00127\",\n      \"marker\": \"2\",\n      \"note_page_no\": 162,\n      \"anchor_page_no\": 162,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"C\\\\h!:[ha!chU_\\\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\\\a! 22&!TaW&!UTf\\\\aZ![\\\\`fX_Y!ba T!`TahfVe\\\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\\\L Ǿƚďɭ \\\\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\\\fV\\\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\\\huf LMLQJ![LDR[XH ...\",\n      \"anchor_excerpt\": \"C\\\\h!:[ha!chU_\\\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\\\a! 22&!TaW&!UTf\\\\aZ![\\\\`fX_Y!ba T!`TahfVe\\\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\\\L Ǿƚďɭ \\\\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\\\fV\\\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\\\huf LMLQJ![LDR[XH ...\"\n    },\n    {\n      \"link_id\": \"link-00155\",\n      \"note_item_id\": \"fn-00072\",\n      \"current_anchor_id\": \"anchor-00417\",\n      \"marker\": \"8\",\n      \"note_page_no\": 169,\n      \"anchor_page_no\": 167,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"$1* )$+8, äŜȠň 4 $1;, <,-, 4??H7<A: GB 4 C4FF4:8 9EB@ 04A: /<BA:UFƑ͂ S $<$1 ƺ˖ ʦǳɖ̬Wĭ˨° ˃˖ǃ Wļ˨ɺ F88 %L?4A 4A7 %L?4A 4A7 *<I<A 4<UF 8C<G4C; 6?4<@87 G;4G 4< 4A7 1;H;47 8K6;4A:87 ?8A:G;L ?8GG8EF ćĎųɯƨĵȔȔhȢ˖ 1;HUF 8C<G4C; <A7<64G87 G;4G V;,$16 ...\",\n      \"anchor_excerpt\": \"cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late-\"\n    },\n    {\n      \"link_id\": \"link-00156\",\n      \"note_item_id\": \"fn-00073\",\n      \"current_anchor_id\": \"anchor-00436\",\n      \"marker\": \"2\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 171,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. $1;,\\u0001<,-, \\u0014 \\u00103\\u0005\\b G\\u0001J4F\\u00016B@@BA\\u00019BE\\u00017<F6<C?8F B9\\u0001G;8\\u00017LA4FGLW\\u0001\\u0004GB G4>8 ABG8F\\u0001J;<?8\\u0001G;8<E\\u0001@4FG8EF\\u0001J8E8\\u0001GE84G<A:\\u0001C4G<8AGF\\b1;4A: \\u001aBA:M; 8A:UF̳Řʑ\\u0011͝ \\u0015\\u0016,1*6+, \\u0012\\u0014\\u0001 \\u0011\\u0012\\u0011\\u0007\\u0012\\u0012\\u0005\\u0006\\u0001J4F G;8A 4G\\u0001G;8 4C8K B9\\u0001;<F\\u0001CBJ8E\\b +,;,1*\\u00016$1/,$2 gĄ\\u0006Ȝ \\u000464\\b\\u0001 \\u0012\\u0015 -8$1 \\u0010\\u0007\\u0012 ...\",\n      \"anchor_excerpt\": \"(太醫院使, ranked 5a), in which quality Dai served until his retirement in 1403 at the age of 80 sui. $ ^{41} $ Dai was then replaced by Han Mao 韓茂, a Suzhou man Dai had recommended many years before. Dai returned home early in 1404. When Dai w ...\"\n    },\n    {\n      \"link_id\": \"link-00159\",\n      \"note_item_id\": \"fn-00076\",\n      \"current_anchor_id\": \"anchor-00446\",\n      \"marker\": \"2\",\n      \"note_page_no\": 176,\n      \"anchor_page_no\": 174,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"+$1*(6 4F >8LF GB G;8 6B@CE8;8AF<BA B9 @87<6<A8 #<>8 1;H #<H FGE8FF87 G;8 <@CBEG4A68 B9 HA78EFG4A7<A: G;8 <A9<A<G8 GE4AF9BE@4G<BAF B9 <??A8FF 7<998E8A68F 58GJ88A ABEG;J8FG8EA 4A7 FBHG;84FG8EA C8BC?8 4A7 G;8 6L6?8F B9 G;8 9<I8 C8E<B7F 4A7 F< ...\",\n      \"anchor_excerpt\": \"Liu and his teachers were products of the Lower Yangzi region, but in the early Hongwu reign (1368-1398), Liu and his family left to establish themselves in Xi'an, the Shaanxi provincial capital. The sources are discrete on the cause of thi ...\"\n    },\n    {\n      \"link_id\": \"link-00160\",\n      \"note_item_id\": \"fn-00077\",\n      \"current_anchor_id\": \"anchor-00458\",\n      \"marker\": \"4\",\n      \"note_page_no\": 178,\n      \"anchor_page_no\": 179,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5BB> JE<GG8A 5L /H;,$16+(1* 9EB@ H<=<W < 8 *;4BK<A: Ņ)ŶɁĉ@ȉĲʧų ó #<H E8CBEG87 G;4G /H <A ;<F LBHG; ;47 E8F<787 <A G;8 .H 4E84 J;8E8 ;8;47 G4H:;G G;8 35,1* $1' 87801 11$/6 GB ?B64? G4?8AGF ʽ ơÎ ) ũȻ ŔŅ̞ 0ą #< *;<M;8A ƂŬȀ ?4G8E 6?4<@87 G;4G ...\",\n      \"anchor_excerpt\": \"Liu Chun's Subtle Meanings contained no section on madness, but the book gave no grounds for attributing kuang to anything else than mucus and Fire. $ ^{64} $ Juan 10 (devoted to Fire) started with Liu Wansu's (4.1) attribution of most illn ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote\",\n  \"chapter_title\": \"“Danxi said…”\",\n  \"page_range\": [\n    159,\n    214\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 159,\n      \"ocr_excerpt\": \"own writings. I will also show that $ \\\\underline{\\\\text{zhezhong}} $ hermeneutics and textual composition rested on the notion that illness was constantly changing. Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $ The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also ...\"\n    },\n    {\n      \"page_no\": 160,\n      \"ocr_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), ...\"\n    },\n    {\n      \"page_no\": 161,\n      \"ocr_excerpt\": \"### 5.2 Madness in Lou Ying's 樓英 (1320-1400) $ ^{12} $ Yixue gangmu 醫學綱目 (1396) The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \\\"Immortals' crag\\\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $ Lou Ying started to collect materials for his summa of current medical doctrine and healing methods in the 1360s and completed a first version in 1380; he achieved the final version in 1396. Lou did not ha ...\"\n    },\n    {\n      \"page_no\": 162,\n      \"ocr_excerpt\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $ Textual montages like Lou's Systematic Outline of Medical Learning were not amateurish endeavors. Composite texts professing to cover all aspects of illness and medicine were actually a new genre of medical writing at which Zhu Zhenheng's disciples excelled. $ ^{18} $ Many books claiming to be for beginners were sophisticated digests of complex medical teachings; they were not easy “primers,” but points of entry into the intricate traditions they summarized. Students of medicine found these compilations all the more useful since readers could not easily access all the texts these works cited. Lou Ying's compilation was concerned ...\"\n    },\n    {\n      \"page_no\": 163,\n      \"ocr_excerpt\": \"Zhongjing [Zhang Ji] is detailed on external contamination that affects the interior and the surface or Yin and Yang; Danxi distinguishes himself on inner harm of Blood or Qi [that causes] depletion or repletion; Dongyuan [Li Gao] supports and protects central Qi; Hejian [Liu Wansu] removes the old to create the new; Mr. Qian [Yi] distinguishes clearly between the five Yin viscera; Dairen [Zhang Congzheng] is well versed in the three methods [vomiting, purging, and sweating]. Formularies from past ages are abundant: we can simply say that each has its strengths. 仲景詳外感於表裡陰陽 丹溪獨內傷於血氣虛實 東垣扶護中氣 河間推陳 致新 錢氏分明五臟 戴人熟施三法 凡歷代方書甚衆 皆各有所長耳 Since the same symptoms could occur for different reasons, it was plausible that many texts could contain useful methods of treatment. $ ^{19} $ “The benighted fail to appreciate this principle: their reckless trying [of recipes] on approximate illnesses has led many to an unjust and premature death” (昧者不悟是理 妄試疑似之病 每致夭橫者不少矣). Armed with a definition of illness as a multifaceted and ever-changing entity that was typical of Zhu Zhenheng's followers, $ ^{20} $ Lou proposed an elegant solution to the controversial issue of whether “old recipes” could cure “curren ...\"\n    },\n    {\n      \"page_no\": 164,\n      \"ocr_excerpt\": \"from the Treatise on Cold Injury (or any other source), for instance, were effective when they were used to treat the kinds of illness they cured best. In typical zbezbong fashion, Lou also used this flexible conception of illness and therapy to justify a syncretic approach to the textual past and to clinical practice. His book counted forty fascicles or chapters. The first nine—all part of a large section called “Yin-Yang and the viscera” 陰陽臟腑部—explained general principles on pathomechanisms, diagnosis, and treatments. Followed twenty fascicles (10-29) describing various illnesses and methods to treat them, four fascicles on Cold Injury (30-3), two on the illnesses of women (34-5), four on those of children (36-9), and one with commentaries on the five periods and six Qi in the Inner Canon (40). $ ^{21} $ In the twenty chapters on disorders other than Cold Injury, Lou Ying classified illnesses into five sections (bu 部) named after the pairs of Yin and Yang viscera with which he associated them. There were six fascicles on the Liver and Gallbladder (肝膽), five on the Heart and Small Intestine (心小腸), five on the Spleen and Stomach (脾胃), two on the Lungs and Large Intestine (肺大腸), and ...\"\n    },\n    {\n      \"page_no\": 166,\n      \"ocr_excerpt\": \"records from various sources. $ ^{22} $ Lou shortened and slightly modified some passages, but his own utterances were limited to his introduction (translated above), cross-references to other sections for remedies whose recipes were given elsewhere, and very brief (and themselves intertextual) “comments” (批) after some citations. $ ^{23} $ Lou’s section on kuang introduced a mix of approaches to madness, as well as recipes compiled at different periods that aimed to cure various imbalances. What justified this catholicity of approaches was not a theoretical reflection on madness in particular, but one on illness in general: any illness could be caused by a large array of imbalances and could therefore be treated in a variety of ways. Note nonetheless that Lou gave little room to kuang’s older etiologies—Wind was mentioned only in a “comment” on what Lou considered to be an anti-Wind remedy by Zhang Ji 張機. $ ^{24} $ The Wind etiology appeared discreetly in recipes that were once used to counter Wind strokes, but nothing in Lou’s work signaled that madness had once been considered as a Wind illness. $ ^{25} $ The cases of madness that Lou selected deployed mostly aggressive therapie ...\"\n    },\n    {\n      \"page_no\": 167,\n      \"ocr_excerpt\": \"cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late- imperial medicine. Only one case deployed an approach that became marginal: Sun Zhao's 孫兆 (late eleventh century) cure of a monk with a recipe and method designed by Shen Kuo 沈括 (1031-1095). $ ^{29} $ These mostly aggressive recipes and methods contrasted with the general therapeutic orientation of the Systematic Outline. Lou's \\\"General discussion on methods of treatment\\\" (Zhifa tonglun 治法通論, beginning of juan 3) cited 21 passages: eight from Wang Haogu, three from Li Gao, three from the Basic Questions, two each from Zhang Ji and Zhu Zhenheng, and one each from the Divine Pivot, the Majue, and the Canon of Problems. $ ^{30} $ Thirteen of the fifteen passages attributed to specific authors were from physicians whose priority, according to Lou, had been \\\"to help and protect primordial Qi\\\" (扶護元氣為主). $ ^{31} $ The contrast between Lou's general advice and the remedies he recommended for treating madness confirms the strength that the Fire and mucus etiology of madness had acquired by the fourteenth century. Madness was then largely seen as an illness caused by some kind of over-repletion. ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00394\",\n      \"marker\": \"7\",\n      \"page_no\": 159,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00397\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. Thes ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00398\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 4,\n      \"source_text\": \"The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the int ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00400\",\n      \"marker\": \"13\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00401\",\n      \"marker\": \"14\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00402\",\n      \"marker\": \"15\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00403\",\n      \"marker\": \"16\",\n      \"page_no\": 162,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books in ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00404\",\n      \"marker\": \"17\",\n      \"page_no\": 162,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books in ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00148\",\n      \"note_item_id\": \"fn-00065\",\n      \"current_anchor_id\": \"synthetic-footnote-00124\",\n      \"marker\": \"4\",\n      \"note_page_no\": 159,\n      \"anchor_page_no\": 159,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L ...\",\n      \"anchor_excerpt\": \"94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L ...\"\n    },\n    {\n      \"link_id\": \"link-00150\",\n      \"note_item_id\": \"fn-00067\",\n      \"current_anchor_id\": \"synthetic-footnote-00125\",\n      \"marker\": \"4\",\n      \"note_page_no\": 161,\n      \"anchor_page_no\": 161,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6 ...\",\n      \"anchor_excerpt\": \"CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6 ...\"\n    },\n    {\n      \"link_id\": \"link-00151\",\n      \"note_item_id\": \"fn-00068\",\n      \"current_anchor_id\": \"anchor-00399\",\n      \"marker\": \"1\",\n      \"note_page_no\": 162,\n      \"anchor_page_no\": 160,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"C\\\\^X!Vbhag_Xff!:[\\\\aXfX!g[\\\\a^Xef&!Cbh!P\\\\aZ!hfXW!P\\\\a!TaW PTaZ!Tf!T!V_Tff\\\\Y\\\\VTg\\\\ba!WXi\\\\VX!g[TgVbeeXfcbaWXW j\\\\g[!9_bbW!TaWH\\\\&!g[X!\\\\agXe\\\\be!TaW!g[X!fheYTVX!$ˉˌ %&!g[X!hccXe!TaW!_bjXe!UbWl!$'( %&!WXc_Xg\\\\ba!TaW eXc_Xg\\\\ba&XgV5!g[X! \\\\iX!8ZXagf!jXeX! ...\",\n      \"anchor_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of ...\"\n    },\n    {\n      \"link_id\": \"link-00152\",\n      \"note_item_id\": \"fn-00069\",\n      \"current_anchor_id\": \"synthetic-footnote-00127\",\n      \"marker\": \"2\",\n      \"note_page_no\": 162,\n      \"anchor_page_no\": 162,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"C\\\\h!:[ha!chU_\\\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\\\a! 22&!TaW&!UTf\\\\aZ![\\\\`fX_Y!ba T!`TahfVe\\\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\\\L Ǿƚďɭ \\\\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\\\fV\\\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\\\huf LMLQJ![LDR[XH ...\",\n      \"anchor_excerpt\": \"C\\\\h!:[ha!chU_\\\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\\\a! 22&!TaW&!UTf\\\\aZ![\\\\`fX_Y!ba T!`TahfVe\\\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\\\L Ǿƚďɭ \\\\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\\\fV\\\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\\\huf LMLQJ![LDR[XH ...\"\n    },\n    {\n      \"link_id\": \"link-00155\",\n      \"note_item_id\": \"fn-00072\",\n      \"current_anchor_id\": \"anchor-00417\",\n      \"marker\": \"8\",\n      \"note_page_no\": 169,\n      \"anchor_page_no\": 167,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"$1* )$+8, äŜȠň 4 $1;, <,-, 4??H7<A: GB 4 C4FF4:8 9EB@ 04A: /<BA:UFƑ͂ S $<$1 ƺ˖ ʦǳɖ̬Wĭ˨° ˃˖ǃ Wļ˨ɺ F88 %L?4A 4A7 %L?4A 4A7 *<I<A 4<UF 8C<G4C; 6?4<@87 G;4G 4< 4A7 1;H;47 8K6;4A:87 ?8A:G;L ?8GG8EF ćĎųɯƨĵȔȔhȢ˖ 1;HUF 8C<G4C; <A7<64G87 G;4G V;,$16 ...\",\n      \"anchor_excerpt\": \"cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late-\"\n    },\n    {\n      \"link_id\": \"link-00156\",\n      \"note_item_id\": \"fn-00073\",\n      \"current_anchor_id\": \"anchor-00436\",\n      \"marker\": \"2\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 171,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. $1;,\\u0001<,-, \\u0014 \\u00103\\u0005\\b G\\u0001J4F\\u00016B@@BA\\u00019BE\\u00017<F6<C?8F B9\\u0001G;8\\u00017LA4FGLW\\u0001\\u0004GB G4>8 ABG8F\\u0001J;<?8\\u0001G;8<E\\u0001@4FG8EF\\u0001J8E8\\u0001GE84G<A:\\u0001C4G<8AGF\\b1;4A: \\u001aBA:M; 8A:UF̳Řʑ\\u0011͝ \\u0015\\u0016,1*6+, \\u0012\\u0014\\u0001 \\u0011\\u0012\\u0011\\u0007\\u0012\\u0012\\u0005\\u0006\\u0001J4F G;8A 4G\\u0001G;8 4C8K B9\\u0001;<F\\u0001CBJ8E\\b +,;,1*\\u00016$1/,$2 gĄ\\u0006Ȝ \\u000464\\b\\u0001 \\u0012\\u0015 -8$1 \\u0010\\u0007\\u0012 ...\",\n      \"anchor_excerpt\": \"(太醫院使, ranked 5a), in which quality Dai served until his retirement in 1403 at the age of 80 sui. $ ^{41} $ Dai was then replaced by Han Mao 韓茂, a Suzhou man Dai had recommended many years before. Dai returned home early in 1404. When Dai w ...\"\n    },\n    {\n      \"link_id\": \"link-00159\",\n      \"note_item_id\": \"fn-00076\",\n      \"current_anchor_id\": \"anchor-00446\",\n      \"marker\": \"2\",\n      \"note_page_no\": 176,\n      \"anchor_page_no\": 174,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"+$1*(6 4F >8LF GB G;8 6B@CE8;8AF<BA B9 @87<6<A8 #<>8 1;H #<H FGE8FF87 G;8 <@CBEG4A68 B9 HA78EFG4A7<A: G;8 <A9<A<G8 GE4AF9BE@4G<BAF B9 <??A8FF 7<998E8A68F 58GJ88A ABEG;J8FG8EA 4A7 FBHG;84FG8EA C8BC?8 4A7 G;8 6L6?8F B9 G;8 9<I8 C8E<B7F 4A7 F< ...\",\n      \"anchor_excerpt\": \"Liu and his teachers were products of the Lower Yangzi region, but in the early Hongwu reign (1368-1398), Liu and his family left to establish themselves in Xi'an, the Shaanxi provincial capital. The sources are discrete on the cause of thi ...\"\n    },\n    {\n      \"link_id\": \"link-00160\",\n      \"note_item_id\": \"fn-00077\",\n      \"current_anchor_id\": \"anchor-00458\",\n      \"marker\": \"4\",\n      \"note_page_no\": 178,\n      \"anchor_page_no\": 179,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5BB> JE<GG8A 5L /H;,$16+(1* 9EB@ H<=<W < 8 *;4BK<A: Ņ)ŶɁĉ@ȉĲʧų ó #<H E8CBEG87 G;4G /H <A ;<F LBHG; ;47 E8F<787 <A G;8 .H 4E84 J;8E8 ;8;47 G4H:;G G;8 35,1* $1' 87801 11$/6 GB ?B64? G4?8AGF ʽ ơÎ ) ũȻ ŔŅ̞ 0ą #< *;<M;8A ƂŬȀ ?4G8E 6?4<@87 G;4G ...\",\n      \"anchor_excerpt\": \"Liu Chun's Subtle Meanings contained no section on madness, but the book gave no grounds for attributing kuang to anything else than mucus and Fire. $ ^{64} $ Juan 10 (devoted to Fire) started with Liu Wansu's (4.1) attribution of most illn ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
       "cluster_id": "toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote",
-      "chapter_title": "\"Danxi said...\"",
+      "chapter_title": "“Danxi said…”",
       "request_mode": "anchor_rebind",
       "allowed_actions": [
         "match",
@@ -29,7 +29,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 96331,
+          "row_id": 106738,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00394",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -42,11 +42,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96334,
+          "row_id": 106741,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00397",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -59,11 +59,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. These scripts also emerged and developed intertextually. Finally, the zbezzhong mode of interpreting the past largely explains why Chinese medical thinking often appears so “syncretistic” and “integrative.” $ ^{10} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96335,
+          "row_id": 106742,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00398",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -76,11 +76,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. These scripts also emerged and developed intertextually. Finally, the zbezzhong mode of interpreting the past largely explains why Chinese medical thinking often appears so “syncretistic” and “integrative.” $ ^{10} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96338,
+          "row_id": 106745,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00400",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -93,11 +93,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96339,
+          "row_id": 106746,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00401",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -110,11 +110,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96340,
+          "row_id": 106747,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00402",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -127,11 +127,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96342,
+          "row_id": 106749,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00403",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -144,11 +144,11 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         },
         {
-          "row_id": 96343,
+          "row_id": 106750,
           "doc_id": "bd05138cd773",
           "anchor_id": "anchor-00404",
           "chapter_id": "toc-ch-005-danxisaid",
@@ -161,8 +161,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $",
-          "created_at": 1776848408,
-          "updated_at": 1776848408
+          "created_at": 1776858527,
+          "updated_at": 1776858527
         }
       ],
       "rebind_candidates": [
@@ -337,7 +337,7 @@
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00065\",\n    \"anchor_id\": \"anchor-00394\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 141 (p. 159 in doc) shows footnote marker '7' after 'final decision'. The note text for fn-00067 ('pronouncing a sentence...') matches the content of footnote 7 on this page. Anchor-00394 is correctly identified as marker 7.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00397\",\n    \"confidence\": 1.0,\n    \"reason\": \"OCR excerpt and anchor source text show '$ ^{10} $' at the end of the paragraph starting 'Intertextual analysis also reveals...'. However, the screenshot (p. 141) clearly shows marker '10' at the end of the *next* paragraph ('Finally, the zhezhong mode...'). Anchor-00397 is bound to the wrong paragraph due to OCR error; it should be ignored here.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00398\",\n    \"confidence\": 1.0,\n    \"reason\": \"This anchor claims marker '10' but is bound to the paragraph ending with marker '9' in the screenshot (p. 141). It is a duplicate/incorrect binding for marker 10 (which belongs to the following paragraph).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00067\",\n    \"anchor_id\": \"anchor-00400\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 143 (p. 161) shows marker '12' after 'Lou Ying's ... (1320-1400)'. Anchor-00400 is marker 12. The note text for fn-00067 ('Dates from the Lou genealogy...') matches footnote 12.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00068\",\n    \"anchor_id\": \"anchor-00401\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 143 (p. 161) shows marker '13' after 'Zhu Zhenheng's guidance'. Anchor-00401 is marker 13. The note text for fn-00068 ('Lou Youxian and Zhu Zhenheng had drunk together...') matches footnote 13.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00069\",\n    \"anchor_id\": \"anchor-00402\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 143 (p. 161) shows marker '14' after 'received disciples'. Anchor-00402 is marker 14. The note text for fn-00069 ('For the school, see Zhou Mingdao...') matches footnote 14.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00070\",\n    \"anchor_id\": \"anchor-00403\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 144 (p. 162) shows marker '16' after 'books infinitely abundant'. Anchor-00403 is marker 16. The note text for fn-00070 ('From Lou's preface...') matches footnote 16.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00071\",\n    \"anchor_id\": \"anchor-00404\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 144 (p. 162) shows marker '17' after 'Yin-Yang and the Five Agents'. Anchor-00404 is marker 17. The note text for fn-00071 ('Like countless Chinese thinkers...') matches footnote 17.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00065\",\n    \"anchor_id\": \"anchor-00394\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00397\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00067\",\n    \"anchor_id\": \"anchor-00400\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00068\",\n    \"anchor_id\": \"anchor-00401\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00069\",\n    \"anchor_id\": \"anchor-00402\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00070\",\n    \"anchor_id\": \"anchor-00403\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00071\",\n    \"anchor_id\": \"anchor-00404\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
@@ -347,7 +347,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Page 141 (p. 159 in doc) shows footnote marker '7' after 'final decision'. The note text for fn-00067 ('pronouncing a sentence...') matches the content of footnote 7 on this page. Anchor-00394 is correctly identified as marker 7."
+      "reason": "The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly."
     },
     {
       "action": "ignore_ref",
@@ -357,17 +357,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "OCR excerpt and anchor source text show '$ ^{10} $' at the end of the paragraph starting 'Intertextual analysis also reveals...'. However, the screenshot (p. 141) clearly shows marker '10' at the end of the *next* paragraph ('Finally, the zhezhong mode...'). Anchor-00397 is bound to the wrong paragraph due to OCR error; it should be ignored here."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00398",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "This anchor claims marker '10' but is bound to the paragraph ending with marker '9' in the screenshot (p. 141). It is a duplicate/incorrect binding for marker 10 (which belongs to the following paragraph)."
+      "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
     },
     {
       "action": "match",
@@ -377,7 +367,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Page 143 (p. 161) shows marker '12' after 'Lou Ying's ... (1320-1400)'. Anchor-00400 is marker 12. The note text for fn-00067 ('Dates from the Lou genealogy...') matches footnote 12."
+      "reason": "The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly."
     },
     {
       "action": "match",
@@ -387,7 +377,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Page 143 (p. 161) shows marker '13' after 'Zhu Zhenheng's guidance'. Anchor-00401 is marker 13. The note text for fn-00068 ('Lou Youxian and Zhu Zhenheng had drunk together...') matches footnote 13."
+      "reason": "The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly."
     },
     {
       "action": "match",
@@ -397,7 +387,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Page 143 (p. 161) shows marker '14' after 'received disciples'. Anchor-00402 is marker 14. The note text for fn-00069 ('For the school, see Zhou Mingdao...') matches footnote 14."
+      "reason": "The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly."
     },
     {
       "action": "match",
@@ -407,7 +397,7 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Page 144 (p. 162) shows marker '16' after 'books infinitely abundant'. Anchor-00403 is marker 16. The note text for fn-00070 ('From Lou's preface...') matches footnote 16."
+      "reason": "The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly."
     },
     {
       "action": "match",
@@ -417,12 +407,12 @@
       "marker": "",
       "note_text": "",
       "confidence": 1.0,
-      "reason": "Page 144 (p. 162) shows marker '17' after 'Yin-Yang and the Five Agents'. Anchor-00404 is marker 17. The note text for fn-00071 ('Like countless Chinese thinkers...') matches footnote 17."
+      "reason": "The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly."
     }
   ],
   "derived_truth": {
     "cluster_id": "toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote",
-    "chapter_title": "\"Danxi said...\"",
+    "chapter_title": "“Danxi said…”",
     "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
@@ -433,7 +423,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 141 (p. 159 in doc) shows footnote marker '7' after 'final decision'. The note text for fn-00067 ('pronouncing a sentence...') matches the content of footnote 7 on this page. Anchor-00394 is correctly identified as marker 7."
+        "reason": "The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly."
       },
       {
         "action": "ignore_ref",
@@ -443,17 +433,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "OCR excerpt and anchor source text show '$ ^{10} $' at the end of the paragraph starting 'Intertextual analysis also reveals...'. However, the screenshot (p. 141) clearly shows marker '10' at the end of the *next* paragraph ('Finally, the zhezhong mode...'). Anchor-00397 is bound to the wrong paragraph due to OCR error; it should be ignored here."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00398",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "This anchor claims marker '10' but is bound to the paragraph ending with marker '9' in the screenshot (p. 141). It is a duplicate/incorrect binding for marker 10 (which belongs to the following paragraph)."
+        "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
       },
       {
         "action": "match",
@@ -463,7 +443,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '12' after 'Lou Ying's ... (1320-1400)'. Anchor-00400 is marker 12. The note text for fn-00067 ('Dates from the Lou genealogy...') matches footnote 12."
+        "reason": "The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly."
       },
       {
         "action": "match",
@@ -473,7 +453,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '13' after 'Zhu Zhenheng's guidance'. Anchor-00401 is marker 13. The note text for fn-00068 ('Lou Youxian and Zhu Zhenheng had drunk together...') matches footnote 13."
+        "reason": "The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly."
       },
       {
         "action": "match",
@@ -483,7 +463,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '14' after 'received disciples'. Anchor-00402 is marker 14. The note text for fn-00069 ('For the school, see Zhou Mingdao...') matches footnote 14."
+        "reason": "The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly."
       },
       {
         "action": "match",
@@ -493,7 +473,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 144 (p. 162) shows marker '16' after 'books infinitely abundant'. Anchor-00403 is marker 16. The note text for fn-00070 ('From Lou's preface...') matches footnote 16."
+        "reason": "The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly."
       },
       {
         "action": "match",
@@ -503,7 +483,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 144 (p. 162) shows marker '17' after 'Yin-Yang and the Five Agents'. Anchor-00404 is marker 17. The note text for fn-00071 ('Like countless Chinese thinkers...') matches footnote 17."
+        "reason": "The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly."
       }
     ],
     "auto_selected_actions": [
@@ -515,7 +495,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 141 (p. 159 in doc) shows footnote marker '7' after 'final decision'. The note text for fn-00067 ('pronouncing a sentence...') matches the content of footnote 7 on this page. Anchor-00394 is correctly identified as marker 7."
+        "reason": "The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly."
       },
       {
         "action": "ignore_ref",
@@ -525,17 +505,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "OCR excerpt and anchor source text show '$ ^{10} $' at the end of the paragraph starting 'Intertextual analysis also reveals...'. However, the screenshot (p. 141) clearly shows marker '10' at the end of the *next* paragraph ('Finally, the zhezhong mode...'). Anchor-00397 is bound to the wrong paragraph due to OCR error; it should be ignored here."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00398",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "This anchor claims marker '10' but is bound to the paragraph ending with marker '9' in the screenshot (p. 141). It is a duplicate/incorrect binding for marker 10 (which belongs to the following paragraph)."
+        "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
       },
       {
         "action": "match",
@@ -545,7 +515,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '12' after 'Lou Ying's ... (1320-1400)'. Anchor-00400 is marker 12. The note text for fn-00067 ('Dates from the Lou genealogy...') matches footnote 12."
+        "reason": "The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly."
       },
       {
         "action": "match",
@@ -555,7 +525,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '13' after 'Zhu Zhenheng's guidance'. Anchor-00401 is marker 13. The note text for fn-00068 ('Lou Youxian and Zhu Zhenheng had drunk together...') matches footnote 13."
+        "reason": "The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly."
       },
       {
         "action": "match",
@@ -565,7 +535,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '14' after 'received disciples'. Anchor-00402 is marker 14. The note text for fn-00069 ('For the school, see Zhou Mingdao...') matches footnote 14."
+        "reason": "The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly."
       },
       {
         "action": "match",
@@ -575,7 +545,7 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 144 (p. 162) shows marker '16' after 'books infinitely abundant'. Anchor-00403 is marker 16. The note text for fn-00070 ('From Lou's preface...') matches footnote 16."
+        "reason": "The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly."
       },
       {
         "action": "match",
@@ -585,21 +555,10 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "Page 144 (p. 162) shows marker '17' after 'Yin-Yang and the Five Agents'. Anchor-00404 is marker 17. The note text for fn-00071 ('Like countless Chinese thinkers...') matches footnote 17."
+        "reason": "The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly."
       }
     ],
     "auto_applied_actions": [
-      {
-        "link_id": "link-00148",
-        "action": "match",
-        "note_item_id": "fn-00065",
-        "anchor_id": "anchor-00394",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 141 (p. 159 in doc) shows footnote marker '7' after 'final decision'. The note text for fn-00067 ('pronouncing a sentence...') matches the content of footnote 7 on this page. Anchor-00394 is correctly identified as marker 7."
-      },
       {
         "link_id": "link-00751",
         "action": "ignore_ref",
@@ -609,83 +568,17 @@
         "marker": "",
         "note_text": "",
         "confidence": 1.0,
-        "reason": "OCR excerpt and anchor source text show '$ ^{10} $' at the end of the paragraph starting 'Intertextual analysis also reveals...'. However, the screenshot (p. 141) clearly shows marker '10' at the end of the *next* paragraph ('Finally, the zhezhong mode...'). Anchor-00397 is bound to the wrong paragraph due to OCR error; it should be ignored here."
-      },
-      {
-        "link_id": "link-00752",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00398",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "This anchor claims marker '10' but is bound to the paragraph ending with marker '9' in the screenshot (p. 141). It is a duplicate/incorrect binding for marker 10 (which belongs to the following paragraph)."
-      },
-      {
-        "link_id": "link-00150",
-        "action": "match",
-        "note_item_id": "fn-00067",
-        "anchor_id": "anchor-00400",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '12' after 'Lou Ying's ... (1320-1400)'. Anchor-00400 is marker 12. The note text for fn-00067 ('Dates from the Lou genealogy...') matches footnote 12."
-      },
-      {
-        "link_id": "link-00151",
-        "action": "match",
-        "note_item_id": "fn-00068",
-        "anchor_id": "anchor-00401",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '13' after 'Zhu Zhenheng's guidance'. Anchor-00401 is marker 13. The note text for fn-00068 ('Lou Youxian and Zhu Zhenheng had drunk together...') matches footnote 13."
-      },
-      {
-        "link_id": "link-00152",
-        "action": "match",
-        "note_item_id": "fn-00069",
-        "anchor_id": "anchor-00402",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 143 (p. 161) shows marker '14' after 'received disciples'. Anchor-00402 is marker 14. The note text for fn-00069 ('For the school, see Zhou Mingdao...') matches footnote 14."
-      },
-      {
-        "link_id": "link-00153",
-        "action": "match",
-        "note_item_id": "fn-00070",
-        "anchor_id": "anchor-00403",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 144 (p. 162) shows marker '16' after 'books infinitely abundant'. Anchor-00403 is marker 16. The note text for fn-00070 ('From Lou's preface...') matches footnote 16."
-      },
-      {
-        "link_id": "link-00154",
-        "action": "match",
-        "note_item_id": "fn-00071",
-        "anchor_id": "anchor-00404",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 144 (p. 162) shows marker '17' after 'Yin-Yang and the Five Agents'. Anchor-00404 is marker 17. The note text for fn-00071 ('Like countless Chinese thinkers...') matches footnote 17."
+        "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 13969,
-    "completion_tokens": 1027,
-    "total_tokens": 14996,
+    "prompt_tokens": 13970,
+    "completion_tokens": 794,
+    "total_tokens": 14764,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 24641
+    "duration_ms": 17889
   }
 }

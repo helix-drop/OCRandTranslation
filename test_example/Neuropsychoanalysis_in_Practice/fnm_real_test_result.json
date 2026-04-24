@@ -68,7 +68,7 @@
     }
   },
   "cleanup": {
-    "cleaned_at": "2026-04-22T17:10:06",
+    "cleaned_at": "2026-04-22T20:01:38",
     "example_dir": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice",
     "removed": [
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces",
@@ -94,7 +94,7 @@
       "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.001.json",
       "reason_for_request": "从目录页截图中抽取单页原子目录项",
       "model_id": "qwen3.5-plus",
-      "total_tokens": 3718
+      "total_tokens": 3719
     },
     {
       "stage": "visual_toc.manual_input_extract",
@@ -115,7 +115,7 @@
       "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.004.json",
       "reason_for_request": "从目录页截图中抽取单页原子目录项",
       "model_id": "qwen3.5-plus",
-      "total_tokens": 3350
+      "total_tokens": 3346
     }
   ],
   "translation_mode": "placeholder",
@@ -129,68 +129,68 @@
   "progress": {
     "status": "done",
     "current_stage": "report_write",
-    "started_at": "2026-04-22T17:10:06",
-    "updated_at": "2026-04-22T17:14:22",
+    "started_at": "2026-04-22T20:01:39",
+    "updated_at": "2026-04-22T20:05:53",
     "stage_history": [
       {
         "stage": "reingest",
         "status": "done",
         "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-        "at": "2026-04-22T17:10:06"
+        "at": "2026-04-22T20:01:39"
       },
       {
         "stage": "visual_toc",
         "status": "done",
         "detail": "needs_offset",
-        "at": "2026-04-22T17:13:47"
+        "at": "2026-04-22T20:05:17"
       },
       {
         "stage": "fnm_pipeline",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T17:13:54"
+        "at": "2026-04-22T20:05:24"
       },
       {
         "stage": "llm_repair",
         "status": "done",
         "detail": "auto_applied=0",
-        "at": "2026-04-22T17:13:54"
+        "at": "2026-04-22T20:05:24"
       },
       {
         "stage": "fnm_pipeline_rebuild",
         "status": "done",
         "detail": "skipped",
-        "at": "2026-04-22T17:13:54"
+        "at": "2026-04-22T20:05:24"
       },
       {
         "stage": "structure_verify",
         "status": "done",
         "detail": "ready",
-        "at": "2026-04-22T17:14:01"
+        "at": "2026-04-22T20:05:32"
       },
       {
         "stage": "placeholder_translate",
         "status": "done",
         "detail": "translated_paras=1807",
-        "at": "2026-04-22T17:14:08"
+        "at": "2026-04-22T20:05:39"
       },
       {
         "stage": "export_verify",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T17:14:22"
+        "at": "2026-04-22T20:05:53"
       },
       {
         "stage": "zip_finalize",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T17:14:22"
+        "at": "2026-04-22T20:05:53"
       },
       {
         "stage": "report_write",
         "status": "done",
         "detail": "单书结果、报告、进度均已写入",
-        "at": "2026-04-22T17:14:22"
+        "at": "2026-04-22T20:05:53"
       }
     ]
   },
@@ -217,8 +217,8 @@
       "visual_toc.manual_input_extract": {
         "request_count": 4,
         "prompt_tokens": 6152,
-        "completion_tokens": 8392,
-        "total_tokens": 14544
+        "completion_tokens": 8389,
+        "total_tokens": 14541
       },
       "llm_repair.cluster_request": {
         "request_count": 0,
@@ -237,15 +237,15 @@
       "qwen3.5-plus": {
         "request_count": 4,
         "prompt_tokens": 6152,
-        "completion_tokens": 8392,
-        "total_tokens": 14544
+        "completion_tokens": 8389,
+        "total_tokens": 14541
       }
     },
     "total": {
       "request_count": 4,
       "prompt_tokens": 6152,
-      "completion_tokens": 8392,
-      "total_tokens": 14544
+      "completion_tokens": 8389,
+      "total_tokens": 14541
     }
   },
   "reingest": {
@@ -1851,7 +1851,7 @@
         },
         {
           "title": "Acknowledgments",
-          "depth": 1,
+          "depth": 0,
           "printed_page": 16,
           "visual_order": 13,
           "role_hint": "content",
@@ -1868,7 +1868,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Transcendental Approach to the Brain",
+          "title": "1 Transcendental Approach to the Brain",
           "depth": 0,
           "printed_page": 19,
           "visual_order": 15,
@@ -1904,7 +1904,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Unknowability and the Concept of the Brain",
+          "title": "2 Unknowability and the Concept of the Brain",
           "depth": 0,
           "printed_page": 36,
           "visual_order": 19,
@@ -1940,7 +1940,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+          "title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
           "depth": 0,
           "printed_page": 57,
           "visual_order": 23,
@@ -1998,7 +1998,7 @@
       [],
       [
         {
-          "title": "12 Psychosis II: Neuropsychodynamic Hypotheses",
+          "title": "Psychosis II: Neuropsychodynamic Hypotheses",
           "depth": 0,
           "printed_page": 283,
           "visual_order": 1,
@@ -2065,7 +2065,7 @@
           "depth": 0,
           "printed_page": 319,
           "visual_order": 8,
-          "role_hint": "back_matter",
+          "role_hint": "content",
           "endnotes_candidate": false,
           "endnotes_subentry_candidate": false
         },
@@ -2233,8 +2233,8 @@
         "model_id": "qwen3.5-plus",
         "request_count": 1,
         "prompt_tokens": 1538,
-        "completion_tokens": 2180,
-        "total_tokens": 3718,
+        "completion_tokens": 2181,
+        "total_tokens": 3719,
         "doc_id": "e7f8a1b6c2d3",
         "slug": "",
         "context": {
@@ -2278,8 +2278,8 @@
         "model_id": "qwen3.5-plus",
         "request_count": 1,
         "prompt_tokens": 1538,
-        "completion_tokens": 1812,
-        "total_tokens": 3350,
+        "completion_tokens": 1808,
+        "total_tokens": 3346,
         "doc_id": "e7f8a1b6c2d3",
         "slug": "",
         "context": {
@@ -2293,8 +2293,8 @@
         "visual_toc.manual_input_extract": {
           "request_count": 4,
           "prompt_tokens": 6152,
-          "completion_tokens": 8392,
-          "total_tokens": 14544
+          "completion_tokens": 8389,
+          "total_tokens": 14541
         },
         "visual_toc.preflight": {
           "request_count": 0,
@@ -2319,15 +2319,15 @@
         "qwen3.5-plus": {
           "request_count": 4,
           "prompt_tokens": 6152,
-          "completion_tokens": 8392,
-          "total_tokens": 14544
+          "completion_tokens": 8389,
+          "total_tokens": 14541
         }
       },
       "total": {
         "request_count": 4,
         "prompt_tokens": 6152,
-        "completion_tokens": 8392,
-        "total_tokens": 14544
+        "completion_tokens": 8389,
+        "total_tokens": 14541
       }
     },
     "llm_traces": [
@@ -2356,12 +2356,12 @@
           "source": "pdf",
           "file_idx": 0
         },
-        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of abbreviations\",\n    \"depth\": 0,\n    \"printed_page\": \"xv\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud and the quest for neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Function- and localization-based approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 3,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s search for psychological structure and organization\",\n    \"depth\": 1,\n    \"printed_page\": 4,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Neural correlates” and “neural predispositions”\",\n    \"depth\": 1,\n    \"printed_page\": 6,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The brain’s intrinsic activity as neural predisposition\",\n    \"depth\": 1,\n    \"printed_page\": 7,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain–self and brain–object differentiation\",\n    \"depth\": 1,\n    \"printed_page\": 8,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Metaphorical excursion: brain, self, and objects\",\n    \"depth\": 1,\n    \"printed_page\": 9,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Focus of the book: general aims and hypotheses\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Plan of the book: overview of contents\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Guidance for the reader\",\n    \"depth\": 1,\n    \"printed_page\": 14,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 1,\n    \"printed_page\": 16,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part I Conceptual Equipment\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 14,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental Approach to the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 19,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 19,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental approach\",\n    \"depth\": 1,\n    \"printed_page\": 25,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 31,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Unknowability and the Concept of the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 36,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 36,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Parallelism between inner and outer sense: Freud, Solms, and the “brain–mental apparatus dilemma”\",\n    \"depth\": 1,\n    \"printed_page\": 40,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neurophilosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 43,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity\",\n    \"depth\": 0,\n    \"printed_page\": 57,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s duality between science and hermeneutics of mind: “concept–fact linkage”\",\n    \"depth\": 1,\n    \"printed_page\": 57,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Humanities and science: narrow and wider concepts of neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 60,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Solms’ quest for method: neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 63,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 65,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Method-based neuropsychoanalysis” versus “result-based neuropsychoanalysis”\",\n    \"depth\": 1,\n    \"printed_page\": 82,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of abbreviations\",\n    \"depth\": 0,\n    \"printed_page\": null,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud and the quest for neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Function- and localization-based approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 3,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s search for psychological structure and organization\",\n    \"depth\": 1,\n    \"printed_page\": 4,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Neural correlates” and “neural predispositions”\",\n    \"depth\": 1,\n    \"printed_page\": 6,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"The brain’s intrinsic activity as neural predisposition\",\n    \"depth\": 1,\n    \"printed_page\": 7,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain–self and brain–object differentiation\",\n    \"depth\": 1,\n    \"printed_page\": 8,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Metaphorical excursion: brain, self, and objects\",\n    \"depth\": 1,\n    \"printed_page\": 9,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Focus of the book: general aims and hypotheses\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Plan of the book: overview of contents\",\n    \"depth\": 1,\n    \"printed_page\": 11,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Guidance for the reader\",\n    \"depth\": 1,\n    \"printed_page\": 14,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": 16,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part I Conceptual Equipment\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 14,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 Transcendental Approach to the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 19,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 19,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental approach\",\n    \"depth\": 1,\n    \"printed_page\": 25,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Approach to the brain\",\n    \"depth\": 1,\n    \"printed_page\": 31,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 Unknowability and the Concept of the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 36,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Philosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 36,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Parallelism between inner and outer sense: Freud, Solms, and the “brain–mental apparatus dilemma”\",\n    \"depth\": 1,\n    \"printed_page\": 40,\n    \"visual_order\": 21,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neurophilosophical concepts\",\n    \"depth\": 1,\n    \"printed_page\": 43,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity\",\n    \"depth\": 0,\n    \"printed_page\": 57,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Freud’s duality between science and hermeneutics of mind: “concept–fact linkage”\",\n    \"depth\": 1,\n    \"printed_page\": 57,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Humanities and science: narrow and wider concepts of neuropsychoanalysis\",\n    \"depth\": 1,\n    \"printed_page\": 60,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Solms’ quest for method: neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 63,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic concept–fact iterativity\",\n    \"depth\": 1,\n    \"printed_page\": 65,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Method-based neuropsychoanalysis” versus “result-based neuropsychoanalysis”\",\n    \"depth\": 1,\n    \"printed_page\": 82,\n    \"visual_order\": 28,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
         "response_parsed": [
           {
             "title": "List of abbreviations",
             "depth": 0,
-            "printed_page": "xv",
+            "printed_page": null,
             "visual_order": 1,
             "role_hint": "content",
             "endnotes_candidate": false,
@@ -2468,7 +2468,7 @@
           },
           {
             "title": "Acknowledgments",
-            "depth": 1,
+            "depth": 0,
             "printed_page": 16,
             "visual_order": 13,
             "role_hint": "content",
@@ -2485,7 +2485,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Transcendental Approach to the Brain",
+            "title": "1 Transcendental Approach to the Brain",
             "depth": 0,
             "printed_page": 19,
             "visual_order": 15,
@@ -2521,7 +2521,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Unknowability and the Concept of the Brain",
+            "title": "2 Unknowability and the Concept of the Brain",
             "depth": 0,
             "printed_page": 36,
             "visual_order": 19,
@@ -2557,7 +2557,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+            "title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
             "depth": 0,
             "printed_page": 57,
             "visual_order": 23,
@@ -2723,7 +2723,7 @@
             },
             {
               "title": "Acknowledgments",
-              "depth": 1,
+              "depth": 0,
               "printed_page": 16,
               "visual_order": 13,
               "role_hint": "content",
@@ -2740,7 +2740,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Transcendental Approach to the Brain",
+              "title": "1 Transcendental Approach to the Brain",
               "depth": 0,
               "printed_page": 19,
               "visual_order": 15,
@@ -2776,7 +2776,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Unknowability and the Concept of the Brain",
+              "title": "2 Unknowability and the Concept of the Brain",
               "depth": 0,
               "printed_page": 36,
               "visual_order": 19,
@@ -2812,7 +2812,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+              "title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
               "depth": 0,
               "printed_page": 57,
               "visual_order": 23,
@@ -2873,8 +2873,8 @@
           "model_id": "qwen3.5-plus",
           "request_count": 1,
           "prompt_tokens": 1538,
-          "completion_tokens": 2180,
-          "total_tokens": 3718,
+          "completion_tokens": 2181,
+          "total_tokens": 3719,
           "doc_id": "e7f8a1b6c2d3",
           "slug": "",
           "context": {
@@ -2883,7 +2883,7 @@
           }
         },
         "timing": {
-          "duration_ms": 43162
+          "duration_ms": 40803
         }
       },
       {
@@ -2940,7 +2940,7 @@
           }
         },
         "timing": {
-          "duration_ms": 41205
+          "duration_ms": 40884
         }
       },
       {
@@ -2968,7 +2968,7 @@
           "source": "pdf",
           "file_idx": 2
         },
-        "response_raw_text": "```json\n[\n  {\n    \"title\": \"8 Unconsciousness and the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 186,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psychodynamic concepts\",\n    \"depth\": 2,\n    \"printed_page\": 186,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic hypotheses\",\n    \"depth\": 2,\n    \"printed_page\": 191,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conceptual implication: conceptual specification of consciousness\",\n    \"depth\": 2,\n    \"printed_page\": 208,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"9 The Self and its Brain\",\n    \"depth\": 0,\n    \"printed_page\": 212,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Concept of self in psychoanalysis and neuroscience\",\n    \"depth\": 2,\n    \"printed_page\": 212,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subcortical–cortical midline structures and the self as structure rather than content\",\n    \"depth\": 2,\n    \"printed_page\": 214,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"High resting-state activity and the self as constructed rather than innate\",\n    \"depth\": 2,\n    \"printed_page\": 218,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self–other continuum in neural activity and the self as relation rather than entity\",\n    \"depth\": 2,\n    \"printed_page\": 223,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic concepts\",\n    \"depth\": 2,\n    \"printed_page\": 226,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part IV Disordered Equipment\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 11,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"10 Depression and the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 239,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Reactivation of early object loss\",\n    \"depth\": 2,\n    \"printed_page\": 239,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of actual object relations, increased introjection coupled with negative affect, and the “self-object dilemma”\",\n    \"depth\": 2,\n    \"printed_page\": 241,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Increased self-focus and decreased environment focus\",\n    \"depth\": 2,\n    \"printed_page\": 243,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Elevated resting-state activity and the reactivation of early object loss\",\n    \"depth\": 2,\n    \"printed_page\": 246,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Reduced rest–exteroceptive stimulus interaction and abnormal affective assignment of actual objects\",\n    \"depth\": 2,\n    \"printed_page\": 251,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Reduced rest–stimulus interaction, reduced goal-oriented cognitions, and the loss of actual object relations\",\n    \"depth\": 2,\n    \"printed_page\": 254,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Imbalance between intero- and exteroceptive processing and increased introjection coupled with negative affect\",\n    \"depth\": 2,\n    \"printed_page\": 256,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Increased paralimbic–midline activity and the “self-object dilemma”\",\n    \"depth\": 2,\n    \"printed_page\": 260,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": 263,\n    \"visual_order\": 21,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"11 Psychosis I: Psychodynamics and Phenomenology\",\n    \"depth\": 0,\n    \"printed_page\": 264,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Lack of energy investment in objects (“decathexis of objects”)\",\n    \"depth\": 2,\n    \"printed_page\": 264,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Volatile and unstable inner and outer ego boundaries\",\n    \"depth\": 2,\n    \"printed_page\": 266,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Attunement and “crisis of common sense”\",\n    \"depth\": 2,\n    \"printed_page\": 267,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self-objects and affects\",\n    \"depth\": 2,\n    \"printed_page\": 269,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self-objects and the fragmentation of the self\",\n    \"depth\": 2,\n    \"printed_page\": 271,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subjective and objective self and body\",\n    \"depth\": 2,\n    \"printed_page\": 273",
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"8 Unconsciousness and the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 186,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psychodynamic concepts\",\n    \"depth\": 2,\n    \"printed_page\": 186,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic hypotheses\",\n    \"depth\": 2,\n    \"printed_page\": 191,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conceptual implication: conceptual specification of consciousness\",\n    \"depth\": 2,\n    \"printed_page\": 208,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"9 The Self and its Brain\",\n    \"depth\": 0,\n    \"printed_page\": 212,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Concept of self in psychoanalysis and neuroscience\",\n    \"depth\": 2,\n    \"printed_page\": 212,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subcortical–cortical midline structures and the self as structure rather than content\",\n    \"depth\": 2,\n    \"printed_page\": 214,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"High resting-state activity and the self as constructed rather than innate\",\n    \"depth\": 2,\n    \"printed_page\": 218,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self–other continuum in neural activity and the self as relation rather than entity\",\n    \"depth\": 2,\n    \"printed_page\": 223,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuropsychodynamic concepts\",\n    \"depth\": 2,\n    \"printed_page\": 226,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Part IV Disordered Equipment\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 11,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"10 Depression and the Brain\",\n    \"depth\": 0,\n    \"printed_page\": 239,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Reactivation of early object loss\",\n    \"depth\": 2,\n    \"printed_page\": 239,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of actual object relations, increased introjection coupled with negative affect, and the “self-object dilemma”\",\n    \"depth\": 2,\n    \"printed_page\": 241,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Increased self-focus and decreased environment focus\",\n    \"depth\": 2,\n    \"printed_page\": 243,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Elevated resting-state activity and the reactivation of early object loss\",\n    \"depth\": 2,\n    \"printed_page\": 246,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Reduced rest–exteroceptive stimulus interaction and abnormal affective assignment of actual objects\",\n    \"depth\": 2,\n    \"printed_page\": 251,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Reduced rest–stimulus interaction, reduced goal-oriented cognitions, and the loss of actual object relations\",\n    \"depth\": 2,\n    \"printed_page\": 254,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Imbalance between intero- and exteroceptive processing and increased introjection coupled with negative affect\",\n    \"depth\": 2,\n    \"printed_page\": 256,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Increased paralimbic–midline activity and the “self-object dilemma”\",\n    \"depth\": 2,\n    \"printed_page\": 260,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 2,\n    \"printed_page\": 263,\n    \"visual_order\": 21,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"11 Psychosis I: Psychodynamics and Phenomenology\",\n    \"depth\": 0,\n    \"printed_page\": 264,\n    \"visual_order\": 22,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Lack of energy investment in objects (“decathexis of objects”)\",\n    \"depth\": 2,\n    \"printed_page\": 264,\n    \"visual_order\": 23,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Volatile and unstable inner and outer ego boundaries\",\n    \"depth\": 2,\n    \"printed_page\": 266,\n    \"visual_order\": 24,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Attunement and “crisis of common sense”\",\n    \"depth\": 2,\n    \"printed_page\": 267,\n    \"visual_order\": 25,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self-objects and affects\",\n    \"depth\": 2,\n    \"printed_page\": 269,\n    \"visual_order\": 26,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self-objects and the fragmentation of the self\",\n    \"depth\": 2,\n    \"printed_page\": 271,\n    \"visual_order\": 27,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subjective and objective self and body\",\n    \"depth\": 2,\n    \"printed_page\": 273",
         "response_parsed": {
           "title": "8 Unconsciousness and the Brain",
           "depth": 0,
@@ -2997,7 +2997,7 @@
           }
         },
         "timing": {
-          "duration_ms": 41009
+          "duration_ms": 41001
         }
       },
       {
@@ -3025,10 +3025,10 @@
           "source": "pdf",
           "file_idx": 3
         },
-        "response_raw_text": "```json\n[\n  {\n    \"title\": \"12 Psychosis II: Neuropsychodynamic Hypotheses\",\n    \"depth\": 0,\n    \"printed_page\": 283,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of object relations and altered neural processing in the sensory cortex\",\n    \"depth\": 1,\n    \"printed_page\": 283,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of inner self–object boundaries and abnormal rest–rest interaction in the sensory cortex\",\n    \"depth\": 1,\n    \"printed_page\": 288,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Lack of self-objects and confusion of neural differences in interoceptive, sensory, and cognitive regions\",\n    \"depth\": 1,\n    \"printed_page\": 297,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Fragmentation of the self and bilateral neural interaction in anterior cortical midline regions\",\n    \"depth\": 1,\n    \"printed_page\": 301,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Existential dilemma” and abnormal cortico-cortical neural coupling\",\n    \"depth\": 1,\n    \"printed_page\": 307,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Volatile self–object boundaries and unstable neural differences in difference-based coding\",\n    \"depth\": 1,\n    \"printed_page\": 312,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Appendix: What Can We Learn From Depression and Psychosis? A Transdisciplinary and Neuroexistential Account\",\n    \"depth\": 0,\n    \"printed_page\": 319,\n    \"visual_order\": 8,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Background\",\n    \"depth\": 1,\n    \"printed_page\": 319,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Depression\",\n    \"depth\": 1,\n    \"printed_page\": 319,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psychosis\",\n    \"depth\": 1,\n    \"printed_page\": 321,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuroexistential account\",\n    \"depth\": 1,\n    \"printed_page\": 323,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue: The Beauty of Transdisciplinary Failure—A Trialogue\",\n    \"depth\": 0,\n    \"printed_page\": 325,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental and empirical views of the brain\",\n    \"depth\": 1,\n    \"printed_page\": 325,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain, mind, and the psychic apparatus\",\n    \"depth\": 1,\n    \"printed_page\": 326,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Knowledge of the brain\",\n    \"depth\": 1,\n    \"printed_page\": 328,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subjectivity and the brain\",\n    \"depth\": 1,\n    \"printed_page\": 330,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Localization and the brain\",\n    \"depth\": 1,\n    \"printed_page\": 332,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain and environment\",\n    \"depth\": 1,\n    \"printed_page\": 333,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neural predisposition and difference-based coding\",\n    \"depth\": 1,\n    \"printed_page\": 334,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": 336,\n    \"visual_order\": 21,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"References\",\n    \"depth\": 0,\n    \"printed_page\": 337,\n    \"visual_order\": 22,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 361,\n    \"visual_order\": 23,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"Psychosis II: Neuropsychodynamic Hypotheses\",\n    \"depth\": 0,\n    \"printed_page\": 283,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of object relations and altered neural processing in the sensory cortex\",\n    \"depth\": 1,\n    \"printed_page\": 283,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Loss of inner self–object boundaries and abnormal rest–rest interaction in the sensory cortex\",\n    \"depth\": 1,\n    \"printed_page\": 288,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Lack of self-objects and confusion of neural differences in interoceptive, sensory, and cognitive regions\",\n    \"depth\": 1,\n    \"printed_page\": 297,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Fragmentation of the self and bilateral neural interaction in anterior cortical midline regions\",\n    \"depth\": 1,\n    \"printed_page\": 301,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"“Existential dilemma” and abnormal cortico-cortical neural coupling\",\n    \"depth\": 1,\n    \"printed_page\": 307,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Volatile self–object boundaries and unstable neural differences in difference-based coding\",\n    \"depth\": 1,\n    \"printed_page\": 312,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Appendix: What Can We Learn From Depression and Psychosis? A Transdisciplinary and Neuroexistential Account\",\n    \"depth\": 0,\n    \"printed_page\": 319,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Background\",\n    \"depth\": 1,\n    \"printed_page\": 319,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Depression\",\n    \"depth\": 1,\n    \"printed_page\": 319,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Psychosis\",\n    \"depth\": 1,\n    \"printed_page\": 321,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neuroexistential account\",\n    \"depth\": 1,\n    \"printed_page\": 323,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue: The Beauty of Transdisciplinary Failure—A Trialogue\",\n    \"depth\": 0,\n    \"printed_page\": 325,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Transcendental and empirical views of the brain\",\n    \"depth\": 1,\n    \"printed_page\": 325,\n    \"visual_order\": 14,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain, mind, and the psychic apparatus\",\n    \"depth\": 1,\n    \"printed_page\": 326,\n    \"visual_order\": 15,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Knowledge of the brain\",\n    \"depth\": 1,\n    \"printed_page\": 328,\n    \"visual_order\": 16,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Subjectivity and the brain\",\n    \"depth\": 1,\n    \"printed_page\": 330,\n    \"visual_order\": 17,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Localization and the brain\",\n    \"depth\": 1,\n    \"printed_page\": 332,\n    \"visual_order\": 18,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Brain and environment\",\n    \"depth\": 1,\n    \"printed_page\": 333,\n    \"visual_order\": 19,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Neural predisposition and difference-based coding\",\n    \"depth\": 1,\n    \"printed_page\": 334,\n    \"visual_order\": 20,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Acknowledgments\",\n    \"depth\": 0,\n    \"printed_page\": 336,\n    \"visual_order\": 21,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"References\",\n    \"depth\": 0,\n    \"printed_page\": 337,\n    \"visual_order\": 22,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 361,\n    \"visual_order\": 23,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
         "response_parsed": [
           {
-            "title": "12 Psychosis II: Neuropsychodynamic Hypotheses",
+            "title": "Psychosis II: Neuropsychodynamic Hypotheses",
             "depth": 0,
             "printed_page": 283,
             "visual_order": 1,
@@ -3095,7 +3095,7 @@
             "depth": 0,
             "printed_page": 319,
             "visual_order": 8,
-            "role_hint": "back_matter",
+            "role_hint": "content",
             "endnotes_candidate": false,
             "endnotes_subentry_candidate": false
           },
@@ -3238,7 +3238,7 @@
         "derived_truth": {
           "items": [
             {
-              "title": "12 Psychosis II: Neuropsychodynamic Hypotheses",
+              "title": "Psychosis II: Neuropsychodynamic Hypotheses",
               "depth": 0,
               "printed_page": 283,
               "visual_order": 1,
@@ -3305,7 +3305,7 @@
               "depth": 0,
               "printed_page": 319,
               "visual_order": 8,
-              "role_hint": "back_matter",
+              "role_hint": "content",
               "endnotes_candidate": false,
               "endnotes_subentry_candidate": false
             },
@@ -3452,8 +3452,8 @@
           "model_id": "qwen3.5-plus",
           "request_count": 1,
           "prompt_tokens": 1538,
-          "completion_tokens": 1812,
-          "total_tokens": 3350,
+          "completion_tokens": 1808,
+          "total_tokens": 3346,
           "doc_id": "e7f8a1b6c2d3",
           "slug": "",
           "context": {
@@ -3462,14 +3462,14 @@
           }
         },
         "timing": {
-          "duration_ms": 33945
+          "duration_ms": 33701
         }
       }
     ]
   },
   "pipeline": {
     "ok": true,
-    "run_id": 42,
+    "run_id": 44,
     "page_count": 386,
     "section_count": 15,
     "note_count": 90,

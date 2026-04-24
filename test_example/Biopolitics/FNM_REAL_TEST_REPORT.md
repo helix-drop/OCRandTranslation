@@ -18,20 +18,20 @@
 - manual_toc_pdf: exists=`True` path=`/Users/hao/OCRandTranslation/test_example/Biopolitics/Bioplitics目录.pdf` size=`6981680` sha256=`47d65ce2923c8a5bb29b08f46c4fec9fbc8127623508cad91f9ff84ebe2de9de`
 
 ## 清理结果
-- removed_count: `7`
-- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.Biopolitics.blocked.test.zip", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.blocked.test.zip"]`
+- removed_count: `8`
+- removed_preview: `["/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_progress.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/fnm_real_test_result.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/FNM_REAL_TEST_REPORT.md", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest_export_status.json", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.Biopolitics.test.zip", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.test.zip", "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest.fnm.obsidian.zip"]`
 
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `752`
+- translated_paras: `750`
 
 ## Token by Stage
 - visual_toc.preflight: request=1, prompt=127, completion=24, total=151
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=6, prompt=10296, completion=3090, total=13386
-- llm_repair.cluster_request: request=9, prompt=52896, completion=4621, total=57517
+- visual_toc.manual_input_extract: request=6, prompt=10296, completion=3094, total=13390
+- llm_repair.cluster_request: request=9, prompt=52896, completion=8886, total=61782
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph

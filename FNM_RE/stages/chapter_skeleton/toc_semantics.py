@@ -2012,6 +2012,8 @@ def _endnote_subentry_match_mode(title: str) -> str:
     if not normalized:
         return "unknown"
     lowered = normalized.lower()
+    if re.match(r"^\s*notes?\s+to\s+\S+", lowered):
+        return "named"
     if _ENDNOTE_NAMED_SUBENTRY_RE.match(lowered):
         return "named"
     if _ENDNOTE_NUMBERED_SUBENTRY_RE.match(lowered):

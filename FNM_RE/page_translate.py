@@ -632,7 +632,8 @@ def build_retry_summary(
         int(snapshot.get("manual_required_count", len(manual_required_locations)) or 0),
     )
     execution_mode = str(snapshot.get("execution_mode", "test") or "test").strip().lower() or "test"
-    blocking_export = execution_mode == "real" and (manual_required_count > 0 or unresolved_count > 0)
+    # real 模式下即使仍有失败项，也不再阻塞导出；失败信息仅用于提示与后续人工修订。
+    blocking_export = False
     reason = ""
     if manual_required_count > 0:
         reason = "manual_required"

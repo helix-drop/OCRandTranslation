@@ -13,20 +13,9 @@
     <div class="flex justify-between items-center mb-16 flex-wrap gap-8">
       <span style="font-size:15px;font-weight:600;">数据来源</span>
       <div class="flex gap-8 items-center">
-        <div class="model-picker">
-          {% for key, m in models.items() %}
-          <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-            <input type="hidden" name="next" value="home">
-            <button type="submit" class="btn {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
-          </form>
-          {% endfor %}
-          <a href="{{ url_for('settings', doc_id=current_doc_id, open_custom_model=1) }}#customModelPanel"
-             class="btn {{ 'active' if custom_model_enabled else '' }}">
-            {{ ('自定义: ' ~ custom_model_name) if custom_model_name else '自定义模型' }}
-          </a>
-        </div>
+        <span style="font-size:12px;color:var(--txS);line-height:1.5;">
+          翻译主模型：{{ current_model_label or current_model_id or '-' }} ｜ FNM 主模型：{{ current_visual_model_label or current_visual_model_id or '-' }}
+        </span>
         <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="btn btn-sec btn-sm">设置</a>
       </div>
     </div>
@@ -980,11 +969,9 @@ function startSSE(taskId) {
     var autoTranslate = !!pendingAutoTranslate;
     if (d.redirect_allowed && d.doc_id && d.start_bp) {
       if (String(d.route_mode || 'standard') === 'fnm') {
-        setProgress(100, '解析完成，即将进入 FNM 视图', d.summary || '');
-        addLog(d.redirect_message || 'FNM 分类完成，准备进入 FNM 阅读。', 'success');
-        setTimeout(function() {
-          window.location.href = '{{ url_for("reading") }}?doc_id=' + encodeURIComponent(d.doc_id) + '&bp=' + encodeURIComponent(d.start_bp) + '&view=fnm';
-        }, 500);
+        setProgress(100, 'FNM 处理完成', d.summary || '请在首页 FNM 工作流卡片继续翻译、收尾和导出。');
+        addLog(d.redirect_message || 'FNM 模式不再提供预览视图；请在首页继续 FNM 工作流。', 'success');
+        refreshFnmWorkflowStatus(true);
         return;
       }
       setProgress(100, '解析完成，即将进入标准阅读', d.summary || '');
@@ -1213,6 +1200,13 @@ function renderFnmWorkflowStatus(data) {
   var processedUnits = Number(data.processed_units || data.done_units || 0);
   var runStatus = String(data.run_status || 'idle');
   var translateRunning = !!data.translate_running;
+  var pauseTranslateAvailable = (data.pause_translate_available === undefined)
+    ? translateRunning
+    : !!data.pause_translate_available;
+  var workflowState = String(data.workflow_state || '').trim();
+  var isRetryTranslating = workflowState === 'translating_retrying';
+  var isTranslatingState = translateRunning || workflowState === 'translating' || isRetryTranslating;
+  var isTailCheckingState = workflowState === 'post_translate_checking' || workflowState === 'post_translate_repairing';
   var gatePassCount = Number(data.gate_pass_count || 0);
   var gateFailCount = Number(data.gate_fail_count || 0);
   var gateTotalCount = Number(data.gate_total_count || 0);
@@ -1222,10 +1216,16 @@ function renderFnmWorkflowStatus(data) {
   var phaseLabel = workflowStateLabel || String(data.run_phase_label || '').trim();
   if (!phaseLabel) {
     phaseLabel = '等待 FNM 处理';
-    if (translateRunning) {
-      phaseLabel = 'FNM 翻译中';
+    if (isTranslatingState) {
+      phaseLabel = isRetryTranslating ? '翻译重试中' : '翻译进行中';
+    } else if (workflowState === 'post_translate_repairing') {
+      phaseLabel = '自动修补中';
+    } else if (isTailCheckingState || data.fnm_post_translate_running) {
+      phaseLabel = '最终校验中';
     } else if (data.can_translate) {
       phaseLabel = '可开始翻译';
+    } else if (data.export_bundle_available && data.export_has_blockers) {
+      phaseLabel = '可导出（含阻塞说明）';
     } else if (data.export_ready_real) {
       phaseLabel = '可导出';
     } else if (runStatus === 'done') {
@@ -1240,8 +1240,12 @@ function renderFnmWorkflowStatus(data) {
   var detail = [];
   detail.push('结构状态：' + String(data.structure_state || '-'));
   detail.push('unit：' + processedUnits + '/' + totalUnits);
-  if (data.translate_phase) {
-    detail.push('翻译态：' + String(data.translate_phase));
+  var translatePhase = String(data.translate_phase || '').trim();
+  if (isRetryTranslating && (!translatePhase || translatePhase === 'stopped' || translatePhase === 'done')) {
+    translatePhase = 'retrying';
+  }
+  if (translatePhase) {
+    detail.push('翻译态：' + translatePhase);
   }
   if (gateTotalCount > 0) {
     detail.push('通过项：' + gatePassCount + '/' + gateTotalCount + '（失败 ' + gateFailCount + '）');
@@ -1289,17 +1293,32 @@ function renderFnmWorkflowStatus(data) {
   if (Array.isArray(data.gate_failed_labels) && data.gate_failed_labels.length) {
     blockerTexts.push('未通过检查：' + data.gate_failed_labels.join('、'));
   }
+  if (Array.isArray(data.tail_blocking_summary) && data.tail_blocking_summary.length) {
+    blockerTexts.push('收尾阻塞：' + data.tail_blocking_summary.join('、'));
+  }
   if (!blockerTexts.length && data.export_ready_real) {
     blockerTexts.push('章节包已可导出。');
+  } else if (!blockerTexts.length && data.export_bundle_available) {
+    blockerTexts.push('章节包已生成，可导出并附带阻塞说明。');
   } else if (!blockerTexts.length && data.can_translate) {
     blockerTexts.push('FNM 已处理完成，可以直接开始翻译。');
   }
 
   if (summaryEl) {
-    if (translateRunning) {
-      summaryEl.textContent = data.draft_note
-        ? ('当前正在首页执行翻译：' + String(data.draft_note))
-        : 'FNM 模式不再提供预览视图；当前正在首页执行翻译。';
+    if (isTranslatingState) {
+      if (isRetryTranslating) {
+        summaryEl.textContent = data.draft_note
+          ? ('正在执行失败段落重试翻译：' + String(data.draft_note))
+          : '正在执行失败段落重试翻译，请稍候。';
+      } else {
+        summaryEl.textContent = data.draft_note
+          ? ('当前正在首页执行翻译：' + String(data.draft_note))
+          : 'FNM 模式不再提供预览视图；当前正在首页执行翻译。';
+      }
+    } else if (workflowState === 'post_translate_repairing') {
+      summaryEl.textContent = '正在执行 FNM 最终校验（自动修补阶段），请稍候。';
+    } else if (isTailCheckingState || data.fnm_post_translate_running) {
+      summaryEl.textContent = '正在执行 FNM 最终校验（未翻译检查 → 导出校验 → 自动修补），请稍候。';
     } else if (data.fnm_fullflow_running) {
       summaryEl.textContent = '正在执行 FNM 一体化流程（结构处理 → 分段翻译），请稍候。';
     } else if (data.fnm_continue_running) {
@@ -1323,7 +1342,13 @@ function renderFnmWorkflowStatus(data) {
   if (blockersEl) blockersEl.textContent = blockerTexts.join(' ');
 
   if (startBtn) {
-    if (data.fnm_fullflow_running) {
+    if (isTranslatingState) {
+      startBtn.textContent = isRetryTranslating ? '翻译重试中…' : '翻译进行中…';
+    } else if (workflowState === 'post_translate_repairing') {
+      startBtn.textContent = '自动修补中…';
+    } else if (isTailCheckingState || data.fnm_post_translate_running) {
+      startBtn.textContent = '最终校验中…';
+    } else if (data.fnm_fullflow_running) {
       startBtn.textContent = '流程处理中…';
     } else if (data.resume_translate_available) {
       startBtn.textContent = '继续翻译';
@@ -1333,10 +1358,26 @@ function renderFnmWorkflowStatus(data) {
       startBtn.textContent = '开始一体化流程';
     }
   }
-  setFnmWorkflowDisabled(startBtn, !data.full_flow_available && !data.can_translate || translateRunning || !!data.fnm_fullflow_running);
+  if (pauseBtn) {
+    if (pauseTranslateAvailable) {
+      pauseBtn.textContent = '暂停翻译';
+    } else if (isTailCheckingState || data.fnm_post_translate_running) {
+      pauseBtn.textContent = '校验中（不可暂停）';
+    } else {
+      pauseBtn.textContent = '暂停翻译';
+    }
+  }
+  setFnmWorkflowDisabled(
+    startBtn,
+    (!data.full_flow_available && !data.can_translate)
+      || isTranslatingState
+      || isTailCheckingState
+      || !!data.fnm_post_translate_running
+      || !!data.fnm_fullflow_running
+  );
   setFnmWorkflowDisabled(continueBtn, !data.continue_fnm_available || !!data.fnm_fullflow_running);
-  setFnmWorkflowDisabled(pauseBtn, !translateRunning);
-  setFnmWorkflowDisabled(exportBtn, !data.export_ready_real);
+  setFnmWorkflowDisabled(pauseBtn, !pauseTranslateAvailable);
+  setFnmWorkflowDisabled(exportBtn, !data.export_bundle_available || !!data.fnm_post_translate_running);
 }
 
 function refreshFnmWorkflowStatus() {

@@ -18,6 +18,7 @@ import translation.translate_launch as translate_launch
 import translation.translate_runtime as translate_runtime
 from pypdf import PdfWriter
 from config import create_doc, ensure_dirs, get_current_doc_id, get_doc_meta, list_docs, set_current_doc
+from persistence.fnm_export_bundle import save_fnm_export_bundle
 from scripts.rebuild_doc_derivatives import find_uppercase_continuation_candidates
 from persistence.sqlite_store import SQLiteRepository
 from document.text_processing import get_page_context_for_translate, parse_page_markdown
@@ -171,6 +172,40 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         with open(toc_path, "wb") as f:
             writer.write(f)
         save_toc_visual_manual_pdf(doc_id, toc_path, original_name="目录.pdf")
+
+    def _save_demo_fnm_export_bundle(
+        self,
+        doc_id: str,
+        *,
+        chapter_markdown: str,
+        title: str = "Demo",
+    ) -> None:
+        chapter_path = "chapters/001-demo.md"
+        save_fnm_export_bundle(
+            doc_id,
+            {
+                "index_path": "index.md",
+                "chapters_dir": "chapters",
+                "chapters": [
+                    {
+                        "order": 1,
+                        "section_id": "sec-01-demo",
+                        "title": title,
+                        "path": chapter_path,
+                    }
+                ],
+                "chapter_files": {chapter_path: chapter_markdown},
+                "files": {
+                    "index.md": f"# {title}\n\n- [{title}]({chapter_path})\n",
+                    chapter_path: chapter_markdown,
+                },
+                "export_semantic_contract_ok": True,
+                "front_matter_leak_detected": False,
+                "toc_residue_detected": False,
+                "mid_paragraph_heading_detected": False,
+                "duplicate_paragraph_detected": False,
+            },
+        )
 
     def test_documents_and_pages_write_to_sqlite_mainline(self):
         doc_id = create_doc("mainline.pdf")
@@ -509,236 +544,6 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn("## PDF第4页", payload["markdown"])
         self.assertIn("Beta", payload["markdown"])
 
-    def test_reading_route_and_export_md_support_fnm_view(self):
-        doc_id = create_doc("fnm-reading.pdf")
-        save_pages_to_disk([
-            {
-                "bookPage": 1,
-                "fileIdx": 0,
-                "imgW": 1000,
-                "imgH": 1600,
-                "markdown": "正文原文一",
-                "footnotes": "",
-                "textSource": "ocr",
-            },
-            {
-                "bookPage": 2,
-                "fileIdx": 1,
-                "imgW": 1000,
-                "imgH": 1600,
-                "markdown": "正文原文二",
-                "footnotes": "",
-                "textSource": "ocr",
-            },
-        ], "fnm-reading.pdf", doc_id)
-        repo = SQLiteRepository()
-        run_id = repo.create_fnm_run(
-            doc_id,
-            status="done",
-            page_count=2,
-            section_count=1,
-            note_count=2,
-            unit_count=3,
-        )
-        self._replace_demo_fnm_structure(
-            repo,
-            doc_id,
-            chapter_pages=[1, 2],
-            note_items=[
-                {
-                    "note_item_id": "fn-01-0001",
-                    "note_kind": "footnote",
-                    "chapter_id": "sec-01-demo",
-                    "region_id": "",
-                    "marker": "1",
-                    "normalized_marker": "1",
-                    "occurrence": 1,
-                    "source_text": "脚注原文",
-                    "page_no": 1,
-                    "display_marker": "1",
-                    "source_marker": "1",
-                    "title_hint": "",
-                },
-                {
-                    "note_item_id": "en-01-0001",
-                    "note_kind": "endnote",
-                    "chapter_id": "sec-01-demo",
-                    "region_id": "sec-01-demo-endnotes",
-                    "marker": "1",
-                    "normalized_marker": "1",
-                    "occurrence": 1,
-                    "source_text": "尾注原文",
-                    "page_no": 2,
-                    "display_marker": "1",
-                    "source_marker": "1",
-                    "title_hint": "",
-                },
-            ],
-        )
-        repo.replace_fnm_data(
-            doc_id,
-            preserve_structure=True,
-            notes=[],
-            units=[
-                {
-                    "unit_id": "body-sec-01-demo-0001",
-                    "kind": "body",
-                    "section_id": "sec-01-demo",
-                    "section_title": "Demo",
-                    "section_start_page": 1,
-                    "section_end_page": 2,
-                    "note_id": None,
-                    "page_start": 1,
-                    "page_end": 2,
-                    "char_count": 8,
-                    "source_text": "正文一\n\n正文二",
-                    "translated_text": "正文译文一[^fn-01-0001]\n\n正文译文二[EN-en-01-0001]",
-                    "status": "done",
-                    "error_msg": "",
-                    "target_ref": "",
-                    "page_segments": [
-                        {
-                            "page_no": 1,
-                            "source_text": "正文一 {{FN_REF:fn-01-0001}}",
-                            "display_text": "正文一 [^fn-01-0001]",
-                            "translated_text": "正文译文一[^fn-01-0001]",
-                            "paragraphs": [
-                                {
-                                    "order": 1,
-                                    "kind": "body",
-                                    "heading_level": 0,
-                                    "source_text": "正文一 {{FN_REF:fn-01-0001}}",
-                                    "display_text": "正文一 [^fn-01-0001]",
-                                    "cross_page": None,
-                                    "consumed_by_prev": False,
-                                    "section_path": ["Demo"],
-                                    "print_page_label": "1",
-                                    "translated_text": "正文译文一[^fn-01-0001]",
-                                }
-                            ],
-                        },
-                        {
-                            "page_no": 2,
-                            "source_text": "正文二 {{EN_REF:en-01-0001}}",
-                            "display_text": "正文二 [EN-en-01-0001]",
-                            "translated_text": "正文译文二[EN-en-01-0001]",
-                            "paragraphs": [
-                                {
-                                    "order": 1,
-                                    "kind": "body",
-                                    "heading_level": 0,
-                                    "source_text": "正文二 {{EN_REF:en-01-0001}}",
-                                    "display_text": "正文二 [EN-en-01-0001]",
-                                    "cross_page": None,
-                                    "consumed_by_prev": False,
-                                    "section_path": ["Demo"],
-                                    "print_page_label": "2",
-                                    "translated_text": "正文译文二[EN-en-01-0001]",
-                                }
-                            ],
-                        },
-                    ],
-                },
-                {
-                    "unit_id": "footnote-fn-01-0001",
-                    "kind": "footnote",
-                    "section_id": "sec-01-demo",
-                    "section_title": "Demo",
-                    "section_start_page": 1,
-                    "section_end_page": 2,
-                    "note_id": "fn-01-0001",
-                    "page_start": 1,
-                    "page_end": 1,
-                    "char_count": 4,
-                    "source_text": "脚注原文",
-                    "translated_text": "脚注译文",
-                    "status": "done",
-                    "error_msg": "",
-                    "target_ref": "{{FN_REF:fn-01-0001}}",
-                    "page_segments": [],
-                },
-                {
-                    "unit_id": "endnote-en-01-0001",
-                    "kind": "endnote",
-                    "section_id": "sec-01-demo",
-                    "section_title": "Demo",
-                    "section_start_page": 1,
-                    "section_end_page": 2,
-                    "note_id": "en-01-0001",
-                    "page_start": 2,
-                    "page_end": 2,
-                    "char_count": 4,
-                    "source_text": "尾注原文",
-                    "translated_text": "尾注译文",
-                    "status": "done",
-                    "error_msg": "",
-                    "target_ref": "{{EN_REF:en-01-0001}}",
-                    "page_segments": [],
-                },
-            ],
-        )
-        repo.update_fnm_run(doc_id, run_id, status="done", error_msg="")
-
-        reading_resp = self.client.get(f"/reading?bp=1&doc_id={doc_id}&view=fnm&orig=0&pdf=0&usage=0")
-        export_resp = self.client.get(f"/export_md?doc_id={doc_id}&format=fnm_obsidian")
-        status_resp = self.client.get(f"/api/reading_view_state?doc_id={doc_id}&view=fnm")
-
-        reading_html = reading_resp.get_data(as_text=True)
-        export_payload = export_resp.get_json()
-        status_payload = status_resp.get_json()
-
-        self.assertEqual(reading_resp.status_code, 200)
-        self.assertIn("正文译文一", reading_html)
-        self.assertIn("脚注译文", reading_html)
-        self.assertIn("页面注释", reading_html)
-        self.assertIn("本页脚注", reading_html)
-        self.assertIn("当前节尾注", reading_html)
-        self.assertNotIn("FNM 注释", reading_html)
-        self.assertEqual(reading_html.count('id="pageNotesPanel"'), 1)
-        self.assertIn("/static/reading/core.js", reading_html)
-        self.assertIn("/static/reading/navigation.js", reading_html)
-        self.assertIn("/static/reading/page_editor.js", reading_html)
-        self.assertIn("/static/reading/task_session.js", reading_html)
-        self.assertIn("/static/reading/index.js", reading_html)
-        self.assertEqual(export_resp.status_code, 200)
-        self.assertIn("正文译文一[^1]", export_payload["markdown"])
-        self.assertIn("正文译文二[^2]", export_payload["markdown"])
-        self.assertIn("[^1]: 脚注译文", export_payload["markdown"])
-        self.assertIn("[^2]: 尾注译文", export_payload["markdown"])
-        self.assertNotIn("[EN-en-01-0001]", export_payload["markdown"])
-        self.assertNotIn("[FN-1]", export_payload["markdown"])
-        self.assertEqual(status_payload["translated_bps"], [1, 2])
-        self.assertEqual(load_entries_from_disk(doc_id)[0], [])
-
-        switch_fnm = self._post(
-            "/switch_reading_mode",
-            data={
-                "doc_id": doc_id,
-                "bp": 1,
-                "usage": "0",
-                "orig": "0",
-                "pdf": "0",
-                "layout": "stack",
-                "target_mode": "fnm",
-            },
-        )
-        self.assertEqual(switch_fnm.status_code, 302)
-        self.assertIn("view=fnm", switch_fnm.headers.get("Location", ""))
-        switch_std = self._post(
-            "/switch_reading_mode",
-            data={
-                "doc_id": doc_id,
-                "bp": 1,
-                "usage": "0",
-                "orig": "0",
-                "pdf": "0",
-                "layout": "stack",
-                "target_mode": "standard",
-            },
-        )
-        self.assertEqual(switch_std.status_code, 302)
-        self.assertNotIn("view=fnm", switch_std.headers.get("Location", ""))
-
     def test_fnm_api_routes_report_status_notes_and_translate_entry(self):
         doc_id = create_doc("fnm-api.pdf")
         save_pages_to_disk([
@@ -989,9 +794,8 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(standard_status, fnm_status)
         self.assertEqual(standard_view["mode"], "standard")
         self.assertEqual(standard_view["translated_bps"], [1])
-        self.assertEqual(fnm_view["mode"], "fnm")
-        self.assertEqual(fnm_view["translated_bps"], [])
-        self.assertEqual(fnm_view["source_only_bps"], [1, 2])
+        self.assertEqual(fnm_view["mode"], "standard")
+        self.assertEqual(fnm_view["translated_bps"], [1])
 
     def test_standard_reading_page_hides_fnm_view_switch_and_fnm_translate_button(self):
         doc_id = create_doc("reading-no-fnm-switch.pdf")
@@ -1049,114 +853,8 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
         )
 
         self.assertEqual(resp.status_code, 302)
-        self.assertIn("view=fnm", resp.headers.get("Location", ""))
-
-    def test_fnm_reading_view_falls_back_to_unit_source_before_projection_exists(self):
-        doc_id = create_doc("fnm-reading-fallback.pdf")
-        save_pages_to_disk([
-            {
-                "bookPage": 1,
-                "fileIdx": 0,
-                "imgW": 1000,
-                "imgH": 1600,
-                "markdown": "正文原文一",
-                "footnotes": "",
-                "textSource": "ocr",
-            },
-            {
-                "bookPage": 2,
-                "fileIdx": 1,
-                "imgW": 1000,
-                "imgH": 1600,
-                "markdown": "正文原文二",
-                "footnotes": "",
-                "textSource": "ocr",
-            },
-        ], "fnm-reading-fallback.pdf", doc_id)
-        repo = SQLiteRepository()
-        run_id = repo.create_fnm_run(
-            doc_id,
-            status="done",
-            page_count=2,
-            section_count=1,
-            note_count=1,
-            unit_count=2,
-        )
-        self._replace_demo_fnm_structure(
-            repo,
-            doc_id,
-            chapter_pages=[1, 2],
-            note_items=[
-                {
-                    "note_item_id": "fn-01-0001",
-                    "note_kind": "footnote",
-                    "chapter_id": "sec-01-demo",
-                    "region_id": "",
-                    "marker": "1",
-                    "normalized_marker": "1",
-                    "occurrence": 1,
-                    "source_text": "脚注原文",
-                    "page_no": 1,
-                    "display_marker": "1",
-                    "source_marker": "1",
-                    "title_hint": "",
-                }
-            ],
-        )
-        repo.replace_fnm_data(
-            doc_id,
-            preserve_structure=True,
-            notes=[],
-            units=[
-                {
-                    "unit_id": "body-sec-01-demo-0001",
-                    "kind": "body",
-                    "section_id": "sec-01-demo",
-                    "section_title": "Demo",
-                    "section_start_page": 1,
-                    "section_end_page": 2,
-                    "note_id": None,
-                    "page_start": 1,
-                    "page_end": 2,
-                    "char_count": 16,
-                    "source_text": "正文原文一 {{FN_REF:fn-01-0001}}\n\n正文原文二",
-                    "translated_text": None,
-                    "status": "pending",
-                    "error_msg": "",
-                    "target_ref": "",
-                    "page_segments": [
-                        {"page_no": 1, "source_text": "正文原文一 {{FN_REF:fn-01-0001}}", "display_text": "正文原文一 [^fn-01-0001]", "paragraph_count": 1},
-                        {"page_no": 2, "source_text": "正文原文二", "display_text": "正文原文二", "paragraph_count": 1},
-                    ],
-                },
-                {
-                    "unit_id": "footnote-fn-01-0001",
-                    "kind": "footnote",
-                    "section_id": "sec-01-demo",
-                    "section_title": "Demo",
-                    "section_start_page": 1,
-                    "section_end_page": 2,
-                    "note_id": "fn-01-0001",
-                    "page_start": 1,
-                    "page_end": 1,
-                    "char_count": 4,
-                    "source_text": "脚注原文",
-                    "translated_text": None,
-                    "status": "pending",
-                    "error_msg": "",
-                    "target_ref": "{{FN_REF:fn-01-0001}}",
-                    "page_segments": [],
-                },
-            ],
-        )
-        repo.update_fnm_run(doc_id, run_id, status="done", error_msg="")
-
-        resp = self.client.get(f"/reading?bp=1&doc_id={doc_id}&view=fnm&orig=0&pdf=0&usage=0")
-        html = resp.get_data(as_text=True)
-
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn("正文原文一", html)
-        self.assertIn("脚注原文", html)
+        self.assertNotIn("view=fnm", resp.headers.get("Location", ""))
+        self.assertIn("/reading", resp.headers.get("Location", ""))
 
     def test_fnm_export_uses_pending_placeholder_when_units_untranslated(self):
         doc_id = create_doc("fnm-export-fallback.pdf")
@@ -1243,8 +941,27 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
             ],
         )
         repo.update_fnm_run(doc_id, run_id, status="done", error_msg="")
-
-        resp = self.client.get(f"/export_md?doc_id={doc_id}&format=fnm_obsidian")
+        self._save_demo_fnm_export_bundle(
+            doc_id,
+            chapter_markdown="# Demo\n\n[待翻译]\n",
+        )
+        with (
+            patch(
+                "web.export_routes.build_doc_status",
+                return_value={
+                    "export_ready_test": True,
+                    "structure_state": "ready",
+                    "blocking_reasons": [],
+                    "manual_toc_required": False,
+                    "link_summary": {},
+                },
+            ),
+            patch(
+                "web.export_routes.build_retry_summary",
+                return_value={"blocking_export": False},
+            ),
+        ):
+            resp = self.client.get(f"/export_md?doc_id={doc_id}&format=fnm_obsidian")
         payload = resp.get_json()
 
         self.assertEqual(resp.status_code, 200)
@@ -1321,11 +1038,65 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
             ],
         )
         repo.update_fnm_run(doc_id, run_id, status="done", error_msg="")
-
-        markdown = self.client.get(f"/export_md?doc_id={doc_id}&format=fnm_obsidian").get_json()["markdown"]
+        self._save_demo_fnm_export_bundle(
+            doc_id,
+            chapter_markdown="# Demo\n\n正文译文\n",
+        )
+        with (
+            patch(
+                "web.export_routes.build_doc_status",
+                return_value={
+                    "export_ready_test": True,
+                    "structure_state": "ready",
+                    "blocking_reasons": [],
+                    "manual_toc_required": False,
+                    "link_summary": {},
+                },
+            ),
+            patch(
+                "web.export_routes.build_retry_summary",
+                return_value={"blocking_export": False},
+            ),
+        ):
+            markdown = self.client.get(f"/export_md?doc_id={doc_id}&format=fnm_obsidian").get_json()["markdown"]
         self.assertIn("正文译文", markdown)
         self.assertNotIn("[^1]: 脚注译文", markdown)
         self.assertNotIn("[FN-1]", markdown)
+
+    def test_fnm_obsidian_export_requires_persisted_bundle_after_split(self):
+        doc_id = create_doc("fnm-export-missing-bundle.pdf")
+        save_pages_to_disk([{
+            "bookPage": 1,
+            "fileIdx": 0,
+            "imgW": 1000,
+            "imgH": 1600,
+            "markdown": "正文原文",
+            "footnotes": "",
+            "textSource": "ocr",
+        }], "fnm-export-missing-bundle.pdf", doc_id)
+
+        with (
+            patch(
+                "web.export_routes.build_doc_status",
+                return_value={
+                    "export_ready_test": True,
+                    "structure_state": "ready",
+                    "blocking_reasons": [],
+                    "manual_toc_required": False,
+                    "link_summary": {},
+                },
+            ),
+            patch(
+                "web.export_routes.build_retry_summary",
+                return_value={"blocking_export": False},
+            ),
+        ):
+            resp = self.client.get(f"/export_md?doc_id={doc_id}&format=fnm_obsidian")
+        payload = resp.get_json()
+
+        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(payload.get("error"), "fnm_export_bundle_missing")
+        self.assertEqual(payload.get("reason"), "post_translate_check_required")
 
     def test_download_md_matches_export_preview_markdown(self):
         doc_id = create_doc("download-export.pdf")
@@ -1403,8 +1174,27 @@ class SQLiteMainlineTest(ClientCSRFMixin, unittest.TestCase):
             ],
         )
         repo.update_fnm_run(doc_id, run_id, status="done", error_msg="")
-
-        download_resp = self.client.get(f"/download_md?doc_id={doc_id}&format=fnm_obsidian")
+        self._save_demo_fnm_export_bundle(
+            doc_id,
+            chapter_markdown="# Demo\n\n正文译文\n",
+        )
+        with (
+            patch(
+                "web.export_routes.build_doc_status",
+                return_value={
+                    "export_ready_test": True,
+                    "structure_state": "ready",
+                    "blocking_reasons": [],
+                    "manual_toc_required": False,
+                    "link_summary": {},
+                },
+            ),
+            patch(
+                "web.export_routes.build_retry_summary",
+                return_value={"blocking_export": False},
+            ),
+        ):
+            download_resp = self.client.get(f"/download_md?doc_id={doc_id}&format=fnm_obsidian")
 
         self.assertEqual(download_resp.status_code, 200)
         self.assertIn("application/zip", download_resp.headers.get("Content-Type", ""))

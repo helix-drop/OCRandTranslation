@@ -2,6 +2,60 @@
 
 本文件只记录**当前口径**、最近实测和下一步工作，不再堆叠历史阶段记录。
 
+## 2026-04-24 模型池 Provider 扩展 + thinking 槽位开关（最新）
+
+### 当前状态
+
+- 已修复旧文档库 `translate_runs` 缺少 FNM 收尾新增列导致 `/api/doc/<doc_id>/fnm/status` 500 的问题：
+  - `initialize_database()` 即使 `schema_version` 已是当前版本，也会幂等补跑核心表和字段迁移。
+  - `TranslationRepoMixin._row_to_translate_run()` 读取旧行时对缺失 JSON 列使用空值兜底，不再 `KeyError`。
+  - 当前报错文档 `0c7b0950c4a4` 的 `doc.db` 已现场补列，状态接口 test client 验证返回 `200`。
+  - 现有 `local_data/user_data/data/documents/*/doc.db` 已批量补迁移：`15` 个文档库完成，`2` 个无 `doc.db` 的目录跳过。
+- 模型池设置页已收敛为渐进式 UI：
+  - 内置模型槽位只显示模式、内置模型和 thinking 开关。
+  - 自定义槽位才展开 Provider / 模型 ID。
+  - 只有 `openai_compatible` 与 `mimo_token_plan` 才显示 Base URL 和专用 API Key；Qwen 才显示地域。
+- FNM 翻译结束后已改成明确收尾链：`translation_retrying -> post_translate_checking -> repairing -> done`。
+- 首页“导出章节包”只看 `export_bundle_available`；收尾未结束时禁用，收尾结束后即使仍有阻塞也允许导出带说明的 zip。
+- 导出接口已切开旧合成/校验职责：导出时只读翻译收尾阶段落盘的 `fnm_export_bundle.json`，不会再现场重跑 phase6。
+- `manual_required` 不再导致导出阶段误拦截；它会进入 `tail_blocking_summary` 与 zip 内 `logs/fnm_export_validation_issues.log`。
+- 模型配置已切到两组三槽池：
+  - `translation_model_pool`：标准翻译 + FNM 文本翻译。
+  - `fnm_model_pool`：视觉目录 + FNM 视觉判断 + LLM 修补。
+- MiMo 已按 OpenAI-compatible 方式接入：按量使用全局 `mimo_api_key + https://api.xiaomimimo.com/v1`，Token Plan 使用槽位内 `base_url + custom_api_key`。
+- GLM / Kimi 已加入同一套模型池：
+  - GLM 使用全局 `glm_api_key + https://open.bigmodel.cn/api/paas/v4/`。
+  - Kimi 使用全局 `kimi_api_key + https://api.moonshot.ai/v1`。
+- 内置候选模型已按能力重新挑选：
+  - `translation_model_pool` 只放文本/对话/专用翻译候选，优先暴露 Qwen3.6、GLM-5.1、Kimi K2.6/K2.5、MiMo V2.5 Pro、DeepSeek 与 Qwen-MT。
+  - `fnm_model_pool` 只放视觉+文本多模态候选，优先暴露 Qwen3.6/Qwen3-VL、GLM-5V-Turbo、Kimi K2.6/K2.5、MiMo V2.5/Omni。
+  - FNM 默认主模型已从旧 `qwen-vl-plus` 改为 `qwen3.6-plus`；旧 Qwen-VL 与 OCR 专用模型不再作为候选推荐。
+- 每个槽位新增 `thinking_enabled`；支持的模型会按 Provider 协议写入请求：
+  - Qwen：`extra_body.enable_thinking`。
+  - DeepSeek / GLM / Kimi / 已标记支持的 MiMo：`extra_body.thinking.type=enabled|disabled`。
+- 视觉目录与 FNM LLM repair 已改成深度合并 `request_overrides`，不会再把 provider 特定 `extra_body` 覆盖掉。
+- 首页、输入页、阅读页顶部旧一键切模入口已移除，只显示当前主模型摘要和设置入口；旧 `/set_model` / `/set_visual_model` 单模型切换路由也已删除。
+- FNM 独立阅读/预览视图已关闭，`view=fnm` 不再切换阅读页；FNM 操作统一留在首页工作流卡片。
+
+### 最近自测
+
+- `python3 -m unittest tests.unit.test_model_pools tests.unit.test_translate_worker_fnm_retry tests.integration.test_fnm_real_mode ...`：`29 tests OK`
+- `python3 -m unittest tests.integration.test_tasks_streaming... tests.integration.test_sqlite_mainline...`：`10 tests OK`
+- `python3 -m unittest tests.unit.test_model_spec_visual tests.unit.test_llm_repair_usage tests.unit.test_visual_toc_manual_inputs tests.unit.test_visual_toc_usage`：`87 tests OK`
+- `python3 -m unittest tests.unit.test_model_pools tests.unit.test_visual_toc_usage.VisualTocUsageTest.test_call_vision_json_returns_parsed_and_usage_event tests.unit.test_llm_repair_usage.LlmRepairUsageSummaryTest.test_request_llm_repair_actions_returns_trace_payload`：`9 tests OK`
+- `python3 -m unittest tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_settings_page_renders_two_model_pool_editors_without_legacy_panels tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_provider_configs_with_thinking tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_global_keys`：`3 tests OK`
+- `python3 -m unittest tests.unit.test_model_pools tests.unit.test_model_spec_visual tests.unit.test_visual_toc_usage ...`：新增候选模型筛选与默认 FNM 主模型相关目标 `22 tests OK`
+- `python3 -m unittest tests.integration.test_sqlite_store... tests.integration.test_translate_stop_flow_real_docs... tests.unit.test_model_pools`：本轮缺列修复与设置页渐进 UI 目标 `16 tests OK`
+- `python3 -c "from app import app; ... /api/doc/0c7b0950c4a4/fnm/status ..."`：返回 `200`
+- `python3 -m py_compile` 覆盖本轮关键 Python 文件：通过。
+- 扩大回归 `tests.unit.test_model_pools tests.unit.test_model_spec_visual tests.unit.test_translator_streaming tests.unit.test_visual_toc_usage tests.unit.test_llm_repair_usage tests.integration.test_translate_stop_flow_real_docs tests.integration.test_tasks_streaming` 当前仍有旧红灯，集中在已移除的 FNM 阅读视图 / 旧切模路由 / 旧收尾断言与仓储缓存测试，未发现本轮模型接入新增失败。
+
+### 下一步
+
+1. 做一次真实 FNM 文档收尾重跑，确认当前书的 `p.48 / p.70 manual_required` 会进入最终阻塞说明包，而不是让导出报 bundle missing。
+2. 若要继续收敛模型池体验，优先给设置页增加槽位状态提示（缺 key / 能力不匹配 / 将被跳过）。
+3. 后续若 MiMo 官方明确公开 thinking 开关协议，需要复核 `mimo-v2-*` 的 `thinking.type` 映射是否与官方完全一致。
+
 ## 2026-04-22 Biopolitics LLM repair 幻觉匹配修复（最新）
 
 ### 问题

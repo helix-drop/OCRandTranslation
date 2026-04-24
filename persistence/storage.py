@@ -12,10 +12,13 @@ from config import (
     MODELS,
     QWEN_BASE_URLS,
     DEEPSEEK_BASE_URL,
-    get_paddle_token, get_deepseek_key, get_dashscope_key,
+    MIMO_BASE_URL,
+    GLM_BASE_URL,
+    KIMI_BASE_URL,
+    get_paddle_token, get_deepseek_key, get_dashscope_key, get_mimo_api_key,
+    get_glm_api_key, get_kimi_api_key,
     get_glossary,
-    get_active_model_mode, get_active_builtin_model_key, get_custom_model_config,
-    get_active_visual_model_mode, get_active_builtin_visual_model_key, get_visual_custom_model_config,
+    get_translation_model_pool, get_fnm_model_pool,
     get_translate_parallel_enabled, get_translate_parallel_limit,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
     get_doc_cleanup_headers_footers,
@@ -578,18 +581,82 @@ class ResolvedModelSpec:
     stream_mode: str = "chat_json"
     companion_chat_model_key: str = ""
     request_overrides: dict = field(default_factory=dict)
+    pool_name: str = ""
+    slot_index: int = 0
 
-def _resolve_builtin_model_spec(key: str, *, capability: str | None = None) -> ResolvedModelSpec:
+
+def _thinking_payload_for_provider(provider: str, enabled: bool, *, request_format: str = "") -> dict:
+    normalized_provider = str(provider or "").strip().lower()
+    normalized_format = str(request_format or "").strip().lower()
+    if normalized_format == "qwen_enable_thinking" or normalized_provider == "qwen":
+        return {"enable_thinking": bool(enabled)}
+    if normalized_format == "thinking_type" or normalized_provider in {
+        "deepseek",
+        "glm",
+        "kimi",
+        "mimo",
+        "mimo_token_plan",
+    }:
+        return {"thinking": {"type": "enabled" if enabled else "disabled"}}
+    return {}
+
+
+def _thinking_request_overrides(
+    provider: str,
+    model: dict,
+    thinking_enabled: bool | None,
+) -> dict:
+    normalized_provider = str(provider or "").strip().lower()
+    enabled = bool(thinking_enabled)
+    supports_toggle = bool(model.get("supports_thinking_toggle", False))
+    request_format = str(model.get("thinking_request_format", "") or "").strip()
+    if normalized_provider == "qwen" and model.get("api_family") == "chat":
+        return {"extra_body": _thinking_payload_for_provider("qwen", enabled, request_format=request_format)}
+    if not supports_toggle:
+        if normalized_provider == "deepseek":
+            supports_toggle = enabled
+            request_format = request_format or "thinking_type"
+        elif normalized_provider in {"glm", "kimi"}:
+            supports_toggle = True
+            request_format = request_format or "thinking_type"
+        elif normalized_provider in {"mimo", "mimo_token_plan"} and enabled:
+            supports_toggle = True
+            request_format = request_format or "thinking_type"
+    if not supports_toggle:
+        return {}
+    if normalized_provider == "deepseek" and not enabled:
+        return {}
+    payload = _thinking_payload_for_provider(normalized_provider, enabled, request_format=request_format)
+    return {"extra_body": payload} if payload else {}
+
+
+def _resolve_builtin_model_spec(
+    key: str,
+    *,
+    capability: str | None = None,
+    thinking_enabled: bool | None = None,
+) -> ResolvedModelSpec:
     builtin_key = normalize_builtin_model_key(key, capability=capability) if capability else str(key or "").strip()
     if builtin_key not in MODELS:
         builtin_key = normalize_builtin_model_key("", capability=capability)
     model = get_builtin_model_spec(builtin_key)
     provider = model.get("provider", "deepseek")
-    api_key = get_dashscope_key() if provider in {"qwen", "qwen_mt"} else get_deepseek_key()
-    base_url = QWEN_BASE_URLS["cn"] if provider in {"qwen", "qwen_mt"} else DEEPSEEK_BASE_URL
-    request_overrides = {}
-    if provider == "qwen" and model.get("api_family") == "chat":
-        request_overrides = {"extra_body": {"enable_thinking": False}}
+    if provider in {"qwen", "qwen_mt"}:
+        api_key = get_dashscope_key()
+        base_url = QWEN_BASE_URLS["cn"]
+    elif provider == "mimo":
+        api_key = get_mimo_api_key()
+        base_url = MIMO_BASE_URL
+    elif provider == "glm":
+        api_key = get_glm_api_key()
+        base_url = GLM_BASE_URL
+    elif provider == "kimi":
+        api_key = get_kimi_api_key()
+        base_url = KIMI_BASE_URL
+    else:
+        api_key = get_deepseek_key()
+        base_url = DEEPSEEK_BASE_URL
+    request_overrides = _thinking_request_overrides(provider, model, thinking_enabled)
     return ResolvedModelSpec(
         source="builtin",
         model_key=builtin_key,
@@ -609,7 +676,7 @@ def _resolve_builtin_model_spec(key: str, *, capability: str | None = None) -> R
 
 
 def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: str) -> ResolvedModelSpec:
-    provider = str(custom_model.get("provider_type", "qwen") or "qwen").strip()
+    provider = str(custom_model.get("provider_type", "qwen") or "qwen").strip().lower()
     model_id = str(custom_model.get("model_id", "") or "").strip()
     builtin_key = infer_builtin_key_from_custom_model(provider, model_id, capability=capability)
     builtin_spec = get_builtin_model_spec(builtin_key, capability=capability) if builtin_key in MODELS else {}
@@ -619,17 +686,34 @@ def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: s
     elif provider == "deepseek":
         api_key = get_deepseek_key()
         base_url = DEEPSEEK_BASE_URL
+    elif provider == "glm":
+        api_key = get_glm_api_key()
+        base_url = GLM_BASE_URL
+    elif provider == "kimi":
+        api_key = get_kimi_api_key()
+        base_url = KIMI_BASE_URL
+    elif provider == "mimo":
+        api_key = get_mimo_api_key()
+        base_url = MIMO_BASE_URL
+    elif provider == "mimo_token_plan":
+        api_key = str(custom_model.get("custom_api_key", "") or "").strip()
+        base_url = str(custom_model.get("base_url", "") or "").strip()
     else:
         api_key = str(custom_model.get("custom_api_key", "") or "").strip()
         base_url = str(custom_model.get("base_url", "") or "").strip()
 
-    request_overrides = {}
+    thinking_enabled = bool(custom_model.get("thinking_enabled", False))
+    request_overrides = _thinking_request_overrides(provider, builtin_spec, thinking_enabled)
     if provider == "qwen":
-        request_overrides = {"extra_body": dict(custom_model.get("extra_body") or {"enable_thinking": False})}
+        request_overrides = {"extra_body": dict(custom_model.get("extra_body") or {"enable_thinking": thinking_enabled})}
     elif provider == "qwen_mt":
         request_overrides = {"extra_body": dict(custom_model.get("extra_body") or {})}
+    elif not request_overrides and isinstance(custom_model.get("extra_body"), dict):
+        extra_body = dict(custom_model.get("extra_body") or {})
+        if extra_body:
+            request_overrides = {"extra_body": extra_body}
 
-    default_api_family = "vision" if capability == "vision" else ("mt" if provider == "qwen_mt" else "chat")
+    default_api_family = "vision" if capability in {"vision", "fnm"} else ("mt" if provider == "qwen_mt" else "chat")
     return ResolvedModelSpec(
         source=source,
         model_key="",
@@ -643,7 +727,7 @@ def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: s
             builtin_spec.get("supports_translation", capability == "translation")
         ),
         supports_vision=bool(
-            builtin_spec.get("supports_vision", capability == "vision")
+            builtin_spec.get("supports_vision", capability in {"vision", "fnm"})
         ),
         supports_stream=bool(builtin_spec.get("supports_stream", True)),
         stream_mode=str(
@@ -657,48 +741,86 @@ def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: s
     )
 
 
+def _resolve_pool_slot_spec(
+    slot: dict,
+    *,
+    capability: str,
+    pool_name: str,
+    slot_index: int,
+) -> ResolvedModelSpec | None:
+    mode = str((slot or {}).get("mode") or "empty").strip().lower() or "empty"
+    if mode == "empty":
+        return None
+    if mode == "builtin":
+        spec = _resolve_builtin_model_spec(
+            str((slot or {}).get("builtin_key") or "").strip(),
+            capability=capability,
+            thinking_enabled=bool((slot or {}).get("thinking_enabled", False)),
+        )
+    else:
+        spec = _resolve_custom_model_spec(slot or {}, source="custom", capability=capability)
+    spec.pool_name = pool_name
+    spec.slot_index = slot_index
+    return spec
+
+
+def _resolve_pool_specs(pool_name: str, capability: str) -> list[ResolvedModelSpec]:
+    pool = get_translation_model_pool() if pool_name == "translation" else get_fnm_model_pool()
+    specs: list[ResolvedModelSpec] = []
+    for index, slot in enumerate(pool, start=1):
+        spec = _resolve_pool_slot_spec(slot, capability=capability, pool_name=pool_name, slot_index=index)
+        if spec is not None:
+            specs.append(spec)
+    return specs
+
+
+def resolve_translation_model_pool_specs() -> list[ResolvedModelSpec]:
+    return _resolve_pool_specs("translation", "translation")
+
+
+def resolve_fnm_model_pool_specs() -> list[ResolvedModelSpec]:
+    return _resolve_pool_specs("fnm", "fnm")
+
+
 def resolve_model_spec(target: str | None = None) -> ResolvedModelSpec:
-    active_mode = get_active_model_mode()
-    active_builtin_key = get_active_builtin_model_key()
-    custom_model = get_custom_model_config()
+    active_specs = resolve_translation_model_pool_specs()
 
     normalized_target = str(target or "").strip()
     if normalized_target.startswith("builtin:"):
         builtin_key = normalized_target.split(":", 1)[1].strip()
-        fallback_key = active_builtin_key if active_builtin_key in MODELS else "deepseek-chat"
+        fallback_key = active_specs[0].model_key if active_specs else "deepseek-chat"
         builtin_key = normalize_builtin_model_key(
             builtin_key if builtin_key in MODELS else fallback_key,
             capability="translation",
         )
         return _resolve_builtin_model_spec(builtin_key, capability="translation")
     if normalized_target == "custom":
-        active_mode = "custom"
-
-    if active_mode == "custom" and custom_model.get("enabled") and custom_model.get("model_id"):
-        return _resolve_custom_model_spec(custom_model, source="custom", capability="translation")
-
-    return resolve_model_spec(f"builtin:{active_builtin_key}")
+        for spec in active_specs:
+            if spec.source == "custom":
+                return spec
+    if active_specs:
+        return active_specs[0]
+    return _resolve_builtin_model_spec("", capability="translation")
 
 
 def resolve_visual_model_spec(target: str | None = None) -> ResolvedModelSpec:
     """自动视觉目录等「读图」能力使用的模型，与翻译模型独立配置。"""
-    active_mode = get_active_visual_model_mode()
-    active_builtin_key = get_active_builtin_visual_model_key()
-    custom_model = get_visual_custom_model_config()
+    active_specs = resolve_fnm_model_pool_specs()
 
     normalized_target = str(target or "").strip()
     if normalized_target.startswith("builtin:"):
         builtin_key = normalized_target.split(":", 1)[1].strip()
+        fallback_key = active_specs[0].model_key if active_specs else "qwen-vl-plus"
         if builtin_key not in MODELS:
-            builtin_key = normalize_builtin_model_key(active_builtin_key, capability="vision")
-        return _resolve_builtin_model_spec(builtin_key)
+            builtin_key = normalize_builtin_model_key(fallback_key, capability="fnm")
+        return _resolve_builtin_model_spec(builtin_key, capability="fnm")
     if normalized_target == "custom":
-        active_mode = "custom"
-
-    if active_mode == "custom" and custom_model.get("enabled") and custom_model.get("model_id"):
-        return _resolve_custom_model_spec(custom_model, source="custom", capability="vision")
-
-    return resolve_visual_model_spec(f"builtin:{active_builtin_key}")
+        for spec in active_specs:
+            if spec.source == "custom":
+                return spec
+    if active_specs:
+        return active_specs[0]
+    return _resolve_builtin_model_spec("", capability="fnm")
 
 
 def get_visual_model_args(target: str | None = None) -> dict:

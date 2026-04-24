@@ -7,19 +7,12 @@ import re
 from flask import flash, redirect, request, url_for
 
 from config import (
-    clear_custom_model_config,
-    clear_visual_custom_model_config,
-    enable_custom_model,
-    enable_visual_custom_model,
-    get_active_model_mode,
     get_current_doc_id,
-    get_custom_model_config,
-    get_model_key,
-    get_visual_custom_model_config,
-    save_custom_model_config,
-    save_visual_custom_model_config,
+    save_fnm_model_pool,
+    save_translation_model_pool,
     set_translate_parallel_settings,
 )
+from model_capabilities import get_selectable_models
 from translation.translate_runtime import has_active_translate_task
 
 
@@ -73,51 +66,12 @@ def serialize_glossary_retranslate_preview(preview: dict) -> dict:
     return payload
 
 
-def redirect_settings(
-    doc_id: str = "",
-    open_custom_model: bool = False,
-    open_visual_custom_model: bool = False,
-):
+def redirect_settings(doc_id: str = ""):
     target_doc_id = (doc_id or get_current_doc_id() or "").strip()
     params = {}
     if target_doc_id:
         params["doc_id"] = target_doc_id
-    if open_custom_model:
-        params["open_custom_model"] = "1"
-    if open_visual_custom_model:
-        params["open_visual_custom_model"] = "1"
-    target = url_for("settings", **params)
-    if open_custom_model:
-        target += "#customModelPanel"
-    elif open_visual_custom_model:
-        target += "#visualCustomModelPanel"
-    return redirect(target)
-
-
-def redirect_after_model_change(next_page: str, doc_id: str):
-    if next_page == "reading":
-        reading_params = {}
-        if doc_id:
-            reading_params["doc_id"] = doc_id
-        bp = request.values.get("bp", type=int)
-        if bp is not None:
-            reading_params["bp"] = bp
-        for key in ("usage", "orig", "pdf"):
-            value = request.values.get(key, "").strip()
-            if value in {"0", "1"}:
-                reading_params[key] = value
-        layout = request.values.get("layout", "").strip()
-        if layout in {"stack", "side"}:
-            reading_params["layout"] = layout
-        view = request.values.get("view", "").strip().lower()
-        if view == "fnm":
-            reading_params["view"] = "fnm"
-        return redirect(url_for("reading", **reading_params))
-    if next_page == "input":
-        return redirect(url_for("input_page", doc_id=doc_id))
-    if next_page == "settings":
-        return redirect_settings(doc_id)
-    return redirect(url_for("home", doc_id=doc_id))
+    return redirect(url_for("settings", **params))
 
 
 def save_text_setting(form_key: str, setter, success_message: str):
@@ -141,138 +95,102 @@ def save_translate_parallel_section():
         flash("当前页的翻译已经启动，新的并发设置会从下一页开始生效。", "info")
 
 
-def current_model_target() -> str:
-    return "custom" if get_active_model_mode() == "custom" else f"builtin:{get_model_key()}"
-
-
 def provider_api_key_label(provider: str) -> str:
     normalized = str(provider or "").strip().lower()
     if normalized in {"qwen", "qwen_mt"}:
         return "DashScope API Key"
     if normalized == "deepseek":
         return "DeepSeek API Key"
+    if normalized == "glm":
+        return "智谱 GLM API Key"
+    if normalized == "kimi":
+        return "Kimi API Key"
+    if normalized == "mimo":
+        return "MiMo 全局 API Key"
+    if normalized == "mimo_token_plan":
+        return "MiMo Token Plan 专用 API Key"
     return "OpenAI 兼容 API Key"
 
 
-def validate_and_build_custom_model(allowed_providers: set[str], label: str) -> dict | str:
-    """从 request.form 校验并构建自定义模型 dict。成功返回 dict，失败返回错误消息字符串。"""
-    provider_type = request.form.get("provider_type", "").strip().lower()
-    display_name = request.form.get("display_name", "").strip()
-    model_id = request.form.get("model_id", "").strip()
-    qwen_region = request.form.get("qwen_region", "cn").strip().lower()
-    base_url = request.form.get("base_url", "").strip()
-    custom_api_key = request.form.get("custom_api_key", "").strip()
+def _pool_slot_form_prefix(pool_name: str, slot_no: int) -> str:
+    return f"{pool_name}_slot{slot_no}"
 
-    if provider_type not in allowed_providers:
-        return f"{label} provider 无效。"
+
+def _pool_custom_provider_options(capability: str) -> set[str]:
+    if capability == "fnm":
+        return {"qwen", "openai_compatible", "mimo", "mimo_token_plan", "glm", "kimi"}
+    return {"deepseek", "qwen", "qwen_mt", "openai_compatible", "mimo", "mimo_token_plan", "glm", "kimi"}
+
+
+def _validate_and_build_model_pool_slot(pool_name: str, slot_no: int, capability: str) -> dict | str:
+    prefix = _pool_slot_form_prefix(pool_name, slot_no)
+    mode = request.form.get(f"{prefix}_mode", "empty").strip().lower()
+    thinking_values = [
+        str(v).strip().lower()
+        for v in request.form.getlist(f"{prefix}_thinking_enabled")
+    ]
+    thinking_enabled = any(v in {"1", "true", "yes", "on"} for v in thinking_values)
+    if mode == "empty":
+        return {"mode": "empty"}
+    if mode == "builtin":
+        builtin_key = request.form.get(f"{prefix}_builtin_key", "").strip()
+        if builtin_key not in get_selectable_models(capability):
+            return f"{pool_name} 第 {slot_no} 槽内置模型无效。"
+        return {
+            "mode": "builtin",
+            "builtin_key": builtin_key,
+            "thinking_enabled": thinking_enabled,
+        }
+    if mode != "custom":
+        return f"{pool_name} 第 {slot_no} 槽模式无效。"
+
+    provider_type = request.form.get(f"{prefix}_provider_type", "").strip().lower()
+    model_id = request.form.get(f"{prefix}_model_id", "").strip()
+    display_name = request.form.get(f"{prefix}_display_name", "").strip()
+    qwen_region = request.form.get(f"{prefix}_qwen_region", "cn").strip().lower()
+    base_url = request.form.get(f"{prefix}_base_url", "").strip()
+    custom_api_key = request.form.get(f"{prefix}_custom_api_key", "").strip()
+
+    if provider_type not in _pool_custom_provider_options(capability):
+        return f"{pool_name} 第 {slot_no} 槽 provider 无效。"
     if not model_id:
-        return f"{label}必须填写模型 ID。"
+        return f"{pool_name} 第 {slot_no} 槽必须填写模型 ID。"
     if not CUSTOM_MODEL_ID_PATTERN.fullmatch(model_id):
-        return "模型 ID 格式无效：仅允许字母、数字、.、_、-、:、/"
-    if provider_type == "openai_compatible":
-        if not base_url:
-            return "OpenAI 兼容模型必须填写 Base URL。"
-        if not custom_api_key:
-            return "OpenAI 兼容模型必须填写专用 API Key。"
+        return f"{pool_name} 第 {slot_no} 槽模型 ID 格式无效。"
+    if provider_type in {"openai_compatible", "mimo_token_plan"} and not base_url:
+        return f"{pool_name} 第 {slot_no} 槽必须填写 Base URL。"
+    if provider_type in {"openai_compatible", "mimo_token_plan"} and not custom_api_key:
+        return f"{pool_name} 第 {slot_no} 槽必须填写专用 API Key。"
 
-    return {
-        "enabled": True,
+    slot = {
+        "mode": "custom",
         "display_name": display_name or model_id,
         "provider_type": provider_type,
         "model_id": model_id,
-        "base_url": base_url if provider_type == "openai_compatible" else "",
+        "base_url": base_url,
         "qwen_region": qwen_region if provider_type in {"qwen", "qwen_mt"} else "cn",
-        "api_key_mode": "builtin_dashscope" if provider_type in {"qwen", "qwen_mt"} else ("builtin_deepseek" if provider_type == "deepseek" else "custom"),
-        "custom_api_key": custom_api_key if provider_type == "openai_compatible" else "",
-        "extra_body": {"enable_thinking": False} if provider_type == "qwen" else {},
+        "custom_api_key": custom_api_key if provider_type in {"openai_compatible", "mimo_token_plan"} else "",
+        "extra_body": {"enable_thinking": thinking_enabled} if provider_type == "qwen" else {},
+        "thinking_enabled": thinking_enabled,
     }
+    return slot
 
 
-def save_custom_model_section(section: str, current_doc_id: str):
-    redir_kw = {"open_custom_model": True}
-
-    if section == "custom_model_save":
-        result = validate_and_build_custom_model(
-            {"qwen", "qwen_mt", "deepseek", "openai_compatible"},
-            "自定义模型",
-        )
+def save_model_pool_section(section: str, current_doc_id: str):
+    if section not in {"translation_model_pool", "fnm_model_pool"}:
+        return None
+    capability = "translation" if section == "translation_model_pool" else "fnm"
+    slots = []
+    for slot_no in range(1, 4):
+        result = _validate_and_build_model_pool_slot(section, slot_no, capability)
         if isinstance(result, str):
             flash(result, "error")
-            return redirect_settings(current_doc_id, **redir_kw)
-        save_custom_model_config(result)
-        flash(f"已保存自定义模型配置：{result['display_name']}", "success")
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    if section in ("custom_model_enable", "custom_model_activate"):
-        custom_model = get_custom_model_config()
-        if not custom_model.get("model_id"):
-            flash("还没有可启用的自定义模型，请先保存配置。", "error")
-        else:
-            enable_custom_model()
-            flash(
-                f"已启用自定义模型：{custom_model.get('display_name') or custom_model.get('model_id')}",
-                "success",
-            )
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    if section == "custom_model":
-        legacy_name = request.form.get("custom_model_name", "").strip()
-        if legacy_name:
-            save_custom_model_config({
-                "enabled": True,
-                "display_name": legacy_name,
-                "provider_type": "qwen",
-                "model_id": legacy_name,
-                "base_url": "",
-                "qwen_region": "cn",
-                "api_key_mode": "builtin_dashscope",
-                "custom_api_key": "",
-                "extra_body": {"enable_thinking": False},
-            })
-            flash(f"已保存自定义模型配置：{legacy_name}", "success")
-        else:
-            clear_custom_model_config()
-            flash("已清空自定义模型配置，恢复使用默认模型", "success")
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    if section == "custom_model_clear":
-        clear_custom_model_config()
-        flash("已清空自定义模型配置，恢复使用默认模型", "success")
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    return None
-
-
-def save_visual_custom_model_section(section: str, current_doc_id: str):
-    redir_kw = {"open_visual_custom_model": True}
-
-    if section == "visual_custom_model_save":
-        result = validate_and_build_custom_model(
-            {"qwen", "deepseek", "openai_compatible"},
-            "视觉目录自定义模型",
-        )
-        if isinstance(result, str):
-            flash(result, "error")
-            return redirect_settings(current_doc_id, **redir_kw)
-        save_visual_custom_model_config(result)
-        flash(f"已保存视觉目录模型配置：{result['display_name']}", "success")
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    if section == "visual_custom_model_enable":
-        visual_model = get_visual_custom_model_config()
-        if not visual_model.get("enabled") or not visual_model.get("model_id"):
-            flash("还没有可启用的视觉目录自定义模型，请先保存配置。", "error")
-        else:
-            enable_visual_custom_model()
-            flash(
-                f"已启用视觉目录自定义模型：{visual_model.get('display_name') or visual_model.get('model_id')}",
-                "success",
-            )
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    if section == "visual_custom_model_clear":
-        clear_visual_custom_model_config()
-        flash("已清空视觉目录自定义模型配置，恢复使用内置视觉模型", "success")
-        return redirect_settings(current_doc_id, **redir_kw)
-
-    return None
+            return redirect_settings(current_doc_id)
+        slots.append(result)
+    if capability == "translation":
+        save_translation_model_pool(slots)
+        flash("翻译模型池已保存。", "success")
+    else:
+        save_fnm_model_pool(slots)
+        flash("FNM 视觉与修补模型池已保存。", "success")
+    return redirect_settings(current_doc_id)

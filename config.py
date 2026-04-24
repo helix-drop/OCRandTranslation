@@ -34,6 +34,7 @@ TRANSLATE_PARALLEL_ENABLED_DEFAULT = False
 TRANSLATE_PARALLEL_LIMIT_DEFAULT = 10
 ACTIVE_MODEL_MODE_DEFAULT = "builtin"
 ACTIVE_BUILTIN_MODEL_KEY_DEFAULT = "deepseek-chat"
+ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT = "qwen3.6-plus"
 CUSTOM_MODEL_NAME_DEFAULT = ""
 CUSTOM_MODEL_ENABLED_DEFAULT = False
 CUSTOM_MODEL_BASE_KEY_DEFAULT = ""
@@ -47,6 +48,25 @@ CUSTOM_MODEL_DEFAULT = {
     "api_key_mode": "builtin_dashscope",
     "custom_api_key": "",
     "extra_body": {},
+    "thinking_enabled": False,
+}
+MODEL_POOL_SLOT_COUNT = 3
+MODEL_POOL_MODE_VALUES = {"builtin", "custom", "empty"}
+MIMO_BASE_URL = "https://api.xiaomimimo.com/v1"
+MIMO_TOKEN_PLAN_BASE_URL_DEFAULT = "https://token-plan-cn.xiaomimimo.com/v1"
+GLM_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
+KIMI_BASE_URL = "https://api.moonshot.ai/v1"
+MODEL_POOL_LEGACY_KEYS = {
+    "model_key",
+    "active_model_mode",
+    "active_builtin_model_key",
+    "custom_model_name",
+    "custom_model_enabled",
+    "custom_model_base_key",
+    "custom_model",
+    "active_visual_model_mode",
+    "active_builtin_visual_model_key",
+    "visual_custom_model",
 }
 
 INVALID_DOC_ID_LITERALS = {"undefined", "null", "None"}
@@ -70,8 +90,24 @@ QWEN_BASE_URLS = {
     "us": "https://dashscope-us.aliyuncs.com/compatible-mode/v1",
 }
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-CUSTOM_MODEL_PROVIDER_TYPES = {"qwen", "qwen_mt", "deepseek", "openai_compatible"}
-CUSTOM_MODEL_API_KEY_MODES = {"builtin_dashscope", "builtin_deepseek", "custom"}
+CUSTOM_MODEL_PROVIDER_TYPES = {
+    "qwen",
+    "qwen_mt",
+    "deepseek",
+    "glm",
+    "kimi",
+    "openai_compatible",
+    "mimo",
+    "mimo_token_plan",
+}
+CUSTOM_MODEL_API_KEY_MODES = {
+    "builtin_dashscope",
+    "builtin_deepseek",
+    "builtin_glm",
+    "builtin_kimi",
+    "builtin_mimo",
+    "custom",
+}
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +123,15 @@ def _normalize_builtin_model_key(key) -> str:
 def _normalize_active_model_mode(value) -> str:
     normalized = str(value or "").strip().lower()
     return normalized if normalized in {"builtin", "custom"} else ACTIVE_MODEL_MODE_DEFAULT
+
+
+def _thinking_extra_body(provider_type: str, enabled: bool) -> dict:
+    normalized = str(provider_type or "").strip().lower()
+    if normalized == "qwen":
+        return {"enable_thinking": bool(enabled)}
+    if normalized in {"deepseek", "glm", "kimi", "mimo", "mimo_token_plan"}:
+        return {"thinking": {"type": "enabled" if enabled else "disabled"}}
+    return {}
 
 
 def _normalize_custom_model_config(value) -> dict:
@@ -105,11 +150,14 @@ def _normalize_custom_model_config(value) -> dict:
     cfg["custom_api_key"] = str(source.get("custom_api_key", "") or "").strip()
     extra_body = source.get("extra_body")
     cfg["extra_body"] = dict(extra_body) if isinstance(extra_body, dict) else {}
+    cfg["thinking_enabled"] = _coerce_bool(
+        source.get("thinking_enabled"),
+        _coerce_bool(cfg["extra_body"].get("enable_thinking") if isinstance(cfg["extra_body"], dict) else None, False),
+    )
 
     if cfg["provider_type"] == "qwen":
         cfg["api_key_mode"] = "builtin_dashscope"
-        if "enable_thinking" not in cfg["extra_body"]:
-            cfg["extra_body"]["enable_thinking"] = False
+        cfg["extra_body"] = _thinking_extra_body("qwen", cfg["thinking_enabled"])
         cfg["base_url"] = ""
         cfg["custom_api_key"] = ""
     elif cfg["provider_type"] == "qwen_mt":
@@ -117,21 +165,313 @@ def _normalize_custom_model_config(value) -> dict:
         cfg["base_url"] = ""
         cfg["custom_api_key"] = ""
         cfg["extra_body"] = {}
+        cfg["thinking_enabled"] = False
     elif cfg["provider_type"] == "deepseek":
         cfg["api_key_mode"] = "builtin_deepseek"
         cfg["base_url"] = ""
         cfg["custom_api_key"] = ""
         cfg["qwen_region"] = "cn"
-        cfg["extra_body"] = {}
+        cfg["extra_body"] = _thinking_extra_body("deepseek", True) if cfg["thinking_enabled"] else {}
+    elif cfg["provider_type"] == "glm":
+        cfg["api_key_mode"] = "builtin_glm"
+        cfg["base_url"] = GLM_BASE_URL
+        cfg["custom_api_key"] = ""
+        cfg["qwen_region"] = "cn"
+        cfg["extra_body"] = _thinking_extra_body("glm", cfg["thinking_enabled"])
+    elif cfg["provider_type"] == "kimi":
+        cfg["api_key_mode"] = "builtin_kimi"
+        cfg["base_url"] = KIMI_BASE_URL
+        cfg["custom_api_key"] = ""
+        cfg["qwen_region"] = "cn"
+        cfg["extra_body"] = _thinking_extra_body("kimi", cfg["thinking_enabled"])
+    elif cfg["provider_type"] == "mimo":
+        cfg["api_key_mode"] = "builtin_mimo"
+        cfg["base_url"] = MIMO_BASE_URL
+        cfg["custom_api_key"] = ""
+        cfg["qwen_region"] = "cn"
+        cfg["extra_body"] = _thinking_extra_body("mimo", cfg["thinking_enabled"]) if cfg["thinking_enabled"] else {}
+    elif cfg["provider_type"] == "mimo_token_plan":
+        cfg["api_key_mode"] = "custom"
+        cfg["base_url"] = cfg["base_url"] or MIMO_TOKEN_PLAN_BASE_URL_DEFAULT
+        cfg["qwen_region"] = "cn"
+        cfg["extra_body"] = _thinking_extra_body("mimo_token_plan", cfg["thinking_enabled"]) if cfg["thinking_enabled"] else {}
     else:
         cfg["api_key_mode"] = "custom"
         cfg["qwen_region"] = "cn"
         cfg["extra_body"] = {}
+        cfg["thinking_enabled"] = False
     if not cfg["display_name"] and cfg["model_id"]:
         cfg["display_name"] = cfg["model_id"]
     if not cfg["model_id"]:
         cfg["enabled"] = False
     return cfg
+
+
+def _default_model_pool_slot(capability: str) -> dict:
+    return {
+        "mode": "empty",
+        "builtin_key": normalize_builtin_model_key("", capability=capability),
+        "display_name": "",
+        "provider_type": "qwen",
+        "model_id": "",
+        "base_url": "",
+        "qwen_region": "cn",
+        "custom_api_key": "",
+        "extra_body": {},
+        "thinking_enabled": False,
+    }
+
+
+def _legacy_custom_model_to_slot(value, *, capability: str) -> dict:
+    custom_model = _normalize_custom_model_config(value)
+    slot = _default_model_pool_slot(capability)
+    if custom_model.get("enabled") and custom_model.get("model_id"):
+        slot.update(
+            {
+                "mode": "custom",
+                "display_name": str(custom_model.get("display_name") or "").strip(),
+                "provider_type": str(custom_model.get("provider_type") or "qwen").strip().lower(),
+                "model_id": str(custom_model.get("model_id") or "").strip(),
+                "base_url": str(custom_model.get("base_url") or "").strip(),
+                "qwen_region": str(custom_model.get("qwen_region") or "cn").strip().lower(),
+                "custom_api_key": str(custom_model.get("custom_api_key") or "").strip(),
+                "extra_body": dict(custom_model.get("extra_body") or {}),
+                "thinking_enabled": _coerce_bool(custom_model.get("thinking_enabled"), False),
+            }
+        )
+    return _normalize_model_pool_slot(slot, capability=capability)
+
+
+def _normalize_model_pool_slot(value, *, capability: str) -> dict:
+    source = value if isinstance(value, dict) else {}
+    slot = _default_model_pool_slot(capability)
+    mode = str(source.get("mode", "empty") or "empty").strip().lower()
+    slot["mode"] = mode if mode in MODEL_POOL_MODE_VALUES else "empty"
+    slot["builtin_key"] = normalize_builtin_model_key(
+        source.get("builtin_key") or source.get("model_key") or slot["builtin_key"],
+        capability=capability,
+    )
+    slot["display_name"] = str(source.get("display_name", "") or "").strip()
+    provider_type = str(source.get("provider_type", "qwen") or "qwen").strip().lower()
+    slot["provider_type"] = provider_type if provider_type in CUSTOM_MODEL_PROVIDER_TYPES else "qwen"
+    slot["model_id"] = str(source.get("model_id", "") or "").strip()
+    slot["base_url"] = str(source.get("base_url", "") or "").strip()
+    qwen_region = str(source.get("qwen_region", "cn") or "cn").strip().lower()
+    slot["qwen_region"] = qwen_region if qwen_region in QWEN_BASE_URLS else "cn"
+    slot["custom_api_key"] = str(source.get("custom_api_key", "") or "").strip()
+    extra_body = source.get("extra_body")
+    slot["extra_body"] = dict(extra_body) if isinstance(extra_body, dict) else {}
+    slot["thinking_enabled"] = _coerce_bool(
+        source.get("thinking_enabled"),
+        _coerce_bool(slot["extra_body"].get("enable_thinking") if isinstance(slot["extra_body"], dict) else None, False),
+    )
+
+    if slot["mode"] == "builtin":
+        slot["display_name"] = ""
+        slot["provider_type"] = "qwen"
+        slot["model_id"] = ""
+        slot["base_url"] = ""
+        slot["qwen_region"] = "cn"
+        slot["custom_api_key"] = ""
+        slot["extra_body"] = {}
+        return slot
+
+    if slot["mode"] == "custom":
+        if slot["provider_type"] == "qwen":
+            slot["base_url"] = ""
+            slot["custom_api_key"] = ""
+            slot["extra_body"] = _thinking_extra_body("qwen", slot["thinking_enabled"])
+        elif slot["provider_type"] == "qwen_mt":
+            slot["base_url"] = ""
+            slot["custom_api_key"] = ""
+            slot["extra_body"] = {}
+            slot["thinking_enabled"] = False
+        elif slot["provider_type"] == "deepseek":
+            slot["base_url"] = ""
+            slot["custom_api_key"] = ""
+            slot["qwen_region"] = "cn"
+            slot["extra_body"] = _thinking_extra_body("deepseek", True) if slot["thinking_enabled"] else {}
+        elif slot["provider_type"] == "glm":
+            slot["base_url"] = GLM_BASE_URL
+            slot["custom_api_key"] = ""
+            slot["qwen_region"] = "cn"
+            slot["extra_body"] = _thinking_extra_body("glm", slot["thinking_enabled"])
+        elif slot["provider_type"] == "kimi":
+            slot["base_url"] = KIMI_BASE_URL
+            slot["custom_api_key"] = ""
+            slot["qwen_region"] = "cn"
+            slot["extra_body"] = _thinking_extra_body("kimi", slot["thinking_enabled"])
+        elif slot["provider_type"] == "mimo":
+            slot["base_url"] = MIMO_BASE_URL
+            slot["custom_api_key"] = ""
+            slot["qwen_region"] = "cn"
+            slot["extra_body"] = _thinking_extra_body("mimo", slot["thinking_enabled"]) if slot["thinking_enabled"] else {}
+        elif slot["provider_type"] == "mimo_token_plan":
+            slot["base_url"] = slot["base_url"] or MIMO_TOKEN_PLAN_BASE_URL_DEFAULT
+            slot["qwen_region"] = "cn"
+            slot["extra_body"] = _thinking_extra_body("mimo_token_plan", slot["thinking_enabled"]) if slot["thinking_enabled"] else {}
+        else:
+            slot["qwen_region"] = "cn"
+            slot["extra_body"] = {}
+            slot["thinking_enabled"] = False
+        if not slot["display_name"] and slot["model_id"]:
+            slot["display_name"] = slot["model_id"]
+        if not slot["model_id"]:
+            return _default_model_pool_slot(capability)
+        return slot
+
+    return _default_model_pool_slot(capability)
+
+
+def _default_model_pool(capability: str) -> list[dict]:
+    builtin_key = (
+        ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT
+        if capability == "fnm"
+        else ACTIVE_BUILTIN_MODEL_KEY_DEFAULT
+    )
+    primary = _default_model_pool_slot(capability)
+    primary["mode"] = "builtin"
+    primary["builtin_key"] = normalize_builtin_model_key(builtin_key, capability=capability)
+    return [
+        primary,
+        _default_model_pool_slot(capability),
+        _default_model_pool_slot(capability),
+    ]
+
+
+def _normalize_model_pool(value, *, capability: str) -> list[dict]:
+    items = list(value) if isinstance(value, list) else []
+    normalized = []
+    for index in range(MODEL_POOL_SLOT_COUNT):
+        source = items[index] if index < len(items) else None
+        normalized.append(_normalize_model_pool_slot(source, capability=capability))
+    if not normalized:
+        return _default_model_pool(capability)
+    return normalized
+
+
+def _migrate_model_pool_config(cfg: dict) -> tuple[dict, bool]:
+    changed = False
+    normalized = dict(cfg or {})
+    if "translation_model_pool" not in normalized:
+        if "custom_model" not in normalized and any(
+            key in normalized
+            for key in ("custom_model_name", "custom_model_enabled", "custom_model_base_key")
+        ):
+            migrated_legacy, legacy_changed = _migrate_legacy_model_config(normalized)
+            for key in ("active_model_mode", "active_builtin_model_key", "custom_model"):
+                normalized[key] = migrated_legacy.get(key)
+            changed = changed or legacy_changed
+        legacy_custom = _normalize_custom_model_config(normalized.get("custom_model"))
+        legacy_mode = _normalize_active_model_mode(normalized.get("active_model_mode"))
+        if "active_model_mode" not in normalized and legacy_custom.get("enabled"):
+            legacy_mode = "custom"
+        legacy_builtin = _normalize_builtin_model_key(
+            normalized.get("active_builtin_model_key", normalized.get("model_key", ACTIVE_BUILTIN_MODEL_KEY_DEFAULT))
+        )
+        primary = _default_model_pool_slot("translation")
+        if legacy_mode == "custom":
+            primary = _legacy_custom_model_to_slot(legacy_custom, capability="translation")
+        else:
+            primary["mode"] = "builtin"
+            primary["builtin_key"] = legacy_builtin
+        normalized["translation_model_pool"] = [
+            primary,
+            _default_model_pool_slot("translation"),
+            _default_model_pool_slot("translation"),
+        ]
+        changed = True
+    normalized["translation_model_pool"] = _normalize_model_pool(
+        normalized.get("translation_model_pool"),
+        capability="translation",
+    )
+
+    if "fnm_model_pool" not in normalized:
+        legacy_visual_custom = _normalize_custom_model_config(normalized.get("visual_custom_model"))
+        legacy_mode = _normalize_active_model_mode(normalized.get("active_visual_model_mode"))
+        if "active_visual_model_mode" not in normalized and legacy_visual_custom.get("enabled"):
+            legacy_mode = "custom"
+        legacy_builtin = normalize_builtin_model_key(
+            normalized.get("active_builtin_visual_model_key", ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT),
+            capability="fnm",
+        )
+        primary = _default_model_pool_slot("fnm")
+        if legacy_mode == "custom":
+            primary = _legacy_custom_model_to_slot(legacy_visual_custom, capability="fnm")
+        else:
+            primary["mode"] = "builtin"
+            primary["builtin_key"] = legacy_builtin
+        normalized["fnm_model_pool"] = [
+            primary,
+            _default_model_pool_slot("fnm"),
+            _default_model_pool_slot("fnm"),
+        ]
+        changed = True
+    normalized["fnm_model_pool"] = _normalize_model_pool(
+        normalized.get("fnm_model_pool"),
+        capability="fnm",
+    )
+
+    if "mimo_api_key" not in normalized:
+        normalized["mimo_api_key"] = str(normalized.get("mimo_api_key", "") or "").strip()
+        changed = True
+    else:
+        normalized["mimo_api_key"] = str(normalized.get("mimo_api_key", "") or "").strip()
+    if "glm_api_key" not in normalized:
+        normalized["glm_api_key"] = str(normalized.get("glm_api_key", "") or "").strip()
+        changed = True
+    else:
+        normalized["glm_api_key"] = str(normalized.get("glm_api_key", "") or "").strip()
+    if "kimi_api_key" not in normalized:
+        normalized["kimi_api_key"] = str(normalized.get("kimi_api_key", "") or "").strip()
+        changed = True
+    else:
+        normalized["kimi_api_key"] = str(normalized.get("kimi_api_key", "") or "").strip()
+
+    for key in list(MODEL_POOL_LEGACY_KEYS):
+        if key in normalized:
+            normalized.pop(key, None)
+            changed = True
+    return normalized, changed
+
+
+def _strip_legacy_model_keys(cfg: dict) -> dict:
+    normalized = dict(cfg or {})
+    for key in MODEL_POOL_LEGACY_KEYS:
+        normalized.pop(key, None)
+    return normalized
+
+
+def _slot_to_legacy_custom_model(slot: dict, *, capability: str) -> dict:
+    normalized_slot = _normalize_model_pool_slot(slot, capability=capability)
+    if normalized_slot.get("mode") != "custom":
+        return _default_custom_model_config()
+    provider_type = str(normalized_slot.get("provider_type") or "qwen").strip().lower()
+    api_key_mode = "custom"
+    if provider_type in {"qwen", "qwen_mt"}:
+        api_key_mode = "builtin_dashscope"
+    elif provider_type == "deepseek":
+        api_key_mode = "builtin_deepseek"
+    elif provider_type == "glm":
+        api_key_mode = "builtin_glm"
+    elif provider_type == "kimi":
+        api_key_mode = "builtin_kimi"
+    elif provider_type == "mimo":
+        api_key_mode = "builtin_mimo"
+    return _normalize_custom_model_config(
+        {
+            "enabled": True,
+            "display_name": normalized_slot.get("display_name", ""),
+            "provider_type": provider_type,
+            "model_id": normalized_slot.get("model_id", ""),
+            "base_url": normalized_slot.get("base_url", ""),
+            "qwen_region": normalized_slot.get("qwen_region", "cn"),
+            "api_key_mode": api_key_mode,
+            "custom_api_key": normalized_slot.get("custom_api_key", ""),
+            "extra_body": dict(normalized_slot.get("extra_body") or {}),
+            "thinking_enabled": _coerce_bool(normalized_slot.get("thinking_enabled"), False),
+        }
+    )
 
 
 def _migrate_legacy_model_config(cfg: dict) -> tuple[dict, bool]:
@@ -156,10 +496,22 @@ def _migrate_legacy_model_config(cfg: dict) -> tuple[dict, bool]:
         custom_model.update({
             "enabled": bool(legacy_name and legacy_enabled),
             "display_name": legacy_name,
-            "provider_type": provider_type if provider_type in {"qwen", "qwen_mt", "deepseek"} else "qwen",
+            "provider_type": provider_type if provider_type in CUSTOM_MODEL_PROVIDER_TYPES else "qwen",
             "model_id": legacy_name,
             "qwen_region": "cn",
-            "api_key_mode": "builtin_dashscope" if provider_type in {"qwen", "qwen_mt"} else "builtin_deepseek",
+            "api_key_mode": (
+                "builtin_dashscope"
+                if provider_type in {"qwen", "qwen_mt"}
+                else (
+                    "builtin_glm"
+                    if provider_type == "glm"
+                    else (
+                        "builtin_kimi"
+                        if provider_type == "kimi"
+                        else ("builtin_mimo" if provider_type == "mimo" else "builtin_deepseek")
+                    )
+                )
+            ),
         })
         if provider_type == "qwen":
             custom_model["extra_body"] = {"enable_thinking": False}
@@ -416,9 +768,7 @@ def load_config() -> dict:
     migrate_from_old_location()
     ensure_dirs()
     cfg = _safe_read_json(CONFIG_FILE, {})
-    normalized, changed = _migrate_legacy_model_config(cfg)
-    normalized, v_changed = _migrate_visual_model_config(normalized)
-    changed = changed or v_changed
+    normalized, changed = _migrate_model_pool_config(cfg)
     if changed or normalized != cfg:
         save_config(normalized)
         return normalized
@@ -427,8 +777,7 @@ def load_config() -> dict:
 
 def save_config(cfg: dict):
     ensure_dirs()
-    normalized, _changed = _migrate_legacy_model_config(cfg)
-    normalized, _v_changed = _migrate_visual_model_config(normalized)
+    normalized, _changed = _migrate_model_pool_config(_strip_legacy_model_keys(cfg))
     _atomic_write_json(CONFIG_FILE, normalized)
 
 
@@ -464,6 +813,52 @@ def get_dashscope_key() -> str:
 
 def set_dashscope_key(key: str):
     _set_config_value("dashscope_key", key)
+
+
+def get_mimo_api_key() -> str:
+    return _get_config_value("mimo_api_key", "")
+
+
+def set_mimo_api_key(key: str):
+    _set_config_value("mimo_api_key", key)
+
+
+def get_glm_api_key() -> str:
+    return _get_config_value("glm_api_key", "")
+
+
+def set_glm_api_key(key: str):
+    _set_config_value("glm_api_key", key)
+
+
+def get_kimi_api_key() -> str:
+    return _get_config_value("kimi_api_key", "")
+
+
+def set_kimi_api_key(key: str):
+    _set_config_value("kimi_api_key", key)
+
+
+def get_translation_model_pool() -> list[dict]:
+    cfg = load_config()
+    return _normalize_model_pool(cfg.get("translation_model_pool"), capability="translation")
+
+
+def save_translation_model_pool(pool: list[dict]) -> None:
+    cfg = load_config()
+    cfg["translation_model_pool"] = _normalize_model_pool(pool, capability="translation")
+    save_config(cfg)
+
+
+def get_fnm_model_pool() -> list[dict]:
+    cfg = load_config()
+    return _normalize_model_pool(cfg.get("fnm_model_pool"), capability="fnm")
+
+
+def save_fnm_model_pool(pool: list[dict]) -> None:
+    cfg = load_config()
+    cfg["fnm_model_pool"] = _normalize_model_pool(pool, capability="fnm")
+    save_config(cfg)
 
 
 def _glossary_state_key(doc_id: str) -> str:
@@ -608,113 +1003,171 @@ def parse_glossary_file(file_storage) -> list[list[str]]:
 
 
 def get_active_model_mode() -> str:
-    cfg = load_config()
-    return _normalize_active_model_mode(cfg.get("active_model_mode"))
+    return str(get_translation_model_pool()[0].get("mode") or "empty").strip().lower() or "empty"
 
 
 def set_active_model_mode(mode: str):
-    cfg = load_config()
-    cfg["active_model_mode"] = _normalize_active_model_mode(mode)
-    save_config(cfg)
+    normalized_mode = str(mode or "").strip().lower()
+    pool = get_translation_model_pool()
+    slot = dict(pool[0])
+    if normalized_mode == "builtin":
+        slot = _default_model_pool_slot("translation")
+        slot["mode"] = "builtin"
+        slot["builtin_key"] = _normalize_builtin_model_key(pool[0].get("builtin_key"))
+    elif normalized_mode == "custom" and str(slot.get("model_id") or "").strip():
+        slot["mode"] = "custom"
+        slot = _normalize_model_pool_slot(slot, capability="translation")
+    pool[0] = slot
+    save_translation_model_pool(pool)
 
 
 def get_active_builtin_model_key() -> str:
-    cfg = load_config()
-    return _normalize_builtin_model_key(cfg.get("active_builtin_model_key"))
+    slot = get_translation_model_pool()[0]
+    return _normalize_builtin_model_key(slot.get("builtin_key"))
 
 
 def set_active_builtin_model_key(key: str):
-    cfg = load_config()
-    cfg["active_builtin_model_key"] = _normalize_builtin_model_key(key)
-    save_config(cfg)
+    pool = get_translation_model_pool()
+    slot = _default_model_pool_slot("translation")
+    slot["mode"] = "builtin"
+    slot["builtin_key"] = _normalize_builtin_model_key(key)
+    pool[0] = slot
+    save_translation_model_pool(pool)
 
 
 def get_custom_model_config() -> dict:
-    cfg = load_config()
-    return _normalize_custom_model_config(cfg.get("custom_model"))
+    return _slot_to_legacy_custom_model(get_translation_model_pool()[0], capability="translation")
 
 
 def save_custom_model_config(custom_model: dict):
-    cfg = load_config()
-    cfg["custom_model"] = _normalize_custom_model_config(custom_model)
-    save_config(cfg)
+    normalized = _normalize_custom_model_config(custom_model)
+    pool = get_translation_model_pool()
+    if normalized.get("enabled") and normalized.get("model_id"):
+        pool[0] = _normalize_model_pool_slot(
+            {
+                "mode": "custom",
+                "display_name": normalized.get("display_name", ""),
+                "provider_type": normalized.get("provider_type", "qwen"),
+                "model_id": normalized.get("model_id", ""),
+                "base_url": normalized.get("base_url", ""),
+                "qwen_region": normalized.get("qwen_region", "cn"),
+                "custom_api_key": normalized.get("custom_api_key", ""),
+                "extra_body": dict(normalized.get("extra_body") or {}),
+                "thinking_enabled": _coerce_bool(normalized.get("thinking_enabled"), False),
+            },
+            capability="translation",
+        )
+    else:
+        pool[0] = _default_model_pool("translation")[0]
+    save_translation_model_pool(pool)
 
 
 def clear_custom_model_config():
-    cfg = load_config()
-    cfg["custom_model"] = _default_custom_model_config()
-    if _normalize_active_model_mode(cfg.get("active_model_mode")) == "custom":
-        cfg["active_model_mode"] = "builtin"
-    save_config(cfg)
+    pool = get_translation_model_pool()
+    pool[0] = _default_model_pool("translation")[0]
+    save_translation_model_pool(pool)
 
 
 def enable_custom_model():
-    cfg = load_config()
-    custom_model = _normalize_custom_model_config(cfg.get("custom_model"))
-    if custom_model.get("enabled") and custom_model.get("model_id"):
-        cfg["active_model_mode"] = "custom"
-    save_config(cfg)
+    pool = get_translation_model_pool()
+    slot = dict(pool[0])
+    if str(slot.get("model_id") or "").strip():
+        slot["mode"] = "custom"
+        pool[0] = _normalize_model_pool_slot(slot, capability="translation")
+        save_translation_model_pool(pool)
 
 
 def disable_custom_model():
-    cfg = load_config()
-    cfg["active_model_mode"] = "builtin"
-    save_config(cfg)
+    pool = get_translation_model_pool()
+    slot = _default_model_pool_slot("translation")
+    slot["mode"] = "builtin"
+    slot["builtin_key"] = _normalize_builtin_model_key(pool[0].get("builtin_key"))
+    pool[0] = slot
+    save_translation_model_pool(pool)
 
 
 def get_active_visual_model_mode() -> str:
-    cfg = load_config()
-    return _normalize_active_model_mode(cfg.get("active_visual_model_mode"))
+    return str(get_fnm_model_pool()[0].get("mode") or "empty").strip().lower() or "empty"
 
 
 def set_active_visual_model_mode(mode: str):
-    cfg = load_config()
-    cfg["active_visual_model_mode"] = _normalize_active_model_mode(mode)
-    save_config(cfg)
+    normalized_mode = str(mode or "").strip().lower()
+    pool = get_fnm_model_pool()
+    slot = dict(pool[0])
+    if normalized_mode == "builtin":
+        slot = _default_model_pool_slot("fnm")
+        slot["mode"] = "builtin"
+        slot["builtin_key"] = normalize_builtin_model_key(pool[0].get("builtin_key"), capability="fnm")
+    elif normalized_mode == "custom" and str(slot.get("model_id") or "").strip():
+        slot["mode"] = "custom"
+        slot = _normalize_model_pool_slot(slot, capability="fnm")
+    pool[0] = slot
+    save_fnm_model_pool(pool)
 
 
 def get_active_builtin_visual_model_key() -> str:
-    cfg = load_config()
-    return normalize_builtin_model_key(cfg.get("active_builtin_visual_model_key"), capability="vision")
+    slot = get_fnm_model_pool()[0]
+    return normalize_builtin_model_key(slot.get("builtin_key"), capability="fnm")
 
 
 def set_active_builtin_visual_model_key(key: str):
-    cfg = load_config()
-    cfg["active_builtin_visual_model_key"] = normalize_builtin_model_key(key, capability="vision")
-    save_config(cfg)
+    pool = get_fnm_model_pool()
+    slot = _default_model_pool_slot("fnm")
+    slot["mode"] = "builtin"
+    slot["builtin_key"] = normalize_builtin_model_key(key, capability="fnm")
+    pool[0] = slot
+    save_fnm_model_pool(pool)
 
 
 def get_visual_custom_model_config() -> dict:
-    cfg = load_config()
-    return _normalize_custom_model_config(cfg.get("visual_custom_model"))
+    return _slot_to_legacy_custom_model(get_fnm_model_pool()[0], capability="fnm")
 
 
 def save_visual_custom_model_config(visual_custom_model: dict):
-    cfg = load_config()
-    cfg["visual_custom_model"] = _normalize_custom_model_config(visual_custom_model)
-    save_config(cfg)
+    normalized = _normalize_custom_model_config(visual_custom_model)
+    pool = get_fnm_model_pool()
+    if normalized.get("enabled") and normalized.get("model_id"):
+        pool[0] = _normalize_model_pool_slot(
+            {
+                "mode": "custom",
+                "display_name": normalized.get("display_name", ""),
+                "provider_type": normalized.get("provider_type", "qwen"),
+                "model_id": normalized.get("model_id", ""),
+                "base_url": normalized.get("base_url", ""),
+                "qwen_region": normalized.get("qwen_region", "cn"),
+                "custom_api_key": normalized.get("custom_api_key", ""),
+                "extra_body": dict(normalized.get("extra_body") or {}),
+                "thinking_enabled": _coerce_bool(normalized.get("thinking_enabled"), False),
+            },
+            capability="fnm",
+        )
+    else:
+        pool[0] = _default_model_pool("fnm")[0]
+    save_fnm_model_pool(pool)
 
 
 def clear_visual_custom_model_config():
-    cfg = load_config()
-    cfg["visual_custom_model"] = _default_custom_model_config()
-    if _normalize_active_model_mode(cfg.get("active_visual_model_mode")) == "custom":
-        cfg["active_visual_model_mode"] = "builtin"
-    save_config(cfg)
+    pool = get_fnm_model_pool()
+    pool[0] = _default_model_pool("fnm")[0]
+    save_fnm_model_pool(pool)
 
 
 def enable_visual_custom_model():
-    cfg = load_config()
-    vcm = _normalize_custom_model_config(cfg.get("visual_custom_model"))
-    if vcm.get("enabled") and vcm.get("model_id"):
-        cfg["active_visual_model_mode"] = "custom"
-    save_config(cfg)
+    pool = get_fnm_model_pool()
+    slot = dict(pool[0])
+    if str(slot.get("model_id") or "").strip():
+        slot["mode"] = "custom"
+        pool[0] = _normalize_model_pool_slot(slot, capability="fnm")
+        save_fnm_model_pool(pool)
 
 
 def disable_visual_custom_model():
-    cfg = load_config()
-    cfg["active_visual_model_mode"] = "builtin"
-    save_config(cfg)
+    pool = get_fnm_model_pool()
+    slot = _default_model_pool_slot("fnm")
+    slot["mode"] = "builtin"
+    slot["builtin_key"] = normalize_builtin_model_key(pool[0].get("builtin_key"), capability="fnm")
+    pool[0] = slot
+    save_fnm_model_pool(pool)
 
 
 def get_visual_model_key() -> str:
@@ -726,7 +1179,8 @@ def set_visual_model_key(key: str):
 
 
 def get_visual_custom_model_name() -> str:
-    return str(get_visual_custom_model_config().get("model_id", "") or "").strip()
+    cfg = get_visual_custom_model_config()
+    return str(cfg.get("display_name") or cfg.get("model_id", "") or "").strip()
 
 
 def get_visual_custom_model_enabled() -> bool:
@@ -742,7 +1196,8 @@ def set_model_key(key: str):
 
 
 def get_custom_model_name() -> str:
-    return str(get_custom_model_config().get("model_id", "") or "").strip()
+    cfg = get_custom_model_config()
+    return str(cfg.get("display_name") or cfg.get("model_id", "") or "").strip()
 
 
 def get_custom_model_enabled() -> bool:
@@ -779,18 +1234,28 @@ def save_custom_model_selection(name: str, enabled: bool, base_key: str):
     custom_model = {
         "enabled": bool(str(name or "").strip() and _coerce_bool(enabled, False)),
         "display_name": str(name or "").strip(),
-        "provider_type": provider_type if provider_type in {"qwen", "qwen_mt", "deepseek"} else "qwen",
+        "provider_type": provider_type if provider_type in CUSTOM_MODEL_PROVIDER_TYPES else "qwen",
         "model_id": str(name or "").strip(),
         "base_url": "",
         "qwen_region": "cn",
-        "api_key_mode": "builtin_dashscope" if provider_type in {"qwen", "qwen_mt"} else "builtin_deepseek",
+        "api_key_mode": (
+            "builtin_dashscope"
+            if provider_type in {"qwen", "qwen_mt"}
+            else (
+                "builtin_glm"
+                if provider_type == "glm"
+                else (
+                    "builtin_kimi"
+                    if provider_type == "kimi"
+                    else ("builtin_mimo" if provider_type == "mimo" else "builtin_deepseek")
+                )
+            )
+        ),
         "custom_api_key": "",
         "extra_body": {"enable_thinking": False} if provider_type == "qwen" else {},
+        "thinking_enabled": False,
     }
-    cfg = load_config()
-    cfg["custom_model"] = custom_model
-    cfg["active_model_mode"] = "custom" if custom_model["enabled"] else "builtin"
-    save_config(cfg)
+    save_custom_model_config(custom_model)
 
 
 # ============ 多文档管理 ============
@@ -1013,4 +1478,3 @@ def delete_doc(doc_id: str):
             thread.start()
         elif os.path.isdir(cleanup_dir):
             shutil.rmtree(cleanup_dir)
-

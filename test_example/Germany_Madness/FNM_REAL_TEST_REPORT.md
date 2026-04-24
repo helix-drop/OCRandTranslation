@@ -24,14 +24,14 @@
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `2276`
+- translated_paras: `2267`
 
 ## Token by Stage
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
 - visual_toc.manual_input_extract: request=2, prompt=6019, completion=2085, total=8104
-- llm_repair.cluster_request: request=6, prompt=90117, completion=3572, total=93689
+- llm_repair.cluster_request: request=6, prompt=90117, completion=3261, total=93378
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph

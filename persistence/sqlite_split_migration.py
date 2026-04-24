@@ -35,6 +35,9 @@ DOC_SCOPED_TABLES = (
     "fnm_structure_reviews",
     "fnm_phase_runs",
     "fnm_dev_snapshots",
+    "fnm_chapter_endnotes",
+    "fnm_paragraph_footnotes",
+    "fnm_chapter_anchor_alignment",
 )
 
 
@@ -91,7 +94,9 @@ def _copy_doc_table(
         return 0
     columns = _table_columns(src, table)
     if "doc_id" in columns:
-        rows = src.execute(f"SELECT * FROM {table} WHERE doc_id = ?", (doc_id,)).fetchall()
+        rows = src.execute(
+            f"SELECT * FROM {table} WHERE doc_id = ?", (doc_id,)
+        ).fetchall()
     elif table == "translation_segments":
         rows = src.execute(
             """
@@ -107,7 +112,9 @@ def _copy_doc_table(
     return _insert_rows(dst, table, rows)
 
 
-def _copy_revision_tables(src: sqlite3.Connection, dst: sqlite3.Connection, doc_id: str) -> int:
+def _copy_revision_tables(
+    src: sqlite3.Connection, dst: sqlite3.Connection, doc_id: str
+) -> int:
     count = 0
     if _table_exists(src, "segment_revisions"):
         rows = src.execute(
@@ -193,12 +200,16 @@ def should_run_split_migration(
         legacy_has_docs = _table_exists(legacy_conn, "documents")
         if not legacy_has_docs:
             return False
-        legacy_count = int(legacy_conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0])
+        legacy_count = int(
+            legacy_conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
+        )
         if legacy_count == 0:
             return False
         if not _table_exists(catalog_conn, "documents"):
             return True
-        catalog_count = int(catalog_conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0])
+        catalog_count = int(
+            catalog_conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
+        )
         return catalog_count == 0
     finally:
         legacy_conn.close()
@@ -235,35 +246,41 @@ def migrate_legacy_app_db(
         if documents:
             catalog_rows = []
             for row in documents:
-                catalog_rows.append({
-                    "id": row["id"],
-                    "name": row["name"],
-                    "created_at": row["created_at"],
-                    "updated_at": row["updated_at"],
-                    "page_count": row["page_count"],
-                    "entry_count": row["entry_count"],
-                    "last_entry_idx": row["last_entry_idx"],
-                    "cleanup_headers_footers": row["cleanup_headers_footers"],
-                    "auto_visual_toc_enabled": row["auto_visual_toc_enabled"],
-                    "toc_visual_status": row["toc_visual_status"],
-                    "toc_visual_message": row["toc_visual_message"],
-                    "toc_visual_model_id": row["toc_visual_model_id"],
-                    "toc_visual_phase": row["toc_visual_phase"],
-                    "toc_visual_progress_pct": row["toc_visual_progress_pct"],
-                    "toc_visual_progress_label": row["toc_visual_progress_label"],
-                    "toc_visual_progress_detail": row["toc_visual_progress_detail"],
-                })
+                catalog_rows.append(
+                    {
+                        "id": row["id"],
+                        "name": row["name"],
+                        "created_at": row["created_at"],
+                        "updated_at": row["updated_at"],
+                        "page_count": row["page_count"],
+                        "entry_count": row["entry_count"],
+                        "last_entry_idx": row["last_entry_idx"],
+                        "cleanup_headers_footers": row["cleanup_headers_footers"],
+                        "auto_visual_toc_enabled": row["auto_visual_toc_enabled"],
+                        "toc_visual_status": row["toc_visual_status"],
+                        "toc_visual_message": row["toc_visual_message"],
+                        "toc_visual_model_id": row["toc_visual_model_id"],
+                        "toc_visual_phase": row["toc_visual_phase"],
+                        "toc_visual_progress_pct": row["toc_visual_progress_pct"],
+                        "toc_visual_progress_label": row["toc_visual_progress_label"],
+                        "toc_visual_progress_detail": row["toc_visual_progress_detail"],
+                    }
+                )
             cols = list(catalog_rows[0].keys())
             sql = f"""
                 INSERT OR REPLACE INTO documents ({", ".join(cols)})
                 VALUES ({", ".join(["?"] * len(cols))})
             """
-            catalog.executemany(sql, [tuple(item[c] for c in cols) for item in catalog_rows])
+            catalog.executemany(
+                sql, [tuple(item[c] for c in cols) for item in catalog_rows]
+            )
             stats.migrated_documents = len(catalog_rows)
 
         app_state_rows = []
         if _table_exists(src, "app_state"):
-            app_state_rows = src.execute("SELECT state_key, state_value, updated_at FROM app_state").fetchall()
+            app_state_rows = src.execute(
+                "SELECT state_key, state_value, updated_at FROM app_state"
+            ).fetchall()
         doc_ids = {normalize_doc_id(row["id"]) for row in documents}
         doc_ids.discard("")
         doc_state_map: dict[str, list[sqlite3.Row]] = {doc_id: [] for doc_id in doc_ids}
@@ -329,6 +346,8 @@ def migrate_legacy_app_db(
     return {
         "legacy_db_path": legacy_path,
         "catalog_db_path": catalog_path,
-        "migrated_legacy_path": migrated_path if os.path.exists(migrated_path) else legacy_path,
+        "migrated_legacy_path": migrated_path
+        if os.path.exists(migrated_path)
+        else legacy_path,
         **stats.to_dict(),
     }

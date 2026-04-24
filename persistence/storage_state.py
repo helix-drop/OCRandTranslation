@@ -7,10 +7,15 @@ from config import (
     get_active_visual_model_mode,
     get_active_builtin_visual_model_key,
     get_visual_custom_model_config,
+    get_translation_model_pool,
+    get_fnm_model_pool,
     get_glossary,
     get_paddle_token,
     get_deepseek_key,
     get_dashscope_key,
+    get_mimo_api_key,
+    get_glm_api_key,
+    get_kimi_api_key,
     get_translate_parallel_enabled,
     get_translate_parallel_limit,
     get_doc_cleanup_headers_footers,
@@ -83,7 +88,9 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
 
     has_entries = len(entries) > 0
     translation_models = get_selectable_models("translation")
-    visual_models = get_selectable_models("vision")
+    fnm_models = get_selectable_models("fnm")
+    translation_model_pool = get_translation_model_pool()
+    fnm_model_pool = get_fnm_model_pool()
     return {
         "pages": pages,
         "src_name": src_name,
@@ -93,11 +100,15 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "model_key": active_builtin_model_key,
         "models": translation_models,
         "translation_models": translation_models,
-        "visual_models": visual_models,
+        "fnm_models": fnm_models,
+        "visual_models": fnm_models,
         "glossary": get_glossary(doc_id),
         "paddle_token": get_paddle_token(),
         "deepseek_key": get_deepseek_key(),
         "dashscope_key": get_dashscope_key(),
+        "mimo_api_key": get_mimo_api_key(),
+        "glm_api_key": get_glm_api_key(),
+        "kimi_api_key": get_kimi_api_key(),
         "active_model_mode": active_model_mode,
         "active_builtin_model_key": active_builtin_model_key,
         "custom_model": custom_model,
@@ -108,6 +119,7 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "current_model_id": resolved_spec.model_id,
         "current_model_label": resolved_spec.display_label,
         "current_model_provider": resolved_spec.provider,
+        "translation_model_pool": translation_model_pool,
         "active_visual_model_mode": active_visual_model_mode,
         "visual_model_key": active_builtin_visual_model_key,
         "visual_custom_model": visual_custom_model,
@@ -117,6 +129,7 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "current_visual_model_id": resolved_visual_spec.model_id,
         "current_visual_model_label": resolved_visual_spec.display_label,
         "current_visual_model_provider": resolved_visual_spec.provider,
+        "fnm_model_pool": fnm_model_pool,
         "translate_parallel_enabled": get_translate_parallel_enabled(),
         "translate_parallel_limit": get_translate_parallel_limit(),
         "has_pages": len(pages) > 0,

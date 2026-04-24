@@ -17,11 +17,13 @@ from FNM_RE.models import (
     ExportChapterRecord,
     BodyAnchorRecord,
     ChapterRecord,
+    ChapterEndnoteRecord,
     ChapterNoteModeRecord,
     NoteItemRecord,
     NoteLinkRecord,
     NoteRegionRecord,
     PagePartitionRecord,
+    ParagraphFootnoteRecord,
     Phase1Structure,
     Phase1Summary,
     Phase2Structure,
@@ -48,6 +50,9 @@ from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.contracts import ModuleResult
 from FNM_RE.modules.note_linking import build_note_link_table
 from FNM_RE.modules.ref_freeze import build_frozen_units
+from FNM_RE.stages.paragraph_footnotes import build_paragraph_footnotes
+from FNM_RE.stages.paragraph_endnotes import build_paragraph_endnotes
+from FNM_RE.stages.chapter_anchor_alignment import build_chapter_anchor_alignment
 from FNM_RE.modules.toc_structure import build_toc_structure
 from FNM_RE.modules.types import (
     BookNoteProfile,
@@ -337,6 +342,9 @@ def _assemble_phase3_summary(
     phase2: Phase2Structure,
     body_anchor_summary: Mapping[str, Any],
     note_link_meta: Mapping[str, Any],
+    paragraph_footnote_summary: Mapping[str, Any] | None = None,
+    paragraph_endnote_summary: Mapping[str, Any] | None = None,
+    chapter_anchor_alignment_summary: Mapping[str, Any] | None = None,
 ) -> Phase3Summary:
     note_link_summary = dict(note_link_meta.get("note_link_summary") or {})
     review_seed_summary = dict(note_link_meta.get("review_seed_summary") or {})
@@ -371,6 +379,9 @@ def _assemble_phase3_summary(
         note_link_summary=note_link_summary,
         review_seed_summary=review_seed_summary,
         review_flags=review_flags,
+        paragraph_footnote_summary=dict(paragraph_footnote_summary or {}),
+        paragraph_endnote_summary=dict(paragraph_endnote_summary or {}),
+        chapter_anchor_alignment_summary=dict(chapter_anchor_alignment_summary or {}),
     )
 
 
@@ -395,6 +406,26 @@ def build_phase3_structure(
     )
     body_anchors, body_anchor_summary = build_body_anchors(phase2, pages=pages)
     enhanced_anchors, note_links, note_link_meta = build_note_links(body_anchors, phase2, pages=pages)
+
+    # —— Paragraph footnotes (layout-based) ——
+    phase1_for_footnotes = Phase1Structure(
+        pages=phase2.pages,
+        chapters=phase2.chapters,
+    )
+    paragraph_footnotes, paragraph_footnote_summary = build_paragraph_footnotes(
+        phase1_for_footnotes, pages=pages,
+    )
+
+    # —— Paragraph endnotes (layout-based) ——
+    paragraph_endnotes, paragraph_endnote_summary = build_paragraph_endnotes(
+        phase1_for_footnotes, pages=pages,
+    )
+
+    # —— Chapter anchor alignment (DP sequence alignment) ——
+    chapter_anchor_alignments, chapter_anchor_alignment_summary = build_chapter_anchor_alignment(
+        enhanced_anchors, paragraph_endnotes,
+    )
+
     refreshed_body_anchor_summary = _refresh_body_anchor_summary(
         base_summary=body_anchor_summary,
         body_anchors=enhanced_anchors,
@@ -403,6 +434,9 @@ def build_phase3_structure(
         phase2=phase2,
         body_anchor_summary=refreshed_body_anchor_summary,
         note_link_meta=note_link_meta,
+        paragraph_footnote_summary=paragraph_footnote_summary,
+        paragraph_endnote_summary=paragraph_endnote_summary,
+        chapter_anchor_alignment_summary=chapter_anchor_alignment_summary,
     )
     return Phase3Structure(
         pages=phase2.pages,
@@ -414,6 +448,9 @@ def build_phase3_structure(
         chapter_note_modes=phase2.chapter_note_modes,
         body_anchors=enhanced_anchors,
         note_links=note_links,
+        paragraph_footnotes=paragraph_footnotes,
+        paragraph_endnotes=paragraph_endnotes,
+        chapter_anchor_alignments=chapter_anchor_alignments,
         summary=summary,
     )
 
