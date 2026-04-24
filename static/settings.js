@@ -43,7 +43,7 @@
     }
   }
 
-  function syncSlotCard(card) {
+  function syncModelPoolSlotCard(card) {
     if (!card) return;
     var mode = card.getAttribute('data-mode') || 'builtin';
     var provider = '';
@@ -80,14 +80,14 @@
           card.setAttribute('data-mode', newMode);
           var hidden = card.querySelector('[data-slot-mode-input]');
           if (hidden) hidden.value = newMode;
-          syncSlotCard(card);
+          syncModelPoolSlotCard(card);
         });
       });
       var providerSel = card.querySelector('[data-slot-provider]');
       if (providerSel) {
-        providerSel.addEventListener('change', function () { syncSlotCard(card); });
+        providerSel.addEventListener('change', function () { syncModelPoolSlotCard(card); });
       }
-      syncSlotCard(card);
+      syncModelPoolSlotCard(card);
     });
   }
 
@@ -195,4 +195,6 @@
     initSlotCards();
     initProvidersPanel();
   });
+
+  window.syncModelPoolSlotCard = syncModelPoolSlotCard;
 })();

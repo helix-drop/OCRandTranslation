@@ -1,534 +1,460 @@
 {% extends "base.html" %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+{% endblock %}
 {% block content %}
-<div class="container">
-  <div class="flex justify-between items-center" style="margin-bottom:32px;">
-    <h1 style="font-size:22px;font-weight:700;">设置</h1>
-    <a href="{{ url_for('home', doc_id=current_doc_id) }}" class="btn btn-sec">← 返回</a>
-  </div>
-
-  <!-- PaddleOCR Token -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>PaddleOCR 令牌</h3>
-      <form method="POST" action="{{ url_for('save_settings') }}">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="section" value="paddle">
-        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-        <input name="paddle_token" class="inp" type="password" value="{{ paddle_token }}"
-               placeholder="输入 PaddleOCR API Token">
-        <div class="hint">
-          访问 <a href="https://aistudio.baidu.com/paddleocr/task" target="_blank">PaddleOCR 官网</a> 获取令牌。
-          如果要自己查询今日解析页数，请打开
-          <a href="https://aistudio.baidu.com/paddleocr" target="_blank" rel="noreferrer">https://aistudio.baidu.com/paddleocr</a>
-          查看官方站内配额状态。
-        </div>
-        <button type="submit" class="btn btn-pri mt-10">保存令牌</button>
-      </form>
+{% set providers_configured =
+  (1 if paddle_token else 0)
+  + (1 if deepseek_key else 0)
+  + (1 if dashscope_key else 0)
+  + (1 if glm_api_key else 0)
+  + (1 if kimi_api_key else 0)
+  + (1 if mimo_api_key else 0)
+%}
+<div class="container" style="max-width:1080px;">
+  <div class="settings-topbar">
+    <h1>设置</h1>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="cur-models">
+        当前模型：翻译主模型：<code>{{ current_model_label or current_model_id }}</code>
+        · FNM 主模型：<code>{{ current_visual_model_label or current_visual_model_id }}</code>
+      </div>
+      <a href="{{ url_for('home', doc_id=current_doc_id) }}" class="btn btn-sec">← 返回</a>
     </div>
   </div>
 
-  <!-- DeepSeek API Key -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>DeepSeek API Key</h3>
-      <form method="POST" action="{{ url_for('save_settings') }}">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="section" value="deepseek">
-        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-        <input name="deepseek_key" class="inp" type="password" value="{{ deepseek_key }}"
-               placeholder="输入 DeepSeek API Key">
-        <div class="hint">
-          访问 <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">DeepSeek Platform</a> 获取 API Key。用于调用 DeepSeek 系列模型。
-        </div>
-        <button type="submit" class="btn btn-pri mt-10">保存 Key</button>
-      </form>
-    </div>
-  </div>
+  <div class="settings-shell">
+    <nav class="settings-side" aria-label="设置分组">
+      <div class="grp">接入</div>
+      <button class="nav-item" data-nav="providers" type="button">
+        <span class="dot" style="background:{% if providers_configured == 6 %}var(--grn){% elif providers_configured == 0 %}var(--red){% else %}var(--acc){% endif %};"></span>
+        <span>Providers</span>
+        <span class="count">{{ providers_configured }}/6</span>
+      </button>
+      <button class="nav-item" data-nav="translation-pool" type="button">
+        <span class="dot" style="background:var(--blu);"></span>
+        <span>翻译模型池</span>
+      </button>
+      <button class="nav-item" data-nav="fnm-pool" type="button">
+        <span class="dot" style="background:var(--blu);"></span>
+        <span>FNM 模型池</span>
+      </button>
 
-  <!-- DashScope API Key (Qwen) -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>DashScope API Key (Qwen)</h3>
-      <form method="POST" action="{{ url_for('save_settings') }}">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="section" value="dashscope">
-        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-        <input name="dashscope_key" class="inp" type="password" value="{{ dashscope_key }}"
-               placeholder="输入 DashScope API Key (sk-...)">
-        <div class="hint">
-          访问 <a href="https://bailian.console.aliyun.com/?tab=model#/api-key" target="_blank">阿里云百炼</a> 获取 API Key。用于调用 Qwen 系列模型。
-        </div>
-        <button type="submit" class="btn btn-pri mt-10">保存 Key</button>
-      </form>
-    </div>
-  </div>
+      <div class="grp">运行</div>
+      <button class="nav-item" data-nav="concurrency" type="button">
+        <span class="dot" style="background:var(--txL);"></span>
+        <span>并发设置</span>
+      </button>
 
-  <!-- Model Selection -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>翻译模型</h3>
-      <div class="model-picker">
-        {% for key, m in translation_models.items() %}
-        <form method="POST" action="{{ url_for('set_model', key=key) }}" class="inline-form">
+      <div class="grp">文档</div>
+      <button class="nav-item" data-nav="glossary" type="button">
+        <span class="dot" style="background:var(--txL);"></span>
+        <span>术语词典</span>
+        <span class="count">{{ glossary|length }}</span>
+      </button>
+      <button class="nav-item" data-nav="toc" type="button">
+        <span class="dot" style="background:var(--txL);"></span>
+        <span>目录文件</span>
+      </button>
+
+      <div class="grp">其他</div>
+      <button class="nav-item" data-nav="data" type="button">
+        <span class="dot" style="background:{% if has_pages or has_entries %}var(--red){% else %}var(--txL){% endif %};"></span>
+        <span>数据管理</span>
+      </button>
+    </nav>
+
+    <section class="settings-main">
+      <div data-panel="providers">
+        <h2 class="panel-h">Providers · 全局 API Key</h2>
+        <div class="panel-sub">
+          所有内置模型共享这些 Key；内置模型会自动选择对应 Provider 的全局 Key，无需在槽位重复填写。
+        </div>
+
+        <div class="section-hd">
+          <div class="lbl">6 Providers</div>
+          <span id="providersStatus" style="font-size:11px;color:var(--txS);"></span>
+        </div>
+
+        <form id="providersForm" method="POST" action="{{ url_for('save_settings') }}">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <input type="hidden" name="next" value="settings">
-          <button type="submit" class="btn {{ 'active' if (not custom_model_enabled and key == model_key) else '' }}">{{ m.label }}</button>
+
+          <div class="prov-row" data-section="paddle">
+            <div class="prov-logo lg-ps">P</div>
+            <div class="prov-name">PaddleOCR</div>
+            <div class="prov-hint">Token · 版面 OCR · 自己查询今日解析页数</div>
+            <input class="inp prov-key" type="password" data-key
+                   name="paddle_token" value="{{ paddle_token }}"
+                   placeholder="输入 PaddleOCR Token">
+            <span class="pill" data-status></span>
+            <a class="prov-link" href="https://aistudio.baidu.com/paddleocr/task" target="_blank" rel="noreferrer" title="获取 Token">↗</a>
+          </div>
+
+          <div class="prov-row" data-section="deepseek">
+            <div class="prov-logo lg-ds">DS</div>
+            <div class="prov-name">DeepSeek</div>
+            <div class="prov-hint">OpenAI 兼容 · DeepSeek V3 / R1</div>
+            <input class="inp prov-key" type="password" data-key
+                   name="deepseek_key" value="{{ deepseek_key }}"
+                   placeholder="sk-...">
+            <span class="pill" data-status></span>
+            <a class="prov-link" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer" title="获取 Key">↗</a>
+          </div>
+
+          <div class="prov-row" data-section="dashscope">
+            <div class="prov-logo lg-qw">Q</div>
+            <div class="prov-name">DashScope</div>
+            <div class="prov-hint">Qwen 系列 · 阿里云百炼</div>
+            <input class="inp prov-key" type="password" data-key
+                   name="dashscope_key" value="{{ dashscope_key }}"
+                   placeholder="sk-...">
+            <span class="pill" data-status></span>
+            <a class="prov-link" href="https://bailian.console.aliyun.com/?tab=model#/api-key" target="_blank" rel="noreferrer" title="获取 Key">↗</a>
+          </div>
+
+          <div class="prov-row" data-section="glm">
+            <div class="prov-logo lg-gl">GL</div>
+            <div class="prov-name">智谱 GLM API Key</div>
+            <div class="prov-hint">GLM-4.6 / GLM-4.5V</div>
+            <input class="inp prov-key" type="password" data-key
+                   name="glm_api_key" value="{{ glm_api_key }}"
+                   placeholder="输入智谱 GLM API Key">
+            <span class="pill" data-status></span>
+            <a class="prov-link" href="https://open.bigmodel.cn/" target="_blank" rel="noreferrer" title="获取 Key">↗</a>
+          </div>
+
+          <div class="prov-row" data-section="kimi">
+            <div class="prov-logo lg-km">K</div>
+            <div class="prov-name">Kimi API Key</div>
+            <div class="prov-hint">Moonshot · K2</div>
+            <input class="inp prov-key" type="password" data-key
+                   name="kimi_api_key" value="{{ kimi_api_key }}"
+                   placeholder="输入 Kimi / Moonshot API Key">
+            <span class="pill" data-status></span>
+            <a class="prov-link" href="https://platform.moonshot.ai/console/api-keys" target="_blank" rel="noreferrer" title="获取 Key">↗</a>
+          </div>
+
+          <div class="prov-row" data-section="mimo">
+            <div class="prov-logo lg-mm">M</div>
+            <div class="prov-name">MiMo</div>
+            <div class="prov-hint">按量 · 小米</div>
+            <input class="inp prov-key" type="password" data-key
+                   name="mimo_api_key" value="{{ mimo_api_key }}"
+                   placeholder="输入 MiMo 按量 API Key">
+            <span class="pill" data-status></span>
+            <a class="prov-link" href="https://api.xiaomimimo.com/" target="_blank" rel="noreferrer" title="获取 Key">↗</a>
+          </div>
+
+          <div class="providers-foot">
+            <span class="hint">只保存到本机 SQLite，不对外上传。Token Plan 的自定义 Base URL 请在“翻译模型池 / FNM 模型池”槽位里单独填写。</span>
+            <button type="submit" class="btn btn-pri">保存所有变更</button>
+          </div>
         </form>
-        {% endfor %}
-        <button type="button" class="btn {{ 'active' if custom_model_enabled else '' }}" onclick="toggleCustomModelPanel();">
-          {{ ('自定义: ' ~ custom_model_name) if custom_model_name else '自定义模型' }}
-        </button>
       </div>
-      <div id="customModelPanel" class="custom-model-panel{% if not custom_model_panel_open %} hidden{% endif %}"{% if not custom_model_panel_open %} hidden{% endif %}>
-        {% if custom_model.model_id %}
-        <div class="custom-model-actions">
-          <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-            <input type="hidden" name="section" value="custom_model_enable">
-            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-            <button type="submit" class="btn {{ 'active' if custom_model_enabled else '' }}">启用此自定义模型：{{ custom_model.display_name or custom_model.model_id }}</button>
-          </form>
-          <span class="custom-model-bound">
-            Provider：{{ custom_model.provider_type }}{% if custom_model.provider_type == 'qwen' %} · 地域：{{ custom_model.qwen_region }}{% endif %}
-          </span>
+
+      <div data-panel="translation-pool">
+        <h2 class="panel-h">翻译模型池</h2>
+        <div class="panel-sub">
+          用于标准连续翻译和 FNM 文本翻译。槽位 1 是主模型；某页或某个 FNM unit 失败后，按 2 → 3 顺序切换重试。
         </div>
-        {% endif %}
+
         <form method="POST" action="{{ url_for('save_settings') }}">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="section" value="custom_model_save">
+          <input type="hidden" name="section" value="translation_model_pool">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <label for="customModelDisplayName" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">展示名</label>
-          <input id="customModelDisplayName" name="display_name" class="inp" type="text" value="{{ custom_model.display_name }}"
-                 placeholder="例如：Qwen 3.5 Plus">
-          <label for="customModelProvider" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">Provider</label>
-          <select id="customModelProvider" name="provider_type" class="inp" onchange="toggleCustomModelProviderFields(this.value)">
-            <option value="qwen"{% if custom_model.provider_type == 'qwen' %} selected{% endif %}>Qwen (DashScope)</option>
-            <option value="qwen_mt"{% if custom_model.provider_type == 'qwen_mt' %} selected{% endif %}>Qwen-MT (DashScope)</option>
-            <option value="deepseek"{% if custom_model.provider_type == 'deepseek' %} selected{% endif %}>DeepSeek</option>
-            <option value="openai_compatible"{% if custom_model.provider_type == 'openai_compatible' %} selected{% endif %}>OpenAI Compatible</option>
-          </select>
-          <label for="customModelId" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">模型 ID</label>
-          <input id="customModelId" name="model_id" class="inp" type="text" value="{{ custom_model.model_id }}"
-                 placeholder="例如：qwen3.5-plus">
-          <div id="qwenRegionWrap" style="margin-top:12px;{% if custom_model.provider_type not in ['qwen', 'qwen_mt'] %}display:none;{% endif %}">
-            <label for="customModelQwenRegion" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Qwen 地域</label>
-            <select id="customModelQwenRegion" name="qwen_region" class="inp">
-              <option value="cn"{% if custom_model.qwen_region == 'cn' %} selected{% endif %}>中国内地</option>
-              <option value="sg"{% if custom_model.qwen_region == 'sg' %} selected{% endif %}>新加坡</option>
-              <option value="us"{% if custom_model.qwen_region == 'us' %} selected{% endif %}>美国</option>
-            </select>
-          </div>
-          <div id="openaiCompatWrap" style="margin-top:12px;{% if custom_model.provider_type != 'openai_compatible' %}display:none;{% endif %}">
-            <label for="customModelBaseUrl" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Base URL</label>
-            <input id="customModelBaseUrl" name="base_url" class="inp" type="text" value="{{ custom_model.base_url }}"
-                   placeholder="例如：https://example.com/v1">
-            <label for="customModelApiKey" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">专用 API Key</label>
-            <input id="customModelApiKey" name="custom_api_key" class="inp" type="password" value="{{ custom_model.custom_api_key }}"
-                   placeholder="输入该 OpenAI 兼容服务的 API Key">
-          </div>
-          <div class="hint" style="margin-top:8px;">
-            当前生效模型 ID：
-            <code>{{ current_model_id }}</code>
-          </div>
-          <div class="hint" style="margin-top:6px;">
-            保存只更新配置，不会自动切换。确认无误后，再点上方“启用此自定义模型”。
-          </div>
-          <button type="submit" class="btn btn-pri mt-10">保存自定义模型配置</button>
-        </form>
-        {% if custom_model.model_id %}
-        <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form" style="margin-top:10px;">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="section" value="custom_model_clear">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <button type="submit" class="btn btn-sec">清空自定义模型配置</button>
-        </form>
-        {% endif %}
-      </div>
-    </div>
-  </div>
 
-  <!-- Visual TOC model (independent from translation) -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>视觉目录模型</h3>
-      <p class="hint" style="margin-bottom:12px;line-height:1.6;">
-        仅用于「自动视觉目录」等需要读 PDF 页面图像的能力，与上方「翻译模型」互不影响。仍使用同一 DashScope / DeepSeek 等 Key。
-      </p>
-      <div class="model-picker">
-        {% for key, m in visual_models.items() %}
-        <form method="POST" action="{{ url_for('set_visual_model', key=key) }}" class="inline-form">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <input type="hidden" name="next" value="settings">
-          <button type="submit" class="btn {{ 'active' if (not visual_custom_model_enabled and key == visual_model_key) else '' }}">{{ m.label }}</button>
-        </form>
-        {% endfor %}
-        <button type="button" class="btn {{ 'active' if visual_custom_model_enabled else '' }}" onclick="toggleVisualCustomModelPanel();">
-          {{ ('自定义: ' ~ visual_custom_model_name) if visual_custom_model_name else '自定义视觉模型' }}
-        </button>
-      </div>
-      <div id="visualCustomModelPanel" class="custom-model-panel{% if not visual_custom_model_panel_open %} hidden{% endif %}"{% if not visual_custom_model_panel_open %} hidden{% endif %}>
-        {% if visual_custom_model.model_id %}
-        <div class="custom-model-actions">
-          <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-            <input type="hidden" name="section" value="visual_custom_model_enable">
-            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-            <button type="submit" class="btn {{ 'active' if visual_custom_model_enabled else '' }}">启用此自定义模型：{{ visual_custom_model.display_name or visual_custom_model.model_id }}</button>
-          </form>
-          <span class="custom-model-bound">
-            Provider：{{ visual_custom_model.provider_type }}{% if visual_custom_model.provider_type == 'qwen' %} · 地域：{{ visual_custom_model.qwen_region }}{% endif %}
-          </span>
-        </div>
-        {% endif %}
-        <form method="POST" action="{{ url_for('save_settings') }}">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="section" value="visual_custom_model_save">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <label for="visualModelDisplayName" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">展示名</label>
-          <input id="visualModelDisplayName" name="display_name" class="inp" type="text" value="{{ visual_custom_model.display_name }}"
-                 placeholder="例如：qwen-vl-plus">
-          <label for="visualModelProvider" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">Provider</label>
-          <select id="visualModelProvider" name="provider_type" class="inp" onchange="toggleVisualCustomModelProviderFields(this.value)">
-            <option value="qwen"{% if visual_custom_model.provider_type == 'qwen' %} selected{% endif %}>Qwen (DashScope)</option>
-            <option value="deepseek"{% if visual_custom_model.provider_type == 'deepseek' %} selected{% endif %}>DeepSeek</option>
-            <option value="openai_compatible"{% if visual_custom_model.provider_type == 'openai_compatible' %} selected{% endif %}>OpenAI Compatible</option>
-          </select>
-          <label for="visualModelId" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">模型 ID</label>
-          <input id="visualModelId" name="model_id" class="inp" type="text" value="{{ visual_custom_model.model_id }}"
-                 placeholder="例如：qwen-vl-plus">
-          <div id="visualQwenRegionWrap" style="margin-top:12px;{% if visual_custom_model.provider_type != 'qwen' %}display:none;{% endif %}">
-            <label for="visualModelQwenRegion" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Qwen 地域</label>
-            <select id="visualModelQwenRegion" name="qwen_region" class="inp">
-              <option value="cn"{% if visual_custom_model.qwen_region == 'cn' %} selected{% endif %}>中国内地</option>
-              <option value="sg"{% if visual_custom_model.qwen_region == 'sg' %} selected{% endif %}>新加坡</option>
-              <option value="us"{% if visual_custom_model.qwen_region == 'us' %} selected{% endif %}>美国</option>
-            </select>
-          </div>
-          <div id="visualOpenaiCompatWrap" style="margin-top:12px;{% if visual_custom_model.provider_type != 'openai_compatible' %}display:none;{% endif %}">
-            <label for="visualModelBaseUrl" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Base URL</label>
-            <input id="visualModelBaseUrl" name="base_url" class="inp" type="text" value="{{ visual_custom_model.base_url }}"
-                   placeholder="例如：https://example.com/v1">
-            <label for="visualModelApiKey" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px;">专用 API Key</label>
-            <input id="visualModelApiKey" name="custom_api_key" class="inp" type="password" value="{{ visual_custom_model.custom_api_key }}"
-                   placeholder="输入该 OpenAI 兼容服务的 API Key">
-          </div>
-          <div class="hint" style="margin-top:8px;">
-            当前生效视觉模型 ID：
-            <code>{{ current_visual_model_id }}</code>
-          </div>
-          <div class="hint" style="margin-top:6px;">
-            保存只更新配置，不会自动切换。确认无误后，再点上方「启用此自定义模型」。
-          </div>
-          <button type="submit" class="btn btn-pri mt-10">保存视觉目录模型配置</button>
-        </form>
-        {% if visual_custom_model.model_id %}
-        <form method="POST" action="{{ url_for('save_settings') }}" class="inline-form" style="margin-top:10px;">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="section" value="visual_custom_model_clear">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <button type="submit" class="btn btn-sec">清空视觉目录自定义配置</button>
-        </form>
-        {% endif %}
-      </div>
-    </div>
-  </div>
+          {% set translation_providers = [
+            ('deepseek', 'DeepSeek'),
+            ('qwen', 'Qwen (DashScope)'),
+            ('qwen_mt', 'Qwen-MT (DashScope)'),
+            ('glm', 'GLM (智谱)'),
+            ('kimi', 'Kimi (Moonshot)'),
+            ('mimo', 'MiMo 按量'),
+            ('mimo_token_plan', 'MiMo Token Plan'),
+            ('openai_compatible', 'OpenAI Compatible')
+          ] %}
 
-
-  <!-- Parallel Translation -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>翻译性能</h3>
-      <form method="POST" action="{{ url_for('save_settings') }}">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="section" value="translate_parallel">
-        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-        <input type="hidden" name="translate_parallel_enabled" value="off">
-        <label class="flex items-center gap-8" style="font-weight:600;margin-bottom:10px;">
-          <input type="checkbox" name="translate_parallel_enabled" value="on"{% if translate_parallel_enabled %} checked{% endif %}
-                 onchange="toggleParallelLimitState(this.checked)">
-          <span>开启段内并发翻译</span>
-        </label>
-        <div class="hint" style="margin-bottom:12px;">
-          默认关闭。开启后，单页会同时请求多个段落，通常会更快，但也更容易触发模型限流、超时或单页失败。实际并发数按你这里填写的上限执行。
-        </div>
-        <div class="flex items-center gap-8" style="flex-wrap:wrap;">
-          <label for="translateParallelLimit" style="font-size:13px;color:var(--tx);">并发上限</label>
-          <input id="translateParallelLimit" name="translate_parallel_limit" class="inp" type="number" min="1" max="10"
-                 value="{{ translate_parallel_limit }}" style="width:96px;"
-                 {% if not translate_parallel_enabled %}disabled{% endif %}>
-          <span class="hint" style="margin:0;">范围 1-10；数值越高，请求越密集，也越容易遇到限流或超时。</span>
-        </div>
-        <button type="submit" class="btn btn-pri mt-10">保存并发设置</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Glossary -->
-  <div class="card" id="glossary">
-    <div class="settings-section">
-      <div class="flex justify-between items-center mb-10">
-        <h3 style="margin-bottom:0;">术语词典 ({{ glossary|length }} 条)</h3>
-      </div>
-      <form method="POST" action="{{ url_for('save_glossary') }}" id="glossaryForm">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-        <div class="glossary-scroll" id="glossaryList">
-          {% for term, defn in glossary %}
-          <div class="glossary-row" data-idx="{{ loop.index0 }}">
-            <input name="term_{{ loop.index0 }}" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--fr);" value="{{ term }}" placeholder="法语术语">
-            <span class="arrow">→</span>
-            <input name="defn_{{ loop.index0 }}" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--cn);" value="{{ defn }}" placeholder="中文译文">
-            <button type="button" class="remove-btn" onclick="this.parentElement.remove();">×</button>
-          </div>
+          {% for slot in translation_model_pool %}
+            {% set slot_no = loop.index %}
+            {% set prefix = 'translation_model_pool_slot' ~ slot_no %}
+            {% with slot=slot, slot_no=slot_no, prefix=prefix, builtin_models=translation_models, providers=translation_providers %}
+              {% include "_settings_model_slot.html" %}
+            {% endwith %}
           {% endfor %}
+
+          <div class="providers-foot">
+            <span class="hint">当前主翻译模型：<code>{{ current_model_label or current_model_id }}</code></span>
+            <button type="submit" class="btn btn-pri">保存翻译模型池</button>
+          </div>
+        </form>
+      </div>
+
+      <div data-panel="fnm-pool">
+        <h2 class="panel-h">FNM 视觉与修补模型</h2>
+        <div class="panel-sub">
+          用于自动视觉目录、FNM 视觉判断和 LLM 修补。槽位 1 是主模型；视觉/修补失败后，按 2 → 3 顺序切换重试。
         </div>
-        <input type="hidden" name="count" id="glossaryCount" value="{{ glossary|length }}">
-        <div class="flex gap-8 mt-10">
-          <button type="button" class="btn btn-grn btn-sm" onclick="addGlossaryRow();">+ 添加术语</button>
-          <button type="submit" class="btn btn-pri btn-sm">保存词典</button>
+
+        <form method="POST" action="{{ url_for('save_settings') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="section" value="fnm_model_pool">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+
+          {% set fnm_providers = [
+            ('qwen', 'Qwen (DashScope)'),
+            ('glm', 'GLM (智谱)'),
+            ('kimi', 'Kimi (Moonshot)'),
+            ('mimo', 'MiMo 按量'),
+            ('mimo_token_plan', 'MiMo Token Plan'),
+            ('openai_compatible', 'OpenAI Compatible')
+          ] %}
+
+          {% for slot in fnm_model_pool %}
+            {% set slot_no = loop.index %}
+            {% set prefix = 'fnm_model_pool_slot' ~ slot_no %}
+            {% with slot=slot, slot_no=slot_no, prefix=prefix, builtin_models=fnm_models, providers=fnm_providers %}
+              {% include "_settings_model_slot.html" %}
+            {% endwith %}
+          {% endfor %}
+
+          <div class="providers-foot">
+            <span class="hint">当前主 FNM 模型：<code>{{ current_visual_model_label or current_visual_model_id }}</code></span>
+            <button type="submit" class="btn btn-pri">保存 FNM 模型池</button>
+          </div>
+        </form>
+      </div>
+
+      <div data-panel="concurrency">
+        <h2 class="panel-h">段内并发翻译</h2>
+        <div class="panel-sub">
+          默认关闭。开启后，单页会同时请求多个段落，通常更快，但也更容易触发模型限流、超时或单页失败。
         </div>
-      </form>
-    </div>
-  </div>
+        <form method="POST" action="{{ url_for('save_settings') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="section" value="translate_parallel">
+          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+          <input type="hidden" name="translate_parallel_enabled" value="off">
+          <label class="flex items-center gap-8" style="font-weight:600;margin-bottom:10px;">
+            <input type="checkbox" name="translate_parallel_enabled" value="on"{% if translate_parallel_enabled %} checked{% endif %}
+                   onchange="document.getElementById('translateParallelLimit').disabled = !this.checked;">
+            <span>开启段内并发翻译</span>
+          </label>
+          <div class="flex items-center gap-8" style="flex-wrap:wrap;">
+            <label for="translateParallelLimit" style="font-size:13px;color:var(--txt);">并发上限</label>
+            <input id="translateParallelLimit" name="translate_parallel_limit" class="inp" type="number" min="1" max="10"
+                   value="{{ translate_parallel_limit }}" style="width:96px;"
+                   {% if not translate_parallel_enabled %}disabled{% endif %}>
+            <span class="hint" style="margin:0;">范围 1-10；数值越高，请求越密集，也越容易遇到限流或超时。</span>
+          </div>
+          <div class="providers-foot">
+            <span></span>
+            <button type="submit" class="btn btn-pri">保存并发设置</button>
+          </div>
+        </form>
+      </div>
 
-  <!-- TOC File -->
-  <div class="card" id="toc-file">
-    <div class="settings-section">
-      <h3>当前目录索引文件</h3>
-      {% if toc_file.exists %}
-      <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 12px;align-items:start;font-size:13px;">
-        <div style="color:var(--txL);">原始文件名</div>
-        <div style="color:var(--txt);word-break:break-word;">{{ toc_file.display_name }}</div>
-        <div style="color:var(--txL);">导入时间</div>
-        <div style="color:var(--txt);">{{ toc_file.uploaded_at_display or '未知' }}</div>
-        <div style="color:var(--txL);">目录条数</div>
-        <div style="color:var(--txt);">{{ toc_item_count }} 条</div>
-        <div style="color:var(--txL);">目录对齐</div>
-        <div style="color:var(--txt);">原书第 1 页 = PDF 第{{ toc_offset + 1 }}页</div>
-      </div>
-      {% if toc_file.is_legacy_name %}
-      <div class="hint" style="margin-top:10px;">旧记录，原始文件名不可恢复；当前仅能显示保存后的固定文件名。</div>
-      {% endif %}
-      {% else %}
-      <div class="hint" style="margin-bottom:10px;">当前未选择目录索引文件</div>
-      {% endif %}
-      <div class="hint" style="margin-top:10px;">
-        上传后的目录文件会持续保留，直到被新上传的目录文件替换。
-      </div>
-      <div style="margin-top:12px;">
-        <input type="file" id="settingsTocFileInput" accept=".csv,.xlsx" style="font-size:12px;color:var(--txt);">
-      </div>
-      <div class="flex gap-8 mt-10" style="align-items:center;flex-wrap:wrap;">
-        <button type="button" class="btn btn-pri btn-sm" id="settingsTocImportBtn" onclick="replaceTocFileFromSettings();">重新上传替换目录文件</button>
-      </div>
-      <div id="settingsTocImportMsg" style="display:none;font-size:12px;margin-top:10px;"></div>
-    </div>
-  </div>
-
-  <!-- TOC Offset (仅用户已导入目录时显示) -->
-  {% if toc_source == 'user' %}
-  <div class="card" id="toc-offset">
-    <div class="settings-section">
-      <h3>书籍目录页码偏移</h3>
-      <p class="hint" style="margin-bottom:14px;">
-        已导入目录 {{ toc_item_count }} 条。若目录跳转落页不准，调整偏移后刷新阅读页即可生效。<br>
-        <strong>偏移含义：</strong>原书第 1 印刷页对应 PDF 的第几页（1-based）。例如封面占 3 页，则填 4。
-      </p>
-      <div class="flex items-center gap-8" style="flex-wrap:wrap;">
-        <label style="font-size:13px;color:var(--txS);">原书第 1 页 = PDF 第</label>
-        <input id="tocOffsetSettingsInput" type="number" min="1" class="inp"
-               style="width:80px;" value="{{ toc_offset + 1 }}">
-        <label style="font-size:13px;color:var(--txS);">页</label>
-        <button type="button" class="btn btn-pri btn-sm" onclick="saveTocOffset();">保存偏移</button>
-      </div>
-      <div id="tocOffsetSettingsMsg" style="display:none;font-size:12px;margin-top:8px;"></div>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Data Management -->
-  <div class="card">
-    <div class="settings-section">
-      <h3>数据管理</h3>
-      <div class="flex gap-8 flex-wrap">
-        {% if has_entries %}
-        <form method="POST" action="{{ url_for('reset_text_action') }}" class="inline-form"
-              onsubmit="return confirm('确定清除翻译数据？');">
+      <div data-panel="glossary">
+        <h2 class="panel-h">术语词典 ({{ glossary|length }} 条)</h2>
+        <div class="panel-sub">法语术语 → 中文译文；翻译阶段会优先参考这里的定义。</div>
+        <form method="POST" action="{{ url_for('save_glossary') }}" id="glossaryForm">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <button type="submit" class="btn btn-sec" style="font-size:12px;">清除翻译数据</button>
+          <div class="glossary-scroll" id="glossaryList">
+            {% for term, defn in glossary %}
+            <div class="glossary-row" data-idx="{{ loop.index0 }}">
+              <input name="term_{{ loop.index0 }}" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--fr);" value="{{ term }}" placeholder="法语术语">
+              <span class="arrow">→</span>
+              <input name="defn_{{ loop.index0 }}" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--cn);" value="{{ defn }}" placeholder="中文译文">
+              <button type="button" class="remove-btn" onclick="this.parentElement.remove();">×</button>
+            </div>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="count" id="glossaryCount" value="{{ glossary|length }}">
+          <div class="providers-foot">
+            <button type="button" class="btn btn-grn btn-sm" onclick="addGlossaryRow();">+ 添加术语</button>
+            <button type="submit" class="btn btn-pri btn-sm">保存词典</button>
+          </div>
         </form>
+      </div>
+
+      <div data-panel="toc">
+        <h2 class="panel-h">当前目录索引文件</h2>
+        <div class="panel-sub">上传后持续保留，直到被新上传的目录文件替换。</div>
+
+        {% if toc_file.exists %}
+        <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 12px;align-items:start;font-size:13px;margin-bottom:12px;">
+          <div style="color:var(--txL);">原始文件名</div>
+          <div style="color:var(--txt);word-break:break-word;">{{ toc_file.display_name }}</div>
+          <div style="color:var(--txL);">导入时间</div>
+          <div style="color:var(--txt);">{{ toc_file.uploaded_at_display or '未知' }}</div>
+          <div style="color:var(--txL);">目录条数</div>
+          <div style="color:var(--txt);">{{ toc_item_count }} 条</div>
+          <div style="color:var(--txL);">目录对齐</div>
+          <div style="color:var(--txt);">原书第 1 页 = PDF 第{{ toc_offset + 1 }}页</div>
+        </div>
+        {% if toc_file.is_legacy_name %}
+        <div class="hint" style="margin-bottom:10px;">旧记录，原始文件名不可恢复；当前仅能显示保存后的固定文件名。</div>
         {% endif %}
-        {% if has_pages %}
-        <form method="POST" action="{{ url_for('reset_all') }}" class="inline-form"
-              onsubmit="return confirm('确定清除所有数据？');">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
-          <button type="submit" class="btn btn-red-ghost" style="font-size:12px;border:1px solid var(--red);">清除所有数据</button>
-        </form>
+        {% else %}
+        <div class="hint" style="margin-bottom:10px;">当前未选择目录索引文件</div>
         {% endif %}
-        {% if not has_pages and not has_entries %}
-        <span style="font-size:13px;color:var(--txL);">暂无数据</span>
+
+        <div style="margin-top:12px;">
+          <input type="file" id="settingsTocFileInput" accept=".csv,.xlsx" style="font-size:12px;color:var(--txt);">
+        </div>
+        <div class="flex gap-8 mt-10" style="align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn btn-pri btn-sm" id="settingsTocImportBtn" onclick="replaceTocFileFromSettings();">重新上传替换目录文件</button>
+        </div>
+        <div id="settingsTocImportMsg" style="display:none;font-size:12px;margin-top:10px;"></div>
+
+        {% if toc_source == 'user' %}
+        <hr style="border:none;border-top:1px solid var(--bdrL);margin:20px 0;">
+        <h3 style="font-size:15px;font-weight:700;color:var(--txt);margin:0 0 6px;">书籍目录页码偏移</h3>
+        <p class="hint" style="margin-bottom:14px;">
+          已导入目录 {{ toc_item_count }} 条。若目录跳转落页不准，调整偏移后刷新阅读页即可生效。<br>
+          <strong>偏移含义：</strong>原书第 1 印刷页对应 PDF 的第几页（1-based）。例如封面占 3 页，则填 4。
+        </p>
+        <div class="flex items-center gap-8" style="flex-wrap:wrap;">
+          <label style="font-size:13px;color:var(--txS);">原书第 1 页 = PDF 第</label>
+          <input id="tocOffsetSettingsInput" type="number" min="1" class="inp"
+                 style="width:80px;" value="{{ toc_offset + 1 }}">
+          <label style="font-size:13px;color:var(--txS);">页</label>
+          <button type="button" class="btn btn-pri btn-sm" onclick="saveTocOffset();">保存偏移</button>
+        </div>
+        <div id="tocOffsetSettingsMsg" style="display:none;font-size:12px;margin-top:8px;"></div>
         {% endif %}
       </div>
-    </div>
+
+      <div data-panel="data">
+        <h2 class="panel-h">数据管理</h2>
+        <div class="panel-sub">清除操作不可撤销，请谨慎。</div>
+        <div class="flex gap-8 flex-wrap">
+          {% if has_entries %}
+          <form method="POST" action="{{ url_for('reset_text_action') }}" class="inline-form"
+                onsubmit="return confirm('确定清除翻译数据？');">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+            <button type="submit" class="btn btn-sec" style="font-size:12px;">清除翻译数据</button>
+          </form>
+          {% endif %}
+          {% if has_pages %}
+          <form method="POST" action="{{ url_for('reset_all') }}" class="inline-form"
+                onsubmit="return confirm('确定清除所有数据？');">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
+            <button type="submit" class="btn btn-red-ghost" style="font-size:12px;border:1px solid var(--red);">清除所有数据</button>
+          </form>
+          {% endif %}
+          {% if not has_pages and not has_entries %}
+          <span style="font-size:13px;color:var(--txL);">暂无数据</span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-var nextIdx = {{ glossary|length }};
+  (function () {
+    var nextIdx = {{ glossary|length }};
+    window.addGlossaryRow = function () {
+      var list = document.getElementById('glossaryList');
+      if (!list) return;
+      var row = document.createElement('div');
+      row.className = 'glossary-row';
+      row.innerHTML =
+        '<input name="term_' + nextIdx + '" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--fr);" placeholder="法语术语">' +
+        '<span class="arrow">→</span>' +
+        '<input name="defn_' + nextIdx + '" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--cn);" placeholder="中文译文">' +
+        '<button type="button" class="remove-btn" onclick="this.parentElement.remove();">×</button>';
+      list.appendChild(row);
+      nextIdx++;
+      var counter = document.getElementById('glossaryCount');
+      if (counter) counter.value = nextIdx;
+    };
+  })();
 
-function addGlossaryRow() {
-  var list = document.getElementById('glossaryList');
-  var row = document.createElement('div');
-  row.className = 'glossary-row';
-  row.innerHTML =
-    '<input name="term_' + nextIdx + '" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--fr);" placeholder="法语术语">' +
-    '<span class="arrow">→</span>' +
-    '<input name="defn_' + nextIdx + '" class="inp" style="flex:1;padding:3px 8px;font-size:12px;color:var(--cn);" placeholder="中文译文">' +
-    '<button type="button" class="remove-btn" onclick="this.parentElement.remove();">×</button>';
-  list.appendChild(row);
-  nextIdx++;
-  document.getElementById('glossaryCount').value = nextIdx;
-}
-
-function toggleParallelLimitState(enabled) {
-  var input = document.getElementById('translateParallelLimit');
-  if (!input) return;
-  input.disabled = !enabled;
-}
-
-function toggleCustomModelPanel(forceOpen) {
-  var panel = document.getElementById('customModelPanel');
-  if (!panel) return;
-  var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : panel.hidden;
-  panel.hidden = !shouldOpen;
-  panel.classList.toggle('hidden', !shouldOpen);
-  if (shouldOpen) {
-    var input = document.getElementById('customModelId');
-    if (input) input.focus();
+  function setSettingsTocMsg(msg, type) {
+    var el = document.getElementById('settingsTocImportMsg');
+    if (!el) return;
+    if (!msg) { el.style.display = 'none'; el.textContent = ''; return; }
+    el.style.display = '';
+    el.textContent = msg;
+    el.style.color = type === 'error' ? 'var(--red)' : 'var(--grn)';
   }
-}
 
-function toggleCustomModelProviderFields(providerType) {
-  var qwenWrap = document.getElementById('qwenRegionWrap');
-  var openaiWrap = document.getElementById('openaiCompatWrap');
-  if (qwenWrap) qwenWrap.style.display = (providerType === 'qwen' || providerType === 'qwen_mt') ? '' : 'none';
-  if (openaiWrap) openaiWrap.style.display = providerType === 'openai_compatible' ? '' : 'none';
-}
-
-function toggleVisualCustomModelPanel(forceOpen) {
-  var panel = document.getElementById('visualCustomModelPanel');
-  if (!panel) return;
-  var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : panel.hidden;
-  panel.hidden = !shouldOpen;
-  panel.classList.toggle('hidden', !shouldOpen);
-  if (shouldOpen) {
-    var input = document.getElementById('visualModelId');
-    if (input) input.focus();
-  }
-}
-
-function toggleVisualCustomModelProviderFields(providerType) {
-  var qwenWrap = document.getElementById('visualQwenRegionWrap');
-  var openaiWrap = document.getElementById('visualOpenaiCompatWrap');
-  if (qwenWrap) qwenWrap.style.display = providerType === 'qwen' ? '' : 'none';
-  if (openaiWrap) openaiWrap.style.display = providerType === 'openai_compatible' ? '' : 'none';
-}
-
-
-function setSettingsTocMsg(msg, type) {
-  var el = document.getElementById('settingsTocImportMsg');
-  if (!el) return;
-  if (!msg) {
-    el.style.display = 'none';
-    el.textContent = '';
-    return;
-  }
-  el.style.display = '';
-  el.textContent = msg;
-  el.style.color = type === 'error' ? 'var(--red)' : 'var(--grn)';
-}
-
-function replaceTocFileFromSettings() {
-  var input = document.getElementById('settingsTocFileInput');
-  var btn = document.getElementById('settingsTocImportBtn');
-  if (!input || !input.files || !input.files.length) {
-    setSettingsTocMsg('请先选择目录文件', 'error');
-    return;
-  }
-  btn.disabled = true;
-  setSettingsTocMsg('上传中…', 'ok');
-  var fd = new FormData();
-  fd.append('file', input.files[0]);
-  fetch('/api/toc/import?doc_id={{ current_doc_id }}', {
-    method: 'POST',
-    headers: { 'X-CSRF-Token': getCsrfToken() },
-    body: fd
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      btn.disabled = false;
-      if (d.ok) {
-        var name = (d.toc_file && d.toc_file.display_name) ? d.toc_file.display_name : '目录文件';
-        setSettingsTocMsg('已替换目录文件：' + name + '，正在刷新页面…', 'ok');
-        window.setTimeout(function() {
-          window.location.href = '{{ url_for("settings", doc_id=current_doc_id) }}#toc-file';
-        }, 180);
-        return;
-      }
-      setSettingsTocMsg(d.error || '上传失败', 'error');
+  function replaceTocFileFromSettings() {
+    var input = document.getElementById('settingsTocFileInput');
+    var btn = document.getElementById('settingsTocImportBtn');
+    if (!input || !input.files || !input.files.length) {
+      setSettingsTocMsg('请先选择目录文件', 'error');
+      return;
+    }
+    btn.disabled = true;
+    setSettingsTocMsg('上传中…', 'ok');
+    var fd = new FormData();
+    fd.append('file', input.files[0]);
+    fetch('/api/toc/import?doc_id={{ current_doc_id }}', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': getCsrfToken() },
+      body: fd
     })
-    .catch(function(err) {
-      btn.disabled = false;
-      setSettingsTocMsg('请求失败：' + err, 'error');
-    });
-}
-
-{% if custom_model_panel_open %}
-toggleCustomModelPanel(true);
-{% endif %}
-{% if visual_custom_model_panel_open %}
-toggleVisualCustomModelPanel(true);
-{% endif %}
-toggleCustomModelProviderFields('{{ custom_model.provider_type }}');
-toggleVisualCustomModelProviderFields('{{ visual_custom_model.provider_type }}');
-
-{% if toc_source == 'user' %}
-function saveTocOffset() {
-  var raw = document.getElementById('tocOffsetSettingsInput').value;
-  var pdfPage1 = parseInt(raw, 10);
-  var msgEl = document.getElementById('tocOffsetSettingsMsg');
-  if (isNaN(pdfPage1) || pdfPage1 < 1) {
-    msgEl.style.display = '';
-    msgEl.textContent = '请输入有效页码（≥ 1）';
-    msgEl.style.color = 'var(--red)';
-    return;
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        btn.disabled = false;
+        if (d.ok) {
+          var name = (d.toc_file && d.toc_file.display_name) ? d.toc_file.display_name : '目录文件';
+          setSettingsTocMsg('已替换目录文件：' + name + '，正在刷新页面…', 'ok');
+          window.setTimeout(function () {
+            window.location.href = '{{ url_for("settings", doc_id=current_doc_id) }}#toc';
+          }, 180);
+          return;
+        }
+        setSettingsTocMsg(d.error || '上传失败', 'error');
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        setSettingsTocMsg('请求失败：' + err, 'error');
+      });
   }
-  fetch('/api/toc/set_offset?doc_id={{ current_doc_id }}', {
-    method: 'POST',
-    headers: Object.assign({'Content-Type': 'application/json'}, withCsrfHeaders()),
-    body: JSON.stringify({ offset: pdfPage1 - 1 })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
+
+  {% if toc_source == 'user' %}
+  function saveTocOffset() {
+    var raw = document.getElementById('tocOffsetSettingsInput').value;
+    var pdfPage1 = parseInt(raw, 10);
+    var msgEl = document.getElementById('tocOffsetSettingsMsg');
+    if (isNaN(pdfPage1) || pdfPage1 < 1) {
       msgEl.style.display = '';
-      if (d.ok) {
-        msgEl.textContent = '偏移已保存（offset = ' + d.offset + '），前往阅读页刷新即可生效';
-        msgEl.style.color = 'var(--grn)';
-      } else {
-        msgEl.textContent = d.error || '保存失败';
-        msgEl.style.color = 'var(--red)';
-      }
-    })
-    .catch(function(err) {
-      msgEl.style.display = '';
-      msgEl.textContent = '请求失败：' + err;
+      msgEl.textContent = '请输入有效页码（≥ 1）';
       msgEl.style.color = 'var(--red)';
-    });
-}
-{% endif %}
+      return;
+    }
+    fetch('/api/toc/set_offset?doc_id={{ current_doc_id }}', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, withCsrfHeaders()),
+      body: JSON.stringify({ offset: pdfPage1 - 1 })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        msgEl.style.display = '';
+        if (d.ok) {
+          msgEl.textContent = '偏移已保存（offset = ' + d.offset + '），前往阅读页刷新即可生效';
+          msgEl.style.color = 'var(--grn)';
+        } else {
+          msgEl.textContent = d.error || '保存失败';
+          msgEl.style.color = 'var(--red)';
+        }
+      })
+      .catch(function (err) {
+        msgEl.style.display = '';
+        msgEl.textContent = '请求失败：' + err;
+        msgEl.style.color = 'var(--red)';
+      });
+  }
+  {% endif %}
 </script>
+<script src="{{ url_for('static', filename='settings.js') }}" data-slot-sync="syncModelPoolSlotCard"></script>
 {% endblock %}

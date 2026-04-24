@@ -1,0 +1,75 @@
+{# ---------------------------------------------------------------
+   Model pool slot.
+   Expected context:
+     slot            (dict)   current slot config
+     slot_no         (int)    1..3
+     prefix          (str)    form name prefix e.g. "translation_model_pool_slot1"
+     builtin_models  (dict)   key -> {label, ...}
+     providers       (list of (value, label)) custom provider options
+--------------------------------------------------------------- #}
+<div class="slot-card" data-slot-card data-model-slot data-slot-prefix="{{ prefix }}" data-mode="{{ slot.mode }}">
+  <div class="slot-hd">
+    <span class="slot-no">#{{ slot_no }}{% if slot_no == 1 %} 主{% else %} 备{% endif %}</span>
+    <div class="seg-tabs" role="tablist">
+      <button type="button" class="seg{% if slot.mode == 'builtin' %} active{% endif %}" data-mode="builtin">内置</button>
+      <button type="button" class="seg{% if slot.mode == 'custom' %} active{% endif %}" data-mode="custom">自定义</button>
+      <button type="button" class="seg{% if slot.mode == 'empty' %} active{% endif %}" data-mode="empty">留空</button>
+    </div>
+    <input type="hidden" name="{{ prefix }}_mode" value="{{ slot.mode }}" data-slot-mode-input>
+    <label class="slot-thinking" data-slot-thinking-row{% if slot.mode == 'empty' %} style="display:none;"{% endif %}>
+      <input type="checkbox" name="{{ prefix }}_thinking_enabled" value="on"{% if slot.thinking_enabled %} checked{% endif %}>
+      <span>启用 thinking / 深度思考</span>
+    </label>
+  </div>
+
+  <div data-slot-mode-panel="builtin" style="{% if slot.mode != 'builtin' %}display:none;{% endif %}">
+    <label class="slot-label">内置模型</label>
+    <select name="{{ prefix }}_builtin_key" class="inp" style="width:100%;">
+      {% for key, model in builtin_models.items() %}
+      <option value="{{ key }}"{% if slot.builtin_key == key %} selected{% endif %}>{{ model.label }}</option>
+      {% endfor %}
+    </select>
+    <div class="hint" style="margin-top:6px;">内置模型会自动使用对应全局 API Key，不需要填写 Base URL 或专用 Key。</div>
+  </div>
+
+  <div data-slot-mode-panel="custom" style="{% if slot.mode != 'custom' %}display:none;{% endif %}">
+    <div class="slot-grid">
+      <div>
+        <label class="slot-label">Provider</label>
+        <select name="{{ prefix }}_provider_type" class="inp" style="width:100%;" data-slot-provider>
+          {% for value, label in providers %}
+          <option value="{{ value }}"{% if slot.provider_type == value %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="slot-label">展示名</label>
+        <input name="{{ prefix }}_display_name" class="inp" type="text" value="{{ slot.display_name }}" placeholder="例如：MiMo Flash" style="width:100%;">
+      </div>
+      <div>
+        <label class="slot-label">模型 ID</label>
+        <input name="{{ prefix }}_model_id" class="inp" type="text" value="{{ slot.model_id }}" placeholder="例如：mimo-v2-flash" style="width:100%;">
+      </div>
+      <div data-provider-field="qwen_region" style="{% if slot.mode != 'custom' or slot.provider_type not in ['qwen', 'qwen_mt'] %}display:none;{% endif %}">
+        <label class="slot-label">Qwen 地域</label>
+        <select name="{{ prefix }}_qwen_region" class="inp" style="width:100%;">
+          <option value="cn"{% if slot.qwen_region == 'cn' %} selected{% endif %}>中国内地</option>
+          <option value="sg"{% if slot.qwen_region == 'sg' %} selected{% endif %}>新加坡</option>
+          <option value="us"{% if slot.qwen_region == 'us' %} selected{% endif %}>美国</option>
+        </select>
+      </div>
+      <div class="full" data-provider-field="endpoint" style="{% if slot.mode != 'custom' or slot.provider_type not in ['openai_compatible', 'mimo_token_plan'] %}display:none;{% endif %}">
+        <label class="slot-label">Base URL</label>
+        <input name="{{ prefix }}_base_url" class="inp" type="text" value="{{ slot.base_url }}" placeholder="例如：https://token-plan-cn.xiaomimimo.com/v1" style="width:100%;">
+      </div>
+      <div class="full" data-provider-field="endpoint" style="{% if slot.mode != 'custom' or slot.provider_type not in ['openai_compatible', 'mimo_token_plan'] %}display:none;{% endif %}">
+        <label class="slot-label">专用 API Key</label>
+        <input name="{{ prefix }}_custom_api_key" class="inp" type="password" value="{{ slot.custom_api_key }}" placeholder="如需专属 Key，请填写" style="width:100%;">
+      </div>
+    </div>
+  </div>
+
+  <div data-slot-mode-panel="empty" style="{% if slot.mode != 'empty' %}display:none;{% endif %}">
+    <div class="hint">留空：失败时不再尝试此槽位。</div>
+  </div>
+</div>
