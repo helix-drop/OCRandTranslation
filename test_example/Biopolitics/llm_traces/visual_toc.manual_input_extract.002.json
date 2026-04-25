@@ -3,7 +3,7 @@
   "reason_for_request": "从目录页截图中抽取单页原子目录项",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
@@ -87,7 +87,7 @@
   "usage": {
     "stage": "visual_toc.manual_input_extract",
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "request_count": 1,
     "prompt_tokens": 1337,
     "completion_tokens": 250,
@@ -100,6 +100,6 @@
     }
   },
   "timing": {
-    "duration_ms": 5994
+    "duration_ms": 6806
   }
 }

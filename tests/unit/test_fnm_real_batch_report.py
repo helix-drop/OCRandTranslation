@@ -51,6 +51,40 @@ class FnmRealBatchReportTest(unittest.TestCase):
                 "usage_summary": _usage_summary(),
                 "slug_zip_path": "/tmp/npi.blocked.zip",
                 "alias_zip_path": "/tmp/latest.blocked.zip",
+                "module_process": {
+                    "boundary_detection": {
+                        "decision_basis": ["fnm_pages.page_role"],
+                        "page_role_counts": {"body": 10, "note": 2},
+                        "first_body_page": 3,
+                        "first_note_page": 259,
+                        "page_role_samples": [{"page_no": 3, "page_role": "body"}],
+                    },
+                    "note_region_detection": {
+                        "decision_basis": ["fnm_note_regions"],
+                        "visual_toc_endnotes_summary": {"present": True},
+                        "chapter_binding_summary": {"chapter_bound_region_count": 2},
+                        "endnote_region_rows": [{"region_id": "nr-en-1"}],
+                    },
+                    "endnote_array_building": {
+                        "decision_basis": ["fnm_note_items.region_id"],
+                        "note_capture_summary": {"captured_note_item_count": 9},
+                        "book_endnote_stream_summary": {"bound_note_item_count": 9},
+                        "endnote_array_rows": [{"region_id": "nr-en-1", "item_count": 9}],
+                    },
+                    "endnote_merging": {
+                        "decision_basis": ["fnm_translation_units.target_ref"],
+                        "freeze_note_unit_summary": {"chapter_view_note_unit_count": 9},
+                        "note_unit_rows": [{"section_title": "Chapter One"}],
+                        "export_merge_rows": [{"title": "Chapter One", "local_def_total": 9}],
+                    },
+                    "anchor_resolution": {
+                        "decision_basis": ["fnm_body_anchors"],
+                        "link_summary": {"matched": 9},
+                        "link_resolver_counts": {"repair": 2, "rule": 7},
+                        "anchor_samples": [{"anchor_id": "anchor-1"}],
+                        "link_samples": [{"link_id": "link-1"}],
+                    },
+                },
                 "visual_toc": {
                     "endnotes_summary": {
                         "present": True,
@@ -92,6 +126,10 @@ class FnmRealBatchReportTest(unittest.TestCase):
         self.assertIn("raw_source_markdown", markdown)
         self.assertIn("translation_api_called", markdown)
         self.assertIn("## 清理结果", markdown)
+        self.assertIn("## 模块过程取证", markdown)
+        self.assertIn("### 边界区分", markdown)
+        self.assertIn("### 尾注区确定", markdown)
+        self.assertIn("### 锚点寻找与链接", markdown)
 
     def test_batch_report_includes_heading_graph_preview_for_blocked_books(self):
         markdown = build_batch_report_markdown(

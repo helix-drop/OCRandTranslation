@@ -40,12 +40,17 @@ _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
         "⁹": "9",
     }
 )
+_LATEX_SYMBOL_SUP_RE = re.compile(r"\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$")
+_TRAILING_SYMBOL_AFTER_BRACKET_RE = re.compile(r"[\]](\*{1,4})")
+_TRAILING_SYMBOL_AFTER_QUOTE_RE = re.compile(r"[»](\*{1,4})")
 _REF_PATTERN_PRIORITY = {
     "latex": 0,
+    "latex_symbol_sup": 0,
     "plain": 1,
     "html": 2,
     "unicode": 3,
     "bracket": 4,
+    "trailing_symbol": 5,
 }
 _REF_PATTERN_CERTAINTY = {
     "latex": 1.0,
@@ -53,6 +58,8 @@ _REF_PATTERN_CERTAINTY = {
     "bracket": 1.0,
     "unicode": 1.0,
     "plain": 0.4,
+    "latex_symbol_sup": 1.0,
+    "trailing_symbol": 0.9,
 }
 
 
@@ -162,9 +169,12 @@ def _scan_inline_refs(text: str) -> list[dict]:
     content = str(text or "")
     for pattern, kind in (
         (_LATEX_SUP_RE, "latex"),
+        (_LATEX_SYMBOL_SUP_RE, "latex_symbol_sup"),
         (_PLAIN_SUP_RE, "plain"),
         (_HTML_SUP_RE, "html"),
         (_BRACKET_REF_RE, "bracket"),
+        (_TRAILING_SYMBOL_AFTER_BRACKET_RE, "trailing_symbol"),
+        (_TRAILING_SYMBOL_AFTER_QUOTE_RE, "trailing_symbol"),
     ):
         for match in pattern.finditer(content):
             marker = normalize_note_marker(match.group(1) or "")

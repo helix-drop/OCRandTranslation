@@ -1291,6 +1291,7 @@ def verify_export(
         "export_artifact_status": "ready" if latest_export_zip_saved else "save_failed",
         "latest_export_status_path": str(latest_export_status.get("path") or ""),
         "chapters": [str(chapter.get("title") or "") for chapter in chapters[:5]],
+        "chapter_stats": chapter_stats,
         "chapter_stats_preview": chapter_stats[:5],
         "full_audit_can_ship": full_audit_can_ship,
         "full_audit_blocking_issue_count": full_audit_blocking_issue_count,

@@ -21,6 +21,7 @@ ExampleBook = SCRIPT_NS["ExampleBook"]
 asset_paths = SCRIPT_NS["_asset_paths"]
 process_book = SCRIPT_NS["_process_book"]
 build_blocking_details = SCRIPT_NS["_build_blocking_details"]
+build_module_process_report = SCRIPT_NS["_build_module_process_report"]
 cleanup_example_results = SCRIPT_NS["_cleanup_example_results"]
 main = SCRIPT_NS["main"]
 
@@ -174,6 +175,92 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
         self.assertIn("原书 p.12", details[0]["paragraph_locator"])
         self.assertIn("Chapter One", details[0]["paragraph_locator"])
 
+    def test_build_module_process_report_collects_boundary_regions_and_anchor_evidence(self):
+        class _RepoStub:
+            def list_fnm_pages(self, _doc_id):
+                return [
+                    {"page_no": 1, "target_pdf_page": 1, "page_role": "front_matter", "role_reason": "default_body", "role_confidence": 1.0, "has_note_heading": False, "section_hint": ""},
+                    {"page_no": 2, "target_pdf_page": 2, "page_role": "body", "role_reason": "chapter_title", "role_confidence": 1.0, "has_note_heading": False, "section_hint": "Chapter One"},
+                    {"page_no": 9, "target_pdf_page": 9, "page_role": "note", "role_reason": "note_band", "role_confidence": 1.0, "has_note_heading": True, "section_hint": "Notes"},
+                ]
+
+            def list_fnm_note_regions(self, _doc_id):
+                return [
+                    {
+                        "region_id": "nr-en-1",
+                        "region_kind": "endnote",
+                        "start_page": 9,
+                        "end_page": 10,
+                        "pages": [9, 10],
+                        "bound_chapter_id": "ch-1",
+                        "region_start_first_source_marker": "1",
+                        "region_first_note_item_marker": "1",
+                        "region_marker_alignment_ok": True,
+                    }
+                ]
+
+            def list_fnm_note_items(self, _doc_id):
+                return [
+                    {"note_item_id": "en-1", "region_id": "nr-en-1", "chapter_id": "ch-1", "page_no": 9, "marker": "1", "normalized_marker": "1", "source_text": "note one"},
+                    {"note_item_id": "en-2", "region_id": "nr-en-1", "chapter_id": "ch-1", "page_no": 9, "marker": "2", "normalized_marker": "2", "source_text": "note two"},
+                ]
+
+            def list_fnm_body_anchors(self, _doc_id):
+                return [
+                    {"anchor_id": "anchor-1", "chapter_id": "ch-1", "page_no": 3, "paragraph_index": 2, "source_marker": "1", "normalized_marker": "1", "anchor_kind": "endnote", "certainty": 1.0, "source_text": "body marker one"},
+                ]
+
+            def list_fnm_note_links(self, _doc_id):
+                return [
+                    {"link_id": "link-1", "chapter_id": "ch-1", "note_item_id": "en-1", "anchor_id": "anchor-1", "status": "matched", "resolver": "repair", "marker": "1", "page_no_start": 3, "page_no_end": 3},
+                ]
+
+            def list_fnm_translation_units(self, _doc_id):
+                return [
+                    {"unit_id": "u-body", "kind": "body", "section_id": "ch-1", "section_title": "Chapter One", "page_start": 2, "page_end": 8, "target_ref": ""},
+                    {"unit_id": "u-note", "kind": "endnote", "section_id": "ch-1", "section_title": "Chapter One", "page_start": 9, "page_end": 10, "target_ref": "{{NOTE_REF:en-1}}"},
+                ]
+
+        with patch.dict(build_module_process_report.__globals__, {"SQLiteRepository": lambda: _RepoStub()}):
+            payload = build_module_process_report(
+                "doc-demo",
+                structure={
+                    "page_partition_summary": {"body": 1, "note": 1},
+                    "visual_toc_endnotes_summary": {"present": True, "container_title": "Notes"},
+                    "chapter_binding_summary": {"chapter_bound_region_count": 1},
+                    "chapter_endnote_region_alignment_summary": {"chapter_endnotes_total": 1},
+                    "note_capture_summary": {"captured_note_item_count": 2},
+                    "book_endnote_stream_summary": {"bound_note_item_count": 2},
+                    "freeze_note_unit_summary": {"chapter_view_note_unit_count": 1},
+                    "link_summary": {"matched": 1},
+                    "chapter_link_contract_summary": {"chapter_contract_ok_count": 1},
+                },
+                export_result={
+                    "chapter_stats": [
+                        {
+                            "title": "Chapter One",
+                            "path": "chapters/001-chapter-one.md",
+                            "local_ref_total": 2,
+                            "local_def_total": 2,
+                            "first_local_def_marker": "1",
+                            "chapter_local_contract_ok": True,
+                            "orphan_local_definitions": [],
+                            "orphan_local_refs": [],
+                        }
+                    ]
+                },
+                trace_index=[
+                    {"stage": "llm_repair.cluster_request", "file": "/tmp/llm.json"},
+                    {"stage": "visual_toc.manual_input_extract", "file": "/tmp/toc.json"},
+                ],
+            )
+
+        self.assertEqual(payload["boundary_detection"]["first_body_page"], 2)
+        self.assertEqual(payload["note_region_detection"]["endnote_region_rows"][0]["region_id"], "nr-en-1")
+        self.assertTrue(payload["endnote_array_building"]["endnote_array_rows"][0]["numeric_marker_contiguous"])
+        self.assertEqual(payload["endnote_merging"]["export_merge_rows"][0]["local_def_total"], 2)
+        self.assertEqual(payload["anchor_resolution"]["link_resolver_counts"]["repair"], 1)
+
     def test_process_book_writes_progress_and_continues_after_llm_repair_exception(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             example_dir = Path(tmp_dir) / "Demo"
@@ -258,6 +345,13 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
                     "alias_zip_path": str(example_dir / "latest.blocked.zip"),
                     "reason": "",
                 }}),
+                patch.dict(process_book.__globals__, {"_build_module_process_report": lambda *_args, **_kwargs: {
+                    "boundary_detection": {"page_role_counts": {"body": 1}},
+                    "note_region_detection": {"endnote_region_rows": []},
+                    "endnote_array_building": {"endnote_array_rows": []},
+                    "endnote_merging": {"export_merge_rows": []},
+                    "anchor_resolution": {"link_resolver_counts": {}},
+                }}),
                 patch.dict(process_book.__globals__, {"_build_blocking_details": lambda *_args, **_kwargs: [
                     {
                         "stage": "llm_repair",
@@ -276,6 +370,7 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
             self.assertEqual(progress["current_stage"], "report_write")
             self.assertTrue(any(row["stage"] == "export_verify" for row in progress["stage_history"]))
             self.assertTrue((example_dir / "fnm_real_test_result.json").is_file())
+            self.assertTrue((example_dir / "fnm_real_test_modules.json").is_file())
             self.assertTrue((example_dir / "FNM_REAL_TEST_REPORT.md").is_file())
             trace_files = sorted((example_dir / "llm_traces").glob("*.json"))
             self.assertTrue(trace_files)

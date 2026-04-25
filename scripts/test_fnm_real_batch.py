@@ -10,6 +10,7 @@ import re
 import shutil
 import sys
 import traceback
+from collections import Counter
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -68,6 +69,7 @@ _CLEANUP_GLOB_PATTERNS = (
     "llm_traces",
     "fnm_real_test_progress.json",
     "fnm_real_test_result.json",
+    "fnm_real_test_modules.json",
     "FNM_REAL_TEST_REPORT.md",
     "FNM_LLM_TIER1A_REPORT.md",
     "auto_visual_toc.json",
@@ -476,6 +478,287 @@ def _trace_index_entry(trace: dict[str, Any], trace_path: Path) -> dict[str, Any
     }
 
 
+def _preview_row_text(value: Any, *, limit: int = 140) -> str:
+    return _trim_preview(str(value or ""), limit=limit)
+
+
+def _group_list_rows(rows: list[dict[str, Any]], key: str) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows or []:
+        token = str((row or {}).get(key) or "").strip()
+        if not token:
+            continue
+        grouped[token].append(dict(row))
+    return dict(grouped)
+
+
+def _numeric_markers_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    numeric_markers: list[int] = []
+    marker_preview: list[str] = []
+    for row in rows or []:
+        marker = str((row or {}).get("normalized_marker") or (row or {}).get("marker") or "").strip()
+        if marker:
+            marker_preview.append(marker)
+        if marker.isdigit():
+            numeric_markers.append(int(marker))
+    unique_numeric = sorted(set(numeric_markers))
+    contiguous = bool(
+        unique_numeric
+        and unique_numeric == list(range(unique_numeric[0], unique_numeric[-1] + 1))
+    )
+    return {
+        "numeric_marker_count": len(unique_numeric),
+        "numeric_marker_start": unique_numeric[0] if unique_numeric else None,
+        "numeric_marker_end": unique_numeric[-1] if unique_numeric else None,
+        "numeric_marker_contiguous": contiguous,
+        "marker_preview": marker_preview[:8],
+    }
+
+
+def _sample_page_role_rows(pages: list[dict[str, Any]], *, limit_per_role: int = 3) -> list[dict[str, Any]]:
+    by_role: dict[str, int] = defaultdict(int)
+    sampled: list[dict[str, Any]] = []
+    for row in sorted(pages or [], key=lambda item: int(item.get("page_no") or 0)):
+        role = str(row.get("page_role") or "").strip() or "unknown"
+        if by_role[role] >= limit_per_role:
+            continue
+        by_role[role] += 1
+        sampled.append(
+            {
+                "page_no": int(row.get("page_no") or 0),
+                "target_pdf_page": int(row.get("target_pdf_page") or 0),
+                "page_role": role,
+                "role_reason": str(row.get("role_reason") or ""),
+                "role_confidence": float(row.get("role_confidence") or 0.0),
+                "has_note_heading": bool(row.get("has_note_heading")),
+                "section_hint": str(row.get("section_hint") or ""),
+            }
+        )
+    return sampled
+
+
+def _build_module_process_report(
+    doc_id: str,
+    *,
+    structure: dict[str, Any],
+    export_result: dict[str, Any],
+    trace_index: list[dict[str, Any]],
+) -> dict[str, Any]:
+    repo = SQLiteRepository()
+    pages = list(repo.list_fnm_pages(doc_id) or [])
+    regions = list(repo.list_fnm_note_regions(doc_id) or [])
+    note_items = list(repo.list_fnm_note_items(doc_id) or [])
+    anchors = list(repo.list_fnm_body_anchors(doc_id) or [])
+    links = list(repo.list_fnm_note_links(doc_id) or [])
+    units = list(repo.list_fnm_translation_units(doc_id) or [])
+
+    pages_sorted = sorted(pages, key=lambda row: int(row.get("page_no") or 0))
+    page_role_counts = dict(Counter(str(row.get("page_role") or "").strip() or "unknown" for row in pages_sorted))
+    first_body_page = next(
+        (int(row.get("page_no") or 0) for row in pages_sorted if str(row.get("page_role") or "").strip() == "body"),
+        None,
+    )
+    first_note_page = next(
+        (int(row.get("page_no") or 0) for row in pages_sorted if str(row.get("page_role") or "").strip() == "note"),
+        None,
+    )
+
+    regions_by_id = {str(row.get("region_id") or ""): dict(row) for row in regions}
+    note_items_by_region = _group_list_rows(note_items, "region_id")
+    note_units = [dict(row) for row in units if str(row.get("kind") or "").strip() != "body"]
+    note_units_by_section = _group_list_rows(note_units, "section_id")
+    chapter_stats = list(export_result.get("chapter_stats") or export_result.get("chapter_stats_preview") or [])
+    chapter_stats_by_path = {str(row.get("path") or ""): dict(row) for row in chapter_stats}
+
+    note_region_rows: list[dict[str, Any]] = []
+    for row in sorted(regions, key=lambda item: (int(item.get("start_page") or 0), str(item.get("region_id") or ""))):
+        region_id = str(row.get("region_id") or "")
+        region_items = list(note_items_by_region.get(region_id) or [])
+        marker_summary = _numeric_markers_summary(region_items)
+        note_region_rows.append(
+            {
+                "region_id": region_id,
+                "region_kind": str(row.get("region_kind") or ""),
+                "bound_chapter_id": str(row.get("bound_chapter_id") or ""),
+                "start_page": int(row.get("start_page") or 0),
+                "end_page": int(row.get("end_page") or 0),
+                "pages": list(row.get("pages") or []),
+                "region_start_first_source_marker": str(row.get("region_start_first_source_marker") or ""),
+                "region_first_note_item_marker": str(row.get("region_first_note_item_marker") or ""),
+                "region_marker_alignment_ok": bool(row.get("region_marker_alignment_ok", True)),
+                "item_count": len(region_items),
+                **marker_summary,
+                "sample_note_items": [
+                    {
+                        "note_item_id": str(item.get("note_item_id") or ""),
+                        "page_no": int(item.get("page_no") or 0),
+                        "marker": str(item.get("normalized_marker") or item.get("marker") or ""),
+                        "source_text_preview": _preview_row_text(item.get("source_text")),
+                    }
+                    for item in region_items[:3]
+                ],
+            }
+        )
+
+    endnote_region_rows = [row for row in note_region_rows if row.get("region_kind") == "endnote"]
+    note_array_rows: list[dict[str, Any]] = []
+    for region_row in note_region_rows:
+        note_array_rows.append(
+            {
+                "region_id": str(region_row.get("region_id") or ""),
+                "region_kind": str(region_row.get("region_kind") or ""),
+                "bound_chapter_id": str(region_row.get("bound_chapter_id") or ""),
+                "item_count": int(region_row.get("item_count") or 0),
+                "numeric_marker_start": region_row.get("numeric_marker_start"),
+                "numeric_marker_end": region_row.get("numeric_marker_end"),
+                "numeric_marker_contiguous": bool(region_row.get("numeric_marker_contiguous")),
+                "marker_preview": list(region_row.get("marker_preview") or []),
+            }
+        )
+
+    merge_rows: list[dict[str, Any]] = []
+    for section_id, rows in sorted(note_units_by_section.items(), key=lambda item: str(item[0])):
+        section_rows = list(rows or [])
+        section_title = str((section_rows[0] or {}).get("section_title") or "")
+        merge_rows.append(
+            {
+                "section_id": section_id,
+                "section_title": section_title,
+                "note_unit_count": len(section_rows),
+                "note_unit_kind_counts": dict(Counter(str(row.get("kind") or "") for row in section_rows)),
+                "target_ref_preview": [str(row.get("target_ref") or "") for row in section_rows[:5]],
+                "page_span": [
+                    min(int(row.get("page_start") or 0) for row in section_rows),
+                    max(int(row.get("page_end") or 0) for row in section_rows),
+                ] if section_rows else [],
+            }
+        )
+    merge_rows_by_title = {_normalize_title_key(str(row.get("section_title") or "")): row for row in merge_rows}
+    export_merge_rows: list[dict[str, Any]] = []
+    for row in chapter_stats:
+        title = str(row.get("title") or "").strip()
+        merge_row = merge_rows_by_title.get(_normalize_title_key(title), {})
+        export_merge_rows.append(
+            {
+                "title": title,
+                "path": str(row.get("path") or ""),
+                "note_unit_count": int(merge_row.get("note_unit_count") or 0),
+                "local_ref_total": int(row.get("local_ref_total") or 0),
+                "local_def_total": int(row.get("local_def_total") or 0),
+                "first_local_def_marker": str(row.get("first_local_def_marker") or ""),
+                "chapter_local_contract_ok": bool(row.get("chapter_local_contract_ok", False)),
+                "orphan_local_definitions": list(row.get("orphan_local_definitions") or []),
+                "orphan_local_refs": list(row.get("orphan_local_refs") or []),
+            }
+        )
+
+    link_status_counts = dict(Counter(str(row.get("status") or "") for row in links))
+    link_resolver_counts = dict(Counter(str(row.get("resolver") or "") for row in links))
+    anchor_kind_counts = dict(Counter(str(row.get("anchor_kind") or "") for row in anchors))
+    anchor_rows = sorted(
+        anchors,
+        key=lambda row: (int(row.get("page_no") or 0), int(row.get("paragraph_index") or -1), str(row.get("anchor_id") or "")),
+    )
+    anchor_samples = [
+        {
+            "anchor_id": str(row.get("anchor_id") or ""),
+            "chapter_id": str(row.get("chapter_id") or ""),
+            "page_no": int(row.get("page_no") or 0),
+            "paragraph_index": int(row.get("paragraph_index") or 0),
+            "marker": str(row.get("normalized_marker") or row.get("source_marker") or ""),
+            "anchor_kind": str(row.get("anchor_kind") or ""),
+            "certainty": float(row.get("certainty") or 0.0),
+            "source_text_preview": _preview_row_text(row.get("source_text")),
+        }
+        for row in anchor_rows[:10]
+    ]
+    link_samples = [
+        {
+            "link_id": str(row.get("link_id") or ""),
+            "chapter_id": str(row.get("chapter_id") or ""),
+            "note_item_id": str(row.get("note_item_id") or ""),
+            "anchor_id": str(row.get("anchor_id") or ""),
+            "status": str(row.get("status") or ""),
+            "resolver": str(row.get("resolver") or ""),
+            "marker": str(row.get("marker") or ""),
+            "page_span": [int(row.get("page_no_start") or 0), int(row.get("page_no_end") or 0)],
+        }
+        for row in links[:12]
+    ]
+
+    llm_trace_refs = [str(row.get("file") or "") for row in trace_index if str(row.get("stage") or "").startswith("llm_repair.")][:12]
+    visual_trace_refs = [str(row.get("file") or "") for row in trace_index if str(row.get("stage") or "").startswith("visual_toc.")][:12]
+
+    return {
+        "boundary_detection": {
+            "decision_basis": [
+                "fnm_pages.page_role",
+                "fnm_pages.role_reason",
+                "fnm_pages.role_confidence",
+                "fnm_pages.has_note_heading",
+                "fnm_pages.section_hint",
+            ],
+            "page_role_counts": page_role_counts,
+            "first_body_page": first_body_page,
+            "first_note_page": first_note_page,
+            "page_role_samples": _sample_page_role_rows(pages_sorted),
+            "structure_page_partition_summary": dict(structure.get("page_partition_summary") or {}),
+        },
+        "note_region_detection": {
+            "decision_basis": [
+                "fnm_note_regions.region_kind/start_page/end_page/pages",
+                "fnm_note_regions.bound_chapter_id",
+                "fnm_note_regions.region_start_first_source_marker",
+                "fnm_note_regions.region_first_note_item_marker",
+                "structure.chapter_binding_summary",
+                "structure.visual_toc_endnotes_summary",
+            ],
+            "visual_toc_endnotes_summary": dict(structure.get("visual_toc_endnotes_summary") or {}),
+            "chapter_binding_summary": dict(structure.get("chapter_binding_summary") or {}),
+            "chapter_endnote_region_alignment_summary": dict(structure.get("chapter_endnote_region_alignment_summary") or {}),
+            "region_rows": note_region_rows,
+            "endnote_region_rows": endnote_region_rows,
+        },
+        "endnote_array_building": {
+            "decision_basis": [
+                "fnm_note_items.region_id/chapter_id/page_no/marker",
+                "按 region_id 聚合生成注释数组",
+                "检查 numeric marker 连续性与首尾 marker",
+            ],
+            "note_capture_summary": dict(structure.get("note_capture_summary") or {}),
+            "book_endnote_stream_summary": dict(structure.get("book_endnote_stream_summary") or {}),
+            "array_rows": note_array_rows,
+            "endnote_array_rows": [row for row in note_array_rows if row.get("region_kind") == "endnote"],
+        },
+        "endnote_merging": {
+            "decision_basis": [
+                "fnm_translation_units.kind/owner_kind/section_id/target_ref",
+                "导出 chapter markdown 中 local refs/local defs 的闭合情况",
+                "structure.freeze_note_unit_summary",
+            ],
+            "freeze_note_unit_summary": dict(structure.get("freeze_note_unit_summary") or {}),
+            "note_unit_rows": merge_rows,
+            "export_merge_rows": export_merge_rows,
+        },
+        "anchor_resolution": {
+            "decision_basis": [
+                "fnm_body_anchors.page_no/paragraph_index/char_start/char_end/source_marker",
+                "fnm_note_links.status/resolver/confidence",
+                "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）",
+            ],
+            "link_summary": dict(structure.get("link_summary") or {}),
+            "chapter_link_contract_summary": dict(structure.get("chapter_link_contract_summary") or {}),
+            "anchor_kind_counts": anchor_kind_counts,
+            "link_status_counts": link_status_counts,
+            "link_resolver_counts": link_resolver_counts,
+            "anchor_samples": anchor_samples,
+            "link_samples": link_samples,
+            "llm_repair_trace_refs": llm_trace_refs,
+            "visual_toc_trace_refs": visual_trace_refs,
+        },
+    }
+
+
 def _persist_traces(
     *,
     example_dir: Path,
@@ -718,6 +1001,7 @@ def _build_blocking_details(
 def _write_book_outputs(example_dir: Path, result: dict[str, Any]) -> None:
     _json_dump(example_dir / "fnm_real_test_progress.json", dict(result.get("progress") or {}))
     _json_dump(example_dir / "fnm_real_test_result.json", result)
+    _json_dump(example_dir / "fnm_real_test_modules.json", dict(result.get("module_process") or {}))
     (example_dir / "FNM_REAL_TEST_REPORT.md").write_text(
         _build_book_report_markdown(result),
         encoding="utf-8",
@@ -786,6 +1070,7 @@ def _build_book_report_markdown(result: dict[str, Any]) -> str:
     cleanup = dict(result.get("cleanup") or {})
     input_assets = dict(result.get("input_assets") or {})
     placeholders = dict(result.get("placeholders") or {})
+    module_process = dict(result.get("module_process") or {})
     lines = [
         f"# FNM Real Test Report — {result.get('slug', '')}",
         "",
@@ -824,6 +1109,9 @@ def _build_book_report_markdown(result: dict[str, Any]) -> str:
             f"- translation_mode: `{result.get('translation_mode') or ''}`",
             f"- translation_api_called: `{bool(result.get('translation_api_called'))}`",
             f"- translated_paras: `{int(placeholders.get('translated_paras') or 0)}`",
+            "",
+            "## 模块过程取证文件",
+            f"- path: `{str((Path(result.get('input_assets', {}).get('pdf', {}).get('path', '')).parents[0] / 'fnm_real_test_modules.json')) if result.get('input_assets', {}).get('pdf', {}).get('path') else ''}`",
             "",
             "## Token by Stage",
         ]
@@ -866,6 +1154,49 @@ def _build_book_report_markdown(result: dict[str, Any]) -> str:
     for row in trace_index[:24]:
         lines.append(
             f"- {row.get('stage')}: {row.get('reason_for_request')} -> `{row.get('file')}`"
+        )
+    if module_process:
+        boundary = dict(module_process.get("boundary_detection") or {})
+        note_regions = dict(module_process.get("note_region_detection") or {})
+        endnote_arrays = dict(module_process.get("endnote_array_building") or {})
+        endnote_merging = dict(module_process.get("endnote_merging") or {})
+        anchor_resolution = dict(module_process.get("anchor_resolution") or {})
+        lines.extend(
+            [
+                "",
+                "## 模块过程取证",
+                "### 边界区分",
+                f"- decision_basis: `{json.dumps(boundary.get('decision_basis') or [], ensure_ascii=False)}`",
+                f"- page_role_counts: `{json.dumps(boundary.get('page_role_counts') or {}, ensure_ascii=False)}`",
+                f"- first_body_page: `{boundary.get('first_body_page')}`",
+                f"- first_note_page: `{boundary.get('first_note_page')}`",
+                f"- page_role_samples: `{json.dumps(boundary.get('page_role_samples') or [], ensure_ascii=False)}`",
+                "",
+                "### 尾注区确定",
+                f"- decision_basis: `{json.dumps(note_regions.get('decision_basis') or [], ensure_ascii=False)}`",
+                f"- visual_toc_endnotes_summary: `{json.dumps(note_regions.get('visual_toc_endnotes_summary') or {}, ensure_ascii=False)}`",
+                f"- chapter_binding_summary: `{json.dumps(note_regions.get('chapter_binding_summary') or {}, ensure_ascii=False)}`",
+                f"- endnote_region_rows: `{json.dumps((note_regions.get('endnote_region_rows') or [])[:8], ensure_ascii=False)}`",
+                "",
+                "### 尾注数组建立",
+                f"- decision_basis: `{json.dumps(endnote_arrays.get('decision_basis') or [], ensure_ascii=False)}`",
+                f"- note_capture_summary: `{json.dumps(endnote_arrays.get('note_capture_summary') or {}, ensure_ascii=False)}`",
+                f"- book_endnote_stream_summary: `{json.dumps(endnote_arrays.get('book_endnote_stream_summary') or {}, ensure_ascii=False)}`",
+                f"- endnote_array_rows: `{json.dumps((endnote_arrays.get('endnote_array_rows') or [])[:8], ensure_ascii=False)}`",
+                "",
+                "### 尾注拼接",
+                f"- decision_basis: `{json.dumps(endnote_merging.get('decision_basis') or [], ensure_ascii=False)}`",
+                f"- freeze_note_unit_summary: `{json.dumps(endnote_merging.get('freeze_note_unit_summary') or {}, ensure_ascii=False)}`",
+                f"- note_unit_rows: `{json.dumps((endnote_merging.get('note_unit_rows') or [])[:8], ensure_ascii=False)}`",
+                f"- export_merge_rows: `{json.dumps((endnote_merging.get('export_merge_rows') or [])[:8], ensure_ascii=False)}`",
+                "",
+                "### 锚点寻找与链接",
+                f"- decision_basis: `{json.dumps(anchor_resolution.get('decision_basis') or [], ensure_ascii=False)}`",
+                f"- link_summary: `{json.dumps(anchor_resolution.get('link_summary') or {}, ensure_ascii=False)}`",
+                f"- link_resolver_counts: `{json.dumps(anchor_resolution.get('link_resolver_counts') or {}, ensure_ascii=False)}`",
+                f"- anchor_samples: `{json.dumps((anchor_resolution.get('anchor_samples') or [])[:8], ensure_ascii=False)}`",
+                f"- link_samples: `{json.dumps((anchor_resolution.get('link_samples') or [])[:8], ensure_ascii=False)}`",
+            ]
         )
     lines.extend(["", "## 阻塞定位明细"])
     for row in blocking_details[:24]:
@@ -948,6 +1279,7 @@ def _process_book(
         "translation_mode": "placeholder",
         "translation_api_called": False,
         "final_zip": {},
+        "module_process": {},
         "progress": _initial_progress(),
         "usage_summary": _merge_usage_summaries({"by_stage": {"translation_test": _usage_zero()}}),
     }
@@ -1160,6 +1492,17 @@ def _process_book(
         and bool(pipeline_result.get("ok"))
     )
     base_result["blocking_reasons"] = _dedupe_strings(list(base_result.get("blocking_reasons") or []))
+    try:
+        base_result["module_process"] = _build_module_process_report(
+            book.doc_id,
+            structure=structure,
+            export_result=export_result,
+            trace_index=list(base_result.get("trace_index") or []),
+        )
+    except Exception as exc:
+        base_result["module_process"] = {
+            "error": str(exc),
+        }
     base_result["blocking_details"] = _build_blocking_details(
         book.doc_id,
         structure=structure,

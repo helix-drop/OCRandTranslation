@@ -39,6 +39,15 @@ _INLINE_FOLLOWUP_TOKEN_RE = re.compile(
 _LEADING_NOISE_NOTE_DEF_RE = re.compile(
     r"^\s*(?P<noise>[IiLl\|'\.,‘’“”])\s*(?P<rest>(?:\[(?:\d{1,4})\]|(?:\d{1,4})[\.;:,\)\]])\s*\S.*)$"
 )
+# 符号型脚注标记：*, **, ***, ****, †, ‡, §, ¶
+_SYMBOL_NOTE_DEF_RE = re.compile(
+    r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s+(?P<body>\S.*)$"
+)
+_SYMBOL_MARKER_ONLY_RE = re.compile(
+    r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s*$"
+)
+# 符号型标记特征匹配（用于 normalize_note_marker 保留符号标记）
+_SYMBOLIC_MARKER_RE = re.compile(r"^[\*†‡§¶]{1,4}$")
 
 
 def _safe_float(value: Any) -> float | None:
@@ -83,7 +92,12 @@ _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
 
 
 def normalize_note_marker(marker: Any) -> str:
-    raw = str(marker or "")
+    raw = str(marker or "").strip()
+    if not raw:
+        return ""
+    # 符号型标记（*, ** 等）原样保留
+    if _SYMBOLIC_MARKER_RE.match(raw):
+        return raw
     translated = raw.translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
     digits = re.sub(r"\D+", "", translated)
     if not digits:
@@ -167,6 +181,14 @@ def _parse_note_definition_line(line: str) -> tuple[str, str, bool] | None:
         if not marker or not body:
             return None
         return marker, body, False
+    # 尝试符号型标记：*， ** 等
+    sym_match = _SYMBOL_NOTE_DEF_RE.match(candidate)
+    if sym_match:
+        marker = sym_match.group(1)
+        body = str(sym_match.group("body") or "").strip()
+        if not body:
+            return None
+        return marker, body, False
     return None
 
 
@@ -206,11 +228,14 @@ def _parse_marker_only_line(line: str) -> str | None:
     if not candidate or is_notes_heading_line(candidate):
         return None
     match = _MARKER_ONLY_RE.match(candidate)
-    if not match:
-        return None
-    raw_marker = match.group("bracket") or match.group("num") or ""
-    marker = normalize_note_marker(raw_marker)
-    return marker or None
+    if match:
+        raw_marker = match.group("bracket") or match.group("num") or ""
+        marker = normalize_note_marker(raw_marker)
+        return marker or None
+    sym_match = _SYMBOL_MARKER_ONLY_RE.match(candidate)
+    if sym_match:
+        return sym_match.group(1)
+    return None
 
 
 def _split_trailing_marker(
@@ -396,9 +421,8 @@ def parse_note_items_from_text(
             marker, body, reconstructed = parsed
             parsed_value = int(marker) if marker.isdigit() else None
             if current:
-                current_value = int(
-                    normalize_note_marker(current.get("marker") or "") or "0"
-                )
+                current_raw = normalize_note_marker(current.get("marker") or "") or ""
+                current_value = int(current_raw) if current_raw.isdigit() else 0
                 if (
                     pending_gap_lines
                     and parsed_value is not None
@@ -473,26 +497,26 @@ def parse_note_items_from_text(
             continue
         marker_only = _parse_marker_only_line(line)
         if current is not None and marker_only:
-            current_value = int(
-                normalize_note_marker(current.get("marker") or "") or "0"
-            )
-            marker_value = int(marker_only)
-            if current_value < marker_value <= current_value + 2:
-                for pending_line in pending_gap_lines:
-                    current, split_marker_state = _append_line_to_current(
-                        items, current, pending_line
-                    )
-                    if split_marker_state is not None:
-                        marker_state = split_marker_state
-                pending_gap_lines = []
-                _finalize_current_note(items, current)
-                current = {
-                    "marker": marker_only,
-                    "text": "",
-                    "is_reconstructed": True,
-                }
-                marker_state = marker_value
-                continue
+            current_marker = normalize_note_marker(current.get("marker") or "") or ""
+            if current_marker.isdigit() and marker_only.isdigit():
+                current_value = int(current_marker)
+                marker_value = int(marker_only)
+                if current_value < marker_value <= current_value + 2:
+                    for pending_line in pending_gap_lines:
+                        current, split_marker_state = _append_line_to_current(
+                            items, current, pending_line
+                        )
+                        if split_marker_state is not None:
+                            marker_state = split_marker_state
+                    pending_gap_lines = []
+                    _finalize_current_note(items, current)
+                    current = {
+                        "marker": marker_only,
+                        "text": "",
+                        "is_reconstructed": True,
+                    }
+                    marker_state = marker_value
+                    continue
         if current is None:
             if _looks_like_ocr_missing_note_body_line(line):
                 pending_gap_lines.append(line)
@@ -511,7 +535,8 @@ def parse_note_items_from_text(
         if split_marker_state is not None:
             marker_state = split_marker_state
     if current:
-        current_value = int(normalize_note_marker(current.get("marker") or "") or "0")
+        current_raw = normalize_note_marker(current.get("marker") or "") or ""
+        current_value = int(current_raw) if current_raw.isdigit() else 0
         if (
             pending_gap_lines
             and len(pending_gap_lines) <= 2

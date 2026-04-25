@@ -3,7 +3,7 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
@@ -30,7 +30,7 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 48753,
+          "row_id": 2005,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00065",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -43,11 +43,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48767,
+          "row_id": 2019,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00079",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -60,11 +60,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48771,
+          "row_id": 2023,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00083",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -77,11 +77,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48776,
+          "row_id": 2028,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00088",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -94,11 +94,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48777,
+          "row_id": 2029,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00089",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -111,11 +111,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48778,
+          "row_id": 2030,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00090",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -128,11 +128,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48779,
+          "row_id": 2031,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00091",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -145,11 +145,11 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "Donc, 18 avril, rapport du Conseil scientifique ; 28 avril, discours d'Erhard ; 24 juin [19]48 28, libération des prix industriels, puis des prix alimentaires, libération progressive de tous les prix, mais relativement lente d'ailleurs. En [19]52, libération des prix du charbon et de l'électricité qui sera, je crois, une des dernières libérations des prix qui a eu lieu en Allemagne. Et c'est en [19]53 seulement que, alors pour le commerce extérieur, il y a une libération des échanges qui atteint à peu près un taux de 80%], 95%. Donc, en [19]52-53 la libération est à peu près acquise.",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         },
         {
-          "row_id": 48788,
+          "row_id": 2040,
           "doc_id": "0d285c0800db",
           "anchor_id": "anchor-00100",
           "chapter_id": "toc-ch-004-leçondu31janvier1979",
@@ -162,8 +162,8 @@
           "anchor_kind": "endnote",
           "certainty": 1.0,
           "source_text": "la fin du XIX<sup>e</sup> siècle. Au congrès de Hanovre<sup>35</sup>, au congrès de Bad Dürkheim encore en 1949, le Parti socialiste allemand reconnaît la validité historique et politique du principe de la lutte des classes et se fixe toujours comme objectif la socialisation des moyens de production<sup>36</sup>. Bon. [19]49, [19]50 on en est encore là. En 1955, Karl Schiller<sup>37</sup>, qui va devenir plus tard ministre de l'Économie et des Finances en Allemagne fédérale<sup>38</sup>, écrit un livre appelé bien sûr à un grand retentissement, puisqu'il porte le titre tout de même significatif de Socialisme et Concurrence<sup>39</sup>, c'est-à-dire non pas socialisme ou concurrence, mais socialisme et concurrence, dans lequel il pose, je ne sais pas si c'est la première fois, mais en tout cas c'est lui qui a donné le plus d'écho à cette formule qui va être désormais celle du socialisme allemand : « concurrence autant que possible et planification dans la mesure juste et nécessaire<sup>40</sup> ». Ça, c'est en 1955. En 1959, congrès de Bad Godesberg<sup>41</sup> dans lequel la social-démocratie allemande, premièrement, renonce au principe du passage à la socialisation des moyens de production, deuxièmement et corrélativement reconnaît que la propriété privée des moyens de production, non seulement est parfaitement légitime, mais a droit à la protection et à l'encouragement de l'État<sup>42</sup>. C'est-à-dire que l'une des tâches essentielles et fondamentales de l'État, c'est donc de protéger non seulement la propriété privée en général, mais la propriété privée des moyens de production, sous réserve, ajoute la motion du congrès, de compatibilité avec « un ordre social équitable ». Enfin, troisièmement, le congrès de Bad Godesberg approuve le principe d'une économie de marché partout – là encore, restriction –, partout du moins « où règnent les conditions d'une véritable concurrence<sup>43</sup> ».",
-          "created_at": 1776856746,
-          "updated_at": 1776856746
+          "created_at": 1777099020,
+          "updated_at": 1777099020
         }
       ],
       "rebind_candidates": [
@@ -282,8 +282,28 @@
     "page_context_count": 7,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00016\",\n    \"anchor_id\": \"anchor-00079\",\n    \"confidence\": 0.95,\n    \"reason\": \"Page 82 screenshot shows footnote marker '16' after 'l'économie¹⁶'. Anchor-00079 is the correct anchor for note 16 (rebinding from synthetic anchor-00078).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00065\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '19' on page 91 is OCR noise for '[19]52' in the text. No corresponding endnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00083\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '21' on page 96 is OCR noise for '1948' or similar digits. No corresponding endnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00088\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00089\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00090\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00091\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00100\",\n    \"confidence\": 0.9,\n    \"reason\": \"Marker '19' on page 104 is OCR noise for '[19]49' or '[19]50'. No corresponding endnote exists.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00001\",\n    \"anchor_id\": \"anchor-00065\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note 1 (Berenson) on page 97 matches anchor 1 on page 81 (shown in screenshot 1). The current binding is to a synthetic anchor; this rebinds it to the explicit structural anchor.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00002\",\n    \"anchor_id\": \"anchor-00064\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note 2 (Citation/Berenson) on page 97 matches anchor 2 on page 81 (shown in screenshot 1).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00016\",\n    \"anchor_id\": \"anchor-00079\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note 16 (Conseil scientifique composition) on page 98 matches anchor 16 on page 82 (shown in screenshot 2: 'administration allemande de l'économie¹⁶').\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"en-00006\",\n    \"anchor_id\": \"anchor-00083\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note 6 ('Cf. supra, p. 69') on page 97 corresponds to the context of anchor 21 on page 82 (screenshot 2), which discusses Turgot and physiocrats ('ce que les physiocrates avaient pu demander...'). Although the marker in the provided anchor list is 21, the note content matches this specific historical reference in the text.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00088\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor 19 on page 88 (screenshot 3) appears after '[19]48'. This is part of a date range/list, not a footnote reference. No corresponding note 19 exists in the provided note items (notes jump from 16 to 35 in later pages or are missing).\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00089\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate/erroneous detection of the same date artifact on page 88.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00090\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate/erroneous detection of the same date artifact on page 88.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00091\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate/erroneous detection of the same date artifact on page 88.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00100\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor 19 on page 90 (screenshot 4) appears after '[19]49'. This is a date, not a footnote reference. Note 19 is not present in the resolved set.\"\n  }\n]\n```",
   "response_parsed": [
+    {
+      "action": "match",
+      "note_item_id": "en-00001",
+      "anchor_id": "anchor-00065",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note 1 (Berenson) on page 97 matches anchor 1 on page 81 (shown in screenshot 1). The current binding is to a synthetic anchor; this rebinds it to the explicit structural anchor."
+    },
+    {
+      "action": "match",
+      "note_item_id": "en-00002",
+      "anchor_id": "anchor-00064",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note 2 (Citation/Berenson) on page 97 matches anchor 2 on page 81 (shown in screenshot 1)."
+    },
     {
       "action": "match",
       "note_item_id": "en-00016",
@@ -291,28 +311,18 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "Page 82 screenshot shows footnote marker '16' after 'l'économie¹⁶'. Anchor-00079 is the correct anchor for note 16 (rebinding from synthetic anchor-00078)."
+      "confidence": 1.0,
+      "reason": "Note 16 (Conseil scientifique composition) on page 98 matches anchor 16 on page 82 (shown in screenshot 2: 'administration allemande de l'économie¹⁶')."
     },
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00065",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '19' on page 91 is OCR noise for '[19]52' in the text. No corresponding endnote exists."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "action": "match",
+      "note_item_id": "en-00006",
       "anchor_id": "anchor-00083",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '21' on page 96 is OCR noise for '1948' or similar digits. No corresponding endnote exists."
+      "confidence": 1.0,
+      "reason": "Note 6 ('Cf. supra, p. 69') on page 97 corresponds to the context of anchor 21 on page 82 (screenshot 2), which discusses Turgot and physiocrats ('ce que les physiocrates avaient pu demander...'). Although the marker in the provided anchor list is 21, the note content matches this specific historical reference in the text."
     },
     {
       "action": "ignore_ref",
@@ -321,8 +331,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+      "confidence": 1.0,
+      "reason": "Anchor 19 on page 88 (screenshot 3) appears after '[19]48'. This is part of a date range/list, not a footnote reference. No corresponding note 19 exists in the provided note items (notes jump from 16 to 35 in later pages or are missing)."
     },
     {
       "action": "ignore_ref",
@@ -331,8 +341,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+      "confidence": 1.0,
+      "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
     },
     {
       "action": "ignore_ref",
@@ -341,8 +351,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+      "confidence": 1.0,
+      "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
     },
     {
       "action": "ignore_ref",
@@ -351,8 +361,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+      "confidence": 1.0,
+      "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
     },
     {
       "action": "ignore_ref",
@@ -361,8 +371,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "Marker '19' on page 104 is OCR noise for '[19]49' or '[19]50'. No corresponding endnote exists."
+      "confidence": 1.0,
+      "reason": "Anchor 19 on page 90 (screenshot 4) appears after '[19]49'. This is a date, not a footnote reference. Note 19 is not present in the resolved set."
     }
   ],
   "derived_truth": {
@@ -372,86 +382,24 @@
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "en-00016",
-        "anchor_id": "anchor-00079",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Page 82 screenshot shows footnote marker '16' after 'l'économie¹⁶'. Anchor-00079 is the correct anchor for note 16 (rebinding from synthetic anchor-00078)."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "note_item_id": "en-00001",
         "anchor_id": "anchor-00065",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 91 is OCR noise for '[19]52' in the text. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Note 1 (Berenson) on page 97 matches anchor 1 on page 81 (shown in screenshot 1). The current binding is to a synthetic anchor; this rebinds it to the explicit structural anchor."
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00083",
+        "action": "match",
+        "note_item_id": "en-00002",
+        "anchor_id": "anchor-00064",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '21' on page 96 is OCR noise for '1948' or similar digits. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Note 2 (Citation/Berenson) on page 97 matches anchor 2 on page 81 (shown in screenshot 1)."
       },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00088",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00089",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00090",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00091",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00100",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 104 is OCR noise for '[19]49' or '[19]50'. No corresponding endnote exists."
-      }
-    ],
-    "auto_selected_actions": [
       {
         "action": "match",
         "note_item_id": "en-00016",
@@ -459,28 +407,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Page 82 screenshot shows footnote marker '16' after 'l'économie¹⁶'. Anchor-00079 is the correct anchor for note 16 (rebinding from synthetic anchor-00078)."
+        "confidence": 1.0,
+        "reason": "Note 16 (Conseil scientifique composition) on page 98 matches anchor 16 on page 82 (shown in screenshot 2: 'administration allemande de l'économie¹⁶')."
       },
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00065",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 91 is OCR noise for '[19]52' in the text. No corresponding endnote exists."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "en-00006",
         "anchor_id": "anchor-00083",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '21' on page 96 is OCR noise for '1948' or similar digits. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Note 6 ('Cf. supra, p. 69') on page 97 corresponds to the context of anchor 21 on page 82 (screenshot 2), which discusses Turgot and physiocrats ('ce que les physiocrates avaient pu demander...'). Although the marker in the provided anchor list is 21, the note content matches this specific historical reference in the text."
       },
       {
         "action": "ignore_ref",
@@ -489,8 +427,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Anchor 19 on page 88 (screenshot 3) appears after '[19]48'. This is part of a date range/list, not a footnote reference. No corresponding note 19 exists in the provided note items (notes jump from 16 to 35 in later pages or are missing)."
       },
       {
         "action": "ignore_ref",
@@ -499,8 +437,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
       },
       {
         "action": "ignore_ref",
@@ -509,8 +447,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
       },
       {
         "action": "ignore_ref",
@@ -519,8 +457,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
       },
       {
         "action": "ignore_ref",
@@ -529,32 +467,113 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 104 is OCR noise for '[19]49' or '[19]50'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Anchor 19 on page 90 (screenshot 4) appears after '[19]49'. This is a date, not a footnote reference. Note 19 is not present in the resolved set."
       }
     ],
-    "auto_applied_actions": [
+    "auto_selected_actions": [
       {
-        "link_id": "link-00281",
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "en-00001",
         "anchor_id": "anchor-00065",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 91 is OCR noise for '[19]52' in the text. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Note 1 (Berenson) on page 97 matches anchor 1 on page 81 (shown in screenshot 1). The current binding is to a synthetic anchor; this rebinds it to the explicit structural anchor."
       },
       {
-        "link_id": "link-00283",
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "action": "match",
+        "note_item_id": "en-00002",
+        "anchor_id": "anchor-00064",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Note 2 (Citation/Berenson) on page 97 matches anchor 2 on page 81 (shown in screenshot 1)."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00016",
+        "anchor_id": "anchor-00079",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Note 16 (Conseil scientifique composition) on page 98 matches anchor 16 on page 82 (shown in screenshot 2: 'administration allemande de l'économie¹⁶')."
+      },
+      {
+        "action": "match",
+        "note_item_id": "en-00006",
         "anchor_id": "anchor-00083",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '21' on page 96 is OCR noise for '1948' or similar digits. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Note 6 ('Cf. supra, p. 69') on page 97 corresponds to the context of anchor 21 on page 82 (screenshot 2), which discusses Turgot and physiocrats ('ce que les physiocrates avaient pu demander...'). Although the marker in the provided anchor list is 21, the note content matches this specific historical reference in the text."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00088",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Anchor 19 on page 88 (screenshot 3) appears after '[19]48'. This is part of a date range/list, not a footnote reference. No corresponding note 19 exists in the provided note items (notes jump from 16 to 35 in later pages or are missing)."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00089",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00090",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00091",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00100",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Anchor 19 on page 90 (screenshot 4) appears after '[19]49'. This is a date, not a footnote reference. Note 19 is not present in the resolved set."
+      }
+    ],
+    "auto_applied_actions": [
+      {
+        "link_id": "link-00002",
+        "action": "match",
+        "note_item_id": "en-00002",
+        "anchor_id": "anchor-00064",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Note 2 (Citation/Berenson) on page 97 matches anchor 2 on page 81 (shown in screenshot 1)."
       },
       {
         "link_id": "link-00284",
@@ -564,8 +583,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Anchor 19 on page 88 (screenshot 3) appears after '[19]48'. This is part of a date range/list, not a footnote reference. No corresponding note 19 exists in the provided note items (notes jump from 16 to 35 in later pages or are missing)."
       },
       {
         "link_id": "link-00285",
@@ -575,8 +594,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
       },
       {
         "link_id": "link-00286",
@@ -586,8 +605,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
       },
       {
         "link_id": "link-00287",
@@ -597,8 +616,8 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 102 is OCR noise for '[19]48'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Duplicate/erroneous detection of the same date artifact on page 88."
       },
       {
         "link_id": "link-00288",
@@ -608,18 +627,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "Marker '19' on page 104 is OCR noise for '[19]49' or '[19]50'. No corresponding endnote exists."
+        "confidence": 1.0,
+        "reason": "Anchor 19 on page 90 (screenshot 4) appears after '[19]49'. This is a date, not a footnote reference. Note 19 is not present in the resolved set."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 7704,
-    "completion_tokens": 652,
-    "total_tokens": 8356,
+    "completion_tokens": 856,
+    "total_tokens": 8560,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 16718
+    "duration_ms": 77861
   }
 }

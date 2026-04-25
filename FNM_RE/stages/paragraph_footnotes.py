@@ -28,9 +28,21 @@ _FOOTNOTE_ITEM_RE = re.compile(
     re.DOTALL,
 )
 
-# 正文中的脚注标记
+# 符号型脚注条目：* / ** / *** / **** / † / ‡ / § / ¶
+_SYMBOL_FOOTNOTE_ITEM_RE = re.compile(
+    r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s+(.*)",
+    re.DOTALL,
+)
+
+# 正文中的脚注标记（含符号标记）
 _FOOTNOTE_MARKER_IN_BODY = re.compile(
-    r"(?:\$\^\{(\d+)\}\$|<sup>(\d+)</sup>|\[(\d+)\])",
+    r"(?:\$\^\{(\d+)\}\$"
+    r"|<sup>(\d+)</sup>"
+    r"|\[(\d+)\]"
+    r"|\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$"          # $^{*}$, $^{**}$ 等
+    r"|[\]](\*{1,4})"                               # ]*（括号后的符号标记）
+    r"|[»](\*{1,4})"                                # »*（法式引号后的符号标记）
+    r")",
 )
 
 # 有结束标点（不跨页）
@@ -50,13 +62,13 @@ def _split_lines(text: str) -> list[str]:
 def _detect_footnote_band(lines: list[str]) -> tuple[int, int]:
     """检测底部 footnote 条带范围。
 
-    优先查找分隔线；无分隔线时从底部向上扫描连续编号行簇。
-    至少需要 2 个连续编号行才认为是脚注条带。
+    优先查找分隔线；无分隔线时从底部向上扫描连续编号行簇或符号行簇。
+    至少需要 2 个连续编号行才认为是脚注条带；符号行（* 等）1 行即可。
 
     Returns:
         (start_line_idx, end_line_idx)，未检测到时返回 (-1, -1)
     """
-    if len(lines) < 3:
+    if len(lines) < 2:
         return -1, -1
 
     # 1. 找分隔线
@@ -73,7 +85,6 @@ def _detect_footnote_band(lines: list[str]) -> tuple[int, int]:
             consecutive += 1
             if consecutive >= 2:
                 band_start = i
-                # 继续向上 — 如果上面几行也是编号行（跨越多行同一编号），纳入 band
                 while band_start > 0:
                     prev = band_start - 1
                     if _FOOTNOTE_ITEM_RE.match(lines[prev]):
@@ -84,18 +95,35 @@ def _detect_footnote_band(lines: list[str]) -> tuple[int, int]:
         else:
             consecutive = 0
 
+    # 3. 从底部扫描符号型脚注行（* 等）
+    for i in range(len(lines) - 1, -1, -1):
+        if _SYMBOL_FOOTNOTE_ITEM_RE.match(lines[i]):
+            # 找到底部最后一组连续符号行
+            sym_end = len(lines)
+            sym_start = i
+            # 向上扩展（处理多个符号行在一起的情况）
+            while sym_start > 0:
+                prev = sym_start - 1
+                if _SYMBOL_FOOTNOTE_ITEM_RE.match(lines[prev]):
+                    sym_start = prev
+                else:
+                    break
+            return sym_start, sym_end
+
     return -1, -1
 
 
 def _parse_band_lines(lines: list[str]) -> list[dict]:
     """从 band 行中解析出脚注条目。
 
-    编号行开新条目，非编号行续到上一条（多行文本）。
-    如果 band 首行无编号，标记为 preamble（跨页续写候选）。
+    编号行 / 符号行开新条目，非编号行续到上一条（多行文本）。
+    如果 band 首行无编号/符号，标记为 preamble（跨页续写候选）。
     """
     items: list[dict] = []
     for line in lines:
         m = _FOOTNOTE_ITEM_RE.match(line)
+        if m is None:
+            m = _SYMBOL_FOOTNOTE_ITEM_RE.match(line)
         if m:
             items.append({
                 "marker": m.group(1),
@@ -127,7 +155,7 @@ def _scan_body_lines_for_marker(body_lines: list[str], marker: str) -> int | Non
     """在 body 行中查找匹配 marker 的行索引。"""
     for i, line in enumerate(body_lines):
         for m in _FOOTNOTE_MARKER_IN_BODY.finditer(line):
-            matched = m.group(1) or m.group(2) or m.group(3)
+            matched = m.group(1) or m.group(2) or m.group(3) or m.group(4) or m.group(5) or m.group(6)
             if matched == marker:
                 return i
     return None

@@ -46,6 +46,9 @@ _INLINE_FOLLOWUP_TOKEN_RE = re.compile(
 _LEADING_NOISE_NUMBERED_NOTE_RE = re.compile(
     r"^\s*(?P<noise>[IiLl\|'\.,‘’“”])\s*(?P<rest>(?:\[(?:\d{1,4})\]|(?:\d{1,4})[\.;:,)、\]])\s*\S.+?)\s*$"
 )
+_SYMBOL_NOTE_LINE_RE = re.compile(
+    r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s+(.*)\s*$",
+)
 
 
 def _normalize_text(text: str) -> str:
@@ -160,6 +163,30 @@ def _parse_embedded_numbered_line(line: str) -> dict | None:
         "marker": f"{number}.",
         "text": f"{number}. {rest}",
         "body": rest,
+    }
+
+
+def _parse_symbol_note_line(line: str) -> dict | None:
+    """解析符号型脚注行，如 * text、** text 等。
+
+    Returns:
+        {marker, text, body}，非符号行返回 None
+    """
+    candidate = _normalize_text(line)
+    if not candidate:
+        return None
+    match = _SYMBOL_NOTE_LINE_RE.match(candidate)
+    if not match:
+        return None
+    marker = match.group(1)
+    text = str(match.group(2) or "").strip()
+    if not text:
+        return None
+    return {
+        "number": 0,
+        "marker": marker,
+        "text": f"{marker} {text}",
+        "body": text,
     }
 
 
@@ -400,6 +427,8 @@ def _split_items_from_text(
         parsed = _parse_numbered_line(line)
         if parsed is None and current is None:
             parsed = _parse_embedded_numbered_line(line)
+        if parsed is None:
+            parsed = _parse_symbol_note_line(line)
         if parsed:
             parsed_number = int(parsed["number"])
             if current:

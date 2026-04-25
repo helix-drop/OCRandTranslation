@@ -3,7 +3,7 @@
   "reason_for_request": "确认当前视觉模型是否可用",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": "这是一个 4x4 黑白方格测试图。请数出每一行黑色方格的数量，只返回 JSON 对象。格式必须是 {\"row_counts\":[1,3,0,2],\"supports_vision\":true}。",
@@ -20,10 +20,10 @@
   "request_context_summary": {
     "probe": "vision_preflight"
   },
-  "response_raw_text": "```json\n{\"row_counts\":[2,3,0,2],\"supports_vision\":true}\n```",
+  "response_raw_text": "```json\n{\"row_counts\":[1,3,0,2],\"supports_vision\":true}\n```",
   "response_parsed": {
     "row_counts": [
-      2,
+      1,
       3,
       0,
       2
@@ -33,7 +33,7 @@
   "derived_truth": {
     "supports_vision": true,
     "row_counts": [
-      2,
+      1,
       3,
       0,
       2
@@ -42,7 +42,7 @@
   "usage": {
     "stage": "visual_toc.preflight",
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "request_count": 1,
     "prompt_tokens": 127,
     "completion_tokens": 24,
@@ -54,6 +54,6 @@
     }
   },
   "timing": {
-    "duration_ms": 1936
+    "duration_ms": 1740
   }
 }

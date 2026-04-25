@@ -28,11 +28,12 @@ _INVALID_CHAPTER_FILENAME_CHARS_RE = re.compile(r'[<>:"/\\|?*\x00-\x1f]+')
 _CHAPTER_FILENAME_SPACE_RE = re.compile(r"\s+")
 _NOTE_TEXT_BODY_MARKUP_RE = re.compile(
     r"\$\s*\^\{\s*\[?\d{1,4}[A-Za-z]?\]?\s*\}\s*\$"
+    r"|\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$"
     r"|<sup>\s*\[?\d{1,4}[A-Za-z]?\]?\s*</sup>",
     re.IGNORECASE,
 )
 _LEADING_RAW_NOTE_MARKER_RE = re.compile(
-    r"^\s*(?:\[\d{1,4}[A-Za-z]?\]|\d{1,4}[A-Za-z]?[.)]|<sup>\s*\d{1,4}[A-Za-z]?\s*</sup>)\s*",
+    r"^\s*(?:\[\d{1,4}[A-Za-z]?\]|\d{1,4}[A-Za-z]?[.)]|\*{1,4}\s+|<sup>\s*\d{1,4}[A-Za-z]?\s*</sup>)\s*",
     re.IGNORECASE,
 )
 _ANY_NOTE_REF_RE = re.compile(
@@ -47,6 +48,7 @@ _ANY_NOTE_REF_RE = re.compile(
 _RAW_BRACKET_NOTE_REF_RE = re.compile(r"(?<!\d)\[(\d{1,4}[A-Za-z]?)\](?!\d)")
 _RAW_SUPERSCRIPT_NOTE_REF_RE = re.compile(
     r"\$\s*\^\{\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*\}\s*\$"
+    r"|\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$"
     r"|<sup>\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*</sup>",
     re.IGNORECASE,
 )
@@ -95,6 +97,13 @@ def _build_chapter_filename(
     return candidate
 
 
+def _escape_leading_asterisks(text: str) -> str:
+    """Escape leading * and ** at line start to prevent markdown italic/bold/list."""
+    def _escape(m: re.Match) -> str:
+        return "".join("\\*" for _ in m.group(1))
+    return re.sub(r"^(\*{1,4})(?=\s)", _escape, text, flags=re.MULTILINE)
+
+
 def _normalize_markdown_content(content: str) -> str:
     text = str(content or "").strip()
     return f"{text}\n" if text else ""
@@ -102,6 +111,9 @@ def _normalize_markdown_content(content: str) -> str:
 
 def _marker_key(raw: Any) -> str:
     normalized = str(raw or "").strip().translate(_UNICODE_SUPERSCRIPT_TRANSLATION).lower()
+    # 符号型标记（*, ** 等）原样保留
+    if re.match(r"^\*{1,4}$", normalized):
+        return normalized
     normalized = re.sub(r"[^0-9a-z]+", "", normalized)
     if normalized.startswith("en") and normalized[2:].isdigit():
         return normalized[2:]
@@ -237,7 +249,7 @@ def _replace_raw_superscript_refs_with_local_labels(
     ordered_note_ids: list[str],
 ) -> str:
     def _replace(match: re.Match) -> str:
-        marker = str(match.group(1) or match.group(2) or "")
+        marker = str(match.group(1) or match.group(2) or match.group(3) or "")
         note_id = _consume_marker_note_id(
             marker,
             marker_note_sequences=marker_note_sequences,
@@ -648,7 +660,7 @@ def _emit_local_note_definitions(
         text = str(note_text_by_id.get(note_id) or "").strip()
         if number <= 0 or not text:
             continue
-        lines.append(f"[^{number}]: {text}")
+        lines.append(f"[^{number}]: {_escape_leading_asterisks(text)}")
         lines.append("")
         emitted_note_ids.add(note_id)
         emitted += 1
@@ -824,7 +836,7 @@ def _build_inline_footnote_section_markdown(
             if not body_text:
                 body_paragraph_index += 1
                 continue
-            lines.append(body_text)
+            lines.append(_escape_leading_asterisks(body_text))
             lines.append("")
             chapter_has_body = True
             page_has_body = True
