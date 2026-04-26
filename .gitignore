@@ -55,9 +55,17 @@ output/**/*
 verification.md
 FootNoteMachine/
 
+# 旧代码归档（仅本地保留，不入库）
+legacy/
+
 # 本地调试探针
 tmp-*.html
 tmp_*.js
+tmp/
+
+# 历史会话转储与本地实施草稿
+session-ses_*.md
+*.docx
 
 # 根目录的空数据库副本（真正的数据库在 local_data/ 下）
 app.db
