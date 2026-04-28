@@ -8,9 +8,13 @@
 
 1. **Python 3.10 或更高版本**
 2. **PaddleOCR 令牌** — 在 [aistudio.baidu.com](https://aistudio.baidu.com) 注册后获取
-3. **翻译模型 API Key**，二选一：
-   - Qwen（DashScope）— 在 [dashscope.aliyun.com](https://dashscope.aliyun.com) 获取
-   - DeepSeek — 在 [platform.deepseek.com](https://platform.deepseek.com) 获取
+3. **翻译模型 API Key**，支持多个提供商：
+   - Qwen（DashScope）— [dashscope.aliyun.com](https://dashscope.aliyun.com)
+   - DeepSeek — [platform.deepseek.com](https://platform.deepseek.com)
+   - GLM（智谱）— [open.bigmodel.cn](https://open.bigmodel.cn)
+   - Kimi（Moonshot）— [platform.moonshot.cn](https://platform.moonshot.cn)
+   - MiMo — [api.xiaomimimo.com](https://api.xiaomimimo.com)
+   - OpenAI Compatible（自建服务）
 
 ## 快速上手
 
@@ -38,10 +42,16 @@ start_managed.bat
 
 ### 第 2 步：填 API Key
 
-在设置页依次填入：
+在设置页填入：
 
 1. `PaddleOCR 令牌`
-2. `DashScope API Key` 或 `DeepSeek API Key`（填其中一个即可）
+2. 至少一个翻译模型槽位的 API Key（支持 Qwen / DeepSeek / GLM / Kimi / MiMo / OpenAI 兼容）
+
+翻译模型分为**两组三槽模型池**：
+- **翻译池**（3 槽位）：标准连续翻译和 FNM 文本翻译共用，按 slot1→slot2→slot3 回退
+- **FNM 池**（3 槽位）：自动视觉目录、FNM 视觉判断和 LLM 修补共用
+
+每个槽位可选内置模型（Qwen / DeepSeek / GLM / Kimi / MiMo），也可展开为自定义模型填入 Provider、Model ID 和 Base URL。槽位可勾选 thinking 开关（DeepSeek / GLM / Kimi / Qwen 支持）。
 
 保存后回到首页。
 
@@ -124,27 +134,31 @@ CSV 示例：
 
 **格式约定**
 
-- **原文**：用 `> ` 引用块包裹
-- **译文**：紧跟原文后的普通段落
-- **脚注**：优先导出为 Obsidian 标准脚注 `[^label]` / `[^label]: ...`，定义就近放在对应段落后；高置信尾注分流到 `## 本章尾注` 或 `## 全书尾注`；编号无法解析时保留为 `[脚注] ...` 普通文本块
-- **标题**：`#` 数量由目录层级决定（depth=0 → `#`，depth=1 → `##`，以此类推）；无目录时退化为 OCR 识别的字体层级
+- **FNM Obsidian 导出**：为首选导出格式，以 ZIP 包给出 `chapters/*.md` 章节文件，每章统一使用 `[^n]` 章节本地脚注（从 1 重置），尾注定义聚合在 `### NOTES` 区段。
+- **标准导出**：原文用 `> ` 引用块包裹，译文紧随其后成为普通段落。
+- **脚注/尾注**：FNM 模式导出为 Obsidian 标准脚注 `[^label]` / `[^label]: ...`，定义按章聚合。
+- **标题**：由目录层级决定（depth=0 → `#`，depth=1 → `##`）。
 
 **按章节选择导出**
 
-导出弹窗会列出所有顶级章节及其页码范围，默认全选。取消勾选部分章节后只导出选中内容。未提取到目录时直接导出全书。
+导出弹窗会列出所有章节及其页码范围，默认全选。取消勾选部分章节后只导出选中内容。
 
 **省略非主体页**
 
-勾选「省略非主体页（版权/广告/重复封面）」后，会自动过滤前置版式页以及前几页中高度相似的重复封面内容。与章节选择导出可叠加使用。
+勾选「省略非主体页（版权/广告/重复封面）」后，会自动过滤前置版式页以及前几页中高度相似的重复封面内容。
 
-### 自定义翻译模型
+### 翻译模型池
 
-在设置页「翻译模型」区域展开「自定义模型」，填写 Provider、模型 ID 和 Base URL（按需）后保存，再点击「启用此自定义模型」。
+在设置页配置翻译模型。当前使用**两组三槽模型池**：
 
-支持三类：
-- `Qwen`：复用 DashScope API Key
-- `DeepSeek`：复用 DeepSeek API Key
-- `OpenAI Compatible`：需单独填写 Base URL 和专用 API Key
+- **翻译池**（slot1/slot2/slot3）：标准连续翻译与 FNM 文本翻译共用
+- **FNM 池**（slot1/slot2/slot3）：自动视觉目录、FNM 视觉判断与 LLM 修补共用
+
+每个槽位可选择内置模型或自定义模型。内置模型按能力筛选：翻译池只显示文本/对话/专用翻译候选，FNM 池只显示同时具备视觉输入和文本输出能力的多模态候选。自定义槽位需填写 Provider、Model ID 和 Base URL（按需）。
+
+槽位支持 thinking 开关（Qwen 映射为 `enable_thinking`，DeepSeek / GLM / Kimi 映射为 `thinking.type`）。
+
+缺少凭据或能力不匹配的回退槽会被自动跳过。
 
 ### 段内并发翻译
 
@@ -183,11 +197,13 @@ python app.py
 - `local_data/user_data/data/documents/{doc_id}/doc.db` — 文档私有 SQLite（页面、翻译、FNM、文档级状态）
 - `local_data/user_data/data/app.db` — 旧单库（仅迁移来源/备份，不再作为运行时主链）
 - `local_data/user_data/data/documents/{doc_id}/source.pdf` — 每份文档的 PDF 副本
-- `local_data/user_data/data/documents/{doc_id}/toc_source.xlsx` 或 `.csv` — 当前目录文件（如有）
+- `local_data/user_data/data/documents/{doc_id}/toc_visual_source.pdf` — 用户手动上传的目录 PDF
+- `local_data/user_data/data/documents/{doc_id}/toc_visual_screenshots/` — 用户上传的目录截图
+- `local_data/user_data/data/documents/{doc_id}/toc_source.csv` 或 `.xlsx` — 当前目录文件（如有）
 
 这些内容默认不会提交到 Git 仓库。
 
-## 当前代码规模（2026-04-21）
+## 当前代码规模（2026-04-28）
 
 统计口径：按 `*.py` 逐行统计，忽略运行产物目录（如 `.venv/`、`local_data/`、`logs/`、`output/`）。
 
@@ -195,8 +211,9 @@ python app.py
 |---|---:|---:|
 | 主链运行代码（`app/config/logging/launcher/model/ocr` + `document/` + `persistence/` + `pipeline/` + `translation/` + `web/`） | 72 | 31,247 |
 | FNM_RE 模块链路（`FNM_RE/**/*.py`） | 51 | 25,960 |
-| 自动化测试（`tests/**/*.py`） | 80 | 30,147 |
-| 工程脚本（`scripts/**/*.py`） | 16 | 6,730 |
+| 自动化测试（`tests/**/*.py`） | 88 | 32,500 |
+| 工程脚本（`scripts/**/*.py`） | 18 | 7,100 |
+| 全部 Python 文件 | 262 | 108,314 |
 
 ## 常见问题
 

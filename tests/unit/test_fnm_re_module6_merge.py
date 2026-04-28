@@ -187,8 +187,8 @@ class FnmReModule6MergeTest(unittest.TestCase):
         content = result.data.chapters[0].markdown_text
         body_text, _ = split_body_and_definitions(content)
 
-        self.assertIn("[^1]", content)
-        self.assertIn("[^1]: Used note.", content)
+        # 阶段1：footnote 在正文中为 * 标记，不生成 [^N] 引用
+        self.assertNotIn("[^1]", content)
         self.assertFalse(any(True for _ in _iter_raw_note_marker_hits(body_text, allowed_markers=None)))
         self.assertFalse(any(True for _ in _iter_raw_superscript_note_marker_hits(body_text, allowed_markers=None)))
         self.assertTrue(result.gate_report.hard["merge.local_refs_closed"])
@@ -220,7 +220,9 @@ class FnmReModule6MergeTest(unittest.TestCase):
         result = build_chapter_markdown_set(frozen_units, note_link_table, layers)
         content = result.data.chapters[0].markdown_text
 
-        self.assertIn("[^1]: Used note.", content)
+        # 阶段1：footnote ref 转为 * 标记，不生成 [^N] 或 [footnote]: 区段
+        self.assertNotIn("[^1]", content)
+        self.assertNotIn("[footnote]:", content)
         self.assertNotIn("Unreferenced note text.", content)
         self.assertNotIn("{{NOTE_REF:", content)
 
@@ -354,9 +356,10 @@ class FnmReModule6MergeTest(unittest.TestCase):
         content = result.data.chapters[0].markdown_text
 
         self.assertIn("First paragraph[^1].", content)
-        self.assertIn("[^1]: Used note.", content)
-        self.assertLess(content.index("First paragraph[^1]."), content.index("[^1]: Used note."))
-        self.assertLess(content.index("[^1]: Used note."), content.index("Second paragraph."))
+        # 工单 #7b：定义行带 `N. ` 印刷前缀（`_apply_notes_block_format` 应用后）
+        self.assertIn("[^1]: 1. Used note.", content)
+        self.assertLess(content.index("First paragraph[^1]."), content.index("[^1]: 1. Used note."))
+        self.assertLess(content.index("[^1]: 1. Used note."), content.index("Second paragraph."))
         self.assertEqual(int(result.data.merge_summary.get("inline_footnote_paragraph_attach_count") or 0), 1)
         self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 0)
 
@@ -378,7 +381,7 @@ class FnmReModule6MergeTest(unittest.TestCase):
         result = build_chapter_markdown_set(frozen_units, note_link_table, layers)
         content = result.data.chapters[0].markdown_text
 
-        self.assertLess(content.index("Second paragraph."), content.index("[^1]: Used note."))
+        self.assertLess(content.index("Second paragraph."), content.index("[^1]: 1. Used note."))
         self.assertEqual(int(result.data.merge_summary.get("inline_footnote_page_fallback_count") or 0), 1)
         self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 0)
 
@@ -399,10 +402,11 @@ class FnmReModule6MergeTest(unittest.TestCase):
         result = build_chapter_markdown_set(frozen_units, note_link_table, layers)
         content = result.data.chapters[0].markdown_text
 
-        self.assertLess(content.index("Second paragraph."), content.index("[^1]: Used note."))
+        # 阶段1：footnote_only 走标准路径，body 有 * 标记，无 [footnote]: 区段
+        self.assertIn("*", content)
+        self.assertNotIn("[^1]", content)
         self.assertEqual(int(result.data.merge_summary.get("inline_footnote_paragraph_attach_count") or 0), 0)
         self.assertEqual(int(result.data.merge_summary.get("inline_footnote_page_fallback_count") or 0), 0)
-        self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 1)
 
 
 if __name__ == "__main__":

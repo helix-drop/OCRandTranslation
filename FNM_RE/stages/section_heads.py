@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Any
 
 from FNM_RE.models import ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord
+from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
 from FNM_RE.shared.title import chapter_title_match_key, normalize_title
 
 
@@ -14,16 +15,7 @@ def _chapter_page_bounds(chapters: list[ChapterRecord]) -> list[ChapterRecord]:
 
 
 def _chapter_id_for_page(chapters: list[ChapterRecord], page_no: int) -> str:
-    if page_no <= 0:
-        return ""
-    for chapter in chapters:
-        if int(page_no) in set(chapter.pages):
-            return chapter.chapter_id
-    for chapter in chapters:
-        if int(chapter.start_page) <= int(page_no) <= int(chapter.end_page):
-            return chapter.chapter_id
-    prior = [chapter for chapter in chapters if chapter.start_page <= page_no]
-    return prior[-1].chapter_id if prior else ""
+    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(chapters, page_no)
 
 
 def _chapter_title_keys(chapters: list[ChapterRecord]) -> dict[str, str]:

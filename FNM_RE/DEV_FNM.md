@@ -18,7 +18,7 @@
 - 这些历史记录有参考价值，但**不能当作当前结论**。
 - 目前的当前口径，以 `2026-04-15 stage6(mainline + snapshot + gate summary) 收口后` 为准。
 
-### 1.2 2026-04-15 最新状态（stage6 mainline-snapshot 收口后）
+### 1.2 2026-04-28 最新状态
 
 当前真实状态是“阶段 6 主线收口已完成，可用”，具体为：
 
@@ -37,18 +37,14 @@
 5. consumer 同步已完成：`web/pipeline/translation/scripts/persistence` 统一从 `FNM_RE` 公开入口取状态、导出、诊断与重建。
 6. phase 专用 API 已从公开导出面移除，`FNM_RE`/`FNM_RE.app` 仅保留通用 doc 级 API 与模块 API。
 
-按本轮阶段 6 的 Biopolitics 快照：
+按 2026-04-28 Biopolitics 超级全量测试快照：
 
-- `Biopolitics`
-  - `toc_structure`：`toc.pages_classified / toc.has_exportable_chapters / toc.chapter_titles_aligned / toc.chapter_order_monotonic / toc.role_semantics_valid` 全部为真。
-  - 导出章节计数：`chapter=12`，`post_body=2`（`RÉSUMÉ DU COURS`、`SITUATION DES COURS`）。
-  - `book_note_type`：`book_type=mixed`，且 `book_type.resolved / book_type.chapter_modes_consistent / book_type.no_unapproved_review_required` 全部为真。
-  - `chapter_split`：`split.regions_bound / split.items_extracted / split.body_note_disjoint / split.cross_page_continuity_ok / split.policy_applied / split.footnote_only_synthesized / split.mixed_marker_materialized` 全部为真。
-  - `note_linking`：`link.first_marker_is_one / link.endnotes_all_matched / link.no_ambiguous_left / link.no_orphan_note / link.endnote_only_no_orphan_anchor` 全部为真（其中 `endnote_only_no_orphan_anchor` 在 `mixed` 下为 `not_applicable`）。
-  - `ref_freeze`：`freeze.only_matched_frozen / freeze.no_duplicate_injection / freeze.accounting_closed / freeze.unit_contract_valid` 全部为真。
-  - `chapter_merge`：`merge.chapter_files_emitted / merge.local_refs_closed / merge.no_frozen_ref_leak / merge.no_raw_marker_leak_in_body` 全部为真。
-  - `book_assemble`：`export.order_follows_toc / export.semantic_contract_ok / export.audit_can_ship / export.no_cross_chapter_contamination / export.no_raw_marker_leak_book_level` 全部为真。
-  - 当前软告警仍有：`link.footnote_orphan_anchor_warn`、`link.synthetic_anchor_warn`、`freeze.synthetic_skip_warn`（不阻塞当前阶段硬验收）。
+- `Biopolitics` **真实模式管道状态：blocked**（4 项阻塞：`toc_pages_unclassified`、`contract_marker_gap`、`contract_def_anchor_mismatch`、`structure_review_required`）
+  - 导出章节计数：`chapter=12`，`post_body=2`（RÉSUMÉ DU COURS、SITUATION DES COURS）。
+  - Visual TOC 漏检尾注容器（`endnotes_summary.present=false`）→ page_role 无 note 页
+  - 553 预期锚点 / 471 捕获（85.17%），29 orphan_note
+  - 脚注被误标为尾注混入 `### NOTES` 区段
+  - ZIP 已产出（310KB）但为 blocked 状态
 
 `FNM_RE` 现在已经不是“纯实验目录”，而是实际接入了 FNM 主链的一套新实现。当前真实状态如下：
 

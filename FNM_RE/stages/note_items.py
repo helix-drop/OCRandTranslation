@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Mapping
 
 from document.note_detection import annotate_pages_with_note_scans
@@ -82,6 +83,42 @@ def _dedupe_region_items(items: list[dict]) -> list[dict]:
 
 def _chapter_id_set(phase1: Phase1Structure) -> set[str]:
     return {chapter.chapter_id for chapter in phase1.chapters}
+
+
+def _fix_year_markers_in_place(records: list[NoteItemRecord]) -> list[NoteItemRecord]:
+    """修正 OCR 将出版年份误作尾注 marker 的情况。
+
+    若一个 marker 是年份（1500-2100）且夹在连续数字之间（如 3, 1976, 4），
+    删除该幽灵条目。
+    若前后数字不连续但有跳跃（如 3, 1976, 5），将年份替换为插值数字。
+    """
+    if len(records) < 3:
+        return records
+    updated = list(records)
+    to_remove: set[int] = set()
+    for i in range(1, len(updated) - 1):
+        prev_marker = _try_parse_int(updated[i - 1].marker)
+        curr_marker = _try_parse_int(updated[i].marker)
+        next_marker = _try_parse_int(updated[i + 1].marker)
+        if prev_marker is None or curr_marker is None or next_marker is None:
+            continue
+        if not (1500 <= curr_marker <= 2100):
+            continue
+        if prev_marker + 1 == next_marker:
+            # 年份夹在连续数字之间 → 幽灵条目，删除
+            to_remove.add(i)
+        elif prev_marker + 2 == next_marker:
+            # 年份占据了一个数字位 → 插值替换
+            corrected = prev_marker + 1
+            updated[i] = replace(updated[i], marker=str(corrected))
+    return [row for idx, row in enumerate(updated) if idx not in to_remove]
+
+
+def _try_parse_int(value: Any) -> int | None:
+    try:
+        return int(str(value or "").strip())
+    except (ValueError, TypeError):
+        return None
 
 
 def build_note_items(
@@ -243,6 +280,8 @@ def build_note_items(
             )
 
     records.sort(key=lambda item: (int(item.page_no), item.note_item_id))
+    # 阶段4.B：修正年份误标——尾注页上的出版年份被 OCR 误作 marker
+    records = _fix_year_markers_in_place(records)
     orphan_item_count = sum(1 for item in records if item.chapter_id not in chapter_ids)
     summary = {
         "region_item_count_map": region_item_count_map,

@@ -128,7 +128,7 @@
 | [FNM_RE/modules/book_assemble.py](/Users/hao/OCRandTranslation/FNM_RE/modules/book_assemble.py) | FNM 模块七：整书组装、语义审计与导出收口 | 395 |
 | [model_capabilities.py](/Users/hao/OCRandTranslation/model_capabilities.py) | 内置模型能力目录：chat / mt / vision 模型、流式模式与 companion fallback | 243 |
 
-### 代码行数快照（2026-04-21）
+### 代码行数快照（2026-04-28）
 
 统计口径：按 `*.py` 逐行统计，忽略运行产物目录（如 `.venv/`、`local_data/`、`logs/`、`output/`）。
 
@@ -136,8 +136,9 @@
 |---|---:|---:|
 | 主链运行代码（`app/config/logging/launcher/model/ocr` + `document/` + `persistence/` + `pipeline/` + `translation/` + `web/`） | 72 | 31,247 |
 | FNM_RE 模块链路（`FNM_RE/**/*.py`） | 51 | 25,960 |
-| 自动化测试（`tests/**/*.py`） | 80 | 30,147 |
-| 工程脚本（`scripts/**/*.py`） | 16 | 6,730 |
+| 自动化测试（`tests/**/*.py`） | 88 | 32,500 |
+| 工程脚本（`scripts/**/*.py`） | 18 | 7,100 |
+| 全部 Python 文件 | 262 | 108,314 |
 
 ## 当前稳定约定
 
@@ -461,6 +462,166 @@ python3 -c "import scripts.e2e_full_manual as t; t.BASE='http://127.0.0.1:8081';
 | [scripts/analyze_segment_duplicates.py](/Users/hao/OCRandTranslation/scripts/analyze_segment_duplicates.py) | 段落重复分析 CLI 工具 |
 | [scripts/audit_footnote_structures.py](/Users/hao/OCRandTranslation/scripts/audit_footnote_structures.py) | 脚注结构审计 CLI 工具 |
 | [scripts/rebuild_doc_derivatives.py](/Users/hao/OCRandTranslation/scripts/rebuild_doc_derivatives.py) | 文档衍生数据重建与分段审计 |
+
+## Biopolitics 全量调试经验 — 贯通式问题的发现与修复
+
+以下记录以 Biopolitics（福柯《生命政治的诞生》，1978-1979 年法兰西学院讲座）为样本，从头到尾串联全链调试，暴露了 9 个结构性缺陷。这些缺陷在单模块测试中几乎不可见，因为每本书的 OCR 噪声、TOC 版式、脚注与尾注的混排方式各不相同——单点测试用 mock 数据容易通过，但真实 PDF 端到端跑下来就会暴露。
+
+### 0. 这本书的物理特征（理解问题的前提）
+
+要理解下文所有问题，必须先知道 Biopolitics 作为一本学术书的物理结构。不了解这些，代码就不知道自己在处理什么。
+
+**书的组成**：370 页 PDF。前半是封面/版权/Avertissement（P7-16），中间是 12 次讲座正文 + 章末尾注（P17-332），后半是 RÉSUMÉ DU COURS + SITUATION DES COURS + INDICES（P333-349）。
+
+**版式特征**：
+- **每章结构**：讲座正文 → 末尾连续 NOTES 页（尾注）。NOTES 页上是一张连续的编号列表（1, 2, 3, ...18），内容是学术文献引用。
+- **页脚注**：正文页底部有一个水平分割线，线下是编辑者添加的脚注。脚注标记使用 `*`（星号），不是数字。内容多为"Manuscrit, p. 10: ..."、"M. Foucault ajoute: ..."、"Lapsus manifeste" 之类。
+- **手稿札记**：第 1 讲末尾（p37-39），福柯准备了但没有在课上读完的讲稿提纲。法国编辑把这些手稿内容也排进了 p37 的脚注区域，标记为 1. 2. 3. 4. 和 a. b. c.。它们是福柯自己写的概念阐述（"Le libéralisme, c'est aussi une pratique..."），不是学术引用。
+- **目录**：目录 PDF 列出了 12 讲 + RÉSUMÉ + SITUATION + INDICES。目录条目没有显式列出 NOTES——这是"每章末尾隐式接尾注"的版式。LLM 分析目录截图时返回 `endnotes_summary.present=false`，因为目录里确实没有叫"Notes"的条目。
+- **尾注页没有标题**：p40 第一条直接是 "2. Robert Walpole..."（p39 有 `## NOTES` 标题，但 p40 没有）。OCR 的 note_scan 对无标题的连续尾注页判断为 `mixed_body_endnotes` 或 `body`，不出 `endnote_collection`。
+
+**OCR 噪声特征**：
+- 法语重音和 ligature（œ, æ, É, è, à, ç）经常被 OCR 错读
+- 上标 `e`（如 XVIIe, XXe）被 OCR 误作 `°`、`º`、`®` 或 HTML `<sup>e</sup>`
+- 尾注页上的数字上下文极其密集——出版年份（1979）、ISBN、卷号、页码全部是数字，OCR 容易把年份当 marker
+- 跨页断词（"gouverne-" 在页末、"ment" 在下一页开头）普遍存在
+- 脚注和尾注在 OCR 层难以区分——两者都在"页面底部"，OCR 引擎统一标为 footnote
+
+### 1. page_role 在中转过程中被覆盖
+
+**图书背景**：Biopolitics 有 65 页连续的尾注页（每章末尾 3-8 页 NOTES），这些页的内容全是编号文献引用。page_partition 阶段正确识别了 `note` 角色，但写入数据库时全部变成了 `other`。
+
+**现象**：`build_page_partitions` 产出 page_role 计数为 note:65, body:282, other:15，但写入 SQLite 后变成 note:0, other:86。然而 `role_reason` 字段仍然保留了 `note_scan_collection` / `note_continuation`，说明早期识别是正确的，但在某个中转环节被覆盖了。
+
+**后果链**：`note` 角色全部消失 → `first_note_page=None` → endnote region 无法识别（`_is_endnote_candidate_page` 要求 page_role=note）→ endnote_region_rows=[] → 所有尾注找不到归属章 → 大量 orphan_note → 多个阻塞原因。
+
+**根因**：`FNM_RE/app/pipeline.py` 中的 `_legacy_page_role_from_toc_role` 函数只处理了三种角色，其余全部打成 `other`：
+
+```python
+if token in {"chapter", "post_body"}: return "body"
+if token == "front_matter": return "front_matter"
+return "other"  # ← note/noise 全部变成 other
+```
+
+函数名叫 `legacy_page_role`，但它是 Phase1→Phase2 的关键中转点。page_partition 正确产出的 `note` 角色在这里被丢弃。
+
+**修法**：补 `note` 和 `noise` 透传分支。1 行修改，连锁消解 endnote region 从 0→13、first_note_page 从 None→p40。
+
+**教训**：中转函数（legacy/fixup/map 类）是角色丢失的第一高发区。每增加一个新 role 值，必须同步更新全链所有中转点，不能假定角色白名单已覆盖全部情况。排查方法：对比 `build_page_partitions` 的角色分布和数据库 `fnm_pages` 的角色分布——两者的 `note` 计数应该一致。
+
+### 2. 模块管道与 APP 管道口径分裂
+
+**图书背景**：ch12（Leçon du 4 avril 1979）是最后一讲。正文页有多个脚注（编辑注），同时末尾有 33 条尾注。body anchor 扫描检测到了 7 个脚注标记但只有 2 个 endnote 标记——因为 ch12 的正文中尾注引用多用在讨论内部，锚点被 OCR 丢失或被脚注标记淹没。
+
+**现象**：ch12 的 `note_mode` 在模块管道中被判为 `footnote_primary`，但实际有 33 条 endnote 和 1 个 chapter_endnotes region。ch12 导出时 refs=2（几乎全部变 `*`），与金标 refs=32 差距巨大。数据库里却看到 `chapter_endnotes` 模式——数据不一致。
+
+**根因**：代码库中存在两条并行的管道，对同一个概念（chapter_note_mode）使用不同判定逻辑：
+
+| 管道 | 数据源 | 判定依据 | 消费者 |
+|---|---|---|---|
+| APP 管道 | `_build_chapter_note_modes` | note_regions（看是否有 endnote 区域） | `build_phase4_status` |
+| 模块管道 | `build_book_note_profile` → `book_type_result` | body anchor 分布（看 body 中哪种标记多） | `build_module_gate_status` |
+
+模块管道只看 body 中哪种标记多，不知道章末有 33 条 endnote。APP 管道能看到 note_regions 所以会正确判定。但 batch test 走的是模块管道。
+
+**修法**：三处协同修改。(1) 判定优先级从 `footnote 优先` 改为 `endnote 优先`——学术书中脚注+尾注混排是常态，有尾注区才是一章的主注释类型。(2) `build_chapter_layers` 中用 endnote region 检测结果覆盖 `mode_by_chapter`。(3) `status.py:_chapter_mode_summary_from_snapshot` 改为优先读取 `split_result` 中已修正的 policy，兜底用 `book_type_result`。
+
+**教训**：学术书（尤其人文学科）几乎每章都是脚注+尾注混排。脚注是编辑者在页底的说明，尾注是章节末尾的完整文献列表。如果代码"先看到脚注就判为 footnote_primary 章"，等于把学术书最常见的情况当作异常。正确做法：**先看有没有尾注区，有尾注区就是尾注主章，脚注是附带的**。
+
+### 3. OCR 的 footnote label 对下游的污染链
+
+**图书背景**：p37 是第 1 讲最后一页正文。页底有一个水平分割线，线下是 PaddleOCR 标注为 `footnote` 的区域。这个区域里有：编辑器加的星号脚注（"Entre guillemets dans le manuscrit..."）、福柯手稿中的编号提纲（1-4）、手稿正文转录（a./b./c./[p.27]-[p.32]）。OCR 引擎看到"页面底部 + 数字编号 + 比正文字号小"，就全部归类为 footnote label。
+
+**现象**：ch01 导出 `### Footnotes` 区段里出现了 "Le libéralisme, c'est aussi une pratique..." 等内容。经调用视觉模型（qwen3.6-plus）直接检查 p37 的页面图像，模型确认这些条目的 `is_printed_footnote=false, is_manuscript_note=true`——是福柯手稿中的讲课提纲，不是学术引用。
+
+**后果链**：OCR `fnBlocks.label=footnote` → note_items 继承 `kind=footnote` → export 编进 `### Footnotes` 区段 → 手稿提纲被当作脚注定义占据编号 [^1][^2][^3] → endnote 区段从 [^4] 开始 → 编号跳跃，与金标差距大。
+
+**修法**：分离 footnote/endnote 编号空间。`_local_endnote_ref_number` 根据 `note_kind_by_id` 判断是否分配 `[^N]`。footnote 返回 None（正文用 `*` 标记，不参与编号池），endnote 独占 `[^N]`。footnote 定义用 `[footnote] \* text` 内联到对应段落后。
+
+**教训**：OCR 的 label 是源头信息但不是最终真相。必须在 note_items 阶段做二次验证。两个最可靠的判别信号：(1) 页码位置——`page_role=note` 页上的条目 100% 是 endnote，不可能是 footnote；(2) 内容模式——以 "Cf."、"Ibid."、"作者名 (" 开头的长文本是学术尾注，以 "M. Foucault dit/ajoute:"、"Manuscrit"、"Lapsus" 开头的是编辑脚注。
+
+### 4. 一页脚注区中三种内容的版面混排
+
+**图书背景**：法国学术书的出版惯例是，福柯在课上没读完的手稿内容，编辑会以脚注形式补充在对应页底部。p37 的脚注区内容有三层：
+- **① 编辑脚注**（`*` 标记）："Entre guillemets dans le manuscrit. M. Foucault, ici, renonce à lire les dernières pages..."——告诉读者这一页的正文是手稿转录，福柯未在课上读完。
+- **② 手稿提纲**（编号 1-4）：福柯在手稿上用 1. 2. 3. 4. 标记的概念阐述——"Acceptation du principe qu'il doit y avoir quelque part une limitation..."、"Le libéralisme, c'est aussi une pratique..." 等。
+- **③ 手稿正文**（字母 a./b./c./，页号 [p.27]-[p.32]）：福柯手稿中更详细的分点阐述，编辑在印刷时保留了原样。
+
+OCR 把三层全部识别为同一种东西（footnote），但它们的属性完全不同：① 是真正的 page footnote，② 是 lecture notes 性质的提纲，③ 实际是正文转录（金标把它放回了正文位置）。
+
+**修法**：保留全部脚注内容（①②），以 `[footnote] \* text` 格式内联到对应段落后。③ 在导出时随着正文段落出现（page_role=body），不是脚注也不在尾注区。金标模板同期待遇。
+
+**教训**：不要因为内容是"手稿札记"就删除——原书印刷版把它们排在了脚注位置，是书的正式组成部分（读者可以通过星号脚注知道这是手稿转录）。但也不应把它们混入学术尾注的 `### NOTES` 区段——那里应该只有编号的学术文献引用。
+
+### 5. 出版年份被 OCR 误读为尾注 marker
+
+**图书背景**：在尾注页上，一段典型的学术引用文本是这样的：
+> "Paris, Gallimard-Le Seuil (« Hautes Études »), 1997."
+> 或 "rééd. 1976, p. 410"
+
+OCR 的 marker 提取器扫描这段文本时，会把 "1997" 或 "1976" 识别为下一条尾注的编号——因为它在行首附近、是纯数字、后面跟着句号或逗号。于是 note_item 的 marker 变成了 1997。
+
+**现象**：8 个 note_item 的 marker 是年份值：1976, 1979, 1967, 1974, 1977, 1999 等。它们在数据库中产生了一条 marker=1976 的 note_item，body 中当然找不到 `[^1976]` 引用，于是产生 orphan_note。
+
+**根因**：`scan_anchor_markers` 在 body 侧有 `looks_like_year_marker` 过滤器（排除 1500-2100），但只在 body anchor 提取方向生效。note_item 提取方向（`_parse_numbered_line` → `_NUMBERED_NOTE_RE`）没有同样的过滤——因为 "1976" 在纯数字正则 `\d{1,4}` 里是完全匹配的 4 位数字。
+
+**具体数据**：en-00003 marker=1976 夹在 en-00002(marker=3) 和 en-00004(marker=4) 之间。邻接关系是 3, 1976, 4, 5——年份是幽灵条目，不该存在。
+
+**修法**：`_fix_year_markers_in_place` 在 note_items 提取后遍历 marker 序列：若一个 1500-2100 的数字夹在两个连续整数之间（如 3, 1976, 4），直接删除该幽灵条目；若占据了一个数字位（如 3, 1976, 5），用 `prev+1` 插值替换。
+
+**教训**：OCR 的 marker 提取在尾注页上远不可靠——尾注页是所有页面类型中数字密度最高的（ISBN、出版年、卷号、页码、日期全部是数字）。必须对 note_items 侧的 marker 做和 body 侧同等严格的年份过滤，或者在提取后做邻接序列修正。修正必须在 note_linking 之前完成，因为幽灵条目会污染整个 anchor-note 匹配表。
+
+### 6. visual_toc_endnotes_summary 口径不一致
+
+**图书背景**：Visual TOC 的 LLM 分析 Biopolitics 目录截图时，看到的是 12 讲 + RÉSUMÉ + SITUATION + INDICES。没有任何条目叫 "Notes"——因为 Biopolitics 的版式是"每章末尾直接接 NOTES，目录不单独列出"。LLM 返回 `endnotes_summary.present=false` 是正确的——它只能看到目录上有什么。
+
+但 page_partition 检测到了 65 页 `note` 角色页面，说明这本书确实有大量尾注页——只是目录没有显式条目。系统应当在发现 LLM 漏检时自行补偿。
+
+**现象**：Phase 5 在 `build_phase1_structure` 中检测到 note 页 ≥3 后合成了 `endnotes_summary={present:true, subentry_pattern:"implicit_chapter_appended"}`。但 `status.py` 读取的是另一个数据源——`toc_result.diagnostics.chapter_meta.visual_toc_endnotes_summary`，这是模块层 TOC 的原生输出，没有被合成更新。结果 `endnotes_summary.present=None` 在 status 报告中持续存在。
+
+**根因**：管道中的数据流并非单层回写。Phase 5 合成的新值只写入了 `Phase1Summary`（APP 管道层），但 `status.py` 从 `snapshot.toc_result`（模块层原生输出）读取。两个数据源独立。
+
+**修法**：在 `build_module_pipeline_snapshot` 中，`split_result` 建成后（此时已知有 endnote regions），若 `toc_result` 的 `endnotes_summary.present` 为 falsy 但 split 层有 ≥3 章 chapter_endnotes region，直接 mutate `toc_result.diagnostics.chapter_meta.visual_toc_endnotes_summary` 为合成的 `present=true`。
+
+**教训**：任何在中间阶段合成的字段，必须**同步回填**到上游模块的原始输出中（toc_result / book_type_result / split_result 等）。下游消费者（status.py、export 层、batch report）都从同一套模块输出读取，不同步就会出现"数据结构正确但状态报告错误"的幽灵阻塞。排查方法：先看数据结构是否正确（数据库中的 link/note/page_role 数量对不对），再看 status 报告是否一致——不一致就是中间阶段合成后没回填模块输出。
+
+### 7. 章节边界只含正文不含尾注
+
+**图书背景**：ch01 正文结束于 p39（最后一页是福柯的课堂结语 "J'avais pensé pouvoir vous faire cette année un cours sur la biopolitique..."），尾注在 p40-42（"1. Citation de Virgile..." 到 "18. Helmut Schmidt..."）。ch02 正文从 p43 开始。p40-42 属于 ch01 还是 ch02？物理上是 ch01 的尾注，但在 PDF 页码上落在 ch01 最后一页正文和 ch02 第一页正文之间的空隙。
+
+**现象**：所有 12 章的 `chapter.end_page` 停在正文最后一页（ch01=39, ch02=66, ch03=90...），尾注页全部落在章间空隙。`orphan_local_ref=68`——正文引用了尾注号，但这些尾注所属的页面不在本章范围内，导致同章 markdown 中找不到定义。
+
+**根因**：`chapter_skeleton` 在设定 `end_page` 时只看 body 页（`_build_structured_body_pages_for_chapter` 的切割逻辑），不看绑定的 endnote region。尾注 region 虽然通过 `_chapter_id_for_page` 的"最近前置章节"兜底规则正确绑到了前章，但 `chapter.end_page` 从未被更新。
+
+**修法**：`build_chapter_layers` 中，note_regions 绑定后，对每个 `kind=endnote + scope=chapter` 的 region，用 `dataclasses.replace` 将对应 `ChapterRecord` 的 `end_page` 扩展到 `max(end_page, region.page_end)`，并将 region 的 `pages` 合并到 `chapter.pages`。
+
+**教训**：对于每章末尾都有尾注区的学术书（占比极高），章节边界应该定义为 `max(body_end_page, endnote_region_end_page)`，不是 body_end_page 单值。这是物理版面的真实边界——一个讲座单元 = 正文 + 它的注释。
+
+### 8. TOC 角色白名单与角色枚举脱节
+
+**图书背景**：Biopolitics 的 TOC 分析产出了 19 个条目：Avertissement(front_matter)、COURS(container)、12 讲(chapter)、RÉSUMÉ(post_body)、SITUATION(post_body)、INDICES(container)、Index des notions(back_matter)、Index des noms(back_matter)。`container` 角色表示目录中的分组标题（类似于 Part I / Part II），不是可导出章节。`endnotes` 角色表示尾注容器（目录中显式列出 Notes 条目时出现，Biopolitics 没有所以为 0）。
+
+**现象**：`toc_pages_unclassified` 阻塞一直存在。TOC 分析已经正确把 `COURS` 和 `INDICES` 标为 `container`，但 gate 检查 `toc.pages_classified` 的白名单是 `{front_matter, chapter, post_body, back_matter}`——没有 `endnotes` 和 `container`。所以这两个条目被视为"未分类"→ 阻塞。
+
+**修法**：扩展白名单为 `{front_matter, chapter, post_body, back_matter, endnotes, container}`。`endnotes` 角色虽然在 Biopolitics 中没有出现（隐式尾注），但对显式列出 Notes 条目的书目是必需的。`container` 是合法且常见的 TOC 条目类型。
+
+**教训**：gate 检查的白名单必须与 TOC 的角色枚举保持同步。每次在 `_build_page_roles` 或 `toc_semantics` 中新增 role 值，必须同时检查全链消费该 role 的所有 gate、filter、whitelist。排查方法：找出 TOC 输出中所有 role 的 distinct 值，与 gate 白名单做差集——多出来的值就是误阻塞的来源。
+
+### 9. footnote/endnote 在导出中共用编号池
+
+**图书背景**：在 Obsidian markdown 中，`[^1]` 是一个全局脚注引用。如果正文同时有脚注 `*` 和尾注 `1`，导出时全部转为 `[^N]`，Obsidian 会把它们当同一类脚注处理。但实际上脚注和尾注在学术书中是两种完全不同的注释类型：脚注在页底（编辑注），尾注在章末（文献引用）。金标模板中脚注用 `[footnote] \* text` 格式、不参与 `[^N]` 编号，尾注独占 `[^N]` 从 1 开始。
+
+**现象**：修复前，ch01 正文所有引用（`*` + `1` + `2` + `3`...）统一被 `_rewrite_body_text_with_local_refs` 转为 `[^1] [^2] [^3]...`。脚注标记 `*` 被分配了 `[^1]` 编号，尾注 1 变成了 `[^4]`。`### NOTES` 的第一条是 `[^4]: 4. M. Foucault ne revient pas...` 而不是 `[^1]: 1. Citation de Virgile...`。
+
+**修法**：导出层的 `_local_endnote_ref_number` 新增 `note_kind_by_id` 参数。查询该 note_id 的 kind：若为 footnote，返回 None（不分配 `[^N]`，正文保留 `*`）；若为 endnote，正常递增编号。4 个 `_replace_*` 函数全部适配。`_rewrite_body_text_with_local_refs` 透传 `note_kind_by_id`。章末只写 `### NOTES`（endnote），footnote 用内联 `[footnote] \* text`。
+
+**教训**：Obsidian 的 `[^N]` 语法是一个扁平的全局脚注命名空间，不支持"局部编号 + 按类型分区"。学术书需要的却是"endnote 独占 [^N] 空间从 1 开始 + footnote 用独立标记不参与编号"。这个张力必须在导出层解决——不能把两种类型塞进同一个编号池。解决方案：在 body 替换阶段用 `note_kind_by_id` 分流，而不是等到了 `### NOTES` 区段再靠内容区分。
+
+---
+
+## 维护原则
+
+---
 
 ## 维护原则
 

@@ -1,21 +1,48 @@
-# 剩余 5 本书导出阻塞交接文档
+# 8 本样本导出阻塞交接文档
 
-日期：2026-04-19  
-分支：未提交  
-前置修复已落地：`_definition_has_raw_note_marker` 改为只检测"行首裸标记"、`update_fnm_run`/`update_fnm_translation_unit` 加 `doc_id` 签名参数、`_resolve_chapter_id_for_page` 章节 fallback。
+日期：2026-04-28（Biopolitics 超级全量测试后更新）
+最新批测方式：`python3 scripts/test_fnm_real_batch.py --slug <slug>`
 
-## 当前状态（test_example 批处理）
+## 当前状态
+
+> 注：下表 Biopolitics 为 2026-04-28 超级全量测试实测值，其余 7 本状态待重新跑批确认。
 
 | 书 | state | zip 落盘 | blocking |
 |---|---|---|---|
-| Biopolitics | ready | ✅ | — |
-| Neuropsychoanalysis_Introduction | ready | ✅ | — |
-| Napoleon | ready | ✅ | — |
-| **Goldstein** | review_required | ❌ | `link_first_marker_not_one`, `link_endnote_not_all_matched`, `link_orphan_note_remaining`, `freeze_unit_contract_invalid` |
-| **Heidegger_en_France** | review_required | ❌ | `toc_chapter_order_non_monotonic` |
-| **Mad_Act** | review_required | ❌ | `freeze_unit_contract_invalid` |
-| **Germany_Madness** | review_required | ❌ | `freeze_unit_contract_invalid`, `export_semantic_contract_broken` |
-| **Neuropsychoanalysis_in_Practice** | review_required | ❌ | `toc_chapter_order_non_monotonic`, `toc_role_semantics_invalid`, `split_footnote_only_synthesis_failed` |
+| **Biopolitics** | blocked | ✅ blocked.zip | `toc_pages_unclassified`, `contract_marker_gap`, `contract_def_anchor_mismatch`, `structure_review_required` |
+| Goldstein | review_required | ❌ | 待重跑确认 |
+| Heidegger_en_France | 上次 ready | ✅ | 待重跑确认 |
+| Mad_Act | review_required | ❌ | 待重跑确认 |
+| Germany_Madness | review_required | ❌ | 待重跑确认 |
+| Napoleon | 上次 ready | ✅ | 待重跑确认 |
+| Neuropsychoanalysis_in_Practice | review_required | ❌ | 待重跑确认 |
+| Neuropsychoanalysis_Introduction | 上次 ready | ✅ | 待重跑确认 |
+
+## Biopolitics 超级全量测试详情（2026-04-28）
+
+10 阶段全链路，34 次 LLM 请求（qwen3.6-plus，148,354 tokens），8 分 27 秒。
+
+### 阻塞原因
+
+1. **toc_pages_unclassified**：Visual TOC 漏检尾注容器（LLM 返回 `endnotes_summary.present=false`）
+2. **contract_marker_gap**：553 预期锚点 vs 471 捕获（85.17%），29 orphan_note
+3. **contract_def_anchor_mismatch**：脚注被误标为尾注混入 `### NOTES` 区段
+4. **structure_review_required**：综合结构不合规
+
+### 关键发现
+
+- page_role 不判 `note`：86 页标为 `other`，first_note_page=None
+- 脚注/尾注在解析阶段未区分，page_role 缺失 NOTE 识别
+- 导出 `[^n]` 沿用 OCR 原始全局编号，未执行章节局部重编
+
+### 与 golden_exports/real_golden_template 对比
+
+| 维度 | 自动管道导出 | 金标模板 |
+|---|---|---|
+| 标题格式 | sentence case | 全大写 |
+| 摘要 | 丢失 | 斜体摘要完整 |
+| 尾注编号 | OCR 原始全局号 | 每章 [^1] 重编 |
+| 页脚注 | 混入 ### NOTES | 独立 [footnote] 块 |
 
 ---
 

@@ -4,21 +4,21 @@
 
 ## 当前状态
 
-- 日期：2026-04-24
-- 执行者：Codex
-- 当前内容：FNM 收尾状态机、双池三槽模型池、MiMo / GLM / Kimi 接入、候选模型按能力重选、旧库缺列修复与 thinking 槽位开关已完成聚焦验证：
-  - 旧文档库缺少 FNM 收尾列时，schema 初始化补列与 translate_run 读取兜底回归 `16 tests OK`；
-  - 模型候选池按能力重选、FNM 默认 `qwen3.6-plus`、Qwen3.6 多模态 thinking 参数回归 `25 tests OK`；
-  - 模型池解析、GLM/Kimi 全局 Key、自定义 Provider 与 thinking 参数回归 `9 tests OK`；
-  - 设置页 GLM/Kimi/三槽 thinking 开关回归 `3 tests OK`；
-  - 视觉目录与 FNM LLM repair 的 `request_overrides.extra_body` 深合并回归 `2 tests OK`；
-  - 本轮关键 Python 文件 `py_compile` 通过。
-  - 扩大回归仍有旧红灯，集中在已移除 FNM 阅读视图、旧单模型切换路由、旧收尾断言与仓储缓存测试，未作为本轮新增失败处理。
+- 日期：2026-04-28
+- 执行者：Claude
+- 当前内容：Biopolitics 超级全量测试（10 阶段全链路 + golden template 对比）已完成：
+  - 从零清理 FNM 结果并重注入 370 页
+  - Visual TOC（7 次 qwen3.6-plus）→ FNM Pipeline（七模块）→ LLM Repair（27 次）→ Placeholder Translate（1064 段）→ Export Verify → ZIP
+  - 全程耗时 8 分 27 秒，148,354 tokens，34 次 LLM 请求
+  - ZIP 已产出（310KB），但最终状态 blocked（4 个阻塞原因）
+  - LLM 交互全文记录到 34 个 trace JSON 文件
+  - 与 golden_exports/real_golden_template 逐章对比完成，定位到 4 类结构性差异
 
 ## 记录格式
 
 | 日期 | 执行者 | 验证内容 | 结果 | 备注 |
 |---|---|---|---|---|
+| 2026-04-28 | Claude | Biopolitics 超级全量测试：`python3 scripts/test_fnm_real_batch.py --slug Biopolitics`，10 阶段全链路（Cleanup→Reingest→Visual TOC→FNM Pipeline→LLM Repair→Pipeline Rebuild→Structure Verify→Placeholder Translate→Export Verify→ZIP），34 次 LLM 请求（qwen3.6-plus，148,354 tokens），与 golden_exports/real_golden_template 逐章对比 | 管道运行完成，最终状态 blocked（4 阻塞原因），ZIP 已产出 | 4 项阻塞：toc_pages_unclassified / contract_marker_gap / contract_def_anchor_mismatch / structure_review_required。LLM 交互全文记录到 34 个 trace JSON。与金标对比：标题大小写、摘要丢失、尾注编号未重排、脚注混入尾注区 4 类差异。 |
 | 2026-04-24 | Codex | 旧 doc.db 缺少 FNM 收尾列修复 + 模型池渐进式设置页：`python3 -m unittest tests.integration.test_sqlite_store.SQLiteStoreTest.test_initialize_database_repairs_current_version_missing_translate_tail_columns tests.integration.test_sqlite_store.SQLiteStoreTest.test_latest_translate_run_handles_legacy_row_missing_tail_columns tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_settings_page_renders_two_model_pool_editors_without_legacy_panels tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_valid_translation_model_pool_config tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_valid_fnm_model_pool_token_plan_config tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_provider_configs_with_thinking tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_rejects_model_pool_openai_compatible_config_without_base_url tests.unit.test_model_pools`、`python3 -c "from app import app; ... /api/doc/0c7b0950c4a4/fnm/status ..."`、关键 Python 文件 `python3 -m py_compile ...` | 通过 | `16 tests OK`，实际报错文档状态接口返回 `200`，现有文档库批量补迁移 `15` 个完成 / `2` 个无 `doc.db` 跳过，Python 编译检查通过。覆盖：`schema_version` 当前但缺列时仍补迁移；旧 translate_run 缺 JSON 列不再 `KeyError`；内置模型槽位隐藏自定义 Provider/Base URL/Key 字段；自定义槽位按 provider 显示必要字段。 |
 | 2026-04-24 | Codex | 模型候选池按能力重选：`python3 -m unittest tests.unit.test_model_pools tests.unit.test_model_spec_visual tests.unit.test_visual_toc_usage tests.unit.test_llm_repair_usage.LlmRepairUsageSummaryTest.test_request_llm_repair_actions_returns_trace_payload tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_settings_page_renders_two_model_pool_editors_without_legacy_panels tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_model_uis_show_pool_summary_and_settings_entry_without_switch_buttons tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_valid_translation_model_pool_config tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_valid_fnm_model_pool_token_plan_config tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_provider_configs_with_thinking tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_global_keys tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_reading_retranslate_button_uses_primary_translation_pool_label`、关键文件 `python3 -m py_compile ...` | 通过 | `25 tests OK`，编译检查通过。覆盖：翻译池只显示文本/对话/专用翻译候选；FNM 池只显示视觉+文本多模态候选；默认 FNM 主模型切到 `qwen3.6-plus`；旧 Qwen-VL/OCR 专用模型不再作为候选；Qwen3.6 FNM 槽位 thinking 解析为 `extra_body.enable_thinking`。扩大回归 `tests.unit.test_model_pools ... tests.integration.test_tasks_streaming` 仍为旧红灯：旧阅读入口 guard、旧 `/set_model`、旧 worker 完成态、旧上传清理断言、旧 reading cache API。 |
 | 2026-04-24 | Codex | GLM / Kimi Provider 接入 + thinking 槽位开关：`python3 -m unittest tests.unit.test_model_pools tests.unit.test_visual_toc_usage.VisualTocUsageTest.test_call_vision_json_returns_parsed_and_usage_event tests.unit.test_llm_repair_usage.LlmRepairUsageSummaryTest.test_request_llm_repair_actions_returns_trace_payload`、`python3 -m unittest tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_settings_page_renders_two_model_pool_editors_without_legacy_panels tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_provider_configs_with_thinking tests.integration.test_translate_stop_flow_real_docs.TranslateStopFlowRealDocsTest.test_save_settings_accepts_glm_and_kimi_global_keys`、关键文件 `python3 -m py_compile ...` | 通过 | 分别为 `9 tests OK`、`3 tests OK`，编译检查通过。覆盖：GLM/Kimi 内置模型可选、全局 Key 保存、custom provider 保存、`thinking_enabled` 映射到 Qwen `enable_thinking` 与 GLM/Kimi/DeepSeek `thinking.type`、视觉目录与 LLM repair 保留 `request_overrides.extra_body`。扩大回归 `tests.unit.test_model_pools ... tests.integration.test_tasks_streaming` 仍有旧红灯：旧 FNM 阅读入口、旧 `/set_model`、旧收尾断言和仓储缓存接口测试，未发现本轮模型接入新增失败。 |

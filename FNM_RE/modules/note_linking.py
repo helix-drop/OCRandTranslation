@@ -106,9 +106,29 @@ def _to_link_layers(rows: list[NoteLinkRecord]) -> list[NoteLinkLayer]:
     ]
 
 
-def _summarize_links(rows: list[NoteLinkRecord]) -> dict[str, int]:
+def _summarize_links(rows: list[NoteLinkRecord]) -> dict[str, Any]:
+    """对所有 link 按 status / note_kind / resolver 聚合统计。
+
+    字段语义说明：
+      - matched / orphan_* / ambiguous / ignored / fallback_count / repair_count
+        都是按"link 数"独立统计，互不交集（按 status）或互不交集（按 resolver）。
+      - **fallback_count / repair_count 不是错误数**：它们是按 resolver 维度的全量计数
+        （含 matched 与 orphan），sum(rule + fallback + repair) 等于总 link 数，
+        与 `matched` 不可直接比较（参见工单 #4）。
+      - 工单 #4 引入 `fallback_match_ratio` 才是真正的链接质量信号：
+        fallback resolver 命中的 matched 数 / matched 总数。
+    """
+    matched_count = sum(1 for row in rows if str(row.status or "") == "matched")
+    fallback_matched_count = sum(
+        1
+        for row in rows
+        if str(row.status or "") == "matched" and str(row.resolver or "") == "fallback"
+    )
+    fallback_match_ratio = (
+        float(fallback_matched_count) / float(matched_count) if matched_count > 0 else 0.0
+    )
     return {
-        "matched": sum(1 for row in rows if str(row.status or "") == "matched"),
+        "matched": matched_count,
         "footnote_orphan_note": sum(
             1
             for row in rows
@@ -133,6 +153,37 @@ def _summarize_links(rows: list[NoteLinkRecord]) -> dict[str, int]:
         "ignored": sum(1 for row in rows if str(row.status or "") == "ignored"),
         "fallback_count": sum(1 for row in rows if str(row.resolver or "") == "fallback"),
         "repair_count": sum(1 for row in rows if str(row.resolver or "") == "repair"),
+        "fallback_matched_count": fallback_matched_count,
+        "fallback_match_ratio": fallback_match_ratio,
+    }
+
+
+def _link_quality_gate(rows: list[NoteLinkRecord]) -> dict[str, Any]:
+    """工单 #4：链接质量阈值阻塞门。
+
+    返回 `{quality_ok, fallback_match_ratio, orphan_anchor_total, ...}`。
+    `quality_ok = False` 表示 fallback 占比或孤儿 anchor 数任一超阈，
+    应转化为 reasons `link_quality_low` 并阻塞。
+    """
+    import config
+
+    summary = _summarize_links(rows)
+    fallback_match_ratio = float(summary.get("fallback_match_ratio") or 0.0)
+    orphan_anchor_total = int(summary.get("footnote_orphan_anchor") or 0) + int(
+        summary.get("endnote_orphan_anchor") or 0
+    )
+    fallback_threshold = float(getattr(config, "LINK_FALLBACK_MATCH_RATIO_THRESHOLD_DEFAULT", 0.30))
+    orphan_threshold = int(getattr(config, "LINK_ORPHAN_ANCHOR_THRESHOLD_DEFAULT", 10))
+    quality_ok = (
+        fallback_match_ratio <= fallback_threshold
+        and orphan_anchor_total <= orphan_threshold
+    )
+    return {
+        "quality_ok": bool(quality_ok),
+        "fallback_match_ratio": float(fallback_match_ratio),
+        "fallback_match_ratio_threshold": float(fallback_threshold),
+        "orphan_anchor_total": int(orphan_anchor_total),
+        "orphan_anchor_threshold": int(orphan_threshold),
     }
 
 
@@ -1356,6 +1407,8 @@ def _chapter_contracts(
         for anchor in body_anchors
         if str(anchor.anchor_id or "").strip()
     }
+    # 工单 #3 契约 v2 用：每章正文 anchor 全形态扫描数（chapter_split 阶段累积）
+    chapter_marker_counts = dict(chapter_layers.chapter_marker_counts or {})
     for chapter in chapter_layers.chapters:
         chapter_id = str(chapter.chapter_id or "")
         raw_has_endnote_signal = bool(chapter.endnote_items or chapter.endnote_regions)
@@ -1496,11 +1549,49 @@ def _chapter_contracts(
             endnote_only_no_orphan_anchor = True
 
         if not requires_endnote_contract:
-            first_marker_is_one = True
+            # endnote-link 视角的 4 类校验保留按 endnote 上下文（mode 不要求时不强求）
             endnotes_all_matched = True
             no_ambiguous_left = True
             no_orphan_note = True
             endnote_only_no_orphan_anchor = True
+
+        # 工单 #3 契约 v2：对地校验（不依赖 requires_endnote_contract 短路）
+        # def 集合 = chapter 的 footnote_items + endnote_items 中带数字 marker 的项
+        all_def_items = list(chapter.footnote_items or []) + list(chapter.endnote_items or [])
+        def_numeric_markers: list[int] = []
+        for item in all_def_items:
+            marker_value = _safe_int(normalize_note_marker(str(item.marker or "")))
+            if marker_value > 0:
+                def_numeric_markers.append(marker_value)
+        def_numeric_markers.sort()
+        def_count = len(def_numeric_markers)
+        anchor_total = int(chapter_marker_counts.get(chapter_id) or 0)
+
+        # first_marker_is_one：所有 def 中数字最小的 == 1（无 def 时 True）
+        contract_first_marker_is_one = (
+            (def_numeric_markers[0] == 1) if def_numeric_markers else True
+        )
+        # 当 def_numeric_markers 为空但 endnote-link 路径已计算了 first_marker_is_one，
+        # 取后者（保持 endnote-only 章节的现有语义）；当有 def_numeric_markers 时以"对地"为准。
+        if def_numeric_markers:
+            first_marker_is_one = bool(contract_first_marker_is_one)
+        elif not requires_endnote_contract:
+            first_marker_is_one = True
+
+        # has_marker_gap：去重后的数字 marker 是否等于 [1, 2, ..., max]
+        unique_markers = sorted(set(def_numeric_markers))
+        if unique_markers:
+            expected = list(range(1, unique_markers[-1] + 1))
+            has_marker_gap = unique_markers != expected
+        else:
+            has_marker_gap = False
+
+        # def_anchor_mismatch：def_count vs chapter_marker_counts 偏差。
+        # 容忍：anchor_total 为 0 时不判（上游未提供基线）；def 与 anchor 必须严格相等。
+        if anchor_total > 0:
+            def_anchor_mismatch = def_count != anchor_total
+        else:
+            def_anchor_mismatch = False
 
         failure_link_ids = sorted(
             {
@@ -1521,6 +1612,11 @@ def _chapter_contracts(
                 no_orphan_note=bool(no_orphan_note),
                 endnote_only_no_orphan_anchor=bool(endnote_only_no_orphan_anchor),
                 failure_link_ids=failure_link_ids,
+                has_marker_gap=bool(has_marker_gap),
+                def_anchor_mismatch=bool(def_anchor_mismatch),
+                def_count=int(def_count),
+                anchor_total=int(anchor_total),
+                marker_sequence=list(unique_markers),
             )
         )
         contract_evidence[chapter_id] = {
@@ -1624,8 +1720,21 @@ def build_note_link_table(
             "reason": f"book_type={book_type}",
         }
 
+    # 工单 #3 契约 v2：对地校验对所有 contract 生效（不依赖 requires_endnote_contract）
+    contract_v2_first_marker_is_one = all(row.first_marker_is_one for row in contracts)
+    contract_v2_no_marker_gap = all(not row.has_marker_gap for row in contracts)
+    contract_v2_def_anchor_aligned = all(not row.def_anchor_mismatch for row in contracts)
+    contract_v2_failed_chapters = [
+        str(row.chapter_id or "")
+        for row in contracts
+        if not bool(row.first_marker_is_one)
+        or bool(row.has_marker_gap)
+        or bool(row.def_anchor_mismatch)
+    ]
+
     raw_link_summary = _summarize_links(repaired_links)
     effective_link_summary = _summarize_links(effective_links)
+    link_quality = _link_quality_gate(effective_links)
     soft_footnote_orphan_anchor_warn = int(effective_link_summary.get("footnote_orphan_anchor") or 0) == 0
     soft_synthetic_anchor_warn = int(anchor_summary.get("synthetic_count") or 0) == 0
 
@@ -1635,6 +1744,12 @@ def build_note_link_table(
         "link.no_ambiguous_left": bool(hard_no_ambiguous_left),
         "link.no_orphan_note": bool(hard_no_orphan_note),
         "link.endnote_only_no_orphan_anchor": bool(hard_endnote_only_no_orphan_anchor),
+        # 工单 #3 契约 v2：对地校验
+        "link.contract_first_marker_is_one": bool(contract_v2_first_marker_is_one),
+        "link.no_marker_gap": bool(contract_v2_no_marker_gap),
+        "link.def_anchor_aligned": bool(contract_v2_def_anchor_aligned),
+        # 工单 #4 链接质量阈值：fallback_match_ratio + orphan_anchor 总数
+        "link.quality_ok": bool(link_quality.get("quality_ok", True)),
     }
     soft = {
         "link.footnote_orphan_anchor_warn": bool(soft_footnote_orphan_anchor_warn),
@@ -1651,12 +1766,21 @@ def build_note_link_table(
         reasons.append("link_orphan_note_remaining")
     if not hard["link.endnote_only_no_orphan_anchor"]:
         reasons.append("link_endnote_only_orphan_anchor_remaining")
+    if not hard["link.contract_first_marker_is_one"]:
+        reasons.append("contract_first_marker_not_one")
+    if not hard["link.no_marker_gap"]:
+        reasons.append("contract_marker_gap")
+    if not hard["link.def_anchor_aligned"]:
+        reasons.append("contract_def_anchor_mismatch")
+    if not hard["link.quality_ok"]:
+        reasons.append("link_quality_low")
 
     evidence = {
         "book_type": str(book_type or "no_notes"),
         "anchor_summary": anchor_summary,
         "raw_link_summary": raw_link_summary,
         "effective_link_summary": effective_link_summary,
+        "link_quality": dict(link_quality),
         "chapter_contracts": contract_evidence,
         "chapter_link_contract_summary": {
             "chapter_count": int(len(contracts)),
@@ -1672,6 +1796,17 @@ def build_note_link_table(
                     and bool(row.endnote_only_no_orphan_anchor)
                 )
             ],
+            # 工单 #3 契约 v2：对地校验失败的章节及统计
+            "contract_v2_failed_chapter_ids": list(contract_v2_failed_chapters),
+            "contract_v2_first_marker_violation_count": int(
+                sum(1 for row in contracts if not bool(row.first_marker_is_one))
+            ),
+            "contract_v2_marker_gap_violation_count": int(
+                sum(1 for row in contracts if bool(row.has_marker_gap))
+            ),
+            "contract_v2_def_anchor_mismatch_count": int(
+                sum(1 for row in contracts if bool(row.def_anchor_mismatch))
+            ),
         },
         "book_endnote_stream_summary": _build_book_endnote_stream_summary(chapter_layers),
         "endnote_only_no_orphan_anchor": endnote_only_evidence,

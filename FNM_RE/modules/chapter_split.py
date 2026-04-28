@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from typing import Any, Mapping
 
 from FNM_RE.models import ChapterRecord, PagePartitionRecord, Phase1Structure, SectionHeadRecord
@@ -18,6 +18,7 @@ from FNM_RE.modules.types import (
     LayerNoteRegion,
     TocStructure,
 )
+from FNM_RE.shared.anchors import scan_anchor_markers
 from FNM_RE.shared.notes import normalize_note_marker
 from FNM_RE.shared.text import page_markdown_text
 from FNM_RE.stages.note_items import build_note_items
@@ -29,7 +30,24 @@ from FNM_RE.stages.units import (
 )
 
 _NOTES_HEADING_RE = re.compile(r"(?im)^\s{0,3}(?:##\s*)?(?:notes?|endnotes?)\s*$")
-_BODY_NOTE_MARKER_RE = re.compile(r"\[\^?(\d{1,4})\]")
+_NOTE_DEF_LINE_PREFIX_RE = re.compile(r"^\s*\[\^?\d{1,4}\]:\s*")
+
+
+def _scan_body_anchor_markers(text: str) -> list[str]:
+    """对页 markdown 扫描正文 anchor marker；跳过 `[^N]: ...` 定义行。
+
+    返回 normalized_marker 列表（可能含重复，按出现顺序）。
+    """
+    markers: list[str] = []
+    for line in (text or "").split("\n"):
+        if _NOTE_DEF_LINE_PREFIX_RE.match(line):
+            continue
+        refs, _ = scan_anchor_markers(line)
+        for ref in refs:
+            normalized = str(ref.get("normalized_marker") or "")
+            if normalized:
+                markers.append(normalized)
+    return markers
 
 
 def _safe_int(value: Any) -> int:
@@ -45,6 +63,10 @@ def _legacy_page_role(toc_role: str) -> str:
         return "body"
     if role == "front_matter":
         return "front_matter"
+    # 工单 #5：note 角色直接透传，让下游 note_regions._is_endnote_candidate_page
+    # 与 chapter_split._chapter_body_marker_sets 都能识别 NOTES 容器页。
+    if role == "note":
+        return "note"
     return "other"
 
 
@@ -132,6 +154,8 @@ def _to_layer_regions(regions: list[Any]) -> list[LayerNoteRegion]:
             bind_confidence=_bind_meta(str(row.source or ""), str(row.chapter_id or ""))[1],
             heading_text=str(row.heading_text or ""),
             review_required=bool(row.review_required),
+            # 工单 #2：透传上游回填的 region 首条 note item marker
+            region_first_note_item_marker=str(row.region_first_note_item_marker or ""),
         )
         for row in regions
     ]
@@ -196,10 +220,8 @@ def _chapter_body_marker_sets(
             if str(page_role_by_no.get(page_no) or "") == "note":
                 continue
             text = page_markdown_text(raw_page_by_no.get(page_no) or {})
-            for marker in _BODY_NOTE_MARKER_RE.findall(text or ""):
-                normalized = normalize_note_marker(str(marker or ""))
-                if normalized:
-                    chapter_markers.add(normalized)
+            for normalized in _scan_body_anchor_markers(text or ""):
+                chapter_markers.add(normalized)
         markers_by_chapter[chapter_id] = chapter_markers
     return markers_by_chapter
 
@@ -364,6 +386,13 @@ def _build_chapter_layers(
     page_role_by_no = {int(row.page_no): str(row.page_role) for row in phase1.pages if int(row.page_no) > 0}
     chapter_endnote_start_map = _chapter_endnote_start_page_map(regions)
     mode_by_chapter = {str(row.chapter_id or ""): str(row.note_mode or "no_notes") for row in book_note_profile.chapter_modes}
+    # 阶段3.A：endnote region 优先——若有 chapter_endnotes region，覆盖 footnote_primary → chapter_endnote_primary
+    for region in layer_regions:
+        if str(region.note_kind or "") != "endnote" or str(region.scope or "") != "chapter":
+            continue
+        cid = str(region.chapter_id or region.owner_chapter_id or "")
+        if cid in mode_by_chapter and mode_by_chapter[cid] == "footnote_primary":
+            mode_by_chapter[cid] = "chapter_endnote_primary"
 
     footnotes_by_chapter: dict[str, list[LayerNoteItem]] = {}
     endnotes_by_chapter: dict[str, list[LayerNoteItem]] = {}
@@ -403,7 +432,7 @@ def _build_chapter_layers(
             page_no = int(row.get("page_no") or 0)
             source_text = str(row.get("text") or "")
             source_role = str(page_role_by_no.get(page_no) or "")
-            marker_hits = [str(match).strip() for match in _BODY_NOTE_MARKER_RE.findall(source_text or "") if str(match).strip()]
+            marker_hits = [marker for marker in _scan_body_anchor_markers(source_text or "") if marker]
             if marker_hits and page_no > 0:
                 page_marker_counts_by_chapter.setdefault(chapter_id, {})[page_no] = len(marker_hits)
                 chapter_marker_counts[chapter_id] = int(chapter_marker_counts.get(chapter_id, 0) or 0) + len(marker_hits)
@@ -683,6 +712,43 @@ def build_chapter_layers(
         pdf_path=str(pdf_path or ""),
         page_text_map=page_text_map,
     )
+    # 工单 #2：回填 NoteRegionRecord.region_first_note_item_marker（之前 4 处
+    # 硬编码空字符串）。按 region_id 取该 region 内首条 note item 的归一化 marker，
+    # 供契约校验和取证报告使用。
+    _first_marker_by_region: dict[str, str] = {}
+    for note_item in note_items:
+        rid = str(note_item.region_id or "")
+        if not rid or rid in _first_marker_by_region:
+            continue
+        marker = str(
+            getattr(note_item, "normalized_marker", "")
+            or getattr(note_item, "marker", "")
+            or ""
+        ).strip()
+        if marker:
+            _first_marker_by_region[rid] = marker
+    for region in note_regions:
+        rid = str(region.region_id or "")
+        if not str(region.region_first_note_item_marker or "").strip():
+            region.region_first_note_item_marker = _first_marker_by_region.get(rid, "")
+    # 阶段3：扩展章节 end_page 以包含绑定的 endnote region
+    for region in note_regions:
+        if str(region.note_kind or "") != "endnote" or str(region.scope or "") != "chapter":
+            continue
+        cid = str(region.chapter_id or "").strip()
+        if not cid:
+            continue
+        for idx, chapter in enumerate(phase1.chapters):
+            if str(chapter.chapter_id or "") != cid:
+                continue
+            new_end = max(int(chapter.end_page), int(region.page_end))
+            new_pages = list(chapter.pages or [])
+            for p in (region.pages or []):
+                if int(p) not in new_pages:
+                    new_pages.append(int(p))
+            new_pages.sort()
+            phase1.chapters[idx] = replace(chapter, end_page=new_end, pages=new_pages)
+            break
     note_kind_by_region = {str(row.region_id or ""): str(row.note_kind or "") for row in note_regions}
     owner_chapter_by_region = {str(row.region_id or ""): str(row.chapter_id or "") for row in note_regions}
     source_scope_by_region = {str(row.region_id or ""): str(row.scope or "") for row in note_regions}
@@ -862,6 +928,7 @@ def build_chapter_layers(
             "note_capture_summary": dict(note_capture_summary),
             "footnote_synthesis_summary": dict(footnote_synthesis_summary),
         },
+        chapter_marker_counts=dict(layer_diag.get("chapter_marker_counts") or {}),
     )
     return ModuleResult(
         data=data,

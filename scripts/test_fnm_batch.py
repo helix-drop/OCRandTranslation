@@ -853,12 +853,19 @@ def _analyze_export_text(content: str) -> dict[str, Any]:
         if str(value).isdigit()
     }
     starts_at_one = True if not all_numbers else min(all_numbers) == 1
+    # 工单 #3 契约 v2：定义编号必须连续无断号（基于 unique defs）
+    def_numbers = sorted({int(v) for v in defs if str(v).isdigit()})
+    if def_numbers:
+        no_gap = def_numbers == list(range(1, def_numbers[-1] + 1))
+    else:
+        no_gap = True
     return {
         "local_ref_total": len(refs),
         "local_def_total": len(defs),
         "unique_local_refs": sorted(set(refs), key=_numeric_first_sort_key),
         "unique_local_defs": sorted(set(defs), key=_numeric_first_sort_key),
         "local_numbering_starts_at_one": starts_at_one,
+        "local_numbering_no_gap": bool(no_gap),
         "legacy_footnote_ref_count": len(LEGACY_FOOTNOTE_RE.findall(text)),
         "legacy_endnote_ref_count": len(LEGACY_ENDNOTE_RE.findall(text)),
         "legacy_en_bracket_ref_count": len(LEGACY_EN_BRACKET_RE.findall(text)),
@@ -1135,6 +1142,7 @@ def verify_export(
         orphan_refs = sorted(unique_refs - unique_defs, key=_numeric_first_sort_key)
         chapter_ok = (
             bool(stats.get("local_numbering_starts_at_one"))
+            and bool(stats.get("local_numbering_no_gap"))
             and not orphan_defs
             and not orphan_refs
             and int(stats.get("legacy_footnote_ref_count", 0) or 0) == 0

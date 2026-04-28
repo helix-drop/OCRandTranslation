@@ -416,6 +416,7 @@ def _rewrite_residual_raw_markers_for_chapter(
     updated_body = export_stage._replace_note_refs_with_local_labels(
         body_text,
         note_text_by_id=resolved_note_text_by_id,
+        note_kind_by_id={},
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
@@ -423,6 +424,7 @@ def _rewrite_residual_raw_markers_for_chapter(
         updated_body,
         marker_note_sequences=marker_note_sequences,
         marker_usage_index=marker_usage_index,
+        note_kind_by_id={},
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
@@ -430,6 +432,7 @@ def _rewrite_residual_raw_markers_for_chapter(
         updated_body,
         marker_note_sequences=marker_note_sequences,
         marker_usage_index=marker_usage_index,
+        note_kind_by_id={},
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
@@ -437,6 +440,7 @@ def _rewrite_residual_raw_markers_for_chapter(
         updated_body,
         marker_note_sequences=marker_note_sequences,
         marker_usage_index=marker_usage_index,
+        note_kind_by_id={},
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
@@ -523,6 +527,58 @@ def _rewrite_residual_raw_markers_for_chapter(
         for number in sorted(definitions.keys()):
             lines.append(f"[^{number}]: {definitions[number]}")
     return "\n".join(lines).strip()
+
+
+_DEF_LINE_PRINTED_PREFIX_RE = re.compile(r"^\[\^(\d+)\]:\s*(.*)$")
+
+
+def _apply_notes_block_format(markdown_text: str) -> str:
+    """工单 #7a + #7b：统一章节 NOTES 块格式。
+
+    - 当章节末尾出现 `[^N]: <text>` 定义行但缺 `### NOTES` 标题时，自动追加
+      标题（除章 1 外原 OCR 不会自带该标题，导致导出 zip 章 2-12 全部缺标题）。
+    - 每条 `[^N]: <text>` 改为 `[^N]: N. <text>` 印刷编号前缀，幂等
+      （text 已以 `N. ` 开头则不重复）。按金板 PROCESSING_NOTES 第 25 条落格。
+    """
+    text = str(markdown_text or "")
+    if not text:
+        return text
+    output_lines: list[str] = []
+    has_def_lines = False
+    notes_heading_inserted = False
+    saw_notes_heading_already = False
+    raw_lines = text.splitlines()
+    # 先扫描定位是否已有 ### NOTES
+    for line in raw_lines:
+        stripped = line.strip()
+        if stripped.startswith("### NOTES") or stripped == "### NOTES":
+            saw_notes_heading_already = True
+            break
+
+    for line in raw_lines:
+        match = _DEF_LINE_PRINTED_PREFIX_RE.match(line.rstrip())
+        if match:
+            number = int(match.group(1))
+            body = str(match.group(2) or "").strip()
+            # 工单 #7a：第一条定义行出现前补 NOTES 标题（如尚无）
+            if not has_def_lines and not saw_notes_heading_already and not notes_heading_inserted:
+                # 在前面插入空行 + 标题
+                while output_lines and output_lines[-1].strip() == "":
+                    output_lines.pop()
+                if output_lines:
+                    output_lines.append("")
+                output_lines.append("### NOTES")
+                output_lines.append("")
+                notes_heading_inserted = True
+            has_def_lines = True
+            # 工单 #7b：印刷编号前缀（幂等）
+            prefix = f"{number}. "
+            if not body.startswith(prefix):
+                body = f"{prefix}{body}"
+            output_lines.append(f"[^{number}]: {body}")
+        else:
+            output_lines.append(line)
+    return "\n".join(output_lines).rstrip() + ("\n" if text.endswith("\n") else "")
 
 
 def _rewrite_chapters_for_merge(
@@ -676,6 +732,20 @@ def build_chapter_markdown_set(
         frozen_units=frozen_units,
         chapter_layers=chapter_layers,
     )
+    # 工单 #7：在最终 markdown 上应用 NOTES 块格式（标题统一 + 印刷编号前缀）。
+    chapters = [
+        ChapterMarkdownEntry(
+            order=int(row.order or 0),
+            chapter_id=str(row.chapter_id or ""),
+            title=str(row.title or ""),
+            path=str(row.path or ""),
+            markdown_text=_apply_notes_block_format(str(row.markdown_text or "")),
+            start_page=int(row.start_page or 0),
+            end_page=int(row.end_page or int(row.start_page or 0)),
+            pages=[int(page_no) for page_no in list(row.pages or []) if int(page_no) > 0],
+        )
+        for row in chapters
+    ]
 
     expected_chapters = [row for row in chapter_layers.chapters if str(row.chapter_id or "").strip()]
     chapter_contract_summary = dict(export_summary.get("chapter_ref_contract_summary") or {})

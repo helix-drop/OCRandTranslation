@@ -122,6 +122,10 @@ class LayerNoteRegion:
     source_scope: str = ""
     bind_method: str = ""
     bind_confidence: float = 0.0
+    # 工单 #2：region 首条 note item 的 marker（来自 NoteRegionRecord 同名字段，
+    # 在 build_chapter_layers 内 build_note_items 后回填）。供下游契约校验
+    # 与取证报告使用，避免空字符串。
+    region_first_note_item_marker: str = ""
 
 
 @dataclass(slots=True)
@@ -180,6 +184,9 @@ class ChapterLayers:
     note_items: list[LayerNoteItem] = field(default_factory=list)
     region_summary: dict[str, Any] = field(default_factory=dict)
     item_summary: dict[str, Any] = field(default_factory=dict)
+    # 由 chapter_split._chapter_body_marker_sets 累积：每章正文中识别到的 anchor marker 唯一数。
+    # 工单 #3 契约 v2 用作 def_anchor_mismatch 的"对地"基线。
+    chapter_marker_counts: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -228,6 +235,12 @@ class ChapterLinkContract:
     no_orphan_note: bool
     endnote_only_no_orphan_anchor: bool
     failure_link_ids: list[str] = field(default_factory=list)
+    # 工单 #3 契约 v2：对地校验（不依赖 requires_endnote_contract 短路）
+    has_marker_gap: bool = False
+    def_anchor_mismatch: bool = False
+    def_count: int = 0
+    anchor_total: int = 0
+    marker_sequence: list[int] = field(default_factory=list)
 
 
 @dataclass(slots=True)

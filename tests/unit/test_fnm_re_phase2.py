@@ -61,7 +61,14 @@ def _section_signature(phase1) -> tuple:
 
 
 class FnmRePhase2Test(unittest.TestCase):
-    def test_footnote_band_chapter_wont_build_chapter_endnote_region(self):
+    def test_mixed_chapter_with_explicit_notes_page_builds_both_regions(self):
+        """工单 #5：mixed 章节（footnote + 章末 NOTES 容器共存）应同时建两种 region。
+
+        旧行为（在工单 #5 之前）：footnote band 章节会跳过所有 endnote 候选页，
+        导致 Biopolitics 章 1 等 mixed 章节的章末尾注（书页 39-42 等）完全丢失。
+        新行为：上游 page_partition 把页 page_role 标为 "note"（无论是 _rule_note_scan
+        自动识别还是 page_overrides 显式指定）时，必须建出 chapter_endnote region。
+        """
         pages = [
             _make_page(
                 1,
@@ -91,8 +98,13 @@ class FnmRePhase2Test(unittest.TestCase):
             and region.scope == "chapter"
             and region.chapter_id == structure.chapters[0].chapter_id
         ]
-        self.assertTrue(foot_regions)
-        self.assertFalse(chapter_end_regions)
+        # 工单 #5：footnote band 仍建（p1 的 page footnote）+ chapter_endnote 也建（p2 的 NOTES 容器）。
+        self.assertTrue(foot_regions, "page footnote 应建 footnote region")
+        self.assertTrue(
+            chapter_end_regions,
+            "工单 #5：显式 note role 页应建 chapter_endnote region，即使该章已有 footnote band",
+        )
+        self.assertEqual(chapter_end_regions[0].pages, [2])
 
     def test_notes_heading_and_continuation_merge_into_single_endnote_region(self):
         pages = [

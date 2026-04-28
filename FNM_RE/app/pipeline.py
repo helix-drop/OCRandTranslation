@@ -46,6 +46,7 @@ from FNM_RE.models import (
 from FNM_RE.modules.book_assemble import build_export_bundle as build_module_export_bundle
 from FNM_RE.modules.book_note_type import build_book_note_profile
 from FNM_RE.modules.chapter_merge import build_chapter_markdown_set
+from FNM_RE.shared.review_overrides import group_review_overrides as _group_review_overrides, empty_grouped_overrides as _empty_grouped_overrides
 from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.contracts import ModuleResult
 from FNM_RE.modules.note_linking import build_note_link_table
@@ -1118,6 +1119,10 @@ def _legacy_page_role_from_toc_role(role: str) -> str:
         return "body"
     if token == "front_matter":
         return "front_matter"
+    if token == "note":
+        return "note"
+    if token == "noise":
+        return "noise"
     return "other"
 
 

@@ -182,8 +182,15 @@ def _build_page_roles(
     rows: list[TocPageRole] = []
     for row in partitions:
         page_no = int(row.page_no)
+        source_role = str(row.page_role or "").strip().lower()
         chapter = chapter_by_page.get(page_no)
-        if chapter is not None:
+        # 工单 #5：上游 note_scan（page_partition._rule_note_scan）已识别为
+        # NOTES 容器页时，note 角色优先于 chapter，避免章末 NOTES 容器被
+        # chapter mapping 覆盖。chapter_id 仍保留供下游 region 绑定。
+        if source_role == "note":
+            role = "note"
+            chapter_id = chapter.chapter_id if chapter is not None else ""
+        elif chapter is not None:
             role = chapter.role
             chapter_id = chapter.chapter_id
         elif page_no > 0 and back_matter_start > 0 and page_no >= back_matter_start:
@@ -192,13 +199,13 @@ def _build_page_roles(
         elif back_matter_start == 0 and str(row.reason or "") in _BACK_MATTER_REASON_HINTS and page_no >= rear_page_role_min_page:
             role = "back_matter"
             chapter_id = ""
-        elif str(row.page_role or "") in {"other"}:
+        elif source_role in {"other"}:
             role = "front_matter"
             chapter_id = ""
         elif first_chapter_start > 0 and page_no < first_chapter_start:
             role = "front_matter"
             chapter_id = ""
-        elif str(row.page_role or "") == "front_matter":
+        elif source_role == "front_matter":
             role = "front_matter"
             chapter_id = ""
         else:
@@ -280,7 +287,7 @@ def build_toc_structure(
 
     hard = {
         "toc.pages_classified": bool(toc_pages) and all(
-            row.role in {"front_matter", "chapter", "post_body", "back_matter"} for row in toc_pages
+            row.role in {"front_matter", "chapter", "post_body", "back_matter", "endnotes", "container"} for row in toc_pages
         ),
         "toc.has_exportable_chapters": any(row.role == "chapter" for row in toc_chapters),
         "toc.chapter_titles_aligned": bool(chapter_meta.get("chapter_title_alignment_ok", True)),

@@ -10,6 +10,7 @@ from document.note_detection import annotate_pages_with_note_scans
 
 from FNM_RE.models import NoteRegionRecord, Phase1Structure
 from FNM_RE.shared.notes import first_notes_heading, first_source_marker, scan_items_by_kind
+from FNM_RE.shared.chapters import chapter_id_for_page as _shared_chapter_id_for_page, nearest_prior_chapter as _shared_nearest_prior_chapter
 from FNM_RE.stages.endnote_chapter_explorer import explore_endnote_chapter_regions
 from FNM_RE.shared.text import extract_page_headings
 from FNM_RE.shared.title import chapter_title_match_key, normalize_title
@@ -25,19 +26,12 @@ _ILLUSTRATION_CONTENT_RE = re.compile(
 
 
 def _chapter_id_for_page(phase1: Phase1Structure, page_no: int) -> str:
-    for chapter in phase1.chapters:
-        if int(page_no) in {int(page) for page in chapter.pages if int(page) > 0}:
-            return chapter.chapter_id
-    prior = [chapter for chapter in phase1.chapters if int(chapter.start_page) <= int(page_no)]
-    return prior[-1].chapter_id if prior else ""
+    chapters = getattr(phase1, "chapters", phase1)
+    return _shared_chapter_id_for_page(chapters, page_no)
 
 
 def _nearest_prior_chapter(phase1: Phase1Structure, page_no: int) -> str:
-    prior = [chapter for chapter in phase1.chapters if int(chapter.start_page) <= int(page_no)]
-    if not prior:
-        return ""
-    prior.sort(key=lambda chapter: (int(chapter.start_page), int(chapter.end_page)))
-    return prior[-1].chapter_id
+    return _shared_nearest_prior_chapter(phase1.chapters, page_no)
 
 
 def _page_payload_by_no(pages: list[dict]) -> dict[int, dict]:

@@ -159,7 +159,8 @@ class FnmRePhase6Test(unittest.TestCase):
         _chapters, bundle, _summary = build_export_bundle(phase5, pages=pages)
         chapter_path = bundle.chapters[0].path
         content = str(bundle.chapter_files.get(chapter_path) or "")
-        self.assertIn("[^1]: Used note text.", content)
+        # 阶段1：footnote 不生成 [^N] 或 [footnote]: 区段，正文中为 *
+        self.assertNotIn("[^1]", content)
         self.assertNotIn("Unreferenced note text.", content)
 
     def test_raw_bracket_and_superscript_markers_are_rewritten_to_local_refs(self):
@@ -174,7 +175,8 @@ class FnmRePhase6Test(unittest.TestCase):
         ]
         phase6 = build_phase6_structure(pages)
         content = _first_chapter_content(phase6)
-        self.assertIn("[^1]", content)
+        # 阶段1：footnote 标记转为 *，不占 [^N]
+        self.assertNotIn("[^1]", content)
         self.assertNotIn("[1]", content)
         self.assertNotIn("$^{1}$", content)
         self.assertNotIn("¹", content)

@@ -28,6 +28,12 @@ OLD_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".foreign_lit_reader")
 GLOSSARY_INIT = []
 PARA_MAX_CONCURRENCY = 10
 PARA_CONTEXT_WINDOW = 200
+
+# 工单 #4：链接质量阈值（FNM_RE.modules.note_linking 用）。
+# fallback resolver 命中的 matched 占 matched 总数的比例，超过即触发 link_quality_low。
+LINK_FALLBACK_MATCH_RATIO_THRESHOLD_DEFAULT = 0.30
+# footnote_orphan_anchor + endnote_orphan_anchor 总数，超过即触发 link_quality_low。
+LINK_ORPHAN_ANCHOR_THRESHOLD_DEFAULT = 10
 PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT = 5
 PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT = 80
 TRANSLATE_PARALLEL_ENABLED_DEFAULT = False

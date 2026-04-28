@@ -17,7 +17,7 @@
 - `persistence/sqlite_store.py`
   - SQLite 统一仓储入口
 - `persistence/sqlite_schema.py`
-  - 当前 SQLite 正式 schema 与迁移
+  - 当前 SQLite 正式 schema（版本 24）与迁移
 - `persistence/sqlite_repo_fnm.py`
   - FNM 结构真相与翻译单元仓储
 - `persistence/storage.py`
@@ -34,49 +34,64 @@
   - 标准翻译/FNM 翻译入口与状态接口
 - `web/reading_routes.py`
   - 标准阅读页主路由
-- `fnm/fnm_structure.py`
-  - FNM 结构真相构建
-- `fnm/fnm_pipeline.py`
-  - FNM 正式流水线：结构 -> 单元 -> 校验
-- `fnm/fnm_export.py`
-  - FNM 正式导出
-- `fnm/fnm_v2_status.py`
+- `FNM_RE/app/mainline.py`
+  - FNM 主线接线层：`run_phase6_pipeline_for_doc` 串联七模块
+- `FNM_RE/app/pipeline.py`
+  - FNM 分阶段总入口：`build_phase1~6_structure`
+- `FNM_RE/modules/toc_structure.py`
+  - 模块一：目录结构与章节角色判定
+- `FNM_RE/modules/book_note_type.py`
+  - 模块二：书籍注释类型分析
+- `FNM_RE/modules/chapter_split.py`
+  - 模块三：章节切分、注释区域绑定
+- `FNM_RE/modules/note_linking.py`
+  - 模块四：正文锚点与注释项链接闭合
+- `FNM_RE/modules/ref_freeze.py`
+  - 模块五：引用冻结与翻译单元构建
+- `FNM_RE/modules/chapter_merge.py`
+  - 模块六：章节 Markdown 合并
+- `FNM_RE/modules/book_assemble.py`
+  - 模块七：整书组装、语义审计与导出收口
+- `FNM_RE/status.py`
   - FNM 结构/进度主状态汇总
 
 ## `diagnostic`
 
 这些模块保留，但只承担只读诊断、批测、审计或样本维护职责，不允许反向污染主链：
 
-- `fnm/fnm_diagnostic.py`
-  - 从结构真相现算页投影与注释摘要
-- `fnm/fnm_page_translate.py`
+- `FNM_RE/page_translate.py`
   - 仅保留翻译单元 helper 与只读诊断投影 helper
+- `FNM_RE/stages/diagnostics.py`
+  - 从结构真相现算诊断页投影与注释摘要
 - `web/reading_view.py`
   - FNM 只读诊断阅读上下文构建
 - `scripts/test_fnm_batch.py`
-  - 8 本基线批测与导出审计
+  - 8 本基线批测（占位翻译模式）
+- `scripts/test_fnm_real_batch.py`
+  - 8 本基线批测（真实 LLM 视觉+修补模式）
 - `scripts/generate_visual_toc_snapshots.py`
   - 视觉目录快照与诊断摘要
 - `scripts/rebuild_doc_derivatives.py`
   - 重新生成派生产物；仅作维护/诊断脚本
 - `scripts/audit_fnm_exports.py`
   - 导出抽样/全量审计
+- `scripts/reingest_fnm_from_snapshots.py`
+  - 从 test_example 快照重新注入 FNM 数据
 - `test_example/`
   - 样本书、目录输入、快照与最新导出包
-- `reading?view=fnm`
-  - 保留为只读诊断入口，不是默认产品路径
 
 ## `legacy_to_remove`
 
 这些内容不应继续进入正式主链；若仍有残留引用，应继续迁走或删除：
 
+- `fnm/` 目录（已迁移到 `FNM_RE/`）
 - 任何基于旧表的持久化逻辑：
   - `fnm_notes`
   - `fnm_page_entries`
   - `fnm_page_revisions`
 - 任何把 `rendered_sections` 当正式真相层的路径
 - FNM 页编辑/页历史相关代码与接口
-- 旧的“自动猜目录页即可进入正式 FNM 主链”的逻辑
+- 旧的"自动猜目录页即可进入正式 FNM 主链"的逻辑
 
 ## 当前判定规则
 

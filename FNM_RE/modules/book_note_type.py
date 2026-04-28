@@ -39,6 +39,25 @@ def _chapter_by_page(toc_structure: TocStructure) -> dict[int, str]:
     return mapped
 
 
+def _nearest_prior_chapter_id(toc_structure: TocStructure, page_no: int) -> str:
+    """返回不晚于 page_no 的最近 chapter 的 chapter_id；不存在则空串。
+
+    工单 #6：用于把章节边界之间的 endnote 容器页（如 LEÇON DU 21 FÉVRIER 章末
+    NOTES 在 197-202，下一章 LEÇON DU 7 MARS 从 220 起，197-202 落在两章之间）
+    绑定到前一章。与 [`note_regions._chapter_id_for_page`](../stages/note_regions.py)
+    的兜底语义一致。
+    """
+    candidates = [
+        ch
+        for ch in toc_structure.chapters
+        if str(ch.chapter_id or "").strip() and int(ch.start_page or 0) <= int(page_no)
+    ]
+    if not candidates:
+        return ""
+    candidates.sort(key=lambda ch: (int(ch.start_page or 0), int(ch.end_page or 0)))
+    return str(candidates[-1].chapter_id or "")
+
+
 def _is_endnote_page(markdown: str) -> bool:
     lines = [line.strip() for line in str(markdown or "").splitlines() if line.strip()]
     if not lines:
@@ -114,18 +133,27 @@ def build_book_note_profile(
                 chapter_has_endnote.setdefault(chapter_id, set()).add(page_no)
             elif page_no > last_chapter_end:
                 book_endnote_pages.add(page_no)
+            else:
+                # 工单 #6：章节边界之间的 endnote 容器页（前章 end < page_no <
+                # 下一章 start）按 nearest-prior chapter 兜底绑定，与 phase2
+                # `note_regions._chapter_id_for_page` 语义保持一致。
+                prior_id = _nearest_prior_chapter_id(toc_structure, page_no)
+                if prior_id:
+                    chapter_has_endnote.setdefault(prior_id, set()).add(page_no)
 
     chapter_modes: list[ChapterNoteMode] = []
     for chapter in chapters:
         chapter_id = str(chapter.chapter_id or "")
         chapter_footnote_pages = chapter_has_footnote.get(chapter_id, set())
         chapter_endnote_pages = chapter_has_endnote.get(chapter_id, set())
-        if chapter_footnote_pages and chapter_endnote_pages:
-            note_mode = "footnote_primary" if len(chapter_footnote_pages) >= len(chapter_endnote_pages) else "chapter_endnote_primary"
+        # 工单 #6：endnote 容器页（_is_endnote_page 命中 / page_kind=endnote_collection）
+        # 是该章 endnote 主导的强信号（NOTES 容器 1 页可含 7-8 条 endnote）；
+        # page footnote（手稿星号等）是辅助补充。endnote 优先，避免按"页数比较"
+        # 把 endnote 主导章误判为 footnote_primary（旧算法 6 vs 8 误判 footnote）。
+        if chapter_endnote_pages:
+            note_mode = "chapter_endnote_primary"
         elif chapter_footnote_pages:
             note_mode = "footnote_primary"
-        elif chapter_endnote_pages:
-            note_mode = "chapter_endnote_primary"
         elif book_endnote_pages:
             note_mode = "book_endnote_bound"
         else:

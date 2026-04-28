@@ -462,6 +462,26 @@ def _chapter_mode_summary_from_snapshot(snapshot: Any) -> dict[str, int]:
         "body_only": 0,
         "mixed_or_unclear": 0,
     }
+    # 优先从 split_result 读取（经过 endnote region 优先级修正）
+    split_result = getattr(snapshot, "split_result", None)
+    split_data = getattr(split_result, "data", None)
+    split_chapters = list(getattr(split_data, "chapters", []) or [])
+    if split_chapters:
+        for chapter in split_chapters:
+            policy = dict(getattr(chapter, "policy_applied", {}) or {})
+            mode = str(policy.get("note_mode") or "")
+            if mode == "footnote_primary":
+                mapped["footnote_primary"] += 1
+            elif mode == "chapter_endnote_primary":
+                mapped["chapter_endnotes"] += 1
+            elif mode == "book_endnote_bound":
+                mapped["book_endnotes"] += 1
+            elif mode == "no_notes":
+                mapped["body_only"] += 1
+            else:
+                mapped["mixed_or_unclear"] += 1
+        return mapped
+    # 兜底：从 book_type_result 读取
     book_type_result = getattr(snapshot, "book_type_result", None)
     book_type_data = getattr(book_type_result, "data", None)
     rows = list(getattr(book_type_data, "chapter_modes", []) or [])

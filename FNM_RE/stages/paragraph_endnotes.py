@@ -14,6 +14,7 @@ import re
 from typing import Any
 
 from FNM_RE.models import ChapterEndnoteRecord, Phase1Structure
+from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
 from FNM_RE.shared.notes import (
     first_notes_heading,
     normalize_note_marker,
@@ -37,11 +38,7 @@ def _page_role_map(phase1: Phase1Structure) -> dict[int, str]:
 
 
 def _chapter_id_for_page(phase1: Phase1Structure, page_no: int) -> str:
-    for chapter in phase1.chapters:
-        if int(page_no) in {int(p) for p in chapter.pages if int(p) > 0}:
-            return chapter.chapter_id
-    prior = [c for c in phase1.chapters if int(c.start_page) <= int(page_no)]
-    return prior[-1].chapter_id if prior else ""
+    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(phase1.chapters, page_no)
 
 
 def _is_endnote_page(

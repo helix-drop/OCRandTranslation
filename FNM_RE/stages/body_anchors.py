@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Any
 
 from FNM_RE.models import BodyAnchorRecord, Phase2Structure
+from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
 from FNM_RE.shared.anchors import (
     anchor_dedupe_key,
     page_body_paragraphs,
@@ -15,15 +16,7 @@ from FNM_RE.shared.anchors import (
 
 
 def _chapter_id_for_page(phase2: Phase2Structure, page_no: int) -> str:
-    for chapter in phase2.chapters:
-        if int(page_no) in {int(page) for page in chapter.pages if int(page) > 0}:
-            return chapter.chapter_id
-    prior = [
-        chapter
-        for chapter in phase2.chapters
-        if int(chapter.start_page) <= int(page_no)
-    ]
-    return prior[-1].chapter_id if prior else ""
+    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(phase2.chapters, page_no)
 
 
 def _page_payload_by_no(pages: list[dict]) -> dict[int, dict]:

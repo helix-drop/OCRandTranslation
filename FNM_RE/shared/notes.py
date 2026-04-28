@@ -30,7 +30,22 @@ _EMBEDDED_NOTE_DEF_RE = re.compile(
 _INLINE_NOTE_BREAK_RE = re.compile(
     r"(?P<prefix>[\.\]\)»”])(?P<gap>\s+)(?=(?:\d[\s,\.\-]*){1,4}[\.,\)\]])"
 )
-_PAGE_CITATION_PREFIX_RE = re.compile(r"(?:\bpp?|\bf(?:o|°)?)\.$", re.IGNORECASE)
+# 工单 #8：扩展引文缩写词集合，避免 `vol. 13` / `n° 21` / `art. 5` / `chap. 2`
+# / `t. III` / `tome 1` / `cf. infra` 等在 NOTES 容器内被
+# `_INLINE_FOLLOWUP_TOKEN_RE` 误识为下一条 note 起始而切断。这是 ch.6 [^5]、
+# ch.7 [^44/48]、ch.10 [^18/22] 等长 note 被截到 `vol.` 的真实根因。与
+# document/note_detection.py 的同名常量保持一致。
+_PAGE_CITATION_PREFIX_RE = re.compile(
+    r"(?:"
+    r"\bpp?|\bf(?:o|°)?"  # p / pp / f / fo / f°
+    r"|\bvol|\bn[°o]|\bnos?|\bnr"  # vol / n° / no / nos / nr
+    r"|\bart|\bchap|\bsect|\b§"  # art / chap / sect / §
+    r"|\bt|\btome|\bliv|\bbk|\bbook|\bch"  # t / tome / liv / bk / book / ch
+    r"|\bcf|\bvoir|\bsee|\binfra|\bsupra|\bibid|\bop|\bloc|\bid"  # cf / voir / see / infra / supra / ibid / op / loc / id
+    r"|\béd|\bed|\beds|\bdir|\btrad|\btr"  # éd / ed / eds / dir / trad / tr
+    r")\.$",
+    re.IGNORECASE,
+)
 _INLINE_FOLLOWUP_TOKEN_RE = re.compile(
     r"(?:\s*[,;:·•]+\s*|\s+)"
     r"(?P<token>\d(?:[ ,\.\-]{0,2}\d){0,3})"

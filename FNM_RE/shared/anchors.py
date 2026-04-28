@@ -24,8 +24,26 @@ _NOTE_DEFINITION_LINE_RE = re.compile(
 _HTML_SUP_RE = re.compile(r"<sup>\s*(\d{1,4})\s*</sup>", re.IGNORECASE)
 _LATEX_SUP_RE = re.compile(r"\$\s*\^\{(\d{1,4})\}\s*\$")
 _PLAIN_SUP_RE = re.compile(r"\^\{(\d{1,4})\}")
+_FOOTNOTE_REF_RE = re.compile(r"\[\^(\d{1,4})\]")
 _BRACKET_REF_RE = re.compile(r"\[(\d{1,4})\]")
 _UNICODE_SUP_RE = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+")
+_BARE_DIGIT_RE = re.compile(r"\s(\d{1,3})(?=[\.\,\;\:\)\]\}»]|\s+[\-–—])")
+_BARE_DIGIT_LEFT_WORD_RE = re.compile(
+    r"([A-Za-zàâäéèêëïîôöùûüÿçœÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇŒ]+)\s*$"
+)
+# 这些缩写/介词后的数字几乎肯定不是 note marker（页码/卷号/章号/引文锚）。
+_BARE_DIGIT_LEFT_WORD_BLACKLIST = frozenset(
+    {
+        "p", "pp", "f", "ff", "vol", "t", "tome", "chap", "chapitre",
+        "art", "article", "fig", "figure", "tableau", "tabl", "no",
+        "sect", "section", "cf", "voir", "see", "infra", "supra",
+        "loc", "op", "n",
+        "et", "ou", "de", "du", "la", "le", "les", "un", "une",
+        "il", "elle", "ils", "elles", "on", "y", "a", "as", "ai",
+        "au", "aux", "ce", "ces", "ma", "ta", "sa", "mes", "tes", "ses",
+        "in", "by", "to", "of", "at",
+    }
+)
 _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
     {
         "⁰": "0",
@@ -44,6 +62,7 @@ _LATEX_SYMBOL_SUP_RE = re.compile(r"\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$")
 _TRAILING_SYMBOL_AFTER_BRACKET_RE = re.compile(r"[\]](\*{1,4})")
 _TRAILING_SYMBOL_AFTER_QUOTE_RE = re.compile(r"[»](\*{1,4})")
 _REF_PATTERN_PRIORITY = {
+    "footnote_ref": 0,
     "latex": 0,
     "latex_symbol_sup": 0,
     "plain": 1,
@@ -51,8 +70,10 @@ _REF_PATTERN_PRIORITY = {
     "unicode": 3,
     "bracket": 4,
     "trailing_symbol": 5,
+    "bare_digit": 6,
 }
 _REF_PATTERN_CERTAINTY = {
+    "footnote_ref": 1.0,
     "latex": 1.0,
     "html": 1.0,
     "bracket": 1.0,
@@ -60,6 +81,7 @@ _REF_PATTERN_CERTAINTY = {
     "plain": 0.4,
     "latex_symbol_sup": 1.0,
     "trailing_symbol": 0.9,
+    "bare_digit": 0.6,
 }
 
 
@@ -164,10 +186,28 @@ def page_body_paragraphs(page: Mapping[str, Any] | None) -> list[dict]:
     return merged
 
 
+def _is_bare_digit_marker_context(content: str, digit_start: int) -> bool:
+    """裸数字（"Encyclopédie 11"）守卫：检查左侧紧邻词是否合法 marker 上下文。
+
+    要求紧邻词长度 ≥ 4 且不在引用前缀黑名单（p./vol./Section/voir 等）。
+    """
+    left = content[:digit_start].rstrip()
+    word_match = _BARE_DIGIT_LEFT_WORD_RE.search(left)
+    if not word_match:
+        return False
+    word = word_match.group(1).lower()
+    if len(word) < 4:
+        return False
+    if word in _BARE_DIGIT_LEFT_WORD_BLACKLIST:
+        return False
+    return True
+
+
 def _scan_inline_refs(text: str) -> list[dict]:
     refs: list[dict] = []
     content = str(text or "")
     for pattern, kind in (
+        (_FOOTNOTE_REF_RE, "footnote_ref"),
         (_LATEX_SUP_RE, "latex"),
         (_LATEX_SYMBOL_SUP_RE, "latex_symbol_sup"),
         (_PLAIN_SUP_RE, "plain"),
@@ -190,6 +230,23 @@ def _scan_inline_refs(text: str) -> list[dict]:
                     "certainty": _REF_PATTERN_CERTAINTY.get(kind, 0.4),
                 }
             )
+    for match in _BARE_DIGIT_RE.finditer(content):
+        digit_start = match.start(1)
+        if not _is_bare_digit_marker_context(content, digit_start):
+            continue
+        marker = normalize_note_marker(match.group(1) or "")
+        if not marker:
+            continue
+        refs.append(
+            {
+                "source_marker": str(match.group(1) or "").strip(),
+                "normalized_marker": marker,
+                "char_start": int(digit_start),
+                "char_end": int(match.end(1)),
+                "pattern": "bare_digit",
+                "certainty": _REF_PATTERN_CERTAINTY.get("bare_digit", 0.6),
+            }
+        )
     for match in _UNICODE_SUP_RE.finditer(content):
         marker = normalize_note_marker(
             match.group(0).translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
