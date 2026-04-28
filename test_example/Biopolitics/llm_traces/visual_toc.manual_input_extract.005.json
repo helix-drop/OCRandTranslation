@@ -23,7 +23,7 @@
     "source": "pdf",
     "file_idx": 4
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Leçon du 4 avril 1979\",\n    \"depth\": 0,\n    \"printed_page\": 295,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"RÉSUMÉ DU COURS\",\n    \"depth\": 0,\n    \"printed_page\": 321,\n    \"visual_order\": 2,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"SITUATION DES COURS\",\n    \"depth\": 0,\n    \"printed_page\": 331,\n    \"visual_order\": 3,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"INDICES\",\n    \"depth\": 1,\n    \"printed_page\": 337,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index des notions\",\n    \"depth\": 0,\n    \"printed_page\": 338,\n    \"visual_order\": 5,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index des noms de personnes\",\n    \"depth\": 0,\n    \"printed_page\": 346,\n    \"visual_order\": 6,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Leçon du 4 avril 1979\",\n    \"depth\": 0,\n    \"printed_page\": 295,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"RÉSUMÉ DU COURS\",\n    \"depth\": 0,\n    \"printed_page\": 321,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"SITUATION DES COURS\",\n    \"depth\": 0,\n    \"printed_page\": 331,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"INDICES\",\n    \"depth\": 1,\n    \"printed_page\": 337,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index des notions\",\n    \"depth\": 0,\n    \"printed_page\": 338,\n    \"visual_order\": 5,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index des noms de personnes\",\n    \"depth\": 0,\n    \"printed_page\": 346,\n    \"visual_order\": 6,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
   "response_parsed": [
     {
       "title": "Leçon du 4 avril 1979",
@@ -39,7 +39,7 @@
       "depth": 0,
       "printed_page": 321,
       "visual_order": 2,
-      "role_hint": "back_matter",
+      "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
@@ -48,7 +48,7 @@
       "depth": 0,
       "printed_page": 331,
       "visual_order": 3,
-      "role_hint": "back_matter",
+      "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
@@ -96,7 +96,7 @@
         "depth": 0,
         "printed_page": 321,
         "visual_order": 2,
-        "role_hint": "back_matter",
+        "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
       },
@@ -105,7 +105,7 @@
         "depth": 0,
         "printed_page": 331,
         "visual_order": 3,
-        "role_hint": "back_matter",
+        "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
       },
@@ -144,8 +144,8 @@
     "model_id": "qwen3.6-plus",
     "request_count": 1,
     "prompt_tokens": 1297,
-    "completion_tokens": 465,
-    "total_tokens": 1762,
+    "completion_tokens": 461,
+    "total_tokens": 1758,
     "doc_id": "0d285c0800db",
     "slug": "",
     "context": {
@@ -154,6 +154,6 @@
     }
   },
   "timing": {
-    "duration_ms": 9523
+    "duration_ms": 11241
   }
 }

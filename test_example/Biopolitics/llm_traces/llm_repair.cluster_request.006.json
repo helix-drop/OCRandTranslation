@@ -8,453 +8,326 @@
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-011-leçondu28mars1979:toc-ch-011-leçondu28mars1979:footnote\",\n  \"chapter_title\": \"Leçon du 28 mars 1979\",\n  \"page_range\": [\n    297,\n    300\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 296,\n      \"ocr_excerpt\": \"n'est pas la peine d'y insister beaucoup, à savoir que, puisque la mécanique économique implique que chacun suive son propre intérêt, il faut donc laisser faire chacun. Il n'y a pas à intervenir, pour le pouvoir politique, dans cette dynamique que la nature a inscrite dans le cœur de l'homme. Il est donc interdit au gouvernement de faire obstacle à cet intérêt des individus. C'est ce que dit Adam Smith, lorsqu'il écrit : l'intérêt commun exige que chacun sache entendre le sien (d'intérêt) et puisse lui obéir sans obstacle $ ^{28} $. Autrement dit, le pouvoir, le gouvernement ne peut pas faire obstacle au jeu des intérêts individuels. Mais il faut aller plus loin. Non seulement le gouvernement ne doit pas faire obstacle à l'intérêt de chacun, mais il est impossible que le souverain puisse avoir sur le mécanisme économique un point de vue qui totalise chacun des éléments et permette de les combiner artificiellement ou volontairement. La main invisible qui combine spontanément les intérêts interdit, en même temps, toute forme d'intervention, bien mieux, toute forme de regard en surplomb qui permettrait de totaliser le processus économique. Sur ce point un texte de Ferguson est très cl ...\"\n    },\n    {\n      \"page_no\": 297,\n      \"ocr_excerpt\": \"courte, et s'il y avait un souverain qui prétendait avoir la vue longue, le regard global et totalisant, ce souverain ne verrait jamais que des chimères. L'économie politique dénonce, au milieu du XVIII<sup>e</sup> siècle, le paralogisme de la totalisation politique du processus économique. Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'importance qu'il y a dans cet adjectif « invisible ». Smith dit ceci : « Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital $ ^{32} $. » Donc, principe du laissez-faire, chacun en tout cas doit suivre son intérêt. Et du coup, dit-il d'une manière relativement hypocrite – enfin, c'est moi qui dis que c'est hypocrite –, le souverain ne peut s'en trouver que très bien, car le voilà « débarrassé d'une charge qu'il ne saurait essayer de remplir – la surveillance de tous les processus économiques – sans s'exposer infailliblement à se voir sans cesse trompé de mille manières $ ^{33} $ ». Je dis ...\"\n    },\n    {\n      \"page_no\": 298,\n      \"ocr_excerpt\": \"sans Dieu ; l'économie est une discipline sans totalité ; l'économie est une discipline qui commence à manifester non seulement l'inutilité, mais l'impossibilité d'un point de vue souverain, d'un point de vue du souverain sur la totalité de l'État qu'il a à gouverner. L'économie subtilise à la forme juridique du souverain exerçant sa souveraineté à l'intérieur d'un État ce qui est en train d'apparaître comme l'essentiel de la vie d'une société, à savoir les processus économiques. Le libéralisme, dans sa consistance moderne, a commencé lorsque, précisément, fut formulée cette incompatibilité essentielle entre, d'une part, la multiplicité non totalisable caractéristique des sujets d'intérêt, des sujets économiques et, d'autre part, l'unité totalisante du souverain juridique. Le grand effort de la pensée juridico-politique, au cours du XVIII<sup>e</sup> siècle, pour montrer comment, à partir de sujets de droit individuels, sujets de droit naturel, on pouvait en arriver à la constitution d'une unité politique définie par l'existence d'un souverain, individuel ou non, peu importe, mais détenteur d'une part de la totalité de ses droits individuels et principe en même temps de la limitati ...\"\n    },\n    {\n      \"page_no\": 299,\n      \"ocr_excerpt\": \"propre et philosophique du terme $ ^{35} $. Après tout, Kant, un peu plus tard d'ailleurs, devait dire à l'homme qu'il ne peut pas connaître la totalité du monde. Eh bien, l'économie politique avait dit au souverain, quelques décennies auparavant : toi non plus, tu ne peux pas connaître, tu ne peux pas connaître la totalité du processus économique. Il n'y a pas de souverain en économie. Il n'y a pas de souverain économique. Je crois qu'on a là un des points tout de même très importants dans l'histoire de la pensée économique, bien sûr, mais surtout dans l'histoire de la raison gouvernementale. L'absence ou l'impossibilité d'un souverain économique : c'est ce problème-là qui va être finalement posé à travers toute l'Europe et à travers tout le monde moderne, par les pratiques gouvernementales, les problèmes économiques, le socialisme, la planification, l'économie du bien-être. Tous les retours, toutes les récurrences de la pensée libérale et néolibérale dans l'Europe du xix<sup>e</sup> et du xx<sup>e</sup> siècle, c'est encore, toujours, une certaine manière de poser le problème de cette impossibilité de l'existence d'un souverain économique. Et tout ce qui va apparaître, au contrai ...\"\n    },\n    {\n      \"page_no\": 300,\n      \"ocr_excerpt\": \"repose bien sur le postulat qu'il doit y avoir un souverain économique. L'économie politique ne constitue pas simplement une réfutation des doctrines ou des pratiques mercantilistes. L'économie politique d'Adam Smith ne montre pas simplement combien le mercantilisme constituait une erreur technique ou une erreur théorique. L'économie politique d'Adam Smith, le libéralisme économique, constitue une disqualification de ce projet politique d'ensemble et, plus radicalement encore, une disqualification d'une raison politique qui serait indexée à l'État et à sa souveraineté. Il est d'ailleurs intéressant de voir à quoi, plus précisément encore, s'oppose la théorie de la main invisible. Elle s'oppose, très exactement, à ce que disaient presque à la même époque ou, en tout cas, ce que venaient de dire quelques années auparavant les physiocrates, parce que la position des physiocrates est, à ce point de vue-là, très intéressante et très paradoxale. Les physiocrates en France ont fait précisément, sur le marché et les mécanismes du marché, ces analyses dont je vous ai déjà parlé plusieurs fois $ ^{37} $ et qui prouvaient qu'il ne fallait absolument pas que le gouvernement, que l'État, que le ...\"\n    },\n    {\n      \"page_no\": 301,\n      \"ocr_excerpt\": \"Tableau économique, à la fois ce qui se passe et comment il faut que ça se passe. Donc il pourra, au nom de ce savoir total, accepter librement et rationnellement, ou plutôt il devra bien accepter par la nécessité même de la raison, du savoir et de la vérité, le principe de la liberté des agents économiques. De sorte qu'entre le savoir du souverain et la liberté des individus, il va y avoir une seconde adéquation. Entin, troisiemement, un bon gouvernement – celui justement d'un souverain qui connaît exactement tout ce qui se passe quant aux processus économiques et grâce au Tableau économique – devra expliquer aux différents agents économiques, aux différents sujets, comment ça se passe. pourquoi ça se passe et ce qu'ils doivent faire pour maximiser leur profit. Il devra y avoir un savoir économique qui sera répandu le plus largement possible, et aussi uniformément que possible, parmi tous les sujets, et ce savoir économique, dont le principe se trouve toujours dans le Tableau économique dressé par les physiocrates, sera commun aux sujets bien éduqués économiquement et au souverain qui saura reconnaître les lois fondamentales de l'économie. De sorte qu'il y aura au niveau du savoir ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00431\",\n      \"marker\": \"32\",\n      \"page_no\": 297,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'i ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00432\",\n      \"marker\": \"33\",\n      \"page_no\": 297,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'i ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00433\",\n      \"marker\": \"34\",\n      \"page_no\": 297,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'i ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00434\",\n      \"marker\": \"35\",\n      \"page_no\": 299,\n      \"paragraph_index\": 0,\n      \"source_text\": \"propre et philosophique du terme $ ^{35} $. Après tout, Kant, un peu plus tard d'ailleurs, devait dire à l'homme qu'il ne peut pas connaître la totalité du monde. Eh bien, l'économie politique avait dit au souverain, quelques décennies aupa ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00435\",\n      \"marker\": \"36\",\n      \"page_no\": 299,\n      \"paragraph_index\": 1,\n      \"source_text\": \"À plus courte échelle, la théorie de la main invisible me paraît avoir essentiellement pour fonction, pour rôle la disqualification du souverain politique. Si on le replace non plus à travers l'histoire du libéralisme des deux derniers sièc ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00436\",\n      \"marker\": \"37\",\n      \"page_no\": 300,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Il est d'ailleurs intéressant de voir à quoi, plus précisément encore, s'oppose la théorie de la main invisible. Elle s'oppose, très exactement, à ce que disaient presque à la même époque ou, en tout cas, ce que venaient de dire quelques an ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-010-leçondu21mars1979:nr-en-ch-0060-toc-ch-010-leçondu21mars1979:endnote\",\n  \"chapter_title\": \"Leçon du 21 mars 1979\",\n  \"page_range\": [\n    279,\n    279\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 17,\n      \"ocr_excerpt\": \"# LEÇON DU 10 JANVIER 1979 Questions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ? [Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année derni ...\"\n    },\n    {\n      \"page_no\": 257,\n      \"ocr_excerpt\": \"Le néolibéralisme américain (II). - L'application de la grille économique aux phénomènes sociaux. - Retour à la problématique ordolibérale : les équivoques de la Gesellschaftspolitik. La généralisation de la forme « entre-prise » dans le champ social. Politique économique et Vitalpolitik : une société pour le marché et contre le marché. - La généralisation illimitée de la forme économique du marché dans le néolibéralisme américain : principe d'intelligibilité des comportements individuels et principe critique des interventions gouvernementales. - Aspects du néolibéralisme américain : (2) La délinquance et la politique pénale. - Rappel historique : le problème de la réforme du droit pénal à la fin du xvii<sup>e</sup> siècle. Calcul économique et principe de légalité. Le parasitage de la loi par la norme au xix<sup>e</sup> siècle et la naissance d'une anthropologie criminelle. - L'analyse néolibérale : (1) la définition du crime ; (2) la caractérisation du sujet criminel comme homo œconomicus ; (3) le statut de la peine comme instrument d'« enforcement » de la loi. L'exemple du marché de la drogue. - Conséquences de cette analyse : (a) le gommage anthropologique du criminel ; (b) la ...\"\n    },\n    {\n      \"page_no\": 260,\n      \"ocr_excerpt\": \"la mode à l'époque des ordolibéraux, ne soit plus aliéné par rapport à son milieu de travail, et au temps de sa vie, et à son ménage, et à sa famille, et à son milieu naturel. Il s'agit de reconstituer autour de l'individu des points d'ancrage concrets, reconstitution de points d'ancrage qui forment ce que Rüstow appelait la Vitalpolitik³. Le retour à l'entreprise, c'est à la fois, donc, une politique économique ou une politique d'économisation du champ social tout entier, de virage à l'économie du champ social tout entier, mais c'est en même temps une politique qui se présente ou se veut comme une Vitalpolitik qui aura pour fonction de compenser ce qu'il y a de froid, d'impassible, de calculateur, de rationnel, de mécanique dans le jeu de la concurrence proprement économique. La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence provoqués par le marché soient par là compensés. C'est ce que Rüstow disait, dans le colloque Walter Lippmann dont je vous parlais il y a quelque temps⁴ : « L'économie du corp ...\"\n    },\n    {\n      \"page_no\": 271,\n      \"ocr_excerpt\": \"vous voyez qu'on est tout près de Beccaria ou de Bentham, de toute cette problématique du xviii<sup>e</sup> siècle dans laquelle, vous le savez, la punition se justifiait par le fait que l'acte puni était nuisible et que c'était pour cela même qu'on avait fait une loi. C'était également ce même principe de l'utilité qui devait être appliqué à la mesure de la punition. On devait punir de telle manière que les effets nocifs de l'action puissent être ou annulés ou prévenus. Donc, on est toujours tout près de la problématique du xviii<sup>e</sup> siècle, mais avec, là aussi, un changement qui est important. Alors que la théorie classique essayait simplement d'articular les uns sur les autres différents effets hétérogènes attendus de la punition, c'est-à-dire le problème de la réparation qui est un problème civil, le problème de l'amendement de l'individu, le problème de la prévention par rapport aux autres individus, etc., les néolibéraux, eux, vont faire une articulation, une désarticulation différente de la punition. Et ils distinguent deux choses, enfin, ils ne font que reprendre, au fond, une problématique qui est courante dans la pensée ou dans la réflexion juridique anglo-saxonne ...\"\n    },\n    {\n      \"page_no\": 279,\n      \"ocr_excerpt\": \"## NOTES 1. Cf. supra, leçon du 14 février 1979, p. 151. 2. Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...] en plusieurs politiques particulières très variées dont les principales sont, pour ces auteurs, un aménagement de l'espace économique, un encouragement aux petites et moyennes entreprises et surtout une déprolétarisation de la société par le développement de l'épargne privée et la répartition aussi large que possible du capital national entre tous les citoyens. En faisant de tous les individus des capitalistes, en établissant un capitalisme populaire, on élimine les tares sociales du capitalisme, et ceci indépendamment du fait de la \\\"salarisation\\\" croissante dans l'économie. Un salarié également capitaliste n'est plus un prolétaire. » 3. Cf. supra, leçon du 14 février 1979, p. 153-154. 4. Cf. supra, leçons du 14 février et du 21 février 1979. 5. A. Rüstow, in Colloque Walter Lippmann, op. cit., p. 83 : « Si, dans l’intérêt de la productivité optima de la collectivité et de l’indépendance maxima de l’individu, on organise l’économie de ce corps social d’après les règles de l’économie d ...\"\n    },\n    {\n      \"page_no\": 314,\n      \"ocr_excerpt\": \"Ferguson, traduit en français en 1783 sous le titre Essai sur l'histoire de la société civile², texte proche, très proche d'Adam Smith et de l'Essai sur la richesse des nations, le mot « nation » d'ailleurs chez Adam Smith ayant à peu près le sens de société civile chez Ferguson³. Nous avons là le corrélatif politique, enfin le corrélatif en terme de société civile, de ce qu'Adam Smith étudiait en termes purement économiques. La société civile de Ferguson, c'est en effet l'élément concret, la globalité concrète à l'intérieur de laquelle fonctionnent les hommes économiques qu'Adam Smith essayait d'étudier. Cette société civile, chez Ferguson, je voudrais en relever trois ou quatre caractères essentiels : premièrement, la société civile entendue comme constante historico-naturelle ; deuxièmement, la société civile comme principe de synthèse spontanée ; troisièmement, la société civile comme matrice permanente de pouvoir politique ; et quatrièmement, la société civile comme élément moteur de l'histoire. Premièrement, la société civile comme constante historico-naturelle. Pour Ferguson, en effet, la société civile est une donnée au-delà de laquelle il n'y a rien à chercher. Avant la so ...\"\n    },\n    {\n      \"page_no\": 315,\n      \"ocr_excerpt\": \"on serait passé de la nature à l'histoire, de la non-société à la société. La nature de la nature humaine est d'être historique, car la nature de la nature humaine est d'être sociale. Il n'y a pas de nature humaine qui soit dissociable du fait même de la société. Et Ferguson évoque l'espèce de mythe, d'utopie méthodologique souvent reprise au XVIIIe siècle : soit, dit-il, une troupe d'enfants que l'on aurait laissés s'éduquer eux-mêmes en dehors de toute autre forme de société. Supposons des enfants que l'on mette dans un désert en les laissant se débrouiller dès leur plus jeune âge, qu'on les laisse se former tout seuls, sans instruction et sans guide, eh bien si nous revenions cinq ans, dix ans, quinze ans après, à condition bien sûr qu'ils ne soient pas morts, qu'est-ce que nous verrions? « Nous verrions les membres de cette petite société manger, dormir, aller en troupes, jouer ensemble, se faire un langage, se diviser, se quereller », se lier d'amitié, oublier pour les autres leur propre conservation $ ^{6} $. Donc, le lien social se forme spontanément. Il n'y a pas d'opération spécifique qui puisse l'établir ou le fonder. Il n'y a pas à instaurer ou à auto-instaurer la sociét ...\"\n    }\n  ],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"en-00375\",\n      \"anchor_id\": \"anchor-00001\",\n      \"marker\": \"1\",\n      \"note_excerpt\": \"Cf. supra, leçon du 14 février 1979, p. 151.\",\n      \"anchor_excerpt\": \"[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon ...\"\n    },\n    {\n      \"note_item_id\": \"en-00376\",\n      \"anchor_id\": \"orphan-recovery-en-00376\",\n      \"marker\": \"2\",\n      \"note_excerpt\": \"Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...] en plusieurs politiques particulières très variées dont les principales sont, pour ces auteurs, un ...\",\n      \"anchor_excerpt\": \"tik des ordolibéraux allemands². Or cette généralisation de\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"en-00384\",\n      \"marker\": \"10\",\n      \"page_no\": 279,\n      \"source_text\": \"« Méthodologie économique et Économie non marchande », communication au congrès des Économistes de langue française (Québec, mai 1976), reproduite en partie dans la Revue d'économie politique, juillet-août 1977 (cf. H. Lepage, Demain le cap ...\"\n    },\n    {\n      \"note_item_id\": \"en-00385\",\n      \"marker\": \"11\",\n      \"page_no\": 279,\n      \"source_text\": \"J.-L. Migué, ibid., cité par H. Lepage, op.cit., p. 346 : « L'une des grandes contributions récentes de l'analyse économique a été d'appliquer intégralement au secteur domestique le cadre analytique traditionnellement réservé à la firme et ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00453\",\n      \"note_item_id\": \"en-00375\",\n      \"current_anchor_id\": \"anchor-00001\",\n      \"marker\": \"1\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 17,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. supra, leçon du 14 février 1979, p. 151.\",\n      \"anchor_excerpt\": \"[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon ...\"\n    },\n    {\n      \"link_id\": \"link-00454\",\n      \"note_item_id\": \"en-00376\",\n      \"current_anchor_id\": \"orphan-recovery-en-00376\",\n      \"marker\": \"2\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 257,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...] en plusieurs politiques particulières très variées dont les principales sont, pour ces auteurs, un ...\",\n      \"anchor_excerpt\": \"tik des ordolibéraux allemands². Or cette généralisation de\"\n    },\n    {\n      \"link_id\": \"link-00455\",\n      \"note_item_id\": \"en-00377\",\n      \"current_anchor_id\": \"anchor-00470\",\n      \"marker\": \"3\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 271,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. supra, leçon du 14 février 1979, p. 153-154.\",\n      \"anchor_excerpt\": \"vous voyez qu'on est tout près de Beccaria ou de Bentham, de toute cette problématique du xviii<sup>e</sup> siècle dans laquelle, vous le savez, la punition se justifiait par le fait que l'acte puni était nuisible et que c'était pour cela m ...\"\n    },\n    {\n      \"link_id\": \"link-00456\",\n      \"note_item_id\": \"en-00378\",\n      \"current_anchor_id\": \"anchor-00522\",\n      \"marker\": \"4\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 314,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. supra, leçons du 14 février et du 21 février 1979.\",\n      \"anchor_excerpt\": \"Premièrement, la société civile comme constante historico-naturelle. Pour Ferguson, en effet, la société civile est une donnée au-delà de laquelle il n'y a rien à chercher. Avant la société civile, rien n'existe ou si quelque chose existe, ...\"\n    },\n    {\n      \"link_id\": \"link-00457\",\n      \"note_item_id\": \"en-00379\",\n      \"current_anchor_id\": \"anchor-00443\",\n      \"marker\": \"5\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 260,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"A. Rüstow, in Colloque Walter Lippmann, op. cit., p. 83 : « Si, dans l’intérêt de la productivité optima de la collectivité et de l’indépendance maxima de l’individu, on organise l’économie de ce corps social d’après les règles de l’économi ...\",\n      \"anchor_excerpt\": \"La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence pro ...\"\n    },\n    {\n      \"link_id\": \"link-00458\",\n      \"note_item_id\": \"en-00380\",\n      \"current_anchor_id\": \"anchor-00444\",\n      \"marker\": \"6\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 260,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"W. Röpke, La Crise de notre temps, trad. citée, I¹ª partie, ch. 2, p. 236 : « [...] ne demandons pas à la concurrence plus qu'elle ne peut donner. Elle est un principe d'ordre et de direction dans le domaine particulier de l'économie du mar ...\",\n      \"anchor_excerpt\": \"La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence pro ...\"\n    },\n    {\n      \"link_id\": \"link-00459\",\n      \"note_item_id\": \"en-00381\",\n      \"current_anchor_id\": \"anchor-00445\",\n      \"marker\": \"7\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 260,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ibid.: « [...] un État fort, trônant bien au-dessus des groupes affamés d'intérêts, une moralité économique très haute, une communauté non désagrégée d'hommes prêts à la coopération, naturellement enracinés et socialement intégrés. »\",\n      \"anchor_excerpt\": \"La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence pro ...\"\n    },\n    {\n      \"link_id\": \"link-00460\",\n      \"note_item_id\": \"en-00382\",\n      \"current_anchor_id\": \"anchor-00526\",\n      \"marker\": \"8\",\n      \"note_page_no\": 279,\n      \"anchor_page_no\": 315,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Cf. leçon précédente (14 mars), p. 235-236.\",\n      \"anchor_excerpt\": \"on serait passé de la nature à l'histoire, de la non-société à la société. La nature de la nature humaine est d'être historique, car la nature de la nature humaine est d'être sociale. Il n'y a pas de nature humaine qui soit dissociable du f ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"Le néolibéralisme américain (II). - L'application de la grille économique aux phénomènes sociaux. - Retour à la problématique ordolibérale : les équivoques de la Gesellschaftspolitik. La généralisation de la forme « entre-prise » dans le champ social. Politique économique et Vitalpolitik : une société pour le marché et contre le marché. - La généralisation illimitée de la forme économique du marché dans le néolibéralisme américain : principe d'intelligibilité des comportements individuels et principe critique des interventions gouvernementales. - Aspects du néolibéralisme américain : (2) La délinquance et la politique pénale. - Rappel historique : le problème de la réforme du droit pénal à la fin du xvii<sup>e</sup> siècle. Calcul économique et principe de légalité. Le parasitage de la loi par la norme au xix<sup>e</sup> siècle et la naissance d'une anthropologie criminelle. - L'analyse néolibérale : (1) la définition du crime ; (2) la caractérisation du sujet criminel comme homo œconomicus ; (3) le statut de la peine comme instrument d'« enforcement » de la loi. L'exemple du marché de la drogue. - Conséquences de cette analyse : (a) le gommage anthropologique du criminel ; (b) la mise hors jeu du modèle disciplinaire. Je voudrais parler un petit peu, aujourd'hui, d'un aspect du néolibéralisme américain, c'est-à-dire de la manière dont [les néolibéraux américains]* essaient d'utiliser l'économie de marché et les analyses caractéristiques de l'économie de marché au déchiffrement de rapports non marchands, au déchiffrement de phénomènes qui ne sont pas des phénomènes strictement et proprement économiques mais qui sont ce qu'on appelle, si vous voulez, des phénomènes sociaux.** C'est-à-dire, en d'autres termes, l'application de la grille économique à un champ qui, au fond, ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-011-leçondu28mars1979:toc-ch-011-leçondu28mars1979:footnote",
-      "chapter_title": "Leçon du 28 mars 1979",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-010-leçondu21mars1979:nr-en-ch-0060-toc-ch-010-leçondu21mars1979:endnote",
+      "chapter_title": "Leçon du 21 mars 1979",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "footnote",
+      "note_system": "endnote",
       "page_range": [
-        297,
-        300
+        279,
+        279
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 2497,
-          "doc_id": "0d285c0800db",
-          "anchor_id": "anchor-00431",
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "page_no": 297,
-          "paragraph_index": 1,
-          "char_start": 438,
-          "char_end": 447,
-          "source_marker": "$ ^{32} $",
-          "normalized_marker": "32",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'importance qu'il y a dans cet adjectif « invisible ». Smith dit ceci : « Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital $ ^{32} $. » Donc, principe du laissez-faire, chacun en tout cas doit suivre son intérêt. Et du coup, dit-il d'une manière relativement hypocrite – enfin, c'est moi qui dis que c'est hypocrite –, le souverain ne peut s'en trouver que très bien, car le voilà « débarrassé d'une charge qu'il ne saurait essayer de remplir – la surveillance de tous les processus économiques – sans s'exposer infailliblement à se voir sans cesse trompé de mille manières $ ^{33} $ ». Je dis « phrase hypocrite » parce qu'on peut aussi bien l'entendre comme ceci : le souverain qui est un homme seul, entouré de conseillers plus ou moins fidèles, s'il entreprenait la tâche infinie de sur-veiller la totalité du processus économique, se verrait sans doute trompé par des administrateurs et des ministres infidèles. Mais la phrase veut dire aussi que ce n'est pas simplement par l'infidélité de ses ministres ou la complexité d'une administration forcément incontrôlable qu'il commet-trait des erreurs. Il commettrait des erreurs, en quelque sorte, pour une raison essentielle et fondamentale. Il ne pourrait pas ne pas se tromper, et c'est d'ailleurs ce que dit la fin de la phrase, parlant donc de cette tâche, de cette charge dont le souverain doit se trouver déchargé, la tâche de surveiller la totalité du processus économique : « pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise $ ^{34} $ ».",
-          "created_at": 1777099020,
-          "updated_at": 1777099020
+          "link_id": "link-00453",
+          "note_item_id": "en-00375",
+          "anchor_id": "anchor-00001",
+          "marker": "1",
+          "note_excerpt": "Cf. supra, leçon du 14 février 1979, p. 151.",
+          "anchor_excerpt": "[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « gouverner », je l'avais utilisé en laissant de côté toutes les mille manières, modalités et possibilités qui existent de guider les hommes, de diriger leur conduite, de contraindre leurs actions et leurs réactions, etc. J'avais donc laissé de côté tout ce qu'on entend d'ordinaire et tout ce qui a été entendu longtemps comme le gouvernement des enfants, le gouvernement des familles, le gouvernement d'une maison, le gouvernement des âmes, le gouvernement des communautés, etc. Et je n'avais pris, et cette année encore je ne prendrai en considération que le gouvernement des hommes dans la mesure, et dans la mesure seulement, où il se donne comme exercice de la souveraineté politique."
         },
         {
-          "row_id": 2498,
-          "doc_id": "0d285c0800db",
-          "anchor_id": "anchor-00432",
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "page_no": 297,
-          "paragraph_index": 1,
-          "char_start": 889,
-          "char_end": 898,
-          "source_marker": "$ ^{33} $",
-          "normalized_marker": "33",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'importance qu'il y a dans cet adjectif « invisible ». Smith dit ceci : « Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital $ ^{32} $. » Donc, principe du laissez-faire, chacun en tout cas doit suivre son intérêt. Et du coup, dit-il d'une manière relativement hypocrite – enfin, c'est moi qui dis que c'est hypocrite –, le souverain ne peut s'en trouver que très bien, car le voilà « débarrassé d'une charge qu'il ne saurait essayer de remplir – la surveillance de tous les processus économiques – sans s'exposer infailliblement à se voir sans cesse trompé de mille manières $ ^{33} $ ». Je dis « phrase hypocrite » parce qu'on peut aussi bien l'entendre comme ceci : le souverain qui est un homme seul, entouré de conseillers plus ou moins fidèles, s'il entreprenait la tâche infinie de sur-veiller la totalité du processus économique, se verrait sans doute trompé par des administrateurs et des ministres infidèles. Mais la phrase veut dire aussi que ce n'est pas simplement par l'infidélité de ses ministres ou la complexité d'une administration forcément incontrôlable qu'il commet-trait des erreurs. Il commettrait des erreurs, en quelque sorte, pour une raison essentielle et fondamentale. Il ne pourrait pas ne pas se tromper, et c'est d'ailleurs ce que dit la fin de la phrase, parlant donc de cette tâche, de cette charge dont le souverain doit se trouver déchargé, la tâche de surveiller la totalité du processus économique : « pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise $ ^{34} $ ».",
-          "created_at": 1777099020,
-          "updated_at": 1777099020
-        },
-        {
-          "row_id": 2499,
-          "doc_id": "0d285c0800db",
-          "anchor_id": "anchor-00433",
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "page_no": 297,
-          "paragraph_index": 1,
-          "char_start": 1868,
-          "char_end": 1877,
-          "source_marker": "$ ^{34} $",
-          "normalized_marker": "34",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'importance qu'il y a dans cet adjectif « invisible ». Smith dit ceci : « Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital $ ^{32} $. » Donc, principe du laissez-faire, chacun en tout cas doit suivre son intérêt. Et du coup, dit-il d'une manière relativement hypocrite – enfin, c'est moi qui dis que c'est hypocrite –, le souverain ne peut s'en trouver que très bien, car le voilà « débarrassé d'une charge qu'il ne saurait essayer de remplir – la surveillance de tous les processus économiques – sans s'exposer infailliblement à se voir sans cesse trompé de mille manières $ ^{33} $ ». Je dis « phrase hypocrite » parce qu'on peut aussi bien l'entendre comme ceci : le souverain qui est un homme seul, entouré de conseillers plus ou moins fidèles, s'il entreprenait la tâche infinie de sur-veiller la totalité du processus économique, se verrait sans doute trompé par des administrateurs et des ministres infidèles. Mais la phrase veut dire aussi que ce n'est pas simplement par l'infidélité de ses ministres ou la complexité d'une administration forcément incontrôlable qu'il commet-trait des erreurs. Il commettrait des erreurs, en quelque sorte, pour une raison essentielle et fondamentale. Il ne pourrait pas ne pas se tromper, et c'est d'ailleurs ce que dit la fin de la phrase, parlant donc de cette tâche, de cette charge dont le souverain doit se trouver déchargé, la tâche de surveiller la totalité du processus économique : « pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise $ ^{34} $ ».",
-          "created_at": 1777099020,
-          "updated_at": 1777099020
-        },
-        {
-          "row_id": 2500,
-          "doc_id": "0d285c0800db",
-          "anchor_id": "anchor-00434",
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "page_no": 299,
-          "paragraph_index": 0,
-          "char_start": 33,
-          "char_end": 42,
-          "source_marker": "$ ^{35} $",
-          "normalized_marker": "35",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "propre et philosophique du terme $ ^{35} $. Après tout, Kant, un peu plus tard d'ailleurs, devait dire à l'homme qu'il ne peut pas connaître la totalité du monde. Eh bien, l'économie politique avait dit au souverain, quelques décennies auparavant : toi non plus, tu ne peux pas connaître, tu ne peux pas connaître la totalité du processus économique. Il n'y a pas de souverain en économie. Il n'y a pas de souverain économique. Je crois qu'on a là un des points tout de même très importants dans l'histoire de la pensée économique, bien sûr, mais surtout dans l'histoire de la raison gouvernementale. L'absence ou l'impossibilité d'un souverain économique : c'est ce problème-là qui va être finalement posé à travers toute l'Europe et à travers tout le monde moderne, par les pratiques gouvernementales, les problèmes économiques, le socialisme, la planification, l'économie du bien-être. Tous les retours, toutes les récurrences de la pensée libérale et néolibérale dans l'Europe du xix<sup>e</sup> et du xx<sup>e</sup> siècle, c'est encore, toujours, une certaine manière de poser le problème de cette impossibilité de l'existence d'un souverain économique. Et tout ce qui va apparaître, au contraire, comme planification, économie dirigée, socialisme, socialisme d'État, va être le problème de savoir si on ne peut pas surmonter, en quelque sorte, cette malédiction formulée par l'économie politique, dès sa fondation, contre le souverain économique et, en même temps, condition même de l'existence d'une économie politique : est-ce qu'il ne peut pas y avoir, malgré tout, un point par où on puisse définir une souveraineté économique?",
-          "created_at": 1777099020,
-          "updated_at": 1777099020
-        },
-        {
-          "row_id": 2501,
-          "doc_id": "0d285c0800db",
-          "anchor_id": "anchor-00435",
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "page_no": 299,
-          "paragraph_index": 1,
-          "char_start": 496,
-          "char_end": 505,
-          "source_marker": "$ ^{36} $",
-          "normalized_marker": "36",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "À plus courte échelle, la théorie de la main invisible me paraît avoir essentiellement pour fonction, pour rôle la disqualification du souverain politique. Si on le replace non plus à travers l'histoire du libéralisme des deux derniers siècles, mais dans son contexte immédiat, il est très évident que cette théorie de la main invisible, entendue comme disqualification de la possibilité même d'un souverain économique, c'est la récusation de cet État de police dont je vous parlais l'an dernier $ ^{36} $. L'État de police, ou encore l'État gouverné par la raison d'État, avec sa politique mercantile, c'était bien depuis le XVIII $ ^{e} $ siècle l'effort fait, de façon parfaitement explicite, pour constituer un souverain qui ne serait plus souverain de droit ou en fonction d'un droit, mais qui serait également un souverain susceptible d'administrer, d'administrer bien sûr les sujets sur lesquels il exerce sa souveraineté, mais également les processus économiques qui peuvent se dérouler entre les individus, entre les groupes, entre les États. L'État de police, l'État tel que va le faire fonctionner la politique à la fois volontariste et mercantiliste des souverains, ou de certains souverains, en tout cas, du XVIII $ ^{e} $ et du XVIII $ ^{e} $ siècle comme le souverain français, tout cela",
-          "created_at": 1777099020,
-          "updated_at": 1777099020
-        },
-        {
-          "row_id": 2502,
-          "doc_id": "0d285c0800db",
-          "anchor_id": "anchor-00436",
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "page_no": 300,
-          "paragraph_index": 1,
-          "char_start": 525,
-          "char_end": 534,
-          "source_marker": "$ ^{37} $",
-          "normalized_marker": "37",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Il est d'ailleurs intéressant de voir à quoi, plus précisément encore, s'oppose la théorie de la main invisible. Elle s'oppose, très exactement, à ce que disaient presque à la même époque ou, en tout cas, ce que venaient de dire quelques années auparavant les physiocrates, parce que la position des physiocrates est, à ce point de vue-là, très intéressante et très paradoxale. Les physiocrates en France ont fait précisément, sur le marché et les mécanismes du marché, ces analyses dont je vous ai déjà parlé plusieurs fois $ ^{37} $ et qui prouvaient qu'il ne fallait absolument pas que le gouvernement, que l'État, que le souverain intervienne sur la mécanique des intérêts qui faisait que les marchandises allaient là où elles trouvaient le plus facilement des acheteurs et au meilleur prix. La physiocratie était donc une critique sévère de toute cette réglementation administrative par laquelle s'exerçait le pouvoir du souverain sur l'économie. Mais les physiocrates ajoutaient aussitôt ceci : il faut laisser libres les agents économiques, mais, premièrement, il faut considérer que le territoire tout entier d'un pays, c'est au fond la propriété du souverain, ou en tout cas que le souverain est copropriétaire de toutes les terres du pays et, par conséquent, coproducteur; ce qui leur permettait de justifier l'impôt. Donc, le souverain va se trouver, dans la conception physiocratique, adéquat en quelque sorte en principe et en droit, et en fait d'ailleurs, à toute la production et à toute l'activité économique d'un pays, à titre de copropriétaire des terres et coproducteur du produit.",
-          "created_at": 1777099020,
-          "updated_at": 1777099020
+          "link_id": "link-00454",
+          "note_item_id": "en-00376",
+          "anchor_id": "orphan-recovery-en-00376",
+          "marker": "2",
+          "note_excerpt": "Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...] en plusieurs politiques particulières très variées dont les principales sont, pour ces auteurs, un aménagement de l'espace économique, un encouragement aux petites et moyennes entreprises et surtout une déprolétarisation de la société par le développement de l'épargne privée et la répartition aussi large que possible du capital national entre tous les citoyens. En faisant de tous les individus des capitalistes, en établissant un capitalisme populaire, on élimine les tares sociales du capitalisme, et ceci indépendamment du fait de la \"salarisation\" croissante dans l'économie. Un salarié également capitaliste n'est plus un prolétaire. »",
+          "anchor_excerpt": "tik des ordolibéraux allemands².\n\nOr cette généralisation de"
         }
       ],
-      "rebind_candidates": []
+      "unmatched_note_items": [
+        {
+          "row_id": 7634,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "en-00384",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-010-leçondu21mars1979",
+          "region_id": "nr-en-ch-0060-toc-ch-010-leçondu21mars1979",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "« Méthodologie économique et Économie non marchande », communication au congrès des Économistes de langue française (Québec, mai 1976), reproduite en partie dans la Revue d'économie politique, juillet-août 1977 (cf. H. Lepage, Demain le capitalisme, op. cit., p. 224).",
+          "page_no": 279,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "NOTES",
+          "created_at": 1777381604,
+          "updated_at": 1777381604
+        },
+        {
+          "row_id": 7635,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "en-00385",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-010-leçondu21mars1979",
+          "region_id": "nr-en-ch-0060-toc-ch-010-leçondu21mars1979",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "J.-L. Migué, ibid., cité par H. Lepage, op.cit., p. 346 : « L'une des grandes contributions récentes de l'analyse économique a été d'appliquer intégralement au secteur domestique le cadre analytique traditionnellement réservé à la firme et au consommateur. En faisant du ménage une unité de production au même titre que la firme classique, on découvre que ses fondements analytiques sont en fait identiques à ceux de la firme. Comme dans la firme, les deux parties en ménage évident grâce à un contrat qui les lie pour de longues périodes les coûts de transaction et le risque d'être privées à tout moment des inputs du conjoint et, partant, de l'output commun du ménage. Qu'est-ce en effet que le ménage sinon l'engagement contractuel des deux parties à fournir des inputs spécifiques et à partager dans des proportions données les bénéfices de l'output du ménage ? Ainsi donc, plutôt que de s'engager dans un processus coûteux",
+          "page_no": 279,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "NOTES",
+          "created_at": 1777381604,
+          "updated_at": 1777381604
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00453",
+          "note_item_id": "en-00375",
+          "current_anchor_id": "anchor-00001",
+          "marker": "1",
+          "note_page_no": 279,
+          "anchor_page_no": 17,
+          "current_anchor_marker": "1",
+          "note_excerpt": "Cf. supra, leçon du 14 février 1979, p. 151.",
+          "anchor_excerpt": "[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « gouverner », je l'avais utilisé en laissant de côté toutes les mille manières, modalités et possibilités qui existent de guider les hommes, de diriger leur conduite, de contraindre leurs actions et leurs réactions, etc. J'avais donc laissé de côté tout ce qu'on entend d'ordinaire et tout ce qui a été entendu longtemps comme le gouvernement des enfants, le gouvernement des familles, le gouvernement d'une maison, le gouvernement des âmes, le gouvernement des communautés, etc. Et je n'avais pris, et cette année encore je ne prendrai en considération que le gouvernement des hommes dans la mesure, et dans la mesure seulement, où il se donne comme exercice de la souveraineté politique.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00454",
+          "note_item_id": "en-00376",
+          "current_anchor_id": "orphan-recovery-en-00376",
+          "marker": "2",
+          "note_page_no": 279,
+          "anchor_page_no": 257,
+          "current_anchor_marker": "2",
+          "note_excerpt": "Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...] en plusieurs politiques particulières très variées dont les principales sont, pour ces auteurs, un aménagement de l'espace économique, un encouragement aux petites et moyennes entreprises et surtout une déprolétarisation de la société par le développement de l'épargne privée et la répartition aussi large que possible du capital national entre tous les citoyens. En faisant de tous les individus des capitalistes, en établissant un capitalisme populaire, on élimine les tares sociales du capitalisme, et ceci indépendamment du fait de la \"salarisation\" croissante dans l'économie. Un salarié également capitaliste n'est plus un prolétaire. »",
+          "anchor_excerpt": "tik des ordolibéraux allemands².\n\nOr cette généralisation de",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00455",
+          "note_item_id": "en-00377",
+          "current_anchor_id": "anchor-00470",
+          "marker": "3",
+          "note_page_no": 279,
+          "anchor_page_no": 271,
+          "current_anchor_marker": "3",
+          "note_excerpt": "Cf. supra, leçon du 14 février 1979, p. 153-154.",
+          "anchor_excerpt": "vous voyez qu'on est tout près de Beccaria ou de Bentham, de toute cette problématique du xviii<sup>e</sup> siècle dans laquelle, vous le savez, la punition se justifiait par le fait que l'acte puni était nuisible et que c'était pour cela même qu'on avait fait une loi. C'était également ce même principe de l'utilité qui devait être appliqué à la mesure de la punition. On devait punir de telle manière que les effets nocifs de l'action puissent être ou annulés ou prévenus. Donc, on est toujours tout près de la problématique du xviii<sup>e</sup> siècle, mais avec, là aussi, un changement qui est important. Alors que la théorie classique essayait simplement d'articular les uns sur les autres différents effets hétérogènes attendus de la punition, c'est-à-dire le problème de la réparation qui est un problème civil, le problème de l'amendement de l'individu, le problème de la prévention par rapport aux autres individus, etc., les néolibéraux, eux, vont faire une articulation, une désarticulation différente de la punition. Et ils distinguent deux choses, enfin, ils ne font que reprendre, au fond, une problématique qui est courante dans la pensée ou dans la réflexion juridique anglo-saxonne. Ils disent : d'une part, il y a la loi, mais qu'est-ce que c'est que la loi ? La loi, ce n'est rien d'autre qu'un interdit, et la formulation de l'interdiction, d'une part, bien sûr, c'est une réalité, une réalité institutionnelle. On pourrait dire si vous voulez, en se référant à une autre problématique : c'est un speech act qui a un certain nombre d'effets<sup>29</sup>. Cet acte a d'ailleurs un certain coût lui-même, puisque la formulation de la loi implique et un parlement et une discussion et des décisions prises. C'est en effet une réalité, mais ce n'est que cette réalité-là. Et puis il y a, d'un autre côté, l'ensemble des instruments par lesquels on va donner à cette interdiction une « force »<sup>3</sup> réelle. Cette idée d'une force de la loi, elle est traduite, vous le savez, par ce mot qu'on rencontre si souvent de enforcement et qu'on traduit souvent par le « renforcement » de la loi. C'est pas ça. L'enforcement of law, c'est plus que l'application de la loi, puisqu'il s'agit de toute une série d'instruments réels qu'on est obligé de mettre en œuvre pour appliquer la loi. Mais ce n'est pas le renforcement de la loi, c'est moins que le renforcement de la loi, dans la mesure où renforcement voudrait dire qu'elle est trop faible et qu'il faut rajouter un petit supplément ou la rendre plus sévère. L'enforcement of law, c'est l'ensemble des instruments mis en œuvre pour donner, à cet acte d'interdiction en quoi consiste la formulation de la loi, réalité sociale, réalité politique, etc.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00456",
+          "note_item_id": "en-00378",
+          "current_anchor_id": "anchor-00522",
+          "marker": "4",
+          "note_page_no": 279,
+          "anchor_page_no": 314,
+          "current_anchor_marker": "4",
+          "note_excerpt": "Cf. supra, leçons du 14 février et du 21 février 1979.",
+          "anchor_excerpt": "Premièrement, la société civile comme constante historico-naturelle. Pour Ferguson, en effet, la société civile est une donnée au-delà de laquelle il n'y a rien à chercher. Avant la société civile, rien n'existe ou si quelque chose existe, dit Ferguson, c'est quelque chose qui est pour nous absolument inaccessible, tellement reculé dans le fond des âges, tellement en quelque sorte antérieur à ce qui fait l'humanité de l'homme, qu'il est impossible de savoir ce qui aurait bien pu se produire, ce qui aurait bien pu avoir lieu avant l'existence de la société civile. Autrement dit, il n'est pas utile de se poser la question de la non-société. Que cette non-société soit caractérisée en termes de solitude, d'isolement, comme s'il avait pu y avoir des hommes dispersés ainsi dans la nature et sans aucune union d'aucune sorte, sans aucun moyen de communiquer, ou encore, que cette non-société soit caractérisée, comme chez Hobbes, sous la forme de la guerre perpétuelle ou de la guerre de tous contre tous, de toute façon — solitude ou guerre de tous contre tous —, tout ceci est à placer dans une sorte d'arrière-fond mythique qui ne sert en rien à l'analyse des phénomènes qui nous concernent. L'histoire humaine a toujours existé « par groupes », dit Ferguson à la page 9 du premier volume de son Histoire de la société civile⁴. À la page 20 il dit : « la société est aussi ancienne que l'individu », et il serait tout aussi vain d'imaginer des hommes qui ne parlent pas entre eux que d'imaginer des hommes qui n'auraient pas de pieds ou pas de mains⁵. Le langage, la communication et par conséquent un certain rapport perpétuel des hommes entre eux est absolument caractéristique de l'individu et de la société, parce que l'individu et la société ne peuvent pas exister l'un sans l'autre. Bref, il n'est jamais venu un moment, ou en tout cas il est inutile d'essayer d'imaginer un moment, où",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00457",
+          "note_item_id": "en-00379",
+          "current_anchor_id": "anchor-00443",
+          "marker": "5",
+          "note_page_no": 279,
+          "anchor_page_no": 260,
+          "current_anchor_marker": "5",
+          "note_excerpt": "A. Rüstow, in Colloque Walter Lippmann, op. cit., p. 83 : « Si, dans l’intérêt de la productivité optima de la collectivité et de l’indépendance maxima de l’individu, on organise l’économie de ce corps social d’après les règles de l’économie du marché, il reste à satisfaire des besoins d’intégration nouveaux et accrus. »",
+          "anchor_excerpt": "La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence provoqués par le marché soient par là compensés. C'est ce que Rüstow disait, dans le colloque Walter Lippmann dont je vous parlais il y a quelque temps⁴ : « L'économie du corps social organisé selon les règles de l'économie de marché, c'est cela qu'il faut faire, mais il n'en reste pas moins qu'il faut encore satisfaire des besoins d'intégration nouveaux et accrus⁵. » C'est cela la Vitalpolitik. Röpke, un peu après, disait ceci : « La concurrence est un principe d'ordre dans le domaine de l'économie de marché, mais non un principe sur lequel il serait possible d'ériger la société tout entière. Moralement et sociologiquement la concurrence est un principe plutôt dissolvant qu'unifiant. » Il faut donc, tout en mettant en place une politique telle que la concurrence puisse économiquement jouer, organiser « un cadre politique et moral », dit Röpke⁶, un cadre politique et moral qui comporte quoi ? Premièrement, un État qui soit capable de se maintenir au-dessus des différents groupes concurrentiels et des différentes entreprises en concurrence les unes avec les autres. Il faut que ce cadre politique et moral assure « une communauté non désagrégée », et enfin qu'il garantisse une coopération entre les hommes « naturellement enracinés et socialement intégrés ⁷ ».",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00458",
+          "note_item_id": "en-00380",
+          "current_anchor_id": "anchor-00444",
+          "marker": "6",
+          "note_page_no": 279,
+          "anchor_page_no": 260,
+          "current_anchor_marker": "6",
+          "note_excerpt": "W. Röpke, La Crise de notre temps, trad. citée, I¹ª partie, ch. 2, p. 236 : « [...] ne demandons pas à la concurrence plus qu'elle ne peut donner. Elle est un principe d'ordre et de direction dans le domaine particulier de l'économie du marché et de la division du travail, mais non un principe sur lequel il serait possible d'ériger la société tout entière. Moralement et sociologiquement, elle est un principe dangereux, plutôt dissolvant qu'unifiant. Si la concurrence ne doit pas agir comme un explosif social ni dégénérer en même temps, elle présuppose un encadrement d'autant plus fort, en dehors de l'économie, un cadre politique et moral d'autant plus solide. »",
+          "anchor_excerpt": "La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence provoqués par le marché soient par là compensés. C'est ce que Rüstow disait, dans le colloque Walter Lippmann dont je vous parlais il y a quelque temps⁴ : « L'économie du corps social organisé selon les règles de l'économie de marché, c'est cela qu'il faut faire, mais il n'en reste pas moins qu'il faut encore satisfaire des besoins d'intégration nouveaux et accrus⁵. » C'est cela la Vitalpolitik. Röpke, un peu après, disait ceci : « La concurrence est un principe d'ordre dans le domaine de l'économie de marché, mais non un principe sur lequel il serait possible d'ériger la société tout entière. Moralement et sociologiquement la concurrence est un principe plutôt dissolvant qu'unifiant. » Il faut donc, tout en mettant en place une politique telle que la concurrence puisse économiquement jouer, organiser « un cadre politique et moral », dit Röpke⁶, un cadre politique et moral qui comporte quoi ? Premièrement, un État qui soit capable de se maintenir au-dessus des différents groupes concurrentiels et des différentes entreprises en concurrence les unes avec les autres. Il faut que ce cadre politique et moral assure « une communauté non désagrégée », et enfin qu'il garantisse une coopération entre les hommes « naturellement enracinés et socialement intégrés ⁷ ».",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00459",
+          "note_item_id": "en-00381",
+          "current_anchor_id": "anchor-00445",
+          "marker": "7",
+          "note_page_no": 279,
+          "anchor_page_no": 260,
+          "current_anchor_marker": "7",
+          "note_excerpt": "Ibid.: « [...] un État fort, trônant bien au-dessus des groupes affamés d'intérêts, une moralité économique très haute, une communauté non désagrégée d'hommes prêts à la coopération, naturellement enracinés et socialement intégrés. »",
+          "anchor_excerpt": "La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence provoqués par le marché soient par là compensés. C'est ce que Rüstow disait, dans le colloque Walter Lippmann dont je vous parlais il y a quelque temps⁴ : « L'économie du corps social organisé selon les règles de l'économie de marché, c'est cela qu'il faut faire, mais il n'en reste pas moins qu'il faut encore satisfaire des besoins d'intégration nouveaux et accrus⁵. » C'est cela la Vitalpolitik. Röpke, un peu après, disait ceci : « La concurrence est un principe d'ordre dans le domaine de l'économie de marché, mais non un principe sur lequel il serait possible d'ériger la société tout entière. Moralement et sociologiquement la concurrence est un principe plutôt dissolvant qu'unifiant. » Il faut donc, tout en mettant en place une politique telle que la concurrence puisse économiquement jouer, organiser « un cadre politique et moral », dit Röpke⁶, un cadre politique et moral qui comporte quoi ? Premièrement, un État qui soit capable de se maintenir au-dessus des différents groupes concurrentiels et des différentes entreprises en concurrence les unes avec les autres. Il faut que ce cadre politique et moral assure « une communauté non désagrégée », et enfin qu'il garantisse une coopération entre les hommes « naturellement enracinés et socialement intégrés ⁷ ».",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00460",
+          "note_item_id": "en-00382",
+          "current_anchor_id": "anchor-00526",
+          "marker": "8",
+          "note_page_no": 279,
+          "anchor_page_no": 315,
+          "current_anchor_marker": "8",
+          "note_excerpt": "Cf. leçon précédente (14 mars), p. 235-236.",
+          "anchor_excerpt": "on serait passé de la nature à l'histoire, de la non-société à la société. La nature de la nature humaine est d'être historique, car la nature de la nature humaine est d'être sociale. Il n'y a pas de nature humaine qui soit dissociable du fait même de la société. Et Ferguson évoque l'espèce de mythe, d'utopie méthodologique souvent reprise au XVIIIe siècle : soit, dit-il, une troupe d'enfants que l'on aurait laissés s'éduquer eux-mêmes en dehors de toute autre forme de société. Supposons des enfants que l'on mette dans un désert en les laissant se débrouiller dès leur plus jeune âge, qu'on les laisse se former tout seuls, sans instruction et sans guide, eh bien si nous revenions cinq ans, dix ans, quinze ans après, à condition bien sûr qu'ils ne soient pas morts, qu'est-ce que nous verrions? « Nous verrions les membres de cette petite société manger, dormir, aller en troupes, jouer ensemble, se faire un langage, se diviser, se quereller », se lier d'amitié, oublier pour les autres leur propre conservation $ ^{6} $. Donc, le lien social se forme spontanément. Il n'y a pas d'opération spécifique qui puisse l'établir ou le fonder. Il n'y a pas à instaurer ou à auto-instaurer la société. On est de toute façon dans la société. Le lien social est sans préhistoire. Dire qu'il est sans préhistoire, ça veut dire qu'il est, à la fois, permanent et indispensable. Permanent, ça veut dire qu'aussi loin que l'on pourra aller dans l'histoire de l'humanité, on trouvera non seulement, bien sûr, la société, mais on trouvera la nature. C'est-à-dire que l'état de nature, cet état de nature que les philosophes allaient chercher dans la réalité ou le mythe d'un sauvage, il n'y a pas à se déplacer par rapport à nous-mêmes [pour le trouver], nous pouvons le trouver ici même. En France, dit Ferguson, aussi bien qu'au cap de Bonne-Espérance, on va trouver l'état de nature, puisque c'est l'état de nature qui veut que l'homme soit en état social $ ^{7} $. La société étudiée même dans ses formes les plus complexes, même les plus développées, l'état de société à son épaisseur maximum nous dira toujours ce qu'est l'état de nature, puisque l'état de nature veut que l'on vive en société. Donc, permanence de l'état de nature dans l'état de société, caractère indispensable aussi de l'état de société pour la nature, c'est-à-dire que l'état de nature ne peut jamais apparaître à l'état nu et simple. Ferguson dit : « Dans l'état sauvage comme dans l'état civilisé, on voit, à chaque pas, les marques de l'invention des hommes $ ^{8} $. » Et il ajoute cette phrase qui est caractéristique parce qu'elle est, non pas comme un point d'origine, mais comme un point de signalisation de la possibilité théorique d'une anthropologie : « Si le palais est loin de la nature, la cabane ne l'est pas moins $ ^{9} $. » C'est-à-dire que la cabane, ce n'est pas l'expression naturelle et pré-sociale de quelque chose. On n'est pas plus près de la nature avec une cabane qu'avec",
+          "current_anchor_synthetic": false
+        }
+      ]
     },
     "page_contexts": [
       {
-        "page_no": 296,
-        "file_idx": 295,
+        "page_no": 17,
+        "file_idx": 16,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
-        "ocr_excerpt": "n'est pas la peine d'y insister beaucoup, à savoir que, puisque la mécanique économique implique que chacun suive son propre intérêt, il faut donc laisser faire chacun. Il n'y a pas à intervenir, pour le pouvoir politique, dans cette dynamique que la nature a inscrite dans le cœur de l'homme. Il est donc interdit au gouvernement de faire obstacle à cet intérêt des individus. C'est ce que dit Adam Smith, lorsqu'il écrit : l'intérêt commun exige que chacun sache entendre le sien (d'intérêt) et puisse lui obéir sans obstacle $ ^{28} $. Autrement dit, le pouvoir, le gouvernement ne peut pas faire obstacle au jeu des intérêts individuels. Mais il faut aller plus loin. Non seulement le gouvernement ne doit pas faire obstacle à l'intérêt de chacun, mais il est impossible que le souverain puisse avoir sur le mécanisme économique un point de vue qui totalise chacun des éléments et permette de les combiner artificiellement ou volontairement. La main invisible qui combine spontanément les intérêts interdit, en même temps, toute forme d'intervention, bien mieux, toute forme de regard en surplomb qui permettrait de totaliser le processus économique. Sur ce point un texte de Ferguson est très clair. Il dit dans l'Histoire de la société civile $ ^{29} $ : « Plus l'individu gagne pour son propre compte, plus il augmente la masse de la richesse nationale. [...] Toutes les fois que l'administrat ...",
-        "byte_size": 411520,
-        "sha256": "508d064381c296b6a6bdfb225c73410ddc11662246cbb8099e9d4a4a5163de81"
+        "ocr_excerpt": "# LEÇON DU 10 JANVIER 1979 Questions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ? [Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « ...",
+        "byte_size": 331831,
+        "sha256": "a6ca0797082b570904965fc9202596425229bee26ff850e09dc60f08131a112a"
       },
       {
-        "page_no": 297,
-        "file_idx": 296,
+        "page_no": 257,
+        "file_idx": 256,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
-        "ocr_excerpt": "courte, et s'il y avait un souverain qui prétendait avoir la vue longue, le regard global et totalisant, ce souverain ne verrait jamais que des chimères. L'économie politique dénonce, au milieu du XVIII<sup>e</sup> siècle, le paralogisme de la totalisation politique du processus économique. Et que le souverain soit, que le souverain puisse, que le souverain doive être ignorant, c'est ce qu'Adam Smith dit au chapitre 9 du livre IV de La Richesse des nations, éclairant parfaitement ce qu'il veut dire par la main invisible et l'importance qu'il y a dans cet adjectif « invisible ». Smith dit ceci : « Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital $ ^{32} $. » Donc, principe du laissez-faire, chacun en tout cas doit suivre son intérêt. Et du coup, dit-il d'une manière relativement hypocrite – enfin, c'est moi qui dis que c'est hypocrite –, le souverain ne peut s'en trouver que très bien, car le voilà « débarrassé d'une charge qu'il ne saurait essayer de remplir – la surveillance de tous les processus économiques – sans s'exposer infailliblement à se voir sans cesse trompé de mille manières $ ^{33} $ ». Je dis « phrase hypocrite » parce qu'on peut aussi bien l'entendre comme ceci : le souverain qui est un homme seul, entouré de conseillers plus ou moins fidèles, s'il entreprenait la tâche infinie de sur-ve ...",
-        "byte_size": 428384,
-        "sha256": "8cf54205a90ed0947fae9daca763f9c49c311218bb8789e7c8ccd8d350d76386"
+        "ocr_excerpt": "Le néolibéralisme américain (II). - L'application de la grille économique aux phénomènes sociaux. - Retour à la problématique ordolibérale : les équivoques de la Gesellschaftspolitik. La généralisation de la forme « entre-prise » dans le champ social. Politique économique et Vitalpolitik : une société pour le marché et contre le marché. - La généralisation illimitée de la forme économique du marché dans le néolibéralisme américain : principe d'intelligibilité des comportements individuels et principe critique des interventions gouvernementales. - Aspects du néolibéralisme américain : (2) La délinquance et la politique pénale. - Rappel historique : le problème de la réforme du droit pénal à la fin du xvii<sup>e</sup> siècle. Calcul économique et principe de légalité. Le parasitage de la loi par la norme au xix<sup>e</sup> siècle et la naissance d'une anthropologie criminelle. - L'analyse néolibérale : (1) la définition du crime ; (2) la caractérisation du sujet criminel comme homo œconomicus ; (3) le statut de la peine comme instrument d'« enforcement » de la loi. L'exemple du marché de la drogue. - Conséquences de cette analyse : (a) le gommage anthropologique du criminel ; (b) la mise hors jeu du modèle disciplinaire. Je voudrais parler un petit peu, aujourd'hui, d'un aspect du néolibéralisme américain, c'est-à-dire de la manière dont [les néolibéraux américains]* essaient d'u ...",
+        "byte_size": 321997,
+        "sha256": "7de6dbfb49e3025eeb96907fdfbaf991aeb0a727a8aa5c08594ffb893c605c07"
       },
       {
-        "page_no": 298,
-        "file_idx": 297,
+        "page_no": 260,
+        "file_idx": 259,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
-        "ocr_excerpt": "sans Dieu ; l'économie est une discipline sans totalité ; l'économie est une discipline qui commence à manifester non seulement l'inutilité, mais l'impossibilité d'un point de vue souverain, d'un point de vue du souverain sur la totalité de l'État qu'il a à gouverner. L'économie subtilise à la forme juridique du souverain exerçant sa souveraineté à l'intérieur d'un État ce qui est en train d'apparaître comme l'essentiel de la vie d'une société, à savoir les processus économiques. Le libéralisme, dans sa consistance moderne, a commencé lorsque, précisément, fut formulée cette incompatibilité essentielle entre, d'une part, la multiplicité non totalisable caractéristique des sujets d'intérêt, des sujets économiques et, d'autre part, l'unité totalisante du souverain juridique. Le grand effort de la pensée juridico-politique, au cours du XVIII<sup>e</sup> siècle, pour montrer comment, à partir de sujets de droit individuels, sujets de droit naturel, on pouvait en arriver à la constitution d'une unité politique définie par l'existence d'un souverain, individuel ou non, peu importe, mais détenteur d'une part de la totalité de ses droits individuels et principe en même temps de la limitation de ces droits, toute cette grande problématique n'est pas du tout complétée par la problématique de l'économie. La problématique de l'économie, la problématique de l'intérêt économique obéit à une ...",
-        "byte_size": 402087,
-        "sha256": "4b549e47d25dc68bca801085e783778d59a0227f594963a16ede8ab778342831"
+        "ocr_excerpt": "la mode à l'époque des ordolibéraux, ne soit plus aliéné par rapport à son milieu de travail, et au temps de sa vie, et à son ménage, et à sa famille, et à son milieu naturel. Il s'agit de reconstituer autour de l'individu des points d'ancrage concrets, reconstitution de points d'ancrage qui forment ce que Rüstow appelait la Vitalpolitik³. Le retour à l'entreprise, c'est à la fois, donc, une politique économique ou une politique d'économisation du champ social tout entier, de virage à l'économie du champ social tout entier, mais c'est en même temps une politique qui se présente ou se veut comme une Vitalpolitik qui aura pour fonction de compenser ce qu'il y a de froid, d'impassible, de calculateur, de rationnel, de mécanique dans le jeu de la concurrence proprement économique. La société d'entreprise dont rêvent les ordolibéraux est donc une société pour le marché et une société contre le marché, une société orientée vers le marché et une société qui soit telle que les effets de valeur, les effets d'existence provoqués par le marché soient par là compensés. C'est ce que Rüstow disait, dans le colloque Walter Lippmann dont je vous parlais il y a quelque temps⁴ : « L'économie du corps social organisé selon les règles de l'économie de marché, c'est cela qu'il faut faire, mais il n'en reste pas moins qu'il faut encore satisfaire des besoins d'intégration nouveaux et accrus⁵. » C'es ...",
+        "byte_size": 420241,
+        "sha256": "b193d7c1a38644a7c0ca2c0f5c0235b91ba7d86e5f84406097b898b7fbd1675e"
       },
       {
-        "page_no": 299,
-        "file_idx": 298,
+        "page_no": 271,
+        "file_idx": 270,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
-        "ocr_excerpt": "propre et philosophique du terme $ ^{35} $. Après tout, Kant, un peu plus tard d'ailleurs, devait dire à l'homme qu'il ne peut pas connaître la totalité du monde. Eh bien, l'économie politique avait dit au souverain, quelques décennies auparavant : toi non plus, tu ne peux pas connaître, tu ne peux pas connaître la totalité du processus économique. Il n'y a pas de souverain en économie. Il n'y a pas de souverain économique. Je crois qu'on a là un des points tout de même très importants dans l'histoire de la pensée économique, bien sûr, mais surtout dans l'histoire de la raison gouvernementale. L'absence ou l'impossibilité d'un souverain économique : c'est ce problème-là qui va être finalement posé à travers toute l'Europe et à travers tout le monde moderne, par les pratiques gouvernementales, les problèmes économiques, le socialisme, la planification, l'économie du bien-être. Tous les retours, toutes les récurrences de la pensée libérale et néolibérale dans l'Europe du xix<sup>e</sup> et du xx<sup>e</sup> siècle, c'est encore, toujours, une certaine manière de poser le problème de cette impossibilité de l'existence d'un souverain économique. Et tout ce qui va apparaître, au contraire, comme planification, économie dirigée, socialisme, socialisme d'État, va être le problème de savoir si on ne peut pas surmonter, en quelque sorte, cette malédiction formulée par l'économie politiq ...",
-        "byte_size": 435494,
-        "sha256": "6735b6ac092d4afe3925c071029386f157c6698b7289387a7054caa949ba1f7f"
+        "ocr_excerpt": "vous voyez qu'on est tout près de Beccaria ou de Bentham, de toute cette problématique du xviii<sup>e</sup> siècle dans laquelle, vous le savez, la punition se justifiait par le fait que l'acte puni était nuisible et que c'était pour cela même qu'on avait fait une loi. C'était également ce même principe de l'utilité qui devait être appliqué à la mesure de la punition. On devait punir de telle manière que les effets nocifs de l'action puissent être ou annulés ou prévenus. Donc, on est toujours tout près de la problématique du xviii<sup>e</sup> siècle, mais avec, là aussi, un changement qui est important. Alors que la théorie classique essayait simplement d'articular les uns sur les autres différents effets hétérogènes attendus de la punition, c'est-à-dire le problème de la réparation qui est un problème civil, le problème de l'amendement de l'individu, le problème de la prévention par rapport aux autres individus, etc., les néolibéraux, eux, vont faire une articulation, une désarticulation différente de la punition. Et ils distinguent deux choses, enfin, ils ne font que reprendre, au fond, une problématique qui est courante dans la pensée ou dans la réflexion juridique anglo-saxonne. Ils disent : d'une part, il y a la loi, mais qu'est-ce que c'est que la loi ? La loi, ce n'est rien d'autre qu'un interdit, et la formulation de l'interdiction, d'une part, bien sûr, c'est une réali ...",
+        "byte_size": 419921,
+        "sha256": "cca0b6b06a9ac5e10a53fa2350b401d09cf61f17b41b9fb622a7725464ae64c6"
       },
       {
-        "page_no": 300,
-        "file_idx": 299,
+        "page_no": 279,
+        "file_idx": 278,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
-        "ocr_excerpt": "repose bien sur le postulat qu'il doit y avoir un souverain économique. L'économie politique ne constitue pas simplement une réfutation des doctrines ou des pratiques mercantilistes. L'économie politique d'Adam Smith ne montre pas simplement combien le mercantilisme constituait une erreur technique ou une erreur théorique. L'économie politique d'Adam Smith, le libéralisme économique, constitue une disqualification de ce projet politique d'ensemble et, plus radicalement encore, une disqualification d'une raison politique qui serait indexée à l'État et à sa souveraineté. Il est d'ailleurs intéressant de voir à quoi, plus précisément encore, s'oppose la théorie de la main invisible. Elle s'oppose, très exactement, à ce que disaient presque à la même époque ou, en tout cas, ce que venaient de dire quelques années auparavant les physiocrates, parce que la position des physiocrates est, à ce point de vue-là, très intéressante et très paradoxale. Les physiocrates en France ont fait précisément, sur le marché et les mécanismes du marché, ces analyses dont je vous ai déjà parlé plusieurs fois $ ^{37} $ et qui prouvaient qu'il ne fallait absolument pas que le gouvernement, que l'État, que le souverain intervienne sur la mécanique des intérêts qui faisait que les marchandises allaient là où elles trouvaient le plus facilement des acheteurs et au meilleur prix. La physiocratie était donc u ...",
-        "byte_size": 420451,
-        "sha256": "b11245c1c7f46fc9aaabf3dbac488865ad0bf57e101e514794649a287ea0af47"
+        "ocr_excerpt": "## NOTES 1. Cf. supra, leçon du 14 février 1979, p. 151. 2. Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...] en plusieurs politiques particulières très variées dont les principales sont, pour ces auteurs, un aménagement de l'espace économique, un encouragement aux petites et moyennes entreprises et surtout une déprolétarisation de la société par le développement de l'épargne privée et la répartition aussi large que possible du capital national entre tous les citoyens. En faisant de tous les individus des capitalistes, en établissant un capitalisme populaire, on élimine les tares sociales du capitalisme, et ceci indépendamment du fait de la \"salarisation\" croissante dans l'économie. Un salarié également capitaliste n'est plus un prolétaire. » 3. Cf. supra, leçon du 14 février 1979, p. 153-154. 4. Cf. supra, leçons du 14 février et du 21 février 1979. 5. A. Rüstow, in Colloque Walter Lippmann, op. cit., p. 83 : « Si, dans l’intérêt de la productivité optima de la collectivité et de l’indépendance maxima de l’individu, on organise l’économie de ce corps social d’après les règles de l’économie du marché, il reste à satisfaire des besoins d’intégration nouveaux et accrus. » 6. W. Röpke, La Crise de notre temps, trad. citée, I¹ª partie, ch. 2, p. 236 : « [...] ne demandons pas à la concurrence ...",
+        "byte_size": 391377,
+        "sha256": "913bf58c56fa2f565f5c4a8a74caf9fd3c4f3304329c5d799e6d790860036784"
       },
       {
-        "page_no": 301,
-        "file_idx": 300,
+        "page_no": 314,
+        "file_idx": 313,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
-        "ocr_excerpt": "Tableau économique, à la fois ce qui se passe et comment il faut que ça se passe. Donc il pourra, au nom de ce savoir total, accepter librement et rationnellement, ou plutôt il devra bien accepter par la nécessité même de la raison, du savoir et de la vérité, le principe de la liberté des agents économiques. De sorte qu'entre le savoir du souverain et la liberté des individus, il va y avoir une seconde adéquation. Entin, troisiemement, un bon gouvernement – celui justement d'un souverain qui connaît exactement tout ce qui se passe quant aux processus économiques et grâce au Tableau économique – devra expliquer aux différents agents économiques, aux différents sujets, comment ça se passe. pourquoi ça se passe et ce qu'ils doivent faire pour maximiser leur profit. Il devra y avoir un savoir économique qui sera répandu le plus largement possible, et aussi uniformément que possible, parmi tous les sujets, et ce savoir économique, dont le principe se trouve toujours dans le Tableau économique dressé par les physiocrates, sera commun aux sujets bien éduqués économiquement et au souverain qui saura reconnaître les lois fondamentales de l'économie. De sorte qu'il y aura au niveau du savoir, au niveau de la conscience de vérité, une troisième adéquation entre le souverain et les processus ou du moins les agents économiques. Vous voyez donc que, chez les physiocrates, le principe du lais ...",
-        "byte_size": 498127,
-        "sha256": "70c33bc3b93f0b5f16be8bb3a411a3fcc9ed64e8fa5556b31b7aeaaee0ab9275"
+        "ocr_excerpt": "Ferguson, traduit en français en 1783 sous le titre Essai sur l'histoire de la société civile², texte proche, très proche d'Adam Smith et de l'Essai sur la richesse des nations, le mot « nation » d'ailleurs chez Adam Smith ayant à peu près le sens de société civile chez Ferguson³. Nous avons là le corrélatif politique, enfin le corrélatif en terme de société civile, de ce qu'Adam Smith étudiait en termes purement économiques. La société civile de Ferguson, c'est en effet l'élément concret, la globalité concrète à l'intérieur de laquelle fonctionnent les hommes économiques qu'Adam Smith essayait d'étudier. Cette société civile, chez Ferguson, je voudrais en relever trois ou quatre caractères essentiels : premièrement, la société civile entendue comme constante historico-naturelle ; deuxièmement, la société civile comme principe de synthèse spontanée ; troisièmement, la société civile comme matrice permanente de pouvoir politique ; et quatrièmement, la société civile comme élément moteur de l'histoire. Premièrement, la société civile comme constante historico-naturelle. Pour Ferguson, en effet, la société civile est une donnée au-delà de laquelle il n'y a rien à chercher. Avant la société civile, rien n'existe ou si quelque chose existe, dit Ferguson, c'est quelque chose qui est pour nous absolument inaccessible, tellement reculé dans le fond des âges, tellement en quelque sorte ...",
+        "byte_size": 410819,
+        "sha256": "c1dfdb586895e80174e86147cddf4fda21ec2f47a6f25f8a80d95d198f452de5"
+      },
+      {
+        "page_no": 315,
+        "file_idx": 314,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/0d285c0800db/source.pdf",
+        "ocr_excerpt": "on serait passé de la nature à l'histoire, de la non-société à la société. La nature de la nature humaine est d'être historique, car la nature de la nature humaine est d'être sociale. Il n'y a pas de nature humaine qui soit dissociable du fait même de la société. Et Ferguson évoque l'espèce de mythe, d'utopie méthodologique souvent reprise au XVIIIe siècle : soit, dit-il, une troupe d'enfants que l'on aurait laissés s'éduquer eux-mêmes en dehors de toute autre forme de société. Supposons des enfants que l'on mette dans un désert en les laissant se débrouiller dès leur plus jeune âge, qu'on les laisse se former tout seuls, sans instruction et sans guide, eh bien si nous revenions cinq ans, dix ans, quinze ans après, à condition bien sûr qu'ils ne soient pas morts, qu'est-ce que nous verrions? « Nous verrions les membres de cette petite société manger, dormir, aller en troupes, jouer ensemble, se faire un langage, se diviser, se quereller », se lier d'amitié, oublier pour les autres leur propre conservation $ ^{6} $. Donc, le lien social se forme spontanément. Il n'y a pas d'opération spécifique qui puisse l'établir ou le fonder. Il n'y a pas à instaurer ou à auto-instaurer la société. On est de toute façon dans la société. Le lien social est sans préhistoire. Dire qu'il est sans préhistoire, ça veut dire qu'il est, à la fois, permanent et indispensable. Permanent, ça veut dire q ...",
+        "byte_size": 425636,
+        "sha256": "36b0ebc871b0280cd3ad182ae9558e670f387878ffed2f8524f820ce976cf275"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-011-leçondu28mars1979:toc-ch-011-leçondu28mars1979:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 6,
+    "cluster_id": "toc-ch-010-leçondu21mars1979:nr-en-ch-0060-toc-ch-010-leçondu21mars1979:endnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 7,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00431\",\n    \"marker\": \"32\",\n    \"note_text\": \"« Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital ».\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text for marker 32 is clearly visible at the bottom of page 285 (image 2). The OCR missed it.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00432\",\n    \"marker\": \"33\",\n    \"note_text\": \"« pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise ».\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text for marker 33 is clearly visible at the bottom of page 285 (image 2), immediately following note 32. The OCR missed it.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00433\",\n    \"confidence\": 0.9,\n    \"reason\": \"No corresponding footnote found on page 285 (image 2) or adjacent pages. The anchor appears to be a false positive or refers to content not present in the provided images.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00434\",\n    \"confidence\": 0.9,\n    \"reason\": \"No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00435\",\n    \"confidence\": 0.9,\n    \"reason\": \"No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00436\",\n    \"confidence\": 0.9,\n    \"reason\": \"No corresponding footnote found on page 288 (image 5). The anchor appears to be a false positive.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"en-00384\",\n    \"anchor_phrase\": \"communication au congrès des Économistes de langue française (Québec, mai 1976)\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 10 refers to a communication at the 'congrès des Économistes de langue française'. The provided chapter_body_excerpt does not contain this phrase or any reference to J.-L. Migué/H. Lepage, implying the anchor is in a missing segment of the text. However, the note text itself contains the unique identifying phrase which can serve as a synthetic anchor.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"en-00385\",\n    \"anchor_phrase\": \"J.-L. Migué, ibid., cité par H. Lepage, op.cit., p. 346\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 11 starts with 'J.-L. Migué, ibid.'. Since Note 10 (Migué) is also unmatched and its anchor is missing from the excerpt, there is no explicit anchor for Note 11 either. The note text provides the unique identifier.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00431",
-      "anchor_phrase": "",
-      "marker": "32",
-      "note_text": "« Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital ».",
+      "action": "synthesize_anchor",
+      "note_item_id": "en-00384",
+      "anchor_id": "",
+      "anchor_phrase": "communication au congrès des Économistes de langue française (Québec, mai 1976)",
+      "marker": "",
+      "note_text": "",
       "confidence": 0.95,
-      "reason": "The footnote text for marker 32 is clearly visible at the bottom of page 285 (image 2). The OCR missed it."
+      "reason": "Note 10 refers to a communication at the 'congrès des Économistes de langue française'. The provided chapter_body_excerpt does not contain this phrase or any reference to J.-L. Migué/H. Lepage, implying the anchor is in a missing segment of the text. However, the note text itself contains the unique identifying phrase which can serve as a synthetic anchor.",
+      "fuzzy_score": 53.16455696202531,
+      "ambiguous": false,
+      "char_start": 15660,
+      "char_end": 15739,
+      "matched_text": " communications d'un économiste canadien qui s'appelle Jean-Luc Migué 9 et qui ",
+      "fuzzy_hit": false
     },
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00432",
-      "anchor_phrase": "",
-      "marker": "33",
-      "note_text": "« pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise ».",
+      "action": "synthesize_anchor",
+      "note_item_id": "en-00385",
+      "anchor_id": "",
+      "anchor_phrase": "J.-L. Migué, ibid., cité par H. Lepage, op.cit., p. 346",
+      "marker": "",
+      "note_text": "",
       "confidence": 0.95,
-      "reason": "The footnote text for marker 33 is clearly visible at the bottom of page 285 (image 2), immediately following note 32. The OCR missed it."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00433",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "No corresponding footnote found on page 285 (image 2) or adjacent pages. The anchor appears to be a false positive or refers to content not present in the provided images."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00434",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00435",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00436",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "No corresponding footnote found on page 288 (image 5). The anchor appears to be a false positive."
+      "reason": "Note 11 starts with 'J.-L. Migué, ibid.'. Since Note 10 (Migué) is also unmatched and its anchor is missing from the excerpt, there is no explicit anchor for Note 11 either. The note text provides the unique identifier.",
+      "fuzzy_score": 41.81818181818182,
+      "ambiguous": false,
+      "char_start": 15712,
+      "char_end": 15767,
+      "matched_text": "le Jean-Luc Migué 9 et qui écrivait ceci, un texte qui ",
+      "fuzzy_hit": false
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-011-leçondu28mars1979:toc-ch-011-leçondu28mars1979:footnote",
-    "chapter_title": "Leçon du 28 mars 1979",
-    "request_mode": "ref_only_visual",
+    "cluster_id": "toc-ch-010-leçondu21mars1979:nr-en-ch-0060-toc-ch-010-leçondu21mars1979:endnote",
+    "chapter_title": "Leçon du 21 mars 1979",
+    "request_mode": "note_only_with_body",
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00431",
-        "anchor_phrase": "",
-        "marker": "32",
-        "note_text": "« Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital ».",
+        "action": "synthesize_anchor",
+        "note_item_id": "en-00384",
+        "anchor_id": "",
+        "anchor_phrase": "communication au congrès des Économistes de langue française (Québec, mai 1976)",
+        "marker": "",
+        "note_text": "",
         "confidence": 0.95,
-        "reason": "The footnote text for marker 32 is clearly visible at the bottom of page 285 (image 2). The OCR missed it."
+        "reason": "Note 10 refers to a communication at the 'congrès des Économistes de langue française'. The provided chapter_body_excerpt does not contain this phrase or any reference to J.-L. Migué/H. Lepage, implying the anchor is in a missing segment of the text. However, the note text itself contains the unique identifying phrase which can serve as a synthetic anchor.",
+        "fuzzy_score": 53.16455696202531,
+        "ambiguous": false,
+        "char_start": 15660,
+        "char_end": 15739,
+        "matched_text": " communications d'un économiste canadien qui s'appelle Jean-Luc Migué 9 et qui ",
+        "fuzzy_hit": false
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00432",
-        "anchor_phrase": "",
-        "marker": "33",
-        "note_text": "« pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise ».",
+        "action": "synthesize_anchor",
+        "note_item_id": "en-00385",
+        "anchor_id": "",
+        "anchor_phrase": "J.-L. Migué, ibid., cité par H. Lepage, op.cit., p. 346",
+        "marker": "",
+        "note_text": "",
         "confidence": 0.95,
-        "reason": "The footnote text for marker 33 is clearly visible at the bottom of page 285 (image 2), immediately following note 32. The OCR missed it."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00433",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 285 (image 2) or adjacent pages. The anchor appears to be a false positive or refers to content not present in the provided images."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00434",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00435",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00436",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 288 (image 5). The anchor appears to be a false positive."
+        "reason": "Note 11 starts with 'J.-L. Migué, ibid.'. Since Note 10 (Migué) is also unmatched and its anchor is missing from the excerpt, there is no explicit anchor for Note 11 either. The note text provides the unique identifier.",
+        "fuzzy_score": 41.81818181818182,
+        "ambiguous": false,
+        "char_start": 15712,
+        "char_end": 15767,
+        "matched_text": "le Jean-Luc Migué 9 et qui écrivait ceci, un texte qui ",
+        "fuzzy_hit": false
       }
     ],
-    "auto_selected_actions": [
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00431",
-        "anchor_phrase": "",
-        "marker": "32",
-        "note_text": "« Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital ».",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker 32 is clearly visible at the bottom of page 285 (image 2). The OCR missed it."
-      },
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00432",
-        "anchor_phrase": "",
-        "marker": "33",
-        "note_text": "« pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise ».",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker 33 is clearly visible at the bottom of page 285 (image 2), immediately following note 32. The OCR missed it."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00433",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 285 (image 2) or adjacent pages. The anchor appears to be a false positive or refers to content not present in the provided images."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00434",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00435",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00436",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 288 (image 5). The anchor appears to be a false positive."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00431",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "32",
-        "note_text": "« Tout homme pourvu qu'il n'enfreigne pas les lois de la justice doit pouvoir porter où il lui plaît son intérêt et son capital ».",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker 32 is clearly visible at the bottom of page 285 (image 2). The OCR missed it."
-      },
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00432",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "33",
-        "note_text": "« pour l'accomplissement convenable de cette tâche il n'y a aucune sagesse humaine ni aucune connaissance qui suffise ».",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker 33 is clearly visible at the bottom of page 285 (image 2), immediately following note 32. The OCR missed it."
-      },
-      {
-        "link_id": "link-00370",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00433",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 285 (image 2) or adjacent pages. The anchor appears to be a false positive or refers to content not present in the provided images."
-      },
-      {
-        "link_id": "link-00371",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00434",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-      },
-      {
-        "link_id": "link-00372",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00435",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 287 (image 4). The anchor appears to be a false positive."
-      },
-      {
-        "link_id": "link-00373",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00436",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "No corresponding footnote found on page 288 (image 5). The anchor appears to be a false positive."
-      }
-    ]
+    "auto_selected_actions": [],
+    "auto_applied_actions": []
   },
   "usage": {
-    "prompt_tokens": 5427,
-    "completion_tokens": 558,
-    "total_tokens": 5985,
+    "prompt_tokens": 8289,
+    "completion_tokens": 309,
+    "total_tokens": 8598,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 11815
+    "duration_ms": 7586
   }
 }

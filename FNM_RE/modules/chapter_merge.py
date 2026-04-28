@@ -709,7 +709,8 @@ def build_chapter_markdown_set(
         diagnostic_machine_by_page=diagnostic_machine_by_page,
         include_diagnostic_entries=bool(include_diagnostic_entries),
     )
-    export_chapters, export_summary = export_stage._build_export_chapters(
+    from FNM_RE.stages.export_contract import _build_export_chapters
+    export_chapters, export_summary = _build_export_chapters(
         phase5,
         include_diagnostic_entries=bool(include_diagnostic_entries),
     )
