@@ -524,9 +524,9 @@ def build_export_bundle(
     pages: list[dict],
     include_diagnostic_entries: bool = False,
 ) -> tuple[list[ExportChapterRecord], ExportBundleRecord, dict[str, Any]]:
-    from FNM_RE.stages.export_contract import _build_export_chapters, _compute_export_semantic_contract
+    from FNM_RE.stages.export_contract import build_export_chapters, _compute_export_semantic_contract
     del pages
-    export_chapters, chapter_summary = _build_export_chapters(
+    export_chapters, chapter_summary = build_export_chapters(
         phase5,
         include_diagnostic_entries=bool(include_diagnostic_entries),
     )
@@ -588,7 +588,7 @@ def build_export_zip(bundle: ExportBundleRecord) -> bytes:
 
 # ── 向后兼容重导出 ──
 from FNM_RE.stages.export_contract import (  # noqa: E402,F401
-    _build_export_chapters,
+    build_export_chapters,
     _compute_export_semantic_contract,
     _is_semantic_duplicate_candidate,
     _looks_like_bibliography_entry,

@@ -113,7 +113,7 @@ def _compute_export_semantic_contract(
     }
 
 
-def _build_export_chapters(
+def build_export_chapters(
     phase5: Phase5Structure,
     *,
     include_diagnostic_entries: bool,
