@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from FNM_RE.shared.title import normalize_title, normalized_title_key
-from FNM_RE.shared.notes import _safe_int
+from FNM_RE.shared.notes import _safe_float, _safe_int
 
 _BODY_PAGE_ROLES = {"body", "front_matter"}
 _HEADING_GRAPH_PREVIEW_LIMIT = 8
@@ -49,12 +49,6 @@ def default_heading_graph_summary() -> dict[str, Any]:
         "expanded_window_hit_count": 0,
         "composite_heading_count": 0,
     }
-
-def _safe_float(value: Any) -> float | None:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 def _normalize_font_weight_hint(value: Any) -> str:
     token = str(value or "").strip().lower()

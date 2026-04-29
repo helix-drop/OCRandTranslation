@@ -9,7 +9,7 @@ from typing import Any, Mapping
 from document.note_detection import annotate_pages_with_note_scans
 
 from FNM_RE.models import NoteRegionRecord, Phase1Structure
-from FNM_RE.shared.notes import first_notes_heading, first_source_marker, scan_items_by_kind
+from FNM_RE.shared.notes import _split_contiguous_ranges, first_notes_heading, first_source_marker, scan_items_by_kind
 from FNM_RE.shared.chapters import chapter_id_for_page as _shared_chapter_id_for_page, nearest_prior_chapter as _shared_nearest_prior_chapter
 from FNM_RE.stages.endnote_chapter_explorer import explore_endnote_chapter_regions
 from FNM_RE.shared.text import extract_page_headings
@@ -45,22 +45,6 @@ def _page_payload_by_no(pages: list[dict]) -> dict[int, dict]:
         if page_no > 0:
             payload[page_no] = dict(page)
     return payload
-
-
-def _split_contiguous_ranges(values: list[int]) -> list[list[int]]:
-    if not values:
-        return []
-    ordered = sorted({int(value) for value in values if int(value) > 0})
-    if not ordered:
-        return []
-    ranges: list[list[int]] = [[ordered[0]]]
-    for value in ordered[1:]:
-        current = ranges[-1]
-        if value == current[-1] + 1:
-            current.append(value)
-            continue
-        ranges.append([value])
-    return ranges
 
 
 def _build_footnote_band_regions(

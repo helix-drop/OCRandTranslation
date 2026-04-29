@@ -650,3 +650,20 @@ def marker_digits_are_ordered_subsequence(short_marker: str, long_marker: str) -
             if cursor == len(short_digits):
                 return True
     return False
+
+
+def _split_contiguous_ranges(values: list[int]) -> list[list[int]]:
+    if not values:
+        return []
+    ordered = sorted({int(value) for value in values if int(value) > 0})
+    if not ordered:
+        return []
+    ranges: list[list[int]] = [[ordered[0]]]
+    for value in ordered[1:]:
+        current = ranges[-1]
+        if value == current[-1] + 1:
+            current.append(value)
+            continue
+        ranges.append([value])
+    return ranges
+

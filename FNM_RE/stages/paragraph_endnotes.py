@@ -16,6 +16,7 @@ from typing import Any
 from FNM_RE.models import ChapterEndnoteRecord, Phase1Structure
 from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
 from FNM_RE.shared.notes import (
+    _split_contiguous_ranges,
     first_notes_heading,
     normalize_note_marker,
     parse_note_items_from_text,
@@ -74,22 +75,6 @@ def _looks_like_illustration_list_page(
         return False
     stripped = lines[0].lstrip("#").strip()
     return bool(_ILLUSTRATION_LIST_RE.match(stripped))
-
-
-def _split_contiguous_ranges(values: list[int]) -> list[list[int]]:
-    if not values:
-        return []
-    ordered = sorted({int(v) for v in values if int(v) > 0})
-    if not ordered:
-        return []
-    ranges: list[list[int]] = [[ordered[0]]]
-    for value in ordered[1:]:
-        current = ranges[-1]
-        if value == current[-1] + 1:
-            current.append(value)
-        else:
-            ranges.append([value])
-    return ranges
 
 
 def _last_chapter_end_page(phase1: Phase1Structure) -> int:

@@ -15,6 +15,7 @@ from FNM_RE.models import ChapterRecord, HeadingCandidate, PagePartitionRecord
 from FNM_RE.shared.refs import extract_note_refs
 from FNM_RE.shared.text import extract_page_headings, page_blocks, page_markdown_text
 from FNM_RE.shared.title import chapter_title_match_key, guess_title_family, normalize_title, normalized_title_key
+from FNM_RE.shared.notes import _safe_float
 from FNM_RE.stages.heading_graph import (
     build_heading_graph as _run_heading_graph,
     default_heading_graph_summary as _default_heading_graph_summary_impl,
@@ -29,7 +30,6 @@ _CHAPTER_KEYWORD_RE = re.compile(
     r"\b(?:chapter|chapitre|lecture|leçon|prologue|epilogue|postambule|appendix|appendices|part)\b",
     re.IGNORECASE,
 )
-
 
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 _LECTURE_TITLE_RE = re.compile(r"\ble[cç]on du\b", re.IGNORECASE)
@@ -117,12 +117,6 @@ _VISUAL_TOC_CHAPTER_KEYWORD_RE = re.compile(
     r"|^\s*(?:part|partie|livre|book)\s+(?:[ivxlcm]+|\d+)\b",
     re.IGNORECASE,
 )
-
-def _safe_float(value: Any) -> float | None:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 def _normalize_font_weight_hint(value: Any) -> str:
     token = str(value or "").strip().lower()

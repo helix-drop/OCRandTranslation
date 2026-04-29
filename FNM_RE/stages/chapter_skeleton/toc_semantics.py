@@ -16,6 +16,7 @@ from FNM_RE.shared.refs import extract_note_refs
 from FNM_RE.shared.text import extract_page_headings, page_blocks, page_markdown_text
 from FNM_RE.shared.title import chapter_title_match_key, guess_title_family, normalize_title, normalized_title_key
 from FNM_RE.stages.heading_graph import build_heading_graph, default_heading_graph_summary
+from FNM_RE.shared.notes import _safe_int
 
 _MARKDOWN_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s*(.+?)\s*$")
 _NOTES_HEADER_RE = re.compile(r"^\s*(?:#+\s*)?(notes?|endnotes?|notes to pages?.*)\s*$", re.IGNORECASE)
@@ -26,7 +27,6 @@ _CHAPTER_KEYWORD_RE = re.compile(
     r"\b(?:chapter|chapitre|lecture|leçon|prologue|epilogue|postambule|appendix|appendices|part)\b",
     re.IGNORECASE,
 )
-
 
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 _LECTURE_TITLE_RE = re.compile(r"\ble[cç]on du\b", re.IGNORECASE)
