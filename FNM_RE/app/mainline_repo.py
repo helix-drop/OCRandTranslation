@@ -6,57 +6,21 @@
 from __future__ import annotations
 
 import json
-import time
-from dataclasses import replace
-from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from FNM_RE.app.pipeline import build_module_pipeline_snapshot
-from FNM_RE.constants import is_valid_pipeline_state
-from FNM_RE.shared.review_overrides import group_review_overrides as _group_review_overrides
 from FNM_RE.models import (
     BodyAnchorRecord,
     ChapterNoteModeRecord,
     ChapterRecord,
-    ExportBundleRecord,
-    ExportChapterRecord,
     NoteItemRecord,
     NoteLinkRecord,
     NoteRegionRecord,
-    Phase4Structure,
-    Phase5Structure,
-    Phase6Structure,
-    Phase6Summary,
     SectionHeadRecord,
     StructureReviewRecord,
-    StructureStatusRecord,
     TranslationUnitRecord,
     UnitPageSegmentRecord,
     UnitParagraphRecord,
 )
-from persistence.fnm_export_bundle import (
-    clear_fnm_export_bundle,
-    load_fnm_export_bundle,
-    save_fnm_export_bundle,
-)
-from FNM_RE.app.persist_helpers import (
-    load_fnm_visual_toc_bundle as _load_fnm_visual_toc_bundle,
-    load_fnm_toc_items as _load_fnm_toc_items,
-    normalize_marker as _normalize_marker,
-    serialize_chapter_note_modes_for_repo as _serialize_chapter_note_modes_for_repo,
-    serialize_heading_candidates_for_repo as _serialize_heading_candidates_for_repo,
-    serialize_note_items_for_repo as _serialize_note_items_for_repo,
-    serialize_note_regions_for_repo as _serialize_note_regions_for_repo,
-    serialize_pages_for_repo as _serialize_pages_for_repo,
-    serialize_section_heads_for_repo as _serialize_section_heads_for_repo,
-    to_plain as _to_plain,
-)
-from FNM_RE.stages.diagnostics import build_diagnostic_projection
-from FNM_RE.stages.export import build_export_zip
-from FNM_RE.stages.export_audit import audit_phase6_export
-from persistence.sqlite_store import SQLiteRepository
-from persistence.storage import get_pdf_path, get_translate_args
-from persistence.storage_toc import load_toc_visual_manual_inputs
 
 _EMPTY_ROLE_SUMMARY = {
     "container": 0,
@@ -70,7 +34,6 @@ _EXPORT_VALIDATION_LOG_PATH = "logs/fnm_export_validation_issues.log"
 _EXPORT_STAGE_REASON_PREFIXES = ("merge_", "export_")
 _EXPORT_STAGE_REASON_EXACT = {"local_note_contract_broken"}
 _MISSING_PERSISTED_EXPORT_BUNDLE_MESSAGE = "FNM 导出包不存在，请先执行最终校验。"
-
 
 
 def _normalize_unit_id(unit_id: str, doc_id: str) -> str:
@@ -277,227 +240,6 @@ def _repo_structure_review_record(index: int, row: dict[str, Any]) -> StructureR
         page_end=page_end,
         severity=str(row.get("severity") or "warning"),
         payload=dict(row.get("payload_json") or {}),
-    )
-
-
-def _overlay_repo_structure_if_needed(phase5: Phase5Structure, *, doc_id: str, repo: SQLiteRepository) -> None:
-    need_chapters = not bool(phase5.chapters)
-    need_note_items = not bool(phase5.note_items)
-    if not need_chapters and not need_note_items:
-        return
-
-    if need_chapters:
-        repo_chapters = [
-            record
-            for record in (
-                _repo_chapter_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_chapters", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_chapters:
-            phase5.chapters = repo_chapters
-
-    if not phase5.section_heads:
-        repo_section_heads = [
-            record
-            for record in (
-                _repo_section_head_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_section_heads", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_section_heads:
-            phase5.section_heads = repo_section_heads
-
-    if not phase5.note_regions:
-        repo_note_regions = [
-            record
-            for record in (
-                _repo_note_region_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_note_regions", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_note_regions:
-            phase5.note_regions = repo_note_regions
-
-    if need_note_items:
-        repo_note_items = [
-            record
-            for record in (
-                _repo_note_item_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_note_items", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_note_items:
-            phase5.note_items = repo_note_items
-
-    if not phase5.chapter_note_modes:
-        repo_note_modes = [
-            record
-            for record in (
-                _repo_chapter_note_mode_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_chapter_note_modes", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_note_modes:
-            phase5.chapter_note_modes = repo_note_modes
-
-    if not phase5.body_anchors:
-        repo_body_anchors = [
-            record
-            for record in (
-                _repo_body_anchor_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_body_anchors", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_body_anchors:
-            phase5.body_anchors = repo_body_anchors
-
-    if not phase5.note_links:
-        repo_note_links = [
-            record
-            for record in (
-                _repo_note_link_record(dict(row))
-                for row in _safe_list(getattr(repo, "list_fnm_note_links", None), doc_id)
-                if isinstance(row, dict)
-            )
-            if record is not None
-        ]
-        if repo_note_links:
-            phase5.note_links = repo_note_links
-    if not phase5.effective_note_links and phase5.note_links:
-        phase5.effective_note_links = list(phase5.note_links)
-
-    if not phase5.structure_reviews:
-        repo_structure_reviews = [
-            _repo_structure_review_record(index, dict(row))
-            for index, row in enumerate(
-                _safe_list(getattr(repo, "list_fnm_structure_reviews", None), doc_id),
-                start=1,
-            )
-            if isinstance(row, dict)
-        ]
-        if repo_structure_reviews:
-            phase5.structure_reviews = repo_structure_reviews
-
-
-def _overlay_repo_translation_units(phase5: Phase5Structure, *, doc_id: str, repo: SQLiteRepository, pages: list[dict]) -> None:
-    repo_units = _safe_list(getattr(repo, "list_fnm_translation_units", None), doc_id)
-    if not repo_units:
-        return
-
-    by_unit_id = {
-        _normalize_unit_id(str(row.get("unit_id") or ""), doc_id): dict(row)
-        for row in repo_units
-        if str(row.get("unit_id") or "").strip()
-    }
-
-    existing_unit_ids = {str(unit.unit_id or "").strip() for unit in phase5.translation_units}
-    for normalized_unit_id, repo_unit in by_unit_id.items():
-        if not normalized_unit_id or normalized_unit_id in existing_unit_ids:
-            continue
-        segment_payload = list(repo_unit.get("page_segments") or [])
-        page_segments = [
-            _segment_record_from_payload(dict(segment))
-            for segment in segment_payload
-            if isinstance(segment, dict)
-        ]
-        phase5.translation_units.append(
-            TranslationUnitRecord(
-                unit_id=normalized_unit_id,
-                kind=str(repo_unit.get("kind") or ""),
-                owner_kind=str(repo_unit.get("owner_kind") or ""),
-                owner_id=str(repo_unit.get("owner_id") or ""),
-                section_id=str(repo_unit.get("section_id") or ""),
-                section_title=str(repo_unit.get("section_title") or ""),
-                section_start_page=int(repo_unit.get("section_start_page") or 0),
-                section_end_page=int(repo_unit.get("section_end_page") or 0),
-                note_id=str(repo_unit.get("note_id") or ""),
-                page_start=int(repo_unit.get("page_start") or 0),
-                page_end=int(repo_unit.get("page_end") or 0),
-                char_count=int(repo_unit.get("char_count") or 0),
-                source_text=str(repo_unit.get("source_text") or ""),
-                translated_text=str(repo_unit.get("translated_text") or ""),
-                status=str(repo_unit.get("status") or "pending"),
-                error_msg=str(repo_unit.get("error_msg") or ""),
-                target_ref=str(repo_unit.get("target_ref") or ""),
-                page_segments=page_segments,
-            )
-        )
-        existing_unit_ids.add(normalized_unit_id)
-
-    for unit in phase5.translation_units:
-        repo_unit = by_unit_id.get(str(unit.unit_id or "").strip())
-        if not repo_unit:
-            continue
-        unit.translated_text = str(repo_unit.get("translated_text") or "")
-        unit.status = str(repo_unit.get("status") or unit.status or "pending")
-        unit.error_msg = str(repo_unit.get("error_msg") or "")
-        target_ref = str(repo_unit.get("target_ref") or "").strip()
-        if target_ref:
-            unit.target_ref = target_ref
-        segment_payload = list(repo_unit.get("page_segments") or [])
-        if segment_payload:
-            unit.page_segments = [
-                _segment_record_from_payload(dict(segment))
-                for segment in segment_payload
-                if isinstance(segment, dict)
-            ]
-
-    phase4_like = Phase4Structure(
-        pages=phase5.pages,
-        heading_candidates=phase5.heading_candidates,
-        chapters=phase5.chapters,
-        section_heads=phase5.section_heads,
-        note_regions=phase5.note_regions,
-        note_items=phase5.note_items,
-        chapter_note_modes=phase5.chapter_note_modes,
-        body_anchors=phase5.body_anchors,
-        note_links=phase5.note_links,
-        effective_note_links=phase5.effective_note_links,
-        structure_reviews=phase5.structure_reviews,
-        status=phase5.status,
-    )
-    diagnostic_pages, diagnostic_notes, diagnostic_summary = build_diagnostic_projection(
-        phase4_like,
-        phase5.translation_units,
-        pages=pages,
-        only_pages=None,
-    )
-    phase5.diagnostic_pages = diagnostic_pages
-    phase5.diagnostic_notes = diagnostic_notes
-    phase5.summary.diagnostic_page_summary = dict(diagnostic_summary.get("diagnostic_page_summary") or {})
-    phase5.summary.diagnostic_note_summary = dict(diagnostic_summary.get("diagnostic_note_summary") or {})
-
-
-def _apply_pipeline_state_override(status: StructureStatusRecord, *, pipeline_state: str) -> StructureStatusRecord:
-    lowered = str(pipeline_state or "done").strip().lower()
-    if not is_valid_pipeline_state(lowered):
-        lowered = "done"
-    if lowered == "done":
-        return status
-    if lowered == "idle":
-        state = "idle"
-    elif lowered == "running":
-        state = "running"
-    else:
-        state = "error"
-    return replace(
-        status,
-        structure_state=state,
-        export_ready_test=False,
-        export_ready_real=False,
     )
 
 

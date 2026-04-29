@@ -10,8 +10,6 @@ from typing import Any, Callable
 
 from FNM_RE.app.mainline_repo import (
     _normalize_unit_id,
-    _overlay_repo_structure_if_needed,
-    _overlay_repo_translation_units,
     _paragraph_record_from_payload,
     _repo_body_anchor_record,
     _repo_chapter_note_mode_record,
