@@ -660,7 +660,7 @@ def _annotate_visual_toc_organization(items: list[dict]) -> tuple[list[dict], di
             )
             if isinstance(parent_row, dict):
                 parent_title = _normalize_header_hint(parent_row.get("title") or "")
-        if not parent_title and role_hint in {"chapter", "section"} and active_container_title:
+        if not parent_title and role_hint in {"chapter", "section"} and active_container_title and raw_depth > 0:
             parent_title = active_container_title
         if role_hint == "endnotes":
             parent_title = ""

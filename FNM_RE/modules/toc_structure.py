@@ -177,7 +177,7 @@ def _build_page_roles(
         # NOTES 容器页时，note 角色优先于 chapter，避免章末 NOTES 容器被
         # chapter mapping 覆盖。chapter_id 仍保留供下游 region 绑定。
         if source_role == "note":
-            role = "note"
+            role = "endnotes"
             chapter_id = chapter.chapter_id if chapter is not None else ""
         elif chapter is not None:
             role = chapter.role
