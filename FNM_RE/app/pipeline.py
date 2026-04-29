@@ -178,24 +178,30 @@ def _build_chapter_note_modes(
         if region.review_required and str(region.chapter_id or "").strip():
             review_chapters.add(str(region.chapter_id or "").strip())
 
+    # 预建按 chapter_id 分组的 region 查找表，避免 O(C×R) 重复扫描
+    regions_by_chapter: dict[str, dict[str, list[str]]] = {}
+    for region in note_regions:
+        chapter_id = str(region.chapter_id or "").strip()
+        if not chapter_id:
+            continue
+        bucket = regions_by_chapter.setdefault(chapter_id, {
+            "footnote": [],
+            "chapter_endnote": [],
+            "book_endnote": [],
+        })
+        if region.note_kind == "footnote":
+            bucket["footnote"].append(region.region_id)
+        elif region.note_kind == "endnote":
+            key = "book_endnote" if region.scope == "book" else "chapter_endnote"
+            bucket[key].append(region.region_id)
+
     rows: list[ChapterNoteModeRecord] = []
     for chapter in phase1.chapters:
         chapter_id = chapter.chapter_id
-        footnote_regions = [
-            region.region_id
-            for region in note_regions
-            if region.chapter_id == chapter_id and region.note_kind == "footnote"
-        ]
-        chapter_endnote_regions = [
-            region.region_id
-            for region in note_regions
-            if region.chapter_id == chapter_id and region.note_kind == "endnote" and region.scope == "chapter"
-        ]
-        book_endnote_regions = [
-            region.region_id
-            for region in note_regions
-            if region.chapter_id == chapter_id and region.note_kind == "endnote" and region.scope == "book"
-        ]
+        bucket = regions_by_chapter.get(chapter_id, {})
+        footnote_regions = bucket.get("footnote") or []
+        chapter_endnote_regions = bucket.get("chapter_endnote") or []
+        book_endnote_regions = bucket.get("book_endnote") or []
         region_ids = sorted({*footnote_regions, *chapter_endnote_regions, *book_endnote_regions})
         if footnote_regions:
             note_mode = "footnote_primary"
