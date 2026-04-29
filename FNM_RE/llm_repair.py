@@ -1123,3 +1123,125 @@ def _find_link_id_for_match(note_links: list[dict], *, note_item_id: str, anchor
 
 def _resolve_chapter_id_for_page(chapters: list, page_no: int) -> str:
     return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(chapters, page_no)
+
+
+def _find_link_id_for_ignore(note_links: list[dict], *, anchor_id: str) -> str:
+    for link in note_links or []:
+        if (
+            str(link.get("status") or "") == "orphan_anchor"
+            and str(link.get("anchor_id") or "").strip() == anchor_id
+        ):
+            return str(link.get("link_id") or "")
+    return ""
+
+
+def run_llm_repair(
+    doc_id: str,
+    *,
+    repo: SQLiteRepository | None = None,
+    slug: str = "",
+    cluster_limit: int | None = None,
+    auto_apply: bool = True,
+    confidence_threshold: float = 0.9,
+    model_args: dict | None = None,
+    max_matched_examples: int | None = None,
+    max_unmatched_note_items: int | None = None,
+    max_unmatched_anchors: int | None = None,
+    clear_materialized_overrides: bool = True,
+) -> dict:
+    repo = repo or SQLiteRepository()
+    chapters_raw = repo.list_fnm_chapters(doc_id)
+    note_items_raw = repo.list_fnm_note_items(doc_id)
+    body_anchors_raw = repo.list_fnm_body_anchors(doc_id)
+    links_raw = repo.list_fnm_note_links(doc_id)
+    clusters = build_unresolved_clusters(
+        chapters=[dict(r) for r in (chapters_raw or [])],
+        note_items=[dict(r) for r in (note_items_raw or [])],
+        body_anchors=[dict(r) for r in (body_anchors_raw or [])],
+        note_links=[dict(r) for r in (links_raw or [])],
+    )
+    if cluster_limit is not None and cluster_limit > 0:
+        clusters = clusters[:cluster_limit]
+
+    if clear_materialized_overrides:
+        repo.clear_fnm_review_overrides(doc_id, scope="llm_suggestion")
+    suggestions: list[dict] = []
+    auto_applied: list[dict] = []
+    request_metrics: list[dict] = []
+    llm_traces: list[dict] = []
+
+    for cluster_index, cluster in enumerate(clusters, start=1):
+        cluster = dict(cluster)
+        cluster["page_contexts"] = _build_cluster_page_contexts(doc_id, cluster, repo=repo)
+        llm_result = request_llm_repair_actions(
+            cluster,
+            model_args=model_args,
+            max_matched_examples=max_matched_examples,
+            max_unmatched_note_items=max_unmatched_note_items,
+            max_unmatched_anchors=max_unmatched_anchors,
+            doc_id=doc_id,
+            slug=slug,
+        )
+        actions = list(llm_result.get("actions") or [])
+        request_metrics.append(dict(llm_result.get("request_metrics") or {}))
+        if llm_result.get("llm_trace"):
+            llm_traces.append(llm_result["llm_trace"])
+        auto_actions = select_auto_applicable_actions(actions, confidence_threshold=confidence_threshold)
+        for action_index, action in enumerate(actions, start=1):
+            suggestion_id = f"llm-{cluster_index:02d}-{action_index:03d}"
+            auto_selected = action in auto_actions
+            payload = {
+                "cluster_id": cluster.get("cluster_id"),
+                "chapter_id": cluster.get("chapter_id"),
+                "chapter_title": cluster.get("chapter_title"),
+                "action": action.get("action"),
+                "note_item_id": action.get("note_item_id"),
+                "anchor_id": action.get("anchor_id"),
+                "confidence": action.get("confidence"),
+                "reason": action.get("reason"),
+                "auto_selected": auto_selected,
+            }
+            repo.save_fnm_review_override(doc_id, "llm_suggestion", suggestion_id, payload)
+            suggestions.append({"suggestion_id": suggestion_id, **payload})
+
+        if not auto_apply:
+            continue
+        for action in auto_actions:
+            if action["action"] == "match":
+                link_id = _find_link_id_for_match(
+                    [dict(r) for r in (links_raw or [])],
+                    note_item_id=str(action.get("note_item_id") or "").strip(),
+                    anchor_id=str(action.get("anchor_id") or "").strip(),
+                )
+                if not link_id:
+                    continue
+                repo.save_fnm_review_override(
+                    doc_id,
+                    "link",
+                    link_id,
+                    {
+                        "action": "match",
+                        "note_item_id": str(action.get("note_item_id") or "").strip(),
+                        "anchor_id": str(action.get("anchor_id") or "").strip(),
+                    },
+                )
+                auto_applied.append({"link_id": link_id, **action})
+            elif action["action"] == "ignore_ref":
+                link_id = _find_link_id_for_ignore(
+                    [dict(r) for r in (links_raw or [])],
+                    anchor_id=str(action.get("anchor_id") or "").strip(),
+                )
+                if not link_id:
+                    continue
+                repo.save_fnm_review_override(doc_id, "link", link_id, {"action": "ignore"})
+                auto_applied.append({"link_id": link_id, **action})
+
+    return {
+        "cluster_count": len(clusters),
+        "suggestion_count": len(suggestions),
+        "auto_applied_count": len(auto_applied),
+        "suggestions": suggestions,
+        "auto_applied": auto_applied,
+        "request_metrics": request_metrics,
+        "llm_traces": llm_traces,
+    }
