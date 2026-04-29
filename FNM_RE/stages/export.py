@@ -17,46 +17,42 @@ from FNM_RE.models import (
     SectionHeadRecord,
     TranslationUnitRecord,
 )
+from FNM_RE.shared.export_constants import (
+    PENDING_TRANSLATION_TEXT,
+    OBSIDIAN_EXPORT_CHAPTERS_PREFIX,
+    _ANY_NOTE_REF_RE,
+    _FRONT_MATTER_TITLE_RE,
+    _LEADING_RAW_NOTE_MARKER_RE,
+    _NOTE_TEXT_BODY_MARKUP_RE,
+    _RAW_BRACKET_NOTE_REF_RE,
+    _RAW_SUPERSCRIPT_NOTE_REF_RE,
+    _RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE,
+    _TOC_RESIDUE_RE,
+    _TRAILING_IMAGE_ONLY_BLOCK_RE,
+    _UNICODE_SUPERSCRIPT_TRANSLATION,
+    _should_replace_definition_text,
+)
+from FNM_RE.shared.marker_sequences import _build_raw_marker_note_sequences
+from FNM_RE.shared.ref_rewriter import (
+    _consume_marker_note_id,
+    _local_endnote_ref_number,
+    _marker_aliases,
+    _marker_key,
+    _normalize_endnote_note_id,
+    _resolve_note_id,
+    _resolve_note_kind,
+    replace_note_refs_with_local_labels as _replace_note_refs_with_local_labels,
+    replace_raw_bracket_refs_with_local_labels as _replace_raw_bracket_refs_with_local_labels,
+    replace_raw_superscript_refs_with_local_labels as _replace_raw_superscript_refs_with_local_labels,
+    replace_raw_unicode_superscript_refs_with_local_labels as _replace_raw_unicode_superscript_refs_with_local_labels,
+)
 from FNM_RE.shared.refs import replace_frozen_refs
 
-PENDING_TRANSLATION_TEXT = "[待翻译]"
 OBSIDIAN_EXPORT_INDEX_MD = "index.md"
 OBSIDIAN_EXPORT_CHAPTERS_DIR = "chapters"
-OBSIDIAN_EXPORT_CHAPTERS_PREFIX = f"{OBSIDIAN_EXPORT_CHAPTERS_DIR}/"
 
 _INVALID_CHAPTER_FILENAME_CHARS_RE = re.compile(r'[<>:"/\\|?*\x00-\x1f]+')
 _CHAPTER_FILENAME_SPACE_RE = re.compile(r"\s+")
-_NOTE_TEXT_BODY_MARKUP_RE = re.compile(
-    r"\$\s*\^\{\s*\[?\d{1,4}[A-Za-z]?\]?\s*\}\s*\$"
-    r"|\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$"
-    r"|<sup>\s*\[?\d{1,4}[A-Za-z]?\]?\s*</sup>",
-    re.IGNORECASE,
-)
-_LEADING_RAW_NOTE_MARKER_RE = re.compile(
-    r"^\s*(?:\[\d{1,4}[A-Za-z]?\]|\d{1,4}[A-Za-z]?[.)]|\*{1,4}\s+|<sup>\s*\d{1,4}[A-Za-z]?\s*</sup>)\s*",
-    re.IGNORECASE,
-)
-_ANY_NOTE_REF_RE = re.compile(
-    r"\{\{NOTE_REF:([^}]+)\}\}"
-    r"|\{\{FN_REF:([^}]+)\}\}"
-    r"|\{\{EN_REF:([^}]+)\}\}"
-    r"|\[EN-([^\]]+)\]"
-    r"|\[FN-([^\]]+)\]"
-    r"|\[\^([^\]]+)\]",
-    re.IGNORECASE,
-)
-_RAW_BRACKET_NOTE_REF_RE = re.compile(r"(?<!\d)\[(\d{1,4}[A-Za-z]?)\](?!\d)")
-_RAW_SUPERSCRIPT_NOTE_REF_RE = re.compile(
-    r"\$\s*\^\{\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*\}\s*\$"
-    r"|\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$"
-    r"|<sup>\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*</sup>",
-    re.IGNORECASE,
-)
-_RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE = re.compile(r"([⁰¹²³⁴⁵⁶⁷⁸⁹]+)")
-_TRAILING_IMAGE_ONLY_BLOCK_RE = re.compile(
-    r"(?:\n\s*)*(?:<div[^>]*>\s*<img\b[^>]*>\s*</div>|!\[[^\]]*\]\([^)]+\))\s*$",
-    re.IGNORECASE | re.DOTALL,
-)
 _SECTION_HEAD_FORBIDDEN_PREFIX_RE = re.compile(
     r"^\d+\.\s*(?:ibid|cf\.?|see|supra|infra)\b",
     re.IGNORECASE,
@@ -65,13 +61,7 @@ _SECTION_HEAD_INLINE_NOTE_TRACE_RE = re.compile(
     r"(?:<sup>|\[\^[^\]]+\]|\$\s*\^\{[^}]+\}\s*\$)",
     re.IGNORECASE,
 )
-_SECTION_HEAD_QUOTE_RE = re.compile(r'^\s*["“”«»‹›「」『』].*["“”«»‹›」』]\s*$')
-_FRONT_MATTER_TITLE_RE = re.compile(
-    r"^(?:preface|foreword|acknowledg(?:e)?ments?|remerciements?|avant-propos|table of contents|contents|目录)\b",
-    re.IGNORECASE,
-)
-_TOC_RESIDUE_RE = re.compile(r"(?im)^\s*(?:table of contents|contents|目录)\b")
-_UNICODE_SUPERSCRIPT_TRANSLATION = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+_SECTION_HEAD_QUOTE_RE = re.compile(r'^\s*["""«»‹›「」『』].*["""«»‹›」』]\s*$')
 
 
 def _sanitize_obsidian_chapter_title(title: str) -> str:
@@ -107,238 +97,6 @@ def _escape_leading_asterisks(text: str) -> str:
 def _normalize_markdown_content(content: str) -> str:
     text = str(content or "").strip()
     return f"{text}\n" if text else ""
-
-
-def _marker_key(raw: Any) -> str:
-    normalized = str(raw or "").strip().translate(_UNICODE_SUPERSCRIPT_TRANSLATION).lower()
-    # 符号型标记（*, ** 等）原样保留
-    if re.match(r"^\*{1,4}$", normalized):
-        return normalized
-    normalized = re.sub(r"[^0-9a-z]+", "", normalized)
-    if normalized.startswith("en") and normalized[2:].isdigit():
-        return normalized[2:]
-    return normalized
-
-
-def _marker_aliases(raw: Any) -> set[str]:
-    key = _marker_key(raw)
-    if not key:
-        return set()
-    aliases = {key}
-    trimmed = key.lstrip("0")
-    if trimmed:
-        aliases.add(trimmed)
-    if key.startswith("en"):
-        aliases.add(key[2:])
-    return {token for token in aliases if token}
-
-
-def _normalize_endnote_note_id(note_id: str) -> str:
-    token = str(note_id or "").strip()
-    if not token:
-        return ""
-    return token if token.lower().startswith("en-") else f"en-{token}"
-
-
-def _resolve_note_id(note_id: str, note_text_by_id: dict[str, str]) -> str:
-    token = str(note_id or "").strip()
-    if not token:
-        return ""
-    if token in note_text_by_id:
-        return token
-    if token.lower().startswith("en-"):
-        stripped = token[3:]
-        if stripped in note_text_by_id:
-            return stripped
-    else:
-        endnote = f"en-{token}"
-        if endnote in note_text_by_id:
-            return endnote
-    return ""
-
-
-def _resolve_note_kind(note_id: str, *, note_kind_by_id: dict[str, str]) -> str:
-    """根据 note_id 查询 note_kind，返回 'endnote' | 'footnote' | ''。"""
-    kind = str(note_kind_by_id.get(note_id, "") or "").strip().lower()
-    if kind in ("endnote", "footnote"):
-        return kind
-    normalized = str(note_id or "").strip()
-    if normalized.startswith("en-"):
-        stripped = normalized[3:]
-        kind = str(note_kind_by_id.get(stripped, "") or "").strip().lower()
-    elif normalized:
-        kind = str(note_kind_by_id.get(f"en-{normalized}", "") or "").strip().lower()
-    return kind if kind in ("endnote", "footnote") else ""
-
-
-def _local_endnote_ref_number(
-    note_id: str,
-    *,
-    note_kind_by_id: dict[str, str],
-    local_ref_numbers: dict[str, int],
-    ordered_note_ids: list[str],
-) -> int | None:
-    """为 endnote 分配 [^N] 编号。footnote 返回 None（不占编号）。note_kind_by_id 为空时兜底分配。"""
-    kind = _resolve_note_kind(note_id, note_kind_by_id=note_kind_by_id)
-    if kind == "footnote":
-        return None
-    if note_id not in local_ref_numbers:
-        local_ref_numbers[note_id] = len(local_ref_numbers) + 1
-        ordered_note_ids.append(note_id)
-    return int(local_ref_numbers[note_id])
-
-
-def _replace_note_refs_with_local_labels(
-    text: str,
-    *,
-    note_text_by_id: dict[str, str],
-    note_kind_by_id: dict[str, str],
-    local_ref_numbers: dict[str, int],
-    ordered_note_ids: list[str],
-    footnote_ids_seen: list[str] | None = None,
-) -> str:
-    def _replace(match: re.Match) -> str:
-        captured = [str(match.group(idx) or "").strip() for idx in range(1, 7)]
-        note_id = ""
-        if captured[0]:
-            note_id = captured[0]
-        elif captured[1]:
-            note_id = captured[1]
-        elif captured[2]:
-            note_id = _normalize_endnote_note_id(captured[2])
-        elif captured[3]:
-            note_id = _normalize_endnote_note_id(captured[3])
-        elif captured[4]:
-            note_id = captured[4]
-        elif captured[5]:
-            local_ref = captured[5]
-            note_id = _normalize_endnote_note_id(local_ref) if local_ref.lower().startswith("en-") else local_ref
-        resolved = _resolve_note_id(note_id, note_text_by_id)
-        if not resolved:
-            return match.group(0)
-        ref_num = _local_endnote_ref_number(resolved, note_kind_by_id=note_kind_by_id,
-                                            local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
-        if ref_num is None:
-            if footnote_ids_seen is not None and resolved not in footnote_ids_seen:
-                footnote_ids_seen.append(resolved)
-            return "*"
-        return f"[^{ref_num}]"
-
-    return _ANY_NOTE_REF_RE.sub(_replace, str(text or ""))
-
-
-def _consume_marker_note_id(
-    marker: str,
-    *,
-    marker_note_sequences: dict[str, list[str]],
-    marker_usage_index: dict[str, int],
-) -> str:
-    normalized = _marker_key(marker)
-    if not normalized:
-        return ""
-    candidates = list(marker_note_sequences.get(normalized) or [])
-    if not candidates:
-        return ""
-    index = int(marker_usage_index.get(normalized) or 0)
-    if index >= len(candidates):
-        index = len(candidates) - 1
-    marker_usage_index[normalized] = index + 1
-    return str(candidates[index] or "")
-
-
-def _replace_raw_bracket_refs_with_local_labels(
-    text: str,
-    *,
-    marker_note_sequences: dict[str, list[str]],
-    marker_usage_index: dict[str, int],
-    note_kind_by_id: dict[str, str],
-    local_ref_numbers: dict[str, int],
-    ordered_note_ids: list[str],
-    footnote_ids_seen: list[str] | None = None,
-) -> str:
-    def _replace(match: re.Match) -> str:
-        note_id = _consume_marker_note_id(
-            str(match.group(1) or ""),
-            marker_note_sequences=marker_note_sequences,
-            marker_usage_index=marker_usage_index,
-        )
-        if not note_id:
-            return match.group(0)
-        ref_num = _local_endnote_ref_number(note_id, note_kind_by_id=note_kind_by_id,
-                                            local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
-        if ref_num is None:
-            if footnote_ids_seen is not None and note_id not in footnote_ids_seen:
-                footnote_ids_seen.append(note_id)
-            return "*"
-        return f"[^{ref_num}]"
-
-    return _RAW_BRACKET_NOTE_REF_RE.sub(_replace, str(text or ""))
-
-
-def _replace_raw_superscript_refs_with_local_labels(
-    text: str,
-    *,
-    marker_note_sequences: dict[str, list[str]],
-    marker_usage_index: dict[str, int],
-    note_kind_by_id: dict[str, str],
-    local_ref_numbers: dict[str, int],
-    ordered_note_ids: list[str],
-    footnote_ids_seen: list[str] | None = None,
-) -> str:
-    def _replace(match: re.Match) -> str:
-        marker = str(match.group(1) or match.group(2) or match.group(3) or "")
-        note_id = _consume_marker_note_id(
-            marker,
-            marker_note_sequences=marker_note_sequences,
-            marker_usage_index=marker_usage_index,
-        )
-        if not note_id:
-            return match.group(0)
-        ref_num = _local_endnote_ref_number(note_id, note_kind_by_id=note_kind_by_id,
-                                            local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
-        if ref_num is None:
-            if footnote_ids_seen is not None and note_id not in footnote_ids_seen:
-                footnote_ids_seen.append(note_id)
-            return "*"
-        return f"[^{ref_num}]"
-
-    return _RAW_SUPERSCRIPT_NOTE_REF_RE.sub(_replace, str(text or ""))
-
-
-
-
-def _replace_raw_unicode_superscript_refs_with_local_labels(
-    text: str,
-    *,
-    marker_note_sequences: dict[str, list[str]],
-    marker_usage_index: dict[str, int],
-    note_kind_by_id: dict[str, str],
-    local_ref_numbers: dict[str, int],
-    ordered_note_ids: list[str],
-    footnote_ids_seen: list[str] | None = None,
-) -> str:
-    def _replace(match: re.Match) -> str:
-        marker = str(match.group(1) or "").translate(_UNICODE_SUPERSCRIPT_TRANSLATION)
-        note_id = _consume_marker_note_id(
-            marker,
-            marker_note_sequences=marker_note_sequences,
-            marker_usage_index=marker_usage_index,
-        )
-        if not note_id:
-            return match.group(0)
-        ref_num = _local_endnote_ref_number(note_id, note_kind_by_id=note_kind_by_id,
-                                            local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
-        if ref_num is None:
-            if footnote_ids_seen is not None and note_id not in footnote_ids_seen:
-                footnote_ids_seen.append(note_id)
-            return "*"
-        return f"[^{ref_num}]"
-
-    return _RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE.sub(_replace, str(text or ""))
 
 
 def _strip_trailing_image_only_block(text: str) -> str:
@@ -381,22 +139,6 @@ def _is_exportable_section_head(head: SectionHeadRecord) -> bool:
     if _looks_like_sentence_section_heading(title):
         return False
     return True
-
-
-def _should_replace_definition_text(existing: str, candidate: str) -> bool:
-    current = str(existing or "").strip()
-    payload = str(candidate or "").strip()
-    if not payload:
-        return False
-    if not current:
-        return True
-    current_has_body_markup = bool(_NOTE_TEXT_BODY_MARKUP_RE.search(current))
-    payload_has_body_markup = bool(_NOTE_TEXT_BODY_MARKUP_RE.search(payload))
-    if current_has_body_markup and not payload_has_body_markup:
-        return True
-    if not current_has_body_markup and payload_has_body_markup:
-        return False
-    return len(payload) > len(current)
 
 
 def _sanitize_note_text(text: str) -> str:
@@ -578,105 +320,6 @@ def _build_section_heads_by_page(
             continue
         payload.setdefault(page_no, []).append(title)
     return payload
-
-
-def _build_raw_marker_note_sequences(
-    chapter_id: str,
-    *,
-    matched_links: list[NoteLinkRecord],
-    note_items_by_id: dict[str, NoteItemRecord],
-    body_anchors_by_id: dict[str, BodyAnchorRecord],
-    note_text_by_id: dict[str, str],
-) -> dict[str, list[str]]:
-    def _anchor_sort_key(anchor_id: str) -> tuple[int, int, int]:
-        anchor = body_anchors_by_id.get(str(anchor_id or "").strip())
-        if not anchor:
-            return (0, 0, 0)
-        return (
-            int(anchor.page_no or 0),
-            int(anchor.paragraph_index or 0),
-            int(anchor.char_start or 0),
-        )
-
-    chapter_links = [
-        link
-        for link in matched_links
-        if str(link.status or "") == "matched"
-        and str(link.chapter_id or "") == str(chapter_id or "")
-        and str(link.note_item_id or "").strip()
-        and str(link.anchor_id or "").strip()
-    ]
-    chapter_links.sort(
-        key=lambda link: (
-            *_anchor_sort_key(str(link.anchor_id or "")),
-            str(link.link_id or ""),
-        )
-    )
-    sequences: dict[str, list[str]] = {}
-    for link in chapter_links:
-        note_item_id = str(link.note_item_id or "").strip()
-        note_id = _resolve_note_id(note_item_id, note_text_by_id)
-        if not note_id:
-            continue
-        anchor = body_anchors_by_id.get(str(link.anchor_id or "").strip())
-        if anchor and bool(anchor.synthetic):
-            continue
-        note_item = note_items_by_id.get(note_item_id)
-        marker_candidates: set[str] = set()
-        marker_candidates.update(_marker_aliases(note_id))
-        marker_candidates.update(_marker_aliases(str(link.marker or "")))
-        if note_item:
-            marker_candidates.update(_marker_aliases(str(note_item.marker or "")))
-        if anchor:
-            marker_candidates.update(_marker_aliases(str(anchor.normalized_marker or "")))
-            marker_candidates.update(_marker_aliases(str(anchor.source_marker or "")))
-            marker_candidates.update(_marker_aliases(str(anchor.ocr_repaired_from_marker or "")))
-        for marker in marker_candidates:
-            row = sequences.setdefault(marker, [])
-            row.append(note_id)
-    chapter_items = sorted(
-        [
-            item
-            for item in note_items_by_id.values()
-            if str(item.chapter_id or "") == str(chapter_id or "")
-        ],
-        key=lambda item: (
-            int(item.page_no or 0),
-            str(item.note_item_id or ""),
-        ),
-    )
-    for item in chapter_items:
-        note_item_id = str(item.note_item_id or "").strip()
-        note_id = _resolve_note_id(note_item_id, note_text_by_id)
-        if not note_id:
-            continue
-        marker_candidates: set[str] = set()
-        marker_candidates.update(_marker_aliases(note_id))
-        marker_candidates.update(_marker_aliases(str(item.marker or "")))
-        for marker in marker_candidates:
-            row = sequences.setdefault(marker, [])
-            if note_id not in row:
-                row.append(note_id)
-    if sequences:
-        return sequences
-
-    fallback_note_ids = {
-        _resolve_note_id(str(item.note_item_id or "").strip(), note_text_by_id)
-        for item in note_items_by_id.values()
-        if str(item.chapter_id or "") == str(chapter_id or "")
-    }
-    fallback_note_ids.discard("")
-    if len(fallback_note_ids) != 1:
-        return sequences
-    fallback_note_id = next(iter(fallback_note_ids))
-    for item in note_items_by_id.values():
-        if str(item.chapter_id or "") != str(chapter_id or ""):
-            continue
-        for marker in _marker_aliases(str(item.marker or "")):
-            row = sequences.setdefault(marker, [])
-            if fallback_note_id not in row:
-                row.append(fallback_note_id)
-    return sequences
 
 
 def _infer_book_note_type_from_modes(chapter_note_modes: list[Any]) -> str:

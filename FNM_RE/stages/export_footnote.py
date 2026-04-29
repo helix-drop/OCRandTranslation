@@ -16,17 +16,19 @@ from FNM_RE.models import (
     SectionHeadRecord,
     TranslationUnitRecord,
 )
-from FNM_RE.stages.export import (
+from FNM_RE.shared.export_constants import (
     _ANY_NOTE_REF_RE,
     PENDING_TRANSLATION_TEXT,
+)
+from FNM_RE.shared.marker_sequences import _build_raw_marker_note_sequences
+from FNM_RE.shared.ref_rewriter import _resolve_note_id
+from FNM_RE.stages.export import (
     _build_note_text_by_id_for_chapter,
-    _build_raw_marker_note_sequences,
     _build_section_heads_by_page,
     _chapter_page_numbers,
     _escape_leading_asterisks,
     _format_chapter_title,
     _normalized_paragraph_key,
-    _resolve_note_id,
     _rewrite_body_text_with_local_refs,
     _strip_trailing_image_only_block,
 )

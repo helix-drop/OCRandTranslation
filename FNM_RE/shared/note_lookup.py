@@ -13,7 +13,7 @@ from FNM_RE.models import TranslationUnitRecord
 def _sanitize_note_text(text: str) -> str:
     """Note text cleanup: strip body markup, leading markers, normalize whitespace."""
     import re
-    from FNM_RE.stages.export import _NOTE_TEXT_BODY_MARKUP_RE, _LEADING_RAW_NOTE_MARKER_RE
+    from FNM_RE.shared.export_constants import _NOTE_TEXT_BODY_MARKUP_RE, _LEADING_RAW_NOTE_MARKER_RE
     payload = str(text or "").strip()
     payload = _NOTE_TEXT_BODY_MARKUP_RE.sub("", payload).strip()
     payload = _LEADING_RAW_NOTE_MARKER_RE.sub("", payload).strip()
@@ -27,7 +27,7 @@ def build_note_text_by_id_for_chapter(
     note_units: list[TranslationUnitRecord],
 ) -> dict[str, str]:
     payload: dict[str, str] = {}
-    from FNM_RE.stages.export import _should_replace_definition_text
+    from FNM_RE.shared.export_constants import _should_replace_definition_text
     for unit in note_units:
         if str(unit.section_id or "") != str(chapter_id or ""):
             continue

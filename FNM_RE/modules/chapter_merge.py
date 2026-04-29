@@ -29,6 +29,19 @@ from FNM_RE.modules.types import (
     FrozenUnits,
     NoteLinkTable,
 )
+from FNM_RE.shared.export_constants import (
+    _ANY_NOTE_REF_RE,
+    _TRAILING_IMAGE_ONLY_BLOCK_RE,
+    _should_replace_definition_text,
+)
+from FNM_RE.shared.ref_rewriter import (
+    _marker_aliases,
+    _resolve_note_id,
+    replace_note_refs_with_local_labels as _replace_note_refs_with_local_labels,
+    replace_raw_bracket_refs_with_local_labels as _replace_raw_bracket_refs_with_local_labels,
+    replace_raw_superscript_refs_with_local_labels as _replace_raw_superscript_refs_with_local_labels,
+    replace_raw_unicode_superscript_refs_with_local_labels as _replace_raw_unicode_superscript_refs_with_local_labels,
+)
 from FNM_RE.stages import export as export_stage
 from FNM_RE.stages import export_audit as export_audit_stage
 
@@ -340,7 +353,7 @@ def _chapter_note_text_by_id(
         if not note_id:
             continue
         text = export_stage._sanitize_note_text(str(unit.translated_text or unit.source_text or ""))
-        if export_stage._should_replace_definition_text(payload.get(note_id, ""), text):
+        if _should_replace_definition_text(payload.get(note_id, ""), text):
             payload[note_id] = text
     return payload
 
@@ -352,7 +365,7 @@ def _book_note_text_by_id(frozen_units: FrozenUnits) -> dict[str, str]:
         if not note_id:
             continue
         text = export_stage._sanitize_note_text(str(unit.translated_text or unit.source_text or ""))
-        if export_stage._should_replace_definition_text(payload.get(note_id, ""), text):
+        if _should_replace_definition_text(payload.get(note_id, ""), text):
             payload[note_id] = text
     return payload
 
@@ -373,12 +386,12 @@ def _chapter_marker_sequences(
         key=lambda item: (int(item.page_no or 0), str(item.note_item_id or "")),
     )
     for item in chapter_items:
-        note_id = export_stage._resolve_note_id(str(item.note_item_id or ""), note_text_by_id)
+        note_id = _resolve_note_id(str(item.note_item_id or ""), note_text_by_id)
         if not note_id:
             continue
         marker_candidates: set[str] = set()
-        marker_candidates.update(export_stage._marker_aliases(note_id))
-        marker_candidates.update(export_stage._marker_aliases(str(item.marker or "")))
+        marker_candidates.update(_marker_aliases(note_id))
+        marker_candidates.update(_marker_aliases(str(item.marker or "")))
         for marker in marker_candidates:
             row = sequences.setdefault(marker, [])
             row.append(note_id)
@@ -413,14 +426,14 @@ def _rewrite_residual_raw_markers_for_chapter(
     ordered_note_ids: list[str] = [f"__reserved_{num}" for num in existing_numbers]
     marker_usage_index: dict[str, int] = {}
 
-    updated_body = export_stage._replace_note_refs_with_local_labels(
+    updated_body = _replace_note_refs_with_local_labels(
         body_text,
         note_text_by_id=resolved_note_text_by_id,
         note_kind_by_id={},
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
-    updated_body = export_stage._replace_raw_bracket_refs_with_local_labels(
+    updated_body = _replace_raw_bracket_refs_with_local_labels(
         updated_body,
         marker_note_sequences=marker_note_sequences,
         marker_usage_index=marker_usage_index,
@@ -428,7 +441,7 @@ def _rewrite_residual_raw_markers_for_chapter(
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
-    updated_body = export_stage._replace_raw_superscript_refs_with_local_labels(
+    updated_body = _replace_raw_superscript_refs_with_local_labels(
         updated_body,
         marker_note_sequences=marker_note_sequences,
         marker_usage_index=marker_usage_index,
@@ -436,7 +449,7 @@ def _rewrite_residual_raw_markers_for_chapter(
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
     )
-    updated_body = export_stage._replace_raw_unicode_superscript_refs_with_local_labels(
+    updated_body = _replace_raw_unicode_superscript_refs_with_local_labels(
         updated_body,
         marker_note_sequences=marker_note_sequences,
         marker_usage_index=marker_usage_index,
@@ -509,7 +522,7 @@ def _rewrite_residual_raw_markers_for_chapter(
                 return m.group(0)
             return m.group(0)
 
-        return export_stage._ANY_NOTE_REF_RE.sub(_replacer, def_text)
+        return _ANY_NOTE_REF_RE.sub(_replacer, def_text)
 
     for note_id in ordered_note_ids:
         if note_id.startswith("__reserved_"):
@@ -761,7 +774,7 @@ def build_chapter_markdown_set(
         str(row.path or "").endswith(".md") for row in chapters
     )
     image_tail_warn = all(
-        not bool(export_stage._TRAILING_IMAGE_ONLY_BLOCK_RE.search(str(row.markdown_text or "")))
+        not bool(_TRAILING_IMAGE_ONLY_BLOCK_RE.search(str(row.markdown_text or "")))
         for row in chapters
     )
     section_heading_warn = all(

@@ -17,11 +17,13 @@ from FNM_RE.models import (
     SectionHeadRecord,
     TranslationUnitRecord,
 )
-from FNM_RE.stages.export import (
+from FNM_RE.shared.export_constants import (
     OBSIDIAN_EXPORT_CHAPTERS_PREFIX,
     PENDING_TRANSLATION_TEXT,
     _FRONT_MATTER_TITLE_RE,
     _TOC_RESIDUE_RE,
+)
+from FNM_RE.stages.export import (
     _build_chapter_filename,
     _build_section_markdown,
     _chapter_page_numbers,
