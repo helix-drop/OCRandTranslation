@@ -46,20 +46,10 @@ from FNM_RE.shared.ref_rewriter import (
 )
 from FNM_RE.stages import export as export_stage
 from FNM_RE.stages import export_audit as export_audit_stage
-from FNM_RE.shared.notes import _safe_int
+from FNM_RE.shared.notes import _collect_chapter_page_numbers, _safe_int
 
 def _chapter_pages_from_layer(chapter: Any) -> list[int]:
-    pages: set[int] = set()
-    pages.update(int(row.page_no) for row in list(chapter.body_pages or []) if int(row.page_no) > 0)
-    pages.update(int(row.page_no) for row in list(chapter.footnote_items or []) if int(row.page_no) > 0)
-    pages.update(int(row.page_no) for row in list(chapter.endnote_items or []) if int(row.page_no) > 0)
-    for row in list(chapter.endnote_regions or []):
-        pages.update(int(page_no) for page_no in list(row.pages or []) if int(page_no) > 0)
-        if int(row.page_start) > 0:
-            pages.add(int(row.page_start))
-        if int(row.page_end) > 0:
-            pages.add(int(row.page_end))
-    return sorted(pages)
+    return _collect_chapter_page_numbers(chapter)
 
 def _to_chapter_records(chapter_layers: ChapterLayers) -> list[ChapterRecord]:
     rows: list[ChapterRecord] = []

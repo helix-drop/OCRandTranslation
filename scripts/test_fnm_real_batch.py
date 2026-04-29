@@ -114,7 +114,7 @@ def _trim_preview(value: str, limit: int = 80) -> str:
     return text[:limit].rstrip() + "..."
 
 
-def _normalize_title_key(value: str) -> str:
+def _casefold_key(value: str) -> str:
     return re.sub(r"\s+", " ", str(value or "").strip()).casefold()
 
 
@@ -276,7 +276,7 @@ def _resolve_title_locator(
     section_heads_by_title: dict[str, dict[str, Any]],
     units_by_title: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    key = _normalize_title_key(title)
+    key = _casefold_key(title)
     visual_item = title_to_item.get(key) or {}
     section_head = section_heads_by_title.get(key) or {}
     unit = units_by_title.get(key) or {}
@@ -633,11 +633,11 @@ def _build_module_process_report(
                 ] if section_rows else [],
             }
         )
-    merge_rows_by_title = {_normalize_title_key(str(row.get("section_title") or "")): row for row in merge_rows}
+    merge_rows_by_title = {_casefold_key(str(row.get("section_title") or "")): row for row in merge_rows}
     export_merge_rows: list[dict[str, Any]] = []
     for row in chapter_stats:
         title = str(row.get("title") or "").strip()
-        merge_row = merge_rows_by_title.get(_normalize_title_key(title), {})
+        merge_row = merge_rows_by_title.get(_casefold_key(title), {})
         export_merge_rows.append(
             {
                 "title": title,
@@ -811,7 +811,7 @@ def _build_blocking_details(
         or []
     )
     title_to_item = {
-        _normalize_title_key(item.get("title") or ""): dict(item)
+        _casefold_key(item.get("title") or ""): dict(item)
         for item in visual_items
         if str(item.get("title") or "").strip()
     }
@@ -830,12 +830,12 @@ def _build_blocking_details(
         anchors = {}
         links = []
     section_heads_by_title = {
-        _normalize_title_key(row.get("text") or ""): dict(row)
+        _casefold_key(row.get("text") or ""): dict(row)
         for row in section_heads
         if str(row.get("text") or "").strip()
     }
     units_by_title = {
-        _normalize_title_key(row.get("section_title") or ""): dict(row)
+        _casefold_key(row.get("section_title") or ""): dict(row)
         for row in translation_units
         if str(row.get("section_title") or "").strip()
     }

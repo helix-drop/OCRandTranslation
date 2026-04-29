@@ -112,7 +112,7 @@ def _note_kind_from_id(note_id: str) -> str:
     return "footnote"
 
 
-def _extract_note_refs(text: str) -> list[dict[str, str]]:
+def _extract_note_refs_with_kind(text: str) -> list[dict[str, str]]:
     content = str(text or "")
     matches: list[tuple[int, str, str]] = []
     for kind, pattern in _NOTE_REF_PATTERNS:
@@ -158,7 +158,7 @@ def _looks_like_prose_after_heading(text: str) -> bool:
     body = _markdown_body_after_first_heading(text).strip()
     if not body:
         return False
-    if _extract_note_refs(body):
+    if _extract_note_refs_with_kind(body):
         return True
     if re.search(r"\^\{\d+\}|\$\s*\^\{\d+\}\s*\$|<sup>\s*\d+\s*</sup>", body):
         return True

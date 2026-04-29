@@ -84,7 +84,7 @@ def _numeric_first_sort_key(value: str) -> tuple[int, int | str]:
     return (1, text)
 
 
-def _normalize_title_key(text: str) -> str:
+def _alphanumeric_key(text: str) -> str:
     return re.sub(r"[^0-9a-z]+", "", str(text or "").strip().lower())
 
 
@@ -231,23 +231,23 @@ def _duplicate_paragraph_count(paragraphs: list[str]) -> int:
 
 
 def _contains_other_chapter_heading(content: str, title: str, chapter_titles: list[str]) -> bool:
-    current_key = _normalize_title_key(title)
+    current_key = _alphanumeric_key(title)
     ordered_titles = [
         str(item or "").strip()
         for item in (chapter_titles or [])
-        if _normalize_title_key(item)
+        if _alphanumeric_key(item)
     ]
     current_index = next(
         (
             index
             for index, item in enumerate(ordered_titles)
-            if _normalize_title_key(item) == current_key
+            if _alphanumeric_key(item) == current_key
         ),
         -1,
     )
     if current_index < 0 or current_index >= len(ordered_titles) - 1:
         return False
-    next_title_key = _normalize_title_key(ordered_titles[current_index + 1])
+    next_title_key = _alphanumeric_key(ordered_titles[current_index + 1])
     if not next_title_key:
         return False
     for raw_line in str(content or "").splitlines():
@@ -257,7 +257,7 @@ def _contains_other_chapter_heading(content: str, title: str, chapter_titles: li
         heading_match = HEADING_RE.match(line)
         if not heading_match:
             continue
-        key = _normalize_title_key(str(heading_match.group(2) or "").strip())
+        key = _alphanumeric_key(str(heading_match.group(2) or "").strip())
         if key == next_title_key:
             return True
     return False
@@ -273,15 +273,15 @@ def _iter_raw_note_marker_hits(
     allowed = None
     if allowed_markers is not None:
         allowed = {
-            _normalize_title_key(value)
+            _alphanumeric_key(value)
             for value in allowed_markers
-            if _normalize_title_key(value)
+            if _alphanumeric_key(value)
         }
     for match in RAW_BRACKET_NOTE_REF_RE.finditer(cleaned_text):
         marker = str(match.group(1) or "").strip()
         if not marker:
             continue
-        marker_key = _normalize_title_key(marker)
+        marker_key = _alphanumeric_key(marker)
         if allowed is not None and marker_key not in allowed:
             continue
         explicit_hits.append(marker)
@@ -298,9 +298,9 @@ def _iter_raw_superscript_note_marker_hits(
     allowed = None
     if allowed_markers is not None:
         allowed = {
-            _normalize_title_key(value)
+            _alphanumeric_key(value)
             for value in allowed_markers
-            if _normalize_title_key(value)
+            if _alphanumeric_key(value)
         }
     for match in RAW_SUPERSCRIPT_NOTE_REF_RE.finditer(cleaned_text):
         marker = str(match.group(1) or match.group(2) or "").strip()
@@ -308,7 +308,7 @@ def _iter_raw_superscript_note_marker_hits(
             marker = str(match.group(3) or "").translate(_UNICODE_SUPERSCRIPT_TRANSLATION).strip()
         if not marker:
             continue
-        marker_key = _normalize_title_key(marker)
+        marker_key = _alphanumeric_key(marker)
         if allowed is not None and marker_key not in allowed:
             continue
         explicit_sup_hits.append(marker)
@@ -391,13 +391,13 @@ def audit_markdown_file(
             },
         )
 
-    if expected_title and _normalize_title_key(file_title) != _normalize_title_key(expected_title):
+    if expected_title and _alphanumeric_key(file_title) != _alphanumeric_key(expected_title):
         _add_issue(issue_codes, issue_summary, "wrong_title", f"{file_title} != {expected_title}")
     if normalized_role in {"container", "back_matter"}:
         _add_issue(issue_codes, issue_summary, "semantic_role_mismatch", normalized_role)
     if manual_toc_titles:
-        manual_keys = {_normalize_title_key(item) for item in manual_toc_titles if _normalize_title_key(item)}
-        if _normalize_title_key(expected_title) and _normalize_title_key(expected_title) not in manual_keys:
+        manual_keys = {_alphanumeric_key(item) for item in manual_toc_titles if _alphanumeric_key(item)}
+        if _alphanumeric_key(expected_title) and _alphanumeric_key(expected_title) not in manual_keys:
             _add_issue(issue_codes, issue_summary, "manual_toc_mismatch", expected_title)
     if paragraphs and _looks_like_mid_sentence_opening(paragraphs[0]):
         _add_issue(issue_codes, issue_summary, "mid_sentence_opening", paragraphs[0][:120])
@@ -493,7 +493,7 @@ def _chapter_note_markers_by_section(phase6: Phase6Structure) -> dict[str, set[s
         if not chapter_id:
             continue
         marker_set = payload.setdefault(chapter_id, set())
-        marker = _normalize_title_key(str(item.marker or ""))
+        marker = _alphanumeric_key(str(item.marker or ""))
         if marker:
             marker_set.add(marker)
     return payload
@@ -525,11 +525,11 @@ def audit_phase6_export(
     )
     role_by_title_key: dict[str, str] = {}
     for title in summary.container_titles or []:
-        role_by_title_key[_normalize_title_key(title)] = "container"
+        role_by_title_key[_alphanumeric_key(title)] = "container"
     for title in summary.post_body_titles or []:
-        role_by_title_key[_normalize_title_key(title)] = "post_body"
+        role_by_title_key[_alphanumeric_key(title)] = "post_body"
     for title in summary.back_matter_titles or []:
-        role_by_title_key[_normalize_title_key(title)] = "back_matter"
+        role_by_title_key[_alphanumeric_key(title)] = "back_matter"
 
     markdown_files = (
         _read_zip_markdown_files(zip_bytes=zip_bytes)
@@ -556,7 +556,7 @@ def audit_phase6_export(
                 int(chapter.start_page or 0),
                 int(chapter.end_page or int(chapter.start_page or 0)),
             ]
-        expected_role = role_by_title_key.get(_normalize_title_key(title), "chapter")
+        expected_role = role_by_title_key.get(_alphanumeric_key(title), "chapter")
         if path == str(bundle.index_path or "index.md"):
             expected_role = "index_file"
         file_reports.append(
@@ -574,14 +574,14 @@ def audit_phase6_export(
         )
 
     exported_title_keys = {
-        _normalize_title_key(chapter.title)
+        _alphanumeric_key(chapter.title)
         for chapter in chapter_rows
-        if _normalize_title_key(chapter.title)
+        if _alphanumeric_key(chapter.title)
     }
     missing_post_body_titles = [
         str(title or "").strip()
         for title in (summary.post_body_titles or [])
-        if _normalize_title_key(title) and _normalize_title_key(title) not in exported_title_keys
+        if _alphanumeric_key(title) and _alphanumeric_key(title) not in exported_title_keys
     ]
     if missing_post_body_titles:
         file_reports.append(
@@ -604,7 +604,7 @@ def audit_phase6_export(
     exported_container_titles = [
         str(title or "").strip()
         for title in (summary.container_titles or [])
-        if _normalize_title_key(title) and _normalize_title_key(title) in exported_title_keys
+        if _alphanumeric_key(title) and _alphanumeric_key(title) in exported_title_keys
     ]
     if exported_container_titles:
         file_reports.append(

@@ -65,6 +65,53 @@ _SYMBOL_MARKER_ONLY_RE = re.compile(
 _SYMBOLIC_MARKER_RE = re.compile(r"^[\*†‡§¶]{1,4}$")
 
 
+def _collect_chapter_page_numbers(chapter: Any) -> list[int]:
+    """从章节对象的 body_pages/footnote_items/endnote_items/endnote_regions 收集所有页码。"""
+    pages: set[int] = set()
+    for row in list(getattr(chapter, "body_pages", None) or []):
+        try:
+            pn = int(getattr(row, "page_no", None) or 0)
+        except (TypeError, ValueError):
+            continue
+        if pn > 0:
+            pages.add(pn)
+    for row in list(getattr(chapter, "footnote_items", None) or []):
+        try:
+            pn = int(getattr(row, "page_no", None) or 0)
+        except (TypeError, ValueError):
+            continue
+        if pn > 0:
+            pages.add(pn)
+    for row in list(getattr(chapter, "endnote_items", None) or []):
+        try:
+            pn = int(getattr(row, "page_no", None) or 0)
+        except (TypeError, ValueError):
+            continue
+        if pn > 0:
+            pages.add(pn)
+    for region in list(getattr(chapter, "endnote_regions", None) or []):
+        for page_no in list(getattr(region, "pages", None) or []):
+            try:
+                pn = int(page_no)
+            except (TypeError, ValueError):
+                continue
+            if pn > 0:
+                pages.add(pn)
+        try:
+            ps = int(getattr(region, "page_start", None) or 0)
+        except (TypeError, ValueError):
+            ps = 0
+        try:
+            pe = int(getattr(region, "page_end", None) or 0)
+        except (TypeError, ValueError):
+            pe = 0
+        if ps > 0:
+            pages.add(ps)
+        if pe > 0:
+            pages.add(pe)
+    return sorted(pages)
+
+
 def _safe_float(value: Any) -> float | None:
     try:
         return float(value)

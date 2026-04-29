@@ -22,7 +22,7 @@ from FNM_RE.modules.types import (
     ExportBundle,
     TocStructure,
 )
-from FNM_RE.shared.text import _summary_title_key
+from FNM_RE.shared.text import _looks_like_bibliography_entry, _summary_title_key
 from FNM_RE.stages import export as export_stage
 from FNM_RE.stages import export_audit as export_audit_stage
 from FNM_RE.stages.export_audit import audit_phase6_export
@@ -196,7 +196,7 @@ def _is_adjacent_duplicate_candidate(paragraph: str) -> bool:
         return False
     if _IMAGE_ONLY_PARAGRAPH_RE.match(normalized):
         return False
-    if export_stage._looks_like_bibliography_entry(normalized):
+    if _looks_like_bibliography_entry(normalized):
         return False
     return bool(export_stage._is_semantic_duplicate_candidate(normalized))
 

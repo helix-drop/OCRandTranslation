@@ -20,7 +20,7 @@ from FNM_RE.modules.types import (
 )
 from FNM_RE.shared.refs import frozen_note_ref, replace_frozen_refs
 from FNM_RE.stages.units import _chunk_body_page_segments, _segment_paragraphs_from_body_pages
-from FNM_RE.shared.notes import _safe_int
+from FNM_RE.shared.notes import _collect_chapter_page_numbers, _safe_int
 
 _TOKEN_CANDIDATE_RE_TEMPLATE = r"\[\s*(?:\^)?\s*{marker}\s*\]"
 
@@ -32,19 +32,9 @@ def _chapter_order_map(chapter_layers: ChapterLayers) -> dict[str, int]:
     }
 
 def _chapter_page_bounds(chapter: ChapterLayer) -> tuple[int, int]:
-    pages: set[int] = set()
-    pages.update(int(row.page_no) for row in chapter.body_pages if int(row.page_no) > 0)
-    pages.update(int(row.page_no) for row in chapter.footnote_items if int(row.page_no) > 0)
-    pages.update(int(row.page_no) for row in chapter.endnote_items if int(row.page_no) > 0)
-    for region in chapter.endnote_regions:
-        pages.update(int(page_no) for page_no in list(region.pages or []) if int(page_no) > 0)
-        if int(region.page_start) > 0:
-            pages.add(int(region.page_start))
-        if int(region.page_end) > 0:
-            pages.add(int(region.page_end))
-    if not pages:
+    sorted_pages = _collect_chapter_page_numbers(chapter)
+    if not sorted_pages:
         return 0, 0
-    sorted_pages = sorted(pages)
     return int(sorted_pages[0]), int(sorted_pages[-1])
 
 def _resolve_note_item_owner(
