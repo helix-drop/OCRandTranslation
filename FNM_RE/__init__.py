@@ -28,7 +28,7 @@ def run_llm_repair(*args, **kwargs):
 
 
 def group_review_overrides(*args, **kwargs):
-    from FNM_RE.review import group_review_overrides as impl
+    from FNM_RE.shared.review_overrides import group_review_overrides as impl
 
     return impl(*args, **kwargs)
 

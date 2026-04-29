@@ -3,25 +3,6 @@
 from __future__ import annotations
 
 
-def group_review_overrides(rows: list[dict] | None) -> dict[str, dict[str, dict]]:
-    grouped: dict[str, dict[str, dict]] = {
-        "page": {},
-        "chapter": {},
-        "region": {},
-        "link": {},
-        "llm_suggestion": {},
-        "anchor": {},
-        "note_item": {},
-    }
-    for row in rows or []:
-        scope = str((row or {}).get("scope") or "").strip().lower()
-        target_id = str((row or {}).get("target_id") or "").strip()
-        if not scope or not target_id:
-            continue
-        grouped.setdefault(scope, {})[target_id] = dict((row or {}).get("payload") or {})
-    return grouped
-
-
 def annotate_review_note_links(note_links: list[dict] | None, overrides: dict[str, dict[str, dict]] | None) -> list[dict]:
     link_overrides = dict((overrides or {}).get("link") or {})
     annotated: list[dict] = []
