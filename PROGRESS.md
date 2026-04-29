@@ -2,6 +2,58 @@
 
 本文件只记录**当前口径**、最近实测和下一步工作，不再堆叠历史阶段记录。
 
+## 2026-04-28 FNM_RE 重构（进行中）
+
+### 已完成
+
+#### 阶段 1：共享工具提取（消重复）
+
+| 步骤 | 共享模块 | 消除副本 | 状态 |
+|---|---|---|---|
+| 1.1 | `FNM_RE/shared/chapters.py` | `_chapter_id_for_page` 5→1 | ✅ |
+| 1.2 | `FNM_RE/shared/review_overrides.py` | `_group_review_overrides` 3→1（共享模块已建，旧函数待清理） | ✅ |
+| 1.3 | `FNM_RE/shared/note_lookup.py` | `_build_note_text_by_id` + `_build_note_kind_by_id` 2→1 | ✅ |
+| 1.4 | `shared/marker_sequences.py` | 暂缓（函数体已提取，需先解正则常量依赖） | ⏸️ |
+| 1.5 | `shared/ref_rewriter.py` | 暂缓（20+符号依赖链，触发循环导入） | 🚫 |
+
+#### 阶段 2：拆分超大文件
+
+| 步骤 | 文件 | 效果 | 状态 |
+|---|---|---|---|
+| 2.2a | `stages/export_footnote.py` | export.py 内联脚注段独立 | ✅（惰性导入） |
+| 2.2b | `stages/export_contract.py` | export.py 合同检查段独立 | ✅（含重导出代理） |
+| 2.1 | `app/pipeline.py`→4文件 | 暂缓（converter与编排紧耦合） | 🚫 |
+| 2.3 | `app/mainline.py`→3文件 | 依赖2.1 | 🚫 |
+
+### 受阻项（待下一 session）
+
+| 任务 | 阻塞原因 | 建议解决路径 |
+|---|---|---|
+| **1.5 ref_rewriter** | 提取20+符号：`export.py` ← `export_contract.py` ← `export_footnote.py` 形成三角循环导入。`__getattr__`惰性重导出对`from X import Y`语法无效 | 先把所有正则常量(`_ANY_NOTE_REF_RE`等)提到独立的`shared/export_constants.py`，让三个文件都只依赖常量模块而不互依赖。然后把ref替换函数提取到`shared/ref_rewriter.py`。最后把`chapter_merge.py`中`export_stage._replace_note_refs_*`替换为直接import shared |
+| **2.1 pipeline.py** | converter函数块(569行)与`_legacy_page_role`、`_build_chapter_note_modes_from_layers`等函数紧耦合，边界切割时函数体尾部落入错误范围 | 安全路径：先把`build_module_pipeline_snapshot`精简化（它的`_run_stage`/`_emit_progress`闭包提到独立辅助函数），再拆converter块。当前pipeline.py 1917行，目标<1000 |
+
+### 架构教训
+
+1. **python循环导入是最常见的重构障碍**。惰性导入(`import X`放在函数内)可防模块级循环，但顶层的`from X import Y`在模块初始化时就执行，不能循环。
+2. **常量/正则独立是解耦的基础**。把正则编译从业务逻辑文件中抽出，是后续任何提取的前提。
+3. **每次提取后立即跑全量回归**。一次提取多个文件时，中间状态的错误会叠加。
+4. **委托包装模式比直接删除更安全**。把旧函数体改为`return shared_func(args)`，保留函数名作为别名，比删除旧代码更不容易引入遗漏。
+
+### 下一 session 执行顺序
+
+```
+1. 提取共享常量 shared/export_constants.py（解循环导入基础）
+2. 完成 1.5 ref_rewriter 提取（消模块边界违规）
+3. 完成 1.2 旧函数清理（删除3处 _group_review_overrides 副本）
+4. 完成 1.4 marker_sequences 提取
+5. 完成 2.1 pipeline.py converter 提取
+6. 完成 2.3 mainline.py 拆分
+7. 阶段 3：命名规范化
+8. 阶段 4：模块边界加固（清理所有 modules→stages 私有函数引用）
+```
+
+验收标准：每一步后 `python3 -m unittest tests.unit.test_fnm_re_phase6 tests.unit.test_fnm_re_module6_merge tests.unit.test_fnm_re_module7_export` 结果与步骤前完全一致（仅 1 个 pre-existing failure）。
+
 ## 2026-04-28 Biopolitics 超级全量测试（最新）
 
 ### 当前状态
