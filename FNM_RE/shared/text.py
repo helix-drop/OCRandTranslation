@@ -100,3 +100,9 @@ def _looks_like_bibliography_entry(text: str) -> bool:
     if not re.search(r"\b\d{4}\.?\s*$", normalized):
         return False
     return bool(re.search(r":\s*[^:]{6,},\s*\d{4}\.?\s*$", normalized))
+
+
+def _summary_title_key(value: str) -> str:
+    text = re.sub(r"\s+", " ", str(value or "").strip())
+    text = re.sub(r"\s+([?!:;,])", r"\1", text)
+    return text.casefold()

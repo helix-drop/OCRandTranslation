@@ -22,6 +22,7 @@ from FNM_RE.modules.types import (
     ExportBundle,
     TocStructure,
 )
+from FNM_RE.shared.text import _summary_title_key
 from FNM_RE.stages import export as export_stage
 from FNM_RE.stages import export_audit as export_audit_stage
 from FNM_RE.stages.export_audit import audit_phase6_export
@@ -33,7 +34,6 @@ _IMAGE_ONLY_PARAGRAPH_RE = re.compile(
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 _CJK_CHAR_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 _SUSPECT_ASCII_GARBLED_RE = re.compile(r"[A-Z0-9@;:<>=?]{12,}")
-_SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([?!:;,])")
 _MARKDOWN_PREFIX_PATTERNS = (
     re.compile(r"^(\s*\[\^[^\]]+\]:\s+)(.*)$"),
     re.compile(r"^(\s*#{1,6}\s+)(.*)$"),
@@ -41,12 +41,6 @@ _MARKDOWN_PREFIX_PATTERNS = (
     re.compile(r"^(\s*\d+\.\s+)(.*)$"),
     re.compile(r"^(\s*>\s+)(.*)$"),
 )
-
-
-def _summary_title_key(value: str) -> str:
-    text = re.sub(r"\s+", " ", str(value or "").strip())
-    text = _SPACE_BEFORE_PUNCT_RE.sub(r"\1", text)
-    return text.casefold()
 
 
 def _toc_titles_and_summary(toc_structure: TocStructure) -> tuple[list[str], list[str], list[str], dict[str, int]]:

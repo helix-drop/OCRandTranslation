@@ -50,6 +50,7 @@ from FNM_RE.modules.book_assemble import build_export_bundle as build_module_exp
 from FNM_RE.modules.book_note_type import build_book_note_profile
 from FNM_RE.modules.chapter_merge import build_chapter_markdown_set
 from FNM_RE.shared.review_overrides import group_review_overrides as _group_review_overrides, empty_grouped_overrides as _empty_grouped_overrides
+from FNM_RE.shared.text import _summary_title_key
 from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.contracts import ModuleResult
 from FNM_RE.modules.note_linking import build_note_link_table
@@ -557,11 +558,6 @@ def _phase6_summary_from_modules(
     manual_toc_summary: Mapping[str, Any] | None,
     pipeline_state: str,
 ) -> Phase6Summary:
-    def _summary_title_key(value: str) -> str:
-        text = re.sub(r"\s+", " ", str(value or "").strip())
-        text = re.sub(r"\s+([?!:;,])", r"\1", text)
-        return text.casefold()
-
     container_titles = [str(row.title or "") for row in toc_result.data.toc_tree if str(row.role or "") == "container"]
     post_body_titles = [str(row.title or "") for row in toc_result.data.chapters if str(row.role or "") == "post_body"]
     back_matter_titles = [
