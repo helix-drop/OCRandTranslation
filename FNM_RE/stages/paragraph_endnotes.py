@@ -41,7 +41,7 @@ def _page_role_map(phase1: Phase1Structure) -> dict[int, str]:
 
 
 def _chapter_id_for_page(phase1: Phase1Structure, page_no: int) -> str:
-    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(phase1.chapters, page_no)
+    return chapter_id_for_page(phase1.chapters, page_no)
 
 
 def _is_endnote_page(

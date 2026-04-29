@@ -15,7 +15,7 @@ def _chapter_page_bounds(chapters: list[ChapterRecord]) -> list[ChapterRecord]:
 
 
 def _chapter_id_for_page(chapters: list[ChapterRecord], page_no: int) -> str:
-    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(chapters, page_no)
+    return chapter_id_for_page(chapters, page_no)
 
 
 def _chapter_title_keys(chapters: list[ChapterRecord]) -> dict[str, str]:

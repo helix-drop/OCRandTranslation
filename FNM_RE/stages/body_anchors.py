@@ -16,7 +16,7 @@ from FNM_RE.shared.anchors import (
 
 
 def _chapter_id_for_page(phase2: Phase2Structure, page_no: int) -> str:
-    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(phase2.chapters, page_no)
+    return chapter_id_for_page(phase2.chapters, page_no)
 
 
 def _page_payload_by_no(pages: list[dict]) -> dict[int, dict]:
