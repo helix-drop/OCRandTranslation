@@ -16,6 +16,9 @@ Thumbs.db
 
 # Python缓存
 __pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 *.py[cod]
 *$py.class
 *.so
@@ -32,6 +35,8 @@ env/
 .qoder/
 .vscode/
 .idea/
+.cursor/
+.superpowers/
 *.sublime-project
 *.sublime-workspace
 
