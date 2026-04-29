@@ -91,3 +91,12 @@ def note_scan_summary(note_scan: Mapping[str, Any] | None) -> dict[str, Any]:
 
 def plain_text_lines(text: str) -> list[str]:
     return [line.strip() for line in str(text or "").splitlines() if str(line or "").strip()]
+
+def _looks_like_bibliography_entry(text: str) -> bool:
+    """Return True if text looks like a bibliography/reference entry ending with a year."""
+    normalized = re.sub(r"\s+", " ", str(text or "").strip())
+    if not normalized:
+        return False
+    if not re.search(r"\b\d{4}\.?\s*$", normalized):
+        return False
+    return bool(re.search(r":\s*[^:]{6,},\s*\d{4}\.?\s*$", normalized))

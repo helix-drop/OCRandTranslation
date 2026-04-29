@@ -15,8 +15,10 @@ from typing import Any
 
 from FNM_RE.models import ChapterEndnoteRecord, Phase1Structure
 from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
+from FNM_RE.shared.text import page_markdown_text
 from FNM_RE.shared.notes import (
     _split_contiguous_ranges,
+
     first_notes_heading,
     normalize_note_marker,
     parse_note_items_from_text,
@@ -88,12 +90,6 @@ def _is_book_scope(
     return page_no > last_chapter_end_page
 
 
-def _page_markdown(page: dict | None) -> str:
-    if not page:
-        return ""
-    return str(page.get("markdown") or "").strip()
-
-
 def _parse_items_from_page(
     page: dict,
     *,
@@ -103,7 +99,7 @@ def _parse_items_from_page(
 
     优先从 markdown 文本解析；回退到 _note_scan 数据。
     """
-    md = _page_markdown(page)
+    md = page_markdown_text(page)
     if md:
         items, _ = parse_note_items_from_text(md)
         if items:

@@ -7,6 +7,7 @@ import zipfile
 from io import BytesIO
 from typing import Any
 
+from FNM_RE.shared.text import _looks_like_bibliography_entry
 from FNM_RE.models import (
     ExportAuditFileRecord,
     ExportAuditReportRecord,
@@ -184,15 +185,6 @@ def _looks_like_mid_sentence_opening(paragraph: str) -> bool:
     if text.startswith(("and ", "or ", "but ", "et ", "ou ", "mais ")):
         return True
     return False
-
-
-def _looks_like_bibliography_entry(text: str) -> bool:
-    normalized = re.sub(r"\s+", " ", str(text or "").strip())
-    if not normalized:
-        return False
-    if not re.search(r"\b\d{4}\.?\s*$", normalized):
-        return False
-    return bool(re.search(r":\s*[^:]{6,},\s*\d{4}\.?\s*$", normalized))
 
 
 def _looks_like_missing_tail(paragraph: str) -> bool:

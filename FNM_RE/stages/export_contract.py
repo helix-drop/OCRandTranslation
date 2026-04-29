@@ -23,6 +23,7 @@ from FNM_RE.shared.export_constants import (
     _FRONT_MATTER_TITLE_RE,
     _TOC_RESIDUE_RE,
 )
+from FNM_RE.shared.text import _looks_like_bibliography_entry
 from FNM_RE.stages.export import (
     _build_chapter_filename,
     _build_section_markdown,
@@ -47,15 +48,6 @@ def _is_semantic_duplicate_candidate(text: str) -> bool:
     if len(words) < 12:
         return False
     return bool(re.search(r"[.!?;:。！？；：]", normalized))
-
-
-def _looks_like_bibliography_entry(text: str) -> bool:
-    normalized = re.sub(r"\s+", " ", str(text or "").strip())
-    if not normalized:
-        return False
-    if not re.search(r"\b\d{4}\.?\s*$", normalized):
-        return False
-    return bool(re.search(r":\s*[^:]{6,},\s*\d{4}\.?\s*$", normalized))
 
 
 def _compute_export_semantic_contract(

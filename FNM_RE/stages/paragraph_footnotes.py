@@ -17,6 +17,7 @@ import re
 from typing import Any
 
 from FNM_RE.models import ParagraphFootnoteRecord, Phase1Structure
+from FNM_RE.shared.text import page_markdown_text
 
 # 分隔线
 _SEPARATOR_RE = re.compile(r"^[-=_]{3,}\s*$")
@@ -145,12 +146,6 @@ def _find_page_by_no(pages: list[dict], bp: int) -> dict | None:
     return None
 
 
-def _page_markdown(page: dict | None) -> str:
-    if not page:
-        return ""
-    return str(page.get("markdown") or "").strip()
-
-
 def _scan_body_lines_for_marker(body_lines: list[str], marker: str) -> int | None:
     """在 body 行中查找匹配 marker 的行索引。"""
     for i, line in enumerate(body_lines):
@@ -207,7 +202,7 @@ def build_paragraph_footnotes(
         # —— Pass 1：逐页检测 band 并解析条目 ——
         page_items: list[list[dict]] = []
         for bp in body_page_nos:
-            md = _page_markdown(_find_page_by_no(pages, bp))
+            md = page_markdown_text(_find_page_by_no(pages, bp))
             if not md:
                 page_items.append([])
                 continue
@@ -251,7 +246,7 @@ def build_paragraph_footnotes(
             if not items:
                 continue
 
-            md = _page_markdown(_find_page_by_no(pages, bp))
+            md = page_markdown_text(_find_page_by_no(pages, bp))
             if not md:
                 continue
 
