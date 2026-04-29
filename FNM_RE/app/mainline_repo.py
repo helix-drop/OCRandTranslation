@@ -8,6 +8,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from FNM_RE.app.persist_helpers import to_plain as _to_plain
+
 from FNM_RE.models import (
     BodyAnchorRecord,
     ChapterNoteModeRecord,

@@ -86,6 +86,7 @@ from FNM_RE.stages.units import build_translation_units
 from FNM_RE.status import build_module_gate_status, build_phase4_status, build_phase6_status
 
 
+@dataclass(slots=True)
 class ModulePipelineSnapshot:
     toc_result: ModuleResult[TocStructure]
     book_type_result: ModuleResult[BookNoteProfile]
