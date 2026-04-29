@@ -10,17 +10,10 @@ from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.types import BookNoteProfile, BookNoteTypeEvidence, ChapterNoteMode, TocStructure
 from FNM_RE.shared.text import page_markdown_text
 from FNM_RE.stages.page_partition import annotate_pages_with_note_scans
+from FNM_RE.shared.notes import _safe_int
 
 _NOTES_HEADING_RE = re.compile(r"^\s*(?:#+\s*)?(?:notes?|endnotes?|notes to pages?.*)\s*$", re.IGNORECASE)
 _NOTE_DEF_RE = re.compile(r"^\s*(?:\d{1,4}[A-Za-z]?)\s*[\.\)\]]\s+")
-
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
 
 def _chapter_by_page(toc_structure: TocStructure) -> dict[int, str]:
     mapped: dict[int, str] = {}
@@ -37,7 +30,6 @@ def _chapter_by_page(toc_structure: TocStructure) -> dict[int, str]:
             for page_no in range(start_page, end_page + 1):
                 mapped.setdefault(page_no, chapter_id)
     return mapped
-
 
 def _nearest_prior_chapter_id(toc_structure: TocStructure, page_no: int) -> str:
     """返回不晚于 page_no 的最近 chapter 的 chapter_id；不存在则空串。
@@ -57,7 +49,6 @@ def _nearest_prior_chapter_id(toc_structure: TocStructure, page_no: int) -> str:
     candidates.sort(key=lambda ch: (int(ch.start_page or 0), int(ch.end_page or 0)))
     return str(candidates[-1].chapter_id or "")
 
-
 def _is_endnote_page(markdown: str) -> bool:
     lines = [line.strip() for line in str(markdown or "").splitlines() if line.strip()]
     if not lines:
@@ -67,7 +58,6 @@ def _is_endnote_page(markdown: str) -> bool:
     note_lines = sum(1 for line in lines[:16] if _NOTE_DEF_RE.match(line))
     return note_lines >= 4
 
-
 def _resolve_book_type(*, has_footnote: bool, has_endnote: bool) -> str:
     if has_footnote and has_endnote:
         return "mixed"
@@ -76,7 +66,6 @@ def _resolve_book_type(*, has_footnote: bool, has_endnote: bool) -> str:
     if has_footnote:
         return "footnote_only"
     return "no_notes"
-
 
 def _mode_compatible(book_type: str, mode: str) -> bool:
     if mode == "review_required":
@@ -88,7 +77,6 @@ def _mode_compatible(book_type: str, mode: str) -> bool:
     if book_type == "footnote_only":
         return mode in {"footnote_primary", "no_notes"}
     return mode == "no_notes"
-
 
 def build_book_note_profile(
     toc_structure: TocStructure,

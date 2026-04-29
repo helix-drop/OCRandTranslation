@@ -26,18 +26,14 @@ from FNM_RE.modules.types import (
     NoteLinkLayer,
     NoteLinkTable,
 )
-from FNM_RE.shared.notes import normalize_note_marker
+from FNM_RE.shared.notes import (
+    _safe_int,
+    marker_digits_are_ordered_subsequence as _marker_digits_are_ordered_subsequence,
+    normalize_note_marker,
+)
 from FNM_RE.shared.review_overrides import group_review_overrides as _group_review_overrides
 from FNM_RE.stages.body_anchors import build_body_anchors
-from FNM_RE.stages.note_links import _marker_digits_are_ordered_subsequence, build_note_links
-
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
+from FNM_RE.stages.note_links import build_note_links
 
 def _refresh_anchor_summary(
     *,
@@ -64,7 +60,6 @@ def _refresh_anchor_summary(
         "ocr_repaired_count": int(ocr_repaired_count),
     }
 
-
 def _to_anchor_layers(rows: list[BodyAnchorRecord]) -> list[BodyAnchorLayer]:
     return [
         BodyAnchorLayer(
@@ -86,7 +81,6 @@ def _to_anchor_layers(rows: list[BodyAnchorRecord]) -> list[BodyAnchorLayer]:
         for row in rows
     ]
 
-
 def _to_link_layers(rows: list[NoteLinkRecord]) -> list[NoteLinkLayer]:
     return [
         NoteLinkLayer(
@@ -105,7 +99,6 @@ def _to_link_layers(rows: list[NoteLinkRecord]) -> list[NoteLinkLayer]:
         )
         for row in rows
     ]
-
 
 def _summarize_links(rows: list[NoteLinkRecord]) -> dict[str, Any]:
     """对所有 link 按 status / note_kind / resolver 聚合统计。
@@ -158,7 +151,6 @@ def _summarize_links(rows: list[NoteLinkRecord]) -> dict[str, Any]:
         "fallback_match_ratio": fallback_match_ratio,
     }
 
-
 def _link_quality_gate(rows: list[NoteLinkRecord]) -> dict[str, Any]:
     """工单 #4：链接质量阈值阻塞门。
 
@@ -187,7 +179,6 @@ def _link_quality_gate(rows: list[NoteLinkRecord]) -> dict[str, Any]:
         "orphan_anchor_threshold": int(orphan_threshold),
     }
 
-
 def _projection_priority(projection_mode: str) -> int:
     mode = str(projection_mode or "").strip().lower()
     if mode == "book_projected":
@@ -197,7 +188,6 @@ def _projection_priority(projection_mode: str) -> int:
     if mode == "book_fallback_projected":
         return 1
     return 0
-
 
 def _looks_like_single_digit_ocr_variant(left_marker: str, right_marker: str) -> bool:
     left = normalize_note_marker(left_marker)
@@ -211,7 +201,6 @@ def _looks_like_single_digit_ocr_variant(left_marker: str, right_marker: str) ->
         return False
     return longer[1:] == shorter
 
-
 def _build_note_item_meta_by_id(chapter_layers: ChapterLayers) -> dict[str, dict[str, Any]]:
     return {
         str(row.note_item_id or ""): {
@@ -223,7 +212,6 @@ def _build_note_item_meta_by_id(chapter_layers: ChapterLayers) -> dict[str, dict
         for row in chapter_layers.note_items
         if str(row.note_item_id or "").strip()
     }
-
 
 def _build_book_endnote_stream_summary(chapter_layers: ChapterLayers) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
@@ -251,7 +239,6 @@ def _build_book_endnote_stream_summary(chapter_layers: ChapterLayers) -> dict[st
         "chapters": rows[:32],
     }
 
-
 def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord, *, mode_by_chapter: Mapping[str, str]) -> str:
     if str(anchor.anchor_kind or "") == "footnote":
         return "footnote"
@@ -261,7 +248,6 @@ def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord, *, mode_by_chapter: M
     if mode in {"footnote_primary", "review_required"}:
         return "footnote"
     return "endnote"
-
 
 def _materialize_anchor_overrides(
     body_anchors: list[BodyAnchorRecord],
@@ -344,7 +330,6 @@ def _materialize_anchor_overrides(
             }
         )
     return new_anchors, summary, logs
-
 
 def _materialize_note_item_overrides(
     phase2: Phase2Structure,
@@ -460,7 +445,6 @@ def _materialize_note_item_overrides(
         )
 
     return replace(phase2, note_regions=note_regions, note_items=note_items), summary, logs
-
 
 def _apply_link_overrides(
     note_links: list[NoteLinkRecord],
@@ -631,7 +615,6 @@ def _apply_link_overrides(
         "invalid_override_flags": invalid_flags,
     }
     return effective_links, override_summary, logs
-
 
 def _repair_endnote_links_for_contract(
     *,
@@ -923,7 +906,6 @@ def _repair_endnote_links_for_contract(
         "contract_repair_fallback_count": int(fallback_match_count),
     }
 
-
 def _repair_explicit_footnote_anchor_ocr_variants(
     *,
     anchors: list[BodyAnchorRecord],
@@ -1153,7 +1135,6 @@ def _repair_explicit_footnote_anchor_ocr_variants(
         "cross_chapter_same_page_rebind_count": int(cross_chapter_same_page_rebind_count),
     }
 
-
 def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2Structure, dict[str, str], str]:
     chapter_policy_by_id = {
         str(chapter.chapter_id or ""): dict(chapter.policy_applied or {})
@@ -1322,7 +1303,6 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
         str(book_type or "no_notes"),
     )
 
-
 def _suppress_endnote_residual_orphans(
     *,
     links: list[NoteLinkRecord],
@@ -1356,7 +1336,6 @@ def _suppress_endnote_residual_orphans(
         "suppressed_orphan_note_count": int(suppressed_orphan_note_count),
         "suppressed_orphan_anchor_count": int(suppressed_orphan_anchor_count),
     }
-
 
 def _chapter_contracts(
     *,
@@ -1598,7 +1577,6 @@ def _chapter_contracts(
 
     contracts.sort(key=lambda row: row.chapter_id)
     return contracts, contract_evidence
-
 
 def build_note_link_table(
     chapter_layers: ChapterLayers,

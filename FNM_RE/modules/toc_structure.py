@@ -11,6 +11,7 @@ from FNM_RE.shared.title import chapter_title_match_key, normalize_title
 from FNM_RE.stages.chapter_skeleton import build_chapter_skeleton
 from FNM_RE.stages.page_partition import build_page_partitions, summarize_page_partitions
 from FNM_RE.stages.section_heads import build_section_heads
+from FNM_RE.shared.notes import _safe_int
 
 _BACK_MATTER_REASON_HINTS = {
     "appendix",
@@ -21,14 +22,6 @@ _BACK_MATTER_REASON_HINTS = {
     "rear_author_blurb",
     "rear_sparse_other",
 }
-
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
 
 def _normalize_toc_node_role(value: Any) -> str:
     role = str(value or "").strip().lower().replace("-", "_")
@@ -41,7 +34,6 @@ def _normalize_toc_node_role(value: Any) -> str:
     if role == "book_title":
         return "front_matter"
     return ""
-
 
 def _map_toc_role(
     title: str,
@@ -73,7 +65,6 @@ def _map_toc_role(
     if any(token in normalized for token in ("bibliograph", "index", "appendix", "references")):
         return "back_matter"
     return "chapter"
-
 
 def _build_toc_tree(
     toc_items: list[dict] | None,
@@ -123,7 +114,6 @@ def _build_toc_tree(
         )
     return nodes
 
-
 def _build_chapters(chapters: list[Any], *, meta: Mapping[str, Any]) -> list[TocChapter]:
     post_body_keys = {chapter_title_match_key(title) for title in list(meta.get("post_body_titles") or [])}
     rows: list[TocChapter] = []
@@ -144,7 +134,6 @@ def _build_chapters(chapters: list[Any], *, meta: Mapping[str, Any]) -> list[Toc
         )
     rows.sort(key=lambda item: (item.start_page, item.chapter_id))
     return rows
-
 
 def _build_page_roles(
     partitions: list[Any],
@@ -223,13 +212,11 @@ def _build_page_roles(
     rows.sort(key=lambda item: item.page_no)
     return rows
 
-
 def _role_semantics_valid(pages: list[TocPageRole]) -> bool:
     first_back_matter_page = min((row.page_no for row in pages if row.role == "back_matter"), default=0)
     if first_back_matter_page <= 0:
         return True
     return not any(row.role == "chapter" and row.page_no > first_back_matter_page for row in pages)
-
 
 def _chapter_order_monotonic(chapters: list[TocChapter], toc_tree: list[TocNode]) -> bool:
     chapter_targets = [
@@ -240,7 +227,6 @@ def _chapter_order_monotonic(chapters: list[TocChapter], toc_tree: list[TocNode]
     if len(chapter_targets) >= 2:
         return all(chapter_targets[index - 1] <= chapter_targets[index] for index in range(1, len(chapter_targets)))
     return all(chapters[index - 1].start_page <= chapters[index].start_page for index in range(1, len(chapters)))
-
 
 def build_toc_structure(
     pages: list[dict],

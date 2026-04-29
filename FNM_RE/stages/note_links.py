@@ -38,18 +38,7 @@ def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord, *, mode_by_chapter: d
     return "endnote"
 
 
-def _marker_digits_are_ordered_subsequence(short_marker: str, long_marker: str) -> bool:
-    short_digits = normalize_note_marker(short_marker)
-    long_digits = normalize_note_marker(long_marker)
-    if not short_digits or not long_digits or short_digits == long_digits:
-        return False
-    cursor = 0
-    for char in long_digits:
-        if cursor < len(short_digits) and short_digits[cursor] == char:
-            cursor += 1
-            if cursor == len(short_digits):
-                return True
-    return False
+from FNM_RE.shared.notes import marker_digits_are_ordered_subsequence as _marker_digits_are_ordered_subsequence  # noqa: F401
 
 
 def _within_footnote_window(anchor_page: int, note_page: int, *, max_distance: int = 1) -> bool:

@@ -19,7 +19,7 @@ from FNM_RE.modules.types import (
     TocStructure,
 )
 from FNM_RE.shared.anchors import scan_anchor_markers
-from FNM_RE.shared.notes import normalize_note_marker
+from FNM_RE.shared.notes import _safe_int, normalize_note_marker
 from FNM_RE.shared.text import page_markdown_text
 from FNM_RE.stages.note_items import build_note_items
 from FNM_RE.stages.note_regions import build_note_regions
@@ -31,7 +31,6 @@ from FNM_RE.stages.units import (
 
 _NOTES_HEADING_RE = re.compile(r"(?im)^\s{0,3}(?:##\s*)?(?:notes?|endnotes?)\s*$")
 _NOTE_DEF_LINE_PREFIX_RE = re.compile(r"^\s*\[\^?\d{1,4}\]:\s*")
-
 
 def _scan_body_anchor_markers(text: str) -> list[str]:
     """对页 markdown 扫描正文 anchor marker；跳过 `[^N]: ...` 定义行。
@@ -49,14 +48,6 @@ def _scan_body_anchor_markers(text: str) -> list[str]:
                 markers.append(normalized)
     return markers
 
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
-
 def _legacy_page_role(toc_role: str) -> str:
     role = str(toc_role or "").strip().lower()
     if role in {"chapter", "post_body"}:
@@ -69,10 +60,8 @@ def _legacy_page_role(toc_role: str) -> str:
         return "note"
     return "other"
 
-
 def _phase1_from_toc_structure(toc_structure: TocStructure) -> Phase1Structure:
     return _phase1_from_toc_structure_with_evidence(toc_structure)
-
 
 def _phase1_from_toc_structure_with_evidence(
     toc_structure: TocStructure,
@@ -124,7 +113,6 @@ def _phase1_from_toc_structure_with_evidence(
         endnote_explorer_hints=dict(endnote_explorer_hints or {}),
     )
 
-
 def _to_layer_regions(regions: list[Any]) -> list[LayerNoteRegion]:
     def _bind_meta(source: str, chapter_id: str) -> tuple[str, float]:
         normalized = str(source or "").strip().lower()
@@ -159,7 +147,6 @@ def _to_layer_regions(regions: list[Any]) -> list[LayerNoteRegion]:
         )
         for row in regions
     ]
-
 
 def _to_layer_items(
     items: list[Any],
@@ -198,7 +185,6 @@ def _to_layer_items(
         )
     return rows
 
-
 def _chapter_body_marker_sets(
     *,
     phase1: Phase1Structure,
@@ -224,7 +210,6 @@ def _chapter_body_marker_sets(
                 chapter_markers.add(normalized)
         markers_by_chapter[chapter_id] = chapter_markers
     return markers_by_chapter
-
 
 def _project_endnotes_by_marker(
     *,
@@ -292,7 +277,6 @@ def _project_endnotes_by_marker(
         region.bind_method = "marker_projection"
         region.bind_confidence = round(float(count / total), 4)
 
-
 def _fallback_assign_unowned_endnotes(
     *,
     phase1: Phase1Structure,
@@ -348,7 +332,6 @@ def _fallback_assign_unowned_endnotes(
         region.bind_method = "fallback_projection"
         region.bind_confidence = round(float(count / total), 4)
 
-
 def _normalize_empty_region_overrides(overrides: Mapping[str, Any] | None) -> tuple[set[str], list[dict[str, Any]]]:
     override_map = dict(overrides or {})
     allow_ids: set[str] = {str(item).strip() for item in list(override_map.get("allow_empty_region_ids") or []) if str(item).strip()}
@@ -366,7 +349,6 @@ def _normalize_empty_region_overrides(overrides: Mapping[str, Any] | None) -> tu
         for region_id in sorted(allow_ids)
     ]
     return allow_ids, used
-
 
 def _build_chapter_layers(
     *,
@@ -531,7 +513,6 @@ def _build_chapter_layers(
         },
     }
 
-
 def _synthesize_footnote_only_markers(
     *,
     chapter_layers: list[ChapterLayer],
@@ -575,7 +556,6 @@ def _synthesize_footnote_only_markers(
         "chapter_count": len(chapter_markers),
         "synthesized_item_count": int(synthesized_item_count),
     }
-
 
 def _note_capture_summary(
     *,
@@ -649,7 +629,6 @@ def _note_capture_summary(
     }
     return bool(not sparse_chapter_ids and not sparse_pages), summary
 
-
 def _chapter_binding_summary(
     *,
     layer_regions: list[LayerNoteRegion],
@@ -679,7 +658,6 @@ def _chapter_binding_summary(
         "unassigned_item_count": len(unassigned_item_ids),
         "unassigned_item_ids_preview": unassigned_item_ids[:16],
     }
-
 
 def build_chapter_layers(
     toc_structure: TocStructure,

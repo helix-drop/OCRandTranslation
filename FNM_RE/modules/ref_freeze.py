@@ -20,16 +20,9 @@ from FNM_RE.modules.types import (
 )
 from FNM_RE.shared.refs import frozen_note_ref, replace_frozen_refs
 from FNM_RE.stages.units import _chunk_body_page_segments, _segment_paragraphs_from_body_pages
+from FNM_RE.shared.notes import _safe_int
 
 _TOKEN_CANDIDATE_RE_TEMPLATE = r"\[\s*(?:\^)?\s*{marker}\s*\]"
-
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
 
 def _chapter_order_map(chapter_layers: ChapterLayers) -> dict[str, int]:
     return {
@@ -37,7 +30,6 @@ def _chapter_order_map(chapter_layers: ChapterLayers) -> dict[str, int]:
         for index, chapter in enumerate(chapter_layers.chapters, start=1)
         if str(chapter.chapter_id or "").strip()
     }
-
 
 def _chapter_page_bounds(chapter: ChapterLayer) -> tuple[int, int]:
     pages: set[int] = set()
@@ -54,7 +46,6 @@ def _chapter_page_bounds(chapter: ChapterLayer) -> tuple[int, int]:
         return 0, 0
     sorted_pages = sorted(pages)
     return int(sorted_pages[0]), int(sorted_pages[-1])
-
 
 def _resolve_note_item_owner(
     item: Any,
@@ -73,7 +64,6 @@ def _resolve_note_item_owner(
         if chapter_id and chapter_id in valid_chapter_ids:
             return chapter_id, source
     return "", ""
-
 
 def _inject_token_once(
     text: str,
@@ -105,7 +95,6 @@ def _inject_token_once(
             return replaced, True
     return payload, False
 
-
 def _unit_contract_issues(*, body_units: list[FrozenUnit], note_units: list[FrozenUnit]) -> list[str]:
     issues: list[str] = []
     for row in list(body_units) + list(note_units):
@@ -130,7 +119,6 @@ def _unit_contract_issues(*, body_units: list[FrozenUnit], note_units: list[Froz
         if not str(row.target_ref or "").startswith("{{NOTE_REF:"):
             issues.append(f"note_target_ref_invalid:{row.unit_id}")
     return issues
-
 
 def build_frozen_units(
     chapter_layers: ChapterLayers,

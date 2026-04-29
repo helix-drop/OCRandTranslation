@@ -32,8 +32,10 @@ from FNM_RE.modules.types import (
 from FNM_RE.shared.export_constants import (
     _ANY_NOTE_REF_RE,
     _TRAILING_IMAGE_ONLY_BLOCK_RE,
+    _UNICODE_SUPERSCRIPT_TRANSLATION,
     _should_replace_definition_text,
 )
+from FNM_RE.shared.note_lookup import _sanitize_note_text
 from FNM_RE.shared.ref_rewriter import (
     _marker_aliases,
     _resolve_note_id,
@@ -44,14 +46,7 @@ from FNM_RE.shared.ref_rewriter import (
 )
 from FNM_RE.stages import export as export_stage
 from FNM_RE.stages import export_audit as export_audit_stage
-
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
+from FNM_RE.shared.notes import _safe_int
 
 def _chapter_pages_from_layer(chapter: Any) -> list[int]:
     pages: set[int] = set()
@@ -65,7 +60,6 @@ def _chapter_pages_from_layer(chapter: Any) -> list[int]:
         if int(row.page_end) > 0:
             pages.add(int(row.page_end))
     return sorted(pages)
-
 
 def _to_chapter_records(chapter_layers: ChapterLayers) -> list[ChapterRecord]:
     rows: list[ChapterRecord] = []
@@ -89,7 +83,6 @@ def _to_chapter_records(chapter_layers: ChapterLayers) -> list[ChapterRecord]:
         )
     return rows
 
-
 def _to_note_item_records(chapter_layers: ChapterLayers) -> list[NoteItemRecord]:
     return [
         NoteItemRecord(
@@ -108,7 +101,6 @@ def _to_note_item_records(chapter_layers: ChapterLayers) -> list[NoteItemRecord]
         for row in chapter_layers.note_items
         if str(row.note_item_id or "").strip()
     ]
-
 
 def _to_body_anchor_records(note_link_table: NoteLinkTable) -> list[BodyAnchorRecord]:
     return [
@@ -132,7 +124,6 @@ def _to_body_anchor_records(note_link_table: NoteLinkTable) -> list[BodyAnchorRe
         if str(row.anchor_id or "").strip()
     ]
 
-
 def _to_note_link_records(note_link_table: NoteLinkTable) -> list[NoteLinkRecord]:
     return [
         NoteLinkRecord(
@@ -152,7 +143,6 @@ def _to_note_link_records(note_link_table: NoteLinkTable) -> list[NoteLinkRecord
         for row in note_link_table.effective_links
         if str(row.link_id or "").strip()
     ]
-
 
 def _to_page_segments(unit: FrozenUnit) -> list[UnitPageSegmentRecord]:
     rows: list[UnitPageSegmentRecord] = []
@@ -194,7 +184,6 @@ def _to_page_segments(unit: FrozenUnit) -> list[UnitPageSegmentRecord]:
         )
     return rows
 
-
 def _to_translation_unit_records(frozen_units: FrozenUnits) -> list[TranslationUnitRecord]:
     rows: list[TranslationUnitRecord] = []
     for unit in list(frozen_units.body_units or []) + list(frozen_units.note_units or []):
@@ -222,7 +211,6 @@ def _to_translation_unit_records(frozen_units: FrozenUnits) -> list[TranslationU
         )
     return rows
 
-
 def _to_chapter_note_mode_records(chapter_layers: ChapterLayers) -> list[ChapterNoteModeRecord]:
     rows: list[ChapterNoteModeRecord] = []
     for chapter in chapter_layers.chapters:
@@ -242,7 +230,6 @@ def _to_chapter_note_mode_records(chapter_layers: ChapterLayers) -> list[Chapter
         )
     return rows
 
-
 def _phase5_book_type(chapter_layers: ChapterLayers) -> str:
     for chapter in chapter_layers.chapters:
         policy = dict(chapter.policy_applied or {})
@@ -250,7 +237,6 @@ def _phase5_book_type(chapter_layers: ChapterLayers) -> str:
         if book_type:
             return book_type
     return "no_notes"
-
 
 def _to_diagnostic_pages(diagnostic_machine_by_page: Mapping[int | str, str] | None) -> list[DiagnosticPageRecord]:
     rows: list[DiagnosticPageRecord] = []
@@ -288,7 +274,6 @@ def _to_diagnostic_pages(diagnostic_machine_by_page: Mapping[int | str, str] | N
         )
     return rows
 
-
 def _build_phase5_shadow(
     frozen_units: FrozenUnits,
     note_link_table: NoteLinkTable,
@@ -320,7 +305,6 @@ def _build_phase5_shadow(
         ),
     )
 
-
 def _has_raw_marker_in_body(markdown_text: str) -> bool:
     body_text, _ = export_audit_stage.split_body_and_definitions(markdown_text)
     allowed_markers = set(export_audit_stage.LOCAL_REF_RE.findall(body_text))
@@ -336,9 +320,7 @@ def _has_raw_marker_in_body(markdown_text: str) -> bool:
         return True
     return False
 
-
 _LOCAL_DEF_LINE_RE = re.compile(r"^\[\^([0-9]+)\]:\s*(.*)$")
-
 
 def _chapter_note_text_by_id(
     frozen_units: FrozenUnits,
@@ -352,11 +334,10 @@ def _chapter_note_text_by_id(
         note_id = str(unit.note_id or "").strip()
         if not note_id:
             continue
-        text = export_stage._sanitize_note_text(str(unit.translated_text or unit.source_text or ""))
+        text = _sanitize_note_text(str(unit.translated_text or unit.source_text or ""))
         if _should_replace_definition_text(payload.get(note_id, ""), text):
             payload[note_id] = text
     return payload
-
 
 def _book_note_text_by_id(frozen_units: FrozenUnits) -> dict[str, str]:
     payload: dict[str, str] = {}
@@ -364,11 +345,10 @@ def _book_note_text_by_id(frozen_units: FrozenUnits) -> dict[str, str]:
         note_id = str(unit.note_id or "").strip()
         if not note_id:
             continue
-        text = export_stage._sanitize_note_text(str(unit.translated_text or unit.source_text or ""))
+        text = _sanitize_note_text(str(unit.translated_text or unit.source_text or ""))
         if _should_replace_definition_text(payload.get(note_id, ""), text):
             payload[note_id] = text
     return payload
-
 
 def _chapter_marker_sequences(
     chapter_layers: ChapterLayers,
@@ -396,7 +376,6 @@ def _chapter_marker_sequences(
             row = sequences.setdefault(marker, [])
             row.append(note_id)
     return sequences
-
 
 def _rewrite_residual_raw_markers_for_chapter(
     chapter: ChapterMarkdownEntry,
@@ -473,7 +452,7 @@ def _rewrite_residual_raw_markers_for_chapter(
     def _replace_raw_sup_with_existing_local_ref(match: re.Match) -> str:
         marker = str(match.group(1) or match.group(2) or "").strip()
         if not marker:
-            marker = str(match.group(3) or "").translate(export_audit_stage._UNICODE_SUPERSCRIPT_TRANSLATION).strip()
+            marker = str(match.group(3) or "").translate(_UNICODE_SUPERSCRIPT_TRANSLATION).strip()
         return f"[^{marker}]" if marker in local_number_tokens else match.group(0)
 
     updated_body = export_audit_stage.RAW_BRACKET_NOTE_REF_RE.sub(
@@ -541,9 +520,7 @@ def _rewrite_residual_raw_markers_for_chapter(
             lines.append(f"[^{number}]: {definitions[number]}")
     return "\n".join(lines).strip()
 
-
 _DEF_LINE_PRINTED_PREFIX_RE = re.compile(r"^\[\^(\d+)\]:\s*(.*)$")
-
 
 def _apply_notes_block_format(markdown_text: str) -> str:
     """工单 #7a + #7b：统一章节 NOTES 块格式。
@@ -593,7 +570,6 @@ def _apply_notes_block_format(markdown_text: str) -> str:
             output_lines.append(line)
     return "\n".join(output_lines).rstrip() + ("\n" if text.endswith("\n") else "")
 
-
 def _rewrite_chapters_for_merge(
     chapters: list[ChapterMarkdownEntry],
     *,
@@ -631,7 +607,6 @@ def _rewrite_chapters_for_merge(
         )
     return rewritten
 
-
 def _chapter_contract_items_by_section(chapter_contract_summary: dict[str, Any]) -> dict[str, dict[str, Any]]:
     payload: dict[str, dict[str, Any]] = {}
     for row in list(chapter_contract_summary.get("items") or []):
@@ -640,7 +615,6 @@ def _chapter_contract_items_by_section(chapter_contract_summary: dict[str, Any])
         if section_id:
             payload[section_id] = item
     return payload
-
 
 def _has_legacy_note_token(markdown_text: str) -> bool:
     text = str(markdown_text or "")
@@ -653,7 +627,6 @@ def _has_legacy_note_token(markdown_text: str) -> bool:
             export_audit_stage.LEGACY_NOTE_TOKEN_RE,
         )
     )
-
 
 def _build_chapter_issue_diagnostics(
     chapters: list[ChapterMarkdownEntry],
@@ -705,7 +678,6 @@ def _build_chapter_issue_diagnostics(
         "local_ref_contract_broken_chapter_count": int(local_ref_contract_broken_chapter_count),
     }
     return chapter_issue_summary, chapter_issue_counts
-
 
 def build_chapter_markdown_set(
     frozen_units: FrozenUnits,

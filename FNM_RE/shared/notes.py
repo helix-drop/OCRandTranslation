@@ -72,6 +72,13 @@ def _safe_float(value: Any) -> float | None:
         return None
 
 
+def _safe_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _expand_inline_note_breaks(text: str) -> str:
     raw = str(text or "")
     if not raw:
@@ -629,3 +636,17 @@ def extract_pdf_text_by_page(
         if text:
             resolved[page_no] = text
     return resolved
+
+
+def marker_digits_are_ordered_subsequence(short_marker: str, long_marker: str) -> bool:
+    short_digits = normalize_note_marker(short_marker)
+    long_digits = normalize_note_marker(long_marker)
+    if not short_digits or not long_digits or short_digits == long_digits:
+        return False
+    cursor = 0
+    for char in long_digits:
+        if cursor < len(short_digits) and short_digits[cursor] == char:
+            cursor += 1
+            if cursor == len(short_digits):
+                return True
+    return False

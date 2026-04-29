@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from FNM_RE.shared.title import normalize_title, normalized_title_key
+from FNM_RE.shared.notes import _safe_int
 
 _BODY_PAGE_ROLES = {"body", "front_matter"}
 _HEADING_GRAPH_PREVIEW_LIMIT = 8
@@ -32,7 +33,6 @@ _CHAPTER_NUMBER_LABEL_RE = re.compile(
     re.IGNORECASE,
 )
 
-
 def default_heading_graph_summary() -> dict[str, Any]:
     return {
         "toc_body_item_count": 0,
@@ -50,20 +50,11 @@ def default_heading_graph_summary() -> dict[str, Any]:
         "composite_heading_count": 0,
     }
 
-
-def _safe_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
-
 def _safe_float(value: Any) -> float | None:
     try:
         return float(value)
     except (TypeError, ValueError):
         return None
-
 
 def _normalize_font_weight_hint(value: Any) -> str:
     token = str(value or "").strip().lower()
@@ -71,13 +62,11 @@ def _normalize_font_weight_hint(value: Any) -> str:
         return token
     return "unknown"
 
-
 def _normalize_align_hint(value: Any) -> str:
     token = str(value or "").strip().lower()
     if token in {"left", "center", "right", "unknown"}:
         return token
     return "unknown"
-
 
 def _compact_unique_titles(values: list[str]) -> list[str]:
     compact: list[str] = []
@@ -92,7 +81,6 @@ def _compact_unique_titles(values: list[str]) -> list[str]:
         seen.add(key)
         compact.append(normalized)
     return compact
-
 
 def _heading_graph_title_key(value: Any) -> str:
     normalized = normalize_title(value)
@@ -111,7 +99,6 @@ def _heading_graph_title_key(value: Any) -> str:
         normalized = _LEADING_QUOTES_RE.sub("", normalized).strip()
     return normalized_title_key(normalized)
 
-
 def _font_family_token(value: Any) -> str:
     token = str(value or "").strip().lower()
     if not token:
@@ -120,10 +107,8 @@ def _font_family_token(value: Any) -> str:
     token = re.sub(r"[^a-z0-9]+", "", token)
     return token
 
-
 def _candidate_page_role(candidate: dict[str, Any], page_role_by_no: dict[int, str]) -> str:
     return str(page_role_by_no.get(_safe_int(candidate.get("page_no"))) or "")
-
 
 def _is_anchor_candidate(candidate: dict[str, Any], *, page_role_by_no: dict[int, str]) -> bool:
     page_no = _safe_int(candidate.get("page_no"))
@@ -135,7 +120,6 @@ def _is_anchor_candidate(candidate: dict[str, Any], *, page_role_by_no: dict[int
     if source in {"visual_toc", "note_heading"}:
         return False
     return True
-
 
 def _is_section_candidate(candidate: dict[str, Any], *, page_role_by_no: dict[int, str]) -> bool:
     page_no = _safe_int(candidate.get("page_no"))
@@ -151,12 +135,10 @@ def _is_section_candidate(candidate: dict[str, Any], *, page_role_by_no: dict[in
     family = str(candidate.get("heading_family_guess") or "").strip().lower()
     return heading_level_hint >= 2 or family == "section" or bool(candidate.get("suppressed_as_chapter"))
 
-
 def _is_section_style_candidate(candidate: dict[str, Any]) -> bool:
     heading_level_hint = _safe_int(candidate.get("heading_level_hint"))
     family = str(candidate.get("heading_family_guess") or "").strip().lower()
     return heading_level_hint >= 2 or family == "section"
-
 
 def _is_chapter_number_candidate(text: str) -> bool:
     normalized = normalize_title(text)
@@ -164,22 +146,17 @@ def _is_chapter_number_candidate(text: str) -> bool:
         return False
     return bool(_PLAIN_NUMBER_RE.match(normalized) or _CHAPTER_NUMBER_LABEL_RE.match(normalized))
 
-
 def _candidate_y(candidate: dict[str, Any]) -> float:
     return _safe_float(candidate.get("y")) or 0.0
-
 
 def _candidate_x(candidate: dict[str, Any]) -> float:
     return _safe_float(candidate.get("x")) or 0.0
 
-
 def _candidate_confidence(candidate: dict[str, Any]) -> float:
     return float(_safe_float(candidate.get("confidence")) or 0.0)
 
-
 def _candidate_text(candidate: dict[str, Any]) -> str:
     return normalize_title(candidate.get("text") or "")
-
 
 def _same_style_pdf_pair(left: dict[str, Any], right: dict[str, Any]) -> bool:
     if str(left.get("source") or "") != "pdf_font_band" or str(right.get("source") or "") != "pdf_font_band":
@@ -206,7 +183,6 @@ def _same_style_pdf_pair(left: dict[str, Any], right: dict[str, Any]) -> bool:
     if max(align_left, align_right) == "center":
         return x_gap <= 140.0
     return x_gap <= 96.0
-
 
 def _compose_heading_parts(parts: list[dict[str, Any]], *, composite_kind: str) -> dict[str, Any] | None:
     texts = [_candidate_text(part) for part in parts]
@@ -262,7 +238,6 @@ def _compose_heading_parts(parts: list[dict[str, Any]], *, composite_kind: str) 
         "composite_kind": composite_kind,
     }
 
-
 def _build_same_style_pdf_composites(pdf_candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     composites: list[dict[str, Any]] = []
     for index, candidate in enumerate(pdf_candidates):
@@ -276,7 +251,6 @@ def _build_same_style_pdf_composites(pdf_candidates: list[dict[str, Any]]) -> li
             if composed is not None:
                 composites.append(composed)
     return composites
-
 
 def _build_chapter_number_pairs(pdf_candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     composites: list[dict[str, Any]] = []
@@ -298,7 +272,6 @@ def _build_chapter_number_pairs(pdf_candidates: list[dict[str, Any]]) -> list[di
             if composed is not None:
                 composites.append(composed)
     return composites
-
 
 def _build_derived_heading_candidates(
     heading_candidates: list[dict[str, Any]],
@@ -330,7 +303,6 @@ def _build_derived_heading_candidates(
             derived.append(candidate)
     return derived, len(derived)
 
-
 def _candidate_source_score(candidate: dict[str, Any]) -> int:
     source = str(candidate.get("source") or "")
     block_label = str(candidate.get("block_label") or "")
@@ -345,7 +317,6 @@ def _candidate_source_score(candidate: dict[str, Any]) -> int:
     if source == "pdf_font_band":
         return 160
     return 80
-
 
 def _candidate_evidence_score(candidate: dict[str, Any]) -> int:
     score = _candidate_source_score(candidate)
@@ -372,7 +343,6 @@ def _candidate_evidence_score(candidate: dict[str, Any]) -> int:
     score += int(round(_candidate_confidence(candidate) * 10))
     return score
 
-
 def _has_strong_chapter_evidence(candidate: dict[str, Any]) -> bool:
     source = str(candidate.get("source") or "")
     block_label = str(candidate.get("block_label") or "")
@@ -397,7 +367,6 @@ def _has_strong_chapter_evidence(candidate: dict[str, Any]) -> bool:
     required = 4 if _is_section_style_candidate(candidate) else 3
     return signals >= required
 
-
 def _candidate_sort_key(
     candidate: dict[str, Any],
     *,
@@ -420,7 +389,6 @@ def _candidate_sort_key(
         -page_no,
     )
 
-
 def _exact_matching_candidates(
     title_key: str,
     *,
@@ -437,7 +405,6 @@ def _exact_matching_candidates(
             continue
         matched.append(candidate)
     return matched
-
 
 def _best_candidate(
     title_key: str,
@@ -472,7 +439,6 @@ def _best_candidate(
     )
     return dict(ranked[0]) if ranked else None
 
-
 def _body_stop_pages(page_rows: list[dict[str, Any]]) -> list[int]:
     return sorted(
         {
@@ -483,13 +449,11 @@ def _body_stop_pages(page_rows: list[dict[str, Any]]) -> list[int]:
         }
     )
 
-
 def _next_stop_page(stop_pages: list[int], *, after_page: int) -> int:
     for page_no in stop_pages:
         if page_no > after_page:
             return page_no
     return 0
-
 
 def build_heading_graph(
     *,
