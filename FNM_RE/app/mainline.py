@@ -52,6 +52,7 @@ from persistence.fnm_export_bundle import (
     save_fnm_export_bundle,
 )
 from FNM_RE.app.persist_helpers import (
+    _safe_list,
     load_fnm_visual_toc_bundle as _load_fnm_visual_toc_bundle,
     load_fnm_toc_items as _load_fnm_toc_items,
     normalize_marker as _normalize_marker,
@@ -82,13 +83,6 @@ _EXPORT_VALIDATION_LOG_PATH = "logs/fnm_export_validation_issues.log"
 _EXPORT_STAGE_REASON_PREFIXES = ("merge_", "export_")
 _EXPORT_STAGE_REASON_EXACT = {"local_note_contract_broken"}
 _MISSING_PERSISTED_EXPORT_BUNDLE_MESSAGE = "FNM 导出包不存在，请先执行最终校验。"
-
-
-def _safe_list(callable_obj: Any, *args) -> list[Any]:
-    if not callable(callable_obj):
-        return []
-    value = callable_obj(*args)
-    return list(value or [])
 
 
 def _safe_dict(callable_obj: Any, *args) -> dict[str, Any]:

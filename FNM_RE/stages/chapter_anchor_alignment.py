@@ -58,7 +58,6 @@ def _needleman_wunsch_align(
     """
     m, n = len(seq_a), len(seq_b)
 
-    # DP 矩阵
     dp = [[0] * (n + 1) for _ in range(m + 1)]
     for i in range(1, m + 1):
         dp[i][0] = dp[i - 1][0] + gap_penalty

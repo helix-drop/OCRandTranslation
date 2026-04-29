@@ -341,7 +341,6 @@ def build_frozen_units(
         seen_note_unit_keys.add(dedupe_key)
         return True
 
-    # 主路径：章节材料化视图
     for chapter in chapter_layers.chapters:
         chapter_note_items = [*list(chapter.footnote_items or []), *list(chapter.endnote_items or [])]
         for item in chapter_note_items:

@@ -112,6 +112,15 @@ def _collect_chapter_page_numbers(chapter: Any) -> list[int]:
     return sorted(pages)
 
 
+def _chapter_mode_map(phase2: Any) -> dict[str, str]:
+    """从 Phase2Structure 提取 chapter_id → note_mode 映射。"""
+    return {
+        str(row.chapter_id or "").strip(): str(row.note_mode or "")
+        for row in getattr(phase2, "chapter_note_modes", None) or []
+        if str(getattr(row, "chapter_id", None) or "").strip()
+    }
+
+
 def _safe_float(value: Any) -> float | None:
     try:
         return float(value)

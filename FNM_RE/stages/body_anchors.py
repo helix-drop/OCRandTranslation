@@ -7,6 +7,7 @@ from typing import Any
 
 from FNM_RE.models import BodyAnchorRecord, Phase2Structure
 from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
+from FNM_RE.shared.notes import _chapter_mode_map
 from FNM_RE.shared.anchors import (
     anchor_dedupe_key,
     page_body_paragraphs,
@@ -29,14 +30,6 @@ def _page_payload_by_no(pages: list[dict]) -> dict[int, dict]:
         if page_no > 0:
             mapping[page_no] = dict(page)
     return mapping
-
-
-def _chapter_mode_map(phase2: Phase2Structure) -> dict[str, str]:
-    return {
-        str(row.chapter_id): str(row.note_mode)
-        for row in phase2.chapter_note_modes
-        if str(row.chapter_id or "").strip()
-    }
 
 
 def _footnote_band_page_keys(phase2: Phase2Structure) -> set[tuple[str, int]]:

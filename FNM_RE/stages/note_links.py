@@ -8,15 +8,7 @@ import re
 from typing import Any
 
 from FNM_RE.models import BodyAnchorRecord, NoteLinkRecord, Phase2Structure
-from FNM_RE.shared.notes import normalize_note_marker
-
-
-def _chapter_mode_map(phase2: Phase2Structure) -> dict[str, str]:
-    return {
-        str(row.chapter_id or ""): str(row.note_mode or "")
-        for row in phase2.chapter_note_modes
-        if str(row.chapter_id or "").strip()
-    }
+from FNM_RE.shared.notes import _chapter_mode_map, normalize_note_marker
 
 
 def _region_map(phase2: Phase2Structure) -> dict[str, Any]:
