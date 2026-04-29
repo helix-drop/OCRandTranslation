@@ -22,7 +22,7 @@ def build_unit_progress(*args, **kwargs):
 
 
 def run_llm_repair(*args, **kwargs):
-    from FNM_RE.llm_repair import run_llm_repair as impl
+    from FNM_RE.llm_repair import request_llm_repair_actions as impl
 
     return impl(*args, **kwargs)
 
