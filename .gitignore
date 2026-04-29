@@ -75,7 +75,7 @@ session-ses_*.md
 # 根目录的空数据库副本（真正的数据库在 local_data/ 下）
 app.db
 
-# test_example 中的大型二进制文件（PDF 源文件、导出 zip、raw_pages）
-test_example/**/*.pdf
-test_example/**/*.zip
-test_example/**/raw_pages.json
+# test_example 中超过 GitHub 100MB 限制的 PDF
+test_example/Napoleon/*.pdf
+test_example/Germany_Madness/Bell*.pdf
+
