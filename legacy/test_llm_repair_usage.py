@@ -4,7 +4,7 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from FNM_RE.llm_repair import _build_cluster_page_contexts, _time_limit, request_llm_repair_actions, run_llm_repair
+from FNM_RE.llm_repair import _build_cluster_page_contexts, _time_limit, request_llm_repair_actions
 
 
 class _RepoStub:
@@ -245,7 +245,7 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
                 },
             ),
         ):
-            result = run_llm_repair("doc-1", repo=repo, slug="book-1", auto_apply=False)
+            result = request_llm_repair_actions("doc-1", repo=repo, slug="book-1", auto_apply=False)
 
         self.assertEqual(result["cluster_count"], 1)
         self.assertEqual(len(result["usage_events"]), 1)
@@ -278,7 +278,7 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
                 },
             ),
         ):
-            run_llm_repair(
+            request_llm_repair_actions(
                 "doc-1",
                 repo=repo,
                 slug="book-1",
@@ -379,7 +379,7 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
                 },
             ),
         ):
-            run_llm_repair("doc-1", repo=repo, slug="book-1", auto_apply=True)
+            request_llm_repair_actions("doc-1", repo=repo, slug="book-1", auto_apply=True)
 
         self.assertIn(
             ("link", "L-match", {"action": "match", "note_item_id": "n-1", "anchor_id": "a-explicit"}),
@@ -449,7 +449,7 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
                 },
             ),
         ):
-            run_llm_repair("doc-1", repo=repo, slug="book-1", auto_apply=True)
+            request_llm_repair_actions("doc-1", repo=repo, slug="book-1", auto_apply=True)
 
         note_item_rows = [row for row in repo.saved_overrides if row[0] == "note_item"]
         self.assertEqual(len(note_item_rows), 1)
@@ -553,7 +553,7 @@ class LlmRepairUsageSummaryTest(unittest.TestCase):
                 },
             ),
         ):
-            result = run_llm_repair("doc-1", repo=repo, slug="book-1", auto_apply=True)
+            result = request_llm_repair_actions("doc-1", repo=repo, slug="book-1", auto_apply=True)
 
         # 建议应该被记录（llm_suggestion），但 link override 不应被自动应用
         link_overrides = [row for row in repo.saved_overrides if row[0] == "link"]
