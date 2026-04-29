@@ -15,6 +15,17 @@ from FNM_RE.models import ChapterRecord, HeadingCandidate, PagePartitionRecord
 from FNM_RE.shared.refs import extract_note_refs
 from FNM_RE.shared.text import extract_page_headings, page_blocks, page_markdown_text
 from FNM_RE.shared.title import chapter_title_match_key, guess_title_family, normalize_title, normalized_title_key
+from FNM_RE.stages.page_partition import (
+    _plain_text_lines,
+    _uppercase_ratio,
+    _markdown_body_after_first_heading,
+    _looks_like_prose_after_heading,
+    _looks_like_title_page,
+    _looks_like_course_listing_page,
+    _looks_like_copyright_front_matter_page,
+    _is_toc_force_export_title,
+    _is_visual_toc_explicit_chapter_title,
+)
 from FNM_RE.stages.heading_graph import build_heading_graph, default_heading_graph_summary
 from FNM_RE.shared.notes import _safe_int
 
@@ -236,104 +247,6 @@ def _safe_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
 
-def _plain_text_lines(text: str) -> list[str]:
-    raw = _HTML_TAG_RE.sub(" ", str(text or ""))
-    return [re.sub(r"\s+", " ", line).strip() for line in raw.splitlines() if re.sub(r"\s+", " ", line).strip()]
-
-def _uppercase_ratio(text: str) -> float:
-    letters = [ch for ch in str(text or "") if ch.isalpha()]
-    if not letters:
-        return 0.0
-    uppers = sum(1 for ch in letters if ch.isupper())
-    return uppers / max(1, len(letters))
-
-def _markdown_body_after_first_heading(text: str) -> str:
-    raw_lines = str(text or "").splitlines()
-    if not raw_lines:
-        return ""
-    if _MARKDOWN_HEADING_RE.match(str(raw_lines[0] or "").strip()):
-        return "\n".join(raw_lines[1:]).strip()
-    return str(text or "").strip()
-
-def _looks_like_prose_after_heading(text: str) -> bool:
-    body = _markdown_body_after_first_heading(text).strip()
-    if not body:
-        return False
-    if extract_note_refs(body):
-        return True
-    if re.search(r"\^\{\d+\}|\$\s*\^\{\d+\}\s*\$|<sup>\s*\d+\s*</sup>", body):
-        return True
-    lines = _plain_text_lines(body)[:10]
-    if not lines:
-        return False
-    sentence_like = sum(1 for line in lines if len(line) >= 40 and re.search(r"[.!?。！？]", line))
-    short_sentence_like = sum(1 for line in lines if len(line) >= 10 and re.search(r"[.!?。！？]", line))
-    long_lines = sum(1 for line in lines if len(line) >= 60)
-    medium_lines = sum(1 for line in lines if len(line) >= 30)
-    mixed_case_lines = sum(1 for line in lines if re.search(r"[a-zà-ÿ]", line))
-    total_chars = sum(len(line) for line in lines[:6])
-    return bool(
-        long_lines >= 2
-        or (long_lines >= 1 and medium_lines >= 3)
-        or sentence_like >= 2
-        or (sentence_like >= 1 and total_chars >= 180)
-        or short_sentence_like >= 1
-        or (mixed_case_lines >= 2 and total_chars >= 70)
-    )
-
-def _looks_like_title_page(text: str, headings: list[str], *, page_no: int, total_pages: int) -> bool:
-    if page_no > max(18, int(total_pages * 0.08)):
-        return False
-    lines = _plain_text_lines(text)[:12]
-    if not lines:
-        return False
-    first_heading = _normalize_title(headings[0] if headings else "")
-    if first_heading and _visual_toc_chapter_keyword_strength(first_heading) >= 1 and _looks_like_prose_after_heading(text):
-        return False
-    if headings and _looks_like_prose_after_heading(text):
-        return False
-    lowered = [line.lower() for line in lines]
-    if any(any(re.search(pattern, line, re.IGNORECASE) for pattern in _FRONT_MATTER_LINE_PATTERNS) for line in lowered):
-        return True
-    short_lines = sum(1 for line in lines if len(line) <= 40)
-    heading_like = any(_uppercase_ratio(item) >= 0.55 for item in headings or [])
-    if len(lines) <= 12 and short_lines >= max(2, len(lines) - 2):
-        if heading_like or headings or _uppercase_ratio(" ".join(lines[:8])) >= 0.55:
-            return True
-    return False
-
-def _looks_like_course_listing_page(text: str, *, page_no: int, total_pages: int) -> bool:
-    if page_no > max(20, int(total_pages * 0.08)):
-        return False
-    lines = _plain_text_lines(text)[:24]
-    if len(lines) < 4:
-        return False
-    year_range_count = sum(1 for line in lines if _YEAR_RANGE_RE.search(line))
-    course_hint = any(
-        re.search(r"cours (?:de|au).*(?:coll[eè]ge de france)", line, re.IGNORECASE)
-        for line in lines[:4]
-    )
-    return year_range_count >= 3 and (course_hint or len(lines) >= 8)
-
-def _looks_like_copyright_front_matter_page(text: str, *, page_no: int, total_pages: int) -> bool:
-    if page_no > max(20, int(total_pages * 0.08)):
-        return False
-    lines = _plain_text_lines(text)[:20]
-    if not lines:
-        return False
-    hits = sum(
-        1
-        for line in lines
-        if re.search(
-            r"\b(?:isbn|all rights reserved|printed in|copyright|code de la propriété intellectuelle)\b|^[©©]",
-            line,
-            re.IGNORECASE,
-        )
-    )
-    if hits >= 2:
-        return True
-    return any("édition établie sous la direction" in line.lower() for line in lines) and hits >= 1
-
 def _trim_exportable_chapter_pages(
     page_numbers: list[int],
     *,
@@ -404,24 +317,11 @@ def _normalize_toc_chapter_id(raw_id: Any, *, order: int, title: str) -> str:
         title_key = f"{order:03d}"
     return f"toc-ch-{order:03d}-{title_key[:24]}"
 
-def _is_toc_force_export_title(title: str) -> bool:
-    return bool(_TOC_FORCE_EXPORT_TITLE_RE.match(_normalize_title(title)))
-
 def _is_toc_body_anchor_title(title: str) -> bool:
     return bool(_TOC_BODY_ANCHOR_TITLE_RE.search(_normalize_title(title)))
 
 def _is_toc_part_title(title: str) -> bool:
     return bool(_TOC_PART_TITLE_RE.match(_normalize_title(title)))
-
-def _is_visual_toc_explicit_chapter_title(title: str) -> bool:
-    normalized = _normalize_title(title)
-    if not normalized:
-        return False
-    if _is_toc_force_export_title(normalized):
-        return True
-    if _MAIN_NUMBERED_TITLE_RE.search(normalized):
-        return True
-    return bool(_TOC_EXPLICIT_CHAPTER_TITLE_RE.search(normalized))
 
 def _is_visual_toc_body_candidate(row: dict) -> bool:
     if "body_candidate" in row:

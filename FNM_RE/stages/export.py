@@ -141,12 +141,7 @@ def _is_exportable_section_head(head: SectionHeadRecord) -> bool:
     return True
 
 
-def _sanitize_note_text(text: str) -> str:
-    payload = str(text or "").strip()
-    payload = _NOTE_TEXT_BODY_MARKUP_RE.sub("", payload).strip()
-    payload = _LEADING_RAW_NOTE_MARKER_RE.sub("", payload).strip()
-    payload = re.sub(r"\s+", " ", payload).strip()
-    return payload
+from FNM_RE.shared.note_lookup import _sanitize_note_text  # noqa: E402
 
 
 def _build_note_text_by_id_for_chapter(
