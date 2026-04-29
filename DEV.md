@@ -175,10 +175,46 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 | 范围 | 文件数 | 总行数 |
 |---|---:|---:|
 | 主链运行代码（`app/config/logging/launcher/model/ocr` + `document/` + `persistence/` + `pipeline/` + `translation/` + `web/`） | 72 | ~31,000 |
-| FNM_RE（`FNM_RE/**/*.py`） | 62 | 29,405 |
-| 自动化测试（`tests/**/*.py`） | 88 | ~32,500 |
-| 工程脚本（`scripts/**/*.py`） | 18 | ~7,100 |
-| 全部 Python 文件 | 266 | ~110,000 |
+| FNM_RE（`FNM_RE/**/*.py`） | 68 | 29,303 |
+| 自动化测试（`tests/**/*.py`） | 87 | ~37,000 |
+| 工程脚本（`scripts/**/*.py`） | 12 | 6,191 |
+| 归档（`legacy/*.py`） | 7 | — |
+
+### 测试当前状态（2026-04-29）
+
+全部单元测试：`python3 -m unittest discover -s tests/unit -p 'test_*.py'`
+
+| 指标 | 数值 | 说明 |
+|------|------|------|
+| 总测试数 | 1,046 | — |
+| 失败 | 64 | 全部为 Biopolitics/Goldstein 等 fixture 数据断言失败（pre-existing） |
+| 错误 | 1 | `test_run_post_translate_export_checks`（pre-existing） |
+| 跳过 | 1 | — |
+
+验收测试（重构 guardrail）：`python3 -m unittest tests.unit.test_fnm_re_phase6 tests.unit.test_fnm_re_module6_merge tests.unit.test_fnm_re_module7_export`
+
+- 42 tests, 1 failure（`test_container_exported_as_chapter_is_blocking`，pre-existing）
+
+### 工程脚本（2026-04-29 清理后）
+
+保留的 12 个活跃脚本：
+
+| 脚本 | 用途 |
+|------|------|
+| `test_fnm_batch.py` | 主批测入口（baseline + extension 8 本） |
+| `test_fnm_real_batch.py` | 真实文档批测（含 LLM repair 集成） |
+| `onboard_example_books.py` | 新样本接入（导入 PDF + OCR + FNM 快照） |
+| `generate_visual_toc_snapshots.py` | 生成/刷新 visual TOC 快照 |
+| `audit_fnm_exports.py` | FNM 导出全量审计 |
+| `apply_manual_toc_to_examples.py` | 手动目录绑定到样本 |
+| `rebuild_doc_derivatives.py` | 重建文档衍生数据 |
+| `reingest_fnm_from_snapshots.py` | 从快照重新注入 FNM 数据 |
+| `run_fnm_llm_repair.py` | LLM 修补 CLI |
+| `run_fnm_llm_tier1a.py` | Tier 1a 工作流批量 LLM 修补 |
+| `analyze_segment_duplicates.py` | 段落重复分析工具 |
+| `audit_footnote_structures.py` | 脚注结构审计工具 |
+
+已归档至 `legacy/`：`migrate_split_sqlite.py`、`cleanup_orphan_state.py`、`e2e_full_manual.py`、`reader_sim_screenshots.py`
 
 ### FNM_RE 维护约定
 
@@ -188,14 +224,31 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 
 **`dev/` 目录**：包含管道门控（`gates.py`）、阶段运行器（`phase_runner.py`）、诊断投影（`diagnostics.py`）、线程池（`thread_pool.py`）、导入/重置工具等。这些是生产代码，命名待改进（`dev/` 有误导性，实际是管道支撑模块）。
 
-**重复消除**（2026-04-29 完成）：
-- `_safe_int` / `_safe_float` → 统一在 `shared/notes.py`
-- `_split_contiguous_ranges` → 统一在 `shared/notes.py`
-- `_collect_chapter_page_numbers` → 统一在 `shared/notes.py`
-- `_chapter_mode_map` → 统一在 `shared/notes.py`
-- `_looks_like_bibliography_entry` / `_summary_title_key` → 统一在 `shared/text.py`
-- `group_review_overrides` → 统一在 `shared/review_overrides.py`（`FNM_RE/review.py` 中副本已删除）
-- `_build_export_chapters` → 重命名为公开 API `build_export_chapters`
+**重构记录**（2026-04-29 完成）：
+
+*阶段 1-2：共享模块提取与文件拆分*
+- 新建 5 个 shared 模块（`export_constants`、`ref_rewriter`、`marker_sequences`、`note_lookup`、`review_overrides`）
+- 拆分 `pipeline.py`（1917→1310）+ `pipeline_converters.py`（686）
+- 拆分 `mainline.py`（1848→1404）+ `mainline_repo.py`（314）
+- 消除 `_safe_int`/`_safe_float`/`_split_contiguous_ranges`/`_chapter_mode_map`/`_collect_chapter_page_numbers` 等 11 处跨文件重复
+- 消除 `_looks_like_bibliography_entry`/`_summary_title_key`/`_page_markdown` 等 5 处跨文件重复
+- `group_review_overrides` 3 副本 → `shared/review_overrides.py` 单一来源
+- `_build_export_chapters` → 公开 API `build_export_chapters`
+- 死代码归档：`build_note_text_by_id_for_chapter`、`_overlay_repo_*`、`_apply_pipeline_state_override` → `legacy/`
+
+*阶段 3-4：模块边界加固 + 效率优化*
+- `chapter_merge.py` 两条跨层引用切换到 shared
+- `toc_semantics.py` 9 个 page_partition 重复函数 → 导入
+- `_build_chapter_note_modes` O(C×R) → O(C+R) 优化
+- `_normalize_title_key` 3 个命名冲突 → 按语义重命名
+- `_sanitize_note_text` 2 副本 → `shared/note_lookup.py`
+- `__import__` 反模式 3 处 → 直接调用
+
+*测试与脚本清理*
+- 修复重构引入的 2 个回归 bug（`@dataclass` 误删、`_to_plain` 误删）
+- 归档 1 个过时测试（`test_llm_repair_usage.py`）
+- 归档 4 个过期脚本（迁移/清理/手动测试）
+- 修复 `FNM_RE/__init__.py` 中 `run_llm_repair` → `request_llm_repair_actions`
 
 ## 当前稳定约定
 
