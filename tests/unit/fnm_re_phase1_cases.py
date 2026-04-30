@@ -201,6 +201,29 @@ class FnmRePhase1Test(unittest.TestCase):
         self.assertEqual(partitions[0].page_role, "note")
         self.assertEqual(partitions[0].reason, "note_continuation")
 
+    def test_endnotes_start_hint_stops_before_rear_back_matter_tail(self):
+        pages = [_make_page(page_no, markdown=f"Body page {page_no}.") for page_no in range(1, 101)]
+        pages[87] = _make_page(88, markdown="1. First note.\n\n2. Second note.")
+        pages[88] = _make_page(89, markdown="3. Third note.\n\n4. Fourth note.")
+        pages[89] = _make_page(90, markdown="5. Fifth note.\n\n6. Sixth note.")
+        pages[90] = _make_page(91, markdown="")
+        pages[91] = _make_page(
+            92,
+            markdown=(
+                "# Index\n\n"
+                "Alpha, 1, 2\n"
+                "Beta, 3, 4\n"
+            ),
+        )
+
+        partitions = build_page_partitions(pages, endnotes_start_page=88)
+        by_no = {item.page_no: item for item in partitions}
+
+        self.assertEqual(by_no[88].page_role, "note")
+        self.assertEqual(by_no[90].page_role, "note")
+        self.assertNotEqual(by_no[91].page_role, "note")
+        self.assertNotEqual(by_no[92].page_role, "note")
+
     def test_page_partition_keeps_illustration_list_continuation_as_other(self):
         pages = [_make_page(page_no, markdown=f"正文第 {page_no} 页。") for page_no in range(1, 41)]
         pages[35] = _make_page(

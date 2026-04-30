@@ -450,6 +450,81 @@ def _signal_region_source(signal: _PageChapterSignal | None, default_source: str
     return "explorer_signal_match"
 
 
+def _supports_shared_boundary(signal: _PageChapterSignal | None) -> bool:
+    if signal is None:
+        return False
+    return str(signal.source or "") != "toc_subentry"
+
+
+def _split_book_region_by_chapter_boundaries(
+    region: NoteRegionRecord,
+    *,
+    phase1: Phase1Structure,
+    chapters: list[dict[str, Any]],
+    page_by_no: Mapping[int, Mapping[str, Any]] | None = None,
+) -> list[tuple[str, list[int]]]:
+    """用 endnote 页上的 markdown heading 拆分 book endnote region。
+
+    当 endnote_explorer 无法从页面 heading 或 TOC 子条目获取章节信号时，
+    退而用页面自身的 markdown heading（如 \"### 2. The Revolutionary Schooling\"）
+    匹配 phase1 章节标题，在 heading 出现处切分 region。
+    """
+    if not region.pages:
+        return []
+    sorted_pages = sorted(region.pages)
+
+    # 构建 chapter 查找表
+    chapter_by_id = {str(ch.chapter_id or ""): ch for ch in phase1.chapters if str(ch.chapter_id or "")}
+    chapter_by_title_key: dict[str, str] = {}
+    for ch in phase1.chapters:
+        title = normalize_title(str(ch.title or ""))
+        key = chapter_title_match_key(title)
+        if key:
+            chapter_by_title_key[key] = str(ch.chapter_id or "")
+
+    # 逐页扫描 heading，确定每页所属 chapter
+    page_chapter: dict[int, str] = {}
+    for page_no in sorted_pages:
+        page = (page_by_no or {}).get(int(page_no)) if page_by_no else None
+        if page is None:
+            continue
+        headings = extract_page_headings(page)
+        for heading_text in headings:
+            normalized = normalize_title(str(heading_text or ""))
+            key = chapter_title_match_key(normalized)
+            if key and key in chapter_by_title_key:
+                page_chapter[int(page_no)] = chapter_by_title_key[key]
+                break
+
+    if not page_chapter:
+        # 没有找到任何 heading 匹配 → 不拆分
+        return [(str(region.chapter_id or ""), list(sorted_pages))]
+
+    # 按 heading 信号切分
+    segments: list[tuple[str, list[int]]] = []
+    current_chapter_id = str(region.chapter_id or "").strip()
+    current_pages: list[int] = []
+
+    for page_no in sorted_pages:
+        ch_id = page_chapter.get(int(page_no))
+        if ch_id and ch_id != current_chapter_id:
+            if current_pages:
+                segments.append((current_chapter_id, list(current_pages)))
+                current_pages = []
+            current_chapter_id = ch_id
+        if not current_chapter_id and ch_id:
+            current_chapter_id = ch_id
+        current_pages.append(int(page_no))
+
+    if current_pages:
+        segments.append((current_chapter_id, list(current_pages)))
+
+    if len(segments) <= 1:
+        return [(str(region.chapter_id or ""), list(sorted_pages))]
+
+    return segments
+
+
 def explore_endnote_chapter_regions(
     regions: list[NoteRegionRecord],
     *,
@@ -519,7 +594,26 @@ def explore_endnote_chapter_regions(
             continue
 
         if not page_signals:
-            rebuilt.append(region)
+            split_segments = _split_book_region_by_chapter_boundaries(
+                region, phase1=phase1, chapters=chapters, page_by_no=page_by_no
+            )
+            if len(split_segments) > 1:
+                split_count += len(split_segments) - 1
+                for index, (ch_id, pages) in enumerate(split_segments, start=1):
+                    rebind_count += 1
+                    rebuilt.append(
+                        replace(
+                            region,
+                            region_id=f"{region.region_id}-chbound-{index:02d}",
+                            chapter_id=ch_id,
+                            page_start=pages[0],
+                            page_end=pages[-1],
+                            pages=pages,
+                            source="chapter_boundary_fallback",
+                        )
+                    )
+            else:
+                rebuilt.append(region)
             continue
 
         segments: list[tuple[str, str, str, list[int]]] = []
@@ -531,7 +625,10 @@ def explore_endnote_chapter_regions(
             signal = page_signals.get(int(page_no))
             signal_source = _signal_region_source(signal, segment_source)
             if signal is not None and segment_pages and signal.chapter_id != segment_chapter_id:
-                segments.append((segment_chapter_id, segment_heading_text, segment_source, list(segment_pages)))
+                previous_pages = list(segment_pages)
+                if _supports_shared_boundary(signal) and int(page_no) not in previous_pages:
+                    previous_pages.append(int(page_no))
+                segments.append((segment_chapter_id, segment_heading_text, segment_source, previous_pages))
                 segment_pages = []
                 segment_chapter_id = signal.chapter_id
                 segment_heading_text = signal.signal_title
@@ -548,6 +645,27 @@ def explore_endnote_chapter_regions(
             segment_pages.append(int(page_no))
         if segment_pages:
             segments.append((segment_chapter_id, segment_heading_text, segment_source, list(segment_pages)))
+
+        if len(segments) < len(phase1.chapters) and len(segments) < 3:
+            split_segments = _split_book_region_by_chapter_boundaries(
+                region, phase1=phase1, chapters=chapters, page_by_no=page_by_no
+            )
+            if len(split_segments) > len(segments):
+                split_count += len(split_segments) - 1
+                for index, (ch_id, pages) in enumerate(split_segments, start=1):
+                    rebind_count += 1
+                    rebuilt.append(
+                        replace(
+                            region,
+                            region_id=f"{region.region_id}-chbound-{index:02d}",
+                            chapter_id=ch_id,
+                            page_start=pages[0],
+                            page_end=pages[-1],
+                            pages=pages,
+                            source="chapter_boundary_fallback",
+                        )
+                    )
+                continue
 
         if len(segments) == 1:
             chapter_id, heading_text, source, pages = segments[0]

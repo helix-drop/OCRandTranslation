@@ -42,6 +42,17 @@ _BARE_DIGIT_LEFT_WORD_BLACKLIST = frozenset(
         "il", "elle", "ils", "elles", "on", "y", "a", "as", "ai",
         "au", "aux", "ce", "ces", "ma", "ta", "sa", "mes", "tes", "ses",
         "in", "by", "to", "of", "at",
+        "letter", "letters", "lettre", "lettres",
+        "page", "pages", "para", "paragraph", "paragraphe",
+        "number", "numbers", "numéro", "numéros",
+        "ligne", "lignes", "line", "lines",
+        "colonne", "col", "colonne",
+        "note", "notes",
+        "chapter", "chapters", "part", "partie",
+        "book", "livre", "livres",
+        "strophe", "stanza",
+        "act", "scene", "scène",
+        "épître", "epistle",
     }
 )
 _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(

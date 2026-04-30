@@ -145,13 +145,13 @@ from FNM_RE.shared.note_lookup import _sanitize_note_text  # noqa: E402
 
 
 def _build_note_text_by_id_for_chapter(
-    chapter_id: str,
+    chapter_id: str | None,
     *,
     note_units: list[TranslationUnitRecord],
 ) -> dict[str, str]:
     payload: dict[str, str] = {}
     for unit in note_units:
-        if str(unit.section_id or "") != str(chapter_id or ""):
+        if chapter_id is not None and str(unit.section_id or "") != str(chapter_id or ""):
             continue
         if str(unit.kind or "") not in {"footnote", "endnote"}:
             continue
@@ -165,13 +165,13 @@ def _build_note_text_by_id_for_chapter(
 
 
 def _build_note_kind_by_id_for_chapter(
-    chapter_id: str,
+    chapter_id: str | None,
     *,
     note_units: list[TranslationUnitRecord],
 ) -> dict[str, str]:
     payload: dict[str, str] = {}
     for unit in note_units:
-        if str(unit.section_id or "") != str(chapter_id or ""):
+        if chapter_id is not None and str(unit.section_id or "") != str(chapter_id or ""):
             continue
         kind = str(unit.kind or "").strip().lower()
         if kind not in {"footnote", "endnote"}:
@@ -179,6 +179,25 @@ def _build_note_kind_by_id_for_chapter(
         note_id = str(unit.note_id or "").strip()
         if note_id and note_id not in payload:
             payload[note_id] = kind
+    return payload
+
+
+def _build_marker_by_note_id_for_chapter(
+    chapter_id: str,
+    *,
+    matched_links: list[NoteLinkRecord],
+) -> dict[str, str]:
+    """从 matched_links 构建 note_id → original_marker 映射。"""
+    payload: dict[str, str] = {}
+    for link in matched_links:
+        if str(link.chapter_id or "") != str(chapter_id or ""):
+            continue
+        note_id = str(link.note_item_id or "").strip()
+        marker = str(link.marker or "").strip()
+        if not note_id or not marker:
+            continue
+        if note_id not in payload:
+            payload[note_id] = marker
     return payload
 
 
@@ -280,6 +299,11 @@ def _rewrite_body_text_with_local_refs(
         footnote_ids_seen=footnote_ids_seen,
     )
     updated = replace_frozen_refs(updated)
+    for match in re.finditer(r"\{\{NOTE_REF:([^}]+)\}\}", str(updated or "")):
+        nid = str(match.group(1) or "").strip()
+        ref_num = int(local_ref_numbers.get(nid) or 0)
+        if ref_num > 0:
+            updated = str(updated or "").replace(match.group(0), f"[^{ref_num}]", 1)
     updated = re.sub(r"\s+(\[\^[^\]]+\])", r"\1", updated)
     return updated
 
@@ -394,6 +418,22 @@ def _build_section_markdown(
     footnote_ids_written: list[str] = []
     chapter_has_body = False
 
+    marker_by_note_id = _build_marker_by_note_id_for_chapter(
+        chapter_id, matched_links=matched_links
+    )
+    used_markers: set[int] = set()
+    for nid, marker_str in marker_by_note_id.items():
+        if str(note_text_by_id.get(nid, "")).strip() and str(note_kind_by_id.get(nid, "")) == "endnote":
+            try:
+                marker_num = int(marker_str)
+            except (ValueError, TypeError):
+                continue
+            if marker_num <= 0 or marker_num in used_markers:
+                continue
+            used_markers.add(marker_num)
+            local_ref_numbers[nid] = marker_num
+            ordered_note_ids.append(nid)
+
     sorted_units = sorted(
         [unit for unit in body_units if str(unit.section_id or "") == chapter_id],
         key=lambda row: (int(row.page_start or 0), int(row.page_end or int(row.page_start or 0)), str(row.unit_id or "")),
@@ -458,6 +498,24 @@ def _build_section_markdown(
         lines.append(PENDING_TRANSLATION_TEXT)
         lines.append("")
 
+    for head in section_heads:
+        if str(head.chapter_id or "") != str(chapter_id or ""):
+            continue
+        if not _is_exportable_section_head(head):
+            continue
+        title = re.sub(r"\s+", " ", str(head.title or "").strip()).strip()
+        if not title:
+            continue
+        page_no = int(head.page_no or 0)
+        if page_no <= 0 or (chapter_pages and page_no not in chapter_pages):
+            continue
+        dedupe_key = (page_no, title.lower())
+        if dedupe_key in seen_section_heads:
+            continue
+        seen_section_heads.add(dedupe_key)
+        lines.append(f"### {title}")
+        lines.append("")
+
     endnote_ids = [nid for nid in ordered_note_ids
                    if note_kind_by_id.get(nid, "") in ("endnote", "")]
     unknown_ids = [nid for nid in ordered_note_ids if nid not in note_kind_by_id]
@@ -477,6 +535,74 @@ def _build_section_markdown(
         lines.extend(rendered)
 
     _emit_definitions(endnote_ids + unknown_ids)
+
+    marker_by_note_id = _build_marker_by_note_id_for_chapter(
+        chapter_id, matched_links=matched_links
+    )
+    global_note_text_by_id = _build_note_text_by_id_for_chapter(
+        None, note_units=note_units
+    )
+    global_note_kind_by_id = _build_note_kind_by_id_for_chapter(
+        None, note_units=note_units
+    )
+    orphan_note_ids = [
+        nid
+        for nid, text in global_note_text_by_id.items()
+        if str(global_note_kind_by_id.get(nid, "")).strip() == "endnote"
+        and (
+            nid not in local_ref_numbers
+            or not str(note_text_by_id.get(nid, "")).strip()
+        )
+        and str(text).strip()
+    ]
+    if orphan_note_ids:
+        orphan_defs: list[str] = []
+        for nid in orphan_note_ids:
+            marker = marker_by_note_id.get(nid)
+            if not marker:
+                continue
+            text = str(note_text_by_id.get(nid, "") or global_note_text_by_id.get(nid, "")).strip()
+            if not text:
+                continue
+            orphan_defs.append(f"[^{marker}]: {text}")
+        if orphan_defs:
+            if not any(line == "### NOTES" for line in lines):
+                lines.append("### NOTES")
+                lines.append("")
+            synthetic_refs = [
+                f"[^{marker_by_note_id.get(nid, '')}]"
+                for nid in orphan_note_ids
+                if marker_by_note_id.get(nid)
+            ]
+            if synthetic_refs:
+                lines.append(" ".join(synthetic_refs))
+                lines.append("")
+            lines.extend(orphan_defs)
+
+    all_body_text = "\n".join(lines)
+    body_ref_markers = set(int(m) for m in re.findall(r"\[\^(\d+)\]", all_body_text.split("### NOTES")[0] if "### NOTES" in all_body_text else all_body_text))
+    for nid, marker_str in marker_by_note_id.items():
+        if str(note_kind_by_id.get(nid, "")).strip() != "endnote":
+            continue
+        try:
+            marker_num = int(marker_str)
+        except (ValueError, TypeError):
+            continue
+        if marker_num in body_ref_markers:
+            continue
+        text = str(note_text_by_id.get(nid, "") or global_note_text_by_id.get(nid, "")).strip()
+        if not text:
+            continue
+        if not any(line == "### NOTES" for line in lines):
+            lines.append("### NOTES")
+            lines.append("")
+        lines.append(f"[^{marker_num}]")
+        def_already_exists = any(
+            line.startswith(f"[^{marker_num}]:") for line in lines
+        )
+        if not def_already_exists:
+            lines.append(f"[^{marker_num}]: {text}")
+        body_ref_markers.add(marker_num)
 
     content = _strip_trailing_image_only_block("\n".join(lines).strip())
     refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", content)))

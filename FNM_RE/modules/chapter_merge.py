@@ -16,6 +16,7 @@ from FNM_RE.models import (
     NoteLinkRecord,
     Phase5Structure,
     Phase5Summary,
+    SectionHeadRecord,
     TranslationUnitRecord,
     UnitPageSegmentRecord,
     UnitParagraphRecord,
@@ -271,6 +272,7 @@ def _build_phase5_shadow(
     *,
     diagnostic_machine_by_page: Mapping[int | str, str] | None,
     include_diagnostic_entries: bool,
+    section_heads: list[SectionHeadRecord] | None = None,
 ) -> Phase5Structure:
     chapter_note_modes = _to_chapter_note_mode_records(chapter_layers)
     chapter_note_mode_summary = {
@@ -279,7 +281,7 @@ def _build_phase5_shadow(
     }
     return Phase5Structure(
         chapters=_to_chapter_records(chapter_layers),
-        section_heads=[],
+        section_heads=list(section_heads or []),
         note_items=_to_note_item_records(chapter_layers),
         chapter_note_modes=chapter_note_modes,
         body_anchors=_to_body_anchor_records(note_link_table),
@@ -676,6 +678,7 @@ def build_chapter_markdown_set(
     *,
     diagnostic_machine_by_page: Mapping[int | str, str] | None = None,
     include_diagnostic_entries: bool = False,
+    section_heads: list[SectionHeadRecord] | None = None,
 ) -> ModuleResult[ChapterMarkdownSet]:
     phase5 = _build_phase5_shadow(
         frozen_units,
@@ -683,6 +686,7 @@ def build_chapter_markdown_set(
         chapter_layers,
         diagnostic_machine_by_page=diagnostic_machine_by_page,
         include_diagnostic_entries=bool(include_diagnostic_entries),
+        section_heads=section_heads,
     )
     from FNM_RE.stages.export_contract import build_export_chapters
     export_chapters, export_summary = build_export_chapters(

@@ -43,7 +43,7 @@ _INLINE_NOTE_BREAK_RE = re.compile(
 # 截到 `vol.` 的真实根因。
 _PAGE_CITATION_PREFIX_RE = re.compile(
     r"(?:"
-    r"\bpp?|\bf(?:o|°)?"  # p / pp / f / fo / f°
+    r"\bpp?|\bf(?:o|°)?|\besp|\bparas?|\bfols?|\bcols?"  # p / pp / f / fo / f° / esp / para / fol / col
     r"|\bvol|\bn[°o]|\bnos?|\bnr"  # vol / n° / no / nos / nr
     r"|\bart|\bchap|\bsect|\b§"  # art / chap / sect / §
     r"|\bt|\btome|\bliv|\bbk|\bbook|\bch"  # t / tome / liv / bk / book / ch
@@ -286,6 +286,20 @@ def _looks_like_ocr_missing_note_body_line(line: str) -> bool:
     return bool(has_ibid_hint or noise_count >= 2 or uppercase_runs >= 2)
 
 
+def _looks_like_large_number_jump_continuation(
+    number: int,
+    body: str,
+    *,
+    current_number: int,
+) -> bool:
+    if int(number or 0) <= int(current_number or 0) + 2:
+        return False
+    candidate = _strip_markdown_heading_prefix(str(body or "").strip())
+    if not candidate:
+        return False
+    return candidate[:1].islower()
+
+
 def _append_current_item(items: list[dict], current: dict | None) -> None:
     if current and _normalize_text(current.get("text", "")):
         items.append(current)
@@ -447,6 +461,32 @@ def _split_items_from_text(
             parsed_number = int(parsed["number"])
             if current:
                 current_number = int(current.get("number") or 0)
+                if _looks_like_large_number_jump_continuation(
+                    parsed_number,
+                    str(parsed.get("body") or ""),
+                    current_number=current_number,
+                ):
+                    for pending_line in pending_gap_lines:
+                        current, split_number, emitted = _append_line_to_current_item(
+                            current,
+                            pending_line,
+                            base_order=base_order + len(items),
+                            default_section_title=default_section_title,
+                        )
+                        items.extend(emitted)
+                        if split_number is not None:
+                            last_seen_number = split_number
+                    pending_gap_lines = []
+                    current, split_number, emitted = _append_line_to_current_item(
+                        current,
+                        line,
+                        base_order=base_order + len(items),
+                        default_section_title=default_section_title,
+                    )
+                    items.extend(emitted)
+                    if split_number is not None:
+                        last_seen_number = split_number
+                    continue
                 if (
                     pending_gap_lines
                     and parsed_number > current_number + 1

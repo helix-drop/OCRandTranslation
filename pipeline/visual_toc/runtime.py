@@ -483,6 +483,8 @@ def generate_auto_visual_toc_for_doc(doc_id: str, *, pdf_path: str, model_spec=N
         }, usage_events), trace_events)
 
     printed_page_lookup = organization._build_printed_page_lookup(doc_id, pdf_path)
+    printed_page_book_page_lookup = organization._build_printed_page_book_page_lookup(doc_id)
+    file_idx_book_page_lookup = organization._build_file_idx_book_page_lookup(doc_id)
     resolved_items: list[dict] = []
     unresolved_items = 0
     selected_page_indices = scan_plan._sorted_unique_indices(
@@ -521,7 +523,12 @@ def generate_auto_visual_toc_for_doc(doc_id: str, *, pdf_path: str, model_spec=N
         except VisionModelRequestError as exc:
             return _attach_trace_payload(_attach_usage_payload(_vision_failure_result(doc_id, model_id, exc), usage_events), trace_events)
         page_items = organization.filter_visual_toc_items(page_items)
-        page_items = organization._apply_printed_page_lookup(page_items, printed_page_lookup)
+        page_items = organization._apply_printed_page_lookup(
+            page_items,
+            printed_page_lookup,
+            printed_page_book_page_lookup,
+            file_idx_book_page_lookup,
+        )
         page_items = organization.map_visual_items_to_link_targets(
             page_items,
             extract_pdf_page_link_targets(pdf_path, file_idx),
@@ -546,8 +553,18 @@ def generate_auto_visual_toc_for_doc(doc_id: str, *, pdf_path: str, model_spec=N
             }
             file_target = _coerce_nonnegative_int(item.get("file_idx"))
             printed_page = _coerce_positive_int(item.get("printed_page"))
+            book_page = _coerce_positive_int(item.get("book_page"))
+            if printed_page is not None:
+                normalized["printed_page"] = printed_page
+            for field in ("role_hint", "parent_title", "endnotes_candidate", "endnotes_subentry_candidate"):
+                if field in item:
+                    normalized[field] = item[field]
             if file_target is not None:
                 normalized["file_idx"] = file_target
+                if book_page is not None:
+                    normalized["book_page"] = book_page
+            elif book_page is not None:
+                normalized["book_page"] = book_page
             elif printed_page is not None:
                 normalized["book_page"] = printed_page
                 unresolved_items += 1
@@ -753,12 +770,19 @@ def _generate_visual_toc_from_manual_inputs(
         model_id=model_id,
     )
     printed_page_lookup = organization._build_printed_page_lookup(doc_id, pdf_path)
+    printed_page_book_page_lookup = organization._build_printed_page_book_page_lookup(doc_id)
+    file_idx_book_page_lookup = organization._build_file_idx_book_page_lookup(doc_id)
     resolved_items: list[dict] = []
     unresolved_items = 0
     seed_titles: list[str] = []
     for page_index, page_items in enumerate(manual_page_items, start=1):
         page_items = organization.filter_visual_toc_items(page_items)
-        page_items = organization._apply_printed_page_lookup(page_items, printed_page_lookup)
+        page_items = organization._apply_printed_page_lookup(
+            page_items,
+            printed_page_lookup,
+            printed_page_book_page_lookup,
+            file_idx_book_page_lookup,
+        )
         for item in page_items:
             visual_order = len(resolved_items) + 1
             normalized = {
@@ -769,8 +793,18 @@ def _generate_visual_toc_from_manual_inputs(
             }
             file_target = _coerce_nonnegative_int(item.get("file_idx"))
             printed_page = _coerce_positive_int(item.get("printed_page"))
+            book_page = _coerce_positive_int(item.get("book_page"))
+            if printed_page is not None:
+                normalized["printed_page"] = printed_page
+            for field in ("role_hint", "parent_title", "endnotes_candidate", "endnotes_subentry_candidate"):
+                if field in item:
+                    normalized[field] = item[field]
             if file_target is not None:
                 normalized["file_idx"] = file_target
+                if book_page is not None:
+                    normalized["book_page"] = book_page
+            elif book_page is not None:
+                normalized["book_page"] = book_page
             elif printed_page is not None:
                 normalized["book_page"] = printed_page
                 unresolved_items += 1
@@ -797,7 +831,12 @@ def _generate_visual_toc_from_manual_inputs(
         outline_nodes = manual_inputs_mod._extract_manual_toc_outline_nodes_from_pdf_text(manual_pdf_path)
         if outline_nodes:
             outline_nodes = organization.filter_visual_toc_items(outline_nodes)
-            outline_nodes = organization._apply_printed_page_lookup(outline_nodes, printed_page_lookup)
+            outline_nodes = organization._apply_printed_page_lookup(
+                outline_nodes,
+                printed_page_lookup,
+                printed_page_book_page_lookup,
+                file_idx_book_page_lookup,
+            )
             if organization_nodes:
                 if organization._should_prefer_manual_outline_nodes(organization_nodes, outline_nodes):
                     organization_nodes = outline_nodes
@@ -807,7 +846,12 @@ def _generate_visual_toc_from_manual_inputs(
                 prefer_outline_as_primary_items = True
     if organization_nodes:
         organization_nodes = organization.filter_visual_toc_items(organization_nodes)
-        organization_nodes = organization._apply_printed_page_lookup(organization_nodes, printed_page_lookup)
+        organization_nodes = organization._apply_printed_page_lookup(
+            organization_nodes,
+            printed_page_lookup,
+            printed_page_book_page_lookup,
+            file_idx_book_page_lookup,
+        )
         if prefer_outline_as_primary_items:
             resolved_items = [dict(item) for item in organization_nodes]
         else:

@@ -103,14 +103,18 @@ def _looks_like_illustration_list_page(
     if _ILLUSTRATION_LIST_RE.match(first_line):
         return True
 
-    prev_page = page_by_no.get(page_no - 1)
-    if prev_page is None:
-        return False
-    prev_lines = [str(line or "").strip() for line in str(prev_page.get("markdown") or "").splitlines() if str(line or "").strip()]
-    if not prev_lines:
-        return False
-    prev_first_line = re.sub(r"^\s{0,3}#{1,6}\s*", "", prev_lines[0]).strip()
-    if not _ILLUSTRATION_LIST_RE.match(prev_first_line):
+    prev_first_line = ""
+    for lookback in range(1, 4):
+        prev_page = page_by_no.get(page_no - lookback)
+        if prev_page is None:
+            continue
+        prev_lines = [str(line or "").strip() for line in str(prev_page.get("markdown") or "").splitlines() if str(line or "").strip()]
+        if not prev_lines:
+            continue
+        prev_first_line = re.sub(r"^\s{0,3}#{1,6}\s*", "", prev_lines[0]).strip()
+        if prev_first_line:
+            break
+    if not prev_first_line or not _ILLUSTRATION_LIST_RE.match(prev_first_line):
         return False
     numbered_prefix = 0
     illustration_hint_count = 0
@@ -128,6 +132,7 @@ def _is_endnote_candidate_page(
     *,
     page_role_by_no: Mapping[int, str],
     page_by_no: Mapping[int, Mapping[str, Any]],
+    first_body_page: int = 0,
 ) -> bool:
     page = page_by_no.get(page_no)
     if page is None:
@@ -135,10 +140,12 @@ def _is_endnote_candidate_page(
     if _looks_like_illustration_list_page(page_no, page_by_no=page_by_no):
         return False
     page_role = str(page_role_by_no.get(page_no) or "")
-    if page_role == "other":
-        return bool(first_notes_heading(page))
     if page_role == "note":
         return True
+    if first_body_page > 0 and page_no < first_body_page:
+        return bool(first_notes_heading(page))
+    if page_role == "other":
+        return bool(first_notes_heading(page))
     if scan_items_by_kind(page, kind="endnote"):
         return True
     return bool(first_notes_heading(page))
@@ -187,6 +194,7 @@ def _build_endnote_regions_raw(
     if not sorted_page_nos:
         return []
     last_chapter_end_page = max((int(chapter.end_page) for chapter in phase1.chapters), default=0)
+    first_body_page = min((int(chapter.start_page) for chapter in phase1.chapters if int(chapter.start_page) > 0), default=0)
 
     regions: list[NoteRegionRecord] = []
     current_pages: list[int] = []
@@ -199,6 +207,7 @@ def _build_endnote_regions_raw(
             page_no,
             page_role_by_no=page_role_by_no,
             page_by_no=page_by_no,
+            first_body_page=first_body_page,
         ):
             if current_pages:
                 start_page = current_pages[0]
@@ -238,7 +247,9 @@ def _build_endnote_regions_raw(
             last_chapter_end_page=last_chapter_end_page,
         )
         if scope == "chapter" and chapter_id in chapters_with_footnote_band:
-            continue
+            page_role = str(page_role_by_no.get(page_no) or "")
+            if page_role != "note" and not first_notes_heading(page_by_no.get(page_no)):
+                continue
         heading_text = first_notes_heading(page_by_no.get(page_no))
         start_reason = _start_reason_for_page(
             page_no,

@@ -786,11 +786,29 @@ def _repair_endnote_links_for_contract(
     for (chapter_id, _marker), indexes in groups.items():
         if not indexes:
             continue
-        anchor_ids = [
-            str(repaired_links[index].anchor_id or "")
-            for index in indexes
-            if str(repaired_links[index].status or "") == "matched" and str(repaired_links[index].anchor_id or "").strip()
-        ]
+        real_anchor_ids: list[str] = []
+        synthetic_anchor_ids_by_position: dict[tuple[str, str, int, int, int], str] = {}
+        for index in indexes:
+            row = repaired_links[index]
+            anchor_id = str(row.anchor_id or "").strip()
+            if str(row.status or "") != "matched" or not anchor_id:
+                continue
+            anchor = anchors_by_id.get(anchor_id)
+            if anchor is None:
+                continue
+            if not bool(anchor.synthetic):
+                if anchor_id not in real_anchor_ids:
+                    real_anchor_ids.append(anchor_id)
+                continue
+            synthetic_key = (
+                str(anchor.chapter_id or ""),
+                normalize_note_marker(str(anchor.normalized_marker or row.marker or "")),
+                int(anchor.page_no or 0),
+                int(anchor.char_start or 0),
+                int(anchor.char_end or 0),
+            )
+            synthetic_anchor_ids_by_position.setdefault(synthetic_key, anchor_id)
+        anchor_ids = real_anchor_ids or list(synthetic_anchor_ids_by_position.values())
         if not anchor_ids:
             continue
         candidate_indexes = [
@@ -1172,7 +1190,7 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
         )
     note_items: list[NoteItemRecord] = []
     for row in chapter_layers.note_items:
-        chapter_id = str(row.owner_chapter_id or row.chapter_id or "")
+        chapter_id = str(row.chapter_id or row.owner_chapter_id or "")
         chapter_mode = str(chapter_policy_by_id.get(chapter_id, {}).get("note_mode") or "")
         region_id = str(row.region_id or "")
         note_kind = str(region_note_kind_by_id.get(region_id) or "")

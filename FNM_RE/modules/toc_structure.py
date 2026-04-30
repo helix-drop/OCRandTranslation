@@ -13,6 +13,29 @@ from FNM_RE.stages.page_partition import build_page_partitions, summarize_page_p
 from FNM_RE.stages.section_heads import build_section_heads
 from FNM_RE.shared.notes import _safe_int
 
+
+def _resolve_endnotes_start_page(visual_toc_bundle: Mapping[str, Any] | None) -> int | None:
+    if not visual_toc_bundle:
+        return None
+    endnotes_summary = visual_toc_bundle.get("endnotes_summary") or {}
+    if not endnotes_summary.get("present"):
+        return None
+    items = visual_toc_bundle.get("items") or []
+    endnotes_item = next(
+        (item for item in items if item.get("role_hint") == "endnotes"),
+        None,
+    )
+    if not endnotes_item:
+        return None
+    book_page = endnotes_item.get("book_page")
+    if book_page is not None:
+        return int(book_page)
+    file_idx = endnotes_item.get("file_idx")
+    if file_idx is not None:
+        return int(file_idx) + 1
+    return None
+
+
 _BACK_MATTER_REASON_HINTS = {
     "appendix",
     "bibliography",
@@ -177,7 +200,7 @@ def _build_page_roles(
         # NOTES 容器页时，note 角色优先于 chapter，避免章末 NOTES 容器被
         # chapter mapping 覆盖。chapter_id 仍保留供下游 region 绑定。
         if source_role == "note":
-            role = "endnotes"
+            role = "note"
             chapter_id = chapter.chapter_id if chapter is not None else ""
         elif chapter is not None:
             role = chapter.role
@@ -236,7 +259,12 @@ def build_toc_structure(
     pdf_path: str = "",
     visual_toc_bundle: Mapping[str, Any] | None = None,
 ) -> ModuleResult[TocStructure]:
-    page_partitions = build_page_partitions(pages, page_overrides=manual_page_overrides)
+    endnotes_start_page = _resolve_endnotes_start_page(visual_toc_bundle)
+    page_partitions = build_page_partitions(
+        pages,
+        page_overrides=manual_page_overrides,
+        endnotes_start_page=endnotes_start_page,
+    )
     heading_candidates, phase1_chapters, chapter_meta = build_chapter_skeleton(
         page_partitions,
         toc_items=toc_items,

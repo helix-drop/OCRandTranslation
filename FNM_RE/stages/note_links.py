@@ -352,6 +352,28 @@ def build_note_links(
                     include_synthetic=False,
                     allow_cross_chapter=True,
                 )
+        if not candidates:
+            candidates = _candidate_anchors(
+                anchors,
+                chapter_id=chapter_id,
+                marker=marker,
+                expected_kinds={"endnote"},
+                used_anchor_ids=used_anchor_ids,
+                page_no=note_item.page_no,
+                include_synthetic=True,
+                allow_cross_chapter=False,
+            )
+        if not candidates:
+            candidates = _candidate_anchors(
+                anchors,
+                chapter_id=chapter_id,
+                marker=marker,
+                expected_kinds={"endnote"},
+                used_anchor_ids=used_anchor_ids,
+                page_no=note_item.page_no,
+                include_synthetic=True,
+                allow_cross_chapter=True,
+            )
         if not candidates and chapter_id and _is_toc_chapter_id(chapter_id):
             candidates = _candidate_anchors(
                 anchors,

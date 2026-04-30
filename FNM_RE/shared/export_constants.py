@@ -22,12 +22,15 @@ _LEADING_RAW_NOTE_MARKER_RE = re.compile(
     r"^\s*(?:\[\d{1,4}[A-Za-z]?\]|\d{1,4}[A-Za-z]?[.)]|\*{1,4}\s+|<sup>\s*\d{1,4}[A-Za-z]?\s*</sup>)\s*",
     re.IGNORECASE,
 )
+_CORRUPTED_NOTE_REF_RE = re.compile(
+    r"\{\{NOTE_REF:([^}\]]+)\]\}\}", re.IGNORECASE
+)
 _ANY_NOTE_REF_RE = re.compile(
     r"\{\{NOTE_REF:([^}]+)\}\}"
     r"|\{\{FN_REF:([^}]+)\}\}"
     r"|\{\{EN_REF:([^}]+)\}\}"
-    r"|\[EN-([^\]]+)\]"
-    r"|\[FN-([^\]]+)\]"
+    r"|\[EN-([^\]{}]+)\]"
+    r"|\[FN-([^\]{}]+)\]"
     r"|\[\^([^\]]+)\]",
     re.IGNORECASE,
 )

@@ -1922,6 +1922,35 @@ def _endnote_subentry_match_mode(title: str) -> str:
         return "chapter_title"
     return "unknown"
 
+def _resolve_endnotes_book_page(
+    *,
+    endnotes_summary: dict[str, Any],
+    bundle_items: list[dict[str, Any]],
+) -> int:
+    """解析尾注容器的真实 bookPage，优先用 file_idx 映射，其次用 book_page 字段。
+
+    不能直接用 container_printed_page，因为它是目录 PDF 上的印刷页码（如 331），
+    与 doc.db 的 bookPage（如 348）存在 17-18 页的前言偏移。
+    """
+    container_title = normalize_title(str(endnotes_summary.get("container_title") or ""))
+    if not container_title:
+        return int(endnotes_summary.get("container_printed_page") or 0)
+    for item in bundle_items:
+        if str(item.get("role_hint") or "").strip().lower() != "endnotes":
+            continue
+        item_title = normalize_title(str(item.get("title") or ""))
+        if item_title != container_title:
+            continue
+        book_page = item.get("book_page")
+        if book_page is not None and int(book_page) > 0:
+            return int(book_page)
+        file_idx = item.get("file_idx")
+        if file_idx is not None and int(file_idx) >= 0:
+            return int(file_idx) + 1
+        break
+    return int(endnotes_summary.get("container_printed_page") or 0)
+
+
 def _build_endnote_explorer_hints(
     *,
     visual_toc_bundle: Mapping[str, Any] | None,
@@ -1930,8 +1959,11 @@ def _build_endnote_explorer_hints(
     endnotes_summary = dict((visual_toc_bundle or {}).get("endnotes_summary") or {})
     present = bool(endnotes_summary.get("present"))
     container_title = normalize_title(str(endnotes_summary.get("container_title") or ""))
-    container_start_page_hint = int(endnotes_summary.get("container_printed_page") or 0)
     bundle_items = list((visual_toc_bundle or {}).get("items") or [])
+    container_start_page_hint = _resolve_endnotes_book_page(
+        endnotes_summary=endnotes_summary,
+        bundle_items=bundle_items,
+    )
     source_rows = bundle_items if bundle_items else list(normalized_toc_rows or [])
     toc_subentries: list[dict[str, Any]] = []
 

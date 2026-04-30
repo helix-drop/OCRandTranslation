@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import replace
+import re
 from typing import Any, Mapping
 
 from document.note_detection import annotate_pages_with_note_scans
@@ -15,6 +17,10 @@ from FNM_RE.shared.notes import (
     scan_items_by_kind,
 )
 from FNM_RE.shared.text import page_markdown_text
+from FNM_RE.shared.title import chapter_title_match_key
+
+
+_MARKDOWN_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s*(.+?)\s*$")
 
 
 def _annotated_page_by_no(pages: list[dict]) -> dict[int, dict]:
@@ -41,6 +47,163 @@ def _region_pages(region: NoteRegionRecord) -> list[int]:
 
 def _parse_items_from_structured_scan(page: Mapping[str, Any], *, kind: str) -> list[dict]:
     return scan_items_by_kind(page, kind=kind)
+
+
+def _raw_scan_items_by_kind(page: Mapping[str, Any], *, kind: str) -> list[dict]:
+    scan = dict((dict(page or {})).get("_note_scan") or {})
+    target_kind = str(kind or "").strip().lower()
+    rows: list[dict] = []
+    for item in scan.get("items") or []:
+        if str(item.get("kind") or "").strip().lower() != target_kind:
+            continue
+        marker = normalize_note_marker(item.get("marker") or item.get("number") or "")
+        text = str(item.get("text") or "").strip()
+        if not marker and not text:
+            continue
+        rows.append(
+            {
+                "marker": marker,
+                "text": re.sub(r"\s+", " ", text).strip(),
+                "is_reconstructed": bool(item.get("is_reconstructed")),
+                "source": str(item.get("source") or "note_scan"),
+                "section_title": str(item.get("section_title") or "").strip(),
+            }
+        )
+    return rows
+
+
+def _section_title_key(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    match = _MARKDOWN_HEADING_RE.match(text)
+    if match:
+        text = str(match.group(1) or "").strip()
+    return chapter_title_match_key(text)
+
+
+def _chapter_title_by_id(phase1: Phase1Structure) -> dict[str, str]:
+    return {
+        str(chapter.chapter_id or "").strip(): str(chapter.title or "").strip()
+        for chapter in phase1.chapters
+        if str(chapter.chapter_id or "").strip()
+    }
+
+
+def _region_title_keys(
+    region: NoteRegionRecord,
+    *,
+    chapter_title_by_id: Mapping[str, str],
+) -> set[str]:
+    keys = {
+        _section_title_key(region.heading_text),
+        _section_title_key(chapter_title_by_id.get(str(region.chapter_id or "").strip()) or ""),
+    }
+    return {key for key in keys if key}
+
+
+def _filter_shared_page_rows_for_region(
+    rows: list[dict],
+    region: NoteRegionRecord,
+    *,
+    chapter_title_by_id: Mapping[str, str],
+) -> list[dict]:
+    section_keys = {_section_title_key(row.get("section_title") or "") for row in rows}
+    section_keys.discard("")
+    if not section_keys:
+        return rows
+    target_keys = _region_title_keys(region, chapter_title_by_id=chapter_title_by_id)
+    matched_keys = target_keys & section_keys
+    if matched_keys:
+        return [
+            row
+            for row in rows
+            if _section_title_key(row.get("section_title") or "") in matched_keys
+        ]
+    return [row for row in rows if not _section_title_key(row.get("section_title") or "")]
+
+
+def _title_key_matches(line_key: str, target_key: str) -> bool:
+    if not line_key or not target_key:
+        return False
+    candidates = {
+        target_key,
+        re.sub(r"^\d+", "", target_key),
+    }
+    for candidate in candidates:
+        if not candidate:
+            continue
+        if line_key == candidate:
+            return True
+        if len(candidate) >= 6 and line_key.startswith(candidate):
+            return True
+        if len(line_key) >= 12 and candidate.startswith(line_key):
+            return True
+    return False
+
+
+def _all_chapter_title_keys(chapter_title_by_id: Mapping[str, str]) -> set[str]:
+    return {
+        key
+        for key in (_section_title_key(title) for title in chapter_title_by_id.values())
+        if key
+    }
+
+
+def _matching_markdown_heading_indices(
+    text: str,
+    *,
+    target_keys: set[str],
+    all_title_keys: set[str],
+) -> tuple[list[int], list[int]]:
+    current_region_indices: list[int] = []
+    any_chapter_indices: list[int] = []
+    for index, raw_line in enumerate(str(text or "").splitlines()):
+        if not _MARKDOWN_HEADING_RE.match(str(raw_line or "")):
+            continue
+        line_key = _section_title_key(raw_line)
+        if not line_key:
+            continue
+        if any(_title_key_matches(line_key, key) for key in target_keys):
+            current_region_indices.append(index)
+        if any(_title_key_matches(line_key, key) for key in all_title_keys):
+            any_chapter_indices.append(index)
+    return current_region_indices, any_chapter_indices
+
+
+def _split_shared_page_text_for_region(
+    text: str,
+    region: NoteRegionRecord,
+    *,
+    chapter_title_by_id: Mapping[str, str],
+) -> tuple[str, bool]:
+    lines = str(text or "").splitlines()
+    if not lines:
+        return "", False
+    target_keys = _region_title_keys(region, chapter_title_by_id=chapter_title_by_id)
+    all_title_keys = _all_chapter_title_keys(chapter_title_by_id)
+    if not target_keys or not all_title_keys:
+        return str(text or ""), False
+    current_indices, any_indices = _matching_markdown_heading_indices(
+        str(text or ""),
+        target_keys=target_keys,
+        all_title_keys=all_title_keys,
+    )
+    if current_indices:
+        return "\n".join(lines[current_indices[0] :]).strip(), True
+    if any_indices:
+        return "\n".join(lines[: any_indices[0]]).strip(), True
+    return str(text or ""), False
+
+
+def _last_numeric_marker_value(rows: list[dict], default: int | None) -> int | None:
+    marker_value = default
+    for row in rows:
+        marker = normalize_note_marker(row.get("marker") or "")
+        if not marker.isdigit():
+            continue
+        marker_value = int(marker)
+    return marker_value
 
 
 def _normalized_page_text(
@@ -158,6 +321,15 @@ def build_note_items(
     footnote_serial = 1
     endnote_serial = 1
     chapter_ids = _chapter_id_set(phase1)
+    chapter_title_by_id = _chapter_title_by_id(phase1)
+    page_region_counts = Counter(
+        page_no
+        for region in note_regions
+        for page_no in _region_pages(region)
+        if int(page_no) > 0
+    )
+    shared_page_split_pages: set[int] = set()
+    shared_page_text_split_pages: set[int] = set()
 
     for region in note_regions:
         region_id = str(region.region_id or "").strip()
@@ -171,6 +343,69 @@ def build_note_items(
 
         for page_no in _region_pages(region):
             page_payload = page_by_no.get(page_no) or {}
+            is_shared_endnote_page = (
+                region_kind == "endnote"
+                and int(page_region_counts.get(page_no, 0) or 0) > 1
+            )
+            if is_shared_endnote_page:
+                parsed_from_scan = _raw_scan_items_by_kind(page_payload, kind=region_kind)
+                if parsed_from_scan and any(_section_title_key(row.get("section_title") or "") for row in parsed_from_scan):
+                    filtered_rows = _filter_shared_page_rows_for_region(
+                        parsed_from_scan,
+                        region,
+                        chapter_title_by_id=chapter_title_by_id,
+                    )
+                    if filtered_rows != parsed_from_scan:
+                        shared_page_split_pages.add(int(page_no))
+                    parsed_rows.extend(
+                        {
+                            "page_no": page_no,
+                            "marker": normalize_note_marker(row.get("marker") or ""),
+                            "text": str(row.get("text") or "").strip(),
+                            "is_reconstructed": bool(row.get("is_reconstructed")),
+                            "source": str(row.get("source") or "note_scan"),
+                        }
+                        for row in filtered_rows
+                    )
+                    last_marker_value = _last_numeric_marker_value(filtered_rows, last_marker_value)
+                    continue
+                text, text_source = _normalized_page_text(
+                    page_no,
+                    note_kind=region_kind,
+                    page_by_no=page_by_no,
+                    page_text_map=normalized_page_text_map,
+                    pdf_text_by_page=pdf_text_by_page,
+                )
+                split_text, did_split_text = _split_shared_page_text_for_region(
+                    text,
+                    region,
+                    chapter_title_by_id=chapter_title_by_id,
+                )
+                if did_split_text:
+                    shared_page_text_split_pages.add(int(page_no))
+                    if not split_text:
+                        continue
+                    parsed_from_text, marker_state = parse_note_items_from_text(
+                        split_text,
+                        last_marker_value=last_marker_value,
+                    )
+                    if parsed_from_text:
+                        parsed_rows.extend(
+                            {
+                                "page_no": page_no,
+                                "marker": normalize_note_marker(row.get("marker") or ""),
+                                "text": str(row.get("text") or "").strip(),
+                                "is_reconstructed": bool(row.get("is_reconstructed")),
+                                "source": text_source or "markdown",
+                            }
+                            for row in parsed_from_text
+                        )
+                        if text_source in {"page_text_map", "pdf_text"}:
+                            used_page_text_fallback = True
+                        last_marker_value = marker_state
+                    continue
+                if int(region.page_start or 0) != int(page_no):
+                    continue
             text, text_source = _normalized_page_text(
                 page_no,
                 note_kind=region_kind,
@@ -210,6 +445,7 @@ def build_note_items(
                     }
                     for row in parsed_from_scan
                 )
+                last_marker_value = _last_numeric_marker_value(parsed_from_scan, last_marker_value)
                 continue
 
             if text_source in {"page_text_map", "pdf_text"} and text:
@@ -290,5 +526,7 @@ def build_note_items(
         "pdf_text_fallback_count": int(pdf_text_fallback_count),
         "marker_alignment_failures": marker_alignment_failures,
         "orphan_item_count": int(orphan_item_count),
+        "shared_page_split_count": int(len(shared_page_split_pages)),
+        "shared_page_text_split_count": int(len(shared_page_text_split_pages)),
     }
     return records, summary

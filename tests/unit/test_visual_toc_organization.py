@@ -29,6 +29,8 @@ _attach_selected_tests(
         "test_annotate_visual_toc_organization_promotes_semantic_container_titles_even_if_prompt_marks_back_matter",
         "test_annotate_visual_toc_organization_demotes_long_root_book_title_before_containers",
         "test_filter_visual_toc_items_keeps_real_index_entry_when_it_has_a_page",
+        "test_apply_printed_page_lookup_keeps_exact_book_page_when_file_idx_is_offset",
+        "test_apply_printed_page_lookup_prefers_file_idx_book_page_for_endnotes",
         "test_map_visual_items_to_link_targets_uses_visual_order_for_link_only_toc",
         "test_filter_resolved_visual_toc_anomalies_drops_tail_introduction_outlier",
         "test_filter_resolved_visual_toc_anomalies_drops_large_reverse_jump_between_neighbors",

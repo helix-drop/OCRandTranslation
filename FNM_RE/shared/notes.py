@@ -37,7 +37,7 @@ _INLINE_NOTE_BREAK_RE = re.compile(
 # document/note_detection.py 的同名常量保持一致。
 _PAGE_CITATION_PREFIX_RE = re.compile(
     r"(?:"
-    r"\bpp?|\bf(?:o|°)?"  # p / pp / f / fo / f°
+    r"\bpp?|\bf(?:o|°)?|\besp|\bparas?|\bfols?|\bcols?"  # p / pp / f / fo / f° / esp / para / fol / col
     r"|\bvol|\bn[°o]|\bnos?|\bnr"  # vol / n° / no / nos / nr
     r"|\bart|\bchap|\bsect|\b§"  # art / chap / sect / §
     r"|\bt|\btome|\bliv|\bbk|\bbook|\bch"  # t / tome / liv / bk / book / ch
@@ -417,6 +417,25 @@ def _looks_like_ocr_missing_note_body_line(line: str) -> bool:
     return bool(has_ibid_hint or noise_count >= 2 or uppercase_runs >= 2)
 
 
+def _looks_like_large_marker_jump_continuation(
+    marker: str,
+    body: str,
+    *,
+    current_marker: str,
+) -> bool:
+    try:
+        marker_value = int(normalize_note_marker(marker))
+        current_value = int(normalize_note_marker(current_marker))
+    except ValueError:
+        return False
+    if marker_value <= current_value + 2:
+        return False
+    candidate = strip_markdown_heading(str(body or "").strip())
+    if not candidate:
+        return False
+    return candidate[:1].islower()
+
+
 def _finalize_current_note(items: list[dict], current: dict | None) -> None:
     if not current:
         return
@@ -500,6 +519,22 @@ def parse_note_items_from_text(
             parsed_value = int(marker) if marker.isdigit() else None
             if current:
                 current_raw = normalize_note_marker(current.get("marker") or "") or ""
+                if _looks_like_large_marker_jump_continuation(
+                    marker,
+                    body,
+                    current_marker=current_raw,
+                ):
+                    for pending_line in pending_gap_lines:
+                        current, split_marker_state = _append_line_to_current(
+                            items, current, pending_line
+                        )
+                        if split_marker_state is not None:
+                            marker_state = split_marker_state
+                    pending_gap_lines = []
+                    current, split_marker_state = _append_line_to_current(items, current, line)
+                    if split_marker_state is not None:
+                        marker_state = split_marker_state
+                    continue
                 current_value = int(current_raw) if current_raw.isdigit() else 0
                 if (
                     pending_gap_lines
@@ -722,4 +757,3 @@ def _split_contiguous_ranges(values: list[int]) -> list[list[int]]:
             continue
         ranges.append([value])
     return ranges
-

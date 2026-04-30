@@ -55,6 +55,40 @@ def _resolve_note_item_owner(
             return chapter_id, source
     return "", ""
 
+_NESTED_NOTE_REF_RE = re.compile(
+    r"\{\{NOTE_REF:([^}]*?)\{\{NOTE_REF:([^}]+)\}\}([^}]*?)\}\}", re.IGNORECASE
+)
+
+
+def _cleanup_nested_note_refs(text: str) -> str:
+    """修复嵌套的 {{NOTE_REF:...{{NOTE_REF:...}}...}} 结构。
+
+    _inject_token_once 对同一区域多次替换时可能造出嵌套 NOTE_REF。
+    此函数检测并拆分为两个独立的 NOTE_REF。
+    """
+    payload = str(text or "")
+    changed = True
+    while changed:
+        changed = False
+        match = _NESTED_NOTE_REF_RE.search(payload)
+        if match:
+            outer_prefix = str(match.group(1) or "")
+            inner_id = str(match.group(2) or "")
+            outer_suffix = str(match.group(3) or "")
+            outer_full = outer_prefix + inner_id + outer_suffix
+            outer_token = f"{{{{NOTE_REF:{outer_full}}}}}"
+            inner_token = f"{{{{NOTE_REF:{inner_id}}}}}"
+            replacement = _NESTED_NOTE_REF_RE.sub(
+                lambda m: f"{inner_token} {outer_token}" if (m.group(1) or m.group(3)) else inner_token,
+                payload,
+                count=1,
+            )
+            if replacement != payload:
+                payload = replacement
+                changed = True
+    return payload
+
+
 def _inject_token_once(
     text: str,
     *,
@@ -240,6 +274,14 @@ def build_frozen_units(
                 page_no=int(anchor.page_no),
             )
         )
+
+    for ch_id, page_map in chapter_body_pages.items():
+        for page_no, payload in page_map.items():
+            text = str(payload.get("text") or "")
+            cleaned = _cleanup_nested_note_refs(text)
+            if cleaned != text:
+                payload["text"] = cleaned
+                chapter_body_pages[ch_id][page_no] = payload
 
     body_units: list[FrozenUnit] = []
     chapter_unit_counts: dict[str, int] = {}

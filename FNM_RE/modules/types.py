@@ -18,7 +18,7 @@ from FNM_RE.constants import (
     RegionSource,
 )
 
-TocExternalRole = Literal["front_matter", "chapter", "post_body", "back_matter"]
+TocExternalRole = Literal["front_matter", "chapter", "post_body", "back_matter", "note", "endnotes"]
 TocNodeRole = Literal["container", "endnotes", "chapter", "section", "post_body", "back_matter", "front_matter"]
 BookNoteType = Literal["mixed", "endnote_only", "footnote_only", "no_notes"]
 FreezeDecision = Literal["injected", "skipped"]

@@ -18,6 +18,7 @@ import unittest
 
 from FNM_RE.app.pipeline import _legacy_page_role_from_toc_role, _phase_pages_from_toc
 from FNM_RE.modules.toc_structure import build_toc_structure
+from FNM_RE.modules.types import TocPageRole, TocStructure
 
 from tests.unit.fnm_re_module_fixtures import load_auto_visual_toc, load_pages
 
@@ -27,6 +28,9 @@ class LegacyPageRoleFromTocRoleTest(unittest.TestCase):
 
     def test_note_role_is_preserved(self):
         self.assertEqual(_legacy_page_role_from_toc_role("note"), "note")
+
+    def test_endnotes_role_becomes_note(self):
+        self.assertEqual(_legacy_page_role_from_toc_role("endnotes"), "note")
 
     def test_noise_role_is_preserved(self):
         self.assertEqual(_legacy_page_role_from_toc_role("noise"), "noise")
@@ -46,6 +50,24 @@ class LegacyPageRoleFromTocRoleTest(unittest.TestCase):
 
 class PhasePagesFromTocPreservesNoteRoleTest(unittest.TestCase):
     """跑完整 build_toc_structure → _phase_pages_from_toc，验证 note role 保留。"""
+
+    def test_phase_pages_convert_toc_endnotes_role_to_note_page_role(self):
+        toc_structure = TocStructure(
+            pages=[
+                TocPageRole(
+                    page_no=349,
+                    role="endnotes",  # type: ignore[arg-type]
+                    source_role="note",
+                    reason="endnotes_start_page_hint",
+                )
+            ]
+        )
+
+        phase_pages = _phase_pages_from_toc(toc_structure)
+
+        self.assertEqual(phase_pages[0].page_no, 349)
+        self.assertEqual(phase_pages[0].page_role, "note")
+        self.assertEqual(phase_pages[0].reason, "endnotes_start_page_hint")
 
     def test_biopolitics_phase_pages_keep_note_role(self):
         pages = load_pages("Biopolitics")

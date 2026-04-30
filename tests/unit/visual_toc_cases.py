@@ -2040,6 +2040,43 @@ class VisualTocLogicTest(unittest.TestCase):
         self.assertEqual(items[0]["title"], "Index")
         self.assertEqual(items[0]["printed_page"], 411)
 
+    def test_apply_printed_page_lookup_keeps_exact_book_page_when_file_idx_is_offset(self):
+        resolved = _apply_printed_page_lookup(
+            [
+                {
+                    "title": "Notes",
+                    "depth": 0,
+                    "printed_page": 331,
+                    "visual_order": 1,
+                    "role_hint": "endnotes",
+                }
+            ],
+            {331: 347},
+            {331: 349},
+        )
+
+        self.assertEqual(resolved[0]["file_idx"], 347)
+        self.assertEqual(resolved[0]["book_page"], 349)
+
+    def test_apply_printed_page_lookup_prefers_file_idx_book_page_for_endnotes(self):
+        resolved = _apply_printed_page_lookup(
+            [
+                {
+                    "title": "Notes",
+                    "depth": 0,
+                    "printed_page": 331,
+                    "visual_order": 1,
+                    "role_hint": "endnotes",
+                }
+            ],
+            {331: 347},
+            {331: 348},
+            {347: 349},
+        )
+
+        self.assertEqual(resolved[0]["file_idx"], 347)
+        self.assertEqual(resolved[0]["book_page"], 349)
+
     def test_map_visual_items_to_link_targets_uses_visual_order_for_link_only_toc(self):
         mapped = map_visual_items_to_link_targets(
             [

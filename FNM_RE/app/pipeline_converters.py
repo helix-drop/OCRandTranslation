@@ -123,7 +123,7 @@ def _legacy_page_role_from_toc_role(role: str) -> str:
         return "body"
     if token == "front_matter":
         return "front_matter"
-    if token == "note":
+    if token in {"note", "endnotes"}:
         return "note"
     if token == "noise":
         return "noise"
@@ -679,5 +679,4 @@ def _overlay_repo_units_on_frozen(
         segment_payload = list(repo_unit.get("page_segments") or [])
         unit.page_segments = [dict(segment) for segment in segment_payload if isinstance(segment, dict)]
     return payload
-
 

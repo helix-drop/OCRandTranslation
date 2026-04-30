@@ -277,6 +277,15 @@ def _finalize_endnotes_summary(
         None,
     )
     if endnotes_item is None:
+        endnotes_item = next(
+            (
+                item
+                for item in normalized_items
+                if bool(item.get("endnotes_candidate"))
+            ),
+            None,
+        )
+    if endnotes_item is None:
         return summary
 
     title = _normalize_header_hint(endnotes_item.get("title") or "")
@@ -314,12 +323,15 @@ def _normalize_visual_toc_page_item_rows(values) -> list[dict]:
         title = re.sub(r"\s+", " ", str(item.get("title", "") or "")).strip()
         if not title:
             continue
+        book_page = _coerce_positive_int(item.get("book_page"))
         row = {
             "title": title,
             "depth": max(0, int(item.get("depth", 0) or 0)),
             "printed_page": _coerce_positive_int(item.get("printed_page")),
             "visual_order": max(1, int(item.get("visual_order", index) or index)),
         }
+        if book_page is not None:
+            row["book_page"] = book_page
         role_hint = str(item.get("role_hint") or "").strip().lower().replace("-", "_")
         if role_hint in _PAGE_ITEM_ROLE_HINT_VALUES:
             row["role_hint"] = role_hint
@@ -365,6 +377,7 @@ def filter_visual_toc_items(items: list[dict]) -> list[dict]:
         if not title:
             continue
         printed_page = _coerce_positive_int(item.get("printed_page"))
+        book_page = _coerce_positive_int(item.get("book_page"))
         file_idx = _coerce_nonnegative_int(item.get("file_idx"))
         role_hint = _normalize_visual_toc_role_hint(item.get("role_hint"), title=title)
         preserve_without_page = role_hint in {
@@ -385,6 +398,8 @@ def filter_visual_toc_items(items: list[dict]) -> list[dict]:
             "file_idx": file_idx,
             "visual_order": max(1, int(item.get("visual_order", index) or index)),
         }
+        if book_page is not None:
+            clone["book_page"] = book_page
         if role_hint:
             clone["role_hint"] = role_hint
         if item.get("parent_title"):
@@ -393,6 +408,10 @@ def filter_visual_toc_items(items: list[dict]) -> list[dict]:
             clone["body_candidate"] = bool(item.get("body_candidate"))
         if "export_candidate" in item:
             clone["export_candidate"] = bool(item.get("export_candidate"))
+        if "endnotes_candidate" in item:
+            clone["endnotes_candidate"] = bool(item.get("endnotes_candidate"))
+        if "endnotes_subentry_candidate" in item:
+            clone["endnotes_subentry_candidate"] = bool(item.get("endnotes_subentry_candidate"))
         filtered.append(clone)
     return filtered
 
@@ -615,6 +634,13 @@ def _annotate_visual_toc_organization(items: list[dict]) -> tuple[list[dict], di
             if role_hint in {"chapter", "section", "back_matter", "front_matter", "post_body"} and looks_like_root_container:
                 role_hint = "container"
             elif role_hint == "back_matter" and _VISUAL_TOC_ENDNOTES_TITLE_RE.search(title):
+                role_hint = "endnotes"
+
+        if role_hint == "back_matter" and (
+            bool(item.get("endnotes_candidate"))
+            or _VISUAL_TOC_ENDNOTES_TITLE_RE.search(title)
+        ):
+            if not _VISUAL_TOC_BACK_MATTER_TITLE_RE.search(title):
                 role_hint = "endnotes"
 
         if (
@@ -874,12 +900,64 @@ def _build_printed_page_lookup(doc_id: str, pdf_path: str) -> dict[int, int]:
                 lookup[printed_page] = file_idx
     return lookup
 
-def _apply_printed_page_lookup(items: list[dict], printed_page_lookup: dict[int, int]) -> list[dict]:
+def _build_printed_page_book_page_lookup(doc_id: str) -> dict[int, int]:
+    lookup: dict[int, int] = {}
+    pages, _ = load_pages_from_disk(doc_id)
+    for page in pages or []:
+        label = resolve_page_print_label(page)
+        if not label.isdigit():
+            continue
+        printed_page = int(label)
+        book_page = _coerce_positive_int(page.get("bookPage"))
+        if printed_page > 0 and book_page is not None and printed_page not in lookup:
+            lookup[printed_page] = book_page
+    return lookup
+
+def _build_file_idx_book_page_lookup(doc_id: str) -> dict[int, int]:
+    lookup: dict[int, int] = {}
+    pages, _ = load_pages_from_disk(doc_id)
+    for page in pages or []:
+        file_idx = _coerce_nonnegative_int(page.get("fileIdx"))
+        book_page = _coerce_positive_int(page.get("bookPage"))
+        if file_idx is not None and book_page is not None and file_idx not in lookup:
+            lookup[file_idx] = book_page
+    return lookup
+
+def _is_endnotes_page_lookup_target(item: dict) -> bool:
+    title = _normalize_header_hint(item.get("title") or "")
+    role_hint = _normalize_visual_toc_role_hint(item.get("role_hint"), title=title)
+    return bool(
+        role_hint == "endnotes"
+        or item.get("endnotes_candidate")
+        or _VISUAL_TOC_ENDNOTES_TITLE_RE.search(title)
+    )
+
+def _apply_printed_page_lookup(
+    items: list[dict],
+    printed_page_lookup: dict[int, int],
+    printed_page_book_page_lookup: dict[int, int] | None = None,
+    file_idx_book_page_lookup: dict[int, int] | None = None,
+) -> list[dict]:
     resolved: list[dict] = []
     for item in items or []:
         clone = dict(item)
         printed_page = _coerce_positive_int(clone.get("printed_page"))
         if clone.get("file_idx") is None and printed_page in printed_page_lookup:
             clone["file_idx"] = printed_page_lookup[printed_page]
+        file_idx = _coerce_nonnegative_int(clone.get("file_idx"))
+        if (
+            clone.get("book_page") is None
+            and file_idx_book_page_lookup
+            and file_idx in file_idx_book_page_lookup
+            and _is_endnotes_page_lookup_target(clone)
+        ):
+            clone["book_page"] = file_idx_book_page_lookup[file_idx]
+        elif (
+            clone.get("book_page") is None
+            and printed_page_book_page_lookup
+            and printed_page in printed_page_book_page_lookup
+            and _is_endnotes_page_lookup_target(clone)
+        ):
+            clone["book_page"] = printed_page_book_page_lookup[printed_page]
         resolved.append(clone)
     return resolved

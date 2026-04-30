@@ -222,7 +222,9 @@ class EndnoteChapterExplorerTest(unittest.TestCase):
 
         self.assertEqual(len(rebuilt), 2)
         self.assertEqual([row.chapter_id for row in rebuilt], ["intro", "ch-1"])
-        self.assertEqual([row.pages for row in rebuilt], [[30], [31, 32]])
+        self.assertEqual([row.pages for row in rebuilt], [[30, 31], [31, 32]])
+        rebuilt_pages = [page for row in rebuilt for page in row.pages]
+        self.assertEqual(rebuilt_pages.count(31), 2)
         self.assertGreaterEqual(int(summary.get("split_count") or 0), 1)
 
     def test_named_toc_subentries_bind_introduction_and_numbered_chapter(self):

@@ -107,6 +107,28 @@ from FNM_RE.stages.units import build_translation_units
 from FNM_RE.status import build_module_gate_status, build_phase4_status, build_phase6_status
 
 
+def _resolve_endnotes_start_page(visual_toc_bundle: Mapping[str, Any] | None) -> int | None:
+    if not visual_toc_bundle:
+        return None
+    endnotes_summary = visual_toc_bundle.get("endnotes_summary") or {}
+    if not endnotes_summary.get("present"):
+        return None
+    items = visual_toc_bundle.get("items") or []
+    endnotes_item = next(
+        (item for item in items if item.get("role_hint") == "endnotes"),
+        None,
+    )
+    if not endnotes_item:
+        return None
+    book_page = endnotes_item.get("book_page")
+    if book_page is not None:
+        return int(book_page)
+    file_idx = endnotes_item.get("file_idx")
+    if file_idx is not None:
+        return int(file_idx) + 1
+    return None
+
+
 def build_phase1_structure(
     pages: list[dict],
     *,
@@ -119,6 +141,7 @@ def build_phase1_structure(
     page_partitions = build_page_partitions(
         pages,
         page_overrides=page_overrides,
+        endnotes_start_page=_resolve_endnotes_start_page(visual_toc_bundle),
     )
     heading_candidates, chapters, chapter_meta = build_chapter_skeleton(
         page_partitions,
@@ -1246,6 +1269,7 @@ def build_module_pipeline_snapshot(
             split_result.data,
             diagnostic_machine_by_page=_diagnostic_machine_by_page(diagnostic_pages),
             include_diagnostic_entries=bool(include_diagnostic_entries),
+            section_heads=_phase_section_heads_from_toc(toc_result.data),
         ),
     )
     export_result = _run_stage(

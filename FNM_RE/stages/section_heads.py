@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from typing import Any
 
@@ -22,11 +23,34 @@ def _chapter_title_keys(chapters: list[ChapterRecord]) -> dict[str, str]:
     return {chapter.chapter_id: chapter_title_match_key(chapter.title) for chapter in chapters}
 
 
+_SECTION_TITLE_MIN_WORDS = 3
+_SECTION_TITLE_MIN_CHARS = 18
+_SECTION_TITLE_NOISE_RE = re.compile(
+    r"^\s*(?:to the|and|or|the|a|an|in the|of the|for the|with the|by the|at the|on the|from the|"
+    r"is a|are|was|were|has|have|had|been|being|"
+    r"it is|that is|this is|there are|there is|"
+    r"\.\s*\)|\]\s*$|"
+    r"\b(?:tices|nomics|ology|ophy|istry|ments|ances|ities|tions|sions|ments)\s*$"
+    r")\s*$",
+    re.IGNORECASE,
+)
+
+
 def _candidate_can_become_section(candidate: HeadingCandidate) -> bool:
     if candidate.suppressed_as_chapter:
         return True
     family = str(candidate.heading_family_guess or "").strip().lower()
-    return family == "section"
+    if family != "section":
+        return False
+    title = normalize_title(candidate.normalized_text or candidate.text)
+    words = [w for w in title.split() if w]
+    if len(words) < _SECTION_TITLE_MIN_WORDS and len(title) < _SECTION_TITLE_MIN_CHARS:
+        return False
+    if _SECTION_TITLE_NOISE_RE.match(title):
+        return False
+    if len(words) == 1 and len(title) < 12:
+        return False
+    return True
 
 
 def build_section_heads(

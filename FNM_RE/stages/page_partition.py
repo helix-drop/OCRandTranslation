@@ -95,6 +95,14 @@ _NOTE_REF_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("footnote", re.compile(r"\[FN-([^\]]+)\]", re.IGNORECASE)),
     ("footnote", re.compile(r"\[\^((?!en-)[^\]]+)\]", re.IGNORECASE)),
 )
+_ENDNOTES_HINT_STOP_REASONS = {
+    "rear_sparse_other",
+    "rear_toc_tail",
+    "rear_author_blurb",
+    "bibliography",
+    "index",
+    "illustrations",
+}
 
 
 def _strip_markdown_heading(text: str) -> str:
@@ -763,11 +771,46 @@ def _apply_back_matter_continuation_fix(
             page_no=record.page_no,
             total_pages=max(1, total_pages),
         ):
+            if record.page_role == "note" and (
+                record.reason != "note_scan_collection" or record.has_note_heading
+            ):
+                continue
             record.page_role = "other"
             record.confidence = max(float(record.confidence), 0.93)
             record.reason = f"{active_family}_continuation"
             continue
         active_family = ""
+
+
+def _apply_endnotes_start_page_hint(
+    records: list[PagePartitionRecord],
+    *,
+    endnotes_start_page: int | None,
+) -> None:
+    if not endnotes_start_page or endnotes_start_page <= 0:
+        return
+    seen_note_run = False
+    stopped_at_back_matter = False
+    for record in records:
+        if record.page_no < endnotes_start_page:
+            continue
+        if stopped_at_back_matter:
+            continue
+        if record.page_role == "note":
+            seen_note_run = True
+            continue
+        if (
+            seen_note_run
+            and record.page_role == "other"
+            and str(record.reason or "") in _ENDNOTES_HINT_STOP_REASONS
+        ):
+            stopped_at_back_matter = True
+            continue
+        if record.page_role in {"body", "other", "front_matter"}:
+            record.page_role = "note"
+            record.confidence = max(float(record.confidence), 0.90)
+            record.reason = "endnotes_start_page_hint"
+            seen_note_run = True
 
 
 def _apply_manual_overrides(
@@ -790,6 +833,7 @@ def build_page_partitions(
     pages: list[dict],
     *,
     page_overrides: Mapping[str, Mapping[str, Any]] | None = None,
+    endnotes_start_page: int | None = None,
 ) -> list[PagePartitionRecord]:
     annotated_pages = annotate_pages_with_note_scans(list(pages or []))
     total_pages = len(annotated_pages)
@@ -829,6 +873,7 @@ def build_page_partitions(
             )
         )
     records.sort(key=lambda item: item.page_no)
+    _apply_endnotes_start_page_hint(records, endnotes_start_page=endnotes_start_page)
     _apply_front_matter_continuation_fix(records, page_by_no=page_by_no, total_pages=max(1, total_pages))
     _apply_back_matter_continuation_fix(records, page_by_no=page_by_no, total_pages=max(1, total_pages))
     _apply_note_continuation_fix(records, page_by_no=page_by_no, total_pages=max(1, total_pages))

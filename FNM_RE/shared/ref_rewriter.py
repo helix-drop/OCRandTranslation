@@ -11,6 +11,7 @@ from typing import Any
 
 from FNM_RE.shared.export_constants import (
     _ANY_NOTE_REF_RE,
+    _CORRUPTED_NOTE_REF_RE,
     _RAW_BRACKET_NOTE_REF_RE,
     _RAW_SUPERSCRIPT_NOTE_REF_RE,
     _RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE,
@@ -122,6 +123,8 @@ def replace_note_refs_with_local_labels(
     ordered_note_ids: list[str],
     footnote_ids_seen: list[str] | None = None,
 ) -> str:
+    text = _CORRUPTED_NOTE_REF_RE.sub(r"{{NOTE_REF:\1}}", str(text or ""))
+
     def _replace(match: re.Match) -> str:
         captured = [str(match.group(idx) or "").strip() for idx in range(1, 7)]
         note_id = ""
@@ -130,9 +133,15 @@ def replace_note_refs_with_local_labels(
         elif captured[1]:
             note_id = captured[1]
         elif captured[2]:
-            note_id = _normalize_endnote_note_id(captured[2])
+            cleaned = captured[2]
+            if re.match(r"^en-\d", cleaned, re.IGNORECASE):
+                cleaned = cleaned[3:]
+            note_id = _normalize_endnote_note_id(cleaned)
         elif captured[3]:
-            note_id = _normalize_endnote_note_id(captured[3])
+            cleaned = captured[3]
+            if re.match(r"^en-\d", cleaned, re.IGNORECASE):
+                cleaned = cleaned[3:]
+            note_id = _normalize_endnote_note_id(cleaned)
         elif captured[4]:
             note_id = captured[4]
         elif captured[5]:
