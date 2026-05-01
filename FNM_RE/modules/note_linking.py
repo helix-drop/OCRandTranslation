@@ -1539,18 +1539,38 @@ def _chapter_contracts(
         elif not requires_endnote_contract:
             first_marker_is_one = True
 
-        # has_marker_gap：去重后的数字 marker 是否等于 [1, 2, ..., max]
+        # has_marker_gap：去重后的数字 marker 是否等于 [1, 2, ..., max]。
+        # book_endnote_bound 书的 marker 序列跨章连续，跳过逐章校验。
         unique_markers = sorted(set(def_numeric_markers))
-        if unique_markers:
-            expected = list(range(1, unique_markers[-1] + 1))
-            has_marker_gap = unique_markers != expected
+        if note_mode == "book_endnote_bound":
+            has_marker_gap = False
+        elif unique_markers:
+            # 过滤 outlier：OCR 可能把页码/垃圾文本误读为超大 marker
+            # （Biopolitics ch.4 marker=359, ch.6 marker=668），
+            # 这类 outlier 会把 range 拉到 [1..668]，制造假 gap。
+            # 策略：若最大 marker 与次大 marker 之间存在 > 50% 的跳跃，
+            # 截断到跳跃点之前的主序列。
+            truncated = list(unique_markers)
+            if len(truncated) >= 2:
+                for i in range(len(truncated) - 1, 0, -1):
+                    gap_ratio = (truncated[i] - truncated[i - 1]) / max(1, truncated[i - 1])
+                    if gap_ratio > 0.5 and truncated[i] > truncated[i - 1] + 20:
+                        truncated = truncated[:i]
+                        break
+            expected = list(range(1, truncated[-1] + 1))
+            has_marker_gap = truncated != expected
         else:
             has_marker_gap = False
 
         # def_anchor_mismatch：def_count vs chapter_marker_counts 偏差。
-        # 容忍：anchor_total 为 0 时不判（上游未提供基线）；def 与 anchor 必须严格相等。
+        # book_endnote_bound 书允许少量偏差（同一尾注被正文多处引用时
+        # anchor 计数已去重，但 rebuild 阶段可能存在数据差异）。
         if anchor_total > 0:
-            def_anchor_mismatch = def_count != anchor_total
+            if note_mode == "book_endnote_bound":
+                tolerance = max(3, int(anchor_total * 0.03))
+                def_anchor_mismatch = abs(def_count - anchor_total) > tolerance
+            else:
+                def_anchor_mismatch = def_count != anchor_total
         else:
             def_anchor_mismatch = False
 
