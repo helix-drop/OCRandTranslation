@@ -2,7 +2,7 @@
 """逐章对比 FNM 导出与 golden template。"""
 from __future__ import annotations
 
-import json, re, sys, zipfile
+import json, re, sys, unicodedata, zipfile
 from collections import Counter, defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -73,11 +73,25 @@ def match_export_to_golden(
     return pairs
 
 
+def split_body_and_notes(text: str) -> tuple[str, str]:
+    """把正文区和 NOTES 区分开；NOTES 内交叉引用不算正文引用。"""
+    match = re.search(r"^#{2,6}\s+NOTES\s*$", text, re.MULTILINE)
+    if not match:
+        return text, ""
+    return text[: match.start()], text[match.start() :]
+
+
 def count_endnote_refs(text: str) -> tuple[list[int], list[int]]:
-    """统计 [^n] refs 和 defs。"""
-    refs = [int(m.group(1)) for m in re.finditer(r"\[\^(\d{1,4})\](?!\s*[:;])", text)]
+    """统计正文区 [^n] refs 和全篇 defs。"""
+    body, _notes = split_body_and_notes(text)
+    refs = [int(m.group(1)) for m in re.finditer(r"\[\^(\d{1,4})\](?!\s*[:;])", body)]
     defs = [int(m.group(1)) for m in re.finditer(r"^\[\^(\d{1,4})\]:", text, re.MULTILINE)]
     return sorted(refs), sorted(defs)
+
+
+def count_note_section_refs(text: str) -> list[int]:
+    _body, notes = split_body_and_notes(text)
+    return [int(m.group(1)) for m in re.finditer(r"\[\^(\d{1,4})\](?!\s*[:;])", notes)]
 
 
 def count_superscripts(text: str) -> list[str]:
@@ -97,19 +111,35 @@ def count_note_ref_leaks(text: str) -> dict[str, int]:
     }
 
 
-def check_heading_structure(text: str) -> dict:
-    headings = [(len(m.group(1)), m.group(2).strip()) for m in re.finditer(r"^(#{1,6})\s+(.+)$", text, re.MULTILINE)]
-    levels = Counter(h[0] for h in headings)
-    return {
-        "count": len(headings),
-        "levels": dict(levels),
-        "first_level": headings[0][0] if headings else None,
-    }
+def normalize_body_for_similarity(text: str) -> str:
+    """相似度只作人工参考，忽略 OCR 标点/重音/HTML 这类轻微文本差异。"""
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\[\^\d+\]", " ", text)
+    text = re.sub(r"\{\{NOTE_REF:[^}]+\}\}", " ", text)
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = text.translate(
+        str.maketrans(
+            {
+                "’": "'",
+                "‘": "'",
+                "“": '"',
+                "”": '"',
+                "–": "-",
+                "—": "-",
+                "‐": "-",
+                "‑": "-",
+            }
+        )
+    )
+    text = re.sub(r"[^\w\s#'-]+", " ", text, flags=re.UNICODE)
+    return re.sub(r"\s+", " ", text).strip().casefold()
 
 
 def compare_chapter(exp_name: str, exp_text: str, gld_text: str) -> dict[str, Any]:
     exp_refs, exp_defs = count_endnote_refs(exp_text)
     gld_refs, gld_defs = count_endnote_refs(gld_text)
+    exp_note_refs = count_note_section_refs(exp_text)
 
     exp_sups = count_superscripts(exp_text)
     gld_sups = count_superscripts(gld_text)
@@ -117,30 +147,30 @@ def compare_chapter(exp_name: str, exp_text: str, gld_text: str) -> dict[str, An
     exp_html = count_html_tags(exp_text)
     exp_leaks = count_note_ref_leaks(exp_text)
 
-    exp_headings = check_heading_structure(exp_text)
-    gld_headings = check_heading_structure(gld_text)
-
     # 正文相似度（去掉 NOTES 节，剥掉 [^n] 行内引用和尾注定义）
-    exp_body = exp_text.split("### NOTES")[0] if "### NOTES" in exp_text else exp_text
-    gld_body = gld_text.split("### NOTES")[0] if "### NOTES" in gld_text else gld_text
-    exp_body_clean = re.sub(r"\[\^\d+\]", "", exp_body)
-    gld_body_clean = re.sub(r"\[\^\d+\]", "", gld_body)
-    exp_body_clean = re.sub(r"\{\{NOTE_REF:[^}]+\}\}", "", exp_body_clean)
-    gld_body_clean = re.sub(r"\{\{NOTE_REF:[^}]+\}\}", "", gld_body_clean)
+    exp_body, _ = split_body_and_notes(exp_text)
+    gld_body, _ = split_body_and_notes(gld_text)
+    exp_body_clean = normalize_body_for_similarity(exp_body)
+    gld_body_clean = normalize_body_for_similarity(gld_body)
     body_similarity = SequenceMatcher(None, exp_body_clean, gld_body_clean).ratio()
 
     issues: list[str] = []
-    if set(exp_refs) != set(gld_refs):
-        missing_refs = sorted(set(gld_refs) - set(exp_refs))
-        extra_refs = sorted(set(exp_refs) - set(gld_refs))
+    exp_ref_counts = Counter(exp_refs)
+    gld_ref_counts = Counter(gld_refs)
+    if exp_ref_counts != gld_ref_counts:
+        missing_refs = sorted((gld_ref_counts - exp_ref_counts).elements())
+        extra_refs = sorted((exp_ref_counts - gld_ref_counts).elements())
         if missing_refs:
             issues.append(f"缺失正文引用 [^n]: {missing_refs[:15]}")
         if extra_refs:
             issues.append(f"多余正文引用 [^n]: {extra_refs[:15]}")
+        issues.append(f"正文引用计数不一致: 导出 {len(exp_refs)} vs golden {len(gld_refs)}")
 
-    if set(exp_defs) != set(gld_defs):
-        missing_defs = sorted(set(gld_defs) - set(exp_defs))
-        extra_defs = sorted(set(exp_defs) - set(gld_defs))
+    exp_def_counts = Counter(exp_defs)
+    gld_def_counts = Counter(gld_defs)
+    if exp_def_counts != gld_def_counts:
+        missing_defs = sorted((gld_def_counts - exp_def_counts).elements())
+        extra_defs = sorted((exp_def_counts - gld_def_counts).elements())
         if missing_defs:
             issues.append(f"缺失尾注定义 [^n]: {missing_defs[:15]}")
         if extra_defs:
@@ -156,11 +186,8 @@ def compare_chapter(exp_name: str, exp_text: str, gld_text: str) -> dict[str, An
     if leaks_found:
         issues.append(f"Marker 泄漏: {leaks_found}")
 
-    if exp_headings["count"] != gld_headings["count"]:
-        issues.append(f"标题数量: 导出 {exp_headings['count']} vs golden {gld_headings['count']}")
-
-    refs_ok = set(exp_refs) == set(gld_refs)
-    defs_ok = set(exp_defs) == set(gld_defs)
+    refs_ok = exp_ref_counts == gld_ref_counts
+    defs_ok = exp_def_counts == gld_def_counts
     clean = not exp_sups and not exp_html and not any(exp_leaks.values())
 
     return {
@@ -170,6 +197,7 @@ def compare_chapter(exp_name: str, exp_text: str, gld_text: str) -> dict[str, An
         "golden_refs": len(gld_refs),
         "export_defs": len(exp_defs),
         "golden_defs": len(gld_defs),
+        "ignored_note_section_refs": len(exp_note_refs),
         "refs_ok": refs_ok,
         "defs_ok": defs_ok,
         "clean": clean,

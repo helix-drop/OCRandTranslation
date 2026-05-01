@@ -3,17 +3,17 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-001-préambule:toc-ch-001-préambule:footnote\",\n  \"chapter_title\": \"Préambule\",\n  \"page_range\": [\n    34,\n    34\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 34,\n      \"ocr_excerpt\": \"souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance publique comme « manquant $ ^{39} $ ». Les observations de Pinel publiées dans son Traité médico-philosophique sur l'aliénation mentale ou la manie sur son expérience à Bicêtre entre 1793 et 1795, les archives de Charenton à partir de 1798, les registres de placements volontaires et d'office, commençant en 1838, ne combient pas à proprement parler ce manque mais le pallient en partie. De même, les registres d'observations médicales de Bicêtre et de la Salpêtrière, asiles évacués au cours de la guerre de 1870, n'offrent que des pages blanches pour la période de la Commune. Mais les registres de Sainte-Anne, commentés durant cette période, prennent une manière de relais. Si bien que, chronologiquement, il est possible de rapiécer bon an mal an, avec quelques sautes géographiques, les pans de la période 1793-1871. Le second trait saillant de cette masse documentaire est, à la fois, son homogénéité et sa disparité. Homogénéité, car tous ces document ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00034\",\n      \"marker\": \"39\",\n      \"page_no\": 34,\n      \"paragraph_index\": 0,\n      \"source_text\": \"souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-015-1848oulapestedémocratiqu:toc-ch-015-1848oulapestedémocratiqu:footnote\",\n  \"chapter_title\": \"1848 ou la peste démocratique\",\n  \"page_range\": [\n    275,\n    279\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 274,\n      \"ocr_excerpt\": \"rêve d’une société meilleure se confond-il avec la perte du sens ? Épineuses questions, qui dépendent (mais pas seulement) de la posture idéologique de celui qui les pose — et, éventuellement, y répond. La fameuse séance du 15 mai 1848 à l’Assemblée nationale représente un de ces moments de l’Histoire où l’articulation de la passion politique et de la folie s’est trouvée posée. Rappelons brièvement les faits. Les élections du 23 avril ont envoyé à l’Assemblée nationale une majorité de « républicains du lendemain », républicains modérés, monarchistes ou conservateurs. Candidats camouflés derrière une étiquette progressiste, électeurs néophytes influencés par l’ascendance du curé ou des notables locaux dans les provinces, diverses raisons ont été avancées pour expliquer ce résultat, qui laisse un goût amer aux insurgés de Février. Pour les chefs d’extrême gauche, anciens de 1830, la révolution est en passe d’être escamotée une deuxième fois. Le 15 mai, ils organisent une manifestation dans Paris pour soutenir les Polonais insurgés, auxquels le gouvernement français refuse de venir en aide, et envahissent le Palais-Bourbon. « Qu’on se figure la halle mêlée au Sénat », se souvient Vict ...\"\n    },\n    {\n      \"page_no\": 275,\n      \"ocr_excerpt\": \"Tandis que Victor Hugo observe la scène, Alexis de Tocqueville est abordé dans la cohue par le docteur Ulysse Trélat, député du Puy-de-Dôme. Républicain, conspirateur de la première heure, l'aliéniste, qui dirige alors la quatrième section de la Salpêtrière, a très tôt appartenu à diverses sociétés secrètes affiliées à la Charbonnerie, hostile aux Bourbons, et participé à d'innombrables complots. Arrêté à plusieurs reprises, il comparaît notamment en 1832 au « procès des Quinze », aux côtés de Raspail et de Blanqui. Sa santé fragile, éprouvée par une incarcération à la prison de Clairvaux en 1835, l'éloigne un temps de la politique. Mais on le retrouve aux premières loges en 1848, dans de multiples fonctions : maire du XII<sup>e</sup> arrondissement, président de la Commission de colonisation, lieutenant-colonel de la 12<sup>e</sup> légion sous les ordres de Barbès, vice-président de l'Assemblée constituante et, à partir du 12 mai, ministre des Travaux publics. Proudhon le tient en « affectueuse admiration », Louis Blanc pour une « nullité<sup>64</sup> ». Quant à Tocqueville, il y voit un « révolutionnaire du genre sentimental et rêveur [...], du reste, médecin de mérite qui dirige ...\"\n    },\n    {\n      \"page_no\": 276,\n      \"ocr_excerpt\": \"la liste, s'il se fût aussi bien connu qu'il connaissait ses anciens amis.» À supposer que l'anecdote rapportée par Tocqueville soit exacte, le docteur Trélat considérait-il vraiment ses camarades de lutte comme de vrais fous ? L'assertion serait digne d'intérêt, a fortiori venant d'un spécialiste autorisé de la maladie mentale, qui plus est d'extrême gauche. Mais, en même temps, quelle légitimité accorder à son jugement, si l'aliéniste était, toujours selon Tocqueville, « timbré » lui-même ? On mettra, en tout état de cause, sur le compte de la distraction (de Trélat ou de Tocqueville, impossible à trancher), voire de la métaphore, le fait de décréter mettre des hommes dans un asile réservé aux femmes. Toute sa vie, Ulysse Trélat a alterné activités politiques et médicales. Il les a aussi confondues, pour le meilleur et pour le pire. Médecin très dévoué qui fit l'essentiel de sa carrière à la Salpêtrière, considéré comme un « saint » par son entourage et ses patients, il se préoccupe du sort des plus démunis et crée des sociétés de soutien pour venir en aide aux aliénées qui sortent de l'asile dépourvues de tout. S'il s'efforce de mettre son métier en accord avec ses convictions p ...\"\n    },\n    {\n      \"page_no\": 277,\n      \"ocr_excerpt\": \"Trélat aurait-il la fâcheuse tendance, par opportunisme ou déformation professionnelle, à juger tous ses semblables dignes de l'asile? Son ouvrage majeur, La Folie lucide, englobant pêle-mêle les monomanes, les aventuriers, les orgueilleux, les méchants, les kleptomanes, les suicidaires, les érotomanes, les dipsomanes et les faibles d'intelligence, montre en tout cas qu'en cette matière il avait l'esprit large. La conclusion que Tocqueville tire de cet épisode soulève un autre débat. « J'ai toujours pensé, poursuit-il, que dans les révolutions et surtout dans les révolutions démocratiques, les fous, non pas ceux auxquels on donne ce nom par métaphore, mais les véritables, ont joué un rôle politique très considérable. Ce qu'il y a de certain, du moins, c'est qu'une demi-folie ne messied pas dans ces temps-là et sert même souvent au succès $ ^{66} $. » On comprend ce que ce commentaire doit à la tradition antirévolutionnaire et à la conscience de classe, assimilant volontiers insurrection et démence, à contempler les portraits hideux et morbides que Tocqueville trace des meneurs de 1848. Voyez Blanqui, surnommé l'Enfermé pour avoir passé plus de trente ans dans les prisons d'État, « ...\"\n    },\n    {\n      \"page_no\": 278,\n      \"ocr_excerpt\": \"Barbès, chez qui s'entremêlent « le démagogue, le fou et le chevalier », dit encore Tocqueville, pour préciser aussitôt : « Je crois qu'en lui le fou prédominait, et sa folie devenait furieuse quand il entendait la voix du peuple $ ^{68} $. » À ces profils patibulaires et ces diagnostics sauvages on pourrait facilement opposer le jugement du docteur Lacambre, saluant l'exceptionnelle mécanique intellectuelle de Blanqui dans une lettre destinée à le rassurer sur sa lucidité, alors qu'il craignait lui-même souffrir de névrose : « Je suis convaincu que vous n'avez aucune lésion organique et que tout cela est l'effet de la captivité et du travail. Votre cerveau est un ressort d'une puissance immense et je m'étonne qu'il n'ait pas encore brisé en mille pièces les frêles rouages qui sont forcés de subir son impulsion $ ^{69} $. » Ou encore ce passage d'une lettre de George Sand à Armand Barbès : « Vous ne vous préservez de rien, vous, quand tous les autres se mettent à l'abri. Aussi vous traitent-ils de fou, ceux qui ne peuvent vous imiter. Mais, selon moi, vous êtes le seul sage et le seul logique, comme vous êtes le meilleur et le plus loyal. [...] Je vous dis tout cela, et pourtant, j ...\"\n    },\n    {\n      \"page_no\": 279,\n      \"ocr_excerpt\": \"tuant la figure de l'homme « hors de lui », dont l'Autoportrait de Courbet, dit Le Désespéré (1843), a popularisé l'image. Gestes, cris, regards, visages, attitudes. On n'y insistera jamais assez : ce sont d'abord et avant tout les corps insurgés du « peuple en haillons », corps marqués par la différence sociale formant une classe à part, barbare et hostile, qui provoquent le rejet, la peur, le dégoût, la répulsion, autant d'émotions analogues à celles dont le visiteur des asiles, face à des comportements inhabituels et des physionomies étranges, est assailli. Insurgés et insensés, dans les yeux bourgeois, se ressemblent. Forcenés, enragés, agités, excités, fanatiques, exaltés, frénétiques... Dans la presse, les mots sont les mêmes pour les décrire. Affranchis de la peur sociale, ils effraient la bourgeoisie. Ils n'ont plus rien à perdre. Les uns renversent l'ordre établi, les autres l'ordre de la raison. L'aliéné, rappelle avec effroi le docteur Bergeret, « étale aux yeux de l'observateur son état moral dans toute sa nudité $ ^{71} $ ». Tels, l'homme ou la femme des barricades et des émeutes. Que l’accomplissement d’une révolution dépende de l’audace et de l’ardeur de quelques men ...\"\n    },\n    {\n      \"page_no\": 280,\n      \"ocr_excerpt\": \"associée à cette énergie et aux prétendus moments d’égarement du peuple. Écoutons Lamartine décrire « les physionomies pâles et exaltées jusqu’au délire » des insurgés de Février, leurs yeux « fixes comme dans la démence », avant d’ajouter : « C’était la démence de la liberté $ ^{72} $. » Ou Marie d’Agoult parler, au sujet du 15 mai, de « ces hommes égarés par la passion, mais bien intentionnés dans leur folie $ ^{73} $ » (et non l’inverse). Même Tocqueville reconnaît, comme à son corps défendant, l’intégrité morale de cette « folie »-là de l’idéal révolutionnaire. Barbès, avoue-t-il, est celui qu’il redoute le plus, car il est « le plus insensé, le plus désintéressé et le plus résolu de tous $ ^{74} $ ». Péjorative ou tacitement saluée, pourquoi la violence des insurrections est-elle toujours associée à la folie, quand celle de la répression ne l'est jamais ? Blanqui est un fou à enfermer, mais Cavaignac, qui transforme les journées de Juin en bain de sang, est salué en sauveur de la patrie. Singulière manie que de vilipender les soulèvements populaires et de récompenser le massacre ; étrange règle que d'installer systématiquement la révolution dans la démence et de parer la réact ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00333\",\n      \"marker\": \"64\",\n      \"page_no\": 275,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Tandis que Victor Hugo observe la scène, Alexis de Tocqueville est abordé dans la cohue par le docteur Ulysse Trélat, député du Puy-de-Dôme. Républicain, conspirateur de la première heure, l'aliéniste, qui dirige alors la quatrième section ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00340\",\n      \"marker\": \"71\",\n      \"page_no\": 279,\n      \"paragraph_index\": 0,\n      \"source_text\": \"tuant la figure de l'homme « hors de lui », dont l'Autoportrait de Courbet, dit Le Désespéré (1843), a popularisé l'image. Gestes, cris, regards, visages, attitudes. On n'y insistera jamais assez : ce sont d'abord et avant tout les corps in ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-001-préambule:toc-ch-001-préambule:footnote",
-      "chapter_title": "Préambule",
+      "cluster_id": "toc-ch-015-1848oulapestedémocratiqu:toc-ch-015-1848oulapestedémocratiqu:footnote",
+      "chapter_title": "1848 ou la peste démocratique",
       "request_mode": "ref_only_visual",
       "allowed_actions": [
         "ignore_ref",
@@ -22,110 +22,168 @@
       ],
       "note_system": "footnote",
       "page_range": [
-        34,
-        34
+        275,
+        279
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 32428,
+          "row_id": 485,
           "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00034",
-          "chapter_id": "toc-ch-001-préambule",
-          "page_no": 34,
+          "anchor_id": "anchor-00333",
+          "chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+          "page_no": 275,
           "paragraph_index": 0,
-          "char_start": 267,
-          "char_end": 276,
-          "source_marker": "$ ^{39} $",
-          "normalized_marker": "39",
+          "char_start": 1055,
+          "char_end": 1068,
+          "source_marker": "<sup>64</sup>",
+          "normalized_marker": "64",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance publique comme « manquant $ ^{39} $ ». Les observations de Pinel publiées dans son Traité médico-philosophique sur l'aliénation mentale ou la manie sur son expérience à Bicêtre entre 1793 et 1795, les archives de Charenton à partir de 1798, les registres de placements volontaires et d'office, commençant en 1838, ne combient pas à proprement parler ce manque mais le pallient en partie. De même, les registres d'observations médicales de Bicêtre et de la Salpêtrière, asiles évacués au cours de la guerre de 1870, n'offrent que des pages blanches pour la période de la Commune. Mais les registres de Sainte-Anne, commentés durant cette période, prennent une manière de relais. Si bien que, chronologiquement, il est possible de rapiécer bon an mal an, avec quelques sautes géographiques, les pans de la période 1793-1871.",
-          "created_at": 1776859188,
-          "updated_at": 1776859188
+          "source_text": "Tandis que Victor Hugo observe la scène, Alexis de Tocqueville est abordé dans la cohue par le docteur Ulysse Trélat, député du Puy-de-Dôme. Républicain, conspirateur de la première heure, l'aliéniste, qui dirige alors la quatrième section de la Salpêtrière, a très tôt appartenu à diverses sociétés secrètes affiliées à la Charbonnerie, hostile aux Bourbons, et participé à d'innombrables complots. Arrêté à plusieurs reprises, il comparaît notamment en 1832 au « procès des Quinze », aux côtés de Raspail et de Blanqui. Sa santé fragile, éprouvée par une incarcération à la prison de Clairvaux en 1835, l'éloigne un temps de la politique. Mais on le retrouve aux premières loges en 1848, dans de multiples fonctions : maire du XII<sup>e</sup> arrondissement, président de la Commission de colonisation, lieutenant-colonel de la 12<sup>e</sup> légion sous les ordres de Barbès, vice-président de l'Assemblée constituante et, à partir du 12 mai, ministre des Travaux publics. Proudhon le tient en « affectueuse admiration », Louis Blanc pour une « nullité<sup>64</sup> ». Quant à Tocqueville, il y voit un « révolutionnaire du genre sentimental et rêveur [...], du reste, médecin de mérite qui dirigeait alors un des principaux hôpitaux de fous de Paris, quoiqu’il fût un timbré lui-même ». Le 15 mai, Trélat s’avance donc vers lui et, les larmes aux yeux, s’écrie : « “Ah! Monsieur, me dit-il, quel malheur et qu’il est étrange de penser que ce sont des fous, des fous véritables qui ont amené ceci ! Je les ai tous pratiqués ou traités. Blanqui est un fou, Barbès est un fou, Sobrier est un fou, Huber surtout est un fou, tous fous, monsieur, qui devraient être à ma Salpêtrière et non ici.” » Et Tocqueville de commenter : « Il se serait assurément ajouté lui-même à",
+          "created_at": 1777568010,
+          "updated_at": 1777568010
+        },
+        {
+          "row_id": 492,
+          "doc_id": "5df1d3d7f9c1",
+          "anchor_id": "anchor-00340",
+          "chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+          "page_no": 279,
+          "paragraph_index": 0,
+          "char_start": 1041,
+          "char_end": 1050,
+          "source_marker": "$ ^{71} $",
+          "normalized_marker": "71",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "tuant la figure de l'homme « hors de lui », dont l'Autoportrait de Courbet, dit Le Désespéré (1843), a popularisé l'image. Gestes, cris, regards, visages, attitudes. On n'y insistera jamais assez : ce sont d'abord et avant tout les corps insurgés du « peuple en haillons », corps marqués par la différence sociale formant une classe à part, barbare et hostile, qui provoquent le rejet, la peur, le dégoût, la répulsion, autant d'émotions analogues à celles dont le visiteur des asiles, face à des comportements inhabituels et des physionomies étranges, est assailli. Insurgés et insensés, dans les yeux bourgeois, se ressemblent. Forcenés, enragés, agités, excités, fanatiques, exaltés, frénétiques... Dans la presse, les mots sont les mêmes pour les décrire. Affranchis de la peur sociale, ils effraient la bourgeoisie. Ils n'ont plus rien à perdre. Les uns renversent l'ordre établi, les autres l'ordre de la raison. L'aliéné, rappelle avec effroi le docteur Bergeret, « étale aux yeux de l'observateur son état moral dans toute sa nudité $ ^{71} $ ». Tels, l'homme ou la femme des barricades et des émeutes.",
+          "created_at": 1777568010,
+          "updated_at": 1777568010
         }
       ],
       "rebind_candidates": []
     },
     "page_contexts": [
       {
-        "page_no": 34,
-        "file_idx": 33,
+        "page_no": 274,
+        "file_idx": 273,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance publique comme « manquant $ ^{39} $ ». Les observations de Pinel publiées dans son Traité médico-philosophique sur l'aliénation mentale ou la manie sur son expérience à Bicêtre entre 1793 et 1795, les archives de Charenton à partir de 1798, les registres de placements volontaires et d'office, commençant en 1838, ne combient pas à proprement parler ce manque mais le pallient en partie. De même, les registres d'observations médicales de Bicêtre et de la Salpêtrière, asiles évacués au cours de la guerre de 1870, n'offrent que des pages blanches pour la période de la Commune. Mais les registres de Sainte-Anne, commentés durant cette période, prennent une manière de relais. Si bien que, chronologiquement, il est possible de rapiécer bon an mal an, avec quelques sautes géographiques, les pans de la période 1793-1871. Le second trait saillant de cette masse documentaire est, à la fois, son homogénéité et sa disparité. Homogénéité, car tous ces documents, de loin, se ressemblent : dates d'entrée, de sortie, état civil, numéros de matricules, diagnostics, anatomies cadavériques — le cas échéant —, c'est toujours le même vocabulaire et les mêmes critè ...",
-        "byte_size": 307606,
-        "sha256": "fdba816a42fa60f3dcc609cec4b915f8d8c98d79c12dcf8889dab3994c1d454d"
+        "ocr_excerpt": "rêve d’une société meilleure se confond-il avec la perte du sens ? Épineuses questions, qui dépendent (mais pas seulement) de la posture idéologique de celui qui les pose — et, éventuellement, y répond. La fameuse séance du 15 mai 1848 à l’Assemblée nationale représente un de ces moments de l’Histoire où l’articulation de la passion politique et de la folie s’est trouvée posée. Rappelons brièvement les faits. Les élections du 23 avril ont envoyé à l’Assemblée nationale une majorité de « républicains du lendemain », républicains modérés, monarchistes ou conservateurs. Candidats camouflés derrière une étiquette progressiste, électeurs néophytes influencés par l’ascendance du curé ou des notables locaux dans les provinces, diverses raisons ont été avancées pour expliquer ce résultat, qui laisse un goût amer aux insurgés de Février. Pour les chefs d’extrême gauche, anciens de 1830, la révolution est en passe d’être escamotée une deuxième fois. Le 15 mai, ils organisent une manifestation dans Paris pour soutenir les Polonais insurgés, auxquels le gouvernement français refuse de venir en aide, et envahissent le Palais-Bourbon. « Qu’on se figure la halle mêlée au Sénat », se souvient Victor Hugo, qui décrit ces flots d’hommes et de femmes, vociférant et s’agitant de toutes parts, au milieu des drapeaux surmontés d’un bonnet rouge : « [P]artout des têtes, des épaules, des faces hurlant ...",
+        "byte_size": 314908,
+        "sha256": "86e07e68a5f3d81edc4ec37ea8468cc0e65764a351739ac8908bac1b52ed5007"
+      },
+      {
+        "page_no": 275,
+        "file_idx": 274,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "Tandis que Victor Hugo observe la scène, Alexis de Tocqueville est abordé dans la cohue par le docteur Ulysse Trélat, député du Puy-de-Dôme. Républicain, conspirateur de la première heure, l'aliéniste, qui dirige alors la quatrième section de la Salpêtrière, a très tôt appartenu à diverses sociétés secrètes affiliées à la Charbonnerie, hostile aux Bourbons, et participé à d'innombrables complots. Arrêté à plusieurs reprises, il comparaît notamment en 1832 au « procès des Quinze », aux côtés de Raspail et de Blanqui. Sa santé fragile, éprouvée par une incarcération à la prison de Clairvaux en 1835, l'éloigne un temps de la politique. Mais on le retrouve aux premières loges en 1848, dans de multiples fonctions : maire du XII<sup>e</sup> arrondissement, président de la Commission de colonisation, lieutenant-colonel de la 12<sup>e</sup> légion sous les ordres de Barbès, vice-président de l'Assemblée constituante et, à partir du 12 mai, ministre des Travaux publics. Proudhon le tient en « affectueuse admiration », Louis Blanc pour une « nullité<sup>64</sup> ». Quant à Tocqueville, il y voit un « révolutionnaire du genre sentimental et rêveur [...], du reste, médecin de mérite qui dirigeait alors un des principaux hôpitaux de fous de Paris, quoiqu’il fût un timbré lui-même ». Le 15 mai, Trélat s’avance donc vers lui et, les larmes aux yeux, s’écrie : « “Ah! Monsieur, me dit-il, quel ...",
+        "byte_size": 304513,
+        "sha256": "435cdddd3064e58a5d19c46082828a2864ce14d452f1720208d43e350ca049b5"
+      },
+      {
+        "page_no": 276,
+        "file_idx": 275,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "la liste, s'il se fût aussi bien connu qu'il connaissait ses anciens amis.» À supposer que l'anecdote rapportée par Tocqueville soit exacte, le docteur Trélat considérait-il vraiment ses camarades de lutte comme de vrais fous ? L'assertion serait digne d'intérêt, a fortiori venant d'un spécialiste autorisé de la maladie mentale, qui plus est d'extrême gauche. Mais, en même temps, quelle légitimité accorder à son jugement, si l'aliéniste était, toujours selon Tocqueville, « timbré » lui-même ? On mettra, en tout état de cause, sur le compte de la distraction (de Trélat ou de Tocqueville, impossible à trancher), voire de la métaphore, le fait de décréter mettre des hommes dans un asile réservé aux femmes. Toute sa vie, Ulysse Trélat a alterné activités politiques et médicales. Il les a aussi confondues, pour le meilleur et pour le pire. Médecin très dévoué qui fit l'essentiel de sa carrière à la Salpêtrière, considéré comme un « saint » par son entourage et ses patients, il se préoccupe du sort des plus démunis et crée des sociétés de soutien pour venir en aide aux aliénées qui sortent de l'asile dépourvues de tout. S'il s'efforce de mettre son métier en accord avec ses convictions politiques et philanthropiques, il conçoit aussi, et de façon plus déconcertante, son rôle d'homme politique en aliéniste. Le 27 mai 1848, le ministre Trélat fait ainsi arrêter Émile Thomas, directeur ...",
+        "byte_size": 312609,
+        "sha256": "9e4420bcb374a332e8249eeab374108ba7ed8961ed5a61b7305c5a3e11fb4f04"
+      },
+      {
+        "page_no": 277,
+        "file_idx": 276,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "Trélat aurait-il la fâcheuse tendance, par opportunisme ou déformation professionnelle, à juger tous ses semblables dignes de l'asile? Son ouvrage majeur, La Folie lucide, englobant pêle-mêle les monomanes, les aventuriers, les orgueilleux, les méchants, les kleptomanes, les suicidaires, les érotomanes, les dipsomanes et les faibles d'intelligence, montre en tout cas qu'en cette matière il avait l'esprit large. La conclusion que Tocqueville tire de cet épisode soulève un autre débat. « J'ai toujours pensé, poursuit-il, que dans les révolutions et surtout dans les révolutions démocratiques, les fous, non pas ceux auxquels on donne ce nom par métaphore, mais les véritables, ont joué un rôle politique très considérable. Ce qu'il y a de certain, du moins, c'est qu'une demi-folie ne messied pas dans ces temps-là et sert même souvent au succès $ ^{66} $. » On comprend ce que ce commentaire doit à la tradition antirévolutionnaire et à la conscience de classe, assimilant volontiers insurrection et démence, à contempler les portraits hideux et morbides que Tocqueville trace des meneurs de 1848. Voyez Blanqui, surnommé l'Enfermé pour avoir passé plus de trente ans dans les prisons d'État, « des joues hâves et flétries, des lèvres blanches, l'air malade, méchant et immonde, une pâleur sale, l'aspect d'un corps moisi », « qui semblait avoir vécu dans un égout et en sortir $ ^{67} $ ». Voye ...",
+        "byte_size": 303013,
+        "sha256": "088d6c7f1d71d437f89cb9d9328c6f9a42c493dc47c211adc4aeb57f6ea267fc"
+      },
+      {
+        "page_no": 278,
+        "file_idx": 277,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "Barbès, chez qui s'entremêlent « le démagogue, le fou et le chevalier », dit encore Tocqueville, pour préciser aussitôt : « Je crois qu'en lui le fou prédominait, et sa folie devenait furieuse quand il entendait la voix du peuple $ ^{68} $. » À ces profils patibulaires et ces diagnostics sauvages on pourrait facilement opposer le jugement du docteur Lacambre, saluant l'exceptionnelle mécanique intellectuelle de Blanqui dans une lettre destinée à le rassurer sur sa lucidité, alors qu'il craignait lui-même souffrir de névrose : « Je suis convaincu que vous n'avez aucune lésion organique et que tout cela est l'effet de la captivité et du travail. Votre cerveau est un ressort d'une puissance immense et je m'étonne qu'il n'ait pas encore brisé en mille pièces les frêles rouages qui sont forcés de subir son impulsion $ ^{69} $. » Ou encore ce passage d'une lettre de George Sand à Armand Barbès : « Vous ne vous préservez de rien, vous, quand tous les autres se mettent à l'abri. Aussi vous traitent-ils de fou, ceux qui ne peuvent vous imiter. Mais, selon moi, vous êtes le seul sage et le seul logique, comme vous êtes le meilleur et le plus loyal. [...] Je vous dis tout cela, et pourtant, je n'accepte pas le 15 mai $ ^{70} $. » Si identifiables que soient les limites de son propos, Tocqueville, en postulant l'existence d'une articulation entre révolution et folie, est néanmoins le seul ...",
+        "byte_size": 315610,
+        "sha256": "8545a5104b7d7b78657af541d1735743549e5dc622e2e812056bedb2b7930af4"
+      },
+      {
+        "page_no": 279,
+        "file_idx": 278,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "tuant la figure de l'homme « hors de lui », dont l'Autoportrait de Courbet, dit Le Désespéré (1843), a popularisé l'image. Gestes, cris, regards, visages, attitudes. On n'y insistera jamais assez : ce sont d'abord et avant tout les corps insurgés du « peuple en haillons », corps marqués par la différence sociale formant une classe à part, barbare et hostile, qui provoquent le rejet, la peur, le dégoût, la répulsion, autant d'émotions analogues à celles dont le visiteur des asiles, face à des comportements inhabituels et des physionomies étranges, est assailli. Insurgés et insensés, dans les yeux bourgeois, se ressemblent. Forcenés, enragés, agités, excités, fanatiques, exaltés, frénétiques... Dans la presse, les mots sont les mêmes pour les décrire. Affranchis de la peur sociale, ils effraient la bourgeoisie. Ils n'ont plus rien à perdre. Les uns renversent l'ordre établi, les autres l'ordre de la raison. L'aliéné, rappelle avec effroi le docteur Bergeret, « étale aux yeux de l'observateur son état moral dans toute sa nudité $ ^{71} $ ». Tels, l'homme ou la femme des barricades et des émeutes. Que l’accomplissement d’une révolution dépende de l’audace et de l’ardeur de quelques meneurs, dont l’énergie ou les débordements se confondent avec les gestes de la folie, n’a rien de très original ni de très neuf. À la violence officielle, cadre immanent de l’ordre et de la raison, les ...",
+        "byte_size": 295873,
+        "sha256": "f5a4cc97e04a09c30543e537addce67e2de3bd7a6cb5029ec99e4c269b299358"
+      },
+      {
+        "page_no": 280,
+        "file_idx": 279,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "associée à cette énergie et aux prétendus moments d’égarement du peuple. Écoutons Lamartine décrire « les physionomies pâles et exaltées jusqu’au délire » des insurgés de Février, leurs yeux « fixes comme dans la démence », avant d’ajouter : « C’était la démence de la liberté $ ^{72} $. » Ou Marie d’Agoult parler, au sujet du 15 mai, de « ces hommes égarés par la passion, mais bien intentionnés dans leur folie $ ^{73} $ » (et non l’inverse). Même Tocqueville reconnaît, comme à son corps défendant, l’intégrité morale de cette « folie »-là de l’idéal révolutionnaire. Barbès, avoue-t-il, est celui qu’il redoute le plus, car il est « le plus insensé, le plus désintéressé et le plus résolu de tous $ ^{74} $ ». Péjorative ou tacitement saluée, pourquoi la violence des insurrections est-elle toujours associée à la folie, quand celle de la répression ne l'est jamais ? Blanqui est un fou à enfermer, mais Cavaignac, qui transforme les journées de Juin en bain de sang, est salué en sauveur de la patrie. Singulière manie que de vilipender les soulèvements populaires et de récompenser le massacre ; étrange règle que d'installer systématiquement la révolution dans la démence et de parer la réaction des vertus du bon sens. Mais ces exigences de la « gouvernementalité », n'est-ce pas ce qu'on a coutume d'appeler, et fort à propos, la raison d'État ? Ces questions se poseront avec une acuité re ...",
+        "byte_size": 322615,
+        "sha256": "1616e1e37915b6ea06de881b1e4fcb93ba67e1db8365e4a8e2182a1f2b1b306d"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-001-préambule:toc-ch-001-préambule:footnote",
+    "cluster_id": "toc-ch-015-1848oulapestedémocratiqu:toc-ch-015-1848oulapestedémocratiqu:footnote",
     "request_mode": "ref_only_visual",
-    "page_context_count": 1,
+    "page_context_count": 7,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00034\",\n    \"marker\": \"39\",\n    \"note_text\": \"Cote 6R1. Mais le volume suivant (6R2) commence en 1847.\",\n    \"confidence\": 0.95,\n    \"reason\": \"The screenshot clearly shows the footnote text on page 40 corresponding to marker '39' in the OCR excerpt. The structured data lacks this note item, so it must be synthesized.\"\n  }\n]",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00333\",\n    \"marker\": \"64\",\n    \"note_text\": \"D'après Georges Duveau, 1848, Gallimard, 1965, p. 124.\",\n    \"confidence\": 0.99,\n    \"reason\": \"The footnote text for marker 64 is clearly visible at the bottom of page 265 (image 2). The OCR/structured data failed to extract this note item.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00340\",\n    \"marker\": \"71\",\n    \"note_text\": \"Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.\",\n    \"confidence\": 0.99,\n    \"reason\": \"The footnote text for marker 71 is clearly visible at the bottom of page 269 (image 6). The OCR/structured data failed to extract this note item.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
       "note_item_id": "",
-      "anchor_id": "anchor-00034",
+      "anchor_id": "anchor-00333",
       "anchor_phrase": "",
-      "marker": "39",
-      "note_text": "Cote 6R1. Mais le volume suivant (6R2) commence en 1847.",
-      "confidence": 0.95,
-      "reason": "The screenshot clearly shows the footnote text on page 40 corresponding to marker '39' in the OCR excerpt. The structured data lacks this note item, so it must be synthesized."
+      "marker": "64",
+      "note_text": "D'après Georges Duveau, 1848, Gallimard, 1965, p. 124.",
+      "confidence": 0.99,
+      "reason": "The footnote text for marker 64 is clearly visible at the bottom of page 265 (image 2). The OCR/structured data failed to extract this note item."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00340",
+      "anchor_phrase": "",
+      "marker": "71",
+      "note_text": "Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.",
+      "confidence": 0.99,
+      "reason": "The footnote text for marker 71 is clearly visible at the bottom of page 269 (image 6). The OCR/structured data failed to extract this note item."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-001-préambule:toc-ch-001-préambule:footnote",
-    "chapter_title": "Préambule",
-    "request_mode": "ref_only_visual",
     "parsed_actions": [
       {
         "action": "synthesize_note_item",
         "note_item_id": "",
-        "anchor_id": "anchor-00034",
+        "anchor_id": "anchor-00333",
         "anchor_phrase": "",
-        "marker": "39",
-        "note_text": "Cote 6R1. Mais le volume suivant (6R2) commence en 1847.",
-        "confidence": 0.95,
-        "reason": "The screenshot clearly shows the footnote text on page 40 corresponding to marker '39' in the OCR excerpt. The structured data lacks this note item, so it must be synthesized."
-      }
-    ],
-    "auto_selected_actions": [
+        "marker": "64",
+        "note_text": "D'après Georges Duveau, 1848, Gallimard, 1965, p. 124.",
+        "confidence": 0.99,
+        "reason": "The footnote text for marker 64 is clearly visible at the bottom of page 265 (image 2). The OCR/structured data failed to extract this note item."
+      },
       {
         "action": "synthesize_note_item",
         "note_item_id": "",
-        "anchor_id": "anchor-00034",
+        "anchor_id": "anchor-00340",
         "anchor_phrase": "",
-        "marker": "39",
-        "note_text": "Cote 6R1. Mais le volume suivant (6R2) commence en 1847.",
-        "confidence": 0.95,
-        "reason": "The screenshot clearly shows the footnote text on page 40 corresponding to marker '39' in the OCR excerpt. The structured data lacks this note item, so it must be synthesized."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00034",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "39",
-        "note_text": "Cote 6R1. Mais le volume suivant (6R2) commence en 1847.",
-        "confidence": 0.95,
-        "reason": "The screenshot clearly shows the footnote text on page 40 corresponding to marker '39' in the OCR excerpt. The structured data lacks this note item, so it must be synthesized."
+        "marker": "71",
+        "note_text": "Dr Bergeret, « Cas nombreux d'aliénation mentale... », art. cité, p. 141.",
+        "confidence": 0.99,
+        "reason": "The footnote text for marker 71 is clearly visible at the bottom of page 269 (image 6). The OCR/structured data failed to extract this note item."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 1352,
-    "completion_tokens": 130,
-    "total_tokens": 1482,
+    "prompt_tokens": 5578,
+    "completion_tokens": 267,
+    "total_tokens": 5845,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 3635
+    "duration_ms": 7303
   }
 }

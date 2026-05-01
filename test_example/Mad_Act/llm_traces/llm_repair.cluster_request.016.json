@@ -3,228 +3,102 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote\",\n  \"chapter_title\": \"16. Madness multiple\",\n  \"page_range\": [\n    632,\n    638\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 632,\n      \"ocr_excerpt\": \"of labels to be recognizable from one field to another, but it also suggests that most people agreed about what madness was. Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials. I tried to develop an approach that would allow me to understand both the obviousness of village madmen and the complexities of technical objects like legal fenghing and medical kuang. For this purpose, I tried to show how th ...\"\n    },\n    {\n      \"page_no\": 633,\n      \"ocr_excerpt\": \"rigor in observation or as a response to the supposedly universal problem of what to do with violent mad people. “Killing because of madness” was created in the 1660s when some officials started considering as legally relevant the fact that some killings were committed in a state of madness. Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $ When the Ministry of Punishments ordered all families to confine “people with madness illness” preventively (first in 1689, and then more rigorously in the 1730s and 1760s), it was thinking of madness from the point of view of its occasional outcome—a homicide committed during a fit (see 11.4). The ...\"\n    },\n    {\n      \"page_no\": 638,\n      \"ocr_excerpt\": \"probably find more information in fiction—Katz did mention some eighteenth-century stories—on how families treated their mad relatives, in the same way as Edward Davis (2001) used a collection of stories to reconstruct the nature of Song local religion. Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $ Another issue I barely addressed is how educated people dealt with their own mental torments. What did men who resorted to neither medicine nor exorcism do when they felt themselves becoming crazy or saw their peers lose sanity? We could probably find several cases like that of Xu Nianzu 許念祖 (1655-1698), a scholar who committed suicide after repeated bouts of despair that his friends and cor ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01731\",\n      \"marker\": \"2\",\n      \"page_no\": 632,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01732\",\n      \"marker\": \"3\",\n      \"page_no\": 632,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01733\",\n      \"marker\": \"4\",\n      \"page_no\": 633,\n      \"paragraph_index\": 4,\n      \"source_text\": \"Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01734\",\n      \"marker\": \"5\",\n      \"page_no\": 633,\n      \"paragraph_index\": 4,\n      \"source_text\": \"Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01735\",\n      \"marker\": \"6\",\n      \"page_no\": 638,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stor ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00455\",\n      \"note_item_id\": \"fn-00372\",\n      \"current_anchor_id\": \"synthetic-footnote-00318\",\n      \"marker\": \"9\",\n      \"note_page_no\": 633,\n      \"anchor_page_no\": 633,\n      \"current_anchor_marker\": \"9\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"7*5 -.78627*=287 *6870 8=1.;<DD8; =8 * ;.->,=287 8/ 9.7*5=B /8; 9.895. @18 @.;. <.7=.7,.- >7-.; 8=1.;9.7*5 -.78627*=287< 524. F*<<*>5=270 *7- 4255270 87.E< 85-.; +;8=1.; G $=*;=270 27 =1. < 6*- 4255.;<,8>5- +.<.7=.7,.- =8 -.*=1>7-.; 8=1.; 9 ...\",\n      \"anchor_excerpt\": \"7*5 -.78627*=287 *6870 8=1.;<DD8; =8 * ;.->,=287 8/ 9.7*5=B /8; 9.895. @18 @.;. <.7=.7,.- >7-.; 8=1.;9.7*5 -.78627*=287< 524. F*<<*>5=270 *7- 4255270 87.E< 85-.; +;8=1.; G $=*;=270 27 =1. < 6*- 4255.;<,8>5- +.<.7=.7,.- =8 -.*=1>7-.; 8=1.; 9 ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-003-prologuediversitycoheren:toc-ch-003-prologuediversitycoheren:endnote\",\n  \"chapter_title\": \"Prologue Diversity, coherence, and scheme transfers\",\n  \"page_range\": [\n    41,\n    41\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 41,\n      \"ocr_excerpt\": \"task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00031\",\n      \"marker\": \"7\",\n      \"page_no\": 41,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symp ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote",
-      "chapter_title": "16. Madness multiple",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-003-prologuediversitycoheren:toc-ch-003-prologuediversitycoheren:endnote",
+      "chapter_title": "Prologue Diversity, coherence, and scheme transfers",
+      "request_mode": "ref_only_visual",
       "allowed_actions": [
-        "match",
         "ignore_ref",
         "synthesize_note_item",
         "needs_review"
       ],
-      "note_system": "footnote",
+      "note_system": "endnote",
       "page_range": [
-        632,
-        638
+        41,
+        41
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 108269,
+          "row_id": 35,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01731",
-          "chapter_id": "toc-manual-2-16-16-madness-multiple",
-          "page_no": 632,
-          "paragraph_index": 1,
-          "char_start": 277,
-          "char_end": 285,
-          "source_marker": "$ ^{2} $",
-          "normalized_marker": "2",
-          "anchor_kind": "footnote",
+          "anchor_id": "anchor-00031",
+          "chapter_id": "toc-ch-003-prologuediversitycoheren",
+          "page_no": 41,
+          "paragraph_index": 2,
+          "char_start": 372,
+          "char_end": 380,
+          "source_marker": "$ ^{7} $",
+          "normalized_marker": "7",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 108270,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01732",
-          "chapter_id": "toc-manual-2-16-16-madness-multiple",
-          "page_no": 632,
-          "paragraph_index": 1,
-          "char_start": 774,
-          "char_end": 782,
-          "source_marker": "$ ^{3} $",
-          "normalized_marker": "3",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 108271,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01733",
-          "chapter_id": "toc-manual-2-16-16-madness-multiple",
-          "page_no": 633,
-          "paragraph_index": 4,
-          "char_start": 475,
-          "char_end": 483,
-          "source_marker": "$ ^{4} $",
-          "normalized_marker": "4",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 108272,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01734",
-          "chapter_id": "toc-manual-2-16-16-madness-multiple",
-          "page_no": 633,
-          "paragraph_index": 4,
-          "char_start": 599,
-          "char_end": 607,
-          "source_marker": "$ ^{5} $",
-          "normalized_marker": "5",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 108274,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01735",
-          "chapter_id": "toc-manual-2-16-16-madness-multiple",
-          "page_no": 638,
-          "paragraph_index": 1,
-          "char_start": 543,
-          "char_end": 551,
-          "source_marker": "$ ^{6} $",
-          "normalized_marker": "6",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子).",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         }
       ],
-      "rebind_candidates": [
-        {
-          "link_id": "link-00455",
-          "note_item_id": "fn-00372",
-          "current_anchor_id": "synthetic-footnote-00318",
-          "marker": "9",
-          "note_page_no": 633,
-          "anchor_page_no": 633,
-          "current_anchor_marker": "9",
-          "note_excerpt": "7*5 -.78627*=287 *6870 8=1.;<DD8; =8 * ;.->,=287 8/ 9.7*5=B /8; 9.895. @18 @.;. <.7=.7,.- >7-.; 8=1.;9.7*5 -.78627*=287< 524. F*<<*>5=270 *7- 4255270 87.E< 85-.; +;8=1.; G $=*;=270 27 =1. < 6*- 4255.;<,8>5- +.<.7=.7,.- =8 -.*=1>7-.; 8=1.; 9.7*5 -.78627*=287< =1*7 F4255270 +.,*><. 8/ 6*-7.<< G+>= 68<= 8/ =1.<. -.*=1 <.7=.7,.< @.;..?.7=>*55B ,87?.;=.- =8 9.;6*7.7= 269;2<876.7= <.. 9",
-          "anchor_excerpt": "7*5 -.78627*=287 *6870 8=1.;<DD8; =8 * ;.->,=287 8/ 9.7*5=B /8; 9.895. @18 @.;. <.7=.7,.- >7-.; 8=1.;9.7*5 -.78627*=287< 524. F*<<*>5=270 *7- 4255270 87.E< 85-.; +;8=1.; G $=*;=270 27 =1. < 6*- 4255.;<,8>5- +.<.7=.7,.- =8 -.*=1>7-.; 8=1.; 9.7*5 -.78627*=287< =1*7 F4255270 +.,*><. 8/ 6*-7.<< G+>= 68<= 8/ =1.<. -.*=1 <.7=.7,.< @.;..?.7=>*55B ,87?.;=.- =8 9.;6*7.7= 269;2<876.7= <.. 9",
-          "current_anchor_synthetic": true
-        }
-      ]
+      "rebind_candidates": []
     },
     "page_contexts": [
       {
-        "page_no": 632,
-        "file_idx": 631,
+        "page_no": 41,
+        "file_idx": 40,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "of labels to be recognizable from one field to another, but it also suggests that most people agreed about what madness was. Was madness a single object, then? And were words like diankuang and jengbing all synonyms? No. Although both legal and medical specialists counted on the easy recognizability of madness, they transposed daily practice and local labels into specialized categories and scripts. $ ^{2} $ Penal denominations and illness names channeled phenomena into understandable and manageable forms. Physicians, for instance, tended to reduce to organic imbalances some problems that had probably emerged through social interactions. They asserted their competence by claiming to understand the organic roots of emotional discomforts and behavioral disorders. This reductionism created—or “enacted”—a different kind of madness than the one found in ritual therapies or judicial practice. $ ^{3} $ As such, physicians faced a different object than legal officials. I tried to develop an approach that would allow me to understand both the obviousness of village madmen and the complexities of technical objects like legal fenghing and medical kuang. For this purpose, I tried to show how these common words acquired specific referents through medical and legal practices. This meant showing how, despite the common equivalence of terms like kuang and fengdian in daily contexts, some fields ...",
-        "byte_size": 134918,
-        "sha256": "b9de22f40b602c0720251d1611a8e6dadf3ead6563bfb88cf3ccae4c19ba270b"
-      },
-      {
-        "page_no": 633,
-        "file_idx": 632,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "rigor in observation or as a response to the supposedly universal problem of what to do with violent mad people. “Killing because of madness” was created in the 1660s when some officials started considering as legally relevant the fact that some killings were committed in a state of madness. Legal officials did not understand madness in the same way as physicians. Although the legal object “madness illness” borrowed from medical and popular conceptions, it evolved to suit the concerns and categories of the legal field. At first, Qing law targeted only one kind of act (homicides), not madness or mad people in general. A killing was considered to have been committed “because of madness” when the killer had had no cognizance—and had no recollection—of his act. $ ^{4} $ This lack of awareness was what convinced early Qing officials that mad killers should not be physically punished. $ ^{5} $ When the Ministry of Punishments ordered all families to confine “people with madness illness” preventively (first in 1689, and then more rigorously in the 1730s and 1760s), it was thinking of madness from the point of view of its occasional outcome—a homicide committed during a fit (see 11.4). The apparent danger of insanity had been made obvious by the very law that treated mad killers leniently, because each application of this law showed that someone had killed “because of madness,” and bec ...",
-        "byte_size": 137924,
-        "sha256": "7cf94c6e4b6361b6aa6e38ffd36eb99333dc5d4bae60654a3b5784b96a3e996d"
-      },
-      {
-        "page_no": 638,
-        "file_idx": 637,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "probably find more information in fiction—Katz did mention some eighteenth-century stories—on how families treated their mad relatives, in the same way as Edward Davis (2001) used a collection of stories to reconstruct the nature of Song local religion. Fiction could be put to many more uses. One feature of mad people in medical texts and popular perception was the peculiarity of their words. How did fictional sources portray mad speech? My impression is that mad characters in Chinese stories were usually misrecognized as mad before being revealed to be something else—playful immortals in disguise, hermits or visionaries, or people in the grip of real demons. Madness thus served to dissimulate something else, sometimes from the reader, but most often from other characters in the story. $ ^{6} $ Another issue I barely addressed is how educated people dealt with their own mental torments. What did men who resorted to neither medicine nor exorcism do when they felt themselves becoming crazy or saw their peers lose sanity? We could probably find several cases like that of Xu Nianzu 許念祖 (1655-1698), a scholar who committed suicide after repeated bouts of despair that his friends and correspondents referred to as madness (for references, see 8.5, p. 344n50). This inventory of ignorance could linger. It reminds us that we are only beginning to understand how late imperial Chinese of v ...",
-        "byte_size": 107757,
-        "sha256": "80a20b6ccd30a3b13c71767e9f542819218b7cd5494bb081b4855156641bf421"
+        "ocr_excerpt": "task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity often borrowed from the prototypical scenarios of other illnesses or from contemporaneous interpretations of human vitality rather than from the observation of mad patients. A formal analysis would sh ...",
+        "byte_size": 135861,
+        "sha256": "66c785c3b66a9d86a351df4fd465a9e3b6f86832ff8122029eec88be2d0954ef"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 3,
+    "cluster_id": "toc-ch-003-prologuediversitycoheren:toc-ch-003-prologuediversitycoheren:endnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00372\",\n    \"anchor_id\": \"anchor-01734\",\n    \"confidence\": 0.95,\n    \"reason\": \"The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00031\",\n    \"marker\": \"7\",\n    \"note_text\": \"This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker 7 is clearly visible at the bottom of the page in the screenshot, but no corresponding note item exists in the structured data.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "fn-00372",
-      "anchor_id": "anchor-01734",
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00031",
       "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
+      "marker": "7",
+      "note_text": "This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.",
+      "confidence": 1.0,
+      "reason": "The footnote text for marker 7 is clearly visible at the bottom of the page in the screenshot, but no corresponding note item exists in the structured data."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-manual-2-16-16-madness-multiple:toc-manual-2-16-16-madness-multiple:footnote",
-    "chapter_title": "16. Madness multiple",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "fn-00372",
-        "anchor_id": "anchor-01734",
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00031",
         "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00372",
-        "anchor_id": "anchor-01734",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-00455",
-        "action": "match",
-        "note_item_id": "fn-00372",
-        "anchor_id": "anchor-01734",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The rebind candidate link-00455 links note fn-00372 (marker 9) to a synthetic anchor on page 633. The screenshot for page 633 clearly shows footnote marker 5 at the end of the paragraph ending '...should not be physically punished.' and the corresponding footnote text at the bottom starting with '5 Starting in the 1750s...'. The OCR excerpt for the note matches this text ('Starting in the 1750s, mad killers could be sentenced to death...'). Therefore, the note should be matched to the explicit anchor-01734 (marker 5) instead of the synthetic one."
+        "marker": "7",
+        "note_text": "This distinction between external and internal causes corresponds broadly to the modern distinction between “ontological” and “functional” causes of illness. For more on these concepts as they apply to Chinese medicine, see Unschuld 1997 and Harper 1998: 69-76.",
+        "confidence": 1.0,
+        "reason": "The footnote text for marker 7 is clearly visible at the bottom of the page in the screenshot, but no corresponding note item exists in the structured data."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 4847,
-    "completion_tokens": 216,
-    "total_tokens": 5063,
+    "prompt_tokens": 1714,
+    "completion_tokens": 163,
+    "total_tokens": 1877,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 9805
+    "duration_ms": 3943
   }
 }

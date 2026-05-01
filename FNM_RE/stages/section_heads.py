@@ -19,12 +19,9 @@ def _chapter_id_for_page(chapters: list[ChapterRecord], page_no: int) -> str:
     return chapter_id_for_page(chapters, page_no)
 
 
-def _chapter_title_keys(chapters: list[ChapterRecord]) -> dict[str, str]:
-    return {chapter.chapter_id: chapter_title_match_key(chapter.title) for chapter in chapters}
-
-
 _SECTION_TITLE_MIN_WORDS = 3
 _SECTION_TITLE_MIN_CHARS = 18
+_CHAPTER_LEADING_NUMBER_RE = re.compile(r"^\s*(?:\d+|[ivxlcdm]+)[\.\):\-–—]?\s+", re.IGNORECASE)
 _SECTION_TITLE_NOISE_RE = re.compile(
     r"^\s*(?:to the|and|or|the|a|an|in the|of the|for the|with the|by the|at the|on the|from the|"
     r"is a|are|was|were|has|have|had|been|being|"
@@ -34,23 +31,63 @@ _SECTION_TITLE_NOISE_RE = re.compile(
     r")\s*$",
     re.IGNORECASE,
 )
+_SECTION_TITLE_OPENING_QUOTES = "\"'“”‘’«»‹›「」『』"
+_SUPPRESSED_SECTION_HARD_REJECT_REASONS = {
+    "invalid_title",
+    "partition_conflict",
+    "note_partition",
+    "note_heading",
+    "non_body_family",
+}
+
+
+def _chapter_title_match_keys(value: str) -> set[str]:
+    title = normalize_title(value)
+    keys = {chapter_title_match_key(title)}
+    stripped = _CHAPTER_LEADING_NUMBER_RE.sub("", title).strip()
+    if stripped and stripped != title:
+        keys.add(chapter_title_match_key(stripped))
+    return {key for key in keys if key}
+
+
+def _chapter_title_keys(chapters: list[ChapterRecord]) -> dict[str, set[str]]:
+    return {chapter.chapter_id: _chapter_title_match_keys(chapter.title) for chapter in chapters}
+
+
+def _section_title_starts_like_heading(title: str) -> bool:
+    stripped = normalize_title(title).lstrip(_SECTION_TITLE_OPENING_QUOTES)
+    first_alpha = next((char for char in stripped if char.isalpha()), "")
+    return not first_alpha or first_alpha.isupper()
+
+
+def _section_title_text_is_plausible(title: str) -> bool:
+    normalized = normalize_title(title)
+    if not normalized:
+        return False
+    words = [w for w in normalized.split() if w]
+    if _SECTION_TITLE_NOISE_RE.match(normalized):
+        return False
+    if len(words) == 1 and len(normalized) < 12:
+        return False
+    if not _section_title_starts_like_heading(normalized):
+        return False
+    if len(words) < _SECTION_TITLE_MIN_WORDS and len(normalized) < _SECTION_TITLE_MIN_CHARS:
+        return _section_title_starts_like_heading(normalized)
+    return True
 
 
 def _candidate_can_become_section(candidate: HeadingCandidate) -> bool:
+    title = normalize_title(candidate.normalized_text or candidate.text)
+    if not _section_title_text_is_plausible(title):
+        return False
     if candidate.suppressed_as_chapter:
+        if str(candidate.reject_reason or "") in _SUPPRESSED_SECTION_HARD_REJECT_REASONS:
+            return False
         return True
     family = str(candidate.heading_family_guess or "").strip().lower()
     if family != "section":
         return False
-    title = normalize_title(candidate.normalized_text or candidate.text)
-    words = [w for w in title.split() if w]
-    if len(words) < _SECTION_TITLE_MIN_WORDS and len(title) < _SECTION_TITLE_MIN_CHARS:
-        return False
-    if _SECTION_TITLE_NOISE_RE.match(title):
-        return False
-    if len(words) == 1 and len(title) < 12:
-        return False
-    return True
+    return _section_title_text_is_plausible(title)
 
 
 def build_section_heads(
@@ -73,7 +110,9 @@ def build_section_heads(
         chapter_id = str(row.get("chapter_id") or "").strip() or _chapter_id_for_page(ordered_chapters, page_no)
         if not title or page_no <= 0 or not chapter_id:
             continue
-        if chapter_title_match_key(title) == chapter_title_key_map.get(chapter_id, ""):
+        if not _section_title_text_is_plausible(title):
+            continue
+        if chapter_title_match_key(title) in chapter_title_key_map.get(chapter_id, set()):
             continue
         key = (chapter_id, page_no, chapter_title_match_key(title))
         if key in seen:
@@ -89,33 +128,34 @@ def build_section_heads(
             }
         )
 
-    for candidate in heading_candidates:
-        if not _candidate_can_become_section(candidate):
-            continue
-        page_no = int(candidate.page_no)
-        if page_no <= 0 or page_role_map.get(page_no) not in {"body", "front_matter"}:
-            continue
-        chapter_id = _chapter_id_for_page(ordered_chapters, page_no)
-        if not chapter_id:
-            continue
-        title = normalize_title(candidate.normalized_text or candidate.text)
-        if not title:
-            continue
-        if chapter_title_match_key(title) == chapter_title_key_map.get(chapter_id, ""):
-            continue
-        key = (chapter_id, page_no, chapter_title_match_key(title))
-        if key in seen:
-            continue
-        seen.add(key)
-        merged_rows.append(
-            {
-                "chapter_id": chapter_id,
-                "title": title,
-                "page_no": page_no,
-                "level": 2,
-                "source": str(candidate.source or "candidate"),
-            }
-        )
+    if fallback_sections is None:
+        for candidate in heading_candidates:
+            if not _candidate_can_become_section(candidate):
+                continue
+            page_no = int(candidate.page_no)
+            if page_no <= 0 or page_role_map.get(page_no) not in {"body", "front_matter"}:
+                continue
+            chapter_id = _chapter_id_for_page(ordered_chapters, page_no)
+            if not chapter_id:
+                continue
+            title = normalize_title(candidate.normalized_text or candidate.text)
+            if not title:
+                continue
+            if chapter_title_match_key(title) in chapter_title_key_map.get(chapter_id, set()):
+                continue
+            key = (chapter_id, page_no, chapter_title_match_key(title))
+            if key in seen:
+                continue
+            seen.add(key)
+            merged_rows.append(
+                {
+                    "chapter_id": chapter_id,
+                    "title": title,
+                    "page_no": page_no,
+                    "level": 2,
+                    "source": str(candidate.source or "candidate"),
+                }
+            )
 
     merged_rows.sort(
         key=lambda item: (
@@ -161,4 +201,3 @@ def build_section_heads(
         "partition_conflict_count": int(suppressed_reason_counts.get("partition_conflict", 0)),
     }
     return section_heads, heading_review_summary
-

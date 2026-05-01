@@ -107,6 +107,72 @@ from FNM_RE.stages.units import build_translation_units
 from FNM_RE.status import build_module_gate_status, build_phase4_status, build_phase6_status
 
 
+def _note_link_summary_from_layers(links: list[Any]) -> dict[str, int]:
+    return {
+        "matched": sum(1 for row in links if str(getattr(row, "status", "") or "") == "matched"),
+        "footnote_orphan_note": sum(
+            1
+            for row in links
+            if str(getattr(row, "note_kind", "") or "") == "footnote"
+            and str(getattr(row, "status", "") or "") == "orphan_note"
+        ),
+        "footnote_orphan_anchor": sum(
+            1
+            for row in links
+            if str(getattr(row, "note_kind", "") or "") == "footnote"
+            and str(getattr(row, "status", "") or "") == "orphan_anchor"
+        ),
+        "endnote_orphan_note": sum(
+            1
+            for row in links
+            if str(getattr(row, "note_kind", "") or "") == "endnote"
+            and str(getattr(row, "status", "") or "") == "orphan_note"
+        ),
+        "endnote_orphan_anchor": sum(
+            1
+            for row in links
+            if str(getattr(row, "note_kind", "") or "") == "endnote"
+            and str(getattr(row, "status", "") or "") == "orphan_anchor"
+        ),
+        "ambiguous": sum(1 for row in links if str(getattr(row, "status", "") or "") == "ambiguous"),
+        "ignored": sum(1 for row in links if str(getattr(row, "status", "") or "") == "ignored"),
+    }
+
+
+def _link_table_with_uninjected_refs_reopened(
+    note_link_table: NoteLinkTable,
+    frozen_units: FrozenUnits,
+) -> NoteLinkTable:
+    skipped_link_ids = {
+        str(row.link_id or "")
+        for row in list(frozen_units.ref_map or [])
+        if str(row.decision or "") == "skipped"
+        and str(row.link_id or "").strip()
+        and str(row.note_item_id or "").strip()
+    }
+    if not skipped_link_ids:
+        return note_link_table
+    adjusted_effective_links = []
+    for row in note_link_table.effective_links:
+        if str(row.link_id or "") in skipped_link_ids and str(row.status or "") == "matched":
+            adjusted_effective_links.append(
+                replace(
+                    row,
+                    anchor_id="",
+                    status="orphan_note",  # type: ignore[arg-type]
+                    resolver="repair",  # type: ignore[arg-type]
+                    confidence=0.0,
+                )
+            )
+        else:
+            adjusted_effective_links.append(row)
+    return replace(
+        note_link_table,
+        effective_links=adjusted_effective_links,
+        link_summary=_note_link_summary_from_layers(adjusted_effective_links),
+    )
+
+
 def _resolve_endnotes_start_page(visual_toc_bundle: Mapping[str, Any] | None) -> int | None:
     if not visual_toc_bundle:
         return None
@@ -1223,6 +1289,10 @@ def build_module_pipeline_snapshot(
             max_body_chars=int(max_body_chars or 6000),
         ),
     )
+    export_link_table = _link_table_with_uninjected_refs_reopened(
+        link_result.data,
+        freeze_result.data,
+    )
     frozen_units_effective = _overlay_repo_units_on_frozen(
         freeze_result.data,
         repo_units=repo_units,
@@ -1238,8 +1308,8 @@ def build_module_pipeline_snapshot(
         note_items=_phase_note_items_from_layers(effective_split_layers),
         chapter_note_modes=_phase_note_modes_from_book_type(book_type_result),
         body_anchors=_phase_anchors_from_links(link_result),
-        note_links=_phase_links_from_layers(link_result.data.links),
-        effective_note_links=_phase_links_from_layers(link_result.data.effective_links),
+        note_links=_phase_links_from_layers(export_link_table.links),
+        effective_note_links=_phase_links_from_layers(export_link_table.effective_links),
         structure_reviews=[],
         status=StructureStatusRecord(structure_state="idle"),
         summary=Phase4Summary(),
@@ -1265,7 +1335,7 @@ def build_module_pipeline_snapshot(
         end_pct=99.9,
         runner=lambda: build_chapter_markdown_set(
             frozen_units_effective,
-            link_result.data,
+            export_link_table,
             split_result.data,
             diagnostic_machine_by_page=_diagnostic_machine_by_page(diagnostic_pages),
             include_diagnostic_entries=bool(include_diagnostic_entries),

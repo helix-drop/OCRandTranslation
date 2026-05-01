@@ -9,6 +9,7 @@ import unittest
 from types import SimpleNamespace
 
 from FNM_RE.models import (
+    NoteLinkRecord,
     TranslationUnitRecord,
     UnitPageSegmentRecord,
     UnitParagraphRecord,
@@ -54,16 +55,18 @@ def _make_note_unit(chapter_id: str, note_id: str, *, kind: str, text: str, page
 
 
 def _run_export(*, body_text: str, notes: list[tuple[str, str, str]],
+                matched_links: list[NoteLinkRecord] | None = None,
+                note_section_id: str | None = None,
                 chapter_id: str = "ch1", chapter_title: str = "Test Chapter") -> str:
     chapter = SimpleNamespace(chapter_id=chapter_id, title=chapter_title, pages=[1])
     body_units = [_make_body_unit(chapter_id, body_text)]
     note_units = [
-        _make_note_unit(chapter_id, nid, kind=kind, text=text)
+        _make_note_unit(note_section_id or chapter_id, nid, kind=kind, text=text)
         for nid, kind, text in notes
     ]
     content, _summary = _build_section_markdown(
         chapter, section_heads=[], body_units=body_units,
-        note_units=note_units, matched_links=[], note_items_by_id={},
+        note_units=note_units, matched_links=list(matched_links or []), note_items_by_id={},
         body_anchors_by_id={}, include_diagnostic_entries=False,
         diagnostic_machine_by_page={},
         book_type="mixed", chapter_note_mode="chapter_endnote_primary",
@@ -157,6 +160,32 @@ class ExportNotesSectionSplitTest(unittest.TestCase):
         endnote_defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
         self.assertEqual(len(refs), 2, f"正文应有 2 个 [^N]（2 endnote），实为 {len(refs)}")
         self.assertEqual(len(endnote_defs), 2, f"### NOTES 应有 2 条 endnote 定义")
+
+    def test_orphan_endnote_definition_is_not_exported_as_normal_note(self):
+        link = NoteLinkRecord(
+            link_id="link-1",
+            chapter_id="ch1",
+            region_id="nr1",
+            note_item_id="en-001",
+            anchor_id="missing-anchor",
+            status="matched",
+            resolver="fallback",
+            confidence=1.0,
+            note_kind="endnote",
+            marker="1",
+            page_no_start=1,
+            page_no_end=1,
+        )
+        content = _run_export(
+            body_text="Body without an explicit note ref.",
+            notes=[("en-001", "endnote", "1. Orphan note text.")],
+            matched_links=[link],
+            note_section_id="orphan-owner",
+        )
+
+        self.assertNotIn("### NOTES", content)
+        self.assertNotIn("[^1]:", content)
+        self.assertNotRegex(content, r"(?m)^\[\^1\]$")
 
     def test_footnote_marks_body_with_star_not_bracket(self):
         """footnote ref 在正文中以 * 呈现，不在 ### NOTES 中。"""

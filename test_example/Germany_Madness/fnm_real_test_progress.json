@@ -1,68 +1,68 @@
 {
   "status": "done",
   "current_stage": "report_write",
-  "started_at": "2026-04-22T19:27:28",
-  "updated_at": "2026-04-22T19:36:57",
+  "started_at": "2026-05-01T00:12:48",
+  "updated_at": "2026-05-01T00:25:46",
   "stage_history": [
     {
       "stage": "reingest",
       "status": "done",
       "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-      "at": "2026-04-22T19:27:28"
+      "at": "2026-05-01T00:12:48"
     },
     {
       "stage": "visual_toc",
       "status": "done",
       "detail": "ready",
-      "at": "2026-04-22T19:28:15"
+      "at": "2026-05-01T00:13:32"
     },
     {
       "stage": "fnm_pipeline",
       "status": "done",
-      "detail": "ready",
-      "at": "2026-04-22T19:29:16"
+      "detail": "review_required",
+      "at": "2026-05-01T00:14:38"
     },
     {
       "stage": "llm_repair",
       "status": "done",
-      "detail": "auto_applied=19",
-      "at": "2026-04-22T19:31:48"
+      "detail": "auto_applied=21",
+      "at": "2026-05-01T00:22:25"
     },
     {
       "stage": "fnm_pipeline_rebuild",
       "status": "done",
-      "detail": "ready",
-      "at": "2026-04-22T19:32:49"
+      "detail": "review_required",
+      "at": "2026-05-01T00:23:32"
     },
     {
       "stage": "structure_verify",
       "status": "done",
-      "detail": "ready",
-      "at": "2026-04-22T19:33:50"
+      "detail": "review_required",
+      "at": "2026-05-01T00:24:38"
     },
     {
       "stage": "placeholder_translate",
       "status": "done",
-      "detail": "translated_paras=2267",
-      "at": "2026-04-22T19:34:54"
+      "detail": "translated_paras=1965",
+      "at": "2026-05-01T00:25:46"
     },
     {
       "stage": "export_verify",
       "status": "done",
-      "detail": "ok",
-      "at": "2026-04-22T19:36:57"
+      "detail": "structure_review_required",
+      "at": "2026-05-01T00:25:46"
     },
     {
       "stage": "zip_finalize",
       "status": "done",
       "detail": "ok",
-      "at": "2026-04-22T19:36:57"
+      "at": "2026-05-01T00:25:46"
     },
     {
       "stage": "report_write",
       "status": "done",
       "detail": "单书结果、报告、进度均已写入",
-      "at": "2026-04-22T19:36:57"
+      "at": "2026-05-01T00:25:46"
     }
   ]
 }

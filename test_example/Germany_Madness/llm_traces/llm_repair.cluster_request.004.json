@@ -3,146 +3,227 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-006-pilgrimsinsearchoftheirr:toc-ch-006-pilgrimsinsearchoftheirr:footnote\",\n  \"chapter_title\": \"Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    308,\n    341\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 308,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 6.2</div> <div style=\\\"text-align: center;\\\">The Miracles of Franconia, 1450–1650</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>(Total Miracles)</td><td style='text-align: center; word-wrap: break-word;'>Demon Possession</td><td style='text-align: center; word-wrap: break-word;'>Madness</td><td style='text-align: center; word-wrap: break-word;'>St. Vitus&#x27; Dance</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1450-1470</td><td style='text-align: center; word-wrap: break-word;'>(0)</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1471-1490</td><td style='text-align: center; word-wrap: break-word;'>(39)</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td>< ...\"\n    },\n    {\n      \"page_no\": 316,\n      \"ocr_excerpt\": \"pray three Hail Marys, and when she did, she was released.\\\" When these attacks did not cease, however, she vowed a pilgrimage of some 180 miles to Altötting, and once there, she felt totally relieved of her suicidal urges. $ ^{78} $ Hans Hochstetter, a Franconian serving as the city secretary of Pettau (Ptuj) also came to Altötting in 1495 to express his thanks to Mary for relief from the “calamity and distress in which I stood, not knowing then how I should escape,” as he wrote in the document that he displayed in the chapel for all to see. $ ^{79} $ Here began the remarkable tradition at Altötting of leaving behind personal descriptions of one’s miraculous cures. In this case, then, we are not dependent on the words of some priest, for we have Hochstetter’s own description, and it is doubly impressive that he chose words like those we have seen before, “calamity and distress” (Widerwärtigkeit und Triibsal), rather than some other more technical vocabulary. We are probably safe in concluding that these early printed miracle books from Altötting preserve the language of the pilgrims themselves, even though the accounts were, of course, abridged to fit the requirements of space on t ...\"\n    },\n    {\n      \"page_no\": 332,\n      \"ocr_excerpt\": \"ers to be drowned in the Pirg; but she recanted and they let her go. Again she became 'not right' and tried to drown and stab herself; so they locked her up. In jail Mary the Mother of God appeared to her [and urged] her to vow herself to Tuntenhausen . . . and she vowed a Mass and a pilgrimage on her knees with the rope of the martyrs and with a wax wreath.\\\" Soon she was healed (1532, fol. A4v). Other persons described their suicidal impulses as a grosse Anfechtung, a great attack, temptation, and obsession. This was, of course, the very word Luther used to describe his religious agonies, but these Bavarian peasants usually used the word to describe murderous, despairing, or suicidal fantasies (e.g., 1533, fol. A4 $ ^{r} $, and 1536, fol. A1 $ ^{v} $). Repeatedly, the miracle reports also state that doctors had been visited, all to no avail, an interesting indication that the poor rural population had some access to a local doctor, probably not a university-trained physician, but a professional healer and more than just an amateur herbalist or cunning man. Such sources suggest that doctors with some training were not available only to noblemen and comfortable burghers. $ ^{132} $ ...\"\n    },\n    {\n      \"page_no\": 333,\n      \"ocr_excerpt\": \"In 1564, a woman from the parish of Euernbeck near Pfaffenhofen went mad with the pain from an ulcer, and a boy lost his mind from a constant headache. $ ^{134} $ Repeatedly, we are reminded that terrors were regarded as extremely dangerous. A maid of sixteen was “very badly frightened on a Saturday night” and went mad for two weeks (1581, fol. B3). A maid of fifteen from Inning on the Ammersee became ill after receiving a bad scare while tending cattle (1574, no. 31). In 1546, a ten-year-old girl watched her father’s bath-house burn down, “saw the fire and was so terrified that she fell into mortal illness; for eight days she didn’t recognize anyone,” but a pilgrimage solved this problem as it did with all the other cases reported (1547, fol. A4). One striking story concerned a six-year-old child, “who led another child off into the woods and then ran away from him, leaving him alone. And so the child went mad [von seinen synnen kummen], and did not know his own mother or others, screaming that a black dog was going to tear him apart” (1532, fol. A4). ## The Attack on Miracles Miracle books aimed first and foremost at magnifying the glory of a particular shrine. In the course of t ...\"\n    },\n    {\n      \"page_no\": 341,\n      \"ocr_excerpt\": \"It was only in the late seventeenth century, and then decisively in the eighteenth, that the state and the church began to find pilgrimage so disorderly that the practice had to be severely regulated, or even curtailed. Typical of the sixteenth century was the treatment received by a certain Oswald Mayr and his wife from Bavaria, who had the misfortune to lose their minds at the same time in 1584. They were “so far bereft of reason and understanding that they had to be chained like the possessed.” For a week they lay bound like wild animals until finally several neighbors took pity on them, vowed a group pilgrimage to Tuntenhausen, and secured relief. $ ^{165} $ Here we have a good example of the way in which madness tested and could strengthen communal bonds. What other hope did such people have in sixteenth-century Germany? As we shall see, occasionally other places of refuge were created for the mad, custodial nursing homes such as the hospitals of many a town and those newly invented in Hesse. Occasionally, too, a medical cure for madness was found. The new hospital in Würzburg pioneered a path in this direction. But usually it was up to family and neighbors to find solutions. ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00854\",\n      \"marker\": \"49\",\n      \"page_no\": 308,\n      \"paragraph_index\": 6,\n      \"source_text\": \"[In 1520] the honorable Lorentz Ebernn from Hollerbach in the region of Buchen came here and said, truthfully, that he had suffered from the horrible disease and misery of the plague, and that in this disease he had lost his reason and run ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00881\",\n      \"marker\": \"80\",\n      \"page_no\": 316,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Although there are other pilgrims of interest in Issickemer’s miracle book, the case of Margereth Geschmeydlerin, a citizen of Straubing in Bavaria, is especially instructive. She arrived in Altötting in 1497 bearing a sealed letter from he ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00931\",\n      \"marker\": \"133\",\n      \"page_no\": 332,\n      \"paragraph_index\": 4,\n      \"source_text\": \"lay in so severe a sickness that she was robbed of her reason [vernunft] and behaved as if she was possessed. In such a state she was taken to Benediktbeuern [to the relic of St. Anastasia's head] in the hope of obtaining a recovery there, ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00932\",\n      \"marker\": \"134\",\n      \"page_no\": 333,\n      \"paragraph_index\": 0,\n      \"source_text\": \"In 1564, a woman from the parish of Euernbeck near Pfaffenhofen went mad with the pain from an ulcer, and a boy lost his mind from a constant headache. $ ^{134} $\"\n    },\n    {\n      \"anchor_id\": \"anchor-00965\",\n      \"marker\": \"165\",\n      \"page_no\": 341,\n      \"paragraph_index\": 0,\n      \"source_text\": \"It was only in the late seventeenth century, and then decisively in the eighteenth, that the state and the church began to find pilgrimage so disorderly that the practice had to be severely regulated, or even curtailed. Typical of the sixte ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-01012\",\n      \"note_item_id\": \"fn-00990\",\n      \"current_anchor_id\": \"synthetic-footnote-00141\",\n      \"marker\": \"1537\",\n      \"note_page_no\": 332,\n      \"anchor_page_no\": 332,\n      \"current_anchor_marker\": \"1537\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zwolff underschidliche Ordnungen aufigethailt . . . zu Tundenhausen (Munich, 1646), category 2, nos. 24 (161 ...\",\n      \"anchor_excerpt\": \"fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zwolff underschidliche Ordnungen aufigethailt . . . zu Tundenhausen (Munich, 1646), category 2, nos. 24 (161 ...\"\n    },\n    {\n      \"link_id\": \"link-01013\",\n      \"note_item_id\": \"fn-00991\",\n      \"current_anchor_id\": \"synthetic-footnote-00142\",\n      \"marker\": \"1564\",\n      \"note_page_no\": 333,\n      \"anchor_page_no\": 333,\n      \"current_anchor_marker\": \"1564\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"fols. A2\\\" and As\\\". See also 1579 fol. Bi\\\", B1¥, and B2\\\".\",\n      \"anchor_excerpt\": \"fols. A2\\\" and As\\\". See also 1579 fol. Bi\\\", B1¥, and B2\\\".\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr:endnote\",\n  \"chapter_title\": \"Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    332,\n    340\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 55,\n      \"ocr_excerpt\": \"In mid July 1518, it appears, when the dancing mania was still new and relatively unknown in Strasbourg, music and dance were specially ordered as therapy for the dancers. Daniel Specklin recorded in his manuscript chronicle, written in the second half of the sixteenth century: 1518: A dance erupted among the young and the old, so that they danced day and night until they fell down; and more than one hundred danced in Strasbourg at the same time. So they reserved the guildhall of the carpenters and the dyers and set up platforms in the horse market and in the grain market and paid people to stay with them and to dance with them, [accompanied] by fife and drum. $ ^{26} $ Evidently these measures were a sad failure, for Specklin noted: \\\"All of this helped not at all.\\\" Many persons danced themselves to death. Dancing was not a cure; it was the disease itself. With a change of policy, the Strasbourg council now decided that music was actually making matters worse; music and rhythmic drumming were infecting others to dance uncontrollably. And so the council forbade almost all music until the end of September. In the municipal archive of Strasbourg is preserved an account in Sebastian Br ...\"\n    },\n    {\n      \"page_no\": 308,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 6.2</div> <div style=\\\"text-align: center;\\\">The Miracles of Franconia, 1450–1650</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>(Total Miracles)</td><td style='text-align: center; word-wrap: break-word;'>Demon Possession</td><td style='text-align: center; word-wrap: break-word;'>Madness</td><td style='text-align: center; word-wrap: break-word;'>St. Vitus&#x27; Dance</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1450-1470</td><td style='text-align: center; word-wrap: break-word;'>(0)</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1471-1490</td><td style='text-align: center; word-wrap: break-word;'>(39)</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td>< ...\"\n    },\n    {\n      \"page_no\": 332,\n      \"ocr_excerpt\": \"ers to be drowned in the Pirg; but she recanted and they let her go. Again she became 'not right' and tried to drown and stab herself; so they locked her up. In jail Mary the Mother of God appeared to her [and urged] her to vow herself to Tuntenhausen . . . and she vowed a Mass and a pilgrimage on her knees with the rope of the martyrs and with a wax wreath.\\\" Soon she was healed (1532, fol. A4v). Other persons described their suicidal impulses as a grosse Anfechtung, a great attack, temptation, and obsession. This was, of course, the very word Luther used to describe his religious agonies, but these Bavarian peasants usually used the word to describe murderous, despairing, or suicidal fantasies (e.g., 1533, fol. A4 $ ^{r} $, and 1536, fol. A1 $ ^{v} $). Repeatedly, the miracle reports also state that doctors had been visited, all to no avail, an interesting indication that the poor rural population had some access to a local doctor, probably not a university-trained physician, but a professional healer and more than just an amateur herbalist or cunning man. Such sources suggest that doctors with some training were not available only to noblemen and comfortable burghers. $ ^{132} $ ...\"\n    },\n    {\n      \"page_no\": 333,\n      \"ocr_excerpt\": \"In 1564, a woman from the parish of Euernbeck near Pfaffenhofen went mad with the pain from an ulcer, and a boy lost his mind from a constant headache. $ ^{134} $ Repeatedly, we are reminded that terrors were regarded as extremely dangerous. A maid of sixteen was “very badly frightened on a Saturday night” and went mad for two weeks (1581, fol. B3). A maid of fifteen from Inning on the Ammersee became ill after receiving a bad scare while tending cattle (1574, no. 31). In 1546, a ten-year-old girl watched her father’s bath-house burn down, “saw the fire and was so terrified that she fell into mortal illness; for eight days she didn’t recognize anyone,” but a pilgrimage solved this problem as it did with all the other cases reported (1547, fol. A4). One striking story concerned a six-year-old child, “who led another child off into the woods and then ran away from him, leaving him alone. And so the child went mad [von seinen synnen kummen], and did not know his own mother or others, screaming that a black dog was going to tear him apart” (1532, fol. A4). ## The Attack on Miracles Miracle books aimed first and foremost at magnifying the glory of a particular shrine. In the course of t ...\"\n    },\n    {\n      \"page_no\": 334,\n      \"ocr_excerpt\": \"his faithful, but not by contravening His own natural order. This left only a couple of possible explanations for the wondrous cures and interventions reported by gleeful Catholics. For many a Protestant, they were lies, deceptions, or demonic illusions. Human fraud played an important role, it seemed, in all of these Catholic miracles. And so the miracle report found itself on the front lines of the confessional battle. $ ^{136} $ Although this battle really heated up in the second half of the sixteenth century, we catch an early hint of it in the miracle book of 1539 from Tuntenhausen. After reporting a miraculous recovery from a grotesque puncture wound, Abbot Lucas Wagner noted: “Now although the ‘new Christians’ [i.e., Protestants] with their vile and idle protests deny and despise [our miracles], yet all things are possible for God and for His chosen spirits. For those persons of weak faith, however, the secrets of God are hidden and [the ability] to recognize His works” (1539, fol. A3). It remains true even today that miracles occur mainly to and for those who believe in them. The Protestant assault did make it harder to register as miraculous events that had, or could have, ...\"\n    },\n    {\n      \"page_no\": 335,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 6.6</div> <div style=\\\"text-align: center;\\\">Cures of Madness in the Tuntenhausen Miracle Book of 1646</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>Madness as Part of Physical Illness; Brain Fevers</td><td style='text-align: center; word-wrap: break-word;'>Madness Without Concomitant Physical Illness</td><td style='text-align: center; word-wrap: break-word;'>Tempted by the Devil (Angefochten) Suicidal</td><td style='text-align: center; word-wrap: break-word;'>Possessed by the Devil</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1588-1599</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>5</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>0</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1600-1619</td><td style='text-align: center; word-wrap: break-word;'>3</td><td style='text-align: center; word-wrap: break-word;'>10</td><td styl ...\"\n    },\n    {\n      \"page_no\": 336,\n      \"ocr_excerpt\": \"exorcists continued to emphasize that their faith was triumphant against all the ills of this world. German Catholics, therefore, continued to go on pilgrimage in the seventeenth and eighteenth centuries, very likely in increased numbers. $ ^{142} $ Miracle books became ever more elaborate, developing into an early form of baroque literature. $ ^{143} $ New shrines sprang up, and old ones took a new lease on life. St. Benno of Meissen, for example, was carried from Saxony to Munich in 1576–80 and became a major attraction for Counter-Reformation Bavarians in the seventeenth century. $ ^{144} $ His shrine drew mainly the lame and the blind, but occasionally the mentally disturbed came as well. $ ^{145} $ Some of these reinvigorated pilgrimage centers came to be so specialized that no mad pilgrims were now reported in their miracle books at all. This was the case in many of the shrines around Augsburg, $ ^{146} $ and in the miracle book of Kirchwald, near Nußdorf, for example. $ ^{147} $ Other holy places, such as St. Salvator in Bettbrunn (between Ingolstadt and Regensburg in Lower Bavaria), attracted ever larger numbers of the mad and demon-possessed. About 10 percent of St. Salvat ...\"\n    },\n    {\n      \"page_no\": 337,\n      \"ocr_excerpt\": \"the Counter-Reformation, many a medieval shrine that had fallen into dis- use during the early and mid sixteenth century bounced back with curious specialties. St. Leonard’s shrine at Inchenhofen (on the Paar River, fourteen miles northeast of Augsburg), for example, had long been a major medieval pilgrimage center. As the patron of prisoners, St. Leonard had special sym- pathy for captives and others bound in chains. That probably explains why mad persons in the fourteenth and fifteenth centuries had turned in large numbers to St. Leonard. $ ^{150} $ Of 199 miraculous cures between 1346 and 1447, Steven Sargent reports, seventeen healed the mentally ill and an additional seven relieved the demon-possessed. It is evident, however, that the early years of the Reformation brought the collapse of pilgrimage we have seen so often elsewhere. When the shrine revived in the late sixteenth century, St. Leonard had changed his specialty. He was now the special patron of horses and cattle, a role for which he became famous. $ ^{151} $ According to the amazing Synopsis miraculorum of 1659, however, this shift did not spell any real diminution of St. Leonard’s sympathy for the mad. Although th ...\"\n    }\n  ],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00933\",\n      \"anchor_id\": \"anchor-00750\",\n      \"marker\": \"149\",\n      \"note_excerpt\": \"Ltliche WunderZaichen, die Gott der Almichtig auff dem heiligen Berg Andechs . . .\",\n      \"anchor_excerpt\": \"[In 1520] the honorable Lorentz Ebernn from Hollerbach in the region of Buchen came here and said, truthfully, that he had suffered from the horrible disease and misery of the plague, and that in this disease he had lost his reason and run ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00949\",\n      \"anchor_id\": \"anchor-00028\",\n      \"marker\": \"18\",\n      \"note_excerpt\": \".\",\n      \"anchor_excerpt\": \"On the second day after Vincula Petri [i.e., on August 3] anno 18: When sadly at this time a horrible episode arose with the sick, dancing persons, which has not yet stopped, our lord councilors of the XXI turned to the honor of God and for ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00916\",\n      \"marker\": \"132\",\n      \"page_no\": 332,\n      \"source_text\": \"Gierl, Bauernleben, pp. 88-9o.\"\n    },\n    {\n      \"note_item_id\": \"fn-00917\",\n      \"marker\": \"133\",\n      \"page_no\": 332,\n      \"source_text\": \"1537, fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zwolff underschidliche Ordnungen aufigethailt . . . zu Tundenhausen (Munich, 1646), category 2, nos. 2 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00918\",\n      \"marker\": \"134\",\n      \"page_no\": 333,\n      \"source_text\": \"fols. A2\\\" and As\\\". See also 1579 fol. Bi\\\", B1¥, and B2\\\".\"\n    },\n    {\n      \"note_item_id\": \"fn-00919\",\n      \"marker\": \"135\",\n      \"page_no\": 333,\n      \"source_text\": \"D. P. Walker, “The Cessation of Miracles,” in Hermeticism and the Renaissance: Intel-\"\n    },\n    {\n      \"note_item_id\": \"fn-00920\",\n      \"marker\": \"136\",\n      \"page_no\": 334,\n      \"source_text\": \"Soergel, “Wondrous in His Saints,” pp. 90-107, 275-334. Cécile Ernst, Teufelaustreibungen; D. P. Walker, Unclean Spirits: Possession and Exorcism in England and France in the Late Sixteenth and Early Seventeenth Centuries (Philadelphia, 198 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00921\",\n      \"marker\": \"137\",\n      \"page_no\": 334,\n      \"source_text\": \"See, e.g., Tiroler Landesausstellung (anon.), Heiltum und Wallfahrt (Innsbruck, 1988), pp. 105-12. But this trend is not everywhere visible; cf. Hanns Bachmann, Das Mirakelbuch der Wallfahrtskirche Mariastein in Tirol als Quelle zur Kulturg ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00922\",\n      \"marker\": \"138\",\n      \"page_no\": 334,\n      \"source_text\": \"See, e.g., Fortunat Hueber, “Zeitiger Granat-apfel.” Muenchen 1671: Mirakelbuch des bayrisch-bohmischen Wallfahrtsortes Neukirchen bei Heilig Blut, ed. Guillaume van Gemert (Amsterdam, 1983), pp. 284-9o.\"\n    },\n    {\n      \"note_item_id\": \"fn-00923\",\n      \"marker\": \"139\",\n      \"page_no\": 335,\n      \"source_text\": \"See Gerlinde Stahl, “Die Wallfahrt zur Schonen Maria in Regensburg,” Beitrige zur Geschichte des Bistums Regensburg 2 (1968): 35282, appendix.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00671\",\n      \"note_item_id\": \"fn-00933\",\n      \"current_anchor_id\": \"anchor-00750\",\n      \"marker\": \"149\",\n      \"note_page_no\": 336,\n      \"anchor_page_no\": 308,\n      \"current_anchor_marker\": \"149\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ltliche WunderZaichen, die Gott der Almichtig auff dem heiligen Berg Andechs . . .\",\n      \"anchor_excerpt\": \"[In 1520] the honorable Lorentz Ebernn from Hollerbach in the region of Buchen came here and said, truthfully, that he had suffered from the horrible disease and misery of the plague, and that in this disease he had lost his reason and run ...\"\n    },\n    {\n      \"link_id\": \"link-00687\",\n      \"note_item_id\": \"fn-00949\",\n      \"current_anchor_id\": \"anchor-00028\",\n      \"marker\": \"18\",\n      \"note_page_no\": 340,\n      \"anchor_page_no\": 55,\n      \"current_anchor_marker\": \"18\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \".\",\n      \"anchor_excerpt\": \"On the second day after Vincula Petri [i.e., on August 3] anno 18: When sadly at this time a horrible episode arose with the sick, dancing persons, which has not yet stopped, our lord councilors of the XXI turned to the honor of God and for ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:toc-ch-006-pilgrimsinsearchoftheirr:footnote",
+      "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
       "chapter_title": "Pilgrims in Search of Their Reason",
-      "request_mode": "anchor_rebind",
+      "request_mode": "note_only",
       "allowed_actions": [
-        "match",
-        "ignore_ref",
-        "synthesize_note_item",
         "needs_review"
       ],
-      "note_system": "footnote",
+      "note_system": "endnote",
       "page_range": [
-        308,
-        341
+        332,
+        340
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 68190,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00854",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "page_no": 308,
-          "paragraph_index": 6,
-          "char_start": 487,
-          "char_end": 496,
-          "source_marker": "$ ^{49} $",
-          "normalized_marker": "49",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "[In 1520] the honorable Lorentz Ebernn from Hollerbach in the region of Buchen came here and said, truthfully, that he had suffered from the horrible disease and misery of the plague, and that in this disease he had lost his reason and run out of his house into the street and attacked [breynt] people and knocked them down. And so his neighbors came running and caught him and bound him in chains in a \"tall\" house [in einen hoge haus]. There he lay all unreasonable for fourteen days. $ ^{49} $",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
+          "link_id": "link-00671",
+          "note_item_id": "fn-00933",
+          "anchor_id": "anchor-00750",
+          "marker": "149",
+          "note_excerpt": "Ltliche WunderZaichen, die Gott der Almichtig auff dem heiligen Berg Andechs . . .",
+          "anchor_excerpt": "[In 1520] the honorable Lorentz Ebernn from Hollerbach in the region of Buchen came here and said, truthfully, that he had suffered from the horrible disease and misery of the plague, and that in this disease he had lost his reason and run out of his house into the street and attacked [breynt] people and knocked them down. And so his neighbors came running and caught him and bound him in chains in a \"tall\" house [in einen hoge haus]. There he lay all unreasonable for fourteen days. $ ^{49} $"
         },
         {
-          "row_id": 68218,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00881",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "page_no": 316,
-          "paragraph_index": 3,
-          "char_start": 695,
-          "char_end": 704,
-          "source_marker": "$ ^{80} $",
-          "normalized_marker": "80",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Although there are other pilgrims of interest in Issickemer’s miracle book, the case of Margereth Geschmeydlerin, a citizen of Straubing in Bavaria, is especially instructive. She arrived in Altötting in 1497 bearing a sealed letter from her father confessor affirming that for three years she had had such “disease, distress, physical pain and various temptations [Anfechtung] that she often lost control of her effective reason [“ihrer wirklichen Vernunft ungewaltig ist gewesen”] and sometimes was so tempted by the evil spirit (by the decree of God, as should be believed) that she should finally run out and kill herself, by which she would condemn her body and soul to eternal damnation.” $ ^{80} $",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
-        },
-        {
-          "row_id": 68278,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00931",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "page_no": 332,
-          "paragraph_index": 4,
-          "char_start": 500,
-          "char_end": 510,
-          "source_marker": "$ ^{133} $",
-          "normalized_marker": "133",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "lay in so severe a sickness that she was robbed of her reason [vernunft] and behaved as if she was possessed. In such a state she was taken to Benediktbeuern [to the relic of St. Anastasia's head] in the hope of obtaining a recovery there, but to no avail. But then she was vowed [by others] to Tuntenhausen with a Holy Mass, a pound of wax, and a pilgrimage, and the above-mentioned woman came again to her reason, was graciously helped, and the vow was carried out to the honor of the Virgin Mary. $ ^{133} $",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
-        },
-        {
-          "row_id": 68280,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00932",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "page_no": 333,
-          "paragraph_index": 0,
-          "char_start": 152,
-          "char_end": 162,
-          "source_marker": "$ ^{134} $",
-          "normalized_marker": "134",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "In 1564, a woman from the parish of Euernbeck near Pfaffenhofen went mad with the pain from an ulcer, and a boy lost his mind from a constant headache. $ ^{134} $",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
-        },
-        {
-          "row_id": 68318,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00965",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "page_no": 341,
-          "paragraph_index": 0,
-          "char_start": 660,
-          "char_end": 670,
-          "source_marker": "$ ^{165} $",
-          "normalized_marker": "165",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "It was only in the late seventeenth century, and then decisively in the eighteenth, that the state and the church began to find pilgrimage so disorderly that the practice had to be severely regulated, or even curtailed. Typical of the sixteenth century was the treatment received by a certain Oswald Mayr and his wife from Bavaria, who had the misfortune to lose their minds at the same time in 1584. They were “so far bereft of reason and understanding that they had to be chained like the possessed.” For a week they lay bound like wild animals until finally several neighbors took pity on them, vowed a group pilgrimage to Tuntenhausen, and secured relief. $ ^{165} $ Here we have a good example of the way in which madness tested and could strengthen communal bonds. What other hope did such people have in sixteenth-century Germany? As we shall see, occasionally other places of refuge were created for the mad, custodial nursing homes such as the hospitals of many a town and those newly invented in Hesse. Occasionally, too, a medical cure for madness was found. The new hospital in Würzburg pioneered a path in this direction. But usually it was up to family and neighbors to find solutions. Of course, the mad were sometimes bound with chains, not usually as a punishment but in order to restrain them. Of course, the mad sometimes behaved as if possessed—indeed, sometimes they were treated as if possessed, but that did not mean only beatings and the kind of abuse we are usually led to expect. Sixteenth-century Germans were capable of careful distinctions. At no time did demonic possession account for more than a small fraction of the madnesses we find in our records. If we oversimplify the early modern German experience of mental disorder, restricting it to a few categories that serve our political or moral purposes (whatever they may be), we do it an injustice and truncate our own freedom, a freedom that depends in part on knowing our past in all its variety.",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
+          "link_id": "link-00687",
+          "note_item_id": "fn-00949",
+          "anchor_id": "anchor-00028",
+          "marker": "18",
+          "note_excerpt": ".",
+          "anchor_excerpt": "On the second day after Vincula Petri [i.e., on August 3] anno 18: When sadly at this time a horrible episode arose with the sick, dancing persons, which has not yet stopped, our lord councilors of the XXI turned to the honor of God and forbade, on pain of a fine of 30 shillings, that anyone, no matter who, should hold a dance until St. Michael's Day [September 29] in this city or its suburbs or in its whole jurisdiction. For by so doing they take away the recovery of such persons. The only exception is that if honorable persons wish to dance at weddings or celebrations of first Mass in their houses, they may do so using stringed instruments, but they are on their conscience not to use tambourines and drums. $ ^{27} $"
         }
       ],
-      "rebind_candidates": [
+      "unmatched_note_items": [
         {
-          "link_id": "link-01012",
-          "note_item_id": "fn-00990",
-          "current_anchor_id": "synthetic-footnote-00141",
-          "marker": "1537",
-          "note_page_no": 332,
-          "anchor_page_no": 332,
-          "current_anchor_marker": "1537",
-          "note_excerpt": "fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zwolff underschidliche Ordnungen aufigethailt . . . zu Tundenhausen (Munich, 1646), category 2, nos. 24 (1616) and 31 (1643).",
-          "anchor_excerpt": "fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zwolff underschidliche Ordnungen aufigethailt . . . zu Tundenhausen (Munich, 1646), category 2, nos. 24 (1616) and 31 (1643).",
-          "current_anchor_synthetic": true
+          "row_id": 942,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00916",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "132",
+          "normalized_marker": "132",
+          "occurrence": 1,
+          "source_text": "Gierl, Bauernleben, pp. 88-9o.",
+          "page_no": 332,
+          "display_marker": "132",
+          "source_marker": "132",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
         },
         {
-          "link_id": "link-01013",
-          "note_item_id": "fn-00991",
-          "current_anchor_id": "synthetic-footnote-00142",
-          "marker": "1564",
-          "note_page_no": 333,
-          "anchor_page_no": 333,
-          "current_anchor_marker": "1564",
-          "note_excerpt": "fols. A2\" and As\". See also 1579 fol. Bi\", B1¥, and B2\".",
-          "anchor_excerpt": "fols. A2\" and As\". See also 1579 fol. Bi\", B1¥, and B2\".",
-          "current_anchor_synthetic": true
+          "row_id": 943,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00917",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "133",
+          "normalized_marker": "133",
+          "occurrence": 1,
+          "source_text": "1537, fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zwolff underschidliche Ordnungen aufigethailt . . . zu Tundenhausen (Munich, 1646), category 2, nos. 24 (1616) and 31 (1643).",
+          "page_no": 332,
+          "display_marker": "133",
+          "source_marker": "133",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 944,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00918",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "134",
+          "normalized_marker": "134",
+          "occurrence": 1,
+          "source_text": "fols. A2\" and As\". See also 1579 fol. Bi\", B1¥, and B2\".",
+          "page_no": 333,
+          "display_marker": "134",
+          "source_marker": "134",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 945,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00919",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "135",
+          "normalized_marker": "135",
+          "occurrence": 1,
+          "source_text": "D. P. Walker, “The Cessation of Miracles,” in Hermeticism and the Renaissance: Intel-",
+          "page_no": 333,
+          "display_marker": "135",
+          "source_marker": "135",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 946,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00920",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "136",
+          "normalized_marker": "136",
+          "occurrence": 1,
+          "source_text": "Soergel, “Wondrous in His Saints,” pp. 90-107, 275-334. Cécile Ernst, Teufelaustreibungen; D. P. Walker, Unclean Spirits: Possession and Exorcism in England and France in the Late Sixteenth and Early Seventeenth Centuries (Philadelphia, 1981); Keith Thomas, Religion and the Decline of Magic (New York, 1971).",
+          "page_no": 334,
+          "display_marker": "136",
+          "source_marker": "136",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 947,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00921",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "137",
+          "normalized_marker": "137",
+          "occurrence": 1,
+          "source_text": "See, e.g., Tiroler Landesausstellung (anon.), Heiltum und Wallfahrt (Innsbruck, 1988), pp. 105-12. But this trend is not everywhere visible; cf. Hanns Bachmann, Das Mirakelbuch der Wallfahrtskirche Mariastein in Tirol als Quelle zur Kulturgeschichte (1678—1742) (Innsbruck, 1973), pp. 71~75, who lists 28 cases of madness among 945 miraculous cures, and not one demonic possession among them.",
+          "page_no": 334,
+          "display_marker": "137",
+          "source_marker": "137",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 948,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00922",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "138",
+          "normalized_marker": "138",
+          "occurrence": 1,
+          "source_text": "See, e.g., Fortunat Hueber, “Zeitiger Granat-apfel.” Muenchen 1671: Mirakelbuch des bayrisch-bohmischen Wallfahrtsortes Neukirchen bei Heilig Blut, ed. Guillaume van Gemert (Amsterdam, 1983), pp. 284-9o.",
+          "page_no": 334,
+          "display_marker": "138",
+          "source_marker": "138",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 949,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00923",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "139",
+          "normalized_marker": "139",
+          "occurrence": 1,
+          "source_text": "See Gerlinde Stahl, “Die Wallfahrt zur Schonen Maria in Regensburg,” Beitrige zur Geschichte des Bistums Regensburg 2 (1968): 35282, appendix.",
+          "page_no": 335,
+          "display_marker": "139",
+          "source_marker": "139",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00671",
+          "note_item_id": "fn-00933",
+          "current_anchor_id": "anchor-00750",
+          "marker": "149",
+          "note_page_no": 336,
+          "anchor_page_no": 308,
+          "current_anchor_marker": "149",
+          "note_excerpt": "Ltliche WunderZaichen, die Gott der Almichtig auff dem heiligen Berg Andechs . . .",
+          "anchor_excerpt": "[In 1520] the honorable Lorentz Ebernn from Hollerbach in the region of Buchen came here and said, truthfully, that he had suffered from the horrible disease and misery of the plague, and that in this disease he had lost his reason and run out of his house into the street and attacked [breynt] people and knocked them down. And so his neighbors came running and caught him and bound him in chains in a \"tall\" house [in einen hoge haus]. There he lay all unreasonable for fourteen days. $ ^{49} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00687",
+          "note_item_id": "fn-00949",
+          "current_anchor_id": "anchor-00028",
+          "marker": "18",
+          "note_page_no": 340,
+          "anchor_page_no": 55,
+          "current_anchor_marker": "18",
+          "note_excerpt": ".",
+          "anchor_excerpt": "On the second day after Vincula Petri [i.e., on August 3] anno 18: When sadly at this time a horrible episode arose with the sick, dancing persons, which has not yet stopped, our lord councilors of the XXI turned to the honor of God and forbade, on pain of a fine of 30 shillings, that anyone, no matter who, should hold a dance until St. Michael's Day [September 29] in this city or its suburbs or in its whole jurisdiction. For by so doing they take away the recovery of such persons. The only exception is that if honorable persons wish to dance at weddings or celebrations of first Mass in their houses, they may do so using stringed instruments, but they are on their conscience not to use tambourines and drums. $ ^{27} $",
+          "current_anchor_synthetic": false
         }
       ]
     },
     "page_contexts": [
+      {
+        "page_no": 55,
+        "file_idx": 54,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "In mid July 1518, it appears, when the dancing mania was still new and relatively unknown in Strasbourg, music and dance were specially ordered as therapy for the dancers. Daniel Specklin recorded in his manuscript chronicle, written in the second half of the sixteenth century: 1518: A dance erupted among the young and the old, so that they danced day and night until they fell down; and more than one hundred danced in Strasbourg at the same time. So they reserved the guildhall of the carpenters and the dyers and set up platforms in the horse market and in the grain market and paid people to stay with them and to dance with them, [accompanied] by fife and drum. $ ^{26} $ Evidently these measures were a sad failure, for Specklin noted: \"All of this helped not at all.\" Many persons danced themselves to death. Dancing was not a cure; it was the disease itself. With a change of policy, the Strasbourg council now decided that music was actually making matters worse; music and rhythmic drumming were infecting others to dance uncontrollably. And so the council forbade almost all music until the end of September. In the municipal archive of Strasbourg is preserved an account in Sebastian Brant's own hand: On the second day after Vincula Petri [i.e., on August 3] anno 18: When sadly at this time a horrible episode arose with the sick, dancing persons, which has not yet stopped, our lord ...",
+        "byte_size": 9672751,
+        "sha256": "95034735ba6a541d8f334b1a84bd6b8ddda0ed8c95bd8c6d2c625b0a6eaecbfb"
+      },
       {
         "page_no": 308,
         "file_idx": 307,
@@ -150,14 +231,6 @@
         "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 6.2</div> <div style=\"text-align: center;\">The Miracles of Franconia, 1450–1650</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>(Total Miracles)</td><td style='text-align: center; word-wrap: break-word;'>Demon Possession</td><td style='text-align: center; word-wrap: break-word;'>Madness</td><td style='text-align: center; word-wrap: break-word;'>St. Vitus&#x27; Dance</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1450-1470</td><td style='text-align: center; word-wrap: break-word;'>(0)</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1471-1490</td><td style='text-align: center; word-wrap: break-word;'>(39)</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1491-1510</td><td style='text-align: center; word-wrap: break-word;'>(73)</td><td style='text-align: center; word-wrap: break-word;'>0</t ...",
         "byte_size": 5517288,
         "sha256": "e541bdfb7e2e2d4fe3ce6e6fccd1f31856ab2791f2a30d69fc5c42c5f9a4da89"
-      },
-      {
-        "page_no": 316,
-        "file_idx": 315,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "pray three Hail Marys, and when she did, she was released.\" When these attacks did not cease, however, she vowed a pilgrimage of some 180 miles to Altötting, and once there, she felt totally relieved of her suicidal urges. $ ^{78} $ Hans Hochstetter, a Franconian serving as the city secretary of Pettau (Ptuj) also came to Altötting in 1495 to express his thanks to Mary for relief from the “calamity and distress in which I stood, not knowing then how I should escape,” as he wrote in the document that he displayed in the chapel for all to see. $ ^{79} $ Here began the remarkable tradition at Altötting of leaving behind personal descriptions of one’s miraculous cures. In this case, then, we are not dependent on the words of some priest, for we have Hochstetter’s own description, and it is doubly impressive that he chose words like those we have seen before, “calamity and distress” (Widerwärtigkeit und Triibsal), rather than some other more technical vocabulary. We are probably safe in concluding that these early printed miracle books from Altötting preserve the language of the pilgrims themselves, even though the accounts were, of course, abridged to fit the requirements of space on the printed page. One of the pilgrims to Altötting in 1497 came from distant Kassel in Hesse, where she had borne a defective baby who lacked hands, legs and feet. She was so appalled \"that she got the ...",
-        "byte_size": 8169721,
-        "sha256": "e6007a1c5b1ddaf10a3833d167f18440e51a6e22367802ef2e41aba96fe2fb2a"
       },
       {
         "page_no": 332,
@@ -176,124 +249,79 @@
         "sha256": "47bcc0da15962b816d316a144842760fcffab6824b3146ca98ec1dfaa8ceabad"
       },
       {
-        "page_no": 341,
-        "file_idx": 340,
+        "page_no": 334,
+        "file_idx": 333,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "It was only in the late seventeenth century, and then decisively in the eighteenth, that the state and the church began to find pilgrimage so disorderly that the practice had to be severely regulated, or even curtailed. Typical of the sixteenth century was the treatment received by a certain Oswald Mayr and his wife from Bavaria, who had the misfortune to lose their minds at the same time in 1584. They were “so far bereft of reason and understanding that they had to be chained like the possessed.” For a week they lay bound like wild animals until finally several neighbors took pity on them, vowed a group pilgrimage to Tuntenhausen, and secured relief. $ ^{165} $ Here we have a good example of the way in which madness tested and could strengthen communal bonds. What other hope did such people have in sixteenth-century Germany? As we shall see, occasionally other places of refuge were created for the mad, custodial nursing homes such as the hospitals of many a town and those newly invented in Hesse. Occasionally, too, a medical cure for madness was found. The new hospital in Würzburg pioneered a path in this direction. But usually it was up to family and neighbors to find solutions. Of course, the mad were sometimes bound with chains, not usually as a punishment but in order to restrain them. Of course, the mad sometimes behaved as if possessed—indeed, sometimes they were treated ...",
-        "byte_size": 7183668,
-        "sha256": "2655c60f0477561e73386e0c9170585f1340c4f16ff79b6354c558bf9e487251"
+        "ocr_excerpt": "his faithful, but not by contravening His own natural order. This left only a couple of possible explanations for the wondrous cures and interventions reported by gleeful Catholics. For many a Protestant, they were lies, deceptions, or demonic illusions. Human fraud played an important role, it seemed, in all of these Catholic miracles. And so the miracle report found itself on the front lines of the confessional battle. $ ^{136} $ Although this battle really heated up in the second half of the sixteenth century, we catch an early hint of it in the miracle book of 1539 from Tuntenhausen. After reporting a miraculous recovery from a grotesque puncture wound, Abbot Lucas Wagner noted: “Now although the ‘new Christians’ [i.e., Protestants] with their vile and idle protests deny and despise [our miracles], yet all things are possible for God and for His chosen spirits. For those persons of weak faith, however, the secrets of God are hidden and [the ability] to recognize His works” (1539, fol. A3). It remains true even today that miracles occur mainly to and for those who believe in them. The Protestant assault did make it harder to register as miraculous events that had, or could have, an easy natural explanation. Increasingly in the seventeenth century, the wondrous cure of madness thus came to be ever more bound up with demonic possession and with other signs of supernatural inte ...",
+        "byte_size": 8989234,
+        "sha256": "5eb7a70913779cc3cfca0dafc6c0a989b9f1ca6febc3e7b1ee599fd435f8470a"
+      },
+      {
+        "page_no": 335,
+        "file_idx": 334,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 6.6</div> <div style=\"text-align: center;\">Cures of Madness in the Tuntenhausen Miracle Book of 1646</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>Madness as Part of Physical Illness; Brain Fevers</td><td style='text-align: center; word-wrap: break-word;'>Madness Without Concomitant Physical Illness</td><td style='text-align: center; word-wrap: break-word;'>Tempted by the Devil (Angefochten) Suicidal</td><td style='text-align: center; word-wrap: break-word;'>Possessed by the Devil</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1588-1599</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>5</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>0</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1600-1619</td><td style='text-align: center; word-wrap: break-word;'>3</td><td style='text-align: center; word-wrap: break-word;'>10</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>1</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1620-1639</td><td styl ...",
+        "byte_size": 8076641,
+        "sha256": "533d5a635b7ca6afa083b6e896cf0eb6fda32ccd8f63b8fd96ed6b531d88ea5c"
+      },
+      {
+        "page_no": 336,
+        "file_idx": 335,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "exorcists continued to emphasize that their faith was triumphant against all the ills of this world. German Catholics, therefore, continued to go on pilgrimage in the seventeenth and eighteenth centuries, very likely in increased numbers. $ ^{142} $ Miracle books became ever more elaborate, developing into an early form of baroque literature. $ ^{143} $ New shrines sprang up, and old ones took a new lease on life. St. Benno of Meissen, for example, was carried from Saxony to Munich in 1576–80 and became a major attraction for Counter-Reformation Bavarians in the seventeenth century. $ ^{144} $ His shrine drew mainly the lame and the blind, but occasionally the mentally disturbed came as well. $ ^{145} $ Some of these reinvigorated pilgrimage centers came to be so specialized that no mad pilgrims were now reported in their miracle books at all. This was the case in many of the shrines around Augsburg, $ ^{146} $ and in the miracle book of Kirchwald, near Nußdorf, for example. $ ^{147} $ Other holy places, such as St. Salvator in Bettbrunn (between Ingolstadt and Regensburg in Lower Bavaria), attracted ever larger numbers of the mad and demon-possessed. About 10 percent of St. Salvator’s roughly 2,700 miracles in the years 1584–97 involved relief from demonic Anfechtung, diabolic possession, madness, and Fraiß, which often meant a frightful choking until the sufferer lost conscio ...",
+        "byte_size": 8653363,
+        "sha256": "0ad5c46de81905dcc1eb3ffa4363aa079933ea876f7d4859594cdc96af2dd66f"
+      },
+      {
+        "page_no": 337,
+        "file_idx": 336,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "the Counter-Reformation, many a medieval shrine that had fallen into dis- use during the early and mid sixteenth century bounced back with curious specialties. St. Leonard’s shrine at Inchenhofen (on the Paar River, fourteen miles northeast of Augsburg), for example, had long been a major medieval pilgrimage center. As the patron of prisoners, St. Leonard had special sym- pathy for captives and others bound in chains. That probably explains why mad persons in the fourteenth and fifteenth centuries had turned in large numbers to St. Leonard. $ ^{150} $ Of 199 miraculous cures between 1346 and 1447, Steven Sargent reports, seventeen healed the mentally ill and an additional seven relieved the demon-possessed. It is evident, however, that the early years of the Reformation brought the collapse of pilgrimage we have seen so often elsewhere. When the shrine revived in the late sixteenth century, St. Leonard had changed his specialty. He was now the special patron of horses and cattle, a role for which he became famous. $ ^{151} $ According to the amazing Synopsis miraculorum of 1659, however, this shift did not spell any real diminution of St. Leonard’s sympathy for the mad. Although thou- sands of miracles were attributed to St. Leonard, this volume describes in some detail 494 miraculous acts of healing, spread out over three centuries. Forty-nine (10%) of these cures involved the ...",
+        "byte_size": 9697374,
+        "sha256": "2144f34b605367cb8e139b0db6a32db274a766a13f770d724a0a4bf89cc1ec98"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:toc-ch-006-pilgrimsinsearchoftheirr:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 5,
+    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
+    "request_mode": "note_only",
+    "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00990\",\n    \"anchor_id\": \"anchor-00931\",\n    \"confidence\": 0.95,\n    \"reason\": \"Screenshot page 312 clearly shows footnote marker '133' in the text and the corresponding note text at the bottom of the page. The rebind candidate links fn-00990 (marker 1537, likely an OCR error for 133) to anchor-00931 (marker 133). The note content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00991\",\n    \"anchor_id\": \"anchor-00932\",\n    \"confidence\": 0.95,\n    \"reason\": \"Screenshot page 313 clearly shows footnote marker '134' in the text and the corresponding note text at the bottom. The rebind candidate links fn-00991 (marker 1564, likely an OCR error for 134) to anchor-00932 (marker 134). The note content matches perfectly.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cluster contains multiple unresolved endnotes (markers 132-139) with corresponding text visible in screenshots (pages 332-335), but no structural anchors are provided in the input to bind them to. Additionally, rebind candidates indicate existing links are bound to incorrect pages (e.g., page 55/308 instead of 336/340). Without explicit anchor IDs for the new notes or correct target anchor IDs for the rebinds, automatic matching cannot be performed reliably.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "fn-00990",
-      "anchor_id": "anchor-00931",
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "Screenshot page 312 clearly shows footnote marker '133' in the text and the corresponding note text at the bottom of the page. The rebind candidate links fn-00990 (marker 1537, likely an OCR error for 133) to anchor-00931 (marker 133). The note content matches perfectly."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00991",
-      "anchor_id": "anchor-00932",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Screenshot page 313 clearly shows footnote marker '134' in the text and the corresponding note text at the bottom. The rebind candidate links fn-00991 (marker 1564, likely an OCR error for 134) to anchor-00932 (marker 134). The note content matches perfectly."
+      "confidence": 0.0,
+      "reason": "Cluster contains multiple unresolved endnotes (markers 132-139) with corresponding text visible in screenshots (pages 332-335), but no structural anchors are provided in the input to bind them to. Additionally, rebind candidates indicate existing links are bound to incorrect pages (e.g., page 55/308 instead of 336/340). Without explicit anchor IDs for the new notes or correct target anchor IDs for the rebinds, automatic matching cannot be performed reliably."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:toc-ch-006-pilgrimsinsearchoftheirr:footnote",
-    "chapter_title": "Pilgrims in Search of Their Reason",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "fn-00990",
-        "anchor_id": "anchor-00931",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Screenshot page 312 clearly shows footnote marker '133' in the text and the corresponding note text at the bottom of the page. The rebind candidate links fn-00990 (marker 1537, likely an OCR error for 133) to anchor-00931 (marker 133). The note content matches perfectly."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00991",
-        "anchor_id": "anchor-00932",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Screenshot page 313 clearly shows footnote marker '134' in the text and the corresponding note text at the bottom. The rebind candidate links fn-00991 (marker 1564, likely an OCR error for 134) to anchor-00932 (marker 134). The note content matches perfectly."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00990",
-        "anchor_id": "anchor-00931",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Screenshot page 312 clearly shows footnote marker '133' in the text and the corresponding note text at the bottom of the page. The rebind candidate links fn-00990 (marker 1537, likely an OCR error for 133) to anchor-00931 (marker 133). The note content matches perfectly."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00991",
-        "anchor_id": "anchor-00932",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Screenshot page 313 clearly shows footnote marker '134' in the text and the corresponding note text at the bottom. The rebind candidate links fn-00991 (marker 1564, likely an OCR error for 134) to anchor-00932 (marker 134). The note content matches perfectly."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-01012",
-        "action": "match",
-        "note_item_id": "fn-00990",
-        "anchor_id": "anchor-00931",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Screenshot page 312 clearly shows footnote marker '133' in the text and the corresponding note text at the bottom of the page. The rebind candidate links fn-00990 (marker 1537, likely an OCR error for 133) to anchor-00931 (marker 133). The note content matches perfectly."
-      },
-      {
-        "link_id": "link-01013",
-        "action": "match",
-        "note_item_id": "fn-00991",
-        "anchor_id": "anchor-00932",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Screenshot page 313 clearly shows footnote marker '134' in the text and the corresponding note text at the bottom. The rebind candidate links fn-00991 (marker 1564, likely an OCR error for 134) to anchor-00932 (marker 134). The note content matches perfectly."
+        "confidence": 0.0,
+        "reason": "Cluster contains multiple unresolved endnotes (markers 132-139) with corresponding text visible in screenshots (pages 332-335), but no structural anchors are provided in the input to bind them to. Additionally, rebind candidates indicate existing links are bound to incorrect pages (e.g., page 55/308 instead of 336/340). Without explicit anchor IDs for the new notes or correct target anchor IDs for the rebinds, automatic matching cannot be performed reliably."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 15692,
-    "completion_tokens": 292,
-    "total_tokens": 15984,
+    "prompt_tokens": 24508,
+    "completion_tokens": 140,
+    "total_tokens": 24648,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 18002
+    "duration_ms": 24860
   }
 }

@@ -3,389 +3,102 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-002-prologue:toc-ch-002-prologue:footnote\",\n  \"chapter_title\": \"Prologue\",\n  \"page_range\": [\n    38,\n    46\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 38,\n      \"ocr_excerpt\": \"## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters ...\"\n    },\n    {\n      \"page_no\": 39,\n      \"ocr_excerpt\": \"approach also deemphasizes the contrast between “elite medicine” and “popular practice” by showing that a large range of literate practitioners lived between these two abstract extremes. My broad reading of medical texts will also help to show that although madness was rarely at the core of doctrinal controversies, medical discussions of insanity quickly absorbed new doctrinal developments. The seven chapters of Part One will thus narrate how conceptions of kuang and its related illnesses evolved along with the rest of medical precepts and practices. Throughout, I use “illness” as a translation of the term bing 病 and as a label for the kinds of disorders that Chinese medicine discussed: clusters of clinically relevant symptoms that were grouped under one particular name. The problem in translating bing is not to determine whether that term really meant “illness,” “disease,” or “disorder,” but to find a rendering that neither clashes with the meaning of bing nor brings undue connotations into our analysis. To some extent, a translation is good because of what it avoids. Translating bing as “illness” will not presuppose that all bing defined in Chinese medical texts were “diseases,” ...\"\n    },\n    {\n      \"page_no\": 41,\n      \"ocr_excerpt\": \"task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity ...\"\n    },\n    {\n      \"page_no\": 44,\n      \"ocr_excerpt\": \"Psycho-behavioral pathology in Chinese medicine Concepts and early developments, $ 3^{rd} $ century BCE – ca. 1150 This chapter provides conceptual and factual tools for understanding how medical treatments of insanity changed despite how stably Chinese doctors kept describing mad behavior. As I pointed out in Chapter 1, Chinese people called “mad” the same disorders of behavior, speech, affect, and perception that we intuitively include under the category of madness. Here I survey the way ancient medical texts described such symptoms and analyze how physicians explained and treated psycho-behavioral pathology before about 1150. I start by examining the prototypical symptoms of kuang as defined in the Yellow Emperor's Inner Canon (first century BCE), a pivotal corpus from which medical writers drew their descriptions of madness for most of imperial history. I then criticize the way modern scholars have used \\\"mental illness\\\" as a foil against which to define Chinese approaches, or even as a reason to refuse comparisons between psychiatry and Chinese medicine. As I shall argue, Chinese medicine and modern psychiatry are comparable because both purport to explain and treat psycho-beha ...\"\n    },\n    {\n      \"page_no\": 45,\n      \"ocr_excerpt\": \"The second half of this chapter traces how the growing prominence of mucus as a cause of illness starting in the eleventh century deeply altered the way in which Chinese physicians understood and handled madness. I first describe the origins of the notion of “mucus,” a pathological fluid that was not mentioned in the Inner Canon. I then review how the medical activism and publishing activities of the northern-Song government (976-1127) helped to create a pool of common references that facilitated medical debates and intertextual borrowings. For example, many Song doctors debated the claim made in a government-sponsored formulary that “Wind strokes” could be treated with vomit-inducing (“emetic”) drugs. Just around the same time (the turn of the twelfth century), these mucus-targeting emetics were starting to be used to treat madness. ### 3.1 The kuang 狂 core in the Yellow Emperor corpus Modern scholars agree that the Yellow Emperor's Inner Canon (Huangdi neijing 黄帝内經) was \\\"an unintegrated compilation of short writings\\\" (Sivin 1995f: 191). Its received versions—the Grand Basis, the Basic Questions, and the Divine Pivot, all of which date to the seventh century or later but were comp ...\"\n    },\n    {\n      \"page_no\": 46,\n      \"ocr_excerpt\": \"explanations and doctrinal statements. $ ^{3} $ Elite physicians from the eleventh to the twentieth century proclaimed it should form the core of medical education. The diversity of views contained in the Canon allowed a number of rival doctrines hinging on it to claim authenticity. One influential passage on madness in the Inner Canon has been traced to the earlier Cauterization Canon of the Eleven Yin and Yang Vessels (Yinyang shiyi mai jiu jing 陰陽十一脈灸 經), a work of the late third century BCE that described the disorders that occurred when eleven distinct vessels (脈) “stirred” or “were stirred” (動).⁴ A few lines on the “Yang- Brilliance” (陽明) vessel later found their way into a section of the Basic Questions that later physicians liked to cite when they described kuang.⁵ When this [vessel] is moved, one ails from: shivers and ailing from coldness; fondness for stretching; continual yawning, blackness in the center of the forehead; ailing from swelling; when severe, detestation for people and fire; when hearing the sound of wood, panicked alarm; panicky heart; the desire to close doors and windows and dwell in isolation; when the ailment is severe, the desire to mount high and sin ...\"\n    },\n    {\n      \"page_no\": 47,\n      \"ocr_excerpt\": \"是勤〔動〕則病 洒洒 病塞＜寒＞ 喜信〔伸〕 數吹〔欠〕 嬿〔顏〕 墨 病種〔腫〕 至則惡人與火 聞木音則狄〔惕〕 然驚 心惕然欲獨必戶牖而處 病甚則欲乘高而歌 棄衣而走 此為骭蹶〔厥〕 是陽明脈主治 # Note the seamless transition between what we could call physical and behavioral symptoms. $ ^{6} $ # Two passages from the Basic Questions appear to have been comments on the above. Pian 49 (“Elucidations on Vessels” 脈解篇) explained: “when the ailment is severe, one desires to mount high and sing, and to cast off clothing and run’ [means that] Yin and Yang [Qi] resume their fight, and they pile on Yang on the outside, $ ^{7} $ making one shed clothes and run” (所謂病至則欲乘高而歌棄衣而走者 陰陽復爭而外並於陽 故使之棄衣而走也; 13.11b). Another gloss in the form of a conversation between the Yellow Emperor and an advisor appeared in pian 30 (“Elucidations on the Yang-Brilliance Vessel” 陽明脈解篇): $ ^{8} $ “When the illness is serious, [one] discards clothes and runs about, mounts heights and sings. One may even not eat for several days. One will leap walls and ascend rooftops. One would not be able to climb [in such a way] ordinarily, yet when one is ill one unexpectedly can. Why is this?” Qibo said: “The four limbs are the root of all Yang [vessels]. When Yang is flourishing, the four limbs are replete, which makes ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00025\",\n      \"marker\": \"1\",\n      \"page_no\": 38,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts w ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00026\",\n      \"marker\": \"2\",\n      \"page_no\": 38,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts w ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00027\",\n      \"marker\": \"3\",\n      \"page_no\": 38,\n      \"paragraph_index\": 3,\n      \"source_text\": \"To assess and explain this diversity properly, I pay attention not only to trendsetters and famous doctors, but also to writings that epitomized their age more than they marked it: $ ^{3} $ primers, florilegia of medical oddities, unpublish ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00031\",\n      \"marker\": \"7\",\n      \"page_no\": 41,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symp ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00035\",\n      \"marker\": \"1\",\n      \"page_no\": 44,\n      \"paragraph_index\": 3,\n      \"source_text\": \"I start by examining the prototypical symptoms of kuang as defined in the Yellow Emperor's Inner Canon (first century BCE), a pivotal corpus from which medical writers drew their descriptions of madness for most of imperial history. I then ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00036\",\n      \"marker\": \"2\",\n      \"page_no\": 45,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Modern scholars agree that the Yellow Emperor's Inner Canon (Huangdi neijing 黄帝内經) was \\\"an unintegrated compilation of short writings\\\" (Sivin 1995f: 191). Its received versions—the Grand Basis, the Basic Questions, and the Divine Pivot, all ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00037\",\n      \"marker\": \"3\",\n      \"page_no\": 46,\n      \"paragraph_index\": 0,\n      \"source_text\": \"explanations and doctrinal statements. $ ^{3} $ Elite physicians from the eleventh to the twentieth century proclaimed it should form the core of medical education. The diversity of views contained in the Canon allowed a number of rival doc ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00090\",\n      \"note_item_id\": \"fn-00007\",\n      \"current_anchor_id\": \"anchor-00028\",\n      \"marker\": \"4\",\n      \"note_page_no\": 38,\n      \"anchor_page_no\": 39,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"to 6. $ ^{3} $ I adapt this turn of phrase from Colin Jones 1990: 379.\",\n      \"anchor_excerpt\": \"Throughout, I use “illness” as a translation of the term bing 病 and as a label for the kinds of disorders that Chinese medicine discussed: clusters of clinically relevant symptoms that were grouped under one particular name. The problem in ...\"\n    },\n    {\n      \"link_id\": \"link-00093\",\n      \"note_item_id\": \"fn-00010\",\n      \"current_anchor_id\": \"synthetic-footnote-00087\",\n      \"marker\": \"5\",\n      \"note_page_no\": 44,\n      \"anchor_page_no\": 44,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"/adknv5\",\n      \"anchor_excerpt\": \"/adknv5\"\n    },\n    {\n      \"link_id\": \"link-00095\",\n      \"note_item_id\": \"fn-00012\",\n      \"current_anchor_id\": \"anchor-00042\",\n      \"marker\": \"6\",\n      \"note_page_no\": 46,\n      \"anchor_page_no\": 47,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Honald0 arper02 AA@B0 =30dates0its0copying0to0about0 =5 A=FGI because0it0was0written0in0a0mix0of0seal0and clerical0scripts60Wince0the0text0provides0no0evidence0that0moxa02mugwort0_Yaɖ `0tinder30was0used0at0the0time4 UcauterizationV0is amore ...\",\n      \"anchor_excerpt\": \"Pian 49 (“Elucidations on Vessels” 脈解篇) explained: “when the ailment is severe, one desires to mount high and sing, and to cast off clothing and run’ [means that] Yin and Yang [Qi] resume their fight, and they pile on Yang on the outside, $ ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote\",\n  \"chapter_title\": \"Mad acts, mad speech, and mad people in Chinese medicine and law\",\n  \"page_range\": [\n    22,\n    22\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 22,\n      \"ocr_excerpt\": \"according to specific legal procedures, categories, and concerns. They have also tended to take madness as a ready-made target for the new laws, or to posit a uniform and unchanging referent: “lunatics” (Bünger 1950), “the mentally ill” (Nakamura 1973d and Hao 2002), “insane persons” (MacCormack 1992), and “insanity” and “the insane” (Ng 1990). Martha Li Chiu hinted at more complexity when she claimed that Qing law responded to “a particular kind of human crisis defined very early in classical medical texts under the label of kuang 狂” (Chiu 1981: 75), but she still suggested that the legal institution responded to a pre-existing object—albeit a culturally determined one—outside of itself. I will show that the Qing legal field reacted neither to a condition (“madness”) nor to a kind of person (“the mad”), but first to individual acts of killing that officials attributed to insanity. “Killing because of madness” was a category of legal practice, not a label imposed upon a pre-existing reality. Through legislative and judicial practices, this penal denomination generated an official view of madness that differed from medical conceptions of kuang. $ ^{6} $ Until recently, there had bee ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00007\",\n      \"marker\": \"6\",\n      \"page_no\": 22,\n      \"paragraph_index\": 1,\n      \"source_text\": \"I will show that the Qing legal field reacted neither to a condition (“madness”) nor to a kind of person (“the mad”), but first to individual acts of killing that officials attributed to insanity. “Killing because of madness” was a category ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-002-prologue:toc-ch-002-prologue:footnote",
-      "chapter_title": "Prologue",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
+      "chapter_title": "Mad acts, mad speech, and mad people in Chinese medicine and law",
+      "request_mode": "ref_only_visual",
       "allowed_actions": [
-        "match",
         "ignore_ref",
         "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        38,
-        46
+        22,
+        22
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 106332,
+          "row_id": 8,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00025",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 38,
-          "paragraph_index": 2,
-          "char_start": 685,
-          "char_end": 693,
-          "source_marker": "$ ^{1} $",
-          "normalized_marker": "1",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106333,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00026",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 38,
-          "paragraph_index": 2,
-          "char_start": 1035,
-          "char_end": 1043,
-          "source_marker": "$ ^{2} $",
-          "normalized_marker": "2",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106334,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00027",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 38,
-          "paragraph_index": 3,
-          "char_start": 181,
-          "char_end": 189,
-          "source_marker": "$ ^{3} $",
-          "normalized_marker": "3",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "To assess and explain this diversity properly, I pay attention not only to trendsetters and famous doctors, but also to writings that epitomized their age more than they marked it: $ ^{3} $ primers, florilegia of medical oddities, unpublished collections of medical cases, etc. In addition to painting a more complete image of medical views of madness, this broad",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106338,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00031",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 41,
-          "paragraph_index": 2,
-          "char_start": 372,
-          "char_end": 380,
-          "source_marker": "$ ^{7} $",
-          "normalized_marker": "7",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子).",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106342,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00035",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 44,
-          "paragraph_index": 3,
-          "char_start": 683,
-          "char_end": 691,
-          "source_marker": "$ ^{1} $",
-          "normalized_marker": "1",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "I start by examining the prototypical symptoms of kuang as defined in the Yellow Emperor's Inner Canon (first century BCE), a pivotal corpus from which medical writers drew their descriptions of madness for most of imperial history. I then criticize the way modern scholars have used \"mental illness\" as a foil against which to define Chinese approaches, or even as a reason to refuse comparisons between psychiatry and Chinese medicine. As I shall argue, Chinese medicine and modern psychiatry are comparable because both purport to explain and treat psycho-behavioral symptoms. As I explain next, Chinese doctors assumed that mental activities \"supervened\" upon organic processes. $ ^{1} $ This is the most critical feature of Chinese medical approaches to insanity. I then map the relations between kuang and proximate illnesses in a seventh-century treatise that attributed most psycho-behavioral pathologies to harmful Winds. The fourth section explains how dian (瑱, 顛, or 癲)—\"seizure sickness\"—came to refer to insanity by borrowing from non-medical usage.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106344,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00036",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 45,
+          "anchor_id": "anchor-00007",
+          "chapter_id": "toc-ch-001-madactsmadspeechandmadpe",
+          "page_no": 22,
           "paragraph_index": 1,
-          "char_start": 351,
-          "char_end": 352,
-          "source_marker": "²",
-          "normalized_marker": "2",
+          "char_start": 464,
+          "char_end": 472,
+          "source_marker": "$ ^{6} $",
+          "normalized_marker": "6",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "Modern scholars agree that the Yellow Emperor's Inner Canon (Huangdi neijing 黄帝内經) was \"an unintegrated compilation of short writings\" (Sivin 1995f: 191). Its received versions—the Grand Basis, the Basic Questions, and the Divine Pivot, all of which date to the seventh century or later but were compiled from sources as early as the third century BCE²—were \"simply different collections of similar material. Any one collection therefore represented the end of one lineage of collecting, as if frozen in time\" (Lo 2002: xxix).",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106345,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00037",
-          "chapter_id": "toc-ch-002-prologue",
-          "page_no": 46,
-          "paragraph_index": 0,
-          "char_start": 39,
-          "char_end": 47,
-          "source_marker": "$ ^{3} $",
-          "normalized_marker": "3",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "explanations and doctrinal statements. $ ^{3} $ Elite physicians from the eleventh to the twentieth century proclaimed it should form the core of medical education. The diversity of views contained in the Canon allowed a number of rival doctrines hinging on it to claim authenticity.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "I will show that the Qing legal field reacted neither to a condition (“madness”) nor to a kind of person (“the mad”), but first to individual acts of killing that officials attributed to insanity. “Killing because of madness” was a category of legal practice, not a label imposed upon a pre-existing reality. Through legislative and judicial practices, this penal denomination generated an official view of madness that differed from medical conceptions of kuang. $ ^{6} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         }
       ],
-      "rebind_candidates": [
-        {
-          "link_id": "link-00090",
-          "note_item_id": "fn-00007",
-          "current_anchor_id": "anchor-00028",
-          "marker": "4",
-          "note_page_no": 38,
-          "anchor_page_no": 39,
-          "current_anchor_marker": "4",
-          "note_excerpt": "to 6. $ ^{3} $ I adapt this turn of phrase from Colin Jones 1990: 379.",
-          "anchor_excerpt": "Throughout, I use “illness” as a translation of the term bing 病 and as a label for the kinds of disorders that Chinese medicine discussed: clusters of clinically relevant symptoms that were grouped under one particular name. The problem in translating bing is not to determine whether that term really meant “illness,” “disease,” or “disorder,” but to find a rendering that neither clashes with the meaning of bing nor brings undue connotations into our analysis. To some extent, a translation is good because of what it avoids. Translating bing as “illness” will not presuppose that all bing defined in Chinese medical texts were “diseases,” a term that now seems to imply rootedness in biological processes. I also avoid “disorder” because it would make Chinese concepts of madness sound too close to those of the DSM (Diagnostic and Statistical Manual of Mental Disorders), the influential manual that calls most psychiatric derangements “disorders” (Post-Traumatic Stress Disorder and the like). $ ^{4} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00093",
-          "note_item_id": "fn-00010",
-          "current_anchor_id": "synthetic-footnote-00087",
-          "marker": "5",
-          "note_page_no": 44,
-          "anchor_page_no": 44,
-          "current_anchor_marker": "5",
-          "note_excerpt": "/adknv5",
-          "anchor_excerpt": "/adknv5",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00095",
-          "note_item_id": "fn-00012",
-          "current_anchor_id": "anchor-00042",
-          "marker": "6",
-          "note_page_no": 46,
-          "anchor_page_no": 47,
-          "current_anchor_marker": "6",
-          "note_excerpt": "Honald0 arper02 AA@B0 =30dates0its0copying0to0about0 =5 A=FGI because0it0was0written0in0a0mix0of0seal0and clerical0scripts60Wince0the0text0provides0no0evidence0that0moxa02mugwort0_Yaɖ `0tinder30was0used0at0the0time4 UcauterizationV0is amore0prudenttranslationforbamƯ in0the0title than0the0usual0UmoxibustionV 2idemB0=n 36 IYa Ⱦ in0pre5 an0texts0referred0to0pathways0for0blood60Wince0these0pathways0were0likened0to0underground rivers02idemB0@ 5 34eYa could also be0rendered0as0Ustreams6V0Fy0the0late0third0centuryFGI 40these0streams0were thought0to0convey0both0Flood0and0Ui60Xhe0eleven0vessels0described0in0the?Yml]jarYlagf0?Yfgfdifferfrom0the twelve conduits described0infondness0for0stretchingC0continual0yawning40blackness0in0the0center0of0the0foreheadC @anaf]0 angl 40which are0not0described0as0forming0a0network4 are0not0correlated with0internal0organs40and are0not0matched0with0acupoints02more0in0 arper0 AA@B0@ 5A 40and0Po0 36 = Xhe0translation0is0from0 arper02 AA@B0 >340whorenders\\gf_ ] as0Umoved6V0 0omithis0notes60Wince0 0haveno access0to0theQawangdui original4 0citefrom0the0quasi5identical0strips0 5 =0of0the0^hangjiashanIYak`m Ⱦŕ 4 from0^hangjiashan0ersiqi0hao0 anmu0zhujian0zhengli0xiaozu0 B0?>5?02strips30and0 A02modern0characters36",
-          "anchor_excerpt": "Pian 49 (“Elucidations on Vessels” 脈解篇) explained: “when the ailment is severe, one desires to mount high and sing, and to cast off clothing and run’ [means that] Yin and Yang [Qi] resume their fight, and they pile on Yang on the outside, $ ^{7} $ making one shed clothes and run” (所謂病至則欲乘高而歌棄衣而走者 陰陽復爭而外並於陽 故使之棄衣而走也; 13.11b). Another gloss in the form of a conversation between the Yellow Emperor and an advisor appeared in pian 30 (“Elucidations on the Yang-Brilliance Vessel” 陽明脈解篇): $ ^{8} $",
-          "current_anchor_synthetic": false
-        }
-      ]
+      "rebind_candidates": []
     },
     "page_contexts": [
       {
-        "page_no": 38,
-        "file_idx": 37,
+        "page_no": 22,
+        "file_idx": 21,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters and famous doctors, but also to writings that epitomized their age more than they marked it: $ ^{3} $ primers, florilegia of medical oddities, unpublished collections of medical cases, etc. In additio ...",
-        "byte_size": 106140,
-        "sha256": "20a718b8de82e5fceaf0ea167b88bd57134583ab8802ea8951948a17e73b1daa"
-      },
-      {
-        "page_no": 39,
-        "file_idx": 38,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "approach also deemphasizes the contrast between “elite medicine” and “popular practice” by showing that a large range of literate practitioners lived between these two abstract extremes. My broad reading of medical texts will also help to show that although madness was rarely at the core of doctrinal controversies, medical discussions of insanity quickly absorbed new doctrinal developments. The seven chapters of Part One will thus narrate how conceptions of kuang and its related illnesses evolved along with the rest of medical precepts and practices. Throughout, I use “illness” as a translation of the term bing 病 and as a label for the kinds of disorders that Chinese medicine discussed: clusters of clinically relevant symptoms that were grouped under one particular name. The problem in translating bing is not to determine whether that term really meant “illness,” “disease,” or “disorder,” but to find a rendering that neither clashes with the meaning of bing nor brings undue connotations into our analysis. To some extent, a translation is good because of what it avoids. Translating bing as “illness” will not presuppose that all bing defined in Chinese medical texts were “diseases,” a term that now seems to imply rootedness in biological processes. I also avoid “disorder” because it would make Chinese concepts of madness sound too close to those of the DSM (Diagnostic and Statist ...",
-        "byte_size": 152955,
-        "sha256": "093b7f3e662a72618bbaa0328200062cc72207790303a64b48ad31f16487c896"
-      },
-      {
-        "page_no": 41,
-        "file_idx": 40,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "task. Yet case records remind us that illness meanings were more than organic. As an affliction that was defined socially, insanity was always more than a bodily event. $ ^{6} $ Categories and scripts channeled phenomena into intelligible and manageable forms; they also guided perception and suggested methods to tackle the reality they purported to describe. Broadly speaking, medical specialists attributed mad symptoms either to invasion by external forces (“deviant Qi”, Wind, ghosts) or to internal imbalances strong enough to provoke illness. $ ^{7} $ Doctors claimed they could cure their patients by expelling these external invaders or redressing these pathogenic imbalances. Because of this emphasis on dynamic situations and a general therapeutic optimism, the medical tradition considered permanent disorders anomalous. Chinese physicians therefore rarely medicalized personality and almost never called patients “madmen” (狂人 or 瘋子). The medical scripts by which doctors understood madness changed significantly between the eighth and the fourteenth century, and again from the fourteenth to the sixteenth century. I plan to demonstrate that new explanations and treatments for insanity often borrowed from the prototypical scenarios of other illnesses or from contemporaneous interpretations of human vitality rather than from the observation of mad patients. A formal analysis would sh ...",
-        "byte_size": 135861,
-        "sha256": "66c785c3b66a9d86a351df4fd465a9e3b6f86832ff8122029eec88be2d0954ef"
-      },
-      {
-        "page_no": 44,
-        "file_idx": 43,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Psycho-behavioral pathology in Chinese medicine Concepts and early developments, $ 3^{rd} $ century BCE – ca. 1150 This chapter provides conceptual and factual tools for understanding how medical treatments of insanity changed despite how stably Chinese doctors kept describing mad behavior. As I pointed out in Chapter 1, Chinese people called “mad” the same disorders of behavior, speech, affect, and perception that we intuitively include under the category of madness. Here I survey the way ancient medical texts described such symptoms and analyze how physicians explained and treated psycho-behavioral pathology before about 1150. I start by examining the prototypical symptoms of kuang as defined in the Yellow Emperor's Inner Canon (first century BCE), a pivotal corpus from which medical writers drew their descriptions of madness for most of imperial history. I then criticize the way modern scholars have used \"mental illness\" as a foil against which to define Chinese approaches, or even as a reason to refuse comparisons between psychiatry and Chinese medicine. As I shall argue, Chinese medicine and modern psychiatry are comparable because both purport to explain and treat psycho-behavioral symptoms. As I explain next, Chinese doctors assumed that mental activities \"supervened\" upon organic processes. $ ^{1} $ This is the most critical feature of Chinese medical approaches to insa ...",
-        "byte_size": 115365,
-        "sha256": "757360ed3dc2e1db5f2af4a7d1fd781197ad163e1bb626f579d30aac4a6fbd19"
-      },
-      {
-        "page_no": 45,
-        "file_idx": 44,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "The second half of this chapter traces how the growing prominence of mucus as a cause of illness starting in the eleventh century deeply altered the way in which Chinese physicians understood and handled madness. I first describe the origins of the notion of “mucus,” a pathological fluid that was not mentioned in the Inner Canon. I then review how the medical activism and publishing activities of the northern-Song government (976-1127) helped to create a pool of common references that facilitated medical debates and intertextual borrowings. For example, many Song doctors debated the claim made in a government-sponsored formulary that “Wind strokes” could be treated with vomit-inducing (“emetic”) drugs. Just around the same time (the turn of the twelfth century), these mucus-targeting emetics were starting to be used to treat madness. ### 3.1 The kuang 狂 core in the Yellow Emperor corpus Modern scholars agree that the Yellow Emperor's Inner Canon (Huangdi neijing 黄帝内經) was \"an unintegrated compilation of short writings\" (Sivin 1995f: 191). Its received versions—the Grand Basis, the Basic Questions, and the Divine Pivot, all of which date to the seventh century or later but were compiled from sources as early as the third century BCE²—were \"simply different collections of similar material. Any one collection therefore represented the end of one lineage of collecting, as if frozen ...",
-        "byte_size": 138554,
-        "sha256": "e41196cdb4a3fbaab3e15b4130f8be094dccdc64c01ad4e926c3ff03c222cdd4"
-      },
-      {
-        "page_no": 46,
-        "file_idx": 45,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "explanations and doctrinal statements. $ ^{3} $ Elite physicians from the eleventh to the twentieth century proclaimed it should form the core of medical education. The diversity of views contained in the Canon allowed a number of rival doctrines hinging on it to claim authenticity. One influential passage on madness in the Inner Canon has been traced to the earlier Cauterization Canon of the Eleven Yin and Yang Vessels (Yinyang shiyi mai jiu jing 陰陽十一脈灸 經), a work of the late third century BCE that described the disorders that occurred when eleven distinct vessels (脈) “stirred” or “were stirred” (動).⁴ A few lines on the “Yang- Brilliance” (陽明) vessel later found their way into a section of the Basic Questions that later physicians liked to cite when they described kuang.⁵ When this [vessel] is moved, one ails from: shivers and ailing from coldness; fondness for stretching; continual yawning, blackness in the center of the forehead; ailing from swelling; when severe, detestation for people and fire; when hearing the sound of wood, panicked alarm; panicky heart; the desire to close doors and windows and dwell in isolation; when the ailment is severe, the desire to mount high and sing, and to cast off clothing and run. These constitute shin reversal. For these [ailments], the Yang-Brilliance vessel controls the treatment.",
-        "byte_size": 166904,
-        "sha256": "a29d3f6cb7621d8cd07b750064da21a648cb77bd8ff51cd9db62821307d966cf"
-      },
-      {
-        "page_no": 47,
-        "file_idx": 46,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "是勤〔動〕則病 洒洒 病塞＜寒＞ 喜信〔伸〕 數吹〔欠〕 嬿〔顏〕 墨 病種〔腫〕 至則惡人與火 聞木音則狄〔惕〕 然驚 心惕然欲獨必戶牖而處 病甚則欲乘高而歌 棄衣而走 此為骭蹶〔厥〕 是陽明脈主治 # Note the seamless transition between what we could call physical and behavioral symptoms. $ ^{6} $ # Two passages from the Basic Questions appear to have been comments on the above. Pian 49 (“Elucidations on Vessels” 脈解篇) explained: “when the ailment is severe, one desires to mount high and sing, and to cast off clothing and run’ [means that] Yin and Yang [Qi] resume their fight, and they pile on Yang on the outside, $ ^{7} $ making one shed clothes and run” (所謂病至則欲乘高而歌棄衣而走者 陰陽復爭而外並於陽 故使之棄衣而走也; 13.11b). Another gloss in the form of a conversation between the Yellow Emperor and an advisor appeared in pian 30 (“Elucidations on the Yang-Brilliance Vessel” 陽明脈解篇): $ ^{8} $ “When the illness is serious, [one] discards clothes and runs about, mounts heights and sings. One may even not eat for several days. One will leap walls and ascend rooftops. One would not be able to climb [in such a way] ordinarily, yet when one is ill one unexpectedly can. Why is this?” Qibo said: “The four limbs are the root of all Yang [vessels]. When Yang is flourishing, the four limbs are replete, which makes one able to climb high.” The Yellow Emperor said: “Why does one shed clothes and run?” Qibo said: “When Heat is flourishing in the body, one sheds clothes and wants to run.” The Yellow Emperor: “Why d ...",
-        "byte_size": 153187,
-        "sha256": "eeb40d85e5cbbb8fba0cb7a376673250ced3a3791dfc523004623aff52f804c0"
+        "ocr_excerpt": "according to specific legal procedures, categories, and concerns. They have also tended to take madness as a ready-made target for the new laws, or to posit a uniform and unchanging referent: “lunatics” (Bünger 1950), “the mentally ill” (Nakamura 1973d and Hao 2002), “insane persons” (MacCormack 1992), and “insanity” and “the insane” (Ng 1990). Martha Li Chiu hinted at more complexity when she claimed that Qing law responded to “a particular kind of human crisis defined very early in classical medical texts under the label of kuang 狂” (Chiu 1981: 75), but she still suggested that the legal institution responded to a pre-existing object—albeit a culturally determined one—outside of itself. I will show that the Qing legal field reacted neither to a condition (“madness”) nor to a kind of person (“the mad”), but first to individual acts of killing that officials attributed to insanity. “Killing because of madness” was a category of legal practice, not a label imposed upon a pre-existing reality. Through legislative and judicial practices, this penal denomination generated an official view of madness that differed from medical conceptions of kuang. $ ^{6} $ Until recently, there had been no serious historical work on whatever may be called madness in Chinese medicine. The many studies that tried to identify precursors to modern psychiatry did not take the original Chinese categories ...",
+        "byte_size": 141970,
+        "sha256": "af5339946ddcd06fa44533ee7e189a487f731a0af5191e7c4abf673aa2326532"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-002-prologue:toc-ch-002-prologue:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 7,
+    "cluster_id": "toc-ch-001-madactsmadspeechandmadpe:toc-ch-001-madactsmadspeechandmadpe:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00007\",\n    \"anchor_id\": \"anchor-00031\",\n    \"confidence\": 0.95,\n    \"reason\": \"Rebind note item fn-00007 (marker '4') to anchor-00031. The current link points to a synthetic anchor on page 39, but the footnote text ('Disorder' is otherwise...) and the marker '4' clearly appear at the bottom of page 21 (OCR page 39), corresponding to the sentence ending in 'disorders' on that page. Anchor-00031 represents this location.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00035\",\n    \"confidence\": 0.95,\n    \"reason\": \"Ignore anchor-00035 (marker '1' on page 26/OCR 44). The screenshot for page 26 shows a footnote marker '1', but there is no corresponding footnote text at the bottom of the page. The marker appears to be an OCR artifact or a misplaced reference from a different context (likely Chapter 1), as the text flow does not support a footnote here and none is printed.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00036\",\n    \"confidence\": 0.95,\n    \"reason\": \"Ignore anchor-00036 (marker '2' on page 27/OCR 45). Similar to anchor-00035, the screenshot for page 27 shows a marker '2' in the text, but no corresponding footnote is printed at the bottom of the page. It is likely a stray OCR detection.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00007\",\n    \"marker\": \"6\",\n    \"note_text\": \"These legal developments are explained in Chapters 11 and 12.\",\n    \"confidence\": 0.98,\n    \"reason\": \"The footnote text is clearly visible at the bottom of the page corresponding to marker 6, but no structured note item was generated.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "fn-00007",
-      "anchor_id": "anchor-00031",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Rebind note item fn-00007 (marker '4') to anchor-00031. The current link points to a synthetic anchor on page 39, but the footnote text ('Disorder' is otherwise...) and the marker '4' clearly appear at the bottom of page 21 (OCR page 39), corresponding to the sentence ending in 'disorders' on that page. Anchor-00031 represents this location."
-    },
-    {
-      "action": "ignore_ref",
+      "action": "synthesize_note_item",
       "note_item_id": "",
-      "anchor_id": "anchor-00035",
+      "anchor_id": "anchor-00007",
       "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Ignore anchor-00035 (marker '1' on page 26/OCR 44). The screenshot for page 26 shows a footnote marker '1', but there is no corresponding footnote text at the bottom of the page. The marker appears to be an OCR artifact or a misplaced reference from a different context (likely Chapter 1), as the text flow does not support a footnote here and none is printed."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00036",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Ignore anchor-00036 (marker '2' on page 27/OCR 45). Similar to anchor-00035, the screenshot for page 27 shows a marker '2' in the text, but no corresponding footnote is printed at the bottom of the page. It is likely a stray OCR detection."
+      "marker": "6",
+      "note_text": "These legal developments are explained in Chapters 11 and 12.",
+      "confidence": 0.98,
+      "reason": "The footnote text is clearly visible at the bottom of the page corresponding to marker 6, but no structured note item was generated."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-002-prologue:toc-ch-002-prologue:footnote",
-    "chapter_title": "Prologue",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "fn-00007",
-        "anchor_id": "anchor-00031",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Rebind note item fn-00007 (marker '4') to anchor-00031. The current link points to a synthetic anchor on page 39, but the footnote text ('Disorder' is otherwise...) and the marker '4' clearly appear at the bottom of page 21 (OCR page 39), corresponding to the sentence ending in 'disorders' on that page. Anchor-00031 represents this location."
-      },
-      {
-        "action": "ignore_ref",
+        "action": "synthesize_note_item",
         "note_item_id": "",
-        "anchor_id": "anchor-00035",
+        "anchor_id": "anchor-00007",
         "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Ignore anchor-00035 (marker '1' on page 26/OCR 44). The screenshot for page 26 shows a footnote marker '1', but there is no corresponding footnote text at the bottom of the page. The marker appears to be an OCR artifact or a misplaced reference from a different context (likely Chapter 1), as the text flow does not support a footnote here and none is printed."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00036",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Ignore anchor-00036 (marker '2' on page 27/OCR 45). Similar to anchor-00035, the screenshot for page 27 shows a marker '2' in the text, but no corresponding footnote is printed at the bottom of the page. It is likely a stray OCR detection."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00007",
-        "anchor_id": "anchor-00031",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Rebind note item fn-00007 (marker '4') to anchor-00031. The current link points to a synthetic anchor on page 39, but the footnote text ('Disorder' is otherwise...) and the marker '4' clearly appear at the bottom of page 21 (OCR page 39), corresponding to the sentence ending in 'disorders' on that page. Anchor-00031 represents this location."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00035",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Ignore anchor-00035 (marker '1' on page 26/OCR 44). The screenshot for page 26 shows a footnote marker '1', but there is no corresponding footnote text at the bottom of the page. The marker appears to be an OCR artifact or a misplaced reference from a different context (likely Chapter 1), as the text flow does not support a footnote here and none is printed."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00036",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Ignore anchor-00036 (marker '2' on page 27/OCR 45). Similar to anchor-00035, the screenshot for page 27 shows a marker '2' in the text, but no corresponding footnote is printed at the bottom of the page. It is likely a stray OCR detection."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-00469",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00035",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Ignore anchor-00035 (marker '1' on page 26/OCR 44). The screenshot for page 26 shows a footnote marker '1', but there is no corresponding footnote text at the bottom of the page. The marker appears to be an OCR artifact or a misplaced reference from a different context (likely Chapter 1), as the text flow does not support a footnote here and none is printed."
-      },
-      {
-        "link_id": "link-00470",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00036",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Ignore anchor-00036 (marker '2' on page 27/OCR 45). Similar to anchor-00035, the screenshot for page 27 shows a marker '2' in the text, but no corresponding footnote is printed at the bottom of the page. It is likely a stray OCR detection."
+        "marker": "6",
+        "note_text": "These legal developments are explained in Chapters 11 and 12.",
+        "confidence": 0.98,
+        "reason": "The footnote text is clearly visible at the bottom of the page corresponding to marker 6, but no structured note item was generated."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 9576,
-    "completion_tokens": 424,
-    "total_tokens": 10000,
+    "prompt_tokens": 1805,
+    "completion_tokens": 113,
+    "total_tokens": 1918,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 10023
+    "duration_ms": 3596
   }
 }

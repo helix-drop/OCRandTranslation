@@ -1,0 +1,3197 @@
+{
+  "boundary_detection": {
+    "decision_basis": [
+      "fnm_pages.page_role",
+      "fnm_pages.role_reason",
+      "fnm_pages.role_confidence",
+      "fnm_pages.has_note_heading",
+      "fnm_pages.section_hint"
+    ],
+    "page_role_counts": {
+      "front_matter": 26,
+      "body": 327,
+      "other": 33
+    },
+    "first_body_page": 23,
+    "first_note_page": null,
+    "page_role_samples": [
+      {
+        "page_no": 1,
+        "target_pdf_page": 1,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 2,
+        "target_pdf_page": 2,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 3,
+        "target_pdf_page": 3,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 23,
+        "target_pdf_page": 23,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 24,
+        "target_pdf_page": 24,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 25,
+        "target_pdf_page": 25,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 354,
+        "target_pdf_page": 354,
+        "page_role": "other",
+        "role_reason": "bibliography",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 355,
+        "target_pdf_page": 355,
+        "page_role": "other",
+        "role_reason": "bibliography_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 356,
+        "target_pdf_page": 356,
+        "page_role": "other",
+        "role_reason": "bibliography_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      }
+    ],
+    "structure_page_partition_summary": {
+      "total_pages": 386,
+      "noise": 0,
+      "front_matter": 13,
+      "body": 339,
+      "note": 0,
+      "other": 34
+    }
+  },
+  "note_region_detection": {
+    "decision_basis": [
+      "fnm_note_regions.region_kind/start_page/end_page/pages",
+      "fnm_note_regions.bound_chapter_id",
+      "fnm_note_regions.region_start_first_source_marker",
+      "fnm_note_regions.region_first_note_item_marker",
+      "structure.chapter_binding_summary",
+      "structure.visual_toc_endnotes_summary"
+    ],
+    "visual_toc_endnotes_summary": {},
+    "chapter_binding_summary": {
+      "region_count": 52,
+      "book_scope_region_count": 0,
+      "unbound_region_count": 0,
+      "unbound_region_ids_preview": [],
+      "unassigned_item_count": 0,
+      "unassigned_item_ids_preview": []
+    },
+    "chapter_endnote_region_alignment_summary": {},
+    "region_rows": [
+      {
+        "region_id": "nr-fn-ch-0001-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "start_page": 26,
+        "end_page": 26,
+        "pages": [
+          26
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00001",
+            "page_no": 26,
+            "marker": "1",
+            "source_text_preview": "What I here call brain–self and brain–object differentiation, within the neuropsychodynamic context, may perceive a self that is different f..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0002-toc-ch-002-1transcendentalapproacht",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "start_page": 38,
+        "end_page": 42,
+        "pages": [
+          38,
+          39,
+          40,
+          41,
+          42
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 9,
+        "numeric_marker_count": 9,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00002",
+            "page_no": 38,
+            "marker": "1",
+            "source_text_preview": "It should be noted that reason prestructures only cognition of the world, not the world itself. The contrithat is occupied not so much with..."
+          },
+          {
+            "note_item_id": "fn-00003",
+            "page_no": 38,
+            "marker": "2",
+            "source_text_preview": "This contribution of reason to our cognition may in turn be perceived by itself, and it is this cognition that events and objects of the wor..."
+          },
+          {
+            "note_item_id": "fn-00004",
+            "page_no": 39,
+            "marker": "3",
+            "source_text_preview": "The transcendental view thus concerns a reflection upon the objects and events that we can perceive which takes place within the same world..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0003-toc-ch-002-1transcendentalapproacht",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "start_page": 46,
+        "end_page": 46,
+        "pages": [
+          46
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00011",
+            "page_no": 46,
+            "marker": "10",
+            "source_text_preview": "However, this amounted to what has been called “brain-paradox” (Northoff, 2001, 2004), since one and the forms properly belonging to it, whi..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0004-toc-ch-002-1transcendentalapproacht",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "start_page": 50,
+        "end_page": 50,
+        "pages": [
+          50
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 11,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "11"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00012",
+            "page_no": 50,
+            "marker": "11",
+            "source_text_preview": "The rejection of possible neural correlates and the consecutive shift to neural predispositions is also well documented in the following quo..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0005-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "start_page": 54,
+        "end_page": 54,
+        "pages": [
+          54
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00013",
+            "page_no": 54,
+            "marker": "1",
+            "source_text_preview": "Kant’s position on the mind–body problem has been interpreted in different ways that do not always refrain from ontological assumptions, whi..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0006-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "start_page": 57,
+        "end_page": 57,
+        "pages": [
+          57
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00014",
+            "page_no": 57,
+            "marker": "2",
+            "source_text_preview": "There is indeed some evidence from private conversations between Freud and Ludwig Binswanger (cited to overlook this when he claims to exten..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0007-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "start_page": 61,
+        "end_page": 61,
+        "pages": [
+          61
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00015",
+            "page_no": 61,
+            "marker": "3",
+            "source_text_preview": "I am aware that the present-day distinction between FPP and TPP may not be completely analogous to the earlier distinction between inner and..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0008-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "start_page": 67,
+        "end_page": 68,
+        "pages": [
+          67,
+          68
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 5,
+        "numeric_marker_count": 5,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00016",
+            "page_no": 67,
+            "marker": "4",
+            "source_text_preview": "At this point I presuppose a broad definition of FPP that includes both subjective experience and introspection. Some authors (see Northoff..."
+          },
+          {
+            "note_item_id": "fn-00017",
+            "page_no": 68,
+            "marker": "5",
+            "source_text_preview": "Metzinger ( 2003 , pp. 177, 294) also recognizes our inability to subjectively experience our own brain as brain."
+          },
+          {
+            "note_item_id": "fn-00018",
+            "page_no": 68,
+            "marker": "6",
+            "source_text_preview": "In the following account I distinguish between brain and body, although I am of course well aware that the"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0009-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "start_page": 71,
+        "end_page": 72,
+        "pages": [
+          71,
+          72
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 12,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9",
+          "10",
+          "11",
+          "12"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00021",
+            "page_no": 71,
+            "marker": "9",
+            "source_text_preview": "Metzinger distinguishes phenomenal transparency from epistemic transparency (which concerns missed processes are going on in these “earlier..."
+          },
+          {
+            "note_item_id": "fn-00022",
+            "page_no": 71,
+            "marker": "10",
+            "source_text_preview": "This understanding of transparency, in which the representational character of something that is repre- from the world. This encounter betwe..."
+          },
+          {
+            "note_item_id": "fn-00023",
+            "page_no": 71,
+            "marker": "11",
+            "source_text_preview": "I claim that two central characteristics of early information-processing stages are sensory coding and their exact empirical characterizatio..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0010-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 75,
+        "end_page": 76,
+        "pages": [
+          75,
+          76
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00025",
+            "page_no": 75,
+            "marker": "1",
+            "source_text_preview": "This presupposes a wider meaning of science, as is nicely expressed by Alfred Tauber: “Freud struggled is not an option. Such a reductive–el..."
+          },
+          {
+            "note_item_id": "fn-00026",
+            "page_no": 76,
+            "marker": "2",
+            "source_text_preview": "I am of course aware that the description of facts in neuroscience also presupposes concepts so that, literally mere duality or parallelism..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0011-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 78,
+        "end_page": 78,
+        "pages": [
+          78
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00027",
+            "page_no": 78,
+            "marker": "3",
+            "source_text_preview": "Freud himself was well aware of such an intermediate position when, for example, he aimed to avoid the cal results to make the former not on..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 82,
+        "end_page": 84,
+        "pages": [
+          82,
+          83,
+          84
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 5,
+        "numeric_marker_count": 5,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00028",
+            "page_no": 82,
+            "marker": "4",
+            "source_text_preview": "The concept of “philosophy of neuropsychoanalysis” is also used by Talvitie and Ihanus ( 2006 , p. 96), and regulations with regard to how p..."
+          },
+          {
+            "note_item_id": "fn-00029",
+            "page_no": 82,
+            "marker": "5",
+            "source_text_preview": "As already mentioned in footnote 2, the concept of concept–fact iterativity is not to be understood in a literal sense, since that would not..."
+          },
+          {
+            "note_item_id": "fn-00030",
+            "page_no": 83,
+            "marker": "6",
+            "source_text_preview": "I am well aware that the concept of fact is by itself a problematic one. However, I leave discussion of this “feedforward transformation,” t..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0013-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 87,
+        "end_page": 87,
+        "pages": [
+          87
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00033",
+            "page_no": 87,
+            "marker": "9",
+            "source_text_preview": "One can already see that even on the side of the neuroscientific concepts we run into deep conceptual itly made in the mediating concept and..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0014-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 90,
+        "end_page": 90,
+        "pages": [
+          90
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00034",
+            "page_no": 90,
+            "marker": "10",
+            "source_text_preview": "I am aware that the concepts of “facts” and “experimental data” cannot be regarded as identical from a not a challenge from a purely methodo..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0015-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 92,
+        "end_page": 92,
+        "pages": [
+          92
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 11,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "11"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00035",
+            "page_no": 92,
+            "marker": "11",
+            "source_text_preview": "Let me offer an example of an observer-induced artifact, namely perception. We might make conceptual stimuli. Rather than presupposing an “a..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0016-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "start_page": 97,
+        "end_page": 97,
+        "pages": [
+          97
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 12,
+        "numeric_marker_end": 12,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "12"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00036",
+            "page_no": 97,
+            "marker": "12",
+            "source_text_preview": "Brook ( 1998 ) considers this to be a violation of the intentional–mechanistic dichotomy. However, it may have been regarded as appropriate..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0017-toc-ch-005-4cathexisandtheenergyoft",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-4cathexisandtheenergyoft",
+        "start_page": 108,
+        "end_page": 108,
+        "pages": [
+          108
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00037",
+            "page_no": 108,
+            "marker": "1",
+            "source_text_preview": "Why is it important to consider the difference between “shifting cathexis into the neural context of the coding stimuli from the outside wor..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0018-toc-ch-005-4cathexisandtheenergyoft",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-4cathexisandtheenergyoft",
+        "start_page": 114,
+        "end_page": 114,
+        "pages": [
+          114
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00038",
+            "page_no": 114,
+            "marker": "2",
+            "source_text_preview": "The concept of the brain’s needs and purposes is to be understood in a figurative rather than literal sense, cathexis. In the same way that..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0019-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "start_page": 128,
+        "end_page": 128,
+        "pages": [
+          128
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00039",
+            "page_no": 128,
+            "marker": "1",
+            "source_text_preview": "Although I am well aware that psychological and mental states can be distinguished both conceptually neural and psychological contexts. I th..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0020-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "start_page": 130,
+        "end_page": 131,
+        "pages": [
+          130,
+          131
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2",
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00040",
+            "page_no": 130,
+            "marker": "2",
+            "source_text_preview": "See also Friston (2000, p. 219), who however only determines the meaning of the term “code” with regard activity has here just a secondary o..."
+          },
+          {
+            "note_item_id": "fn-00041",
+            "page_no": 131,
+            "marker": "3",
+            "source_text_preview": "Fiorillo ( 2008 ) too considers the single neuron and characterizes them by difference-based coding. Based for us to infer the actual direct..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0021-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "start_page": 135,
+        "end_page": 135,
+        "pages": [
+          135
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 4,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00042",
+            "page_no": 135,
+            "marker": "4",
+            "source_text_preview": "I am fully aware that the concept of the object is rather complex, although this issue cannot be discussed the traditional philosophical sen..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0022-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "start_page": 137,
+        "end_page": 137,
+        "pages": [
+          137
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "5"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00043",
+            "page_no": 137,
+            "marker": "5",
+            "source_text_preview": "Empirically speaking this is not entirely true. Even in the resting state, extrinsic stimuli still penetrate the Carhart-Harris and Friston..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0023-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "start_page": 143,
+        "end_page": 143,
+        "pages": [
+          143
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00044",
+            "page_no": 143,
+            "marker": "6",
+            "source_text_preview": "Since these are more conceptual issues, I shall not pursue them here. However, I am fully aware that the two different concepts of embeddedn..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0024-toc-ch-007-6defensemechanismsandbra",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-6defensemechanismsandbra",
+        "start_page": 162,
+        "end_page": 162,
+        "pages": [
+          162
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00045",
+            "page_no": 162,
+            "marker": "1",
+            "source_text_preview": "The psychoanalyst may still want to object. The overlap between what he calls “mentalization of objects” In addition to rest–stimulus intera..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0025-toc-ch-007-6defensemechanismsandbra",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-6defensemechanismsandbra",
+        "start_page": 164,
+        "end_page": 164,
+        "pages": [
+          164
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00046",
+            "page_no": 164,
+            "marker": "2",
+            "source_text_preview": "However, it remains unclear whether such intero-exteroceptive integration at the cortical level corresponds to analogous processes at the le..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0026-toc-ch-007-6defensemechanismsandbra",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-6defensemechanismsandbra",
+        "start_page": 172,
+        "end_page": 173,
+        "pages": [
+          172,
+          173
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 3,
+        "numeric_marker_count": 3,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3",
+          "4",
+          "5"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00047",
+            "page_no": 172,
+            "marker": "3",
+            "source_text_preview": "I am aware that here again I use the term object in a rather blurred way that does not fully correspond type (intero- or exteroceptive or ne..."
+          },
+          {
+            "note_item_id": "fn-00048",
+            "page_no": 173,
+            "marker": "4",
+            "source_text_preview": "This might be interesting to consider for the specific case of self-objects as intermediate between mere ral, with both presupposing a diffe..."
+          },
+          {
+            "note_item_id": "fn-00049",
+            "page_no": 173,
+            "marker": "5",
+            "source_text_preview": "One may finally raise the question for the body (see also the end of Chapter 7 for further discussion of this neither from the body nor from..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0027-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "start_page": 181,
+        "end_page": 182,
+        "pages": [
+          181,
+          182
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00050",
+            "page_no": 181,
+            "marker": "1",
+            "source_text_preview": "One may, however, also take a different perspective. Cathexis is no longer invested in real and physical Taken together, Freud’s concept of..."
+          },
+          {
+            "note_item_id": "fn-00051",
+            "page_no": 182,
+            "marker": "2",
+            "source_text_preview": "Kohut introduces the term self-object to characterize the special relationship of the self to specific objects that serve to maintain and su..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0028-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "start_page": 184,
+        "end_page": 184,
+        "pages": [
+          184
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00052",
+            "page_no": 184,
+            "marker": "3",
+            "source_text_preview": "As well as these different contexts, one may also assume a sociological context for the concept of narcissism when it is used to describe th..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0029-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "start_page": 189,
+        "end_page": 190,
+        "pages": [
+          189,
+          190
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4",
+          "5"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00053",
+            "page_no": 189,
+            "marker": "4",
+            "source_text_preview": "The reader may be surprised that I introduce new psychodynamic concepts here, where the primary aim is sufficient but only a necessary condi..."
+          },
+          {
+            "note_item_id": "fn-00054",
+            "page_no": 190,
+            "marker": "5",
+            "source_text_preview": "Thus, conceptually, object–self-object transformation and self–self-object integration refer to processes, specific stimuli) may enable and..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0030-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "start_page": 193,
+        "end_page": 193,
+        "pages": [
+          193
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00055",
+            "page_no": 193,
+            "marker": "6",
+            "source_text_preview": "Conceptually, the embodied approach to emotion emphasizes the crucial role of the body in emotional clearly distinguished from exteroceptive..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0031-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "start_page": 197,
+        "end_page": 197,
+        "pages": [
+          197
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 7,
+        "numeric_marker_end": 7,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "7"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00056",
+            "page_no": 197,
+            "marker": "7",
+            "source_text_preview": "One may speculatively assume that such control or gating may possibly be mediated by inhibition. However, in contrast to Solms (1998, 1999),..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0032-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "start_page": 200,
+        "end_page": 200,
+        "pages": [
+          200
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "8",
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00057",
+            "page_no": 200,
+            "marker": "8",
+            "source_text_preview": "I am aware that I am contradicting Kohut and self psychology here. I would strongly argue that the body, One would consequently assume that..."
+          },
+          {
+            "note_item_id": "fn-00058",
+            "page_no": 200,
+            "marker": "9",
+            "source_text_preview": "This is meant in a figurative way, as the brain itself does not possess any perspective by itself: brains do not in that, unlike other self-..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0033-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "start_page": 203,
+        "end_page": 205,
+        "pages": [
+          203,
+          204,
+          205
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 5,
+        "numeric_marker_count": 5,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00059",
+            "page_no": 203,
+            "marker": "1",
+            "source_text_preview": "One may also distinguish between a repressed unconscious and an unrepressed unconscious, with the conscious are no longer as instinctually d..."
+          },
+          {
+            "note_item_id": "fn-00060",
+            "page_no": 203,
+            "marker": "2",
+            "source_text_preview": "However, in his later work he refrained, at least in part, from exhaustive and exclusive definition of the Nietzsche) and literature (Dostoy..."
+          },
+          {
+            "note_item_id": "fn-00061",
+            "page_no": 204,
+            "marker": "3",
+            "source_text_preview": "The variety of contents associated with the unconscious suggests that one can no longer speak of “the sible to bring such an unconscious men..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0034-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "start_page": 208,
+        "end_page": 208,
+        "pages": [
+          208
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00064",
+            "page_no": 208,
+            "marker": "6",
+            "source_text_preview": "The reader may also want to ask what precise concept of dreams I here presuppose (e.g. whether dreams are considered in a wide sense as any..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0035-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "start_page": 210,
+        "end_page": 210,
+        "pages": [
+          210
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 7,
+        "numeric_marker_end": 7,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "7"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00065",
+            "page_no": 210,
+            "marker": "7",
+            "source_text_preview": "I here ignore the fact that dreams can also occur in NREM sleep stages, where they seem to be less accessible for subsequent remembrance and..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0036-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "start_page": 227,
+        "end_page": 227,
+        "pages": [
+          227
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00066",
+            "page_no": 227,
+            "marker": "8",
+            "source_text_preview": "The avid philosopher may of course immediately see a contradiction at work. If our cognition and knowledge and thus observation are consider..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0037-toc-ch-010-9theselfanditsbrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-9theselfanditsbrain",
+        "start_page": 236,
+        "end_page": 236,
+        "pages": [
+          236
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00067",
+            "page_no": 236,
+            "marker": "1",
+            "source_text_preview": "Characterizing the self by construction within the relation to the environment implies a wider notion of psychic reality that includes both..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0038-toc-ch-010-9theselfanditsbrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-9theselfanditsbrain",
+        "start_page": 249,
+        "end_page": 249,
+        "pages": [
+          249
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00068",
+            "page_no": 249,
+            "marker": "2",
+            "source_text_preview": "However, one may argue that the former includes the latter, so that relational cathexis is a specific subset of libidinal or narcissistic ca..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0039-toc-ch-011-10depressionandthebrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-10depressionandthebrain",
+        "start_page": 263,
+        "end_page": 263,
+        "pages": [
+          263
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00069",
+            "page_no": 263,
+            "marker": "1",
+            "source_text_preview": "I am fully aware, though, that these correspondences between phenomenological and psychodynamic to demonstrate how the persistence of the de..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0040-toc-ch-011-10depressionandthebrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-10depressionandthebrain",
+        "start_page": 270,
+        "end_page": 270,
+        "pages": [
+          270
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00070",
+            "page_no": 270,
+            "marker": "2",
+            "source_text_preview": "Interestingly, however, there appears to be hyperactivity in the very same regions during punishing stimuli (for a review, see Eshel and Roi..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0041-toc-ch-011-10depressionandthebrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-10depressionandthebrain",
+        "start_page": 274,
+        "end_page": 274,
+        "pages": [
+          274
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00071",
+            "page_no": 274,
+            "marker": "3",
+            "source_text_preview": "The abnormalities in depression are not confined to the insula, but also occur in typical exteroceptive regions such as the visual cortex (D..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-11psychosisipsychodynami",
+        "start_page": 281,
+        "end_page": 281,
+        "pages": [
+          281
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 4,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00072",
+            "page_no": 281,
+            "marker": "1",
+            "source_text_preview": "I here and in the following account (in both this and the next chapter) deliberately use the term “psychosis” enable and predispose to self-..."
+          },
+          {
+            "note_item_id": "fn-00073",
+            "page_no": 281,
+            "marker": "2",
+            "source_text_preview": "I here devote an entire chapter to the psychodynamics (and phenomenology) of psychosis, which I deem possibly be invested in any kind of con..."
+          },
+          {
+            "note_item_id": "fn-00074",
+            "page_no": 281,
+            "marker": "3",
+            "source_text_preview": "I shall use the terms “psychosis” and “schizophrenia” interchangeably, since I here focus more on the"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0043-toc-ch-012-11psychosisipsychodynami",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-11psychosisipsychodynami",
+        "start_page": 287,
+        "end_page": 287,
+        "pages": [
+          287
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "5",
+          "6"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00076",
+            "page_no": 287,
+            "marker": "5",
+            "source_text_preview": "I owe this remark to M. Dümpelmann, who made me aware of the difference between the non-existence patient is unable to constitute “good self..."
+          },
+          {
+            "note_item_id": "fn-00077",
+            "page_no": 287,
+            "marker": "6",
+            "source_text_preview": "Relying on Stern and his description of infants, Garfield ( 1995 , 2001) speaks of so-called “vitality affects” self-objects that are no lon..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0044-toc-ch-012-11psychosisipsychodynami",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-11psychosisipsychodynami",
+        "start_page": 289,
+        "end_page": 289,
+        "pages": [
+          289
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 7,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00078",
+            "page_no": 289,
+            "marker": "7",
+            "source_text_preview": "One should be careful, though. Due to the reasons discussed below (e.g. the breakdown of defense mechaanything that the psychotic patient ca..."
+          },
+          {
+            "note_item_id": "fn-00079",
+            "page_no": 289,
+            "marker": "8",
+            "source_text_preview": "Due to their strong affective assignment, the projected parts may be prone to be introjected again and thus"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0045-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 300,
+        "end_page": 300,
+        "pages": [
+          300
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00080",
+            "page_no": 300,
+            "marker": "1",
+            "source_text_preview": "As in the previous chapter, since my focus is primarily on the symptoms rather than a specific etiology, sis as a system disorder must be di..."
+          },
+          {
+            "note_item_id": "fn-00081",
+            "page_no": 300,
+            "marker": "2",
+            "source_text_preview": "There is an enormous abundance of different types of data available on psychosis. Needless to say, I shall including other people) and the m..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0046-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 303,
+        "end_page": 303,
+        "pages": [
+          303
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00082",
+            "page_no": 303,
+            "marker": "3",
+            "source_text_preview": "I here explicitly focus on objects rather than self-objects. I postulate that the constitution of what are called objects within the psychod..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0047-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 305,
+        "end_page": 305,
+        "pages": [
+          305
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 4,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00083",
+            "page_no": 305,
+            "marker": "4",
+            "source_text_preview": "One may want to argue that AVH still show a connection to the external physical world in that they repreto account for sensory-based common-..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0048-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 307,
+        "end_page": 307,
+        "pages": [
+          307
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "5"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00084",
+            "page_no": 307,
+            "marker": "5",
+            "source_text_preview": "Frith argues that such a deficit in self-monitoring can explain a particular group of psychotic symptoms, namely those that are characterize..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0049-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 313,
+        "end_page": 314,
+        "pages": [
+          313,
+          314
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 7,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6",
+          "7"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00085",
+            "page_no": 313,
+            "marker": "6",
+            "source_text_preview": "The theory of impaired inner monitoring has been criticized for remaining unable to explain that AVH are usually associated with a particula..."
+          },
+          {
+            "note_item_id": "fn-00086",
+            "page_no": 314,
+            "marker": "7",
+            "source_text_preview": "I thank Michael Duempelmann for making me aware of the difference between “bad self-objects” and consequently be reformulated as a “failed c..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 321,
+        "end_page": 322,
+        "pages": [
+          321,
+          322
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "8",
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00087",
+            "page_no": 321,
+            "marker": "8",
+            "source_text_preview": "Whether this confusion of difference is related to the described deficit in GABA-ergic mediated neural inhibition can only be speculated at..."
+          },
+          {
+            "note_item_id": "fn-00088",
+            "page_no": 322,
+            "marker": "9",
+            "source_text_preview": "Relying on Freud, Carhart-Harris and Friston ( 2010 ) characterize psychosis by increased primary process thinking and reduced secondary pro..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0051-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 324,
+        "end_page": 324,
+        "pages": [
+          324
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00089",
+            "page_no": 324,
+            "marker": "10",
+            "source_text_preview": "One may also discuss how the three-stage model of psychosis by the former German psychopathologist Klaus Conrad relates to our distinct stag..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0052-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "start_page": 333,
+        "end_page": 333,
+        "pages": [
+          333
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 11,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "11"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00090",
+            "page_no": 333,
+            "marker": "11",
+            "source_text_preview": "One may want to raise the question for the difference between psychosis and dreams since the latter can also be characterized by violations..."
+          }
+        ]
+      }
+    ],
+    "endnote_region_rows": []
+  },
+  "endnote_array_building": {
+    "decision_basis": [
+      "fnm_note_items.region_id/chapter_id/page_no/marker",
+      "按 region_id 聚合生成注释数组",
+      "检查 numeric marker 连续性与首尾 marker"
+    ],
+    "note_capture_summary": {
+      "expected_anchor_count": 112,
+      "captured_note_count": 90,
+      "capture_ratio": 0.8036,
+      "sparse_capture_chapter_ids": [],
+      "dense_anchor_zero_capture_pages": [],
+      "chapters": [
+        {
+          "chapter_id": "toc-ch-001-introduction",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 1,
+          "captured_note_count": 1,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-002-1transcendentalapproacht",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 16,
+          "captured_note_count": 11,
+          "capture_ratio": 0.6875
+        },
+        {
+          "chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 14,
+          "captured_note_count": 12,
+          "capture_ratio": 0.8571
+        },
+        {
+          "chapter_id": "toc-ch-004-3transdisciplinarymethod",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 13,
+          "captured_note_count": 12,
+          "capture_ratio": 0.9231
+        },
+        {
+          "chapter_id": "toc-ch-005-4cathexisandtheenergyoft",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 3,
+          "captured_note_count": 2,
+          "capture_ratio": 0.6667
+        },
+        {
+          "chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 6,
+          "captured_note_count": 6,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-007-6defensemechanismsandbra",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 7,
+          "captured_note_count": 5,
+          "capture_ratio": 0.7143
+        },
+        {
+          "chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 9,
+          "captured_note_count": 9,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 9,
+          "captured_note_count": 8,
+          "capture_ratio": 0.8889
+        },
+        {
+          "chapter_id": "toc-ch-010-9theselfanditsbrain",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 3,
+          "captured_note_count": 2,
+          "capture_ratio": 0.6667
+        },
+        {
+          "chapter_id": "toc-ch-011-10depressionandthebrain",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 3,
+          "captured_note_count": 3,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-012-11psychosisipsychodynami",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 11,
+          "captured_note_count": 8,
+          "capture_ratio": 0.7273
+        },
+        {
+          "chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 17,
+          "captured_note_count": 11,
+          "capture_ratio": 0.6471
+        },
+        {
+          "chapter_id": "toc-ch-014-appendixwhatcanwelearnfr",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-015-epiloguethebeautyoftrans",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        }
+      ]
+    },
+    "book_endnote_stream_summary": {
+      "chapter_count": 0,
+      "chapters_with_endnote_stream": [],
+      "high_concentration_chapter_ids": [],
+      "chapters": []
+    },
+    "array_rows": [
+      {
+        "region_id": "nr-fn-ch-0001-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0002-toc-ch-002-1transcendentalapproacht",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "item_count": 9,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0003-toc-ch-002-1transcendentalapproacht",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "item_count": 1,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0004-toc-ch-002-1transcendentalapproacht",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "item_count": 1,
+        "numeric_marker_start": 11,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "11"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0005-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0006-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "item_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0007-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "item_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0008-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "item_count": 5,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0009-toc-ch-003-2unknowabilityandtheconc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+        "item_count": 4,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 12,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9",
+          "10",
+          "11",
+          "12"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0010-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 2,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0011-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 5,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0013-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 1,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0014-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 1,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0015-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 1,
+        "numeric_marker_start": 11,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "11"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0016-toc-ch-004-3transdisciplinarymethod",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-3transdisciplinarymethod",
+        "item_count": 1,
+        "numeric_marker_start": 12,
+        "numeric_marker_end": 12,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "12"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0017-toc-ch-005-4cathexisandtheenergyoft",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-4cathexisandtheenergyoft",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0018-toc-ch-005-4cathexisandtheenergyoft",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-4cathexisandtheenergyoft",
+        "item_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0019-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0020-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "item_count": 2,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2",
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0021-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "item_count": 1,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 4,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0022-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "item_count": 1,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "5"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0023-toc-ch-006-5cathexisneuralcodingand",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-5cathexisneuralcodingand",
+        "item_count": 1,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0024-toc-ch-007-6defensemechanismsandbra",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-6defensemechanismsandbra",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0025-toc-ch-007-6defensemechanismsandbra",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-6defensemechanismsandbra",
+        "item_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0026-toc-ch-007-6defensemechanismsandbra",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-6defensemechanismsandbra",
+        "item_count": 3,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0027-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "item_count": 2,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0028-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "item_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0029-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "item_count": 2,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4",
+          "5"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0030-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "item_count": 1,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0031-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "item_count": 1,
+        "numeric_marker_start": 7,
+        "numeric_marker_end": 7,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "7"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0032-toc-ch-008-7narcissismselfobjectsan",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-7narcissismselfobjectsan",
+        "item_count": 2,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "8",
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0033-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "item_count": 5,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0034-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "item_count": 1,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0035-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "item_count": 1,
+        "numeric_marker_start": 7,
+        "numeric_marker_end": 7,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "7"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0036-toc-ch-009-8unconsciousnessandthebr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-8unconsciousnessandthebr",
+        "item_count": 1,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0037-toc-ch-010-9theselfanditsbrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-9theselfanditsbrain",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0038-toc-ch-010-9theselfanditsbrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-9theselfanditsbrain",
+        "item_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0039-toc-ch-011-10depressionandthebrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-10depressionandthebrain",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0040-toc-ch-011-10depressionandthebrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-10depressionandthebrain",
+        "item_count": 1,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0041-toc-ch-011-10depressionandthebrain",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-10depressionandthebrain",
+        "item_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-11psychosisipsychodynami",
+        "item_count": 4,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 4,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0043-toc-ch-012-11psychosisipsychodynami",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-11psychosisipsychodynami",
+        "item_count": 2,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "5",
+          "6"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0044-toc-ch-012-11psychosisipsychodynami",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-11psychosisipsychodynami",
+        "item_count": 2,
+        "numeric_marker_start": 7,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0045-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 2,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 2,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0046-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 1,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0047-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 1,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 4,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "4"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0048-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 1,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 5,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "5"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0049-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 2,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 7,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6",
+          "7"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 2,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "8",
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0051-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 1,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0052-toc-ch-013-12psychosisiineuropsycho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+        "item_count": 1,
+        "numeric_marker_start": 11,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "11"
+        ]
+      }
+    ],
+    "endnote_array_rows": []
+  },
+  "endnote_merging": {
+    "decision_basis": [
+      "fnm_translation_units.kind/owner_kind/section_id/target_ref",
+      "导出 chapter markdown 中 local refs/local defs 的闭合情况",
+      "structure.freeze_note_unit_summary"
+    ],
+    "freeze_note_unit_summary": {
+      "chapter_view_note_unit_count": 90,
+      "owner_fallback_note_unit_count": 0,
+      "unresolved_note_item_count": 0,
+      "unresolved_note_item_ids_preview": []
+    },
+    "note_unit_rows": [
+      {
+        "section_id": "toc-ch-001-introduction",
+        "section_title": "Introduction",
+        "note_unit_count": 1,
+        "note_unit_kind_counts": {
+          "footnote": 1
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00001}}"
+        ],
+        "page_span": [
+          26,
+          26
+        ]
+      },
+      {
+        "section_id": "toc-ch-002-1transcendentalapproacht",
+        "section_title": "1 Transcendental Approach to the Brain",
+        "note_unit_count": 11,
+        "note_unit_kind_counts": {
+          "footnote": 11
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00002}}",
+          "{{NOTE_REF:fn-00003}}",
+          "{{NOTE_REF:fn-00004}}",
+          "{{NOTE_REF:fn-00005}}",
+          "{{NOTE_REF:fn-00006}}"
+        ],
+        "page_span": [
+          38,
+          50
+        ]
+      },
+      {
+        "section_id": "toc-ch-003-2unknowabilityandtheconc",
+        "section_title": "2 Unknowability and the Concept of the Brain",
+        "note_unit_count": 12,
+        "note_unit_kind_counts": {
+          "footnote": 12
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00013}}",
+          "{{NOTE_REF:fn-00014}}",
+          "{{NOTE_REF:fn-00015}}",
+          "{{NOTE_REF:fn-00016}}",
+          "{{NOTE_REF:fn-00017}}"
+        ],
+        "page_span": [
+          54,
+          72
+        ]
+      },
+      {
+        "section_id": "toc-ch-004-3transdisciplinarymethod",
+        "section_title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+        "note_unit_count": 12,
+        "note_unit_kind_counts": {
+          "footnote": 12
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00025}}",
+          "{{NOTE_REF:fn-00026}}",
+          "{{NOTE_REF:fn-00027}}",
+          "{{NOTE_REF:fn-00028}}",
+          "{{NOTE_REF:fn-00029}}"
+        ],
+        "page_span": [
+          75,
+          97
+        ]
+      },
+      {
+        "section_id": "toc-ch-005-4cathexisandtheenergyoft",
+        "section_title": "4 Cathexis and the Energy of the Brain",
+        "note_unit_count": 2,
+        "note_unit_kind_counts": {
+          "footnote": 2
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00037}}",
+          "{{NOTE_REF:fn-00038}}"
+        ],
+        "page_span": [
+          108,
+          114
+        ]
+      },
+      {
+        "section_id": "toc-ch-006-5cathexisneuralcodingand",
+        "section_title": "5 Cathexis, Neural Coding, and Mental States",
+        "note_unit_count": 6,
+        "note_unit_kind_counts": {
+          "footnote": 6
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00039}}",
+          "{{NOTE_REF:fn-00040}}",
+          "{{NOTE_REF:fn-00041}}",
+          "{{NOTE_REF:fn-00042}}",
+          "{{NOTE_REF:fn-00043}}"
+        ],
+        "page_span": [
+          128,
+          143
+        ]
+      },
+      {
+        "section_id": "toc-ch-007-6defensemechanismsandbra",
+        "section_title": "6 Defense Mechanisms and Brain–Object and Brain–Self Differentiation",
+        "note_unit_count": 5,
+        "note_unit_kind_counts": {
+          "footnote": 5
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00045}}",
+          "{{NOTE_REF:fn-00046}}",
+          "{{NOTE_REF:fn-00047}}",
+          "{{NOTE_REF:fn-00048}}",
+          "{{NOTE_REF:fn-00049}}"
+        ],
+        "page_span": [
+          162,
+          173
+        ]
+      },
+      {
+        "section_id": "toc-ch-008-7narcissismselfobjectsan",
+        "section_title": "7 Narcissism, Self-Objects, and the Brain",
+        "note_unit_count": 9,
+        "note_unit_kind_counts": {
+          "footnote": 9
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00050}}",
+          "{{NOTE_REF:fn-00051}}",
+          "{{NOTE_REF:fn-00052}}",
+          "{{NOTE_REF:fn-00053}}",
+          "{{NOTE_REF:fn-00054}}"
+        ],
+        "page_span": [
+          181,
+          200
+        ]
+      },
+      {
+        "section_id": "toc-ch-009-8unconsciousnessandthebr",
+        "section_title": "8 Unconsciousness and the Brain",
+        "note_unit_count": 8,
+        "note_unit_kind_counts": {
+          "footnote": 8
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00059}}",
+          "{{NOTE_REF:fn-00060}}",
+          "{{NOTE_REF:fn-00061}}",
+          "{{NOTE_REF:fn-00062}}",
+          "{{NOTE_REF:fn-00063}}"
+        ],
+        "page_span": [
+          203,
+          227
+        ]
+      },
+      {
+        "section_id": "toc-ch-010-9theselfanditsbrain",
+        "section_title": "9 The Self and its Brain",
+        "note_unit_count": 2,
+        "note_unit_kind_counts": {
+          "footnote": 2
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00067}}",
+          "{{NOTE_REF:fn-00068}}"
+        ],
+        "page_span": [
+          236,
+          249
+        ]
+      },
+      {
+        "section_id": "toc-ch-011-10depressionandthebrain",
+        "section_title": "10 Depression and the Brain",
+        "note_unit_count": 3,
+        "note_unit_kind_counts": {
+          "footnote": 3
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00069}}",
+          "{{NOTE_REF:fn-00070}}",
+          "{{NOTE_REF:fn-00071}}"
+        ],
+        "page_span": [
+          263,
+          274
+        ]
+      },
+      {
+        "section_id": "toc-ch-012-11psychosisipsychodynami",
+        "section_title": "11 Psychosis I: Psychodynamics and Phenomenology",
+        "note_unit_count": 8,
+        "note_unit_kind_counts": {
+          "footnote": 8
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00072}}",
+          "{{NOTE_REF:fn-00073}}",
+          "{{NOTE_REF:fn-00074}}",
+          "{{NOTE_REF:fn-00075}}",
+          "{{NOTE_REF:fn-00076}}"
+        ],
+        "page_span": [
+          281,
+          289
+        ]
+      },
+      {
+        "section_id": "toc-ch-013-12psychosisiineuropsycho",
+        "section_title": "12 Psychosis II: Neuropsychodynamic Hypotheses",
+        "note_unit_count": 11,
+        "note_unit_kind_counts": {
+          "footnote": 11
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00080}}",
+          "{{NOTE_REF:fn-00081}}",
+          "{{NOTE_REF:fn-00082}}",
+          "{{NOTE_REF:fn-00083}}",
+          "{{NOTE_REF:fn-00084}}"
+        ],
+        "page_span": [
+          300,
+          333
+        ]
+      }
+    ],
+    "export_merge_rows": []
+  },
+  "anchor_resolution": {
+    "decision_basis": [
+      "fnm_body_anchors.page_no/paragraph_index/char_start/char_end/source_marker",
+      "fnm_note_links.status/resolver/confidence",
+      "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
+    ],
+    "link_summary": {
+      "matched": 90,
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 0,
+      "endnote_orphan_anchor": 0,
+      "ambiguous": 0,
+      "ignored": 0,
+      "fallback_count": 22,
+      "repair_count": 1,
+      "fallback_matched_count": 22,
+      "fallback_match_ratio": 0.24444444444444444
+    },
+    "chapter_link_contract_summary": {
+      "chapter_count": 15,
+      "contract_required_count": 0,
+      "failed_chapter_ids": [],
+      "contract_v2_failed_chapter_ids": [
+        "toc-ch-002-1transcendentalapproacht",
+        "toc-ch-003-2unknowabilityandtheconc",
+        "toc-ch-004-3transdisciplinarymethod",
+        "toc-ch-005-4cathexisandtheenergyoft",
+        "toc-ch-007-6defensemechanismsandbra",
+        "toc-ch-009-8unconsciousnessandthebr",
+        "toc-ch-010-9theselfanditsbrain",
+        "toc-ch-012-11psychosisipsychodynami",
+        "toc-ch-013-12psychosisiineuropsycho"
+      ],
+      "contract_v2_first_marker_violation_count": 0,
+      "contract_v2_marker_gap_violation_count": 0,
+      "contract_v2_def_anchor_mismatch_count": 9
+    },
+    "anchor_kind_counts": {
+      "footnote": 130
+    },
+    "link_status_counts": {
+      "matched": 90
+    },
+    "link_resolver_counts": {
+      "fallback": 22,
+      "rule": 67,
+      "repair": 1
+    },
+    "anchor_samples": [
+      {
+        "anchor_id": "anchor-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 26,
+        "paragraph_index": 2,
+        "marker": "5",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "So long as self and object are not distinguished from the brain in our perception and experience, and thus in our mental states, we could no..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 26,
+        "paragraph_index": 999,
+        "marker": "1",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "What I here call brain–self and brain–object differentiation, within the neuropsychodynamic context, may perceive a self that is different f..."
+      },
+      {
+        "anchor_id": "anchor-00002",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 38,
+        "paragraph_index": 0,
+        "marker": "1",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "investigated the contribution of reason and understanding by posing the following question: “What must reason and understanding be like in o..."
+      },
+      {
+        "anchor_id": "anchor-00003",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 38,
+        "paragraph_index": 0,
+        "marker": "2",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "investigated the contribution of reason and understanding by posing the following question: “What must reason and understanding be like in o..."
+      },
+      {
+        "anchor_id": "anchor-00004",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 39,
+        "paragraph_index": 1,
+        "marker": "3",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "Let me rephrase this important distinction. Whereas the concept of “transcendental” concerns possible knowledge of the objects within the wo..."
+      },
+      {
+        "anchor_id": "anchor-00005",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 39,
+        "paragraph_index": 1,
+        "marker": "6",
+        "anchor_kind": "footnote",
+        "certainty": 0.6,
+        "source_text_preview": "Let me rephrase this important distinction. Whereas the concept of “transcendental” concerns possible knowledge of the objects within the wo..."
+      },
+      {
+        "anchor_id": "anchor-00006",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 39,
+        "paragraph_index": 1,
+        "marker": "4",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "Let me rephrase this important distinction. Whereas the concept of “transcendental” concerns possible knowledge of the objects within the wo..."
+      },
+      {
+        "anchor_id": "anchor-00007",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 40,
+        "paragraph_index": 3,
+        "marker": "5",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "According to Kant, form and content (or better still, matter to which content can be traced back) are reciprocally related to each other. Fo..."
+      },
+      {
+        "anchor_id": "anchor-00008",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 40,
+        "paragraph_index": 3,
+        "marker": "6",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "According to Kant, form and content (or better still, matter to which content can be traced back) are reciprocally related to each other. Fo..."
+      },
+      {
+        "anchor_id": "anchor-00009",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 41,
+        "paragraph_index": 2,
+        "marker": "7",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "Freud appeared to have taken this lesson to heart when he described the psychic apparatus in terms of both a specific form and mode on the o..."
+      }
+    ],
+    "link_samples": [
+      {
+        "link_id": "link-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00001",
+        "anchor_id": "synthetic-footnote-00001",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "1",
+        "page_span": [
+          26,
+          26
+        ]
+      },
+      {
+        "link_id": "link-00002",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00002",
+        "anchor_id": "anchor-00002",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "1",
+        "page_span": [
+          38,
+          38
+        ]
+      },
+      {
+        "link_id": "link-00003",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00003",
+        "anchor_id": "anchor-00003",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "2",
+        "page_span": [
+          38,
+          38
+        ]
+      },
+      {
+        "link_id": "link-00004",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00004",
+        "anchor_id": "anchor-00004",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "3",
+        "page_span": [
+          39,
+          39
+        ]
+      },
+      {
+        "link_id": "link-00005",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00005",
+        "anchor_id": "anchor-00006",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "4",
+        "page_span": [
+          39,
+          39
+        ]
+      },
+      {
+        "link_id": "link-00006",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00006",
+        "anchor_id": "anchor-00007",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "5",
+        "page_span": [
+          40,
+          40
+        ]
+      },
+      {
+        "link_id": "link-00007",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00007",
+        "anchor_id": "anchor-00008",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "6",
+        "page_span": [
+          40,
+          40
+        ]
+      },
+      {
+        "link_id": "link-00008",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00008",
+        "anchor_id": "anchor-00009",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "7",
+        "page_span": [
+          41,
+          41
+        ]
+      },
+      {
+        "link_id": "link-00009",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00009",
+        "anchor_id": "anchor-00010",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "8",
+        "page_span": [
+          41,
+          41
+        ]
+      },
+      {
+        "link_id": "link-00010",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00010",
+        "anchor_id": "anchor-00011",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "9",
+        "page_span": [
+          42,
+          42
+        ]
+      },
+      {
+        "link_id": "link-00011",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00011",
+        "anchor_id": "synthetic-footnote-00002",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "10",
+        "page_span": [
+          46,
+          46
+        ]
+      },
+      {
+        "link_id": "link-00012",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "note_item_id": "fn-00012",
+        "anchor_id": "synthetic-footnote-00003",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "11",
+        "page_span": [
+          50,
+          50
+        ]
+      }
+    ],
+    "llm_repair_trace_refs": [],
+    "visual_toc_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.002.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.003.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.004.json"
+    ]
+  }
+}

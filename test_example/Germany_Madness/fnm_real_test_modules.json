@@ -1,0 +1,3866 @@
+{
+  "boundary_detection": {
+    "decision_basis": [
+      "fnm_pages.page_role",
+      "fnm_pages.role_reason",
+      "fnm_pages.role_confidence",
+      "fnm_pages.has_note_heading",
+      "fnm_pages.section_hint"
+    ],
+    "page_role_counts": {
+      "front_matter": 44,
+      "body": 360,
+      "note": 6,
+      "other": 54
+    },
+    "first_body_page": 45,
+    "first_note_page": 129,
+    "page_role_samples": [
+      {
+        "page_no": 1,
+        "target_pdf_page": 1,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 2,
+        "target_pdf_page": 2,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 3,
+        "target_pdf_page": 3,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 45,
+        "target_pdf_page": 45,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 46,
+        "target_pdf_page": 46,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 47,
+        "target_pdf_page": 47,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 129,
+        "target_pdf_page": 129,
+        "page_role": "note",
+        "role_reason": "note_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 139,
+        "target_pdf_page": 139,
+        "page_role": "note",
+        "role_reason": "note_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 280,
+        "target_pdf_page": 280,
+        "page_role": "note",
+        "role_reason": "note_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 411,
+        "target_pdf_page": 411,
+        "page_role": "other",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 412,
+        "target_pdf_page": 412,
+        "page_role": "other",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 413,
+        "target_pdf_page": 413,
+        "page_role": "other",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      }
+    ],
+    "structure_page_partition_summary": {
+      "total_pages": 464,
+      "noise": 1,
+      "front_matter": 12,
+      "body": 426,
+      "note": 6,
+      "other": 19
+    }
+  },
+  "note_region_detection": {
+    "decision_basis": [
+      "fnm_note_regions.region_kind/start_page/end_page/pages",
+      "fnm_note_regions.bound_chapter_id",
+      "fnm_note_regions.region_start_first_source_marker",
+      "fnm_note_regions.region_first_note_item_marker",
+      "structure.chapter_binding_summary",
+      "structure.visual_toc_endnotes_summary"
+    ],
+    "visual_toc_endnotes_summary": {},
+    "chapter_binding_summary": {
+      "region_count": 47,
+      "book_scope_region_count": 0,
+      "unbound_region_count": 0,
+      "unbound_region_ids_preview": [],
+      "unassigned_item_count": 0,
+      "unassigned_item_ids_preview": []
+    },
+    "chapter_endnote_region_alignment_summary": {},
+    "region_rows": [
+      {
+        "region_id": "nr-fn-ch-0001-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "start_page": 46,
+        "end_page": 63,
+        "pages": [
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 60,
+        "numeric_marker_count": 60,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 63,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00001",
+            "page_no": 46,
+            "marker": "2",
+            "source_text_preview": "H.]J. Sander, “Beitrage zur Biographie Hugos van der Goes und zur Chronologie seiner Werke,” Repertorium fiir Kunstwissenschaft 35 (1912): 5..."
+          },
+          {
+            "note_item_id": "fn-00002",
+            "page_no": 47,
+            "marker": "3",
+            "source_text_preview": "Ridderbos, De melancholie van de kunstenaar, p. 10, citing the text printed in Imaginair Museum Hugo van der Goes (Ghent, 1982)."
+          },
+          {
+            "note_item_id": "fn-00003",
+            "page_no": 48,
+            "marker": "4",
+            "source_text_preview": "The connection between the two descriptions provides the focus for Ridderbos’s analysis in De melancholie van de kunstenaar."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0002-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "start_page": 65,
+        "end_page": 67,
+        "pages": [
+          65,
+          66,
+          67
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 13,
+        "numeric_marker_count": 13,
+        "numeric_marker_start": 64,
+        "numeric_marker_end": 76,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00061",
+            "page_no": 65,
+            "marker": "64",
+            "source_text_preview": "Johann Heinrich Zedler, Grosses vollstindiges Universal-Lexikon, vol. 46 (Leipzig and Halle, 1745), col. 1013."
+          },
+          {
+            "note_item_id": "fn-00062",
+            "page_no": 65,
+            "marker": "65",
+            "source_text_preview": "J. F. C. Hecker, Die grossen Volkskrankheiten des Mittelalters: Historisch-pathologische Untersuchungen, ed. August Hirsch (Berlin, 1865), p..."
+          },
+          {
+            "note_item_id": "fn-00063",
+            "page_no": 65,
+            "marker": "66",
+            "source_text_preview": "Neil Harding McAlister, “The Dancing Pilgrims at Muelebeek,” Journal of the History of Medicine and Allied Sciences 32 (1977): 315-19; by th..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0003-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "start_page": 69,
+        "end_page": 82,
+        "pages": [
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 44,
+        "numeric_marker_count": 44,
+        "numeric_marker_start": 79,
+        "numeric_marker_end": 122,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00074",
+            "page_no": 69,
+            "marker": "79",
+            "source_text_preview": "S. Kemp and K. Williams, “Demonic Possession and Mental Disorder in Medieval and Early Modern Europe,” Psychological Medicine 17 (1987): 21-..."
+          },
+          {
+            "note_item_id": "fn-00075",
+            "page_no": 69,
+            "marker": "80",
+            "source_text_preview": "For an unconvincing effort to assimilate demoniacs and witches to the history of hysteria, see G. S. Rousseau, “’A Strange Pathology”: Hyste..."
+          },
+          {
+            "note_item_id": "fn-00077",
+            "page_no": 70,
+            "marker": "81",
+            "source_text_preview": "My account depends on Andreas Angelus, Wider Natur und Wunderbuch: Darin so wol in gemein von Wunderwercken dess Himmels, Luffts, Wassers un..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0004-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "start_page": 87,
+        "end_page": 93,
+        "pages": [
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 27,
+        "numeric_marker_count": 27,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 147,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "123",
+          "124",
+          "125",
+          "126",
+          "127",
+          "128",
+          "129",
+          "130"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00119",
+            "page_no": 87,
+            "marker": "123",
+            "source_text_preview": "Daniel Cramer, Das Grosse Pomersche Kirchen Chronicon (Stettin [Szczecin, Poland], 1628), p. 54"
+          },
+          {
+            "note_item_id": "fn-00120",
+            "page_no": 87,
+            "marker": "124",
+            "source_text_preview": "One finds this use of hymn singing, and especially of Luther’s famous hymn, in Celichius, Notwendige Erinnerung (1595), fol. Ngv; Nicolaus B..."
+          },
+          {
+            "note_item_id": "fn-00121",
+            "page_no": 88,
+            "marker": "125",
+            "source_text_preview": "See Gerhard Schormann, Hexenprozesse in Deutschland (Gottingen, 1981), and Brian Levack, The Witch Hunt in Early Modern Europe (London, 1987..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0005-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "start_page": 95,
+        "end_page": 98,
+        "pages": [
+          95,
+          96,
+          97,
+          98
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 15,
+        "numeric_marker_count": 15,
+        "numeric_marker_start": 152,
+        "numeric_marker_end": 166,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "152",
+          "153",
+          "154",
+          "155",
+          "156",
+          "157",
+          "158",
+          "159"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00146",
+            "page_no": 95,
+            "marker": "152",
+            "source_text_preview": "Ibid., fol. E7r."
+          },
+          {
+            "note_item_id": "fn-00147",
+            "page_no": 95,
+            "marker": "153",
+            "source_text_preview": "Dannhauer, Scheid- und Absag-Brieff, fol. Agv: “dann sie ergeben sich dem gottlosen spielen, fressen, und sauffen, dem Huren und Buhlen, und..."
+          },
+          {
+            "note_item_id": "fn-00148",
+            "page_no": 95,
+            "marker": "154",
+            "source_text_preview": "Ibid., fol. A7v: “Ich wil gern sterben, wann du wilt, wann es dein Vatterlicher Will ist. Ach lieber Gott ich danke dir von grund meines Her..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0006-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "start_page": 100,
+        "end_page": 128,
+        "pages": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 132,
+        "numeric_marker_count": 132,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 4749,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00161",
+            "page_no": 100,
+            "marker": "1",
+            "source_text_preview": "See the brilliant evocation by Lucien Febvre, Life in Renaissance France (Cambridge, Mass., 1977)."
+          },
+          {
+            "note_item_id": "fn-00162",
+            "page_no": 101,
+            "marker": "2",
+            "source_text_preview": "Luther and Paracelsus have been compared theologically in Hartmut Rudolph, “Einige Gesichtspunkte zum Thema ‘Paracelsus und Luther,”” Archiv..."
+          },
+          {
+            "note_item_id": "fn-00163",
+            "page_no": 101,
+            "marker": "3",
+            "source_text_preview": "Jaroslav Pelikan, Obedient Rebels: Catholic Substance and Protestant Principle in Luther’s Reformation (New York, 1964)."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0007-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "start_page": 129,
+        "end_page": 129,
+        "pages": [
+          129
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 136,
+        "numeric_marker_end": 137,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "136",
+          "137"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00001",
+            "page_no": 129,
+            "marker": "136",
+            "source_text_preview": "Paracelsus: Sämtliche Werke nach der 10-bändigen Huserschen Gesamtausgabe (1589–91), zum erstenmal in neuzetliches Deutsch übersetzt, ed. an..."
+          },
+          {
+            "note_item_id": "en-00002",
+            "page_no": 129,
+            "marker": "137",
+            "source_text_preview": "Kurt Goldammer, Paracelsus: Natur und Offenbarung (Hannover, 1953); Heinrich Schipperges, Paracelsus: Der Mensch in der Licht der Natur (Stu..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0008-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "start_page": 130,
+        "end_page": 134,
+        "pages": [
+          130,
+          131,
+          132,
+          133,
+          134
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 26,
+        "numeric_marker_count": 26,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 161,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "138",
+          "139",
+          "140",
+          "1",
+          "141",
+          "142",
+          "2",
+          "143"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00293",
+            "page_no": 130,
+            "marker": "138",
+            "source_text_preview": "See Charles Nauert, Agrippa and the Crisis of Renaissance Thought (Urbana, IIL., 1965); Hiram Hayden, The Counter Renaissance (New York, 195..."
+          },
+          {
+            "note_item_id": "fn-00294",
+            "page_no": 130,
+            "marker": "139",
+            "source_text_preview": "See Kammerer, Das Leib-Seele-Geist-Problem bei Paracelsus. It is worth emphasizing that, for Paracelsus, the highest part of man was one’s G..."
+          },
+          {
+            "note_item_id": "fn-00295",
+            "page_no": 130,
+            "marker": "140",
+            "source_text_preview": "SW, pt."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0009-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "start_page": 136,
+        "end_page": 138,
+        "pages": [
+          136,
+          137,
+          138
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 12,
+        "numeric_marker_count": 12,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 173,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "163",
+          "164",
+          "165",
+          "1",
+          "166",
+          "167",
+          "168",
+          "169"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00319",
+            "page_no": 136,
+            "marker": "163",
+            "source_text_preview": "Ibid., p. 65."
+          },
+          {
+            "note_item_id": "fn-00320",
+            "page_no": 136,
+            "marker": "164",
+            "source_text_preview": "Ibid., p. 300."
+          },
+          {
+            "note_item_id": "fn-00321",
+            "page_no": 136,
+            "marker": "165",
+            "source_text_preview": "Von den Krankheiten die der Vernunft berauben, in SW, pt."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0010-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "start_page": 139,
+        "end_page": 139,
+        "pages": [
+          139
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 6,
+        "numeric_marker_count": 6,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00003",
+            "page_no": 139,
+            "marker": "1",
+            "source_text_preview": "ebriecata mania, exemplified in those who interpreted Scripture in a nonsensical way;"
+          },
+          {
+            "note_item_id": "en-00004",
+            "page_no": 139,
+            "marker": "2",
+            "source_text_preview": "inebriata phrenesis, as found in those who were always ready to fight and flew easily into rages;"
+          },
+          {
+            "note_item_id": "en-00005",
+            "page_no": 139,
+            "marker": "3",
+            "source_text_preview": "inebriata phantasmata, as in men who affected strange gestures, behavior, and morals;"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "start_page": 140,
+        "end_page": 158,
+        "pages": [
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 94,
+        "numeric_marker_count": 94,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 273,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "180",
+          "181",
+          "182",
+          "1",
+          "183",
+          "184",
+          "185",
+          "186"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00331",
+            "page_no": 140,
+            "marker": "180",
+            "source_text_preview": "Ibid., p. 306."
+          },
+          {
+            "note_item_id": "fn-00332",
+            "page_no": 140,
+            "marker": "181",
+            "source_text_preview": "Ibid., p. 438."
+          },
+          {
+            "note_item_id": "fn-00333",
+            "page_no": 140,
+            "marker": "182",
+            "source_text_preview": "Opus paramirum, in SW, pt."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "start_page": 160,
+        "end_page": 162,
+        "pages": [
+          160,
+          161,
+          162
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 8,
+        "numeric_marker_count": 8,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00425",
+            "page_no": 160,
+            "marker": "1",
+            "source_text_preview": "Stanley Jackson’s excellent Melancholia and Depression: From Hippocratic Times to Modern Times (New Haven, 1986) summarizes much work in thi..."
+          },
+          {
+            "note_item_id": "fn-00426",
+            "page_no": 161,
+            "marker": "2",
+            "source_text_preview": "Mad Princes, pp- 31—46."
+          },
+          {
+            "note_item_id": "fn-00427",
+            "page_no": 161,
+            "marker": "3",
+            "source_text_preview": "Useful bibliographical guides to this large literature include J. B. Friedreich, Versuch einer Literirgeschichte der Pathologie und Therapie..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0013-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "start_page": 164,
+        "end_page": 178,
+        "pages": [
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 47,
+        "numeric_marker_count": 47,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 55,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00433",
+            "page_no": 164,
+            "marker": "9",
+            "source_text_preview": "Johann Schoner von Karlstadt, Ein nutzlichs biichlein viler bewerter Ertzney, lang zeyt versamlet und ziisammen pracht (Nuremberg: [1528]),..."
+          },
+          {
+            "note_item_id": "fn-00434",
+            "page_no": 164,
+            "marker": "10",
+            "source_text_preview": "Laurentius Fries, Spiegel der Artzny (Strasbourg, 1519), fol. 1 v. [ have also used the expanded edition by Otto Brunfels (Strasbourg, 1532)..."
+          },
+          {
+            "note_item_id": "fn-00435",
+            "page_no": 165,
+            "marker": "11",
+            "source_text_preview": "Ibid., fol. g6 ."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0014-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "start_page": 180,
+        "end_page": 183,
+        "pages": [
+          180,
+          181,
+          182,
+          183
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 8,
+        "numeric_marker_count": 8,
+        "numeric_marker_start": 57,
+        "numeric_marker_end": 64,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00481",
+            "page_no": 180,
+            "marker": "57",
+            "source_text_preview": "Theses de Phrenetide (Heidelberg, 1584)."
+          },
+          {
+            "note_item_id": "fn-00482",
+            "page_no": 180,
+            "marker": "58",
+            "source_text_preview": "For a reported use of a split rooster, see the account of Felix Platter, P. 176 below."
+          },
+          {
+            "note_item_id": "fn-00483",
+            "page_no": 181,
+            "marker": "59",
+            "source_text_preview": "Disputatio de Phrenetide (Tlibingen, 1588)."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0015-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "start_page": 185,
+        "end_page": 200,
+        "pages": [
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 54,
+        "numeric_marker_count": 54,
+        "numeric_marker_start": 66,
+        "numeric_marker_end": 120,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00489",
+            "page_no": 185,
+            "marker": "66",
+            "source_text_preview": "Here I record my gratitude to James Cassedy and the excellent staff of the NLM for their help."
+          },
+          {
+            "note_item_id": "fn-00490",
+            "page_no": 186,
+            "marker": "67",
+            "source_text_preview": "Consiliorum medicinalium, ed. Lorenz Scholtz (Frankfurt a/M, 1598)."
+          },
+          {
+            "note_item_id": "fn-00491",
+            "page_no": 186,
+            "marker": "68",
+            "source_text_preview": "Ibid., no. 323, cols. gog—15."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0016-toc-ch-004-witchcraftandthemelancho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
+        "start_page": 202,
+        "end_page": 203,
+        "pages": [
+          202,
+          203
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 3,
+        "numeric_marker_count": 3,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00543",
+            "page_no": 202,
+            "marker": "1",
+            "source_text_preview": "For the basic Roman approach to insanity in matters dealing with contracts, testaments, and witnesses, consult Justinian’s Institutes 1.10,..."
+          },
+          {
+            "note_item_id": "fn-00544",
+            "page_no": 202,
+            "marker": "2",
+            "source_text_preview": "Nigel Walker, Crime and Insanity in England, 1: The Historical Perspective (Edinburgh, 1967)."
+          },
+          {
+            "note_item_id": "fn-00545",
+            "page_no": 203,
+            "marker": "3",
+            "source_text_preview": "For details of the Herman case, | rely on the Wirttembergisches Hauptstaatsarchiy, A209, Bii. 1425, which contains all the assembled legal d..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0017-toc-ch-004-witchcraftandthemelancho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
+        "start_page": 205,
+        "end_page": 246,
+        "pages": [
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 168,
+        "numeric_marker_count": 168,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 1737,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00546",
+            "page_no": 205,
+            "marker": "4",
+            "source_text_preview": "Petrus Heigius, Quaestiones iuris tam civilis quam Saxonici . . . editae nunc primum cura Ludovici Person, (Wittenberg, 1601), vol. 2, quest..."
+          },
+          {
+            "note_item_id": "fn-00547",
+            "page_no": 205,
+            "marker": "5",
+            "source_text_preview": "Ibid., p. 333."
+          },
+          {
+            "note_item_id": "fn-00548",
+            "page_no": 205,
+            "marker": "6",
+            "source_text_preview": "Ibid."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0018-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 248,
+        "end_page": 257,
+        "pages": [
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 19,
+        "numeric_marker_count": 19,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 20,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "8",
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00714",
+            "page_no": 248,
+            "marker": "1",
+            "source_text_preview": "Das Lalebuch: In Abbildung des Drucks von 1597, ed. Werner Wunderlich (Goppingen, 1982), p. 213. Wunderlich also edited a version in modern..."
+          },
+          {
+            "note_item_id": "fn-00715",
+            "page_no": 249,
+            "marker": "2",
+            "source_text_preview": "Folk-book can be a dangerous term if it is taken to mean a book with no author, a book that therefore springs directly from the timeless sou..."
+          },
+          {
+            "note_item_id": "fn-00716",
+            "page_no": 249,
+            "marker": "3",
+            "source_text_preview": "Hermann Bausinger, “Schildbiirgergeschichten: Betrachtungen zum Schwank,” in Wunderseltsame Geschichten: Interpretationen zu Schildbiirgern..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0019-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 259,
+        "end_page": 259,
+        "pages": [
+          259
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 21,
+        "numeric_marker_end": 22,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "21",
+          "22"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00733",
+            "page_no": 259,
+            "marker": "21",
+            "source_text_preview": "J. Franck, “Kunz von der Rosen,” in Allgemeine deutsche Biographie (Leipzig, 1875-1912), 29: 195—97; Flogel, Hofnarren, pp. 190—203. Charles..."
+          },
+          {
+            "note_item_id": "fn-00734",
+            "page_no": 259,
+            "marker": "22",
+            "source_text_preview": "Burgkmair, Triumph of Maximilian I, ed. and trans. Appelbaum, p. 6. have modified two lines of Appelbaum’s translation, which, for my purpos..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0020-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 263,
+        "end_page": 263,
+        "pages": [
+          263
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 24,
+        "numeric_marker_end": 24,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "24"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00735",
+            "page_no": 263,
+            "marker": "24",
+            "source_text_preview": "Jost Amman and Hans Sachs, Eygentliche Beschreibung Aller Stinde auff Erden, Hoher und Nidriger, Geistlicher und Weltlicher, Aller Kiinsten,..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0021-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 265,
+        "end_page": 265,
+        "pages": [
+          265
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 25,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00736",
+            "page_no": 265,
+            "marker": "25",
+            "source_text_preview": "Jost Amman and Hans Sachs, The Book of Trades (Stindebuch), ed. Benjamin A. Rifkin (New York, 1973), p. 121."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0022-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 267,
+        "end_page": 267,
+        "pages": [
+          267
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 27,
+        "numeric_marker_end": 28,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "27",
+          "28"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00737",
+            "page_no": 267,
+            "marker": "27",
+            "source_text_preview": "Amman and Sachs, Book of Trades, p. 122."
+          },
+          {
+            "note_item_id": "fn-00738",
+            "page_no": 267,
+            "marker": "28",
+            "source_text_preview": "Ibid., pp. 122, 41."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0023-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 269,
+        "end_page": 269,
+        "pages": [
+          269
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 30,
+        "numeric_marker_end": 31,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "30",
+          "31"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00739",
+            "page_no": 269,
+            "marker": "30",
+            "source_text_preview": "Werner Mezger, Hofnarren im Mittelalter: Vom tieferen Sinn eines seltsamen Amts (Constance, 1981), p. 52."
+          },
+          {
+            "note_item_id": "fn-00740",
+            "page_no": 269,
+            "marker": "31",
+            "source_text_preview": "Ibid., pp. 52-54."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0024-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 272,
+        "end_page": 274,
+        "pages": [
+          272,
+          273,
+          274
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 11,
+        "numeric_marker_count": 11,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 42,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "33",
+          "1",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00741",
+            "page_no": 272,
+            "marker": "33",
+            "source_text_preview": "Paracelsus, Liber de lunaticis, in SW, pt."
+          },
+          {
+            "note_item_id": "fn-00742",
+            "page_no": 272,
+            "marker": "1",
+            "source_text_preview": "14: 43-44, cf. De generatione stultorum, in ibid., p. 84. And see also pp. 125-32 above."
+          },
+          {
+            "note_item_id": "fn-00743",
+            "page_no": 272,
+            "marker": "34",
+            "source_text_preview": "Paracelsus, De inventione artium, in SW, pt."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0025-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 277,
+        "end_page": 277,
+        "pages": [
+          277
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 43,
+        "numeric_marker_end": 43,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "43"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00752",
+            "page_no": 277,
+            "marker": "43",
+            "source_text_preview": "This year of death is confirmed by documents in the Weimar Staatsarchiv, detailing the fiscal outlays in 1515 for Claus Narr’s funeral, coff..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0026-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 279,
+        "end_page": 279,
+        "pages": [
+          279
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 3,
+        "numeric_marker_count": 3,
+        "numeric_marker_start": 42,
+        "numeric_marker_end": 45,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "44",
+          "45",
+          "42"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00753",
+            "page_no": 279,
+            "marker": "44",
+            "source_text_preview": "Schmitz, Wolfgang Biittners Volksbuch von Claus Narr, pp. 13-14, citing Johann von Staupitz, Samtliche Werke, ed. ]. K. F. Knaake, Deutsche..."
+          },
+          {
+            "note_item_id": "fn-00754",
+            "page_no": 279,
+            "marker": "45",
+            "source_text_preview": "Schmitz, Wolfgang Biittners Volksbuch von Claus Narr, pp. 12—13. Those who added to Pauli’s Schimpf und Ernst in 1533, in 1546, and in 1555..."
+          },
+          {
+            "note_item_id": "fn-00755",
+            "page_no": 279,
+            "marker": "42",
+            "source_text_preview": "Schmitz, Wolfgang Biittners Volksbuch von Claus Narr, p. 13."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0027-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 280,
+        "end_page": 281,
+        "pages": [
+          280,
+          281
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 12,
+        "numeric_marker_count": 12,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 14,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00009",
+            "page_no": 280,
+            "marker": "3",
+            "source_text_preview": "Claus's mother used to tie him to a ring to keep him from getting into trouble, an indication surely that as a child Claus had been difficul..."
+          },
+          {
+            "note_item_id": "en-00010",
+            "page_no": 280,
+            "marker": "4",
+            "source_text_preview": "Duke Ernst's father, Friedrich the Mild (d. 1464) adopted Claus after interviewing him. Claus had complained that his mother, whom he called..."
+          },
+          {
+            "note_item_id": "en-00011",
+            "page_no": 280,
+            "marker": "5",
+            "source_text_preview": "When his brother was arrested for theft, Claus exclaimed: \"Off to the gallows with him!\" (\"Immer an galgen\"), but he had wept when he realiz..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 282,
+        "end_page": 290,
+        "pages": [
+          282,
+          283,
+          284,
+          285,
+          286,
+          287,
+          288,
+          289,
+          290
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 25,
+        "numeric_marker_count": 25,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 75,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "50",
+          "51",
+          "52",
+          "53",
+          "55",
+          "56",
+          "57",
+          "58"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00756",
+            "page_no": 282,
+            "marker": "50",
+            "source_text_preview": "Heinz-Gunter Schmitz, Physiologie des Scherzes: Bedeutung und Rechtfertiqung der Ars locandi im 16. Jahrhundert (Hildesheim, 1972)."
+          },
+          {
+            "note_item_id": "fn-00757",
+            "page_no": 282,
+            "marker": "51",
+            "source_text_preview": "Wolfgang Sedelius, Wie sich ain Christenlicher Herr, so Landt unnd Leiit zuo Regieren under im hat, vor schedlicher Phantasey verhueten, unn..."
+          },
+          {
+            "note_item_id": "fn-00758",
+            "page_no": 282,
+            "marker": "52",
+            "source_text_preview": "kridolin Solleder, “Markgrafin Susanna und ihr Narr,” Das Bayerland 47 (1936): 686—89. ‘"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0029-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 292,
+        "end_page": 292,
+        "pages": [
+          292
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 3,
+        "numeric_marker_count": 3,
+        "numeric_marker_start": 77,
+        "numeric_marker_end": 79,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "77",
+          "78",
+          "79"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00781",
+            "page_no": 292,
+            "marker": "77",
+            "source_text_preview": "1bid., pp. 47-49."
+          },
+          {
+            "note_item_id": "fn-00782",
+            "page_no": 292,
+            "marker": "78",
+            "source_text_preview": "Ibid., p. 100."
+          },
+          {
+            "note_item_id": "fn-00783",
+            "page_no": 292,
+            "marker": "79",
+            "source_text_preview": "Ibid., pp. 84-85, 219—20."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0030-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 294,
+        "end_page": 294,
+        "pages": [
+          294
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 5,
+        "numeric_marker_count": 5,
+        "numeric_marker_start": 84,
+        "numeric_marker_end": 88,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "84",
+          "85",
+          "86",
+          "87",
+          "88"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00784",
+            "page_no": 294,
+            "marker": "84",
+            "source_text_preview": "Ibid., pp. 246, 248."
+          },
+          {
+            "note_item_id": "fn-00785",
+            "page_no": 294,
+            "marker": "85",
+            "source_text_preview": "Ibid., p. 190."
+          },
+          {
+            "note_item_id": "fn-00786",
+            "page_no": 294,
+            "marker": "86",
+            "source_text_preview": "Ibid., pp. 193-210, for a series of examples."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0031-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "start_page": 296,
+        "end_page": 296,
+        "pages": [
+          296
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 89,
+        "numeric_marker_end": 89,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "89"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00789",
+            "page_no": 296,
+            "marker": "89",
+            "source_text_preview": "Pauli, Schimpf und Ernst, no. 32, pp. 26—27."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0032-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 297,
+        "end_page": 307,
+        "pages": [
+          297,
+          298,
+          299,
+          300,
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 47,
+        "numeric_marker_count": 47,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 48,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "8",
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00790",
+            "page_no": 297,
+            "marker": "1",
+            "source_text_preview": "Charles Zika, “Hosts, Processions and Pilgrimages: Controlling the Sacred in Fifteenth-Century Germany,” Past & Present, no. 118 (Feb."
+          },
+          {
+            "note_item_id": "fn-00792",
+            "page_no": 297,
+            "marker": "2",
+            "source_text_preview": "Ulrich Gabler, “Die Kinderwallfahrten aus Deutschland und der Schweiz zum Mont St. Michel, 1456-1459,” Zeitschrift fiir schweizerische Kirch..."
+          },
+          {
+            "note_item_id": "fn-00793",
+            "page_no": 297,
+            "marker": "3",
+            "source_text_preview": "Zika, “Hosts, Processions and Pilgrimages,” pp. 62—-63; Peter Burke, Popular Culture in Early Modern Europe (New York, 1978)."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 309,
+        "end_page": 309,
+        "pages": [
+          309
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 50,
+        "numeric_marker_end": 53,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "50",
+          "51",
+          "52",
+          "53"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00021",
+            "page_no": 309,
+            "marker": "50",
+            "source_text_preview": "Ibid."
+          },
+          {
+            "note_item_id": "en-00022",
+            "page_no": 309,
+            "marker": "51",
+            "source_text_preview": "Ibid."
+          },
+          {
+            "note_item_id": "en-00023",
+            "page_no": 309,
+            "marker": "52",
+            "source_text_preview": "Ibid."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 310,
+        "end_page": 318,
+        "pages": [
+          310,
+          311,
+          312,
+          313,
+          314,
+          315,
+          316,
+          317,
+          318
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 37,
+        "numeric_marker_count": 37,
+        "numeric_marker_start": 0,
+        "numeric_marker_end": 90,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00838",
+            "page_no": 310,
+            "marker": "54",
+            "source_text_preview": "Ibid., p 69."
+          },
+          {
+            "note_item_id": "fn-00839",
+            "page_no": 310,
+            "marker": "55",
+            "source_text_preview": "Ibid., p. 73. )"
+          },
+          {
+            "note_item_id": "fn-00840",
+            "page_no": 310,
+            "marker": "56",
+            "source_text_preview": "Fritz Meingast, Marienwallfahrten in Bayern und Osterreich (Munich, 1979), p. 56."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 320,
+        "end_page": 320,
+        "pages": [
+          320
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 92,
+        "numeric_marker_end": 95,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "92",
+          "93",
+          "94",
+          "95"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00875",
+            "page_no": 320,
+            "marker": "92",
+            "source_text_preview": "Bauer, Bayerische Wallfahrt Altotting, p. 64; Philipp Maria Halm, “Die Mirakelbilder zu Altotting,” Bayerischer Heimatschutz 21 (1925): 1—25..."
+          },
+          {
+            "note_item_id": "fn-00876",
+            "page_no": 320,
+            "marker": "93",
+            "source_text_preview": "See the remarks of Felicitas D. Goodman on “Visions,” in The Encyclopedia of Religion, ed. Mircea Eliade (New York, 1987), 15: 282-88; cf. W..."
+          },
+          {
+            "note_item_id": "fn-00877",
+            "page_no": 320,
+            "marker": "94",
+            "source_text_preview": "Bauer, Bayerische Wallfahrt Altotting, p. 64."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0036-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 321,
+        "end_page": 321,
+        "pages": [
+          321
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 5,
+        "numeric_marker_count": 5,
+        "numeric_marker_start": 20,
+        "numeric_marker_end": 1521,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "96",
+          "97",
+          "20",
+          "1520",
+          "1521"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00025",
+            "page_no": 321,
+            "marker": "96",
+            "source_text_preview": "Bauer, \"Das älteste gedruckte Mirakelbüchlein von Altötting,\" p. 150, nos. 4, 6, 16, 24."
+          },
+          {
+            "note_item_id": "en-00026",
+            "page_no": 321,
+            "marker": "97",
+            "source_text_preview": "Bauer, \"Das Büchlein der Zuflucht zu Maria,\" p. 235, nos. 1, 2, 4b, 5, 6, 11, 24, 40, 43, 48, 64, 65, 66, 75. of the twenty-five miracles li..."
+          },
+          {
+            "note_item_id": "en-00027",
+            "page_no": 321,
+            "marker": "20",
+            "source_text_preview": "Madwoman: Margreth, Hanns Eyseleis's daughter. Panel painting from the Gnadentafel, Heilige Kapelle, Altötting."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 322,
+        "end_page": 330,
+        "pages": [
+          322,
+          323,
+          324,
+          325,
+          326,
+          327,
+          328,
+          329,
+          330
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 37,
+        "numeric_marker_count": 37,
+        "numeric_marker_start": 27,
+        "numeric_marker_end": 693,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00879",
+            "page_no": 322,
+            "marker": "98",
+            "source_text_preview": "Hoffmann and Dohms, eds., Mirakelbiicher, nos. 106, 107,111, 137, 177,184,234, 272, 452, 590, 627, 674, 741."
+          },
+          {
+            "note_item_id": "fn-00880",
+            "page_no": 322,
+            "marker": "99",
+            "source_text_preview": "Foucault, Histoire de la folie, p. 549; id., Madness and Civilization, p. 264."
+          },
+          {
+            "note_item_id": "fn-00881",
+            "page_no": 322,
+            "marker": "100",
+            "source_text_preview": "See p. 286 above. Hoffmann and Dohms, eds., Mirakelbiicher, no. 380."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "start_page": 332,
+        "end_page": 340,
+        "pages": [
+          332,
+          333,
+          334,
+          335,
+          336,
+          337,
+          338,
+          339,
+          340
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 35,
+        "numeric_marker_count": 35,
+        "numeric_marker_start": 16,
+        "numeric_marker_end": 164,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "132",
+          "133",
+          "134",
+          "135",
+          "136",
+          "137",
+          "138",
+          "139"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00916",
+            "page_no": 332,
+            "marker": "132",
+            "source_text_preview": "Gierl, Bauernleben, pp. 88-9o."
+          },
+          {
+            "note_item_id": "fn-00917",
+            "page_no": 332,
+            "marker": "133",
+            "source_text_preview": "1537, fol. A4Y. For other examples of Tuntenhausen’s proud superiority to Benediktbeuern, see Denkwiirdige Miracula unnd Wunderzaichen in Zw..."
+          },
+          {
+            "note_item_id": "fn-00918",
+            "page_no": 333,
+            "marker": "134",
+            "source_text_preview": "fols. A2\" and As\". See also 1579 fol. Bi\", B1¥, and B2\"."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0039-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 343,
+        "end_page": 363,
+        "pages": [
+          343,
+          344,
+          345,
+          346,
+          347,
+          348,
+          349,
+          350,
+          351,
+          352,
+          353,
+          354,
+          355,
+          356,
+          357,
+          358,
+          359,
+          360,
+          361,
+          362,
+          363
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 73,
+        "numeric_marker_count": 73,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 73,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "4",
+          "3",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00951",
+            "page_no": 343,
+            "marker": "1",
+            "source_text_preview": "E. W. Zeeden, Katholische Uberlieferungen in den lutherischen Kirchenordnungen des 16. Jahrhunderts (Minster, 1959); Robert Scribner, Popula..."
+          },
+          {
+            "note_item_id": "fn-00952",
+            "page_no": 343,
+            "marker": "2",
+            "source_text_preview": "On the welfare system in Hesse, see William J. Wright, “Reformation Contributions to the Development of Public Welfare Policy in Hesse,” Jou..."
+          },
+          {
+            "note_item_id": "fn-00953",
+            "page_no": 343,
+            "marker": "4",
+            "source_text_preview": "(Stuttgart, 1978), pp. 128—43."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0040-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 365,
+        "end_page": 367,
+        "pages": [
+          365,
+          366,
+          367
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 7,
+        "numeric_marker_count": 7,
+        "numeric_marker_start": 28,
+        "numeric_marker_end": 80,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "74",
+          "75",
+          "76",
+          "77",
+          "28",
+          "79",
+          "80"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01026",
+            "page_no": 365,
+            "marker": "74",
+            "source_text_preview": "StAM, 40a XXIV Generalia 2: “Bericht warumb in anno 74 zu Heyna mehr als zu Merxhausen uffgangen.”"
+          },
+          {
+            "note_item_id": "fn-01027",
+            "page_no": 365,
+            "marker": "75",
+            "source_text_preview": "StAM, 40a XXIV Generalia 2: “Heinischen Abschidt und Extract, 1621.”"
+          },
+          {
+            "note_item_id": "fn-01028",
+            "page_no": 366,
+            "marker": "76",
+            "source_text_preview": "One Haina malter of rye grain weighed 552 Ib in 1621. It is inconceivable that they should have obtained only 425 Ib of bread from so much g..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0041-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 369,
+        "end_page": 370,
+        "pages": [
+          369,
+          370
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 81,
+        "numeric_marker_end": 84,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "81",
+          "82",
+          "83",
+          "84"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01033",
+            "page_no": 369,
+            "marker": "81",
+            "source_text_preview": "The only other persons to receive wine daily were the “sick,” who were usually assumed to be at death’s door."
+          },
+          {
+            "note_item_id": "fn-01034",
+            "page_no": 370,
+            "marker": "82",
+            "source_text_preview": "Recall that all of these figures make no allowance for possible wastage and therefore probably overestimate the amounts of food actually eat..."
+          },
+          {
+            "note_item_id": "fn-01035",
+            "page_no": 370,
+            "marker": "83",
+            "source_text_preview": "Franz, Urkundliche Quellen, 3: 897."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0042-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 372,
+        "end_page": 378,
+        "pages": [
+          372,
+          373,
+          374,
+          375,
+          376,
+          377,
+          378
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 36,
+        "numeric_marker_count": 36,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 114,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "86",
+          "87",
+          "88",
+          "89",
+          "19",
+          "8",
+          "30",
+          "91"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01037",
+            "page_no": 372,
+            "marker": "86",
+            "source_text_preview": "Ibid., articles 1, 2, 3, 4, 5, 6, 7, 12, 38, 40, 45, 46."
+          },
+          {
+            "note_item_id": "fn-01038",
+            "page_no": 372,
+            "marker": "87",
+            "source_text_preview": "Gustav Radbruch, ed., Die peinliche Gerichtsordnung Kaiser Karls V. von 1532 (Carolina) (Stuttgart, 1962), articles 113, 120—23."
+          },
+          {
+            "note_item_id": "fn-01039",
+            "page_no": 372,
+            "marker": "88",
+            "source_text_preview": "StAM, goa XXIV Generalia 2: “Hospitals Fundation” (an undated document of ten fols. intended primarily for Merxhausen), “Ein Gebet,” fols. s..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0043-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 382,
+        "end_page": 383,
+        "pages": [
+          382,
+          383
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 115,
+        "numeric_marker_end": 116,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "115",
+          "116"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01073",
+            "page_no": 382,
+            "marker": "115",
+            "source_text_preview": "The episode is described in Hugo Brunner, “Behandlung einer Geisteskranken im Jahre 1575,” Zeitschrift des Vereins fiir hessische Geschichte..."
+          },
+          {
+            "note_item_id": "fn-01074",
+            "page_no": 383,
+            "marker": "116",
+            "source_text_preview": "An additional case, involving a mentally disordered woman who was remanded to Hofheim instead of Merxhausen, has been excluded from these fi..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0044-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 385,
+        "end_page": 385,
+        "pages": [
+          385
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 117,
+        "numeric_marker_end": 117,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "117"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01075",
+            "page_no": 385,
+            "marker": "117",
+            "source_text_preview": "Gotz, Frhr. von Polnitz, Julius Echter von Mespelbrunn, Schriftenreihe zur bayerischen Landesgeschichte, no. 17 (Munich, 1934); Ernst Schube..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0045-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 387,
+        "end_page": 395,
+        "pages": [
+          387,
+          388,
+          389,
+          390,
+          391,
+          392,
+          393,
+          394,
+          395
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 30,
+        "numeric_marker_count": 30,
+        "numeric_marker_start": 118,
+        "numeric_marker_end": 147,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "118",
+          "119",
+          "120",
+          "121",
+          "122",
+          "123",
+          "124",
+          "125"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01076",
+            "page_no": 387,
+            "marker": "118",
+            "source_text_preview": "Alfred Wendehorst, Das [uliusspital in Wiirzburg, vol. 1: Kulturgeschichte (Wiirzburg, 1976), pp. 17-18."
+          },
+          {
+            "note_item_id": "fn-01077",
+            "page_no": 387,
+            "marker": "119",
+            "source_text_preview": "Ibid., p. 18. In Vienna in 1551, for example, the new Hofspital founded by Emperor Ferdinand I explicitly excluded “those who spend their da..."
+          },
+          {
+            "note_item_id": "fn-01078",
+            "page_no": 387,
+            "marker": "120",
+            "source_text_preview": "650 Jahre Biirgerspital zum Heiligen Geist Wiirzburg (Wirzburg, 1969), pp. 30—-31."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0046-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "start_page": 398,
+        "end_page": 403,
+        "pages": [
+          398,
+          399,
+          400,
+          401,
+          402,
+          403
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 25,
+        "numeric_marker_count": 25,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 2286,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "148",
+          "149",
+          "2285",
+          "25",
+          "150",
+          "2286",
+          "18",
+          "151"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01106",
+            "page_no": 398,
+            "marker": "148",
+            "source_text_preview": "On the general history of melancholia, see Stanley W. Jackson, Melancholia and Depression from Hippocratic Times to Modern Times (New Haven,..."
+          },
+          {
+            "note_item_id": "fn-01107",
+            "page_no": 398,
+            "marker": "149",
+            "source_text_preview": "StAW, Lit."
+          },
+          {
+            "note_item_id": "fn-01108",
+            "page_no": 398,
+            "marker": "2285",
+            "source_text_preview": "Apr."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0047-toc-ch-008-epilogue",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-epilogue",
+        "start_page": 406,
+        "end_page": 406,
+        "pages": [
+          406
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01131",
+            "page_no": 406,
+            "marker": "1",
+            "source_text_preview": "I have treated a good example of this sort of professional buck-passing in Mad Princes, pp. 118—22."
+          }
+        ]
+      }
+    ],
+    "endnote_region_rows": []
+  },
+  "endnote_array_building": {
+    "decision_basis": [
+      "fnm_note_items.region_id/chapter_id/page_no/marker",
+      "按 region_id 聚合生成注释数组",
+      "检查 numeric marker 连续性与首尾 marker"
+    ],
+    "note_capture_summary": {
+      "expected_anchor_count": 978,
+      "captured_note_count": 816,
+      "capture_ratio": 0.8344,
+      "sparse_capture_chapter_ids": [],
+      "dense_anchor_zero_capture_pages": [],
+      "chapters": [
+        {
+          "chapter_id": "toc-ch-001-historicalproblemssinstv",
+          "note_mode": "chapter_endnote_primary",
+          "expected_anchor_count": 174,
+          "captured_note_count": 0,
+          "capture_ratio": 0.0
+        },
+        {
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 135,
+          "captured_note_count": 264,
+          "capture_ratio": 1.9556
+        },
+        {
+          "chapter_id": "toc-ch-003-academicpsychiatryandthe",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 147,
+          "captured_note_count": 117,
+          "capture_ratio": 0.7959
+        },
+        {
+          "chapter_id": "toc-ch-004-witchcraftandthemelancho",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 172,
+          "captured_note_count": 171,
+          "capture_ratio": 0.9942
+        },
+        {
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 49,
+          "captured_note_count": 76,
+          "capture_ratio": 1.551
+        },
+        {
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "note_mode": "chapter_endnote_primary",
+          "expected_anchor_count": 55,
+          "captured_note_count": 9,
+          "capture_ratio": 0.1636
+        },
+        {
+          "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 245,
+          "captured_note_count": 178,
+          "capture_ratio": 0.7265
+        },
+        {
+          "chapter_id": "toc-ch-008-epilogue",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 1,
+          "captured_note_count": 1,
+          "capture_ratio": 1.0
+        }
+      ]
+    },
+    "book_endnote_stream_summary": {
+      "chapter_count": 3,
+      "chapters_with_endnote_stream": [
+        "toc-ch-002-tworeformersandaworldgon",
+        "toc-ch-005-courtfoolsandtheirfollyi",
+        "toc-ch-006-pilgrimsinsearchoftheirr"
+      ],
+      "high_concentration_chapter_ids": [],
+      "chapters": [
+        {
+          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
+          "item_count": 8,
+          "projection_mode_counts": {
+            "native": 8
+          }
+        },
+        {
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "item_count": 12,
+          "projection_mode_counts": {
+            "native": 12
+          }
+        },
+        {
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "item_count": 9,
+          "projection_mode_counts": {
+            "native": 9
+          }
+        }
+      ]
+    },
+    "array_rows": [
+      {
+        "region_id": "nr-fn-ch-0001-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "item_count": 60,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 63,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0002-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "item_count": 13,
+        "numeric_marker_start": 64,
+        "numeric_marker_end": 76,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0003-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "item_count": 44,
+        "numeric_marker_start": 79,
+        "numeric_marker_end": 122,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0004-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "item_count": 27,
+        "numeric_marker_start": 5,
+        "numeric_marker_end": 147,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "123",
+          "124",
+          "125",
+          "126",
+          "127",
+          "128",
+          "129",
+          "130"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0005-toc-ch-001-historicalproblemssinstv",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "item_count": 15,
+        "numeric_marker_start": 152,
+        "numeric_marker_end": 166,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "152",
+          "153",
+          "154",
+          "155",
+          "156",
+          "157",
+          "158",
+          "159"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0006-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "item_count": 132,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 4749,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0007-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "item_count": 2,
+        "numeric_marker_start": 136,
+        "numeric_marker_end": 137,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "136",
+          "137"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0008-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "item_count": 26,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 161,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "138",
+          "139",
+          "140",
+          "1",
+          "141",
+          "142",
+          "2",
+          "143"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0009-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "item_count": 12,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 173,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "163",
+          "164",
+          "165",
+          "1",
+          "166",
+          "167",
+          "168",
+          "169"
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0010-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "item_count": 6,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 6,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
+        "item_count": 94,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 273,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "180",
+          "181",
+          "182",
+          "1",
+          "183",
+          "184",
+          "185",
+          "186"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "item_count": 8,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0013-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "item_count": 47,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 55,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0014-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "item_count": 8,
+        "numeric_marker_start": 57,
+        "numeric_marker_end": 64,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0015-toc-ch-003-academicpsychiatryandthe",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
+        "item_count": 54,
+        "numeric_marker_start": 66,
+        "numeric_marker_end": 120,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0016-toc-ch-004-witchcraftandthemelancho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
+        "item_count": 3,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 3,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0017-toc-ch-004-witchcraftandthemelancho",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
+        "item_count": 168,
+        "numeric_marker_start": 4,
+        "numeric_marker_end": 1737,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0018-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 19,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 20,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "8",
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0019-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 2,
+        "numeric_marker_start": 21,
+        "numeric_marker_end": 22,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "21",
+          "22"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0020-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 1,
+        "numeric_marker_start": 24,
+        "numeric_marker_end": 24,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "24"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0021-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 1,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 25,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0022-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 2,
+        "numeric_marker_start": 27,
+        "numeric_marker_end": 28,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "27",
+          "28"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0023-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 2,
+        "numeric_marker_start": 30,
+        "numeric_marker_end": 31,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "30",
+          "31"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0024-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 11,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 42,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "33",
+          "1",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0025-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 1,
+        "numeric_marker_start": 43,
+        "numeric_marker_end": 43,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "43"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0026-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 3,
+        "numeric_marker_start": 42,
+        "numeric_marker_end": 45,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "44",
+          "45",
+          "42"
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0027-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 12,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 14,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 25,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 75,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "50",
+          "51",
+          "52",
+          "53",
+          "55",
+          "56",
+          "57",
+          "58"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0029-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 3,
+        "numeric_marker_start": 77,
+        "numeric_marker_end": 79,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "77",
+          "78",
+          "79"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0030-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 5,
+        "numeric_marker_start": 84,
+        "numeric_marker_end": 88,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "84",
+          "85",
+          "86",
+          "87",
+          "88"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0031-toc-ch-005-courtfoolsandtheirfollyi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "item_count": 1,
+        "numeric_marker_start": 89,
+        "numeric_marker_end": 89,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "89"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0032-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 47,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 48,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "8",
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 4,
+        "numeric_marker_start": 50,
+        "numeric_marker_end": 53,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "50",
+          "51",
+          "52",
+          "53"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 37,
+        "numeric_marker_start": 0,
+        "numeric_marker_end": 90,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 4,
+        "numeric_marker_start": 92,
+        "numeric_marker_end": 95,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "92",
+          "93",
+          "94",
+          "95"
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0036-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 5,
+        "numeric_marker_start": 20,
+        "numeric_marker_end": 1521,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "96",
+          "97",
+          "20",
+          "1520",
+          "1521"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 37,
+        "numeric_marker_start": 27,
+        "numeric_marker_end": 693,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0038-toc-ch-006-pilgrimsinsearchoftheirr",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "item_count": 35,
+        "numeric_marker_start": 16,
+        "numeric_marker_end": 164,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "132",
+          "133",
+          "134",
+          "135",
+          "136",
+          "137",
+          "138",
+          "139"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0039-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 73,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 73,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "4",
+          "3",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0040-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 7,
+        "numeric_marker_start": 28,
+        "numeric_marker_end": 80,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "74",
+          "75",
+          "76",
+          "77",
+          "28",
+          "79",
+          "80"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0041-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 4,
+        "numeric_marker_start": 81,
+        "numeric_marker_end": 84,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "81",
+          "82",
+          "83",
+          "84"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0042-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 36,
+        "numeric_marker_start": 2,
+        "numeric_marker_end": 114,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "86",
+          "87",
+          "88",
+          "89",
+          "19",
+          "8",
+          "30",
+          "91"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0043-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 2,
+        "numeric_marker_start": 115,
+        "numeric_marker_end": 116,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "115",
+          "116"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0044-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 1,
+        "numeric_marker_start": 117,
+        "numeric_marker_end": 117,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "117"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0045-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 30,
+        "numeric_marker_start": 118,
+        "numeric_marker_end": 147,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "118",
+          "119",
+          "120",
+          "121",
+          "122",
+          "123",
+          "124",
+          "125"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0046-toc-ch-007-madnessashelplessnesstwo",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
+        "item_count": 25,
+        "numeric_marker_start": 8,
+        "numeric_marker_end": 2286,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "148",
+          "149",
+          "2285",
+          "25",
+          "150",
+          "2286",
+          "18",
+          "151"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0047-toc-ch-008-epilogue",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-epilogue",
+        "item_count": 1,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1"
+        ]
+      }
+    ],
+    "endnote_array_rows": []
+  },
+  "endnote_merging": {
+    "decision_basis": [
+      "fnm_translation_units.kind/owner_kind/section_id/target_ref",
+      "导出 chapter markdown 中 local refs/local defs 的闭合情况",
+      "structure.freeze_note_unit_summary"
+    ],
+    "freeze_note_unit_summary": {
+      "chapter_view_note_unit_count": 1155,
+      "owner_fallback_note_unit_count": 0,
+      "unresolved_note_item_count": 0,
+      "unresolved_note_item_ids_preview": []
+    },
+    "note_unit_rows": [
+      {
+        "section_id": "toc-ch-001-historicalproblemssinstv",
+        "section_title": "Historical Problems: Sin, St. Vitus, and the Devil",
+        "note_unit_count": 159,
+        "note_unit_kind_counts": {
+          "footnote": 159
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00001}}",
+          "{{NOTE_REF:fn-00002}}",
+          "{{NOTE_REF:fn-00003}}",
+          "{{NOTE_REF:fn-00004}}",
+          "{{NOTE_REF:fn-00005}}"
+        ],
+        "page_span": [
+          46,
+          98
+        ]
+      },
+      {
+        "section_id": "toc-ch-002-tworeformersandaworldgon",
+        "section_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+        "note_unit_count": 272,
+        "note_unit_kind_counts": {
+          "footnote": 264,
+          "endnote": 8
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00161}}",
+          "{{NOTE_REF:fn-00162}}",
+          "{{NOTE_REF:fn-00163}}",
+          "{{NOTE_REF:fn-00164}}",
+          "{{NOTE_REF:fn-00165}}"
+        ],
+        "page_span": [
+          100,
+          158
+        ]
+      },
+      {
+        "section_id": "toc-ch-003-academicpsychiatryandthe",
+        "section_title": "Academic “Psychiatry” and the Rise of Galenic Observation",
+        "note_unit_count": 117,
+        "note_unit_kind_counts": {
+          "footnote": 117
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00425}}",
+          "{{NOTE_REF:fn-00426}}",
+          "{{NOTE_REF:fn-00427}}",
+          "{{NOTE_REF:fn-00428}}",
+          "{{NOTE_REF:fn-00429}}"
+        ],
+        "page_span": [
+          160,
+          200
+        ]
+      },
+      {
+        "section_id": "toc-ch-004-witchcraftandthemelancho",
+        "section_title": "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+        "note_unit_count": 171,
+        "note_unit_kind_counts": {
+          "footnote": 171
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00543}}",
+          "{{NOTE_REF:fn-00544}}",
+          "{{NOTE_REF:fn-00545}}",
+          "{{NOTE_REF:fn-00546}}",
+          "{{NOTE_REF:fn-00547}}"
+        ],
+        "page_span": [
+          202,
+          246
+        ]
+      },
+      {
+        "section_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "section_title": "Court Fools and Their Folly: Image and Social Reality",
+        "note_unit_count": 88,
+        "note_unit_kind_counts": {
+          "footnote": 76,
+          "endnote": 12
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00714}}",
+          "{{NOTE_REF:fn-00715}}",
+          "{{NOTE_REF:fn-00716}}",
+          "{{NOTE_REF:fn-00717}}",
+          "{{NOTE_REF:fn-00718}}"
+        ],
+        "page_span": [
+          248,
+          296
+        ]
+      },
+      {
+        "section_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "section_title": "Pilgrims in Search of Their Reason",
+        "note_unit_count": 169,
+        "note_unit_kind_counts": {
+          "footnote": 160,
+          "endnote": 9
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00790}}",
+          "{{NOTE_REF:fn-00792}}",
+          "{{NOTE_REF:fn-00793}}",
+          "{{NOTE_REF:fn-00794}}",
+          "{{NOTE_REF:fn-00795}}"
+        ],
+        "page_span": [
+          297,
+          340
+        ]
+      },
+      {
+        "section_id": "toc-ch-007-madnessashelplessnesstwo",
+        "section_title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+        "note_unit_count": 178,
+        "note_unit_kind_counts": {
+          "footnote": 178
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00951}}",
+          "{{NOTE_REF:fn-00952}}",
+          "{{NOTE_REF:fn-00953}}",
+          "{{NOTE_REF:fn-00954}}",
+          "{{NOTE_REF:fn-00955}}"
+        ],
+        "page_span": [
+          343,
+          403
+        ]
+      },
+      {
+        "section_id": "toc-ch-008-epilogue",
+        "section_title": "Epilogue",
+        "note_unit_count": 1,
+        "note_unit_kind_counts": {
+          "footnote": 1
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-01131}}"
+        ],
+        "page_span": [
+          406,
+          406
+        ]
+      }
+    ],
+    "export_merge_rows": []
+  },
+  "anchor_resolution": {
+    "decision_basis": [
+      "fnm_body_anchors.page_no/paragraph_index/char_start/char_end/source_marker",
+      "fnm_note_links.status/resolver/confidence",
+      "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
+    ],
+    "link_summary": {
+      "matched": 887,
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 11,
+      "endnote_orphan_note": 261,
+      "endnote_orphan_anchor": 1,
+      "ambiguous": 0,
+      "ignored": 20,
+      "fallback_count": 39,
+      "repair_count": 83,
+      "fallback_matched_count": 32,
+      "fallback_match_ratio": 0.036076662908680945
+    },
+    "chapter_link_contract_summary": {
+      "chapter_count": 8,
+      "contract_required_count": 3,
+      "failed_chapter_ids": [
+        "toc-ch-002-tworeformersandaworldgon",
+        "toc-ch-005-courtfoolsandtheirfollyi",
+        "toc-ch-006-pilgrimsinsearchoftheirr"
+      ],
+      "contract_v2_failed_chapter_ids": [
+        "toc-ch-001-historicalproblemssinstv",
+        "toc-ch-002-tworeformersandaworldgon",
+        "toc-ch-003-academicpsychiatryandthe",
+        "toc-ch-004-witchcraftandthemelancho",
+        "toc-ch-005-courtfoolsandtheirfollyi",
+        "toc-ch-006-pilgrimsinsearchoftheirr",
+        "toc-ch-007-madnessashelplessnesstwo"
+      ],
+      "contract_v2_first_marker_violation_count": 0,
+      "contract_v2_marker_gap_violation_count": 7,
+      "contract_v2_def_anchor_mismatch_count": 7
+    },
+    "anchor_kind_counts": {
+      "endnote": 439,
+      "footnote": 624
+    },
+    "link_status_counts": {
+      "matched": 887,
+      "orphan_note": 261,
+      "ignored": 20,
+      "orphan_anchor": 12
+    },
+    "link_resolver_counts": {
+      "repair": 83,
+      "rule": 1051,
+      "fallback": 39,
+      "orphan_recovery": 7
+    },
+    "anchor_samples": [
+      {
+        "anchor_id": "anchor-00001",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 46,
+        "paragraph_index": 1,
+        "marker": "1",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "In 1475, or more likely 1477–78, the renowned Flemish painter Hugo van der Goes (1440?–1482) retreated from the world to become a converso,..."
+      },
+      {
+        "anchor_id": "anchor-00002",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 46,
+        "paragraph_index": 2,
+        "marker": "2",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "As his brother Nicolaes [a donatus, or lay brother in the same monastery] told me at the time, our brother Hugo, during one night on his jou..."
+      },
+      {
+        "anchor_id": "anchor-00003",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 47,
+        "paragraph_index": 2,
+        "marker": "3",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "Van der Goes may well have been experiencing a much more specific humiliation than what Ofhuys described in general terms. When Nuremberg hu..."
+      },
+      {
+        "anchor_id": "anchor-00004",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 48,
+        "paragraph_index": 0,
+        "marker": "4",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "ted together with Ofhuys's firsthand report on Hugo's fears that he was damned. $ ^{4} $ We may not be far wrong in guessing that for Hugo a..."
+      },
+      {
+        "anchor_id": "anchor-00005",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 48,
+        "paragraph_index": 2,
+        "marker": "5",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "There are many different opinions about the illness of this converso. Some said that it was a kind of frenesis magna; others asserted that h..."
+      },
+      {
+        "anchor_id": "anchor-01007",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 48,
+        "paragraph_index": 2,
+        "marker": "6",
+        "anchor_kind": "endnote",
+        "certainty": 0.55,
+        "source_text_preview": "There are many different opinions about the illness of this converso. Some said that it was a kind of frenesis magna; others asserted that h..."
+      },
+      {
+        "anchor_id": "anchor-00006",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 49,
+        "paragraph_index": 0,
+        "marker": "7",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "count of his guests. $ ^{7} $ In the course of time, Ofhuys thought, van der Goes may in this way have laid the physical or natural basis fo..."
+      },
+      {
+        "anchor_id": "anchor-00007",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 49,
+        "paragraph_index": 1,
+        "marker": "8",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "This detailed description has seemed so clear in its particulars, so clinically detached, so natural, that historians have stumbled over one..."
+      },
+      {
+        "anchor_id": "anchor-00008",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 49,
+        "paragraph_index": 1,
+        "marker": "9",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "This detailed description has seemed so clear in its particulars, so clinically detached, so natural, that historians have stumbled over one..."
+      },
+      {
+        "anchor_id": "anchor-00009",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "page_no": 49,
+        "paragraph_index": 2,
+        "marker": "10",
+        "anchor_kind": "endnote",
+        "certainty": 1.0,
+        "source_text_preview": "[T]hese passions are caused sometimes by melancholy foods, sometimes by the drinking of strong wine, which burns the humors and turns them i..."
+      }
+    ],
+    "link_samples": [
+      {
+        "link_id": "link-00001",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00001",
+        "anchor_id": "anchor-00002",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "2",
+        "page_span": [
+          46,
+          46
+        ]
+      },
+      {
+        "link_id": "link-00002",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00002",
+        "anchor_id": "anchor-00003",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "3",
+        "page_span": [
+          47,
+          47
+        ]
+      },
+      {
+        "link_id": "link-00003",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00003",
+        "anchor_id": "anchor-00004",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "4",
+        "page_span": [
+          48,
+          48
+        ]
+      },
+      {
+        "link_id": "link-00004",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00004",
+        "anchor_id": "anchor-00005",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "5",
+        "page_span": [
+          48,
+          48
+        ]
+      },
+      {
+        "link_id": "link-00005",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00005",
+        "anchor_id": "anchor-01007",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "6",
+        "page_span": [
+          48,
+          48
+        ]
+      },
+      {
+        "link_id": "link-00006",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00006",
+        "anchor_id": "anchor-00006",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "7",
+        "page_span": [
+          49,
+          49
+        ]
+      },
+      {
+        "link_id": "link-00007",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00007",
+        "anchor_id": "anchor-00007",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "8",
+        "page_span": [
+          49,
+          49
+        ]
+      },
+      {
+        "link_id": "link-00008",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00008",
+        "anchor_id": "anchor-00008",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "9",
+        "page_span": [
+          49,
+          49
+        ]
+      },
+      {
+        "link_id": "link-00009",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00009",
+        "anchor_id": "anchor-00009",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "10",
+        "page_span": [
+          49,
+          49
+        ]
+      },
+      {
+        "link_id": "link-00010",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00010",
+        "anchor_id": "anchor-00011",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "12",
+        "page_span": [
+          50,
+          50
+        ]
+      },
+      {
+        "link_id": "link-00011",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00011",
+        "anchor_id": "anchor-00012",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "13",
+        "page_span": [
+          50,
+          50
+        ]
+      },
+      {
+        "link_id": "link-00012",
+        "chapter_id": "toc-ch-001-historicalproblemssinstv",
+        "note_item_id": "fn-00012",
+        "anchor_id": "anchor-00013",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "14",
+        "page_span": [
+          50,
+          50
+        ]
+      }
+    ],
+    "llm_repair_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.002.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.003.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.004.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.005.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.006.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.007.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.008.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.009.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.010.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.011.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.012.json"
+    ],
+    "visual_toc_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/visual_toc.manual_input_extract.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/visual_toc.manual_input_extract.002.json"
+    ]
+  }
+}

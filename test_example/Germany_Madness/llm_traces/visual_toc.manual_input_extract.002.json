@@ -3,7 +3,7 @@
   "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction\n- Historical Problems: Sin, St. Vitus, and the Devil\n- Two Reformers and a World Gone Mad: Luther and Paracelsus\n- Academic “Psychiatry” and the Rise of Galenic Observation\n- Witchcraft and the Melancholy Interpretation of the Insanity Defense\n- Court Fools and Their Folly: Image and Social Reality\n- Pilgrims in Search of Their Reason\n- Madness as Helplessness: Two Hospitals in the Age of the Reformations\n- Epilogue\n- Bibliography\n- Index",
@@ -23,7 +23,7 @@
     "source": "organization",
     "images_count": 1
   },
-  "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Tables and Maps\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"xii\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xiv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Abbreviations\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"xv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Historical Problems: Sin, St. Vitus, and the Devil\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 25,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 80,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Academic “Psychiatry” and the Rise of Galenic Observation\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 140,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Witchcraft and the Melancholy Interpretation of the Insanity Defense\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 182,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Court Fools and Their Folly: Image and Social Reality\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 228,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Pilgrims in Search of Their Reason\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 277,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Madness as Helplessness: Two Hospitals in the Age of the Reformations\",\n      \"depth\": 0,\n      \"visual_order\": 11,\n      \"printed_page\": 322,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 12,\n      \"printed_page\": 385,\n      \"role_hint\": \"post_body\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Bibliography\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": 391,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": 427,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+  "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Tables and Maps\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"xii\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xiv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Abbreviations\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": \"xv\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Historical Problems: Sin, St. Vitus, and the Devil\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 25,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 80,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Academic “Psychiatry” and the Rise of Galenic Observation\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 140,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Witchcraft and the Melancholy Interpretation of the Insanity Defense\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 182,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Court Fools and Their Folly: Image and Social Reality\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 228,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Pilgrims in Search of Their Reason\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 277,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Madness as Helplessness: Two Hospitals in the Age of the Reformations\",\n      \"depth\": 0,\n      \"visual_order\": 11,\n      \"printed_page\": 322,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 12,\n      \"printed_page\": 385,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Bibliography\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": 391,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": 427,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
   "response_parsed": {
     "endnotes_summary": {
       "present": false,
@@ -127,7 +127,7 @@
         "depth": 0,
         "visual_order": 12,
         "printed_page": 385,
-        "role_hint": "post_body",
+        "role_hint": "chapter",
         "parent_title": ""
       },
       {
@@ -244,7 +244,7 @@
         "printed_page": 385,
         "file_idx": null,
         "visual_order": 12,
-        "role_hint": "post_body"
+        "role_hint": "chapter"
       },
       {
         "title": "Bibliography",
@@ -275,11 +275,11 @@
   "usage": {
     "stage": "visual_toc.manual_input_extract",
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "request_count": 1,
     "prompt_tokens": 3162,
-    "completion_tokens": 1001,
-    "total_tokens": 4163,
+    "completion_tokens": 1000,
+    "total_tokens": 4162,
     "doc_id": "67356d1f7d9a",
     "slug": "",
     "context": {
@@ -288,6 +288,6 @@
     }
   },
   "timing": {
-    "duration_ms": 23147
+    "duration_ms": 19851
   }
 }

@@ -1,7 +1,9 @@
 {
   "doc_id": "e7f8a1b6c2d3",
-  "status": "ready",
-  "reason": "ok",
-  "blocking_reasons": [],
-  "generated_at": 1776859539
+  "status": "blocked",
+  "reason": "structure_review_required",
+  "blocking_reasons": [
+    "contract_def_anchor_mismatch"
+  ],
+  "generated_at": 1777568394
 }

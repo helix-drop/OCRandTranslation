@@ -1,15 +1,15 @@
 {
-  "cleaned_at": "2026-04-22T19:36:57",
+  "cleaned_at": "2026-05-01T00:25:46",
   "example_dir": "/Users/hao/OCRandTranslation/test_example/post-revolutionary",
   "removed": [
     "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces",
     "/Users/hao/OCRandTranslation/test_example/post-revolutionary/fnm_real_test_progress.json",
     "/Users/hao/OCRandTranslation/test_example/post-revolutionary/fnm_real_test_result.json",
+    "/Users/hao/OCRandTranslation/test_example/post-revolutionary/fnm_real_test_modules.json",
     "/Users/hao/OCRandTranslation/test_example/post-revolutionary/FNM_REAL_TEST_REPORT.md",
     "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest_export_status.json",
-    "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.Goldstein.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.zip"
+    "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.Goldstein.blocked.test.zip",
+    "/Users/hao/OCRandTranslation/test_example/post-revolutionary/latest.fnm.obsidian.blocked.test.zip"
   ],
   "removed_count": 8,
   "failed": [],

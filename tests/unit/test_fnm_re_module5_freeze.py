@@ -77,10 +77,14 @@ class FnmReModule5FreezeTest(unittest.TestCase):
             item_summary={},
         )
 
-    def test_biopolitics_main_path_hard_gates_true(self):
+    def test_biopolitics_main_path_reports_uninjected_matched_refs(self):
         pages, layers, link_table = self._build_biopolitics_inputs()
         result = build_frozen_units(layers, link_table)
-        self.assertTrue(all(result.gate_report.hard.values()))
+        self.assertTrue(result.gate_report.hard["freeze.only_matched_frozen"])
+        self.assertTrue(result.gate_report.hard["freeze.no_duplicate_injection"])
+        self.assertTrue(result.gate_report.hard["freeze.accounting_closed"])
+        self.assertFalse(result.gate_report.hard["freeze.all_matched_refs_injected"])
+        self.assertIn("freeze_matched_ref_not_injected", result.gate_report.reasons)
         self.assertTrue(result.data.body_units)
         self.assertEqual(len(result.data.note_units), len(layers.note_items))
         self.assertEqual(
@@ -88,6 +92,7 @@ class FnmReModule5FreezeTest(unittest.TestCase):
             len([row for row in link_table.effective_links if row.status == "matched"]),
         )
         self.assertEqual(result.data.freeze_summary.get("max_body_chars"), 6000)
+        self.assertGreater(int(result.data.freeze_summary.get("skipped_note_item_count") or 0), 0)
         del pages
 
     def test_matched_explicit_link_injects_note_ref_token(self):
@@ -138,7 +143,11 @@ class FnmReModule5FreezeTest(unittest.TestCase):
         layers, note_link_result = _build_layers_and_links(pages, toc_items)
         freeze_result = build_frozen_units(layers, note_link_result.data)
         self.assertFalse(freeze_result.gate_report.soft["freeze.synthetic_skip_warn"])
+        self.assertFalse(freeze_result.gate_report.hard["freeze.all_matched_refs_injected"])
+        self.assertIn("freeze_matched_ref_not_injected", freeze_result.gate_report.reasons)
         self.assertTrue(any(row.reason == "synthetic_anchor" for row in freeze_result.data.ref_map))
+        skipped_ids = set(freeze_result.data.freeze_summary.get("skipped_note_item_ids_preview") or [])
+        self.assertTrue(skipped_ids)
 
     def test_note_units_keep_worker_target_ref_contract(self):
         pages = [

@@ -1,7 +1,14 @@
 {
   "doc_id": "bd05138cd773",
-  "status": "ready",
-  "reason": "ok",
-  "blocking_reasons": [],
-  "generated_at": 1776859047
+  "status": "blocked",
+  "reason": "semantic_export_blocked",
+  "blocking_reasons": [
+    "toc_pages_unclassified",
+    "toc_role_semantics_invalid",
+    "contract_first_marker_not_one",
+    "contract_marker_gap",
+    "contract_def_anchor_mismatch",
+    "link_quality_low"
+  ],
+  "generated_at": 1777567909
 }

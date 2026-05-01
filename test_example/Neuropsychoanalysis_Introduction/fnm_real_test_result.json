@@ -68,7 +68,7 @@
     }
   },
   "cleanup": {
-    "cleaned_at": "2026-04-22T20:05:53",
+    "cleaned_at": "2026-05-01T00:59:54",
     "example_dir": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction",
     "removed": [
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces",
@@ -84,99 +84,621 @@
     "failed": [],
     "failed_count": 0
   },
-  "all_ok": true,
-  "blocked": false,
-  "blocking_reasons": [],
-  "blocking_details": [],
+  "all_ok": false,
+  "blocked": true,
+  "blocking_reasons": [
+    "contract_def_anchor_mismatch",
+    "structure_review_required"
+  ],
+  "blocking_details": [
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "structure_verify",
+      "reason_code": "chapter_issue",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "",
+      "upstream_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    },
+    {
+      "stage": "export_verify",
+      "reason_code": "structure_review_required",
+      "page_no": null,
+      "chapter_title": "",
+      "paragraph_locator": "",
+      "evidence_text_preview": "[\"contract_def_anchor_mismatch\"]",
+      "upstream_trace_refs": []
+    }
+  ],
   "trace_index": [
     {
       "stage": "visual_toc.manual_input_extract",
       "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
       "reason_for_request": "从目录页截图中抽取单页原子目录项",
-      "model_id": "qwen3.5-plus",
-      "total_tokens": 1910
+      "model_id": "qwen3.6-plus",
+      "total_tokens": 1915
     },
     {
       "stage": "visual_toc.manual_input_extract",
       "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json",
       "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
-      "model_id": "qwen3.5-plus",
-      "total_tokens": 1806
+      "model_id": "qwen3.6-plus",
+      "total_tokens": 1825
+    },
+    {
+      "stage": "llm_repair.cluster_request",
+      "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.001.json",
+      "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+      "model_id": "qwen3.6-plus",
+      "total_tokens": 2508
+    },
+    {
+      "stage": "llm_repair.cluster_request",
+      "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.002.json",
+      "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+      "model_id": "qwen3.6-plus",
+      "total_tokens": 1671
+    },
+    {
+      "stage": "llm_repair.cluster_request",
+      "file": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.003.json",
+      "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+      "model_id": "qwen3.6-plus",
+      "total_tokens": 1426
     }
   ],
   "translation_mode": "placeholder",
   "translation_api_called": false,
   "final_zip": {
     "written": true,
-    "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip",
-    "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip",
+    "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip",
+    "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip",
     "reason": ""
+  },
+  "module_process": {
+    "boundary_detection": {
+      "decision_basis": [
+        "fnm_pages.page_role",
+        "fnm_pages.role_reason",
+        "fnm_pages.role_confidence",
+        "fnm_pages.has_note_heading",
+        "fnm_pages.section_hint"
+      ],
+      "page_role_counts": {
+        "front_matter": 42,
+        "body": 117,
+        "other": 9
+      },
+      "first_body_page": 20,
+      "first_note_page": null,
+      "page_role_samples": [
+        {
+          "page_no": 1,
+          "target_pdf_page": 1,
+          "page_role": "front_matter",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 2,
+          "target_pdf_page": 2,
+          "page_role": "front_matter",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 3,
+          "target_pdf_page": 3,
+          "page_role": "front_matter",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 20,
+          "target_pdf_page": 20,
+          "page_role": "body",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 21,
+          "target_pdf_page": 21,
+          "page_role": "body",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 22,
+          "target_pdf_page": 22,
+          "page_role": "body",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 160,
+          "target_pdf_page": 160,
+          "page_role": "other",
+          "role_reason": "bibliography",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 161,
+          "target_pdf_page": 161,
+          "page_role": "other",
+          "role_reason": "default_body",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        },
+        {
+          "page_no": 162,
+          "target_pdf_page": 162,
+          "page_role": "other",
+          "role_reason": "rear_toc_tail",
+          "role_confidence": 1.0,
+          "has_note_heading": false,
+          "section_hint": ""
+        }
+      ],
+      "structure_page_partition_summary": {
+        "total_pages": 168,
+        "noise": 0,
+        "front_matter": 4,
+        "body": 146,
+        "note": 0,
+        "other": 18
+      }
+    },
+    "note_region_detection": {
+      "decision_basis": [
+        "fnm_note_regions.region_kind/start_page/end_page/pages",
+        "fnm_note_regions.bound_chapter_id",
+        "fnm_note_regions.region_start_first_source_marker",
+        "fnm_note_regions.region_first_note_item_marker",
+        "structure.chapter_binding_summary",
+        "structure.visual_toc_endnotes_summary"
+      ],
+      "visual_toc_endnotes_summary": {},
+      "chapter_binding_summary": {
+        "region_count": 0,
+        "book_scope_region_count": 0,
+        "unbound_region_count": 0,
+        "unbound_region_ids_preview": [],
+        "unassigned_item_count": 0,
+        "unassigned_item_ids_preview": []
+      },
+      "chapter_endnote_region_alignment_summary": {},
+      "region_rows": [],
+      "endnote_region_rows": []
+    },
+    "endnote_array_building": {
+      "decision_basis": [
+        "fnm_note_items.region_id/chapter_id/page_no/marker",
+        "按 region_id 聚合生成注释数组",
+        "检查 numeric marker 连续性与首尾 marker"
+      ],
+      "note_capture_summary": {
+        "expected_anchor_count": 4,
+        "captured_note_count": 0,
+        "capture_ratio": 0.0,
+        "sparse_capture_chapter_ids": [],
+        "dense_anchor_zero_capture_pages": [],
+        "chapters": [
+          {
+            "chapter_id": "toc-ch-001-introduction",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 0,
+            "captured_note_count": 0,
+            "capture_ratio": 1.0
+          },
+          {
+            "chapter_id": "toc-ch-002-1selfandnarcissism",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 1,
+            "captured_note_count": 0,
+            "capture_ratio": 0.0
+          },
+          {
+            "chapter_id": "toc-ch-003-2attachmentandtrauma",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 0,
+            "captured_note_count": 0,
+            "capture_ratio": 1.0
+          },
+          {
+            "chapter_id": "toc-ch-004-3defensemechanismsanddis",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 0,
+            "captured_note_count": 0,
+            "capture_ratio": 1.0
+          },
+          {
+            "chapter_id": "toc-ch-005-4cathexisandfreeenergy",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 0,
+            "captured_note_count": 0,
+            "capture_ratio": 1.0
+          },
+          {
+            "chapter_id": "toc-ch-006-5unconsciousandconscious",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 1,
+            "captured_note_count": 0,
+            "capture_ratio": 0.0
+          },
+          {
+            "chapter_id": "toc-ch-007-6dreams",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 0,
+            "captured_note_count": 0,
+            "capture_ratio": 1.0
+          },
+          {
+            "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 2,
+            "captured_note_count": 0,
+            "capture_ratio": 0.0
+          },
+          {
+            "chapter_id": "toc-ch-009-conclusion",
+            "note_mode": "no_notes",
+            "expected_anchor_count": 0,
+            "captured_note_count": 0,
+            "capture_ratio": 1.0
+          }
+        ]
+      },
+      "book_endnote_stream_summary": {
+        "chapter_count": 0,
+        "chapters_with_endnote_stream": [],
+        "high_concentration_chapter_ids": [],
+        "chapters": []
+      },
+      "array_rows": [],
+      "endnote_array_rows": []
+    },
+    "endnote_merging": {
+      "decision_basis": [
+        "fnm_translation_units.kind/owner_kind/section_id/target_ref",
+        "导出 chapter markdown 中 local refs/local defs 的闭合情况",
+        "structure.freeze_note_unit_summary"
+      ],
+      "freeze_note_unit_summary": {
+        "chapter_view_note_unit_count": 0,
+        "owner_fallback_note_unit_count": 0,
+        "unresolved_note_item_count": 0,
+        "unresolved_note_item_ids_preview": []
+      },
+      "note_unit_rows": [],
+      "export_merge_rows": []
+    },
+    "anchor_resolution": {
+      "decision_basis": [
+        "fnm_body_anchors.page_no/paragraph_index/char_start/char_end/source_marker",
+        "fnm_note_links.status/resolver/confidence",
+        "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
+      ],
+      "link_summary": {
+        "matched": 0,
+        "footnote_orphan_note": 0,
+        "footnote_orphan_anchor": 0,
+        "endnote_orphan_note": 0,
+        "endnote_orphan_anchor": 0,
+        "ambiguous": 0,
+        "ignored": 4,
+        "fallback_count": 0,
+        "repair_count": 4,
+        "fallback_matched_count": 0,
+        "fallback_match_ratio": 0.0
+      },
+      "chapter_link_contract_summary": {
+        "chapter_count": 9,
+        "contract_required_count": 0,
+        "failed_chapter_ids": [],
+        "contract_v2_failed_chapter_ids": [
+          "toc-ch-002-1selfandnarcissism",
+          "toc-ch-006-5unconsciousandconscious",
+          "toc-ch-008-7schizophreniaanddepress"
+        ],
+        "contract_v2_first_marker_violation_count": 0,
+        "contract_v2_marker_gap_violation_count": 0,
+        "contract_v2_def_anchor_mismatch_count": 3
+      },
+      "anchor_kind_counts": {
+        "unknown": 4
+      },
+      "link_status_counts": {
+        "ignored": 4
+      },
+      "link_resolver_counts": {
+        "repair": 4
+      },
+      "anchor_samples": [
+        {
+          "anchor_id": "anchor-00001",
+          "chapter_id": "toc-ch-002-1selfandnarcissism",
+          "page_no": 39,
+          "paragraph_index": 5,
+          "marker": "29",
+          "anchor_kind": "unknown",
+          "certainty": 0.6,
+          "source_text_preview": "Scalabrini A, Ebisch SJH, Huang Z, Di Plinio S, Perrucci MG, Romani GL, et al (2019) Spontaneous brain activity predicts task-evoked activit..."
+        },
+        {
+          "anchor_id": "anchor-00002",
+          "chapter_id": "toc-ch-006-5unconsciousandconscious",
+          "page_no": 111,
+          "paragraph_index": 0,
+          "marker": "10",
+          "anchor_kind": "unknown",
+          "certainty": 0.6,
+          "source_text_preview": "Zhang J, Huang Z, Tumati S, Northoff G (2020) Rest-task modulation of fMRI-derived global signal topography is mediated by transient coactiv..."
+        },
+        {
+          "anchor_id": "anchor-00003",
+          "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+          "page_no": 146,
+          "paragraph_index": 1,
+          "marker": "3",
+          "anchor_kind": "unknown",
+          "certainty": 0.6,
+          "source_text_preview": "We first observed that OC neural activity is indeed not fast enough; that is, it is too slow. In fMRI we could observe decreased representat..."
+        },
+        {
+          "anchor_id": "anchor-00004",
+          "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+          "page_no": 149,
+          "paragraph_index": 10,
+          "marker": "2",
+          "anchor_kind": "unknown",
+          "certainty": 0.6,
+          "source_text_preview": "Fuchs T, Van Duppen Z (2017) Time and events: On the phenomenology of temporal experience in schizophrenia (Ancillary article to EAWE domain..."
+        }
+      ],
+      "link_samples": [
+        {
+          "link_id": "link-00001",
+          "chapter_id": "toc-ch-002-1selfandnarcissism",
+          "note_item_id": "",
+          "anchor_id": "anchor-00001",
+          "status": "ignored",
+          "resolver": "repair",
+          "marker": "29",
+          "page_span": [
+            39,
+            39
+          ]
+        },
+        {
+          "link_id": "link-00002",
+          "chapter_id": "toc-ch-006-5unconsciousandconscious",
+          "note_item_id": "",
+          "anchor_id": "anchor-00002",
+          "status": "ignored",
+          "resolver": "repair",
+          "marker": "10",
+          "page_span": [
+            111,
+            111
+          ]
+        },
+        {
+          "link_id": "link-00003",
+          "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+          "note_item_id": "",
+          "anchor_id": "anchor-00003",
+          "status": "ignored",
+          "resolver": "repair",
+          "marker": "3",
+          "page_span": [
+            146,
+            146
+          ]
+        },
+        {
+          "link_id": "link-00004",
+          "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+          "note_item_id": "",
+          "anchor_id": "anchor-00004",
+          "status": "ignored",
+          "resolver": "repair",
+          "marker": "2",
+          "page_span": [
+            149,
+            149
+          ]
+        }
+      ],
+      "llm_repair_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.002.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.003.json"
+      ],
+      "visual_toc_trace_refs": [
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
+        "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
+      ]
+    }
   },
   "progress": {
     "status": "done",
     "current_stage": "report_write",
-    "started_at": "2026-04-22T20:05:53",
-    "updated_at": "2026-04-22T20:06:40",
+    "started_at": "2026-05-01T00:59:54",
+    "updated_at": "2026-05-01T01:00:54",
     "stage_history": [
       {
         "stage": "reingest",
         "status": "done",
         "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-        "at": "2026-04-22T20:05:53"
+        "at": "2026-05-01T00:59:54"
       },
       {
         "stage": "visual_toc",
         "status": "done",
         "detail": "needs_offset",
-        "at": "2026-04-22T20:06:23"
+        "at": "2026-05-01T01:00:24"
       },
       {
         "stage": "fnm_pipeline",
         "status": "done",
-        "detail": "ready",
-        "at": "2026-04-22T20:06:26"
+        "detail": "review_required",
+        "at": "2026-05-01T01:00:28"
       },
       {
         "stage": "llm_repair",
         "status": "done",
-        "detail": "auto_applied=0",
-        "at": "2026-04-22T20:06:26"
+        "detail": "auto_applied=4",
+        "at": "2026-05-01T01:00:40"
       },
       {
         "stage": "fnm_pipeline_rebuild",
         "status": "done",
-        "detail": "skipped",
-        "at": "2026-04-22T20:06:26"
+        "detail": "review_required",
+        "at": "2026-05-01T01:00:45"
       },
       {
         "stage": "structure_verify",
         "status": "done",
-        "detail": "ready",
-        "at": "2026-04-22T20:06:29"
+        "detail": "review_required",
+        "at": "2026-05-01T01:00:49"
       },
       {
         "stage": "placeholder_translate",
         "status": "done",
         "detail": "translated_paras=735",
-        "at": "2026-04-22T20:06:33"
+        "at": "2026-05-01T01:00:54"
       },
       {
         "stage": "export_verify",
         "status": "done",
-        "detail": "ok",
-        "at": "2026-04-22T20:06:40"
+        "detail": "structure_review_required",
+        "at": "2026-05-01T01:00:54"
       },
       {
         "stage": "zip_finalize",
         "status": "done",
         "detail": "ok",
-        "at": "2026-04-22T20:06:40"
+        "at": "2026-05-01T01:00:54"
       },
       {
         "stage": "report_write",
         "status": "done",
         "detail": "单书结果、报告、进度均已写入",
-        "at": "2026-04-22T20:06:40"
+        "at": "2026-05-01T01:00:54"
       }
     ]
   },
@@ -202,9 +724,9 @@
       },
       "visual_toc.manual_input_extract": {
         "request_count": 2,
-        "prompt_tokens": 2302,
-        "completion_tokens": 1414,
-        "total_tokens": 3716
+        "prompt_tokens": 2316,
+        "completion_tokens": 1424,
+        "total_tokens": 3740
       },
       "llm_repair.cluster_request": {
         "request_count": 0,
@@ -220,18 +742,18 @@
       }
     },
     "by_model": {
-      "qwen3.5-plus": {
+      "qwen3.6-plus": {
         "request_count": 2,
-        "prompt_tokens": 2302,
-        "completion_tokens": 1414,
-        "total_tokens": 3716
+        "prompt_tokens": 2316,
+        "completion_tokens": 1424,
+        "total_tokens": 3740
       }
     },
     "total": {
       "request_count": 2,
-      "prompt_tokens": 2302,
-      "completion_tokens": 1414,
-      "total_tokens": 3716
+      "prompt_tokens": 2316,
+      "completion_tokens": 1424,
+      "total_tokens": 3740
     }
   },
   "reingest": {
@@ -273,13 +795,13 @@
       "has_back_matter": true,
       "body_root_titles": [
         "Introduction",
-        "Self and narcissism",
-        "Attachment and trauma",
-        "Defense mechanisms and dissociation",
-        "Cathexis and free energy",
-        "Unconscious and conscious",
-        "Dreams",
-        "Schizophrenia and depression",
+        "1 Self and narcissism",
+        "2 Attachment and trauma",
+        "3 Defense mechanisms and dissociation",
+        "4 Cathexis and free energy",
+        "5 Unconscious and conscious",
+        "6 Dreams",
+        "7 Schizophrenia and depression",
         "Conclusion"
       ],
       "container_titles": [],
@@ -302,7 +824,7 @@
         "export_candidate": true
       },
       {
-        "title": "Self and narcissism",
+        "title": "1 Self and narcissism",
         "depth": 0,
         "printed_page": 13,
         "file_idx": 19,
@@ -313,7 +835,7 @@
         "export_candidate": true
       },
       {
-        "title": "Attachment and trauma",
+        "title": "2 Attachment and trauma",
         "depth": 0,
         "printed_page": 33,
         "file_idx": 39,
@@ -324,7 +846,7 @@
         "export_candidate": true
       },
       {
-        "title": "Defense mechanisms and dissociation",
+        "title": "3 Defense mechanisms and dissociation",
         "depth": 0,
         "printed_page": 49,
         "file_idx": 55,
@@ -335,7 +857,7 @@
         "export_candidate": true
       },
       {
-        "title": "Cathexis and free energy",
+        "title": "4 Cathexis and free energy",
         "depth": 0,
         "printed_page": 68,
         "file_idx": 74,
@@ -346,7 +868,7 @@
         "export_candidate": true
       },
       {
-        "title": "Unconscious and conscious",
+        "title": "5 Unconscious and conscious",
         "depth": 0,
         "printed_page": 88,
         "file_idx": 94,
@@ -357,7 +879,7 @@
         "export_candidate": true
       },
       {
-        "title": "Dreams",
+        "title": "6 Dreams",
         "depth": 0,
         "printed_page": 105,
         "file_idx": 111,
@@ -368,7 +890,7 @@
         "export_candidate": true
       },
       {
-        "title": "Schizophrenia and depression",
+        "title": "7 Schizophrenia and depression",
         "depth": 0,
         "printed_page": 126,
         "file_idx": 132,
@@ -424,7 +946,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Self and narcissism",
+          "title": "1 Self and narcissism",
           "depth": 0,
           "printed_page": 13,
           "visual_order": 2,
@@ -433,7 +955,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Attachment and trauma",
+          "title": "2 Attachment and trauma",
           "depth": 0,
           "printed_page": 33,
           "visual_order": 3,
@@ -442,7 +964,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Defense mechanisms and dissociation",
+          "title": "3 Defense mechanisms and dissociation",
           "depth": 0,
           "printed_page": 49,
           "visual_order": 4,
@@ -451,7 +973,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Cathexis and free energy",
+          "title": "4 Cathexis and free energy",
           "depth": 0,
           "printed_page": 68,
           "visual_order": 5,
@@ -460,7 +982,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Unconscious and conscious",
+          "title": "5 Unconscious and conscious",
           "depth": 0,
           "printed_page": 88,
           "visual_order": 6,
@@ -469,7 +991,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Dreams",
+          "title": "6 Dreams",
           "depth": 0,
           "printed_page": 105,
           "visual_order": 7,
@@ -478,7 +1000,7 @@
           "endnotes_subentry_candidate": false
         },
         {
-          "title": "Schizophrenia and depression",
+          "title": "7 Schizophrenia and depression",
           "depth": 0,
           "printed_page": 126,
           "visual_order": 8,
@@ -517,7 +1039,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Self and narcissism",
+          "title": "1 Self and narcissism",
           "depth": 0,
           "printed_page": 13,
           "file_idx": null,
@@ -525,7 +1047,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Attachment and trauma",
+          "title": "2 Attachment and trauma",
           "depth": 0,
           "printed_page": 33,
           "file_idx": null,
@@ -533,7 +1055,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Defense mechanisms and dissociation",
+          "title": "3 Defense mechanisms and dissociation",
           "depth": 0,
           "printed_page": 49,
           "file_idx": null,
@@ -541,7 +1063,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Cathexis and free energy",
+          "title": "4 Cathexis and free energy",
           "depth": 0,
           "printed_page": 68,
           "file_idx": null,
@@ -549,7 +1071,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Unconscious and conscious",
+          "title": "5 Unconscious and conscious",
           "depth": 0,
           "printed_page": 88,
           "file_idx": null,
@@ -557,7 +1079,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Dreams",
+          "title": "6 Dreams",
           "depth": 0,
           "printed_page": 105,
           "file_idx": null,
@@ -565,7 +1087,7 @@
           "role_hint": "chapter"
         },
         {
-          "title": "Schizophrenia and depression",
+          "title": "7 Schizophrenia and depression",
           "depth": 0,
           "printed_page": 126,
           "file_idx": null,
@@ -611,11 +1133,11 @@
       {
         "stage": "visual_toc.manual_input_extract",
         "provider": "qwen",
-        "model_id": "qwen3.5-plus",
+        "model_id": "qwen3.6-plus",
         "request_count": 1,
         "prompt_tokens": 1182,
-        "completion_tokens": 728,
-        "total_tokens": 1910,
+        "completion_tokens": 733,
+        "total_tokens": 1915,
         "doc_id": "a3c9e1f7b284",
         "slug": "",
         "context": {
@@ -626,11 +1148,11 @@
       {
         "stage": "visual_toc.manual_input_extract",
         "provider": "qwen",
-        "model_id": "qwen3.5-plus",
+        "model_id": "qwen3.6-plus",
         "request_count": 1,
-        "prompt_tokens": 1120,
-        "completion_tokens": 686,
-        "total_tokens": 1806,
+        "prompt_tokens": 1134,
+        "completion_tokens": 691,
+        "total_tokens": 1825,
         "doc_id": "a3c9e1f7b284",
         "slug": "",
         "context": {
@@ -643,9 +1165,9 @@
       "by_stage": {
         "visual_toc.manual_input_extract": {
           "request_count": 2,
-          "prompt_tokens": 2302,
-          "completion_tokens": 1414,
-          "total_tokens": 3716
+          "prompt_tokens": 2316,
+          "completion_tokens": 1424,
+          "total_tokens": 3740
         },
         "visual_toc.preflight": {
           "request_count": 0,
@@ -667,18 +1189,18 @@
         }
       },
       "by_model": {
-        "qwen3.5-plus": {
+        "qwen3.6-plus": {
           "request_count": 2,
-          "prompt_tokens": 2302,
-          "completion_tokens": 1414,
-          "total_tokens": 3716
+          "prompt_tokens": 2316,
+          "completion_tokens": 1424,
+          "total_tokens": 3740
         }
       },
       "total": {
         "request_count": 2,
-        "prompt_tokens": 2302,
-        "completion_tokens": 1414,
-        "total_tokens": 3716
+        "prompt_tokens": 2316,
+        "completion_tokens": 1424,
+        "total_tokens": 3740
       }
     },
     "llm_traces": [
@@ -687,7 +1209,7 @@
         "reason_for_request": "从目录页截图中抽取单页原子目录项",
         "model": {
           "provider": "qwen",
-          "model_id": "qwen3.5-plus",
+          "model_id": "qwen3.6-plus",
           "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
         },
         "request_prompt": "你会看到一页书籍目录截图。请只提取真正可导航的目录项，并按从上到下的顺序返回 JSON 数组。每项格式必须是 [{\"title\":\"章节标题\",\"depth\":0,\"printed_page\":12,\"visual_order\":1,\"role_hint\":\"content\",\"endnotes_candidate\":false,\"endnotes_subentry_candidate\":false}]。规则：1. depth 只做单页粗粒度层级判断：顶层正文/前后附记为 0，容器如 Part/Book/COURS/APPENDICES/INDICES/Notes 可为 1，章内子项可更深；2. role_hint 只能是 container/content/back_matter 之一；3. container 只用于组织层标题，如 Part、Book、COURS、APPENDICES、INDICES、Notes；它们不是正文 chapter；4. content 包括正文 chapter、章内 section，以及 front_matter/post_body 这类有页码的可导航条目；back_matter 只用于 Bibliography、References、Index、Note on Sources（单行独立）这类参考性材料；5. 目录页总标题如 Contents、Sommaire、Table des matieres 不输出；标题下面很长的摘要、说明文字、介绍段落不能输出；纯数字孤立行不要单独输出；5. 没有可见页码就把 printed_page 设为 null，绝不猜测；6. Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 这类尾注容器可额外标 endnotes_candidate=true；7. Notes to Chapter 1、Notes to Introduction、或尾注容器下按章分组的子条目可额外标 endnotes_subentry_candidate=true；8. 不要补全不可见文字，只做空白归一化。",
@@ -707,7 +1229,7 @@
           "source": "pdf",
           "file_idx": 0
         },
-        "response_raw_text": "```json\n[\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Self and narcissism\",\n    \"depth\": 0,\n    \"printed_page\": 13,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Attachment and trauma\",\n    \"depth\": 0,\n    \"printed_page\": 33,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Defense mechanisms and dissociation\",\n    \"depth\": 0,\n    \"printed_page\": 49,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Cathexis and free energy\",\n    \"depth\": 0,\n    \"printed_page\": 68,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Unconscious and conscious\",\n    \"depth\": 0,\n    \"printed_page\": 88,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Dreams\",\n    \"depth\": 0,\n    \"printed_page\": 105,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Schizophrenia and depression\",\n    \"depth\": 0,\n    \"printed_page\": 126,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conclusion\",\n    \"depth\": 0,\n    \"printed_page\": 146,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 155,\n    \"visual_order\": 10,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"Introduction\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 Self and narcissism\",\n    \"depth\": 0,\n    \"printed_page\": 13,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 Attachment and trauma\",\n    \"depth\": 0,\n    \"printed_page\": 33,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Defense mechanisms and dissociation\",\n    \"depth\": 0,\n    \"printed_page\": 49,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"4 Cathexis and free energy\",\n    \"depth\": 0,\n    \"printed_page\": 68,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"5 Unconscious and conscious\",\n    \"depth\": 0,\n    \"printed_page\": 88,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"6 Dreams\",\n    \"depth\": 0,\n    \"printed_page\": 105,\n    \"visual_order\": 7,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"7 Schizophrenia and depression\",\n    \"depth\": 0,\n    \"printed_page\": 126,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Conclusion\",\n    \"depth\": 0,\n    \"printed_page\": 146,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 155,\n    \"visual_order\": 10,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
         "response_parsed": [
           {
             "title": "Introduction",
@@ -719,7 +1241,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Self and narcissism",
+            "title": "1 Self and narcissism",
             "depth": 0,
             "printed_page": 13,
             "visual_order": 2,
@@ -728,7 +1250,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Attachment and trauma",
+            "title": "2 Attachment and trauma",
             "depth": 0,
             "printed_page": 33,
             "visual_order": 3,
@@ -737,7 +1259,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Defense mechanisms and dissociation",
+            "title": "3 Defense mechanisms and dissociation",
             "depth": 0,
             "printed_page": 49,
             "visual_order": 4,
@@ -746,7 +1268,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Cathexis and free energy",
+            "title": "4 Cathexis and free energy",
             "depth": 0,
             "printed_page": 68,
             "visual_order": 5,
@@ -755,7 +1277,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Unconscious and conscious",
+            "title": "5 Unconscious and conscious",
             "depth": 0,
             "printed_page": 88,
             "visual_order": 6,
@@ -764,7 +1286,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Dreams",
+            "title": "6 Dreams",
             "depth": 0,
             "printed_page": 105,
             "visual_order": 7,
@@ -773,7 +1295,7 @@
             "endnotes_subentry_candidate": false
           },
           {
-            "title": "Schizophrenia and depression",
+            "title": "7 Schizophrenia and depression",
             "depth": 0,
             "printed_page": 126,
             "visual_order": 8,
@@ -812,7 +1334,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Self and narcissism",
+              "title": "1 Self and narcissism",
               "depth": 0,
               "printed_page": 13,
               "visual_order": 2,
@@ -821,7 +1343,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Attachment and trauma",
+              "title": "2 Attachment and trauma",
               "depth": 0,
               "printed_page": 33,
               "visual_order": 3,
@@ -830,7 +1352,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Defense mechanisms and dissociation",
+              "title": "3 Defense mechanisms and dissociation",
               "depth": 0,
               "printed_page": 49,
               "visual_order": 4,
@@ -839,7 +1361,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Cathexis and free energy",
+              "title": "4 Cathexis and free energy",
               "depth": 0,
               "printed_page": 68,
               "visual_order": 5,
@@ -848,7 +1370,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Unconscious and conscious",
+              "title": "5 Unconscious and conscious",
               "depth": 0,
               "printed_page": 88,
               "visual_order": 6,
@@ -857,7 +1379,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Dreams",
+              "title": "6 Dreams",
               "depth": 0,
               "printed_page": 105,
               "visual_order": 7,
@@ -866,7 +1388,7 @@
               "endnotes_subentry_candidate": false
             },
             {
-              "title": "Schizophrenia and depression",
+              "title": "7 Schizophrenia and depression",
               "depth": 0,
               "printed_page": 126,
               "visual_order": 8,
@@ -897,11 +1419,11 @@
         "usage": {
           "stage": "visual_toc.manual_input_extract",
           "provider": "qwen",
-          "model_id": "qwen3.5-plus",
+          "model_id": "qwen3.6-plus",
           "request_count": 1,
           "prompt_tokens": 1182,
-          "completion_tokens": 728,
-          "total_tokens": 1910,
+          "completion_tokens": 733,
+          "total_tokens": 1915,
           "doc_id": "a3c9e1f7b284",
           "slug": "",
           "context": {
@@ -910,7 +1432,7 @@
           }
         },
         "timing": {
-          "duration_ms": 14970
+          "duration_ms": 15255
         }
       },
       {
@@ -918,10 +1440,10 @@
         "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
         "model": {
           "provider": "qwen",
-          "model_id": "qwen3.5-plus",
+          "model_id": "qwen3.6-plus",
           "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
         },
-        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction\n- Self and narcissism\n- Attachment and trauma\n- Defense mechanisms and dissociation\n- Cathexis and free energy\n- Unconscious and conscious\n- Dreams\n- Schizophrenia and depression\n- Conclusion\n- Index",
+        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction\n- 1 Self and narcissism\n- 2 Attachment and trauma\n- 3 Defense mechanisms and dissociation\n- 4 Cathexis and free energy\n- 5 Unconscious and conscious\n- 6 Dreams\n- 7 Schizophrenia and depression\n- Conclusion\n- Index",
         "request_content": {
           "images": [
             {
@@ -938,7 +1460,7 @@
           "source": "organization",
           "images_count": 1
         },
-        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Self and narcissism\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 13,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Attachment and trauma\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 33,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Defense mechanisms and dissociation\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 49,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Cathexis and free energy\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 68,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Unconscious and conscious\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 88,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Dreams\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 105,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Schizophrenia and depression\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 126,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Conclusion\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 146,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 155,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"1 Self and narcissism\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 13,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"2 Attachment and trauma\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 33,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"3 Defense mechanisms and dissociation\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 49,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"4 Cathexis and free energy\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 68,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"5 Unconscious and conscious\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 88,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"6 Dreams\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 105,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"7 Schizophrenia and depression\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 126,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Conclusion\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 146,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 155,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
         "response_parsed": {
           "endnotes_summary": {
             "present": false,
@@ -958,7 +1480,7 @@
               "parent_title": ""
             },
             {
-              "title": "Self and narcissism",
+              "title": "1 Self and narcissism",
               "depth": 0,
               "visual_order": 2,
               "printed_page": 13,
@@ -966,7 +1488,7 @@
               "parent_title": ""
             },
             {
-              "title": "Attachment and trauma",
+              "title": "2 Attachment and trauma",
               "depth": 0,
               "visual_order": 3,
               "printed_page": 33,
@@ -974,7 +1496,7 @@
               "parent_title": ""
             },
             {
-              "title": "Defense mechanisms and dissociation",
+              "title": "3 Defense mechanisms and dissociation",
               "depth": 0,
               "visual_order": 4,
               "printed_page": 49,
@@ -982,7 +1504,7 @@
               "parent_title": ""
             },
             {
-              "title": "Cathexis and free energy",
+              "title": "4 Cathexis and free energy",
               "depth": 0,
               "visual_order": 5,
               "printed_page": 68,
@@ -990,7 +1512,7 @@
               "parent_title": ""
             },
             {
-              "title": "Unconscious and conscious",
+              "title": "5 Unconscious and conscious",
               "depth": 0,
               "visual_order": 6,
               "printed_page": 88,
@@ -998,7 +1520,7 @@
               "parent_title": ""
             },
             {
-              "title": "Dreams",
+              "title": "6 Dreams",
               "depth": 0,
               "visual_order": 7,
               "printed_page": 105,
@@ -1006,7 +1528,7 @@
               "parent_title": ""
             },
             {
-              "title": "Schizophrenia and depression",
+              "title": "7 Schizophrenia and depression",
               "depth": 0,
               "visual_order": 8,
               "printed_page": 126,
@@ -1042,7 +1564,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Self and narcissism",
+              "title": "1 Self and narcissism",
               "depth": 0,
               "printed_page": 13,
               "file_idx": null,
@@ -1050,7 +1572,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Attachment and trauma",
+              "title": "2 Attachment and trauma",
               "depth": 0,
               "printed_page": 33,
               "file_idx": null,
@@ -1058,7 +1580,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Defense mechanisms and dissociation",
+              "title": "3 Defense mechanisms and dissociation",
               "depth": 0,
               "printed_page": 49,
               "file_idx": null,
@@ -1066,7 +1588,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Cathexis and free energy",
+              "title": "4 Cathexis and free energy",
               "depth": 0,
               "printed_page": 68,
               "file_idx": null,
@@ -1074,7 +1596,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Unconscious and conscious",
+              "title": "5 Unconscious and conscious",
               "depth": 0,
               "printed_page": 88,
               "file_idx": null,
@@ -1082,7 +1604,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Dreams",
+              "title": "6 Dreams",
               "depth": 0,
               "printed_page": 105,
               "file_idx": null,
@@ -1090,7 +1612,7 @@
               "role_hint": "chapter"
             },
             {
-              "title": "Schizophrenia and depression",
+              "title": "7 Schizophrenia and depression",
               "depth": 0,
               "printed_page": 126,
               "file_idx": null,
@@ -1126,11 +1648,11 @@
         "usage": {
           "stage": "visual_toc.manual_input_extract",
           "provider": "qwen",
-          "model_id": "qwen3.5-plus",
+          "model_id": "qwen3.6-plus",
           "request_count": 1,
-          "prompt_tokens": 1120,
-          "completion_tokens": 686,
-          "total_tokens": 1806,
+          "prompt_tokens": 1134,
+          "completion_tokens": 691,
+          "total_tokens": 1825,
           "doc_id": "a3c9e1f7b284",
           "slug": "",
           "context": {
@@ -1139,83 +1661,590 @@
           }
         },
         "timing": {
-          "duration_ms": 14185
+          "duration_ms": 13382
         }
       }
     ]
   },
   "pipeline": {
     "ok": true,
-    "run_id": 41,
+    "run_id": 1,
     "page_count": 168,
     "section_count": 9,
     "note_count": 0,
     "unit_count": 16,
-    "structure_state": "ready",
+    "structure_state": "review_required",
     "manual_toc_required": false,
-    "blocking_reasons": [],
-    "review_counts": {},
-    "export_ready_real": true
+    "blocking_reasons": [
+      "contract_def_anchor_mismatch"
+    ],
+    "review_counts": {
+      "contract_def_anchor_mismatch": 1
+    },
+    "export_ready_real": false
   },
   "llm_repair": {
-    "cluster_count": 0,
-    "suggestion_count": 0,
-    "auto_applied_count": 0,
-    "suggestions": [],
-    "auto_applied": [],
-    "request_metrics": [],
-    "usage_events": [],
-    "llm_traces": [],
-    "usage_summary": {
-      "by_stage": {
-        "llm_repair.cluster_request": {
-          "request_count": 0,
-          "prompt_tokens": 0,
-          "completion_tokens": 0,
-          "total_tokens": 0
+    "cluster_count": 3,
+    "suggestion_count": 4,
+    "auto_applied_count": 4,
+    "suggestions": [
+      {
+        "suggestion_id": "llm-01-001",
+        "cluster_id": "toc-ch-008-7schizophreniaanddepress:toc-ch-008-7schizophreniaanddepress:endnote",
+        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+        "chapter_title": "7 Schizophrenia and depression",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00003",
+        "confidence": 1.0,
+        "reason": "The marker '3' in the text '(slow 3: 0.073 to 0.198 Hz)' refers to a frequency band name (Slow-3), not a citation endnote number.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-01-002",
+        "cluster_id": "toc-ch-008-7schizophreniaanddepress:toc-ch-008-7schizophreniaanddepress:endnote",
+        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+        "chapter_title": "7 Schizophrenia and depression",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00004",
+        "confidence": 1.0,
+        "reason": "The detected anchor is inside a bibliography entry ('Fuchs T... (2017)... 50(1):68–74'). The '2' is part of the volume/issue/page metadata or DOI, not a superscript citation marker requiring an endnote item.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-02-001",
+        "cluster_id": "toc-ch-002-1selfandnarcissism:toc-ch-002-1selfandnarcissism:endnote",
+        "chapter_id": "toc-ch-002-1selfandnarcissism",
+        "chapter_title": "1 Self and narcissism",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00001",
+        "confidence": 1.0,
+        "reason": "The marker '29' in the anchor source text corresponds to the journal volume number 'Cereb Cortex 29', not a footnote/endnote reference marker. The actual note markers in this bibliography section are superscript digits (e.g., 1, 2) attached to author names.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-03-001",
+        "cluster_id": "toc-ch-006-5unconsciousandconscious:toc-ch-006-5unconsciousandconscious:endnote",
+        "chapter_id": "toc-ch-006-5unconsciousandconscious",
+        "chapter_title": "5 Unconscious and conscious",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00002",
+        "confidence": 1.0,
+        "reason": "The anchor text is a bibliography entry on page 104 (not page 111 as in metadata). The marker '10' appears to be part of the date 'July 10' or a misinterpreted artifact within the reference text, rather than a superscript citation callout linking to an endnote. No corresponding note item exists for this marker.",
+        "auto_selected": true
+      }
+    ],
+    "auto_applied": [
+      {
+        "link_id": "link-00003",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00003",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The marker '3' in the text '(slow 3: 0.073 to 0.198 Hz)' refers to a frequency band name (Slow-3), not a citation endnote number."
+      },
+      {
+        "link_id": "link-00004",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00004",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The detected anchor is inside a bibliography entry ('Fuchs T... (2017)... 50(1):68–74'). The '2' is part of the volume/issue/page metadata or DOI, not a superscript citation marker requiring an endnote item."
+      },
+      {
+        "link_id": "link-00001",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00001",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The marker '29' in the anchor source text corresponds to the journal volume number 'Cereb Cortex 29', not a footnote/endnote reference marker. The actual note markers in this bibliography section are superscript digits (e.g., 1, 2) attached to author names."
+      },
+      {
+        "link_id": "link-00002",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00002",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "The anchor text is a bibliography entry on page 104 (not page 111 as in metadata). The marker '10' appears to be part of the date 'July 10' or a misinterpreted artifact within the reference text, rather than a superscript citation callout linking to an endnote. No corresponding note item exists for this marker."
+      }
+    ],
+    "request_metrics": [
+      {
+        "cluster_id": "toc-ch-008-7schizophreniaanddepress:toc-ch-008-7schizophreniaanddepress:endnote",
+        "request_mode": "ref_only_visual",
+        "allowed_actions": [
+          "ignore_ref",
+          "synthesize_note_item",
+          "needs_review"
+        ],
+        "chars": 4770,
+        "estimated_prompt_tokens": 1632,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 2,
+        "page_context_count": 2,
+        "image_refused": false,
+        "truncated": false
+      },
+      {
+        "cluster_id": "toc-ch-002-1selfandnarcissism:toc-ch-002-1selfandnarcissism:endnote",
+        "request_mode": "ref_only_visual",
+        "allowed_actions": [
+          "ignore_ref",
+          "synthesize_note_item",
+          "needs_review"
+        ],
+        "chars": 3113,
+        "estimated_prompt_tokens": 1158,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 1,
+        "page_context_count": 1,
+        "image_refused": false,
+        "truncated": false
+      },
+      {
+        "cluster_id": "toc-ch-006-5unconsciousandconscious:toc-ch-006-5unconsciousandconscious:endnote",
+        "request_mode": "ref_only_visual",
+        "allowed_actions": [
+          "ignore_ref",
+          "synthesize_note_item",
+          "needs_review"
+        ],
+        "chars": 2494,
+        "estimated_prompt_tokens": 982,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 1,
+        "page_context_count": 1,
+        "image_refused": false,
+        "truncated": false
+      }
+    ],
+    "llm_traces": [
+      {
+        "stage": "llm_repair.cluster_request",
+        "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+        "model": {
+          "provider": "qwen",
+          "model_id": "qwen3.6-plus",
+          "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        },
+        "request_prompt": {
+          "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+          "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-008-7schizophreniaanddepress:toc-ch-008-7schizophreniaanddepress:endnote\",\n  \"chapter_title\": \"7 Schizophrenia and depression\",\n  \"page_range\": [\n    146,\n    149\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 146,\n      \"ocr_excerpt\": \"or occipital cortex (OC) as a paradigmatic example. OC processes visual input, and it is well known that depressed subjects perceive their environment in mainly gray, static, and coarse-grained ways (Song et al. 2021; Fitzgerald 2013). Additionally, depressed subjects perceive their own inner time speed as too slow (Fuchs 2019; Northoff et al. 2018). Together, these psychological observations raise the question of whether neural activity in OC is too slow. This was investigated in two recent papers of ours by Song et al. (2021, 2022). We first observed that OC neural activity is indeed not fast enough; that is, it is too slow. In fMRI we could observe decreased representation of global brain activity in specifically the faster frequencies (slow 3: 0.073 to 0.198 Hz) of the signal (Song et al. 2022). Analogous findings were obtained in the faster frequency range (1–50 Hz) of EEG. Here again, OC activity was too slow as measured by median frequency (MF) and autocorrelation window. Moreover, the abnormally slow activity in the OC resting state impacted its responsiveness to external inputs during task-related activity: the latter was simply too slow in depression to process especially ...\"\n    },\n    {\n      \"page_no\": 149,\n      \"ocr_excerpt\": \"and psychopathological perspectives. Psychopathology. Dec 6:1–11. doi:10.1159/000519500. Online ahead of print. Boeker H, Hartwich P, Northoff G (Eds) (2019) Neuropsychodynamic psychiatry. Springer, Heidelberg, New York. Carhart-Harris RL, Leech R, Erritzoe D, Williams TM, Stone JM, Evans J, Sharp DJ, Feilding A, Wise RG, Nutt DJ (2013) Functional connectivity measures after psilocybin inform a novel hypothesis of early psychosis. Schizophr Bull. Nov;39(6):1343–1351. doi: 10.1093/schbul/sbs117. Epub 2012 Oct 8. Doege K, Jansen M, Mallikarjun P, Liddle EB, Liddle PF (2010a) How much does phase resetting contribute to event-related EEG abnormalities in schizophrenia? Neurosci Lett. Aug 30;481(1):1–5. doi: 10.1016/j.neulet.2010.06.008. Epub 2010 Jun 16. Doege K, Kumar M, Bates AT, Das D, Boks MP, Liddle PF (2010b) Time and frequency domain event-related electrical activity associated with response control in schizophrenia. Clin Neurophysiol. Oct;121(10):1760–1771. doi: 10.1016/j.clinph.2010.03.049. Epub 2010 Apr 18. Federn P (1952) Ego psychology and the psychoses. Basic Books, New York. Fitzgerald PJ (2013) Gray colored glasses: Is major depression partially a sensory perceptual diso ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00003\",\n      \"marker\": \"3\",\n      \"page_no\": 146,\n      \"paragraph_index\": 1,\n      \"source_text\": \"We first observed that OC neural activity is indeed not fast enough; that is, it is too slow. In fMRI we could observe decreased representation of global brain activity in specifically the faster frequencies (slow 3: 0.073 to 0.198 Hz) of t ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00004\",\n      \"marker\": \"2\",\n      \"page_no\": 149,\n      \"paragraph_index\": 10,\n      \"source_text\": \"Fuchs T, Van Duppen Z (2017) Time and events: On the phenomenology of temporal experience in schizophrenia (Ancillary article to EAWE domain 2). Psychopathology. 50(1):68–74. doi: 10.1159/000452768. Epub 2017 Jan 7.\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+        },
+        "request_content": {
+          "cluster": {
+            "cluster_id": "toc-ch-008-7schizophreniaanddepress:toc-ch-008-7schizophreniaanddepress:endnote",
+            "chapter_title": "7 Schizophrenia and depression",
+            "request_mode": "ref_only_visual",
+            "allowed_actions": [
+              "ignore_ref",
+              "synthesize_note_item",
+              "needs_review"
+            ],
+            "note_system": "endnote",
+            "page_range": [
+              146,
+              149
+            ],
+            "matched_examples": [],
+            "unmatched_note_items": [],
+            "unmatched_anchors": [
+              {
+                "row_id": 3,
+                "doc_id": "a3c9e1f7b284",
+                "anchor_id": "anchor-00003",
+                "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+                "page_no": 146,
+                "paragraph_index": 1,
+                "char_start": 214,
+                "char_end": 215,
+                "source_marker": "3",
+                "normalized_marker": "3",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "We first observed that OC neural activity is indeed not fast enough; that is, it is too slow. In fMRI we could observe decreased representation of global brain activity in specifically the faster frequencies (slow 3: 0.073 to 0.198 Hz) of the signal (Song et al. 2022). Analogous findings were obtained in the faster frequency range (1–50 Hz) of EEG. Here again, OC activity was too slow as measured by median frequency (MF) and autocorrelation window. Moreover, the abnormally slow activity in the OC resting state impacted its responsiveness to external inputs during task-related activity: the latter was simply too slow in depression to process especially fast inputs.",
+                "created_at": 1777568428,
+                "updated_at": 1777568428
+              },
+              {
+                "row_id": 4,
+                "doc_id": "a3c9e1f7b284",
+                "anchor_id": "anchor-00004",
+                "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+                "page_no": 149,
+                "paragraph_index": 10,
+                "char_start": 141,
+                "char_end": 142,
+                "source_marker": "2",
+                "normalized_marker": "2",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Fuchs T, Van Duppen Z (2017) Time and events: On the phenomenology of temporal experience in schizophrenia (Ancillary article to EAWE domain 2). Psychopathology. 50(1):68–74. doi: 10.1159/000452768. Epub 2017 Jan 7.",
+                "created_at": 1777568428,
+                "updated_at": 1777568428
+              }
+            ],
+            "rebind_candidates": []
+          },
+          "page_contexts": [
+            {
+              "page_no": 146,
+              "file_idx": 145,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a3c9e1f7b284/source.pdf",
+              "ocr_excerpt": "or occipital cortex (OC) as a paradigmatic example. OC processes visual input, and it is well known that depressed subjects perceive their environment in mainly gray, static, and coarse-grained ways (Song et al. 2021; Fitzgerald 2013). Additionally, depressed subjects perceive their own inner time speed as too slow (Fuchs 2019; Northoff et al. 2018). Together, these psychological observations raise the question of whether neural activity in OC is too slow. This was investigated in two recent papers of ours by Song et al. (2021, 2022). We first observed that OC neural activity is indeed not fast enough; that is, it is too slow. In fMRI we could observe decreased representation of global brain activity in specifically the faster frequencies (slow 3: 0.073 to 0.198 Hz) of the signal (Song et al. 2022). Analogous findings were obtained in the faster frequency range (1–50 Hz) of EEG. Here again, OC activity was too slow as measured by median frequency (MF) and autocorrelation window. Moreover, the abnormally slow activity in the OC resting state impacted its responsiveness to external inputs during task-related activity: the latter was simply too slow in depression to process especially fast inputs. Most interestingly, the too-slow OC activity was abnormally strongly connected with the cortical midline regions of the DMN. This, again, was observed in both fMRI and EEG. Accordingly, ...",
+              "byte_size": 97629,
+              "sha256": "55a8cb3f30d671ea79bcc5fdb992ac71c47e2b303b96a6d094641557cad601b8"
+            },
+            {
+              "page_no": 149,
+              "file_idx": 148,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a3c9e1f7b284/source.pdf",
+              "ocr_excerpt": "and psychopathological perspectives. Psychopathology. Dec 6:1–11. doi:10.1159/000519500. Online ahead of print. Boeker H, Hartwich P, Northoff G (Eds) (2019) Neuropsychodynamic psychiatry. Springer, Heidelberg, New York. Carhart-Harris RL, Leech R, Erritzoe D, Williams TM, Stone JM, Evans J, Sharp DJ, Feilding A, Wise RG, Nutt DJ (2013) Functional connectivity measures after psilocybin inform a novel hypothesis of early psychosis. Schizophr Bull. Nov;39(6):1343–1351. doi: 10.1093/schbul/sbs117. Epub 2012 Oct 8. Doege K, Jansen M, Mallikarjun P, Liddle EB, Liddle PF (2010a) How much does phase resetting contribute to event-related EEG abnormalities in schizophrenia? Neurosci Lett. Aug 30;481(1):1–5. doi: 10.1016/j.neulet.2010.06.008. Epub 2010 Jun 16. Doege K, Kumar M, Bates AT, Das D, Boks MP, Liddle PF (2010b) Time and frequency domain event-related electrical activity associated with response control in schizophrenia. Clin Neurophysiol. Oct;121(10):1760–1771. doi: 10.1016/j.clinph.2010.03.049. Epub 2010 Apr 18. Federn P (1952) Ego psychology and the psychoses. Basic Books, New York. Fitzgerald PJ (2013) Gray colored glasses: Is major depression partially a sensory perceptual disorder? J Affect Disorders. Nov;151(2):418–422. doi: 10.1016/j.jad.2013.06.045. Epub 2013 Jul 29. Freud S (1911) Psychoanalytic notes on an autobiographical account of a case of paranoia (Dementia Paran ...",
+              "byte_size": 110894,
+              "sha256": "7ecacdaaf1c0a75288c1e268a9d823bb8e6f6184927abb14e1dce55d1a983aef"
+            }
+          ]
+        },
+        "request_context_summary": {
+          "cluster_id": "toc-ch-008-7schizophreniaanddepress:toc-ch-008-7schizophreniaanddepress:endnote",
+          "request_mode": "ref_only_visual",
+          "page_context_count": 2,
+          "image_refused": false
+        },
+        "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00003\",\n    \"confidence\": 1.0,\n    \"reason\": \"The marker '3' in the text '(slow 3: 0.073 to 0.198 Hz)' refers to a frequency band name (Slow-3), not a citation endnote number.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00004\",\n    \"confidence\": 1.0,\n    \"reason\": \"The detected anchor is inside a bibliography entry ('Fuchs T... (2017)... 50(1):68–74'). The '2' is part of the volume/issue/page metadata or DOI, not a superscript citation marker requiring an endnote item.\"\n  }\n]\n```",
+        "response_parsed": [
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00003",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 1.0,
+            "reason": "The marker '3' in the text '(slow 3: 0.073 to 0.198 Hz)' refers to a frequency band name (Slow-3), not a citation endnote number."
+          },
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00004",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 1.0,
+            "reason": "The detected anchor is inside a bibliography entry ('Fuchs T... (2017)... 50(1):68–74'). The '2' is part of the volume/issue/page metadata or DOI, not a superscript citation marker requiring an endnote item."
+          }
+        ],
+        "derived_truth": {
+          "parsed_actions": [
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00003",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 1.0,
+              "reason": "The marker '3' in the text '(slow 3: 0.073 to 0.198 Hz)' refers to a frequency band name (Slow-3), not a citation endnote number."
+            },
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00004",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 1.0,
+              "reason": "The detected anchor is inside a bibliography entry ('Fuchs T... (2017)... 50(1):68–74'). The '2' is part of the volume/issue/page metadata or DOI, not a superscript citation marker requiring an endnote item."
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 2302,
+          "completion_tokens": 206,
+          "total_tokens": 2508,
+          "request_count": 1
+        },
+        "timing": {
+          "duration_ms": 5405
         }
       },
-      "by_model": {},
-      "total": {
-        "request_count": 0,
-        "prompt_tokens": 0,
-        "completion_tokens": 0,
-        "total_tokens": 0
+      {
+        "stage": "llm_repair.cluster_request",
+        "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+        "model": {
+          "provider": "qwen",
+          "model_id": "qwen3.6-plus",
+          "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        },
+        "request_prompt": {
+          "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+          "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-002-1selfandnarcissism:toc-ch-002-1selfandnarcissism:endnote\",\n  \"chapter_title\": \"1 Self and narcissism\",\n  \"page_range\": [\n    39,\n    39\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 39,\n      \"ocr_excerpt\": \"Northoff G, Wainio-Theberge S, Evers K (2020b). Spatiotemporal neuroscience – What is it and why we need it. Phys Life Rev. 33:78–87. doi:10.1016/j.plrev.2020.06.005 Northoff G, Wiebking C, Feinberg T, Panksepp J (2011) The “resting-state hypothesis” of major depressive disorder—a translational subcortical-cortical framework for a system disorder. Neurosci Biobehav Rev. Oct;35(9):1929–1945. doi: 10.1016/j.neubiorev.2010.12.007. Epub 2010 Dec 28. Panksepp J (1998) The periconscious substrates of consciousness: Affective states and the evolutionary origins of the self. J. Conscious. Stud. 5:566–582. Panksepp J (2012) What is an emotional feeling? Lessons about affective origins from cross-species neuroscience. Motiv. Emot. 36:4–15. doi:10.1007/s11031-011-9232-y Qin P, Wang M, Northoff G (2020) Linking bodily, environmental and mental states in the self—A three-level model based on a meta-analysis. Neurosci Biobehav Rev. 115:77–95. doi: 10.1016/j.neubiorev.2020.05.004 Scalabrini A, Ebisch SJH, Huang Z, Di Plinio S, Perrucci MG, Romani GL, et al (2019) Spontaneous brain activity predicts task-evoked activity during animate versus inanimate touch. Cereb Cortex 29:4628–4645. doi:10.1093/ ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00001\",\n      \"marker\": \"29\",\n      \"page_no\": 39,\n      \"paragraph_index\": 5,\n      \"source_text\": \"Scalabrini A, Ebisch SJH, Huang Z, Di Plinio S, Perrucci MG, Romani GL, et al (2019) Spontaneous brain activity predicts task-evoked activity during animate versus inanimate touch. Cereb Cortex 29:4628–4645. doi:10.1093/cercor/bhy340\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+        },
+        "request_content": {
+          "cluster": {
+            "cluster_id": "toc-ch-002-1selfandnarcissism:toc-ch-002-1selfandnarcissism:endnote",
+            "chapter_title": "1 Self and narcissism",
+            "request_mode": "ref_only_visual",
+            "allowed_actions": [
+              "ignore_ref",
+              "synthesize_note_item",
+              "needs_review"
+            ],
+            "note_system": "endnote",
+            "page_range": [
+              39,
+              39
+            ],
+            "matched_examples": [],
+            "unmatched_note_items": [],
+            "unmatched_anchors": [
+              {
+                "row_id": 1,
+                "doc_id": "a3c9e1f7b284",
+                "anchor_id": "anchor-00001",
+                "chapter_id": "toc-ch-002-1selfandnarcissism",
+                "page_no": 39,
+                "paragraph_index": 5,
+                "char_start": 194,
+                "char_end": 196,
+                "source_marker": "29",
+                "normalized_marker": "29",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Scalabrini A, Ebisch SJH, Huang Z, Di Plinio S, Perrucci MG, Romani GL, et al (2019) Spontaneous brain activity predicts task-evoked activity during animate versus inanimate touch. Cereb Cortex 29:4628–4645. doi:10.1093/cercor/bhy340",
+                "created_at": 1777568428,
+                "updated_at": 1777568428
+              }
+            ],
+            "rebind_candidates": []
+          },
+          "page_contexts": [
+            {
+              "page_no": 39,
+              "file_idx": 38,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a3c9e1f7b284/source.pdf",
+              "ocr_excerpt": "Northoff G, Wainio-Theberge S, Evers K (2020b). Spatiotemporal neuroscience – What is it and why we need it. Phys Life Rev. 33:78–87. doi:10.1016/j.plrev.2020.06.005 Northoff G, Wiebking C, Feinberg T, Panksepp J (2011) The “resting-state hypothesis” of major depressive disorder—a translational subcortical-cortical framework for a system disorder. Neurosci Biobehav Rev. Oct;35(9):1929–1945. doi: 10.1016/j.neubiorev.2010.12.007. Epub 2010 Dec 28. Panksepp J (1998) The periconscious substrates of consciousness: Affective states and the evolutionary origins of the self. J. Conscious. Stud. 5:566–582. Panksepp J (2012) What is an emotional feeling? Lessons about affective origins from cross-species neuroscience. Motiv. Emot. 36:4–15. doi:10.1007/s11031-011-9232-y Qin P, Wang M, Northoff G (2020) Linking bodily, environmental and mental states in the self—A three-level model based on a meta-analysis. Neurosci Biobehav Rev. 115:77–95. doi: 10.1016/j.neubiorev.2020.05.004 Scalabrini A, Ebisch SJH, Huang Z, Di Plinio S, Perrucci MG, Romani GL, et al (2019) Spontaneous brain activity predicts task-evoked activity during animate versus inanimate touch. Cereb Cortex 29:4628–4645. doi:10.1093/cercor/bhy340 Scalabrini A, Huang Z, Mucci C, Perrucci MG, Ferretti A, Fossati A, Romani GL, Northoff G, Ebisch SJH (2017) How spontaneous brain activity and narcissistic features shape social interac ...",
+              "byte_size": 97357,
+              "sha256": "422486d2701f7dcbe5bb3d745e1757e8bb778963d601bf9ce6a1cb01269a65c8"
+            }
+          ]
+        },
+        "request_context_summary": {
+          "cluster_id": "toc-ch-002-1selfandnarcissism:toc-ch-002-1selfandnarcissism:endnote",
+          "request_mode": "ref_only_visual",
+          "page_context_count": 1,
+          "image_refused": false
+        },
+        "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00001\",\n    \"confidence\": 1.0,\n    \"reason\": \"The marker '29' in the anchor source text corresponds to the journal volume number 'Cereb Cortex 29', not a footnote/endnote reference marker. The actual note markers in this bibliography section are superscript digits (e.g., 1, 2) attached to author names.\"\n  }\n]\n```",
+        "response_parsed": [
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00001",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 1.0,
+            "reason": "The marker '29' in the anchor source text corresponds to the journal volume number 'Cereb Cortex 29', not a footnote/endnote reference marker. The actual note markers in this bibliography section are superscript digits (e.g., 1, 2) attached to author names."
+          }
+        ],
+        "derived_truth": {
+          "parsed_actions": [
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00001",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 1.0,
+              "reason": "The marker '29' in the anchor source text corresponds to the journal volume number 'Cereb Cortex 29', not a footnote/endnote reference marker. The actual note markers in this bibliography section are superscript digits (e.g., 1, 2) attached to author names."
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 1555,
+          "completion_tokens": 116,
+          "total_tokens": 1671,
+          "request_count": 1
+        },
+        "timing": {
+          "duration_ms": 3054
+        }
+      },
+      {
+        "stage": "llm_repair.cluster_request",
+        "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+        "model": {
+          "provider": "qwen",
+          "model_id": "qwen3.6-plus",
+          "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        },
+        "request_prompt": {
+          "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+          "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-006-5unconsciousandconscious:toc-ch-006-5unconsciousandconscious:endnote\",\n  \"chapter_title\": \"5 Unconscious and conscious\",\n  \"page_range\": [\n    111,\n    111\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 111,\n      \"ocr_excerpt\": \"Zhang J, Huang Z, Tumati S, Northoff G (2020) Rest-task modulation of fMRI-derived global signal topography is mediated by transient coactivation patterns. PLoS Biol. July 10;18(7):e3000733. doi: 10.1371/journal.pbio.3000733. eCollection 2020 July. Zhang J, Magioncalda P, Huang Z, Tan Z, Hu X, Hu Z, Conio B, Amore M, Inglese M, Martino M, Northoff G (2019) Altered global signal topography and its different regional localization in motor cortex and hippocampus in mania and depression. Schizophr Bull. Jun 18;45(4):902–910. doi:10.1093/schbul/sby138\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00002\",\n      \"marker\": \"10\",\n      \"page_no\": 111,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Zhang J, Huang Z, Tumati S, Northoff G (2020) Rest-task modulation of fMRI-derived global signal topography is mediated by transient coactivation patterns. PLoS Biol. July 10;18(7):e3000733. doi: 10.1371/journal.pbio.3000733. eCollection 20 ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+        },
+        "request_content": {
+          "cluster": {
+            "cluster_id": "toc-ch-006-5unconsciousandconscious:toc-ch-006-5unconsciousandconscious:endnote",
+            "chapter_title": "5 Unconscious and conscious",
+            "request_mode": "ref_only_visual",
+            "allowed_actions": [
+              "ignore_ref",
+              "synthesize_note_item",
+              "needs_review"
+            ],
+            "note_system": "endnote",
+            "page_range": [
+              111,
+              111
+            ],
+            "matched_examples": [],
+            "unmatched_note_items": [],
+            "unmatched_anchors": [
+              {
+                "row_id": 2,
+                "doc_id": "a3c9e1f7b284",
+                "anchor_id": "anchor-00002",
+                "chapter_id": "toc-ch-006-5unconsciousandconscious",
+                "page_no": 111,
+                "paragraph_index": 0,
+                "char_start": 172,
+                "char_end": 174,
+                "source_marker": "10",
+                "normalized_marker": "10",
+                "anchor_kind": "unknown",
+                "certainty": 0.6,
+                "source_text": "Zhang J, Huang Z, Tumati S, Northoff G (2020) Rest-task modulation of fMRI-derived global signal topography is mediated by transient coactivation patterns. PLoS Biol. July 10;18(7):e3000733. doi: 10.1371/journal.pbio.3000733. eCollection 2020 July.",
+                "created_at": 1777568428,
+                "updated_at": 1777568428
+              }
+            ],
+            "rebind_candidates": []
+          },
+          "page_contexts": [
+            {
+              "page_no": 111,
+              "file_idx": 110,
+              "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a3c9e1f7b284/source.pdf",
+              "ocr_excerpt": "Zhang J, Huang Z, Tumati S, Northoff G (2020) Rest-task modulation of fMRI-derived global signal topography is mediated by transient coactivation patterns. PLoS Biol. July 10;18(7):e3000733. doi: 10.1371/journal.pbio.3000733. eCollection 2020 July. Zhang J, Magioncalda P, Huang Z, Tan Z, Hu X, Hu Z, Conio B, Amore M, Inglese M, Martino M, Northoff G (2019) Altered global signal topography and its different regional localization in motor cortex and hippocampus in mania and depression. Schizophr Bull. Jun 18;45(4):902–910. doi:10.1093/schbul/sby138",
+              "byte_size": 28023,
+              "sha256": "9a6c05cab88070b946bf0039f109c8d50c6ef16a7ce2a8ee4899ce4c54c63830"
+            }
+          ]
+        },
+        "request_context_summary": {
+          "cluster_id": "toc-ch-006-5unconsciousandconscious:toc-ch-006-5unconsciousandconscious:endnote",
+          "request_mode": "ref_only_visual",
+          "page_context_count": 1,
+          "image_refused": false
+        },
+        "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00002\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor text is a bibliography entry on page 104 (not page 111 as in metadata). The marker '10' appears to be part of the date 'July 10' or a misinterpreted artifact within the reference text, rather than a superscript citation callout linking to an endnote. No corresponding note item exists for this marker.\"\n  }\n]\n```",
+        "response_parsed": [
+          {
+            "action": "ignore_ref",
+            "note_item_id": "",
+            "anchor_id": "anchor-00002",
+            "anchor_phrase": "",
+            "marker": "",
+            "note_text": "",
+            "confidence": 1.0,
+            "reason": "The anchor text is a bibliography entry on page 104 (not page 111 as in metadata). The marker '10' appears to be part of the date 'July 10' or a misinterpreted artifact within the reference text, rather than a superscript citation callout linking to an endnote. No corresponding note item exists for this marker."
+          }
+        ],
+        "derived_truth": {
+          "parsed_actions": [
+            {
+              "action": "ignore_ref",
+              "note_item_id": "",
+              "anchor_id": "anchor-00002",
+              "anchor_phrase": "",
+              "marker": "",
+              "note_text": "",
+              "confidence": 1.0,
+              "reason": "The anchor text is a bibliography entry on page 104 (not page 111 as in metadata). The marker '10' appears to be part of the date 'July 10' or a misinterpreted artifact within the reference text, rather than a superscript citation callout linking to an endnote. No corresponding note item exists for this marker."
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 1295,
+          "completion_tokens": 131,
+          "total_tokens": 1426,
+          "request_count": 1
+        },
+        "timing": {
+          "duration_ms": 3273
+        }
       }
-    },
-    "action_counts": {},
-    "auto_action_counts": {},
-    "synth_suggestion_count": 0,
-    "synth_auto_applied_count": 0,
-    "fuzzy_hit_count": 0,
-    "fuzzy_ambiguous_count": 0,
-    "caps": {
-      "matched_examples": 2,
-      "unmatched_note_items": 8,
-      "unmatched_anchors": 8,
-      "cluster_limit": 0
-    }
+    ]
   },
-  "rebuild": {},
-  "structure": {
+  "rebuild": {
     "ok": true,
+    "run_id": 2,
+    "page_count": 168,
+    "section_count": 9,
+    "note_count": 0,
+    "unit_count": 16,
+    "structure_state": "review_required",
+    "manual_toc_required": false,
+    "blocking_reasons": [
+      "contract_def_anchor_mismatch"
+    ],
+    "review_counts": {
+      "contract_def_anchor_mismatch": 1
+    },
+    "export_ready_real": false
+  },
+  "structure": {
+    "ok": false,
     "status": "done",
     "page_count": 168,
     "chapter_count": 9,
-    "section_head_count": 168,
+    "section_head_count": 113,
     "note_region_count": 0,
     "note_item_count": 0,
-    "body_anchor_count": 0,
-    "note_link_count": 0,
+    "body_anchor_count": 4,
+    "note_link_count": 4,
     "suppressed_chapter_candidate_count": 0,
     "partition_heading_conflict_count": 0,
     "review_row_count": 0,
     "footnote_count": 0,
     "endnote_count": 0,
     "linked_endnote_count": 0,
-    "structure_state": "ready",
-    "review_counts": {},
-    "blocking_reasons": [],
+    "structure_state": "review_required",
+    "review_counts": {
+      "contract_def_anchor_mismatch": 1
+    },
+    "blocking_reasons": [
+      "contract_def_anchor_mismatch"
+    ],
     "link_summary": {
       "matched": 0,
       "footnote_orphan_note": 0,
@@ -1223,9 +2252,11 @@
       "endnote_orphan_note": 0,
       "endnote_orphan_anchor": 0,
       "ambiguous": 0,
-      "ignored": 0,
+      "ignored": 4,
       "fallback_count": 0,
-      "repair_count": 0
+      "repair_count": 4,
+      "fallback_matched_count": 0,
+      "fallback_match_ratio": 0.0
     },
     "page_partition_summary": {
       "total_pages": 168,
@@ -1356,9 +2387,9 @@
       "unassigned_item_ids_preview": []
     },
     "note_capture_summary": {
-      "expected_anchor_count": 0,
+      "expected_anchor_count": 4,
       "captured_note_count": 0,
-      "capture_ratio": 1.0,
+      "capture_ratio": 0.0,
       "sparse_capture_chapter_ids": [],
       "dense_anchor_zero_capture_pages": [],
       "chapters": [
@@ -1370,53 +2401,53 @@
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-002-selfandnarcissism",
+          "chapter_id": "toc-ch-002-1selfandnarcissism",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 1,
+          "captured_note_count": 0,
+          "capture_ratio": 0.0
+        },
+        {
+          "chapter_id": "toc-ch-003-2attachmentandtrauma",
           "note_mode": "no_notes",
           "expected_anchor_count": 0,
           "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-003-attachmentandtrauma",
+          "chapter_id": "toc-ch-004-3defensemechanismsanddis",
           "note_mode": "no_notes",
           "expected_anchor_count": 0,
           "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-004-defensemechanismsanddiss",
+          "chapter_id": "toc-ch-005-4cathexisandfreeenergy",
           "note_mode": "no_notes",
           "expected_anchor_count": 0,
           "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-005-cathexisandfreeenergy",
+          "chapter_id": "toc-ch-006-5unconsciousandconscious",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 1,
+          "captured_note_count": 0,
+          "capture_ratio": 0.0
+        },
+        {
+          "chapter_id": "toc-ch-007-6dreams",
           "note_mode": "no_notes",
           "expected_anchor_count": 0,
           "captured_note_count": 0,
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-006-unconsciousandconscious",
+          "chapter_id": "toc-ch-008-7schizophreniaanddepress",
           "note_mode": "no_notes",
-          "expected_anchor_count": 0,
+          "expected_anchor_count": 2,
           "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-007-dreams",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-008-schizophreniaanddepressi",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
+          "capture_ratio": 0.0
         },
         {
           "chapter_id": "toc-ch-009-conclusion",
@@ -1435,7 +2466,15 @@
     "chapter_link_contract_summary": {
       "chapter_count": 9,
       "contract_required_count": 0,
-      "failed_chapter_ids": []
+      "failed_chapter_ids": [],
+      "contract_v2_failed_chapter_ids": [
+        "toc-ch-002-1selfandnarcissism",
+        "toc-ch-006-5unconsciousandconscious",
+        "toc-ch-008-7schizophreniaanddepress"
+      ],
+      "contract_v2_first_marker_violation_count": 0,
+      "contract_v2_marker_gap_violation_count": 0,
+      "contract_v2_def_anchor_mismatch_count": 3
     },
     "book_endnote_stream_summary": {
       "chapter_count": 0,
@@ -1467,9 +2506,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-002-selfandnarcissism",
-        "title": "Self and narcissism",
-        "path": "chapters/002-Self and narcissism.md",
+        "chapter_id": "toc-ch-002-1selfandnarcissism",
+        "title": "1 Self and narcissism",
+        "path": "chapters/002-1 Self and narcissism.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1477,9 +2516,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-003-attachmentandtrauma",
-        "title": "Attachment and trauma",
-        "path": "chapters/003-Attachment and trauma.md",
+        "chapter_id": "toc-ch-003-2attachmentandtrauma",
+        "title": "2 Attachment and trauma",
+        "path": "chapters/003-2 Attachment and trauma.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1487,9 +2526,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-004-defensemechanismsanddiss",
-        "title": "Defense mechanisms and dissociation",
-        "path": "chapters/004-Defense mechanisms and dissociation.md",
+        "chapter_id": "toc-ch-004-3defensemechanismsanddis",
+        "title": "3 Defense mechanisms and dissociation",
+        "path": "chapters/004-3 Defense mechanisms and dissociation.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1497,9 +2536,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-005-cathexisandfreeenergy",
-        "title": "Cathexis and free energy",
-        "path": "chapters/005-Cathexis and free energy.md",
+        "chapter_id": "toc-ch-005-4cathexisandfreeenergy",
+        "title": "4 Cathexis and free energy",
+        "path": "chapters/005-4 Cathexis and free energy.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1507,9 +2546,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-006-unconsciousandconscious",
-        "title": "Unconscious and conscious",
-        "path": "chapters/006-Unconscious and conscious.md",
+        "chapter_id": "toc-ch-006-5unconsciousandconscious",
+        "title": "5 Unconscious and conscious",
+        "path": "chapters/006-5 Unconscious and conscious.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1517,9 +2556,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-007-dreams",
-        "title": "Dreams",
-        "path": "chapters/007-Dreams.md",
+        "chapter_id": "toc-ch-007-6dreams",
+        "title": "6 Dreams",
+        "path": "chapters/007-6 Dreams.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1527,9 +2566,9 @@
         "local_refs_closed": true
       },
       {
-        "chapter_id": "toc-ch-008-schizophreniaanddepressi",
-        "title": "Schizophrenia and depression",
-        "path": "chapters/008-Schizophrenia and depression.md",
+        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+        "title": "7 Schizophrenia and depression",
+        "path": "chapters/008-7 Schizophrenia and depression.md",
         "frozen_ref_leak": false,
         "raw_marker_leak": false,
         "missing_definition_count": 0,
@@ -1556,9 +2595,9 @@
       "orphan_local_ref_count": 0
     },
     "chapter_local_endnote_contract_ok": true,
-    "export_ready_test": true,
-    "export_ready_real": true,
-    "validation_needs_human_review": false,
+    "export_ready_test": false,
+    "export_ready_real": false,
+    "validation_needs_human_review": true,
     "validation_reason_counts": {}
   },
   "placeholders": {
@@ -1583,193 +2622,29 @@
     }
   },
   "export": {
-    "ok": true,
-    "blocked": false,
-    "file_count": 10,
-    "chapter_count": 9,
-    "zip_size": 100725,
+    "ok": false,
+    "blocked": true,
+    "reason": "structure_review_required",
+    "structure_state": "review_required",
+    "blocking_reasons": [
+      "contract_def_anchor_mismatch"
+    ],
     "execution_mode": "test",
-    "local_ref_total": 0,
-    "local_def_total": 0,
-    "unique_local_ref_count": 0,
-    "unique_local_def_count": 0,
-    "orphan_local_definition_count": 0,
-    "orphan_local_ref_count": 0,
-    "orphan_local_definitions_preview": [],
-    "orphan_local_refs_preview": [],
-    "pending_placeholder_count": 0,
-    "raw_note_heading_leak_count": 0,
-    "legacy_footnote_ref_count": 0,
-    "legacy_endnote_ref_count": 0,
-    "legacy_en_bracket_ref_count": 0,
-    "legacy_note_token_count": 0,
-    "forbidden_section_heading_count": 0,
-    "expected_note_count": 0,
-    "chapter_local_endnote_contract_ok": true,
-    "export_semantic_contract_ok": true,
-    "front_matter_leak_detected": false,
-    "toc_residue_detected": false,
-    "mid_paragraph_heading_detected": false,
-    "duplicate_paragraph_detected": false,
-    "preliminary_export_ok": true,
+    "latest_export_zip_saved": false,
+    "latest_export_zip_path": "",
+    "latest_export_zip_folder": "Neuropsychoanalysis_Introduction",
+    "latest_export_zip_reason": "structure_review_required",
+    "stale_export_artifact_detected": false,
+    "export_artifact_status": "blocked",
+    "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json",
     "biopolitics_export_contract_ok": true,
     "biopolitics_export_audit": {
       "applicable": false,
       "ok": true
-    },
-    "export_drift_summary": {
-      "legacy_footnote_ref_count": 0,
-      "legacy_endnote_ref_count": 0,
-      "legacy_en_bracket_ref_count": 0,
-      "legacy_note_token_count": 0,
-      "orphan_local_definition_count": 0,
-      "orphan_local_ref_count": 0
-    },
-    "latest_export_zip_saved": true,
-    "latest_export_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.zip",
-    "latest_export_zip_folder": "Neuropsychoanalysis_Introduction",
-    "latest_export_zip_reason": "",
-    "stale_export_artifact_detected": false,
-    "export_artifact_status": "ready",
-    "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest_export_status.json",
-    "chapters": [
-      "Introduction",
-      "Self and narcissism",
-      "Attachment and trauma",
-      "Defense mechanisms and dissociation",
-      "Cathexis and free energy"
-    ],
-    "chapter_stats_preview": [
-      {
-        "title": "Introduction",
-        "path": "chapters/001-Introduction.md",
-        "first_local_def_marker": "",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": [],
-        "local_ref_total": 0,
-        "local_def_total": 0,
-        "unique_local_refs": [],
-        "unique_local_defs": [],
-        "local_numbering_starts_at_one": true,
-        "legacy_footnote_ref_count": 0,
-        "legacy_endnote_ref_count": 0,
-        "legacy_en_bracket_ref_count": 0,
-        "legacy_note_token_count": 0,
-        "pending_placeholder_count": 0,
-        "raw_note_heading_leak_count": 0,
-        "section_heading_total": 0,
-        "forbidden_section_heading_count": 0,
-        "forbidden_section_heading_preview": []
-      },
-      {
-        "title": "Self and narcissism",
-        "path": "chapters/002-Self and narcissism.md",
-        "first_local_def_marker": "",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": [],
-        "local_ref_total": 0,
-        "local_def_total": 0,
-        "unique_local_refs": [],
-        "unique_local_defs": [],
-        "local_numbering_starts_at_one": true,
-        "legacy_footnote_ref_count": 0,
-        "legacy_endnote_ref_count": 0,
-        "legacy_en_bracket_ref_count": 0,
-        "legacy_note_token_count": 0,
-        "pending_placeholder_count": 0,
-        "raw_note_heading_leak_count": 0,
-        "section_heading_total": 0,
-        "forbidden_section_heading_count": 0,
-        "forbidden_section_heading_preview": []
-      },
-      {
-        "title": "Attachment and trauma",
-        "path": "chapters/003-Attachment and trauma.md",
-        "first_local_def_marker": "",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": [],
-        "local_ref_total": 0,
-        "local_def_total": 0,
-        "unique_local_refs": [],
-        "unique_local_defs": [],
-        "local_numbering_starts_at_one": true,
-        "legacy_footnote_ref_count": 0,
-        "legacy_endnote_ref_count": 0,
-        "legacy_en_bracket_ref_count": 0,
-        "legacy_note_token_count": 0,
-        "pending_placeholder_count": 0,
-        "raw_note_heading_leak_count": 0,
-        "section_heading_total": 0,
-        "forbidden_section_heading_count": 0,
-        "forbidden_section_heading_preview": []
-      },
-      {
-        "title": "Defense mechanisms and dissociation",
-        "path": "chapters/004-Defense mechanisms and dissociation.md",
-        "first_local_def_marker": "",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": [],
-        "local_ref_total": 0,
-        "local_def_total": 0,
-        "unique_local_refs": [],
-        "unique_local_defs": [],
-        "local_numbering_starts_at_one": true,
-        "legacy_footnote_ref_count": 0,
-        "legacy_endnote_ref_count": 0,
-        "legacy_en_bracket_ref_count": 0,
-        "legacy_note_token_count": 0,
-        "pending_placeholder_count": 0,
-        "raw_note_heading_leak_count": 0,
-        "section_heading_total": 0,
-        "forbidden_section_heading_count": 0,
-        "forbidden_section_heading_preview": []
-      },
-      {
-        "title": "Cathexis and free energy",
-        "path": "chapters/005-Cathexis and free energy.md",
-        "first_local_def_marker": "",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": [],
-        "local_ref_total": 0,
-        "local_def_total": 0,
-        "unique_local_refs": [],
-        "unique_local_defs": [],
-        "local_numbering_starts_at_one": true,
-        "legacy_footnote_ref_count": 0,
-        "legacy_endnote_ref_count": 0,
-        "legacy_en_bracket_ref_count": 0,
-        "legacy_note_token_count": 0,
-        "pending_placeholder_count": 0,
-        "raw_note_heading_leak_count": 0,
-        "section_heading_total": 0,
-        "forbidden_section_heading_count": 0,
-        "forbidden_section_heading_preview": []
-      }
-    ],
-    "full_audit_can_ship": true,
-    "full_audit_blocking_issue_count": 0,
-    "full_audit_report_path": "/Users/hao/OCRandTranslation/output/fnm_book_audits/Neuropsychoanalysis_Introduction.json",
-    "full_audit_summary": {
-      "must_fix_before_next_book": [],
-      "recommended_followups": [
-        {
-          "issue_code": "chapter_boundary_missing_tail",
-          "count": 3
-        },
-        {
-          "issue_code": "mid_sentence_opening",
-          "count": 1
-        }
-      ]
     }
   },
-  "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip",
-  "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip",
+  "slug_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.blocked.test.zip",
+  "alias_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.blocked.test.zip",
   "zip_written": true,
   "zip_reason": ""
 }

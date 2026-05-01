@@ -3,10 +3,10 @@
   "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
-  "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction\n- Self and narcissism\n- Attachment and trauma\n- Defense mechanisms and dissociation\n- Cathexis and free energy\n- Unconscious and conscious\n- Dreams\n- Schizophrenia and depression\n- Conclusion\n- Index",
+  "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction\n- 1 Self and narcissism\n- 2 Attachment and trauma\n- 3 Defense mechanisms and dissociation\n- 4 Cathexis and free energy\n- 5 Unconscious and conscious\n- 6 Dreams\n- 7 Schizophrenia and depression\n- Conclusion\n- Index",
   "request_content": {
     "images": [
       {
@@ -23,7 +23,7 @@
     "source": "organization",
     "images_count": 1
   },
-  "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Self and narcissism\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 13,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Attachment and trauma\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 33,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Defense mechanisms and dissociation\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 49,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Cathexis and free energy\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 68,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Unconscious and conscious\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 88,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Dreams\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 105,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Schizophrenia and depression\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 126,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Conclusion\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 146,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 155,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+  "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": false,\n    \"container_title\": null,\n    \"container_printed_page\": null,\n    \"container_visual_order\": null,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"Introduction\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"1 Self and narcissism\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 13,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"2 Attachment and trauma\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 33,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"3 Defense mechanisms and dissociation\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": 49,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"4 Cathexis and free energy\",\n      \"depth\": 0,\n      \"visual_order\": 5,\n      \"printed_page\": 68,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"5 Unconscious and conscious\",\n      \"depth\": 0,\n      \"visual_order\": 6,\n      \"printed_page\": 88,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"6 Dreams\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": 105,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"7 Schizophrenia and depression\",\n      \"depth\": 0,\n      \"visual_order\": 8,\n      \"printed_page\": 126,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Conclusion\",\n      \"depth\": 0,\n      \"visual_order\": 9,\n      \"printed_page\": 146,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 10,\n      \"printed_page\": 155,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
   "response_parsed": {
     "endnotes_summary": {
       "present": false,
@@ -43,7 +43,7 @@
         "parent_title": ""
       },
       {
-        "title": "Self and narcissism",
+        "title": "1 Self and narcissism",
         "depth": 0,
         "visual_order": 2,
         "printed_page": 13,
@@ -51,7 +51,7 @@
         "parent_title": ""
       },
       {
-        "title": "Attachment and trauma",
+        "title": "2 Attachment and trauma",
         "depth": 0,
         "visual_order": 3,
         "printed_page": 33,
@@ -59,7 +59,7 @@
         "parent_title": ""
       },
       {
-        "title": "Defense mechanisms and dissociation",
+        "title": "3 Defense mechanisms and dissociation",
         "depth": 0,
         "visual_order": 4,
         "printed_page": 49,
@@ -67,7 +67,7 @@
         "parent_title": ""
       },
       {
-        "title": "Cathexis and free energy",
+        "title": "4 Cathexis and free energy",
         "depth": 0,
         "visual_order": 5,
         "printed_page": 68,
@@ -75,7 +75,7 @@
         "parent_title": ""
       },
       {
-        "title": "Unconscious and conscious",
+        "title": "5 Unconscious and conscious",
         "depth": 0,
         "visual_order": 6,
         "printed_page": 88,
@@ -83,7 +83,7 @@
         "parent_title": ""
       },
       {
-        "title": "Dreams",
+        "title": "6 Dreams",
         "depth": 0,
         "visual_order": 7,
         "printed_page": 105,
@@ -91,7 +91,7 @@
         "parent_title": ""
       },
       {
-        "title": "Schizophrenia and depression",
+        "title": "7 Schizophrenia and depression",
         "depth": 0,
         "visual_order": 8,
         "printed_page": 126,
@@ -127,7 +127,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Self and narcissism",
+        "title": "1 Self and narcissism",
         "depth": 0,
         "printed_page": 13,
         "file_idx": null,
@@ -135,7 +135,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Attachment and trauma",
+        "title": "2 Attachment and trauma",
         "depth": 0,
         "printed_page": 33,
         "file_idx": null,
@@ -143,7 +143,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Defense mechanisms and dissociation",
+        "title": "3 Defense mechanisms and dissociation",
         "depth": 0,
         "printed_page": 49,
         "file_idx": null,
@@ -151,7 +151,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Cathexis and free energy",
+        "title": "4 Cathexis and free energy",
         "depth": 0,
         "printed_page": 68,
         "file_idx": null,
@@ -159,7 +159,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Unconscious and conscious",
+        "title": "5 Unconscious and conscious",
         "depth": 0,
         "printed_page": 88,
         "file_idx": null,
@@ -167,7 +167,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Dreams",
+        "title": "6 Dreams",
         "depth": 0,
         "printed_page": 105,
         "file_idx": null,
@@ -175,7 +175,7 @@
         "role_hint": "chapter"
       },
       {
-        "title": "Schizophrenia and depression",
+        "title": "7 Schizophrenia and depression",
         "depth": 0,
         "printed_page": 126,
         "file_idx": null,
@@ -211,11 +211,11 @@
   "usage": {
     "stage": "visual_toc.manual_input_extract",
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "request_count": 1,
-    "prompt_tokens": 1120,
-    "completion_tokens": 686,
-    "total_tokens": 1806,
+    "prompt_tokens": 1134,
+    "completion_tokens": 691,
+    "total_tokens": 1825,
     "doc_id": "a3c9e1f7b284",
     "slug": "",
     "context": {
@@ -224,6 +224,6 @@
     }
   },
   "timing": {
-    "duration_ms": 14185
+    "duration_ms": 13382
   }
 }

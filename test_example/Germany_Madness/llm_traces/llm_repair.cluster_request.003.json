@@ -3,381 +3,489 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote\",\n  \"chapter_title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n  \"page_range\": [\n    113,\n    157\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 113,\n      \"ocr_excerpt\": \"and tortured by the devil, and not lunatics, fools, or senseless persons.\\\"⁴⁶ In this passage, Luther distinguished the physically possessed from the mentally ill and the retarded, but more often he spoke of demonic possession as a general condition of willful sin. When Eve was tempted in the garden, for example, she was not rationally persuaded to disobey God; she was deluded: \\\"Because Satan restrains her mind [animum] and eyes, however, she not only does not see death or become aware of it, but gradually she is also more inflamed by her desire for the fruit and delights in this idolatry and sin.\\\"⁴⁷ Indeed, Adam should have warned his descendants about the consequences of sin, for \\\"when he was deprived of his mind by Satan and believed that he would be like God, he became like Satan himself.\\\"⁴⁸ The fall into sin had been a fall into unreason. Sin brought fundamental changes in both man and nature. From then on, man's \\\"will is impaired, his intellect depraved, and his reason entirely corrupt and altogether changed.\\\"⁴⁹ So mankind became sick with a leprosy of the spirit. Human history had thus begun with a lapse into madness. The next major atrocity in history was the killing of Abel ...\"\n    },\n    {\n      \"page_no\": 121,\n      \"ocr_excerpt\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \\\"be a fool, poor, worthless and despised.\\\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \\\"What? Do you, reader, think me insane or drunk?\\\" Echoing St. Paul (Acts 26:25), he asserted: \\\"I am not mad, for I speak words of soberness.\\\"$^{92}$ He admitted that he sometimes acted foolishly, \\\"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\\\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life. Far from admiring the insensate or contented tranquillity of a satisfied mind, Luther held that true wisdom was found among “those who are oppressed and in conflict with ...\"\n    },\n    {\n      \"page_no\": 135,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 2.1</div> <div style=\\\"text-align: center;\\\">Bipartite and Tripartite Divisions of Nature in Paracelsus</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td colspan=\\\"4\\\">I. Bipartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Creation (heaven and earth)</td><td style='text-align: center; word-wrap: break-word;'>God</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Microcosm:</td><td style='text-align: center; word-wrap: break-word;'>Body: tierisch Vernunft</td><td style='text-align: center; word-wrap: break-word;'>Soul: menschlich Vernunft (Bildnus, Image of God)</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td colspan=\\\"4\\\">II. Tripartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Earth</td><td style='text-align: center; word-wrap: break-word;'>Star</td><td style='text-align: center; word-wrap: break-word;'>Go ...\"\n    },\n    {\n      \"page_no\": 157,\n      \"ocr_excerpt\": \"the bestial tendencies that destroyed one's felicity in Christ. This harsh language of rejection did not, however, mean that Paracelsus advocated a program of exile or euthanasia by which his society might rid itself of its subhuman members. For one thing, Paracelsus had no confidence in the spiritual capacities of the state. He thought that Christianity had been in decline ever since the fourth century, when the emperor Constantine had employed Christ as a prop for his state. $ ^{268} $ In addition, true Christians were hard to detect among the mass of hypocrites and anti-Christs who multiplied “in these last days.” Instead of killing or eliminating the subhuman (the mad, the possessed, the sick), one's Christian duty was to love them and to attempt to heal (convert) them to the Way of Life. The physician's calling was a high one precisely because it was so close to that of Christ himself. Referring to the physician's art, Paracelsus declared, \\\"Wo kein lieb ist, do ist keine kunst\\\" (\\\"Where there is no love there is also no art\\\"). $ ^{269} $ Even witches, those hateful creatures who were devoted to the devil body and soul, deserved better from Christian society. Instead of burning ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00217\",\n      \"marker\": \"50\",\n      \"page_no\": 113,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00218\",\n      \"marker\": \"51\",\n      \"page_no\": 113,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00254\",\n      \"marker\": \"90\",\n      \"page_no\": 121,\n      \"paragraph_index\": 0,\n      \"source_text\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00324\",\n      \"marker\": \"162\",\n      \"page_no\": 135,\n      \"paragraph_index\": 4,\n      \"source_text\": \"The triadic scheme of human nature (body, spirit, soul) gave Paracelsus conceptual room in which to elaborate three forms of mental corruption. It was a flexible system, which allowed him to expound physical (cerebral and physiological) dis ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00422\",\n      \"marker\": \"271\",\n      \"page_no\": 157,\n      \"paragraph_index\": 2,\n      \"source_text\": \"We are now in a position to see why two figures so widely, even wildly, divergent as Luther and Paracelsus, could agree on certain fundamentals regarding mental, moral, and spiritual health. Both men were rooted in the Western tradition of ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr:endnote\",\n  \"chapter_title\": \"Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    322,\n    330\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 76,\n      \"ocr_excerpt\": \"pamphlets, broadsides, \\\"neue Zeitungen,\\\" wonder books, and sermons were published before 1600, reporting demonic actions of all sorts. $ ^{99} $ Of course, these sources were first and foremost the creation of their learned, or at least basically literate, authors and reflected the views of an elite culture, but popular views are also evident in these reports and sermons. However tempting the notion, we cannot expect this genre of \\\"popular literature\\\" to provide perfect access to the popular mind. $ ^{100} $ Moreover, such books, sermons, and pamphlets made no claim to list all the cases of possession even for a given town or year. Their pious authors selected examples in order to illustrate a conclusion, and one can search in vain, for example, for Catholic accounts of unsuccessful exorcisms, even though we know that there were many unsuccessful efforts to free victims of demonic obsession. $ ^{101} $ It would be just as foolish to look for Lutheran accounts of successful Catholic exorcisms. It was, moreover, never against the law or even necessarily immoral to be demon-possessed, and so we do not find official registers or jail records of the possessed. No police blotters were fi ...\"\n    },\n    {\n      \"page_no\": 82,\n      \"ocr_excerpt\": \"tiny number were published concerning outbreaks in the great lands of the Counter-Reformation, Bavaria and Austria. Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121} $ Demonic possession does appear now and then, albeit rarely, in the printed Bavarian and Franconian miracle books, another indication that possession was not a dominant idiom of madness in the south. It may be surprising, but the evidence is clear that famous demonic possessions and controversial exorcisms were largely absent from southern Germany, and especially the Catholic southeast, during the sixteenth century. Can we draw any conclusions about the pressure to be increasingly pious in these regions? Could it be that the Catholic Reformation in those lands did not encourage those pious feelings of doubt, unworthiness, and despair that we sometimes find in monastic culture and in Lutheran Germany alike? $ ^{122} $ ## PUBLISHED DEMONIC POSSESSIONS IN GERMANY, 1490–1650 Represented on these four maps are all the \\\"publicly known\\\" ...\"\n    },\n    {\n      \"page_no\": 267,\n      \"ocr_excerpt\": \"Denn ich hab weder Witz noch Sinn Hab ein groben verstand / der massen Kan weder hengen noch nachlassen Ich fahr herauß mit wort und that Tölpischer weiß / folg keinem raht Verschon niemand / drumb man mich zelt Für ein groben Stocknarren helt. The Natural Fool I am a natural fool For I have neither wit nor sense I have so coarse an understanding That I can neither stick nor let go. I journey forth in word and deed, Foolishly, taking no advice. I spare no one, and so I'm called A gross natural fool. $ ^{27} $ Here, too, Amman’s image dramatically interprets what Sachs leaves largely to the imagination. Amman presents a clumsy man in contemporary dress (but with a hat that seems to suggest the court fool’s donkey-ears), holding in his left hand a tray of trinkets, including an hourglass, a cup, and a chain of beads, while in his right hand he holds aloft a mirror, in just the same gesture we recognize from the Schalksnarr. Is he holding up the mirror of self-knowledge or of vanity? This image of the natural fool is not only similar in certain ways to that of the court fool, however, for Amman’s image of the natural fool is also exactly identical to his picture of the peddler, the Kr ...\"\n    },\n    {\n      \"page_no\": 322,\n      \"ocr_excerpt\": \"helm of Bernkastel reported thirteen visions, but none of them seemed to him to be symptomatic of mental disorder. These were not regarded as hallucinations, and they prompted no investigation. $ ^{98} $ Another modern image of madness was utterly lacking in these accounts: the megalomaniac who imagined himself to be Alexander the Great, Christ, or some other world-historical figure. In a clever bon mot, Michel Foucault suggests that the madmen of the early modern period, instead of identifying with God, actually denied the existence of God altogether. $ ^{99} $ Unfortunately for this witty idea, not one of the dozens of madmen we meet in these miracle reports was thought mad (or thought himself mad) for failure to believe in God. Indeed, as we have already noticed, religious troubles appear amazingly seldom, and none of these recorded pilgrims seem to have showed much anxiety over doctrinal matters. The one major exception was the religious madness described as demonic despair and the temptation to commit suicide, a desperation that never took the form of denying God but was always an intensely personal feeling of unworthiness, failure, sadness, and what Renaissance doctors quickl ...\"\n    },\n    {\n      \"page_no\": 323,\n      \"ocr_excerpt\": \"man Renaissance artists, Michael Packer, constructed a famous altar. As we shall see in a moment, Regensburg employed the talents of both Albrecht Aldorfer and Michael Ostendorfer, and in 1519 the Alsatian pilgrimage shrine of Marienthal also commissioned a picture cycle of miracles. In Styrian Mariazell, we find a similar array of miracle books, “pilgrim-badges” made of lead and precious metal, devotional pictures, and miracle books going back to the early fifteenth century. But in addition the Benedictine abbot of nearby St. Lambert commissioned a small miracle altar (1512) with six miracle scenes. Scholars surmise that the gallery of large and touching but fairly crude panel paintings at Altötting, dating from 1519 or 1520, was a response to the visual challenge provided by Mariazell. And Mariazell in turn answered the pictures of Altötting and especially of Regensburg with the 1519 construction of a huge “miracle altar” that displayed fifty miracle scenes and celebrated the Styrian shrine’s greatest wonders in a more spectacular manner than could be found anywhere else. $ ^{102} $ Without getting lost in the intricacies of Styrian shrines and miracles, it is worth noting that t ...\"\n    },\n    {\n      \"page_no\": 324,\n      \"ocr_excerpt\": \"snake. $ ^{105} $ Pictorially, Mariazell was establishing its sovereignty over the whole spectrum of human misfortune, but especially over demons, and over the perhaps related conditions of epilepsy and “serpent possession.” Shortly after completion of the large altar, Abbot Pierer commissioned (ca. 1520) a series of 25 or 26 excellent woodcut miracle pictures, which served to advertise the Styrian shrine's greatest miracles and to counteract the burgeoning fame of Regensburg's \\\"Schöne Maria.\\\" These woodcuts, by an unknown master of the Danube School, represent one of the high points of the Austrian Renaissance. $ ^{106} $ Although they depict the miraculous curing of three cases of epilepsy, these woodcuts do not hint at even one cure of madness. $ ^{107} $ The artistic and popular excitement about miracles and pilgrimage reached such a peak in just these years that if Luther's Reformation had not burst forth upon the German scene at the same time, we would probably remember the years 1510 to 1520 as a time of escalating competition for pious pilgrims. ## BEAUTIFUL MARY OF REGENSBURG In 1519, the already heated competition between Mariazell and Altötting was complicated by a new c ...\"\n    },\n    {\n      \"page_no\": 325,\n      \"ocr_excerpt\": \"working image of Mary was placed on the altar and a sculpture of her by Erhard Heydenreich outside. Within weeks, rumors of miracles in Regensburg spread like wildfire well beyond the city. Pilgrims began to arrive by the hundreds and then by the thousands. Regensburg's new shrine became the site of the most explosive cult in late medieval Germany. $ ^{109} $ Folksongs told of miracles that opened the eyes of the blind. $ ^{110} $ Hubmaier himself seems to have kept \\\"a kind of diary,\\\" in which he recorded and commented on the miracles of 1519. $ ^{111} $ In that year, 10,172 lead images and 2,430 silver pilgrim badges were sold; in 1520, sales of such mementos went up to 109,198 in lead and 9,763 in silver. Leonhard Widman claimed that on St. George's Day alone (April 23, 1520), 50,000 pilgrims arrived and 27,000 of these badges were sold. $ ^{112} $ Albrecht Altdorfer, the renowned artist of the Danube School, made numerous copies of the Schöne Maria and illuminated a copy of the papal bull of indulgence (June 1, 1519) on green silk for use in the chapel. $ ^{113} $ During the next year, he painted the large chapel banner that appears, for example, in Michael Ostendorfer's famous ...\"\n    },\n    {\n      \"page_no\": 326,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 6.4 Miracles at Regensburg, 1519–1522</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Relief from Accidents of all sorts</td><td style='text-align: center; word-wrap: break-word;'>112 (39 involving children)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Physical assaults, imprisonment</td><td style='text-align: center; word-wrap: break-word;'>42</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Illnesses</td><td style='text-align: center; word-wrap: break-word;'>562</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Eyes</td><td style='text-align: center; word-wrap: break-word;'>28</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Head</td><td style='text-align: center; word-wrap: break-word;'>22</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Ruptures</td><td style='text-align: center; word-wrap: break-word;'>37</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Bladder &amp; Kidney Stones</td><td style='text-align: center; word-wrap: break-word;'>16</td>< ...\"\n    }\n  ],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00883\",\n      \"anchor_id\": \"anchor-00106\",\n      \"marker\": \"102\",\n      \"note_excerpt\": \"Only forty-seven miracles survive today in the altar as preserved in the Johanneum in Graz. See Peter Krenn, “Der grofie Mariazeller Wunderaltar von 1519 und sein Meister,” Jahrbuch des Kunsthistorischen Instituts der Universitit Graz 2 (19 ...\",\n      \"anchor_excerpt\": \"Far from aiming at complete or objective reporting, most accounts of de- monic possession are zealous polemics. $ ^{102} $ Describing the pitiful case of the\"\n    },\n    {\n      \"note_item_id\": \"fn-00903\",\n      \"anchor_id\": \"anchor-00131\",\n      \"marker\": \"121\",\n      \"note_excerpt\": \"Stahl, “Wallfahrt zur Schonen Maria,” pp. 77—79.\",\n      \"anchor_excerpt\": \"Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121 ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00879\",\n      \"marker\": \"98\",\n      \"page_no\": 322,\n      \"source_text\": \"Hoffmann and Dohms, eds., Mirakelbiicher, nos. 106, 107,111, 137, 177,184,234, 272, 452, 590, 627, 674, 741.\"\n    },\n    {\n      \"note_item_id\": \"fn-00880\",\n      \"marker\": \"99\",\n      \"page_no\": 322,\n      \"source_text\": \"Foucault, Histoire de la folie, p. 549; id., Madness and Civilization, p. 264.\"\n    },\n    {\n      \"note_item_id\": \"fn-00881\",\n      \"marker\": \"100\",\n      \"page_no\": 322,\n      \"source_text\": \"See p. 286 above. Hoffmann and Dohms, eds., Mirakelbiicher, no. 380.\"\n    },\n    {\n      \"note_item_id\": \"fn-00882\",\n      \"marker\": \"101\",\n      \"page_no\": 322,\n      \"source_text\": \"Konig, Weihegaben; Bauer, Bayerische Wallfahrt Altotting, pp. 66-67.\"\n    },\n    {\n      \"note_item_id\": \"fn-00884\",\n      \"marker\": \"103\",\n      \"page_no\": 323,\n      \"source_text\": \"Krenn, “Der grofse Mariazeller Wunderaltar,” p. 31.\"\n    },\n    {\n      \"note_item_id\": \"fn-00885\",\n      \"marker\": \"104\",\n      \"page_no\": 323,\n      \"source_text\": \"Ibid., illustration 17 and p. 33.\"\n    },\n    {\n      \"note_item_id\": \"fn-00886\",\n      \"marker\": \"105\",\n      \"page_no\": 324,\n      \"source_text\": \"Ibid., illustrations 3, 6; p. 33.\"\n    },\n    {\n      \"note_item_id\": \"fn-00887\",\n      \"marker\": \"106\",\n      \"page_no\": 324,\n      \"source_text\": \"George Hirth, Die Wunder von Mariazell: Facsimile-Reproduction der 25 Holzschnitte eines unbekannten deutschen Meisters um 1520 (Munich, 1883); Karl Garzarolli-Thurnlackh, “Die Holzschnitte der Mariazeller Wunder: Ihre Vorlaufer und Meister ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00621\",\n      \"note_item_id\": \"fn-00883\",\n      \"current_anchor_id\": \"anchor-00106\",\n      \"marker\": \"102\",\n      \"note_page_no\": 323,\n      \"anchor_page_no\": 76,\n      \"current_anchor_marker\": \"102\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Only forty-seven miracles survive today in the altar as preserved in the Johanneum in Graz. See Peter Krenn, “Der grofie Mariazeller Wunderaltar von 1519 und sein Meister,” Jahrbuch des Kunsthistorischen Instituts der Universitit Graz 2 (19 ...\",\n      \"anchor_excerpt\": \"Far from aiming at complete or objective reporting, most accounts of de- monic possession are zealous polemics. $ ^{102} $ Describing the pitiful case of the\"\n    },\n    {\n      \"link_id\": \"link-00641\",\n      \"note_item_id\": \"fn-00903\",\n      \"current_anchor_id\": \"anchor-00131\",\n      \"marker\": \"121\",\n      \"note_page_no\": 327,\n      \"anchor_page_no\": 82,\n      \"current_anchor_marker\": \"121\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Stahl, “Wallfahrt zur Schonen Maria,” pp. 77—79.\",\n      \"anchor_excerpt\": \"Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121 ...\"\n    },\n    {\n      \"link_id\": \"link-00642\",\n      \"note_item_id\": \"fn-00904\",\n      \"current_anchor_id\": \"anchor-00132\",\n      \"marker\": \"122\",\n      \"note_page_no\": 327,\n      \"anchor_page_no\": 82,\n      \"current_anchor_marker\": \"122\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Soergel, Wondrous in His Saints, p. 61. |\",\n      \"anchor_excerpt\": \"Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121 ...\"\n    },\n    {\n      \"link_id\": \"link-00647\",\n      \"note_item_id\": \"fn-00909\",\n      \"current_anchor_id\": \"anchor-00677\",\n      \"marker\": \"27\",\n      \"note_page_no\": 328,\n      \"anchor_page_no\": 267,\n      \"current_anchor_marker\": \"27\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"where he also omits mention of the editions of 1555 and, indeed, all of the editions after 1569, leading to an underestimate of the continuity of pilgrimage to Tuntenhausen (Wondrous in His Saints, p. 72).\",\n      \"anchor_excerpt\": \"Denn ich hab weder Witz noch Sinn Hab ein groben verstand / der massen Kan weder hengen noch nachlassen Ich fahr herauß mit wort und that Tölpischer weiß / folg keinem raht Verschon niemand / drumb man mich zelt Für ein groben Stocknarren h ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote",
-      "chapter_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
+      "chapter_title": "Pilgrims in Search of Their Reason",
+      "request_mode": "note_only",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
         "needs_review"
       ],
-      "note_system": "footnote",
+      "note_system": "endnote",
       "page_range": [
-        113,
-        157
+        322,
+        330
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 67471,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00217",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "page_no": 113,
-          "paragraph_index": 1,
-          "char_start": 372,
-          "char_end": 381,
-          "source_marker": "$ ^{50} $",
-          "normalized_marker": "50",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
+          "link_id": "link-00621",
+          "note_item_id": "fn-00883",
+          "anchor_id": "anchor-00106",
+          "marker": "102",
+          "note_excerpt": "Only forty-seven miracles survive today in the altar as preserved in the Johanneum in Graz. See Peter Krenn, “Der grofie Mariazeller Wunderaltar von 1519 und sein Meister,” Jahrbuch des Kunsthistorischen Instituts der Universitit Graz 2 (1966-67): 31-51; Leopold Schmidt, “Via sacra: Zur Geschichte der ‘Heiligen Strafie” zwischen Wien und Mariazell,” in Via sacra: Das Wallfahrtsmuseum in Kleinmariazell, ed. Helene Griinn, Veroffentlichungen des Osterreichischen Museums fur Volkskunde, vol. 15 (Vienna, 1977), pp73-83, at p. 80; Gustav Gugitz, Osterreichs Gnadenstitten in Kult und Brauch (Vienna, 1955-58), vol. 4: Kirnten und Steiermark, pp. 197—201; Peter Krenn, “Die Wunder von Mariazell und Steiermark,” in Die Kunst der Donauschule, 1490—1540: Ausstellung des Landes Oberosterreich, ed. Otto Wutzel (Linz, 1965), pp. 164—68.",
+          "anchor_excerpt": "Far from aiming at complete or objective reporting, most accounts of de- monic possession are zealous polemics. $ ^{102} $ Describing the pitiful case of the"
         },
         {
-          "row_id": 67472,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00218",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "page_no": 113,
-          "paragraph_index": 1,
-          "char_start": 577,
-          "char_end": 586,
-          "source_marker": "$ ^{51} $",
-          "normalized_marker": "51",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
-        },
-        {
-          "row_id": 67511,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00254",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "page_no": 121,
-          "paragraph_index": 0,
-          "char_start": 115,
-          "char_end": 122,
-          "source_marker": "$^{90}$",
-          "normalized_marker": "90",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life.",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
-        },
-        {
-          "row_id": 67591,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00324",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "page_no": 135,
-          "paragraph_index": 4,
-          "char_start": 1060,
-          "char_end": 1068,
-          "source_marker": "$^{162}$",
-          "normalized_marker": "162",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The triadic scheme of human nature (body, spirit, soul) gave Paracelsus conceptual room in which to elaborate three forms of mental corruption. It was a flexible system, which allowed him to expound physical (cerebral and physiological) diseases and spiritual (mental) illnesses without threatening the essential humanity (imago, biltnus) of man. Its hallmark was an emphasis on the astra and the sidereal body of man. In classic form, we find it in the great work of Paracelsus's last years, the Astronomia magna of 1537 or 1538. Here Paracelsus was mainly interested in the sidereal body of man, his mortal spirit, as it could be understood by the Light of Nature. The basic reason for all mental disease, he argued, was a sinful privileging of the lower parts of human nature. When man ignored or was ignorant of his immortal soul, he was less than perfect, but when he ignored even his sidereal nature, he sank to the level of the beasts, having only a bestial reason. If one acted bestially, it followed that one was indeed \"a beast and not a man at all.\"$^{162}$ Those who did not sink so far were sometimes tempted and torn be-",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
-        },
-        {
-          "row_id": 67697,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-00422",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "page_no": 157,
-          "paragraph_index": 2,
-          "char_start": 332,
-          "char_end": 342,
-          "source_marker": "$ ^{271} $",
-          "normalized_marker": "271",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "We are now in a position to see why two figures so widely, even wildly, divergent as Luther and Paracelsus, could agree on certain fundamentals regarding mental, moral, and spiritual health. Both men were rooted in the Western tradition of seeing sin as disease, and disease as often a punishment for or the very embodiment of sin. $ ^{271} $ Luther was surely original in the vehement force with which he attacked the enemies of truth (his truth) as demonic fools, madmen, and self-blinded maniacs. And Paracelsus was surely original in his union of the languages of Scripture, chemistry, and astrology, the symbolic and syncretic net with which he hoped to capture the whole man. His use of both dualist and triadic schemes for understanding the microcosm suited his need to find order in the chaos of life as he found it. But both Luther and Paracelsus, for all their originality, were speaking for sixteenth-century Germans when they assumed that divine salvation",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
+          "link_id": "link-00641",
+          "note_item_id": "fn-00903",
+          "anchor_id": "anchor-00131",
+          "marker": "121",
+          "note_excerpt": "Stahl, “Wallfahrt zur Schonen Maria,” pp. 77—79.",
+          "anchor_excerpt": "Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121} $ Demonic possession does appear now and then, albeit rarely, in the printed Bavarian and Franconian miracle books, another indication that possession was not a dominant idiom of madness in the south. It may be surprising, but the evidence is clear that famous demonic possessions and controversial exorcisms were largely absent from southern Germany, and especially the Catholic southeast, during the sixteenth century. Can we draw any conclusions about the pressure to be increasingly pious in these regions? Could it be that the Catholic Reformation in those lands did not encourage those pious feelings of doubt, unworthiness, and despair that we sometimes find in monastic culture and in Lutheran Germany alike? $ ^{122} $"
         }
       ],
-      "rebind_candidates": []
+      "unmatched_note_items": [
+        {
+          "row_id": 905,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00879",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "98",
+          "normalized_marker": "98",
+          "occurrence": 1,
+          "source_text": "Hoffmann and Dohms, eds., Mirakelbiicher, nos. 106, 107,111, 137, 177,184,234, 272, 452, 590, 627, 674, 741.",
+          "page_no": 322,
+          "display_marker": "98",
+          "source_marker": "98",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 906,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00880",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "99",
+          "normalized_marker": "99",
+          "occurrence": 1,
+          "source_text": "Foucault, Histoire de la folie, p. 549; id., Madness and Civilization, p. 264.",
+          "page_no": 322,
+          "display_marker": "99",
+          "source_marker": "99",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 907,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00881",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "100",
+          "normalized_marker": "100",
+          "occurrence": 1,
+          "source_text": "See p. 286 above. Hoffmann and Dohms, eds., Mirakelbiicher, no. 380.",
+          "page_no": 322,
+          "display_marker": "100",
+          "source_marker": "100",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 908,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00882",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "101",
+          "normalized_marker": "101",
+          "occurrence": 1,
+          "source_text": "Konig, Weihegaben; Bauer, Bayerische Wallfahrt Altotting, pp. 66-67.",
+          "page_no": 322,
+          "display_marker": "101",
+          "source_marker": "101",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 910,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00884",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "103",
+          "normalized_marker": "103",
+          "occurrence": 1,
+          "source_text": "Krenn, “Der grofse Mariazeller Wunderaltar,” p. 31.",
+          "page_no": 323,
+          "display_marker": "103",
+          "source_marker": "103",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 911,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00885",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "104",
+          "normalized_marker": "104",
+          "occurrence": 1,
+          "source_text": "Ibid., illustration 17 and p. 33.",
+          "page_no": 323,
+          "display_marker": "104",
+          "source_marker": "104",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 912,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00886",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "105",
+          "normalized_marker": "105",
+          "occurrence": 1,
+          "source_text": "Ibid., illustrations 3, 6; p. 33.",
+          "page_no": 324,
+          "display_marker": "105",
+          "source_marker": "105",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 913,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00887",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr",
+          "marker": "106",
+          "normalized_marker": "106",
+          "occurrence": 1,
+          "source_text": "George Hirth, Die Wunder von Mariazell: Facsimile-Reproduction der 25 Holzschnitte eines unbekannten deutschen Meisters um 1520 (Munich, 1883); Karl Garzarolli-Thurnlackh, “Die Holzschnitte der Mariazeller Wunder: Ihre Vorlaufer und Meister,” Phaidros 1 (1947): 181-89; Franz Winzinger, Wolf Huber: Das Gesamtwerk, vol. 1 (Munich, 1979), p. 170; Charles Talbot and Alan Shestack, eds., Prints and Drawings of the Danube School (New Haven, 1969), pp. 67-72; Krenn, “Der grofie Mariazeller Wunderaltar,” pp. 31-51.",
+          "page_no": 324,
+          "display_marker": "106",
+          "source_marker": "106",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00621",
+          "note_item_id": "fn-00883",
+          "current_anchor_id": "anchor-00106",
+          "marker": "102",
+          "note_page_no": 323,
+          "anchor_page_no": 76,
+          "current_anchor_marker": "102",
+          "note_excerpt": "Only forty-seven miracles survive today in the altar as preserved in the Johanneum in Graz. See Peter Krenn, “Der grofie Mariazeller Wunderaltar von 1519 und sein Meister,” Jahrbuch des Kunsthistorischen Instituts der Universitit Graz 2 (1966-67): 31-51; Leopold Schmidt, “Via sacra: Zur Geschichte der ‘Heiligen Strafie” zwischen Wien und Mariazell,” in Via sacra: Das Wallfahrtsmuseum in Kleinmariazell, ed. Helene Griinn, Veroffentlichungen des Osterreichischen Museums fur Volkskunde, vol. 15 (Vienna, 1977), pp73-83, at p. 80; Gustav Gugitz, Osterreichs Gnadenstitten in Kult und Brauch (Vienna, 1955-58), vol. 4: Kirnten und Steiermark, pp. 197—201; Peter Krenn, “Die Wunder von Mariazell und Steiermark,” in Die Kunst der Donauschule, 1490—1540: Ausstellung des Landes Oberosterreich, ed. Otto Wutzel (Linz, 1965), pp. 164—68.",
+          "anchor_excerpt": "Far from aiming at complete or objective reporting, most accounts of de- monic possession are zealous polemics. $ ^{102} $ Describing the pitiful case of the",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00641",
+          "note_item_id": "fn-00903",
+          "current_anchor_id": "anchor-00131",
+          "marker": "121",
+          "note_page_no": 327,
+          "anchor_page_no": 82,
+          "current_anchor_marker": "121",
+          "note_excerpt": "Stahl, “Wallfahrt zur Schonen Maria,” pp. 77—79.",
+          "anchor_excerpt": "Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121} $ Demonic possession does appear now and then, albeit rarely, in the printed Bavarian and Franconian miracle books, another indication that possession was not a dominant idiom of madness in the south. It may be surprising, but the evidence is clear that famous demonic possessions and controversial exorcisms were largely absent from southern Germany, and especially the Catholic southeast, during the sixteenth century. Can we draw any conclusions about the pressure to be increasingly pious in these regions? Could it be that the Catholic Reformation in those lands did not encourage those pious feelings of doubt, unworthiness, and despair that we sometimes find in monastic culture and in Lutheran Germany alike? $ ^{122} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00642",
+          "note_item_id": "fn-00904",
+          "current_anchor_id": "anchor-00132",
+          "marker": "122",
+          "note_page_no": 327,
+          "anchor_page_no": 82,
+          "current_anchor_marker": "122",
+          "note_excerpt": "Soergel, Wondrous in His Saints, p. 61. |",
+          "anchor_excerpt": "Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121} $ Demonic possession does appear now and then, albeit rarely, in the printed Bavarian and Franconian miracle books, another indication that possession was not a dominant idiom of madness in the south. It may be surprising, but the evidence is clear that famous demonic possessions and controversial exorcisms were largely absent from southern Germany, and especially the Catholic southeast, during the sixteenth century. Can we draw any conclusions about the pressure to be increasingly pious in these regions? Could it be that the Catholic Reformation in those lands did not encourage those pious feelings of doubt, unworthiness, and despair that we sometimes find in monastic culture and in Lutheran Germany alike? $ ^{122} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00647",
+          "note_item_id": "fn-00909",
+          "current_anchor_id": "anchor-00677",
+          "marker": "27",
+          "note_page_no": 328,
+          "anchor_page_no": 267,
+          "current_anchor_marker": "27",
+          "note_excerpt": "where he also omits mention of the editions of 1555 and, indeed, all of the editions after 1569, leading to an underestimate of the continuity of pilgrimage to Tuntenhausen (Wondrous in His Saints, p. 72).",
+          "anchor_excerpt": "Denn ich hab weder Witz noch Sinn Hab ein groben verstand / der massen Kan weder hengen noch nachlassen Ich fahr herauß mit wort und that Tölpischer weiß / folg keinem raht Verschon niemand / drumb man mich zelt Für ein groben Stocknarren helt. The Natural Fool I am a natural fool For I have neither wit nor sense I have so coarse an understanding That I can neither stick nor let go. I journey forth in word and deed, Foolishly, taking no advice. I spare no one, and so I'm called A gross natural fool. $ ^{27} $",
+          "current_anchor_synthetic": false
+        }
+      ]
     },
     "page_contexts": [
       {
-        "page_no": 113,
-        "file_idx": 112,
+        "page_no": 76,
+        "file_idx": 75,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "and tortured by the devil, and not lunatics, fools, or senseless persons.\"⁴⁶ In this passage, Luther distinguished the physically possessed from the mentally ill and the retarded, but more often he spoke of demonic possession as a general condition of willful sin. When Eve was tempted in the garden, for example, she was not rationally persuaded to disobey God; she was deluded: \"Because Satan restrains her mind [animum] and eyes, however, she not only does not see death or become aware of it, but gradually she is also more inflamed by her desire for the fruit and delights in this idolatry and sin.\"⁴⁷ Indeed, Adam should have warned his descendants about the consequences of sin, for \"when he was deprived of his mind by Satan and believed that he would be like God, he became like Satan himself.\"⁴⁸ The fall into sin had been a fall into unreason. Sin brought fundamental changes in both man and nature. From then on, man's \"will is impaired, his intellect depraved, and his reason entirely corrupt and altogether changed.\"⁴⁹ So mankind became sick with a leprosy of the spirit. Human history had thus begun with a lapse into madness. The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolic ...",
-        "byte_size": 8799202,
-        "sha256": "b12007166ac4697273976223a235437248df42cd9a0c732760a1254c5cd969a6"
+        "ocr_excerpt": "pamphlets, broadsides, \"neue Zeitungen,\" wonder books, and sermons were published before 1600, reporting demonic actions of all sorts. $ ^{99} $ Of course, these sources were first and foremost the creation of their learned, or at least basically literate, authors and reflected the views of an elite culture, but popular views are also evident in these reports and sermons. However tempting the notion, we cannot expect this genre of \"popular literature\" to provide perfect access to the popular mind. $ ^{100} $ Moreover, such books, sermons, and pamphlets made no claim to list all the cases of possession even for a given town or year. Their pious authors selected examples in order to illustrate a conclusion, and one can search in vain, for example, for Catholic accounts of unsuccessful exorcisms, even though we know that there were many unsuccessful efforts to free victims of demonic obsession. $ ^{101} $ It would be just as foolish to look for Lutheran accounts of successful Catholic exorcisms. It was, moreover, never against the law or even necessarily immoral to be demon-possessed, and so we do not find official registers or jail records of the possessed. No police blotters were filled with these demonic atrocities. Like Judith Klatten, many of the possessed may have lain in obscurity without ever coming to public attention. Far from aiming at complete or objective reporting, m ...",
+        "byte_size": 8976581,
+        "sha256": "7a9ef3b42fb416f5f26e59540741de9f8757e6f1d4c2469d5f8d458d86a4bfcf"
       },
       {
-        "page_no": 121,
-        "file_idx": 120,
+        "page_no": 82,
+        "file_idx": 81,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life. Far from admiring the insensate or contented tranquillity of a satisfied mind, Luther held that true wisdom was found among “those who are oppressed and in conflict with spiritual trials.” $ ^{94} $ Only they could recognize their need for God’s consolation. In the Last Days, moreover, not all men would suffer the anxiety and terror of knowing that the end was fast ap ...",
-        "byte_size": 8834453,
-        "sha256": "1937b177d7f9fbaf6a33ae4e88e63d95b0ebcf0b0635039f974a7f4d67d72172"
+        "ocr_excerpt": "tiny number were published concerning outbreaks in the great lands of the Counter-Reformation, Bavaria and Austria. Proud as he was of the Catholic miracles performed by Our Lady of Alt- ötting, Dr. Martin Eisengrein, writing in 1570, listed only one dispossession of demons in the almost 200 pages of his treatise on that famous pilgrimage shrine. $ ^{121} $ Demonic possession does appear now and then, albeit rarely, in the printed Bavarian and Franconian miracle books, another indication that possession was not a dominant idiom of madness in the south. It may be surprising, but the evidence is clear that famous demonic possessions and controversial exorcisms were largely absent from southern Germany, and especially the Catholic southeast, during the sixteenth century. Can we draw any conclusions about the pressure to be increasingly pious in these regions? Could it be that the Catholic Reformation in those lands did not encourage those pious feelings of doubt, unworthiness, and despair that we sometimes find in monastic culture and in Lutheran Germany alike? $ ^{122} $ ## PUBLISHED DEMONIC POSSESSIONS IN GERMANY, 1490–1650 Represented on these four maps are all the \"publicly known\" cases of demonic possession in the German-speaking lands, 1490–1650. Thus, they include instances recorded in published chronicles, sermons, pamphlets, and news sheets, but they do not portray cases ...",
+        "byte_size": 6837847,
+        "sha256": "814ae1814b06c1c0da9902b2fe5ff280a67532247cd4e05644f698b6a9518251"
       },
       {
-        "page_no": 135,
-        "file_idx": 134,
+        "page_no": 267,
+        "file_idx": 266,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 2.1</div> <div style=\"text-align: center;\">Bipartite and Tripartite Divisions of Nature in Paracelsus</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td colspan=\"4\">I. Bipartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Creation (heaven and earth)</td><td style='text-align: center; word-wrap: break-word;'>God</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Microcosm:</td><td style='text-align: center; word-wrap: break-word;'>Body: tierisch Vernunft</td><td style='text-align: center; word-wrap: break-word;'>Soul: menschlich Vernunft (Bildnus, Image of God)</td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td colspan=\"4\">II. Tripartite Anthropology</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Macrocosm:</td><td style='text-align: center; word-wrap: break-word;'>Earth</td><td style='text-align: center; word-wrap: break-word;'>Star</td><td style='text-align: center; word-wrap: break-word;'>God</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Microcosm:</td><td style='text-align: center; word-wrap: break-word;'>Flesh (Body)</td><td style='text-align: center; word-wrap: b ...",
-        "byte_size": 7610903,
-        "sha256": "796ffddc6c368c55e6e6158cc0c8af7ebfdf4f66ee267c130e27df4dacafa40f"
+        "ocr_excerpt": "Denn ich hab weder Witz noch Sinn Hab ein groben verstand / der massen Kan weder hengen noch nachlassen Ich fahr herauß mit wort und that Tölpischer weiß / folg keinem raht Verschon niemand / drumb man mich zelt Für ein groben Stocknarren helt. The Natural Fool I am a natural fool For I have neither wit nor sense I have so coarse an understanding That I can neither stick nor let go. I journey forth in word and deed, Foolishly, taking no advice. I spare no one, and so I'm called A gross natural fool. $ ^{27} $ Here, too, Amman’s image dramatically interprets what Sachs leaves largely to the imagination. Amman presents a clumsy man in contemporary dress (but with a hat that seems to suggest the court fool’s donkey-ears), holding in his left hand a tray of trinkets, including an hourglass, a cup, and a chain of beads, while in his right hand he holds aloft a mirror, in just the same gesture we recognize from the Schalksnarr. Is he holding up the mirror of self-knowledge or of vanity? This image of the natural fool is not only similar in certain ways to that of the court fool, however, for Amman’s image of the natural fool is also exactly identical to his picture of the peddler, the Krämer (from 60 pages earlier). $ ^{28} $ Are we to conclude that the peddler is a fool, or that the simpleton was not different in looks from other honorable estates, or that Amman was simply pressed f ...",
+        "byte_size": 7634390,
+        "sha256": "498e1022c00757acc9aca9813c84d83edf9fcb674a6e9127fe6120dc217e6844"
       },
       {
-        "page_no": 157,
-        "file_idx": 156,
+        "page_no": 322,
+        "file_idx": 321,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "the bestial tendencies that destroyed one's felicity in Christ. This harsh language of rejection did not, however, mean that Paracelsus advocated a program of exile or euthanasia by which his society might rid itself of its subhuman members. For one thing, Paracelsus had no confidence in the spiritual capacities of the state. He thought that Christianity had been in decline ever since the fourth century, when the emperor Constantine had employed Christ as a prop for his state. $ ^{268} $ In addition, true Christians were hard to detect among the mass of hypocrites and anti-Christs who multiplied “in these last days.” Instead of killing or eliminating the subhuman (the mad, the possessed, the sick), one's Christian duty was to love them and to attempt to heal (convert) them to the Way of Life. The physician's calling was a high one precisely because it was so close to that of Christ himself. Referring to the physician's art, Paracelsus declared, \"Wo kein lieb ist, do ist keine kunst\" (\"Where there is no love there is also no art\"). $ ^{269} $ Even witches, those hateful creatures who were devoted to the devil body and soul, deserved better from Christian society. Instead of burning them to death for their supposed crimes, Paracelsus held, Christians should pray and fast in order to drive out the evil spirit and heal them with Christ. $ ^{270} $ We are now in a position to see wh ...",
-        "byte_size": 9232039,
-        "sha256": "4bab87e34a9f17a19d2a0b3642f87b7580e1eec0275c9c5e43360da1e61dd948"
+        "ocr_excerpt": "helm of Bernkastel reported thirteen visions, but none of them seemed to him to be symptomatic of mental disorder. These were not regarded as hallucinations, and they prompted no investigation. $ ^{98} $ Another modern image of madness was utterly lacking in these accounts: the megalomaniac who imagined himself to be Alexander the Great, Christ, or some other world-historical figure. In a clever bon mot, Michel Foucault suggests that the madmen of the early modern period, instead of identifying with God, actually denied the existence of God altogether. $ ^{99} $ Unfortunately for this witty idea, not one of the dozens of madmen we meet in these miracle reports was thought mad (or thought himself mad) for failure to believe in God. Indeed, as we have already noticed, religious troubles appear amazingly seldom, and none of these recorded pilgrims seem to have showed much anxiety over doctrinal matters. The one major exception was the religious madness described as demonic despair and the temptation to commit suicide, a desperation that never took the form of denying God but was always an intensely personal feeling of unworthiness, failure, sadness, and what Renaissance doctors quickly diagnosed as melancholy. This was the word used by Wilhelm of Bernkastel in describing the desperate nun who “denied God” (although she did not deny His existence) and felt that she must die. $ ^{10 ...",
+        "byte_size": 8364920,
+        "sha256": "01c7bf99564dc43dd4ca4a983fee300b5f8222f1e43ef5db60324872cbb2269b"
+      },
+      {
+        "page_no": 323,
+        "file_idx": 322,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "man Renaissance artists, Michael Packer, constructed a famous altar. As we shall see in a moment, Regensburg employed the talents of both Albrecht Aldorfer and Michael Ostendorfer, and in 1519 the Alsatian pilgrimage shrine of Marienthal also commissioned a picture cycle of miracles. In Styrian Mariazell, we find a similar array of miracle books, “pilgrim-badges” made of lead and precious metal, devotional pictures, and miracle books going back to the early fifteenth century. But in addition the Benedictine abbot of nearby St. Lambert commissioned a small miracle altar (1512) with six miracle scenes. Scholars surmise that the gallery of large and touching but fairly crude panel paintings at Altötting, dating from 1519 or 1520, was a response to the visual challenge provided by Mariazell. And Mariazell in turn answered the pictures of Altötting and especially of Regensburg with the 1519 construction of a huge “miracle altar” that displayed fifty miracle scenes and celebrated the Styrian shrine’s greatest wonders in a more spectacular manner than could be found anywhere else. $ ^{102} $ Without getting lost in the intricacies of Styrian shrines and miracles, it is worth noting that the expulsion of demons was a well-known specialty at Mariazell. Of the three miracles regularly portrayed there in the fifteenth century, one was an exorcism. $ ^{103} $ The small miracle altar of 151 ...",
+        "byte_size": 10285047,
+        "sha256": "2142cbc555365633286e22f73e59aa70748f2c5636627dbb1d61e5625b281e12"
+      },
+      {
+        "page_no": 324,
+        "file_idx": 323,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "snake. $ ^{105} $ Pictorially, Mariazell was establishing its sovereignty over the whole spectrum of human misfortune, but especially over demons, and over the perhaps related conditions of epilepsy and “serpent possession.” Shortly after completion of the large altar, Abbot Pierer commissioned (ca. 1520) a series of 25 or 26 excellent woodcut miracle pictures, which served to advertise the Styrian shrine's greatest miracles and to counteract the burgeoning fame of Regensburg's \"Schöne Maria.\" These woodcuts, by an unknown master of the Danube School, represent one of the high points of the Austrian Renaissance. $ ^{106} $ Although they depict the miraculous curing of three cases of epilepsy, these woodcuts do not hint at even one cure of madness. $ ^{107} $ The artistic and popular excitement about miracles and pilgrimage reached such a peak in just these years that if Luther's Reformation had not burst forth upon the German scene at the same time, we would probably remember the years 1510 to 1520 as a time of escalating competition for pious pilgrims. ## BEAUTIFUL MARY OF REGENSBURG In 1519, the already heated competition between Mariazell and Altötting was complicated by a new contender. In Regensburg, in the wake of the cathedral preacher Balthasar Hubmaier's anti-Semitic sermons, the town council seized the political opportunity offered by the death of Emperor Maximilian I ...",
+        "byte_size": 8397417,
+        "sha256": "bfedb001bca2668cc9a07c7371fd7e438fbc574f4409939ebba9269143386e1f"
+      },
+      {
+        "page_no": 325,
+        "file_idx": 324,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "working image of Mary was placed on the altar and a sculpture of her by Erhard Heydenreich outside. Within weeks, rumors of miracles in Regensburg spread like wildfire well beyond the city. Pilgrims began to arrive by the hundreds and then by the thousands. Regensburg's new shrine became the site of the most explosive cult in late medieval Germany. $ ^{109} $ Folksongs told of miracles that opened the eyes of the blind. $ ^{110} $ Hubmaier himself seems to have kept \"a kind of diary,\" in which he recorded and commented on the miracles of 1519. $ ^{111} $ In that year, 10,172 lead images and 2,430 silver pilgrim badges were sold; in 1520, sales of such mementos went up to 109,198 in lead and 9,763 in silver. Leonhard Widman claimed that on St. George's Day alone (April 23, 1520), 50,000 pilgrims arrived and 27,000 of these badges were sold. $ ^{112} $ Albrecht Altdorfer, the renowned artist of the Danube School, made numerous copies of the Schöne Maria and illuminated a copy of the papal bull of indulgence (June 1, 1519) on green silk for use in the chapel. $ ^{113} $ During the next year, he painted the large chapel banner that appears, for example, in Michael Ostendorfer's famous woodcut depicting the pilgrimage to the \"Beautiful Mary.\" Altdorfer's workshop also produced miracle woodcuts, probably by the thousands, although only two survive. $ ^{114} $ With these major talents ...",
+        "byte_size": 9414234,
+        "sha256": "1581a842ac6d286f1d9f2c03407595ca137da2360f14c90accebcc18ea5bd404"
+      },
+      {
+        "page_no": 326,
+        "file_idx": 325,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 6.4 Miracles at Regensburg, 1519–1522</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Relief from Accidents of all sorts</td><td style='text-align: center; word-wrap: break-word;'>112 (39 involving children)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Physical assaults, imprisonment</td><td style='text-align: center; word-wrap: break-word;'>42</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Illnesses</td><td style='text-align: center; word-wrap: break-word;'>562</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Eyes</td><td style='text-align: center; word-wrap: break-word;'>28</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Head</td><td style='text-align: center; word-wrap: break-word;'>22</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Ruptures</td><td style='text-align: center; word-wrap: break-word;'>37</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Bladder &amp; Kidney Stones</td><td style='text-align: center; word-wrap: break-word;'>16</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Crippled limbs</td><td style='text-align: center; word-wrap: break-word;'>58</td></tr><tr><td style='text-align: center; word-wrap: break ...",
+        "byte_size": 5894181,
+        "sha256": "8bfe7b3a62b5dc7dcd22149afd12b6ccfba400ce129d3f39661741b69bbf7a54"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 4,
+    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0037-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
+    "request_mode": "note_only",
+    "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00217\",\n    \"marker\": \"50\",\n    \"note_text\": \"Ibid.: WA, 42: 193; LW, 1: 261–62.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR failed to extract footnote 50 on page 113, but it is clearly visible in the screenshot at the bottom of the page.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00218\",\n    \"marker\": \"51\",\n    \"note_text\": \"Ibid.: WA, 42: 201–2; LW, 1: 272–73.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR failed to extract footnote 51 on page 113, but it is clearly visible in the screenshot at the bottom of the page.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00254\",\n    \"marker\": \"90\",\n    \"note_text\": \"Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR failed to extract footnote 90 on page 121, but it is clearly visible in the screenshot at the bottom of the page.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00324\",\n    \"marker\": \"162\",\n    \"note_text\": \"Astronomia magna, SW, pt 1, 12: 58.\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR failed to extract footnote 162 on page 135, but it is clearly visible in the screenshot at the bottom of the page.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00422\",\n    \"marker\": \"271\",\n    \"note_text\": \"Susan Sontag, Illness as Metaphor (New York, 1978); Pedro Lain Entralgo, Enfermedad y pecado (Barcelona, 1961).\",\n    \"confidence\": 0.98,\n    \"reason\": \"OCR failed to extract footnote 271 on page 157, but it is clearly visible in the screenshot at the bottom of the page.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00879\",\n    \"anchor_id\": \"anchor-00103\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 322 (image 4) shows superscript 98 in text and corresponding note 98 at bottom. The provided anchor 'anchor-00103' corresponds to marker 98 based on sequence and context.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00880\",\n    \"anchor_id\": \"anchor-00104\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 322 (image 4) shows superscript 99 in text and corresponding note 99 at bottom. The provided anchor 'anchor-00104' corresponds to marker 99.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00881\",\n    \"anchor_id\": \"anchor-00105\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 322 (image 4) shows superscript 100 in text and corresponding note 100 at bottom. The provided anchor 'anchor-00105' corresponds to marker 100.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00882\",\n    \"anchor_id\": \"anchor-00106\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 322 (image 4) shows superscript 101 in text and corresponding note 101 at bottom. The provided anchor 'anchor-00106' corresponds to marker 101.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00884\",\n    \"anchor_id\": \"anchor-00108\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 323 (image 5) shows superscript 103 in text and corresponding note 103 at bottom. The provided anchor 'anchor-00108' corresponds to marker 103.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00885\",\n    \"anchor_id\": \"anchor-00109\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 323 (image 5) shows superscript 104 in text and corresponding note 104 at bottom. The provided anchor 'anchor-00109' corresponds to marker 104.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00886\",\n    \"anchor_id\": \"anchor-00110\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 324 (image 6) shows superscript 105 in text and corresponding note 105 at bottom. The provided anchor 'anchor-00110' corresponds to marker 105.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00887\",\n    \"anchor_id\": \"anchor-00111\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 324 (image 6) shows superscript 106 in text and corresponding note 106 at bottom. The provided anchor 'anchor-00111' corresponds to marker 106.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00217",
+      "action": "match",
+      "note_item_id": "fn-00879",
+      "anchor_id": "anchor-00103",
       "anchor_phrase": "",
-      "marker": "50",
-      "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
-      "confidence": 0.98,
-      "reason": "OCR failed to extract footnote 50 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 322 (image 4) shows superscript 98 in text and corresponding note 98 at bottom. The provided anchor 'anchor-00103' corresponds to marker 98 based on sequence and context."
     },
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00218",
+      "action": "match",
+      "note_item_id": "fn-00880",
+      "anchor_id": "anchor-00104",
       "anchor_phrase": "",
-      "marker": "51",
-      "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
-      "confidence": 0.98,
-      "reason": "OCR failed to extract footnote 51 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 322 (image 4) shows superscript 99 in text and corresponding note 99 at bottom. The provided anchor 'anchor-00104' corresponds to marker 99."
     },
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00254",
+      "action": "match",
+      "note_item_id": "fn-00881",
+      "anchor_id": "anchor-00105",
       "anchor_phrase": "",
-      "marker": "90",
-      "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
-      "confidence": 0.98,
-      "reason": "OCR failed to extract footnote 90 on page 121, but it is clearly visible in the screenshot at the bottom of the page."
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 322 (image 4) shows superscript 100 in text and corresponding note 100 at bottom. The provided anchor 'anchor-00105' corresponds to marker 100."
     },
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00324",
+      "action": "match",
+      "note_item_id": "fn-00882",
+      "anchor_id": "anchor-00106",
       "anchor_phrase": "",
-      "marker": "162",
-      "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
-      "confidence": 0.98,
-      "reason": "OCR failed to extract footnote 162 on page 135, but it is clearly visible in the screenshot at the bottom of the page."
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 322 (image 4) shows superscript 101 in text and corresponding note 101 at bottom. The provided anchor 'anchor-00106' corresponds to marker 101."
     },
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00422",
+      "action": "match",
+      "note_item_id": "fn-00884",
+      "anchor_id": "anchor-00108",
       "anchor_phrase": "",
-      "marker": "271",
-      "note_text": "Susan Sontag, Illness as Metaphor (New York, 1978); Pedro Lain Entralgo, Enfermedad y pecado (Barcelona, 1961).",
-      "confidence": 0.98,
-      "reason": "OCR failed to extract footnote 271 on page 157, but it is clearly visible in the screenshot at the bottom of the page."
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 323 (image 5) shows superscript 103 in text and corresponding note 103 at bottom. The provided anchor 'anchor-00108' corresponds to marker 103."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00885",
+      "anchor_id": "anchor-00109",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 323 (image 5) shows superscript 104 in text and corresponding note 104 at bottom. The provided anchor 'anchor-00109' corresponds to marker 104."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00886",
+      "anchor_id": "anchor-00110",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 324 (image 6) shows superscript 105 in text and corresponding note 105 at bottom. The provided anchor 'anchor-00110' corresponds to marker 105."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00887",
+      "anchor_id": "anchor-00111",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Page 324 (image 6) shows superscript 106 in text and corresponding note 106 at bottom. The provided anchor 'anchor-00111' corresponds to marker 106."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-002-tworeformersandaworldgon:toc-ch-002-tworeformersandaworldgon:footnote",
-    "chapter_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
-    "request_mode": "ref_only_visual",
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00217",
+        "action": "match",
+        "note_item_id": "fn-00879",
+        "anchor_id": "anchor-00103",
         "anchor_phrase": "",
-        "marker": "50",
-        "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 50 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 322 (image 4) shows superscript 98 in text and corresponding note 98 at bottom. The provided anchor 'anchor-00103' corresponds to marker 98 based on sequence and context."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00218",
+        "action": "match",
+        "note_item_id": "fn-00880",
+        "anchor_id": "anchor-00104",
         "anchor_phrase": "",
-        "marker": "51",
-        "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 51 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 322 (image 4) shows superscript 99 in text and corresponding note 99 at bottom. The provided anchor 'anchor-00104' corresponds to marker 99."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00254",
+        "action": "match",
+        "note_item_id": "fn-00881",
+        "anchor_id": "anchor-00105",
         "anchor_phrase": "",
-        "marker": "90",
-        "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 90 on page 121, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 322 (image 4) shows superscript 100 in text and corresponding note 100 at bottom. The provided anchor 'anchor-00105' corresponds to marker 100."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00324",
+        "action": "match",
+        "note_item_id": "fn-00882",
+        "anchor_id": "anchor-00106",
         "anchor_phrase": "",
-        "marker": "162",
-        "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 162 on page 135, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 322 (image 4) shows superscript 101 in text and corresponding note 101 at bottom. The provided anchor 'anchor-00106' corresponds to marker 101."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00422",
+        "action": "match",
+        "note_item_id": "fn-00884",
+        "anchor_id": "anchor-00108",
         "anchor_phrase": "",
-        "marker": "271",
-        "note_text": "Susan Sontag, Illness as Metaphor (New York, 1978); Pedro Lain Entralgo, Enfermedad y pecado (Barcelona, 1961).",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 271 on page 157, but it is clearly visible in the screenshot at the bottom of the page."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00217",
-        "anchor_phrase": "",
-        "marker": "50",
-        "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 50 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 323 (image 5) shows superscript 103 in text and corresponding note 103 at bottom. The provided anchor 'anchor-00108' corresponds to marker 103."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00218",
+        "action": "match",
+        "note_item_id": "fn-00885",
+        "anchor_id": "anchor-00109",
         "anchor_phrase": "",
-        "marker": "51",
-        "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 51 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 323 (image 5) shows superscript 104 in text and corresponding note 104 at bottom. The provided anchor 'anchor-00109' corresponds to marker 104."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00254",
+        "action": "match",
+        "note_item_id": "fn-00886",
+        "anchor_id": "anchor-00110",
         "anchor_phrase": "",
-        "marker": "90",
-        "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 90 on page 121, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 324 (image 6) shows superscript 105 in text and corresponding note 105 at bottom. The provided anchor 'anchor-00110' corresponds to marker 105."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00324",
+        "action": "match",
+        "note_item_id": "fn-00887",
+        "anchor_id": "anchor-00111",
         "anchor_phrase": "",
-        "marker": "162",
-        "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 162 on page 135, but it is clearly visible in the screenshot at the bottom of the page."
-      },
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00422",
-        "anchor_phrase": "",
-        "marker": "271",
-        "note_text": "Susan Sontag, Illness as Metaphor (New York, 1978); Pedro Lain Entralgo, Enfermedad y pecado (Barcelona, 1961).",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 271 on page 157, but it is clearly visible in the screenshot at the bottom of the page."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00217",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "50",
-        "note_text": "Ibid.: WA, 42: 193; LW, 1: 261–62.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 50 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
-      },
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00218",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "51",
-        "note_text": "Ibid.: WA, 42: 201–2; LW, 1: 272–73.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 51 on page 113, but it is clearly visible in the screenshot at the bottom of the page."
-      },
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00254",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "90",
-        "note_text": "Kirchenpostille (1522): WA, 10, pt. 1, sec. 1: 6.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 90 on page 121, but it is clearly visible in the screenshot at the bottom of the page."
-      },
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00324",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "162",
-        "note_text": "Astronomia magna, SW, pt 1, 12: 58.",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 162 on page 135, but it is clearly visible in the screenshot at the bottom of the page."
-      },
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00422",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "271",
-        "note_text": "Susan Sontag, Illness as Metaphor (New York, 1978); Pedro Lain Entralgo, Enfermedad y pecado (Barcelona, 1961).",
-        "confidence": 0.98,
-        "reason": "OCR failed to extract footnote 271 on page 157, but it is clearly visible in the screenshot at the bottom of the page."
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Page 324 (image 6) shows superscript 106 in text and corresponding note 106 at bottom. The provided anchor 'anchor-00111' corresponds to marker 106."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 12352,
-    "completion_tokens": 628,
-    "total_tokens": 12980,
+    "prompt_tokens": 24807,
+    "completion_tokens": 888,
+    "total_tokens": 25695,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 25732
+    "duration_ms": 36447
   }
 }

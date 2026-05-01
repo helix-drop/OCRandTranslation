@@ -1,0 +1,2916 @@
+{
+  "boundary_detection": {
+    "decision_basis": [
+      "fnm_pages.page_role",
+      "fnm_pages.role_reason",
+      "fnm_pages.role_confidence",
+      "fnm_pages.has_note_heading",
+      "fnm_pages.section_hint"
+    ],
+    "page_role_counts": {
+      "front_matter": 6,
+      "body": 536,
+      "other": 66
+    },
+    "first_body_page": 7,
+    "first_note_page": null,
+    "page_role_samples": [
+      {
+        "page_no": 1,
+        "target_pdf_page": 1,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 2,
+        "target_pdf_page": 2,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 3,
+        "target_pdf_page": 3,
+        "page_role": "front_matter",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 7,
+        "target_pdf_page": 7,
+        "page_role": "body",
+        "role_reason": "title_family",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 8,
+        "target_pdf_page": 8,
+        "page_role": "body",
+        "role_reason": "front_matter_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 9,
+        "target_pdf_page": 9,
+        "page_role": "body",
+        "role_reason": "front_matter_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 543,
+        "target_pdf_page": 543,
+        "page_role": "other",
+        "role_reason": "bibliography",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 544,
+        "target_pdf_page": 544,
+        "page_role": "other",
+        "role_reason": "bibliography_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 545,
+        "target_pdf_page": 545,
+        "page_role": "other",
+        "role_reason": "bibliography_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      }
+    ],
+    "structure_page_partition_summary": {
+      "total_pages": 608,
+      "noise": 0,
+      "front_matter": 5,
+      "body": 549,
+      "note": 0,
+      "other": 54
+    }
+  },
+  "note_region_detection": {
+    "decision_basis": [
+      "fnm_note_regions.region_kind/start_page/end_page/pages",
+      "fnm_note_regions.bound_chapter_id",
+      "fnm_note_regions.region_start_first_source_marker",
+      "fnm_note_regions.region_first_note_item_marker",
+      "structure.chapter_binding_summary",
+      "structure.visual_toc_endnotes_summary"
+    ],
+    "visual_toc_endnotes_summary": {},
+    "chapter_binding_summary": {
+      "region_count": 24,
+      "book_scope_region_count": 0,
+      "unbound_region_count": 0,
+      "unbound_region_ids_preview": [],
+      "unassigned_item_count": 0,
+      "unassigned_item_ids_preview": []
+    },
+    "chapter_endnote_region_alignment_summary": {},
+    "region_rows": [
+      {
+        "region_id": "nr-fn-ch-0001-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "start_page": 7,
+        "end_page": 9,
+        "pages": [
+          7,
+          8,
+          9
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 8,
+        "numeric_marker_count": 8,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00001",
+            "page_no": 7,
+            "marker": "1",
+            "source_text_preview": "Voir Tom ROCKMORE, Heidegger and French Philosopby, Londres-New York, Rout!edge, 1995, particulièrement l'Introduction et le chap_ 1."
+          },
+          {
+            "note_item_id": "fn-00002",
+            "page_no": 8,
+            "marker": "2",
+            "source_text_preview": "Karl LŒWITH, «Les implications politiques de la philosophie de l'existence chez Heidegger>>, Les Temps modernes, novembre 1946/p. 343."
+          },
+          {
+            "note_item_id": "fn-00003",
+            "page_no": 8,
+            "marker": "3",
+            "source_text_preview": "C'est d'ailleurs cette expression qu'un pamphlétaire communiste a utilisée comme titre ironique pour brocarder la vogue française de Heidegg..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0002-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "start_page": 11,
+        "end_page": 15,
+        "pages": [
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 8,
+        "numeric_marker_count": 8,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 16,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00009",
+            "page_no": 11,
+            "marker": "9",
+            "source_text_preview": "Rainer Maria Rn.KE, <<Auguste Rodin>>, Œuvres, I, Paris, Éditions du Seuil, 1966, p. 391; Werke, IV; p. 299. Cité par HEIDEGGER, Gesamtausga..."
+          },
+          {
+            "note_item_id": "fn-00010",
+            "page_no": 12,
+            "marker": "10",
+            "source_text_preview": "Dans un article qu'il intitulait déjà <<Heidegger en France >>,Magazine littéraire, n\" 235, novembre 1986, pp. 34-38. TI a également noté la..."
+          },
+          {
+            "note_item_id": "fn-00011",
+            "page_no": 13,
+            "marker": "11",
+            "source_text_preview": "Voir Louis PINro, Les Neveux de Zarathoustra. La réception de Nietzsche en France, Paris, Éditions du Seuil, 1995, et surtout Jacques LE RID..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0003-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "start_page": 17,
+        "end_page": 18,
+        "pages": [
+          17,
+          18
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 2,
+        "numeric_marker_start": 17,
+        "numeric_marker_end": 18,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "17",
+          "18"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00017",
+            "page_no": 17,
+            "marker": "17",
+            "source_text_preview": "Déjà en 1857 Taine déplorait en ces t=es l'invasion de la métaphysique alle· mande durant les premières décennies du XIX\" siècle : <<Bientôt..."
+          },
+          {
+            "note_item_id": "fn-00018",
+            "page_no": 18,
+            "marker": "18",
+            "source_text_preview": "« Systematically mistaken », selon les propres termes de T. RoCKMORE, Heidegger and French Philosophy, op. dt., p. XI. l"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0004-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "start_page": 20,
+        "end_page": 21,
+        "pages": [
+          20,
+          21
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 19,
+        "numeric_marker_end": 22,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "19",
+          "20",
+          "21",
+          "22"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00019",
+            "page_no": 20,
+            "marker": "19",
+            "source_text_preview": "Expression de Jacques Derrida dans nos Entrbtiens."
+          },
+          {
+            "note_item_id": "fn-00020",
+            "page_no": 20,
+            "marker": "20",
+            "source_text_preview": "Voir Hans Robert ]AUSS, Pour une esthétique de la réception, trad. Claude Maillard, Préface de Jeao Starobinski, Paris, Gallimard, 1978."
+          },
+          {
+            "note_item_id": "fn-00021",
+            "page_no": 20,
+            "marker": "21",
+            "source_text_preview": "n nous fallait une butée chronologique: nous' avons choisi la date symbolique du 1 =janvier 2000. '"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0005-toc-ch-002-premierspassagesdurhin",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-premierspassagesdurhin",
+        "start_page": 25,
+        "end_page": 53,
+        "pages": [
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 100,
+        "numeric_marker_count": 100,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 101,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00023",
+            "page_no": 25,
+            "marker": "1",
+            "source_text_preview": "Publié par Georges GURVITCH sous le. titre: Les Tendances actuelles de la philo­ sophie allemande (Paris, Vrin, 1930)."
+          },
+          {
+            "note_item_id": "fn-00024",
+            "page_no": 26,
+            "marker": "2",
+            "source_text_preview": "Ibid., p. s."
+          },
+          {
+            "note_item_id": "fn-00025",
+            "page_no": 26,
+            "marker": "3",
+            "source_text_preview": "Ibid., p. 207."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0006-toc-ch-003-labombesartre",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-labombesartre",
+        "start_page": 55,
+        "end_page": 79,
+        "pages": [
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 70,
+        "numeric_marker_count": 70,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 70,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00123",
+            "page_no": 55,
+            "marker": "1",
+            "source_text_preview": "J.-P. SAR!'RE, Les Carnets de la drôle de guerre, op. dt., p. 224-229."
+          },
+          {
+            "note_item_id": "fn-00124",
+            "page_no": 55,
+            "marker": "2",
+            "source_text_preview": "Id., L'~tre et le néant. Essai d'ontologie phénoménologique, Paris, Gallimard, 1943."
+          },
+          {
+            "note_item_id": "fn-00125",
+            "page_no": 56,
+            "marker": "3",
+            "source_text_preview": "Les Carnets de la drôle de guerre comport~t un assez grand nombre d'allusions cursives, et souvent critiques, à Heidegger: elles recoupent c..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0007-toc-ch-004-lesfascinationsdelaprèsg",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-lesfascinationsdelaprèsg",
+        "start_page": 81,
+        "end_page": 111,
+        "pages": [
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 109,
+        "numeric_marker_count": 109,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 109,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00193",
+            "page_no": 81,
+            "marker": "2",
+            "source_text_preview": "Frédéric DE ToWARNICKI, A la rencontre de Heidegger, op. dt., p. 15."
+          },
+          {
+            "note_item_id": "fn-00194",
+            "page_no": 82,
+            "marker": "3",
+            "source_text_preview": "n l'affirme, mais ne donne pas de repère chrmiologique moins vague que <d'au­ tomne 1945 » (A la rencontre de Heidegger ... , op. cit.; p. 2..."
+          },
+          {
+            "note_item_id": "fn-00195",
+            "page_no": 82,
+            "marker": "4",
+            "source_text_preview": "Voir R de ToWARNICKI, A la rencontre de Heidegger ... , op. cit., pp. 27-35."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0008-toc-ch-005-lhumanismedanslesturbule",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+        "start_page": 113,
+        "end_page": 115,
+        "pages": [
+          113,
+          114,
+          115
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 9,
+        "numeric_marker_count": 9,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00302",
+            "page_no": 113,
+            "marker": "1",
+            "source_text_preview": "Martin HEIDEGGER, Platons Lehre von der Wahrheit. Mit einem Brie/ über den « Humanismus », Berne, Francke, 1947 ; trad. R Munier, Paris, Aub..."
+          },
+          {
+            "note_item_id": "fn-00303",
+            "page_no": 114,
+            "marker": "2",
+            "source_text_preview": "« Wir bedenken das Wesen des Handelns noch lange nicht entschieden genug » (Lettre sur l'humanisme, op. dt., p. 24). La trad. Munier a été m..."
+          },
+          {
+            "note_item_id": "fn-00304",
+            "page_no": 114,
+            "marker": "3",
+            "source_text_preview": "Ibid., p. 30. La question est citée en français par Heidegger."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+        "start_page": 118,
+        "end_page": 134,
+        "pages": [
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 56,
+        "numeric_marker_count": 56,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 65,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00311",
+            "page_no": 118,
+            "marker": "10",
+            "source_text_preview": "Maurice ME!u.EAu-PoNJY, Humanisme et terrlmr. Essai sur le problème commu­ niste, Paris, Gallimard, 1947."
+          },
+          {
+            "note_item_id": "fn-00312",
+            "page_no": 118,
+            "marker": "11",
+            "source_text_preview": "Citation tirée de la Critique de la philosophie du Droit de Hegel, donnée par M. MERLEAu-PONlY, Humanisme et terreur ... , op. dt.~ p. 109."
+          },
+          {
+            "note_item_id": "fn-00313",
+            "page_no": 118,
+            "marker": "12",
+            "source_text_preview": "Ibid., p. 205. Cette allusion aux procès de Moscou est reprise de manière non moins contestable par G. LUKACS (Existentialisme ou: marxisme?..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-lembelliedesannées1950",
+        "start_page": 136,
+        "end_page": 178,
+        "pages": [
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 179,
+        "numeric_marker_count": 179,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 179,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00367",
+            "page_no": 136,
+            "marker": "1",
+            "source_text_preview": "Parmi ceux-ci, signalons Walter Bierne! quj fait paraître en 1950 Le Concept de monde chez Heidegger {Louvain-Paris, Nauwelaérts-Vrin). Cet..."
+          },
+          {
+            "note_item_id": "fn-00368",
+            "page_no": 136,
+            "marker": "2",
+            "source_text_preview": "On en trouve encore un tétnoignage en 1956 chez Jean-Toussaint DESANTI (Introduction à l'histoire de la philosophie, Paris, Éditions de la N..."
+          },
+          {
+            "note_item_id": "fn-00369",
+            "page_no": 137,
+            "marker": "3",
+            "source_text_preview": "Éric WEIL, Logique de la philosophie, Paris, Vrin, 1951."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0011-toc-ch-007-polémiquesrenouveléesdép",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-polémiquesrenouveléesdép",
+        "start_page": 185,
+        "end_page": 187,
+        "pages": [
+          185,
+          186,
+          187
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 10,
+        "numeric_marker_count": 10,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00546",
+            "page_no": 185,
+            "marker": "1",
+            "source_text_preview": "Ainsi la thèse de Kostas AxEr.os, Marx penseur de la technique, Paris, Éditions de Minuit, 1961. Axelos situe Marx dans la perspective du dé..."
+          },
+          {
+            "note_item_id": "fn-00547",
+            "page_no": 185,
+            "marker": "2",
+            "source_text_preview": "Martin :HEIDEGGER, Chemins qui ne mènent nulle part, Patis, Gallimard, 1962; Holzwege, Francfort, Klost=ann, 1957. Wolfgang Brokmeier, qui s..."
+          },
+          {
+            "note_item_id": "fn-00548",
+            "page_no": 186,
+            "marker": "3",
+            "source_text_preview": "Signalons également l'ingénieuse traduction de Der Sat:t. vom Grund (Pfullingen, Neske, 1957) par André Préau (Le Principe de raison, Paris,..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-008-1desdocumentsencombrants",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-1desdocumentsencombrants",
+        "start_page": 188,
+        "end_page": 223,
+        "pages": [
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 133,
+        "numeric_marker_count": 133,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 142,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00556",
+            "page_no": 188,
+            "marker": "11",
+            "source_text_preview": "Aimé PATRI, «Un exemple d'engagement. Martin Heidegger et le nazisme>>, Le Contrat soda!, janvier-février 1962, p. 37. ·"
+          },
+          {
+            "note_item_id": "fn-00557",
+            "page_no": 188,
+            "marker": "12",
+            "source_text_preview": "Recherche qui devait aboutir à ses ouvrages Théorie du rédt et Langages totali­ taires publiés tous deux en 1972 chez Hermann."
+          },
+          {
+            "note_item_id": "fn-00558",
+            "page_no": 188,
+            "marker": "13",
+            "source_text_preview": "Guido SCHNEEBERGER, Ergiinzungen zu eyner Heidegger-Bibliographie, Berne, 1960, 27 p. et une illustration."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0013-toc-ch-010-disséminationourecomposi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-disséminationourecomposi",
+        "start_page": 233,
+        "end_page": 239,
+        "pages": [
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 24,
+        "numeric_marker_count": 24,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 24,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00689",
+            "page_no": 233,
+            "marker": "1",
+            "source_text_preview": "Jacques DERRIDA, La Dissémination, Paris, Éditions du Seuil, 1972."
+          },
+          {
+            "note_item_id": "fn-00690",
+            "page_no": 234,
+            "marker": "2",
+            "source_text_preview": "Voir Luc FERRY et Alain .RENAUT, La Pensée 68. Essai sur l'anti-humanisme contemporain, Paris, Gallimard, 1985."
+          },
+          {
+            "note_item_id": "fn-00691",
+            "page_no": 234,
+            "marker": "3",
+            "source_text_preview": "Otto PëiGGELER, La Pensée de Martin Heidegger, trad .. Mariana Simon, Paris, Aubier, 1967. Ce livre est une présentation tou\\ à fait scrupul..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0014-toc-ch-010-disséminationourecomposi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-disséminationourecomposi",
+        "start_page": 241,
+        "end_page": 268,
+        "pages": [
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 107,
+        "numeric_marker_count": 107,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 132,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00713",
+            "page_no": 241,
+            "marker": "25",
+            "source_text_preview": "Ce fait, attesté par de multiples témoignages, nous a été confirmé par Jacques Orsoni qui, en septembre 1966, a bavardé avec René Char (y co..."
+          },
+          {
+            "note_item_id": "fn-00714",
+            "page_no": 241,
+            "marker": "26",
+            "source_text_preview": "il est bien précisé par le traducteur Curd Ochwadt, dans l'édition allemande des séminaires, que René Char n'a assisté personnellement qu'à..."
+          },
+          {
+            "note_item_id": "fn-00715",
+            "page_no": 241,
+            "marker": "27",
+            "source_text_preview": "Jean BEAUFRET, <<Martin Heidegger (1889-1976) >>, La Quinzaine littéraire, no 235, 16-30 juin 1976, p. 21. Sur ces lieux et ces circonstance..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0015-toc-ch-011-mortettransfiguration",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-mortettransfiguration",
+        "start_page": 275,
+        "end_page": 285,
+        "pages": [
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 52,
+        "numeric_marker_count": 52,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 4146,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "113",
+          "13",
+          "4146",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00820",
+            "page_no": 275,
+            "marker": "1",
+            "source_text_preview": "Pain et vin (4< strophe), Aux Allemands (1re et 2' strophe), Condliateur, à qui nul n'a jamais cru ... (v."
+          },
+          {
+            "note_item_id": "fn-00821",
+            "page_no": 275,
+            "marker": "113",
+            "source_text_preview": ", Les Titans (v."
+          },
+          {
+            "note_item_id": "fn-00822",
+            "page_no": 275,
+            "marker": "13",
+            "source_text_preview": ", Pain et vin (v."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0016-toc-ch-011-mortettransfiguration",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-mortettransfiguration",
+        "start_page": 287,
+        "end_page": 310,
+        "pages": [
+          287,
+          288,
+          289,
+          290,
+          291,
+          292,
+          293,
+          294,
+          295,
+          296,
+          297,
+          298,
+          299,
+          300,
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309,
+          310
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 90,
+        "numeric_marker_count": 90,
+        "numeric_marker_start": 13,
+        "numeric_marker_end": 142,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00872",
+            "page_no": 287,
+            "marker": "51",
+            "source_text_preview": "Luc F:E!ŒY et Alain RENAUT, «Heidegger en question. Essai de critiqUe interne», Archives de philosophie, octobre-décembre 1978, pp. 597-639."
+          },
+          {
+            "note_item_id": "fn-00873",
+            "page_no": 287,
+            "marker": "52",
+            "source_text_preview": "Henri BIRAULT, Heidegger et l'expérience de la pensée, Paris, Gallimard, 1978."
+          },
+          {
+            "note_item_id": "fn-00874",
+            "page_no": 288,
+            "marker": "53",
+            "source_text_preview": "ll faut, en effet, rappeler que Renaut publie encore en 1976 deux te>.l:es d'un heideggérianisme extraordinairement «orthodoxe» et d'un ton..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0017-toc-ch-012-lalettreetlesprit",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-lalettreetlesprit",
+        "start_page": 317,
+        "end_page": 342,
+        "pages": [
+          317,
+          318,
+          319,
+          320,
+          321,
+          322,
+          323,
+          324,
+          325,
+          326,
+          327,
+          328,
+          329,
+          330,
+          331,
+          332,
+          333,
+          334,
+          335,
+          336,
+          337,
+          338,
+          339,
+          340,
+          341,
+          342
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 102,
+        "numeric_marker_count": 102,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 103,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-00962",
+            "page_no": 317,
+            "marker": "1",
+            "source_text_preview": "Voir Entretiens (BIEMEL). D'après M. Claude 'Il:oisfontaines, professeur à l'uni­versité de Louvain, la traduction intégrale de Sein und Zei..."
+          },
+          {
+            "note_item_id": "fn-00963",
+            "page_no": 318,
+            "marker": "2",
+            "source_text_preview": "C'est effectivement à janvier 1980 que remonte la signature du contrat de Gallimard en faveur de François Vezin, d' apr'\"lle témoignage de c..."
+          },
+          {
+            "note_item_id": "fn-00964",
+            "page_no": 318,
+            "marker": "3",
+            "source_text_preview": "Ce sont ses propres termes dans le billet glissé dans chaque envoi et qu'il vaut la peine de citer intégralement : << Chers lecteurs, Voici,..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0018-toc-ch-013-leretourdurefoulé",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-leretourdurefoulé",
+        "start_page": 348,
+        "end_page": 386,
+        "pages": [
+          348,
+          349,
+          350,
+          351,
+          352,
+          353,
+          354,
+          355,
+          356,
+          357,
+          358,
+          359,
+          360,
+          361,
+          362,
+          363,
+          364,
+          365,
+          366,
+          367,
+          368,
+          369,
+          370,
+          371,
+          372,
+          373,
+          374,
+          375,
+          376,
+          377,
+          378,
+          379,
+          380,
+          381,
+          382,
+          383,
+          384,
+          385,
+          386
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 126,
+        "numeric_marker_count": 126,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 126,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01064",
+            "page_no": 348,
+            "marker": "1",
+            "source_text_preview": "Victor PARIAS, Heidegger et le nazisme, trad. de l'espagnol et de l'allemand par M. Benarroch etJ.-B. Grasset, Préface de C.Jamb,et, Lagrass..."
+          },
+          {
+            "note_item_id": "fn-01065",
+            "page_no": 348,
+            "marker": "2",
+            "source_text_preview": "Dans les cas de Staudinger et de Baumgarte!).: voir ibid., pp. 130-132 et234-237."
+          },
+          {
+            "note_item_id": "fn-01066",
+            "page_no": 349,
+            "marker": "3",
+            "source_text_preview": "Ibid., préface à PARIAS, p. 8."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0019-toc-ch-014-entreéruditionettechnosc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-014-entreéruditionettechnosc",
+        "start_page": 391,
+        "end_page": 439,
+        "pages": [
+          391,
+          392,
+          393,
+          394,
+          395,
+          396,
+          397,
+          398,
+          399,
+          400,
+          401,
+          402,
+          403,
+          404,
+          405,
+          406,
+          407,
+          408,
+          409,
+          410,
+          411,
+          412,
+          413,
+          414,
+          415,
+          416,
+          417,
+          418,
+          419,
+          420,
+          421,
+          422,
+          423,
+          424,
+          425,
+          426,
+          427,
+          428,
+          429,
+          430,
+          431,
+          432,
+          433,
+          434,
+          435,
+          436,
+          437,
+          438,
+          439
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 174,
+        "numeric_marker_count": 174,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1173,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01190",
+            "page_no": 391,
+            "marker": "1",
+            "source_text_preview": "Une longue et minutieuse étude de Nicolas TERTIJLIAN sur les Beitriige (<<Histoire de l'être et révolution politique>>, Les Temps modernes,..."
+          },
+          {
+            "note_item_id": "fn-01191",
+            "page_no": 391,
+            "marker": "2",
+            "source_text_preview": "Hugo OTI', Martin Heidegger. Éléments pour une biographie, trad. J.-M. Belœil, Postface de J.-M. Pahnier, Paris, Payot, 1990."
+          },
+          {
+            "note_item_id": "fn-01192",
+            "page_no": 392,
+            "marker": "3",
+            "source_text_preview": "C'estle cas de Thomas Ferenczi dans Le Monde du 16 novembre 1990: <<Douze ans dans la vie de Heidegger. L'historien allemand Hugo Ott confir..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0020-toc-ch-015-lacroiséedeschemins",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-015-lacroiséedeschemins",
+        "start_page": 445,
+        "end_page": 499,
+        "pages": [
+          445,
+          446,
+          447,
+          448,
+          449,
+          450,
+          451,
+          452,
+          453,
+          454,
+          455,
+          456,
+          457,
+          458,
+          459,
+          460,
+          461,
+          462,
+          463,
+          464,
+          465,
+          466,
+          467,
+          468,
+          469,
+          470,
+          471,
+          472,
+          473,
+          474,
+          475,
+          476,
+          477,
+          478,
+          479,
+          480,
+          481,
+          482,
+          483,
+          484,
+          485,
+          486,
+          487,
+          488,
+          489,
+          490,
+          491,
+          492,
+          493,
+          494,
+          495,
+          496,
+          497,
+          498,
+          499
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 185,
+        "numeric_marker_count": 185,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 186,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01364",
+            "page_no": 445,
+            "marker": "1",
+            "source_text_preview": "Propos rapportés par J. BEAUFRET, Dialogue avec Heidegger, op. cit., I, p. 17."
+          },
+          {
+            "note_item_id": "fn-01365",
+            "page_no": 446,
+            "marker": "2",
+            "source_text_preview": "HEIDEGGER, <<Mon chemin de pensée et la phénoménologie>>, Questions IV, op. dt., pp. 161-175. '"
+          },
+          {
+            "note_item_id": "fn-01366",
+            "page_no": 447,
+            "marker": "3",
+            "source_text_preview": "Précision qu'il donne dans l'appendice de 1969: ibid., p. 173."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0021-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "start_page": 501,
+        "end_page": 529,
+        "pages": [
+          501,
+          502,
+          503,
+          504,
+          505,
+          506,
+          507,
+          508,
+          509,
+          510,
+          511,
+          512,
+          513,
+          514,
+          515,
+          516,
+          517,
+          518,
+          519,
+          520,
+          521,
+          522,
+          523,
+          524,
+          525,
+          526,
+          527,
+          528,
+          529
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 82,
+        "numeric_marker_count": 82,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 161,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01549",
+            "page_no": 501,
+            "marker": "1",
+            "source_text_preview": "<<Martin Heidegger et le problème de la vérité>>, Fontaine, novembre 1947, p. 758."
+          },
+          {
+            "note_item_id": "fn-01550",
+            "page_no": 502,
+            "marker": "2",
+            "source_text_preview": "Dialogue avec Heidegger, op. cit., rv, p.[s6."
+          },
+          {
+            "note_item_id": "fn-01551",
+            "page_no": 503,
+            "marker": "3",
+            "source_text_preview": "Dans la lignée et la tradition de Jean Beaufret, citons' ses anciens élèves ou disciples: Serge Boucheron, François Fédier, Gérard Guest, Pi..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0022-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "start_page": 531,
+        "end_page": 535,
+        "pages": [
+          531,
+          532,
+          533,
+          534,
+          535
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 20,
+        "numeric_marker_count": 20,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 102,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01631",
+            "page_no": 531,
+            "marker": "84",
+            "source_text_preview": "Dans la pièce Sit venia verbo écrite en collaboration avec Michel DEUTSCH (op. dt., p. 17)."
+          },
+          {
+            "note_item_id": "fn-01632",
+            "page_no": 531,
+            "marker": "85",
+            "source_text_preview": "Ce relevé des traductions publiées en volumes (en excluant les rééditions) donne: années 1930: 1; années 1940: 1; années 1950: 6; années 196..."
+          },
+          {
+            "note_item_id": "fn-01633",
+            "page_no": 531,
+            "marker": "86",
+            "source_text_preview": "A propos de laquelle on aura noté que nous n'en avons pas attribué la <<pater· nité >> à Heidegger, à la différence de quelques auteurs qui..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0023-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "start_page": 537,
+        "end_page": 538,
+        "pages": [
+          537,
+          538
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 3,
+        "numeric_marker_count": 3,
+        "numeric_marker_start": 103,
+        "numeric_marker_end": 105,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "103",
+          "104",
+          "105"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01651",
+            "page_no": 537,
+            "marker": "103",
+            "source_text_preview": "Voir Entretiens (A:x:EI.os).ll n'est d'ailleurs pas sûr que Heidegger ait vérita­ blement voulu cette édition monumentale. TI semble plutôt..."
+          },
+          {
+            "note_item_id": "fn-01652",
+            "page_no": 537,
+            "marker": "104",
+            "source_text_preview": "Kostas A:x:EI.os, Métamorphoses, Paris, Éditions de Minuit, 1991, pp. 16-17: <<Le cas de Heidegger est extrêmement complexe et contradictoir..."
+          },
+          {
+            "note_item_id": "fn-01653",
+            "page_no": 538,
+            "marker": "105",
+            "source_text_preview": "La plus stupéfiante a été ·formulée au 'moment du plébiscite organisé par Hitler le 12 novembre 1933 en vue de faire apprduver s.a rupture s..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0024-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "start_page": 540,
+        "end_page": 541,
+        "pages": [
+          540,
+          541
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 4,
+        "numeric_marker_count": 4,
+        "numeric_marker_start": 106,
+        "numeric_marker_end": 109,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "106",
+          "107",
+          "108",
+          "109"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "fn-01654",
+            "page_no": 540,
+            "marker": "106",
+            "source_text_preview": "Rappdons les échéances qui marquerJnt la poursuite de la réception de Heidegger au xxr siècle: en 2026, ouverture d,; fonds Heidegger aux Ar..."
+          },
+          {
+            "note_item_id": "fn-01655",
+            "page_no": 540,
+            "marker": "107",
+            "source_text_preview": "C'est sur la question de la rdation à la sci~ce que <d'énormité>> de Heidegger est la plus sensible, sdonJean Beaufret (voir l'entretien por..."
+          },
+          {
+            "note_item_id": "fn-01656",
+            "page_no": 541,
+            "marker": "108",
+            "source_text_preview": "HEIDEGGER, Lettre sur l'humanisme, trad. citée (modifiée), pp. 164-165 («die Strenge der Besinnung, die Sorgfalt des Sa gens, die Sparsamkei..."
+          }
+        ]
+      }
+    ],
+    "endnote_region_rows": []
+  },
+  "endnote_array_building": {
+    "decision_basis": [
+      "fnm_note_items.region_id/chapter_id/page_no/marker",
+      "按 region_id 聚合生成注释数组",
+      "检查 numeric marker 连续性与首尾 marker"
+    ],
+    "note_capture_summary": {
+      "expected_anchor_count": 797,
+      "captured_note_count": 1657,
+      "capture_ratio": 2.079,
+      "sparse_capture_chapter_ids": [],
+      "dense_anchor_zero_capture_pages": [],
+      "chapters": [
+        {
+          "chapter_id": "toc-ch-001-introduction",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 11,
+          "captured_note_count": 22,
+          "capture_ratio": 2.0
+        },
+        {
+          "chapter_id": "toc-ch-002-premierspassagesdurhin",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 54,
+          "captured_note_count": 100,
+          "capture_ratio": 1.8519
+        },
+        {
+          "chapter_id": "toc-ch-003-labombesartre",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 25,
+          "captured_note_count": 70,
+          "capture_ratio": 2.8
+        },
+        {
+          "chapter_id": "toc-ch-004-lesfascinationsdelaprèsg",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 28,
+          "captured_note_count": 109,
+          "capture_ratio": 3.8929
+        },
+        {
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 30,
+          "captured_note_count": 65,
+          "capture_ratio": 2.1667
+        },
+        {
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 91,
+          "captured_note_count": 179,
+          "capture_ratio": 1.967
+        },
+        {
+          "chapter_id": "toc-ch-007-polémiquesrenouveléesdép",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 2,
+          "captured_note_count": 10,
+          "capture_ratio": 5.0
+        },
+        {
+          "chapter_id": "toc-ch-008-1desdocumentsencombrants",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 63,
+          "captured_note_count": 133,
+          "capture_ratio": 2.1111
+        },
+        {
+          "chapter_id": "toc-ch-009-epilogueii",
+          "note_mode": "book_endnote_bound",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-010-disséminationourecomposi",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 65,
+          "captured_note_count": 131,
+          "capture_ratio": 2.0154
+        },
+        {
+          "chapter_id": "toc-ch-011-mortettransfiguration",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 73,
+          "captured_note_count": 142,
+          "capture_ratio": 1.9452
+        },
+        {
+          "chapter_id": "toc-ch-012-lalettreetlesprit",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 51,
+          "captured_note_count": 102,
+          "capture_ratio": 2.0
+        },
+        {
+          "chapter_id": "toc-ch-013-leretourdurefoulé",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 54,
+          "captured_note_count": 126,
+          "capture_ratio": 2.3333
+        },
+        {
+          "chapter_id": "toc-ch-014-entreéruditionettechnosc",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 89,
+          "captured_note_count": 174,
+          "capture_ratio": 1.9551
+        },
+        {
+          "chapter_id": "toc-ch-015-lacroiséedeschemins",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 107,
+          "captured_note_count": 185,
+          "capture_ratio": 1.729
+        },
+        {
+          "chapter_id": "toc-ch-016-conclusion",
+          "note_mode": "footnote_primary",
+          "expected_anchor_count": 54,
+          "captured_note_count": 109,
+          "capture_ratio": 2.0185
+        }
+      ]
+    },
+    "book_endnote_stream_summary": {
+      "chapter_count": 0,
+      "chapters_with_endnote_stream": [],
+      "high_concentration_chapter_ids": [],
+      "chapters": []
+    },
+    "array_rows": [
+      {
+        "region_id": "nr-fn-ch-0001-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "item_count": 8,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 8,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0002-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "item_count": 8,
+        "numeric_marker_start": 9,
+        "numeric_marker_end": 16,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0003-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "item_count": 2,
+        "numeric_marker_start": 17,
+        "numeric_marker_end": 18,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "17",
+          "18"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0004-toc-ch-001-introduction",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-001-introduction",
+        "item_count": 4,
+        "numeric_marker_start": 19,
+        "numeric_marker_end": 22,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "19",
+          "20",
+          "21",
+          "22"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0005-toc-ch-002-premierspassagesdurhin",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-premierspassagesdurhin",
+        "item_count": 100,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 101,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0006-toc-ch-003-labombesartre",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-003-labombesartre",
+        "item_count": 70,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 70,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0007-toc-ch-004-lesfascinationsdelaprèsg",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-lesfascinationsdelaprèsg",
+        "item_count": 109,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 109,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0008-toc-ch-005-lhumanismedanslesturbule",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+        "item_count": 9,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 9,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+        "item_count": 56,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 65,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-lembelliedesannées1950",
+        "item_count": 179,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 179,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0011-toc-ch-007-polémiquesrenouveléesdép",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-polémiquesrenouveléesdép",
+        "item_count": 10,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 10,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-008-1desdocumentsencombrants",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-1desdocumentsencombrants",
+        "item_count": 133,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 142,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0013-toc-ch-010-disséminationourecomposi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-disséminationourecomposi",
+        "item_count": 24,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 24,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0014-toc-ch-010-disséminationourecomposi",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-disséminationourecomposi",
+        "item_count": 107,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 132,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0015-toc-ch-011-mortettransfiguration",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-mortettransfiguration",
+        "item_count": 52,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 4146,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "113",
+          "13",
+          "4146",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0016-toc-ch-011-mortettransfiguration",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-mortettransfiguration",
+        "item_count": 90,
+        "numeric_marker_start": 13,
+        "numeric_marker_end": 142,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "51",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0017-toc-ch-012-lalettreetlesprit",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-lalettreetlesprit",
+        "item_count": 102,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 103,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0018-toc-ch-013-leretourdurefoulé",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-013-leretourdurefoulé",
+        "item_count": 126,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 126,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0019-toc-ch-014-entreéruditionettechnosc",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-014-entreéruditionettechnosc",
+        "item_count": 174,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 1173,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0020-toc-ch-015-lacroiséedeschemins",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-015-lacroiséedeschemins",
+        "item_count": 185,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 186,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0021-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "item_count": 82,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 161,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0022-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "item_count": 20,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 102,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0023-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "item_count": 3,
+        "numeric_marker_start": 103,
+        "numeric_marker_end": 105,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "103",
+          "104",
+          "105"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0024-toc-ch-016-conclusion",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-016-conclusion",
+        "item_count": 4,
+        "numeric_marker_start": 106,
+        "numeric_marker_end": 109,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "106",
+          "107",
+          "108",
+          "109"
+        ]
+      }
+    ],
+    "endnote_array_rows": []
+  },
+  "endnote_merging": {
+    "decision_basis": [
+      "fnm_translation_units.kind/owner_kind/section_id/target_ref",
+      "导出 chapter markdown 中 local refs/local defs 的闭合情况",
+      "structure.freeze_note_unit_summary"
+    ],
+    "freeze_note_unit_summary": {
+      "chapter_view_note_unit_count": 1657,
+      "owner_fallback_note_unit_count": 0,
+      "unresolved_note_item_count": 0,
+      "unresolved_note_item_ids_preview": []
+    },
+    "note_unit_rows": [
+      {
+        "section_id": "toc-ch-001-introduction",
+        "section_title": "Introduction",
+        "note_unit_count": 22,
+        "note_unit_kind_counts": {
+          "footnote": 22
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00001}}",
+          "{{NOTE_REF:fn-00002}}",
+          "{{NOTE_REF:fn-00003}}",
+          "{{NOTE_REF:fn-00004}}",
+          "{{NOTE_REF:fn-00005}}"
+        ],
+        "page_span": [
+          7,
+          21
+        ]
+      },
+      {
+        "section_id": "toc-ch-002-premierspassagesdurhin",
+        "section_title": "1. Premiers passages du Rhin",
+        "note_unit_count": 100,
+        "note_unit_kind_counts": {
+          "footnote": 100
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00023}}",
+          "{{NOTE_REF:fn-00024}}",
+          "{{NOTE_REF:fn-00025}}",
+          "{{NOTE_REF:fn-00026}}",
+          "{{NOTE_REF:fn-00027}}"
+        ],
+        "page_span": [
+          25,
+          53
+        ]
+      },
+      {
+        "section_id": "toc-ch-003-labombesartre",
+        "section_title": "2. La bombe Sartre",
+        "note_unit_count": 70,
+        "note_unit_kind_counts": {
+          "footnote": 70
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00123}}",
+          "{{NOTE_REF:fn-00124}}",
+          "{{NOTE_REF:fn-00125}}",
+          "{{NOTE_REF:fn-00126}}",
+          "{{NOTE_REF:fn-00127}}"
+        ],
+        "page_span": [
+          55,
+          79
+        ]
+      },
+      {
+        "section_id": "toc-ch-004-lesfascinationsdelaprèsg",
+        "section_title": "3. Les fascinations de l'après-guerre",
+        "note_unit_count": 109,
+        "note_unit_kind_counts": {
+          "footnote": 109
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00193}}",
+          "{{NOTE_REF:fn-00194}}",
+          "{{NOTE_REF:fn-00195}}",
+          "{{NOTE_REF:fn-00196}}",
+          "{{NOTE_REF:fn-00197}}"
+        ],
+        "page_span": [
+          81,
+          111
+        ]
+      },
+      {
+        "section_id": "toc-ch-005-lhumanismedanslesturbule",
+        "section_title": "4. L'humanisme dans les turbulences",
+        "note_unit_count": 65,
+        "note_unit_kind_counts": {
+          "footnote": 65
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00302}}",
+          "{{NOTE_REF:fn-00303}}",
+          "{{NOTE_REF:fn-00304}}",
+          "{{NOTE_REF:fn-00305}}",
+          "{{NOTE_REF:fn-00306}}"
+        ],
+        "page_span": [
+          113,
+          134
+        ]
+      },
+      {
+        "section_id": "toc-ch-006-lembelliedesannées1950",
+        "section_title": "5. L'embellie des années 1950",
+        "note_unit_count": 179,
+        "note_unit_kind_counts": {
+          "footnote": 179
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00367}}",
+          "{{NOTE_REF:fn-00368}}",
+          "{{NOTE_REF:fn-00369}}",
+          "{{NOTE_REF:fn-00370}}",
+          "{{NOTE_REF:fn-00371}}"
+        ],
+        "page_span": [
+          136,
+          178
+        ]
+      },
+      {
+        "section_id": "toc-ch-007-polémiquesrenouveléesdép",
+        "section_title": "6. Polémiques renouvelées, déplacements inédits",
+        "note_unit_count": 10,
+        "note_unit_kind_counts": {
+          "footnote": 10
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00546}}",
+          "{{NOTE_REF:fn-00547}}",
+          "{{NOTE_REF:fn-00548}}",
+          "{{NOTE_REF:fn-00549}}",
+          "{{NOTE_REF:fn-00550}}"
+        ],
+        "page_span": [
+          185,
+          187
+        ]
+      },
+      {
+        "section_id": "toc-ch-008-1desdocumentsencombrants",
+        "section_title": "1 Des documents encombrants: le retour de la politique",
+        "note_unit_count": 133,
+        "note_unit_kind_counts": {
+          "footnote": 133
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00556}}",
+          "{{NOTE_REF:fn-00557}}",
+          "{{NOTE_REF:fn-00558}}",
+          "{{NOTE_REF:fn-00559}}",
+          "{{NOTE_REF:fn-00560}}"
+        ],
+        "page_span": [
+          188,
+          223
+        ]
+      },
+      {
+        "section_id": "toc-ch-010-disséminationourecomposi",
+        "section_title": "7. Dissémination ou recomposition? .:",
+        "note_unit_count": 131,
+        "note_unit_kind_counts": {
+          "footnote": 131
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00689}}",
+          "{{NOTE_REF:fn-00690}}",
+          "{{NOTE_REF:fn-00691}}",
+          "{{NOTE_REF:fn-00692}}",
+          "{{NOTE_REF:fn-00693}}"
+        ],
+        "page_span": [
+          233,
+          268
+        ]
+      },
+      {
+        "section_id": "toc-ch-011-mortettransfiguration",
+        "section_title": "8. Mort et transfiguration?",
+        "note_unit_count": 142,
+        "note_unit_kind_counts": {
+          "footnote": 142
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00820}}",
+          "{{NOTE_REF:fn-00821}}",
+          "{{NOTE_REF:fn-00822}}",
+          "{{NOTE_REF:fn-00823}}",
+          "{{NOTE_REF:fn-00824}}"
+        ],
+        "page_span": [
+          275,
+          310
+        ]
+      },
+      {
+        "section_id": "toc-ch-012-lalettreetlesprit",
+        "section_title": "9. La lettre et l'esprit",
+        "note_unit_count": 102,
+        "note_unit_kind_counts": {
+          "footnote": 102
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00962}}",
+          "{{NOTE_REF:fn-00963}}",
+          "{{NOTE_REF:fn-00964}}",
+          "{{NOTE_REF:fn-00965}}",
+          "{{NOTE_REF:fn-00966}}"
+        ],
+        "page_span": [
+          317,
+          342
+        ]
+      },
+      {
+        "section_id": "toc-ch-013-leretourdurefoulé",
+        "section_title": "10. Le retour du refoulé?",
+        "note_unit_count": 126,
+        "note_unit_kind_counts": {
+          "footnote": 126
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-01064}}",
+          "{{NOTE_REF:fn-01065}}",
+          "{{NOTE_REF:fn-01066}}",
+          "{{NOTE_REF:fn-01067}}",
+          "{{NOTE_REF:fn-01068}}"
+        ],
+        "page_span": [
+          348,
+          385
+        ]
+      },
+      {
+        "section_id": "toc-ch-014-entreéruditionettechnosc",
+        "section_title": "11. Entre érudition et techno-science",
+        "note_unit_count": 174,
+        "note_unit_kind_counts": {
+          "footnote": 174
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-01190}}",
+          "{{NOTE_REF:fn-01191}}",
+          "{{NOTE_REF:fn-01192}}",
+          "{{NOTE_REF:fn-01193}}",
+          "{{NOTE_REF:fn-01194}}"
+        ],
+        "page_span": [
+          391,
+          439
+        ]
+      },
+      {
+        "section_id": "toc-ch-015-lacroiséedeschemins",
+        "section_title": "12. La croisée des chemins",
+        "note_unit_count": 185,
+        "note_unit_kind_counts": {
+          "footnote": 185
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-01364}}",
+          "{{NOTE_REF:fn-01365}}",
+          "{{NOTE_REF:fn-01366}}",
+          "{{NOTE_REF:fn-01367}}",
+          "{{NOTE_REF:fn-01368}}"
+        ],
+        "page_span": [
+          445,
+          499
+        ]
+      },
+      {
+        "section_id": "toc-ch-016-conclusion",
+        "section_title": "Conclusion",
+        "note_unit_count": 109,
+        "note_unit_kind_counts": {
+          "footnote": 109
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-01549}}",
+          "{{NOTE_REF:fn-01550}}",
+          "{{NOTE_REF:fn-01551}}",
+          "{{NOTE_REF:fn-01552}}",
+          "{{NOTE_REF:fn-01553}}"
+        ],
+        "page_span": [
+          501,
+          541
+        ]
+      }
+    ],
+    "export_merge_rows": []
+  },
+  "anchor_resolution": {
+    "decision_basis": [
+      "fnm_body_anchors.page_no/paragraph_index/char_start/char_end/source_marker",
+      "fnm_note_links.status/resolver/confidence",
+      "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
+    ],
+    "link_summary": {
+      "matched": 1657,
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 1,
+      "endnote_orphan_note": 0,
+      "endnote_orphan_anchor": 0,
+      "ambiguous": 0,
+      "ignored": 11,
+      "fallback_count": 1040,
+      "repair_count": 146,
+      "fallback_matched_count": 1040,
+      "fallback_match_ratio": 0.627640313820157
+    },
+    "chapter_link_contract_summary": {
+      "chapter_count": 16,
+      "contract_required_count": 0,
+      "failed_chapter_ids": [],
+      "contract_v2_failed_chapter_ids": [
+        "toc-ch-001-introduction",
+        "toc-ch-002-premierspassagesdurhin",
+        "toc-ch-003-labombesartre",
+        "toc-ch-004-lesfascinationsdelaprèsg",
+        "toc-ch-005-lhumanismedanslesturbule",
+        "toc-ch-006-lembelliedesannées1950",
+        "toc-ch-007-polémiquesrenouveléesdép",
+        "toc-ch-008-1desdocumentsencombrants",
+        "toc-ch-010-disséminationourecomposi",
+        "toc-ch-011-mortettransfiguration",
+        "toc-ch-012-lalettreetlesprit",
+        "toc-ch-013-leretourdurefoulé",
+        "toc-ch-014-entreéruditionettechnosc",
+        "toc-ch-015-lacroiséedeschemins",
+        "toc-ch-016-conclusion"
+      ],
+      "contract_v2_first_marker_violation_count": 0,
+      "contract_v2_marker_gap_violation_count": 8,
+      "contract_v2_def_anchor_mismatch_count": 15
+    },
+    "anchor_kind_counts": {
+      "footnote": 2855,
+      "endnote": 1
+    },
+    "link_status_counts": {
+      "matched": 1657,
+      "ignored": 11,
+      "orphan_anchor": 1
+    },
+    "link_resolver_counts": {
+      "rule": 483,
+      "fallback": 1040,
+      "repair": 146
+    },
+    "anchor_samples": [
+      {
+        "anchor_id": "anchor-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 7,
+        "paragraph_index": 1,
+        "marker": "1",
+        "anchor_kind": "footnote",
+        "certainty": 1.0,
+        "source_text_preview": "Il était une fois un enfant pauvre de Souabe — né dans un petit bourg à l'est de la Forêt-Noire. Par la seule force de sa pensée et l'acharn..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 8,
+        "paragraph_index": 999,
+        "marker": "2",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "Karl LŒWITH, «Les implications politiques de la philosophie de l'existence chez Heidegger>>, Les Temps modernes, novembre 1946/p. 343."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00002",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 8,
+        "paragraph_index": 999,
+        "marker": "3",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "C'est d'ailleurs cette expression qu'un pamphlétaire communiste a utilisée comme titre ironique pour brocarder la vogue française de Heidegg..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00003",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 8,
+        "paragraph_index": 999,
+        "marker": "4",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "Frankfurter Allgemeine Zeitung, 19 mai 1999, p. 49: <<Die Trivialisierung des Martin Heidegger. Schund, Sex und Sühne: Di~ neuen Abenteuer d..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00004",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 8,
+        "paragraph_index": 999,
+        "marker": "5",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "ll serait «un Heidegger en quelque sorte aci::Iimaté et assimilé, métamorphosé, qni aurait trouvé en France une dimension inconnue de sa pro..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00005",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 9,
+        "paragraph_index": 999,
+        "marker": "6",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "Theodor W. ADoRNO, ]argon der Eigentlichkeit, Francfort, Suhrkamp, 1964; Jargon de l'authenticité, trad. É. Escoubas, Paris, Payot, 1989."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00006",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 9,
+        "paragraph_index": 999,
+        "marker": "7",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "Voir, par exemple, Hans-Georg GADAMER, Philosophische Lehrjahre, Francfort, Klostermann, 1995, pp. 175-176."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00007",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 9,
+        "paragraph_index": 999,
+        "marker": "8",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "<<Un tel travail présenterait saos conteste un intérêt certain» (François FÉDIER, <<Heidegger vu de France», Regarder voir, Paris, Les Belle..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00008",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 11,
+        "paragraph_index": 999,
+        "marker": "9",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "Rainer Maria Rn.KE, <<Auguste Rodin>>, Œuvres, I, Paris, Éditions du Seuil, 1966, p. 391; Werke, IV; p. 299. Cité par HEIDEGGER, Gesamtausga..."
+      },
+      {
+        "anchor_id": "synthetic-footnote-00009",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 12,
+        "paragraph_index": 999,
+        "marker": "10",
+        "anchor_kind": "footnote",
+        "certainty": 0.4,
+        "source_text_preview": "Dans un article qu'il intitulait déjà <<Heidegger en France >>,Magazine littéraire, n\" 235, novembre 1986, pp. 34-38. TI a également noté la..."
+      }
+    ],
+    "link_samples": [
+      {
+        "link_id": "link-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00001",
+        "anchor_id": "anchor-00001",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "1",
+        "page_span": [
+          7,
+          7
+        ]
+      },
+      {
+        "link_id": "link-00002",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00002",
+        "anchor_id": "synthetic-footnote-00001",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "2",
+        "page_span": [
+          8,
+          8
+        ]
+      },
+      {
+        "link_id": "link-00003",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00003",
+        "anchor_id": "synthetic-footnote-00002",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "3",
+        "page_span": [
+          8,
+          8
+        ]
+      },
+      {
+        "link_id": "link-00004",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00004",
+        "anchor_id": "synthetic-footnote-00003",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "4",
+        "page_span": [
+          8,
+          8
+        ]
+      },
+      {
+        "link_id": "link-00005",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00005",
+        "anchor_id": "synthetic-footnote-00004",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "5",
+        "page_span": [
+          8,
+          8
+        ]
+      },
+      {
+        "link_id": "link-00006",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00006",
+        "anchor_id": "synthetic-footnote-00005",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "6",
+        "page_span": [
+          9,
+          9
+        ]
+      },
+      {
+        "link_id": "link-00007",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00007",
+        "anchor_id": "synthetic-footnote-00006",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "7",
+        "page_span": [
+          9,
+          9
+        ]
+      },
+      {
+        "link_id": "link-00008",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00008",
+        "anchor_id": "synthetic-footnote-00007",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "8",
+        "page_span": [
+          9,
+          9
+        ]
+      },
+      {
+        "link_id": "link-00009",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00009",
+        "anchor_id": "synthetic-footnote-00008",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "9",
+        "page_span": [
+          11,
+          11
+        ]
+      },
+      {
+        "link_id": "link-00010",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00010",
+        "anchor_id": "synthetic-footnote-00009",
+        "status": "matched",
+        "resolver": "fallback",
+        "marker": "10",
+        "page_span": [
+          12,
+          12
+        ]
+      },
+      {
+        "link_id": "link-00011",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00011",
+        "anchor_id": "anchor-00002",
+        "status": "matched",
+        "resolver": "rule",
+        "marker": "11",
+        "page_span": [
+          13,
+          13
+        ]
+      },
+      {
+        "link_id": "link-00012",
+        "chapter_id": "toc-ch-001-introduction",
+        "note_item_id": "fn-00012",
+        "anchor_id": "anchor-00003",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "12",
+        "page_span": [
+          14,
+          14
+        ]
+      }
+    ],
+    "llm_repair_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/llm_repair.cluster_request.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/llm_repair.cluster_request.002.json",
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/llm_repair.cluster_request.003.json"
+    ],
+    "visual_toc_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/visual_toc.manual_input_extract.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/visual_toc.manual_input_extract.002.json",
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/visual_toc.manual_input_extract.003.json",
+      "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/llm_traces/visual_toc.manual_input_extract.004.json"
+    ]
+  }
+}

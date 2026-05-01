@@ -3,349 +3,251 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-010-prologue:toc-ch-010-prologue:footnote\",\n  \"chapter_title\": \"Prologue\",\n  \"page_range\": [\n    426,\n    436\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 426,\n      \"ocr_excerpt\": \"# 10 ## Prologue to Part Two Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} $ Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts. In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \\\"madness illness\\\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dynasties prior to the Qing dealt ...\"\n    },\n    {\n      \"page_no\": 427,\n      \"ocr_excerpt\": \"designated madness, but I reject the possibility that feng bing referred to another kind of madness than dian 癲 and kuang 狂. ## The Qing judicial system and the documents it produced Criminal investigations usually began when someone brought an illegal act to the attention of the local magistrate, who, in addition to being the highest-ranked local administrator, was also in charge of judicial matters. When a suspicious death occurred, the magistrate brought a coroner with him to examine the corpse and ascertain the cause of death. If necessary, the magistrate also sent deputies to apprehend the killer. Although the magistrate could start to interrogate witnesses at once, the formal trial only started when the “criminal”—as a person under trial was called—and the witnesses had all been assembled. In Chinese imperial law, no indictment told a person what charges he or she faced. Instead, the magistrate investigated the “circumstances” (qing 情) of a criminal act and then decided under what law that crime should be sentenced. He then composed a report (xiang 詳) recounting the entire affair and specifying the sentence (ni 擬) that went with the law that covered this particular act. $ ^{4 ...\"\n    },\n    {\n      \"page_no\": 428,\n      \"ocr_excerpt\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions. But routine memorials have limits as sources of information. Since they were written only after a sentence had been meted out, the information they presented was designed to lead seamlessly to the proposed verdict. These highly structured reports left no room for debate, unless an official from the Ministry of Punishments had raised a point that required debate. When doubts were expressed ...\"\n    },\n    {\n      \"page_no\": 429,\n      \"ocr_excerpt\": \"Created in the late seventeenth century, palace memorials exploded in numbers after the creation of the Grand Council during the Yongzheng reign (1723-1735). The Grand Council, which unlike the Grand Secretariat worked in direct collaboration with the monarch, became the most important agency in the central government from the 1730s until the end of the Qing. Legal cases judged grave (like parricide or sedition) had to be reported to the Grand Council by palace memorial. Such cases were processed more quickly than those reported through routine memorials, because palace memorials were considered more urgent, and because the sentences meted out in them necessitated no repeated reviews. Unlike tiben, palace memorials could also contain documentary attachments, such as seized texts or more detailed transcriptions of depositions. The cases I discuss in Chapters 14 and 15 were all brought to the attention of the throne through palace memorials. Besides “routine” and “palace” memorials, I also found information on Qing official views of madness in successive editions of the Qing Code (called Dai Qing liü 大清律, Dai Qing liü jijie fuli 大清律集解附例, or Dai Qing lüli 大清律例 depending on when they w ...\"\n    },\n    {\n      \"page_no\": 430,\n      \"ocr_excerpt\": \"Lingering Doubts contained neither the diagrams (on family relations, legal instruments of punishment, technical terms, table of monetary redemption, etc.) included at the beginning of the official editions of the Code, nor the running commentaries that topped each page in both private and state-sponsored editions of the Code. It is Huang Jingjia's inclusion of these tables and his numbering of all the statutes and sub-statutes that make his edition (not a \\\"reprint\\\") of Lingering Doubts so convenient. Xue's analyses themselves are invaluable for tracing the origin of most sub-statutes, though he was imprecise about Kangxi-era (1662-1722) legislation. ## The pre-Qing handling of mad homicides Let me now discuss pre-Qing legal treatments of mad homicides and trace at the same time the emergence of the character feng 瘋, by which Qing law officially referred to insanity. The terms by which \\\"madness\\\" was designated in Chinese imperial law changed through time, yet no word in particular implied either distance from or closeness with medical approaches. The legal treatment of mad people under dynasties that used medical terms like diankuang 顛狂 and fengkuang 風狂 seems to have been no more ( ...\"\n    },\n    {\n      \"page_no\": 431,\n      \"ocr_excerpt\": \"were mad killers granted an unspecified reduction of punishment (狂易殺人 待減重論). $ ^{11} $ No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) who committed crimes. When mad persons committed a homicide that deserved the death penalty, their sentence (decapitation or strangulation) had to be set forth in a special memorial to the emperor to petition for his decision. $ ^{12} $ How the emperor treated such cases is unknown. The Song dynasty (960-1279) adopted the Tang approach wholesale. $ ^{13} $\"\n    },\n    {\n      \"page_no\": 432,\n      \"ocr_excerpt\": \"Unlike the Tang and Song, the Yuan dynasty (1260-1368) promulgated several explicit laws concerning homicides committed by mad people. Yuan courts were instructed to diminish the sentence of mad killers, but not to absolve them from penalties entirely. For instance, a man who killed one of his parents or grand-parents in a state of insanity (風狂) was to be simply “executed” (處死) rather than put to death by dismemberment. $ ^{14} $ In 1269 a man killed four people in a fit of “Heart Wind” (心風). $ ^{15} $ Legal officials petitioned his case to the emperor (上請) “in accordance with the old precedent” (照依舊例) that instructed to do so in cases of killing because of insanity (顛狂殺人). $ ^{16} $ Khubilai Khan eventually absolved the killer from the death penalty by imperial edict (敕裁) and condemned him to paying 50 ounces of silver (per person?) in “cremation or burial fees” (燒埋銀) to the family of his victims, the same amount as for people who committed a regular homicide. $ ^{17} $ Khubilai's reasoning may have been the same as the one behind another Yuan law stating that someone who, in a state of madness (病風狂), injured another person during a fight, leading to that person's death (毆傷人致死), s ...\"\n    },\n    {\n      \"page_no\": 433,\n      \"ocr_excerpt\": \"though cremation or burial fees should still be collected (徵燒埋銀) from the culprit (History of the Yuan 105: 2678). Early Qing laws handled mad homicides in a similar fashion, though the legal reasoning that justified monetary compensation differed. $ ^{18} $ Another Yuan law absolved those who “spoke inappropriately” (失口亂言) as long as they had done so while “suffering from Wind madness” (害風狂疾) and if there was nothing else behind their words. $ ^{19} $ As I will show in Chapters 14 and 15, the Qing attitude toward seditious words pronounced by mad people would be much harsher. Yuan legal documents referred to madness as xin feng 心風 (“Heart Wind”), feng kuang 風狂 (“Wind kuang”), dian kuang 顛狂 (“insanity”), and perhaps even feng bing 瘋病, the term that Qing law would officially adopt to discuss insanity. $ ^{20} $ Despite their different origins, these names did not have different legal implications. $ ^{21} $\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01201\",\n      \"marker\": \"3\",\n      \"page_no\": 426,\n      \"paragraph_index\": 1,\n      \"source_text\": \"In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain ho ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01203\",\n      \"marker\": \"5\",\n      \"page_no\": 427,\n      \"paragraph_index\": 3,\n      \"source_text\": \"In a “re-trial” (覆審), the prefect reviewed the entire case and could go as far as to re-interrogate the accused and all the witnesses. $ ^{5} $ Even when he agreed with the magistrate’s verdict, the prefect still had to write his own report ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01206\",\n      \"marker\": \"8\",\n      \"page_no\": 428,\n      \"paragraph_index\": 8,\n      \"source_text\": \"who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.\"\n    },\n    {\n      \"anchor_id\": \"anchor-01207\",\n      \"marker\": \"6\",\n      \"page_no\": 428,\n      \"paragraph_index\": 11,\n      \"source_text\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01209\",\n      \"marker\": \"8\",\n      \"page_no\": 428,\n      \"paragraph_index\": 11,\n      \"source_text\": \"governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01210\",\n      \"marker\": \"9\",\n      \"page_no\": 429,\n      \"paragraph_index\": 2,\n      \"source_text\": \"As has become customary in English-language scholarship, I will refer to Qing legal articles by their numbers in Huang Jingjia's 黄靜嘉 1970 re-edition of Xue Yunsheng's 薛允升 Lingering Doubts in the Study of the Sub-Statutes (Duli cunyi 讀例存疑; 1 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01211\",\n      \"marker\": \"10\",\n      \"page_no\": 430,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Whereas in English law acts committed because of insanity did not count as crimes, Chinese imperial law sentenced killings committed because of madness differently depending on the circumstances. $ ^{10} $ For the larger part of the Han dyn ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01214\",\n      \"marker\": \"13\",\n      \"page_no\": 431,\n      \"paragraph_index\": 1,\n      \"source_text\": \"No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) wh ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00320\",\n      \"note_item_id\": \"fn-00237\",\n      \"current_anchor_id\": \"anchor-01204\",\n      \"marker\": \"7\",\n      \"note_page_no\": 430,\n      \"anchor_page_no\": 428,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Xhe0following0paragraphs0contradict0 arl0FPngerWs0claim01 @ 7A0?4@20that Xthe0exemption0of0lunatics0from punishment0_Z50has0been`0a0principle0of0the0Ghinese0law0from0the0^hou0dynasty0until0nowadays5Y\",\n      \"anchor_excerpt\": \"confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments”\"\n    },\n    {\n      \"link_id\": \"link-00325\",\n      \"note_item_id\": \"fn-00242\",\n      \"current_anchor_id\": \"anchor-01230\",\n      \"marker\": \"4\",\n      \"note_page_no\": 436,\n      \"anchor_page_no\": 434,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"4. *#)!%\\u0001 $1 *# À \\u0003 @C\\u0001=6AC@DJ \\u0002) \\\"!*#\\u0001 %*# ¾¿» \\u0003\\u0006\\u001b@C\\u0001>@C6\\u0001@? E96\\u0001\\u00189:?6D6\\u0001>65:42=\\u00016IA=2?2E:@?D\\u0001@7\\u0001=6AC@DJ\\u00012?5\\u0001E96\\u0001=2?8F286\\u0001FD65\\u0001E@\\u0001C676C\\u0001E@\\u0001E9:D\\u00015:D62D6\\u0004\\u0001D66\\u0001!6F?8\\u0001 \\b\\b\\u0011\\u0012\\u0001 \\u000f\\u0005 \\u0011\\u0006\\u0001)96\\u000162C=:6DE\\u0001:?DE2?46\\u0001@7\\\"!*# \\u000192G6\\u00017@F?5\\u0001:?\\u0001E96\\u0001>65:42=\\u0001=:E6C2E ...\",\n      \"anchor_excerpt\": \"The key to the widening use of feng 瘋 to mean “madness” was its phonetic equivalence with feng 風 (“Wind”) and the age-old association of the sound feng with madness in expressions like fengkuang (風狂, “Wind madness”), fengdian (風癲, “Wind dia ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-025-appendices:nr-en-bk-0162-toc-ch-025-appendices:footnote\",\n  \"chapter_title\": \"Appendices\",\n  \"page_range\": [\n    770,\n    771\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 769,\n      \"ocr_excerpt\": \"## Appendix 3 # The madness section of Lou Ying's Yixue gangmu 醫學綱目 (1396) In section 5.2, I cited Lou Ying's 櫻英 (1320-1400) treatise as an example of intertextual composition and as good representatives of the zhèzhong (5.1) approach to the textual past that consisted in selectively borrowing approaches from previous books and authors. Here is a list of the works cited in the madness section of Lou Ying's Yixue gangmu. Lou referred to each book or author by one or two distinctive characters, which I cite in square brackets at the end of each entry. 1. The Suwen 素問 (Basic Questions): short passages from pian 28, 46, 74, and 79, the latter along with Wang Bing's 王冰 eighth-century annotations [cited as Su 素] 2. The Lingshu 靈樞 (Divine Pivot): pian 22 and 78 [Ling 靈] 3. The Nanjing 難經 (Canon of Problems): problems 20 and 59 [Nan 難] 4. The Zhenjiu jiayi jing 針灸甲乙經 (AB Canon of Acumoxa) [Jia 甲], compiled by Huangfu Mi in the third century CE. 5. Zhang Ji 張機: “Fangji and foxglove decoction” 防已地黃湯 from an entry called “Fangji and foxglove decoction” (防已地黃湯方) in Jingui yaolüe 金匱要略, juan 1, section 5 [Zhong 仲, from Zhang Ji’s zi Zhongjing 仲景]\"\n    },\n    {\n      \"page_no\": 770,\n      \"ocr_excerpt\": \"6. Shen Kuo's Lingyuan fang 靈苑方 (1048/77): “Cinnabar powder” 辰砂散 $ ^{1} $ 7. A case record by Sun Zhao 孫兆 (late 11 $ ^{th} $ century; see 3.7, pp. 65-65) [Sun 孫] $ ^{2} $ 8. Xu Shuwei's 許叔微 Puji benshi fang 普濟本事方 (1132): recipes for \\\"Will-appeasing paste\\\" (寧志膏) and \\\"Fright-Qi pill\\\" (驚氣丸), as well as three case files that Xu appended to his entry on the latter [Ben 本, from the title of Xu's book] $ ^{3} $ 9. Chen Yan's 陳言 Sanyin fang 三因方 (1174): three recipes, \\\"Guo-alum elixir\\\" (號礬丹), $ ^{4} $ the \\\"Heart-pacifying elixir\\\" (鎮心丹), and a modified version of the \\\"Lesser life-prolonging decoction\\\" (小續命湯) [Wu 無, from Chen's $ \\\\ddot{\\\\gamma} $ Wuze 無擇] $ ^{5} $ 10. Liu Wansu's 劉完素 Suwen bingji qiyi baoming ji 素問病機氣宜保命集 (1186): for the “Angelica Qi-supporting decoction” (當歸承氣湯) [Bao 保] $ ^{6} $ 11. Zhang Congzheng’s 張從正 Rumen shiqin 儒門事親 (ca. 1228): four case records [Zihe 子和, Zhang’s $ z_{i} $] 12. Wang Haogu's 王好古 Yinzheng lieli 陰證略例 (author's prefaces from 1232 and 1243): one case record and a commentary on some passages from the Inner Canon concerning madness [Hai 海, short for Wang's bao Haicang 海藏] $ ^{8} $\"\n    },\n    {\n      \"page_no\": 771,\n      \"ocr_excerpt\": \"13. Shatumusu's 沙圖穆蘇 Ruizhu tang jingyan fang 瑞竹堂經驗方 (1323): one recipe, \\\"Coming-to paste\\\" (Laisu gao 來蘇膏), designed to induce vomiting in cases of Wind strokes [Zhu'竹] $ ^{9} $ 14. Wei Yilin's 危亦林 Shiyi dexiao fang 世醫得效方 (1337; first printed in 1345): three recipes (“Instant-drunkenness paste” 一醉膏, $ ^{10} $ “Turmeric and alum powder” 鬱謦散, $ ^{11} $ and “Shrubby sophora decoction” 苦參湯 $ ^{12} $ and one case $ ^{13} $ [Shi 世]\"\n    },\n    {\n      \"page_no\": 772,\n      \"ocr_excerpt\": \"## Appendix 4 ## Ming editions of books by Liu Chun 劉純 (1340-1412) Liu Chun's 劉純 medical treatises were widely read in the fifteenth century and thus contributed to the diffusion of Danxi medicine, the doctrines attributed to Zhu Zhenheng 朱震亨 (1282-1358) that became so central to medical thinking in the fifteenth and sixteenth centuries. $ ^{1} $ This appendix lists most known editions of four works by Liu Chun: Yijing xiaoxue 醫經小學 [“Elementary Learning on the Medical Canons”; first ed.: 1388], Yuji weiyi 玉機微義 [“Subtle Meanings of the Secrets Carved in Jade”; compiled on the basis of a shorter manuscript by Xu Yanchun 徐彥純 (d. 1384); first ed.: 1396], Zabing zhili 雜病治例 [“Examples of Treatments for Miscellaneous Illnesses”; first ed.: 1408?], and Shanghai zhili 傷寒治例 [“Examples of Treatments for Cold Injury”; first ed.: 1479]. The table is based on information found in the Quanguo Zhongyi tushu lianbe mulu 全國中醫圖書聯合目錄 (Xue Qinglu 1991), a catalog of Chinese medical books that have survived in Chinese libraries, as well as on data from prefaces to Liu's books. $ ^{2} $ In addition to four editions of the Yijing xiaoxue (all listed in the table below), Xue 1991 mentions copies of fifteen ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"en-00001\",\n      \"marker\": \"6\",\n      \"page_no\": 770,\n      \"source_text\": \"Shen Kuo's Lingyuan fang 靈苑方 (1048/77): “Cinnabar powder” 辰砂散 $ ^{1} $\"\n    },\n    {\n      \"note_item_id\": \"en-00002\",\n      \"marker\": \"7\",\n      \"page_no\": 770,\n      \"source_text\": \"A case record by Sun Zhao 孫兆 (late 11 $ ^{th} $ century; see 3.7, pp. 65-65) [Sun 孫] $ ^{2} $\"\n    },\n    {\n      \"note_item_id\": \"en-00003\",\n      \"marker\": \"8\",\n      \"page_no\": 770,\n      \"source_text\": \"Xu Shuwei's 許叔微 Puji benshi fang 普濟本事方 (1132): recipes for \\\"Will-appeasing paste\\\" (寧志膏) and \\\"Fright-Qi pill\\\" (驚氣丸), as well as three case files that Xu appended to his entry on the latter [Ben 本, from the title of Xu's book] $ ^{3} $\"\n    },\n    {\n      \"note_item_id\": \"en-00004\",\n      \"marker\": \"9\",\n      \"page_no\": 770,\n      \"source_text\": \"Chen Yan's 陳言 Sanyin fang 三因方 (1174): three recipes, \\\"Guo-alum elixir\\\" (號礬丹), $ ^{4} $ the \\\"Heart-pacifying elixir\\\" (鎮心丹), and a modified version of the \\\"Lesser life-prolonging decoction\\\" (小續命湯) [Wu 無, from Chen's $ \\\\ddot{\\\\gamma} $ Wuze 無擇] ...\"\n    },\n    {\n      \"note_item_id\": \"en-00005\",\n      \"marker\": \"10\",\n      \"page_no\": 770,\n      \"source_text\": \"Liu Wansu's 劉完素 Suwen bingji qiyi baoming ji 素問病機氣宜保命集 (1186): for the “Angelica Qi-supporting decoction” (當歸承氣湯) [Bao 保] $ ^{6} $\"\n    },\n    {\n      \"note_item_id\": \"en-00006\",\n      \"marker\": \"11\",\n      \"page_no\": 770,\n      \"source_text\": \"Zhang Congzheng’s 張從正 Rumen shiqin 儒門事親 (ca.\"\n    },\n    {\n      \"note_item_id\": \"en-00007\",\n      \"marker\": \"1228\",\n      \"page_no\": 770,\n      \"source_text\": \": four case records [Zihe 子和, Zhang’s $ z_{i} $]\"\n    },\n    {\n      \"note_item_id\": \"en-00008\",\n      \"marker\": \"12\",\n      \"page_no\": 770,\n      \"source_text\": \"Wang Haogu's 王好古 Yinzheng lieli 陰證略例 (author's prefaces from 1232 and 1243): one case record and a commentary on some passages from the Inner Canon concerning madness [Hai 海, short for Wang's bao Haicang 海藏] $ ^{8} $\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": []\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-010-prologue:toc-ch-010-prologue:footnote",
-      "chapter_title": "Prologue",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-025-appendices:nr-en-bk-0162-toc-ch-025-appendices:footnote",
+      "chapter_title": "Appendices",
+      "request_mode": "note_only",
       "allowed_actions": [
-        "match",
-        "ignore_ref",
-        "synthesize_note_item",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        426,
-        436
+        770,
+        771
       ],
       "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "unmatched_note_items": [
         {
-          "row_id": 107670,
+          "row_id": 565,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01201",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 426,
-          "paragraph_index": 1,
-          "char_start": 549,
-          "char_end": 557,
-          "source_marker": "$ ^{3} $",
-          "normalized_marker": "3",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \"madness illness\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dynasties prior to the Qing dealt with homicides committed in a fit of insanity. $ ^{3} $ Then I probe the origin of the term \"madness illness\" by which Qing law",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 107672,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01203",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 427,
-          "paragraph_index": 3,
-          "char_start": 135,
-          "char_end": 143,
-          "source_marker": "$ ^{5} $",
-          "normalized_marker": "5",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "In a “re-trial” (覆審), the prefect reviewed the entire case and could go as far as to re-interrogate the accused and all the witnesses. $ ^{5} $ Even when he agreed with the magistrate’s verdict, the prefect still had to write his own report and send it to the provincial judge, the highest legal official in the province. After having made sure that the sentence meted out was consistent with the evidence presented, the judge passed the case to the governor or",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 107675,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01206",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 428,
-          "paragraph_index": 8,
-          "char_start": 22,
-          "char_end": 30,
-          "source_marker": "$ ^{8} $",
-          "normalized_marker": "8",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 107676,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01207",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 428,
-          "paragraph_index": 11,
-          "char_start": 276,
-          "char_end": 284,
-          "source_marker": "$ ^{6} $",
+          "note_item_id": "en-00001",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "6",
           "normalized_marker": "6",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "occurrence": 1,
+          "source_text": "Shen Kuo's Lingyuan fang 靈苑方 (1048/77): “Cinnabar powder” 辰砂散 $ ^{1} $",
+          "page_no": 770,
+          "display_marker": "6",
+          "source_marker": "6",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107678,
+          "row_id": 566,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01209",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 428,
-          "paragraph_index": 11,
-          "char_start": 742,
-          "char_end": 750,
-          "source_marker": "$ ^{8} $",
+          "note_item_id": "en-00002",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "A case record by Sun Zhao 孫兆 (late 11 $ ^{th} $ century; see 3.7, pp. 65-65) [Sun 孫] $ ^{2} $",
+          "page_no": 770,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 567,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "en-00003",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "8",
           "normalized_marker": "8",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "occurrence": 1,
+          "source_text": "Xu Shuwei's 許叔微 Puji benshi fang 普濟本事方 (1132): recipes for \"Will-appeasing paste\" (寧志膏) and \"Fright-Qi pill\" (驚氣丸), as well as three case files that Xu appended to his entry on the latter [Ben 本, from the title of Xu's book] $ ^{3} $",
+          "page_no": 770,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107679,
+          "row_id": 568,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01210",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 429,
-          "paragraph_index": 2,
-          "char_start": 438,
-          "char_end": 446,
-          "source_marker": "$ ^{9} $",
+          "note_item_id": "en-00004",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "9",
           "normalized_marker": "9",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "As has become customary in English-language scholarship, I will refer to Qing legal articles by their numbers in Huang Jingjia's 黄靜嘉 1970 re-edition of Xue Yunsheng's 薛允升 Lingering Doubts in the Study of the Sub-Statutes (Duli cunyi 讀例存疑; 1905). Xue's work was originally not an edition of the code, but an unpublished critical commentary on the \"sub-statutes\" (例) as they existed after 1870, when the Qing Code had last been overhauled. $ ^{9} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "occurrence": 1,
+          "source_text": "Chen Yan's 陳言 Sanyin fang 三因方 (1174): three recipes, \"Guo-alum elixir\" (號礬丹), $ ^{4} $ the \"Heart-pacifying elixir\" (鎮心丹), and a modified version of the \"Lesser life-prolonging decoction\" (小續命湯) [Wu 無, from Chen's $ \\ddot{\\gamma} $ Wuze 無擇] $ ^{5} $",
+          "page_no": 770,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107680,
+          "row_id": 569,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01211",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 430,
-          "paragraph_index": 2,
-          "char_start": 196,
-          "char_end": 205,
-          "source_marker": "$ ^{10} $",
+          "note_item_id": "en-00005",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "10",
           "normalized_marker": "10",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Whereas in English law acts committed because of insanity did not count as crimes, Chinese imperial law sentenced killings committed because of madness differently depending on the circumstances. $ ^{10} $ For the larger part of the Han dynasty (206 BCE – 220 CE), people who killed in a state of insanity were sentenced to death. Only in the early second century CE",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "occurrence": 1,
+          "source_text": "Liu Wansu's 劉完素 Suwen bingji qiyi baoming ji 素問病機氣宜保命集 (1186): for the “Angelica Qi-supporting decoction” (當歸承氣湯) [Bao 保] $ ^{6} $",
+          "page_no": 770,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107684,
+          "row_id": 570,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01214",
-          "chapter_id": "toc-ch-010-prologue",
-          "page_no": 431,
-          "paragraph_index": 1,
-          "char_start": 587,
-          "char_end": 596,
-          "source_marker": "$ ^{13} $",
-          "normalized_marker": "13",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) who committed crimes. When mad persons committed a homicide that deserved the death penalty, their sentence (decapitation or strangulation) had to be set forth in a special memorial to the emperor to petition for his decision. $ ^{12} $ How the emperor treated such cases is unknown. The Song dynasty (960-1279) adopted the Tang approach wholesale. $ ^{13} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "note_item_id": "en-00006",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "Zhang Congzheng’s 張從正 Rumen shiqin 儒門事親 (ca.",
+          "page_no": 770,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 571,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "en-00007",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "1228",
+          "normalized_marker": "1228",
+          "occurrence": 1,
+          "source_text": ": four case records [Zihe 子和, Zhang’s $ z_{i} $]",
+          "page_no": 770,
+          "display_marker": "1228",
+          "source_marker": "1228",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 572,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "en-00008",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-025-appendices",
+          "region_id": "nr-en-bk-0162-toc-ch-025-appendices",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "Wang Haogu's 王好古 Yinzheng lieli 陰證略例 (author's prefaces from 1232 and 1243): one case record and a commentary on some passages from the Inner Canon concerning madness [Hai 海, short for Wang's bao Haicang 海藏] $ ^{8} $",
+          "page_no": 770,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         }
       ],
-      "rebind_candidates": [
-        {
-          "link_id": "link-00320",
-          "note_item_id": "fn-00237",
-          "current_anchor_id": "anchor-01204",
-          "marker": "7",
-          "note_page_no": 430,
-          "anchor_page_no": 428,
-          "current_anchor_marker": "7",
-          "note_excerpt": "Xhe0following0paragraphs0contradict0 arl0FPngerWs0claim01 @ 7A0?4@20that Xthe0exemption0of0lunatics0from punishment0_Z50has0been`0a0principle0of0the0Ghinese0law0from0the0^hou0dynasty0until0nowadays5Y",
-          "anchor_excerpt": "confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments”",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00325",
-          "note_item_id": "fn-00242",
-          "current_anchor_id": "anchor-01230",
-          "marker": "4",
-          "note_page_no": 436,
-          "anchor_page_no": 434,
-          "current_anchor_marker": "4",
-          "note_excerpt": "4. *#)!%\u0001 $1 *# À \u0003 @C\u0001=6AC@DJ \u0002) \"!*#\u0001 %*# ¾¿» \u0003\u0006\u001b@C\u0001>@C6\u0001@? E96\u0001\u00189:?6D6\u0001>65:42=\u00016IA=2?2E:@?D\u0001@7\u0001=6AC@DJ\u00012?5\u0001E96\u0001=2?8F286\u0001FD65\u0001E@\u0001C676C\u0001E@\u0001E9:D\u00015:D62D6\u0004\u0001D66\u0001!6F?8\u0001 \b\b\u0011\u0012\u0001 \u000f\u0005 \u0011\u0006\u0001)96\u000162C=:6DE\u0001:?DE2?46\u0001@7\"!*# \u000192G6\u00017@F?5\u0001:?\u0001E96\u0001>65:42=\u0001=:E6C2EFC6 H2D\u0001:?\u00012\u00015:D4FDD:@?\u0001@7X>25\u00015@8DY\u0001\u0002¿¯ \u0013 D66\u00141&%\u0001\" *# ¨ 0 \b\u000e1\u0004\u0001 \b\u000e\u0006 2\u0005 3\u0004 X/9F\u000149@?8D9@F\u0001D92?8\u0001>6?Y öéµ\u0019Đ \u0004 X/9:BF2? ?:6Y³¯: \u0003\u0006 - )\u0017\u0004 >6>@C:2=D 52E65\u0001 \u0001 F=J\u0001 \u000f \u000e\u0001\u0002&! \u0006\u000e\u0006 \u00032?5 \u000f\u0001\"2C49\u0001 \u0010 \u000e \u0002 & \u0006 \u0006\u0011\u0003\u0006 #2E92?\u0001(:G:?\u0001\u0002 \u0011\u0011 \u0012\u0001 \u000e \u0017\u0003\u0001>256\u00012\u0001D:>:=2C\u0001DF886DE:@?\u0001:?\u00012\u0001C6G:6H\u0001@7\u0001#8\u0001 \u0011\u0011\b\u0006",
-          "anchor_excerpt": "The key to the widening use of feng 瘋 to mean “madness” was its phonetic equivalence with feng 風 (“Wind”) and the age-old association of the sound feng with madness in expressions like fengkuang (風狂, “Wind madness”), fengdian (風癲, “Wind dian”), and xin feng 心風 (“Heart Wind”). By the twelfth century the sound feng (“Wind”) had been associated with madness for so long that it had come to mean madness even when it was not followed by either kuang or dian nor disambiguated by the addition of the “illness radical” (疒) to yield the form 瘋. $ ^{22} $ One “crazy monk brother” (風僧哥) was mentioned in a twelfth-century collection of anecdotes. $ ^{23} $ The term fa feng 發風 (“fit of Wind” = “fit of madness”) also appeared in a Yuan play titled A Pair of Battling Quacks (Shuang dou yi 雙鬥醫). $ ^{24} $",
-          "current_anchor_synthetic": false
-        }
-      ]
+      "unmatched_anchors": [],
+      "rebind_candidates": []
     },
     "page_contexts": [
       {
-        "page_no": 426,
-        "file_idx": 425,
+        "page_no": 769,
+        "file_idx": 768,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "# 10 ## Prologue to Part Two Madness and mad people in the Qing dynasty have been studied mostly in a legal context. $ ^{1} $ The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. $ ^{2} $ Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts. In this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \"madness illness\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dynasties prior to the Qing dealt with homicides committed in a fit of insanity. $ ^{3} $ Then I probe the origin of the term \"madness illness\" by which Qing law",
-        "byte_size": 126369,
-        "sha256": "ca1fe2a7c8d1d30a8ee8ba032461320bd8f14b57a0eac362321ae38b883347e4"
+        "ocr_excerpt": "## Appendix 3 # The madness section of Lou Ying's Yixue gangmu 醫學綱目 (1396) In section 5.2, I cited Lou Ying's 櫻英 (1320-1400) treatise as an example of intertextual composition and as good representatives of the zhèzhong (5.1) approach to the textual past that consisted in selectively borrowing approaches from previous books and authors. Here is a list of the works cited in the madness section of Lou Ying's Yixue gangmu. Lou referred to each book or author by one or two distinctive characters, which I cite in square brackets at the end of each entry. 1. The Suwen 素問 (Basic Questions): short passages from pian 28, 46, 74, and 79, the latter along with Wang Bing's 王冰 eighth-century annotations [cited as Su 素] 2. The Lingshu 靈樞 (Divine Pivot): pian 22 and 78 [Ling 靈] 3. The Nanjing 難經 (Canon of Problems): problems 20 and 59 [Nan 難] 4. The Zhenjiu jiayi jing 針灸甲乙經 (AB Canon of Acumoxa) [Jia 甲], compiled by Huangfu Mi in the third century CE. 5. Zhang Ji 張機: “Fangji and foxglove decoction” 防已地黃湯 from an entry called “Fangji and foxglove decoction” (防已地黃湯方) in Jingui yaolüe 金匱要略, juan 1, section 5 [Zhong 仲, from Zhang Ji’s zi Zhongjing 仲景]",
+        "byte_size": 96955,
+        "sha256": "e14bc992d1201cbbc72d7c72ae5306080c5faa8c270e92fc28bfcae5ac941bba"
       },
       {
-        "page_no": 427,
-        "file_idx": 426,
+        "page_no": 770,
+        "file_idx": 769,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "designated madness, but I reject the possibility that feng bing referred to another kind of madness than dian 癲 and kuang 狂. ## The Qing judicial system and the documents it produced Criminal investigations usually began when someone brought an illegal act to the attention of the local magistrate, who, in addition to being the highest-ranked local administrator, was also in charge of judicial matters. When a suspicious death occurred, the magistrate brought a coroner with him to examine the corpse and ascertain the cause of death. If necessary, the magistrate also sent deputies to apprehend the killer. Although the magistrate could start to interrogate witnesses at once, the formal trial only started when the “criminal”—as a person under trial was called—and the witnesses had all been assembled. In Chinese imperial law, no indictment told a person what charges he or she faced. Instead, the magistrate investigated the “circumstances” (qing 情) of a criminal act and then decided under what law that crime should be sentenced. He then composed a report (xiang 詳) recounting the entire affair and specifying the sentence (ni 擬) that went with the law that covered this particular act. $ ^{4} $ He sent this report to his immediate superior the prefect. In a “re-trial” (覆審), the prefect reviewed the entire case and could go as far as to re-interrogate the accused and all the witnesses. $ ...",
-        "byte_size": 126430,
-        "sha256": "52f29c2dd6552c9a00862382c2757a1b0c929d325d61d01983b7b7863f20157e"
+        "ocr_excerpt": "6. Shen Kuo's Lingyuan fang 靈苑方 (1048/77): “Cinnabar powder” 辰砂散 $ ^{1} $ 7. A case record by Sun Zhao 孫兆 (late 11 $ ^{th} $ century; see 3.7, pp. 65-65) [Sun 孫] $ ^{2} $ 8. Xu Shuwei's 許叔微 Puji benshi fang 普濟本事方 (1132): recipes for \"Will-appeasing paste\" (寧志膏) and \"Fright-Qi pill\" (驚氣丸), as well as three case files that Xu appended to his entry on the latter [Ben 本, from the title of Xu's book] $ ^{3} $ 9. Chen Yan's 陳言 Sanyin fang 三因方 (1174): three recipes, \"Guo-alum elixir\" (號礬丹), $ ^{4} $ the \"Heart-pacifying elixir\" (鎮心丹), and a modified version of the \"Lesser life-prolonging decoction\" (小續命湯) [Wu 無, from Chen's $ \\ddot{\\gamma} $ Wuze 無擇] $ ^{5} $ 10. Liu Wansu's 劉完素 Suwen bingji qiyi baoming ji 素問病機氣宜保命集 (1186): for the “Angelica Qi-supporting decoction” (當歸承氣湯) [Bao 保] $ ^{6} $ 11. Zhang Congzheng’s 張從正 Rumen shiqin 儒門事親 (ca. 1228): four case records [Zihe 子和, Zhang’s $ z_{i} $] 12. Wang Haogu's 王好古 Yinzheng lieli 陰證略例 (author's prefaces from 1232 and 1243): one case record and a commentary on some passages from the Inner Canon concerning madness [Hai 海, short for Wang's bao Haicang 海藏] $ ^{8} $",
+        "byte_size": 164704,
+        "sha256": "2d1e9fcdacbc84d130381b3a3f42153d618f4754c1afbbc3d07ddd12048f2aca"
       },
       {
-        "page_no": 428,
-        "file_idx": 427,
+        "page_no": 771,
+        "file_idx": 770,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "governor-general, who, after another review (usually made by his legal secretaries), transcribed all the evidence into a tiben 題本, a “routine memorial” that he sent to the Grand Secretariat (Neige 內閣), which forwarded it to the Ministry of Punishments for final confirmation. $ ^{6} $ In a new memorial, the “Office of Scrutiny of the Ministry of Punishments” (Xingke 刑科) sometimes rejected (bo 駁), but usually confirmed the sentence proposed by the governor. $ ^{7} $ These “routine memorials” recounted entire incidents—from before the killing to the arrest—and the way they were processed by the judicial system. They even cited depositions from physicians or the relatives of mad killers, and even from the very men who were under trial. $ ^{8} $ Much of Chapters 13 to 15 are based on these depositions. But routine memorials have limits as sources of information. Since they were written only after a sentence had been meted out, the information they presented was designed to lead seamlessly to the proposed verdict. These highly structured reports left no room for debate, unless an official from the Ministry of Punishments had raised a point that required debate. When doubts were expressed, it was usually to show that they had already been resolved. The limits of these documents depend on the information we seek from them. They may provide little information on the daily life of “ordin ...",
-        "byte_size": 149857,
-        "sha256": "d55034ea3469a2833646953cef157c93acc492ce562b1f9cf819e0644a291c94"
+        "ocr_excerpt": "13. Shatumusu's 沙圖穆蘇 Ruizhu tang jingyan fang 瑞竹堂經驗方 (1323): one recipe, \"Coming-to paste\" (Laisu gao 來蘇膏), designed to induce vomiting in cases of Wind strokes [Zhu'竹] $ ^{9} $ 14. Wei Yilin's 危亦林 Shiyi dexiao fang 世醫得效方 (1337; first printed in 1345): three recipes (“Instant-drunkenness paste” 一醉膏, $ ^{10} $ “Turmeric and alum powder” 鬱謦散, $ ^{11} $ and “Shrubby sophora decoction” 苦參湯 $ ^{12} $ and one case $ ^{13} $ [Shi 世]",
+        "byte_size": 109899,
+        "sha256": "c5e34314bbf8dbb0cd1388a788d171d0bbbe1d91b72994f0f106d398f0f4e02b"
       },
       {
-        "page_no": 429,
-        "file_idx": 428,
+        "page_no": 772,
+        "file_idx": 771,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Created in the late seventeenth century, palace memorials exploded in numbers after the creation of the Grand Council during the Yongzheng reign (1723-1735). The Grand Council, which unlike the Grand Secretariat worked in direct collaboration with the monarch, became the most important agency in the central government from the 1730s until the end of the Qing. Legal cases judged grave (like parricide or sedition) had to be reported to the Grand Council by palace memorial. Such cases were processed more quickly than those reported through routine memorials, because palace memorials were considered more urgent, and because the sentences meted out in them necessitated no repeated reviews. Unlike tiben, palace memorials could also contain documentary attachments, such as seized texts or more detailed transcriptions of depositions. The cases I discuss in Chapters 14 and 15 were all brought to the attention of the throne through palace memorials. Besides “routine” and “palace” memorials, I also found information on Qing official views of madness in successive editions of the Qing Code (called Dai Qing liü 大清律, Dai Qing liü jijie fuli 大清律集解附例, or Dai Qing lüli 大清律例 depending on when they were published), commentaries on the Code, imperial edicts, memorials on policy issues, as well as several collections of legal cases. As has become customary in English-language scholarship, I will re ...",
-        "byte_size": 133958,
-        "sha256": "f276062a215ffa4c8bbbe94e59d9d956ad0aa0d5fbff94609cafcf474bfa79d2"
-      },
-      {
-        "page_no": 430,
-        "file_idx": 429,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Lingering Doubts contained neither the diagrams (on family relations, legal instruments of punishment, technical terms, table of monetary redemption, etc.) included at the beginning of the official editions of the Code, nor the running commentaries that topped each page in both private and state-sponsored editions of the Code. It is Huang Jingjia's inclusion of these tables and his numbering of all the statutes and sub-statutes that make his edition (not a \"reprint\") of Lingering Doubts so convenient. Xue's analyses themselves are invaluable for tracing the origin of most sub-statutes, though he was imprecise about Kangxi-era (1662-1722) legislation. ## The pre-Qing handling of mad homicides Let me now discuss pre-Qing legal treatments of mad homicides and trace at the same time the emergence of the character feng 瘋, by which Qing law officially referred to insanity. The terms by which \"madness\" was designated in Chinese imperial law changed through time, yet no word in particular implied either distance from or closeness with medical approaches. The legal treatment of mad people under dynasties that used medical terms like diankuang 顛狂 and fengkuang 風狂 seems to have been no more (or less) compatible with medical approaches than that of eras that used less medical concepts like xinfeng 心風 or kuangyi 狂易. Whereas in English law acts committed because of insanity did not count as ...",
-        "byte_size": 123030,
-        "sha256": "3196288c9a2d9d6fb9aa6e0b4224c50eccd8870dfa979f26694aa28b4f2f1619"
-      },
-      {
-        "page_no": 431,
-        "file_idx": 430,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "were mad killers granted an unspecified reduction of punishment (狂易殺人 待減重論). $ ^{11} $ No law concerning mad homicides existed during the Tang dynasty (617-908). Instead, a statute called “Those Who Are Aged, Juvenile, or Disabled” (老少廢疾) granted limited clemency to “critically disabled” 篤疾 people (including mad people 癲狂) who committed crimes. When mad persons committed a homicide that deserved the death penalty, their sentence (decapitation or strangulation) had to be set forth in a special memorial to the emperor to petition for his decision. $ ^{12} $ How the emperor treated such cases is unknown. The Song dynasty (960-1279) adopted the Tang approach wholesale. $ ^{13} $",
-        "byte_size": 205652,
-        "sha256": "9e668a4db0f7e776d003bf4df3d08e7b08a4442b768094629fe7dc092e002f1b"
-      },
-      {
-        "page_no": 432,
-        "file_idx": 431,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Unlike the Tang and Song, the Yuan dynasty (1260-1368) promulgated several explicit laws concerning homicides committed by mad people. Yuan courts were instructed to diminish the sentence of mad killers, but not to absolve them from penalties entirely. For instance, a man who killed one of his parents or grand-parents in a state of insanity (風狂) was to be simply “executed” (處死) rather than put to death by dismemberment. $ ^{14} $ In 1269 a man killed four people in a fit of “Heart Wind” (心風). $ ^{15} $ Legal officials petitioned his case to the emperor (上請) “in accordance with the old precedent” (照依舊例) that instructed to do so in cases of killing because of insanity (顛狂殺人). $ ^{16} $ Khubilai Khan eventually absolved the killer from the death penalty by imperial edict (敕裁) and condemned him to paying 50 ounces of silver (per person?) in “cremation or burial fees” (燒埋銀) to the family of his victims, the same amount as for people who committed a regular homicide. $ ^{17} $ Khubilai's reasoning may have been the same as the one behind another Yuan law stating that someone who, in a state of madness (病風狂), injured another person during a fight, leading to that person's death (毆傷人致死), should be \"absolved of crime\" (免罪),",
-        "byte_size": 171722,
-        "sha256": "b0460622fa5d255c8e38637596a5a44bf98eae820684a9c77c9cfa2485b1179c"
-      },
-      {
-        "page_no": 433,
-        "file_idx": 432,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "though cremation or burial fees should still be collected (徵燒埋銀) from the culprit (History of the Yuan 105: 2678). Early Qing laws handled mad homicides in a similar fashion, though the legal reasoning that justified monetary compensation differed. $ ^{18} $ Another Yuan law absolved those who “spoke inappropriately” (失口亂言) as long as they had done so while “suffering from Wind madness” (害風狂疾) and if there was nothing else behind their words. $ ^{19} $ As I will show in Chapters 14 and 15, the Qing attitude toward seditious words pronounced by mad people would be much harsher. Yuan legal documents referred to madness as xin feng 心風 (“Heart Wind”), feng kuang 風狂 (“Wind kuang”), dian kuang 顛狂 (“insanity”), and perhaps even feng bing 瘋病, the term that Qing law would officially adopt to discuss insanity. $ ^{20} $ Despite their different origins, these names did not have different legal implications. $ ^{21} $",
-        "byte_size": 185361,
-        "sha256": "04fb70ba4bc0878d532d9bfe9ac1f86f3d85d625519ee71ce72c5389fb02c5f0"
+        "ocr_excerpt": "## Appendix 4 ## Ming editions of books by Liu Chun 劉純 (1340-1412) Liu Chun's 劉純 medical treatises were widely read in the fifteenth century and thus contributed to the diffusion of Danxi medicine, the doctrines attributed to Zhu Zhenheng 朱震亨 (1282-1358) that became so central to medical thinking in the fifteenth and sixteenth centuries. $ ^{1} $ This appendix lists most known editions of four works by Liu Chun: Yijing xiaoxue 醫經小學 [“Elementary Learning on the Medical Canons”; first ed.: 1388], Yuji weiyi 玉機微義 [“Subtle Meanings of the Secrets Carved in Jade”; compiled on the basis of a shorter manuscript by Xu Yanchun 徐彥純 (d. 1384); first ed.: 1396], Zabing zhili 雜病治例 [“Examples of Treatments for Miscellaneous Illnesses”; first ed.: 1408?], and Shanghai zhili 傷寒治例 [“Examples of Treatments for Cold Injury”; first ed.: 1479]. The table is based on information found in the Quanguo Zhongyi tushu lianbe mulu 全國中醫圖書聯合目錄 (Xue Qinglu 1991), a catalog of Chinese medical books that have survived in Chinese libraries, as well as on data from prefaces to Liu's books. $ ^{2} $ In addition to four editions of the Yijing xiaoxue (all listed in the table below), Xue 1991 mentions copies of fifteen extant Ming editions of the Yuji weiyi. Twelve of them are identified below. I do not list the other three because they are undated. Two of these three undated editions, however, indicate the name of ...",
+        "byte_size": 122594,
+        "sha256": "79f1640f04688ae34d854834ab18013086ca534ab6bacbd5164436bdddda068c"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-010-prologue:toc-ch-010-prologue:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 8,
+    "cluster_id": "toc-ch-025-appendices:nr-en-bk-0162-toc-ch-025-appendices:footnote",
+    "request_mode": "note_only",
+    "page_context_count": 4,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00237\",\n    \"anchor_id\": \"anchor-01211\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text for marker '10' visible on page 412 (screenshot) matches the OCR excerpt of fn-00237 in the rebind candidate. The current binding to anchor-01204 (marker 7 on p.428) is incorrect; it should be bound to anchor-01211 (marker 10 on p.430).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00242\",\n    \"anchor_id\": \"anchor-01203\",\n    \"confidence\": 0.95,\n    \"reason\": \"The footnote text for marker '4' visible on page 409 (screenshot) corresponds to the content of fn-00242 (despite OCR corruption). The current binding to anchor-01230 (p.434) is incorrect; it should be bound to anchor-01203 (marker 4 on p.427).\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"The provided OCR data contains significant structural errors that prevent automated matching. Specifically, the 'unmatched_note_items' list incorrectly treats body text paragraphs (items 6-14) as note items with wrong markers (e.g., item 7 has marker '7' but is body text; item 12 has marker '12' but corresponds to anchor 8). The actual footnotes (markers 1-13) are visible in the page screenshots (pp. 752-753) but are missing from the structured 'unmatched_note_items' input. Due to this mismatch between the input data and the visual evidence, automatic resolution is not possible.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "fn-00237",
-      "anchor_id": "anchor-01211",
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The footnote text for marker '10' visible on page 412 (screenshot) matches the OCR excerpt of fn-00237 in the rebind candidate. The current binding to anchor-01204 (marker 7 on p.428) is incorrect; it should be bound to anchor-01211 (marker 10 on p.430)."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00242",
-      "anchor_id": "anchor-01203",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The footnote text for marker '4' visible on page 409 (screenshot) corresponds to the content of fn-00242 (despite OCR corruption). The current binding to anchor-01230 (p.434) is incorrect; it should be bound to anchor-01203 (marker 4 on p.427)."
+      "confidence": 0.0,
+      "reason": "The provided OCR data contains significant structural errors that prevent automated matching. Specifically, the 'unmatched_note_items' list incorrectly treats body text paragraphs (items 6-14) as note items with wrong markers (e.g., item 7 has marker '7' but is body text; item 12 has marker '12' but corresponds to anchor 8). The actual footnotes (markers 1-13) are visible in the page screenshots (pp. 752-753) but are missing from the structured 'unmatched_note_items' input. Due to this mismatch between the input data and the visual evidence, automatic resolution is not possible."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-010-prologue:toc-ch-010-prologue:footnote",
-    "chapter_title": "Prologue",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "fn-00237",
-        "anchor_id": "anchor-01211",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '10' visible on page 412 (screenshot) matches the OCR excerpt of fn-00237 in the rebind candidate. The current binding to anchor-01204 (marker 7 on p.428) is incorrect; it should be bound to anchor-01211 (marker 10 on p.430)."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00242",
-        "anchor_id": "anchor-01203",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '4' visible on page 409 (screenshot) corresponds to the content of fn-00242 (despite OCR corruption). The current binding to anchor-01230 (p.434) is incorrect; it should be bound to anchor-01203 (marker 4 on p.427)."
+        "confidence": 0.0,
+        "reason": "The provided OCR data contains significant structural errors that prevent automated matching. Specifically, the 'unmatched_note_items' list incorrectly treats body text paragraphs (items 6-14) as note items with wrong markers (e.g., item 7 has marker '7' but is body text; item 12 has marker '12' but corresponds to anchor 8). The actual footnotes (markers 1-13) are visible in the page screenshots (pp. 752-753) but are missing from the structured 'unmatched_note_items' input. Due to this mismatch between the input data and the visual evidence, automatic resolution is not possible."
       }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00237",
-        "anchor_id": "anchor-01211",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '10' visible on page 412 (screenshot) matches the OCR excerpt of fn-00237 in the rebind candidate. The current binding to anchor-01204 (marker 7 on p.428) is incorrect; it should be bound to anchor-01211 (marker 10 on p.430)."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00242",
-        "anchor_id": "anchor-01203",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The footnote text for marker '4' visible on page 409 (screenshot) corresponds to the content of fn-00242 (despite OCR corruption). The current binding to anchor-01230 (p.434) is incorrect; it should be bound to anchor-01203 (marker 4 on p.427)."
-      }
-    ],
-    "auto_applied_actions": []
+    ]
   },
   "usage": {
-    "prompt_tokens": 10933,
-    "completion_tokens": 301,
-    "total_tokens": 11234,
+    "prompt_tokens": 6093,
+    "completion_tokens": 169,
+    "total_tokens": 6262,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 9613
+    "duration_ms": 4973
   }
 }

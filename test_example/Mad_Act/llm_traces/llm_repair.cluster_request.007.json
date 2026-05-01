@@ -3,17 +3,17 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-009-genderedmania:toc-ch-009-genderedmania:footnote\",\n  \"chapter_title\": \"Gendered mania\",\n  \"page_range\": [\n    387,\n    422\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 387,\n      \"ocr_excerpt\": \"average of 4 cases per century and barely more than 2 if we exclude the last hundred years I cover. I found only two relevant cases between 1588 and 1821. The 35 cases represent the way elite doctors (mostly from the Lower Yangzi region) explained the way they understood and treated mad women. They give only a small glimpse of how society handled women who were called mad. Indeed, the main treatment for manic women may not have been medical. There is too little evidence to tell, but home confinement was certainly an option, though it may have come only after the failure of medical or exorcistic treatments. Since the documents tell us precious little about the way female patients experienced their own condition, we are also deprived of the “first-person” data that have informed recent studies of women in Chinese history. $ ^{2} $ I will remind the reader of these limits when I propose tentative conclusions or try to point to possible trends. This chapter’s opening section tries to determine whether and how the diagnoses and therapies of “mad women” were gendered. One guiding issue will be whether physicians found relevant the notion that the body of women was “governed by Blood.” Th ...\"\n    },\n    {\n      \"page_no\": 388,\n      \"ocr_excerpt\": \"whether postpartum insanity was “really madness,” since late-imperial physicians tied it explicitly to what they called madness. ### 9.1 Non-gendered bodies, gendered etiologies Medical explanations of mad behavior in treatises purported to apply to both men and women. But in practice, did doctors consistently trace cases of women's mad behavior to the roots they identified in their treatises? Did their descriptions and treatments apply to the \\\"androgynous body\\\" (Furth 1999: 25-29, 44-48 and 56-57)—a body without anatomical sex—that characterized elite Chinese medicine? Charlotte Furth has indeed argued that late-imperial physicians focused increasingly less on the uniqueness of women, and tended to understand the women's illnesses in the same way as they understood men's. I shall agree with Furth in general, but I will also show that the etiology of madness was already ungendered in the Song dynasty (960-1279), and that glimpses of gendered etiologies only appeared in late-imperial times, especially in the nineteenth century. In recorded symptoms, identified etiology, and adopted therapy, a spectrum of more or less gendered solutions were available. Some symptoms (notably nudity a ...\"\n    },\n    {\n      \"page_no\": 389,\n      \"ocr_excerpt\": \"In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files. Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \\\"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\\\" (夫婦人顛狂病者 ...\"\n    },\n    {\n      \"page_no\": 390,\n      \"ocr_excerpt\": \"In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $ A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's strange behavior (she \\\"would cry or laugh, or run around naked, or shut the doors and speak a lot\\\" (或哭或笑 或裸體而走 或閉戶而多言) to \\\"harm caused by excessive ratiocination, [which made] the spiri ...\"\n    },\n    {\n      \"page_no\": 392,\n      \"ocr_excerpt\": \"flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 血氣迷心 或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was among the first to ascribe mad symptoms to pathological menses, but the text explained how one specific imbalance could lead to insanity, not how mad symptoms should be interpreted in general. In other words, he was locking one etiology and some symptoms together in a contextually limited script. Li probably believed that the general explanation of insanity as caused by the action of Fire and mucus still applied to women who did not suffer from menorrhagia and whose symptoms did not occur postpartum. Although the rare sources we have are difficult to bind into a single narrative, dispersed writings indicate that at least some physicians thought that women suffered from madness for reasons particular to them. Zhuang Lüyan's 莊履嚴 Fuke baibian 婦科百辨 (early 17 $ ^{th} $ century?) claimed that the mucus that made women mad (顛狂) by encroaching on their Heart was brought about by extreme fr ...\"\n    },\n    {\n      \"page_no\": 393,\n      \"ocr_excerpt\": \"薹憤 遂成此疾). $ ^{17} $ Sorrow appeared in both Zhuang's and Chen's accounts, but neither said much more about it than the lines I just cited. It is tempting to speculate that women isolated from their kin by patrilocal marriage and with limited social relations because of the necessity to stay at home were more likely than men to suffer from “sorrow.” Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in ...\"\n    },\n    {\n      \"page_no\": 394,\n      \"ocr_excerpt\": \"imperial times. $ ^{21} $ Gong recommended treating such a disorder with an enhanced version of the “Carefree powder” (加味逍遥散), which was often used to redress Liver imbalances, but he did not record ever using this treatment in a clinical case. I found only one case of a “mad” woman between 1615 and 1822: a file by Suzhou physician Zhang Lu 張璐 (1617-1699). A woman spoke madly, screaming and scolding. She would sing and laugh unusually, as if she were possessed. Her eye and the corner of her mouth on one side were raised in a stupid grin. Some treated her as if these were convulsive fits, others as if these were fits of Heart Wind, all to no avail. It turns out that she had long had a Head-Wind illness, and that it was the acting up of Wind mucus that had made her this way. I used [Sichuan-] lovage-and-wild-ginger decoction with an addition of avert-wind, and she quickly became better after a few doses. $ ^{22} $ 一婦人狂言叫罵 歌笑非常 似崇憑依 一邊眼與口角呆起 或作癎治 成作心風治 皆不效 乃是舊有頭風之疾 風痰作之使然 用芎辛湯加防風 數服頓愈 This way to treat madness symptoms was unusual, but not obviously gendered. The record also indicates that previous physicians had used methods that could have applied to men. Following a disappointing l ...\"\n    },\n    {\n      \"page_no\": 395,\n      \"ocr_excerpt\": \"and left several case files to supplement their general explanations. $ ^{24} $ His long survey of causes of insanity included a claim that “women suffer from dian because of Blood imbalances” (婦人患癲 由血不調), $ ^{25} $ but none of his three cases of “mad women” mentioned Blood. He diagnosed that a woman who spoke and laughed to herself was suffering from “abundance of mucus, and Qi in stasis” (痰多氣鬱), and attributed to fright the dian case of a despondent and emaciated (神衰肌削) patient who had been “sitting and lying as if stupid” (坐臥如癡) for more than ten years. $ ^{26} $ Lin noted that “only the massive replenishing of primordial Qi will bring results” (非大補元氣不為功), but since many physicians considered that prolonged disorders led to general depletion, Lin’s approach did not apply solely to women. In another case by Lin, a woman surnamed Zhang was “confused and manic” (恍惚狂妄). In addition to “seeing her husband as an enemy” (视夫若仇), she menacingly “held an instrument and shed her clothes, so that no one dared to approach her” (持械棄衣 莫之敢近). Lin adopted the conventional remedy for such acute crises: an emetic. Pure melon pedicle “removed a lot of viscous saliva and lodged sputum” (去粘涎宿沫頗多), bu ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01093\",\n      \"marker\": \"2\",\n      \"page_no\": 387,\n      \"paragraph_index\": 0,\n      \"source_text\": \"average of 4 cases per century and barely more than 2 if we exclude the last hundred years I cover. I found only two relevant cases between 1588 and 1821. The 35 cases represent the way elite doctors (mostly from the Lower Yangzi region) ex ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01099\",\n      \"marker\": \"8\",\n      \"page_no\": 389,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), whi ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01102\",\n      \"marker\": \"11\",\n      \"page_no\": 390,\n      \"paragraph_index\": 1,\n      \"source_text\": \"A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's stran ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01103\",\n      \"marker\": \"15\",\n      \"page_no\": 392,\n      \"paragraph_index\": 3,\n      \"source_text\": \"或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was\"\n    },\n    {\n      \"anchor_id\": \"anchor-01105\",\n      \"marker\": \"15\",\n      \"page_no\": 392,\n      \"paragraph_index\": 20,\n      \"source_text\": \"flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01107\",\n      \"marker\": \"17\",\n      \"page_no\": 393,\n      \"paragraph_index\": 0,\n      \"source_text\": \"薹憤 遂成此疾). $ ^{17} $ Sorrow appeared in both Zhuang's and Chen's accounts, but neither said much more about it than the lines I just cited. It is tempting to speculate that women isolated from their kin by patrilocal marriage and with limite ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01109\",\n      \"marker\": \"19\",\n      \"page_no\": 393,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published i ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01110\",\n      \"marker\": \"20\",\n      \"page_no\": 393,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published i ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00291\",\n      \"note_item_id\": \"fn-00208\",\n      \"current_anchor_id\": \"anchor-01095\",\n      \"marker\": \"4\",\n      \"note_page_no\": 388,\n      \"anchor_page_no\": 389,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \">@23/and/that/glimpses/of/gendered\",\n      \"anchor_excerpt\": \"In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had ...\"\n    },\n    {\n      \"link_id\": \"link-00293\",\n      \"note_item_id\": \"fn-00210\",\n      \"current_anchor_id\": \"anchor-01098\",\n      \"marker\": \"3\",\n      \"note_page_no\": 390,\n      \"anchor_page_no\": 389,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"3. R uren/fengxie/diankuang/fanglunS ä ˩ʷ˦ǀłʎ 1Ghen^]UA/ >E25 Ghen/presented/the/elixir/as an/equivalent/of/the/R allbladder4embracing/pillS/1ĥɈÉ 23/the/name/by/which this/remedy/was/best/known5 /explained/the/collapse/of/R[ind/illnessesS/i ...\",\n      \"anchor_excerpt\": \"Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), whi ...\"\n    },\n    {\n      \"link_id\": \"link-00294\",\n      \"note_item_id\": \"fn-00211\",\n      \"current_anchor_id\": \"anchor-01100\",\n      \"marker\": \"6\",\n      \"note_page_no\": 392,\n      \"anchor_page_no\": 390,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6. EB7DE76\\u0001ID;F;@9E\\u0001;@6;53F7\\u0001F:3F\\u00013F\\u0001>73EF\\u0001EA?7\\u0001B:KE;5;3@E\\u0001F:AG9:F\\u0001F:3F\\u0001IA?7@\\u0001EG887D76\\u00018DA? \\u000e +:7'\\u000147/'0 ˀ»Eˊ \\u0005,7#0 \\u0005\\u0001R034;@9\\u000187@>7;S˙ǙU˧ \\u0005\\u0001R$7;E:3@9\\u0001>7;SF@˧ \\u0005\\u0001R*3@\\u0001>7;Sǜ˧ \\u0005 R\\u001a;3@=G3@9S ǣǀ \\u0003 \\u0012\\u0012\\u000e\\u00011 \\u000e\\u0010\\u000e2\\u0013 \\u0012\\u000e\\u0018\\u0004\\u0007 ?36@7EE\\u00018AD\\u0001D73EA@E\\u0001B3DF;5G>3D\\u0001 ...\",\n      \"anchor_excerpt\": \"In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for ...\"\n    },\n    {\n      \"link_id\": \"link-00296\",\n      \"note_item_id\": \"fn-00213\",\n      \"current_anchor_id\": \"anchor-01111\",\n      \"marker\": \"1\",\n      \"note_page_no\": 393,\n      \"anchor_page_no\": 394,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. <>=23 ZeQ^ >3/RHiankuangS/1 ong]UA/ < E23/where/the/original madness/and [ind/disordersS/1recommendation/and/ ong/XingxianQs/comments/are/found5/Gase/ AƑ/Vǣǀ˩ǘ ŒǤ<ǚ 25 Q^RY^W/XeYSXe^ ɟǙÅŊ 1 <?>23 ZeQ^\",\n      \"anchor_excerpt\": \"imperial times. $ ^{21} $ Gong recommended treating such a disorder with an enhanced version of the “Carefree powder” (加味逍遥散), which was often used to redress Liver imbalances, but he did not record ever using this treatment in a clinical c ...\"\n    },\n    {\n      \"link_id\": \"link-00298\",\n      \"note_item_id\": \"fn-00215\",\n      \"current_anchor_id\": \"synthetic-footnote-00236\",\n      \"marker\": \"1822\",\n      \"note_page_no\": 394,\n      \"anchor_page_no\": 394,\n      \"current_anchor_marker\": \"1822\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1822. in 8.4 (p. 346) and one by Wu Tang 吳瑭 (1758-1836) in 9.3 below.\",\n      \"anchor_excerpt\": \"1822. in 8.4 (p. 346) and one by Wu Tang 吳瑭 (1758-1836) in 9.3 below.\"\n    },\n    {\n      \"link_id\": \"link-00301\",\n      \"note_item_id\": \"fn-00218\",\n      \"current_anchor_id\": \"anchor-01121\",\n      \"marker\": \"1\",\n      \"note_page_no\": 399,\n      \"anchor_page_no\": 398,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. @ 23/case/cited/in/ \\\\Q]PEA/ <? F5 ei Ghengzu had/studied/medicine/from/his/grand4father ei/FoxiongʘW˖ 1 ? 4 ?>@23/who/had/learned/from/his/own father/ ei/[enjiʘŀș 1 >=>4 ? 25/Xhey/were/central/figures/of/RQenghe/medicineS/1for/more/on/wh ...\",\n      \"anchor_excerpt\": \"added eight drugs. $ ^{31} $ Three doses were enough to “make menstrual blood flow down” (经血下行). Her illness vanished (其病如失). We are told that she had a child the next year.\"\n    },\n    {\n      \"link_id\": \"link-00302\",\n      \"note_item_id\": \"fn-00219\",\n      \"current_anchor_id\": \"anchor-01125\",\n      \"marker\": \"5\",\n      \"note_page_no\": 400,\n      \"anchor_page_no\": 399,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5 2B/YGHE3 httpA66catalog5digitalarchives5tw6DYVRC < @ redress/thisimbalance5 Xhe/attribution/of/moral/meanings/to/mad/behavior thus went/against B/retrieved/on/Qay/ 3/ @5/Xian/was/sentenced/to Rstrangulation/after/the/EssizesS/1ȝǬd 2/accor ...\",\n      \"anchor_excerpt\": \"stasis’(憂鬱病紐) had stemmed from “mucus and Fire’s having obscured and blocked the [Heart’s] Envelope tract” (痰火蒙蔽包絡). $ ^{35} $ He treated her by the purgative method of “clearing Fire and transforming mucus” (清火化痰).\"\n    },\n    {\n      \"link_id\": \"link-00303\",\n      \"note_item_id\": \"fn-00220\",\n      \"current_anchor_id\": \"anchor-01154\",\n      \"marker\": \"5\",\n      \"note_page_no\": 411,\n      \"anchor_page_no\": 413,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"b4 <a5/Xhis/passage/attributed/postpartum/madness/to/[ind/intrusion3 the/same/process/that/the/book/identified/as/the/cause/of/ordinary/insanity5/Wee/also/the/sections/on/RXhe symptoms/of postpartum/Gardiac/depletionS/1ǐí÷ɫi B/ 5@b2/and/RXh ...\",\n      \"anchor_excerpt\": \"(Furen daquan liangfang 婦人大全良方; mid 13 $ ^{th} $ century). $ ^{65} $ Both explanations of “postpartum\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-12-12-punish-but-how-mad-ac:toc-manual-2-12-12-punish-but-how-mad-ac:footnote\",\n  \"chapter_title\": \"12. Punish, but how? Mad acts and their punishments, 1750-1911\",\n  \"page_range\": [\n    490,\n    522\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 490,\n      \"ocr_excerpt\": \"according to the degree of criminal intention they involved (see 11.1). The first type of balance was enforced through judicial practice, the second one through legislation. The seriousness of crimes was defined comparatively by the main statutes (律) of the Code, which were supposed to form a well-balanced network of crimes and punishments. The Code also provided a table of “mourning degrees” according to which the gravity of crimes against relatives was assessed. $ ^{4} $ As Table 12.1 (next page) illustrates, the order of severity of the six killings was preserved even after the degree of family relation between killer and victim had been factored in. In the table, the punishment increases downwards (toward more serious kinds of homicides) and toward the right (from junior relatives to senior relatives as victims). The middle column defines the standard punishment for the killing of a single unrelated person (凡人). The punishments meted out therefore reflected not only the nature of the act itself, but also the relative status of offender and victim. $ ^{5} $ In the terms of our table, the hierarchy of the punishments imposed for proximate crimes was thus observed both vertically ...\"\n    },\n    {\n      \"page_no\": 491,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">Table 12.1: The punishments for different types of homicides with different victims (1740)</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Victim</td><td style='text-align: center; word-wrap: break-word;'>Son / daughter</td><td style='text-align: center; word-wrap: break-word;'>Younger brother / sister</td><td style='text-align: center; word-wrap: break-word;'>Commoner</td><td style='text-align: center; word-wrap: break-word;'>Older brother / sister</td><td style='text-align: center; word-wrap: break-word;'>Father / mother</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Crime</td><td style='text-align: center; word-wrap: break-word;'>[No punishment]</td><td style='text-align: center; word-wrap: break-word;'>12.42 ounces of silver, not collected = exemption</td><td style='text-align: center; word-wrap: break-word;'>12.42 ounces of silver to victim&#x27;s family</td><td style='text-align: center; word-wrap: break-word;'>EITHER &quot;decapitation after the Assizes&quot; OR 100 strokes of the heavy stick and 3 years of penal servitude</td><td style='text-al ...\"\n    },\n    {\n      \"page_no\": 492,\n      \"ocr_excerpt\": \"<table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>If the victim had scolded or hit the killer beforehand: no punishment.</td><td style='text-align: center; word-wrap: break-word;'>100 strokes of the heavy stick, 1 year of penal servitude</td><td style='text-align: center; word-wrap: break-word;'>depending on the circumstances of the case] Decapitation after the Assizes [effectively executed]</td><td style='text-align: center; word-wrap: break-word;'>Lingchi</td><td style='text-align: center; word-wrap: break-word;'>Lingchi</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Killing by design 謀殺 [treated like intentional killing]</td><td style='text-align: center; word-wrap: break-word;'>No clause [60 strokes of the heavy stick, 1 year of penal servitude</td><td style='text-align: center; word-wrap: break-word;'>No clause [100 strokes of the heavy stick, 2,000 li [100 strokes of the heavy stick, 2,000 li] at 2,000 li]</td><td style='text-align: center; word-wrap: break-word;'>Decapitation after the Assizes [effectively executed] Decapitation after the Assizes [effectively executed]</td><td style='t ...\"\n    },\n    {\n      \"page_no\": 493,\n      \"ocr_excerpt\": \"or to one that imposed a punishment that was deemed appropriate to the crime at hand. $ ^{10} $ Thanks to analogies, the judicial system could sentence a potentially unlimited number of criminal acts with a limited number of laws. But judicial analogies could only be deployed when no law was found relevant to the punishment of a specific act. This strictly regulated process differed from what doctors did when they treated an illness by analogy to their understanding of another disorder. In Part One, I argued that this kind of “scheme transfer” was the main way in which medical approaches to madness changed. For almost a hundred years after 1669, homicides committed in a fit of madness were sentenced as “killing because of madness” regardless of the identity and number of the victims, because the law considered that the lack of intention of mad acts justified a light punishment. $ ^{11} $ Starting around the mid-eighteenth century, however, a few concerned officials argued that treating in bulk all killings committed because of madness created an imbalance between some crimes and their punishments. The acts of legislation we are about to examine did not stem from new reflections on ...\"\n    },\n    {\n      \"page_no\": 494,\n      \"ocr_excerpt\": \"misbehavior were promulgated during the second half of the Qing in response to an increase in the number of unmarried men. It is more difficult to find social roots for transformations in the legal treatment of insane killers. I try to show instead that the dynamics of madness as a legal object was governed by the way the Qing legal system functioned. In the second half of the eighteenth century, two important phenomena enabled madness laws to proliferate and become more severe. One was the general proliferation of sub-statutes, which after 1740 could be cited in judgments without reference to statutes. $ ^{12} $ Second was the subsequent development of the sentencing guidelines found in “completed cases” (成案) and in the regulations of the Autumn Assizes. $ ^{13} $ Both events helped to modulate in a formal way the punishments that mad killers incurred depending on whom they had killed. Legislative developments stemmed from the initiatives of the emperor, provincial judges and governors, and officials from the Ministry of Punishments. The more highly ranked the proponents of change, the more likely new measures were to be implemented. It was usually the Ministry of Punishments that ...\"\n    },\n    {\n      \"page_no\": 495,\n      \"ocr_excerpt\": \"crimes committed against senior family members. Once some changes had taken place, officials knew that the Ministry would likely approve of more proposals along the same lines, and change therefore followed from change. Since this policy theme did not automatically determine legislation, I explain each increase in punishment individually. As I observed above, this general increase in severity did not stem from a change in the legal conception of mad acts or mad people. For an act to qualify as “mad,” it still had to have been devoid of awareness, and the officials of the Ministry of Punishments still pressed field officials for clarifications when they detected traces of intentions in the actions of a potentially mad killer. The earliest example of a desire to adjust punishments for crimes committed “because of madness” was atypically systematic. In 1754, Shanxi provincial judge Jiang Zhou 蔣洲 (d. 1760) memorialized to “balance the sub-statute on killing because of madness” (請平瘋病殺人之例). $ ^{15} $ He first noted that those who had killed an older brother in a fit of madness had been sentenced in two conflicting ways: 1) to 3 years of penal servitude and 100 strokes of the heavy stick ...\"\n    },\n    {\n      \"page_no\": 496,\n      \"ocr_excerpt\": \"secondary circumstance within the homicide of a close senior relative. These sentences were bolstered by two equally valid legal logics, namely the importance of intentions and the weight of seniority in intra-family crimes. Finding these judgments “particularly inconsistent” (殊未劃一), Jiang proposed to calibrate punishment according to the degree of family relation between killer and victim. $ ^{19} $ The killing of distant relatives would be redeemed monetarily according to the statute on killing relatives by accident. $ ^{20} $ One who killed a third- or fourth-degree relative (大小功尊長) whose death usually mandated “immediate decapitation” should be punished by the lower “decapitation after the Assizes.” $ ^{21} $ Finally, the sentence of “immediate decapitation” for killing second-degree seniors should be preserved, but an inserted slip should declare the insanity of the killer. The final decision should be left to the emperor. The Ministry of Punishments rejected Jiang’s proposal, but provincial officials soon had to face again the issues that Jiang had tried to disentangle. In 1756, the governor of Zhejiang confirmed a sentence of “decapitation after the Assizes” for a mad man wh ...\"\n    },\n    {\n      \"page_no\": 497,\n      \"ocr_excerpt\": \"impose its judgment, but referred the case to the emperor, who entrusted the Nine Chief Ministers (九卿) with the final decision. $ ^{23} $ The congregated Ministers agreed with the governor to postpone death until “after the Assizes.” This way of sentencing madness-induced homicides of second-degree seniors remained in force until the end of the Qing. What made Jiang Zhou, the Ministry of Punishments, and the Zhejiang governor reluctant to treat the killing of seniors as cases of “accidental killing” was probably the view that a killing “because of madness” had an extra component that other “accidental killings” did not possess: direct aggression. Madmen killed with violent gestures. This feature of mad killings may have been what justified the Qianlong emperor's decision in 1761 to make the crime of \\\"killing one's parents because of madness\\\" punishable by dismemberment (凌遲), the harshest form of death penalty allowed by the Code. $ ^{24} $ His pronouncement was part of an edict that instructed provincial officials to execute all parricides swiftly—for fear they would take their own lives or die of starvation in prison—and to report the execution afterwards by palace memorial. $ ^{2 ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01461\",\n      \"marker\": \"12\",\n      \"page_no\": 490,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The seriousness of crimes was defined comparatively by the main statutes (律) of the Code, which were supposed to form a well-balanced network of crimes and punishments. The Code also provided a table of “mourning degrees” according to which ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01464\",\n      \"marker\": \"12\",\n      \"page_no\": 491,\n      \"paragraph_index\": 0,\n      \"source_text\": \"<div style=\\\"text-align: center;\\\">Table 12.1: The punishments for different types of homicides with different victims (1740)</div>\"\n    },\n    {\n      \"anchor_id\": \"anchor-01465\",\n      \"marker\": \"12\",\n      \"page_no\": 491,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Table 12.1: The punishments for different types of homicides with different victims (1740)\"\n    },\n    {\n      \"anchor_id\": \"anchor-01468\",\n      \"marker\": \"10\",\n      \"page_no\": 493,\n      \"paragraph_index\": 0,\n      \"source_text\": \"or to one that imposed a punishment that was deemed appropriate to the crime at hand. $ ^{10} $ Thanks to analogies, the judicial system could sentence a potentially unlimited number of criminal acts with a limited number of laws. But judic ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01469\",\n      \"marker\": \"11\",\n      \"page_no\": 493,\n      \"paragraph_index\": 1,\n      \"source_text\": \"For almost a hundred years after 1669, homicides committed in a fit of madness were sentenced as “killing because of madness” regardless of the identity and number of the victims, because the law considered that the lack of intention of mad ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01470\",\n      \"marker\": \"12\",\n      \"page_no\": 494,\n      \"paragraph_index\": 1,\n      \"source_text\": \"In the second half of the eighteenth century, two important phenomena enabled madness laws to proliferate and become more severe. One was the general proliferation of sub-statutes, which after 1740 could be cited in judgments without refere ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01471\",\n      \"marker\": \"13\",\n      \"page_no\": 494,\n      \"paragraph_index\": 1,\n      \"source_text\": \"In the second half of the eighteenth century, two important phenomena enabled madness laws to proliferate and become more severe. One was the general proliferation of sub-statutes, which after 1740 could be cited in judgments without refere ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01472\",\n      \"marker\": \"14\",\n      \"page_no\": 494,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Legislative developments stemmed from the initiatives of the emperor, provincial judges and governors, and officials from the Ministry of Punishments. The more highly ranked the proponents of change, the more likely new measures were to be ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00484\",\n      \"note_item_id\": \"fn-00476\",\n      \"current_anchor_id\": \"anchor-01463\",\n      \"marker\": \"7\",\n      \"note_page_no\": 491,\n      \"anchor_page_no\": 490,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"7. For an explanation of how cases of mistaken killing could be treated, see 11.1, pp. 426-27.\",\n      \"anchor_excerpt\": \"In trials, it was an official's duty to select the “penal denomination” (罪名) that most appropriately described an unlawful act. The sentencing of a crime was called kezui 科罪 or duanzui 斷罪, in which zui referred both to the crime as defined ...\"\n    },\n    {\n      \"link_id\": \"link-00485\",\n      \"note_item_id\": \"fn-00477\",\n      \"current_anchor_id\": \"anchor-01467\",\n      \"marker\": \"5\",\n      \"note_page_no\": 493,\n      \"anchor_page_no\": 492,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Xhe/law/that/explained/how/to/pronounce judgments/by/analogy/was/Ert5/ 3 [Qeting/out/a/sentencewhen/thereis/no/relevant article\\\\óņþÜ× 1HPG]/< A ?25 or/an/example/of/this/reasoning3/see/Gh5/ 3/p5 <<5 Xhe/exception/was/parenticide/and/sometim ...\",\n      \"anchor_excerpt\": \"magistrates instructed officials on how to judge cases. $ ^{8} $ The selection of the most fitting crime name was based on a careful assessment of the circumstances of the crime, including the degree of intention involved, the relative stat ...\"\n    },\n    {\n      \"link_id\": \"link-00487\",\n      \"note_item_id\": \"fn-00479\",\n      \"current_anchor_id\": \"anchor-01476\",\n      \"marker\": \"8\",\n      \"note_page_no\": 496,\n      \"anchor_page_no\": 495,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"8. .\\\")!. ±ÖÄŁ \\u0003 \\u0010\\u000f \\u0004 \\u0012\\u0007 3\\u0006 4\\u0007#AD7 67F3;>\\u0001;@$9 \\u0012\\u0012 \\u0013 \\u0006 \\u000e\\u0007 *:;E\\u0001BG@;E:?7@F\\u00015ADD7EBA@676 I;F:\\u0001F:7\\u0001E75A@6\\u0001I3K\\u0001A8\\u0001E7@F7@5;@9\\u0001F:3F\\u0001 ;3@9\\u00010:AG\\u0001:36\\u0001AGF>;@76\\u0001;@\\u0001:;E\\u0001 \\u0010\\u000e \\u0001?7?AD;3>\\u0007\",\n      \"anchor_excerpt\": \"The earliest example of a desire to adjust punishments for crimes committed “because of madness” was atypically systematic. In 1754, Shanxi provincial judge Jiang Zhou 蔣洲 (d. 1760) memorialized to “balance the sub-statute on killing because ...\"\n    },\n    {\n      \"link_id\": \"link-00489\",\n      \"note_item_id\": \"fn-00481\",\n      \"current_anchor_id\": \"anchor-01494\",\n      \"marker\": \"5\",\n      \"note_page_no\": 499,\n      \"anchor_page_no\": 500,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"3/pp5/ <<4<=/and/ <?5 Wee/Ert5/ ?>3 [Oilling three/persons/of/the/same/family\\\\ 1â0§2? 2 1HPG]/ A/? <B/ ones/ @@ A/ > 25 the/Gode/considered/equally/grave when/they/were/not/committed/because/of/madness5 Voutine/memorial/by/the/Qinistry/of/T ...\",\n      \"anchor_excerpt\": \"From 1786 onwards, the madness-induced homicides of senior relatives were consistently judged in accordance with the relevant statutes, but the death sentence mandated by these laws was diminished from “immediate” to “after the Assizes” bec ...\"\n    },\n    {\n      \"link_id\": \"link-00491\",\n      \"note_item_id\": \"fn-00483\",\n      \"current_anchor_id\": \"anchor-01505\",\n      \"marker\": \"4\",\n      \"note_page_no\": 503,\n      \"anchor_page_no\": 502,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"4. 5served/as/thecatch4all/punishment/for/almost/all/mad/killers3/regardless/of/whom/they/had = Qemorandum/cited/in \\\\E P\\\\F 5 >b4 ?bA =4 ?5/Wimilar/measures/may/have/existed/before5 > n/routine/memorials/of/the/ uangxu/reign/1 ?><4 @ ?23/ /f ...\",\n      \"anchor_excerpt\": \"Men who had killed a senior relative because of madness were excluded from these rules of liberation. $ ^{44} $ As we saw above, the killing of a senior relative was usually sentenced to\"\n    },\n    {\n      \"link_id\": \"link-00493\",\n      \"note_item_id\": \"fn-00485\",\n      \"current_anchor_id\": \"anchor-01524\",\n      \"marker\": \"3\",\n      \"note_page_no\": 508,\n      \"anchor_page_no\": 510,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"3. vol5/ A ?n>25 Xhe/first/law/requestingthat therelatives of/a/possibly/mad/killer sign/bonded/statements appeared/in/ >== 1see/Eppendix ?23/butWhanxi naturally seek/to/extend/grievance/for/her5/ ow/could/ /be/willing/to/help/my/son4in4law ...\",\n      \"anchor_excerpt\": \"Caizuo 李裁左, who had killed his paternal uncle in 1889, was submitted to torture but he showed no fear (加以刑嚇 罔知畏懼). $ ^{63} $\"\n    },\n    {\n      \"link_id\": \"link-00494\",\n      \"note_item_id\": \"fn-00486\",\n      \"current_anchor_id\": \"anchor-01522\",\n      \"marker\": \"1\",\n      \"note_page_no\": 510,\n      \"anchor_page_no\": 509,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. \\u0011\\u0010 \\u0006\\u0010\\u000e2\\u0007*:7 !3().'\\u0001 7!9\\u0001/&\\u0001 2/.'3 I3E D7\\u000676;F764K\\u0001F:7#;@;EFDK A8\\u0001&G@;E:?7@FE\\u0001;@\\u0001 \\u000f\\u0012 \\u0001G@67D\\u0001F:7\\u0001F;F>7 \\u0017=,)'5!.\\u0001*)!/:(%.'\\u0001 )95!.,5 \\u0011\\u0007.\\u0016\\u001a\\u001b ) \\u0003 \\u0003 )95!.,5 \\u0005\\u00015A>>3F76\\u00013@6\\u00015ADD75F76\\u00014K\\u0001F:7\\u0001\\u0019A6;8;53F;A@\\u0001%88;57\\u0004 \\u0004\\u0007 )77\\u0001-;>>\\u0001 \\u0010\\u0007\",\n      \"anchor_excerpt\": \"The second group of mad killers that judicial officials encountered was those who never recovered from madness after committing homicide. Chronic delirium kept a killer from providing the confession that was necessary for a sentence to be p ...\"\n    },\n    {\n      \"link_id\": \"link-00495\",\n      \"note_item_id\": \"fn-00487\",\n      \"current_anchor_id\": \"anchor-01523\",\n      \"marker\": \"2\",\n      \"note_page_no\": 511,\n      \"anchor_page_no\": 509,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"in/Ghinese3/led/by/those/of/ ia/ ingtaoŻƠü 1 @? 3/ @? 3/ @? 3/and/ @@=2B/see also/ ia/ ingtao/and/^hang/[eifeng/ @? 5 Inglish4language scholarship/on/Ghinese/forensic/medicine/is/limited5 Gonsult/Pu andReedham /_ @??`3/but/remember/that/rec ...\",\n      \"anchor_excerpt\": \"I mentioned in Chapter 11 that the criminal's appearance hinted, but did not prove, that he had been crazy when committing his crime. To make sure that the killer was not faking, an officially hired physician (警官) assessed his condition. To ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-009-genderedmania:toc-ch-009-genderedmania:footnote",
-      "chapter_title": "Gendered mania",
+      "cluster_id": "toc-manual-2-12-12-punish-but-how-mad-ac:toc-manual-2-12-12-punish-but-how-mad-ac:footnote",
+      "chapter_title": "12. Punish, but how? Mad acts and their punishments, 1750-1911",
       "request_mode": "anchor_rebind",
       "allowed_actions": [
         "match",
@@ -22,670 +22,495 @@
       ],
       "note_system": "footnote",
       "page_range": [
-        387,
-        422
+        490,
+        522
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 107546,
+          "row_id": 3226,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01093",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 387,
+          "anchor_id": "anchor-01461",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 490,
+          "paragraph_index": 1,
+          "char_start": 313,
+          "char_end": 315,
+          "source_marker": "12",
+          "normalized_marker": "12",
+          "anchor_kind": "footnote",
+          "certainty": 0.6,
+          "source_text": "The seriousness of crimes was defined comparatively by the main statutes (律) of the Code, which were supposed to form a well-balanced network of crimes and punishments. The Code also provided a table of “mourning degrees” according to which the gravity of crimes against relatives was assessed. $ ^{4} $ As Table 12.1 (next page) illustrates, the order of severity of the six killings was preserved even after the degree of family relation between killer and victim had been factored in. In the table, the punishment increases downwards (toward more serious kinds of homicides) and toward the right (from junior relatives to senior relatives as victims). The middle column defines the standard punishment for the killing of a single unrelated person (凡人). The punishments meted out therefore reflected not only the nature of the act itself, but also the relative status of offender and victim. $ ^{5} $ In the terms of our table, the hierarchy of the punishments imposed for proximate crimes was thus observed both vertically and horizontally.",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 3230,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01464",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 491,
           "paragraph_index": 0,
-          "char_start": 832,
-          "char_end": 840,
-          "source_marker": "$ ^{2} $",
-          "normalized_marker": "2",
+          "char_start": 39,
+          "char_end": 41,
+          "source_marker": "12",
+          "normalized_marker": "12",
           "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "average of 4 cases per century and barely more than 2 if we exclude the last hundred years I cover. I found only two relevant cases between 1588 and 1821. The 35 cases represent the way elite doctors (mostly from the Lower Yangzi region) explained the way they understood and treated mad women. They give only a small glimpse of how society handled women who were called mad. Indeed, the main treatment for manic women may not have been medical. There is too little evidence to tell, but home confinement was certainly an option, though it may have come only after the failure of medical or exorcistic treatments. Since the documents tell us precious little about the way female patients experienced their own condition, we are also deprived of the “first-person” data that have informed recent studies of women in Chinese history. $ ^{2} $ I will remind the reader of these limits when I propose tentative conclusions or try to point to possible trends.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "certainty": 0.6,
+          "source_text": "<div style=\"text-align: center;\">Table 12.1: The punishments for different types of homicides with different victims (1740)</div>",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107552,
+          "row_id": 3231,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01099",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 389,
-          "paragraph_index": 1,
-          "char_start": 757,
-          "char_end": 765,
-          "source_marker": "$ ^{8} $",
-          "normalized_marker": "8",
+          "anchor_id": "anchor-01465",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 491,
+          "paragraph_index": 3,
+          "char_start": 6,
+          "char_end": 8,
+          "source_marker": "12",
+          "normalized_marker": "12",
           "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\" (夫婦人顛狂病者 由血氣虛受風邪所為也). $ ^{7} $ Despite the mention of Blood depletion, this etiology was not gendered, because it corresponded with the traditional etiology of most Wind disorders. $ ^{8} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "certainty": 0.6,
+          "source_text": "Table 12.1: The punishments for different types of homicides with different victims (1740)",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107555,
+          "row_id": 3235,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01102",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 390,
+          "anchor_id": "anchor-01468",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 493,
+          "paragraph_index": 0,
+          "char_start": 86,
+          "char_end": 95,
+          "source_marker": "$ ^{10} $",
+          "normalized_marker": "10",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "or to one that imposed a punishment that was deemed appropriate to the crime at hand. $ ^{10} $ Thanks to analogies, the judicial system could sentence a potentially unlimited number of criminal acts with a limited number of laws. But judicial analogies could only be deployed when no law was found relevant to the punishment of a specific act. This strictly regulated process differed from what doctors did when they treated an illness by analogy to their understanding of another disorder. In Part One, I argued that this kind of “scheme transfer” was the main way in which medical approaches to madness changed.",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 3236,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01469",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 493,
           "paragraph_index": 1,
-          "char_start": 467,
-          "char_end": 476,
+          "char_start": 276,
+          "char_end": 285,
           "source_marker": "$ ^{11} $",
           "normalized_marker": "11",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's strange behavior (she \"would cry or laugh, or run around naked, or shut the doors and speak a lot\" (或哭或笑 或裸體而走 或閉戶而多言) to \"harm caused by excessive ratiocination, [which made] the spirit unable to hold to its lodging\" (思慮過傷 神不守舍也). $ ^{11} $ In the sixteenth century, this etiology typified medicine's increasing focus on \"inner harm\"—a category that included exhaustion, food scarcity or excesses, and emotional imbalances—and the devising of new ways to treat it. Wu's therapy based on human placenta differed from those proposed in contemporary books, but, as great specialist of medicinal drugs Li Shizhen 李時珍 (1518-",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "For almost a hundred years after 1669, homicides committed in a fit of madness were sentenced as “killing because of madness” regardless of the identity and number of the victims, because the law considered that the lack of intention of mad acts justified a light punishment. $ ^{11} $ Starting around the mid-eighteenth century, however, a few concerned officials argued that treating in bulk all killings committed because of madness created an imbalance between some crimes and their punishments. The acts of legislation we are about to examine did not stem from new reflections on madness, but from efforts to reestablish consistent and well-balanced penalties for homicides committed because of madness.",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107557,
+          "row_id": 3238,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01103",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 392,
-          "paragraph_index": 3,
-          "char_start": 29,
-          "char_end": 38,
-          "source_marker": "$ ^{15} $",
-          "normalized_marker": "15",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 107559,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01105",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 392,
-          "paragraph_index": 20,
-          "char_start": 274,
-          "char_end": 283,
-          "source_marker": "$ ^{15} $",
-          "normalized_marker": "15",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 血氣迷心 或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was among the first to ascribe mad symptoms to pathological menses, but the text explained how one specific imbalance could lead to insanity, not how mad symptoms should be interpreted in general. In other words, he was locking one etiology and some symptoms together in a contextually limited script. Li probably believed that the general explanation of insanity as caused by the action of Fire and mucus still applied to women who did not suffer from menorrhagia and whose symptoms did not occur postpartum.",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 107562,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01107",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 393,
-          "paragraph_index": 0,
-          "char_start": 10,
-          "char_end": 19,
-          "source_marker": "$ ^{17} $",
-          "normalized_marker": "17",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "薹憤 遂成此疾). $ ^{17} $ Sorrow appeared in both Zhuang's and Chen's accounts, but neither said much more about it than the lines I just cited. It is tempting to speculate that women isolated from their kin by patrilocal marriage and with limited social relations because of the necessity to stay at home were more likely than men to suffer from “sorrow.”",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 107564,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01109",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 393,
+          "anchor_id": "anchor-01470",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 494,
           "paragraph_index": 1,
-          "char_start": 678,
-          "char_end": 680,
-          "source_marker": "¹⁹",
-          "normalized_marker": "19",
+          "char_start": 257,
+          "char_end": 266,
+          "source_marker": "$ ^{12} $",
+          "normalized_marker": "12",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in the Heart’s Envelope” (營血迷於心包所致也).²⁰ I do not know what Gong Tingxian meant by “constructive Blood,” but it may have been unique to women. As we have seen, however, blockage of the “Heart’s Envelope” was one of the most commonly identified causes of disorders of consciousness for both men and women in late-",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "In the second half of the eighteenth century, two important phenomena enabled madness laws to proliferate and become more severe. One was the general proliferation of sub-statutes, which after 1740 could be cited in judgments without reference to statutes. $ ^{12} $ Second was the subsequent development of the sentencing guidelines found in “completed cases” (成案) and in the regulations of the Autumn Assizes. $ ^{13} $ Both events helped to modulate in a formal way the punishments that mad killers incurred depending on whom they had killed.",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 107565,
+          "row_id": 3239,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01110",
-          "chapter_id": "toc-ch-009-genderedmania",
-          "page_no": 393,
+          "anchor_id": "anchor-01471",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 494,
           "paragraph_index": 1,
-          "char_start": 883,
-          "char_end": 885,
-          "source_marker": "²⁰",
-          "normalized_marker": "20",
+          "char_start": 412,
+          "char_end": 421,
+          "source_marker": "$ ^{13} $",
+          "normalized_marker": "13",
           "anchor_kind": "footnote",
           "certainty": 1.0,
-          "source_text": "Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in the Heart’s Envelope” (營血迷於心包所致也).²⁰ I do not know what Gong Tingxian meant by “constructive Blood,” but it may have been unique to women. As we have seen, however, blockage of the “Heart’s Envelope” was one of the most commonly identified causes of disorders of consciousness for both men and women in late-",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "In the second half of the eighteenth century, two important phenomena enabled madness laws to proliferate and become more severe. One was the general proliferation of sub-statutes, which after 1740 could be cited in judgments without reference to statutes. $ ^{12} $ Second was the subsequent development of the sentencing guidelines found in “completed cases” (成案) and in the regulations of the Autumn Assizes. $ ^{13} $ Both events helped to modulate in a formal way the punishments that mad killers incurred depending on whom they had killed.",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 3240,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-01472",
+          "chapter_id": "toc-manual-2-12-12-punish-but-how-mad-ac",
+          "page_no": 494,
+          "paragraph_index": 2,
+          "char_start": 555,
+          "char_end": 564,
+          "source_marker": "$ ^{14} $",
+          "normalized_marker": "14",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Legislative developments stemmed from the initiatives of the emperor, provincial judges and governors, and officials from the Ministry of Punishments. The more highly ranked the proponents of change, the more likely new measures were to be implemented. It was usually the Ministry of Punishments that decided whether to turn such proposals into laws. Eighteenth-century changes may thus have stemmed from the habitus of the Ministry of Punishments and the provincial bureaucracy under the Qianlong reign (1736-1796), a topic we know almost nothing about. $ ^{14} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00291",
-          "note_item_id": "fn-00208",
-          "current_anchor_id": "anchor-01095",
+          "link_id": "link-00484",
+          "note_item_id": "fn-00476",
+          "current_anchor_id": "anchor-01463",
+          "marker": "7",
+          "note_page_no": 491,
+          "anchor_page_no": 490,
+          "current_anchor_marker": "7",
+          "note_excerpt": "7. For an explanation of how cases of mistaken killing could be treated, see 11.1, pp. 426-27.",
+          "anchor_excerpt": "In trials, it was an official's duty to select the “penal denomination” (罪名) that most appropriately described an unlawful act. The sentencing of a crime was called kezui 科罪 or duanzui 斷罪, in which zui referred both to the crime as defined by the Code, and to the penalty that this crime legally demanded. $ ^{6} $ Many legal articles and countless manuals for",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00485",
+          "note_item_id": "fn-00477",
+          "current_anchor_id": "anchor-01467",
+          "marker": "5",
+          "note_page_no": 493,
+          "anchor_page_no": 492,
+          "current_anchor_marker": "5",
+          "note_excerpt": "Xhe/law/that/explained/how/to/pronounce judgments/by/analogy/was/Ert5/ 3 [Qeting/out/a/sentencewhen/thereis/no/relevant article\\óņþÜ× 1HPG]/< A ?25 or/an/example/of/this/reasoning3/see/Gh5/ 3/p5 <<5 Xhe/exception/was/parenticide/and/sometimes/the killing/of/senior/relatives/of/the/second4degree/1like/older/brothers25/Wee/below3pp5 >> and/ >@5",
+          "anchor_excerpt": "magistrates instructed officials on how to judge cases. $ ^{8} $ The selection of the most fitting crime name was based on a careful assessment of the circumstances of the crime, including the degree of intention involved, the relative status of offender and victim, and anything else that could be relevant—conflict over property, particular cruelty, the number of times one had hit a victim, etc. For “circumstances” (情) to be balanced with “law” (法 or 律), “light” (輕) crimes had to be punished lightly, and “severe” (重) crimes sentenced severely. Officials who selected the wrong penal denomination or punished either too severely or too lightly could face administrative sanctions. $ ^{9} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00487",
+          "note_item_id": "fn-00479",
+          "current_anchor_id": "anchor-01476",
+          "marker": "8",
+          "note_page_no": 496,
+          "anchor_page_no": 495,
+          "current_anchor_marker": "8",
+          "note_excerpt": "8. .\")!. ±ÖÄŁ \u0003 \u0010\u000f \u0004 \u0012\u0007 3\u0006 4\u0007#AD7 67F3;>\u0001;@$9 \u0012\u0012 \u0013 \u0006 \u000e\u0007 *:;E\u0001BG@;E:?7@F\u00015ADD7EBA@676 I;F:\u0001F:7\u0001E75A@6\u0001I3K\u0001A8\u0001E7@F7@5;@9\u0001F:3F\u0001 ;3@9\u00010:AG\u0001:36\u0001AGF>;@76\u0001;@\u0001:;E\u0001 \u0010\u000e \u0001?7?AD;3>\u0007",
+          "anchor_excerpt": "The earliest example of a desire to adjust punishments for crimes committed “because of madness” was atypically systematic. In 1754, Shanxi provincial judge Jiang Zhou 蔣洲 (d. 1760) memorialized to “balance the sub-statute on killing because of madness” (請平瘋病殺人之例). $ ^{15} $ He first noted that those who had killed an older brother in a fit of madness had been sentenced in two conflicting ways: 1) to 3 years of penal servitude and 100 strokes of the heavy stick for the “Accidental killing of a superior or senior relative of the second degree” (過失殺期親尊長), $ ^{16} $ or 2) to “immediate decapitation” (斬立決) according to the statute on “killing one’s elder brother,” $ ^{17} $ but with an inserted “slip” 簽 declaring that the killer had been mad and that his sentence should therefore be commuted to “decapitation after the Assizes” (斬監侯). $ ^{18} $ The first kind of judgment reasserted the likening of mad homicides with accidental killings that had founded the 1669 law on “killing because of madness,” whereas the second way of sentencing treated madness only as a",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00489",
+          "note_item_id": "fn-00481",
+          "current_anchor_id": "anchor-01494",
+          "marker": "5",
+          "note_page_no": 499,
+          "anchor_page_no": 500,
+          "current_anchor_marker": "5",
+          "note_excerpt": "3/pp5/ <<4<=/and/ <?5 Wee/Ert5/ ?>3 [Oilling three/persons/of/the/same/family\\ 1â0§2? 2 1HPG]/ A/? <B/ ones/ @@ A/ > 25 the/Gode/considered/equally/grave when/they/were/not/committed/because/of/madness5 Voutine/memorial/by/the/Qinistry/of/Tunishments/dated/>/ une6=/ uly/ >== 1UP 5<2B/YGHE3 httpA66catalog5digitalarchives5tw6DYVRC =< @? 3/retrieved/on/ uly/ 3/ @5 n/ ? 3/another/sub4statute/defined/penalties/for/multiple/killings/more/systematicallyA/someone/who/killed n/ >>=3 the/Qinistry of/Tunishments finally accepted/a request/to punish multiple two/or/more/people/or/two/people/from/a/single/family/would/be/sentenced/to/[strangulation/after/the/Essizes5\\ Xhe/punishment/for/killingthree/people/of/the/same/family/would/be/[decapitation/aftertheEssizes5\\ Ell/these homicides/committed/because/of/insanity more/severely5/Xhe/proponent3/this/time3/wasa sentences wereto/beeffectively/executed5",
+          "anchor_excerpt": "From 1786 onwards, the madness-induced homicides of senior relatives were consistently judged in accordance with the relevant statutes, but the death sentence mandated by these laws was diminished from “immediate” to “after the Assizes” because the crime had “not been committed intentionally” (非有心干犯). $ ^{35} $ As this reduction of punishment indicates, the Ministry still recognized that killing relatives in a fit of madness was less serious than killing them while in a normal state. But insanity was now treated only as a secondary circumstance instead of a defining one.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00491",
+          "note_item_id": "fn-00483",
+          "current_anchor_id": "anchor-01505",
           "marker": "4",
-          "note_page_no": 388,
-          "anchor_page_no": 389,
+          "note_page_no": 503,
+          "anchor_page_no": 502,
           "current_anchor_marker": "4",
-          "note_excerpt": ">@23/and/that/glimpses/of/gendered",
-          "anchor_excerpt": "In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files.",
+          "note_excerpt": "4. 5served/as/thecatch4all/punishment/for/almost/all/mad/killers3/regardless/of/whom/they/had = Qemorandum/cited/in \\E P\\F 5 >b4 ?bA =4 ?5/Wimilar/measures/may/have/existed/before5 > n/routine/memorials/of/the/ uangxu/reign/1 ?><4 @ ?23/ /found/mentions/of/almost/yearly/edicts/of/amnesty3 killed3/but the/Qinistry reasserted/some/sort/of hierarchy/by/refusing/to/release/people/who and/sometimes/even/of/several/edicts/in/the/same/year5",
+          "anchor_excerpt": "Men who had killed a senior relative because of madness were excluded from these rules of liberation. $ ^{44} $ As we saw above, the killing of a senior relative was usually sentenced to",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00293",
-          "note_item_id": "fn-00210",
-          "current_anchor_id": "anchor-01098",
+          "link_id": "link-00493",
+          "note_item_id": "fn-00485",
+          "current_anchor_id": "anchor-01524",
           "marker": "3",
-          "note_page_no": 390,
-          "anchor_page_no": 389,
+          "note_page_no": 508,
+          "anchor_page_no": 510,
           "current_anchor_marker": "3",
-          "note_excerpt": "3. R uren/fengxie/diankuang/fanglunS ä ˩ʷ˦ǀłʎ 1Ghen^]UA/ >E25 Ghen/presented/the/elixir/as an/equivalent/of/the/R allbladder4embracing/pillS/1ĥɈÉ 23/the/name/by/which this/remedy/was/best/known5 /explained/the/collapse/of/R[ind/illnessesS/in/ 5>3/and/the/dominance/of/the/mucus/and/ ire/script/in/the following/two/chapters5 better/than/to/men5/[u/Uiu±ǈ 1fl5/ < s4 s2/traced/a young/womanQs/strange/behavior n AY^WiY/\\UYQ^ ®ˀ˧Ũ 1 <@ 2 ?5? a4b3 RHiankuang/xinbingS˦ǀ÷Ǚ",
-          "anchor_excerpt": "Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\" (夫婦人顛狂病者 由血氣虛受風邪所為也). $ ^{7} $ Despite the mention of Blood depletion, this etiology was not gendered, because it corresponded with the traditional etiology of most Wind disorders. $ ^{8} $",
+          "note_excerpt": "3. vol5/ A ?n>25 Xhe/first/law/requestingthat therelatives of/a/possibly/mad/killer sign/bonded/statements appeared/in/ >== 1see/Eppendix ?23/butWhanxi naturally seek/to/extend/grievance/for/her5/ ow/could/ /be/willing/to/help/my/son4in4law/Riu provincial/judge iang/^houŗµ had/alreadyrecommended this/safety/measure in/ >< /1palace/memorial dated/ /Rov5/ >< /_UP @5 5@`B/P ^^3/mf/ ?=5 25 <@ Xhe/ >== guideline only/mentioned/that/the/victimZs/relatives/were/to/give/[depositions\\/1 Ů 25 Hafu to fake/madness/in/order/to/escape a/severe/punishmentD\\/1= \\OXF3/memorial/dated/ / une/ ? =/1 U 5<5=25 ŖýŢėkěŀî Ə",
+          "anchor_excerpt": "Caizuo 李裁左, who had killed his paternal uncle in 1889, was submitted to torture but he showed no fear (加以刑嚇 罔知畏懼). $ ^{63} $",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00294",
-          "note_item_id": "fn-00211",
-          "current_anchor_id": "anchor-01100",
-          "marker": "6",
-          "note_page_no": 392,
-          "anchor_page_no": 390,
-          "current_anchor_marker": "6",
-          "note_excerpt": "6. EB7DE76\u0001ID;F;@9E\u0001;@6;53F7\u0001F:3F\u00013F\u0001>73EF\u0001EA?7\u0001B:KE;5;3@E\u0001F:AG9:F\u0001F:3F\u0001IA?7@\u0001EG887D76\u00018DA? \u000e +:7'\u000147/'0 ˀ»Eˊ \u0005,7#0 \u0005\u0001R034;@9\u000187@>7;S˙ǙU˧ \u0005\u0001R$7;E:3@9\u0001>7;SF@˧ \u0005\u0001R*3@\u0001>7;Sǜ˧ \u0005 R\u001a;3@=G3@9S ǣǀ \u0003 \u0012\u0012\u000e\u00011 \u000e\u0010\u000e2\u0013 \u0012\u000e\u0018\u0004\u0007 ?36@7EE\u00018AD\u0001D73EA@E\u0001B3DF;5G>3D\u0001FA\u0001F:7?\u0007\u00010:G3@9\u0001\"MK3@QEɜÕ 7-'\u0001$#+$+#0 ¶ȀǦʦ",
-          "anchor_excerpt": "In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00296",
-          "note_item_id": "fn-00213",
-          "current_anchor_id": "anchor-01111",
+          "link_id": "link-00494",
+          "note_item_id": "fn-00486",
+          "current_anchor_id": "anchor-01522",
           "marker": "1",
-          "note_page_no": 393,
-          "anchor_page_no": 394,
+          "note_page_no": 510,
+          "anchor_page_no": 509,
           "current_anchor_marker": "1",
-          "note_excerpt": "1. <>=23 ZeQ^ >3/RHiankuangS/1 ong]UA/ < E23/where/the/original madness/and [ind/disordersS/1recommendation/and/ ong/XingxianQs/comments/are/found5/Gase/ AƑ/Vǣǀ˩ǘ ŒǤ<ǚ 25 Q^RY^W/XeYSXe^ ɟǙÅŊ 1 <?>23 ZeQ^",
-          "anchor_excerpt": "imperial times. $ ^{21} $ Gong recommended treating such a disorder with an enhanced version of the “Carefree powder” (加味逍遥散), which was often used to redress Liver imbalances, but he did not record ever using this treatment in a clinical case.",
+          "note_excerpt": "1. \u0011\u0010 \u0006\u0010\u000e2\u0007*:7 !3().'\u0001 7!9\u0001/&\u0001 2/.'3 I3E D7\u000676;F764K\u0001F:7#;@;EFDK A8\u0001&G@;E:?7@FE\u0001;@\u0001 \u000f\u0012 \u0001G@67D\u0001F:7\u0001F;F>7 \u0017=,)'5!.\u0001*)!/:(%.'\u0001 )95!.,5 \u0011\u0007.\u0016\u001a\u001b ) \u0003 \u0003 )95!.,5 \u0005\u00015A>>3F76\u00013@6\u00015ADD75F76\u00014K\u0001F:7\u0001\u0019A6;8;53F;A@\u0001%88;57\u0004 \u0004\u0007 )77\u0001-;>>\u0001 \u0010\u0007",
+          "anchor_excerpt": "The second group of mad killers that judicial officials encountered was those who never recovered from madness after committing homicide. Chronic delirium kept a killer from providing the confession that was necessary for a sentence to be pronounced. When such cases occurred, legal reports almost invariably noted that the killer's \"eyes were inexpressive and his words incoherent: no confession can be extracted\" (两目直瞪 語無論次 不能取供). $ ^{61} $ People like this were considered \"permanently crazy\" (始終瘋迷). When they were not executed for a serious crime like parricide, they were sentenced to permanent imprisonment.",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00298",
-          "note_item_id": "fn-00215",
-          "current_anchor_id": "synthetic-footnote-00236",
-          "marker": "1822",
-          "note_page_no": 394,
-          "anchor_page_no": 394,
-          "current_anchor_marker": "1822",
-          "note_excerpt": "1822. in 8.4 (p. 346) and one by Wu Tang 吳瑭 (1758-1836) in 9.3 below.",
-          "anchor_excerpt": "1822. in 8.4 (p. 346) and one by Wu Tang 吳瑭 (1758-1836) in 9.3 below.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00301",
-          "note_item_id": "fn-00218",
-          "current_anchor_id": "anchor-01121",
-          "marker": "1",
-          "note_page_no": 399,
-          "anchor_page_no": 398,
-          "current_anchor_marker": "1",
-          "note_excerpt": "1. @ 23/case/cited/in/ \\Q]PEA/ <? F5 ei Ghengzu had/studied/medicine/from/his/grand4father ei/FoxiongʘW˖ 1 ? 4 ?>@23/who/had/learned/from/his/own father/ ei/[enjiʘŀș 1 >=>4 ? 25/Xhey/were/central/figures/of/RQenghe/medicineS/1for/more/on/which3 see/Wcheid/ >25 = Sne/scenario/often/noted/in/both/treatises/and/case/files/applied/exclusively/to/menA/the/attribution/ofTYQ^ to the/failure/of/ambitions/1jXY û or jXYieQ^ û˥ 25/ n/the/ethical/and/social/milieu/that/elite/physicians represented3/it/was/not/appropriate/for/women/to/have/Rambitions5S/Xhis/is/not/to/say/that/Ghinese/women/had neither/hopes/nor/desires3/but/that/their/aspirations/were/not/called/Rambitions5S",
-          "anchor_excerpt": "added eight drugs. $ ^{31} $ Three doses were enough to “make menstrual blood flow down” (经血下行). Her illness vanished (其病如失). We are told that she had a child the next year.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00302",
-          "note_item_id": "fn-00219",
-          "current_anchor_id": "anchor-01125",
-          "marker": "5",
-          "note_page_no": 400,
-          "anchor_page_no": 399,
-          "current_anchor_marker": "5",
-          "note_excerpt": "5 2B/YGHE3 httpA66catalog5digitalarchives5tw6DYVRC < @ redress/thisimbalance5 Xhe/attribution/of/moral/meanings/to/mad/behavior thus went/against B/retrieved/on/Qay/ 3/ @5/Xian/was/sentenced/to Rstrangulation/after/the/EssizesS/1ȝǬd 2/according/to/the/statute/that/covered/the/crime/of/Rkilling/oneQs/wife",
-          "anchor_excerpt": "stasis’(憂鬱病紐) had stemmed from “mucus and Fire’s having obscured and blocked the [Heart’s] Envelope tract” (痰火蒙蔽包絡). $ ^{35} $ He treated her by the purgative method of “clearing Fire and transforming mucus” (清火化痰).",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00303",
-          "note_item_id": "fn-00220",
-          "current_anchor_id": "anchor-01154",
-          "marker": "5",
-          "note_page_no": 411,
-          "anchor_page_no": 413,
-          "current_anchor_marker": "5",
-          "note_excerpt": "b4 <a5/Xhis/passage/attributed/postpartum/madness/to/[ind/intrusion3 the/same/process/that/the/book/identified/as/the/cause/of/ordinary/insanity5/Wee/also/the/sections/on/RXhe symptoms/of postpartum/Gardiac/depletionS/1ǐí÷ɫi B/ 5@b2/and/RXhe/symptoms/of/postpartum/[ind strokesS/1ǐí ˩i B/ 5 a4 a25 or more/on/the/script/Rinternal/depletion/occurs U [ind/intrudes U illness/ensues3S see/ 5 5",
-          "anchor_excerpt": "(Furen daquan liangfang 婦人大全良方; mid 13 $ ^{th} $ century). $ ^{65} $ Both explanations of “postpartum",
+          "link_id": "link-00495",
+          "note_item_id": "fn-00487",
+          "current_anchor_id": "anchor-01523",
+          "marker": "2",
+          "note_page_no": 511,
+          "anchor_page_no": 509,
+          "current_anchor_marker": "2",
+          "note_excerpt": "in/Ghinese3/led/by/those/of/ ia/ ingtaoŻƠü 1 @? 3/ @? 3/ @? 3/and/ @@=2B/see also/ ia/ ingtao/and/^hang/[eifeng/ @? 5 Inglish4language scholarship/on/Ghinese/forensic/medicine/is/limited5 Gonsult/Pu andReedham /_ @??`3/but/remember/that/recent/Ghinese/scholarship/is/more/reliable5/ or a few/examplesof/completed/forensic/charts3/see documents/ 4 >of/the/Han4\\in/archives3/in/which/the digits/referto/the[third/main/sectionA/criminal/matters\\ 1P0X 3 2 23 [second/sub4section3/personal security\\ 1P3[ 34VR 23 [first/sub4categoryA/homicide\\ 1P/G 34 23[cases/ 4 >5\\ == Xhis/latter/role/is/mentioned/several/times/in/the/compendium/of/administrative/rules of/the/Uing/dynasty3 way/to a/site/of exile/or/penal/servitude5 the>O W W\\U/VcWRWO\\/aVWZW i÷üb< _Wupplementary/Vegulations/of/the/Gollected/Ganons/of/the/ reat Uing`5 Ert5/ /1[Xime/Pimit/for/_Vesponsibility`/to/Gare/for/_the/Zictim/of`/Grime\\OžƖþ B/HPG]/ <A/?@>4 @?2/mentions[medical/treatment\\ƍí of/injured/people5/ /do/not/know/when/these/physicians/started/to work/in/yamens5/E/sub4statute/dating/from/the/Qing/dynasty/1 =?4 = 2/mentionedsuch/physicians1 HWP ? 3/\\ingbujƋ _Qinistry/of/Tunishments`/ @3/[\\inglT/duanyu\\jÃóĆ 3/[]uqiu/yiliang\\ Ć^ŠĹ B @E4F25PT/Oun Vf 1 < =4 = ?2 spoke/of/officially/employed/doctors/as/[ill4paid/prison/physicians\\ 1Peung @?>A 3/citingPT/Oun Zs VWhVS\\U/Zc ©íƑ 5<?b23show ing that/they/already/existed/during/the/Qing5",
+          "anchor_excerpt": "I mentioned in Chapter 11 that the criminal's appearance hinted, but did not prove, that he had been crazy when committing his crime. To make sure that the killer was not faking, an officially hired physician (警官) assessed his condition. To do so, the doctor used the most common diagnostic method in Chinese medicine—he took the killer's pulse. $ ^{62} $ This measure implied that the body could speak for itself, its intelligibility detached from the mad person's (or the faker's) will. Since no pulse was unique to madness, however, we do not know how yamen physicians could distinguish a real madman from, say, a feverish faker. In the next section, I discuss in more detail the role of physicians in trials involving madness.",
           "current_anchor_synthetic": false
         }
       ]
     },
     "page_contexts": [
       {
-        "page_no": 387,
-        "file_idx": 386,
+        "page_no": 490,
+        "file_idx": 489,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "average of 4 cases per century and barely more than 2 if we exclude the last hundred years I cover. I found only two relevant cases between 1588 and 1821. The 35 cases represent the way elite doctors (mostly from the Lower Yangzi region) explained the way they understood and treated mad women. They give only a small glimpse of how society handled women who were called mad. Indeed, the main treatment for manic women may not have been medical. There is too little evidence to tell, but home confinement was certainly an option, though it may have come only after the failure of medical or exorcistic treatments. Since the documents tell us precious little about the way female patients experienced their own condition, we are also deprived of the “first-person” data that have informed recent studies of women in Chinese history. $ ^{2} $ I will remind the reader of these limits when I propose tentative conclusions or try to point to possible trends. This chapter’s opening section tries to determine whether and how the diagnoses and therapies of “mad women” were gendered. One guiding issue will be whether physicians found relevant the notion that the body of women was “governed by Blood.” The second section focuses on nudity and excessive desires, two symptoms that were likely to provoke extra-medical responses. Perhaps unsurprisingly, we shall see that the gendered character of medical ...",
-        "byte_size": 125946,
-        "sha256": "0899f33564b017a3afe889574204f194f431a1ce7e9fd5c8f11e6314a8fc6c8e"
+        "ocr_excerpt": "according to the degree of criminal intention they involved (see 11.1). The first type of balance was enforced through judicial practice, the second one through legislation. The seriousness of crimes was defined comparatively by the main statutes (律) of the Code, which were supposed to form a well-balanced network of crimes and punishments. The Code also provided a table of “mourning degrees” according to which the gravity of crimes against relatives was assessed. $ ^{4} $ As Table 12.1 (next page) illustrates, the order of severity of the six killings was preserved even after the degree of family relation between killer and victim had been factored in. In the table, the punishment increases downwards (toward more serious kinds of homicides) and toward the right (from junior relatives to senior relatives as victims). The middle column defines the standard punishment for the killing of a single unrelated person (凡人). The punishments meted out therefore reflected not only the nature of the act itself, but also the relative status of offender and victim. $ ^{5} $ In the terms of our table, the hierarchy of the punishments imposed for proximate crimes was thus observed both vertically and horizontally. In trials, it was an official's duty to select the “penal denomination” (罪名) that most appropriately described an unlawful act. The sentencing of a crime was called kezui 科罪 or duanz ...",
+        "byte_size": 143586,
+        "sha256": "634b94e2855c240a47f1d40d0a5d2cdd5981e8194fc63d8179a25ac671ad8e1d"
       },
       {
-        "page_no": 388,
-        "file_idx": 387,
+        "page_no": 491,
+        "file_idx": 490,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "whether postpartum insanity was “really madness,” since late-imperial physicians tied it explicitly to what they called madness. ### 9.1 Non-gendered bodies, gendered etiologies Medical explanations of mad behavior in treatises purported to apply to both men and women. But in practice, did doctors consistently trace cases of women's mad behavior to the roots they identified in their treatises? Did their descriptions and treatments apply to the \"androgynous body\" (Furth 1999: 25-29, 44-48 and 56-57)—a body without anatomical sex—that characterized elite Chinese medicine? Charlotte Furth has indeed argued that late-imperial physicians focused increasingly less on the uniqueness of women, and tended to understand the women's illnesses in the same way as they understood men's. I shall agree with Furth in general, but I will also show that the etiology of madness was already ungendered in the Song dynasty (960-1279), and that glimpses of gendered etiologies only appeared in late-imperial times, especially in the nineteenth century. In recorded symptoms, identified etiology, and adopted therapy, a spectrum of more or less gendered solutions were available. Some symptoms (notably nudity and grief) were proportionally more common in women's cases, probably because these acts were seen as socially more problematic, and were therefore more likely to be brought to the attention of a physi ...",
-        "byte_size": 121615,
-        "sha256": "55dfec28c238e1e5c0d0cb89fa179ca6723a9270e28beeba299d8a81bc5b055c"
+        "ocr_excerpt": "<div style=\"text-align: center;\">Table 12.1: The punishments for different types of homicides with different victims (1740)</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Victim</td><td style='text-align: center; word-wrap: break-word;'>Son / daughter</td><td style='text-align: center; word-wrap: break-word;'>Younger brother / sister</td><td style='text-align: center; word-wrap: break-word;'>Commoner</td><td style='text-align: center; word-wrap: break-word;'>Older brother / sister</td><td style='text-align: center; word-wrap: break-word;'>Father / mother</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Crime</td><td style='text-align: center; word-wrap: break-word;'>[No punishment]</td><td style='text-align: center; word-wrap: break-word;'>12.42 ounces of silver, not collected = exemption</td><td style='text-align: center; word-wrap: break-word;'>12.42 ounces of silver to victim&#x27;s family</td><td style='text-align: center; word-wrap: break-word;'>EITHER &quot;decapitation after the Assizes&quot; OR 100 strokes of the heavy stick and 3 years of penal servitude</td><td style='text-align: center; word-wrap: break-word;'>Irregular, but death (1713 case: immediate decapitation)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Accidental killing</td><td style='text ...",
+        "byte_size": 157573,
+        "sha256": "aecb96dd6471d0c6679b0ac7780eda57be98cb4671adb027861304981a8841c4"
       },
       {
-        "page_no": 389,
-        "file_idx": 388,
+        "page_no": 492,
+        "file_idx": 491,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files. Even one of the best-known Song works on women's illnesses proposed solutions that were equally applicable to men. Chen Ziming's 陳自明 All-Inclusive Excellent Recipes for Women (Furen daquan liangfang 婦人大全良方; hereafter Excellent Recipes), which he compiled in the mid thirteenth century, regrouped a large number of recipes designed to treat disorders as they happened to women. $ ^{6} $ On the issue that concerns us, Chen maintained that, \"In women, the disorders dian and kuang are brought about by the deviant [Qi] of Wind, which is absorbed when Qi and Blood are depleted\" (夫婦人顛狂病者 由血氣虛受風邪所為也). $ ^{7} $ Despite the mention of Blood depletion, this etiology was not gendered, because it corresponded with the traditional etiology of most Wind disorders. $ ^{8} $",
-        "byte_size": 160334,
-        "sha256": "b1688aca3af88398d468efe35ecac2a956e8aa3757fb9c562395b846f8354da8"
+        "ocr_excerpt": "<table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>If the victim had scolded or hit the killer beforehand: no punishment.</td><td style='text-align: center; word-wrap: break-word;'>100 strokes of the heavy stick, 1 year of penal servitude</td><td style='text-align: center; word-wrap: break-word;'>depending on the circumstances of the case] Decapitation after the Assizes [effectively executed]</td><td style='text-align: center; word-wrap: break-word;'>Lingchi</td><td style='text-align: center; word-wrap: break-word;'>Lingchi</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Killing by design 謀殺 [treated like intentional killing]</td><td style='text-align: center; word-wrap: break-word;'>No clause [60 strokes of the heavy stick, 1 year of penal servitude</td><td style='text-align: center; word-wrap: break-word;'>No clause [100 strokes of the heavy stick, 2,000 li [100 strokes of the heavy stick, 2,000 li] at 2,000 li]</td><td style='text-align: center; word-wrap: break-word;'>Decapitation after the Assizes [effectively executed] Decapitation after the Assizes [effectively executed]</td><td style='text-align: center; word-wrap: break-word;'>Lingchi</td></tr></table> magistrates instructed officials on how to judge cases. $ ^{8} $ The selection of the most fitting crime name was based on a carefu ...",
+        "byte_size": 133908,
+        "sha256": "719b36862b175dd118d55be8f683056d5b3c968d399a9cf1ab83770986117ce3"
       },
       {
-        "page_no": 390,
-        "file_idx": 389,
+        "page_no": 493,
+        "file_idx": 492,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "In a brief case record, Chen explained that he cured a woman with the “Elixir that nourishes the correct” (養正丹), a common remedy for madness and seizures. $ ^{9} $ But as if to emphasize that this treatment was not designed exclusively for women, Chen mentioned that he also cured a man with the same remedy. Despite the popularity of Chen’s Excellent Recipes after Xue Ji 薛己 (1487-1559) re-edited them in 1547, there is no sign that Chen’s explanation of women’s mad behavior was ever adopted by elite physicians of the sixteenth century and after, probably because the Wind explanation that Chen had embraced had by then been replaced by a script that traced most problems involving consciousness to the disorderly movements of Fire and mucus in and around the Heart. $ ^{10} $ A few sixteenth-century cases tell us what therapies were current at the time. The physicians who designed them did not seem to think these remedies applied to women better than to men. Wu Qiu 吳球 (fl. 1520s-30s) traced a young woman's strange behavior (she \"would cry or laugh, or run around naked, or shut the doors and speak a lot\" (或哭或笑 或裸體而走 或閉戶而多言) to \"harm caused by excessive ratiocination, [which made] the spirit unable to hold to its lodging\" (思慮過傷 神不守舍也). $ ^{11} $ In the sixteenth century, this etiology typified medicine's increasing focus on \"inner harm\"—a category that included exhaustion, food scarcity ...",
-        "byte_size": 140210,
-        "sha256": "154890134c594acb86b26a21186d2de91b5fe0a84aadcd45937a0a1a17804165"
+        "ocr_excerpt": "or to one that imposed a punishment that was deemed appropriate to the crime at hand. $ ^{10} $ Thanks to analogies, the judicial system could sentence a potentially unlimited number of criminal acts with a limited number of laws. But judicial analogies could only be deployed when no law was found relevant to the punishment of a specific act. This strictly regulated process differed from what doctors did when they treated an illness by analogy to their understanding of another disorder. In Part One, I argued that this kind of “scheme transfer” was the main way in which medical approaches to madness changed. For almost a hundred years after 1669, homicides committed in a fit of madness were sentenced as “killing because of madness” regardless of the identity and number of the victims, because the law considered that the lack of intention of mad acts justified a light punishment. $ ^{11} $ Starting around the mid-eighteenth century, however, a few concerned officials argued that treating in bulk all killings committed because of madness created an imbalance between some crimes and their punishments. The acts of legislation we are about to examine did not stem from new reflections on madness, but from efforts to reestablish consistent and well-balanced penalties for homicides committed because of madness. ### 12.2 Increasing severity in sentencing crimes committed “because of madn ...",
+        "byte_size": 130628,
+        "sha256": "79f7b6f7c34bf96f151d02992ae1881980229e06b83e68487b837783184ad3aa"
       },
       {
-        "page_no": 392,
-        "file_idx": 391,
+        "page_no": 494,
+        "file_idx": 493,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "flow out in excess, Blood and Qi confuse the Heart; or when postpartum noxious dew flushes upward and makes speech jumbled and the mind unable to stay steadfast, this is the result of depletion of Blood and exhaustion of Spirit” (有婦人月水崩漏過多 血氣迷心 或產後惡露上沖 而言語錯亂 神志不守者 此血虛神耗也). $ ^{15} $ Li's popular work was among the first to ascribe mad symptoms to pathological menses, but the text explained how one specific imbalance could lead to insanity, not how mad symptoms should be interpreted in general. In other words, he was locking one etiology and some symptoms together in a contextually limited script. Li probably believed that the general explanation of insanity as caused by the action of Fire and mucus still applied to women who did not suffer from menorrhagia and whose symptoms did not occur postpartum. Although the rare sources we have are difficult to bind into a single narrative, dispersed writings indicate that at least some physicians thought that women suffered from madness for reasons particular to them. Zhuang Lüyan's 莊履嚴 Fuke baibian 婦科百辨 (early 17 $ ^{th} $ century?) claimed that the mucus that made women mad (顛狂) by encroaching on their Heart was brought about by extreme fright or sorrow (驚憂之極 痰犯心胸所 致), $ ^{16} $ an emotional theory of mucus that was still relatively rare at the time. In the late seventeenth century, Chen Shiduo 陳士鐸 argued that fits of madness caused by ...",
-        "byte_size": 130458,
-        "sha256": "39c17a064290d1811db45eb043f5431ea09b3a6eb958970db76d89e2106f8bbc"
+        "ocr_excerpt": "misbehavior were promulgated during the second half of the Qing in response to an increase in the number of unmarried men. It is more difficult to find social roots for transformations in the legal treatment of insane killers. I try to show instead that the dynamics of madness as a legal object was governed by the way the Qing legal system functioned. In the second half of the eighteenth century, two important phenomena enabled madness laws to proliferate and become more severe. One was the general proliferation of sub-statutes, which after 1740 could be cited in judgments without reference to statutes. $ ^{12} $ Second was the subsequent development of the sentencing guidelines found in “completed cases” (成案) and in the regulations of the Autumn Assizes. $ ^{13} $ Both events helped to modulate in a formal way the punishments that mad killers incurred depending on whom they had killed. Legislative developments stemmed from the initiatives of the emperor, provincial judges and governors, and officials from the Ministry of Punishments. The more highly ranked the proponents of change, the more likely new measures were to be implemented. It was usually the Ministry of Punishments that decided whether to turn such proposals into laws. Eighteenth-century changes may thus have stemmed from the habitus of the Ministry of Punishments and the provincial bureaucracy under the Qianlong re ...",
+        "byte_size": 145391,
+        "sha256": "59bd7c1d84c29e4d3171651feddc17aa0bd7547c078ead7b06ea86075a7bdb9b"
       },
       {
-        "page_no": 393,
-        "file_idx": 392,
+        "page_no": 495,
+        "file_idx": 494,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "薹憤 遂成此疾). $ ^{17} $ Sorrow appeared in both Zhuang's and Chen's accounts, but neither said much more about it than the lines I just cited. It is tempting to speculate that women isolated from their kin by patrilocal marriage and with limited social relations because of the necessity to stay at home were more likely than men to suffer from “sorrow.” Several cases by Gong Tingxian 龔廷賢 (fl. 1570s-1610s) indicate that one physician could propose many different explanations for similar behaviors, an aspect of late-imperial medicine with which we are now familiar. In two records published in 1576 and 1587, Gong treated female patients with the “Avert-wind tongsheng powder” 防風通聖散, a formula that a book by his father had claimed could “treat the suddenly erupting symptoms of all madness and Wind disorders” (治一切癲狂風疾 暴發之症).¹⁸ When he re-edited his father’s work, Gong added that this remedy “treats diankuang that has just started to arise” (此方治癲狂初起), when “in most cases there is repletion-Heat and Wind-heteropathy” (多有實熱風邪).¹⁹ In later books, Gong explained that women’s dian behavior (singing at strange times and “climbing on rooftops” 歌唱無時 簫垣上屋) was “caused by constructive Blood (?) lost in the Heart’s Envelope” (營血迷於心包所致也).²⁰ I do not know what Gong Tingxian meant by “constructive Blood,” but it may have been unique to women. As we have seen, however, blockage of the “Heart’s Envelope” ...",
-        "byte_size": 158825,
-        "sha256": "fce03ffd701df08c8f0833f33da7470fe20a43aa0832d041ead077612f715739"
+        "ocr_excerpt": "crimes committed against senior family members. Once some changes had taken place, officials knew that the Ministry would likely approve of more proposals along the same lines, and change therefore followed from change. Since this policy theme did not automatically determine legislation, I explain each increase in punishment individually. As I observed above, this general increase in severity did not stem from a change in the legal conception of mad acts or mad people. For an act to qualify as “mad,” it still had to have been devoid of awareness, and the officials of the Ministry of Punishments still pressed field officials for clarifications when they detected traces of intentions in the actions of a potentially mad killer. The earliest example of a desire to adjust punishments for crimes committed “because of madness” was atypically systematic. In 1754, Shanxi provincial judge Jiang Zhou 蔣洲 (d. 1760) memorialized to “balance the sub-statute on killing because of madness” (請平瘋病殺人之例). $ ^{15} $ He first noted that those who had killed an older brother in a fit of madness had been sentenced in two conflicting ways: 1) to 3 years of penal servitude and 100 strokes of the heavy stick for the “Accidental killing of a superior or senior relative of the second degree” (過失殺期親尊長), $ ^{16} $ or 2) to “immediate decapitation” (斬立決) according to the statute on “killing one’s elder brother ...",
+        "byte_size": 142047,
+        "sha256": "c702db45cb6c279c728162228563442f7ae990c8b57f4c2603a8a0a297b23820"
       },
       {
-        "page_no": 394,
-        "file_idx": 393,
+        "page_no": 496,
+        "file_idx": 495,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "imperial times. $ ^{21} $ Gong recommended treating such a disorder with an enhanced version of the “Carefree powder” (加味逍遥散), which was often used to redress Liver imbalances, but he did not record ever using this treatment in a clinical case. I found only one case of a “mad” woman between 1615 and 1822: a file by Suzhou physician Zhang Lu 張璐 (1617-1699). A woman spoke madly, screaming and scolding. She would sing and laugh unusually, as if she were possessed. Her eye and the corner of her mouth on one side were raised in a stupid grin. Some treated her as if these were convulsive fits, others as if these were fits of Heart Wind, all to no avail. It turns out that she had long had a Head-Wind illness, and that it was the acting up of Wind mucus that had made her this way. I used [Sichuan-] lovage-and-wild-ginger decoction with an addition of avert-wind, and she quickly became better after a few doses. $ ^{22} $ 一婦人狂言叫罵 歌笑非常 似崇憑依 一邊眼與口角呆起 或作癎治 成作心風治 皆不效 乃是舊有頭風之疾 風痰作之使然 用芎辛湯加防風 數服頓愈 This way to treat madness symptoms was unusual, but not obviously gendered. The record also indicates that previous physicians had used methods that could have applied to men. Following a disappointing lack of cases for two centuries after 1615, we have ten cases of “mad women” written by five men between 1822 and 1859. $ ^{23} $ Lin Peiqin 林佩琴 (1772-1839) was one of very few doctors who published ex ...",
-        "byte_size": 135611,
-        "sha256": "bd04765708a50a7a81f6735ca918d340a7f3b2fc05202bb958b1aca2cfdc470c"
+        "ocr_excerpt": "secondary circumstance within the homicide of a close senior relative. These sentences were bolstered by two equally valid legal logics, namely the importance of intentions and the weight of seniority in intra-family crimes. Finding these judgments “particularly inconsistent” (殊未劃一), Jiang proposed to calibrate punishment according to the degree of family relation between killer and victim. $ ^{19} $ The killing of distant relatives would be redeemed monetarily according to the statute on killing relatives by accident. $ ^{20} $ One who killed a third- or fourth-degree relative (大小功尊長) whose death usually mandated “immediate decapitation” should be punished by the lower “decapitation after the Assizes.” $ ^{21} $ Finally, the sentence of “immediate decapitation” for killing second-degree seniors should be preserved, but an inserted slip should declare the insanity of the killer. The final decision should be left to the emperor. The Ministry of Punishments rejected Jiang’s proposal, but provincial officials soon had to face again the issues that Jiang had tried to disentangle. In 1756, the governor of Zhejiang confirmed a sentence of “decapitation after the Assizes” for a mad man who had killed his older brother. $ ^{22} $ This was one degree of lower than the penalty of “immediate decapitation” meted out to those who killed an older brother in a regular fight. But the Ministry ...",
+        "byte_size": 140054,
+        "sha256": "4a331ffb7b1608ce6524c1c9c7c7b259c6b31791feb68b6298f4182c1229ac83"
       },
       {
-        "page_no": 395,
-        "file_idx": 394,
+        "page_no": 497,
+        "file_idx": 496,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "and left several case files to supplement their general explanations. $ ^{24} $ His long survey of causes of insanity included a claim that “women suffer from dian because of Blood imbalances” (婦人患癲 由血不調), $ ^{25} $ but none of his three cases of “mad women” mentioned Blood. He diagnosed that a woman who spoke and laughed to herself was suffering from “abundance of mucus, and Qi in stasis” (痰多氣鬱), and attributed to fright the dian case of a despondent and emaciated (神衰肌削) patient who had been “sitting and lying as if stupid” (坐臥如癡) for more than ten years. $ ^{26} $ Lin noted that “only the massive replenishing of primordial Qi will bring results” (非大補元氣不為功), but since many physicians considered that prolonged disorders led to general depletion, Lin’s approach did not apply solely to women. In another case by Lin, a woman surnamed Zhang was “confused and manic” (恍惚狂妄). In addition to “seeing her husband as an enemy” (视夫若仇), she menacingly “held an instrument and shed her clothes, so that no one dared to approach her” (持械棄衣 莫之敢近). Lin adopted the conventional remedy for such acute crises: an emetic. Pure melon pedicle “removed a lot of viscous saliva and lodged sputum” (去粘涎宿沫頗多), but the violent vomiting caused the patient chest pains. When he saw that she still “spoke and laughed to herself,” Lin “knew that.... the Heart-lodging was [still] depleted and that the Spirit-souls ha ...",
-        "byte_size": 137268,
-        "sha256": "46c61337d2e6a30c74cc5f397d125554d774372b630f3b2352638314c564e7d3"
+        "ocr_excerpt": "impose its judgment, but referred the case to the emperor, who entrusted the Nine Chief Ministers (九卿) with the final decision. $ ^{23} $ The congregated Ministers agreed with the governor to postpone death until “after the Assizes.” This way of sentencing madness-induced homicides of second-degree seniors remained in force until the end of the Qing. What made Jiang Zhou, the Ministry of Punishments, and the Zhejiang governor reluctant to treat the killing of seniors as cases of “accidental killing” was probably the view that a killing “because of madness” had an extra component that other “accidental killings” did not possess: direct aggression. Madmen killed with violent gestures. This feature of mad killings may have been what justified the Qianlong emperor's decision in 1761 to make the crime of \"killing one's parents because of madness\" punishable by dismemberment (凌遲), the harshest form of death penalty allowed by the Code. $ ^{24} $ His pronouncement was part of an edict that instructed provincial officials to execute all parricides swiftly—for fear they would take their own lives or die of starvation in prison—and to report the execution afterwards by palace memorial. $ ^{25} $ The law had long stressed the importance of hierarchical family relations, but in the 1760s the emperor pushed the same logic even further. By ordering dismemberment for",
+        "byte_size": 162622,
+        "sha256": "6799cf75236cced750733a308b052775c47adfd180dfb5e24a4a8449bfcfc2c1"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-009-genderedmania:toc-ch-009-genderedmania:footnote",
+    "cluster_id": "toc-manual-2-12-12-punish-but-how-mad-ac:toc-manual-2-12-12-punish-but-how-mad-ac:footnote",
     "request_mode": "anchor_rebind",
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00215\",\n    \"anchor_id\": \"anchor-01110\",\n    \"confidence\": 0.9,\n    \"reason\": \"The note item 'fn-00215' (marker '1822') is currently bound to a synthetic anchor. The screenshot for page 376 clearly shows the text 'between 1615 and 1822: a file by Suzhou physician Zhang Lu...' followed by footnote marker 23. The OCR excerpt for 'anchor-01110' contains this exact phrase ('I found only one case of a “mad” woman between 1615 and 1822...'). Although the anchor's stored marker is '20', the source text content matches the location of the note perfectly, indicating an OCR error in the marker field that should be corrected by rebinding.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01093\",\n    \"confidence\": 0.95,\n    \"reason\": \"The OCR excerpt for this anchor contains '$ ^{2} $', but the corresponding screenshot (page 369) shows the number '2' as a regular inline character within the sentence ('...women in Chinese history.2 I will remind...'), not as a superscript footnote marker. The actual footnote 2 on that page refers to 'Dorothy Ko'. Thus, this is a false positive detection of a reference.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01099\",\n    \"confidence\": 0.95,\n    \"reason\": \"The OCR excerpt contains '$ ^{8} $', but the screenshot (page 371) shows the number '8' appearing at the end of a paragraph as part of the sentence structure ('...etiology of most Wind disorders.8'), not as a superscript footnote marker. Footnote 8 on that page discusses 'Wind illness'. This is a false positive.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01102\",\n    \"confidence\": 0.95,\n    \"reason\": \"The OCR excerpt contains '$ ^{11} $', but the screenshot (page 372) shows the number '11' as part of the text flow ('...spirit unable to hold to its lodging”...11 In the sixteenth century...'), not as a superscript marker. Footnote 11 is located elsewhere. This is a false positive.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01103\",\n    \"confidence\": 0.95,\n    \"reason\": \"The OCR excerpt contains '$ ^{15} $', but the screenshot (page 374) shows the number '15' occurring after the closing parenthesis of a quote ('...exhaustion of Spirit”...15 Li's popular work...'), functioning as punctuation or a section break rather than a footnote callout. The actual footnote 15 is at the bottom of the page. This is a false positive.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01105\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate of anchor-01103 logic; the number '15' in the source text is not a superscript footnote marker.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01107\",\n    \"confidence\": 0.95,\n    \"reason\": \"The OCR excerpt contains '$ ^{17} $', but the screenshot (page 375) shows '17' appearing after the closing parenthesis of a quote ('...sorrow and anger”...17 Sorrow appeared...'), not as a superscript marker. This is a false positive.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01109\",\n    \"confidence\": 0.95,\n    \"reason\": \"The OCR excerpt contains '$ ^{19} $', but the screenshot (page 375) shows '19' appearing after the closing parenthesis of a quote ('...Wind-heteropathy”...19 In later books...'), not as a superscript marker. This is a false positive.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00476\",\n    \"anchor_id\": \"anchor-01465\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note item fn-00476 has marker '7'. The screenshot of page 473 (image 2) clearly shows footnote 7 at the bottom: 'For an explanation of how cases of mistaken killing could be treated...'. This matches the note text exactly. Anchor anchor-01465 is on page 491 (which corresponds to image 2, page 473 in the book's internal numbering or simply the page shown). The marker in the text body on that page (Table 12.1 area) corresponds to this footnote. Although the JSON lists anchor-01465 with marker '12' (likely an OCR error for '7' or a different anchor), the visual evidence confirms the match between the note content and the footnote visible on the page associated with the cluster.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01461\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor marker is '12'. Page 490 (image 1) does not show footnote 12. Footnote 12 appears on page 494 (image 6). This anchor is likely a false positive or belongs to a different note not in this cluster's immediate unresolved set requiring rebind here, or it is correctly ignored as the note is elsewhere.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01464\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate/Erroneous anchor for marker '12' on page 491. Ignored.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01468\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor marker '10' on page 493. Footnote 10 is on page 495 (image 5). No note item for fn-10 in this specific rebind candidate list to match against, or it's handled elsewhere. Ignoring anchor as no matching note item provided in rebind_candidates for this specific action set.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01469\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor marker '11' on page 493. Footnote 11 is on page 495 (image 5). Ignoring anchor.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01470\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor marker '12' on page 494. Footnote 12 is on page 496 (image 6). Ignoring anchor.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01471\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor marker '13' on page 494. Footnote 13 is on page 496 (image 6). Ignoring anchor.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01472\",\n    \"confidence\": 1.0,\n    \"reason\": \"Anchor marker '14' on page 494. Footnote 14 is on page 496 (image 6). Ignoring anchor.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-00215",
-      "anchor_id": "anchor-01110",
+      "note_item_id": "fn-00476",
+      "anchor_id": "anchor-01465",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.9,
-      "reason": "The note item 'fn-00215' (marker '1822') is currently bound to a synthetic anchor. The screenshot for page 376 clearly shows the text 'between 1615 and 1822: a file by Suzhou physician Zhang Lu...' followed by footnote marker 23. The OCR excerpt for 'anchor-01110' contains this exact phrase ('I found only one case of a “mad” woman between 1615 and 1822...'). Although the anchor's stored marker is '20', the source text content matches the location of the note perfectly, indicating an OCR error in the marker field that should be corrected by rebinding."
+      "confidence": 1.0,
+      "reason": "Note item fn-00476 has marker '7'. The screenshot of page 473 (image 2) clearly shows footnote 7 at the bottom: 'For an explanation of how cases of mistaken killing could be treated...'. This matches the note text exactly. Anchor anchor-01465 is on page 491 (which corresponds to image 2, page 473 in the book's internal numbering or simply the page shown). The marker in the text body on that page (Table 12.1 area) corresponds to this footnote. Although the JSON lists anchor-01465 with marker '12' (likely an OCR error for '7' or a different anchor), the visual evidence confirms the match between the note content and the footnote visible on the page associated with the cluster."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01093",
+      "anchor_id": "anchor-01461",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The OCR excerpt for this anchor contains '$ ^{2} $', but the corresponding screenshot (page 369) shows the number '2' as a regular inline character within the sentence ('...women in Chinese history.2 I will remind...'), not as a superscript footnote marker. The actual footnote 2 on that page refers to 'Dorothy Ko'. Thus, this is a false positive detection of a reference."
+      "confidence": 1.0,
+      "reason": "Anchor marker is '12'. Page 490 (image 1) does not show footnote 12. Footnote 12 appears on page 494 (image 6). This anchor is likely a false positive or belongs to a different note not in this cluster's immediate unresolved set requiring rebind here, or it is correctly ignored as the note is elsewhere."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01099",
+      "anchor_id": "anchor-01464",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The OCR excerpt contains '$ ^{8} $', but the screenshot (page 371) shows the number '8' appearing at the end of a paragraph as part of the sentence structure ('...etiology of most Wind disorders.8'), not as a superscript footnote marker. Footnote 8 on that page discusses 'Wind illness'. This is a false positive."
+      "confidence": 1.0,
+      "reason": "Duplicate/Erroneous anchor for marker '12' on page 491. Ignored."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01102",
+      "anchor_id": "anchor-01468",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The OCR excerpt contains '$ ^{11} $', but the screenshot (page 372) shows the number '11' as part of the text flow ('...spirit unable to hold to its lodging”...11 In the sixteenth century...'), not as a superscript marker. Footnote 11 is located elsewhere. This is a false positive."
+      "confidence": 1.0,
+      "reason": "Anchor marker '10' on page 493. Footnote 10 is on page 495 (image 5). No note item for fn-10 in this specific rebind candidate list to match against, or it's handled elsewhere. Ignoring anchor as no matching note item provided in rebind_candidates for this specific action set."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01103",
+      "anchor_id": "anchor-01469",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The OCR excerpt contains '$ ^{15} $', but the screenshot (page 374) shows the number '15' occurring after the closing parenthesis of a quote ('...exhaustion of Spirit”...15 Li's popular work...'), functioning as punctuation or a section break rather than a footnote callout. The actual footnote 15 is at the bottom of the page. This is a false positive."
+      "confidence": 1.0,
+      "reason": "Anchor marker '11' on page 493. Footnote 11 is on page 495 (image 5). Ignoring anchor."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01105",
+      "anchor_id": "anchor-01470",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "Duplicate of anchor-01103 logic; the number '15' in the source text is not a superscript footnote marker."
+      "confidence": 1.0,
+      "reason": "Anchor marker '12' on page 494. Footnote 12 is on page 496 (image 6). Ignoring anchor."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01107",
+      "anchor_id": "anchor-01471",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The OCR excerpt contains '$ ^{17} $', but the screenshot (page 375) shows '17' appearing after the closing parenthesis of a quote ('...sorrow and anger”...17 Sorrow appeared...'), not as a superscript marker. This is a false positive."
+      "confidence": 1.0,
+      "reason": "Anchor marker '13' on page 494. Footnote 13 is on page 496 (image 6). Ignoring anchor."
     },
     {
       "action": "ignore_ref",
       "note_item_id": "",
-      "anchor_id": "anchor-01109",
+      "anchor_id": "anchor-01472",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "The OCR excerpt contains '$ ^{19} $', but the screenshot (page 375) shows '19' appearing after the closing parenthesis of a quote ('...Wind-heteropathy”...19 In later books...'), not as a superscript marker. This is a false positive."
+      "confidence": 1.0,
+      "reason": "Anchor marker '14' on page 494. Footnote 14 is on page 496 (image 6). Ignoring anchor."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-009-genderedmania:toc-ch-009-genderedmania:footnote",
-    "chapter_title": "Gendered mania",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00215",
-        "anchor_id": "anchor-01110",
+        "note_item_id": "fn-00476",
+        "anchor_id": "anchor-01465",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.9,
-        "reason": "The note item 'fn-00215' (marker '1822') is currently bound to a synthetic anchor. The screenshot for page 376 clearly shows the text 'between 1615 and 1822: a file by Suzhou physician Zhang Lu...' followed by footnote marker 23. The OCR excerpt for 'anchor-01110' contains this exact phrase ('I found only one case of a “mad” woman between 1615 and 1822...'). Although the anchor's stored marker is '20', the source text content matches the location of the note perfectly, indicating an OCR error in the marker field that should be corrected by rebinding."
+        "confidence": 1.0,
+        "reason": "Note item fn-00476 has marker '7'. The screenshot of page 473 (image 2) clearly shows footnote 7 at the bottom: 'For an explanation of how cases of mistaken killing could be treated...'. This matches the note text exactly. Anchor anchor-01465 is on page 491 (which corresponds to image 2, page 473 in the book's internal numbering or simply the page shown). The marker in the text body on that page (Table 12.1 area) corresponds to this footnote. Although the JSON lists anchor-01465 with marker '12' (likely an OCR error for '7' or a different anchor), the visual evidence confirms the match between the note content and the footnote visible on the page associated with the cluster."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01093",
+        "anchor_id": "anchor-01461",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt for this anchor contains '$ ^{2} $', but the corresponding screenshot (page 369) shows the number '2' as a regular inline character within the sentence ('...women in Chinese history.2 I will remind...'), not as a superscript footnote marker. The actual footnote 2 on that page refers to 'Dorothy Ko'. Thus, this is a false positive detection of a reference."
+        "confidence": 1.0,
+        "reason": "Anchor marker is '12'. Page 490 (image 1) does not show footnote 12. Footnote 12 appears on page 494 (image 6). This anchor is likely a false positive or belongs to a different note not in this cluster's immediate unresolved set requiring rebind here, or it is correctly ignored as the note is elsewhere."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01099",
+        "anchor_id": "anchor-01464",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{8} $', but the screenshot (page 371) shows the number '8' appearing at the end of a paragraph as part of the sentence structure ('...etiology of most Wind disorders.8'), not as a superscript footnote marker. Footnote 8 on that page discusses 'Wind illness'. This is a false positive."
+        "confidence": 1.0,
+        "reason": "Duplicate/Erroneous anchor for marker '12' on page 491. Ignored."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01102",
+        "anchor_id": "anchor-01468",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{11} $', but the screenshot (page 372) shows the number '11' as part of the text flow ('...spirit unable to hold to its lodging”...11 In the sixteenth century...'), not as a superscript marker. Footnote 11 is located elsewhere. This is a false positive."
+        "confidence": 1.0,
+        "reason": "Anchor marker '10' on page 493. Footnote 10 is on page 495 (image 5). No note item for fn-10 in this specific rebind candidate list to match against, or it's handled elsewhere. Ignoring anchor as no matching note item provided in rebind_candidates for this specific action set."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01103",
+        "anchor_id": "anchor-01469",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{15} $', but the screenshot (page 374) shows the number '15' occurring after the closing parenthesis of a quote ('...exhaustion of Spirit”...15 Li's popular work...'), functioning as punctuation or a section break rather than a footnote callout. The actual footnote 15 is at the bottom of the page. This is a false positive."
+        "confidence": 1.0,
+        "reason": "Anchor marker '11' on page 493. Footnote 11 is on page 495 (image 5). Ignoring anchor."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01105",
+        "anchor_id": "anchor-01470",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate of anchor-01103 logic; the number '15' in the source text is not a superscript footnote marker."
+        "confidence": 1.0,
+        "reason": "Anchor marker '12' on page 494. Footnote 12 is on page 496 (image 6). Ignoring anchor."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01107",
+        "anchor_id": "anchor-01471",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{17} $', but the screenshot (page 375) shows '17' appearing after the closing parenthesis of a quote ('...sorrow and anger”...17 Sorrow appeared...'), not as a superscript marker. This is a false positive."
+        "confidence": 1.0,
+        "reason": "Anchor marker '13' on page 494. Footnote 13 is on page 496 (image 6). Ignoring anchor."
       },
       {
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-01109",
+        "anchor_id": "anchor-01472",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{19} $', but the screenshot (page 375) shows '19' appearing after the closing parenthesis of a quote ('...Wind-heteropathy”...19 In later books...'), not as a superscript marker. This is a false positive."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00215",
-        "anchor_id": "anchor-01110",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "The note item 'fn-00215' (marker '1822') is currently bound to a synthetic anchor. The screenshot for page 376 clearly shows the text 'between 1615 and 1822: a file by Suzhou physician Zhang Lu...' followed by footnote marker 23. The OCR excerpt for 'anchor-01110' contains this exact phrase ('I found only one case of a “mad” woman between 1615 and 1822...'). Although the anchor's stored marker is '20', the source text content matches the location of the note perfectly, indicating an OCR error in the marker field that should be corrected by rebinding."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01093",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt for this anchor contains '$ ^{2} $', but the corresponding screenshot (page 369) shows the number '2' as a regular inline character within the sentence ('...women in Chinese history.2 I will remind...'), not as a superscript footnote marker. The actual footnote 2 on that page refers to 'Dorothy Ko'. Thus, this is a false positive detection of a reference."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01099",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{8} $', but the screenshot (page 371) shows the number '8' appearing at the end of a paragraph as part of the sentence structure ('...etiology of most Wind disorders.8'), not as a superscript footnote marker. Footnote 8 on that page discusses 'Wind illness'. This is a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01102",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{11} $', but the screenshot (page 372) shows the number '11' as part of the text flow ('...spirit unable to hold to its lodging”...11 In the sixteenth century...'), not as a superscript marker. Footnote 11 is located elsewhere. This is a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01103",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{15} $', but the screenshot (page 374) shows the number '15' occurring after the closing parenthesis of a quote ('...exhaustion of Spirit”...15 Li's popular work...'), functioning as punctuation or a section break rather than a footnote callout. The actual footnote 15 is at the bottom of the page. This is a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01105",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate of anchor-01103 logic; the number '15' in the source text is not a superscript footnote marker."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01107",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{17} $', but the screenshot (page 375) shows '17' appearing after the closing parenthesis of a quote ('...sorrow and anger”...17 Sorrow appeared...'), not as a superscript marker. This is a false positive."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01109",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{19} $', but the screenshot (page 375) shows '19' appearing after the closing parenthesis of a quote ('...Wind-heteropathy”...19 In later books...'), not as a superscript marker. This is a false positive."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-00298",
-        "action": "match",
-        "note_item_id": "fn-00215",
-        "anchor_id": "anchor-01110",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "The note item 'fn-00215' (marker '1822') is currently bound to a synthetic anchor. The screenshot for page 376 clearly shows the text 'between 1615 and 1822: a file by Suzhou physician Zhang Lu...' followed by footnote marker 23. The OCR excerpt for 'anchor-01110' contains this exact phrase ('I found only one case of a “mad” woman between 1615 and 1822...'). Although the anchor's stored marker is '20', the source text content matches the location of the note perfectly, indicating an OCR error in the marker field that should be corrected by rebinding."
-      },
-      {
-        "link_id": "link-01305",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01093",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt for this anchor contains '$ ^{2} $', but the corresponding screenshot (page 369) shows the number '2' as a regular inline character within the sentence ('...women in Chinese history.2 I will remind...'), not as a superscript footnote marker. The actual footnote 2 on that page refers to 'Dorothy Ko'. Thus, this is a false positive detection of a reference."
-      },
-      {
-        "link_id": "link-01307",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01099",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{8} $', but the screenshot (page 371) shows the number '8' appearing at the end of a paragraph as part of the sentence structure ('...etiology of most Wind disorders.8'), not as a superscript footnote marker. Footnote 8 on that page discusses 'Wind illness'. This is a false positive."
-      },
-      {
-        "link_id": "link-01309",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01102",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{11} $', but the screenshot (page 372) shows the number '11' as part of the text flow ('...spirit unable to hold to its lodging”...11 In the sixteenth century...'), not as a superscript marker. Footnote 11 is located elsewhere. This is a false positive."
-      },
-      {
-        "link_id": "link-01310",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01103",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{15} $', but the screenshot (page 374) shows the number '15' occurring after the closing parenthesis of a quote ('...exhaustion of Spirit”...15 Li's popular work...'), functioning as punctuation or a section break rather than a footnote callout. The actual footnote 15 is at the bottom of the page. This is a false positive."
-      },
-      {
-        "link_id": "link-01311",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01105",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate of anchor-01103 logic; the number '15' in the source text is not a superscript footnote marker."
-      },
-      {
-        "link_id": "link-01312",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01107",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{17} $', but the screenshot (page 375) shows '17' appearing after the closing parenthesis of a quote ('...sorrow and anger”...17 Sorrow appeared...'), not as a superscript marker. This is a false positive."
-      },
-      {
-        "link_id": "link-01313",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01109",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The OCR excerpt contains '$ ^{19} $', but the screenshot (page 375) shows '19' appearing after the closing parenthesis of a quote ('...Wind-heteropathy”...19 In later books...'), not as a superscript marker. This is a false positive."
+        "confidence": 1.0,
+        "reason": "Anchor marker '14' on page 494. Footnote 14 is on page 496 (image 6). Ignoring anchor."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 12908,
-    "completion_tokens": 1037,
-    "total_tokens": 13945,
+    "prompt_tokens": 12666,
+    "completion_tokens": 877,
+    "total_tokens": 13543,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 22172
+    "duration_ms": 78680
   }
 }

@@ -47,6 +47,7 @@ from FNM_RE.shared.ref_rewriter import (
     replace_raw_unicode_superscript_refs_with_local_labels as _replace_raw_unicode_superscript_refs_with_local_labels,
 )
 from FNM_RE.shared.refs import replace_frozen_refs
+from FNM_RE.stages.section_heads import _section_title_text_is_plausible
 
 OBSIDIAN_EXPORT_INDEX_MD = "index.md"
 OBSIDIAN_EXPORT_CHAPTERS_DIR = "chapters"
@@ -117,7 +118,7 @@ def _looks_like_sentence_section_heading(text: str) -> bool:
     words = [part for part in normalized.split(" ") if part]
     if len(words) >= 16 or len(normalized) >= 110:
         return True
-    if normalized.endswith(("?", "!", ";")):
+    if normalized.endswith(("!", ";")):
         return True
     if re.search(r"[.!;]\s+[A-Za-zÀ-ÖØ-öø-ÿ]", normalized):
         return True
@@ -135,6 +136,8 @@ def _is_exportable_section_head(head: SectionHeadRecord) -> bool:
     if _SECTION_HEAD_INLINE_NOTE_TRACE_RE.search(title):
         return False
     if _SECTION_HEAD_QUOTE_RE.match(title):
+        return False
+    if not _section_title_text_is_plausible(title):
         return False
     if _looks_like_sentence_section_heading(title):
         return False
@@ -418,22 +421,6 @@ def _build_section_markdown(
     footnote_ids_written: list[str] = []
     chapter_has_body = False
 
-    marker_by_note_id = _build_marker_by_note_id_for_chapter(
-        chapter_id, matched_links=matched_links
-    )
-    used_markers: set[int] = set()
-    for nid, marker_str in marker_by_note_id.items():
-        if str(note_text_by_id.get(nid, "")).strip() and str(note_kind_by_id.get(nid, "")) == "endnote":
-            try:
-                marker_num = int(marker_str)
-            except (ValueError, TypeError):
-                continue
-            if marker_num <= 0 or marker_num in used_markers:
-                continue
-            used_markers.add(marker_num)
-            local_ref_numbers[nid] = marker_num
-            ordered_note_ids.append(nid)
-
     sorted_units = sorted(
         [unit for unit in body_units if str(unit.section_id or "") == chapter_id],
         key=lambda row: (int(row.page_start or 0), int(row.page_end or int(row.page_start or 0)), str(row.unit_id or "")),
@@ -519,12 +506,15 @@ def _build_section_markdown(
     endnote_ids = [nid for nid in ordered_note_ids
                    if note_kind_by_id.get(nid, "") in ("endnote", "")]
     unknown_ids = [nid for nid in ordered_note_ids if nid not in note_kind_by_id]
+    global_note_text_by_id = _build_note_text_by_id_for_chapter(
+        None, note_units=note_units
+    )
 
     def _emit_definitions(ids: list[str]) -> None:
         rendered: list[str] = []
         for note_id in ids:
             number = int(local_ref_numbers.get(note_id) or 0)
-            text = str(note_text_by_id.get(note_id) or "").strip()
+            text = str(note_text_by_id.get(note_id) or global_note_text_by_id.get(note_id) or "").strip()
             if number <= 0 or not text:
                 continue
             rendered.append(f"[^{number}]: {text}")
@@ -536,76 +526,9 @@ def _build_section_markdown(
 
     _emit_definitions(endnote_ids + unknown_ids)
 
-    marker_by_note_id = _build_marker_by_note_id_for_chapter(
-        chapter_id, matched_links=matched_links
-    )
-    global_note_text_by_id = _build_note_text_by_id_for_chapter(
-        None, note_units=note_units
-    )
-    global_note_kind_by_id = _build_note_kind_by_id_for_chapter(
-        None, note_units=note_units
-    )
-    orphan_note_ids = [
-        nid
-        for nid, text in global_note_text_by_id.items()
-        if str(global_note_kind_by_id.get(nid, "")).strip() == "endnote"
-        and (
-            nid not in local_ref_numbers
-            or not str(note_text_by_id.get(nid, "")).strip()
-        )
-        and str(text).strip()
-    ]
-    if orphan_note_ids:
-        orphan_defs: list[str] = []
-        for nid in orphan_note_ids:
-            marker = marker_by_note_id.get(nid)
-            if not marker:
-                continue
-            text = str(note_text_by_id.get(nid, "") or global_note_text_by_id.get(nid, "")).strip()
-            if not text:
-                continue
-            orphan_defs.append(f"[^{marker}]: {text}")
-        if orphan_defs:
-            if not any(line == "### NOTES" for line in lines):
-                lines.append("### NOTES")
-                lines.append("")
-            synthetic_refs = [
-                f"[^{marker_by_note_id.get(nid, '')}]"
-                for nid in orphan_note_ids
-                if marker_by_note_id.get(nid)
-            ]
-            if synthetic_refs:
-                lines.append(" ".join(synthetic_refs))
-                lines.append("")
-            lines.extend(orphan_defs)
-
-    all_body_text = "\n".join(lines)
-    body_ref_markers = set(int(m) for m in re.findall(r"\[\^(\d+)\]", all_body_text.split("### NOTES")[0] if "### NOTES" in all_body_text else all_body_text))
-    for nid, marker_str in marker_by_note_id.items():
-        if str(note_kind_by_id.get(nid, "")).strip() != "endnote":
-            continue
-        try:
-            marker_num = int(marker_str)
-        except (ValueError, TypeError):
-            continue
-        if marker_num in body_ref_markers:
-            continue
-        text = str(note_text_by_id.get(nid, "") or global_note_text_by_id.get(nid, "")).strip()
-        if not text:
-            continue
-        if not any(line == "### NOTES" for line in lines):
-            lines.append("### NOTES")
-            lines.append("")
-        lines.append(f"[^{marker_num}]")
-        def_already_exists = any(
-            line.startswith(f"[^{marker_num}]:") for line in lines
-        )
-        if not def_already_exists:
-            lines.append(f"[^{marker_num}]: {text}")
-        body_ref_markers.add(marker_num)
-
     content = _strip_trailing_image_only_block("\n".join(lines).strip())
-    refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", content)))
+    body_part = content.split("### NOTES", 1)[0] if "### NOTES" in content else content
+    refs = sorted(set(re.findall(r"\[\^([0-9]+)\](?!\s*:)", body_part)))
     defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
     footnote_defs = re.findall(r"^\[footnote\]:", content, re.MULTILINE)
     missing = len(set(refs) - set(defs))

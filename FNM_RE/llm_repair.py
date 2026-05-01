@@ -204,7 +204,17 @@ def build_unresolved_clusters(
         if status not in {"matched", "orphan_note", "orphan_anchor", "ambiguous"}:
             continue
         chapter_id = str(link.get("chapter_id") or "").strip()
-        region_id = str(link.get("region_id") or "").strip() or chapter_id
+        anchor_for_key = anchors_by_id.get(str(link.get("anchor_id") or "").strip())
+        anchor_id_for_key = str(link.get("anchor_id") or "").strip()
+        matched_synthetic_for_key = (
+            status == "matched"
+            and (bool((anchor_for_key or {}).get("synthetic")) or anchor_id_for_key.startswith("synthetic-"))
+        )
+        region_id = (
+            chapter_id
+            if matched_synthetic_for_key
+            else str(link.get("region_id") or "").strip() or chapter_id
+        )
         key = (chapter_id, region_id, note_system)
         cluster = grouped.setdefault(
             key,
@@ -222,6 +232,27 @@ def build_unresolved_clusters(
         if status == "matched":
             note_item = note_items_by_id.get(str(link.get("note_item_id") or "").strip())
             anchor = anchors_by_id.get(str(link.get("anchor_id") or "").strip())
+            current_anchor_id = str(link.get("anchor_id") or "").strip()
+            current_anchor_is_synthetic = bool((anchor or {}).get("synthetic")) or current_anchor_id.startswith("synthetic-")
+            if note_item and current_anchor_is_synthetic:
+                cluster["unmatched_note_items"].append(note_item)
+                cluster.setdefault("rebind_candidates", []).append(
+                    {
+                        "link_id": str(link.get("link_id") or ""),
+                        "note_item_id": str(note_item.get("note_item_id") or "").strip(),
+                        "current_anchor_id": current_anchor_id,
+                        "marker": str(note_item.get("marker") or link.get("marker") or "").strip(),
+                        "note_page_no": int(note_item.get("page_no") or 0),
+                        "anchor_page_no": int((anchor or {}).get("page_no") or 0),
+                        "current_anchor_marker": str(
+                            (anchor or {}).get("normalized_marker") or (anchor or {}).get("source_marker") or ""
+                        ).strip(),
+                        "note_excerpt": str(note_item.get("source_text") or "").strip(),
+                        "anchor_excerpt": str((anchor or {}).get("source_text") or "").strip(),
+                        "current_anchor_synthetic": True,
+                    }
+                )
+                continue
             if note_item and anchor:
                 cluster["matched_examples"].append(
                     {
@@ -271,8 +302,12 @@ def build_unresolved_clusters(
             )
             if str(page_no or "").strip()
         }
-        rebind_candidates: list[dict[str, Any]] = []
-        seen_note_item_ids: set[str] = set()
+        rebind_candidates: list[dict[str, Any]] = list(cluster.get("rebind_candidates") or [])
+        seen_note_item_ids: set[str] = {
+            str(item.get("note_item_id") or "").strip()
+            for item in rebind_candidates
+            if str(item.get("note_item_id") or "").strip()
+        }
         for link in note_links or []:
             if str(link.get("status") or "") != "matched":
                 continue
@@ -1135,6 +1170,56 @@ def _find_link_id_for_ignore(note_links: list[dict], *, anchor_id: str) -> str:
     return ""
 
 
+def _slug_token(value: str) -> str:
+    token = re.sub(r"[^0-9A-Za-z_-]+", "-", str(value or "").strip())
+    token = re.sub(r"-+", "-", token).strip("-_")
+    return token or "x"
+
+
+def _chapter_for_cluster(cluster: dict, chapters: list[dict]) -> dict:
+    cluster_chapter_id = str(cluster.get("chapter_id") or "").strip()
+    for chapter in chapters or []:
+        if str(chapter.get("chapter_id") or "").strip() == cluster_chapter_id:
+            return dict(chapter)
+    page_start = int(cluster.get("page_start") or 0)
+    page_end = int(cluster.get("page_end") or page_start or 0)
+    resolved = _resolve_chapter_id_for_page(chapters, page_start)
+    for chapter in chapters or []:
+        if str(chapter.get("chapter_id") or "").strip() == resolved:
+            return dict(chapter)
+    return {
+        "chapter_id": cluster_chapter_id,
+        "title": str(cluster.get("chapter_title") or cluster_chapter_id),
+        "start_page": page_start,
+        "end_page": page_end,
+    }
+
+
+def _enrich_synthesize_anchor_actions(
+    actions: list[dict],
+    *,
+    cluster: dict,
+    spans: list[tuple[int, int, int]],
+) -> list[dict]:
+    body_text = str(cluster.get("chapter_body_text") or "")
+    enriched: list[dict] = []
+    for action in actions or []:
+        item = dict(action)
+        if str(item.get("action") or "") != "synthesize_anchor":
+            enriched.append(item)
+            continue
+        located = locate_anchor_phrase_in_body(body_text, str(item.get("anchor_phrase") or ""))
+        item["fuzzy_score"] = float(located.get("score") or 0.0)
+        item["ambiguous"] = bool(located.get("ambiguous"))
+        item["char_start"] = int(located.get("char_start") or -1)
+        item["char_end"] = int(located.get("char_end") or -1)
+        item["matched_text"] = str(located.get("matched_text") or "")
+        if bool(located.get("hit")) and int(item["char_start"]) >= 0:
+            item["page_no"] = _resolve_page_from_offset(spans, int(item["char_start"]))
+        enriched.append(item)
+    return enriched
+
+
 def run_llm_repair(
     doc_id: str,
     *,
@@ -1154,11 +1239,17 @@ def run_llm_repair(
     note_items_raw = repo.list_fnm_note_items(doc_id)
     body_anchors_raw = repo.list_fnm_body_anchors(doc_id)
     links_raw = repo.list_fnm_note_links(doc_id)
+    chapters_plain = [dict(r) for r in (chapters_raw or [])]
+    note_items_plain = [dict(r) for r in (note_items_raw or [])]
+    body_anchors_plain = [dict(r) for r in (body_anchors_raw or [])]
+    links_plain = [dict(r) for r in (links_raw or [])]
+    note_items_by_id = _index_by_key(note_items_plain, "note_item_id")
+    anchors_by_id = _index_by_key(body_anchors_plain, "anchor_id")
     clusters = build_unresolved_clusters(
-        chapters=[dict(r) for r in (chapters_raw or [])],
-        note_items=[dict(r) for r in (note_items_raw or [])],
-        body_anchors=[dict(r) for r in (body_anchors_raw or [])],
-        note_links=[dict(r) for r in (links_raw or [])],
+        chapters=chapters_plain,
+        note_items=note_items_plain,
+        body_anchors=body_anchors_plain,
+        note_links=links_plain,
     )
     if cluster_limit is not None and cluster_limit > 0:
         clusters = clusters[:cluster_limit]
@@ -1173,6 +1264,14 @@ def run_llm_repair(
     for cluster_index, cluster in enumerate(clusters, start=1):
         cluster = dict(cluster)
         cluster["page_contexts"] = _build_cluster_page_contexts(doc_id, cluster, repo=repo)
+        chapter_for_body = _chapter_for_cluster(cluster, chapters_plain)
+        chapter_body_text, body_spans = _build_chapter_body_text(
+            doc_id,
+            chapter_for_body,
+            repo=repo,
+            fallback_contexts=list(cluster.get("page_contexts") or []),
+        )
+        cluster["chapter_body_text"] = chapter_body_text
         llm_result = request_llm_repair_actions(
             cluster,
             model_args=model_args,
@@ -1182,11 +1281,19 @@ def run_llm_repair(
             doc_id=doc_id,
             slug=slug,
         )
-        actions = list(llm_result.get("actions") or [])
+        actions = _enrich_synthesize_anchor_actions(
+            list(llm_result.get("actions") or []),
+            cluster=cluster,
+            spans=body_spans,
+        )
         request_metrics.append(dict(llm_result.get("request_metrics") or {}))
         if llm_result.get("llm_trace"):
             llm_traces.append(llm_result["llm_trace"])
-        auto_actions = select_auto_applicable_actions(actions, confidence_threshold=confidence_threshold)
+        auto_actions = select_auto_applicable_actions(
+            actions,
+            confidence_threshold=confidence_threshold,
+            chapter_unmatched_count=len(list(cluster.get("unmatched_note_items") or [])),
+        )
         for action_index, action in enumerate(actions, start=1):
             suggestion_id = f"llm-{cluster_index:02d}-{action_index:03d}"
             auto_selected = action in auto_actions
@@ -1197,6 +1304,11 @@ def run_llm_repair(
                 "action": action.get("action"),
                 "note_item_id": action.get("note_item_id"),
                 "anchor_id": action.get("anchor_id"),
+                "anchor_phrase": action.get("anchor_phrase"),
+                "marker": action.get("marker"),
+                "note_text": action.get("note_text"),
+                "fuzzy_score": action.get("fuzzy_score"),
+                "ambiguous": action.get("ambiguous"),
                 "confidence": action.get("confidence"),
                 "reason": action.get("reason"),
                 "auto_selected": auto_selected,
@@ -1206,10 +1318,13 @@ def run_llm_repair(
 
         if not auto_apply:
             continue
+        note_system = str(cluster.get("note_system") or "endnote").strip()
+        if note_system not in {"endnote", "footnote"}:
+            note_system = "endnote"
         for action in auto_actions:
             if action["action"] == "match":
                 link_id = _find_link_id_for_match(
-                    [dict(r) for r in (links_raw or [])],
+                    links_plain,
                     note_item_id=str(action.get("note_item_id") or "").strip(),
                     anchor_id=str(action.get("anchor_id") or "").strip(),
                 )
@@ -1228,13 +1343,115 @@ def run_llm_repair(
                 auto_applied.append({"link_id": link_id, **action})
             elif action["action"] == "ignore_ref":
                 link_id = _find_link_id_for_ignore(
-                    [dict(r) for r in (links_raw or [])],
+                    links_plain,
                     anchor_id=str(action.get("anchor_id") or "").strip(),
                 )
                 if not link_id:
                     continue
                 repo.save_fnm_review_override(doc_id, "link", link_id, {"action": "ignore"})
                 auto_applied.append({"link_id": link_id, **action})
+            elif action["action"] == "synthesize_anchor":
+                note_item_id = str(action.get("note_item_id") or "").strip()
+                note_item = note_items_by_id.get(note_item_id)
+                if not note_item:
+                    continue
+                page_no = int(action.get("page_no") or note_item.get("page_no") or 0)
+                chapter_id = (
+                    str(cluster.get("chapter_id") or "").strip()
+                    or str(note_item.get("chapter_id") or "").strip()
+                    or _resolve_chapter_id_for_page(chapters_plain, page_no)
+                )
+                if not chapter_id or page_no <= 0:
+                    continue
+                marker = normalize_note_marker(str(note_item.get("marker") or action.get("marker") or ""))
+                if not marker:
+                    continue
+                anchor_id = f"llm-anchor-{_slug_token(note_item_id)}"
+                char_start = int(action.get("char_start") or 0)
+                char_end = int(action.get("char_end") or max(char_start + 1, 1))
+                matched_text = str(action.get("matched_text") or action.get("anchor_phrase") or "").strip()
+                if not matched_text:
+                    continue
+                repo.save_fnm_review_override(
+                    doc_id,
+                    "anchor",
+                    anchor_id,
+                    {
+                        "action": "create",
+                        "anchor_id": anchor_id,
+                        "chapter_id": chapter_id,
+                        "page_no": page_no,
+                        "paragraph_index": 0,
+                        "char_start": max(0, char_start),
+                        "char_end": max(char_start + 1, char_end),
+                        "source_text": matched_text,
+                        "source_marker": marker,
+                        "normalized_marker": marker,
+                        "anchor_kind": note_system,
+                        "certainty": float(action.get("confidence") or 0.0),
+                        "source": "llm",
+                        "synthetic": False,
+                    },
+                )
+                link_id = _find_link_id_for_match(
+                    links_plain,
+                    note_item_id=note_item_id,
+                    anchor_id="",
+                )
+                if link_id:
+                    repo.save_fnm_review_override(
+                        doc_id,
+                        "link",
+                        link_id,
+                        {
+                            "action": "match",
+                            "note_item_id": note_item_id,
+                            "anchor_id": anchor_id,
+                        },
+                    )
+                auto_applied.append({"link_id": link_id, "anchor_id": anchor_id, **action})
+            elif action["action"] == "synthesize_note_item":
+                anchor_id = str(action.get("anchor_id") or "").strip()
+                anchor = anchors_by_id.get(anchor_id)
+                if not anchor:
+                    continue
+                marker = normalize_note_marker(str(action.get("marker") or anchor.get("normalized_marker") or ""))
+                note_text = str(action.get("note_text") or "").strip()
+                if not marker or not note_text:
+                    continue
+                page_no = int(anchor.get("page_no") or 0)
+                chapter_id = str(anchor.get("chapter_id") or "").strip() or _resolve_chapter_id_for_page(chapters_plain, page_no)
+                if not chapter_id or page_no <= 0:
+                    continue
+                note_item_id = f"llm-note-{_slug_token(anchor_id)}-{_slug_token(marker)}"
+                repo.save_fnm_review_override(
+                    doc_id,
+                    "note_item",
+                    note_item_id,
+                    {
+                        "action": "create",
+                        "note_item_id": note_item_id,
+                        "chapter_id": chapter_id,
+                        "page_no": page_no,
+                        "marker": marker,
+                        "note_text": note_text,
+                        "note_kind": note_system,
+                        "source": "llm",
+                    },
+                )
+                link_id = _find_link_id_for_ignore(links_plain, anchor_id=anchor_id)
+                if link_id:
+                    repo.save_fnm_review_override(
+                        doc_id,
+                        "link",
+                        link_id,
+                        {
+                            "action": "match",
+                            "note_item_id": note_item_id,
+                            "anchor_id": anchor_id,
+                        },
+                    )
+                auto_applied.append({"link_id": link_id, "note_item_id": note_item_id, **action})
 
     return {
         "cluster_count": len(clusters),

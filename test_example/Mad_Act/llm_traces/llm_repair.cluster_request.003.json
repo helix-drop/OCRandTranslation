@@ -3,582 +3,514 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote\",\n  \"chapter_title\": \"“Danxi said…”\",\n  \"page_range\": [\n    159,\n    214\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 159,\n      \"ocr_excerpt\": \"own writings. I will also show that $ \\\\underline{\\\\text{zhezhong}} $ hermeneutics and textual composition rested on the notion that illness was constantly changing. Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $ The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also ...\"\n    },\n    {\n      \"page_no\": 160,\n      \"ocr_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), ...\"\n    },\n    {\n      \"page_no\": 161,\n      \"ocr_excerpt\": \"### 5.2 Madness in Lou Ying's 樓英 (1320-1400) $ ^{12} $ Yixue gangmu 醫學綱目 (1396) The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \\\"Immortals' crag\\\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $ Lou Ying started to collect materials for his summa of current medical doctrine and healing methods in the 1360s and completed a first version in 1380; he achieved the final version in 1396. Lou did not ha ...\"\n    },\n    {\n      \"page_no\": 162,\n      \"ocr_excerpt\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $ Textual montages like Lou's Systematic Outline of Medical Learning were not amateurish endeavors. Composite texts professing to cover all aspects of illness and medicine were actually a new genre of medical writing at which Zhu Zhenheng's disciples excelled. $ ^{18} $ Many books claiming to be for beginners were sophisticated digests of complex medical teachings; they were not easy “primers,” but points of entry into the intricate traditions they summarized. Students of medicine found these compilations all the more useful since readers could not easily access all the texts these works cited. Lou Ying's compilation was concerned ...\"\n    },\n    {\n      \"page_no\": 163,\n      \"ocr_excerpt\": \"Zhongjing [Zhang Ji] is detailed on external contamination that affects the interior and the surface or Yin and Yang; Danxi distinguishes himself on inner harm of Blood or Qi [that causes] depletion or repletion; Dongyuan [Li Gao] supports and protects central Qi; Hejian [Liu Wansu] removes the old to create the new; Mr. Qian [Yi] distinguishes clearly between the five Yin viscera; Dairen [Zhang Congzheng] is well versed in the three methods [vomiting, purging, and sweating]. Formularies from past ages are abundant: we can simply say that each has its strengths. 仲景詳外感於表裡陰陽 丹溪獨內傷於血氣虛實 東垣扶護中氣 河間推陳 致新 錢氏分明五臟 戴人熟施三法 凡歷代方書甚衆 皆各有所長耳 Since the same symptoms could occur for different reasons, it was plausible that many texts could contain useful methods of treatment. $ ^{19} $ “The benighted fail to appreciate this principle: their reckless trying [of recipes] on approximate illnesses has led many to an unjust and premature death” (昧者不悟是理 妄試疑似之病 每致夭橫者不少矣). Armed with a definition of illness as a multifaceted and ever-changing entity that was typical of Zhu Zhenheng's followers, $ ^{20} $ Lou proposed an elegant solution to the controversial issue of whether “old recipes” could cure “curren ...\"\n    },\n    {\n      \"page_no\": 164,\n      \"ocr_excerpt\": \"from the Treatise on Cold Injury (or any other source), for instance, were effective when they were used to treat the kinds of illness they cured best. In typical zbezbong fashion, Lou also used this flexible conception of illness and therapy to justify a syncretic approach to the textual past and to clinical practice. His book counted forty fascicles or chapters. The first nine—all part of a large section called “Yin-Yang and the viscera” 陰陽臟腑部—explained general principles on pathomechanisms, diagnosis, and treatments. Followed twenty fascicles (10-29) describing various illnesses and methods to treat them, four fascicles on Cold Injury (30-3), two on the illnesses of women (34-5), four on those of children (36-9), and one with commentaries on the five periods and six Qi in the Inner Canon (40). $ ^{21} $ In the twenty chapters on disorders other than Cold Injury, Lou Ying classified illnesses into five sections (bu 部) named after the pairs of Yin and Yang viscera with which he associated them. There were six fascicles on the Liver and Gallbladder (肝膽), five on the Heart and Small Intestine (心小腸), five on the Spleen and Stomach (脾胃), two on the Lungs and Large Intestine (肺大腸), and ...\"\n    },\n    {\n      \"page_no\": 166,\n      \"ocr_excerpt\": \"records from various sources. $ ^{22} $ Lou shortened and slightly modified some passages, but his own utterances were limited to his introduction (translated above), cross-references to other sections for remedies whose recipes were given elsewhere, and very brief (and themselves intertextual) “comments” (批) after some citations. $ ^{23} $ Lou’s section on kuang introduced a mix of approaches to madness, as well as recipes compiled at different periods that aimed to cure various imbalances. What justified this catholicity of approaches was not a theoretical reflection on madness in particular, but one on illness in general: any illness could be caused by a large array of imbalances and could therefore be treated in a variety of ways. Note nonetheless that Lou gave little room to kuang’s older etiologies—Wind was mentioned only in a “comment” on what Lou considered to be an anti-Wind remedy by Zhang Ji 張機. $ ^{24} $ The Wind etiology appeared discreetly in recipes that were once used to counter Wind strokes, but nothing in Lou’s work signaled that madness had once been considered as a Wind illness. $ ^{25} $ The cases of madness that Lou selected deployed mostly aggressive therapie ...\"\n    },\n    {\n      \"page_no\": 167,\n      \"ocr_excerpt\": \"cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late- imperial medicine. Only one case deployed an approach that became marginal: Sun Zhao's 孫兆 (late eleventh century) cure of a monk with a recipe and method designed by Shen Kuo 沈括 (1031-1095). $ ^{29} $ These mostly aggressive recipes and methods contrasted with the general therapeutic orientation of the Systematic Outline. Lou's \\\"General discussion on methods of treatment\\\" (Zhifa tonglun 治法通論, beginning of juan 3) cited 21 passages: eight from Wang Haogu, three from Li Gao, three from the Basic Questions, two each from Zhang Ji and Zhu Zhenheng, and one each from the Divine Pivot, the Majue, and the Canon of Problems. $ ^{30} $ Thirteen of the fifteen passages attributed to specific authors were from physicians whose priority, according to Lou, had been \\\"to help and protect primordial Qi\\\" (扶護元氣為主). $ ^{31} $ The contrast between Lou's general advice and the remedies he recommended for treating madness confirms the strength that the Fire and mucus etiology of madness had acquired by the fourteenth century. Madness was then largely seen as an illness caused by some kind of over-repletion. ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00394\",\n      \"marker\": \"7\",\n      \"page_no\": 159,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing a ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00397\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. Thes ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00398\",\n      \"marker\": \"10\",\n      \"page_no\": 159,\n      \"paragraph_index\": 4,\n      \"source_text\": \"The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the int ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00400\",\n      \"marker\": \"13\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00401\",\n      \"marker\": \"14\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00402\",\n      \"marker\": \"15\",\n      \"page_no\": 161,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness f ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00403\",\n      \"marker\": \"16\",\n      \"page_no\": 162,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books in ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00404\",\n      \"marker\": \"17\",\n      \"page_no\": 162,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books in ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00148\",\n      \"note_item_id\": \"fn-00065\",\n      \"current_anchor_id\": \"synthetic-footnote-00124\",\n      \"marker\": \"4\",\n      \"note_page_no\": 159,\n      \"anchor_page_no\": 159,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L ...\",\n      \"anchor_excerpt\": \"94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L ...\"\n    },\n    {\n      \"link_id\": \"link-00150\",\n      \"note_item_id\": \"fn-00067\",\n      \"current_anchor_id\": \"synthetic-footnote-00125\",\n      \"marker\": \"4\",\n      \"note_page_no\": 161,\n      \"anchor_page_no\": 161,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6 ...\",\n      \"anchor_excerpt\": \"CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6 ...\"\n    },\n    {\n      \"link_id\": \"link-00151\",\n      \"note_item_id\": \"fn-00068\",\n      \"current_anchor_id\": \"anchor-00399\",\n      \"marker\": \"1\",\n      \"note_page_no\": 162,\n      \"anchor_page_no\": 160,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"C\\\\^X!Vbhag_Xff!:[\\\\aXfX!g[\\\\a^Xef&!Cbh!P\\\\aZ!hfXW!P\\\\a!TaW PTaZ!Tf!T!V_Tff\\\\Y\\\\VTg\\\\ba!WXi\\\\VX!g[TgVbeeXfcbaWXW j\\\\g[!9_bbW!TaWH\\\\&!g[X!\\\\agXe\\\\be!TaW!g[X!fheYTVX!$ˉˌ %&!g[X!hccXe!TaW!_bjXe!UbWl!$'( %&!WXc_Xg\\\\ba!TaW eXc_Xg\\\\ba&XgV5!g[X! \\\\iX!8ZXagf!jXeX! ...\",\n      \"anchor_excerpt\": \"This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of ...\"\n    },\n    {\n      \"link_id\": \"link-00152\",\n      \"note_item_id\": \"fn-00069\",\n      \"current_anchor_id\": \"synthetic-footnote-00127\",\n      \"marker\": \"2\",\n      \"note_page_no\": 162,\n      \"anchor_page_no\": 162,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"C\\\\h!:[ha!chU_\\\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\\\a! 22&!TaW&!UTf\\\\aZ![\\\\`fX_Y!ba T!`TahfVe\\\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\\\L Ǿƚďɭ \\\\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\\\fV\\\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\\\huf LMLQJ![LDR[XH ...\",\n      \"anchor_excerpt\": \"C\\\\h!:[ha!chU_\\\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\\\a! 22&!TaW&!UTf\\\\aZ![\\\\`fX_Y!ba T!`TahfVe\\\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\\\L Ǿƚďɭ \\\\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\\\fV\\\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\\\huf LMLQJ![LDR[XH ...\"\n    },\n    {\n      \"link_id\": \"link-00155\",\n      \"note_item_id\": \"fn-00072\",\n      \"current_anchor_id\": \"anchor-00417\",\n      \"marker\": \"8\",\n      \"note_page_no\": 169,\n      \"anchor_page_no\": 167,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"$1* )$+8, äŜȠň 4 $1;, <,-, 4??H7<A: GB 4 C4FF4:8 9EB@ 04A: /<BA:UFƑ͂ S $<$1 ƺ˖ ʦǳɖ̬Wĭ˨° ˃˖ǃ Wļ˨ɺ F88 %L?4A 4A7 %L?4A 4A7 *<I<A 4<UF 8C<G4C; 6?4<@87 G;4G 4< 4A7 1;H;47 8K6;4A:87 ?8A:G;L ?8GG8EF ćĎųɯƨĵȔȔhȢ˖ 1;HUF 8C<G4C; <A7<64G87 G;4G V;,$16 ...\",\n      \"anchor_excerpt\": \"cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late-\"\n    },\n    {\n      \"link_id\": \"link-00156\",\n      \"note_item_id\": \"fn-00073\",\n      \"current_anchor_id\": \"anchor-00436\",\n      \"marker\": \"2\",\n      \"note_page_no\": 170,\n      \"anchor_page_no\": 171,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. $1;,\\u0001<,-, \\u0014 \\u00103\\u0005\\b G\\u0001J4F\\u00016B@@BA\\u00019BE\\u00017<F6<C?8F B9\\u0001G;8\\u00017LA4FGLW\\u0001\\u0004GB G4>8 ABG8F\\u0001J;<?8\\u0001G;8<E\\u0001@4FG8EF\\u0001J8E8\\u0001GE84G<A:\\u0001C4G<8AGF\\b1;4A: \\u001aBA:M; 8A:UF̳Řʑ\\u0011͝ \\u0015\\u0016,1*6+, \\u0012\\u0014\\u0001 \\u0011\\u0012\\u0011\\u0007\\u0012\\u0012\\u0005\\u0006\\u0001J4F G;8A 4G\\u0001G;8 4C8K B9\\u0001;<F\\u0001CBJ8E\\b +,;,1*\\u00016$1/,$2 gĄ\\u0006Ȝ \\u000464\\b\\u0001 \\u0012\\u0015 -8$1 \\u0010\\u0007\\u0012 ...\",\n      \"anchor_excerpt\": \"(太醫院使, ranked 5a), in which quality Dai served until his retirement in 1403 at the age of 80 sui. $ ^{41} $ Dai was then replaced by Han Mao 韓茂, a Suzhou man Dai had recommended many years before. Dai returned home early in 1404. When Dai w ...\"\n    },\n    {\n      \"link_id\": \"link-00159\",\n      \"note_item_id\": \"fn-00076\",\n      \"current_anchor_id\": \"anchor-00446\",\n      \"marker\": \"2\",\n      \"note_page_no\": 176,\n      \"anchor_page_no\": 174,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"+$1*(6 4F >8LF GB G;8 6B@CE8;8AF<BA B9 @87<6<A8 #<>8 1;H #<H FGE8FF87 G;8 <@CBEG4A68 B9 HA78EFG4A7<A: G;8 <A9<A<G8 GE4AF9BE@4G<BAF B9 <??A8FF 7<998E8A68F 58GJ88A ABEG;J8FG8EA 4A7 FBHG;84FG8EA C8BC?8 4A7 G;8 6L6?8F B9 G;8 9<I8 C8E<B7F 4A7 F< ...\",\n      \"anchor_excerpt\": \"Liu and his teachers were products of the Lower Yangzi region, but in the early Hongwu reign (1368-1398), Liu and his family left to establish themselves in Xi'an, the Shaanxi provincial capital. The sources are discrete on the cause of thi ...\"\n    },\n    {\n      \"link_id\": \"link-00160\",\n      \"note_item_id\": \"fn-00077\",\n      \"current_anchor_id\": \"anchor-00458\",\n      \"marker\": \"4\",\n      \"note_page_no\": 178,\n      \"anchor_page_no\": 179,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5BB> JE<GG8A 5L /H;,$16+(1* 9EB@ H<=<W < 8 *;4BK<A: Ņ)ŶɁĉ@ȉĲʧų ó #<H E8CBEG87 G;4G /H <A ;<F LBHG; ;47 E8F<787 <A G;8 .H 4E84 J;8E8 ;8;47 G4H:;G G;8 35,1* $1' 87801 11$/6 GB ?B64? G4?8AGF ʽ ơÎ ) ũȻ ŔŅ̞ 0ą #< *;<M;8A ƂŬȀ ?4G8E 6?4<@87 G;4G ...\",\n      \"anchor_excerpt\": \"Liu Chun's Subtle Meanings contained no section on madness, but the book gave no grounds for attributing kuang to anything else than mucus and Fire. $ ^{64} $ Juan 10 (devoted to Fire) started with Liu Wansu's (4.1) attribution of most illn ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-012-shapesofpracticesmedical:toc-ch-012-shapesofpracticesmedical:endnote\",\n  \"chapter_title\": \"Shapes of practices Medical trends surrounding dian and kuang, 1650-1911\",\n  \"page_range\": [\n    285,\n    331\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 38,\n      \"ocr_excerpt\": \"## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters ...\"\n    },\n    {\n      \"page_no\": 86,\n      \"ocr_excerpt\": \"inclusion of potent emetics in the court-sponsored Recipes of the Pharmacy Service (see p. 61 and 61n94 above), which was distributed to officials and eventually local physicians throughout the Song realm. Despite Chu’s warnings, the vomiting method remained a firmly established therapeutic practice and compilers of formularies continued to insert emetics for Wind strokes and other disorders into their books. Court compilers included the Suns’ “Saliva-thinning powder” in the Comprehensive Records from [the Hall of] Sagely Succor (Shengji zonglu 聖濟總錄; 1110/18), a gigantic imperial collection. $ ^{117} $ The same book recommended the use of “Chinese-quinine powder” (常山散) to induce vomiting in cases of intermittent fevers (niè瘧). $ ^{118} $ An emetic recommended in the Comprehensive Records was said to treat, among other symptoms, “crazy and disorderly language” (言語狂亂). Called Melon-pedicle powder from the name of the Shanghai lun recipe, it contained only melon pedicle (a recipe that was otherwise called “Lone-saint powder” 獨聖散). But the explanation of this recipe’s properties did not mention mucus. Other twelfth-century prescription manuals teemed with such emetics. A book that Zhan ...\"\n    },\n    {\n      \"page_no\": 281,\n      \"ocr_excerpt\": \"## Shapes of practice Medical trends surrounding dian and kuang, 17th-19th century The profusion of medical works that appeared after 1650 are an irritating windfall. As medical publications boomed, vectors of knowledge transmission and the doctrinal debates that interested physicians became more intricate and numerous. It thus becomes difficult to find narrative threads to explain how Qing medical reflections on madness changed. Far too many texts were published for me to base my conclusions on comprehensive data as I tried to do for earlier periods. But the extensive array of short treatises, collections of case files, formularies, and medical primers that appeared in Qing times hint to the thinking and practice of minor physicians who made no “contributions to the development of Chinese medicine”—to borrow a phrase from a less critical historiography. These works allow us to see how much medical luminaries had in common with their less famous counterparts. I first present a few important trends in Chinese medical thinking and practice from the seventeenth to the nineteenth century. After showing that the mucus etiology remained dominant over that period, I show how resilient and ...\"\n    },\n    {\n      \"page_no\": 285,\n      \"ocr_excerpt\": \"Xiuyuan 陳修園 (1753-1823) also adopted Zhang Lu's new interpretation of the “four masters” in his Three-Character Classic of Medicine (Yixue san zì jìng 醫學三字經; 1804), pointing out that Li Zhongzi's interpretation of them as including Zhang Ji was “erroneous” (誤). $ ^{9} $ ## Other Qing trends Qing Suzhou was an important center of medical studies supported by a prosperous printing industry and mature scholarly networks. As one of the main cities on the Grand Canal, it had long been an important hub of trade and communication, and many doctors had traveled there to find books and exchange ideas. But in Qing times Suzhou physicians claimed to represent the most advanced medical approaches in the empire. Although this pride predated the eighteenth century, it became particularly evident after the publication in 1766 of some of Ye Gui's 葉桂 (1667-1746; see 7.5 below) case files by men who claimed to be his disciples. I discuss Suzhou doctors' approach to madness in the next chapter. $ ^{10} $ One trend in the eighteenth and especially the nineteenth century was the rising number of case collections in the surviving medical literature. Many of them were never printed. They allow us to cont ...\"\n    },\n    {\n      \"page_no\": 286,\n      \"ocr_excerpt\": \"with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that another doctor’s attacking of mucus and Fire in a case of insanity had “helped the bandits do harm” (助賊為虐). $ ^{11} $ Medical writing also remained profoundly intertextual. Several treatises from the seventeenth and eighteenth centuries included long and increasingly complex sections on madness. They were longer and denser partly because they could borrow from a larger number of texts, but also because they applied to more disorders than ever the old claim that any illness could be caused by multiple factors. Two representative examples are Feng Zhaozhang's 馮兆張 (from Haiyan 海鹽 in Zhejiang) Jinnang milu zazheng daxiao becan 錦囊祕錄雜證大小合參 (in 20 juan; 1694) and Shen Jin'ao's 沈金鰲 (1717-1776; from Wuxi 無錫 in Jiangsu) Zabing yuanliu xizhu 雜病源流犀燭 (in 30 juan; 1773), both of which concentrated on explaining miscellaneous illnesses. Besides these exhaustive accounts of manifold etiologies, we find attempts to simplify—even unify—medical doctrines, books with ti ...\"\n    },\n    {\n      \"page_no\": 287,\n      \"ocr_excerpt\": \"### 7.2 The continued dominance of the mucus etiology In earlier chapters, I examined the rise of mucus in Chinese medical thinking and its eventual use in explanations of madness. I also showed how the Danxi corpus had given pride of place to the mucus etiology in general. On the basis of these now mature theories, seventeenth-century physicians continued to discuss how mucus emerged, what disorders it caused, and how these illnesses should be treated. Some did so in special sections on this viscous intruder, others in commentaries on the notion of “mucus and rheum” (痰飲; 3.5) in Zhang Ji’s Essentials of the Golden Casket (3 $ ^{rd} $ century CE). Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire ...\"\n    },\n    {\n      \"page_no\": 288,\n      \"ocr_excerpt\": \"During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $ This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $\"\n    },\n    {\n      \"page_no\": 289,\n      \"ocr_excerpt\": \"### 7.3 Shapes of practice: the scope of mucus therapies of madness The above section showed that mucus played an important role in Qing medical discussions of many illnesses. Starting with an examination of seventeenth-century medical primers that were popular under the Qing, let me now demonstrate from many different angles that mucus conceptions also dominated the way doctors thought about insanity. Since the practice of medicine was not regulated, virtually anyone could take it up. All that was needed was a medical primer and a few patients willing to pay for a cure. Physicians who sought a more elite clientele usually needed to claim a teacher and to be able to couch their arguments in classical terms drawn from the medical canons or the Yijing, but the success of medical primers suggests that medicine was easily learned outside of teacher-student relations. The large number of surviving editions of books like Huangfu Zhong's 皇甫中 Enlightened Physician Pointing to His Palm (Mingyi zhizhang 明醫指掌) or Gong Tingxian's Shoushi baoyuan 壽世保元, and the fact that other books lamented their excessive influence, suggest that they guided the practice of more physicians than the treatises mo ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00801\",\n      \"marker\": \"10\",\n      \"page_no\": 285,\n      \"paragraph_index\": 3,\n      \"source_text\": \"Qing Suzhou was an important center of medical studies supported by a prosperous printing industry and mature scholarly networks. As one of the main cities on the Grand Canal, it had long been an important hub of trade and communication, an ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00803\",\n      \"marker\": \"11\",\n      \"page_no\": 286,\n      \"paragraph_index\": 0,\n      \"source_text\": \"with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that anot ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00804\",\n      \"marker\": \"12\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00805\",\n      \"marker\": \"13\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00806\",\n      \"marker\": \"14\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00807\",\n      \"marker\": \"15\",\n      \"page_no\": 287,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00808\",\n      \"marker\": \"16\",\n      \"page_no\": 288,\n      \"paragraph_index\": 0,\n      \"source_text\": \"During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00809\",\n      \"marker\": \"17\",\n      \"page_no\": 288,\n      \"paragraph_index\": 0,\n      \"source_text\": \"During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00094\",\n      \"note_item_id\": \"fn-00230\",\n      \"current_anchor_id\": \"anchor-01299\",\n      \"marker\": \"2\",\n      \"note_page_no\": 290,\n      \"anchor_page_no\": 435,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \">B/=? A3/specified/that/he/was/from/Ghangshu ĤȰ 4a/fewdozen kilometers/north/of/the/city/of/Wuzhou4/but/still/withinWuzhou prefecture6 e/gained/the^]bg\\\\] title/in/ > 6 < X he E]b[m]/n\\\\]n\\\\Ub[ Us/title was/modeled/on/[u/WhuUs ÏŔ \\\\Ub[\\\\Ub/n \\\\]n ...\",\n      \"anchor_excerpt\": \"http://catalog.digitalarchives.tw/?URN=2627716; retrieved on 27 May 2009; I discuss the parricide case found in this memorial in 11.2). For fenghing, see memorial by Tuhai 圖海 dated 6 June 1656 (SZ13.5.14) (UCDA, http://catalog.digitalarchiv ...\"\n    },\n    {\n      \"link_id\": \"link-00095\",\n      \"note_item_id\": \"fn-00231\",\n      \"current_anchor_id\": \"anchor-00891\",\n      \"marker\": \"6\",\n      \"note_page_no\": 293,\n      \"anchor_page_no\": 309,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6. 36 < Xhis/point/was/similar/to/[ang/OentangUsɃˑ÷ claim 2>6?3that _iUb[ was/a/more/serious/form/ofX]Ub 6 = Xhe/VdragonW/represented/ ire6/Xhe/pill/was/made/with/cinnabar/2ƿʀ 34/limonite/2̔ ɿ 34/gold/foil/2Όʡ 3 silver/foil/2ΐʡ 34/and/molte ...\",\n      \"anchor_excerpt\": \"An interesting addition to these cases was co-editor Gong Shangnian's 龔商年 long elaboration on the symptoms, causes, and treatments of dian, kuang, and xian. This text (which I translate in Appendix 6) notably claimed that dian and kuang cou ...\"\n    },\n    {\n      \"link_id\": \"link-00098\",\n      \"note_item_id\": \"fn-00234\",\n      \"current_anchor_id\": \"anchor-01153\",\n      \"marker\": \"5\",\n      \"note_page_no\": 301,\n      \"anchor_page_no\": 389,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"B/< =36 n/the/same/section4/Ghen/Ui/alsowarned that_iUb[ Vcould/not/be/treated/likeX]Ub illnessW/25Æ˫ɨɝÊǻ@ 34/which/had/other/causes6 >< Q]liY/l]bki ·òņř 2 ? 34 ^iUb <4/VHian/kuang/xianWɨȾɥ C QU\\\\G/ed6B = 6/GhengUs/claim/that/he wrote/the/bo ...\",\n      \"anchor_excerpt\": \"In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had ...\"\n    },\n    {\n      \"link_id\": \"link-00100\",\n      \"note_item_id\": \"fn-00242\",\n      \"current_anchor_id\": \"anchor-00172\",\n      \"marker\": \"2\",\n      \"note_page_no\": 311,\n      \"anchor_page_no\": 86,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"<@?5 ==A3 Ucm]b[/WicmUc kéƅ̡ 2authorUs/preface/from/ ==>34 ^iUb 4/VPiverW ː 4/under VPiver5inhibiting/powderWŵːƐ 2\\\\ue]UB/= E36 A> uaUs/explanation/appearsat/the/end/of/theVQu/cheng/tuW I1= section/in ^iUb /2]e]UB/A 5A<36 A? Eccording/to/the ...\",\n      \"anchor_excerpt\": \"生必用方言如吐其涎 令人跛躄 (Rumen shiqin 2, entry 14, \\\"Fan zai shang zhe jie ke tu shi\\\" 凡在上者皆可吐式; RMSQ 2.14b; Zibe yiji: 66).\"\n    },\n    {\n      \"link_id\": \"link-00103\",\n      \"note_item_id\": \"fn-00245\",\n      \"current_anchor_id\": \"anchor-01038\",\n      \"marker\": \"7\",\n      \"note_page_no\": 315,\n      \"anchor_page_no\": 347,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"7. 3E\\u0001D7H7DE7\\u00018>AI\\u0001\\u00043E\\u0001;@ F:7\\u0001D7H7DE7\\u00018>AI\\u0001A8\\u0001\\\";H7D\\u0001 ;D7 ;@FA\\u0001F:7\\u00015:7EF\\u0005 I;F: ;FE\\u0001>793>\\u00013@6\\u0001BA>;F;53>\\u0001?73@;@9\\u00013E\\u0001VE76;F;A@W\\u0001AD\\u0001D7HA>F\\b\\u0001 AD\\u0001?AD7\\u0001A@\\u0001F:7\\u0001>793>\\u0001?73@;@9\\u0001A84/ \\u0006 E77\\u0001 \\u000f\\b\\u000e\\b\",\n      \"anchor_excerpt\": \"Zhu Zhenheng's 朱震亨 (1282-1358) influential view that possession symptoms were commonly triggered by mucus. $ ^{7} $ The third section tries to interpret the dramatic decrease in mentions of exorcistic healers in late-imperial cases that phy ...\"\n    },\n    {\n      \"link_id\": \"link-00105\",\n      \"note_item_id\": \"fn-00252\",\n      \"current_anchor_id\": \"anchor-00026\",\n      \"marker\": \"2\",\n      \"note_page_no\": 318,\n      \"anchor_page_no\": 38,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"@A=34/cited/in/ \\\\Q]PEB/ =@=F6/Hing/ anren 0ɋP 2 @><5 A <3/adopted anotherpeculiar meaning/in/the/early/twentieth/century6/Wee<]b[/?UbfYb/m]Ub ·ǌ 2a6k6a6 <]b[g\\\\]/m]Ub 0Ǳ·ǌ\",\n      \"anchor_excerpt\": \"Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts w ...\"\n    },\n    {\n      \"link_id\": \"link-00107\",\n      \"note_item_id\": \"fn-00254\",\n      \"current_anchor_id\": \"anchor-01037\",\n      \"marker\": \"6\",\n      \"note_page_no\": 320,\n      \"anchor_page_no\": 346,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"R ^©_`e« R {o {ei¡hiZ Yanjing§an研經言 V_fcdWZ j£an `Z ci¢ed in Wang vong¢£ _ggeZ ¤ol\\\\ `h _e_e\\\\ @ /discuss/]e/ uiUs/cases/and/their/wide/influence/in/?6< above6\",\n      \"anchor_excerpt\": \"Whereas ritual texts that proposed methods to remove these beings gave little detail about how they affected the body, medical sources often described ghosts as entering the body of their victims and occupying specific organs. As such, late ...\"\n    },\n    {\n      \"link_id\": \"link-00113\",\n      \"note_item_id\": \"fn-00267\",\n      \"current_anchor_id\": \"orphan-recovery-fn-00267\",\n      \"marker\": \"1\",\n      \"note_page_no\": 329,\n      \"anchor_page_no\": 281,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. 28ADFD3@E>3F;A@E\\u0001A8\\u0001F:7\\u0001D7>7H3@F\\u0001>3IE\\b\\u0001 AD\\u0001F:7\\u0001AD;9;@E\\u0001A8\\u0001F:7\\u0001BA>;5K\\u0001A8\\u0001BD7H7@F;H7 V675>3D3F;A@\\u00013@6\\u00015A@8;@7?7@FW\\u0001\\u0004Ë÷ΖΕ \\u0005\\u0006\\u0001F:7\\u0001;EEG7\\u0001A8\\u0001I:7F:7D\\u00013@6\\u0001:AI\\u0001;F\\u0001I3E\\u0001;?B>7?7@F76\\u0006\\u00013@6\\u00018AD\\u0001?AD7 *:7D7\\u0001I3E\\u0001@AF:;@9\\u0001>3F7@F\\u000134AGF\\u0001\\u00183AUE\\u0001;>>@7EESS\\u00183AUE\\u0001D ...\",\n      \"anchor_excerpt\": \"vivid “imagination of mucus” $ ^{1} $ through which physicians—from\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote",
-      "chapter_title": "“Danxi said…”",
+      "cluster_id": "toc-ch-012-shapesofpracticesmedical:toc-ch-012-shapesofpracticesmedical:endnote",
+      "chapter_title": "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
       "request_mode": "anchor_rebind",
       "allowed_actions": [
         "match",
         "ignore_ref",
         "needs_review"
       ],
-      "note_system": "footnote",
+      "note_system": "endnote",
       "page_range": [
-        159,
-        214
+        285,
+        331
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 106738,
+          "row_id": 1103,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00394",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 159,
-          "paragraph_index": 1,
-          "char_start": 285,
-          "char_end": 293,
-          "source_marker": "$ ^{7} $",
-          "normalized_marker": "7",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106741,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00397",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 159,
+          "anchor_id": "anchor-00801",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 285,
           "paragraph_index": 3,
-          "char_start": 443,
-          "char_end": 452,
+          "char_start": 699,
+          "char_end": 708,
           "source_marker": "$ ^{10} $",
           "normalized_marker": "10",
-          "anchor_kind": "footnote",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. These scripts also emerged and developed intertextually. Finally, the zbezzhong mode of interpreting the past largely explains why Chinese medical thinking often appears so “syncretistic” and “integrative.” $ ^{10} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "Qing Suzhou was an important center of medical studies supported by a prosperous printing industry and mature scholarly networks. As one of the main cities on the Grand Canal, it had long been an important hub of trade and communication, and many doctors had traveled there to find books and exchange ideas. But in Qing times Suzhou physicians claimed to represent the most advanced medical approaches in the empire. Although this pride predated the eighteenth century, it became particularly evident after the publication in 1766 of some of Ye Gui's 葉桂 (1667-1746; see 7.5 below) case files by men who claimed to be his disciples. I discuss Suzhou doctors' approach to madness in the next chapter. $ ^{10} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 106742,
+          "row_id": 1105,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00398",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 159,
-          "paragraph_index": 4,
-          "char_start": 906,
-          "char_end": 915,
-          "source_marker": "$ ^{10} $",
-          "normalized_marker": "10",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed symptoms. These scripts also emerged and developed intertextually. Finally, the zbezzhong mode of interpreting the past largely explains why Chinese medical thinking often appears so “syncretistic” and “integrative.” $ ^{10} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
-        },
-        {
-          "row_id": 106745,
-          "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00400",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 161,
+          "anchor_id": "anchor-00803",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 286,
           "paragraph_index": 0,
-          "char_start": 563,
-          "char_end": 572,
+          "char_start": 344,
+          "char_end": 353,
+          "source_marker": "$ ^{11} $",
+          "normalized_marker": "11",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that another doctor’s attacking of mucus and Fire in a case of insanity had “helped the bandits do harm” (助賊為虐). $ ^{11} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 1106,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00804",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 181,
+          "char_end": 190,
+          "source_marker": "$ ^{12} $",
+          "normalized_marker": "12",
+          "anchor_kind": "endnote",
+          "certainty": 1.0,
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
+        },
+        {
+          "row_id": 1107,
+          "doc_id": "bd05138cd773",
+          "anchor_id": "anchor-00805",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 277,
+          "char_end": 286,
           "source_marker": "$ ^{13} $",
           "normalized_marker": "13",
-          "anchor_kind": "footnote",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 106746,
+          "row_id": 1108,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00401",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 161,
-          "paragraph_index": 0,
-          "char_start": 694,
-          "char_end": 703,
+          "anchor_id": "anchor-00806",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 554,
+          "char_end": 563,
           "source_marker": "$ ^{14} $",
           "normalized_marker": "14",
-          "anchor_kind": "footnote",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 106747,
+          "row_id": 1109,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00402",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 161,
-          "paragraph_index": 0,
-          "char_start": 905,
-          "char_end": 914,
+          "anchor_id": "anchor-00807",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 287,
+          "paragraph_index": 1,
+          "char_start": 759,
+          "char_end": 768,
           "source_marker": "$ ^{15} $",
           "normalized_marker": "15",
-          "anchor_kind": "footnote",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰即有形之火 火即無形之痰). $ ^{15} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 106749,
+          "row_id": 1110,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00403",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 162,
+          "anchor_id": "anchor-00808",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 288,
           "paragraph_index": 0,
-          "char_start": 275,
-          "char_end": 284,
+          "char_start": 216,
+          "char_end": 225,
           "source_marker": "$ ^{16} $",
           "normalized_marker": "16",
-          "anchor_kind": "footnote",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         },
         {
-          "row_id": 106750,
+          "row_id": 1111,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-00404",
-          "chapter_id": "toc-ch-005-danxisaid",
-          "page_no": 162,
+          "anchor_id": "anchor-00809",
+          "chapter_id": "toc-ch-012-shapesofpracticesmedical",
+          "page_no": 288,
           "paragraph_index": 0,
-          "char_start": 553,
-          "char_end": 562,
+          "char_start": 406,
+          "char_end": 415,
           "source_marker": "$ ^{17} $",
           "normalized_marker": "17",
-          "anchor_kind": "footnote",
+          "anchor_kind": "endnote",
           "certainty": 1.0,
-          "source_text": "Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $",
-          "created_at": 1776858527,
-          "updated_at": 1776858527
+          "source_text": "During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $",
+          "created_at": 1777566988,
+          "updated_at": 1777566988
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00148",
-          "note_item_id": "fn-00065",
-          "current_anchor_id": "synthetic-footnote-00124",
-          "marker": "4",
-          "note_page_no": 159,
-          "anchor_page_no": 159,
-          "current_anchor_marker": "4",
-          "note_excerpt": "94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L B9 4 786<F<BA 5$1' ,&&, 8AGEL 253 IB? $1* , *8 $1<8 =,',$1 <G 7<7 ABG @84A 4A 4I8E4:8 BE 4 @<77?8 CB<AG 5HG 4A 4FF8FF@8AG 478DH4G8 GB G;8 6<E6H@FG4A68F $7+(",
-          "anchor_excerpt": "94@BHF *BA: 6B@C<?4G<BA B9 ?8:4? 786<F<BAF G;8!+( <8 *8, -,$1 ļǸͱ̯ $1<8 '$ &,',$1 *HBL<A 58A :?BFF8F =+( <8 Ǹ 4F VCEBABHA6<A: 4 F8AG8A68 49G8E 78G4<?87 8K4@<A4G<BA B9 G;8 8I<78A68 B9 4 64F8W ˟ØƋĠɶTƳ !+>1* ˋ G; GBA8 E898EE87 GB G;8 478DH46L B9 4 786<F<BA 5$1' ,&&, 8AGEL 253 IB? $1* , *8 $1<8 =,',$1 <G 7<7 ABG @84A 4A 4I8E4:8 BE 4 @<77?8 CB<AG 5HG 4A 4FF8FF@8AG 478DH4G8 GB G;8 6<E6H@FG4A68F $7+(",
-          "current_anchor_synthetic": true
+          "link_id": "link-00094",
+          "note_item_id": "fn-00230",
+          "current_anchor_id": "anchor-01299",
+          "marker": "2",
+          "note_page_no": 290,
+          "anchor_page_no": 435,
+          "current_anchor_marker": "2",
+          "note_excerpt": ">B/=? A3/specified/that/he/was/from/Ghangshu ĤȰ 4a/fewdozen kilometers/north/of/the/city/of/Wuzhou4/but/still/withinWuzhou prefecture6 e/gained/the^]bg\\] title/in/ > 6 < X he E]b[m]/n\\]n\\Ub[ Us/title was/modeled/on/[u/WhuUs ÏŔ \\Ub[\\Ub/n \\]n\\Ub[/hi yÿŽƂî 2 ?36 VTointing/to/oneUs/palmW/referred/to/something/easy/to/do/or/to/understand6E]b[m]/n\\]n\\Ub[ had/first/been composed/by/ uangfu/^hong ɯɐ 2in/ =?A34/allegedly/supplemented/by/[ang/OentangɃˑ÷ 2 == 5 > @C/seeR\\cb[m]/XU/W]X]Ub B A <C R\\cb[m]/kYbl]Ub/W]X]Ub B < <34/and finallyre5edited/and/supplemented/by/Whao/Ha ΀ͺ 4who had/it published in/Feijing in/ > with/the/help/of/\\u/Whirou/2as/\\u/claimed/in/his/preface36 = \\u/WhirouUs/preface/and/Whao/HaUs/Vself5accountW/2˨̪ 3/both/praisedthemedical/prowess/of/WhaoUs/father6 many/books4/and/the/difficulty/of/mastering these convoluted/doctrines6 n/the=b`][\\hYbYX",
+          "anchor_excerpt": "http://catalog.digitalarchives.tw/?URN=2627716; retrieved on 27 May 2009; I discuss the parricide case found in this memorial in 11.2). For fenghing, see memorial by Tuhai 圖海 dated 6 June 1656 (SZ13.5.14) (UCDA, http://catalog.digitalarchives.tw/?URN=2516751, retrieved on 27 May 2009). The term fengji 瘋疾 also appeared in Qing codified law; see Appendix 7 under \"1725 [2].\"",
+          "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00150",
-          "note_item_id": "fn-00067",
-          "current_anchor_id": "synthetic-footnote-00125",
-          "marker": "4",
-          "note_page_no": 161,
-          "anchor_page_no": 161,
-          "current_anchor_marker": "4",
-          "note_excerpt": "CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6E46L 5864@8 I464AG <A 477<G<BA GB 9<A7<A: C8EFBAA8? 9EB@ @87<64? ;BHF8;B?7F 4A7 4@BA: GE4<A88F 4G G;8 @C8E<4? 6478@L BHGFG4A7<A: C;LF<6<4AF 9EB@ G;8 ?B64?<G<8F F;BH?7 58 E86B@@8A787 GB G;8 6BHEG #<4A: !HA",
-          "anchor_excerpt": "CBF<G<BA 4G G;8 @C8E<4? 6478@L B9 $87<6<A8 5HG #BH 58::87 GB 58 8K6HF87 5864HF8 B9 <??A8FF 4A7 B?7 4:8 8 J4F E86B@@8A787 4:4<A <A #BHUF E86B@@8A74G<BAFGBB> C?468 589BE8 G;8 L84E G;8 8@C8EBE 786E887 G;4G J;8A CBF<G<BAF <A G;8 @87<64? 5HE84H6E46L 5864@8 I464AG <A 477<G<BA GB 9<A7<A: C8EFBAA8? 9EB@ @87<64? ;BHF8;B?7F 4A7 4@BA: GE4<A88F 4G G;8 @C8E<4? 6478@L BHGFG4A7<A: C;LF<6<4AF 9EB@ G;8 ?B64?<G<8F F;BH?7 58 E86B@@8A787 GB G;8 6BHEG #<4A: !HA",
-          "current_anchor_synthetic": true
+          "link_id": "link-00095",
+          "note_item_id": "fn-00231",
+          "current_anchor_id": "anchor-00891",
+          "marker": "6",
+          "note_page_no": 293,
+          "anchor_page_no": 309,
+          "current_anchor_marker": "6",
+          "note_excerpt": "6. 36 < Xhis/point/was/similar/to/[ang/OentangUsɃˑ÷ claim 2>6?3that _iUb[ was/a/more/serious/form/ofX]Ub 6 = Xhe/VdragonW/represented/ ire6/Xhe/pill/was/made/with/cinnabar/2ƿʀ 34/limonite/2̔ ɿ 34/gold/foil/2Όʡ 3 silver/foil/2ΐʡ 34/and/molten/Vblack/leadW/2ϦΏ 3/saut}ed/in/mercury/until/it/became/a/powder/2ʦ 36/Xhe/mix was/to/be/swallowed/withGhina5rootdecoction/2˹ʉȖ 36 > /am/referring/to/[ang/FingUs/commentary/to/a/passage/in/the Ug]W/IiYgh]cbg 4/where/he/said/that _iUb[ means much/anger/andX]Ub much/joy 2see/ 6<36",
+          "anchor_excerpt": "An interesting addition to these cases was co-editor Gong Shangnian's 龔商年 long elaboration on the symptoms, causes, and treatments of dian, kuang, and xian. This text (which I translate in Appendix 6) notably claimed that dian and kuang could both be caused by either depletion or over-repletion. $ ^{90} $ Before Gong, physicians had mostly classified dian as madness caused by depletion and kuang as more manic insanity occasioned by over-repletion.",
+          "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-00151",
-          "note_item_id": "fn-00068",
-          "current_anchor_id": "anchor-00399",
+          "link_id": "link-00098",
+          "note_item_id": "fn-00234",
+          "current_anchor_id": "anchor-01153",
+          "marker": "5",
+          "note_page_no": 301,
+          "anchor_page_no": 389,
+          "current_anchor_marker": "5",
+          "note_excerpt": "B/< =36 n/the/same/section4/Ghen/Ui/alsowarned that_iUb[ Vcould/not/be/treated/likeX]Ub illnessW/25Æ˫ɨɝÊǻ@ 34/which/had/other/causes6 >< Q]liY/l]bki ·òņř 2 ? 34 ^iUb <4/VHian/kuang/xianWɨȾɥ C QU\\G/ed6B = 6/GhengUs/claim/that/he wrote/the/book/for/his/disciples/appears/in/his/ ? /preface2p6=/of/prefatory/material in/QU\\G/ed636",
+          "anchor_excerpt": "In both etiology and treatment, extant cases of “mad women” predating 1500 are indistinguishable from those of men. Xu Shuwei 許叔微 (1079-1154) gave the same pill to a woman who had been scared out of her wits by pirates and to a man who had lost his mind as he was about to be executed as a criminal. Wang Haogu 王好古 (13 $ ^{th} $ century) cured a manic woman with a purgative he borrowed from the Treatise on Cold Injury. $ ^{4} $ Two cases by Ni Weide 倪維德 (1303-1377) displayed the same gender neutrality. $ ^{5} $ If these physicians made distinctions between genders, they did not record them in their case files.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00100",
+          "note_item_id": "fn-00242",
+          "current_anchor_id": "anchor-00172",
+          "marker": "2",
+          "note_page_no": 311,
+          "anchor_page_no": 86,
+          "current_anchor_marker": "2",
+          "note_excerpt": "<@?5 ==A3 Ucm]b[/WicmUc kéƅ̡ 2authorUs/preface/from/ ==>34 ^iUb 4/VPiverW ː 4/under VPiver5inhibiting/powderWŵːƐ 2\\ue]UB/= E36 A> uaUs/explanation/appearsat/the/end/of/theVQu/cheng/tuW I1= section/in ^iUb /2]e]UB/A 5A<36 A? Eccording/to/the/order/of/conquest/of/the/ ive/Thases4/[ood/was/said/to VovercomeW 2g\\Yb[ ¦ 3/Iarth6",
+          "anchor_excerpt": "生必用方言如吐其涎 令人跛躄 (Rumen shiqin 2, entry 14, \"Fan zai shang zhe jie ke tu shi\" 凡在上者皆可吐式; RMSQ 2.14b; Zibe yiji: 66).",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00103",
+          "note_item_id": "fn-00245",
+          "current_anchor_id": "anchor-01038",
+          "marker": "7",
+          "note_page_no": 315,
+          "anchor_page_no": 347,
+          "current_anchor_marker": "7",
+          "note_excerpt": "7. 3E\u0001D7H7DE7\u00018>AI\u0001\u00043E\u0001;@ F:7\u0001D7H7DE7\u00018>AI\u0001A8\u0001\";H7D\u0001 ;D7 ;@FA\u0001F:7\u00015:7EF\u0005 I;F: ;FE\u0001>793>\u00013@6\u0001BA>;F;53>\u0001?73@;@9\u00013E\u0001VE76;F;A@W\u0001AD\u0001D7HA>F\b\u0001 AD\u0001?AD7\u0001A@\u0001F:7\u0001>793>\u0001?73@;@9\u0001A84/ \u0006 E77\u0001 \u000f\b\u000e\b",
+          "anchor_excerpt": "Zhu Zhenheng's 朱震亨 (1282-1358) influential view that possession symptoms were commonly triggered by mucus. $ ^{7} $ The third section tries to interpret the dramatic decrease in mentions of exorcistic healers in late-imperial cases that physicians or their patients' relatives explicitly attributed to \"evil ghosts\" or designated as \"spectral affliction.\" I suggest that shamans and elite physicians no longer competed for the same patients. Yet, as I show in the fourth section, even in the late nineteenth century many elite physicians still ascribed illness to the action of various kinds of ghosts. The \"medical exorcisms\" they performed often borrowed from ritual therapies that today we associate more readily with Daoism than with scholarly medicine. $ ^{8} $ The final section explains how some physicians explained and treated hallucinations, a special type of possession symptom.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00105",
+          "note_item_id": "fn-00252",
+          "current_anchor_id": "anchor-00026",
+          "marker": "2",
+          "note_page_no": 318,
+          "anchor_page_no": 38,
+          "current_anchor_marker": "2",
+          "note_excerpt": "@A=34/cited/in/ \\Q]PEB/ =@=F6/Hing/ anren 0ɋP 2 @><5 A <3/adopted anotherpeculiar meaning/in/the/early/twentieth/century6/Wee<]b[/?UbfYb/m]Ub ·ǌ 2a6k6a6 <]b[g\\]/m]Ub 0Ǳ·ǌ",
+          "anchor_excerpt": "Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00107",
+          "note_item_id": "fn-00254",
+          "current_anchor_id": "anchor-01037",
+          "marker": "6",
+          "note_page_no": 320,
+          "anchor_page_no": 346,
+          "current_anchor_marker": "6",
+          "note_excerpt": "R ^©_`e« R {o {ei¡hiZ Yanjing§an研經言 V_fcdWZ j£an `Z ci¢ed in Wang vong¢£ _ggeZ ¤ol\\ `h _e_e\\ @ /discuss/]e/ uiUs/cases/and/their/wide/influence/in/?6< above6",
+          "anchor_excerpt": "Whereas ritual texts that proposed methods to remove these beings gave little detail about how they affected the body, medical sources often described ghosts as entering the body of their victims and occupying specific organs. As such, late-imperial sui (“spectral afflictions”) thus differed from the sui (“calamities”) of the Shang era, which did not depend on control over the body of the victim. $ ^{6} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00113",
+          "note_item_id": "fn-00267",
+          "current_anchor_id": "orphan-recovery-fn-00267",
           "marker": "1",
-          "note_page_no": 162,
-          "anchor_page_no": 160,
+          "note_page_no": 329,
+          "anchor_page_no": 281,
           "current_anchor_marker": "1",
-          "note_excerpt": "C\\^X!Vbhag_Xff!:[\\aXfX!g[\\a^Xef&!Cbh!P\\aZ!hfXW!P\\a!TaW PTaZ!Tf!T!V_Tff\\Y\\VTg\\ba!WXi\\VX!g[TgVbeeXfcbaWXW j\\g[!9_bbW!TaWH\\&!g[X!\\agXe\\be!TaW!g[X!fheYTVX!$ˉˌ %&!g[X!hccXe!TaW!_bjXe!UbWl!$'( %&!WXc_Xg\\ba!TaW eXc_Xg\\ba&XgV5!g[X! \\iX!8ZXagf!jXeX!`TgV[XW!j\\g[!g[X!Y\\iX!P\\a!i\\fVXeT&!g[X!Y\\iX!cXe\\bWf!TaW!f\\kH\\&!XgV(",
-          "anchor_excerpt": "This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), from Ningbo, and Yu Tuan 虞搏 (1438-1517), from the same locale as Zhu in Zhejiang. Though I focus on individual writers, I insist that they were responding to each other and explain how each of them proposed different interpretations of a common body of texts that included the Danxi corpus, but also the Inner Canon and the works of Liu Wansu and Li Gao. $ ^{11} $ Throughout, I try to recreate the doctrinal debates that make changes in their approaches to madness intelligible.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00152",
-          "note_item_id": "fn-00069",
-          "current_anchor_id": "synthetic-footnote-00127",
-          "marker": "2",
-          "note_page_no": 162,
-          "anchor_page_no": 162,
-          "current_anchor_marker": "2",
-          "note_excerpt": "C\\h!:[ha!chU_\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\a! 22&!TaW&!UTf\\aZ![\\`fX_Y!ba T!`TahfVe\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\L Ǿƚďɭ \\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\fV\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\huf LMLQJ![LDR[XH ( W\\fVhff!C\\huf!gjb!jbe^f!UX_bj(",
-          "anchor_excerpt": "C\\h!:[ha!chU_\\f[XWg[X LMLQJ![LDR[XH ̡ɞàç \\a! 22&!TaW&!UTf\\aZ![\\`fX_Y!ba T!`TahfVe\\cg!_XYg!Ul Oh PTaV[ha& g[X XML!ZHL\\L Ǿƚďɭ \\a! 30(NTaZ!Cruf ǿæ $T_fb!T!W\\fV\\c_X!bY!Q[huf% LMLQJ!VXKXL!ML ̡ɞǖƽ̈́ $ 02%[TW g[X!fT`XchecbfX Tf!C\\huf LMLQJ![LDR[XH ( W\\fVhff!C\\huf!gjb!jbe^f!UX_bj(",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00155",
-          "note_item_id": "fn-00072",
-          "current_anchor_id": "anchor-00417",
-          "marker": "8",
-          "note_page_no": 169,
-          "anchor_page_no": 167,
-          "current_anchor_marker": "8",
-          "note_excerpt": "$1* )$+8, äŜȠň 4 $1;, <,-, 4??H7<A: GB 4 C4FF4:8 9EB@ 04A: /<BA:UFƑ͂ S $<$1 ƺ˖ ʦǳɖ̬Wĭ˨° ˃˖ǃ Wļ˨ɺ F88 %L?4A 4A7 %L?4A 4A7 *<I<A 4<UF 8C<G4C; 6?4<@87 G;4G 4< 4A7 1;H;47 8K6;4A:87 ?8A:G;L ?8GG8EF ćĎųɯƨĵȔȔhȢ˖ 1;HUF 8C<G4C; <A7<64G87 G;4G V;,$16+(1* UF G;8E4C<8F JBE>87 JBA78E9H??L G;8E8 4E8 F6BE8F B9 FH6; 264F8F3 2;<F3 7<F6<C?8F",
-          "anchor_excerpt": "cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late-",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00156",
-          "note_item_id": "fn-00073",
-          "current_anchor_id": "anchor-00436",
-          "marker": "2",
-          "note_page_no": 170,
-          "anchor_page_no": 171,
-          "current_anchor_marker": "2",
-          "note_excerpt": "2. $1;,\u0001<,-, \u0014 \u00103\u0005\b G\u0001J4F\u00016B@@BA\u00019BE\u00017<F6<C?8F B9\u0001G;8\u00017LA4FGLW\u0001\u0004GB G4>8 ABG8F\u0001J;<?8\u0001G;8<E\u0001@4FG8EF\u0001J8E8\u0001GE84G<A:\u0001C4G<8AGF\b1;4A: \u001aBA:M; 8A:UF̳Řʑ\u0011͝ \u0015\u0016,1*6+, \u0012\u0014\u0001 \u0011\u0012\u0011\u0007\u0012\u0012\u0005\u0006\u0001J4F G;8A 4G\u0001G;8 4C8K B9\u0001;<F\u0001CBJ8E\b +,;,1*\u00016$1/,$2 gĄ\u0006Ȝ \u000464\b\u0001 \u0012\u0015 -8$1 \u0010\u0007\u0012\u0001B9\u0001G;8\u0001E868<I87\u001b80(1\u00016+,4,1 ;̲\u0019˓ \u0005\u0001J4F\u00014\u00016B??86G<BA\u0001B9\u000164F8\u0001E86BE7F$9$17\u0001/$\u0001/(775( \b #HB\u0001+<4AL<UF ɬ° ȧ (,6+(1*\u0001%$2-,$1 ˇȉÜ̯ \u0004 \u0012 \u0005\u00014A7 21*<8$1\u00016+,;,$2\u0001)$1* Ƅ¢˝őŜ \u00044\u00015BB>BA #<\u0001 4BUF\u0001@87<6<A8G;4G .;8A\u0001\u001b4<\u0001E8GHEA87\u0001;B@8 G;4G\u0001L84E49G8E;4I<A:\u0001786?<A87 E86B@@8A74G<BA\u0001GB\u0001586B@8\u00014\u00016BHEG #HB\u0001+<4AL<\u000187<G87\u0001<A\u0001 \u0012 \u0005\u0006\u00014?FB\u00016BAG4<A87\u0001@4AL\u000164F8F\u00015L\u0001#HBUF\u0001@4FG8E\u0001#<\u0001 4B\u0001G;4G\u0001#HB\u0001;47\u0001JE<GG8A\u00017BJA\b \u0013 A\u0001;<F\u0001BA?L\u0001FHEI<I<A:\u0001?8GG8E\u0001\u0004JE<GG8A\u0001<A\u0001 \u000f \u0001GB\u00014\u0001@<ABE\u0001 7H64G<BA\u0001B99<6<4?\u0001A4@87\u0001#BH\u0001#<Ɨq <A\u0001A8<:;5BE<A: C;LF<6<4A\u0006\u0001*BA:\u0001#<4A 6B@CBF87 4 ?BA:\u0001C<868 64??87\u0001V,CBA\u0001*8A7<A:\u0001&99\u0001\u001b4<\u00010H4A?<\u0001BA\u0001;<F \u001a;HM;BH\u0001)BHG8 ʸî˿ \u0005\u0006\u00011;H\u00014AFJ8E87\u0001;<F\u00016BEE8FCBA78AGUF\u0001DH8FG<BAF\u0001BA\u0001@87<64?\u00017B6GE<A8\u0001\u00046<G<A:\u0001;<F\u0001BJA \u0010(=+,\u0001<8/81 Ɖʕ͜˧ 4F\u0001J8??\u00014F\u0001G;8 \u001211(5\u0001 $121 \u0005\u0006\u0001BA\u0001G;8\u000189986GF\u0001B9\u0001I4E<BHF\u00017EH:F\u0006\u0001BA\u00017<8G\u0001\u00048FC86<4??L\u0001@84G\u0005\u0006\u0001BA ;BJ\u0001GB\u0001@4>8\u0001 <E8\u000178F68A7\u0006\u00014A7\u0001BA\u0001;BJ\u0001GB\u0001GE84G\u000145F68FF8F\u0006\u0001CE4<F<A:\u0001#<\u0001 4BUF\u0001@8G;B7F\u0001BA\u0001G;8\u0001?4GG8E\u0001<FFH8\b BHA7 <A\u0001G;8\u00011;H\u00016?4AUF\u0001:8A84?B:L\u0001\u0004 +,B$1\u0001!+86+,\u0001=21*38 ˹ëƀƪÌˮ \u0005\u0006\u0001G;8\u0001?8GG8E\u0001<F\u0001E8CEB7H687\u0001<A $1;,\u0001<,-, \u0004 \u0014 \u0011 \u0005\b\u0001 A\u00014\u00016B?BC;BA\u0001GB\u0001G;<F\u0001?8GG8E\u0006\u0001#BH\u0001#<UF\u0001FBA\u00016?4<@87\u0001G;4G\u0001;<F\u000194G;8E\u0001;47\u00018K6;4A:87\u0001@BE8\u0001G;4A\u00019BEGL\u0001?8GG8EF J<G;\u00011;H\b\u0001\u001aBAF<78E<A:\u0001G;8\u0001IB?H@8 B9\u0001G;8\u00016BEE8FCBA78A68\u00011;H\u00018K6;4A:87\u0001J<G;\u0001\u001b4<\u0001*<:BA:\u0006\u0001#BH\u0001#<\u0006\u00014A7 CEB545?L\u0001@4AL\u0001BG;8EF\u0006\u0001?8GG8EF\u0001@HFG\u0001;4I8\u0001588A\u0001<@CBEG4AG\u00016;4AA8?F\u0001<A\u0001G;8\u00017<FF8@<A4G<BA\u0001B9\u0001@87<64?\u00017B6GE<A8F\b \u000e V+<\u00011;H\u000104AK<H\u0001L<\u0001@B\u0001;BHW͓ƀą2̕©Ĉ \u0004 (1;,$1\u0001-, Řī̈́ \b \u00104\u0005\b\u0001\u001b4<8A=B<A87\u0001*BA:\u0001#<4AGB\u0001JE<G8 G;<F\u0001G8KG49G8E\u001b4< ;47\u0001F;BJA *BA:\u00019<I8\u0001<AF6E<587\u0001F;88GF\u0001G;4G\u00011;H1;8A;8A: ;47\u0001:<I8A\u001b4<\b",
-          "anchor_excerpt": "(太醫院使, ranked 5a), in which quality Dai served until his retirement in 1403 at the age of 80 sui. $ ^{41} $ Dai was then replaced by Han Mao 韓茂, a Suzhou man Dai had recommended many years before. Dai returned home early in 1404. When Dai went back to the capital in the summer of 1405, the newly enthroned Yongle emperor (r. 1402-1424) sent Dai's former student Yuan Bao, who was now Administrative Assistant of the Imperial Academy of Medicine (太醫院判; the second highest post in the organization), to greet him. $ ^{42} $ Dai died in late 1405, soon after he had returned home again.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00159",
-          "note_item_id": "fn-00076",
-          "current_anchor_id": "anchor-00446",
-          "marker": "2",
-          "note_page_no": 176,
-          "anchor_page_no": 174,
-          "current_anchor_marker": "2",
-          "note_excerpt": "+$1*(6 4F >8LF GB G;8 6B@CE8;8AF<BA B9 @87<6<A8 #<>8 1;H #<H FGE8FF87 G;8 <@CBEG4A68 B9 HA78EFG4A7<A: G;8 <A9<A<G8 GE4AF9BE@4G<BAF B9 <??A8FF 7<998E8A68F 58GJ88A ABEG;J8FG8EA 4A7 FBHG;84FG8EA C8BC?8 4A7 G;8 6L6?8F B9 G;8 9<I8 C8E<B7F 4A7 F<K (< 4A7 4:E887 G;4G G;8 11(5 $121 J4F G;8 9BHAG B9 4?? @87<64? >ABJ?87:8",
-          "anchor_excerpt": "Liu and his teachers were products of the Lower Yangzi region, but in the early Hongwu reign (1368-1398), Liu and his family left to establish themselves in Xi'an, the Shaanxi provincial capital. The sources are discrete on the cause of this relocation, and we know little about Liu's life between the time he moved to Shaanxi and his death in 1412, except that he followed the army to Liangzhou 凉州 (present-day Wuwei 武威 in Gansu) before finally settling further west in Ganzhou 甘州, where he was living in 1395. $ ^{52} $ His descendants still resided there in the late 1470s. $ ^{53} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00160",
-          "note_item_id": "fn-00077",
-          "current_anchor_id": "anchor-00458",
-          "marker": "4",
-          "note_page_no": 178,
-          "anchor_page_no": 179,
-          "current_anchor_marker": "4",
-          "note_excerpt": "5BB> JE<GG8A 5L /H;,$16+(1* 9EB@ H<=<W < 8 *;4BK<A: Ņ)ŶɁĉ@ȉĲʧų ó #<H E8CBEG87 G;4G /H <A ;<F LBHG; ;47 E8F<787 <A G;8 .H 4E84 J;8E8 ;8;47 G4H:;G G;8 35,1* $1' 87801 11$/6 GB ?B64? G4?8AGF ʽ ơÎ ) ũȻ ŔŅ̞ 0ą #< *;<M;8A ƂŬȀ ?4G8E 6?4<@87 G;4G V1;H 4AK<UF 7<F6<C?8 /H 04A6;HAW JEBG8 4 (1&$2 )$+8, žʢȠň <A G;8 BA:JH E8<:A F88 #<UF (1&$ 2 *$1*08 žʢɠȫ 2 3 4 V#<74< M;H=<4 58A64BWƢ(˨Òžʢ V (1&$2 )$+8, W /HJ4 F ABG @8AG<BA87 <A 4 E868AG 4EG<6?8 BA 94@BHF *;4BK<A: C;LF<6<4AF 1;H /<4BL<A: #<H <AGEB7H687 ;<F BJAABG8FJ<G; $1 ń 4A7 477<G<BA4? F86G<BAFJ<G;;87,$1 ɨ¦ +;8 G<G?8 ,;8( =+(=+21* ̡Çļˋ 5L J;<6;@BFG F6;B?4EFABJ E898E GB /HUF 5BB><F4A 8KGE4CB?4G<BA 9EB@ #<H ;HAUF 78F6E<CG<BA B9 /HUF @8G;B7 B9 F8?86G<BA +;8 84E?<8FG B66HEE8A68 ;4I8 9BHA7 B9 <G 4F 4 5BB> G<G?8 <F 4 CE89468 GB 8-, :(,<, Ǿƚďɭ #<H ;0( 1+(=+21* @84A G F8?86G<A: @4G8E<4? 9EB@ 7<998E8AG FBHE68F <A BE78E GB 6E84G8 4 7B6GE<A4? 4@4?:4@ /H 4?FB47BCG87 G;4G4CCEB46; <A 6B@C<?<A:;<F (1&$2 )$+8, ž ʢȠň J;<6; J4F ?4G8E 6E<G<6<M87 5864HF8 <G VF<@C?L F8?86G87 CE868CGF 9EB@ @4AL @4FG8EF FH6; 4F 1;4A: !<8:H G;8 0H4A 2/H3=+(=+21* U7 G;8<E 8FF8AG<4?F BA G;8 54F<F B9 G;8 @4<A CE868CGF B9 G;8 2 11(5 3 20H4AFH3 #< BA:LH4A 2 4B3 .4A: 4<64A: 2 4B:H3 1;H 4AK< 21;8A;8A:3 4A7 ;8A: .H=< 4A7 6B@5<A87 G;8@ <AGB BA8 5BB> J<G;BHG 9HEG;8E 477<G<BAFW zăǜ| ƂƄ¢ ǿǆʳ ƀ ǔ ĮǧñŗÒ ˥ $121 W ŋ̥[Èȯ =ƂŤ ƀą2ƀƪ˧̈́ ž ɞšɶļˋIˑ Į ųǱ Uǧ¨ȧ #< *;<M;8A ƂȳȀ (1&$2 *$1*08 žʢɠȫ 8AGEL BA (1&$2 )$+8,",
-          "anchor_excerpt": "Liu Chun's Subtle Meanings contained no section on madness, but the book gave no grounds for attributing kuang to anything else than mucus and Fire. $ ^{64} $ Juan 10 (devoted to Fire) started with Liu Wansu's (4.1) attribution of most illnesses—including kuang—to Fire. The second section was Zhu Zhenheng's \"On Ministerial Fire\" (4.4); the third cited Dai Sigong's appendices to Jingui gouxuan 金匱鉤玄. $ ^{65} $ The mucus chapter contained a cross-reference to the section on \"depletion and fatigue\" 虚損 (juan 19) for a discussion of Zhu's idea that depletion and mucus could cause possession symptoms. The text recommended emetics for most disorders attributed to mucus, and purgatives for those caused by Fire. $ ^{66} $ Subtle Meanings of the Secret Carved in Jade was thus squarely part of the intertextual and syncretic Danxi approach to illness.",
+          "note_excerpt": "1. 28ADFD3@E>3F;A@E\u0001A8\u0001F:7\u0001D7>7H3@F\u0001>3IE\b\u0001 AD\u0001F:7\u0001AD;9;@E\u0001A8\u0001F:7\u0001BA>;5K\u0001A8\u0001BD7H7@F;H7 V675>3D3F;A@\u00013@6\u00015A@8;@7?7@FW\u0001\u0004Ë÷ΖΕ \u0005\u0006\u0001F:7\u0001;EEG7\u0001A8\u0001I:7F:7D\u00013@6\u0001:AI\u0001;F\u0001I3E\u0001;?B>7?7@F76\u0006\u00013@6\u00018AD\u0001?AD7 *:7D7\u0001I3E\u0001@AF:;@9\u0001>3F7@F\u000134AGF\u0001\u00183AUE\u0001;>>@7EESS\u00183AUE\u0001D7>3F;H7E\u0006\u0001-G\u0001*3@9\u0006\u00013@6\u0001D7367DE\u0001A8\u0001F:7 A@\u0001F:7\u00015A@5D7F7\u00015A@6;F;A@E\u0001A8\u0001F:AE7\u0001I:A\u0001I7D7\u00015A@8;@76\u00013F\u0001:A?7\u0006\u0001E77 \b\u000e\b \u0010\u000f AD\u00013@AF:7D\u0001';@9\u00017J3?B>7\u0001A8\u0001F:7\u0001GE7\u0001A8\u0001F:7\u00018AGD\u00016;39@AEF;5\u0001?7F:A6E\u0006\u0001E77\u0001 GDF:\u0001 \u0013\u0013\u0013\u0014\u0001 \u000e\u0010\u0007\u000e\u0011\b",
+          "anchor_excerpt": "vivid “imagination of mucus” $ ^{1} $ through which physicians—from",
           "current_anchor_synthetic": false
         }
       ]
     },
     "page_contexts": [
       {
-        "page_no": 159,
-        "file_idx": 158,
+        "page_no": 38,
+        "file_idx": 37,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "own writings. I will also show that $ \\underline{\\text{zhezhong}} $ hermeneutics and textual composition rested on the notion that illness was constantly changing. Zbezbong is difficult to translate. One of the earliest meanings of zbe 折 was “to break” or “to snap.” In legal language, zbe yu 折獄 meant “judging [i.e., deciding] a criminal case.” $ ^{6} $ But zbe in zbe yu also referred to the weighing and pondering that led to the final decision. $ ^{7} $ Zbe zbong (折中 or 折衷) itself implied the balanced assessment of various positions. $ ^{8} $ We may gloss zbezbong as to resolve—a case, a point of doctrine, etc.—by arbitrating between various positions, often on the basis of another authority. $ ^{9} $ The result of zbezzhong writing was not a simple average of previous teachings, it was a coherent amalgamation of several approaches to illness. Zbezzhong was deliberate syncretism—-eclecticism by design, not by default. Focusing on the intertextuality inherent in the zbezzhong approach avoids treating changes in medical doctrine as radical departures from predecessors or as the unfolding of realizations in the consciousness of a series of unrelated authors. Intertextual analysis also reveals why medical knowledge was not simply “passed on” from one generation to the other. It shows that the illness scripts that interest us were more than culturally informed responses to observed ...",
-        "byte_size": 150039,
-        "sha256": "ea280b9381e4914bee3f6a3b37429f0c2b94651809f05e7dcef4c98807b8d1dd"
+        "ocr_excerpt": "## 2 Prologue to Part One Diversity, coherence, and scheme transfer Medicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works. $ ^{1} $ Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text. $ ^{2} $ To assess and explain this diversity properly, I pay attention not only to trendsetters and famous doctors, but also to writings that epitomized their age more than they marked it: $ ^{3} $ primers, florilegia of medical oddities, unpublished collections of medical cases, etc. In additio ...",
+        "byte_size": 106140,
+        "sha256": "20a718b8de82e5fceaf0ea167b88bd57134583ab8802ea8951948a17e73b1daa"
       },
       {
-        "page_no": 160,
-        "file_idx": 159,
+        "page_no": 86,
+        "file_idx": 85,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "This chapter explores the way medical texts were composed and handed down, the history of important medical doctrines, and the formation and transmission of medical ideas on madness. I first analyze the most elaborate section on madness of all pre-1500 Chinese medical treatises—the section on kuang of a book by Zhu Zhenheng's disciple Lou Ying 櫻英 (1320-1400)—to show how an erudite physician selected from a rich textual heritage to construct a coherent view of illness. I then discuss how another illustrious disciple of Zhu's, Dai Sigong 戴思恭 (1324-1405), contributed to giving prestige to the Danxi approach. Next, I explain how two books that Liu Chun 劉純 (1340-1412), whose father had been Zhu's pupil, compiled in Shaanxi in the late fourteenth century typified the zhezhong approach to the past and further helped to diffused Danxi medicine. In a fourth section, I explain the emergence of the core works of the Danxi corpus in the late fifteenth century and the evolution of their sections on madness. The final two parts are about two writers whose works based on Danxi texts were widely debated and cited in the decades that followed their death. These writers were Wang Lun 王綸 (1453-1510), from Ningbo, and Yu Tuan 虞搏 (1438-1517), from the same locale as Zhu in Zhejiang. Though I focus on individual writers, I insist that they were responding to each other and explain how each of them p ...",
-        "byte_size": 121419,
-        "sha256": "2114a19beeb86c21feb258f0fe9521469615bdf1fbcb828f74f6c1a939398e08"
+        "ocr_excerpt": "inclusion of potent emetics in the court-sponsored Recipes of the Pharmacy Service (see p. 61 and 61n94 above), which was distributed to officials and eventually local physicians throughout the Song realm. Despite Chu’s warnings, the vomiting method remained a firmly established therapeutic practice and compilers of formularies continued to insert emetics for Wind strokes and other disorders into their books. Court compilers included the Suns’ “Saliva-thinning powder” in the Comprehensive Records from [the Hall of] Sagely Succor (Shengji zonglu 聖濟總錄; 1110/18), a gigantic imperial collection. $ ^{117} $ The same book recommended the use of “Chinese-quinine powder” (常山散) to induce vomiting in cases of intermittent fevers (niè瘧). $ ^{118} $ An emetic recommended in the Comprehensive Records was said to treat, among other symptoms, “crazy and disorderly language” (言語狂亂). Called Melon-pedicle powder from the name of the Shanghai lun recipe, it contained only melon pedicle (a recipe that was otherwise called “Lone-saint powder” 獨聖散). But the explanation of this recipe’s properties did not mention mucus. Other twelfth-century prescription manuals teemed with such emetics. A book that Zhang Congzheng (d. 1228) called “a recent Puji fang” (近代普濟方)—perhaps Zhang Rui’s Jifeng puji fang 雞峰普濟方 (1133)—recommended the emetics “Wind-chasing powder” (追風散) and “vomiting-Wind powder” (吐風散) to get ...",
+        "byte_size": 139103,
+        "sha256": "012bd7ac164556676a38d62d7be9dc8abc58dd2f2333de35c92258704c2ebc8d"
       },
       {
-        "page_no": 161,
-        "file_idx": 160,
+        "page_no": 281,
+        "file_idx": 280,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "### 5.2 Madness in Lou Ying's 樓英 (1320-1400) $ ^{12} $ Yixue gangmu 醫學綱目 (1396) The only early-Ming treatise that contained a substantial section on madness was Lou Ying's Systematic Outline of Medical Learning (Yixue gangmu). This work exemplifies how a highly literate practitioner could devise approaches to madness from the rich array of texts that were available to him. Lou Ying lived at the \"Immortals' crag\" (仙岩) in Xiaoshan 蕭山, a town located southeast of Hangzhou across the Qiantang River on an extension of the Grand Canal. Probably introduced by his father Lou Youxian 友賢, Lou Ying studied medicine under Zhu Zhenheng's guidance. $ ^{13} $ In 1362, a little less than four years after he attended Zhu's funeral, Lou opened a school where he received disciples. $ ^{14} $ He became famous enough to be summoned to Nanjing in 1377 and 1381 to treat the emperor (Zhu Yuanzhang, of the newly established Ming dynasty), but he refused permanent employment at court both times. $ ^{15} $ Lou Ying started to collect materials for his summa of current medical doctrine and healing methods in the 1360s and completed a first version in 1380; he achieved the final version in 1396. Lou did not have all the books he consulted at hand at any given time. He probably kept adding to his text as he consulted more and more works, something that was made more convenient by the proximity of Hangzhou ( ...",
-        "byte_size": 152135,
-        "sha256": "9f65abec479720bca7f3a8e8d76935b0a9abe51f42ca2ba5685cb0a21c43d70d"
+        "ocr_excerpt": "## Shapes of practice Medical trends surrounding dian and kuang, 17th-19th century The profusion of medical works that appeared after 1650 are an irritating windfall. As medical publications boomed, vectors of knowledge transmission and the doctrinal debates that interested physicians became more intricate and numerous. It thus becomes difficult to find narrative threads to explain how Qing medical reflections on madness changed. Far too many texts were published for me to base my conclusions on comprehensive data as I tried to do for earlier periods. But the extensive array of short treatises, collections of case files, formularies, and medical primers that appeared in Qing times hint to the thinking and practice of minor physicians who made no “contributions to the development of Chinese medicine”—to borrow a phrase from a less critical historiography. These works allow us to see how much medical luminaries had in common with their less famous counterparts. I first present a few important trends in Chinese medical thinking and practice from the seventeenth to the nineteenth century. After showing that the mucus etiology remained dominant over that period, I show how resilient and ubiquitous the script of blockage of the Heart by mucus was. I map the vivid “imagination of mucus” $ ^{1} $ through which physicians—from treatise writers to village healers—continued to envision ma ...",
+        "byte_size": 109109,
+        "sha256": "a614ac48d12ec16a9c242c54a2595cb5d77725167dc454583742331b61b29f92"
       },
       {
-        "page_no": 162,
-        "file_idx": 161,
+        "page_no": 285,
+        "file_idx": 284,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Another reason why Lou took so long to complete his opus was the complexity of its subject matter. Lou opened his preface with a telling statement on “medicine as a learning” (醫之為學): “its Way is extensive, its meaning profound, its books infinitely abundant” (其道博 其義深 其書浩瀚). $ ^{16} $ Although Lou claimed that the essentials of medicine “simply hinge on Yin-Yang and the Five Agents” (其要不過陰陽五行而已), he admitted he took more than thirty years to realize that the myriad transformations of illness emerged from imbalances in Yin-Yang and the Five Agents. $ ^{17} $ Textual montages like Lou's Systematic Outline of Medical Learning were not amateurish endeavors. Composite texts professing to cover all aspects of illness and medicine were actually a new genre of medical writing at which Zhu Zhenheng's disciples excelled. $ ^{18} $ Many books claiming to be for beginners were sophisticated digests of complex medical teachings; they were not easy “primers,” but points of entry into the intricate traditions they summarized. Students of medicine found these compilations all the more useful since readers could not easily access all the texts these works cited. Lou Ying's compilation was concerned with medical practice, not abstract doctrine. As a reasoned anthology of citations, the point of the Systematic Outline of Medical Learning was not to reconcile all medical approaches into a perfectly ...",
-        "byte_size": 142014,
-        "sha256": "e08df324a4ee3f62f98cec5bc497ba75c716dc5285d7b8c1f778cd8372af4737"
+        "ocr_excerpt": "Xiuyuan 陳修園 (1753-1823) also adopted Zhang Lu's new interpretation of the “four masters” in his Three-Character Classic of Medicine (Yixue san zì jìng 醫學三字經; 1804), pointing out that Li Zhongzi's interpretation of them as including Zhang Ji was “erroneous” (誤). $ ^{9} $ ## Other Qing trends Qing Suzhou was an important center of medical studies supported by a prosperous printing industry and mature scholarly networks. As one of the main cities on the Grand Canal, it had long been an important hub of trade and communication, and many doctors had traveled there to find books and exchange ideas. But in Qing times Suzhou physicians claimed to represent the most advanced medical approaches in the empire. Although this pride predated the eighteenth century, it became particularly evident after the publication in 1766 of some of Ye Gui's 葉桂 (1667-1746; see 7.5 below) case files by men who claimed to be his disciples. I discuss Suzhou doctors' approach to madness in the next chapter. $ ^{10} $ One trend in the eighteenth and especially the nineteenth century was the rising number of case collections in the surviving medical literature. Many of them were never printed. They allow us to continue comparing the propositions found in treatises with the way physicians actually handled mad patients. Through them, we can also understand better how women were treated when they behaved in ways t ...",
+        "byte_size": 131518,
+        "sha256": "615ecd49eb08dddea471a18f5d1999324d25e1a6586b4e913e99f841d34ee59f"
       },
       {
-        "page_no": 163,
-        "file_idx": 162,
+        "page_no": 286,
+        "file_idx": 285,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Zhongjing [Zhang Ji] is detailed on external contamination that affects the interior and the surface or Yin and Yang; Danxi distinguishes himself on inner harm of Blood or Qi [that causes] depletion or repletion; Dongyuan [Li Gao] supports and protects central Qi; Hejian [Liu Wansu] removes the old to create the new; Mr. Qian [Yi] distinguishes clearly between the five Yin viscera; Dairen [Zhang Congzheng] is well versed in the three methods [vomiting, purging, and sweating]. Formularies from past ages are abundant: we can simply say that each has its strengths. 仲景詳外感於表裡陰陽 丹溪獨內傷於血氣虛實 東垣扶護中氣 河間推陳 致新 錢氏分明五臟 戴人熟施三法 凡歷代方書甚衆 皆各有所長耳 Since the same symptoms could occur for different reasons, it was plausible that many texts could contain useful methods of treatment. $ ^{19} $ “The benighted fail to appreciate this principle: their reckless trying [of recipes] on approximate illnesses has led many to an unjust and premature death” (昧者不悟是理 妄試疑似之病 每致夭橫者不少矣). Armed with a definition of illness as a multifaceted and ever-changing entity that was typical of Zhu Zhenheng's followers, $ ^{20} $ Lou proposed an elegant solution to the controversial issue of whether “old recipes” could cure “current illnesses.” “Given that an illness with a single name [can require] different methods of treatment, when people use recipes from past ages to treat illness, their success or failure depends on wheth ...",
-        "byte_size": 152477,
-        "sha256": "c1106889dd0e04c816b7751d59a280b5908c209a2a6726e77d65807f9dcc3b57"
+        "ocr_excerpt": "with warming drugs, others kept blaming them for it, as when Xu Yuhe 許豫和 (late 18 $ ^{th} $ century) accused a physician of having exacerbated a madman’s symptoms with calorific replenishing, or when Wu Tang 吴塘 (1758-1836) claimed that another doctor’s attacking of mucus and Fire in a case of insanity had “helped the bandits do harm” (助賊為虐). $ ^{11} $ Medical writing also remained profoundly intertextual. Several treatises from the seventeenth and eighteenth centuries included long and increasingly complex sections on madness. They were longer and denser partly because they could borrow from a larger number of texts, but also because they applied to more disorders than ever the old claim that any illness could be caused by multiple factors. Two representative examples are Feng Zhaozhang's 馮兆張 (from Haiyan 海鹽 in Zhejiang) Jinnang milu zazheng daxiao becan 錦囊祕錄雜證大小合參 (in 20 juan; 1694) and Shen Jin'ao's 沈金鰲 (1717-1776; from Wuxi 無錫 in Jiangsu) Zabing yuanliu xizhu 雜病源流犀燭 (in 30 juan; 1773), both of which concentrated on explaining miscellaneous illnesses. Besides these exhaustive accounts of manifold etiologies, we find attempts to simplify—even unify—medical doctrines, books with titles like Unity in the Forest of Medicine (Luo Denggao's 駱登高 Yilin yizhi 醫林一致; 1703), Knowing Medicine in One Glance (Zhu Shijin's 朱時進 Yijian nengyi 一見能醫; 1769), and Medicine for Sots (Long Huitang's ...",
+        "byte_size": 148554,
+        "sha256": "6d90e55039ada0783729f15b48cee3647162ce97fefa24737c7a8cb984253c6b"
       },
       {
-        "page_no": 164,
-        "file_idx": 163,
+        "page_no": 287,
+        "file_idx": 286,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "from the Treatise on Cold Injury (or any other source), for instance, were effective when they were used to treat the kinds of illness they cured best. In typical zbezbong fashion, Lou also used this flexible conception of illness and therapy to justify a syncretic approach to the textual past and to clinical practice. His book counted forty fascicles or chapters. The first nine—all part of a large section called “Yin-Yang and the viscera” 陰陽臟腑部—explained general principles on pathomechanisms, diagnosis, and treatments. Followed twenty fascicles (10-29) describing various illnesses and methods to treat them, four fascicles on Cold Injury (30-3), two on the illnesses of women (34-5), four on those of children (36-9), and one with commentaries on the five periods and six Qi in the Inner Canon (40). $ ^{21} $ In the twenty chapters on disorders other than Cold Injury, Lou Ying classified illnesses into five sections (bu 部) named after the pairs of Yin and Yang viscera with which he associated them. There were six fascicles on the Liver and Gallbladder (肝膽), five on the Heart and Small Intestine (心小腸), five on the Spleen and Stomach (脾胃), two on the Lungs and Large Intestine (肺大腸), and two on the Kidneys and Bladder (腎膀胱). These sections did not present the anatomy of these viscera: they discussed illnesses that occurred when these organs failed to fulfil their functions. The secti ...",
-        "byte_size": 136365,
-        "sha256": "6f0c47ef24a084eb503bf8e23b2b5c322d84e6cb6563e7080d6c847a0bce26f6"
+        "ocr_excerpt": "### 7.2 The continued dominance of the mucus etiology In earlier chapters, I examined the rise of mucus in Chinese medical thinking and its eventual use in explanations of madness. I also showed how the Danxi corpus had given pride of place to the mucus etiology in general. On the basis of these now mature theories, seventeenth-century physicians continued to discuss how mucus emerged, what disorders it caused, and how these illnesses should be treated. Some did so in special sections on this viscous intruder, others in commentaries on the notion of “mucus and rheum” (痰飲; 3.5) in Zhang Ji’s Essentials of the Golden Casket (3 $ ^{rd} $ century CE). Although mucus and Fire had long been paired, Liang Xuemeng 梁學孟 in 1607 was perhaps the first to dedicate a section to “mucus Fire” (痰火) in a medical work (his Guoyi zongzhi 國醫宗旨). $ ^{12} $ His Tanbuo zhuanmen 痰火顓門 (1610) became the first work devoted entirely to this topic, $ ^{13} $ followed by Gong Juzhong’s 龔居中 Tanbuo dianxue 痰火點雪 (1630). Zhang Lu also discussed mucus-Fire in his Comprehensive Medicine (Yitong 醫通, 1695), explaining that “formful [i.e., visible and palpable] mucus” (有形之痰) was associated with “formless [invisible] Fire” (無形之火). $ ^{14} $ Cao Cunxin 曹存心 (1767-1834, from Changshu 常熟 in Jiangsu), later posed mucus and Fire as two equivalents: “Mucus is none other than Fire with form, whereas Fire is formless mucus” (痰 ...",
+        "byte_size": 148029,
+        "sha256": "d4fdd7c5e098c2dc90face1876e23d2a5844ed308b420c5ae1190a5b0576cb8f"
       },
       {
-        "page_no": 166,
-        "file_idx": 165,
+        "page_no": 288,
+        "file_idx": 287,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "records from various sources. $ ^{22} $ Lou shortened and slightly modified some passages, but his own utterances were limited to his introduction (translated above), cross-references to other sections for remedies whose recipes were given elsewhere, and very brief (and themselves intertextual) “comments” (批) after some citations. $ ^{23} $ Lou’s section on kuang introduced a mix of approaches to madness, as well as recipes compiled at different periods that aimed to cure various imbalances. What justified this catholicity of approaches was not a theoretical reflection on madness in particular, but one on illness in general: any illness could be caused by a large array of imbalances and could therefore be treated in a variety of ways. Note nonetheless that Lou gave little room to kuang’s older etiologies—Wind was mentioned only in a “comment” on what Lou considered to be an anti-Wind remedy by Zhang Ji 張機. $ ^{24} $ The Wind etiology appeared discreetly in recipes that were once used to counter Wind strokes, but nothing in Lou’s work signaled that madness had once been considered as a Wind illness. $ ^{25} $ The cases of madness that Lou selected deployed mostly aggressive therapies. $ ^{26} $ Three of Zhang Congzheng's 張從正 four cases had used attacking methods. A case from the Shiyi dexiao fang 世醫得效方 (1337) used powdered melon pedicle (not to be confused with the multi-ingredi ...",
-        "byte_size": 136194,
-        "sha256": "29cb6ad73dc69efeb9b1baa58e021873a61b715303f41c29f82ae7748a52e105"
+        "ocr_excerpt": "During the seventeenth and eighteenth centuries, physicians increasingly asserted the general importance of mucus pathology. Zhang Lu claimed that mucus appeared in seven or eight ill people out of ten (痰飲為患 十人有七八), $ ^{16} $ whereas Cheng Guopeng 程國彭 (from She 歙 county in Huizhou; fl. early 18 $ ^{th} $ century) asserted that “There are no illnesses in which there is no fever or mucus” (凡病未有不發熱 不生痰者). $ ^{17} $ This perceived ubiquity of mucus generated more explanations of its pathological origins. Physicians argued that mucus could stem from an almost infinite diversity of imbalances and failures to circulate. $ ^{18} $ Huang Yuanyu 黄元御 (1705-1758) grounded mucus in Dampness (associated with the Spleen), another common explanation. $ ^{19} $ Chen Xiuyuan 陳修園 (1753-1823), a popularizer of medical doctrines whose writings circulated widely in the second half of the nineteenth century, claimed that mucus was rooted in Water (the phase associated with either the two Kidneys or the left Kidney) and that sticky mucus appeared when Water Qi was “decocted” by excessive Yang (得陽煎熬). $ ^{20} $",
+        "byte_size": 179127,
+        "sha256": "8b39b12179d53dbabac4b31c83a3cb10867f3760425a5fa71e1e8468e63dec35"
       },
       {
-        "page_no": 167,
-        "file_idx": 166,
+        "page_no": 289,
+        "file_idx": 288,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "cure a female patient. $ ^{28} $ All these methods either became or remained widely used in late- imperial medicine. Only one case deployed an approach that became marginal: Sun Zhao's 孫兆 (late eleventh century) cure of a monk with a recipe and method designed by Shen Kuo 沈括 (1031-1095). $ ^{29} $ These mostly aggressive recipes and methods contrasted with the general therapeutic orientation of the Systematic Outline. Lou's \"General discussion on methods of treatment\" (Zhifa tonglun 治法通論, beginning of juan 3) cited 21 passages: eight from Wang Haogu, three from Li Gao, three from the Basic Questions, two each from Zhang Ji and Zhu Zhenheng, and one each from the Divine Pivot, the Majue, and the Canon of Problems. $ ^{30} $ Thirteen of the fifteen passages attributed to specific authors were from physicians whose priority, according to Lou, had been \"to help and protect primordial Qi\" (扶護元氣為主). $ ^{31} $ The contrast between Lou's general advice and the remedies he recommended for treating madness confirms the strength that the Fire and mucus etiology of madness had acquired by the fourteenth century. Madness was then largely seen as an illness caused by some kind of over-repletion. Be it Fire, mucus, Heat, or Wind, it had to be purged or attacked. $ ^{32} $ Lou Ying did not cite Zhu Zhenheng's ideas on madness, probably because he did not find any in the texts by Zhu that he po ...",
-        "byte_size": 151582,
-        "sha256": "69813632aa4b45eb47540774226f5162a6075a62a9cfe6d76b4158470642f0bb"
+        "ocr_excerpt": "### 7.3 Shapes of practice: the scope of mucus therapies of madness The above section showed that mucus played an important role in Qing medical discussions of many illnesses. Starting with an examination of seventeenth-century medical primers that were popular under the Qing, let me now demonstrate from many different angles that mucus conceptions also dominated the way doctors thought about insanity. Since the practice of medicine was not regulated, virtually anyone could take it up. All that was needed was a medical primer and a few patients willing to pay for a cure. Physicians who sought a more elite clientele usually needed to claim a teacher and to be able to couch their arguments in classical terms drawn from the medical canons or the Yijing, but the success of medical primers suggests that medicine was easily learned outside of teacher-student relations. The large number of surviving editions of books like Huangfu Zhong's 皇甫中 Enlightened Physician Pointing to His Palm (Mingyi zhizhang 明醫指掌) or Gong Tingxian's Shoushi baoyuan 壽世保元, and the fact that other books lamented their excessive influence, suggest that they guided the practice of more physicians than the treatises modern historians rely on in their studies of Chinese medical thinking. $ ^{21} $ ## Shapers of practice? What seventeenth-century medical manuals said about madness There is no lack of people within an ...",
+        "byte_size": 122579,
+        "sha256": "720c29459d2ee519e01e847c3110649d855d3ab2774a77abc30c077112f0e041"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote",
+    "cluster_id": "toc-ch-012-shapesofpracticesmedical:toc-ch-012-shapesofpracticesmedical:endnote",
     "request_mode": "anchor_rebind",
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00065\",\n    \"anchor_id\": \"anchor-00394\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00397\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00067\",\n    \"anchor_id\": \"anchor-00400\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00068\",\n    \"anchor_id\": \"anchor-00401\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00069\",\n    \"anchor_id\": \"anchor-00402\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00070\",\n    \"anchor_id\": \"anchor-00403\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00071\",\n    \"anchor_id\": \"anchor-00404\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00230\",\n    \"anchor_id\": \"anchor-01299\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '2' matches. The note text discusses the semantic transformations of 'dian' and 'kuang', which corresponds to the context in Chapter 2 (Page 20) where these terms are introduced and defined.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00231\",\n    \"anchor_id\": \"anchor-00891\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '6' matches. The note text discusses a pill made with cinnabar and gold foil, which corresponds to the discussion of treatments for 'dian' and 'kuang' on Page 309.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00234\",\n    \"anchor_id\": \"anchor-01153\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '5' matches. The note text discusses Chen's claim about writing a book and treating 'dian/kuang/xian', which aligns with the medical case discussions on Page 389.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00242\",\n    \"anchor_id\": \"anchor-00172\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '2' matches. The note text cites 'Rumen shiqin' and discusses vomiting phlegm, corresponding to the Song dynasty emetic practices discussed on Page 68 (Image 2).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00245\",\n    \"anchor_id\": \"anchor-01038\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '7' matches. The note text discusses Zhu Zhenheng's view on mucus triggering possession, corresponding to the text on Page 347.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00252\",\n    \"anchor_id\": \"anchor-00026\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '2' matches. The note text discusses the adoption of meanings for 'dian' and 'kuang' in the early 20th century, corresponding to the introduction of these terms in Chapter 2 (Page 20, Image 1).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00254\",\n    \"anchor_id\": \"anchor-01037\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '6' matches. The note text discusses Yanjingyan and Wang's cases, corresponding to the discussion of ghost possession and medical sources on Page 346.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00267\",\n    \"anchor_id\": \"orphan-recovery-fn-00267\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '1' matches. The note text discusses laws and preventive declarations regarding illness, corresponding to the 'imagination of mucus' and legal/medical context on Page 281 (Image 3).\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-00065",
-      "anchor_id": "anchor-00394",
+      "note_item_id": "fn-00230",
+      "anchor_id": "anchor-01299",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00397",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
+      "confidence": 0.95,
+      "reason": "Marker '2' matches. The note text discusses the semantic transformations of 'dian' and 'kuang', which corresponds to the context in Chapter 2 (Page 20) where these terms are introduced and defined."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00067",
-      "anchor_id": "anchor-00400",
+      "note_item_id": "fn-00231",
+      "anchor_id": "anchor-00891",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly."
+      "confidence": 0.95,
+      "reason": "Marker '6' matches. The note text discusses a pill made with cinnabar and gold foil, which corresponds to the discussion of treatments for 'dian' and 'kuang' on Page 309."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00068",
-      "anchor_id": "anchor-00401",
+      "note_item_id": "fn-00234",
+      "anchor_id": "anchor-01153",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly."
+      "confidence": 0.95,
+      "reason": "Marker '5' matches. The note text discusses Chen's claim about writing a book and treating 'dian/kuang/xian', which aligns with the medical case discussions on Page 389."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00069",
-      "anchor_id": "anchor-00402",
+      "note_item_id": "fn-00242",
+      "anchor_id": "anchor-00172",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly."
+      "confidence": 0.95,
+      "reason": "Marker '2' matches. The note text cites 'Rumen shiqin' and discusses vomiting phlegm, corresponding to the Song dynasty emetic practices discussed on Page 68 (Image 2)."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00070",
-      "anchor_id": "anchor-00403",
+      "note_item_id": "fn-00245",
+      "anchor_id": "anchor-01038",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly."
+      "confidence": 0.95,
+      "reason": "Marker '7' matches. The note text discusses Zhu Zhenheng's view on mucus triggering possession, corresponding to the text on Page 347."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00071",
-      "anchor_id": "anchor-00404",
+      "note_item_id": "fn-00252",
+      "anchor_id": "anchor-00026",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly."
+      "confidence": 0.95,
+      "reason": "Marker '2' matches. The note text discusses the adoption of meanings for 'dian' and 'kuang' in the early 20th century, corresponding to the introduction of these terms in Chapter 2 (Page 20, Image 1)."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00254",
+      "anchor_id": "anchor-01037",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Marker '6' matches. The note text discusses Yanjingyan and Wang's cases, corresponding to the discussion of ghost possession and medical sources on Page 346."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00267",
+      "anchor_id": "orphan-recovery-fn-00267",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Marker '1' matches. The note text discusses laws and preventive declarations regarding illness, corresponding to the 'imagination of mucus' and legal/medical context on Page 281 (Image 3)."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-005-danxisaid:toc-ch-005-danxisaid:footnote",
-    "chapter_title": "“Danxi said…”",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00065",
-        "anchor_id": "anchor-00394",
+        "note_item_id": "fn-00230",
+        "anchor_id": "anchor-01299",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00397",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
+        "confidence": 0.95,
+        "reason": "Marker '2' matches. The note text discusses the semantic transformations of 'dian' and 'kuang', which corresponds to the context in Chapter 2 (Page 20) where these terms are introduced and defined."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00067",
-        "anchor_id": "anchor-00400",
+        "note_item_id": "fn-00231",
+        "anchor_id": "anchor-00891",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly."
+        "confidence": 0.95,
+        "reason": "Marker '6' matches. The note text discusses a pill made with cinnabar and gold foil, which corresponds to the discussion of treatments for 'dian' and 'kuang' on Page 309."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00068",
-        "anchor_id": "anchor-00401",
+        "note_item_id": "fn-00234",
+        "anchor_id": "anchor-01153",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly."
+        "confidence": 0.95,
+        "reason": "Marker '5' matches. The note text discusses Chen's claim about writing a book and treating 'dian/kuang/xian', which aligns with the medical case discussions on Page 389."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00069",
-        "anchor_id": "anchor-00402",
+        "note_item_id": "fn-00242",
+        "anchor_id": "anchor-00172",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly."
+        "confidence": 0.95,
+        "reason": "Marker '2' matches. The note text cites 'Rumen shiqin' and discusses vomiting phlegm, corresponding to the Song dynasty emetic practices discussed on Page 68 (Image 2)."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00070",
-        "anchor_id": "anchor-00403",
+        "note_item_id": "fn-00245",
+        "anchor_id": "anchor-01038",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly."
+        "confidence": 0.95,
+        "reason": "Marker '7' matches. The note text discusses Zhu Zhenheng's view on mucus triggering possession, corresponding to the text on Page 347."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00071",
-        "anchor_id": "anchor-00404",
+        "note_item_id": "fn-00252",
+        "anchor_id": "anchor-00026",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00065",
-        "anchor_id": "anchor-00394",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '7' on page 141 (screenshot 1) corresponds to the anchor 'anchor-00394' (marker 7) in the OCR text on page 159. The content matches perfectly."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00397",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
+        "confidence": 0.95,
+        "reason": "Marker '2' matches. The note text discusses the adoption of meanings for 'dian' and 'kuang' in the early 20th century, corresponding to the introduction of these terms in Chapter 2 (Page 20, Image 1)."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00067",
-        "anchor_id": "anchor-00400",
+        "note_item_id": "fn-00254",
+        "anchor_id": "anchor-01037",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '12' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00400' (marker 12) in the OCR text on page 161. The content matches perfectly."
+        "confidence": 0.95,
+        "reason": "Marker '6' matches. The note text discusses Yanjingyan and Wang's cases, corresponding to the discussion of ghost possession and medical sources on Page 346."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00068",
-        "anchor_id": "anchor-00401",
+        "note_item_id": "fn-00267",
+        "anchor_id": "orphan-recovery-fn-00267",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '13' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00401' (marker 13) in the OCR text on page 161. The content matches perfectly."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00069",
-        "anchor_id": "anchor-00402",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '14' on page 143 (screenshot 3) corresponds to the anchor 'anchor-00402' (marker 14) in the OCR text on page 161. The content matches perfectly."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00070",
-        "anchor_id": "anchor-00403",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '16' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00403' (marker 16) in the OCR text on page 162. The content matches perfectly."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00071",
-        "anchor_id": "anchor-00404",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The footnote text for marker '17' on page 144 (screenshot 4) corresponds to the anchor 'anchor-00404' (marker 17) in the OCR text on page 162. The content matches perfectly."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-00751",
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00397",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor is a duplicate of marker '10'. The correct binding is with anchor-00398 which contains the full sentence ending with the citation. This one is a fragment."
+        "confidence": 0.95,
+        "reason": "Marker '1' matches. The note text discusses laws and preventive declarations regarding illness, corresponding to the 'imagination of mucus' and legal/medical context on Page 281 (Image 3)."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 13970,
-    "completion_tokens": 794,
-    "total_tokens": 14764,
+    "prompt_tokens": 13203,
+    "completion_tokens": 852,
+    "total_tokens": 14055,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 17889
+    "duration_ms": 19775
   }
 }

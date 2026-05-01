@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import re
 from typing import Any
 
@@ -18,6 +19,7 @@ from FNM_RE.models import (
     UnitParagraphRecord,
 )
 from FNM_RE.shared.refs import frozen_note_ref, replace_frozen_refs
+from FNM_RE.shared.notes import normalize_note_marker
 from FNM_RE.shared.segments import build_fallback_unit_paragraphs
 from FNM_RE.shared.text import page_markdown_text
 
@@ -473,9 +475,34 @@ def _ref_materialization_context(phase4: Phase4Structure) -> dict[str, Any]:
         for anchor_id, note_ids in anchor_to_note_ids.items()
         if len(note_ids) > 1
     }
+    unresolved_marker_keys = {
+        (
+            str(link.chapter_id or ""),
+            str(link.note_kind or ""),
+            normalize_note_marker(str(link.marker or "")),
+        )
+        for link in phase4.effective_note_links
+        if str(link.status or "") in {"ambiguous", "orphan_anchor"}
+        and normalize_note_marker(str(link.marker or ""))
+    }
+    anchor_marker_counts = Counter(
+        (
+            str(anchor.chapter_id or ""),
+            str(anchor.anchor_kind or ""),
+            normalize_note_marker(str(anchor.normalized_marker or anchor.source_marker or "")),
+        )
+        for anchor in phase4.body_anchors
+        if not bool(anchor.synthetic)
+        and str(anchor.anchor_kind or "") in {"endnote", "footnote"}
+        and normalize_note_marker(str(anchor.normalized_marker or anchor.source_marker or ""))
+    )
+    unresolved_marker_keys.update(
+        key for key, count in anchor_marker_counts.items() if int(count) > 1
+    )
     return {
         "anchors_by_id": anchors_by_id,
         "conflict_anchor_ids": conflict_anchor_ids,
+        "unresolved_marker_keys": unresolved_marker_keys,
         "matched_link_count": len(matched_links),
         "ignored_skipped_count": sum(1 for link in phase4.effective_note_links if str(link.status or "") == "ignored"),
         "ambiguous_skipped_count": sum(1 for link in phase4.effective_note_links if str(link.status or "") == "ambiguous"),
@@ -522,6 +549,7 @@ def _materialize_refs_for_chapter(
 ) -> tuple[list[dict[str, Any]], dict[str, int]]:
     anchors_by_id: dict[str, BodyAnchorRecord] = dict(ref_ctx.get("anchors_by_id") or {})
     conflict_anchor_ids: set[str] = set(ref_ctx.get("conflict_anchor_ids") or set())
+    unresolved_marker_keys: set[tuple[str, str, str]] = set(ref_ctx.get("unresolved_marker_keys") or set())
     page_payload_by_no = {
         int(row.get("page_no") or 0): dict(row)
         for row in body_pages
@@ -552,6 +580,13 @@ def _materialize_refs_for_chapter(
         if not anchor_id or not note_id:
             continue
         if anchor_id in injected_anchor_ids:
+            continue
+        marker_key = (
+            str(link.chapter_id or ""),
+            str(link.note_kind or ""),
+            normalize_note_marker(str(link.marker or "")),
+        )
+        if marker_key in unresolved_marker_keys:
             continue
         if anchor_id in conflict_anchor_ids:
             continue

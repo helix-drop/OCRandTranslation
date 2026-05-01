@@ -3,12 +3,12 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-002-uneinventionutiledansleg:toc-ch-002-uneinventionutiledansleg:footnote\",\n  \"chapter_title\": \"« Une invention utile dans le genre funeste »\",\n  \"page_range\": [\n    46,\n    47\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 45,\n      \"ocr_excerpt\": \"par exemple que 68 exécutions ont lieu à la seule date du 7 juillet 1794, avant-veille de la chute de Robespierre $ ^{14} $. Que la guillotine soit devenue l’« étendard » (Cabanis) de la Révolution et l’emblème auquel on réduira la Terreur ne doit pas surprendre. La Révolution coupe avec le passé, ampute les membres malades du corps de l’État, œuvre à une sécession rendue inévitable. Cette nécessité vitale de la rupture, promesse et condition d’un monde réformé, la guillotine, superlativement, l’exemplifie et la résume. Machine moderne, enfantée par les lois de la géométrie et de la gravitation, elle assure une mort égalitaire et démocratique. En cela, elle rompt définitivement avec le système hiérarchisé des peines sous l’Ancien Régime, qui réservait le bûcher aux hérétiques et aux incendiaires, le supplice aux régicides, la pendaison aux criminels et aux voleurs, mais le privilège de la décollation par l’épée aux nobles. C’est pour lutter contre cette inégalité jusque dans la mort que le docteur Joseph-Ignace Guillotin, député à la Constituante, propose le 9 octobre 1789 une nouvelle forme d’exécution capitale, qui soit la même pour tous. Le décret passe le 1er décembre. L’articl ...\"\n    },\n    {\n      \"page_no\": 46,\n      \"ocr_excerpt\": \"longtemps sur l'éventualité de l'abolition de la peine de mort en 1789 — abolition dont Robespierre s'avéra le plus ardent défenseur — que sur les modalités et la mise en place de la terrible machine, qui ne voit le jour qu'en 1792. La France n'a pas inventé ce mode d'exécution, elle en a changé l'échelle de production, en faisant entrer la mort dans l'ère technique et sérialisée. Différents modèles de machines à décapiter, dont la Diele en Allemagne au Moyen Âge, la mannaia en Italie au XVIe siècle, la Maiden en Écosse ou le Halifax gibet en Angleterre avaient fait leurs preuves par le passé. L'efficacité de la guillotine la distingue néanmoins de ces prédécesseurs : la mise au point de la « bascule », sur laquelle le condamné est attaché, la création de la « lunette », qui maintient sa tête immobile, enfin la préconisation d'une lame « oblique » mieux qu'en « croissant » rendent son effet « immanquable », selon le rapport remis le 7 mars 1792 par Antoine Louis, son véritable inventeur — ce qui valut à la guillotine d'être un temps surnommée Petite Louison ou Louisette. Comme Guillotin, Louis est médecin. Il est même un chirurgien renommé, secrétaire perpétuel de l'Académie de chi ...\"\n    },\n    {\n      \"page_no\": 47,\n      \"ocr_excerpt\": \"de l’Intérieur lui refusera le brevet qu’il réclame : « Il répu- gne à l’humanité d’accorder un brevet d’invention pour une découverte de cette espèce ; nous n’en sommes pas encore à un tel excès de barbarie. Si M. Schmidt a fait une invention utile dans le genre funeste, comme elle ne peut servir que pour l’exécution des jugements, c’est au gouvernement qu’il doit le proposer $ ^{16} $. » Phrase à double entente : si le pouvoir n’adopte pas la guillotine de gaiété de cœur, il entend bien en faire cette « machine à gouvernement », comme tous les écrits de l’époque la désigneront d’ailleurs. Machine politique donc, œuvrant à une mort réputée indolore mais aussi impersonnelle, où une poulie, une lame en biseau et deux montants tout droit sortis de la talentueuse ingénierie française remplacent la main du bourreau fonctionnaire. Le premier essai, concluant, sur des moutons vivants et trois cadavres humains a lieu à Bicêtre, au petit matin du 17 avril 1792, en présence, encore, de médecins, dont l'illustre Cabanis. La médecine se penche décidément au chevet de la guillotine. Et ce n'est pas fini. À l'automne 1795, une fois levée la censure sur la presse, Le Moniteur universel publie un ...\"\n    },\n    {\n      \"page_no\": 48,\n      \"ocr_excerpt\": \"encore régulièrement par les organes de la voix, qui n'auraient pas été détruits, ces têtes parleraient $ ^{17} $ ». La guillotine soi-disant humanitaire est selon lui une barbarie, à laquelle la pendaison, provoquant une mort par « endor-missement », demeure nettement préférable. Il n'en fallait pas davantage pour que le 'débat s'enflamme. Le journaliste franco-prussien Conrad Engelbert Elsner, à qui la lettre de Sömmering était adressée, monte en première ligne dans le Magasin encyclopédique, où le chirurgien Jean-Joseph Sue — le père du romancier — lui emboîte le pas, avant de rassembler ses notes dans un opuscule sur la question $ ^{18} $. Les Français s'appuient en particulier sur la mort de Charlotte Corday, décapitée le 17 juillet 1793, et dont la tête sortie du panier, soufflée par un sans-culotte, aurait selon des témoins rougi d'indignation... Rumeur? Hallucination collective? Cabale des adversaires de l'Ami du peuple? Le supposé sursaut posthume de «l'ange de l'assassinat», comme l'appelait Lamartine, alimente les discussions dans la presse lorsque Georges Cabanis, membre du cercle des Idéologues et de la loge maçonnique des Neuf Sœurs au même titre que Guillotin, décide ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00049\",\n      \"marker\": \"15\",\n      \"page_no\": 46,\n      \"paragraph_index\": 1,\n      \"source_text\": \"La France n'a pas inventé ce mode d'exécution, elle en a changé l'échelle de production, en faisant entrer la mort dans l'ère technique et sérialisée. Différents modèles de machines à décapiter, dont la Diele en Allemagne au Moyen Âge, la m ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00050\",\n      \"marker\": \"16\",\n      \"page_no\": 47,\n      \"paragraph_index\": 0,\n      \"source_text\": \"de l’Intérieur lui refusera le brevet qu’il réclame : « Il répu- gne à l’humanité d’accorder un brevet d’invention pour une découverte de cette espèce ; nous n’en sommes pas encore à un tel excès de barbarie. Si M. Schmidt a fait une invent ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-002-uneinventionutiledansleg:toc-ch-002-uneinventionutiledansleg:footnote\",\n  \"chapter_title\": \"« Une invention utile dans le genre funeste »\",\n  \"page_range\": [\n    46,\n    47\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 45,\n      \"ocr_excerpt\": \"par exemple que 68 exécutions ont lieu à la seule date du 7 juillet 1794, avant-veille de la chute de Robespierre $ ^{14} $. Que la guillotine soit devenue l’« étendard » (Cabanis) de la Révolution et l’emblème auquel on réduira la Terreur ne doit pas surprendre. La Révolution coupe avec le passé, ampute les membres malades du corps de l’État, œuvre à une sécession rendue inévitable. Cette nécessité vitale de la rupture, promesse et condition d’un monde réformé, la guillotine, superlativement, l’exemplifie et la résume. Machine moderne, enfantée par les lois de la géométrie et de la gravitation, elle assure une mort égalitaire et démocratique. En cela, elle rompt définitivement avec le système hiérarchisé des peines sous l’Ancien Régime, qui réservait le bûcher aux hérétiques et aux incendiaires, le supplice aux régicides, la pendaison aux criminels et aux voleurs, mais le privilège de la décollation par l’épée aux nobles. C’est pour lutter contre cette inégalité jusque dans la mort que le docteur Joseph-Ignace Guillotin, député à la Constituante, propose le 9 octobre 1789 une nouvelle forme d’exécution capitale, qui soit la même pour tous. Le décret passe le 1er décembre. L’articl ...\"\n    },\n    {\n      \"page_no\": 46,\n      \"ocr_excerpt\": \"longtemps sur l'éventualité de l'abolition de la peine de mort en 1789 — abolition dont Robespierre s'avéra le plus ardent défenseur — que sur les modalités et la mise en place de la terrible machine, qui ne voit le jour qu'en 1792. La France n'a pas inventé ce mode d'exécution, elle en a changé l'échelle de production, en faisant entrer la mort dans l'ère technique et sérialisée. Différents modèles de machines à décapiter, dont la Diele en Allemagne au Moyen Âge, la mannaia en Italie au XVIe siècle, la Maiden en Écosse ou le Halifax gibet en Angleterre avaient fait leurs preuves par le passé. L'efficacité de la guillotine la distingue néanmoins de ces prédécesseurs : la mise au point de la « bascule », sur laquelle le condamné est attaché, la création de la « lunette », qui maintient sa tête immobile, enfin la préconisation d'une lame « oblique » mieux qu'en « croissant » rendent son effet « immanquable », selon le rapport remis le 7 mars 1792 par Antoine Louis, son véritable inventeur — ce qui valut à la guillotine d'être un temps surnommée Petite Louison ou Louisette. Comme Guillotin, Louis est médecin. Il est même un chirurgien renommé, secrétaire perpétuel de l'Académie de chi ...\"\n    },\n    {\n      \"page_no\": 47,\n      \"ocr_excerpt\": \"de l’Intérieur lui refusera le brevet qu’il réclame : « Il répu- gne à l’humanité d’accorder un brevet d’invention pour une découverte de cette espèce ; nous n’en sommes pas encore à un tel excès de barbarie. Si M. Schmidt a fait une invention utile dans le genre funeste, comme elle ne peut servir que pour l’exécution des jugements, c’est au gouvernement qu’il doit le proposer $ ^{16} $. » Phrase à double entente : si le pouvoir n’adopte pas la guillotine de gaiété de cœur, il entend bien en faire cette « machine à gouvernement », comme tous les écrits de l’époque la désigneront d’ailleurs. Machine politique donc, œuvrant à une mort réputée indolore mais aussi impersonnelle, où une poulie, une lame en biseau et deux montants tout droit sortis de la talentueuse ingénierie française remplacent la main du bourreau fonctionnaire. Le premier essai, concluant, sur des moutons vivants et trois cadavres humains a lieu à Bicêtre, au petit matin du 17 avril 1792, en présence, encore, de médecins, dont l'illustre Cabanis. La médecine se penche décidément au chevet de la guillotine. Et ce n'est pas fini. À l'automne 1795, une fois levée la censure sur la presse, Le Moniteur universel publie un ...\"\n    },\n    {\n      \"page_no\": 48,\n      \"ocr_excerpt\": \"encore régulièrement par les organes de la voix, qui n'auraient pas été détruits, ces têtes parleraient $ ^{17} $ ». La guillotine soi-disant humanitaire est selon lui une barbarie, à laquelle la pendaison, provoquant une mort par « endor-missement », demeure nettement préférable. Il n'en fallait pas davantage pour que le 'débat s'enflamme. Le journaliste franco-prussien Conrad Engelbert Elsner, à qui la lettre de Sömmering était adressée, monte en première ligne dans le Magasin encyclopédique, où le chirurgien Jean-Joseph Sue — le père du romancier — lui emboîte le pas, avant de rassembler ses notes dans un opuscule sur la question $ ^{18} $. Les Français s'appuient en particulier sur la mort de Charlotte Corday, décapitée le 17 juillet 1793, et dont la tête sortie du panier, soufflée par un sans-culotte, aurait selon des témoins rougi d'indignation... Rumeur? Hallucination collective? Cabale des adversaires de l'Ami du peuple? Le supposé sursaut posthume de «l'ange de l'assassinat», comme l'appelait Lamartine, alimente les discussions dans la presse lorsque Georges Cabanis, membre du cercle des Idéologues et de la loge maçonnique des Neuf Sœurs au même titre que Guillotin, décide ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00051\",\n      \"marker\": \"15\",\n      \"page_no\": 46,\n      \"paragraph_index\": 1,\n      \"source_text\": \"La France n'a pas inventé ce mode d'exécution, elle en a changé l'échelle de production, en faisant entrer la mort dans l'ère technique et sérialisée. Différents modèles de machines à décapiter, dont la Diele en Allemagne au Moyen Âge, la m ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00052\",\n      \"marker\": \"16\",\n      \"page_no\": 47,\n      \"paragraph_index\": 0,\n      \"source_text\": \"de l’Intérieur lui refusera le brevet qu’il réclame : « Il répu- gne à l’humanité d’accorder un brevet d’invention pour une découverte de cette espèce ; nous n’en sommes pas encore à un tel excès de barbarie. Si M. Schmidt a fait une invent ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
   },
   "request_content": {
     "cluster": {
@@ -29,9 +29,9 @@
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 32446,
+          "row_id": 63,
           "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00049",
+          "anchor_id": "anchor-00051",
           "chapter_id": "toc-ch-002-uneinventionutiledansleg",
           "page_no": 46,
           "paragraph_index": 1,
@@ -42,13 +42,13 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "La France n'a pas inventé ce mode d'exécution, elle en a changé l'échelle de production, en faisant entrer la mort dans l'ère technique et sérialisée. Différents modèles de machines à décapiter, dont la Diele en Allemagne au Moyen Âge, la mannaia en Italie au XVIe siècle, la Maiden en Écosse ou le Halifax gibet en Angleterre avaient fait leurs preuves par le passé. L'efficacité de la guillotine la distingue néanmoins de ces prédécesseurs : la mise au point de la « bascule », sur laquelle le condamné est attaché, la création de la « lunette », qui maintient sa tête immobile, enfin la préconisation d'une lame « oblique » mieux qu'en « croissant » rendent son effet « immanquable », selon le rapport remis le 7 mars 1792 par Antoine Louis, son véritable inventeur — ce qui valut à la guillotine d'être un temps surnommée Petite Louison ou Louisette. Comme Guillotin, Louis est médecin. Il est même un chirurgien renommé, secrétaire perpétuel de l'Académie de chirurgie, ce qui fait de lui l'homme tout désigné pour évaluer avec précision les conditions nécessaires à une décollation prompte et assurée $ ^{15} $.",
-          "created_at": 1776859188,
-          "updated_at": 1776859188
+          "created_at": 1777568010,
+          "updated_at": 1777568010
         },
         {
-          "row_id": 32447,
+          "row_id": 64,
           "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00050",
+          "anchor_id": "anchor-00052",
           "chapter_id": "toc-ch-002-uneinventionutiledansleg",
           "page_no": 47,
           "paragraph_index": 0,
@@ -59,8 +59,8 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "de l’Intérieur lui refusera le brevet qu’il réclame : « Il répu- gne à l’humanité d’accorder un brevet d’invention pour une découverte de cette espèce ; nous n’en sommes pas encore à un tel excès de barbarie. Si M. Schmidt a fait une invention utile dans le genre funeste, comme elle ne peut servir que pour l’exécution des jugements, c’est au gouvernement qu’il doit le proposer $ ^{16} $. » Phrase à double entente : si le pouvoir n’adopte pas la guillotine de gaiété de cœur, il entend bien en faire cette « machine à gouvernement », comme tous les écrits de l’époque la désigneront d’ailleurs. Machine politique donc, œuvrant à une mort réputée indolore mais aussi impersonnelle, où une poulie, une lame en biseau et deux montants tout droit sortis de la talentueuse ingénierie française remplacent la main du bourreau fonctionnaire.",
-          "created_at": 1776859188,
-          "updated_at": 1776859188
+          "created_at": 1777568010,
+          "updated_at": 1777568010
         }
       ],
       "rebind_candidates": []
@@ -106,107 +106,60 @@
     "page_context_count": 4,
     "image_refused": false
   },
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00049\",\n    \"marker\": \"15\",\n    \"note_text\": \"Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00050\",\n    \"marker\": \"16\",\n    \"note_text\": \"Cité par D. Arasse, op. cit., p. 35-36.\",\n    \"confidence\": 0.98,\n    \"reason\": \"Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53.\"\n  }\n]",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00051\",\n    \"marker\": \"15\",\n    \"note_text\": \"Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker 15 is clearly visible at the bottom of page 52 (image 2) and matches the anchor on that page.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00052\",\n    \"marker\": \"16\",\n    \"note_text\": \"Cité par D. Arasse, op. cit., p. 35-36.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker 16 is clearly visible at the bottom of page 53 (image 3) and matches the anchor on that page.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "synthesize_note_item",
       "note_item_id": "",
-      "anchor_id": "anchor-00049",
+      "anchor_id": "anchor-00051",
       "anchor_phrase": "",
       "marker": "15",
       "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
-      "confidence": 0.98,
-      "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
+      "confidence": 1.0,
+      "reason": "The footnote text for marker 15 is clearly visible at the bottom of page 52 (image 2) and matches the anchor on that page."
     },
     {
       "action": "synthesize_note_item",
       "note_item_id": "",
-      "anchor_id": "anchor-00050",
+      "anchor_id": "anchor-00052",
       "anchor_phrase": "",
       "marker": "16",
       "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
-      "confidence": 0.98,
-      "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
+      "confidence": 1.0,
+      "reason": "The footnote text for marker 16 is clearly visible at the bottom of page 53 (image 3) and matches the anchor on that page."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-002-uneinventionutiledansleg:toc-ch-002-uneinventionutiledansleg:footnote",
-    "chapter_title": "« Une invention utile dans le genre funeste »",
-    "request_mode": "ref_only_visual",
     "parsed_actions": [
       {
         "action": "synthesize_note_item",
         "note_item_id": "",
-        "anchor_id": "anchor-00049",
+        "anchor_id": "anchor-00051",
         "anchor_phrase": "",
         "marker": "15",
         "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
-        "confidence": 0.98,
-        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
+        "confidence": 1.0,
+        "reason": "The footnote text for marker 15 is clearly visible at the bottom of page 52 (image 2) and matches the anchor on that page."
       },
       {
         "action": "synthesize_note_item",
         "note_item_id": "",
-        "anchor_id": "anchor-00050",
+        "anchor_id": "anchor-00052",
         "anchor_phrase": "",
         "marker": "16",
         "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
-        "confidence": 0.98,
-        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00049",
-        "anchor_phrase": "",
-        "marker": "15",
-        "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
-        "confidence": 0.98,
-        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
-      },
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00050",
-        "anchor_phrase": "",
-        "marker": "16",
-        "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
-        "confidence": 0.98,
-        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00049",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "15",
-        "note_text": "Antoine Louis, Avis motivé sur le mode de décollation, cité par D. Arasse, La Guillotine et l'imaginaire de la Terreur, op. cit., p. 209.",
-        "confidence": 0.98,
-        "reason": "Footnote 15 is clearly visible at the bottom of page 52 (image 2), corresponding to anchor 15 on page 46/52."
-      },
-      {
-        "note_item_id": "",
-        "anchor_id": "anchor-00050",
-        "action": "synthesize_note_item",
-        "anchor_phrase": "",
-        "marker": "16",
-        "note_text": "Cité par D. Arasse, op. cit., p. 35-36.",
-        "confidence": 0.98,
-        "reason": "Footnote 16 is clearly visible at the bottom of page 53 (image 3), corresponding to anchor 16 on page 47/53."
+        "confidence": 1.0,
+        "reason": "The footnote text for marker 16 is clearly visible at the bottom of page 53 (image 3) and matches the anchor on that page."
       }
     ]
   },
   "usage": {
     "prompt_tokens": 3489,
-    "completion_tokens": 271,
-    "total_tokens": 3760,
+    "completion_tokens": 266,
+    "total_tokens": 3755,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 6412
+    "duration_ms": 6358
   }
 }

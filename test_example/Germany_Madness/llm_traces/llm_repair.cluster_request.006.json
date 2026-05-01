@@ -3,376 +3,313 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote\",\n  \"chapter_title\": \"Madness as Helplessness: Two Hospitals in the Age of the Reformations\",\n  \"page_range\": [\n    367,\n    372\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 366,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.5</div> <div style=\\\"text-align: center;\\\">Corn Tests at Haina and Merxhausen, 1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Grain</td><td style='text-align: center; word-wrap: break-word;'>Quantity</td><td style='text-align: center; word-wrap: break-word;'>Yield in Flour</td><td style='text-align: center; word-wrap: break-word;'>Yield in Bread</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Haina rye</td><td style='text-align: center; word-wrap: break-word;'>552 lb.</td><td style='text-align: center; word-wrap: break-word;'>478 lb.</td><td style='text-align: center; word-wrap: break-word;'>649 lb.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>March 9, 1621</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Index</td><td style='text-align: center; word-wrap: break-word;'>100</td><td style='text-align: center; word-wrap: break ...\"\n    },\n    {\n      \"page_no\": 367,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.6</div> <div style=\\\"text-align: center;\\\">Estimates of Food for 500 Poor Persons at Haina and Merxhausen, 1575</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td colspan=\\\"2\\\">grams/person/day</td><td style='text-align: center; word-wrap: break-word;'>calories/day</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat (6 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>124</td><td style='text-align: center; word-wrap: break-word;'>@ 2.73 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>339</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Fish (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>83</td><td style='text-align: center; word-wrap: break-word;'>@ 1.75 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>145</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Cheese (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: br ...\"\n    },\n    {\n      \"page_no\": 368,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.7</div> <div style=\\\"text-align: center;\\\">Daily Food Consumption at Haina and Merxhausen, 1590</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td style='text-align: center; word-wrap: break-word;'>Haina</td><td style='text-align: center; word-wrap: break-word;'>Merxhausen</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Grains</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Rye bread $ ^{a} $</td><td style='text-align: center; word-wrap: break-word;'>1,282g.</td><td style='text-align: center; word-wrap: break-word;'>916 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 240 cal.</td><td style='text-align: center; word-wrap: break-word;'>(3,077 cal.)</td><td style='text-align: center; word-wrap: break-word;'>(2,198 cal.)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Other grains</td><td style='text-align: center; word-wrap: break-word;'>25 ...\"\n    },\n    {\n      \"page_no\": 369,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 7.8</div> <div style=\\\"text-align: center;\\\">Recommended Diet at Haina, 1620-1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td rowspan=\\\"2\\\"></td><td colspan=\\\"5\\\">Hospital Classes</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>I</td><td style='text-align: center; word-wrap: break-word;'>II</td><td style='text-align: center; word-wrap: break-word;'>III</td><td style='text-align: center; word-wrap: break-word;'>IV</td><td style='text-align: center; word-wrap: break-word;'>V</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat</td><td style='text-align: center; word-wrap: break-word;'>463 g.</td><td style='text-align: center; word-wrap: break-word;'>231 g.</td><td style='text-align: center; word-wrap: break-word;'>159 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 273 cal.</td><td style='text-align: center; word-wrap: break-word;'>1,264 cal.</td><td style='text-align: center; word-wrap: break-word;'>631 cal.</td><td styl ...\"\n    },\n    {\n      \"page_no\": 370,\n      \"ocr_excerpt\": \"“prebenderies,” who had been granted entry to the hospital despite their elevated social station, persons for whom the hospitals had never been intended: a schoolmaster, a doctor’s widow and child, and educated men with latinate names (“Hartman Scaevola” and “M. Agricola”). They received decidedly more meat than the bottom two classes, averaging one-third of a pound a day. The fourth class comprised 49 hospital servants (including 20 poor brothers and sisters). Their daily work must have been arduous, and in return they received over 5,000 calories daily; but since their social status was poor, they obtained an average of only one pound of meat a week and made up for this meager allotment with cheese and huge amounts of bread. $ ^{82} $ At the bottom of the five classes were 220 poor persons, who ate less than the servants because they were usually elderly and not hired for hard work. From surviving records, we cannot tell when this classification began, but up to the 1590s, the records do not even hint at a class of Pröbner, even though some Hessian officials and pastors had been granted retirement in the hospital as a reward for faithful service. $ ^{83} $ In allowing such a visi ...\"\n    },\n    {\n      \"page_no\": 371,\n      \"ocr_excerpt\": \"## STRAINING FOR A MORAL ORDER The food consumed at Haina and Merxhausen guaranteed a higher standard of living for these sixteenth-century \\\"welfare recipients\\\" than many working families enjoyed. This fact made hospital officials touchy or even defensive when it came to explaining the existence of the hospital. The obligation to be (and to appear) worthy of charity put residents of the hospitals under a code of behavior much stricter than that imposed on persons living normal lives. Before one can estimate how hard the hospital tried to meet a higher moral standard than that imposed on the world, one needs to know what standard was imposed upon the world. Fortunately for us, the Haina Hospital Archive has preserved an ordinance issued by Landgrave Philipp for the common inhabitants of Haina and the neighboring lands subject to the jurisdiction of the hospital. The very first clause shows that religious rules played a large role in the outside world as well as in the hospital: First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead ...\"\n    },\n    {\n      \"page_no\": 372,\n      \"ocr_excerpt\": \"cost from six alber (i.e., $ \\\\frac{1}{4} $ gulden) to five gulden. No man or woman, for example, could slander another \\\"with immoral, gross words or with any kind of libel or insult\\\" without running the risk of a one-gulden fine. During a fire, all must help in fighting it or pay a ten-gulden fine. Failure to attend a village court or assembly meeting might trigger a fine of one gulden. Dances of certain sorts were forbidden: \\\"Sunday dancing and other suspect evening dances are herewith completely forbidden; and if this is disobeyed, the men shall pay a fine of one gulden and the woman a fine of thirteen alber.\\\"86 Such ordinances obviously tried to set a general standard of Christian conduct and communal responsibility, but it is noteworthy that the punishments for false measures, adultery, and fornication were far less severe than those imposed by the imperial criminal code, the Carolina. $ ^{87} $ Although this set of village regulations tried to establish the Christian community as an ideal, there can be little doubt that the hospital, with its regular daily religious observances, strained to maintain a higher moral order. A prayer used at Merxhausen asked God for help in obeyin ...\"\n    },\n    {\n      \"page_no\": 373,\n      \"ocr_excerpt\": \"vice set for 6:00 P.M. in the summer, and directly after supper in the large common room during the winter; the prayers were to include special thanks to the territorial prince for his benevolence. And in 1573, Schenck's ordinance described this evening service as a half-hour service with Bible reading and preaching as well as prayers of thanks. $ ^{93} $ Perhaps this was merely a case of ordinary practice becoming more and more explicit in the records, but it seems to indicate an intensified religious life for residents of the hospital, with two services on normal weekdays in addition to special holiday services, the two Sunday sermons, and the extra services on Wednesday and Friday mentioned by Letzener in 1588. The privileged life of semimonasticism also demanded a higher standard of social behavior. This is why residents of the hospital were not allowed to leave the institution to visit nearby villages. The rule was just as hard to enforce as it had been in the days when Haina was a monastery. In 1573, the superintendent, Reinhard Schenck zu Schweinsberg, observed that some of the brethren at Haina were “involved in all kinds of crafts, commerce, and trading, even on Sundays; a ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01044\",\n      \"marker\": \"78\",\n      \"page_no\": 367,\n      \"paragraph_index\": 6,\n      \"source_text\": \"It was not easy to regulate the fleshpots of Haina. When a survey of food consumption was again conducted in 1591, examining the year 1590, the average intake was still 5,161 calories a day at Haina and 3,994 at Merx-hausen (table 7.7). $ ^ ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01054\",\n      \"marker\": \"90\",\n      \"page_no\": 372,\n      \"paragraph_index\": 4,\n      \"source_text\": \"Applicants to the hospital emphasized their religious character and their readiness to live “as befits Christian brethren.” $ ^{90} $ The preacher at Haina was to urge the poor to hear God’s Word not only at the regular services but at spec ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-01127\",\n      \"note_item_id\": \"fn-01105\",\n      \"current_anchor_id\": \"synthetic-footnote-00150\",\n      \"marker\": \"28\",\n      \"note_page_no\": 367,\n      \"anchor_page_no\": 367,\n      \"current_anchor_marker\": \"28\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals e ...\",\n      \"anchor_excerpt\": \"StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals e ...\"\n    },\n    {\n      \"link_id\": \"link-01128\",\n      \"note_item_id\": \"fn-01106\",\n      \"current_anchor_id\": \"synthetic-footnote-00151\",\n      \"marker\": \"79\",\n      \"note_page_no\": 367,\n      \"anchor_page_no\": 367,\n      \"current_anchor_marker\": \"79\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.\",\n      \"anchor_excerpt\": \"StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.\"\n    },\n    {\n      \"link_id\": \"link-01134\",\n      \"note_item_id\": \"fn-01112\",\n      \"current_anchor_id\": \"anchor-01050\",\n      \"marker\": \"86\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 371,\n      \"current_anchor_marker\": \"86\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ibid., articles 1, 2, 3, 4, 5, 6, 7, 12, 38, 40, 45, 46.\",\n      \"anchor_excerpt\": \"First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead they are to be notorious like t ...\"\n    },\n    {\n      \"link_id\": \"link-01138\",\n      \"note_item_id\": \"fn-01116\",\n      \"current_anchor_id\": \"synthetic-footnote-00153\",\n      \"marker\": \"19\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 372,\n      \"current_anchor_marker\": \"19\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1564), Valtin Niphudt (Nov.\",\n      \"anchor_excerpt\": \"1564), Valtin Niphudt (Nov.\"\n    },\n    {\n      \"link_id\": \"link-01139\",\n      \"note_item_id\": \"fn-01117\",\n      \"current_anchor_id\": \"synthetic-footnote-00154\",\n      \"marker\": \"8\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 372,\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.\",\n      \"anchor_excerpt\": \"1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.\"\n    },\n    {\n      \"link_id\": \"link-01140\",\n      \"note_item_id\": \"fn-01118\",\n      \"current_anchor_id\": \"synthetic-footnote-00155\",\n      \"marker\": \"30\",\n      \"note_page_no\": 372,\n      \"anchor_page_no\": 372,\n      \"current_anchor_marker\": \"30\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"1581).\",\n      \"anchor_excerpt\": \"1581).\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-courtfoolsandtheirfollyi:nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi:endnote\",\n  \"chapter_title\": \"Court Fools and Their Folly: Image and Social Reality\",\n  \"page_range\": [\n    284,\n    290\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 284,\n      \"ocr_excerpt\": \"The first nine editions of Claus Narr continued to print these aesthetically dubious, flat, but supposedly edifying verses. It was only with the cheaper and smaller editions starting in 1645 that these Christianizing moral rhymes were dropped, and only then if at all that Claus Narr became a Volksbuch. I find Büttner's authorial decisions deeply interesting: Büttner chose to publish anonymously and subverted his text by adding insipid moral rhymes with the intention of castrating the humor or at least diverting attention from the frivolous nature of some of Claus's gestures, stupidities, and pranks. Over and over, Büttner found deep wisdom or simple piety in jokes that surely had a simpler or ruder meaning. When Claus talked to his hat when it fell off and expressed his worry that his head might fall off next, Büttner extracts the moral: \\\"What can't be cured must be endured\\\" (\\\"Laß fahren hin was nicht sein kan\\\"). $ ^{59} $ Sometimes, Büttner openly rejects the force of his own story. One one occasion, for example, Claus defended a man who had impregnated a maid, saying that she had previously been only a Mayd but was now Fraw Mutter. Pastor Büttner, however, drew the opposite concl ...\"\n    },\n    {\n      \"page_no\": 285,\n      \"ocr_excerpt\": \"ture or knowing clairvoyantly what was happening elsewhere; and (b) in being an amusing fellow to have around. We need to admit, frankly, that we do not understand the fool's supernatural knowledge, if indeed he ever possessed any gift of clairvoyance. But we may approach the second part of the fool's \\\"wisdom\\\" by asking what was so hilarious. My impression is that Claus Narr and most other court fools seemed funny because they defied the increasingly delicate standards of courtesy, of restrained courtly behavior, of Höflichkeit. Claus Narr had a childish ignorance of such adult realities as money, sex, adultery, counting and numbers, metaphoric language, religion, and death. Although Claus possessed a childish modesty, he was a naive and clumsy master of social transgression. According to the Grimm brothers' famous dictionary, even the German word unhöflich (discourteous) dates precisely from Sebastian Brant's Ship of Fools. Those new or newly rigorous standards of deportment have been famously studied by the German sociologist Norbert Elias, who found in courtly culture a new set of embarrassments about the body, about cleanliness, excretion, nakedness and sex, about food and drin ...\"\n    },\n    {\n      \"page_no\": 286,\n      \"ocr_excerpt\": \"Cleves, Duchess Jakobe von Baden was accused by the duke’s sister Sibylla of committing a variety of crimes and outrages ranging from the casting of magic spells to frequent acts of marital infidelity. But the duchess had, in addition, disgraced herself with the court fool, a man named Martin, whom she “secretly after dinner ordered to her rooms, where, behind closed doors, she tugged at his trousers for two or three hours.” Was she playing sexual games with a fool? These were dangerous indiscretions. Witnesses charged that she had “stroked him lovingly, clothed him delicately, painted his face, and given him baths twice a week.” $ ^{65} $ The princess had a reputation for frivolity but this was surely too much! The court in Düsseldorf was abuzz with rumors, but for our limited purposes here it is noteworthy that a fool had his part to play in this melodrama, a tragedy that only ended with the bedroom murder of Duchess Jakobe. $ ^{66} $ Here was a fool with whom a lady could play naughty games, but only at the risk of her life. The historian’s task in describing the life of court fools is to find more of this sort of credible evidence of life as it was actually lived, as distinct f ...\"\n    },\n    {\n      \"page_no\": 287,\n      \"ocr_excerpt\": \"went about barefoot summer and winter. Courtiers obviously had a good time abusing this unfortunate man, so much so that on one occasion he fell into a rage and took revenge by stuffing wood shavings into all the palace key holes. But this deed in turn irritated Count Johann so deeply that he banished his fool from Messkirch. According to this decree, Letzkopf was seized and led to the nearby monastery of Wald. To the astonishment of all, later that same day Letzkopf appeared in Messkirch at court again, returning even before the servant who had taken him into exile (the fool had known a shortcut through the woods). When asked to explain himself, Letzkopf set forth a touching confession. Once abandoned at the monastery, the poor man \\\"had sat down on a large stone and had looked around at the wide world in all directions\\\" and concluded that \\\"no place in all the world was so dear to him as Mösskirch.\\\" This touching story made Count Johann laugh, and he received Letzkopf back into his good graces again. The life of a natural fool at court was clearly not all beer and skittles, but Peter Letzkopf was evidently something more than a helpless imbecile. It was said that he had been four t ...\"\n    },\n    {\n      \"page_no\": 288,\n      \"ocr_excerpt\": \"Putting on his crab shell, he fancied the guests could not see him. \\\"Where, oh, where, has our Peter gone?\\\" (\\\"Ach, wo ist uns der Petter hinkommen?\\\"), the guests would then exclaim. This pleased Peter enormously, who then betook himself to a corner. One guest lamented, \\\"I fear that our Peter is lost,\\\" but another objected, \\\"Hah, that rascal, that thief is probably off stealing another sheep or skinning a cat so that he can sell the pelt to a furrier as if it were a buckskin.\\\" Such a charge was too much for the fool, but thinking that he could not be seen, he swallowed his anger. \\\"They kept up this kind of mummery with him a long time. Finally, someone came along and knocked the crab shell off his nose as if by accident and shouted, 'Look, Peter, are you here? We all thought you were away.'\\\" And then Peter laughed and exclaimed, \\\"'Ja, I just came from the fish market where I was doing this or that.'\\\" Our chronicler remarks that Peter had to be teased and enraged periodically, \\\"so that his spirit would get excited, for otherwise he would get sick because of his melancholy, as the proverb says: 'Fools have to be driven and exercised, or else they go rotten and soft from lying around.' ...\"\n    },\n    {\n      \"page_no\": 289,\n      \"ocr_excerpt\": \"oped a strong sense of family loyalty. Count Johann Wernher took a young, retarded boy named Junghans and raised him, \\\"for the sake of God.\\\" It should not surprise us, therefore, that when his widow, Countess Margarethe von Zimmern, was to be displaced from her residence by Count Haug von Werdenberg, Junghans, a \\\"poor, childish, silly person,\\\" felt it as an attack on his own mother. In defense of \\\"my dear mother,\\\" this \\\"senseless fool\\\" threatened to kill Count Haug with an ax, but he was disarmed by the countess before he could do any harm. $ ^{70} $ As we can see, the fools mentioned in the Zimmerische Chronik were not professional jesters, entertainers, or Schalksnarren. They were men with more or less serious mental troubles or deficiencies. Sometimes the idées fixes or “melancholy” delusions of such fools made life hard for everyone. The Chronik reports on Count Rudolf von Sulz’s fool, who on the face of it seemed normal but had a mania for collecting all sorts of papers. To humor this odd fixation, courtiers used to give him old letters and other irrelevant waste paper. Once, when Count Rudolf was trying to travel incognito, his companion, the fool, seized a package of confide ...\"\n    },\n    {\n      \"page_no\": 290,\n      \"ocr_excerpt\": \"As we have seen, fools were sometimes put to work with simple tasks, but there was always the risk that a fool would not perform as expected. The Zimmerische Chronik tells of a swineherd who deliberately led his pigs to feed on poisonous herbs so that he would have fewer pigs to guard. $ ^{73} $ Another fool, admired for his ability to play the bagpipe, fashioned a foxskin blanket for his instrument so that his pipes would not feel cold in the winter. $ ^{74} $ The most common expression used to describe a fool in the Zimmerische Chronik is ain lauters kindt, “nothing but a child,” a phrase that explains perhaps the amusement and the indulgence with which these unfortunatest were regarded. The counts of Zimmern did not, however, see their fools as licensed oracles or goofy critics of courtly convention. They were funny specimens of a distorted humanity. ## An Artificial Fool: Friedrich Taubmann One of the more remarkable academic careers in sixteenth-century Germany was that of Friedrich Taubmann (1565–1613), a poet, professor, and \\\"merry counselor\\\" (lustiger Rat) to the electors of Saxony (fig. 18). Over one hundred years ago, Friedrich Ebeling published an excellent study of Taub ...\"\n    },\n    {\n      \"page_no\": 304,\n      \"ocr_excerpt\": \"tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epileptics in particular because a folk etymology connected the “falling sickness” (vallendes siechtum) with Valentine. The miracle book for Diepoldskichen begins in 1420 and lists 2,914 miracles between that date and 1691, 95 percent of them from the period after 1535. $ ^{33} $ The shrine to St. Rasso in Grafrath (Wörth on the Amper, 18 miles west of Munich) recorded 5,173 miracles between 1444 and 1518, and another 7,000 by the end of the eighteenth century, with a characteristic steep decline between 1514 and about 1560. $ ^{34} $ The common claim among Erasmians and Protestant reformers that the age of miracles was over must have struck devout pilgrims from Bavaria and Austria as bizarre and easily disproved. Literally hundreds of shrines sprang up between 1400 and 1700, and each one could demonstrate its power with lists of wondrous cures and “miracles.” ## LATE MEDIEVAL MIRACLES IN ## THE RHINELAND We can get closer to the mad by looking at sev ...\"\n    }\n  ],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00756\",\n      \"anchor_id\": \"anchor-00229\",\n      \"marker\": \"50\",\n      \"note_excerpt\": \"Heinz-Gunter Schmitz, Physiologie des Scherzes: Bedeutung und Rechtfertiqung der Ars locandi im 16. Jahrhundert (Hildesheim, 1972).\",\n      \"anchor_excerpt\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00757\",\n      \"anchor_id\": \"anchor-00230\",\n      \"marker\": \"51\",\n      \"note_excerpt\": \"Wolfgang Sedelius, Wie sich ain Christenlicher Herr, so Landt unnd Leiit zuo Regieren under im hat, vor schedlicher Phantasey verhueten, unnd in allen noeten troesten soll (Munich, 1547). See Mad Princes, pp. 21—22.\",\n      \"anchor_excerpt\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00764\",\n      \"marker\": \"59\",\n      \"page_no\": 284,\n      \"source_text\": \"Buttner, Von Claus Narren (Frankfurt a/M, 1602), p. 13.\"\n    },\n    {\n      \"note_item_id\": \"fn-00765\",\n      \"marker\": \"60\",\n      \"page_no\": 284,\n      \"source_text\": \"Ibid., pp. 73—74, cf. pp. 174-75.\"\n    },\n    {\n      \"note_item_id\": \"fn-00766\",\n      \"marker\": \"61\",\n      \"page_no\": 284,\n      \"source_text\": \"Ibid., fol. Aiiiiv. |\"\n    },\n    {\n      \"note_item_id\": \"fn-00767\",\n      \"marker\": \"62\",\n      \"page_no\": 284,\n      \"source_text\": \"Despite Buttner’s disclaimer, however, excrement, farting, and defecation are a major theme of several stories in his collection. See ibid., pp. 5657, 71, 108—10, 15255, 185-86, 202, 204, 233, 239, 336, 446, 46768, 476.\"\n    },\n    {\n      \"note_item_id\": \"fn-00768\",\n      \"marker\": \"63\",\n      \"page_no\": 285,\n      \"source_text\": \"Ibid., p. 41.\"\n    },\n    {\n      \"note_item_id\": \"fn-00769\",\n      \"marker\": \"64\",\n      \"page_no\": 285,\n      \"source_text\": \"Adolf Schwammberger, “Von Hofnarren in und aus Franken,” Jahrbuch fiir frankische Landesforschung 3435 (1974-75): 975-81, at 976.\"\n    },\n    {\n      \"note_item_id\": \"fn-00770\",\n      \"marker\": \"65\",\n      \"page_no\": 286,\n      \"source_text\": \"Muschka, Opfergang einer Frau, p. 332.\"\n    },\n    {\n      \"note_item_id\": \"fn-00771\",\n      \"marker\": \"66\",\n      \"page_no\": 286,\n      \"source_text\": \"I sketch the episode in Mad Princes, pp. 100-118.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00507\",\n      \"note_item_id\": \"fn-00777\",\n      \"current_anchor_id\": \"anchor-00727\",\n      \"marker\": \"2\",\n      \"note_page_no\": 289,\n      \"anchor_page_no\": 304,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"This famous anecdote concerning the melancholic who thought himself dead was attributed also to Claus Narr (Biittner, Von Claus Narren [1602], pp. 486-87). Many such stories, originating with the ancient physician Rufus of Ephesus (fl. unde ...\",\n      \"anchor_excerpt\": \"tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epile ...\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote",
-      "chapter_title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-005-courtfoolsandtheirfollyi:nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi:endnote",
+      "chapter_title": "Court Fools and Their Folly: Image and Social Reality",
+      "request_mode": "note_only",
       "allowed_actions": [
-        "match",
-        "ignore_ref",
         "needs_review"
       ],
-      "note_system": "footnote",
+      "note_system": "endnote",
       "page_range": [
-        367,
-        372
+        284,
+        290
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 68400,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-01044",
-          "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
-          "page_no": 367,
-          "paragraph_index": 6,
-          "char_start": 237,
-          "char_end": 246,
-          "source_marker": "$ ^{78} $",
-          "normalized_marker": "78",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "It was not easy to regulate the fleshpots of Haina. When a survey of food consumption was again conducted in 1591, examining the year 1590, the average intake was still 5,161 calories a day at Haina and 3,994 at Merx-hausen (table 7.7). $ ^{78} $ Eggs, oatmeal, and honey were somewhat more abundant, but meat, cheese, milk, and beer were somewhat less so. The hospitals now diverged even more sharply than they had sixteen years earlier.",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
+          "link_id": "link-00486",
+          "note_item_id": "fn-00756",
+          "anchor_id": "anchor-00229",
+          "marker": "50",
+          "note_excerpt": "Heinz-Gunter Schmitz, Physiologie des Scherzes: Bedeutung und Rechtfertiqung der Ars locandi im 16. Jahrhundert (Hildesheim, 1972).",
+          "anchor_excerpt": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to"
         },
         {
-          "row_id": 68412,
-          "doc_id": "67356d1f7d9a",
-          "anchor_id": "anchor-01054",
-          "chapter_id": "toc-ch-007-madnessashelplessnesstwo",
-          "page_no": 372,
-          "paragraph_index": 4,
-          "char_start": 124,
-          "char_end": 133,
-          "source_marker": "$ ^{90} $",
-          "normalized_marker": "90",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Applicants to the hospital emphasized their religious character and their readiness to live “as befits Christian brethren.” $ ^{90} $ The preacher at Haina was to urge the poor to hear God’s Word not only at the regular services but at special services as well and to inculcate an attitude of constant (ohn unterlass) prayer and thankfulness. $ ^{91} $ The hospital seems to have instituted a regular half-hour evening prayer service to balance the one in the morning. The original ordinance of the hospital (1534) required only one sermon a day and stated simply, “after supper and the prayer of thanks, let them rest and have them go to bed at a set time.” $ ^{92} $ Already in the undated “Hospitals-Fundation,” this thanksgiving was explicitly described as a church ser-",
-          "created_at": 1776857356,
-          "updated_at": 1776857356
+          "link_id": "link-00487",
+          "note_item_id": "fn-00757",
+          "anchor_id": "anchor-00230",
+          "marker": "51",
+          "note_excerpt": "Wolfgang Sedelius, Wie sich ain Christenlicher Herr, so Landt unnd Leiit zuo Regieren under im hat, vor schedlicher Phantasey verhueten, unnd in allen noeten troesten soll (Munich, 1547). See Mad Princes, pp. 21—22.",
+          "anchor_excerpt": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to"
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 782,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00764",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "59",
+          "normalized_marker": "59",
+          "occurrence": 1,
+          "source_text": "Buttner, Von Claus Narren (Frankfurt a/M, 1602), p. 13.",
+          "page_no": 284,
+          "display_marker": "59",
+          "source_marker": "59",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 783,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00765",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "60",
+          "normalized_marker": "60",
+          "occurrence": 1,
+          "source_text": "Ibid., pp. 73—74, cf. pp. 174-75.",
+          "page_no": 284,
+          "display_marker": "60",
+          "source_marker": "60",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 784,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00766",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "61",
+          "normalized_marker": "61",
+          "occurrence": 1,
+          "source_text": "Ibid., fol. Aiiiiv. |",
+          "page_no": 284,
+          "display_marker": "61",
+          "source_marker": "61",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 785,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00767",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "62",
+          "normalized_marker": "62",
+          "occurrence": 1,
+          "source_text": "Despite Buttner’s disclaimer, however, excrement, farting, and defecation are a major theme of several stories in his collection. See ibid., pp. 5657, 71, 108—10, 15255, 185-86, 202, 204, 233, 239, 336, 446, 46768, 476.",
+          "page_no": 284,
+          "display_marker": "62",
+          "source_marker": "62",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 786,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00768",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "63",
+          "normalized_marker": "63",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 41.",
+          "page_no": 285,
+          "display_marker": "63",
+          "source_marker": "63",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 787,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00769",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "64",
+          "normalized_marker": "64",
+          "occurrence": 1,
+          "source_text": "Adolf Schwammberger, “Von Hofnarren in und aus Franken,” Jahrbuch fiir frankische Landesforschung 3435 (1974-75): 975-81, at 976.",
+          "page_no": 285,
+          "display_marker": "64",
+          "source_marker": "64",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 788,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00770",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "65",
+          "normalized_marker": "65",
+          "occurrence": 1,
+          "source_text": "Muschka, Opfergang einer Frau, p. 332.",
+          "page_no": 286,
+          "display_marker": "65",
+          "source_marker": "65",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 789,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00771",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
+          "marker": "66",
+          "normalized_marker": "66",
+          "occurrence": 1,
+          "source_text": "I sketch the episode in Mad Princes, pp. 100-118.",
+          "page_no": 286,
+          "display_marker": "66",
+          "source_marker": "66",
+          "title_hint": "",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": [
         {
-          "link_id": "link-01127",
-          "note_item_id": "fn-01105",
-          "current_anchor_id": "synthetic-footnote-00150",
-          "marker": "28",
-          "note_page_no": 367,
-          "anchor_page_no": 367,
-          "current_anchor_marker": "28",
-          "note_excerpt": "StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals elsewhere also served huge amounts of food. See, e.g., Helmut Freiherr Haller von Hallerstein and Ernst Eichhorn, Das Pilgrimspital zum Heiligen Kreuz vor Niirnberg (Nuremberg, 1969), pp. 44-50.",
-          "anchor_excerpt": "StAM, 40a XXIV Generalia 2: “Ahnschlag was uff die arme leuth zue Merxhausen in verschienen go Jahr, an allerhandt gangen,” and “Ahnschlag wass uff die Arme Leuth zu Heyna in verschienen 9o Jahr an allerhandt Victualien gangen.” Hospitals elsewhere also served huge amounts of food. See, e.g., Helmut Freiherr Haller von Hallerstein and Ernst Eichhorn, Das Pilgrimspital zum Heiligen Kreuz vor Niirnberg (Nuremberg, 1969), pp. 44-50.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01128",
-          "note_item_id": "fn-01106",
-          "current_anchor_id": "synthetic-footnote-00151",
-          "marker": "79",
-          "note_page_no": 367,
-          "anchor_page_no": 367,
-          "current_anchor_marker": "79",
-          "note_excerpt": "StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.",
-          "anchor_excerpt": "StAM, g40a XXIV Generalia 2: Landgraf Ludwig der Eltere to Moritz, May 31, 1602.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01134",
-          "note_item_id": "fn-01112",
-          "current_anchor_id": "anchor-01050",
-          "marker": "86",
-          "note_page_no": 372,
-          "anchor_page_no": 371,
-          "current_anchor_marker": "86",
-          "note_excerpt": "Ibid., articles 1, 2, 3, 4, 5, 6, 7, 12, 38, 40, 45, 46.",
-          "anchor_excerpt": "First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead they are to be notorious like those involved in magic, witchcraft, and other works of the devil; and after being publicly rebuked, they may be punished according to the seriousness of their offense. $ ^{85} $",
+          "link_id": "link-00507",
+          "note_item_id": "fn-00777",
+          "current_anchor_id": "anchor-00727",
+          "marker": "2",
+          "note_page_no": 289,
+          "anchor_page_no": 304,
+          "current_anchor_marker": "2",
+          "note_excerpt": "This famous anecdote concerning the melancholic who thought himself dead was attributed also to Claus Narr (Biittner, Von Claus Narren [1602], pp. 486-87). Many such stories, originating with the ancient physician Rufus of Ephesus (fl. under Trajan) were collected by Jason Pratensis in De cerebri morbis (see pp. 152-56 above) and by Robert Burton in The Anatomy of Melancholy (London, 1621). On ancient psychiatry, see J. Pigeaud, La",
+          "anchor_excerpt": "tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epileptics in particular because a folk etymology connected the “falling sickness” (vallendes siechtum) with Valentine. The miracle book for Diepoldskichen begins in 1420 and lists 2,914 miracles between that date and 1691, 95 percent of them from the period after 1535. $ ^{33} $ The shrine to St. Rasso in Grafrath (Wörth on the Amper, 18 miles west of Munich) recorded 5,173 miracles between 1444 and 1518, and another 7,000 by the end of the eighteenth century, with a characteristic steep decline between 1514 and about 1560. $ ^{34} $ The common claim among Erasmians and Protestant reformers that the age of miracles was over must have struck devout pilgrims from Bavaria and Austria as bizarre and easily disproved. Literally hundreds of shrines sprang up between 1400 and 1700, and each one could demonstrate its power with lists of wondrous cures and “miracles.”",
           "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-01138",
-          "note_item_id": "fn-01116",
-          "current_anchor_id": "synthetic-footnote-00153",
-          "marker": "19",
-          "note_page_no": 372,
-          "anchor_page_no": 372,
-          "current_anchor_marker": "19",
-          "note_excerpt": "1564), Valtin Niphudt (Nov.",
-          "anchor_excerpt": "1564), Valtin Niphudt (Nov.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01139",
-          "note_item_id": "fn-01117",
-          "current_anchor_id": "synthetic-footnote-00154",
-          "marker": "8",
-          "note_page_no": 372,
-          "anchor_page_no": 372,
-          "current_anchor_marker": "8",
-          "note_excerpt": "1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.",
-          "anchor_excerpt": "1587), Henn Cleinhens (n.d.), Hans Schneider (Wednesday after Invocavit, 1562), Klaus Fischer (Aug.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01140",
-          "note_item_id": "fn-01118",
-          "current_anchor_id": "synthetic-footnote-00155",
-          "marker": "30",
-          "note_page_no": 372,
-          "anchor_page_no": 372,
-          "current_anchor_marker": "30",
-          "note_excerpt": "1581).",
-          "anchor_excerpt": "1581).",
-          "current_anchor_synthetic": true
         }
       ]
     },
     "page_contexts": [
       {
-        "page_no": 366,
-        "file_idx": 365,
+        "page_no": 284,
+        "file_idx": 283,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.5</div> <div style=\"text-align: center;\">Corn Tests at Haina and Merxhausen, 1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Grain</td><td style='text-align: center; word-wrap: break-word;'>Quantity</td><td style='text-align: center; word-wrap: break-word;'>Yield in Flour</td><td style='text-align: center; word-wrap: break-word;'>Yield in Bread</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Haina rye</td><td style='text-align: center; word-wrap: break-word;'>552 lb.</td><td style='text-align: center; word-wrap: break-word;'>478 lb.</td><td style='text-align: center; word-wrap: break-word;'>649 lb.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>March 9, 1621</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Index</td><td style='text-align: center; word-wrap: break-word;'>100</td><td style='text-align: center; word-wrap: break-word;'>86.6</td><td style='text-align: center; word-wrap: break-word;'>117.6</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Haina rye</td><td style='text-align: center; word-wrap ...",
-        "byte_size": 6367189,
-        "sha256": "86d6a23268a7aec51f25f7debdb9050bb883c66745410cd9991a5be2ab7b886e"
+        "ocr_excerpt": "The first nine editions of Claus Narr continued to print these aesthetically dubious, flat, but supposedly edifying verses. It was only with the cheaper and smaller editions starting in 1645 that these Christianizing moral rhymes were dropped, and only then if at all that Claus Narr became a Volksbuch. I find Büttner's authorial decisions deeply interesting: Büttner chose to publish anonymously and subverted his text by adding insipid moral rhymes with the intention of castrating the humor or at least diverting attention from the frivolous nature of some of Claus's gestures, stupidities, and pranks. Over and over, Büttner found deep wisdom or simple piety in jokes that surely had a simpler or ruder meaning. When Claus talked to his hat when it fell off and expressed his worry that his head might fall off next, Büttner extracts the moral: \"What can't be cured must be endured\" (\"Laß fahren hin was nicht sein kan\"). $ ^{59} $ Sometimes, Büttner openly rejects the force of his own story. One one occasion, for example, Claus defended a man who had impregnated a maid, saying that she had previously been only a Mayd but was now Fraw Mutter. Pastor Büttner, however, drew the opposite conclusion and urged punishment for fornication (Unzucht). $ ^{60} $ Such editorializing suggests that Büttner was both fascinated by these stories but apprehensive that they might be turned to secular or ...",
+        "byte_size": 7543537,
+        "sha256": "b4a9cb6ee5b01285e2e5c15fe7ffbf5a788172a5cefed748262dadc79f60d5c7"
       },
       {
-        "page_no": 367,
-        "file_idx": 366,
+        "page_no": 285,
+        "file_idx": 284,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.6</div> <div style=\"text-align: center;\">Estimates of Food for 500 Poor Persons at Haina and Merxhausen, 1575</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td colspan=\"2\">grams/person/day</td><td style='text-align: center; word-wrap: break-word;'>calories/day</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat (6 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>124</td><td style='text-align: center; word-wrap: break-word;'>@ 2.73 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>339</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Fish (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>83</td><td style='text-align: center; word-wrap: break-word;'>@ 1.75 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>145</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Cheese (4 courses @ 3 lb. for 10 persons weekly)</td><td style='text-align: center; word-wrap: break-word;'>28</td><td style='text-align: center; word-wrap: break-word;'>@ 4.25 cal./g. =</td><td style='text-align: center; word-wrap: break-word;'>119</td></tr><tr><td style='text-align: center; wor ...",
-        "byte_size": 8534072,
-        "sha256": "0c5065b08b7945dad93f9ff06b959b953979bf5615e421a43297c7d0ed52f451"
+        "ocr_excerpt": "ture or knowing clairvoyantly what was happening elsewhere; and (b) in being an amusing fellow to have around. We need to admit, frankly, that we do not understand the fool's supernatural knowledge, if indeed he ever possessed any gift of clairvoyance. But we may approach the second part of the fool's \"wisdom\" by asking what was so hilarious. My impression is that Claus Narr and most other court fools seemed funny because they defied the increasingly delicate standards of courtesy, of restrained courtly behavior, of Höflichkeit. Claus Narr had a childish ignorance of such adult realities as money, sex, adultery, counting and numbers, metaphoric language, religion, and death. Although Claus possessed a childish modesty, he was a naive and clumsy master of social transgression. According to the Grimm brothers' famous dictionary, even the German word unhöflich (discourteous) dates precisely from Sebastian Brant's Ship of Fools. Those new or newly rigorous standards of deportment have been famously studied by the German sociologist Norbert Elias, who found in courtly culture a new set of embarrassments about the body, about cleanliness, excretion, nakedness and sex, about food and drink, about farting and sleeping, invasions of privacy and lapses from elegance, all deviations from smooth gracefulness and from an emerging conformity to aristocratic standards of appearance and deport ...",
+        "byte_size": 8241751,
+        "sha256": "81724485eaf0dc22d13c88e4175052238ac23d9960cfeb038f07b98d3478c1f0"
       },
       {
-        "page_no": 368,
-        "file_idx": 367,
+        "page_no": 286,
+        "file_idx": 285,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.7</div> <div style=\"text-align: center;\">Daily Food Consumption at Haina and Merxhausen, 1590</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'>Food Categories</td><td style='text-align: center; word-wrap: break-word;'>Haina</td><td style='text-align: center; word-wrap: break-word;'>Merxhausen</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Grains</td><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'></td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Rye bread $ ^{a} $</td><td style='text-align: center; word-wrap: break-word;'>1,282g.</td><td style='text-align: center; word-wrap: break-word;'>916 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 240 cal.</td><td style='text-align: center; word-wrap: break-word;'>(3,077 cal.)</td><td style='text-align: center; word-wrap: break-word;'>(2,198 cal.)</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Other grains</td><td style='text-align: center; word-wrap: break-word;'>257 g.</td><td style='text-align: center; word-wrap: break-word;'>235 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 340 cal.</td><td style='text-align: center; word-wr ...",
-        "byte_size": 3388053,
-        "sha256": "f3126ed633e7a7a2d4f62a28a0dd9920f04a546f07967f2a34e4cfe87a897d8d"
+        "ocr_excerpt": "Cleves, Duchess Jakobe von Baden was accused by the duke’s sister Sibylla of committing a variety of crimes and outrages ranging from the casting of magic spells to frequent acts of marital infidelity. But the duchess had, in addition, disgraced herself with the court fool, a man named Martin, whom she “secretly after dinner ordered to her rooms, where, behind closed doors, she tugged at his trousers for two or three hours.” Was she playing sexual games with a fool? These were dangerous indiscretions. Witnesses charged that she had “stroked him lovingly, clothed him delicately, painted his face, and given him baths twice a week.” $ ^{65} $ The princess had a reputation for frivolity but this was surely too much! The court in Düsseldorf was abuzz with rumors, but for our limited purposes here it is noteworthy that a fool had his part to play in this melodrama, a tragedy that only ended with the bedroom murder of Duchess Jakobe. $ ^{66} $ Here was a fool with whom a lady could play naughty games, but only at the risk of her life. The historian’s task in describing the life of court fools is to find more of this sort of credible evidence of life as it was actually lived, as distinct from the heaps of literary and derivative fantasies that were collected in the jest books of Narrenliteratur. We have seen in the case of Claus Narr how quickly the sources fill up with literary stereo ...",
+        "byte_size": 8466226,
+        "sha256": "2736b6270e31751bd0b810a23f270b77252bca92c8b7aec68f37e26a6529efce"
       },
       {
-        "page_no": 369,
-        "file_idx": 368,
+        "page_no": 287,
+        "file_idx": 286,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 7.8</div> <div style=\"text-align: center;\">Recommended Diet at Haina, 1620-1621</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td rowspan=\"2\"></td><td colspan=\"5\">Hospital Classes</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>I</td><td style='text-align: center; word-wrap: break-word;'>II</td><td style='text-align: center; word-wrap: break-word;'>III</td><td style='text-align: center; word-wrap: break-word;'>IV</td><td style='text-align: center; word-wrap: break-word;'>V</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Meat</td><td style='text-align: center; word-wrap: break-word;'>463 g.</td><td style='text-align: center; word-wrap: break-word;'>231 g.</td><td style='text-align: center; word-wrap: break-word;'>159 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td><td style='text-align: center; word-wrap: break-word;'>72 g.</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>@100 g. = 273 cal.</td><td style='text-align: center; word-wrap: break-word;'>1,264 cal.</td><td style='text-align: center; word-wrap: break-word;'>631 cal.</td><td style='text-align: center; word-wrap: break-word;'>434 cal.</td><td style='text-align: center; word-wrap: break-word;'>197 cal.</td><td style='text-align: center; word-wrap: break-word;'>197 cal.</td></tr ...",
-        "byte_size": 6866696,
-        "sha256": "7f1fddcb26f8de29a035e1ff8e7b754d165715d515bca70035e8fda67db51758"
+        "ocr_excerpt": "went about barefoot summer and winter. Courtiers obviously had a good time abusing this unfortunate man, so much so that on one occasion he fell into a rage and took revenge by stuffing wood shavings into all the palace key holes. But this deed in turn irritated Count Johann so deeply that he banished his fool from Messkirch. According to this decree, Letzkopf was seized and led to the nearby monastery of Wald. To the astonishment of all, later that same day Letzkopf appeared in Messkirch at court again, returning even before the servant who had taken him into exile (the fool had known a shortcut through the woods). When asked to explain himself, Letzkopf set forth a touching confession. Once abandoned at the monastery, the poor man \"had sat down on a large stone and had looked around at the wide world in all directions\" and concluded that \"no place in all the world was so dear to him as Mösskirch.\" This touching story made Count Johann laugh, and he received Letzkopf back into his good graces again. The life of a natural fool at court was clearly not all beer and skittles, but Peter Letzkopf was evidently something more than a helpless imbecile. It was said that he had been four times to Santiago de Compostela, and that in Rome he had once tricked a blind beggar who had secreted a hoard of forty gold pieces in his cloak into jumping off a bridge into the Tiber (and drowning), ...",
+        "byte_size": 9576153,
+        "sha256": "dd545c01d19e5e166273c407cd53ab4b94298e2fc7a3e01c5288af5340b9e616"
       },
       {
-        "page_no": 370,
-        "file_idx": 369,
+        "page_no": 288,
+        "file_idx": 287,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "“prebenderies,” who had been granted entry to the hospital despite their elevated social station, persons for whom the hospitals had never been intended: a schoolmaster, a doctor’s widow and child, and educated men with latinate names (“Hartman Scaevola” and “M. Agricola”). They received decidedly more meat than the bottom two classes, averaging one-third of a pound a day. The fourth class comprised 49 hospital servants (including 20 poor brothers and sisters). Their daily work must have been arduous, and in return they received over 5,000 calories daily; but since their social status was poor, they obtained an average of only one pound of meat a week and made up for this meager allotment with cheese and huge amounts of bread. $ ^{82} $ At the bottom of the five classes were 220 poor persons, who ate less than the servants because they were usually elderly and not hired for hard work. From surviving records, we cannot tell when this classification began, but up to the 1590s, the records do not even hint at a class of Pröbner, even though some Hessian officials and pastors had been granted retirement in the hospital as a reward for faithful service. $ ^{83} $ In allowing such a visible and officially sanctioned class system to develop, hospital officials were accommodating social needs never imagined by Philipp of Hesse. Established with a monastic ideal, they fell into a patter ...",
-        "byte_size": 8164431,
-        "sha256": "41f74cb2409c241a73b8158de06d6f7fae1b596827b6539a99caa0e499833a7e"
+        "ocr_excerpt": "Putting on his crab shell, he fancied the guests could not see him. \"Where, oh, where, has our Peter gone?\" (\"Ach, wo ist uns der Petter hinkommen?\"), the guests would then exclaim. This pleased Peter enormously, who then betook himself to a corner. One guest lamented, \"I fear that our Peter is lost,\" but another objected, \"Hah, that rascal, that thief is probably off stealing another sheep or skinning a cat so that he can sell the pelt to a furrier as if it were a buckskin.\" Such a charge was too much for the fool, but thinking that he could not be seen, he swallowed his anger. \"They kept up this kind of mummery with him a long time. Finally, someone came along and knocked the crab shell off his nose as if by accident and shouted, 'Look, Peter, are you here? We all thought you were away.'\" And then Peter laughed and exclaimed, \"'Ja, I just came from the fish market where I was doing this or that.'\" Our chronicler remarks that Peter had to be teased and enraged periodically, \"so that his spirit would get excited, for otherwise he would get sick because of his melancholy, as the proverb says: 'Fools have to be driven and exercised, or else they go rotten and soft from lying around.'\" The application of this proverb is of interest here, not only because it reveals that a kind of debased medical thinking had penetrated the nobility even in remote rural corners of Germany, but also ...",
+        "byte_size": 8015665,
+        "sha256": "64f3425271e361a8734b4dc7c505c715716f2ee2b6509af7f9b3b7cb270dd39e"
       },
       {
-        "page_no": 371,
-        "file_idx": 370,
+        "page_no": 289,
+        "file_idx": 288,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "## STRAINING FOR A MORAL ORDER The food consumed at Haina and Merxhausen guaranteed a higher standard of living for these sixteenth-century \"welfare recipients\" than many working families enjoyed. This fact made hospital officials touchy or even defensive when it came to explaining the existence of the hospital. The obligation to be (and to appear) worthy of charity put residents of the hospitals under a code of behavior much stricter than that imposed on persons living normal lives. Before one can estimate how hard the hospital tried to meet a higher moral standard than that imposed on the world, one needs to know what standard was imposed upon the world. Fortunately for us, the Haina Hospital Archive has preserved an ordinance issued by Landgrave Philipp for the common inhabitants of Haina and the neighboring lands subject to the jurisdiction of the hospital. The very first clause shows that religious rules played a large role in the outside world as well as in the hospital: First, God's Word and teaching should be held up before everyone's eyes . . . and all those who are of another faith and doctrine than that taught in the principality of Hesse are not to be tolerated; instead they are to be notorious like those involved in magic, witchcraft, and other works of the devil; and after being publicly rebuked, they may be punished according to the seriousness of their offense. ...",
-        "byte_size": 8971987,
-        "sha256": "e0515b396106784d876a0969a715e3c0515685b6b696a9bcf8753168c84d50da"
+        "ocr_excerpt": "oped a strong sense of family loyalty. Count Johann Wernher took a young, retarded boy named Junghans and raised him, \"for the sake of God.\" It should not surprise us, therefore, that when his widow, Countess Margarethe von Zimmern, was to be displaced from her residence by Count Haug von Werdenberg, Junghans, a \"poor, childish, silly person,\" felt it as an attack on his own mother. In defense of \"my dear mother,\" this \"senseless fool\" threatened to kill Count Haug with an ax, but he was disarmed by the countess before he could do any harm. $ ^{70} $ As we can see, the fools mentioned in the Zimmerische Chronik were not professional jesters, entertainers, or Schalksnarren. They were men with more or less serious mental troubles or deficiencies. Sometimes the idées fixes or “melancholy” delusions of such fools made life hard for everyone. The Chronik reports on Count Rudolf von Sulz’s fool, who on the face of it seemed normal but had a mania for collecting all sorts of papers. To humor this odd fixation, courtiers used to give him old letters and other irrelevant waste paper. Once, when Count Rudolf was trying to travel incognito, his companion, the fool, seized a package of confidential letters from the count, prompting the count to strike the fool on the finger, sending the poor man off into such a rage that he was uncontrollable for a time. By charging that Count Rudolf had a ...",
+        "byte_size": 9352150,
+        "sha256": "e5f35e11e811fbd0ec082d44bce907262c625db9511ee18d1beb15ba0b854b1a"
       },
       {
-        "page_no": 372,
-        "file_idx": 371,
+        "page_no": 290,
+        "file_idx": 289,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "cost from six alber (i.e., $ \\frac{1}{4} $ gulden) to five gulden. No man or woman, for example, could slander another \"with immoral, gross words or with any kind of libel or insult\" without running the risk of a one-gulden fine. During a fire, all must help in fighting it or pay a ten-gulden fine. Failure to attend a village court or assembly meeting might trigger a fine of one gulden. Dances of certain sorts were forbidden: \"Sunday dancing and other suspect evening dances are herewith completely forbidden; and if this is disobeyed, the men shall pay a fine of one gulden and the woman a fine of thirteen alber.\"86 Such ordinances obviously tried to set a general standard of Christian conduct and communal responsibility, but it is noteworthy that the punishments for false measures, adultery, and fornication were far less severe than those imposed by the imperial criminal code, the Carolina. $ ^{87} $ Although this set of village regulations tried to establish the Christian community as an ideal, there can be little doubt that the hospital, with its regular daily religious observances, strained to maintain a higher moral order. A prayer used at Merxhausen asked God for help in obeying the hospital officials, \"and let us not misuse these alms in laziness, lechery, or in other scandalous vices resulting in our eternal damnation.\" $ ^{88} $ The original ordinance of 1534 read: \"And ...",
-        "byte_size": 7897210,
-        "sha256": "89b5c2678ed264c3f044935f4d42747d25c20bc82479ae717e38abf811473b62"
+        "ocr_excerpt": "As we have seen, fools were sometimes put to work with simple tasks, but there was always the risk that a fool would not perform as expected. The Zimmerische Chronik tells of a swineherd who deliberately led his pigs to feed on poisonous herbs so that he would have fewer pigs to guard. $ ^{73} $ Another fool, admired for his ability to play the bagpipe, fashioned a foxskin blanket for his instrument so that his pipes would not feel cold in the winter. $ ^{74} $ The most common expression used to describe a fool in the Zimmerische Chronik is ain lauters kindt, “nothing but a child,” a phrase that explains perhaps the amusement and the indulgence with which these unfortunatest were regarded. The counts of Zimmern did not, however, see their fools as licensed oracles or goofy critics of courtly convention. They were funny specimens of a distorted humanity. ## An Artificial Fool: Friedrich Taubmann One of the more remarkable academic careers in sixteenth-century Germany was that of Friedrich Taubmann (1565–1613), a poet, professor, and \"merry counselor\" (lustiger Rat) to the electors of Saxony (fig. 18). Over one hundred years ago, Friedrich Ebeling published an excellent study of Taubmann's life and writings, together with a collection of his jests and a bouquet of his Latin poems. It is still today the best work on Taubmann, who was born in 1565 in Wonsees, near Bayreuth in Franc ...",
+        "byte_size": 8090203,
+        "sha256": "401e40ab851380f30f2382b223d3bb27aa9ab6d9a5308ae790c3fa98fde59313"
       },
       {
-        "page_no": 373,
-        "file_idx": 372,
+        "page_no": 304,
+        "file_idx": 303,
         "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "vice set for 6:00 P.M. in the summer, and directly after supper in the large common room during the winter; the prayers were to include special thanks to the territorial prince for his benevolence. And in 1573, Schenck's ordinance described this evening service as a half-hour service with Bible reading and preaching as well as prayers of thanks. $ ^{93} $ Perhaps this was merely a case of ordinary practice becoming more and more explicit in the records, but it seems to indicate an intensified religious life for residents of the hospital, with two services on normal weekdays in addition to special holiday services, the two Sunday sermons, and the extra services on Wednesday and Friday mentioned by Letzener in 1588. The privileged life of semimonasticism also demanded a higher standard of social behavior. This is why residents of the hospital were not allowed to leave the institution to visit nearby villages. The rule was just as hard to enforce as it had been in the days when Haina was a monastery. In 1573, the superintendent, Reinhard Schenck zu Schweinsberg, observed that some of the brethren at Haina were “involved in all kinds of crafts, commerce, and trading, even on Sundays; and they go out weekly to the villages and attend church fairs and weddings, where they obtain wine and beer and pass the time in drunkenness, immorality [fornication], and wantonness; all of which mig ...",
-        "byte_size": 9359269,
-        "sha256": "f87c89993c4ae404de86d26cd04a3a3ad993daa1e0ddbc43c974588aedfd0ff3"
+        "ocr_excerpt": "tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epileptics in particular because a folk etymology connected the “falling sickness” (vallendes siechtum) with Valentine. The miracle book for Diepoldskichen begins in 1420 and lists 2,914 miracles between that date and 1691, 95 percent of them from the period after 1535. $ ^{33} $ The shrine to St. Rasso in Grafrath (Wörth on the Amper, 18 miles west of Munich) recorded 5,173 miracles between 1444 and 1518, and another 7,000 by the end of the eighteenth century, with a characteristic steep decline between 1514 and about 1560. $ ^{34} $ The common claim among Erasmians and Protestant reformers that the age of miracles was over must have struck devout pilgrims from Bavaria and Austria as bizarre and easily disproved. Literally hundreds of shrines sprang up between 1400 and 1700, and each one could demonstrate its power with lists of wondrous cures and “miracles.” ## LATE MEDIEVAL MIRACLES IN ## THE RHINELAND We can get closer to the mad by looking at several specific miracle books in which we find vivid case histories. One of the most interesting miracle books is that of the monastery of Eberhardsklausen on the Mosel River, downstream from Trier. The ...",
+        "byte_size": 8036205,
+        "sha256": "ee6b085a7521f597308fc7293b83b76606c875b9c7d2d2b35deccd56c27fafa8"
       }
     ]
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote",
-    "request_mode": "anchor_rebind",
+    "cluster_id": "toc-ch-005-courtfoolsandtheirfollyi:nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi:endnote",
+    "request_mode": "note_only",
     "page_context_count": 8,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01105\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01106\",\n    \"anchor_id\": \"anchor-01044\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01106 (marker 79) corresponds to the anchor at page 367 (OCR excerpt shows '...artisans.”$^{79}$'). The screenshot of page 347 confirms footnote 79 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01112\",\n    \"anchor_id\": \"anchor-01050\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01116\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01054\",\n    \"confidence\": 1.0,\n    \"reason\": \"The rebind candidate list contains synthetic anchors for markers 19, 8, and 30 on page 372. These correspond to fragments of footnote 90 in the screenshot (page 352), which lists multiple cases with dates. Since these are synthetic fragments derived from a single valid footnote already matched (fn-01116), they should be ignored as separate entities.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"The provided JSON input contains 'unmatched_note_items' (fn-00764 to fn-00771) but the 'unmatched_anchors' list is empty. This indicates that while the note texts are available, the corresponding structural anchor records for the superscript numbers (59-66) in the text are missing from the input data. Without valid anchor_ids in the input, I cannot perform 'match' actions which require an existing anchor_id. Additionally, the page images provided (264-270, 284) do not cover the full range of pages implied by the note items (up to page 286/290), preventing a complete verification of all notes via screenshot.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "fn-01105",
-      "anchor_id": "anchor-01044",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01106",
-      "anchor_id": "anchor-01044",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "The note item fn-01106 (marker 79) corresponds to the anchor at page 367 (OCR excerpt shows '...artisans.”$^{79}$'). The screenshot of page 347 confirms footnote 79 is located there and matches the content in the note item."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01112",
-      "anchor_id": "anchor-01050",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01116",
-      "anchor_id": "anchor-01054",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item."
-    },
-    {
-      "action": "ignore_ref",
+      "action": "needs_review",
       "note_item_id": "",
-      "anchor_id": "anchor-01054",
+      "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The rebind candidate list contains synthetic anchors for markers 19, 8, and 30 on page 372. These correspond to fragments of footnote 90 in the screenshot (page 352), which lists multiple cases with dates. Since these are synthetic fragments derived from a single valid footnote already matched (fn-01116), they should be ignored as separate entities."
+      "confidence": 0.0,
+      "reason": "The provided JSON input contains 'unmatched_note_items' (fn-00764 to fn-00771) but the 'unmatched_anchors' list is empty. This indicates that while the note texts are available, the corresponding structural anchor records for the superscript numbers (59-66) in the text are missing from the input data. Without valid anchor_ids in the input, I cannot perform 'match' actions which require an existing anchor_id. Additionally, the page images provided (264-270, 284) do not cover the full range of pages implied by the note items (up to page 286/290), preventing a complete verification of all notes via screenshot."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-007-madnessashelplessnesstwo:toc-ch-007-madnessashelplessnesstwo:footnote",
-    "chapter_title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "fn-01105",
-        "anchor_id": "anchor-01044",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01106",
-        "anchor_id": "anchor-01044",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01106 (marker 79) corresponds to the anchor at page 367 (OCR excerpt shows '...artisans.”$^{79}$'). The screenshot of page 347 confirms footnote 79 is located there and matches the content in the note item."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01112",
-        "anchor_id": "anchor-01050",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01116",
-        "anchor_id": "anchor-01054",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item."
-      },
-      {
-        "action": "ignore_ref",
+        "action": "needs_review",
         "note_item_id": "",
-        "anchor_id": "anchor-01054",
+        "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The rebind candidate list contains synthetic anchors for markers 19, 8, and 30 on page 372. These correspond to fragments of footnote 90 in the screenshot (page 352), which lists multiple cases with dates. Since these are synthetic fragments derived from a single valid footnote already matched (fn-01116), they should be ignored as separate entities."
-      }
-    ],
-    "auto_selected_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-01105",
-        "anchor_id": "anchor-01044",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01105 (marker 78) corresponds to the anchor at page 367 (OCR excerpt shows '...table 7.7). $ ^{78} $'). The screenshot of page 347 confirms footnote 78 is located there and matches the content in the note item."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01112",
-        "anchor_id": "anchor-01050",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01116",
-        "anchor_id": "anchor-01054",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01116 (marker 90) corresponds to the anchor at page 372 (OCR excerpt shows '...Christian brethren.”$^{90}$'). The screenshot of page 352 confirms footnote 90 is located there and matches the content in the note item."
-      }
-    ],
-    "auto_applied_actions": [
-      {
-        "link_id": "link-01134",
-        "action": "match",
-        "note_item_id": "fn-01112",
-        "anchor_id": "anchor-01050",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "The note item fn-01112 (marker 86) corresponds to the anchor at page 371 (OCR excerpt shows '...offense.$^{86}$'). The screenshot of page 352 confirms footnote 86 is located there and matches the content in the note item."
+        "confidence": 0.0,
+        "reason": "The provided JSON input contains 'unmatched_note_items' (fn-00764 to fn-00771) but the 'unmatched_anchors' list is empty. This indicates that while the note texts are available, the corresponding structural anchor records for the superscript numbers (59-66) in the text are missing from the input data. Without valid anchor_ids in the input, I cannot perform 'match' actions which require an existing anchor_id. Additionally, the page images provided (264-270, 284) do not cover the full range of pages implied by the note items (up to page 286/290), preventing a complete verification of all notes via screenshot."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 24544,
-    "completion_tokens": 651,
-    "total_tokens": 25195,
+    "prompt_tokens": 24076,
+    "completion_tokens": 185,
+    "total_tokens": 24261,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 28312
+    "duration_ms": 22751
   }
 }

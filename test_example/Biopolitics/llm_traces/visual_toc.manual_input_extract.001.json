@@ -23,14 +23,14 @@
     "source": "pdf",
     "file_idx": 0
   },
-  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Avertissement\",\n    \"depth\": 0,\n    \"printed_page\": 7,\n    \"visual_order\": 1,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"COURS, ANNÉE 1978-1979\",\n    \"depth\": 1,\n    \"printed_page\": 1,\n    \"visual_order\": 2,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Leçon du 10 janvier 1979\",\n    \"depth\": 0,\n    \"printed_page\": 3,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Leçon du 17 janvier 1979\",\n    \"depth\": 0,\n    \"printed_page\": 29,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Leçon du 24 janvier 1979\",\n    \"depth\": 0,\n    \"printed_page\": 53,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"title\": \"Avertissement\",\n    \"depth\": 0,\n    \"printed_page\": \"VII\",\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"COURS, ANNÉE 1978-1979\",\n    \"depth\": 1,\n    \"printed_page\": 1,\n    \"visual_order\": 2,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Leçon du 10 janvier 1979\",\n    \"depth\": 0,\n    \"printed_page\": 3,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Leçon du 17 janvier 1979\",\n    \"depth\": 0,\n    \"printed_page\": 29,\n    \"visual_order\": 4,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Leçon du 24 janvier 1979\",\n    \"depth\": 0,\n    \"printed_page\": 53,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
   "response_parsed": [
     {
       "title": "Avertissement",
       "depth": 0,
-      "printed_page": 7,
+      "printed_page": "VII",
       "visual_order": 1,
-      "role_hint": "back_matter",
+      "role_hint": "content",
       "endnotes_candidate": false,
       "endnotes_subentry_candidate": false
     },
@@ -76,9 +76,9 @@
       {
         "title": "Avertissement",
         "depth": 0,
-        "printed_page": 7,
+        "printed_page": null,
         "visual_order": 1,
-        "role_hint": "back_matter",
+        "role_hint": "content",
         "endnotes_candidate": false,
         "endnotes_subentry_candidate": false
       },
@@ -126,8 +126,8 @@
     "model_id": "qwen3.6-plus",
     "request_count": 1,
     "prompt_tokens": 1297,
-    "completion_tokens": 403,
-    "total_tokens": 1700,
+    "completion_tokens": 401,
+    "total_tokens": 1698,
     "doc_id": "0d285c0800db",
     "slug": "",
     "context": {
@@ -136,6 +136,6 @@
     }
   },
   "timing": {
-    "duration_ms": 11067
+    "duration_ms": 8447
   }
 }

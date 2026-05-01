@@ -1,0 +1,276 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "qwen",
+    "model_id": "qwen3.6-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-003-academicpsychiatryandthe:toc-ch-003-academicpsychiatryandthe:footnote\",\n  \"chapter_title\": \"Academic “Psychiatry” and the Rise of Galenic Observation\",\n  \"page_range\": [\n    171,\n    191\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 171,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 3.3</div> <div style=\\\"text-align: center;\\\">Printed Editions of Galen, 1473–1600</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>De Atra Bile $ ^{*} $</td><td style='text-align: center; word-wrap: break-word;'>Collected Works</td><td style='text-align: center; word-wrap: break-word;'>Total Galen Editions</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1473-1480</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>3</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1481-1500</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>18</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1501-1520</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word ...\"\n    },\n    {\n      \"page_no\": 178,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 3.5</div> <div style=\\\"text-align: center;\\\">Medical Dissertations of \\\"Psychiatric Interest,\\\" 1550–1650</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>Melancholy</td><td style='text-align: center; word-wrap: break-word;'>Hypochondria</td><td style='text-align: center; word-wrap: break-word;'>Mania</td><td style='text-align: center; word-wrap: break-word;'>Phrenesis</td><td style='text-align: center; word-wrap: break-word;'>Total Dissertations</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1550-1580</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>9</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1581-1590</td><td style='text-align: center; word-wrap: break-word;'>3 $ ^{a} $</td><td style='text-align: center; word-wrap: ...\"\n    },\n    {\n      \"page_no\": 184,\n      \"ocr_excerpt\": \"works on melancholy, and once there were enough learned physicians available to deploy this system of diagnosis and treatment. This is nowhere more evident than at the dozens of princely courts of the Holy Roman Empire, where courtiers and anxious family members began increasingly to take the advice of their increasingly influential personal physicians. When Duke Wilhelm II (the Younger) of Braunschweig-Lüneburg (1535–1592) went mad, for example, he was confined to his beautiful new palace at Celle and subjected to an elaborate therapeutic regime that mixed rigorous Galenic remedies for melancholy with daily Lutheran sermons. $ ^{65} $ His court physicians dominated these scenes, but when they failed to obtain results, the pious prince was given adventurous Paracelsan remedies for his sad condition. By the late sixteenth century, every prince who suffered attacks of depression, hallucination, confusion, or insanity was treated in the same way. Duke Albrecht Friedrich of Prussia (1553–1618) and Duke Johann Wilhelm of Jülich-Cleves are only the two best-known examples. But it seemed to some observers a gloomy comment on the state of the declining world that the Holy Roman Emperor him ...\"\n    },\n    {\n      \"page_no\": 191,\n      \"ocr_excerpt\": \"with chains until he was restored to health by the application of wet poul- tices and by moist foods. $ ^{86} $ In addition to his concern with sexual anxieties, Schenck revealed a deep-seated concern with demons. Repeatedly, he told of cases of supposed demonic possession that turned out on medical inspection to be medical problems. Horrible cases of lycanthropy, cribbed from Aetius and Pliny, Jost Fincel and Johann Weyer, all proved to be cases of melancholy, \\\"of which there is little doubt.\\\"⁸⁷ Stories of nightmare encounters with in-cubus demons were also susceptible of the same medical account. Borrowing a story from Jason Pratensis, Schenck told of a man who was suffering from a dreadful wasting illness. According to the patient, a woman came to him during the night and pressed his chest so tightly that he could scarcely breathe. Doctors had told him that this was all fantasy, but the man insisted that he was awake during these attacks and in full possession of his faculties. No matter how he struggled, he could not beat off the phantom succubus, and he feared that he was bewitched. To these symptoms were added frightful pains in the bladder and a vile choking sensation. At la ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00350\",\n      \"marker\": \"*\",\n      \"page_no\": 171,\n      \"paragraph_index\": 2,\n      \"source_text\": \"<table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>De Atra Bile $ ^{*} $</td><td style='text-align: center; wor ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00352\",\n      \"marker\": \"*\",\n      \"page_no\": 171,\n      \"paragraph_index\": 12,\n      \"source_text\": \"<table><tr><td></td><td>De Atra Bile $ ^{*} $</td><td>Collected Works</td><td>Total Galen Editions</td></tr><tr><td>1473-1480</td><td>0</td><td>0</td><td>3</td></tr><tr><td>1481-1500</td><td>1</td><td>1</td><td>18</td></tr><tr><td>1501-1520 ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00381\",\n      \"marker\": \"56\",\n      \"page_no\": 178,\n      \"paragraph_index\": 7,\n      \"source_text\": \"Nowadays psychiatric topics hardly dominate the general field of medical inquiry, but in the sixteenth and early seventeenth centuries, dissertations on the mental illnesses were surprisingly common, owing no doubt to the fact that these di ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00402\",\n      \"marker\": \"65\",\n      \"page_no\": 184,\n      \"paragraph_index\": 0,\n      \"source_text\": \"works on melancholy, and once there were enough learned physicians available to deploy this system of diagnosis and treatment. This is nowhere more evident than at the dozens of princely courts of the Holy Roman Empire, where courtiers and ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00431\",\n      \"marker\": \"90\",\n      \"page_no\": 191,\n      \"paragraph_index\": 3,\n      \"source_text\": \"This last case bears a suspicious resemblance to a remarkable theory pronounced by Levinus Lemnius, a physician from Zirikzee (1505–1568) whose De miraculis occultis naturae libri iiiii ran through numerous editions. Lemnius made a valiant ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-academicpsychiatryandthe:toc-ch-003-academicpsychiatryandthe:footnote",
+      "chapter_title": "Academic “Psychiatry” and the Rise of Galenic Observation",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        171,
+        191
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 361,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00350",
+          "chapter_id": "toc-ch-003-academicpsychiatryandthe",
+          "page_no": 171,
+          "paragraph_index": 2,
+          "char_start": 193,
+          "char_end": 201,
+          "source_marker": "$ ^{*} $",
+          "normalized_marker": "*",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "<table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>De Atra Bile $ ^{*} $</td><td style='text-align: center; word-wrap: break-word;'>Collected Works</td><td style='text-align: center; word-wrap: break-word;'>Total Galen Editions</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1473-1480</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>3</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1481-1500</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>18</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1501-1520</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>3</td><td style='text-align: center; word-wrap: break-word;'>35</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1521-1540</td><td style='text-align: center; word-wrap: break-word;'>5</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>203</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1541-1560</td><td style='text-align: center; word-wrap: break-word;'>9</td><td style='text-align: center; word-wrap: break-word;'>7</td><td style='text-align: center; word-wrap: break-word;'>198</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1561-1580</td><td style='text-align: center; word-wrap: break-word;'>4</td><td style='text-align: center; word-wrap: break-word;'>4</td><td style='text-align: center; word-wrap: break-word;'>69</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1581-1600</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>42</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Total</td><td style='text-align: center; word-wrap: break-word;'>22</td><td style='text-align: center; word-wrap: break-word;'>19</td><td style='text-align: center; word-wrap: break-word;'>568</td></tr></table>",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 363,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00352",
+          "chapter_id": "toc-ch-003-academicpsychiatryandthe",
+          "page_no": 171,
+          "paragraph_index": 12,
+          "char_start": 37,
+          "char_end": 45,
+          "source_marker": "$ ^{*} $",
+          "normalized_marker": "*",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "<table><tr><td></td><td>De Atra Bile $ ^{*} $</td><td>Collected Works</td><td>Total Galen Editions</td></tr><tr><td>1473-1480</td><td>0</td><td>0</td><td>3</td></tr><tr><td>1481-1500</td><td>1</td><td>1</td><td>18</td></tr><tr><td>1501-1520</td><td>1</td><td>3</td><td>35</td></tr><tr><td>1521-1540</td><td>5</td><td>2</td><td>203</td></tr><tr><td>1541-1560</td><td>9</td><td>7</td><td>198</td></tr><tr><td>1561-1580</td><td>4</td><td>4</td><td>69</td></tr><tr><td>1581-1600</td><td>2</td><td>2</td><td>42</td></tr><tr><td>Total</td><td>22</td><td>19</td><td>568</td></tr></table>",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 392,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00381",
+          "chapter_id": "toc-ch-003-academicpsychiatryandthe",
+          "page_no": 178,
+          "paragraph_index": 7,
+          "char_start": 810,
+          "char_end": 819,
+          "source_marker": "$ ^{56} $",
+          "normalized_marker": "56",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Nowadays psychiatric topics hardly dominate the general field of medical inquiry, but in the sixteenth and early seventeenth centuries, dissertations on the mental illnesses were surprisingly common, owing no doubt to the fact that these disorders had also figured prominently among the concerns of Galen and Hippocrates. $ ^{55} $ As such psychiatric topics entered the medical mainstream in Germany, the visible influence of Galen actually rose. Of the 241 disputations registered by Oskar Diethelm for the period 1550–1650 (in a list that is far from complete), fully 138 dealt with just four classical disorders: melancholy, hypochondriasis (and hypochondriacal melancholy), mania, and phrenesis (see table 3.5). After 1600, theses on hysteria, another classical topic, became increasingly common as well. $ ^{56} $ It is obvious, however, that the largest fascination was with melancholy. By the last decade of the sixteenth century, of 33 dissertations in Diethelm’s list, 10 dealt with disorders of the black bile (as did a further 23 of the 79 dissertations from the period 1601 to 1620). For physicians, this was truly the “age of melancholy,” although the theme of melancholy madness remained for a century one of the standard topics for medical humanists and fledgling physicians alike.",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 413,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00402",
+          "chapter_id": "toc-ch-003-academicpsychiatryandthe",
+          "page_no": 184,
+          "paragraph_index": 0,
+          "char_start": 634,
+          "char_end": 643,
+          "source_marker": "$ ^{65} $",
+          "normalized_marker": "65",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "works on melancholy, and once there were enough learned physicians available to deploy this system of diagnosis and treatment. This is nowhere more evident than at the dozens of princely courts of the Holy Roman Empire, where courtiers and anxious family members began increasingly to take the advice of their increasingly influential personal physicians. When Duke Wilhelm II (the Younger) of Braunschweig-Lüneburg (1535–1592) went mad, for example, he was confined to his beautiful new palace at Celle and subjected to an elaborate therapeutic regime that mixed rigorous Galenic remedies for melancholy with daily Lutheran sermons. $ ^{65} $ His court physicians dominated these scenes, but when they failed to obtain results, the pious prince was given adventurous Paracelsan remedies for his sad condition. By the late sixteenth century, every prince who suffered attacks of depression, hallucination, confusion, or insanity was treated in the same way. Duke Albrecht Friedrich of Prussia (1553–1618) and Duke Johann Wilhelm of Jülich-Cleves are only the two best-known examples. But it seemed to some observers a gloomy comment on the state of the declining world that the Holy Roman Emperor himself, the secretive and fearful Rudolf II (1552–1612), was occasionally so afflicted by rage, so frantic with suspicion, so proud in his refusal to marry, that he set his melancholy stamp upon his whole court at Prague. It was indeed the age of the melancholy prince, an age created in large part by the classically trained physicians who diagnosed and treated their mad princes and princesses with the slogans of ancient Greek medicine.",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        },
+        {
+          "row_id": 442,
+          "doc_id": "67356d1f7d9a",
+          "anchor_id": "anchor-00431",
+          "chapter_id": "toc-ch-003-academicpsychiatryandthe",
+          "page_no": 191,
+          "paragraph_index": 3,
+          "char_start": 420,
+          "char_end": 429,
+          "source_marker": "$ ^{90} $",
+          "normalized_marker": "90",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "This last case bears a suspicious resemblance to a remarkable theory pronounced by Levinus Lemnius, a physician from Zirikzee (1505–1568) whose De miraculis occultis naturae libri iiiii ran through numerous editions. Lemnius made a valiant effort to explain physically and by a Platonic theory of remembrance how it came about that melancholic madmen could sometimes speak foreign languages they had never heard before. $ ^{90} $ We know that Schenck had read Lemnius, for he cited him often, but he claimed to have discovered this case of what we might call “melancholia latinophonia” in Pietro d’Abano’s Commentary on Aristotle’s Problems. Wherever he actually found the case, it is a good example of how far a physical reductionist might be willing to go in order to deny the actual influence of demons and demonic possession, even while conceding, if pushed, that demonic possession was possible.",
+          "created_at": 1777565678,
+          "updated_at": 1777565678
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 171,
+        "file_idx": 170,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 3.3</div> <div style=\"text-align: center;\">Printed Editions of Galen, 1473–1600</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>De Atra Bile $ ^{*} $</td><td style='text-align: center; word-wrap: break-word;'>Collected Works</td><td style='text-align: center; word-wrap: break-word;'>Total Galen Editions</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1473-1480</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>3</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1481-1500</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>18</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1501-1520</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>3</td><td style='text-align: center; word-wrap: break-word;'>35</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1521-1540</td><td style='text-align: center; word-wrap: break-wor ...",
+        "byte_size": 5275853,
+        "sha256": "45a3f649c5ae03e6b9a06e892e34f89337ff73fe9a0878cff84cc1d1ff97e2b2"
+      },
+      {
+        "page_no": 178,
+        "file_idx": 177,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 3.5</div> <div style=\"text-align: center;\">Medical Dissertations of \"Psychiatric Interest,\" 1550–1650</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td style='text-align: center; word-wrap: break-word;'></td><td style='text-align: center; word-wrap: break-word;'>Melancholy</td><td style='text-align: center; word-wrap: break-word;'>Hypochondria</td><td style='text-align: center; word-wrap: break-word;'>Mania</td><td style='text-align: center; word-wrap: break-word;'>Phrenesis</td><td style='text-align: center; word-wrap: break-word;'>Total Dissertations</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1550-1580</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>0</td><td style='text-align: center; word-wrap: break-word;'>2</td><td style='text-align: center; word-wrap: break-word;'>9</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>1581-1590</td><td style='text-align: center; word-wrap: break-word;'>3 $ ^{a} $</td><td style='text-align: center; word-wrap: break-word;'>1</td><td style='text-align: center; word-wrap: break-word;'>1 $ ^{a} $</td><td style='text-align: center; word-wrap: break-word;'>6 $ ^{a} $</td><td style='text-align: center; word-wrap: ...",
+        "byte_size": 6907920,
+        "sha256": "c80b91bb77e23ff2666058f5471d1367512af51ef564df24fd9b8e7893f311e9"
+      },
+      {
+        "page_no": 184,
+        "file_idx": 183,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "works on melancholy, and once there were enough learned physicians available to deploy this system of diagnosis and treatment. This is nowhere more evident than at the dozens of princely courts of the Holy Roman Empire, where courtiers and anxious family members began increasingly to take the advice of their increasingly influential personal physicians. When Duke Wilhelm II (the Younger) of Braunschweig-Lüneburg (1535–1592) went mad, for example, he was confined to his beautiful new palace at Celle and subjected to an elaborate therapeutic regime that mixed rigorous Galenic remedies for melancholy with daily Lutheran sermons. $ ^{65} $ His court physicians dominated these scenes, but when they failed to obtain results, the pious prince was given adventurous Paracelsan remedies for his sad condition. By the late sixteenth century, every prince who suffered attacks of depression, hallucination, confusion, or insanity was treated in the same way. Duke Albrecht Friedrich of Prussia (1553–1618) and Duke Johann Wilhelm of Jülich-Cleves are only the two best-known examples. But it seemed to some observers a gloomy comment on the state of the declining world that the Holy Roman Emperor himself, the secretive and fearful Rudolf II (1552–1612), was occasionally so afflicted by rage, so frantic with suspicion, so proud in his refusal to marry, that he set his melancholy stamp upon his who ...",
+        "byte_size": 8246285,
+        "sha256": "27c21ab3bf71054b30e7c11638a3f6689be61333894e9da9e8788761150e1ac1"
+      },
+      {
+        "page_no": 191,
+        "file_idx": 190,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
+        "ocr_excerpt": "with chains until he was restored to health by the application of wet poul- tices and by moist foods. $ ^{86} $ In addition to his concern with sexual anxieties, Schenck revealed a deep-seated concern with demons. Repeatedly, he told of cases of supposed demonic possession that turned out on medical inspection to be medical problems. Horrible cases of lycanthropy, cribbed from Aetius and Pliny, Jost Fincel and Johann Weyer, all proved to be cases of melancholy, \"of which there is little doubt.\"⁸⁷ Stories of nightmare encounters with in-cubus demons were also susceptible of the same medical account. Borrowing a story from Jason Pratensis, Schenck told of a man who was suffering from a dreadful wasting illness. According to the patient, a woman came to him during the night and pressed his chest so tightly that he could scarcely breathe. Doctors had told him that this was all fantasy, but the man insisted that he was awake during these attacks and in full possession of his faculties. No matter how he struggled, he could not beat off the phantom succubus, and he feared that he was bewitched. To these symptoms were added frightful pains in the bladder and a vile choking sensation. At last his condition improved, not for any medical reason, but because he began to see his situation as funny.⁸⁸ Even apparently secure proofs of demonic possession did not persuade Schenck. He related th ...",
+        "byte_size": 9742609,
+        "sha256": "59f92d2b81f4fdd25f96863c93f4dae441ca59e35a916051ce1fc1d8fbf1ba2b"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-academicpsychiatryandthe:toc-ch-003-academicpsychiatryandthe:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 4,
+    "image_refused": false
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00350\",\n    \"marker\": \"*\",\n    \"note_text\": \"Includes separate editions and reprints as part of an edition of the collected works.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text corresponding to the asterisk marker in Table 3.3 is clearly visible at the bottom of page 171 (Image 1), but was not captured in the structured data.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00352\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate anchor for the same table footnote '*' on page 171; the note content is handled by the first anchor.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00381\",\n    \"marker\": \"56\",\n    \"note_text\": \"I have tabulated works listed in Oskar Diethelm, Medical Dissertations of Psychiatric Interest Printed Before 1750 (Basel, 1971); see also G. S. Rousseau, “‘A Strange Pathology’: Hysteria in the Early Modern World, 1500–1800,” in Hysteria Beyond Freud, ed. Sander L. Gilman et al. (Berkeley and Los Angeles, 1993), pp. 91–221.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker 56 is clearly visible at the bottom of page 158 (Image 2), but was not captured in the structured data.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00402\",\n    \"marker\": \"65\",\n    \"note_text\": \"I have treated his case and the others mentioned in this paragraph in Mad Princes.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text for marker 65 is clearly visible at the bottom of page 164 (Image 3), but was not captured in the structured data.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Anchor 'anchor-00431' (marker 90) is located on page 171 (Image 4). The footnotes visible on this page are 86, 87, 88, 89, and 90. However, the provided OCR excerpt for page 171 cuts off before the footnote section, and no other images show page 171's footnotes clearly enough to extract the full text for note 90 without risk of error. Needs manual verification or better image coverage.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00350",
+      "anchor_phrase": "",
+      "marker": "*",
+      "note_text": "Includes separate editions and reprints as part of an edition of the collected works.",
+      "confidence": 1.0,
+      "reason": "The footnote text corresponding to the asterisk marker in Table 3.3 is clearly visible at the bottom of page 171 (Image 1), but was not captured in the structured data."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "anchor-00352",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Duplicate anchor for the same table footnote '*' on page 171; the note content is handled by the first anchor."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00381",
+      "anchor_phrase": "",
+      "marker": "56",
+      "note_text": "I have tabulated works listed in Oskar Diethelm, Medical Dissertations of Psychiatric Interest Printed Before 1750 (Basel, 1971); see also G. S. Rousseau, “‘A Strange Pathology’: Hysteria in the Early Modern World, 1500–1800,” in Hysteria Beyond Freud, ed. Sander L. Gilman et al. (Berkeley and Los Angeles, 1993), pp. 91–221.",
+      "confidence": 1.0,
+      "reason": "The footnote text for marker 56 is clearly visible at the bottom of page 158 (Image 2), but was not captured in the structured data."
+    },
+    {
+      "action": "synthesize_note_item",
+      "note_item_id": "",
+      "anchor_id": "anchor-00402",
+      "anchor_phrase": "",
+      "marker": "65",
+      "note_text": "I have treated his case and the others mentioned in this paragraph in Mad Princes.",
+      "confidence": 1.0,
+      "reason": "The footnote text for marker 65 is clearly visible at the bottom of page 164 (Image 3), but was not captured in the structured data."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.0,
+      "reason": "Anchor 'anchor-00431' (marker 90) is located on page 171 (Image 4). The footnotes visible on this page are 86, 87, 88, 89, and 90. However, the provided OCR excerpt for page 171 cuts off before the footnote section, and no other images show page 171's footnotes clearly enough to extract the full text for note 90 without risk of error. Needs manual verification or better image coverage."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00350",
+        "anchor_phrase": "",
+        "marker": "*",
+        "note_text": "Includes separate editions and reprints as part of an edition of the collected works.",
+        "confidence": 1.0,
+        "reason": "The footnote text corresponding to the asterisk marker in Table 3.3 is clearly visible at the bottom of page 171 (Image 1), but was not captured in the structured data."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00352",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Duplicate anchor for the same table footnote '*' on page 171; the note content is handled by the first anchor."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00381",
+        "anchor_phrase": "",
+        "marker": "56",
+        "note_text": "I have tabulated works listed in Oskar Diethelm, Medical Dissertations of Psychiatric Interest Printed Before 1750 (Basel, 1971); see also G. S. Rousseau, “‘A Strange Pathology’: Hysteria in the Early Modern World, 1500–1800,” in Hysteria Beyond Freud, ed. Sander L. Gilman et al. (Berkeley and Los Angeles, 1993), pp. 91–221.",
+        "confidence": 1.0,
+        "reason": "The footnote text for marker 56 is clearly visible at the bottom of page 158 (Image 2), but was not captured in the structured data."
+      },
+      {
+        "action": "synthesize_note_item",
+        "note_item_id": "",
+        "anchor_id": "anchor-00402",
+        "anchor_phrase": "",
+        "marker": "65",
+        "note_text": "I have treated his case and the others mentioned in this paragraph in Mad Princes.",
+        "confidence": 1.0,
+        "reason": "The footnote text for marker 65 is clearly visible at the bottom of page 164 (Image 3), but was not captured in the structured data."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.0,
+        "reason": "Anchor 'anchor-00431' (marker 90) is located on page 171 (Image 4). The footnotes visible on this page are 86, 87, 88, 89, and 90. However, the provided OCR excerpt for page 171 cuts off before the footnote section, and no other images show page 171's footnotes clearly enough to extract the full text for note 90 without risk of error. Needs manual verification or better image coverage."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 12508,
+    "completion_tokens": 659,
+    "total_tokens": 13167,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 25743
+  }
+}

@@ -126,7 +126,6 @@ from .fallback import (
     _default_toc_alignment_summary,
     _default_toc_role_summary,
     _default_toc_semantic_summary,
-    _find_chapter_by_page,
     _infer_back_matter_start_page,
     _mark_suppressed_candidates,
     _merge_section_heads,
@@ -141,6 +140,99 @@ from .toc_semantics import (
     _compact_unique_titles,
     _compute_toc_role_summary,
 )
+
+_FALLBACK_SECTION_HARD_REJECT_REASONS = {
+    "invalid_title",
+    "partition_conflict",
+    "note_partition",
+    "note_heading",
+    "non_body_family",
+}
+_BARE_CHAPTER_NUMBER_RE = re.compile(r"^\s*(?:\d+|[ivxlcdm]+)[\.\):\-–—]?\s+", re.IGNORECASE)
+
+
+def _chapter_title_keys_for_visual_match(title: str) -> set[str]:
+    normalized = normalize_title(title)
+    keys = {chapter_title_match_key(normalized)}
+    stripped = _BARE_CHAPTER_NUMBER_RE.sub("", normalized).strip()
+    if stripped and stripped != normalized:
+        keys.add(chapter_title_match_key(stripped))
+    return {key for key in keys if key}
+
+
+def _strict_chapter_id_for_page(chapters: list[dict], page_no: int) -> str:
+    safe_page_no = int(page_no or 0)
+    if safe_page_no <= 0:
+        return ""
+    for chapter in sorted(chapters, key=lambda item: int(item.get("start_page") or 0)):
+        chapter_id = str(chapter.get("chapter_id") or "").strip()
+        if not chapter_id:
+            continue
+        pages = {int(page) for page in (chapter.get("pages") or []) if int(page) > 0}
+        if safe_page_no in pages:
+            return chapter_id
+        start_page = int(chapter.get("start_page") or 0)
+        end_page = int(chapter.get("end_page") or 0)
+        if start_page > 0 and end_page >= start_page and start_page <= safe_page_no <= end_page:
+            return chapter_id
+    return ""
+
+
+def _has_section_heading_evidence(section: dict) -> bool:
+    for candidate in section.get("matched_candidates") or []:
+        source = str(candidate.get("source") or "")
+        block_label = str(candidate.get("block_label") or "")
+        if source == "markdown_heading":
+            return True
+        if source == "ocr_block" and block_label in {"doc_title", "paragraph_title"}:
+            return True
+    return False
+
+
+def _visual_fallback_section_heads(
+    classified_sections: list[dict],
+    *,
+    chapters: list[dict],
+    page_roles: dict[int, str],
+) -> list[dict]:
+    chapter_title_keys = {
+        str(chapter.get("chapter_id") or "").strip(): _chapter_title_keys_for_visual_match(
+            str(chapter.get("title") or "")
+        )
+        for chapter in chapters
+        if str(chapter.get("chapter_id") or "").strip()
+    }
+    rows: list[dict] = []
+    for section in classified_sections:
+        title = normalize_title(section.get("title") or "")
+        page_no = int(section.get("start_page") or section.get("page_no") or 0)
+        if not title or page_no <= 0:
+            continue
+        if str(page_roles.get(page_no) or "") not in {"body", "front_matter"}:
+            continue
+        if str(section.get("reject_reason") or "") in _FALLBACK_SECTION_HARD_REJECT_REASONS:
+            continue
+        if not _has_section_heading_evidence(section):
+            continue
+        chapter_id = _strict_chapter_id_for_page(chapters, page_no)
+        if not chapter_id:
+            continue
+        if chapter_title_match_key(title) in chapter_title_keys.get(chapter_id, set()):
+            continue
+        rows.append(
+            {
+                "section_head_id": "",
+                "chapter_id": chapter_id,
+                "text": title,
+                "title": title,
+                "normalized_text": normalize_title(title),
+                "page_no": page_no,
+                "level": 2,
+                "source": "fallback",
+            }
+        )
+    return rows
+
 
 def build_chapter_skeleton(
     page_partitions: list[PagePartitionRecord],
@@ -185,20 +277,17 @@ def build_chapter_skeleton(
 
     if visual_chapters_raw:
         chapters_raw = list(visual_chapters_raw)
-        remapped_fallback_heads: list[dict] = []
-        for row in fallback_section_heads_raw:
-            remapped = dict(row)
-            page_no = int(remapped.get("page_no") or 0)
-            remapped["chapter_id"] = _find_chapter_by_page(chapters_raw, page_no)
-            if str(remapped.get("chapter_id") or "").strip():
-                remapped_fallback_heads.append(remapped)
-        merged_section_fallbacks = _merge_section_heads(visual_section_heads_raw, remapped_fallback_heads)
+        merged_section_fallbacks = list(visual_section_heads_raw)
         chapter_source_summary = dict(visual_meta.get("chapter_source_summary") or {})
         chapter_source_summary.setdefault("source", "visual_toc")
         chapter_source_summary.setdefault("chapter_level", None)
         chapter_source_summary.setdefault("visual_toc_chapter_count", len(visual_chapters_raw))
         chapter_source_summary.setdefault("legacy_chapter_count", len(fallback_chapters_raw))
         chapter_source_summary.setdefault("fallback_used", False)
+        chapter_source_summary.setdefault(
+            "body_section_fallback_suppressed",
+            max(0, len(fallback_section_heads_raw)),
+        )
         source_hint: ChapterSource = "visual_toc"
     else:
         chapters_raw = list(fallback_chapters_raw)

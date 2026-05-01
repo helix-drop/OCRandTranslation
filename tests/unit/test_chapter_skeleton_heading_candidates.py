@@ -17,5 +17,6 @@ _attach_selected_tests(
     [
         "test_fallback_does_not_promote_sentence_like_paragraph_title_to_chapter",
         "test_section_heads_keep_suppressed_candidates_with_reject_reason",
+        "test_visual_toc_suppresses_body_guessed_section_heads",
     ],
 )

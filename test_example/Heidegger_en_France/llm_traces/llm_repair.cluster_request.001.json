@@ -3,12 +3,12 @@
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
     "provider": "qwen",
-    "model_id": "qwen3.5-plus",
+    "model_id": "qwen3.6-plus",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
   "request_prompt": {
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-008-1desdocumentsencombrants:toc-ch-008-1desdocumentsencombrants:footnote\",\n  \"chapter_title\": \"1 Des documents encombrants: le retour de la politique\",\n  \"page_range\": [\n    201,\n    218\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 201,\n      \"ocr_excerpt\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » inde ...\"\n    },\n    {\n      \"page_no\": 218,\n      \"ocr_excerpt\": \"savante préméditation. Il est à noter que, loin d'éclairer à partir de l'entente heideggérienne de l'aletheïa le paradoxe de la «Lettre volée» (invisible par son excès même d'évidence), elle plie la découverte du mot de la vérité à la logique paradoxale, toujours valide, d'un jeu de cache-cache où ce qui est « le plus vraiment » ne se livre qu'à ses « amants ». Rien de plus étranger à Heidegger que cette érotique de l'intelligence en un jeu de société où l'esprit de notre XVIII* siècle se reconnaît beaucoup mieux que toute hellénité prétendument originaire. Aussi, plus que la parcimonie de l'allusion, c'est la nature même de ce clin d'œil qui doit nous inciter à la prudence en toute tentative d'annexion » au champ herméneutique heideggérien. Il est extrêmement difficile (et il serait sans doute vain) de vouloir décider si cette allusion relève de la simple coquetterie (puisque précisément une telle intéressante manœuvre n'est jamais si simple), si elle n'est pas plutôt sous le couvert d'un hommage la réduction maliceuse de la découverte heideggérienne d'un mot clé à une sorte de vérité éternelle réservée cependant aux gens d'esprit, ou si - tierce possibilité - elle manifeste une p ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00268\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00269\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00270\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00271\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00297\",\n      \"marker\": \"221\",\n      \"page_no\": 218,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Rien ne serait plus superficiel et plus vain que de partir en quête de traces d'heideggerianisme» chez Lacan. C'est d'ailleurs ce qu'évitera soigneusement un interprète avisé, Gérard Granel, lorsque consacrant un texte à « Lacan et Heidegge ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00611\",\n      \"note_item_id\": \"fn-00611\",\n      \"current_anchor_id\": \"synthetic-footnote-00411\",\n      \"marker\": \"65\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"65\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 36.\",\n      \"anchor_excerpt\": \"Ibid., p. 36.\"\n    },\n    {\n      \"link_id\": \"link-00612\",\n      \"note_item_id\": \"fn-00612\",\n      \"current_anchor_id\": \"synthetic-footnote-00412\",\n      \"marker\": \"66\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"66\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Voir ibid., p. 36.\",\n      \"anchor_excerpt\": \"Voir ibid., p. 36.\"\n    },\n    {\n      \"link_id\": \"link-00613\",\n      \"note_item_id\": \"fn-00613\",\n      \"current_anchor_id\": \"synthetic-footnote-00413\",\n      \"marker\": \"67\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"67\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 37.\",\n      \"anchor_excerpt\": \"Ibid., p. 37.\"\n    },\n    {\n      \"link_id\": \"link-00614\",\n      \"note_item_id\": \"fn-00614\",\n      \"current_anchor_id\": \"synthetic-footnote-00414\",\n      \"marker\": \"68\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"68\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"L'opposition à la « conception heideggérienne >> est explicite à ce propos : ibid., p.13.\",\n      \"anchor_excerpt\": \"L'opposition à la « conception heideggérienne >> est explicite à ce propos : ibid., p.13.\"\n    },\n    {\n      \"link_id\": \"link-00615\",\n      \"note_item_id\": \"fn-00615\",\n      \"current_anchor_id\": \"synthetic-footnote-00415\",\n      \"marker\": \"69\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"69\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 142.\",\n      \"anchor_excerpt\": \"Ibid., p. 142.\"\n    },\n    {\n      \"link_id\": \"link-00670\",\n      \"note_item_id\": \"fn-00670\",\n      \"current_anchor_id\": \"synthetic-footnote-00453\",\n      \"marker\": \"123\",\n      \"note_page_no\": 218,\n      \"anchor_page_no\": 218,\n      \"current_anchor_marker\": \"123\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Texte qui ne sera publié en volume qn'~ 1995 chez Galilée dans Études, pp. 45-62.\",\n      \"anchor_excerpt\": \"Texte qui ne sera publié en volume qn'~ 1995 chez Galilée dans Études, pp. 45-62.\"\n    },\n    {\n      \"link_id\": \"link-00671\",\n      \"note_item_id\": \"fn-00671\",\n      \"current_anchor_id\": \"synthetic-footnote-00454\",\n      \"marker\": \"124\",\n      \"note_page_no\": 218,\n      \"anchor_page_no\": 218,\n      \"current_anchor_marker\": \"124\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"n ne cachera pas non plus, fût-ce à un niveau encore extérieur, l'inaccessibi­lité ressentie par Heidegger lui-même devant le caractère <<baroque» du texte lacanien: voir la lettre à Medard Boss du 4 décembre 1966, citée par G. GRANEL, Étud ...\",\n      \"anchor_excerpt\": \"n ne cachera pas non plus, fût-ce à un niveau encore extérieur, l'inaccessibi­lité ressentie par Heidegger lui-même devant le caractère <<baroque» du texte lacanien: voir la lettre à Medard Boss du 4 décembre 1966, citée par G. GRANEL, Étud ...\"\n    }\n  ]\n}"
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-008-1desdocumentsencombrants:toc-ch-008-1desdocumentsencombrants:footnote\",\n  \"chapter_title\": \"1 Des documents encombrants: le retour de la politique\",\n  \"page_range\": [\n    201,\n    201\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 201,\n      \"ocr_excerpt\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » inde ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00271\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00272\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00273\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00274\",\n      \"marker\": \"4\",\n      \"page_no\": 201,\n      \"paragraph_index\": 0,\n      \"source_text\": \"d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutr ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00610\",\n      \"note_item_id\": \"fn-00610\",\n      \"current_anchor_id\": \"synthetic-footnote-00407\",\n      \"marker\": \"65\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"65\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 36.\",\n      \"anchor_excerpt\": \"Ibid., p. 36.\"\n    },\n    {\n      \"link_id\": \"link-00611\",\n      \"note_item_id\": \"fn-00611\",\n      \"current_anchor_id\": \"synthetic-footnote-00408\",\n      \"marker\": \"66\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"66\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Voir ibid., p. 36.\",\n      \"anchor_excerpt\": \"Voir ibid., p. 36.\"\n    },\n    {\n      \"link_id\": \"link-00612\",\n      \"note_item_id\": \"fn-00612\",\n      \"current_anchor_id\": \"synthetic-footnote-00409\",\n      \"marker\": \"67\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"67\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 37.\",\n      \"anchor_excerpt\": \"Ibid., p. 37.\"\n    },\n    {\n      \"link_id\": \"link-00613\",\n      \"note_item_id\": \"fn-00613\",\n      \"current_anchor_id\": \"synthetic-footnote-00410\",\n      \"marker\": \"68\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"68\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"L'opposition à la « conception heideggérienne >> est explicite à ce propos : ibid., p.13.\",\n      \"anchor_excerpt\": \"L'opposition à la « conception heideggérienne >> est explicite à ce propos : ibid., p.13.\"\n    },\n    {\n      \"link_id\": \"link-00614\",\n      \"note_item_id\": \"fn-00614\",\n      \"current_anchor_id\": \"synthetic-footnote-00411\",\n      \"marker\": \"69\",\n      \"note_page_no\": 201,\n      \"anchor_page_no\": 201,\n      \"current_anchor_marker\": \"69\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 142.\",\n      \"anchor_excerpt\": \"Ibid., p. 142.\"\n    }\n  ]\n}"
   },
   "request_content": {
     "cluster": {
@@ -23,15 +23,15 @@
       "note_system": "footnote",
       "page_range": [
         201,
-        218
+        201
       ],
       "matched_examples": [],
       "unmatched_note_items": [],
       "unmatched_anchors": [
         {
-          "row_id": 110173,
+          "row_id": 1038,
           "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00268",
+          "anchor_id": "anchor-00271",
           "chapter_id": "toc-ch-008-1desdocumentsencombrants",
           "page_no": 201,
           "paragraph_index": 0,
@@ -42,13 +42,13 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » indescriptiables, au-delà même du visage.",
-          "created_at": 1776858144,
-          "updated_at": 1776858144
+          "created_at": 1777566667,
+          "updated_at": 1777566667
         },
         {
-          "row_id": 110174,
+          "row_id": 1039,
           "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00269",
+          "anchor_id": "anchor-00272",
           "chapter_id": "toc-ch-008-1desdocumentsencombrants",
           "page_no": 201,
           "paragraph_index": 0,
@@ -59,13 +59,13 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » indescriptiables, au-delà même du visage.",
-          "created_at": 1776858144,
-          "updated_at": 1776858144
+          "created_at": 1777566667,
+          "updated_at": 1777566667
         },
         {
-          "row_id": 110175,
+          "row_id": 1040,
           "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00270",
+          "anchor_id": "anchor-00273",
           "chapter_id": "toc-ch-008-1desdocumentsencombrants",
           "page_no": 201,
           "paragraph_index": 0,
@@ -76,13 +76,13 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » indescriptiables, au-delà même du visage.",
-          "created_at": 1776858144,
-          "updated_at": 1776858144
+          "created_at": 1777566667,
+          "updated_at": 1777566667
         },
         {
-          "row_id": 110176,
+          "row_id": 1041,
           "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00271",
+          "anchor_id": "anchor-00274",
           "chapter_id": "toc-ch-008-1desdocumentsencombrants",
           "page_no": 201,
           "paragraph_index": 0,
@@ -93,32 +93,15 @@
           "anchor_kind": "footnote",
           "certainty": 1.0,
           "source_text": "d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » indescriptiables, au-delà même du visage.",
-          "created_at": 1776858144,
-          "updated_at": 1776858144
-        },
-        {
-          "row_id": 110245,
-          "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00297",
-          "chapter_id": "toc-ch-008-1desdocumentsencombrants",
-          "page_no": 218,
-          "paragraph_index": 2,
-          "char_start": 281,
-          "char_end": 284,
-          "source_marker": "²²¹",
-          "normalized_marker": "221",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Rien ne serait plus superficiel et plus vain que de partir en quête de traces d'heideggerianisme» chez Lacan. C'est d'ailleurs ce qu'évitera soigneusement un interprète avisé, Gérard Granel, lorsque consacrant un texte à « Lacan et Heidegger »²⁹, il se gardera de tout comparatisme²²¹, soulignant au contraire l'Ent-fernung, la distance entre les deux penseurs. Il montrera cependant que c'est une même désobjectivation de l'homme qui est à l'œuvre dans les deux cas, une extrême attention aux « gestes du langage dans la langue »²⁵. Et la « fraternité » inattendue que Granel discernera, malgré tout, entre Lacan et Heidegger concerne l'idée même de science en son « sujet » comme en son « modèle » : « Le sujet de la science est la constitution narcissique de l'Occident »²⁶. » Pour exor-",
-          "created_at": 1776858144,
-          "updated_at": 1776858144
+          "created_at": 1777566667,
+          "updated_at": 1777566667
         }
       ],
       "rebind_candidates": [
         {
-          "link_id": "link-00611",
-          "note_item_id": "fn-00611",
-          "current_anchor_id": "synthetic-footnote-00411",
+          "link_id": "link-00610",
+          "note_item_id": "fn-00610",
+          "current_anchor_id": "synthetic-footnote-00407",
           "marker": "65",
           "note_page_no": 201,
           "anchor_page_no": 201,
@@ -128,9 +111,9 @@
           "current_anchor_synthetic": true
         },
         {
-          "link_id": "link-00612",
-          "note_item_id": "fn-00612",
-          "current_anchor_id": "synthetic-footnote-00412",
+          "link_id": "link-00611",
+          "note_item_id": "fn-00611",
+          "current_anchor_id": "synthetic-footnote-00408",
           "marker": "66",
           "note_page_no": 201,
           "anchor_page_no": 201,
@@ -140,9 +123,9 @@
           "current_anchor_synthetic": true
         },
         {
-          "link_id": "link-00613",
-          "note_item_id": "fn-00613",
-          "current_anchor_id": "synthetic-footnote-00413",
+          "link_id": "link-00612",
+          "note_item_id": "fn-00612",
+          "current_anchor_id": "synthetic-footnote-00409",
           "marker": "67",
           "note_page_no": 201,
           "anchor_page_no": 201,
@@ -152,9 +135,9 @@
           "current_anchor_synthetic": true
         },
         {
-          "link_id": "link-00614",
-          "note_item_id": "fn-00614",
-          "current_anchor_id": "synthetic-footnote-00414",
+          "link_id": "link-00613",
+          "note_item_id": "fn-00613",
+          "current_anchor_id": "synthetic-footnote-00410",
           "marker": "68",
           "note_page_no": 201,
           "anchor_page_no": 201,
@@ -164,39 +147,15 @@
           "current_anchor_synthetic": true
         },
         {
-          "link_id": "link-00615",
-          "note_item_id": "fn-00615",
-          "current_anchor_id": "synthetic-footnote-00415",
+          "link_id": "link-00614",
+          "note_item_id": "fn-00614",
+          "current_anchor_id": "synthetic-footnote-00411",
           "marker": "69",
           "note_page_no": 201,
           "anchor_page_no": 201,
           "current_anchor_marker": "69",
           "note_excerpt": "Ibid., p. 142.",
           "anchor_excerpt": "Ibid., p. 142.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00670",
-          "note_item_id": "fn-00670",
-          "current_anchor_id": "synthetic-footnote-00453",
-          "marker": "123",
-          "note_page_no": 218,
-          "anchor_page_no": 218,
-          "current_anchor_marker": "123",
-          "note_excerpt": "Texte qui ne sera publié en volume qn'~ 1995 chez Galilée dans Études, pp. 45-62.",
-          "anchor_excerpt": "Texte qui ne sera publié en volume qn'~ 1995 chez Galilée dans Études, pp. 45-62.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00671",
-          "note_item_id": "fn-00671",
-          "current_anchor_id": "synthetic-footnote-00454",
-          "marker": "124",
-          "note_page_no": 218,
-          "anchor_page_no": 218,
-          "current_anchor_marker": "124",
-          "note_excerpt": "n ne cachera pas non plus, fût-ce à un niveau encore extérieur, l'inaccessibi­lité ressentie par Heidegger lui-même devant le caractère <<baroque» du texte lacanien: voir la lettre à Medard Boss du 4 décembre 1966, citée par G. GRANEL, Études, op. cit., p. 48, n.",
-          "anchor_excerpt": "n ne cachera pas non plus, fût-ce à un niveau encore extérieur, l'inaccessibi­lité ressentie par Heidegger lui-même devant le caractère <<baroque» du texte lacanien: voir la lettre à Medard Boss du 4 décembre 1966, citée par G. GRANEL, Études, op. cit., p. 48, n.",
           "current_anchor_synthetic": true
         }
       ]
@@ -209,249 +168,209 @@
         "ocr_excerpt": "d'Héradite que l'être se révèle comme guerre⁴, » L'ontologie est pensée comme saisie primordiale de la totalité, affirmation de la maîtrise sur l'étant, expression abstraite de la violence et valorisation de la guerre. L'être lui-même neutralise toute relation à l'Autre dans un savoir impersonnel. En affirmant la priorité de l'être sur l'étant, l'ontologie heideggérienne subordonne « la relation avec quelqu'un » à la relation avec l'être impersonnel, permettant la domination de l'étant : elle « subordonne la justice à la liberté ⁴». Certes l'ontologie heideggérienne est ainsi reconnue selon un certain « primat ⁴, » en sa radicalité de philosophie première, mais par là même rejetée, parce qu'elle réduit l'Autre au Même : « l'ontologie comme philosophie première est une philosophie de la puissance ⁴. À l'opposé, c'est la transcendance métaphysique, c'est la subjectivité, c'est l'éthique qui se voient non seulement revalorisées, mais absolument affirmées dans une extériorité radicale et antérieure à toute récupération identitaire. Le débordement de tout « jeu de lumières », de tout dévoilement en mode heideggérienne ⁴ est revendiquée, au profit d'événements ou de « conjonctures » indescriptiables, au-delà même du visage. On n'insistera pas ici sur les thèmes fondamentaux d'une philosophie devenue célèbre, puisque nous ne devons pas lâcher le fil conducteur d'une relation extrêmeme ...",
         "byte_size": 133222,
         "sha256": "8729d16528be5a3ada9a2ca405a40d58d65c8be6c89fa804b77638b1bb643c85"
-      },
-      {
-        "page_no": 218,
-        "file_idx": 217,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a5d9a08d6871/source.pdf",
-        "ocr_excerpt": "savante préméditation. Il est à noter que, loin d'éclairer à partir de l'entente heideggérienne de l'aletheïa le paradoxe de la «Lettre volée» (invisible par son excès même d'évidence), elle plie la découverte du mot de la vérité à la logique paradoxale, toujours valide, d'un jeu de cache-cache où ce qui est « le plus vraiment » ne se livre qu'à ses « amants ». Rien de plus étranger à Heidegger que cette érotique de l'intelligence en un jeu de société où l'esprit de notre XVIII* siècle se reconnaît beaucoup mieux que toute hellénité prétendument originaire. Aussi, plus que la parcimonie de l'allusion, c'est la nature même de ce clin d'œil qui doit nous inciter à la prudence en toute tentative d'annexion » au champ herméneutique heideggérien. Il est extrêmement difficile (et il serait sans doute vain) de vouloir décider si cette allusion relève de la simple coquetterie (puisque précisément une telle intéressante manœuvre n'est jamais si simple), si elle n'est pas plutôt sous le couvert d'un hommage la réduction maliceuse de la découverte heideggérienne d'un mot clé à une sorte de vérité éternelle réservée cependant aux gens d'esprit, ou si - tierce possibilité - elle manifeste une profonde fascination masquée du voile de l'ellipse, par peur de méconnaissance ou de contresens. Rien ne serait plus superficiel et plus vain que de partir en quête de traces d'heideggerianisme» chez L ...",
-        "byte_size": 135821,
-        "sha256": "0d97f5f8ba40b26dcbb771bcdda594d7ccc38aebd25c76775ad5534745a4495c"
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "toc-ch-008-1desdocumentsencombrants:toc-ch-008-1desdocumentsencombrants:footnote",
     "request_mode": "anchor_rebind",
-    "page_context_count": 2,
+    "page_context_count": 1,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00611\",\n    \"anchor_id\": \"anchor-00268\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '4' matches the footnote marker on page 201; OCR misread as '⁴' or similar.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00269\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate anchor for the same footnote marker '4' on page 201.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00270\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate anchor for the same footnote marker '4' on page 201.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00271\",\n    \"confidence\": 0.95,\n    \"reason\": \"Duplicate anchor for the same footnote marker '4' on page 201.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00670\",\n    \"anchor_id\": \"anchor-00297\",\n    \"confidence\": 0.95,\n    \"reason\": \"Marker '221' in unmatched_anchors is an OCR error for '123' (visible in screenshot); matches fn-00670 content and location on page 218.\"\n  }\n]\n```",
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00610\",\n    \"anchor_id\": \"anchor-00271\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote marker '4' in the text at anchor-00271 is an OCR error for '65'. The corresponding footnote item fn-00610 has marker '65' and content 'Ibid., p. 36.', which matches the first footnote visible in the screenshot.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00611\",\n    \"anchor_id\": \"anchor-00272\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote marker '4' in the text at anchor-00272 is an OCR error for '66'. The corresponding footnote item fn-00611 has marker '66' and content 'Voir ibid., p. 36.', which matches the second footnote visible in the screenshot.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00612\",\n    \"anchor_id\": \"anchor-00273\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote marker '4' in the text at anchor-00273 is an OCR error for '67'. The corresponding footnote item fn-00612 has marker '67' and content 'Ibid., p. 37.', which matches the third footnote visible in the screenshot.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00613\",\n    \"anchor_id\": \"anchor-00274\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote marker '4' in the text at anchor-00274 is an OCR error for '68'. The corresponding footnote item fn-00613 has marker '68' and content starting with 'L'opposition...', which matches the fourth footnote visible in the screenshot.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00407\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note fn-00610 has been successfully matched to explicit anchor anchor-00271. The synthetic anchor is no longer needed.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00408\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note fn-00611 has been successfully matched to explicit anchor anchor-00272. The synthetic anchor is no longer needed.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00409\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note fn-00612 has been successfully matched to explicit anchor anchor-00273. The synthetic anchor is no longer needed.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00410\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note fn-00613 has been successfully matched to explicit anchor anchor-00274. The synthetic anchor is no longer needed.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"synthetic-footnote-00411\",\n    \"confidence\": 1.0,\n    \"reason\": \"Note fn-00614 (marker 69) corresponds to the fifth footnote in the screenshot ('Ibid., p. 142.'), but there is no corresponding unresolved anchor provided in the unmatched_anchors list (only 4 anchors provided). Thus, this synthetic anchor cannot be resolved via match and should be ignored in this cluster context.\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "match",
-      "note_item_id": "fn-00611",
-      "anchor_id": "anchor-00268",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Marker '4' matches the footnote marker on page 201; OCR misread as '⁴' or similar."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00269",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00270",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
+      "note_item_id": "fn-00610",
       "anchor_id": "anchor-00271",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
+      "confidence": 1.0,
+      "reason": "The footnote marker '4' in the text at anchor-00271 is an OCR error for '65'. The corresponding footnote item fn-00610 has marker '65' and content 'Ibid., p. 36.', which matches the first footnote visible in the screenshot."
     },
     {
       "action": "match",
-      "note_item_id": "fn-00670",
-      "anchor_id": "anchor-00297",
+      "note_item_id": "fn-00611",
+      "anchor_id": "anchor-00272",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.95,
-      "reason": "Marker '221' in unmatched_anchors is an OCR error for '123' (visible in screenshot); matches fn-00670 content and location on page 218."
+      "confidence": 1.0,
+      "reason": "The footnote marker '4' in the text at anchor-00272 is an OCR error for '66'. The corresponding footnote item fn-00611 has marker '66' and content 'Voir ibid., p. 36.', which matches the second footnote visible in the screenshot."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00612",
+      "anchor_id": "anchor-00273",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The footnote marker '4' in the text at anchor-00273 is an OCR error for '67'. The corresponding footnote item fn-00612 has marker '67' and content 'Ibid., p. 37.', which matches the third footnote visible in the screenshot."
+    },
+    {
+      "action": "match",
+      "note_item_id": "fn-00613",
+      "anchor_id": "anchor-00274",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "The footnote marker '4' in the text at anchor-00274 is an OCR error for '68'. The corresponding footnote item fn-00613 has marker '68' and content starting with 'L'opposition...', which matches the fourth footnote visible in the screenshot."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00407",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note fn-00610 has been successfully matched to explicit anchor anchor-00271. The synthetic anchor is no longer needed."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00408",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note fn-00611 has been successfully matched to explicit anchor anchor-00272. The synthetic anchor is no longer needed."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00409",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note fn-00612 has been successfully matched to explicit anchor anchor-00273. The synthetic anchor is no longer needed."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00410",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note fn-00613 has been successfully matched to explicit anchor anchor-00274. The synthetic anchor is no longer needed."
+    },
+    {
+      "action": "ignore_ref",
+      "note_item_id": "",
+      "anchor_id": "synthetic-footnote-00411",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 1.0,
+      "reason": "Note fn-00614 (marker 69) corresponds to the fifth footnote in the screenshot ('Ibid., p. 142.'), but there is no corresponding unresolved anchor provided in the unmatched_anchors list (only 4 anchors provided). Thus, this synthetic anchor cannot be resolved via match and should be ignored in this cluster context."
     }
   ],
   "derived_truth": {
-    "cluster_id": "toc-ch-008-1desdocumentsencombrants:toc-ch-008-1desdocumentsencombrants:footnote",
-    "chapter_title": "1 Des documents encombrants: le retour de la politique",
-    "request_mode": "anchor_rebind",
     "parsed_actions": [
       {
         "action": "match",
-        "note_item_id": "fn-00611",
-        "anchor_id": "anchor-00268",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker '4' matches the footnote marker on page 201; OCR misread as '⁴' or similar."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00269",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00270",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
+        "note_item_id": "fn-00610",
         "anchor_id": "anchor-00271",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
+        "confidence": 1.0,
+        "reason": "The footnote marker '4' in the text at anchor-00271 is an OCR error for '65'. The corresponding footnote item fn-00610 has marker '65' and content 'Ibid., p. 36.', which matches the first footnote visible in the screenshot."
       },
-      {
-        "action": "match",
-        "note_item_id": "fn-00670",
-        "anchor_id": "anchor-00297",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker '221' in unmatched_anchors is an OCR error for '123' (visible in screenshot); matches fn-00670 content and location on page 218."
-      }
-    ],
-    "auto_selected_actions": [
       {
         "action": "match",
         "note_item_id": "fn-00611",
-        "anchor_id": "anchor-00268",
+        "anchor_id": "anchor-00272",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker '4' matches the footnote marker on page 201; OCR misread as '⁴' or similar."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00269",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00270",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00271",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
+        "confidence": 1.0,
+        "reason": "The footnote marker '4' in the text at anchor-00272 is an OCR error for '66'. The corresponding footnote item fn-00611 has marker '66' and content 'Voir ibid., p. 36.', which matches the second footnote visible in the screenshot."
       },
       {
         "action": "match",
-        "note_item_id": "fn-00670",
-        "anchor_id": "anchor-00297",
+        "note_item_id": "fn-00612",
+        "anchor_id": "anchor-00273",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker '221' in unmatched_anchors is an OCR error for '123' (visible in screenshot); matches fn-00670 content and location on page 218."
-      }
-    ],
-    "auto_applied_actions": [
+        "confidence": 1.0,
+        "reason": "The footnote marker '4' in the text at anchor-00273 is an OCR error for '67'. The corresponding footnote item fn-00612 has marker '67' and content 'Ibid., p. 37.', which matches the third footnote visible in the screenshot."
+      },
       {
-        "link_id": "link-00611",
         "action": "match",
-        "note_item_id": "fn-00611",
-        "anchor_id": "anchor-00268",
+        "note_item_id": "fn-00613",
+        "anchor_id": "anchor-00274",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker '4' matches the footnote marker on page 201; OCR misread as '⁴' or similar."
+        "confidence": 1.0,
+        "reason": "The footnote marker '4' in the text at anchor-00274 is an OCR error for '68'. The corresponding footnote item fn-00613 has marker '68' and content starting with 'L'opposition...', which matches the fourth footnote visible in the screenshot."
       },
       {
-        "link_id": "link-01666",
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-00269",
+        "anchor_id": "synthetic-footnote-00407",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
+        "confidence": 1.0,
+        "reason": "Note fn-00610 has been successfully matched to explicit anchor anchor-00271. The synthetic anchor is no longer needed."
       },
       {
-        "link_id": "link-01667",
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-00270",
+        "anchor_id": "synthetic-footnote-00408",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
+        "confidence": 1.0,
+        "reason": "Note fn-00611 has been successfully matched to explicit anchor anchor-00272. The synthetic anchor is no longer needed."
       },
       {
-        "link_id": "link-01668",
         "action": "ignore_ref",
         "note_item_id": "",
-        "anchor_id": "anchor-00271",
+        "anchor_id": "synthetic-footnote-00409",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Duplicate anchor for the same footnote marker '4' on page 201."
+        "confidence": 1.0,
+        "reason": "Note fn-00612 has been successfully matched to explicit anchor anchor-00273. The synthetic anchor is no longer needed."
       },
       {
-        "link_id": "link-00670",
-        "action": "match",
-        "note_item_id": "fn-00670",
-        "anchor_id": "anchor-00297",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00410",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.95,
-        "reason": "Marker '221' in unmatched_anchors is an OCR error for '123' (visible in screenshot); matches fn-00670 content and location on page 218."
+        "confidence": 1.0,
+        "reason": "Note fn-00613 has been successfully matched to explicit anchor anchor-00274. The synthetic anchor is no longer needed."
+      },
+      {
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "synthetic-footnote-00411",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 1.0,
+        "reason": "Note fn-00614 (marker 69) corresponds to the fifth footnote in the screenshot ('Ibid., p. 142.'), but there is no corresponding unresolved anchor provided in the unmatched_anchors list (only 4 anchors provided). Thus, this synthetic anchor cannot be resolved via match and should be ignored in this cluster context."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 3487,
-    "completion_tokens": 394,
-    "total_tokens": 3881,
+    "prompt_tokens": 2324,
+    "completion_tokens": 954,
+    "total_tokens": 3278,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 8495
+    "duration_ms": 18434
   }
 }

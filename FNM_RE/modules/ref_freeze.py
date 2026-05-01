@@ -111,6 +111,10 @@ def _inject_token_once(
             continue
         if candidate in payload:
             return payload.replace(candidate, token, 1), True
+    if str(anchor.source or "").strip() == "llm":
+        phrase = str(anchor.source_text or "").strip()
+        if phrase and phrase in payload:
+            return payload.replace(phrase, f"{phrase}{token}", 1), True
     normalized_marker = str(marker or "").strip()
     if normalized_marker:
         pattern = re.compile(_TOKEN_CANDIDATE_RE_TEMPLATE.format(marker=re.escape(normalized_marker)))
@@ -440,10 +444,18 @@ def build_frozen_units(
 
     matched_link_ids = {str(row.link_id or "") for row in matched_links}
     injected_rows = [row for row in ref_map if row.decision == "injected"]
+    skipped_rows = [row for row in ref_map if row.decision == "skipped"]
     injected_count = len(injected_rows)
     skipped_count = len(ref_map) - injected_count
     synthetic_skipped_count = int(skipped_reason_counts.get("synthetic_anchor", 0))
     conflict_skipped_count = int(skipped_reason_counts.get("conflict_anchor", 0))
+    skipped_note_item_ids = sorted(
+        {
+            str(row.note_item_id or "")
+            for row in skipped_rows
+            if str(row.note_item_id or "").strip()
+        }
+    )
     unit_contract_issues = _unit_contract_issues(body_units=body_units, note_units=note_units)
     unit_contract_issues.extend(f"unresolved_note_item:{note_item_id}" for note_item_id in unresolved_note_item_ids)
 
@@ -452,6 +464,7 @@ def build_frozen_units(
         "freeze.no_duplicate_injection": injected_count == len({str(row.anchor_id or "") for row in injected_rows}),
         "freeze.accounting_closed": len(ref_map) == len(matched_links)
         and all(row.decision in {"injected", "skipped"} for row in ref_map),
+        "freeze.all_matched_refs_injected": skipped_count == 0,
         "freeze.unit_contract_valid": len(unit_contract_issues) == 0,
     }
     soft = {
@@ -465,6 +478,8 @@ def build_frozen_units(
         reasons.append("freeze_duplicate_injection")
     if not hard["freeze.accounting_closed"]:
         reasons.append("freeze_accounting_unclosed")
+    if not hard["freeze.all_matched_refs_injected"]:
+        reasons.append("freeze_matched_ref_not_injected")
     if not hard["freeze.unit_contract_valid"]:
         reasons.append("freeze_unit_contract_invalid")
 
@@ -473,6 +488,19 @@ def build_frozen_units(
         "injected_count": int(injected_count),
         "skipped_count": int(skipped_count),
         "skip_reason_counts": dict(skipped_reason_counts),
+        "skipped_note_item_count": int(len(skipped_note_item_ids)),
+        "skipped_note_item_ids_preview": list(skipped_note_item_ids[:24]),
+        "skipped_ref_preview": [
+            {
+                "link_id": str(row.link_id or ""),
+                "chapter_id": str(row.chapter_id or ""),
+                "anchor_id": str(row.anchor_id or ""),
+                "note_item_id": str(row.note_item_id or ""),
+                "reason": str(row.reason or ""),
+                "page_no": int(row.page_no or 0),
+            }
+            for row in skipped_rows[:24]
+        ],
         "synthetic_skipped_count": int(synthetic_skipped_count),
         "conflict_anchor_count": int(len(conflict_anchor_ids)),
         "body_unit_count": int(len(body_units)),

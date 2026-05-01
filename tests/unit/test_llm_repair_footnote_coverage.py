@@ -158,8 +158,54 @@ class FootnoteNoteOnlyWithBodyTest(unittest.TestCase):
         self.assertTrue(clusters[0]["rebind_candidates"][0]["current_anchor_synthetic"])
 
         sliced = _slice_cluster_for_request(clusters[0])
-        self.assertEqual(sliced["request_mode"], "anchor_rebind")
+        self.assertEqual(sliced["request_mode"], "paired")
         self.assertIn("match", sliced["allowed_actions"])
+
+    def test_matched_synthetic_anchor_is_reopened_as_note_only_cluster(self):
+        chapters = [{"chapter_id": "ch-1", "title": "Chapter 1"}]
+        note_items = [
+            {
+                "note_item_id": "n-1",
+                "chapter_id": "ch-1",
+                "region_id": "r-1",
+                "marker": "1",
+                "normalized_marker": "1",
+                "page_no": 10,
+                "source_text": "definition of note 1",
+            }
+        ]
+        body_anchors = [
+            {
+                "anchor_id": "synthetic-footnote-1",
+                "chapter_id": "ch-1",
+                "page_no": 10,
+                "normalized_marker": "1",
+                "source_marker": "1",
+                "source_text": "synthetic fallback anchor",
+                "synthetic": True,
+            }
+        ]
+        note_links = [
+            {
+                "link_id": "L-match",
+                "chapter_id": "ch-1",
+                "region_id": "r-1",
+                "note_kind": "footnote",
+                "status": "matched",
+                "note_item_id": "n-1",
+                "anchor_id": "synthetic-footnote-1",
+                "marker": "1",
+            }
+        ]
+        clusters = build_unresolved_clusters(
+            chapters=chapters,
+            note_items=note_items,
+            body_anchors=body_anchors,
+            note_links=note_links,
+        )
+        self.assertEqual(len(clusters), 1)
+        self.assertEqual(clusters[0]["unmatched_note_items"][0]["note_item_id"], "n-1")
+        self.assertEqual(clusters[0]["rebind_candidates"][0]["current_anchor_id"], "synthetic-footnote-1")
 
     def test_ref_only_visual_can_synthesize_note_item(self):
         cluster = {

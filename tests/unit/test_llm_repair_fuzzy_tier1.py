@@ -229,14 +229,14 @@ class SelectAutoApplicableSynthesizeTest(unittest.TestCase):
 
 
 class ClusterFocusPagesTest(unittest.TestCase):
-    def test_focus_pages_returns_up_to_six(self):
+    def test_focus_pages_returns_up_to_configured_cap(self):
         cluster = {
             "unmatched_note_items": [{"page_no": p} for p in (10, 20, 30, 40)],
             "unmatched_anchors": [{"page_no": p} for p in (50, 60, 70, 80)],
         }
         pages = _cluster_focus_pages(cluster)
-        self.assertEqual(pages, [10, 20, 30, 40, 50, 60])
-        self.assertLessEqual(len(pages), 6)
+        self.assertEqual(pages, [10, 20, 30, 40, 50, 60, 70, 80])
+        self.assertLessEqual(len(pages), 8)
 
     def test_focus_pages_deduplicates(self):
         cluster = {

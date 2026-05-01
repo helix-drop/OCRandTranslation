@@ -638,6 +638,34 @@ class FnmRePhase1Test(unittest.TestCase):
         )
         self.assertNotIn("Notes", [head.title for head in structure.section_heads])
 
+    def test_visual_toc_suppresses_body_guessed_section_heads(self):
+        structure = build_phase1_structure(
+            _load_pages("post-revolutionary"),
+            toc_items=_load_auto_visual_toc("post-revolutionary"),
+            toc_offset=0,
+            pdf_path=_load_pdf_path("post-revolutionary"),
+            visual_toc_bundle=_load_auto_visual_toc_bundle("post-revolutionary"),
+        )
+
+        section_titles = {head.title for head in structure.section_heads}
+        self.assertNotIn("Targeted Mental Operations", section_titles)
+        self.assertNotIn("The Philosophical Discourse of Imagination", section_titles)
+        self.assertNotIn("to the", section_titles)
+        self.assertNotIn("tices and", section_titles)
+        self.assertNotIn("and", section_titles)
+        self.assertNotIn("that same", section_titles)
+
+        biopolitics = build_phase1_structure(
+            _load_pages("Biopolitics"),
+            toc_items=_load_auto_visual_toc("Biopolitics"),
+            toc_offset=0,
+            pdf_path=_load_pdf_path("Biopolitics"),
+            visual_toc_bundle=_load_auto_visual_toc_bundle("Biopolitics"),
+        )
+        biopolitics_titles = {head.title for head in biopolitics.section_heads}
+        self.assertNotIn("LECON DU 24 JANVIER 1979", biopolitics_titles)
+        self.assertNotIn("Il faudrait", biopolitics_titles)
+
     def test_phase1_treats_explicit_part_role_as_container_not_chapter(self):
         part_title = "I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION"
         chapter_title = "1 Is There a Self in This Mental Apparatus?"
