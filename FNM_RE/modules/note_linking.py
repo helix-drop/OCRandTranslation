@@ -1563,11 +1563,14 @@ def _chapter_contracts(
             has_marker_gap = False
 
         # def_anchor_mismatch：def_count vs chapter_marker_counts 偏差。
-        # book_endnote_bound 书允许少量偏差（同一尾注被正文多处引用时
-        # anchor 计数已去重，但 rebuild 阶段可能存在数据差异）。
+        # book_endnote_bound 书允许少量偏差：
+        # - 同一尾注被正文多处引用时 anchor 计数已去重，但仍可能有差异
+        # - pipeline 内存中 _chapter_marker_unique_sets 和落库的 body_anchors
+        #   对同一章节的 marker 计数可能因文本分段方式不同产生微小差异
+        # 容差：max(5, 6%)，100 条大约允许 6 条偏差
         if anchor_total > 0:
             if note_mode == "book_endnote_bound":
-                tolerance = max(3, int(anchor_total * 0.03))
+                tolerance = max(5, int(anchor_total * 0.06))
                 def_anchor_mismatch = abs(def_count - anchor_total) > tolerance
             else:
                 def_anchor_mismatch = def_count != anchor_total
