@@ -339,6 +339,7 @@ def build_note_links(
             page_no=note_item.page_no,
             include_synthetic=False,
         )
+        is_direct_match = bool(candidates)
         if not candidates and chapter_id and _is_fallback_chapter_id(chapter_id):
             chapter_anchor_count = int(anchor_count_by_chapter.get(chapter_id, 0) or 0)
             if chapter_anchor_count == 0:
@@ -404,7 +405,7 @@ def build_note_links(
                 note_item_id=note_item.note_item_id,
                 anchor_id=selected.anchor_id,
                 status="matched",
-                resolver="fallback" if scope == "book" else "rule",
+                resolver="rule" if is_direct_match else "fallback",
                 confidence=max(0.0, min(1.0, float(selected.certainty))),
                 note_kind="endnote",
                 marker=marker,
