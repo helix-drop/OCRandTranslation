@@ -1368,8 +1368,17 @@ def _chapter_contracts(
         for anchor in body_anchors
         if str(anchor.anchor_id or "").strip()
     }
-    # 工单 #3 契约 v2 用：每章正文 anchor 全形态扫描数（chapter_split 阶段累积）
-    chapter_marker_counts = dict(chapter_layers.chapter_marker_counts or {})
+    # 工单 #3 契约 v2：anchor_total 直接取自 body_anchors（与落库数据同源），
+    # 不再使用 chapter_layers.chapter_marker_counts（Phase 2 逐行扫描，与 Phase 3
+    # 的分段扫描+OCR blocks 是两个不同路径，计数会有微小差异，导致假阳性 mismatch）。
+    _anchor_total_by_chapter: dict[str, int] = {}
+    for anchor in body_anchors:
+        cid = str(anchor.chapter_id or "")
+        marker = normalize_note_marker(str(anchor.normalized_marker or ""))
+        if not cid or not marker or not marker.isdigit():
+            continue
+        _anchor_total_by_chapter.setdefault(cid, set()).add(marker)  # type: ignore[union-attr]
+    chapter_marker_counts = {cid: len(s) for cid, s in _anchor_total_by_chapter.items()}
     for chapter in chapter_layers.chapters:
         chapter_id = str(chapter.chapter_id or "")
         raw_has_endnote_signal = bool(chapter.endnote_items or chapter.endnote_regions)
@@ -1517,13 +1526,17 @@ def _chapter_contracts(
             endnote_only_no_orphan_anchor = True
 
         # 工单 #3 契约 v2：对地校验（不依赖 requires_endnote_contract 短路）
-        # def 集合 = chapter 的 footnote_items + endnote_items 中带数字 marker 的项
+        # def 集合 = chapter 的 footnote_items + endnote_items 中带数字 marker 的项。
+        # 必须去重：_build_chapter_layers 中 endnote region 拆分/投影可能产生同 marker
+        # 的重复条目（ChapterLayer 有 112 项但 DB 落库去重后只有 108 项）。
         all_def_items = list(chapter.footnote_items or []) + list(chapter.endnote_items or [])
         def_numeric_markers: list[int] = []
+        seen_markers: set[int] = set()
         for item in all_def_items:
             marker_value = _safe_int(normalize_note_marker(str(item.marker or "")))
-            if marker_value > 0:
+            if marker_value > 0 and marker_value not in seen_markers:
                 def_numeric_markers.append(marker_value)
+                seen_markers.add(marker_value)
         def_numeric_markers.sort()
         def_count = len(def_numeric_markers)
         anchor_total = int(chapter_marker_counts.get(chapter_id) or 0)
@@ -1562,18 +1575,14 @@ def _chapter_contracts(
         else:
             has_marker_gap = False
 
-        # def_anchor_mismatch：def_count vs chapter_marker_counts 偏差。
-        # book_endnote_bound 书允许少量偏差：
-        # - 同一尾注被正文多处引用时 anchor 计数已去重，但仍可能有差异
-        # - pipeline 内存中 _chapter_marker_unique_sets 和落库的 body_anchors
-        #   对同一章节的 marker 计数可能因文本分段方式不同产生微小差异
-        # 容差：max(5, 6%)，100 条大约允许 6 条偏差
-        if anchor_total > 0:
-            if note_mode == "book_endnote_bound":
-                tolerance = max(5, int(anchor_total * 0.06))
-                def_anchor_mismatch = abs(def_count - anchor_total) > tolerance
-            else:
-                def_anchor_mismatch = def_count != anchor_total
+        # def_anchor_mismatch：def_count vs anchor_total 偏差。
+        # book_endnote_bound 的 items 从全书尾注池按 marker 投影到章，
+        # 章级 item↔anchor 对齐本质上是近似的（item 可能投到相邻章），
+        # 逐章校验无意义。与 marker_gap 一致，跳过。
+        if note_mode == "book_endnote_bound":
+            def_anchor_mismatch = False
+        elif anchor_total > 0:
+            def_anchor_mismatch = def_count != anchor_total
         else:
             def_anchor_mismatch = False
 
