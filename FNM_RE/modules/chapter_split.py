@@ -368,14 +368,8 @@ def _build_chapter_layers(
     page_role_by_no = {int(row.page_no): str(row.page_role) for row in phase1.pages if int(row.page_no) > 0}
     chapter_endnote_start_map = _chapter_endnote_start_page_map(regions)
     mode_by_chapter = {str(row.chapter_id or ""): str(row.note_mode or "no_notes") for row in book_note_profile.chapter_modes}
-    # 阶段3.A：endnote region 优先——若有 chapter_endnotes region，覆盖 footnote_primary → chapter_endnote_primary
-    for region in layer_regions:
-        if str(region.note_kind or "") != "endnote" or str(region.scope or "") != "chapter":
-            continue
-        cid = str(region.chapter_id or region.owner_chapter_id or "")
-        if cid in mode_by_chapter and mode_by_chapter[cid] == "footnote_primary":
-            mode_by_chapter[cid] = "chapter_endnote_primary"
 
+    # 先按 item 归类，用于后续 mode override 的安全校验
     footnotes_by_chapter: dict[str, list[LayerNoteItem]] = {}
     endnotes_by_chapter: dict[str, list[LayerNoteItem]] = {}
     for item in layer_items:
@@ -384,6 +378,22 @@ def _build_chapter_layers(
             footnotes_by_chapter.setdefault(chapter_key, []).append(item)
         else:
             endnotes_by_chapter.setdefault(chapter_key, []).append(item)
+
+    # 阶段3.A：endnote region 优先——若有 chapter_endnotes region，覆盖 footnote_primary → chapter_endnote_primary
+    for region in layer_regions:
+        if str(region.note_kind or "") != "endnote" or str(region.scope or "") != "chapter":
+            continue
+        cid = str(region.chapter_id or region.owner_chapter_id or "")
+        if cid in mode_by_chapter and mode_by_chapter[cid] == "footnote_primary":
+            # 安全检查：若章内脚注条目数 > 尾注条目数，且 region 没有 notes heading，
+            # 则 endnote region 很可能是脚注页被 note_detection 误判，不回退会导致
+            # note_capture 只看尾注而忽略大量脚注条目（Germany_Madness ch.1 captured=0 的根因）。
+            fn_count = len(footnotes_by_chapter.get(cid, []))
+            en_count = len(endnotes_by_chapter.get(cid, []))
+            region_has_heading = bool(str(region.heading_text or "").strip())
+            if fn_count > en_count and not region_has_heading:
+                continue
+            mode_by_chapter[cid] = "chapter_endnote_primary"
     endnote_regions_by_chapter: dict[str, list[LayerNoteRegion]] = {}
     for region in layer_regions:
         if region.note_kind == "endnote":
@@ -397,6 +407,7 @@ def _build_chapter_layers(
     char_drop_candidates: list[dict[str, Any]] = []
     page_marker_counts_by_chapter: dict[str, dict[int, int]] = {}
     chapter_marker_counts: dict[str, int] = {}
+    _chapter_marker_unique_sets: dict[str, set[str]] = {}
 
     for index, chapter in enumerate(phase1.chapters):
         next_chapter = phase1.chapters[index + 1] if index + 1 < len(phase1.chapters) else None
@@ -417,7 +428,12 @@ def _build_chapter_layers(
             marker_hits = [marker for marker in _scan_body_anchor_markers(source_text or "") if marker]
             if marker_hits and page_no > 0:
                 page_marker_counts_by_chapter.setdefault(chapter_id, {})[page_no] = len(marker_hits)
-                chapter_marker_counts[chapter_id] = int(chapter_marker_counts.get(chapter_id, 0) or 0) + len(marker_hits)
+                # 章级总数用去重 marker——同一尾注被正文多次引用时，
+                # anchor_total 应与 def_count (唯一 note items) 语义一致。
+                prev_set = _chapter_marker_unique_sets.get(chapter_id, set())
+                prev_set.update(marker_hits)
+                _chapter_marker_unique_sets[chapter_id] = prev_set
+                chapter_marker_counts[chapter_id] = len(prev_set)
             if (
                 page_no > 0
                 and note_start_page > 0
@@ -599,7 +615,21 @@ def _note_capture_summary(
             chapter_row["sparse_capture"] = True
         chapter_rows.append(chapter_row)
         page_counts = dict(page_marker_counts_by_chapter.get(chapter_id) or {})
-        captured_pages = {int(item.page_no) for item in list(chapter.footnote_items or []) if int(item.page_no) > 0}
+        # 同时收集 footnote 和 endnote items 的页码——之前只取 footnote_items，
+        # 导致 book_endnote_bound / chapter_endnote_primary 章的 captured_pages
+        # 始终为空，dense_anchor_zero_capture_pages 全为假阳性。
+        captured_pages: set[int] = set()
+        for item in list(chapter.footnote_items or []):
+            pn = int(item.page_no)
+            if pn > 0:
+                captured_pages.add(pn)
+        for item in list(chapter.endnote_items or []):
+            pn = int(item.page_no)
+            if pn > 0:
+                captured_pages.add(pn)
+        # 对 book_endnote_bound 章，尾注条目在全书尾注区（不在正文页），逐页比对无意义，
+        # 跳过 dense_anchor_zero_capture_pages 检查。
+        skip_page_check = note_mode == "book_endnote_bound"
         for page_no_str, expected_page_count in page_counts.items():
             try:
                 page_no = int(page_no_str)
@@ -607,7 +637,8 @@ def _note_capture_summary(
                 continue
             expected_page_count = int(expected_page_count or 0)
             if (
-                should_block_sparse
+                not skip_page_check
+                and should_block_sparse
                 and expected_page_count >= 8
                 and page_no not in captured_pages
             ):

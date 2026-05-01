@@ -49,7 +49,14 @@ def _nearest_prior_chapter_id(toc_structure: TocStructure, page_no: int) -> str:
     candidates.sort(key=lambda ch: (int(ch.start_page or 0), int(ch.end_page or 0)))
     return str(candidates[-1].chapter_id or "")
 
+def _has_notes_heading(markdown: str) -> bool:
+    """页首有 ## NOTES / ## Endnotes 标题——尾注强信号。"""
+    lines = [line.strip() for line in str(markdown or "").splitlines() if line.strip()]
+    return bool(lines and _NOTES_HEADING_RE.match(lines[0]))
+
+
 def _is_endnote_page(markdown: str) -> bool:
+    """页首有 NOTES 标题或 ≥4 条编号定义——后者可能是脚注，不可靠。"""
     lines = [line.strip() for line in str(markdown or "").splitlines() if line.strip()]
     if not lines:
         return False
@@ -91,6 +98,12 @@ def build_book_note_profile(
     chapter_by_page = _chapter_by_page(toc_structure)
     chapters = [row for row in toc_structure.chapters if row.role == "chapter"]
     last_chapter_end = max((int(row.end_page or 0) for row in chapters), default=0)
+    # 检查 TOC 中是否有 endnotes 条目：若无，则 endnote_collection 页更有
+    # 可能是脚注页被 note_detection 误判（纯脚注书如 Germany_Madness）。
+    toc_has_endnotes_entry = any(
+        str(node.role or "").strip().lower() == "endnotes"
+        for node in (toc_structure.toc_tree or [])
+    )
 
     footnote_pages: set[int] = set()
     endnote_pages: set[int] = set()
@@ -106,8 +119,20 @@ def build_book_note_profile(
         note_scan = dict(page.get("_note_scan") or {})
         page_kind = str(note_scan.get("page_kind") or "").strip().lower()
         has_footnote = bool(str(page.get("footnotes") or "").strip())
-        has_endnote = page_kind == "endnote_collection" or _is_endnote_page(markdown)
-        if has_endnote and has_footnote:
+        # 尾注信号分级：
+        # 强信号：页首有 ## NOTES / ## Endnotes 标题（无论 TOC 有无条目）
+        # 弱信号：page_kind=endnote_collection 或 ≥4 条编号定义但无标题
+        #   （可能是脚注页被 note_detection 误判——Germany_Madness 的根因）
+        is_heading_endnote = _has_notes_heading(markdown)
+        is_weak_endnote = (page_kind == "endnote_collection" or _is_endnote_page(markdown)) and not is_heading_endnote
+        has_endnote = is_heading_endnote or is_weak_endnote
+        # 弱尾注信号在 TOC 无 endnotes 条目时降级：纯脚注书（Germany_Madness）
+        # 的脚注页在缺少 ^{N} 标记时，note_detection 把编号条目全标为 endnote。
+        # 强尾注信号（显式 ## NOTES 标题）始终保留，不受 TOC 约束——
+        # 很多学术书（Biopolitics）的章末尾注不在 TOC 中列出。
+        if is_weak_endnote and not has_footnote and not toc_has_endnotes_entry:
+            has_endnote = False
+        elif has_endnote and has_footnote:
             has_endnote = False
         chapter_id = chapter_by_page.get(page_no, "")
 

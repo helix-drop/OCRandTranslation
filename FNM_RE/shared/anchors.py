@@ -53,8 +53,19 @@ _BARE_DIGIT_LEFT_WORD_BLACKLIST = frozenset(
         "strophe", "stanza",
         "act", "scene", "scène",
         "épître", "epistle",
+        # 学术书常见非 marker 上下文——月份/日期/文档编号/数量词
+        "january", "february", "march", "april", "may", "june",
+        "july", "august", "september", "october", "november", "december",
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+        "lesson", "leçon", "leçons",
+        "mémoire", "memoir", "number", "numéro",
+        "needs", "expect", "about", "some", "almost", "nearly",
+        "volume", "volumes", "tome", "tomes",
     }
 )
+# OCR 常见上标乱码：'12、' 3、`45 等，数字前有一个孤立的撇号/反引号。
+_APOSTROPHE_SUP_RE = re.compile(r"[\'`]\s*(\d{1,4})\b")
 _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
     {
         "⁰": "0",
@@ -79,6 +90,7 @@ _REF_PATTERN_PRIORITY = {
     "plain": 1,
     "html": 2,
     "unicode": 3,
+    "apostrophe_sup": 3,
     "bracket": 4,
     "trailing_symbol": 5,
     "bare_digit": 6,
@@ -91,6 +103,7 @@ _REF_PATTERN_CERTAINTY = {
     "unicode": 1.0,
     "plain": 0.4,
     "latex_symbol_sup": 1.0,
+    "apostrophe_sup": 0.55,
     "trailing_symbol": 0.9,
     "bare_digit": 0.6,
 }
@@ -197,10 +210,12 @@ def page_body_paragraphs(page: Mapping[str, Any] | None) -> list[dict]:
     return merged
 
 
-def _is_bare_digit_marker_context(content: str, digit_start: int) -> bool:
-    """裸数字（"Encyclopédie 11"）守卫：检查左侧紧邻词是否合法 marker 上下文。
+def _is_bare_digit_marker_context(content: str, digit_start: int, digit_end: int) -> bool:
+    """裸数字（"Encyclopédie 11"）守卫。
 
-    要求紧邻词长度 ≥ 4 且不在引用前缀黑名单（p./vol./Section/voir 等）。
+    左侧：紧邻词长度 ≥ 4 且不在引用前缀黑名单。
+    右侧：跳过标点后紧跟数字（列表/日期/千分位）则拒绝。
+    "needs 4, 5 or 6"、"August 4, 1789"、"2,000 copies" 都是非 marker。
     """
     left = content[:digit_start].rstrip()
     word_match = _BARE_DIGIT_LEFT_WORD_RE.search(left)
@@ -210,6 +225,13 @@ def _is_bare_digit_marker_context(content: str, digit_start: int) -> bool:
     if len(word) < 4:
         return False
     if word in _BARE_DIGIT_LEFT_WORD_BLACKLIST:
+        return False
+    # 右侧守卫：跳过标点后如果紧跟数字，说明是列表/日期/千分位
+    right = content[digit_end:].lstrip()
+    punctuation = set(".,;:)]}\u00bb\u201d\u2019")
+    while right and right[0] in punctuation:
+        right = right[1:].lstrip()
+    if right and right[0].isdigit():
         return False
     return True
 
@@ -224,6 +246,7 @@ def _scan_inline_refs(text: str) -> list[dict]:
         (_PLAIN_SUP_RE, "plain"),
         (_HTML_SUP_RE, "html"),
         (_BRACKET_REF_RE, "bracket"),
+        (_APOSTROPHE_SUP_RE, "apostrophe_sup"),
         (_TRAILING_SYMBOL_AFTER_BRACKET_RE, "trailing_symbol"),
         (_TRAILING_SYMBOL_AFTER_QUOTE_RE, "trailing_symbol"),
     ):
@@ -243,7 +266,7 @@ def _scan_inline_refs(text: str) -> list[dict]:
             )
     for match in _BARE_DIGIT_RE.finditer(content):
         digit_start = match.start(1)
-        if not _is_bare_digit_marker_context(content, digit_start):
+        if not _is_bare_digit_marker_context(content, digit_start, match.end(1)):
             continue
         marker = normalize_note_marker(match.group(1) or "")
         if not marker:
@@ -272,21 +295,6 @@ def _scan_inline_refs(text: str) -> list[dict]:
                 "char_end": int(match.end()),
                 "pattern": "unicode",
                 "certainty": _REF_PATTERN_CERTAINTY.get("unicode", 1.0),
-            }
-        )
-    for match in _UNICODE_SUP_RE.finditer(content):
-        marker = normalize_note_marker(
-            match.group(0).translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
-        )
-        if not marker:
-            continue
-        refs.append(
-            {
-                "source_marker": str(match.group(0) or "").strip(),
-                "normalized_marker": marker,
-                "char_start": int(match.start()),
-                "char_end": int(match.end()),
-                "pattern": "unicode",
             }
         )
     refs.sort(key=lambda row: (int(row["char_start"]), int(row["char_end"])))

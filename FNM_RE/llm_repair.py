@@ -530,6 +530,14 @@ def _slice_cluster_for_request(
     unmatched_anchors = list(cluster.get("unmatched_anchors") or [])[:cap_anchors]
     rebind_candidates = list(cluster.get("rebind_candidates") or [])[:cap_notes]
     has_body_text = bool(str(cluster.get("chapter_body_text") or "").strip())
+    # 兜底：chapter_body_text 为空时，检查 page_contexts 的 ocr_excerpt 是否能提供正文上下文，
+    # 确保 book_endnote_bound 模式也能拿到 synthesize_anchor 所需的最小正文摘录。
+    if not has_body_text:
+        has_body_text = any(
+            str(ctx.get("ocr_excerpt") or "").strip()
+            for ctx in (cluster.get("page_contexts") or [])
+            if isinstance(ctx, dict)
+        )
     has_page_context = bool(list(cluster.get("page_contexts") or []))
     allowed_actions = ["needs_review"]
     request_mode = "review_only"
@@ -648,6 +656,16 @@ def _repair_user_prompt(
         ],
     }
     chapter_body_text = str(request_cluster.get("chapter_body_text") or "").strip()
+    # 兜底：chapter_body_text 为空时，用 page_contexts 的 ocr_excerpt 拼接最小正文摘录，
+    # 确保 book_endnote_bound 等模式也能拿到可供 synthesize_anchor 使用的上下文。
+    if not chapter_body_text and "synthesize_anchor" in allowed_actions:
+        excerpt_parts = [
+            str(ctx.get("ocr_excerpt") or "").strip()
+            for ctx in (request_cluster.get("page_contexts") or [])
+            if str(ctx.get("ocr_excerpt") or "").strip()
+        ]
+        if excerpt_parts:
+            chapter_body_text = "\n\n".join(excerpt_parts)
     if chapter_body_text and "synthesize_anchor" in allowed_actions:
         payload["chapter_body_excerpt"] = _trim_excerpt(chapter_body_text, limit=1800)
     action_hint = "、".join(allowed_actions)
@@ -904,6 +922,10 @@ def _build_chapter_body_text(
             page = by_page.get(page_no) or {}
             md = page.get("markdown")
             text = str(md.get("text") if isinstance(md, dict) else (md or "")).strip()
+            # 兜底：markdown 为空时尝试从 textSource 字段提取正文
+            if not text:
+                ts = page.get("textSource") or page.get("text_source") or ""
+                text = str(ts.get("text") if isinstance(ts, dict) else (ts or "")).strip()
             if not text:
                 continue
             if parts:
@@ -1596,6 +1618,8 @@ def run_llm_repair(
         note_system = str(cluster.get("note_system") or "endnote").strip()
         if note_system not in {"endnote", "footnote"}:
             note_system = "endnote"
+        # 同一 cluster 内禁止多个 note 复用同一正文位置，避免 Biopolitics 式的多对一绑定。
+        used_synth_positions: set[tuple[str, int, int, int]] = set()
         for action in auto_actions:
             if action["action"] == "match":
                 link_id = _find_link_id_for_match(
@@ -1644,6 +1668,11 @@ def run_llm_repair(
                 anchor_id = f"llm-anchor-{_slug_token(note_item_id)}"
                 char_start = int(action.get("char_start") or 0)
                 char_end = int(action.get("char_end") or max(char_start + 1, 1))
+                # 去重：同一 (chapter, page, char_start, char_end) 位置不允许多个 note 复用
+                pos_key = (chapter_id, page_no, max(0, char_start), max(char_start + 1, char_end))
+                if pos_key in used_synth_positions:
+                    continue
+                used_synth_positions.add(pos_key)
                 matched_text = str(action.get("matched_text") or action.get("anchor_phrase") or "").strip()
                 if not matched_text:
                     continue

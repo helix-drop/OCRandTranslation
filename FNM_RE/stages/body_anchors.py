@@ -110,7 +110,7 @@ def _marker_in_expected_range(
         marker_val = int(normalized_marker)
     except (ValueError, TypeError):
         return True
-    if pattern in {"latex", "latex_symbol_sup", "plain", "html", "unicode", "footnote_ref"}:
+    if pattern in {"latex", "latex_symbol_sup", "plain", "html", "unicode", "footnote_ref", "apostrophe_sup"}:
         return True
     tolerance = max(5, int(marker_max * 0.05))
     return marker_min <= marker_val <= marker_max + tolerance

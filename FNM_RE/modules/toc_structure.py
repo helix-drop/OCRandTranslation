@@ -301,7 +301,7 @@ def build_toc_structure(
 
     hard = {
         "toc.pages_classified": bool(toc_pages) and all(
-            row.role in {"front_matter", "chapter", "post_body", "back_matter", "endnotes", "container"} for row in toc_pages
+            row.role in {"front_matter", "chapter", "post_body", "back_matter", "endnotes", "container", "note"} for row in toc_pages
         ),
         "toc.has_exportable_chapters": any(row.role == "chapter" for row in toc_chapters),
         "toc.chapter_titles_aligned": bool(chapter_meta.get("chapter_title_alignment_ok", True)),
