@@ -111,6 +111,19 @@ def build_book_note_profile(
     chapter_has_endnote: dict[str, set[int]] = {}
     book_endnote_pages: set[int] = set()
 
+    # 第一遍：确定哪些章有显式 ## NOTES 标题（强信号锚点）。
+    # 同章后续的弱信号尾注页（延续页）应跟随锚点保留。
+    chapters_with_heading: set[str] = set()
+    if not toc_has_endnotes_entry:
+        for page in annotated_pages:
+            page_no = _safe_int(page.get("bookPage") or 0)
+            if page_no <= 0:
+                continue
+            if _has_notes_heading(page_markdown_text(page)):
+                chapter_id = chapter_by_page.get(page_no, "")
+                if chapter_id:
+                    chapters_with_heading.add(chapter_id)
+
     for page in annotated_pages:
         page_no = _safe_int(page.get("bookPage") or 0)
         if page_no <= 0:
@@ -120,20 +133,21 @@ def build_book_note_profile(
         page_kind = str(note_scan.get("page_kind") or "").strip().lower()
         has_footnote = bool(str(page.get("footnotes") or "").strip())
         # 尾注信号分级：
-        # 强信号：页首有 ## NOTES / ## Endnotes 标题（无论 TOC 有无条目）
+        # 强信号：页首有 ## NOTES / ## Endnotes 标题
         # 弱信号：page_kind=endnote_collection 或 ≥4 条编号定义但无标题
-        #   （可能是脚注页被 note_detection 误判——Germany_Madness 的根因）
         is_heading_endnote = _has_notes_heading(markdown)
         is_weak_endnote = (page_kind == "endnote_collection" or _is_endnote_page(markdown)) and not is_heading_endnote
         has_endnote = is_heading_endnote or is_weak_endnote
-        # 弱尾注信号在 TOC 无 endnotes 条目时降级：纯脚注书（Germany_Madness）
-        # 的脚注页在缺少 ^{N} 标记时，note_detection 把编号条目全标为 endnote。
-        # 强尾注信号（显式 ## NOTES 标题）始终保留，不受 TOC 约束——
-        # 很多学术书（Biopolitics）的章末尾注不在 TOC 中列出。
-        if is_weak_endnote and not has_footnote and not toc_has_endnotes_entry:
+        if has_endnote and has_footnote:
             has_endnote = False
-        elif has_endnote and has_footnote:
-            has_endnote = False
+        elif is_weak_endnote and not toc_has_endnotes_entry:
+            # TOC 无 endnotes 条目时，弱信号需额外守卫。若同章有显式标题页
+            # （Biopolitics：## NOTES 后跟延续页），弱信号跟随保留。若同章
+            # 无标题页（Germany_Madness：纯脚注书的编号条目被 note_detection
+            # 误判为 endnote），弱信号降级丢弃。
+            chapter_id = chapter_by_page.get(page_no, "")
+            if chapter_id not in chapters_with_heading:
+                has_endnote = False
         chapter_id = chapter_by_page.get(page_no, "")
 
         if has_footnote:
