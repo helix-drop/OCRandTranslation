@@ -146,16 +146,9 @@ def _is_endnote_candidate_page(
         return bool(first_notes_heading(page))
     if page_role == "other":
         return bool(first_notes_heading(page))
-    # 若页面同时有 footnote items 且无显式 endnotes 标题，优先按脚注页处理，
-    # 避免纯脚注书的脚注页被 note_detection 的 endnote 扫描误判为尾注页。
-    has_footnote_items = bool(scan_items_by_kind(page, kind="footnote"))
-    has_endnote_items = bool(scan_items_by_kind(page, kind="endnote"))
-    has_notes_heading = bool(first_notes_heading(page))
-    if has_footnote_items and not has_notes_heading:
-        return False
-    if has_endnote_items:
+    if scan_items_by_kind(page, kind="endnote"):
         return True
-    return has_notes_heading
+    return bool(first_notes_heading(page))
 
 
 def _endnote_scope_for_page(
@@ -254,12 +247,8 @@ def _build_endnote_regions_raw(
             last_chapter_end_page=last_chapter_end_page,
         )
         if scope == "chapter" and chapter_id in chapters_with_footnote_band:
-            # 有脚注带的章节不应再创建章级尾注 region，除非该页有显式
-            # endnotes 标题。之前仅跳过 page_role != "note" 的页，但纯脚注书
-            # （如 Germany_Madness）的 note 页实际上也是脚注页，note_detection
-            # 在缺少 ^{N} 标记时将所有编号条目分类为 "endnote"，导致脚注页被
-            # 误认为尾注候选页，进而触发 chapter_endnote_primary 覆盖。
-            if not first_notes_heading(page_by_no.get(page_no)):
+            page_role = str(page_role_by_no.get(page_no) or "")
+            if page_role != "note" and not first_notes_heading(page_by_no.get(page_no)):
                 continue
         heading_text = first_notes_heading(page_by_no.get(page_no))
         start_reason = _start_reason_for_page(
