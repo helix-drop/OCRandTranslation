@@ -1372,19 +1372,39 @@ def _process_book(
         _record_stage_error("fnm_pipeline", "fnm_pipeline_exception", exc)
 
     try:
+        repair_trace_callback_seen = False
+
+        def _repair_trace_callback(trace: dict[str, Any]) -> None:
+            nonlocal repair_trace_callback_seen
+            repair_trace_callback_seen = True
+            _persist_traces(
+                example_dir=example_dir,
+                traces=[dict(trace)],
+                trace_counters=trace_counters,
+                trace_index=base_result["trace_index"],
+            )
+            summary = dict(trace.get("request_context_summary") or {})
+            cluster_id = str(summary.get("cluster_id") or "").strip()
+            request_mode = str(summary.get("request_mode") or "").strip()
+            trace_stage = str(trace.get("stage") or "").strip()
+            detail_parts = [part for part in (trace_stage, cluster_id, request_mode) if part]
+            _advance("llm_repair", "running", " | ".join(detail_parts))
+
         repair_result = run_llm_repair(
             book.doc_id,
             slug=book.slug,
             cluster_limit=None,
             auto_apply=True,
+            trace_callback=_repair_trace_callback,
         ) or {}
         base_result["llm_repair"] = repair_result
-        _persist_traces(
-            example_dir=example_dir,
-            traces=list(repair_result.get("llm_traces") or []),
-            trace_counters=trace_counters,
-            trace_index=base_result["trace_index"],
-        )
+        if not repair_trace_callback_seen:
+            _persist_traces(
+                example_dir=example_dir,
+                traces=list(repair_result.get("llm_traces") or []),
+                trace_counters=trace_counters,
+                trace_index=base_result["trace_index"],
+            )
         _advance("llm_repair", "done", f"auto_applied={int(repair_result.get('auto_applied_count') or 0)}")
     except Exception as exc:
         repair_result = {"error": str(exc), "auto_applied_count": 0, "usage_summary": {}}

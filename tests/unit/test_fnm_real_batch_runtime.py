@@ -288,6 +288,22 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
                 }
             )
 
+            def _repair_with_incremental_trace(*_args, **kwargs):
+                trace_callback = kwargs.get("trace_callback")
+                if callable(trace_callback):
+                    trace_callback(
+                        {
+                            "stage": "llm_repair.cluster_request.started",
+                            "reason_for_request": "准备请求 LLM 修补 cluster",
+                            "model": {"model_id": "qwen3.5-plus"},
+                            "request_context_summary": {"cluster_id": "c-1"},
+                            "usage": {},
+                        }
+                    )
+                raise RuntimeError("repair boom")
+
+            repair_mock = Mock(side_effect=_repair_with_incremental_trace)
+
             with (
                 patch.dict(process_book.__globals__, {"_check_required_assets": lambda _book: {
                     "ok": True,
@@ -323,7 +339,7 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
                     "endnotes_summary": {},
                 }}),
                 patch.dict(process_book.__globals__, {"run_fnm_pipeline": Mock(side_effect=[{"ok": True, "structure_state": "ready"}, {"ok": True, "structure_state": "ready"}])}),
-                patch.dict(process_book.__globals__, {"run_llm_repair": Mock(side_effect=RuntimeError("repair boom"))}),
+                patch.dict(process_book.__globals__, {"run_llm_repair": repair_mock}),
                 patch.dict(process_book.__globals__, {"load_fnm_doc_structure": lambda *_args, **_kwargs: object()}),
                 patch.dict(process_book.__globals__, {"verify_fnm_structure": lambda *_args, **_kwargs: {
                     "blocking_reasons": ["heading_graph_boundary_conflict"],
@@ -374,6 +390,12 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
             self.assertTrue((example_dir / "FNM_REAL_TEST_REPORT.md").is_file())
             trace_files = sorted((example_dir / "llm_traces").glob("*.json"))
             self.assertTrue(trace_files)
+            self.assertIn("trace_callback", repair_mock.call_args.kwargs)
+            self.assertTrue(any("llm_repair.cluster_request.started" in path.name for path in trace_files))
+            started_trace = json.loads(
+                next(path for path in trace_files if "llm_repair.cluster_request.started" in path.name).read_text(encoding="utf-8")
+            )
+            self.assertEqual(started_trace["request_context_summary"]["cluster_id"], "c-1")
             self.assertTrue(materialize_mock.called)
             self.assertTrue(export_mock.called)
             self.assertTrue(result["zip_written"])

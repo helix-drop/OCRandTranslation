@@ -13,7 +13,11 @@ from __future__ import annotations
 import unittest
 
 from FNM_RE.llm_repair import (
+    LLM_REPAIR_IMAGE_SCALE,
+    _should_attach_repair_images,
+    _should_request_llm_for_cluster,
     _slice_cluster_for_request,
+    _token_accounting_for_request,
     build_unresolved_clusters,
 )
 
@@ -224,6 +228,74 @@ class FootnoteNoteOnlyWithBodyTest(unittest.TestCase):
         sliced = _slice_cluster_for_request(cluster)
         self.assertEqual(sliced["request_mode"], "ref_only_visual")
         self.assertIn("synthesize_note_item", sliced["allowed_actions"])
+
+    def test_needs_review_only_cluster_is_not_sent_to_llm(self):
+        cluster = {
+            "cluster_id": "ch-1:r-1:endnote",
+            "chapter_id": "ch-1",
+            "chapter_title": "Chapter 1",
+            "region_id": "r-1",
+            "note_system": "endnote",
+            "matched_examples": [],
+            "unmatched_note_items": [
+                {"note_item_id": "n-1", "marker": "1", "page_no": 20},
+            ],
+            "unmatched_anchors": [],
+            "page_contexts": [{"page_no": 20, "ocr_excerpt": "already known note text"}],
+        }
+        sliced = _slice_cluster_for_request(cluster)
+        self.assertEqual(sliced["allowed_actions"], ["needs_review"])
+        self.assertFalse(_should_request_llm_for_cluster(sliced))
+
+    def test_only_synthesize_note_item_clusters_attach_images(self):
+        rebind_cluster = {
+            "cluster_id": "ch-1:r-1:footnote",
+            "chapter_id": "ch-1",
+            "note_system": "footnote",
+            "unmatched_note_items": [],
+            "unmatched_anchors": [{"anchor_id": "a-1", "page_no": 10}],
+            "rebind_candidates": [{"note_item_id": "n-1", "current_anchor_id": "synthetic-1"}],
+            "page_contexts": [{"page_no": 10, "ocr_excerpt": "page excerpt"}],
+        }
+        visual_cluster = {
+            "cluster_id": "ch-1:r-1:footnote",
+            "chapter_id": "ch-1",
+            "note_system": "footnote",
+            "unmatched_note_items": [],
+            "unmatched_anchors": [{"anchor_id": "a-1", "page_no": 10}],
+            "page_contexts": [{"page_no": 10, "ocr_excerpt": "page excerpt"}],
+        }
+        self.assertFalse(_should_attach_repair_images(_slice_cluster_for_request(rebind_cluster)))
+        self.assertTrue(_should_attach_repair_images(_slice_cluster_for_request(visual_cluster)))
+
+    def test_token_accounting_records_input_and_output_tokens(self):
+        accounting = _token_accounting_for_request(
+            {"prompt_tokens": 123, "completion_tokens": 45, "total_tokens": 168, "request_count": 1},
+            {"estimated_prompt_tokens": 140},
+        )
+        self.assertEqual(accounting["input_tokens"], 123)
+        self.assertEqual(accounting["output_tokens"], 45)
+        self.assertEqual(accounting["total_tokens"], 168)
+        self.assertEqual(accounting["estimated_input_tokens"], 140)
+        self.assertEqual(accounting["request_count"], 1)
+        self.assertEqual(accounting["source"], "provider_usage")
+
+    def test_token_accounting_for_skipped_request_has_zero_actual_tokens(self):
+        accounting = _token_accounting_for_request(
+            {},
+            {"estimated_prompt_tokens": 140},
+            skipped=True,
+            skip_reason="no_actionable_auto_repair",
+        )
+        self.assertEqual(accounting["input_tokens"], 0)
+        self.assertEqual(accounting["output_tokens"], 0)
+        self.assertEqual(accounting["total_tokens"], 0)
+        self.assertEqual(accounting["estimated_input_tokens"], 140)
+        self.assertEqual(accounting["request_count"], 0)
+        self.assertTrue(accounting["skipped"])
+
+    def test_repair_image_scale_keeps_small_note_markers_legible(self):
+        self.assertGreaterEqual(LLM_REPAIR_IMAGE_SCALE, 1.2)
 
 
 class SynthesizeAutoApplyPayloadShapeTest(unittest.TestCase):

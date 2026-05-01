@@ -41,11 +41,16 @@ QWEN35_PLUS_MAX_INPUT_TOKENS_NO_THINK = 991_808
 # LLM repair 只做 unresolved 小块修补，软预算故意压得远低于模型上限，
 # 目的是降低延迟，而不是去吃满上下文。
 LLM_REPAIR_SOFT_INPUT_TOKEN_BUDGET = 2_048
-LLM_REPAIR_MAX_OUTPUT_TOKENS = 4096
+LLM_REPAIR_MAX_OUTPUT_TOKENS = 2048
 LLM_REPAIR_MAX_MATCHED_EXAMPLES = 2
 LLM_REPAIR_MAX_UNMATCHED_DEFINITIONS = 8
 LLM_REPAIR_MAX_UNMATCHED_REFS = 8
 LLM_REPAIR_MAX_FOCUS_PAGES = 8
+LLM_REPAIR_MAX_IMAGE_PAGES = 2
+LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS = 700
+# 脚注/尾注标号通常很小；这里保留接近旧 PNG 路径的分辨率，
+# 体积优化主要依赖按场景少发图和 JPEG，而不是降低可读性。
+LLM_REPAIR_IMAGE_SCALE = 1.3
 LLM_REPAIR_FOOTNOTE_PAGE_PADDING = 1
 
 # Tier 1 fuzzy anchor synthesis:
@@ -457,6 +462,59 @@ def _estimate_prompt_tokens(text: str) -> int:
     return int(cjk_count + math.ceil(non_cjk_count / 3.5) + 16)
 
 
+def _should_request_llm_for_cluster(request_cluster: dict) -> bool:
+    allowed_actions = [str(item or "").strip() for item in (request_cluster.get("allowed_actions") or [])]
+    return any(action and action != "needs_review" for action in allowed_actions)
+
+
+def _should_attach_repair_images(request_cluster: dict) -> bool:
+    allowed_actions = [str(item or "").strip() for item in (request_cluster.get("allowed_actions") or [])]
+    return "synthesize_note_item" in allowed_actions
+
+
+def _should_include_page_context_text(request_cluster: dict) -> bool:
+    return _should_attach_repair_images(request_cluster)
+
+
+def _priority_pages_for_visual_context(request_cluster: dict) -> list[int]:
+    pages: list[int] = []
+    for item in request_cluster.get("unmatched_anchors") or []:
+        try:
+            page_no = int(item.get("page_no") or 0)
+        except (TypeError, ValueError):
+            page_no = 0
+        if page_no > 0:
+            pages.append(page_no)
+    for item in request_cluster.get("unmatched_note_items") or []:
+        try:
+            page_no = int(item.get("page_no") or 0)
+        except (TypeError, ValueError):
+            page_no = 0
+        if page_no > 0:
+            pages.append(page_no)
+    ordered: list[int] = []
+    seen: set[int] = set()
+    for page_no in pages:
+        if page_no in seen:
+            continue
+        seen.add(page_no)
+        ordered.append(page_no)
+    return ordered
+
+
+def _select_page_contexts_for_request(request_cluster: dict) -> list[dict]:
+    contexts = [dict(item) for item in (request_cluster.get("page_contexts") or [])]
+    if not contexts or not _should_include_page_context_text(request_cluster):
+        return []
+    priority_pages = _priority_pages_for_visual_context(request_cluster)
+    if priority_pages:
+        by_page = {int(item.get("page_no") or 0): dict(item) for item in contexts}
+        selected = [by_page[p] for p in priority_pages if p in by_page]
+        if selected:
+            contexts = selected
+    return contexts[:LLM_REPAIR_MAX_IMAGE_PAGES]
+
+
 def _slice_cluster_for_request(
     cluster: dict,
     *,
@@ -512,6 +570,7 @@ def _slice_cluster_for_request(
         "unmatched_note_items": cap_notes,
         "unmatched_anchors": cap_anchors,
     }
+    request_cluster["page_contexts"] = _select_page_contexts_for_request(request_cluster)
     return request_cluster
 
 
@@ -539,7 +598,7 @@ def _repair_user_prompt(
         "page_contexts": [
             {
                 "page_no": item.get("page_no"),
-                "ocr_excerpt": _trim_excerpt(item.get("ocr_excerpt"), limit=1200),
+                "ocr_excerpt": _trim_excerpt(item.get("ocr_excerpt"), limit=LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS),
             }
             for item in (request_cluster.get("page_contexts") or [])
         ],
@@ -609,7 +668,7 @@ def _repair_user_prompt(
         "/no_think\n"
         "下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n"
         f"本次只允许动作：{action_hint}。\n"
-        f"若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。{extra_rules}\n\n"
+        f"若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。{extra_rules}\n\n"
         f"{json.dumps(payload, ensure_ascii=False, indent=2)}"
     )
 
@@ -917,16 +976,162 @@ def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepo
             "source_pdf_path": str(pdf_path or ""),
             "ocr_excerpt": _trim_page_text(page_text),
         }
-        try:
-            if pdf_path:
-                rendered = render_pdf_page(pdf_path, file_idx, scale=1.3)
-                if rendered:
-                    encoded = base64.b64encode(rendered).decode("ascii")
-                    item["image_url"] = f"data:image/png;base64,{encoded}"
-        except Exception:
-            pass
         contexts.append(item)
     return contexts
+
+
+def _render_repair_page_image(pdf_path: str, file_idx: int) -> tuple[bytes, str]:
+    try:
+        import fitz  # PyMuPDF
+
+        doc = fitz.open(pdf_path)
+        try:
+            if file_idx < 0 or file_idx >= len(doc):
+                return (b"", "")
+            page = doc[file_idx]
+            pix = page.get_pixmap(matrix=fitz.Matrix(LLM_REPAIR_IMAGE_SCALE, LLM_REPAIR_IMAGE_SCALE), alpha=False)
+            return (pix.tobytes("jpg"), "image/jpeg")
+        finally:
+            doc.close()
+    except Exception:
+        try:
+            rendered = render_pdf_page(pdf_path, file_idx, scale=LLM_REPAIR_IMAGE_SCALE)
+        except Exception:
+            return (b"", "")
+        return (rendered, "image/png") if rendered else (b"", "")
+
+
+def _attach_repair_images_to_contexts(contexts: list[dict], *, request_cluster: dict) -> list[dict]:
+    if not _should_attach_repair_images(request_cluster):
+        return [dict(item) for item in contexts or []]
+    out: list[dict] = []
+    for item in list(contexts or [])[:LLM_REPAIR_MAX_IMAGE_PAGES]:
+        row = dict(item)
+        pdf_path = str(row.get("source_pdf_path") or "").strip()
+        try:
+            file_idx = int(row.get("file_idx") or 0)
+        except (TypeError, ValueError):
+            file_idx = 0
+        if pdf_path:
+            rendered, mime = _render_repair_page_image(pdf_path, file_idx)
+            if rendered and mime:
+                encoded = base64.b64encode(rendered).decode("ascii")
+                row["image_url"] = f"data:{mime};base64,{encoded}"
+        out.append(row)
+    return out
+
+
+def _page_context_trace_rows(page_contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in page_contexts or []:
+        image_url = str(row.get("image_url") or "").strip()
+        raw_bytes = b""
+        if image_url.startswith("data:") and "," in image_url:
+            try:
+                raw_bytes = base64.b64decode(image_url.split(",", 1)[1])
+            except Exception:
+                raw_bytes = b""
+        rows.append(
+            {
+                "page_no": int(row.get("page_no") or 0),
+                "file_idx": int(row.get("file_idx") or 0),
+                "source_pdf_path": str(row.get("source_pdf_path") or ""),
+                "ocr_excerpt": str(row.get("ocr_excerpt") or ""),
+                "byte_size": len(raw_bytes),
+                "sha256": hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else "",
+            }
+        )
+    return rows
+
+
+def _request_metrics_for_cluster(
+    *,
+    cluster: dict,
+    request_cluster: dict,
+    system_prompt: str = "",
+    user_prompt: str = "",
+    image_refused: bool = False,
+    skipped: bool = False,
+    skip_reason: str = "",
+) -> dict:
+    return {
+        "cluster_id": str(cluster.get("cluster_id") or ""),
+        "request_mode": str(request_cluster.get("request_mode") or ""),
+        "allowed_actions": list(request_cluster.get("allowed_actions") or []),
+        "chars": len(system_prompt) + len(user_prompt),
+        "estimated_prompt_tokens": _estimate_prompt_tokens(system_prompt) + _estimate_prompt_tokens(user_prompt),
+        "soft_input_token_budget": LLM_REPAIR_SOFT_INPUT_TOKEN_BUDGET,
+        "model_max_input_tokens_thinking": QWEN35_PLUS_MAX_INPUT_TOKENS_THINKING,
+        "model_max_input_tokens_no_think": QWEN35_PLUS_MAX_INPUT_TOKENS_NO_THINK,
+        "matched_examples": len(request_cluster.get("matched_examples") or []),
+        "unmatched_note_items": len(request_cluster.get("unmatched_note_items") or []),
+        "unmatched_anchors": len(request_cluster.get("unmatched_anchors") or []),
+        "page_context_count": len(request_cluster.get("page_contexts") or []),
+        "image_refused": image_refused,
+        "skipped": skipped,
+        "skip_reason": skip_reason,
+        "truncated": (
+            len(request_cluster.get("matched_examples") or []) < len(cluster.get("matched_examples") or [])
+            or len(request_cluster.get("unmatched_note_items") or []) < len(cluster.get("unmatched_note_items") or [])
+            or len(request_cluster.get("unmatched_anchors") or []) < len(cluster.get("unmatched_anchors") or [])
+        ),
+    }
+
+
+def _token_accounting_for_request(
+    usage: dict | None,
+    request_metrics: dict | None,
+    *,
+    skipped: bool = False,
+    skip_reason: str = "",
+) -> dict:
+    usage_row = dict(usage or {})
+    metrics = dict(request_metrics or {})
+    input_tokens = _coerce_usage_int(usage_row.get("prompt_tokens"))
+    output_tokens = _coerce_usage_int(usage_row.get("completion_tokens"))
+    total_tokens = _coerce_usage_int(usage_row.get("total_tokens"))
+    if total_tokens <= 0 and (input_tokens or output_tokens):
+        total_tokens = input_tokens + output_tokens
+    request_count = _coerce_usage_int(usage_row.get("request_count"))
+    if skipped:
+        input_tokens = 0
+        output_tokens = 0
+        total_tokens = 0
+        request_count = 0
+    return {
+        "request_count": request_count,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
+        "estimated_input_tokens": _coerce_usage_int(metrics.get("estimated_prompt_tokens")),
+        "source": "skipped" if skipped else ("provider_usage" if usage_row else "local_estimate"),
+        "skipped": bool(skipped),
+        "skip_reason": str(skip_reason or ""),
+    }
+
+
+def _compact_cluster_for_trace(request_cluster: dict) -> dict:
+    return {
+        "cluster_id": str(request_cluster.get("cluster_id") or ""),
+        "chapter_title": str(request_cluster.get("chapter_title") or ""),
+        "request_mode": str(request_cluster.get("request_mode") or ""),
+        "allowed_actions": list(request_cluster.get("allowed_actions") or []),
+        "note_system": str(request_cluster.get("note_system") or ""),
+        "page_range": [request_cluster.get("page_start"), request_cluster.get("page_end")],
+        "matched_examples": list(request_cluster.get("matched_examples") or []),
+        "unmatched_note_items": list(request_cluster.get("unmatched_note_items") or []),
+        "unmatched_anchors": list(request_cluster.get("unmatched_anchors") or []),
+        "rebind_candidates": list(request_cluster.get("rebind_candidates") or []),
+    }
+
+
+def _emit_llm_trace(trace_callback, trace: dict) -> None:
+    if not callable(trace_callback):
+        return
+    try:
+        trace_callback(dict(trace))
+    except Exception:
+        pass
 
 
 def request_llm_repair_actions(
@@ -938,6 +1143,7 @@ def request_llm_repair_actions(
     max_unmatched_anchors: int | None = None,
     doc_id: str = "",
     slug: str = "",
+    trace_callback=None,
 ) -> dict:
     resolved_args = dict(model_args or _resolve_repair_model_args())
     request_cluster = _slice_cluster_for_request(
@@ -946,6 +1152,63 @@ def request_llm_repair_actions(
         max_unmatched_note_items=max_unmatched_note_items,
         max_unmatched_anchors=max_unmatched_anchors,
     )
+    model_info = {
+        "provider": str(resolved_args.get("provider") or "qwen"),
+        "model_id": str(resolved_args.get("model_id") or ""),
+        "base_url": str(resolved_args.get("base_url") or ""),
+    }
+    if not _should_request_llm_for_cluster(request_cluster):
+        metrics = _request_metrics_for_cluster(
+            cluster=cluster,
+            request_cluster=request_cluster,
+            skipped=True,
+            skip_reason="no_actionable_auto_repair",
+        )
+        token_accounting = _token_accounting_for_request(
+            {},
+            metrics,
+            skipped=True,
+            skip_reason="no_actionable_auto_repair",
+        )
+        trace = {
+            "stage": f"{_LLM_REPAIR_USAGE_STAGE}.skipped",
+            "reason_for_request": "该 cluster 只有 needs_review 动作，真实流程无人工 review，跳过 LLM 请求",
+            "model": model_info,
+            "request_content": {
+                "cluster": _compact_cluster_for_trace(request_cluster),
+                "page_contexts": _page_context_trace_rows(list(request_cluster.get("page_contexts") or [])),
+            },
+            "request_context_summary": {
+                "cluster_id": str(cluster.get("cluster_id") or ""),
+                "request_mode": str(request_cluster.get("request_mode") or ""),
+                "page_context_count": len(request_cluster.get("page_contexts") or []),
+                "skipped": True,
+                "skip_reason": "no_actionable_auto_repair",
+            },
+            "request_metrics": metrics,
+            "token_accounting": token_accounting,
+            "response_raw_text": "",
+            "response_parsed": [],
+            "derived_truth": {"parsed_actions": []},
+            "usage": {},
+            "timing": {"duration_ms": 0},
+        }
+        _emit_llm_trace(trace_callback, trace)
+        return {
+            "raw_text": "",
+            "usage": {},
+            "usage_event": {},
+            "actions": [],
+            "request_metrics": metrics,
+            "llm_trace": trace,
+            "token_accounting": token_accounting,
+            "skipped": True,
+        }
+    if _should_attach_repair_images(request_cluster):
+        request_cluster["page_contexts"] = _attach_repair_images_to_contexts(
+            list(request_cluster.get("page_contexts") or []),
+            request_cluster=request_cluster,
+        )
     system_prompt = _repair_system_prompt()
     user_prompt = _repair_user_prompt(
         request_cluster,
@@ -963,6 +1226,31 @@ def request_llm_repair_actions(
                     "image_url": {"url": image_url},
                 }
             )
+    started_metrics = _request_metrics_for_cluster(
+        cluster=cluster,
+        request_cluster=request_cluster,
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+    )
+    started_trace = {
+        "stage": f"{_LLM_REPAIR_USAGE_STAGE}.started",
+        "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+        "model": model_info,
+        "request_content": {
+            "cluster": _compact_cluster_for_trace(request_cluster),
+            "page_contexts": _page_context_trace_rows(list(request_cluster.get("page_contexts") or [])),
+        },
+        "request_context_summary": {
+            "cluster_id": str(cluster.get("cluster_id") or ""),
+            "request_mode": str(request_cluster.get("request_mode") or ""),
+            "page_context_count": len(request_cluster.get("page_contexts") or []),
+            "image_count": sum(1 for context in (request_cluster.get("page_contexts") or []) if str(context.get("image_url") or "").strip()),
+        },
+        "request_metrics": started_metrics,
+        "token_accounting": _token_accounting_for_request({}, started_metrics),
+        "usage": {},
+    }
+    _emit_llm_trace(trace_callback, started_trace)
     client = OpenAI(
         api_key=str(resolved_args.get("api_key") or ""),
         base_url=str(resolved_args.get("base_url") or ""),
@@ -970,28 +1258,6 @@ def request_llm_repair_actions(
     )
     image_refused = False
     started = time.time()
-
-    def _page_context_trace_rows(page_contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        rows: list[dict[str, Any]] = []
-        for row in page_contexts or []:
-            image_url = str(row.get("image_url") or "").strip()
-            raw_bytes = b""
-            if image_url.startswith("data:") and "," in image_url:
-                try:
-                    raw_bytes = base64.b64decode(image_url.split(",", 1)[1])
-                except Exception:
-                    raw_bytes = b""
-            rows.append(
-                {
-                    "page_no": int(row.get("page_no") or 0),
-                    "file_idx": int(row.get("file_idx") or 0),
-                    "source_pdf_path": str(row.get("source_pdf_path") or ""),
-                    "ocr_excerpt": str(row.get("ocr_excerpt") or ""),
-                    "byte_size": len(raw_bytes),
-                    "sha256": hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else "",
-                }
-            )
-        return rows
 
     def _do_call(content: list[dict[str, Any]]):
         request_overrides = dict(resolved_args.get("request_overrides") or {})
@@ -1024,9 +1290,31 @@ def request_llm_repair_actions(
             try:
                 response = _do_call(text_only_content)
             except Exception as exc2:
-                raise _classify_provider_exception(exc2) from exc2
+                failed = _classify_provider_exception(exc2)
+                _emit_llm_trace(
+                    trace_callback,
+                    {
+                        **started_trace,
+                        "stage": f"{_LLM_REPAIR_USAGE_STAGE}.failed",
+                        "reason_for_request": "LLM repair 请求失败",
+                        "error": str(failed),
+                        "timing": {"duration_ms": int(max(0.0, (time.time() - started) * 1000.0))},
+                    },
+                )
+                raise failed from exc2
         else:
-            raise _classify_provider_exception(exc) from exc
+            failed = _classify_provider_exception(exc)
+            _emit_llm_trace(
+                trace_callback,
+                {
+                    **started_trace,
+                    "stage": f"{_LLM_REPAIR_USAGE_STAGE}.failed",
+                    "reason_for_request": "LLM repair 请求失败",
+                    "error": str(failed),
+                    "timing": {"duration_ms": int(max(0.0, (time.time() - started) * 1000.0))},
+                },
+            )
+            raise failed from exc
     usage = _build_usage(
         prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
         completion_tokens=getattr(response.usage, "completion_tokens", 0),
@@ -1037,88 +1325,67 @@ def request_llm_repair_actions(
         raw_text = _extract_openai_message_text(getattr(response.choices[0].message, "content", ""))
     duration_ms = int(max(0.0, (time.time() - started) * 1000.0))
     parsed_actions = parse_llm_repair_actions(raw_text)
+    usage_event = {
+        "stage": _LLM_REPAIR_USAGE_STAGE,
+        "provider": str(resolved_args.get("provider") or "qwen"),
+        "model_id": str(resolved_args.get("model_id") or ""),
+        "request_count": _coerce_usage_int(usage.get("request_count")),
+        "prompt_tokens": _coerce_usage_int(usage.get("prompt_tokens")),
+        "completion_tokens": _coerce_usage_int(usage.get("completion_tokens")),
+        "total_tokens": _coerce_usage_int(usage.get("total_tokens")),
+        "doc_id": str(doc_id or "").strip(),
+        "slug": str(slug or "").strip(),
+        "context": _compact_usage_context(
+            {
+                "cluster_id": str(cluster.get("cluster_id") or ""),
+                "request_mode": str(request_cluster.get("request_mode") or ""),
+            }
+        ),
+    }
+    request_metrics = _request_metrics_for_cluster(
+        cluster=cluster,
+        request_cluster=request_cluster,
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        image_refused=image_refused,
+    )
+    token_accounting = _token_accounting_for_request(usage, request_metrics)
+    llm_trace = {
+        "stage": _LLM_REPAIR_USAGE_STAGE,
+        "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+        "model": model_info,
+        "request_prompt": {
+            "system": system_prompt,
+            "user": user_prompt,
+        },
+        "request_content": {
+            "cluster": _compact_cluster_for_trace(request_cluster),
+            "page_contexts": _page_context_trace_rows(list(request_cluster.get("page_contexts") or [])),
+        },
+        "request_context_summary": {
+            "cluster_id": str(cluster.get("cluster_id") or ""),
+            "request_mode": str(request_cluster.get("request_mode") or ""),
+            "page_context_count": len(request_cluster.get("page_contexts") or []),
+            "image_refused": bool(image_refused),
+        },
+        "token_accounting": token_accounting,
+        "response_raw_text": raw_text,
+        "response_parsed": parsed_actions,
+        "derived_truth": {
+            "parsed_actions": parsed_actions,
+        },
+        "usage": dict(usage or {}),
+        "timing": {"duration_ms": duration_ms},
+    }
+    _emit_llm_trace(trace_callback, llm_trace)
     return {
         "raw_text": raw_text,
         "usage": usage,
-        "usage_event": {
-            "stage": _LLM_REPAIR_USAGE_STAGE,
-            "provider": str(resolved_args.get("provider") or "qwen"),
-            "model_id": str(resolved_args.get("model_id") or ""),
-            "request_count": _coerce_usage_int(usage.get("request_count")),
-            "prompt_tokens": _coerce_usage_int(usage.get("prompt_tokens")),
-            "completion_tokens": _coerce_usage_int(usage.get("completion_tokens")),
-            "total_tokens": _coerce_usage_int(usage.get("total_tokens")),
-            "doc_id": str(doc_id or "").strip(),
-            "slug": str(slug or "").strip(),
-            "context": _compact_usage_context(
-                {
-                    "cluster_id": str(cluster.get("cluster_id") or ""),
-                    "request_mode": str(request_cluster.get("request_mode") or ""),
-                }
-            ),
-        },
+        "usage_event": usage_event,
         "actions": parsed_actions,
-        "request_metrics": {
-            "cluster_id": str(cluster.get("cluster_id") or ""),
-            "request_mode": str(request_cluster.get("request_mode") or ""),
-            "allowed_actions": list(request_cluster.get("allowed_actions") or []),
-            "chars": len(system_prompt) + len(user_prompt),
-            "estimated_prompt_tokens": _estimate_prompt_tokens(system_prompt) + _estimate_prompt_tokens(user_prompt),
-            "soft_input_token_budget": LLM_REPAIR_SOFT_INPUT_TOKEN_BUDGET,
-            "model_max_input_tokens_thinking": QWEN35_PLUS_MAX_INPUT_TOKENS_THINKING,
-            "model_max_input_tokens_no_think": QWEN35_PLUS_MAX_INPUT_TOKENS_NO_THINK,
-            "matched_examples": len(request_cluster.get("matched_examples") or []),
-            "unmatched_note_items": len(request_cluster.get("unmatched_note_items") or []),
-            "unmatched_anchors": len(request_cluster.get("unmatched_anchors") or []),
-            "page_context_count": len(request_cluster.get("page_contexts") or []),
-            "image_refused": image_refused,
-            "truncated": (
-                len(request_cluster.get("matched_examples") or []) < len(cluster.get("matched_examples") or [])
-                or len(request_cluster.get("unmatched_note_items") or []) < len(cluster.get("unmatched_note_items") or [])
-                or len(request_cluster.get("unmatched_anchors") or []) < len(cluster.get("unmatched_anchors") or [])
-            ),
-        },
-        "llm_trace": {
-            "stage": _LLM_REPAIR_USAGE_STAGE,
-            "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
-            "model": {
-                "provider": str(resolved_args.get("provider") or "qwen"),
-                "model_id": str(resolved_args.get("model_id") or ""),
-                "base_url": str(resolved_args.get("base_url") or ""),
-            },
-            "request_prompt": {
-                "system": system_prompt,
-                "user": user_prompt,
-            },
-            "request_content": {
-                "cluster": {
-                    "cluster_id": str(request_cluster.get("cluster_id") or ""),
-                    "chapter_title": str(request_cluster.get("chapter_title") or ""),
-                    "request_mode": str(request_cluster.get("request_mode") or ""),
-        "allowed_actions": list(request_cluster.get("allowed_actions") or []),
-        "note_system": str(request_cluster.get("note_system") or ""),
-        "page_range": [request_cluster.get("page_start"), request_cluster.get("page_end")],
-        "matched_examples": list(request_cluster.get("matched_examples") or []),
-        "unmatched_note_items": list(request_cluster.get("unmatched_note_items") or []),
-        "unmatched_anchors": list(request_cluster.get("unmatched_anchors") or []),
-        "rebind_candidates": list(request_cluster.get("rebind_candidates") or []),
-    },
-                "page_contexts": _page_context_trace_rows(list(request_cluster.get("page_contexts") or [])),
-            },
-            "request_context_summary": {
-                "cluster_id": str(cluster.get("cluster_id") or ""),
-                "request_mode": str(request_cluster.get("request_mode") or ""),
-                "page_context_count": len(request_cluster.get("page_contexts") or []),
-                "image_refused": bool(image_refused),
-            },
-            "response_raw_text": raw_text,
-            "response_parsed": parsed_actions,
-            "derived_truth": {
-                "parsed_actions": parsed_actions,
-            },
-            "usage": dict(usage or {}),
-            "timing": {"duration_ms": duration_ms},
-        },
+        "request_metrics": request_metrics,
+        "token_accounting": token_accounting,
+        "llm_trace": llm_trace,
     }
 
 
@@ -1233,6 +1500,7 @@ def run_llm_repair(
     max_unmatched_note_items: int | None = None,
     max_unmatched_anchors: int | None = None,
     clear_materialized_overrides: bool = True,
+    trace_callback=None,
 ) -> dict:
     repo = repo or SQLiteRepository()
     chapters_raw = repo.list_fnm_chapters(doc_id)
@@ -1260,6 +1528,8 @@ def run_llm_repair(
     auto_applied: list[dict] = []
     request_metrics: list[dict] = []
     llm_traces: list[dict] = []
+    usage_events: list[dict] = []
+    token_accounting: list[dict] = []
 
     for cluster_index, cluster in enumerate(clusters, start=1):
         cluster = dict(cluster)
@@ -1280,6 +1550,7 @@ def run_llm_repair(
             max_unmatched_anchors=max_unmatched_anchors,
             doc_id=doc_id,
             slug=slug,
+            trace_callback=trace_callback,
         )
         actions = _enrich_synthesize_anchor_actions(
             list(llm_result.get("actions") or []),
@@ -1287,6 +1558,10 @@ def run_llm_repair(
             spans=body_spans,
         )
         request_metrics.append(dict(llm_result.get("request_metrics") or {}))
+        if llm_result.get("token_accounting"):
+            token_accounting.append(dict(llm_result.get("token_accounting") or {}))
+        if llm_result.get("usage_event"):
+            usage_events.append(dict(llm_result.get("usage_event") or {}))
         if llm_result.get("llm_trace"):
             llm_traces.append(llm_result["llm_trace"])
         auto_actions = select_auto_applicable_actions(
@@ -1460,5 +1735,7 @@ def run_llm_repair(
         "suggestions": suggestions,
         "auto_applied": auto_applied,
         "request_metrics": request_metrics,
+        "token_accounting": token_accounting,
         "llm_traces": llm_traces,
+        "usage_summary": _summarize_usage_events(usage_events, required_stages=(_LLM_REPAIR_USAGE_STAGE,)),
     }
