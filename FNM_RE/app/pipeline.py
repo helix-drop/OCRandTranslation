@@ -1265,6 +1265,57 @@ def build_module_pipeline_snapshot(
         for scope, rows in dict(grouped_overrides or {}).items()
     }
     grouped_overrides_for_link["note_item"] = {}
+
+    # ── sup_recovery：恢复 OCR 丢失的正文上标标记 ──
+    # 必须在 Phase 2（note_items 已产出）之后、Phase 3（读 enriched_markdown）之前
+    if str(pdf_path or "").strip():
+        try:
+            from FNM_RE.modules.sup_recovery import recover_book_chapter_scoped
+            chapter_note_markers: dict[str, set[str]] = {}
+            chapter_page_ranges: dict[str, tuple[int, int]] = {}
+            for chapter in toc_result.data.chapters:
+                ch_id = str(chapter.chapter_id or "")
+                if not ch_id:
+                    continue
+                start_p = int(chapter.start_page or 0)
+                end_p = int(chapter.end_page or 0)
+                if start_p > 0 and end_p >= start_p:
+                    chapter_page_ranges[ch_id] = (start_p, end_p)
+            for item in split_result.data.note_items:
+                ch_id = str(item.chapter_id or "")
+                marker = str(item.marker or "").strip()
+                if ch_id and marker.isdigit():
+                    chapter_note_markers.setdefault(ch_id, set()).add(marker)
+            print(f"[sup_recovery] chapters={len(chapter_page_ranges)} "
+                  f"ch_with_markers={len(chapter_note_markers)} "
+                  f"pdf_path={'yes' if pdf_path else 'no'}")
+            if chapter_note_markers and chapter_page_ranges:
+                stats = recover_book_chapter_scoped(
+                    pages,
+                    chapter_note_markers,
+                    chapter_page_ranges,
+                    pdf_path=str(pdf_path),
+                )
+                print(f"[sup_recovery] done: {stats}")
+        except Exception as _e:
+            print(f"[sup_recovery] pipeline call failed: {_e}")
+            import traceback
+            traceback.print_exc()
+
+    # ── sup_recovery 结果回写到 ChapterLayers.body_pages.text ──
+    # Phase 2 构建 ChapterLayers 时快照了原始文本。sup_recovery 修改了
+    # pages[].enriched_markdown，但 Phase 4 ref_freeze 读的是 ChapterLayers
+    # 的快照，看不到修复。这里把 enriched_markdown 同步回去。
+    if str(pdf_path or "").strip():
+        for chapter in effective_split_layers.chapters:
+            for bp in chapter.body_pages:
+                pn = int(bp.page_no or 0)
+                if pn <= 0:
+                    continue
+                page = next((p for p in pages if int(p.get("pdfPage") or p.get("page_no") or 0) == pn), None)
+                if page and page.get("enriched_markdown"):
+                    bp.text = page["enriched_markdown"]
+
     link_result = _run_stage(
         progress_callback=progress_callback,
         stage="note_link_table",

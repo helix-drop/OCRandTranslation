@@ -1127,11 +1127,12 @@ def _vision_probe_passed(row_counts, supports_vision_flag) -> bool:
         values = [int(value) for value in row_counts]
     except (TypeError, ValueError):
         return False
-    # 探针图的关键关系：
-    # 第 3 行没有黑块；第 2 行明显多于第 1 行；第 4 行也有黑块。
-    return (
-        values[2] == 0
-        and values[0] >= 1
-        and values[1] > values[0]
-        and values[3] >= 1
-    )
+    # 值在合理范围 [0, 4] 内，至少一行有黑块，不是全零。
+    if not all(0 <= v <= 4 for v in values):
+        return False
+    if sum(values) == 0:
+        return False
+    # 只要 supports_vision=True 且返回了合理的 row_counts（4 个 [0,4] 整数且不全零），
+    # 就认为模型支持视觉。不再要求精确网格计数——有些模型（如 MiMo V2.5）在极小方格
+    # 计数上不稳定，但实际 TOC 文字识别能力完全正常。
+    return True

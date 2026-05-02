@@ -1814,6 +1814,11 @@ def build_note_link_table(
         anchor_summary=anchor_summary,
         link_summary=effective_link_summary,
     )
+    for l in effective_links:
+        if str(l.note_item_id or "") == "en-00007":
+            print(f"[DEBUG build_note_link_table] FINAL en-00007: anchor={l.anchor_id} status={l.status} resolver={l.resolver}")
+            break
+
     return ModuleResult(
         data=data,
         gate_report=gate_report,

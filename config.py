@@ -59,7 +59,7 @@ CUSTOM_MODEL_DEFAULT = {
 MODEL_POOL_SLOT_COUNT = 3
 MODEL_POOL_MODE_VALUES = {"builtin", "custom", "empty"}
 MIMO_BASE_URL = "https://api.xiaomimimo.com/v1"
-MIMO_TOKEN_PLAN_BASE_URL_DEFAULT = "https://token-plan-cn.xiaomimimo.com/v1"
+MIMO_TOKEN_PLAN_BASE_URL_DEFAULT = "https://token-plan-sgp.xiaomimimo.com/v1"
 GLM_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
 KIMI_BASE_URL = "https://api.moonshot.ai/v1"
 MODEL_POOL_LEGACY_KEYS = {
@@ -200,7 +200,7 @@ def _normalize_custom_model_config(value) -> dict:
         cfg["api_key_mode"] = "custom"
         cfg["base_url"] = cfg["base_url"] or MIMO_TOKEN_PLAN_BASE_URL_DEFAULT
         cfg["qwen_region"] = "cn"
-        cfg["extra_body"] = _thinking_extra_body("mimo_token_plan", cfg["thinking_enabled"]) if cfg["thinking_enabled"] else {}
+        cfg["extra_body"] = _thinking_extra_body("mimo_token_plan", cfg["thinking_enabled"])
     else:
         cfg["api_key_mode"] = "custom"
         cfg["qwen_region"] = "cn"
@@ -315,7 +315,7 @@ def _normalize_model_pool_slot(value, *, capability: str) -> dict:
         elif slot["provider_type"] == "mimo_token_plan":
             slot["base_url"] = slot["base_url"] or MIMO_TOKEN_PLAN_BASE_URL_DEFAULT
             slot["qwen_region"] = "cn"
-            slot["extra_body"] = _thinking_extra_body("mimo_token_plan", slot["thinking_enabled"]) if slot["thinking_enabled"] else {}
+            slot["extra_body"] = _thinking_extra_body("mimo_token_plan", slot["thinking_enabled"])
         else:
             slot["qwen_region"] = "cn"
             slot["extra_body"] = {}

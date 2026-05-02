@@ -66,6 +66,23 @@ FUZZY_AMBIGUITY_MARGIN = 5.0
 _LLM_REPAIR_USAGE_STAGE = "llm_repair.cluster_request"
 
 
+def _safe_float(value, default: float = 0.0) -> float:
+    """安全转换 float，处理 MiMo 返回的非数字字符串（如 'high', 'medium'）。"""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        pass
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in ("high", "very_high", "strong"):
+            return 0.9
+        if lowered in ("medium", "moderate"):
+            return 0.7
+        if lowered in ("low", "weak"):
+            return 0.4
+    return default
+
+
 def _coerce_usage_int(value) -> int:
     try:
         return max(0, int(value or 0))
@@ -440,6 +457,7 @@ def _repair_system_prompt() -> str:
         "需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；"
         "synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，"
         "需要 anchor_id、marker、note_text、confidence、reason；"
+        "confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；"
         "若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。"
         "needs_review 需要 reason。"
     )
@@ -735,7 +753,7 @@ def parse_llm_repair_actions(text: str) -> list[dict]:
                 "anchor_phrase": anchor_phrase,
                 "marker": marker,
                 "note_text": note_text,
-                "confidence": float(item.get("confidence", 0.0) or 0.0),
+                "confidence": _safe_float(item.get("confidence"), 0.8),
                 "reason": str(item.get("reason") or "").strip(),
             }
         )
@@ -761,7 +779,10 @@ def select_auto_applicable_actions(
     used_refs: set[str] = set()
     for action in actions or []:
         kind = str(action.get("action") or "").strip().lower()
-        confidence = float(action.get("confidence", 0.0) or 0.0)
+        try:
+            confidence = float(action.get("confidence", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            confidence = 0.0
         if confidence < confidence_threshold:
             continue
         if kind == "match":
@@ -786,7 +807,10 @@ def select_auto_applicable_actions(
                 continue
             if not str(action.get("anchor_phrase") or "").strip():
                 continue
-            fuzzy_score = float(action.get("fuzzy_score", 0.0) or 0.0)
+            try:
+                fuzzy_score = float(action.get("fuzzy_score", 0.0) or 0.0)
+            except (TypeError, ValueError):
+                fuzzy_score = 0.0
             if fuzzy_score < FUZZY_SCORE_THRESHOLD:
                 continue
             if bool(action.get("ambiguous")):
@@ -1692,7 +1716,7 @@ def run_llm_repair(
                         "source_marker": marker,
                         "normalized_marker": marker,
                         "anchor_kind": note_system,
-                        "certainty": float(action.get("confidence") or 0.0),
+                        "certainty": _safe_float(action.get("confidence"), 0.8),
                         "source": "llm",
                         "synthetic": False,
                     },

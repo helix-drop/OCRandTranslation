@@ -503,6 +503,17 @@ def _build_section_markdown(
         lines.append(f"### {title}")
         lines.append("")
 
+    # 将章内有 note_unit 但 body 中未遇到的 endnote 补入序列末尾，
+    # 避免因某个 orphan endnote 缺失导致后续所有编号偏移（Biopolitics  marker 18→17）。
+    chapter_endnote_ids = sorted(
+        [nid for nid, kind in note_kind_by_id.items() if kind == "endnote"],
+        key=lambda nid: str(note_text_by_id.get(nid, "") or ""),
+    )
+    for nid in chapter_endnote_ids:
+        if nid not in local_ref_numbers:
+            local_ref_numbers[nid] = len(local_ref_numbers) + 1
+            ordered_note_ids.append(nid)
+
     endnote_ids = [nid for nid in ordered_note_ids
                    if note_kind_by_id.get(nid, "") in ("endnote", "")]
     unknown_ids = [nid for nid in ordered_note_ids if nid not in note_kind_by_id]

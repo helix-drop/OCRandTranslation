@@ -1260,6 +1260,7 @@ def _process_book(
     book: ExampleBook,
     *,
     stage_callback=None,
+    skip_translation: bool = False,
 ) -> dict[str, Any]:
     asset_check = _check_required_assets(book)
     example_dir = _resolve_example_dir(book)
@@ -1442,14 +1443,18 @@ def _process_book(
         base_result["structure"] = structure
         _record_stage_error("structure_verify", "structure_verify_exception", exc)
 
-    try:
-        placeholder_result = materialize_test_placeholders(book.doc_id)
-        base_result["placeholders"] = placeholder_result
-        _advance("placeholder_translate", "done", f"translated_paras={int(placeholder_result.get('translated_paras') or 0)}")
-    except Exception as exc:
-        placeholder_result = {"ok": False, "error": str(exc)}
-        base_result["placeholders"] = placeholder_result
-        _record_stage_error("placeholder_translate", "placeholder_translate_exception", exc)
+    if skip_translation:
+        base_result["placeholders"] = {"ok": True, "skipped": True, "translated_paras": 0}
+        _advance("placeholder_translate", "skipped", "已跳过 placeholder 翻译")
+    else:
+        try:
+            placeholder_result = materialize_test_placeholders(book.doc_id)
+            base_result["placeholders"] = placeholder_result
+            _advance("placeholder_translate", "done", f"translated_paras={int(placeholder_result.get('translated_paras') or 0)}")
+        except Exception as exc:
+            placeholder_result = {"ok": False, "error": str(exc)}
+            base_result["placeholders"] = placeholder_result
+            _record_stage_error("placeholder_translate", "placeholder_translate_exception", exc)
 
     try:
         export_result = verify_export(
@@ -1544,6 +1549,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--group", default="all", choices=["baseline", "extension", "all"])
     parser.add_argument("--include-all", action="store_true", help="包含 manifest 中默认批次外的样本")
     parser.add_argument("--limit", type=int, default=0, help="仅处理前 N 本")
+    parser.add_argument("--skip-translation", action="store_true", help="跳过 placeholder 翻译步骤")
     parser.add_argument("--batch-tag", default="", help="输出目录标签；默认时间戳")
     return parser.parse_args()
 
@@ -1600,7 +1606,7 @@ def main() -> int:
     batch_outputs: dict[str, Any] = {}
     for book in books:
         print(f"[{book.slug}] running...", flush=True)
-        result = _process_book(book, stage_callback=_stage_callback)
+        result = _process_book(book, stage_callback=_stage_callback, skip_translation=args.skip_translation)
         results.append(result)
         batch_outputs = _write_batch_outputs(output_dir, results) or {}
         _write_batch_runtime_status(

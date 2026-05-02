@@ -242,7 +242,7 @@ def _build_orphan_recovery_anchors(
         pno = int(p.get("bookPage") or p.get("pdfPage") or 0)
         if pno <= 0:
             continue
-        md = str(p.get("markdown") or "").strip()
+        md = str(p.get("enriched_markdown") or p.get("markdown") or "").strip()
         if md:
             page_text[pno] = md
 
@@ -369,6 +369,11 @@ def build_note_links(
             page_no=note_item.page_no,
             include_synthetic=False,
         )
+        if marker == "7" and "ch-001" in str(chapter_id or ""):
+            all_m7_anchors = [a for a in anchors if getattr(a, "normalized_marker", "") == "7"]
+            print(f"[DEBUG note_links] en-00007: chapter={chapter_id} candidates={len(candidates)} "
+                  f"all_m7_anchors={[(a.anchor_id, a.page_no, str(a.chapter_id)[:40]) for a in all_m7_anchors]} "
+                  f"used_has_00012={any('00012' in u for u in used_anchor_ids)}")
         is_direct_match = bool(candidates)
         if not candidates and chapter_id and _is_fallback_chapter_id(chapter_id):
             chapter_anchor_count = int(anchor_count_by_chapter.get(chapter_id, 0) or 0)
@@ -422,31 +427,20 @@ def build_note_links(
             )
             continue
         if len(candidates) > 1:
-            selected = _nearest_unique_candidate(candidates, target_page=note_item.page_no)
-            if selected is not None:
-                used_anchor_ids.add(selected.anchor_id)
-                _append_link(
-                    chapter_id=chapter_id,
-                    region_id=note_item.region_id,
-                    note_item_id=note_item.note_item_id,
-                    anchor_id=selected.anchor_id,
-                    status="matched",
-                    resolver="repair",
-                    confidence=max(0.0, min(1.0, float(selected.certainty))),
-                    note_kind="endnote",
-                    marker=marker,
-                    page_no_start=note_item.page_no,
-                    page_no_end=note_item.page_no,
-                )
-                continue
+            # 同章内多候选时（Biopolitics：每章 marker 从 1 重新开始编号），
+            # 按正文阅读顺序选择最早的未用 anchor，而非按 note 页距离选择。
+            # 这保证第一个 endnote 匹配第一个正文锚点，依此类推。
+            candidates.sort(key=lambda row: (int(row.page_no), int(row.paragraph_index), int(row.char_start)))
+            selected = candidates[0]
+            used_anchor_ids.add(selected.anchor_id)
             _append_link(
                 chapter_id=chapter_id,
                 region_id=note_item.region_id,
                 note_item_id=note_item.note_item_id,
-                anchor_id="",
-                status="ambiguous",
-                resolver="rule",
-                confidence=0.0,
+                anchor_id=selected.anchor_id,
+                status="matched",
+                resolver="repair",
+                confidence=max(0.0, min(1.0, float(selected.certainty))),
                 note_kind="endnote",
                 marker=marker,
                 page_no_start=note_item.page_no,
@@ -467,6 +461,12 @@ def build_note_links(
             page_no_end=note_item.page_no,
         )
         orphan_endnote_link_indexes.append(len(links) - 1)
+
+    # 诊断：en-00007 匹配状态
+    for l in links:
+        if l.note_item_id == "en-00007":
+            print(f"[DEBUG note_links] AFTER MATCH en-00007: anchor={l.anchor_id} status={l.status} resolver={l.resolver}")
+            break
 
     # endnote orphan repair
     for index in orphan_endnote_link_indexes:
@@ -492,10 +492,16 @@ def build_note_links(
                 confidence=max(0.0, min(1.0, float(selected.certainty))),
             )
         elif len(candidates) > 1:
+            # 同样按阅读顺序选择最早的未用 anchor
+            candidates.sort(key=lambda row: (int(row.page_no), int(row.paragraph_index), int(row.char_start)))
+            selected = candidates[0]
+            used_anchor_ids.add(selected.anchor_id)
             links[index] = replace(
                 link,
-                status="ambiguous",
+                anchor_id=selected.anchor_id,
+                status="matched",
                 resolver="repair",
+                confidence=max(0.0, min(1.0, float(selected.certainty))),
             )
 
     # ── 阶段4：orphan endnote 直接正文搜索恢复 ──
@@ -570,6 +576,33 @@ def build_note_links(
                 page_no_end=note_item.page_no,
             )
             continue
+        # ── 星号脚注按页内顺序匹配 ──────────────────────────────────────
+        # 混合书型中 * 脚注是编者注，本质是页级绑定。同页多个 * 按出现
+        # 顺序配对（第 1 个 fnBlock * 配第 1 个 body *）。
+        if marker and re.match(r"^\*{1,4}$", marker):
+            same_page_candidates = [
+                a for a in anchors
+                if str(a.chapter_id or "") == chapter_id
+                and not a.synthetic
+                and a.anchor_id not in used_anchor_ids
+                and a.anchor_kind in {"footnote", "unknown"}
+                and normalize_note_marker(a.normalized_marker) == marker
+                and int(a.page_no or 0) == int(note_item.page_no or 0)
+            ]
+            same_page_candidates.sort(key=lambda a: (int(a.paragraph_index), int(a.char_start)))
+            if same_page_candidates:
+                selected = same_page_candidates[0]
+                used_anchor_ids.add(selected.anchor_id)
+                _append_link(
+                    chapter_id=chapter_id, region_id=note_item.region_id,
+                    note_item_id=note_item.note_item_id, anchor_id=selected.anchor_id,
+                    status="matched", resolver="rule",
+                    confidence=max(0.0, min(1.0, float(selected.certainty))),
+                    note_kind="footnote", marker=marker,
+                    page_no_start=note_item.page_no, page_no_end=note_item.page_no,
+                )
+                continue
+
         candidates = _candidate_anchors(
             anchors,
             chapter_id=chapter_id,

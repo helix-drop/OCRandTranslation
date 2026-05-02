@@ -111,18 +111,26 @@ def build_book_note_profile(
     chapter_has_endnote: dict[str, set[int]] = {}
     book_endnote_pages: set[int] = set()
 
-    # 第一遍：确定哪些章有显式 ## NOTES 标题（强信号锚点）。
+    # 第一遍：确定哪些章有显式 ## NOTES 标题（强信号锚点）或 endnote_collection 页。
     # 同章后续的弱信号尾注页（延续页）应跟随锚点保留。
+    # Biopolitics 类型：章末 note 页不一定有 ## NOTES 标题，且可能落在章节间隙中
+    # （ch1 end=39, note 页=40-42, ch2 start=43），需 nearest_prior 兜底。
     chapters_with_heading: set[str] = set()
     if not toc_has_endnotes_entry:
         for page in annotated_pages:
             page_no = _safe_int(page.get("bookPage") or 0)
             if page_no <= 0:
                 continue
-            if _has_notes_heading(page_markdown_text(page)):
-                chapter_id = chapter_by_page.get(page_no, "")
-                if chapter_id:
-                    chapters_with_heading.add(chapter_id)
+            markdown = page_markdown_text(page)
+            chapter_id = chapter_by_page.get(page_no, "") or _nearest_prior_chapter_id(toc_structure, page_no)
+            if not chapter_id:
+                continue
+            if _has_notes_heading(markdown):
+                chapters_with_heading.add(chapter_id)
+                continue
+            note_scan = dict(page.get("_note_scan") or {})
+            if str(note_scan.get("page_kind") or "").strip().lower() == "endnote_collection":
+                chapters_with_heading.add(chapter_id)
 
     for page in annotated_pages:
         page_no = _safe_int(page.get("bookPage") or 0)
@@ -142,13 +150,17 @@ def build_book_note_profile(
             has_endnote = False
         elif is_weak_endnote and not toc_has_endnotes_entry:
             # TOC 无 endnotes 条目时，弱信号需额外守卫。若同章有显式标题页
-            # （Biopolitics：## NOTES 后跟延续页），弱信号跟随保留。若同章
-            # 无标题页（Germany_Madness：纯脚注书的编号条目被 note_detection
-            # 误判为 endnote），弱信号降级丢弃。
-            chapter_id = chapter_by_page.get(page_no, "")
+            # 或 endnote_collection 页（Biopolitics：章末 note 页不一定有 ## NOTES），
+            # 弱信号跟随保留。若同章无任何尾注证据（Germany_Madness：纯脚注书的
+            # 编号条目被 note_detection 误判为 endnote），弱信号降级丢弃。
+            chapter_id = chapter_by_page.get(page_no, "") or _nearest_prior_chapter_id(toc_structure, page_no)
             if chapter_id not in chapters_with_heading:
                 has_endnote = False
         chapter_id = chapter_by_page.get(page_no, "")
+        # 间隙页（章边界之间）和章内未分配页用 nearest_prior 兜底，
+        # 但不包括全书末尾页（> last_chapter_end）——那些属于 book_endnote。
+        if not chapter_id and page_no <= last_chapter_end:
+            chapter_id = _nearest_prior_chapter_id(toc_structure, page_no)
 
         if has_footnote:
             footnote_pages.add(page_no)
