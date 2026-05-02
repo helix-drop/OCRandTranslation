@@ -680,8 +680,13 @@ def _extract_page_footnote_items(page: dict, prev_page: dict | None = None) -> l
             bbox = block.get("bbox")
             if bbox and len(bbox) >= 4:
                 top = float(bbox[1])
+            block_text = str(block.get("text") or "")
+            # 扫描版 PDF 的隐藏文字层(textSource=pdf)常为乱码(Identity-H 编码)。
+            # 乱码块跳过，交由下方的 footnotes 文本兜底。
+            if str(block.get("textSource") or "") == "pdf" and _looks_garbled(block_text):
+                continue
             for item in _split_items_from_text(
-                block.get("text", ""),
+                block_text,
                 kind="footnote",
                 source="fnBlocks",
                 base_order=len(items),
@@ -699,6 +704,23 @@ def _extract_page_footnote_items(page: dict, prev_page: dict | None = None) -> l
         source="footnotes",
         last_number=previous_last_number,
     )
+
+
+def _looks_garbled(text: str) -> bool:
+    """检测文本是否为乱码（排除拉丁重音和 CJK 后的高 ASCII 字符占比过高）。"""
+    if len(text) < 10:
+        return False
+    weird = 0
+    for c in text:
+        cp = ord(c)
+        if cp <= 127 or c.isspace():
+            continue
+        if cp >= 0x4E00:  # CJK
+            continue
+        if 0xC0 <= cp <= 0x24F:  # Latin extended (重音/ligature: àâäéèêëïîôöùûüÿçœæ)
+            continue
+        weird += 1
+    return weird > len(text) * 0.15
 
 
 def _page_has_footnote_blocks(page: dict | None) -> bool:
