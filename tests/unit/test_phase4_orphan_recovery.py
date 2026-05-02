@@ -95,7 +95,6 @@ class Phase4OrphanRecoveryIntegrationTest(unittest.TestCase):
         from FNM_RE.stages.note_links import (
             _find_marker_in_body,
             _build_orphan_recovery_anchors,
-            _chapter_body_text,
         )
         # 构造最小测试数据
         pages = [{"bookPage": 1, "markdown": "Body text [42] reference."}]

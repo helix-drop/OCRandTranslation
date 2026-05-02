@@ -242,8 +242,14 @@ def build_frozen_units(
             _append_skipped("missing_anchor")
             continue
         if bool(anchor.synthetic):
-            _append_skipped("synthetic_anchor", page_no=int(anchor.page_no))
-            continue
+            sm = str(anchor.source_marker or "").strip()
+            nm = str(anchor.normalized_marker or "").strip()
+            if sm == nm:
+                # bare digit source_marker 太宽泛，_inject_token_once 会在
+                # 整页文本中裸搜 "7"，容易误匹配。只有带格式的 source_marker
+                #（如 [7]、<sup>7</sup>）才能安全注入。
+                _append_skipped("synthetic_anchor", page_no=int(anchor.page_no))
+                continue
         if anchor_id in conflict_anchor_ids:
             _append_skipped("conflict_anchor", page_no=int(anchor.page_no))
             continue

@@ -8,6 +8,7 @@ from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.note_linking import (
     _apply_link_overrides,
     _chapter_contracts,
+    _phase2_from_chapter_layers,
     _repair_explicit_footnote_anchor_ocr_variants,
     build_note_link_table,
 )
@@ -88,6 +89,84 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             item_summary={},
         )
 
+    def test_phase2_projection_preserves_region_item_note_kind_over_chapter_mode(self):
+        """mixed 章里 item/region 的 note_kind 已由 Phase 2 判定，Phase 3 投影不能覆盖。"""
+        footnote_region = LayerNoteRegion(
+            region_id="fn-rg-1",
+            chapter_id="ch-1",
+            owner_chapter_id="ch-1",
+            page_start=10,
+            page_end=10,
+            pages=[10],
+            note_kind="footnote",
+            scope="chapter",
+            source_scope="chapter",
+            source="footnote_band",
+            bind_method="rule",
+            bind_confidence=1.0,
+            heading_text="",
+            review_required=False,
+        )
+        endnote_region = LayerNoteRegion(
+            region_id="en-rg-1",
+            chapter_id="ch-1",
+            owner_chapter_id="ch-1",
+            page_start=20,
+            page_end=20,
+            pages=[20],
+            note_kind="endnote",
+            scope="chapter",
+            source_scope="chapter",
+            source="notes_heading",
+            bind_method="rule",
+            bind_confidence=1.0,
+            heading_text="NOTES",
+            review_required=False,
+        )
+        footnote_item = LayerNoteItem(
+            note_item_id="fn-1",
+            region_id="fn-rg-1",
+            chapter_id="ch-1",
+            owner_chapter_id="ch-1",
+            page_no=10,
+            marker="*",
+            marker_type="footnote_marker",
+            text="A page footnote.",
+            source="footnotes",
+            is_reconstructed=False,
+            review_required=False,
+            note_kind="footnote",
+        )
+        endnote_item = LayerNoteItem(
+            note_item_id="en-1",
+            region_id="en-rg-1",
+            chapter_id="ch-1",
+            owner_chapter_id="ch-1",
+            page_no=20,
+            marker="1",
+            marker_type="numeric",
+            text="A chapter endnote.",
+            source="notes_page",
+            is_reconstructed=False,
+            review_required=False,
+            note_kind="endnote",
+        )
+        layers = self._single_chapter_layers(
+            note_items=[footnote_item, endnote_item],
+            note_regions=[footnote_region, endnote_region],
+            note_mode="chapter_endnote_primary",
+            book_type="mixed",
+        )
+
+        phase2, _mode_by_chapter, _book_type = _phase2_from_chapter_layers(layers)
+
+        region_kind_by_id = {row.region_id: row.note_kind for row in phase2.note_regions}
+        item_marker_type_by_id = {row.note_item_id: row.marker_type for row in phase2.note_items}
+        self.assertEqual(region_kind_by_id["fn-rg-1"], "footnote")
+        self.assertEqual(region_kind_by_id["en-rg-1"], "endnote")
+        self.assertEqual(item_marker_type_by_id["fn-1"], "footnote_marker")
+        self.assertEqual(item_marker_type_by_id["en-1"], "numeric")
+
     def test_biopolitics_main_path_endnote_link_hard_gates_true(self):
         """Biopolitics 主路径下，endnote-link 视角的 4 类原 hard gate 仍 True。
 
@@ -118,20 +197,14 @@ class FnmReModule4LinkingTest(unittest.TestCase):
         # 工单 #6 关键改善确认：link_quality_low 已被消除（fallback_match_ratio < 30% 阈值）
         self.assertTrue(result.gate_report.hard.get("link.quality_ok"), "工单 #6 应让 quality_ok 转 True")
 
-    def test_biopolitics_contract_v2_blocks_due_to_def_anchor_mismatch(self):
-        """工单 #3 验收：Biopolitics 当前状态下契约 v2 的 def_anchor_aligned 必须 False。
-
-        因为 anchor 全形态扫描数（chapter_marker_counts）远超 def 数（footnote+endnote items），
-        进入 blocking_reasons = [contract_def_anchor_mismatch]。
-        修完工单 #2/#5/#6/#7 后该 reason 应消失。
-        """
+    def test_biopolitics_contract_v2_def_anchor_mismatch_is_resolved(self):
+        """Biopolitics 的定义数与正文 anchor 数应保持对齐。"""
         pages, layers = self._build_biopolitics_inputs()
         result = build_note_link_table(layers, pages)
-        self.assertFalse(result.gate_report.hard["link.def_anchor_aligned"],
-                         "Biopolitics 当前状态应触发 def_anchor_mismatch")
-        self.assertIn("contract_def_anchor_mismatch", result.gate_report.reasons)
+        self.assertTrue(result.gate_report.hard["link.def_anchor_aligned"])
+        self.assertNotIn("contract_def_anchor_mismatch", result.gate_report.reasons)
         summary = dict(result.evidence.get("chapter_link_contract_summary") or {})
-        self.assertGreater(int(summary.get("contract_v2_def_anchor_mismatch_count") or 0), 0)
+        self.assertEqual(int(summary.get("contract_v2_def_anchor_mismatch_count") or 0), 0)
 
     def test_year_like_marker_is_filtered_from_anchors(self):
         pages = [
@@ -389,6 +462,162 @@ class FnmReModule4LinkingTest(unittest.TestCase):
         )
         self.assertTrue(result.gate_report.hard["link.first_marker_is_one"])
         self.assertEqual(contract_evidence.get("non_ignored_numeric_markers"), [1, 2])
+
+    def test_chapter_endnote_does_not_match_cross_chapter_same_marker_anchor(self):
+        pages = [
+            _make_page(1, markdown="# Chapter One\nNo body anchor here.", block_text="Chapter One"),
+            _make_page(2, markdown="# Chapter Two\nA different chapter has [1].", block_text="Chapter Two"),
+        ]
+        region = LayerNoteRegion(
+            region_id="r-1",
+            chapter_id="toc-ch-001",
+            page_start=10,
+            page_end=10,
+            pages=[10],
+            note_kind="endnote",
+            scope="chapter",
+            source_scope="chapter",
+            source="unit-test",
+            bind_method="manual",
+            bind_confidence=1.0,
+            heading_text="Notes",
+            review_required=False,
+        )
+        note = LayerNoteItem(
+            note_item_id="n-1",
+            region_id="r-1",
+            chapter_id="toc-ch-001",
+            page_no=10,
+            marker="1",
+            source_marker="1",
+            normalized_marker="1",
+            synth_marker="",
+            projection_mode="native",
+            marker_type="numeric",
+            text="Chapter-one note without a local body anchor.",
+            source="unit-test",
+            is_reconstructed=False,
+            review_required=False,
+            note_kind="endnote",
+        )
+        ch1 = ChapterLayer(
+            chapter_id="toc-ch-001",
+            title="Chapter One",
+            body_pages=[
+                BodyPageLayer(
+                    page_no=1,
+                    text="# Chapter One\nNo body anchor here.",
+                    split_reason="body_page",
+                    source_role="body",
+                )
+            ],
+            endnote_items=[note],
+            endnote_regions=[region],
+            policy_applied={"note_mode": "chapter_endnote_primary", "book_type": "mixed"},
+        )
+        ch2 = ChapterLayer(
+            chapter_id="toc-ch-002",
+            title="Chapter Two",
+            body_pages=[
+                BodyPageLayer(
+                    page_no=2,
+                    text="# Chapter Two\nA different chapter has [1].",
+                    split_reason="body_page",
+                    source_role="body",
+                )
+            ],
+            endnote_items=[],
+            endnote_regions=[],
+            policy_applied={"note_mode": "chapter_endnote_primary", "book_type": "mixed"},
+        )
+        layers = ChapterLayers(
+            chapters=[ch1, ch2],
+            regions=[region],
+            note_items=[note],
+            region_summary={},
+            item_summary={},
+        )
+
+        result = build_note_link_table(layers, pages)
+
+        note_link = next(row for row in result.data.effective_links if row.note_item_id == "n-1")
+        self.assertEqual(note_link.status, "orphan_note")
+        self.assertEqual(note_link.anchor_id, "")
+
+    def test_gap_fill_recovers_small_leading_and_trailing_endnote_anchor_gaps(self):
+        pages = [
+            _make_page(1, markdown="# Chapter One\nOnly the middle marker [2] survived OCR.", block_text="Chapter One"),
+        ]
+        region = LayerNoteRegion(
+            region_id="r-1",
+            chapter_id="toc-ch-001",
+            page_start=10,
+            page_end=10,
+            pages=[10],
+            note_kind="endnote",
+            scope="chapter",
+            source_scope="chapter",
+            source="unit-test",
+            bind_method="manual",
+            bind_confidence=1.0,
+            heading_text="Notes",
+            review_required=False,
+        )
+        notes = [
+            LayerNoteItem(
+                note_item_id=f"n-{marker}",
+                region_id="r-1",
+                chapter_id="toc-ch-001",
+                page_no=10,
+                marker=str(marker),
+                source_marker=str(marker),
+                normalized_marker=str(marker),
+                synth_marker="",
+                projection_mode="native",
+                marker_type="numeric",
+                text=f"Note {marker}.",
+                source="unit-test",
+                is_reconstructed=False,
+                review_required=False,
+                note_kind="endnote",
+            )
+            for marker in (1, 2, 3)
+        ]
+        chapter = ChapterLayer(
+            chapter_id="toc-ch-001",
+            title="Chapter One",
+            body_pages=[
+                BodyPageLayer(
+                    page_no=1,
+                    text="# Chapter One\nOnly the middle marker [2] survived OCR.",
+                    split_reason="body_page",
+                    source_role="body",
+                )
+            ],
+            endnote_items=notes,
+            endnote_regions=[region],
+            policy_applied={"note_mode": "chapter_endnote_primary", "book_type": "mixed"},
+        )
+        layers = ChapterLayers(
+            chapters=[chapter],
+            regions=[region],
+            note_items=notes,
+            region_summary={},
+            item_summary={},
+        )
+
+        result = build_note_link_table(layers, pages)
+
+        anchors_by_marker = {
+            row.normalized_marker: row
+            for row in result.data.anchors
+            if row.chapter_id == "toc-ch-001"
+        }
+        self.assertEqual(set(anchors_by_marker), {"1", "2", "3"})
+        self.assertTrue(anchors_by_marker["1"].synthetic)
+        self.assertFalse(anchors_by_marker["2"].synthetic)
+        self.assertTrue(anchors_by_marker["3"].synthetic)
+        self.assertTrue(result.gate_report.hard["link.def_anchor_aligned"])
 
     def test_chapter_endnote_first_marker_ignores_cross_chapter_stale_anchor_order(self):
         region = LayerNoteRegion(
@@ -848,7 +1077,6 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             anchors=anchors,
             links=links,
             note_items=note_items,
-            chapter_mode_by_id={"ch-1": "chapter_endnote_primary", "ch-2": "footnote_primary"},
         )
 
         matched = next(row for row in repaired_links if row.link_id == "link-match")
@@ -1013,7 +1241,6 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             note_items=note_items,
             body_anchors=anchors,
             note_regions=regions,
-            chapter_mode_by_id={"ch-1": "footnote_primary"},
         )
 
         current = next(row for row in effective_links if row.link_id == "link-current")

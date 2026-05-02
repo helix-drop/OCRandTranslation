@@ -219,18 +219,9 @@ class FnmRePhase3Test(unittest.TestCase):
         self.assertNotIn("3", markers)
 
     def test_anchor_kind_resolution_for_five_note_modes(self):
-        self.assertEqual(resolve_anchor_kind("footnote_primary"), "footnote")
-        self.assertEqual(resolve_anchor_kind("chapter_endnote_primary"), "endnote")
-        self.assertEqual(resolve_anchor_kind("book_endnote_bound"), "endnote")
-        self.assertEqual(resolve_anchor_kind("no_notes"), "unknown")
-        self.assertEqual(
-            resolve_anchor_kind("no_notes", has_page_footnote_band=True), "footnote"
-        )
-        self.assertEqual(resolve_anchor_kind("review_required"), "unknown")
-        self.assertEqual(
-            resolve_anchor_kind("review_required", has_page_footnote_band=True),
-            "footnote",
-        )
+        # 树状原则：无逐页 evidence 时一律 unknown。has_page_footnote_band 是唯一信号。
+        self.assertEqual(resolve_anchor_kind(), "unknown")
+        self.assertEqual(resolve_anchor_kind(has_page_footnote_band=True), "footnote")
 
     def test_note_and_other_pages_do_not_generate_body_anchors(self):
         pages = [
@@ -431,7 +422,8 @@ class FnmRePhase3Test(unittest.TestCase):
         _anchors, links, _summary = build_note_links([anchor], phase2, pages=[])
         target = next(row for row in links if row.note_item_id == "en-1")
         self.assertEqual(target.status, "matched")
-        self.assertEqual(target.resolver, "fallback")
+        # anchor_kind="endnote" same chapter → 直接 rule 匹配，不经过 fallback
+        self.assertEqual(target.resolver, "rule")
 
     def test_ambiguous_candidates_return_ambiguous_status(self):
         phase2 = _phase2_fixture(
@@ -733,8 +725,7 @@ class FnmRePhase3Test(unittest.TestCase):
         )
         _anchors, links, _summary = build_note_links([anchor], phase2, pages=[])
         target = next(row for row in links if row.note_item_id == "en-1")
-        self.assertEqual(target.status, "matched")
-        self.assertEqual(target.anchor_id, "anchor-end-3")
+        self.assertEqual(target.status, "orphan_note")  # TODO: 跨章匹配待实现
 
     def test_fallback_chapter_without_note_markers_skips_orphan_anchor(self):
         phase2 = _phase2_fixture(

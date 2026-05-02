@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable
@@ -1071,17 +1072,18 @@ def run_phase6_pipeline_for_doc(
         return {"ok": False, "error": "no_pages", "run_id": run_id}
 
     try:
-        phase6 = load_phase6_for_doc(
+        snapshot, _pipeline_state = _load_module_snapshot_for_doc(
             doc_id,
+            repo=repo,
+            pages=pages,
+            pipeline_state_override="done",
+            max_body_chars=max_body_chars,
+            overlay_repo_units=False,
             include_diagnostic_entries=False,
             slug=doc_id,
-            repo=repo,
-            max_body_chars=max_body_chars,
-            pipeline_state_override="done",
-            pages=pages,
-            overlay_repo_units=False,
             progress_callback=progress_callback,
         )
+        phase6 = snapshot.phase6
         _persist_phase6_to_repo(doc_id, phase6, repo=repo)
         _run_id, status_payload, _validation_payload = _update_latest_fnm_run_from_phase6(
             doc_id,
@@ -1104,6 +1106,14 @@ def run_phase6_pipeline_for_doc(
             "blocking_reasons": list(status_payload.get("blocking_reasons") or []),
             "review_counts": dict(status_payload.get("review_counts") or {}),
             "export_ready_real": bool(status_payload.get("export_ready_real")),
+            "module_phase2_detail": {
+                "total_items": len(snapshot.split_result.data.note_items),
+                "item_kind_counts": dict(
+                    Counter(str(row.note_kind or "") for row in snapshot.split_result.data.note_items)
+                ),
+            },
+            "module_phase3_detail": dict(snapshot.link_result.data.link_summary or {}),
+            "module_phase3_reasons": list(snapshot.link_result.gate_report.reasons or []),
         }
     except Exception as exc:
         repo.update_fnm_run(doc_id, run_id, status="error", error_msg=str(exc))

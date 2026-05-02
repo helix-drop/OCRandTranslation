@@ -244,6 +244,66 @@ def _dedupe_region_items(items: list[dict]) -> list[dict]:
     return deduped
 
 
+def _repair_parsed_row_sequence_markers(rows: list[dict]) -> list[dict]:
+    if len(rows) < 3:
+        return rows
+    updated = [dict(row) for row in rows]
+    to_remove: set[int] = set()
+
+    for i in range(1, len(updated) - 1):
+        prev_marker = _try_parse_int(updated[i - 1].get("marker"))
+        curr_marker = _try_parse_int(updated[i].get("marker"))
+        next_marker = _try_parse_int(updated[i + 1].get("marker"))
+        if prev_marker is None or curr_marker is None or next_marker is None:
+            continue
+        if next_marker == prev_marker + 1 and curr_marker != next_marker:
+            if curr_marker > next_marker + 20 or curr_marker <= prev_marker - 1:
+                to_remove.add(i)
+                continue
+        if next_marker == prev_marker + 2 and curr_marker != prev_marker + 1:
+            if curr_marker > next_marker + 20 or curr_marker <= prev_marker:
+                updated[i]["marker"] = str(prev_marker + 1)
+
+    i = 1
+    while i < len(updated) - 1:
+        if i in to_remove:
+            i += 1
+            continue
+        prev_marker = _try_parse_int(updated[i - 1].get("marker"))
+        curr_marker = _try_parse_int(updated[i].get("marker"))
+        if prev_marker is None or curr_marker is None or curr_marker == prev_marker + 1:
+            i += 1
+            continue
+        run_end = i
+        while run_end + 1 < len(updated):
+            current_marker = _try_parse_int(updated[run_end].get("marker"))
+            following_marker = _try_parse_int(updated[run_end + 1].get("marker"))
+            if current_marker is None or following_marker is None:
+                break
+            if following_marker != current_marker + 1:
+                break
+            run_end += 1
+        after_index = run_end + 1
+        after_marker = (
+            _try_parse_int(updated[after_index].get("marker"))
+            if after_index < len(updated)
+            else None
+        )
+        run_len = run_end - i + 1
+        if (
+            after_marker is not None
+            and after_marker == prev_marker + run_len + 1
+            and curr_marker <= prev_marker
+        ):
+            for offset, row_index in enumerate(range(i, run_end + 1), start=1):
+                updated[row_index]["marker"] = str(prev_marker + offset)
+            i = run_end + 1
+            continue
+        i += 1
+
+    return [row for index, row in enumerate(updated) if index not in to_remove]
+
+
 def _chapter_id_set(phase1: Phase1Structure) -> set[str]:
     return {chapter.chapter_id for chapter in phase1.chapters}
 
@@ -275,6 +335,38 @@ def _fix_year_markers_in_place(records: list[NoteItemRecord]) -> list[NoteItemRe
             corrected = prev_marker + 1
             updated[i] = replace(updated[i], marker=str(corrected))
     return [row for idx, row in enumerate(updated) if idx not in to_remove]
+
+
+def _fix_sequence_outlier_markers_in_place(records: list[NoteItemRecord]) -> list[NoteItemRecord]:
+    if len(records) < 3:
+        return records
+    updated = list(records)
+    for i in range(1, len(updated) - 1):
+        prev = updated[i - 1]
+        curr = updated[i]
+        nxt = updated[i + 1]
+        if str(prev.region_id or "") != str(curr.region_id or ""):
+            continue
+        if str(curr.region_id or "") != str(nxt.region_id or ""):
+            continue
+        if str(prev.chapter_id or "") != str(curr.chapter_id or ""):
+            continue
+        if str(curr.chapter_id or "") != str(nxt.chapter_id or ""):
+            continue
+        prev_marker = _try_parse_int(prev.marker)
+        curr_marker = _try_parse_int(curr.marker)
+        next_marker = _try_parse_int(nxt.marker)
+        if prev_marker is None or curr_marker is None or next_marker is None:
+            continue
+        expected_marker = prev_marker + 1
+        if next_marker != prev_marker + 2:
+            continue
+        if curr_marker == expected_marker:
+            continue
+        if curr_marker <= next_marker + 20:
+            continue
+        updated[i] = replace(curr, marker=str(expected_marker))
+    return updated
 
 
 def _try_parse_int(value: Any) -> int | None:
@@ -451,6 +543,8 @@ def build_note_items(
             if text_source in {"page_text_map", "pdf_text"} and text:
                 used_page_text_fallback = True
 
+        if region_kind == "endnote":
+            parsed_rows = _repair_parsed_row_sequence_markers(parsed_rows)
         parsed_rows = [row for row in _dedupe_region_items(parsed_rows) if row.get("text")]
         region_item_count_map[region_id] = len(parsed_rows)
         if used_page_text_fallback:
@@ -518,6 +612,7 @@ def build_note_items(
     records.sort(key=lambda item: (int(item.page_no), item.note_item_id))
     # 阶段4.B：修正年份误标——尾注页上的出版年份被 OCR 误作 marker
     records = _fix_year_markers_in_place(records)
+    records = _fix_sequence_outlier_markers_in_place(records)
     orphan_item_count = sum(1 for item in records if item.chapter_id not in chapter_ids)
     summary = {
         "region_item_count_map": region_item_count_map,

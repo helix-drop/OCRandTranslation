@@ -57,20 +57,23 @@ def _make_note_unit(chapter_id: str, note_id: str, *, kind: str, text: str, page
 def _run_export(*, body_text: str, notes: list[tuple[str, str, str]],
                 matched_links: list[NoteLinkRecord] | None = None,
                 note_section_id: str | None = None,
-                chapter_id: str = "ch1", chapter_title: str = "Test Chapter") -> str:
+                chapter_id: str = "ch1", chapter_title: str = "Test Chapter",
+                return_summary: bool = False) -> str | tuple[str, dict[str, int]]:
     chapter = SimpleNamespace(chapter_id=chapter_id, title=chapter_title, pages=[1])
     body_units = [_make_body_unit(chapter_id, body_text)]
     note_units = [
         _make_note_unit(note_section_id or chapter_id, nid, kind=kind, text=text)
         for nid, kind, text in notes
     ]
-    content, _summary = _build_section_markdown(
+    content, summary = _build_section_markdown(
         chapter, section_heads=[], body_units=body_units,
         note_units=note_units, matched_links=list(matched_links or []), note_items_by_id={},
         body_anchors_by_id={}, include_diagnostic_entries=False,
         diagnostic_machine_by_page={},
         book_type="mixed", chapter_note_mode="chapter_endnote_primary",
     )
+    if return_summary:
+        return content, summary
     return content
 
 
@@ -160,6 +163,18 @@ class ExportNotesSectionSplitTest(unittest.TestCase):
         endnote_defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
         self.assertEqual(len(refs), 2, f"正文应有 2 个 [^N]（2 endnote），实为 {len(refs)}")
         self.assertEqual(len(endnote_defs), 2, f"### NOTES 应有 2 条 endnote 定义")
+
+    def test_body_ref_before_colon_counts_as_closed(self):
+        """法语正文常见 `[^N] :`，不能误判为 orphan definition。"""
+        content, summary = _run_export(
+            body_text="Le problème pascalien{{NOTE_REF:en-001}} : qu'est-ce qui arrive ?",
+            notes=[("en-001", "endnote", "1. Pascal note.")],
+            return_summary=True,
+        )
+
+        self.assertIn("[^1] :", content)
+        self.assertEqual(int(summary.get("missing_definition_count") or 0), 0)
+        self.assertEqual(int(summary.get("orphan_definition_count") or 0), 0)
 
     def test_orphan_endnote_definition_is_not_exported_as_normal_note(self):
         link = NoteLinkRecord(

@@ -43,6 +43,34 @@ class SharedNoteParserTest(unittest.TestCase):
         self.assertEqual([item["marker"] for item in items], ["93", "94"])
         self.assertIn("4359, letter", items[0]["text"])
 
+    def test_note_body_starting_with_number_does_not_merge_into_previous_marker(self):
+        text = (
+            "24. Prior note.\n"
+            "25 1. von Mises, quoted passage.\n"
+            "26.\n"
+            "1. von Mises, second quoted passage.\n"
+            "27. Following note."
+        )
+
+        items, _ = parse_note_items_from_text(text)
+
+        self.assertEqual([item["marker"] for item in items], ["24", "25", "26", "27"])
+        self.assertIn("1. von Mises", items[1]["text"])
+        self.assertIn("1. von Mises", items[2]["text"])
+
+    def test_noisy_next_note_line_reconstructs_expected_marker(self):
+        text = (
+            "30. Previous complete note.\n"
+            "!! 3er la distinction entre les actions conformes et non conformes.\n"
+            "32. Following note."
+        )
+
+        items, _ = parse_note_items_from_text(text)
+
+        self.assertEqual([item["marker"] for item in items], ["30", "31", "32"])
+        self.assertIn("la distinction", items[1]["text"])
+        self.assertTrue(items[1]["is_reconstructed"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -61,6 +61,10 @@ _SYMBOL_NOTE_DEF_RE = re.compile(
 _SYMBOL_MARKER_ONLY_RE = re.compile(
     r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s*$"
 )
+_NOISY_NEXT_NOTE_RE = re.compile(
+    r"^\s*(?P<noise>[!¡\|\[\]\(\)\.,;:'\"“”‘’?/\\-]{1,6})\s*"
+    r"(?P<token>\d{1,4}[A-Za-zÀ-ÖØ-öø-ÿ]{0,6})\s+(?P<body>\S.*)$"
+)
 # 符号型标记特征匹配（用于 normalize_note_marker 保留符号标记）
 _SYMBOLIC_MARKER_RE = re.compile(r"^[\*†‡§¶]{1,4}$")
 
@@ -240,22 +244,39 @@ def _parse_note_definition_line(line: str) -> tuple[str, str, bool] | None:
     noise_match = _LEADING_NOISE_NOTE_DEF_RE.match(candidate)
     if noise_match:
         candidate = str(noise_match.group("rest") or "").strip()
+    standard_match = _NOTE_DEF_RE.match(candidate)
     split_match = _OCR_SPLIT_NOTE_DEF_RE.match(candidate)
     if split_match:
         token = str(split_match.group("token") or "").strip()
         body = str(split_match.group("body") or "").strip()
         collapsed = normalize_note_marker(token)
-        if not collapsed or not body:
+        if standard_match:
+            standard_raw_marker = (
+                standard_match.group("bracket")
+                or standard_match.group("num")
+                or standard_match.group("loose")
+                or ""
+            )
+            standard_marker = normalize_note_marker(standard_raw_marker)
+            if (
+                standard_marker
+                and collapsed != standard_marker
+                and re.match(rf"^\s*{re.escape(standard_raw_marker)}\s+\d", candidate)
+            ):
+                split_match = None
+        if split_match is None:
+            pass
+        elif not collapsed or not body:
             return None
-        reconstructed = bool(re.search(r"[\s\.\-]", token))
-        return collapsed, body, reconstructed
-    match = _NOTE_DEF_RE.match(candidate)
-    if match:
+        else:
+            reconstructed = bool(re.search(r"[\s\.\-]", token))
+            return collapsed, body, reconstructed
+    if standard_match:
         raw_marker = (
-            match.group("bracket") or match.group("num") or match.group("loose") or ""
+            standard_match.group("bracket") or standard_match.group("num") or standard_match.group("loose") or ""
         )
         marker = normalize_note_marker(raw_marker)
-        body = str(match.group("body") or "").strip()
+        body = str(standard_match.group("body") or "").strip()
         if not marker or not body:
             return None
         return marker, body, False
@@ -417,6 +438,25 @@ def _looks_like_ocr_missing_note_body_line(line: str) -> bool:
     return bool(has_ibid_hint or noise_count >= 2 or uppercase_runs >= 2)
 
 
+def _parse_noisy_expected_next_note_body(line: str) -> str | None:
+    candidate = strip_markdown_heading(str(line or "").strip())
+    if not candidate or is_notes_heading_line(candidate):
+        return None
+    if _parse_note_definition_line(candidate) or _parse_marker_only_line(candidate):
+        return None
+    match = _NOISY_NEXT_NOTE_RE.match(candidate)
+    if not match:
+        return None
+    noise = str(match.group("noise") or "")
+    token = str(match.group("token") or "")
+    body = str(match.group("body") or "").strip()
+    if not body:
+        return None
+    if len(noise) < 2 and not re.search(r"\d+[A-Za-zÀ-ÖØ-öø-ÿ]+", token):
+        return None
+    return body
+
+
 def _looks_like_large_marker_jump_continuation(
     marker: str,
     body: str,
@@ -519,6 +559,18 @@ def parse_note_items_from_text(
             parsed_value = int(marker) if marker.isdigit() else None
             if current:
                 current_raw = normalize_note_marker(current.get("marker") or "") or ""
+                current_text = str(current.get("text") or "").strip()
+                current_value = int(current_raw) if current_raw.isdigit() else 0
+                if (
+                    not current_text
+                    and parsed_value is not None
+                    and current_value > 0
+                    and parsed_value <= current_value
+                ):
+                    current, split_marker_state = _append_line_to_current(items, current, line)
+                    if split_marker_state is not None:
+                        marker_state = split_marker_state
+                    continue
                 if _looks_like_large_marker_jump_continuation(
                     marker,
                     body,
@@ -535,7 +587,6 @@ def parse_note_items_from_text(
                     if split_marker_state is not None:
                         marker_state = split_marker_state
                     continue
-                current_value = int(current_raw) if current_raw.isdigit() else 0
                 if (
                     pending_gap_lines
                     and parsed_value is not None
@@ -633,6 +684,33 @@ def parse_note_items_from_text(
         if current is None:
             if _looks_like_ocr_missing_note_body_line(line):
                 pending_gap_lines.append(line)
+            continue
+        current_raw = normalize_note_marker(current.get("marker") or "") or ""
+        current_value = int(current_raw) if current_raw.isdigit() else 0
+        noisy_next_body = _parse_noisy_expected_next_note_body(line)
+        if (
+            noisy_next_body
+            and current_value > 0
+            and _looks_like_complete_note_text(str(current.get("text") or ""))
+        ):
+            for pending_line in pending_gap_lines:
+                current, split_marker_state = _append_line_to_current(
+                    items, current, pending_line
+                )
+                if split_marker_state is not None:
+                    marker_state = split_marker_state
+            pending_gap_lines = []
+            _finalize_current_note(items, current)
+            next_marker = str(current_value + 1)
+            current = {
+                "marker": next_marker,
+                "text": noisy_next_body,
+                "is_reconstructed": True,
+            }
+            marker_state = int(next_marker)
+            current, split_marker_state = _split_followup_notes(items, current)
+            if split_marker_state is not None:
+                marker_state = split_marker_state
             continue
         if _looks_like_ocr_missing_note_body_line(line):
             pending_gap_lines.append(line)

@@ -701,6 +701,14 @@ def _extract_page_footnote_items(page: dict, prev_page: dict | None = None) -> l
     )
 
 
+def _page_has_footnote_blocks(page: dict | None) -> bool:
+    """页上有 fnBlock 则说明这是正文页（含页底脚注），编号行是正文列举。"""
+    if not isinstance(page, dict):
+        return False
+    fnb = page.get("fnBlocks")
+    return isinstance(fnb, list) and len(fnb) > 0
+
+
 def _looks_like_note_continuation(page: dict | None) -> bool:
     if not isinstance(page, dict):
         return False
@@ -774,6 +782,16 @@ def _collect_markdown_endnotes(page: dict, prev_page: dict | None, next_page: di
                 "items": [],
                 "section_hints": [],
                 "ambiguity_flags": [],
+                "note_start_line_index": None,
+            }
+        # 有 fnBlock 的页是正文页（含页底脚注），编号行是正文列举，不是尾注。
+        if _page_has_footnote_blocks(page):
+            ambiguity_flags.append("numbered_body_page_with_footnotes")
+            return {
+                "page_kind": "body",
+                "items": [],
+                "section_hints": [],
+                "ambiguity_flags": ambiguity_flags,
                 "note_start_line_index": None,
             }
         first_number_idx = numbered_positions[0][0]

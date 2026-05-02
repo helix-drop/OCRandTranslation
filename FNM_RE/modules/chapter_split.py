@@ -606,8 +606,10 @@ def _note_capture_summary(
             "captured_note_count": captured_count,
             "capture_ratio": round(ratio, 4),
         }
+        # footnote_only 书的 expected_count 来自 body anchor digit markers，
+        # 与 footnotes 无直接对应关系，capture_ratio 无意义。
         should_block_sparse = (
-            book_type in {"footnote_only", "endnote_only"}
+            book_type in {"endnote_only"}
             or (book_type == "no_notes" and note_mode == "no_notes")
         )
         if should_block_sparse and expected_count >= 10 and ratio < 0.6:

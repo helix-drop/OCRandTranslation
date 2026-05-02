@@ -38,89 +38,175 @@
 3. **缺口填补用已知序列推断，不做文本猜测。** OCR 丢失了一个 superscript，应该用前后已检测 marker 的位置和 note_items 的预期序列来定位，而不是在 OCR 文本里搜"可能是 47 的东西"。
 4. **改完后用另一本书回归。** Goldstein 修完跑 Biopolitics，Biopolitics 修完跑 Goldstein。两本书结构差异越大，回归越有价值。
 5. **模块化修补，先上游再下游。** pipeline 阶段之间有明确的数据依赖，修 bug 时必须从最上游的断层开始，验证该层输出正确后再进入下一层。跳层修补会造成下游基于错误输入做正确决策的假象。具体数据流和 blocker 归属见下方"FNM Pipeline 数据流与 blocker 归因"。
+## 设计原则：树枝状条件处理
 
-## FNM Pipeline 数据流与 blocker 归因
+这是贯穿整个代码库的**最高优先级**原则。违反它是一切"修不好的 bug"的根因。
 
-Pipeline 共 6 个 phase，严格串行，每个 phase 的输出是下一个 phase 的输入。排查 blocker 时先找到最上游的断层 phase，修复并验证该层输出后再看下游。
+### 核心思想
+
+代码中的每个条件分支像一棵树：从根（数据源）到叶（最终决策），每一层分叉都必须**精确、排他、无遗漏**。分支之间不允许交叉感染，上层决策不允许被下层推翻。
+
+### 五条铁律
+
+**1. 分类源头唯一。** 每个 entity 的类型（如 footnote vs endnote）只能在**一个位置、一次性地**决定。这个位置是数据产生的地方（如 `chapter_layers` 构建时），不是数据消费的地方。下游代码只能读取这个分类，不能重新推断或覆盖。
+
+> 反例：`_phase2_from_chapter_layers` 按 `chapter_mode` 把所有 item 的 `note_kind` 统一覆盖——这就是"下游重新推断"。note_kind 应该在 `chapter_layers` 构建时逐条确定，`_phase2_from_chapter_layers` 只是透传。
+
+**2. 分支条件穷尽且互斥。** 每个 `if/elif/else` 必须覆盖所有可能情况，且分支之间不能有隐含重叠。`else` 只能用于"其它所有情况都处理不了"的兜底，不能悄悄吞掉未预期的输入。
+
+> 反例：`if chapter_mode == "footnote_primary": note_kind = "footnote"` —— 这条分支把 `chapter_mode` 当作个体 entity 的类型，混淆了"章的聚合属性"和"entity 的个体属性"两个不同层次的概念。
+
+**3. 禁止广播。** 永远不能把容器（章/书）的聚合属性赋值给容器内的个体 entity。章的 `note_mode` 描述的是"这章的主注释类型是什么"，不能用来覆盖章内每个 item 的 `note_kind`。同一章内可以同时存在 footnote 和 endnote，它们的分类必须独立于章的聚合属性。
+
+**4. 上下游隔离。** 每个 phase 产出的数据结构是**不可变事实**。下游 phase 只能消费这些事实，不能因为自己的需求不同而重新解释上游的决策。如果下游发现上游数据"不对"，修上游，不要在下游打补丁。
+
+> 反例：Phase 3 的 `_repair_endnote_links_for_contract` 用 `chapter_mode` 跳过整章——这是 Phase 3 在推翻 Phase 2 的 region 数据。如果 region 说这里有 endnote，Phase 3 就应该处理，不管 chapter_mode 怎么说。
+
+**5. 集中 dispatch，分散处理。** 当一个函数需要处理多种类型（如同时处理 footnote 和 endnote 的 link），结构和处理必须分离：一个 dispatch 层按类型分流，每种类型有独立的处理函数。不允许在同一个循环里用 `if kind == X` 交叉处理不同逻辑。
+
+> 正例：`build_note_links` 的 endnote_resolver 和 footnote_resolver 是分开的循环。反例：一个循环里混写 footnote 和 endnote 的匹配、修复、dedup 逻辑。
+
+## FNM Pipeline 数据流与 phase 职责边界
+
+Pipeline 共 6 个 phase，严格串行。**每个 phase 只做一种决策**——这是树状原则在架构层的体现。决策权不重复、不下放、不旁路。
 
 ```
 Phase 1 → Phase 2 → Phase 3 → Phase 3.5 → Phase 4 → Phase 5 → Phase 6
 ```
 
-### Phase 1：TOC 结构（`build_toc_structure()`）
+### Phase 1：TOC 结构与页面分区
 
-包含 visual_toc 提取、page_partition（页面分区）、chapter_skeleton（章节骨架）。
+| 项 | 内容 |
+|---|---|
+| **决策权** | ① 每页的 `page_role`（body/note/front_matter/back_matter）② 章节骨架与边界 |
+| **输入** | OCR 页面 + 目录数据（自动/手动 visual TOC） |
+| **产出** | `PagePartition`（page_role）+ `ChapterRecord`（start_page/end_page） |
+| **禁止** | 不关心注释内容、不判断 footnote/endnote 类型 |
+| **代码** | `toc_structure.py`、`stages/page_partition.py` |
 
 | blocker | 触发条件 |
 |---|---|
 | `toc_pages_unclassified` | 存在页面未被分配合法 role |
 | `toc_no_exportable_chapter` | 没有 role=chapter 的章节 |
 | `toc_chapter_title_mismatch` | 章节标题未对齐 |
-| `toc_chapter_order_non_monotonic` | 章节顺序非单调递增 |
 
-### Phase 2：章节拆分与注释捕获（`build_chapter_layers()`）
+### Phase 2：注释捕获与分类
 
-包含 note_region_detection（注释区检测）、endnote_array_building（注释条目捕获）。
+| 项 | 内容 |
+|---|---|
+| **决策权** | ① **每个 note item 的 `note_kind`（footnote vs endnote）**——这是全书唯一的分类来源 ② 每章的 `note_mode`（聚合属性，仅用于 contract gate，不能广播）③ `chapter_mode` 是章的摘要信号，不是个体 entity 的标签 |
+| **输入** | Phase 1 的章节边界 + 页面分区 |
+| **产出** | `NoteRegion`（含 note_kind）+ `NoteItem`（含 note_kind, marker）+ `ChapterNoteMode`（含 note_mode） |
+| **禁止** | 不匹配 link、不猜测 body anchor、**不允许下游覆盖 note_kind** |
+| **代码** | `chapter_split.py`、`stages/note_regions.py`、`stages/note_items.py` |
 
 | blocker | 触发条件 |
 |---|---|
-| `split_items_sparse_note_capture` | 注释捕获验证失败（密集锚点页零捕获等） |
+| `split_items_sparse_note_capture` | 注释捕获验证失败 |
 
-**上游依赖**：Phase 1 的章节边界和页面分区。如果 Phase 1 章节边界错了，Phase 2 的 note region 与 chapter 绑定会错位，导致注释分配到错误章节。
+**书型问题必须在 Phase 2 内解决**：如果某章的 footnote/endnote 分类不对，加强 Phase 2 的识别能力（如 note_region 检测、`## NOTES` 标题匹配），不要把分类问题推给 Phase 3/4 用 chapter_mode 门禁绕过。
 
-### Phase 3：锚点检测与链接（`build_note_link_table()`）
+### Phase 3：锚点检测与链接匹配
 
-包含 body_anchor 提取（正文上标 marker 检测）和 note_link 匹配。
+| 项 | 内容 |
+|---|---|
+| **决策权** | ① body anchor 检测（正文上标 marker 扫描）② anchor 与 note_item 的一对一匹配 ③ unmatched link 修复 |
+| **输入** | Phase 2 的 NoteItem（含 note_kind）+ NoteRegion + Phase 1 的页面数据 |
+| **产出** | `BodyAnchor`（含 anchor_kind, marker）+ `NoteLink`（含 status: matched/orphan_note/orphan_anchor） |
+| **禁止** | **不能重新分类 note_kind**——Phase 2 已经决定了，Phase 3 只消费。**不能用 chapter_mode 跳过整章的 link 修复**——修复判断标准是 link 自身的 note_kind 和 status。**不能把 anchor_kind 按章广播**——anchor_kind 只能由逐页 evidence（如 fnBlock）决定 |
+| **代码** | `stages/body_anchors.py`、`stages/note_links.py`、`modules/note_linking.py` |
 
 | blocker | 触发条件 |
 |---|---|
 | `link_endnote_not_all_matched` | 存在未匹配的尾注 |
-| `contract_first_marker_not_one` | 章节首 marker ≠ 1 |
 | `contract_marker_gap` | marker 序列有断裂 |
-| `contract_def_anchor_mismatch` | 注释定义数 ≠ 正文锚点数 |
-| `link_quality_low` | fallback_match_ratio 或 orphan anchor 数超过阈值 |
+| `contract_def_anchor_mismatch` | 章内 def 数与 anchor 数不一致 |
+| `link_quality_low` | fallback 占比或 orphan_anchor 数超阈值 |
 
-**上游依赖**：Phase 2 的注释条目数组。如果 Phase 2 注释没分对章，Phase 3 的合约校验（marker 序列、定义数对齐）必然大面积失败——这是"假阳性 blocker"，根因在 Phase 2。区分方法：看 Phase 2 的 `note_capture_summary`，如果 capture_ratio 严重偏离 1.0，则 Phase 3 的 blocker 是上游污染。
+### Phase 3.5：LLM 修补
 
-### Phase 3.5：LLM 修补（llm_repair）
+| 项 | 内容 |
+|---|---|
+| **决策权** | LLM 辅助合成 anchor、建议 link 匹配 |
+| **输入** | Phase 3 的 orphan links |
+| **产出** | 合成 anchor + link override（写入 `fnm_review_overrides_v2`） |
+| **禁止** | 不能绕过 Phase 2 的 note_kind 分类 |
 
-不直接产出 blocker，但影响 Phase 4 输入。对 Phase 3 产生的 unresolved link 尝试 LLM 修补。
+### Phase 4：引用冻结与翻译单元生成
 
-**已知问题模式**：
-- `chapter_body_excerpt` 未传入（`book_endnote_bound` 模式书）→ LLM 完全无法工作
-- 缺"一位置一 note"去重约束 → 多个 note 被绑到同一正文位置，downstream 触发 `token_not_found`
-
-### Phase 4：引用冻结（`build_frozen_units()`）
+| 项 | 内容 |
+|---|---|
+| **决策权** | 将 matched link 注入正文（用 anchor 坐标替换原文标记）、生成翻译单元 |
+| **输入** | Phase 3 的 matched links + Phase 3.5 的合成 anchors |
+| **产出** | 注入后的 body text + `TranslationUnit` 列表 |
+| **禁止** | 不修改 link 匹配结果。如果 anchor 无法注入（synthetic/坐标缺失），报 blocker 而不是静默跳过 |
 
 | blocker | 触发条件 |
 |---|---|
-| `freeze_matched_ref_not_injected` | 存在 matched link 未真正注入正文（missing_body_page / synthetic_anchor / token_not_found） |
+| `freeze_matched_ref_not_injected` | 存在 matched link 无法注入正文 |
 
-**性质**：正确的兜底拦截，不是 Phase 4 自身 bug。根因来自 Phase 1（页面分区）、Phase 3（锚点检测）、Phase 3.5（合成锚点）。
+### Phase 5：章节 Markdown 合并
 
-### Phase 5：章节合并（`build_chapter_markdown_set()`）
+| 项 | 内容 |
+|---|---|
+| **决策权** | 章内 body text + footnote 定义 + endnote 定义 → 单章 markdown |
+| **输入** | Phase 4 的注入后 body text + note 定义 |
+| **产出** | 单章 markdown 文本 |
+| **禁止** | 不修改 link、不重新匹配 |
 
 | blocker | 触发条件 |
 |---|---|
-| `merge_local_refs_unclosed` | 注释定义写进 NOTES 区但正文无对应引用 |
-| `merge_frozen_ref_leak` | frozen ref token 泄漏到导出 markdown |
+| `merge_local_refs_unclosed` | 注释定义无对应正文引用 |
+| `merge_frozen_ref_leak` | frozen ref token 泄漏 |
 
-**性质**：下游症状层。
+### Phase 6：导出审计
 
-### Phase 6：导出审计（`build_export_bundle()`）
+| 项 | 内容 |
+|---|---|
+| **决策权** | 整书组装、最终质量检查 |
+| **输入** | Phase 5 的各章 markdown |
+| **产出** | Obsidian ZIP 导出包 |
+| **禁止** | 不修改任何上游数据 |
 
 | blocker | 触发条件 |
 |---|---|
-| `export_audit_blocking` | 导出审计报告 can_ship=false |
-| `export_raw_marker_leak` | 原始 marker 泄漏到最终导出文件 |
+| `export_audit_blocking` | 导出审计 can_ship=false |
 
-**性质**：最下游症状层。
+## FNM 测试脚本分层
 
-### 兜底 fallback
+三种测试脚本，数据源和产物不同，禁止混用：
 
-| blocker | 来源 |
-|---|---|
-| `structure_review_required` | `web/export_routes.py`，只要有任何其他 blocker 就出现，无独立含义 |
+### 1. 增量测试 `scripts/test_fnm_incremental.py`
+
+**用途**：冻结已确认成果，层层推进修复。已通过的 phase 不再重跑，每次只对剩余问题逐层处理。支持 `--repair` 调 LLM 修补残余 orphan。
+
+**数据源**：
+- `Module Phase 2/3`：来自 `build_module_pipeline_snapshot()` 的模块管道输出（`split_result.data` / `link_result.data.link_summary`）。这是 Phase 3 gate 的权威来源。
+- `Persisted Phase 2/3`：来自 `SQLiteRepository` 的落库读回（`fnm_note_items` / `fnm_body_anchors` / `fnm_note_links`）。这是 Phase 4-6 持久化后的数据。
+
+**关键约定**：Module 和 Persisted 是同一次 pipeline run 的两个视角，但数值可能不同——Phase 4 会把未注入的 matched link 重新打开成 orphan_note。当两者分叉时，**以 Module Phase 3 作为 Phase 3 gate 的判断来源**，Persisted 的分叉由 Phase 4 blocker 解释。
+
+**产物**：只输出到终端，不写文件。
+
+### 2. 实批 `scripts/test_fnm_real_batch.py`
+
+**用途**：真实视觉 TOC + 真实 LLM repair 的完整集成测试。
+
+**数据源**：同批测，但额外调用视觉模型和 LLM repair API。
+
+**产物**：
+- `test_example/<书名>/FNM_REAL_TEST_REPORT.md`（注意：可能过期）
+- `test_example/<书名>/fnm_real_test_modules.json`
+- `test_example/<书名>/fnm_real_test_progress.json`
+- `test_example/<书名>/fnm_real_test_result.json`
+- `test_example/<书名>/llm_traces/`
+
+### 时间戳约定
+
+- 每次 pipeline run 都会在 SQLite `fnm_runs` 表中创建一条记录，包含 `created_at`。
+- 增量脚本输出的 `Module Phase 2/3` 数据来自当次 snapshot 构建，不是历史 DB 数据。
+- 实批报告 `FNM_REAL_TEST_REPORT.md` 的 `generated_at` 字段记录了报告生成时间；如果该时间早于最近一次 pipeline run，报告数据视为过期。
+- **判断任何 blocker 前，先确认数据来源的时间戳**：增量看终端输出时间，批测看 `latest_export_status.json` 的 `timestamp`，实批看报告 `generated_at`。
 
 ## FNM 调试方法论
 

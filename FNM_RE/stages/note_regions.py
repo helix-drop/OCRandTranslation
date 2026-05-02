@@ -240,6 +240,41 @@ def _build_endnote_regions_raw(
                 current_heading_text = ""
                 current_start_reason = ""
             continue
+        # 有 fnBlock 的页是正文页（含页底脚注），不能作为尾注 region 候选。
+        page_data = page_by_no.get(page_no) or {}
+        fnb = page_data.get("fnBlocks")
+        if isinstance(fnb, list) and len(fnb) > 0:
+            if current_pages:
+                start_page = current_pages[0]
+                end_page = current_pages[-1]
+                regions.append(
+                    NoteRegionRecord(
+                        region_id=f"region-endnote-{len(regions) + 1:04d}",
+                        chapter_id=current_chapter_id,
+                        page_start=start_page,
+                        page_end=end_page,
+                        pages=list(current_pages),
+                        note_kind="endnote",
+                        scope=current_scope if current_scope in {"chapter", "book"} else "chapter",
+                        source="heading_scan",
+                        heading_text=current_heading_text,
+                        start_reason=current_start_reason or "candidate_page",
+                        end_reason="contiguous_break",
+                        region_marker_alignment_ok=True,
+                        region_start_first_source_marker=first_source_marker(
+                            page_by_no.get(start_page),
+                            kind="endnote",
+                        ),
+                        region_first_note_item_marker="",
+                        review_required=False,
+                    )
+                )
+                current_pages = []
+                current_scope = ""
+                current_chapter_id = ""
+                current_heading_text = ""
+                current_start_reason = ""
+            continue
 
         scope, chapter_id = _endnote_scope_for_page(
             page_no,

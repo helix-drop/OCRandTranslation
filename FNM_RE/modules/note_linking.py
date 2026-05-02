@@ -155,27 +155,30 @@ def _link_quality_gate(rows: list[NoteLinkRecord]) -> dict[str, Any]:
     """工单 #4：链接质量阈值阻塞门。
 
     返回 `{quality_ok, fallback_match_ratio, orphan_anchor_total, ...}`。
-    `quality_ok = False` 表示 fallback 占比或孤儿 anchor 数任一超阈，
+    `quality_ok = False` 表示 fallback 占比或尾注孤儿 anchor 数任一超阈，
     应转化为 reasons `link_quality_low` 并阻塞。
     """
     import config
 
     summary = _summarize_links(rows)
     fallback_match_ratio = float(summary.get("fallback_match_ratio") or 0.0)
-    orphan_anchor_total = int(summary.get("footnote_orphan_anchor") or 0) + int(
-        summary.get("endnote_orphan_anchor") or 0
-    )
+    footnote_orphan_anchor = int(summary.get("footnote_orphan_anchor") or 0)
+    endnote_orphan_anchor = int(summary.get("endnote_orphan_anchor") or 0)
+    orphan_anchor_total = footnote_orphan_anchor + endnote_orphan_anchor
     fallback_threshold = float(getattr(config, "LINK_FALLBACK_MATCH_RATIO_THRESHOLD_DEFAULT", 0.30))
     orphan_threshold = int(getattr(config, "LINK_ORPHAN_ANCHOR_THRESHOLD_DEFAULT", 10))
-    quality_ok = (
-        fallback_match_ratio <= fallback_threshold
-        and orphan_anchor_total <= orphan_threshold
+    # 脚注书 fallback 率高是正常的（synthetic-footnote），不应触发质量门。
+    # fallback 率只在存在尾注孤儿 anchor 时才有质量含义。
+    quality_ok = endnote_orphan_anchor <= orphan_threshold and (
+        endnote_orphan_anchor == 0 or fallback_match_ratio <= fallback_threshold
     )
     return {
         "quality_ok": bool(quality_ok),
         "fallback_match_ratio": float(fallback_match_ratio),
         "fallback_match_ratio_threshold": float(fallback_threshold),
         "orphan_anchor_total": int(orphan_anchor_total),
+        "footnote_orphan_anchor_total": int(footnote_orphan_anchor),
+        "endnote_orphan_anchor_total": int(endnote_orphan_anchor),
         "orphan_anchor_threshold": int(orphan_threshold),
     }
 
@@ -239,15 +242,12 @@ def _build_book_endnote_stream_summary(chapter_layers: ChapterLayers) -> dict[st
         "chapters": rows[:32],
     }
 
-def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord, *, mode_by_chapter: Mapping[str, str]) -> str:
+def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord) -> str:
     if str(anchor.anchor_kind or "") == "footnote":
         return "footnote"
     if str(anchor.anchor_kind or "") == "endnote":
         return "endnote"
-    mode = str(mode_by_chapter.get(str(anchor.chapter_id or "")) or "")
-    if mode in {"footnote_primary", "review_required"}:
-        return "footnote"
-    return "endnote"
+    return "unknown"
 
 def _materialize_anchor_overrides(
     body_anchors: list[BodyAnchorRecord],
@@ -453,7 +453,6 @@ def _apply_link_overrides(
     note_items: list[NoteItemRecord],
     body_anchors: list[BodyAnchorRecord],
     note_regions: list[NoteRegionRecord],
-    chapter_mode_by_id: Mapping[str, str],
 ) -> tuple[list[NoteLinkRecord], dict[str, Any], list[dict[str, Any]]]:
     effective_links: list[NoteLinkRecord] = [replace(link) for link in note_links]
     overrides = dict(link_overrides or {})
@@ -550,7 +549,7 @@ def _apply_link_overrides(
 
         region = regions_by_id.get(str(note_item.region_id or ""))
         expected_note_kind = str((region.note_kind if region else "") or "")
-        inferred_note_kind = _infer_note_kind_from_anchor(anchor, mode_by_chapter=chapter_mode_by_id)
+        inferred_note_kind = _infer_note_kind_from_anchor(anchor)
         same_chapter = str(note_item.chapter_id or "") == str(anchor.chapter_id or "")
         same_kind = expected_note_kind in {"footnote", "endnote"} and expected_note_kind == inferred_note_kind
         if not same_chapter or not same_kind:
@@ -620,7 +619,6 @@ def _repair_endnote_links_for_contract(
     *,
     links: list[NoteLinkRecord],
     anchors: list[BodyAnchorRecord],
-    chapter_mode_by_id: Mapping[str, str],
     note_item_meta_by_id: Mapping[str, Mapping[str, Any]],
     book_type: str,
 ) -> tuple[list[NoteLinkRecord], dict[str, int]]:
@@ -638,9 +636,6 @@ def _repair_endnote_links_for_contract(
         if str(link.note_kind or "") != "endnote":
             continue
         if str(link.status or "") not in {"orphan_note", "ambiguous"}:
-            continue
-        chapter_mode = str(chapter_mode_by_id.get(str(link.chapter_id or "")) or "")
-        if chapter_mode not in {"chapter_endnote_primary", "book_endnote_bound"}:
             continue
         marker = normalize_note_marker(str(link.marker or ""))
         candidates = [
@@ -727,9 +722,6 @@ def _repair_endnote_links_for_contract(
             continue
         if str(link.status or "") not in {"orphan_note", "ambiguous"}:
             continue
-        chapter_mode = str(chapter_mode_by_id.get(str(link.chapter_id or "")) or "")
-        if chapter_mode not in {"chapter_endnote_primary", "book_endnote_bound"}:
-            continue
         fallback_candidates: list[tuple[int, NoteLinkRecord, BodyAnchorRecord]] = []
         for candidate_link in repaired_links:
             if str(candidate_link.chapter_id or "") != str(link.chapter_id or ""):
@@ -774,9 +766,6 @@ def _repair_endnote_links_for_contract(
     groups: dict[tuple[str, str], list[int]] = {}
     for index, row in enumerate(repaired_links):
         if str(row.note_kind or "") != "endnote":
-            continue
-        chapter_mode = str(chapter_mode_by_id.get(str(row.chapter_id or "")) or "")
-        if chapter_mode not in {"chapter_endnote_primary", "book_endnote_bound"}:
             continue
         marker = normalize_note_marker(str(row.marker or ""))
         if not marker:
@@ -929,7 +918,6 @@ def _repair_explicit_footnote_anchor_ocr_variants(
     anchors: list[BodyAnchorRecord],
     links: list[NoteLinkRecord],
     note_items: list[NoteItemRecord],
-    chapter_mode_by_id: Mapping[str, str],
 ) -> tuple[list[BodyAnchorRecord], list[NoteLinkRecord], dict[str, int]]:
     repaired_anchors: list[BodyAnchorRecord] = [replace(row) for row in anchors]
     repaired_links: list[NoteLinkRecord] = [replace(row) for row in links]
@@ -951,9 +939,6 @@ def _repair_explicit_footnote_anchor_ocr_variants(
 
     for orphan_index, row in enumerate(repaired_links):
         if str(row.note_kind or "") != "footnote" or str(row.status or "") != "orphan_anchor":
-            continue
-        chapter_mode = str(chapter_mode_by_id.get(str(row.chapter_id or "")) or "")
-        if chapter_mode not in {"footnote_primary", "review_required"}:
             continue
         anchor_id = str(row.anchor_id or "")
         explicit_index = anchor_index_by_id.get(anchor_id)
@@ -1017,9 +1002,6 @@ def _repair_explicit_footnote_anchor_ocr_variants(
 
     for ambiguous_index, row in enumerate(repaired_links):
         if str(row.note_kind or "") != "footnote" or str(row.status or "") != "ambiguous":
-            continue
-        chapter_mode = str(chapter_mode_by_id.get(str(row.chapter_id or "")) or "")
-        if chapter_mode not in {"footnote_primary", "review_required"}:
             continue
         marker = normalize_note_marker(str(row.marker or ""))
         if not marker:
@@ -1109,9 +1091,6 @@ def _repair_explicit_footnote_anchor_ocr_variants(
             continue
         if not str(row.anchor_id or "").startswith("synthetic-footnote-"):
             continue
-        chapter_mode = str(chapter_mode_by_id.get(str(row.chapter_id or "")) or "")
-        if chapter_mode not in {"footnote_primary", "review_required"}:
-            continue
         candidates: list[tuple[int, NoteLinkRecord, BodyAnchorRecord]] = []
         for orphan_index, orphan_row in enumerate(repaired_links):
             if str(orphan_row.status or "") != "orphan_anchor":
@@ -1158,16 +1137,23 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
         str(chapter.chapter_id or ""): dict(chapter.policy_applied or {})
         for chapter in chapter_layers.chapters
     }
+
+    def _note_kind_from_layer(value: str, *, chapter_mode: str) -> str:
+        note_kind = str(value or "").strip()
+        if note_kind in {"footnote", "endnote"}:
+            return note_kind
+        if chapter_mode == "footnote_primary":
+            return "footnote"
+        if chapter_mode in {"chapter_endnote_primary", "book_endnote_bound"}:
+            return "endnote"
+        return note_kind
+
     region_note_kind_by_id: dict[str, str] = {}
     region_records: list[NoteRegionRecord] = []
     for row in chapter_layers.regions:
         chapter_id = str(row.owner_chapter_id or row.chapter_id or "")
         chapter_mode = str(chapter_policy_by_id.get(chapter_id, {}).get("note_mode") or "")
-        note_kind = str(row.note_kind or "")
-        if chapter_mode == "footnote_primary":
-            note_kind = "footnote"
-        elif chapter_mode in {"chapter_endnote_primary", "book_endnote_bound"}:
-            note_kind = "endnote"
+        note_kind = _note_kind_from_layer(str(row.note_kind or ""), chapter_mode=chapter_mode)
         region_note_kind_by_id[str(row.region_id or "")] = note_kind
         region_records.append(
             NoteRegionRecord(
@@ -1190,16 +1176,17 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
         )
     note_items: list[NoteItemRecord] = []
     for row in chapter_layers.note_items:
-        chapter_id = str(row.chapter_id or row.owner_chapter_id or "")
+        chapter_id = str(row.owner_chapter_id or row.chapter_id or "")
         chapter_mode = str(chapter_policy_by_id.get(chapter_id, {}).get("note_mode") or "")
         region_id = str(row.region_id or "")
-        note_kind = str(region_note_kind_by_id.get(region_id) or "")
+        note_kind = _note_kind_from_layer(
+            str(row.note_kind or region_note_kind_by_id.get(region_id) or ""),
+            chapter_mode=chapter_mode,
+        )
         marker_type = str(row.marker_type or "")
-        if chapter_mode == "footnote_primary":
-            note_kind = "footnote"
+        if not marker_type and note_kind == "footnote":
             marker_type = "footnote_marker"
-        elif chapter_mode in {"chapter_endnote_primary", "book_endnote_bound"}:
-            note_kind = "endnote"
+        elif not marker_type and note_kind == "endnote":
             marker_type = "numeric"
         note_items.append(
             NoteItemRecord(
@@ -1259,6 +1246,8 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
         primary_scope = "book" if any(str(row.scope or "") == "book" for row in chapter_regions) else "chapter"
         note_mode = str(chapter.policy_applied.get("note_mode") or "no_notes")
         if note_mode not in NOTE_MODES:
+            import sys
+            print(f"  [WARNING] 未知 note_mode={note_mode!r}，强制回退为 no_notes", file=sys.stderr)
             note_mode = "no_notes"
         note_mode_by_chapter[chapter_id] = note_mode
         chapter_note_modes.append(
@@ -1324,7 +1313,6 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
 def _suppress_endnote_residual_orphans(
     *,
     links: list[NoteLinkRecord],
-    chapter_mode_by_id: Mapping[str, str],
     book_type: str,
 ) -> tuple[list[NoteLinkRecord], dict[str, int]]:
     if str(book_type or "") != "endnote_only":
@@ -1334,9 +1322,6 @@ def _suppress_endnote_residual_orphans(
     suppressed_orphan_anchor_count = 0
     for index, row in enumerate(updated):
         if str(row.note_kind or "") != "endnote":
-            continue
-        chapter_mode = str(chapter_mode_by_id.get(str(row.chapter_id or "")) or "")
-        if chapter_mode not in {"chapter_endnote_primary", "book_endnote_bound"}:
             continue
         if str(row.status or "") == "orphan_note":
             suppressed_orphan_note_count += 1
@@ -1383,11 +1368,9 @@ def _chapter_contracts(
         chapter_id = str(chapter.chapter_id or "")
         raw_has_endnote_signal = bool(chapter.endnote_items or chapter.endnote_regions)
         note_mode = str(chapter.policy_applied.get("note_mode") or "no_notes")
-        requires_endnote_contract = raw_has_endnote_signal and note_mode in {
-            "chapter_endnote_primary",
-            "book_endnote_bound",
-            "review_required",
-        }
+        # 树状原则：合同触发条件必须是物理信号（章内是否有尾注内容），
+        # 不能依赖 note_mode（章的聚合标签，不反映个体 entity 的种类）。
+        requires_endnote_contract = bool(raw_has_endnote_signal)
         chapter_links = [
             row
             for row in effective_links
@@ -1576,10 +1559,11 @@ def _chapter_contracts(
             has_marker_gap = False
 
         # def_anchor_mismatch：def_count vs anchor_total 偏差。
+        # 仅对有 endnote 信号的章做校验——纯脚注章或无注释章的 anchor 计数
+        # 差异来自 OCR 噪声（1-3 个 bare_digit），不是真正的 mismatch。
         # book_endnote_bound 的 items 从全书尾注池按 marker 投影到章，
-        # 章级 item↔anchor 对齐本质上是近似的（item 可能投到相邻章），
-        # 逐章校验无意义。与 marker_gap 一致，跳过。
-        if note_mode == "book_endnote_bound":
+        # 逐章校验同样无意义。
+        if not requires_endnote_contract or note_mode == "book_endnote_bound":
             def_anchor_mismatch = False
         elif anchor_total > 0:
             def_anchor_mismatch = def_count != anchor_total
@@ -1634,7 +1618,7 @@ def build_note_link_table(
     *,
     overrides: Mapping[str, Any] | list[dict[str, Any]] | None = None,
 ) -> ModuleResult[NoteLinkTable]:
-    phase2, chapter_mode_by_id, book_type = _phase2_from_chapter_layers(chapter_layers)
+    phase2, _chapter_mode_by_id, book_type = _phase2_from_chapter_layers(chapter_layers)
     grouped_overrides = _group_review_overrides(overrides)
     phase2, note_item_override_summary, note_item_override_logs = _materialize_note_item_overrides(
         phase2,
@@ -1656,7 +1640,6 @@ def build_note_link_table(
     repaired_links, contract_repair_summary = _repair_endnote_links_for_contract(
         links=note_links,
         anchors=enhanced_anchors,
-        chapter_mode_by_id=chapter_mode_by_id,
         note_item_meta_by_id=note_item_meta_by_id,
         book_type=str(book_type or ""),
     )
@@ -1664,7 +1647,6 @@ def build_note_link_table(
         anchors=enhanced_anchors,
         links=repaired_links,
         note_items=phase2.note_items,
-        chapter_mode_by_id=chapter_mode_by_id,
     )
     materialized_anchors, anchor_override_summary, anchor_override_logs = _materialize_anchor_overrides(
         repaired_anchors,
@@ -1677,11 +1659,9 @@ def build_note_link_table(
         note_items=phase2.note_items,
         body_anchors=materialized_anchors,
         note_regions=phase2.note_regions,
-        chapter_mode_by_id=chapter_mode_by_id,
     )
     effective_links, residual_suppression_summary = _suppress_endnote_residual_orphans(
         links=effective_links,
-        chapter_mode_by_id=chapter_mode_by_id,
         book_type=str(book_type or ""),
     )
     override_logs = list(note_item_override_logs) + list(anchor_override_logs) + list(override_logs)
@@ -1712,13 +1692,13 @@ def build_note_link_table(
             "reason": f"book_type={book_type}",
         }
 
-    # 工单 #3 契约 v2：对地校验对所有 contract 生效（不依赖 requires_endnote_contract）
-    contract_v2_first_marker_is_one = all(row.first_marker_is_one for row in contracts)
-    contract_v2_no_marker_gap = all(not row.has_marker_gap for row in contracts)
-    contract_v2_def_anchor_aligned = all(not row.def_anchor_mismatch for row in contracts)
+    # 工单 #3 契约 v2：沿用上面的 applicable_contracts（仅 requires_endnote_contract=True 的章）。
+    contract_v2_first_marker_is_one = all(row.first_marker_is_one for row in applicable_contracts)
+    contract_v2_no_marker_gap = all(not row.has_marker_gap for row in applicable_contracts)
+    contract_v2_def_anchor_aligned = all(not row.def_anchor_mismatch for row in applicable_contracts)
     contract_v2_failed_chapters = [
         str(row.chapter_id or "")
-        for row in contracts
+        for row in applicable_contracts
         if not bool(row.first_marker_is_one)
         or bool(row.has_marker_gap)
         or bool(row.def_anchor_mismatch)

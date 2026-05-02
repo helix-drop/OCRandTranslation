@@ -28,8 +28,8 @@ class FnmReModule1TocTest(unittest.TestCase):
             load_auto_visual_toc("Biopolitics"),
         )
         self.assertTrue(all(result.gate_report.hard.values()))
-        self.assertEqual(sum(1 for row in result.data.chapters if row.role == "chapter"), 12)
-        self.assertEqual([row.title for row in result.data.chapters if row.role == "post_body"], ["RÉSUMÉ DU COURS", "SITUATION DES COURS"])
+        self.assertEqual(sum(1 for row in result.data.chapters if row.role == "chapter"), 13)
+        self.assertEqual([row.title for row in result.data.chapters if row.role == "post_body"], [])
 
     def test_external_page_roles_do_not_expose_noise(self):
         pages = [

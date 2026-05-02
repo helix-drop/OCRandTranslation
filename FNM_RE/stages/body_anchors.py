@@ -98,12 +98,15 @@ def _marker_in_expected_range(
     pattern: str,
     marker_min: int,
     marker_max: int,
+    has_page_footnote_band: bool = False,
 ) -> bool:
     """正向验证：marker 是否在章节的预期尾注范围内。
 
     高置信度模式（superscript/latex/html/unicode）始终保留。
     低置信度模式（bare_digit/bracket/trailing）只在预期范围内才保留。
     """
+    if has_page_footnote_band:
+        return True
     if marker_max <= 0:
         return True
     try:
@@ -148,7 +151,7 @@ def _fill_marker_gaps(
         if not detected:
             continue
         detected_set = set(detected)
-        expected = set(range(detected[0], detected[-1] + 1))
+        expected = set(range(marker_min, marker_max + 1))
         missing = sorted(expected - detected_set)
         if not missing:
             continue
@@ -163,23 +166,41 @@ def _fill_marker_gaps(
         note_mode = str(mode_by_chapter.get(chapter_id) or "no_notes")
         for missing_marker in missing:
             prev_anchor = anchor_by_marker.get(missing_marker - 1)
-            if prev_anchor is None:
+            next_anchor = anchor_by_marker.get(missing_marker + 1)
+            if prev_anchor is None and next_anchor is None:
                 continue
-            has_footnote_band = (chapter_id, prev_anchor.page_no) in footnote_band_pages
-            anchor_kind = resolve_anchor_kind(note_mode, has_page_footnote_band=has_footnote_band)
+            if prev_anchor is None and missing_marker < detected[0]:
+                if detected[0] - missing_marker > 3:
+                    continue
+            elif prev_anchor is not None and missing_marker > detected[-1]:
+                if missing_marker - detected[-1] > 3:
+                    continue
+            elif prev_anchor is None:
+                continue
+            reference_anchor = prev_anchor or next_anchor
+            if reference_anchor is None:
+                continue
+            has_footnote_band = (chapter_id, reference_anchor.page_no) in footnote_band_pages
+            anchor_kind = resolve_anchor_kind(has_page_footnote_band=has_footnote_band)
+            if prev_anchor is not None:
+                char_start = int(prev_anchor.char_end or 0) + 1
+                char_end = int(prev_anchor.char_end or 0) + 2
+            else:
+                char_end = max(0, int(reference_anchor.char_start or 0) - 1)
+                char_start = max(0, char_end - 1)
             counter += 1
             new_anchor = BodyAnchorRecord(
                 anchor_id=f"anchor-{counter:05d}",
                 chapter_id=chapter_id,
-                page_no=prev_anchor.page_no,
-                paragraph_index=prev_anchor.paragraph_index,
-                char_start=prev_anchor.char_end + 1,
-                char_end=prev_anchor.char_end + 2,
+                page_no=reference_anchor.page_no,
+                paragraph_index=reference_anchor.paragraph_index,
+                char_start=char_start,
+                char_end=char_end,
                 source_marker="",
                 normalized_marker=str(missing_marker),
                 anchor_kind=anchor_kind,
                 certainty=0.55,
-                source_text=prev_anchor.source_text,
+                source_text=reference_anchor.source_text,
                 source="gap_fill",
                 synthetic=True,
                 ocr_repaired_from_marker="",
@@ -214,11 +235,8 @@ def build_body_anchors(
         chapter_id = _chapter_id_for_page(phase2, page_no)
         if not chapter_id:
             continue
-        note_mode = str(mode_by_chapter.get(chapter_id) or "no_notes")
         has_page_footnote_band = (chapter_id, page_no) in footnote_band_pages
-        anchor_kind = resolve_anchor_kind(
-            note_mode, has_page_footnote_band=has_page_footnote_band
-        )
+        anchor_kind = resolve_anchor_kind(has_page_footnote_band=has_page_footnote_band)
         marker_min, marker_max = chapter_marker_range.get(chapter_id, (0, 0))
         page_payload = page_by_no.get(page_no) or {}
         for paragraph in page_body_paragraphs(page_payload):
@@ -237,6 +255,7 @@ def build_body_anchors(
                     pattern=str(match.get("pattern") or ""),
                     marker_min=marker_min,
                     marker_max=marker_max,
+                    has_page_footnote_band=has_page_footnote_band,
                 ):
                     continue
                 char_start = int(match.get("char_start") or 0)

@@ -59,7 +59,7 @@
 | M5 类型载体 | [`FNM_RE/modules/types.py`](../FNM_RE/modules/types.py) | ✅ `ChapterLayers.chapter_marker_counts`、✅ `ChapterLinkContract.has_marker_gap` / `def_anchor_mismatch` / `def_count` / `anchor_total` / `marker_sequence` |
 | M5 阈值 | [`config.py`](../config.py) | ✅ `LINK_FALLBACK_MATCH_RATIO_THRESHOLD_DEFAULT`、`LINK_ORPHAN_ANCHOR_THRESHOLD_DEFAULT` |
 | M6 导出 | [`FNM_RE/modules/chapter_merge.py`](../FNM_RE/modules/chapter_merge.py) | `build_chapter_markdown_set`、`_LOCAL_DEF_LINE_RE` |
-| M6 导出审计 | [`scripts/test_fnm_batch.py`](../scripts/test_fnm_batch.py) | ✅ `_analyze_export_text.local_numbering_no_gap`（工单 #3 旁路） |
+| M6 导出审计 | [`FNM_RE/shared/export_audit.py`](../FNM_RE/shared/export_audit.py) | ✅ `analyze_export_text.local_numbering_no_gap`（工单 #3 旁路） |
 | M7 visual_toc/类型 | [`FNM_RE/modules/book_note_type.py`](../FNM_RE/modules/book_note_type.py) | `_NOTES_HEADING_RE`、`_is_endnote_page`、`build_book_note_profile` |
 | 真实回归入口 | [`scripts/test_fnm_real_batch.py`](../scripts/test_fnm_real_batch.py)、[`tests/integration/test_fnm_real_mode.py`](../tests/integration/test_fnm_real_mode.py) | — |
 
@@ -250,8 +250,8 @@
      - `def_anchor_mismatch`：def_count 与 chapter_marker_counts[chapter_id] 严格不等（anchor_total = 0 时不判）
    - `build_note_link_table.gate_report.hard` 加 `link.contract_first_marker_is_one` / `link.no_marker_gap` / `link.def_anchor_aligned`，对应 reasons `contract_first_marker_not_one` / `contract_marker_gap` / `contract_def_anchor_mismatch`。
    - `evidence.chapter_link_contract_summary` 加 `contract_v2_failed_chapter_ids` / `contract_v2_first_marker_violation_count` / `contract_v2_marker_gap_violation_count` / `contract_v2_def_anchor_mismatch_count` 四个诊断字段。
-4. [`scripts/test_fnm_batch.py`](../scripts/test_fnm_batch.py)：
-   - `_analyze_export_text` 加 `local_numbering_no_gap`：`sorted(int defs) == list(range(1, max+1))`。
+4. [`FNM_RE/shared/export_audit.py`](../FNM_RE/shared/export_audit.py)：
+   - `analyze_export_text` 加 `local_numbering_no_gap`：`sorted(int defs) == list(range(1, max+1))`。
    - `chapter_local_contract_ok` 校验加上 `local_numbering_no_gap`。
 
 **测试方案**（实际）：

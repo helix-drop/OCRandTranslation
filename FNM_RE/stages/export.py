@@ -528,7 +528,7 @@ def _build_section_markdown(
 
     content = _strip_trailing_image_only_block("\n".join(lines).strip())
     body_part = content.split("### NOTES", 1)[0] if "### NOTES" in content else content
-    refs = sorted(set(re.findall(r"\[\^([0-9]+)\](?!\s*:)", body_part)))
+    refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", body_part)))
     defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
     footnote_defs = re.findall(r"^\[footnote\]:", content, re.MULTILINE)
     missing = len(set(refs) - set(defs))

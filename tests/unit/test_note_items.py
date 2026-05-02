@@ -114,6 +114,73 @@ class NoteItemsTest(unittest.TestCase):
         self.assertEqual(markers_by_chapter.get("ch-1"), ["1", "2", "3", "4"])
         self.assertEqual(summary.get("shared_page_text_split_count"), 1)
 
+    def test_single_outlier_marker_between_neighbors_is_repaired_by_sequence(self):
+        phase1 = Phase1Structure(chapters=[_chapter("ch-1", "Chapter One", 1, 1)])
+        regions = [_region("r-ch-1", "ch-1", [1], "Chapter One")]
+        pages = [
+            _page(
+                1,
+                "# Notes\n"
+                "34. Prior note.\n"
+                "359. OCR folded marker 35 into nearby text.\n"
+                "36. Following note.",
+            )
+        ]
+
+        items, _summary = build_note_items(regions, phase1, pages=pages)
+
+        self.assertEqual([item.marker for item in items], ["34", "35", "36"])
+
+    def test_non_monotonic_ocr_markers_are_repaired_before_region_dedupe(self):
+        phase1 = Phase1Structure(chapters=[_chapter("ch-1", "Chapter One", 1, 1)])
+        regions = [_region("r-ch-1", "ch-1", [1], "Chapter One")]
+        pages = [
+            _page(
+                1,
+                "# Notes\n"
+                "12. Existing earlier note.\n"
+                "13. Existing earlier note.\n"
+                "23. Note twenty-three. 668. Continuation misread as a note.\n"
+                "24. Note twenty-four.\n"
+                "25. Note twenty-five.\n"
+                "26. Note twenty-six.\n"
+                "27. Note twenty-seven.\n"
+                "22. Note twenty-eight misread as twenty-two.\n"
+                "29. Note twenty-nine.\n"
+                "30. Note thirty.\n"
+                "!! 3er Noisy note thirty-one.\n"
+                "12. Note thirty-two misread as twelve.\n"
+                "13. Note thirty-three misread as thirteen.\n"
+                "34. Note thirty-four.\n"
+                "35. Note thirty-five.",
+            )
+        ]
+
+        items, _summary = build_note_items(regions, phase1, pages=pages)
+
+        markers = [item.marker for item in items]
+        self.assertNotIn("668", markers)
+        self.assertEqual(
+            markers,
+            [
+                "12",
+                "13",
+                "23",
+                "24",
+                "25",
+                "26",
+                "27",
+                "28",
+                "29",
+                "30",
+                "31",
+                "32",
+                "33",
+                "34",
+                "35",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -62,6 +62,6 @@ from FNM_RE import (
 ## 当前状态
 
 - 七模块主链已完整落地，旧 `fnm/` 模块已退役
-- 8 本样本批测脚本：`scripts/test_fnm_batch.py`（占位翻译）和 `scripts/test_fnm_real_batch.py`（真实 LLM 视觉+修补）
+- 样本批测脚本：`scripts/test_fnm_incremental.py`（增量，冻结已确认成果）和 `scripts/test_fnm_real_batch.py`（实批，多书完整回归）
 - Biopolitics 在真实模式管道中因 4 项阻塞原因未能通过（2026-04-28）
 - 处理流程：`reingest → visual_toc → pipeline → llm_repair → rebuild → structure_verify → placeholder_translate → export_verify → zip`

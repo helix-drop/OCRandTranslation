@@ -123,19 +123,16 @@ class LinkQualityGateThresholdTest(unittest.TestCase):
         self.assertGreater(gate.get("fallback_match_ratio", 0.0), 0.30)
 
     def test_quality_low_when_orphan_anchor_above_threshold(self):
-        # 5 matched all rule + 11 orphan_anchor (footnote+endnote 混)
+        # 质量门只检查 endnote orphan_anchor（footnote 不计入阈值）
         links = [
             _link(link_id=f"r{i}", anchor_id=f"a{i}", status="matched", resolver="rule")
             for i in range(5)
         ] + [
-            _link(link_id=f"of{i}", anchor_id=f"of{i}", status="orphan_anchor", resolver="rule", note_kind="footnote")
-            for i in range(6)
-        ] + [
             _link(link_id=f"oe{i}", anchor_id=f"oe{i}", status="orphan_anchor", resolver="rule", note_kind="endnote")
-            for i in range(5)
+            for i in range(12)
         ]
         gate = self._build_with_links(links)
-        # 11 > 10 threshold → quality_low
+        # 12 endnote orphan_anchor > 10 threshold → quality_low
         self.assertFalse(gate["quality_ok"], gate)
 
     def test_quality_ok_when_orphan_anchor_at_or_below_threshold(self):

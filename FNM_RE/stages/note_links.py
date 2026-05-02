@@ -8,7 +8,7 @@ import re
 from typing import Any
 
 from FNM_RE.models import BodyAnchorRecord, NoteLinkRecord, Phase2Structure
-from FNM_RE.shared.notes import _chapter_mode_map, normalize_note_marker
+from FNM_RE.shared.notes import normalize_note_marker
 
 
 def _region_map(phase2: Phase2Structure) -> dict[str, Any]:
@@ -19,15 +19,12 @@ def _region_map(phase2: Phase2Structure) -> dict[str, Any]:
     }
 
 
-def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord, *, mode_by_chapter: dict[str, str]) -> str:
+def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord) -> str:
     if anchor.anchor_kind == "footnote":
         return "footnote"
     if anchor.anchor_kind == "endnote":
         return "endnote"
-    mode = str(mode_by_chapter.get(anchor.chapter_id) or "")
-    if mode in {"footnote_primary", "review_required"}:
-        return "footnote"
-    return "endnote"
+    return "unknown"
 
 
 from FNM_RE.shared.notes import marker_digits_are_ordered_subsequence as _marker_digits_are_ordered_subsequence  # noqa: F401
@@ -224,59 +221,93 @@ def _find_marker_in_body(body_text: str, marker: str) -> dict | None:
             return {
                 "start": m.start(),
                 "end": m.end(),
+                "matched_text": m.group(0),
                 "source_text": body_text[max(0, m.start()-30):min(len(body_text), m.end()+30)],
             }
     return None
-
-
-def _chapter_body_text(pages: list[dict], body_page_nos: set[int]) -> str:
-    """拼接一章所有 body 页的 markdown 文字。"""
-    parts: list[str] = []
-    for p in pages:
-        pno = int(p.get("bookPage") or p.get("pdfPage") or 0)
-        if pno not in body_page_nos:
-            continue
-        md = str(p.get("markdown") or "").strip()
-        if md:
-            parts.append(md)
-    return "\n".join(parts)
 
 
 def _build_orphan_recovery_anchors(
     orphans: list[dict],
     pages: list[dict],
 ) -> list[BodyAnchorRecord]:
-    """对残余 orphan endnote，用正文直接搜索恢复 anchor。"""
+    """对残余 orphan endnote，逐页搜索恢复 anchor。
+
+    与旧实现的关键区别：逐页搜索而非拼接搜索，保存的 page_no 和
+    char_start/char_end 是真实页内坐标，Phase 4 可以直接注入。
+    """
+    # 预建页码 → markdown 映射
+    page_text: dict[int, str] = {}
+    for p in pages:
+        pno = int(p.get("bookPage") or p.get("pdfPage") or 0)
+        if pno <= 0:
+            continue
+        md = str(p.get("markdown") or "").strip()
+        if md:
+            page_text[pno] = md
+
     recovered: list[BodyAnchorRecord] = []
     for orphan in orphans:
         marker = orphan["marker"]
         chapter_id = orphan["chapter_id"]
         note_item_id = orphan["note_item_id"]
-        page_nos = set(orphan.get("page_nos") or [])
-        body_text = _chapter_body_text(pages, page_nos)
-        if not body_text or not marker:
+        page_nos = sorted(orphan.get("page_nos") or [])
+        if not marker:
             continue
-        hit = _find_marker_in_body(body_text, marker)
-        if not hit:
-            continue
-        recovered.append(
-            BodyAnchorRecord(
-                anchor_id=f"orphan-recovery-{note_item_id}",
-                chapter_id=chapter_id,
-                page_no=min(page_nos) if page_nos else 0,
-                paragraph_index=0,
-                char_start=hit["start"],
-                char_end=hit["end"],
-                source_marker=marker,
-                normalized_marker=marker,
-                anchor_kind="endnote",
-                certainty=0.7,
-                source_text=hit["source_text"],
-                source="orphan_recovery",
-                synthetic=True,
-                ocr_repaired_from_marker="",
+        found = False
+        for pno in page_nos:
+            body_text = page_text.get(pno, "")
+            if not body_text:
+                continue
+            hit = _find_marker_in_body(body_text, marker)
+            if not hit:
+                continue
+            recovered.append(
+                BodyAnchorRecord(
+                    anchor_id=f"orphan-recovery-{note_item_id}",
+                    chapter_id=chapter_id,
+                    page_no=pno,
+                    paragraph_index=0,
+                    char_start=hit["start"],
+                    char_end=hit["end"],
+                    source_marker=hit.get("matched_text", marker),
+                    normalized_marker=marker,
+                    anchor_kind="endnote",
+                    certainty=0.7,
+                    source_text=hit["source_text"],
+                    source="orphan_recovery",
+                    synthetic=True,
+                    ocr_repaired_from_marker="",
+                )
             )
-        )
+            found = True
+            break
+        if not found and page_nos:
+            # 回退：所有 body 页拼接搜索（坐标不精确，但至少有一个 anchor）
+            combined = "\n".join(
+                page_text.get(pno, "") for pno in page_nos if page_text.get(pno, "")
+            )
+            if combined:
+                hit = _find_marker_in_body(combined, marker)
+                if hit:
+                    recovered.append(
+                        BodyAnchorRecord(
+                            anchor_id=f"orphan-recovery-{note_item_id}",
+                            chapter_id=chapter_id,
+                            page_no=page_nos[0],
+                            paragraph_index=0,
+                            char_start=hit["start"],
+                            char_end=hit["end"],
+                            source_marker=hit.get("matched_text", marker),
+                            normalized_marker=marker,
+                            anchor_kind="endnote",
+                            certainty=0.5,
+                            source_text=hit["source_text"],
+                            source="orphan_recovery",
+                            synthetic=True,
+                            ocr_repaired_from_marker="",
+                        )
+                    )
     return recovered
 
 
@@ -288,7 +319,6 @@ def build_note_links(
 ) -> tuple[list[BodyAnchorRecord], list[NoteLinkRecord], dict]:
     _ = list(pages or [])
     anchors: list[BodyAnchorRecord] = [replace(anchor) for anchor in body_anchors]
-    mode_by_chapter = _chapter_mode_map(phase2)
     regions_by_id = _region_map(phase2)
     used_anchor_ids: set[str] = set()
     links: list[NoteLinkRecord] = []
@@ -363,28 +393,6 @@ def build_note_links(
                 page_no=note_item.page_no,
                 include_synthetic=True,
                 allow_cross_chapter=False,
-            )
-        if not candidates:
-            candidates = _candidate_anchors(
-                anchors,
-                chapter_id=chapter_id,
-                marker=marker,
-                expected_kinds={"endnote"},
-                used_anchor_ids=used_anchor_ids,
-                page_no=note_item.page_no,
-                include_synthetic=True,
-                allow_cross_chapter=True,
-            )
-        if not candidates and chapter_id and _is_toc_chapter_id(chapter_id):
-            candidates = _candidate_anchors(
-                anchors,
-                chapter_id=chapter_id,
-                marker=marker,
-                expected_kinds={"endnote", "unknown"},
-                used_anchor_ids=used_anchor_ids,
-                page_no=note_item.page_no,
-                include_synthetic=False,
-                allow_cross_chapter=True,
             )
         if not candidates and scope == "book" and chapter_id:
             candidates = _candidate_anchors(
@@ -547,7 +555,6 @@ def build_note_links(
             continue
         marker = normalize_note_marker(note_item.marker)
         chapter_id = str(note_item.chapter_id or getattr(region, "chapter_id", "") or "")
-        chapter_mode = str(mode_by_chapter.get(chapter_id) or "")
         if not marker:
             _append_link(
                 chapter_id=chapter_id,
@@ -660,33 +667,31 @@ def build_note_links(
             )
             continue
 
-        allow_synthetic = chapter_mode in {"footnote_primary", "review_required"}
-        if allow_synthetic:
-            synthetic_anchor = _make_synthetic_anchor(
-                serial=synthetic_serial,
-                chapter_id=chapter_id,
-                page_no=note_item.page_no,
-                marker=marker,
-                source_text=note_item.text,
-            )
-            synthetic_serial += 1
-            synthetic_added_count += 1
-            anchors.append(synthetic_anchor)
-            used_anchor_ids.add(synthetic_anchor.anchor_id)
-            _append_link(
-                chapter_id=chapter_id,
-                region_id=note_item.region_id,
-                note_item_id=note_item.note_item_id,
-                anchor_id=synthetic_anchor.anchor_id,
-                status="matched",
-                resolver="fallback",
-                confidence=0.4,
-                note_kind="footnote",
-                marker=marker,
-                page_no_start=note_item.page_no,
-                page_no_end=note_item.page_no,
-            )
-            continue
+        synthetic_anchor = _make_synthetic_anchor(
+            serial=synthetic_serial,
+            chapter_id=chapter_id,
+            page_no=note_item.page_no,
+            marker=marker,
+            source_text=note_item.text,
+        )
+        synthetic_serial += 1
+        synthetic_added_count += 1
+        anchors.append(synthetic_anchor)
+        used_anchor_ids.add(synthetic_anchor.anchor_id)
+        _append_link(
+            chapter_id=chapter_id,
+            region_id=note_item.region_id,
+            note_item_id=note_item.note_item_id,
+            anchor_id=synthetic_anchor.anchor_id,
+            status="matched",
+            resolver="fallback",
+            confidence=0.4,
+            note_kind="footnote",
+            marker=marker,
+            page_no_start=note_item.page_no,
+            page_no_end=note_item.page_no,
+        )
+        continue
 
         _append_link(
             chapter_id=chapter_id,
@@ -780,7 +785,7 @@ def build_note_links(
             continue
         if anchor.anchor_id in used_anchor_ids:
             continue
-        inferred_kind = _infer_note_kind_from_anchor(anchor, mode_by_chapter=mode_by_chapter)
+        inferred_kind = _infer_note_kind_from_anchor(anchor)
         if (
             str(anchor.chapter_id or ""),
             inferred_kind,

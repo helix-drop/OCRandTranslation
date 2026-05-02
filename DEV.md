@@ -168,6 +168,22 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 | `modules/book_assemble.py` | 395 | 模块七：整书组装、语义审计与导出收口 |
 | [model_capabilities.py](/Users/hao/OCRandTranslation/model_capabilities.py) | 内置模型能力目录：chat / mt / vision 模型、流式模式与 companion fallback | 243 |
 
+### Phase 职责边界（树状原则在架构层的体现）
+
+每个 phase 只有一种决策权，不重复、不下放。详见 [AGENTS.md § FNM Pipeline 数据流与 phase 职责边界](/Users/hao/OCRandTranslation/AGENTS.md)。
+
+| Phase | 唯一决策权 | 禁止 |
+|---|---|---|
+| 1 TOC | 页面 role + 章节边界 | 不判断 footnote/endnote |
+| 2 Split | **note_kind 分类（全书唯一来源）** + chapter_note_mode（聚合） | 不匹配 link，不猜测 anchor |
+| 3 Link | body anchor 检测 + link 匹配 + 修复 | **不能重分类 note_kind**，不能用 chapter_mode 跳过修复 |
+| 3.5 LLM | LLM 合成 anchor + link override | 不能绕过 Phase2 的 note_kind |
+| 4 Freeze | matched link 注入正文 + 翻译单元 | 不修改匹配结果 |
+| 5 Merge | 章 markdown 合并 | 不修改 link |
+| 6 Export | 整书组装 + 最终审计 | 不修改任何上游数据 |
+
+**核心规则**：书型问题（某章是 footnote_primary 还是 chapter_endnote_primary，某个 item 是 footnote 还是 endnote）必须在 Phase 2 解决。下游 phase 只能消费 Phase 2 的分类结果，不能因为"chapter_mode 不匹配"就跳过处理。
+
 ### 代码行数快照（2026-04-29）
 
 统计口径：按 `*.py` 逐行统计，忽略运行产物目录（如 `.venv/`、`local_data/`、`logs/`、`output/`）。
@@ -197,12 +213,12 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 
 ### 工程脚本（2026-04-29 清理后）
 
-保留的 12 个活跃脚本：
+保留的 13 个活跃脚本：
 
 | 脚本 | 用途 |
 |------|------|
-| `test_fnm_batch.py` | 主批测入口（baseline + extension 8 本） |
-| `test_fnm_real_batch.py` | 真实文档批测（含 LLM repair 集成） |
+| `test_fnm_incremental.py` | 单本或少量书的 FNM 增量验证；冻结已确认成果，层层推进 |
+| `test_fnm_real_batch.py` | 多书回归批测（含 LLM repair + Obsidian 导出） |
 | `onboard_example_books.py` | 新样本接入（导入 PDF + OCR + FNM 快照） |
 | `generate_visual_toc_snapshots.py` | 生成/刷新 visual TOC 快照 |
 | `audit_fnm_exports.py` | FNM 导出全量审计 |
@@ -215,6 +231,42 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 | `audit_footnote_structures.py` | 脚注结构审计工具 |
 
 已归档至 `legacy/`：`migrate_split_sqlite.py`、`cleanup_orphan_state.py`、`e2e_full_manual.py`、`reader_sim_screenshots.py`
+
+### FNM 测试脚本分层
+
+三种测试脚本，数据源和产物不同，禁止混用。详细说明见 [AGENTS.md § FNM 测试脚本分层](/Users/hao/OCRandTranslation/AGENTS.md)。
+
+| 脚本 | 用途 | LLM 消耗 | 产物 |
+|---|---|---|---|
+| `test_fnm_incremental.py` | 单书快速验证 + LLM repair，冻结已确认成果 | 可选（`--repair`） | 终端输出（含时间戳） |
+| `test_fnm_real_batch.py` | 多书完整回归 | 视觉模型 + LLM repair | `latest.fnm.obsidian.zip` + `FNM_REAL_TEST_REPORT.md` 等 |
+
+**时间戳约定**：
+- 增量脚本每次运行输出 `run_ts`（UTC ISO8601），作为本次数据的唯一时间标识。
+- Pipeline run 在 SQLite `fnm_runs` 表中记录 `created_at`。
+- 实批报告 `FNM_REAL_TEST_REPORT.md` 的 `generated_at` 若早于最近一次 pipeline run，报告视为过期。
+- **判断任何 blocker 前，先确认数据来源的时间戳。**
+
+**Module vs Persisted 分叉**：
+- `Module Phase 3` = `build_module_pipeline_snapshot()` 的模块管道输出，是 Phase 3 gate 的权威来源。
+- `Persisted note_links` = SQLite 落库读回，是 Phase 4-6 持久化后的数据。
+- 两者 matched 数不同时，Phase 4 blocker（如 `freeze_matched_ref_not_injected`）会解释原因。不能把 persisted readback 当成 Phase 3 gate 失败。
+
+常用命令：
+
+```bash
+# 只跑 pipeline（Phase 1-6，无 LLM repair）
+.venv/bin/python scripts/test_fnm_incremental.py --slug Biopolitics
+
+# 多本书回归
+.venv/bin/python scripts/test_fnm_incremental.py --slug Biopolitics,Germany_Madness
+
+# 只读当前 DB，不重跑 pipeline
+.venv/bin/python scripts/test_fnm_incremental.py --slug Biopolitics --check
+
+# pipeline + LLM repair，会消耗 token
+.venv/bin/python scripts/test_fnm_incremental.py --slug Biopolitics --repair
+```
 
 ### FNM_RE 维护约定
 
@@ -319,7 +371,7 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 - `test_example/example_manifest.json` 现在是样本与批测的单一事实源；当前共维护 8 本样本（5 本 baseline + 3 本 extension）
 - `scripts/apply_manual_toc_to_examples.py` 会把 `test_example/<书名>/目录.pdf` 绑定回对应 `doc_id` 的 `toc_visual_source.pdf`，并重跑自动视觉目录；这是当前 8 本样本验证手动目录主链的标准入口
 - 新样本接入统一走 `python3 scripts/onboard_example_books.py`，它只做“导入 PDF + PaddleOCR + 自动视觉目录 + FNM 结构快照”，不会触发真实 FNM 翻译
-- `scripts/test_fnm_batch.py` 默认已从 5 本扩展为 8 本，按 manifest 中 `include_in_default_batch=true` 的书目执行
+- `scripts/test_fnm_real_batch.py` 默认按 manifest 中 `include_in_default_batch=true` 的书目执行
 - 批测脚本落盘策略已收口：只有导出通过且 `toc_semantic_contract_ok=true` 时才会更新 `test_example/<folder>/latest.fnm.obsidian.zip`
 - 如果样本本轮被语义或结构门槛阻塞，批测脚本会把旧的 `latest.fnm.obsidian.zip` 改名为 `latest.fnm.obsidian.blocked.zip`，并写 `latest_export_status.json` 记录阻塞原因，避免人工误看旧包
 - `scripts/audit_fnm_exports.py --group extension` 用于新样本导出抽样审计，默认检查扩展样本的分段、目录对齐、脚注/尾注闭合情况

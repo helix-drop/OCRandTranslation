@@ -121,19 +121,15 @@ def looks_like_year_marker(marker: str) -> bool:
 
 
 def resolve_anchor_kind(
-    note_mode: str,
     *,
     has_page_footnote_band: bool = False,
 ) -> str:
-    normalized_mode = str(note_mode or "").strip()
-    if normalized_mode == "footnote_primary":
-        return "footnote"
-    # 页上已经确认存在脚注带时，优先按脚注处理；
+    # 页上已经确认存在脚注带时，按脚注处理；
     # 这能兜住 post_body / 未显式建模章节中的真实页脚脚注。
     if has_page_footnote_band:
         return "footnote"
-    if normalized_mode in {"chapter_endnote_primary", "book_endnote_bound"}:
-        return "endnote"
+    # 无逐页 evidence 时返回 unknown——同一章内
+    # 可以同时有 footnote 和 endnote marker，不能按章 mode 广播。
     return "unknown"
 
 
@@ -228,6 +224,9 @@ def _is_bare_digit_marker_context(content: str, digit_start: int, digit_end: int
         return False
     # 右侧守卫：跳过标点后如果紧跟数字，说明是列表/日期/千分位
     right = content[digit_end:].lstrip()
+    # \u4f5c\u8005\u9996\u5b57\u6bcd+\u5e74\u4efd\u6a21\u5f0f\uff1a"Z (2017)"\u3001"X 1999)"\u2014\u2014\u4e0d\u662f note marker
+    if len(word) == 1 and word.isalpha():
+        return False
     punctuation = set(".,;:)]}\u00bb\u201d\u2019")
     while right and right[0] in punctuation:
         right = right[1:].lstrip()

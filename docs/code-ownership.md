@@ -65,8 +65,6 @@
   - 从结构真相现算诊断页投影与注释摘要
 - `web/reading_view.py`
   - FNM 只读诊断阅读上下文构建
-- `scripts/test_fnm_batch.py`
-  - 8 本基线批测（占位翻译模式）
 - `scripts/test_fnm_real_batch.py`
   - 8 本基线批测（真实 LLM 视觉+修补模式）
 - `scripts/generate_visual_toc_snapshots.py`

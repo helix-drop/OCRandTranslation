@@ -14,7 +14,7 @@ _NOTES_HEADER_RE = re.compile(r"^\s*(?:#+\s*)?(notes?|endnotes?|notes to pages?.
 def page_markdown_text(page: Mapping[str, Any] | None) -> str:
     if not isinstance(page, Mapping):
         return ""
-    markdown = page.get("markdown")
+    markdown = page.get("enriched_markdown") or page.get("markdown")
     if isinstance(markdown, Mapping):
         return str(markdown.get("text") or "").strip()
     if markdown:
