@@ -525,7 +525,7 @@ def build_phase3_structure(
         page_text_map=page_text_map,
         visual_toc_bundle=visual_toc_bundle,
     )
-    body_anchors, body_anchor_summary = build_body_anchors(phase2, pages=pages)
+    body_anchors, body_anchor_summary = build_body_anchors(phase2, pages=pages, pdf_path=str(pdf_path or ""))
     enhanced_anchors, note_links, note_link_meta = build_note_links(body_anchors, phase2, pages=pages)
 
     # —— Paragraph footnotes (layout-based) ——
@@ -1275,6 +1275,7 @@ def build_module_pipeline_snapshot(
             effective_split_layers,
             pages,
             overrides=grouped_overrides_for_link,
+            pdf_path=str(pdf_path or ""),
         ),
     )
     freeze_result = _run_stage(

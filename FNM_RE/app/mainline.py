@@ -806,6 +806,15 @@ def _load_module_snapshot_for_doc(
     if not is_valid_pipeline_state(pipeline_state):
         pipeline_state = "done"
 
+    # ── sup_recovery：恢复 OCR 丢失的正文上标标记 ──
+    pdf_path = get_pdf_path(doc_id)
+    if pdf_path:
+        try:
+            from FNM_RE.modules.sup_recovery import recover_book
+            recover_book({"pages": pages}, pdf_path)
+        except Exception:
+            pass
+
     toc_items, toc_offset = _load_fnm_toc_items(doc_id, repo)
     visual_toc_bundle = _load_fnm_visual_toc_bundle(doc_id)
     overrides = _group_review_overrides(

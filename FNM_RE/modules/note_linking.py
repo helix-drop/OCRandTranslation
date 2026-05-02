@@ -1617,6 +1617,7 @@ def build_note_link_table(
     pages: list[dict],
     *,
     overrides: Mapping[str, Any] | list[dict[str, Any]] | None = None,
+    pdf_path: str = "",
 ) -> ModuleResult[NoteLinkTable]:
     phase2, _chapter_mode_by_id, book_type = _phase2_from_chapter_layers(chapter_layers)
     grouped_overrides = _group_review_overrides(overrides)
@@ -1635,7 +1636,7 @@ def build_note_link_table(
             "source_marker": str(row.marker or ""),
             "normalized_marker": str(row.marker or ""),
         }
-    body_anchors, base_anchor_summary = build_body_anchors(phase2, pages=pages)
+    body_anchors, base_anchor_summary = build_body_anchors(phase2, pages=pages, pdf_path=str(pdf_path or ""))
     enhanced_anchors, note_links, note_link_meta = build_note_links(body_anchors, phase2, pages=pages)
     repaired_links, contract_repair_summary = _repair_endnote_links_for_contract(
         links=note_links,

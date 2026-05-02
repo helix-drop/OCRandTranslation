@@ -214,6 +214,7 @@ def build_body_anchors(
     phase2: Phase2Structure,
     *,
     pages: list[dict],
+    pdf_path: str = "",
 ) -> tuple[list[BodyAnchorRecord], dict]:
     page_by_no = _page_payload_by_no(pages)
     page_role_by_no = {
