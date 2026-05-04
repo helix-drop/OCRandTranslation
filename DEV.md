@@ -828,3 +828,77 @@ OCR 的 marker 提取器扫描这段文本时，会把 "1997" 或 "1976" 识别�
 1. `DEV.md` 只写稳定事实，不写当天任务过程。
 2. 路径、端口、目录名、接口名以当前代码为准，代码改了就同步更新。
 3. 历史验证放 [verification.md](/Users/hao/OCRandTranslation/verification.md)，阶段进度和下一步计划放 [PROGRESS.md](/Users/hao/OCRandTranslation/PROGRESS.md)。
+
+## 待解决问题：Phase 4 注入 token 在 body_units 构建中丢失
+
+### 现象
+
+Goldstein 一书 Phase 3-4 全部 clean（所有 note 正确匹配并注入），但 Phase 5 contract 检查报告 1 个 orphan definition（`en-00411`，definition 编号 138，在 ch-005 中）。该 note 在 body 中没有对应的 `[^138]` 引用。
+
+Biopolitics 同样有类似 orphan，归因于 Phase 4 error_skip note。
+
+### 完整数据追踪
+
+以 Goldstein `en-00411` 为例，逐层追踪：
+
+| 步骤 | 位置 | 文件:行 | 状态 |
+|------|------|---------|------|
+| Phase 3 matching | link table | `FNM_RE/modules/note_linking.py` | status=`matched`, anchor=`anchor-00433`, marker=`96`, page=183 |
+| Phase 4 freeze | ref_map | `FNM_RE/modules/ref_freeze.py:336-345` | decision=`injected` |
+| Phase 4 injection | `chapter_body_pages` | `ref_freeze.py:333-334` | `text_has_ref=True` ✓ `{{NOTE_REF:en-00411}}` 已写入 |
+| Phase 4 page→synthetic | `_synthetic_markdown_pages` | `FNM_RE/stages/units.py:139-152` | `has_ref=True` ✓ |
+| Phase 4 markdown→para | `parse_page_markdown` | `document/text_processing.py:615` | `has_ref=True` ✓ |
+| Phase 4 para→segment | `_segment_paragraphs_from_body_pages` | `FNM_RE/stages/units.py:155-209` | **`in_segments=False` ✗** |
+| Phase 4 segment→chunk | `_chunk_body_page_segments` | `FNM_RE/stages/units.py:289` | **`in_chunks=False` ✗** |
+| Phase 4 chunk→unit | body_units 构建 | `ref_freeze.py:393-410` | `source_text` 不包含 `en-00411` |
+| Phase 5 export | body text 处理 | `FNM_RE/stages/export.py:371-556` | `local_ref_numbers[en-00411]=138`, body 中无 `[^138]` |
+| Phase 5 contract | regex 检查 | `export.py:567-576` | orphan → `merge_local_refs_unclosed` |
+
+### 关键调试输出
+
+```
+DEBUG_INJECT|en-00411 page=183 ch=toc-ch-005-4anaprioriselfforthebour text_has_ref=True
+DEBUG_BODY_UNITS|ch5 in_segments=False in_chunks=False
+```
+
+### 丢失位置
+
+**`ref_freeze.py:385`** → `FNM_RE/stages/units.py:155` `_segment_paragraphs_from_body_pages`
+
+具体丢失点：`units.py:231`
+```python
+source_text = aligned_source_text or str(source_para.get("text") or display_para.get("text") or "").strip()
+```
+
+该函数有两种段落对齐模式：
+
+1. **对齐模式**（`paragraph_total == 1 and len(raw_source_parts) > 1`，line 218-223）：使用 `raw_source_parts`（按 `\n\n` 分割的原始文本）拼接为 `aligned_source_text`。此时 `{{NOTE_REF:en-00411}}` 应保留在文本中。
+
+2. **标准模式**（line 231）：使用 `parse_page_markdown` 返回的段落 `text` 字段。`parse_page_markdown` 调用 `normalize_latex_footnote_markers` → `_parse_md_lines_to_segments`，不处理 `{{NOTE_REF:...}}` token，应透传。
+
+两个路径理论上都不应丢失 token，但实际 `in_segments=False`。需要进一步在 `_segment_paragraphs_from_body_pages` 内部加 trace 确认：
+- `raw_source_parts` 是否包含 `{{NOTE_REF:en-00411}}`
+- `source_paras[0]["text"]` 是否包含
+- `aligned_source_text` 是否包含
+- 最终 `source_text` 是否包含
+
+### 涉及的代码文件
+
+| 文件 | 关键行 | 说明 |
+|------|--------|------|
+| `FNM_RE/modules/ref_freeze.py` | 231-244 | `chapter_body_pages` 构建（Phase 4 入口） |
+| 同上 | 270-346 | 注入循环 + `_inject_token_once` |
+| 同上 | 366-410 | `frozen_body_pages` → body_units 构建 |
+| `FNM_RE/stages/units.py` | 139-152 | `_synthetic_markdown_pages`：page dict → markdown 字段 |
+| 同上 | 155-209 | **`_segment_paragraphs_from_body_pages`** ← token 丢失点 |
+| `document/text_processing.py` | 615-665 | `parse_page_markdown` |
+| 同上 | 546-561 | `_prepare_markdown_for_note_page` |
+| 同上 | 568-612 | `_parse_md_lines_to_segments` |
+| 同上 | 189-205 | `normalize_latex_footnote_markers` |
+| `FNM_RE/stages/export.py` | 371-556 | Phase 5 body 文本处理 + contract 计算 |
+
+### 影响面
+
+- Goldstein：1 个 orphan（en-00411）
+- Biopolitics：通过 `unlinked_note_ids` 格式降级后，剩余少数 orphan 可能也与此有关
+- 潜在影响：任何 `{{NOTE_REF:...}}` 注入后，如果 body 文本经过 `_segment_paragraphs_from_body_pages` 处理时段落对齐逻辑选中了不含 token 的源，就会丢失
