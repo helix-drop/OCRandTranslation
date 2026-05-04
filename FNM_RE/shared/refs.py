@@ -30,8 +30,8 @@ def _normalize_endnote_label(note_id: str) -> str:
     return token if token.lower().startswith("en-") else f"en-{token}"
 
 
-def replace_frozen_refs(text: str, *, endnote_mode: str = "legacy") -> str:
-    mode = str(endnote_mode or "legacy").strip().lower()
+def replace_frozen_refs(text: str, *, endnote_mode: str = "standard") -> str:
+    mode = str(endnote_mode or "standard").strip().lower()
     if mode not in {"legacy", "standard"}:
         raise ValueError(f"Unsupported endnote_mode: {endnote_mode}")
     payload = str(text or "")
@@ -41,24 +41,22 @@ def replace_frozen_refs(text: str, *, endnote_mode: str = "legacy") -> str:
         if not note_id:
             return ""
         if note_kind_from_id(note_id) == "endnote":
-            return f"[^{_normalize_endnote_label(note_id)}]" if mode == "standard" else f"[EN-{note_id}]"
+            return f"[^{_normalize_endnote_label(note_id)}]"
         return f"[^{note_id}]"
 
     payload = _NOTE_REF_RE.sub(_replace_note_ref, payload)
     payload = _FN_REF_RE.sub(lambda m: f"[^{str(m.group(1) or '').strip()}]", payload)
-    if mode == "standard":
-        payload = _EN_REF_RE.sub(
-            lambda m: f"[^{_normalize_endnote_label(str(m.group(1) or '').strip())}]",
-            payload,
-        )
-        payload = _VISIBLE_EN_BRACKET_RE.sub(
-            lambda m: f"[^{_normalize_endnote_label(str(m.group(1) or '').strip())}]",
-            payload,
-        )
-        payload = re.sub(r"\s+(\[\^[^\]]+\])", r"\1", payload)
-    else:
-        payload = _EN_REF_RE.sub(lambda m: f"[EN-{str(m.group(1) or '').strip()}]", payload)
-        payload = re.sub(r"\s+(\[\^[^\]]+\]|\[EN-[^\]]+\])", r"\1", payload)
+    payload = _EN_REF_RE.sub(
+        lambda m: f"[^{_normalize_endnote_label(str(m.group(1) or '').strip())}]",
+        payload,
+    )
+    payload = _VISIBLE_EN_BRACKET_RE.sub(
+        lambda m: f"[^{_normalize_endnote_label(str(m.group(1) or '').strip())}]",
+        payload,
+    )
+    payload = re.sub(r"\s+(\[\^[^\]]+\])", r"\1", payload)
+    if mode == "legacy":
+        payload = re.sub(r"\[\^([^\]]+)\]", r"[EN-\1]", payload)
     return payload
 
 
