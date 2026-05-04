@@ -117,7 +117,7 @@ def _normalize_toc_items_with_offset(toc_items: list[dict] | None, *, toc_offset
     return rows
 
 
-def _legacy_page_role_from_toc_role(role: str) -> str:
+def _toc_role_to_page_role(role: str) -> str:
     token = str(role or "").strip().lower()
     if token in {"chapter", "post_body"}:
         return "body"
@@ -135,7 +135,7 @@ def _phase_pages_from_toc(toc_structure: TocStructure) -> list[Any]:
         PagePartitionRecord(
             page_no=int(row.page_no or 0),
             target_pdf_page=int(row.page_no or 0),
-            page_role=_legacy_page_role_from_toc_role(str(row.role or "")),  # type: ignore[arg-type]
+            page_role=_toc_role_to_page_role(str(row.role or "")),  # type: ignore[arg-type]
             confidence=1.0,
             reason=str(row.reason or ""),
             section_hint="",

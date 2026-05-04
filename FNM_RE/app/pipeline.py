@@ -52,7 +52,7 @@ from FNM_RE.app.pipeline_converters import (
     _diagnostic_machine_by_page,
     _export_audit_record_from_module,
     _export_bundle_record_from_module,
-    _legacy_page_role_from_toc_role,
+    _toc_role_to_page_role,
     _normalize_overlay_unit_id,
     _normalize_toc_items_with_offset,
     _overlay_repo_units_on_frozen,

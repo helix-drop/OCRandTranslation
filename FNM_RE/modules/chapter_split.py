@@ -52,7 +52,7 @@ def _scan_body_anchor_markers(text: str) -> list[str]:
                 markers.append(normalized)
     return markers
 
-def _legacy_page_role(toc_role: str) -> str:
+def _toc_role_to_page_role(toc_role: str) -> str:
     role = str(toc_role or "").strip().lower()
     if role in {"chapter", "post_body"}:
         return "body"
@@ -77,7 +77,7 @@ def _phase1_from_toc_structure_with_evidence(
         PagePartitionRecord(
             page_no=int(row.page_no),
             target_pdf_page=int(row.page_no),
-            page_role=_legacy_page_role(row.role),  # type: ignore[arg-type]
+            page_role=_toc_role_to_page_role(row.role),  # type: ignore[arg-type]
             confidence=1.0,
             reason=str(row.reason or "module_projection"),
             section_hint="",

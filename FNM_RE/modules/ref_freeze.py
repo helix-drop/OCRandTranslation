@@ -108,8 +108,6 @@ def _inject_token_once(
     candidates = [
         str(anchor.source_marker or "").strip(),
         f"[{str(marker or '').strip()}]",
-        f"[EN-{str(note_id or '').strip()}]",   # 旧格式残留 [EN-en-00018]
-        f"[FN-{str(note_id or '').strip()}]",   # 旧格式残留 [FN-fn-00001]
     ]
     for candidate in candidates:
         if not candidate:

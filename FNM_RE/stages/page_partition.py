@@ -91,8 +91,6 @@ _NOTE_REF_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("footnote", re.compile(r"\{\{FN_REF:([^}]+)\}\}")),
     ("endnote", re.compile(r"\{\{EN_REF:([^}]+)\}\}")),
     ("endnote", re.compile(r"\[\^(en-[^\]]+)\]", re.IGNORECASE)),
-    ("endnote", re.compile(r"\[EN-([^\]]+)\]", re.IGNORECASE)),
-    ("footnote", re.compile(r"\[FN-([^\]]+)\]", re.IGNORECASE)),
     ("footnote", re.compile(r"\[\^((?!en-)[^\]]+)\]", re.IGNORECASE)),
 )
 _ENDNOTES_HINT_STOP_REASONS = {

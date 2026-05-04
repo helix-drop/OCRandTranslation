@@ -8,8 +8,6 @@ _NOTE_REF_RE = re.compile(r"\{\{NOTE_REF:([^}]+)\}\}")
 _FN_REF_RE = re.compile(r"\{\{FN_REF:([^}]+)\}\}")
 _EN_REF_RE = re.compile(r"\{\{EN_REF:([^}]+)\}\}")
 _VISIBLE_ENDNOTE_RE = re.compile(r"\[\^(en-[^\]]+)\]", re.IGNORECASE)
-_VISIBLE_EN_BRACKET_RE = re.compile(r"\[EN-([^\]]+)\]", re.IGNORECASE)
-_VISIBLE_FN_RE = re.compile(r"\[FN-([^\]]+)\]", re.IGNORECASE)
 _VISIBLE_FOOTNOTE_RE = re.compile(r"\[\^((?!en-)[^\]]+)\]", re.IGNORECASE)
 
 
@@ -50,13 +48,7 @@ def replace_frozen_refs(text: str, *, endnote_mode: str = "standard") -> str:
         lambda m: f"[^{_normalize_endnote_label(str(m.group(1) or '').strip())}]",
         payload,
     )
-    payload = _VISIBLE_EN_BRACKET_RE.sub(
-        lambda m: f"[^{_normalize_endnote_label(str(m.group(1) or '').strip())}]",
-        payload,
-    )
     payload = re.sub(r"\s+(\[\^[^\]]+\])", r"\1", payload)
-    if mode == "legacy":
-        payload = re.sub(r"\[\^([^\]]+)\]", r"[EN-\1]", payload)
     return payload
 
 
@@ -68,8 +60,6 @@ def extract_note_refs(text: str) -> list[dict]:
         ("footnote", _FN_REF_RE),
         ("endnote", _EN_REF_RE),
         ("endnote", _VISIBLE_ENDNOTE_RE),
-        ("endnote", _VISIBLE_EN_BRACKET_RE),
-        ("footnote", _VISIBLE_FN_RE),
         ("footnote", _VISIBLE_FOOTNOTE_RE),
     ]
     for kind, pattern in patterns:
