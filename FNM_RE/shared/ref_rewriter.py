@@ -126,7 +126,7 @@ def replace_note_refs_with_local_labels(
     text = _CORRUPTED_NOTE_REF_RE.sub(r"{{NOTE_REF:\1}}", str(text or ""))
 
     def _replace(match: re.Match) -> str:
-        captured = [str(match.group(idx) or "").strip() for idx in range(1, 7)]
+        captured = [str(match.group(idx) or "").strip() for idx in range(1, 5)]
         note_id = ""
         if captured[0]:
             note_id = captured[0]
@@ -138,14 +138,7 @@ def replace_note_refs_with_local_labels(
                 cleaned = cleaned[3:]
             note_id = _normalize_endnote_note_id(cleaned)
         elif captured[3]:
-            cleaned = captured[3]
-            if re.match(r"^en-\d", cleaned, re.IGNORECASE):
-                cleaned = cleaned[3:]
-            note_id = _normalize_endnote_note_id(cleaned)
-        elif captured[4]:
-            note_id = captured[4]
-        elif captured[5]:
-            local_ref = captured[5]
+            local_ref = captured[3]
             note_id = _normalize_endnote_note_id(local_ref) if local_ref.lower().startswith("en-") else local_ref
         resolved = _resolve_note_id(note_id, note_text_by_id)
         if not resolved:

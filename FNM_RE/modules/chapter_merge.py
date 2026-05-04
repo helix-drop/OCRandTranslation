@@ -478,7 +478,7 @@ def _rewrite_residual_raw_markers_for_chapter(
 
         def _replacer(m: re.Match) -> str:
             nonlocal last_ref_num
-            for idx in range(1, 7):
+            for idx in range(1, 5):
                 captured = str(m.group(idx) or "").strip()
                 if not captured:
                     continue
