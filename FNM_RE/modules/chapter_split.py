@@ -448,10 +448,9 @@ def _build_chapter_layers(
                 page_no > 0
                 and note_start_page > 0
                 and page_no > note_start_page
-                and (source_role in {"note", "other"} or bool(_NOTES_HEADING_RE.search(source_text)))
+                and source_role == "body"
+                and bool(_NOTES_HEADING_RE.search(source_text))
             ):
-                chapter_disjoint_violations.append(chapter_id)
-            if page_no == note_start_page and _NOTES_HEADING_RE.search(source_text):
                 chapter_disjoint_violations.append(chapter_id)
             split_reason = "note_start_split" if page_no == note_start_page and note_start_page > 0 else "body_page"
             body_pages.append(
