@@ -3,11 +3,12 @@
   "status": "blocked",
   "reason": "structure_review_required",
   "blocking_reasons": [
-    "toc_pages_unclassified",
     "link_endnote_not_all_matched",
-    "contract_marker_gap",
+    "link_orphan_note_remaining",
     "contract_def_anchor_mismatch",
-    "link_quality_low"
+    "freeze_matched_ref_not_injected",
+    "merge_local_refs_unclosed",
+    "export_audit_blocking"
   ],
-  "generated_at": 1777566346
+  "generated_at": 1777754968
 }

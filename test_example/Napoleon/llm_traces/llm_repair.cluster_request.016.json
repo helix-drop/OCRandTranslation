@@ -1,0 +1,140 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-010-lamonomanieorgueilleuseo:nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo:footnote\",\n  \"chapter_title\": \"La monomanie orgueilleuse ou le mal du siècle\",\n  \"page_range\": [\n    172,\n    174\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00193\",\n      \"anchor_id\": \"anchor-00264\",\n      \"marker\": \"8\",\n      \"note_excerpt\": \"Pinel, Traité... [1809/2005], p. 223.\",\n      \"anchor_excerpt\": \"reconnu pour Louis XVI?» Ce dernier, flatté de cet hommage, se retire aussitôt en regardant les autres avec une hauteur dédaigneuse. Le même artifice réussit avec un second ; et c'est ainsi que dans un instant il ne resta plus aucune trace ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00194\",\n      \"anchor_id\": \"anchor-00265\",\n      \"marker\": \"9\",\n      \"note_excerpt\": \"F.-J.-V. Broussais, De l’irritation et de la folie, t. II, J.-B. Baillière, 1839, p. 368.\",\n      \"anchor_excerpt\": \"De toutes les monomanies, l’orgueilleuse est la plus répandue, la plus immédiatement reconnaissable aussi. Broussais la tient pour « la principale monomanie d’origine intellectuelle $ ^{9} $ », Trélat considère les orgueilleux comme les plu ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00197\",\n      \"marker\": \"12\",\n      \"page_no\": 172,\n      \"source_text\": \"L.-F. Calmeil, «Paralysie générale des aliénés», Dictionnaire de médecine ou Répertoire général des sciences médicales considérées sous le rapport théorique et pratique, par MM. Adelon, Béclard, Bérard et al.; 2° éd., t. XXIII, 1841, p. 141 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00201\",\n      \"marker\": \"16\",\n      \"page_no\": 174,\n      \"source_text\": \"Alfred de Musset, La Confession d'un enfant du siècle [1836], Gallimard, «Folio», 1973, p. 35.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"asiles, où les monarques se disputent la place des prophètes, où Jésus-Christ, Mahomet et Louis XVI suscitent déjà de multiples candidatures ? Si oui, en quoi et pour-quoi le personnage de Napoléon se prêterait-il plus volontiers à la mégalomanie que la figure de Charlemagne ou de Louis XIV ? Sous ces questions, c'est en réalité un plus vaste débat qui se dessine autour des problèmes d'identité et de subjectivité, d'usurpation et de projection, dans les rapports de la folie à l'Histoire, entre être et s'imaginer être, se croire, prétendre à et se prendre pour. Si bien que l'interrogation ne serait pas tant le classique qui suis-je ? mais plutôt : suis-je bien celui pour qui je me prends ? — une question à laquelle Napoléon Bonaparte lui-même, ou plutôt Bonaparte et Napoléon, mérite d'être soumis. Mais avant d'atteindre ces régions, force est de comprendre comment la psychiatrie du XIXe siècle regarde et analyse la folie des grandeurs, qui pourrait bien détrôner la mélancolie au titre de mal du siècle. ## LA MONOMANIE ORGUEILLEUSE OU LE MAL DU SIÈCLE Avatar de l'hybris (ou ubris) grecque, cette propension des hommes à défier les dieux, synonyme de démesure, la folie qui consiste à se prendre pour un grand personnage correspond au XIXe siècle à une maladie spécifique, la monomanie dite « orgueilleuse » ou « ambitieuse ». « Carac- térisée par un désir exagéré de puissance et de domination » (Littré), elle constitue l'une des nombreuses déclinaisons du mot monomanie, forgé dans les années 1810 par Esquirol, définie comme un « délire sur un seul objet » ou « délire partiel ». Monomanie homicide, incendiaire, raisonnante, d'ivresse, érotique, les attributs se succèdent pour qualifier ce que la psychiatrie moderne nommera la psychose délirante chronique. Le terme ne survivra p ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo:footnote",
+      "chapter_title": "La monomanie orgueilleuse ou le mal du siècle",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        172,
+        174
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00193",
+          "note_item_id": "fn-00193",
+          "anchor_id": "anchor-00264",
+          "marker": "8",
+          "note_excerpt": "Pinel, Traité... [1809/2005], p. 223.",
+          "anchor_excerpt": "reconnu pour Louis XVI?» Ce dernier, flatté de cet hommage, se retire aussitôt en regardant les autres avec une hauteur dédaigneuse. Le même artifice réussit avec un second ; et c'est ainsi que dans un instant il ne resta plus aucune trace de dispute $ ^{8} $."
+        },
+        {
+          "link_id": "link-00194",
+          "note_item_id": "fn-00194",
+          "anchor_id": "anchor-00265",
+          "marker": "9",
+          "note_excerpt": "F.-J.-V. Broussais, De l’irritation et de la folie, t. II, J.-B. Baillière, 1839, p. 368.",
+          "anchor_excerpt": "De toutes les monomanies, l’orgueilleuse est la plus répandue, la plus immédiatement reconnaissable aussi. Broussais la tient pour « la principale monomanie d’origine intellectuelle $ ^{9} $ », Trélat considère les orgueilleux comme les plus dangereux des « fous lucides $ ^{10} $ ». Les centaines de cas croisés dans les archives rendent leur portrait-robot facile à tracer. Mine hautaine et dédaigneuse, le vaniteux pathologique, sans cesse courroucé de n’être pas obéi, tient à tout-va des propos pleins d’emphase et d’assurance, et souvent sans suite. Il est le seigneur des mondes, elle est l’impératrice de l’Univers. Leur fortune se compte en milliards, leurs armées sont invincibles, ils peuvent d’un souffle anéantir la terre. « Air habituel de joie, couronne sur la tête, propos incohérent, calme habituel excepté lorsqu’on la contrarie $ ^{11} $ », résume une observation, à propos d’une patiente convaincue d’être reine de France."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11727,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00197",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "region_id": "nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "L.-F. Calmeil, «Paralysie générale des aliénés», Dictionnaire de médecine ou Répertoire général des sciences médicales considérées sous le rapport théorique et pratique, par MM. Adelon, Béclard, Bérard et al.; 2° éd., t. XXIII, 1841, p. 141. Voir également le chapitre sur la paralysie générale in Nouvelle histoire de la psychiatrie, op. cit., p. 203-214.",
+          "page_no": 172,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11731,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00201",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "region_id": "nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo",
+          "marker": "16",
+          "normalized_marker": "16",
+          "occurrence": 1,
+          "source_text": "Alfred de Musset, La Confession d'un enfant du siècle [1836], Gallimard, «Folio», 1973, p. 35.",
+          "page_no": 174,
+          "display_marker": "16",
+          "source_marker": "16",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1715,
+    "output_tokens": 44,
+    "total_tokens": 1759,
+    "estimated_input_tokens": 1702,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"No anchor phrase in excerpt for marker 12, no anchor phrase for marker 16.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "No anchor phrase in excerpt for marker 12, no anchor phrase for marker 16."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "No anchor phrase in excerpt for marker 12, no anchor phrase for marker 16."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1715,
+    "completion_tokens": 44,
+    "total_tokens": 1759,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1417
+  }
+}

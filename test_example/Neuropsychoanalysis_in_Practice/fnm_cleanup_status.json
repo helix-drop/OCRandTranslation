@@ -1,15 +1,15 @@
 {
-  "cleaned_at": "2026-05-01T00:55:42",
+  "cleaned_at": "2026-05-03T05:18:50",
   "example_dir": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice",
   "removed": [
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/fnm_real_test_progress.json",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/fnm_real_test_result.json",
+    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/fnm_real_test_modules.json",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/FNM_REAL_TEST_REPORT.md",
     "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest_export_status.json",
-    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest.fnm.obsidian.Neuropsychoanalysis_in_Practice.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest.fnm.obsidian.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest.fnm.obsidian.zip"
+    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest.fnm.obsidian.Neuropsychoanalysis_in_Practice.blocked.test.zip",
+    "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest.fnm.obsidian.blocked.test.zip"
   ],
   "removed_count": 8,
   "failed": [],

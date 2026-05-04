@@ -1842,9 +1842,9 @@
       "检查 numeric marker 连续性与首尾 marker"
     ],
     "note_capture_summary": {
-      "expected_anchor_count": 112,
+      "expected_anchor_count": 106,
       "captured_note_count": 90,
-      "capture_ratio": 0.8036,
+      "capture_ratio": 0.8491,
       "sparse_capture_chapter_ids": [],
       "dense_anchor_zero_capture_pages": [],
       "chapters": [
@@ -1858,16 +1858,16 @@
         {
           "chapter_id": "toc-ch-002-1transcendentalapproacht",
           "note_mode": "footnote_primary",
-          "expected_anchor_count": 16,
+          "expected_anchor_count": 14,
           "captured_note_count": 11,
-          "capture_ratio": 0.6875
+          "capture_ratio": 0.7857
         },
         {
           "chapter_id": "toc-ch-003-2unknowabilityandtheconc",
           "note_mode": "footnote_primary",
-          "expected_anchor_count": 14,
+          "expected_anchor_count": 13,
           "captured_note_count": 12,
-          "capture_ratio": 0.8571
+          "capture_ratio": 0.9231
         },
         {
           "chapter_id": "toc-ch-004-3transdisciplinarymethod",
@@ -1907,9 +1907,9 @@
         {
           "chapter_id": "toc-ch-009-8unconsciousnessandthebr",
           "note_mode": "footnote_primary",
-          "expected_anchor_count": 9,
+          "expected_anchor_count": 8,
           "captured_note_count": 8,
-          "capture_ratio": 0.8889
+          "capture_ratio": 1.0
         },
         {
           "chapter_id": "toc-ch-010-9theselfanditsbrain",
@@ -1935,9 +1935,9 @@
         {
           "chapter_id": "toc-ch-013-12psychosisiineuropsycho",
           "note_mode": "footnote_primary",
-          "expected_anchor_count": 17,
+          "expected_anchor_count": 15,
           "captured_note_count": 11,
-          "capture_ratio": 0.6471
+          "capture_ratio": 0.7333
         },
         {
           "chapter_id": "toc-ch-014-appendixwhatcanwelearnfr",
@@ -2891,44 +2891,46 @@
       "endnote_orphan_anchor": 0,
       "ambiguous": 0,
       "ignored": 0,
-      "fallback_count": 22,
-      "repair_count": 1,
-      "fallback_matched_count": 22,
-      "fallback_match_ratio": 0.24444444444444444
+      "fallback_count": 17,
+      "repair_count": 6,
+      "fallback_matched_count": 17,
+      "fallback_match_ratio": 0.18888888888888888
     },
     "chapter_link_contract_summary": {
       "chapter_count": 15,
       "contract_required_count": 0,
       "failed_chapter_ids": [],
-      "contract_v2_failed_chapter_ids": [
-        "toc-ch-002-1transcendentalapproacht",
-        "toc-ch-003-2unknowabilityandtheconc",
-        "toc-ch-004-3transdisciplinarymethod",
-        "toc-ch-005-4cathexisandtheenergyoft",
-        "toc-ch-007-6defensemechanismsandbra",
-        "toc-ch-009-8unconsciousnessandthebr",
-        "toc-ch-010-9theselfanditsbrain",
-        "toc-ch-012-11psychosisipsychodynami",
-        "toc-ch-013-12psychosisiineuropsycho"
-      ],
+      "contract_v2_failed_chapter_ids": [],
       "contract_v2_first_marker_violation_count": 0,
       "contract_v2_marker_gap_violation_count": 0,
-      "contract_v2_def_anchor_mismatch_count": 9
+      "contract_v2_def_anchor_mismatch_count": 0
     },
     "anchor_kind_counts": {
-      "footnote": 130
+      "unknown": 15,
+      "footnote": 121
     },
     "link_status_counts": {
-      "matched": 90
+      "matched": 73,
+      "orphan_note": 17,
+      "orphan_anchor": 15
     },
     "link_resolver_counts": {
-      "fallback": 22,
-      "rule": 67,
-      "repair": 1
+      "repair": 23,
+      "rule": 82
     },
     "anchor_samples": [
       {
         "anchor_id": "anchor-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 23,
+        "paragraph_index": 0,
+        "marker": "1",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": "(or the behavior) in question. The former is thus a sufficient condition of the latter. This is different in the case of psychological struc..."
+      },
+      {
+        "anchor_id": "anchor-00002",
         "chapter_id": "toc-ch-001-introduction",
         "page_no": 26,
         "paragraph_index": 2,
@@ -2948,7 +2950,27 @@
         "source_text_preview": "What I here call brain–self and brain–object differentiation, within the neuropsychodynamic context, may perceive a self that is different f..."
       },
       {
-        "anchor_id": "anchor-00002",
+        "anchor_id": "llm-anchor-fn-00001",
+        "chapter_id": "toc-ch-001-introduction",
+        "page_no": 28,
+        "paragraph_index": 0,
+        "marker": "1",
+        "anchor_kind": "footnote",
+        "certainty": 0.95,
+        "source_text_preview": "what I call brain–self and brain–object differentiation). Th"
+      },
+      {
+        "anchor_id": "llm-anchor-fn-00012",
+        "chapter_id": "toc-ch-002-1transcendentalapproacht",
+        "page_no": 36,
+        "paragraph_index": 0,
+        "marker": "11",
+        "anchor_kind": "footnote",
+        "certainty": 0.9,
+        "source_text_preview": "Freud starts to describe the ego in terms of specific contents such as bodily contents"
+      },
+      {
+        "anchor_id": "anchor-00003",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "page_no": 38,
         "paragraph_index": 0,
@@ -2958,7 +2980,7 @@
         "source_text_preview": "investigated the contribution of reason and understanding by posing the following question: “What must reason and understanding be like in o..."
       },
       {
-        "anchor_id": "anchor-00003",
+        "anchor_id": "anchor-00004",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "page_no": 38,
         "paragraph_index": 0,
@@ -2968,7 +2990,7 @@
         "source_text_preview": "investigated the contribution of reason and understanding by posing the following question: “What must reason and understanding be like in o..."
       },
       {
-        "anchor_id": "anchor-00004",
+        "anchor_id": "anchor-00005",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "page_no": 39,
         "paragraph_index": 1,
@@ -2978,7 +3000,7 @@
         "source_text_preview": "Let me rephrase this important distinction. Whereas the concept of “transcendental” concerns possible knowledge of the objects within the wo..."
       },
       {
-        "anchor_id": "anchor-00005",
+        "anchor_id": "anchor-00006",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "page_no": 39,
         "paragraph_index": 1,
@@ -2988,7 +3010,7 @@
         "source_text_preview": "Let me rephrase this important distinction. Whereas the concept of “transcendental” concerns possible knowledge of the objects within the wo..."
       },
       {
-        "anchor_id": "anchor-00006",
+        "anchor_id": "anchor-00007",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "page_no": 39,
         "paragraph_index": 1,
@@ -2996,36 +3018,6 @@
         "anchor_kind": "footnote",
         "certainty": 1.0,
         "source_text_preview": "Let me rephrase this important distinction. Whereas the concept of “transcendental” concerns possible knowledge of the objects within the wo..."
-      },
-      {
-        "anchor_id": "anchor-00007",
-        "chapter_id": "toc-ch-002-1transcendentalapproacht",
-        "page_no": 40,
-        "paragraph_index": 3,
-        "marker": "5",
-        "anchor_kind": "footnote",
-        "certainty": 1.0,
-        "source_text_preview": "According to Kant, form and content (or better still, matter to which content can be traced back) are reciprocally related to each other. Fo..."
-      },
-      {
-        "anchor_id": "anchor-00008",
-        "chapter_id": "toc-ch-002-1transcendentalapproacht",
-        "page_no": 40,
-        "paragraph_index": 3,
-        "marker": "6",
-        "anchor_kind": "footnote",
-        "certainty": 1.0,
-        "source_text_preview": "According to Kant, form and content (or better still, matter to which content can be traced back) are reciprocally related to each other. Fo..."
-      },
-      {
-        "anchor_id": "anchor-00009",
-        "chapter_id": "toc-ch-002-1transcendentalapproacht",
-        "page_no": 41,
-        "paragraph_index": 2,
-        "marker": "7",
-        "anchor_kind": "footnote",
-        "certainty": 1.0,
-        "source_text_preview": "Freud appeared to have taken this lesson to heart when he described the psychic apparatus in terms of both a specific form and mode on the o..."
       }
     ],
     "link_samples": [
@@ -3033,20 +3025,20 @@
         "link_id": "link-00001",
         "chapter_id": "toc-ch-001-introduction",
         "note_item_id": "fn-00001",
-        "anchor_id": "synthetic-footnote-00001",
+        "anchor_id": "llm-anchor-fn-00001",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "repair",
         "marker": "1",
         "page_span": [
-          26,
-          26
+          28,
+          28
         ]
       },
       {
         "link_id": "link-00002",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00002",
-        "anchor_id": "anchor-00002",
+        "anchor_id": "anchor-00003",
         "status": "matched",
         "resolver": "rule",
         "marker": "1",
@@ -3059,7 +3051,7 @@
         "link_id": "link-00003",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00003",
-        "anchor_id": "anchor-00003",
+        "anchor_id": "anchor-00004",
         "status": "matched",
         "resolver": "rule",
         "marker": "2",
@@ -3072,7 +3064,7 @@
         "link_id": "link-00004",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00004",
-        "anchor_id": "anchor-00004",
+        "anchor_id": "anchor-00005",
         "status": "matched",
         "resolver": "rule",
         "marker": "3",
@@ -3085,7 +3077,7 @@
         "link_id": "link-00005",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00005",
-        "anchor_id": "anchor-00006",
+        "anchor_id": "anchor-00007",
         "status": "matched",
         "resolver": "rule",
         "marker": "4",
@@ -3098,7 +3090,7 @@
         "link_id": "link-00006",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00006",
-        "anchor_id": "anchor-00007",
+        "anchor_id": "anchor-00008",
         "status": "matched",
         "resolver": "rule",
         "marker": "5",
@@ -3111,7 +3103,7 @@
         "link_id": "link-00007",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00007",
-        "anchor_id": "anchor-00008",
+        "anchor_id": "anchor-00009",
         "status": "matched",
         "resolver": "repair",
         "marker": "6",
@@ -3124,7 +3116,7 @@
         "link_id": "link-00008",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00008",
-        "anchor_id": "anchor-00009",
+        "anchor_id": "anchor-00010",
         "status": "matched",
         "resolver": "rule",
         "marker": "7",
@@ -3137,7 +3129,7 @@
         "link_id": "link-00009",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00009",
-        "anchor_id": "anchor-00010",
+        "anchor_id": "anchor-00011",
         "status": "matched",
         "resolver": "rule",
         "marker": "8",
@@ -3150,7 +3142,7 @@
         "link_id": "link-00010",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00010",
-        "anchor_id": "anchor-00011",
+        "anchor_id": "anchor-00012",
         "status": "matched",
         "resolver": "rule",
         "marker": "9",
@@ -3163,9 +3155,9 @@
         "link_id": "link-00011",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00011",
-        "anchor_id": "synthetic-footnote-00002",
-        "status": "matched",
-        "resolver": "fallback",
+        "anchor_id": "",
+        "status": "orphan_note",
+        "resolver": "repair",
         "marker": "10",
         "page_span": [
           46,
@@ -3176,17 +3168,30 @@
         "link_id": "link-00012",
         "chapter_id": "toc-ch-002-1transcendentalapproacht",
         "note_item_id": "fn-00012",
-        "anchor_id": "synthetic-footnote-00003",
+        "anchor_id": "llm-anchor-fn-00012",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "repair",
         "marker": "11",
         "page_span": [
-          50,
-          50
+          36,
+          36
         ]
       }
     ],
-    "llm_repair_trace_refs": [],
+    "llm_repair_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.started.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.001.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.started.002.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.002.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.started.003.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.003.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.started.004.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.004.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.started.005.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.005.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.started.006.json",
+      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/llm_repair.cluster_request.006.json"
+    ],
     "visual_toc_trace_refs": [
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.001.json",
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/llm_traces/visual_toc.manual_input_extract.002.json",

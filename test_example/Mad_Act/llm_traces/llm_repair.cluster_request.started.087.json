@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-012-punishbuthow:nr-fn-ch-0079-toc-ch-012-punishbuthow:footnote",
+      "chapter_title": "12. Punish, but how?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        515,
+        515
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11863,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00292",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-012-punishbuthow",
+          "region_id": "nr-fn-ch-0079-toc-ch-012-punishbuthow",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": "bA/ 5 the/medical/witness _in/insanity/trials` coincided/with/a/fundamental/reconceptualization/of > Rineteenth4century/Iuropean/psychiatrists/sought/to/distinguish/themselves/by/shifting/attention/from/overt forms/of/mad/behavior/toward/the/inner/workings/of/the/insane/mind3/the/subtle/movements/of/the/soul/that the/relation/between/criminal/responsibility/and/madness\\ 1Iigen @@<A/=23 and/[the/insanity the/jury/and medical/generalists/could/purportedly/not/understand5/ or/more/on/the/rise/of/forensic/psychiatry in/nineteenth4century/Iurope3/see/Wmith/ @? 3/Iigen/ @?@/and/ @@<3/ oldstein/ /_ @?>`3/and/Wk}lev}g/ =5",
+          "page_no": 515,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-012-punishbuthow:nr-fn-ch-0079-toc-ch-012-punishbuthow:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-012-punishbuthow:nr-fn-ch-0079-toc-ch-012-punishbuthow:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3757,
+    "estimated_prompt_tokens": 1366,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1366,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

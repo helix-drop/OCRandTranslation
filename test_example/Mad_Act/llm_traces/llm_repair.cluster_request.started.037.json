@@ -1,0 +1,123 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0041-toc-ch-006-replenishorattack:footnote",
+      "chapter_title": "6. Replenish or attack?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        264,
+        266
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11699,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00127",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0041-toc-ch-006-replenishorattack",
+          "marker": "26",
+          "normalized_marker": "26",
+          "occurrence": 1,
+          "source_text": "5?=bB/Wun]UA/?> E25",
+          "page_no": 264,
+          "display_marker": "26",
+          "source_marker": "26",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11700,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00128",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0041-toc-ch-006-replenishorattack",
+          "marker": "27",
+          "normalized_marker": "27",
+          "occurrence": 1,
+          "source_text": "Ghina4rootʛȫ _the/Ghinese/name/of/which/literally/means/Vsupport/the spiritW`3 thesium/1ûʝ C Ȕʧʝ 23/red4rooted/sage ¡ 3/and/angelica/rootǾƒ 5 oxglove ̄͢ and/bamboo/shavings Ƚʜ 3/plus/Ringbo/figwortǨ¡ Vto/assist/themW/1W> 25 < ossil/teethͧͦ 3/pearlsǫǬ 3/antelope/hornɤɢˈ 3/ox/gallstoneǟ͢ 3/jack4in4the4pulpitʄœ 3/gastrodia Ó͡ 3/refuse/of/indigo̾ͤ 3/cinnabar˷ȥ 3/whole/scorpionwʴ 3/ice/shavingsRǞ 3 foxglovē͢ 3/licorice paste/to/help/form/the/pillsǲʝʂǑ 3/and/gold/foil/as/a/coating̙ɁǑʻ 5/Qany/of/the/above/were/animal4 based/drugs3/which/were/thought/to/carry/VspiritW/1XUZS ̽ 25",
+          "page_no": 265,
+          "display_marker": "27",
+          "source_marker": "27",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11701,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00129",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0041-toc-ch-006-replenishorattack",
+          "marker": "28",
+          "normalized_marker": "28",
+          "occurrence": 1,
+          "source_text": "bB/V\\u/xianbing/zhi/shiW ŃȎȃ>Þ 1PiuGh]UA/ @ E25",
+          "page_no": 266,
+          "display_marker": "28",
+          "source_marker": "28",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0041-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0041-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4066,
+    "estimated_prompt_tokens": 1466,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 3,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1466,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

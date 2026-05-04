@@ -1,0 +1,104 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad:footnote",
+      "chapter_title": "« Cet homme n'est pas aliéné » : Sade à Charenton",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        147,
+        147
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00170",
+          "note_item_id": "fn-00170",
+          "anchor_id": "anchor-00236",
+          "marker": "50",
+          "note_excerpt": "Cité in Journal inédit de Sade, op. cit., p. 116.",
+          "anchor_excerpt": "Quelle confiance peut inspirer un Directeur auprès duquel on a souvent accès et faveur par un être auquel je ne puis donner le nom d'homme ; un Directeur qui consent à prendre un tel panégyriste ; qui fait jouer publiquement sur son théâtre une pièce faite par lui et à sa louange, dans laquelle on trouve les flatteries les plus basses et où on le compare aux dieux mêmes ; que dis-je? qui lui a permis de jouer un rôle dans une autre pièce, et quel rôle encore ? Celui du méchant qu'il rend avec toute la vérité du crime qu'il porte dans son cœur. J'ai vu tout un public frémir d'horreur à ce spectacle, tandis que le Directeur général rougissait de colère de n'entendre aucun applaudissement dans la salle $ ^{50} $."
+        },
+        {
+          "link_id": "link-00172",
+          "note_item_id": "fn-00172",
+          "anchor_id": "anchor-00238",
+          "marker": "52",
+          "note_excerpt": "Charles-François Giraudy, Mémoire sur la Maison nationale de Charenton, Imprimerie de la Société de médecine, 1804, p. 7.",
+          "anchor_excerpt": "vociférations des malades qu’on y amène ne puissent être que faiblement entendus de ceux dont la tranquillité serait troublée par les impressions pénibles qu’ils en éprouveraient $ ^{52} $.»"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11701,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00171",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+          "region_id": "nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad",
+          "marker": "51",
+          "normalized_marker": "51",
+          "occurrence": 1,
+          "source_text": "«Une visite des établissements d'aliénés parisïens en 1808» par August-Friedrich Schweigger, trad. de l'allemand par Michel Caire et mis en ligne sur son site : http://psychiatrie.histoire.free.fr/index.htm.",
+          "page_no": 147,
+          "display_marker": "51",
+          "source_marker": "51",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4693,
+    "estimated_prompt_tokens": 1631,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1631,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

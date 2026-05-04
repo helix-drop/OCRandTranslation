@@ -1,0 +1,96 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-leçondu14février1979:nr-fn-ch-0035-toc-ch-006-leçondu14février1979:footnote",
+      "chapter_title": "Leçon du 14 février 1979",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        168,
+        168
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00543",
+          "note_item_id": "fn-00050",
+          "anchor_id": "anchor-00365",
+          "marker": "*",
+          "note_excerpt": "Deux ou trois mots inaudibles.",
+          "anchor_excerpt": "Et dans cette mesure-là, vous voyez bien qu'on se trouve au carrefour où sont bien sûr réactivés un certain nombre de vieux thèmes sur la vie familiale, la copropriété et tout un tas de thèmes critiques qui sont les thèmes critiques que nous voyons courir partout contre la société marchande, contre l'uniformisation par la consommation. Et c'est ainsi que – sans qu'il y ait du tout quelque chose comme la récupération, mot qui ne veut rigoureusement rien dire, entre la critique qui était faite, disons dans un style sombartien, depuis 1900 à peu près, contre cette société marchande, uniformisante, etc., et puis les objectifs de la politique gouvernementale actuelle –, vous avez très exactement convergence. Ils veulent bien la même chose. Simplement, se trompent les critiques qui s'imaginent, lorsqu'ils dénoncent une société disons « sombartienne » entre guillemets, je veux dire cette société uniformisante, de masse, de consommation, de spectacle, etc., ils se trompent quand ils croient qu'ils sont en train de critiquer ce qui est l'objectif actuel de la politique gouvernementale. Ils critiquent quelque chose d'autre. Ils critiquent quelque chose qui a bien été sans doute à l'horizon explicite ou implicite, voulu ou non, des arts de gouverner des années [vingt aux années soixante]*. Mais nous avons dépassé ce stade. Nous n'en sommes plus là. L'art de gouverner programmé vers les années 1930 par les ordolibéraux et qui est devenu maintenant la programmation de la plupart des gouvernements en"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 227,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "fn-00051",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-leçondu14février1979",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-leçondu14février1979",
+          "marker": "**",
+          "normalized_marker": "",
+          "occurrence": 11,
+          "source_text": "M.F.:1920-1960",
+          "page_no": 168,
+          "display_marker": "**",
+          "source_marker": "**",
+          "title_hint": "",
+          "created_at": 1777820124,
+          "updated_at": 1777820124
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-leçondu14février1979:nr-fn-ch-0035-toc-ch-006-leçondu14février1979:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-leçondu14février1979:nr-fn-ch-0035-toc-ch-006-leçondu14février1979:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3979,
+    "estimated_prompt_tokens": 1427,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 1,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1427,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1729,24 +1729,34 @@ def build_note_link_table(
         "link.synthetic_anchor_warn": bool(soft_synthetic_anchor_warn),
     }
     reasons: list[str] = []
+    blockers: list[str] = []
+    warnings: list[str] = []
+    # book_endnotes 模式下，跨章编号序列检查不适用
+    _is_book_endnotes = str(book_type or "") == "endnote_only"
+    def _add(code: str, *, blocker: bool = True) -> None:
+        reasons.append(code)
+        if blocker:
+            blockers.append(code)
+        else:
+            warnings.append(code)
     if not hard["link.first_marker_is_one"]:
-        reasons.append("link_first_marker_not_one")
+        _add("link_first_marker_not_one", blocker=not _is_book_endnotes)
     if not hard["link.endnotes_all_matched"]:
-        reasons.append("link_endnote_not_all_matched")
+        _add("link_endnote_not_all_matched")
     if not hard["link.no_ambiguous_left"]:
-        reasons.append("link_ambiguous_remaining")
+        _add("link_ambiguous_remaining")
     if not hard["link.no_orphan_note"]:
-        reasons.append("link_orphan_note_remaining")
+        _add("link_orphan_note_remaining")
     if not hard["link.endnote_only_no_orphan_anchor"]:
-        reasons.append("link_endnote_only_orphan_anchor_remaining")
+        _add("link_endnote_only_orphan_anchor_remaining")
     if not hard["link.contract_first_marker_is_one"]:
-        reasons.append("contract_first_marker_not_one")
+        _add("contract_first_marker_not_one", blocker=not _is_book_endnotes)
     if not hard["link.no_marker_gap"]:
-        reasons.append("contract_marker_gap")
+        _add("contract_marker_gap", blocker=not _is_book_endnotes)
     if not hard["link.def_anchor_aligned"]:
-        reasons.append("contract_def_anchor_mismatch")
+        _add("contract_def_anchor_mismatch")
     if not hard["link.quality_ok"]:
-        reasons.append("link_quality_low")
+        _add("link_quality_low")
 
     evidence = {
         "book_type": str(book_type or "no_notes"),
@@ -1803,6 +1813,8 @@ def build_note_link_table(
         hard=hard,
         soft=soft,
         reasons=reasons,
+        blockers=blockers,
+        warnings=warnings,
         evidence=evidence,
         overrides_used=list(override_logs),
     )

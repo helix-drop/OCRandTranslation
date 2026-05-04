@@ -1,0 +1,122 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo:footnote",
+      "chapter_title": "La monomanie orgueilleuse ou le mal du siècle",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        167,
+        167
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00191",
+          "note_item_id": "fn-00191",
+          "anchor_id": "anchor-00262",
+          "marker": "4",
+          "note_excerpt": "Eugène Scribe, Une monomanie, comédie vaudeville en un acte, théâtre du Gymnase, 31 août 1832, in Œuvres complètes, II° série, vol. XXIV, E. Dentu, 1876-1885, p. 123-124.",
+          "anchor_excerpt": "tout-va, serait-il déjà vidé de son sens? C'est ce que semble suggérer Eugène Scribe, dans un vaudeville intitulé Une monomanie, raillant cette mode que rien n'arrête et qui excuserait tout. À son neveu qui justifie par la «monomanie» l'idée d'avoir orchestré son faux suicide pour faire parler de lui, un oncle répond en grondant: «Ta justification, dis-tu? Mais si on admet une fois celle-là, elle va servir à toutes les bassesses, à tous les crimes. [...] Celui qui vient de se dégrader par un vol, te dira: Je suis monomane. [...] L'assassin qui frappe une victime désarmée, crie au jury: Je suis monomane. [...] Et toimême, abusé par un pareil sophisme, tu cédais à ton délire en le croyant légitime. [...] Ô jeunes gens! [...] vous qui avez montré tous les genres de courage, ayez encore maintenant le plus rare, mais le plus indispensable de tous, celui de la raison 4. »"
+        },
+        {
+          "link_id": "link-00192",
+          "note_item_id": "fn-00192",
+          "anchor_id": "anchor-00263",
+          "marker": "5",
+          "note_excerpt": "J.-E.-D. Esquirol, «De la monomanie», in Des maladies mentales, op. cit., t. I, p. 332.",
+          "anchor_excerpt": "La <sup>4</sup>réalité scientifique est sensiblement plus complexe. La monomanie est une affection cérébrale chronique qui se caractérise « par une lésion partielle de l'intelligence, des affections ou de la volonté ». Hors d'un délire particulier, fixé sur un objet, les malades vivent, agissent et raisonnent normalement. Mais la corruption même inoffensive d'une faculté, qu'elle soit intellectuelle, affective ou morale, entraîne le plus souvent avec elle de fâcheuses conséquences. Combien d'aliénés tranquilles et d'apparence raisonnable doivent par exemple être nourris de force parce qu'ils refusent tout aliment, persuadés qu'on veut les"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11719,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00189",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "region_id": "nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "Voir notamment «Esquirol et la nosographie», in Nouvelle histoire de la psychiatrie, sous la dir. de Jacques Postel et Claude Quetel, Dunod, 1994, et l'article «Monomanie», rédigé par Esquirol, dans le Dictionnaire des sciences médicales, vol. XXXIV, Panckoucke, 1819.",
+          "page_no": 167,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11720,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00190",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+          "region_id": "nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "Charles Duveyrier, Le Monomane, drame en cinq actes, Bufquin-Desessart éditeur, 1835, p. 32.",
+          "page_no": 167,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5070,
+    "estimated_prompt_tokens": 1739,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1739,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire:footnote",
+      "chapter_title": "4. From Wind to mucus and Fire",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        110,
+        111
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11605,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00033",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Qutual0conquest0and0mutual0production0of0the0Jive0Egents40with0their g`e^Z_Xe^ _common40ordinary`60Sne0is0frightened0because0one0suddenly0comes0upon0something60Qake0one0see and0hear0this0thing0habitually40and0one0will0no0longer0be0frightened6T02associated0organs0and0emotions ʕƢ ΍ʨěA _W[? ` ě̝ěĘH ý΍[bĽȝʪ̈́AH fʤ́ʤʮ¡7΍ɨ 3",
+          "page_no": 110,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11606,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00034",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "2. @ 5 = 3C0see 6 below6 == _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SfrightT΍ 2VQWU0?6 a6 aCU`_\\0p`a` B0 ?5@360Sther0physicians0had treated0this0case0asan Sillness0of0the0 eartTĹɇ 40and0ineffectively0prescribed0Sginseng40pearls40and0[ill5 settling0pillT02V¹Ȱȱ»îĻ 360Xhe0[ill5settling0pill0was0a0typical0treatment0for0fright6 => _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SinsomniaT7÷ 2VQWU0?6 a4 U`_\\0p`a` B0 ?360^hangRs0version0claimed patient0sweating0with0outrage6 that0heonly Sfeigned0drunkennessT02w͒ 302 ld\\e0j_`h`e S͝ ̃ 40entry0 >C0VQWU0 6 ?b4U`_\\0p`a` B0 36 =? _`o`e^ jXec`Xf ¬Ĭ4ɐ 40case0 40SPumps0caused0by0sorrowT âřʔî 2VQWU0?6 aC U`_\\0p`a` B0 >36 =@ t0is0unclear0whether0the0exorcist0was0in0collusion6 =A Es0^hang0was0quoted0to0have0said40theEee\\i0?Xefe already0contained0information0on0this0method0when0it said0that0Swhen0one0is0sorrowful4Ui congeals0into0knotsT02ř¡ǘʔ 340that0Swhen0one0is0joyous40all0the0vessels are0in0harmonyT02Ü¡ɖʽ˔Õ 34and0that0Sjoy0overcomes0sorrowT02Ü¦ō 36Xhe0third0phrase0was0taken directly0fromg`Xe =02and0>?30of0the>Xj`Z0 l\\jk`fej 60E0sentence0toward0the0end0of >Xj`Z0 l\\jk`fej A gave0a0slightly different0version0of0the0effect0on0Ui0of0various0emotions60S[hen0one0is0joyous40all0the0vessels0are0in0harmonyT appeared0verbatim0in0^hangRs0entry0on0the0nine0types0of Ui and0explained0why0joy0rarelyproduced illness 2 ld\\e0j_`h`e S͝ ̃ 40entry0 >CVQWU0 6 ?b5 @a4U`_\\0p`a` B0 36",
+          "page_no": 111,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4152,
+    "estimated_prompt_tokens": 1481,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1481,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

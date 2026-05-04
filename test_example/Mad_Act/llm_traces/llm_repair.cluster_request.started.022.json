@@ -1,0 +1,177 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0048-toc-ch-007-shapesofpractices:footnote",
+      "chapter_title": "7. Shapes of practices",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        328,
+        332
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11727,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00155",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0048-toc-ch-007-shapesofpractices",
+          "marker": "20",
+          "normalized_marker": "20",
+          "occurrence": 1,
+          "source_text": "^iUb 4/VHiankuang4W/case/of/Qs6/^hang/2[uX]U B/ =?F36/ /discuss/this/case/in/A6 6",
+          "page_no": 328,
+          "display_marker": "20",
+          "source_marker": "20",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11728,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00156",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0048-toc-ch-007-shapesofpractices",
+          "marker": "21",
+          "normalized_marker": "21",
+          "occurrence": 1,
+          "source_text": "1. 28ADFD3@E>3F;A@E\u0001A8\u0001F:7\u0001D7>7H3@F\u0001>3IE\b\u0001 AD\u0001F:7\u0001AD;9;@E\u0001A8\u0001F:7\u0001BA>;5K\u0001A8\u0001BD7H7@F;H7 V675>3D3F;A@\u00013@6\u00015A@8;@7?7@FW\u0001\u0004Ë÷ΖΕ \u0005\u0006\u0001F:7\u0001;EEG7\u0001A8\u0001I:7F:7D\u00013@6\u0001:AI\u0001;F\u0001I3E\u0001;?B>7?7@F76\u0006\u00013@6\u00018AD\u0001?AD7 *:7D7\u0001I3E\u0001@AF:;@9\u0001>3F7@F\u000134AGF\u0001\u00183AUE\u0001;>>@7EESS\u00183AUE\u0001D7>3F;H7E\u0006\u0001-G\u0001*3@9\u0006\u00013@6\u0001D7367DE\u0001A8\u0001F:7 A@\u0001F:7\u00015A@5D7F7\u00015A@6;F;A@E\u0001A8\u0001F:AE7\u0001I:A\u0001I7D7\u00015A@8;@76\u00013F\u0001:A?7\u0006\u0001E77 \b\u000e\b \u0010\u000f AD\u00013@AF:7D\u0001';@9\u00017J3?B>7\u0001A8\u0001F:7\u0001GE7\u0001A8\u0001F:7\u00018AGD\u00016;39@AEF;5\u0001?7F:A6E\u0006\u0001E77\u0001 GDF:\u0001 \u0013\u0013\u0013\u0014\u0001 \u000e\u0010\u0007\u000e\u0011\b",
+          "page_no": 329,
+          "display_marker": "21",
+          "source_marker": "21",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11729,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00157",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0048-toc-ch-007-shapesofpractices",
+          "marker": "22",
+          "normalized_marker": "22",
+          "occurrence": 1,
+          "source_text": "165. For another Qing example of the use of the four diagnostic methods, see Furth 1999: 246-47.",
+          "page_no": 329,
+          "display_marker": "22",
+          "source_marker": "22",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11730,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00158",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0048-toc-ch-007-shapesofpractices",
+          "marker": "23",
+          "normalized_marker": "23",
+          "occurrence": 1,
+          "source_text": "2. 6 4/ 6 36 Wince/Qr6/FaoUs conditions/probably/prevented/him/from/explaining/his symptoms/properly4/[u was/probably/askingFaoUs relatives6 >? n/a/judiciously/oblique/way4[u hinted that/Fao wanted/to/have/sexual/intercourse/with/his/wife6 >@ Xhe/use/of^]b[ W 4/Vsomewhat/unexpectedlyW/or/Vto/oneUs/surpriseW/2which/ /render/with/an/exclamation mark3 was/meant/to/emphasize howinappropriate/FaoUs/reaction/was6 >A B]U/fYb @3 usually/referredto thedependent members/of/a/broadly/understood/Vhousehold6W/Xhe/term VO5ňˍ ÄľVZüOĵg< ȫĻČô ǡƛSȫ ȩ/ƛ<ʖ heremay have/referred/to/a/concubine or/a/secondary/wife6/VQinistering/tohimW probably meant/complying with/the/sexual/requests/his/wifehad refused/to/grant6 ? Xhis/approach was/an/ideal/that was/not/always/adopted6Wo/far4/[uwas describing/FaoUs/appearance/and/his/excessive/behavior6",
+          "page_no": 330,
+          "display_marker": "23",
+          "source_marker": "23",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11731,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00159",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0048-toc-ch-007-shapesofpractices",
+          "marker": "24",
+          "normalized_marker": "24",
+          "occurrence": 1,
+          "source_text": "tracts6/Qany/physicians attributed/madness/to/a/blockage/in/the]ang 5Frilliance/2Ϊơ 3tract4 associated/with/theWtomach 6 ?< Xhe/Wmall/ ntestine/tractwa s/ and/ reater5]ang 2űÝΪ 36 ?= [u was not/draining fluid/fromorgansB hewa s/draining/V ireW/from/the/tracts/named/aftertheseorgans because he/thought/ irewa s preventingthem from/fulfilling/their/functions6 Xhe/visceral/systemswe renot conceived solely as/physicalstructures4/butalsoasVfunctional/ensemblesW/2 urth AAAB/ @36͞ ŇȤċ˟@ ?> [as [u/Xang/stating/a/common/medical/precept/or/noticing/a/pathology/specific/to/his/patientD ?? /am/not/sure/how[u/Xang/understood the/ allbladder/and/the/Wmall/ ntestine/tracts/to/be/connected6 ?@ 6 /and/ 6 explain the/social/stresses/and/failuresthatcommon Uing/people claimed/led/themselves/or Pike/many/contemporaries4/[u/Xang/recognized/that/intellectual/or/emotional/frustrations othersto madness6",
+          "page_no": 331,
+          "display_marker": "24",
+          "source_marker": "24",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11732,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00160",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0048-toc-ch-007-shapesofpractices",
+          "marker": "25",
+          "normalized_marker": "25",
+          "occurrence": 1,
+          "source_text": "179. See Zhongyao da cidian entries on each drug: 0133 (p. 74, foxglove) 0645 (p. 318, asparagus), 1284 (p. 627, gentian), 2082 (p. 1024, lily turf), 2292 (p. 1127, tree peony), and 3233 (p. 1548, picrorhiza).",
+          "page_no": 332,
+          "display_marker": "25",
+          "source_marker": "25",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0048-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0048-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5417,
+    "estimated_prompt_tokens": 1839,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 6,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1839,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -14,7 +14,7 @@ from config import ensure_dirs, get_sqlite_db_path
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 24
+SCHEMA_VERSION = 25
 _schema_init_lock = threading.Lock()
 
 # ---- TOC 来源常量 ----
@@ -420,6 +420,10 @@ def _create_core_tables(conn: sqlite3.Connection) -> None:
             error_msg TEXT,
             target_ref TEXT,
             page_segments_json TEXT,
+            source_hash TEXT,
+            segment_plan_hash TEXT,
+            pipeline_run_id TEXT,
+            stale_reason TEXT,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
             FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
@@ -428,6 +432,32 @@ def _create_core_tables(conn: sqlite3.Connection) -> None:
             ON fnm_translation_units(doc_id, status, kind, page_start, page_end);
         CREATE INDEX IF NOT EXISTS idx_fnm_units_doc_section
             ON fnm_translation_units(doc_id, section_id, kind, page_start, page_end);
+
+        CREATE TABLE IF NOT EXISTS fnm_phase_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            phase INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'running',
+            gate_report_json TEXT,
+            counts_json TEXT,
+            hash_json TEXT,
+            started_at INTEGER NOT NULL,
+            finished_at INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_fn_phase_runs_doc_phase
+            ON fnm_phase_runs(doc_id, phase, started_at);
+
+        CREATE TABLE IF NOT EXISTS fnm_dev_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            phase INTEGER NOT NULL,
+            snapshot_json TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_fn_dev_snapshots_doc
+            ON fnm_dev_snapshots(doc_id, phase, created_at);
 
         CREATE TABLE IF NOT EXISTS segment_revisions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -998,6 +1028,56 @@ def _migrate_fnm_schema(conn: sqlite3.Connection) -> None:
             UNIQUE(doc_id, chapter_id),
             FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
         );
+        """
+    )
+    # ── SCHEMA_VERSION 25 迁移：新增 hash 字段 + checkpoint 表 ──
+    _ensure_columns(
+        conn,
+        "fnm_translation_units",
+        [
+            ("source_hash", "TEXT NOT NULL DEFAULT ''"),
+            ("segment_plan_hash", "TEXT NOT NULL DEFAULT ''"),
+            ("pipeline_run_id", "TEXT NOT NULL DEFAULT ''"),
+            ("stale_reason", "TEXT NOT NULL DEFAULT ''"),
+        ],
+    )
+    _ensure_columns(
+        conn,
+        "fnm_dev_snapshots",
+        [("run_id", "TEXT NOT NULL DEFAULT ''")],
+    )
+    _ensure_columns(
+        conn,
+        "fnm_phase_runs",
+        [("run_id", "TEXT NOT NULL DEFAULT ''")],
+    )
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS fnm_phase_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            phase INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'running',
+            gate_report_json TEXT,
+            counts_json TEXT,
+            hash_json TEXT,
+            started_at INTEGER NOT NULL,
+            finished_at INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_fn_phase_runs_doc_phase
+            ON fnm_phase_runs(doc_id, phase, started_at);
+
+        CREATE TABLE IF NOT EXISTS fnm_dev_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            phase INTEGER NOT NULL,
+            snapshot_json TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_fn_dev_snapshots_doc
+            ON fnm_dev_snapshots(doc_id, phase, created_at);
         """
     )
 

@@ -3,14 +3,9 @@
   "status": "blocked",
   "reason": "structure_review_required",
   "blocking_reasons": [
-    "toc_pages_unclassified",
-    "split_items_sparse_note_capture",
-    "contract_marker_gap",
-    "contract_def_anchor_mismatch",
-    "link_quality_low",
-    "merge_frozen_ref_leak",
-    "export_audit_blocking",
-    "export_raw_marker_leak"
+    "freeze_matched_ref_not_injected",
+    "merge_local_refs_unclosed",
+    "export_audit_blocking"
   ],
-  "generated_at": 1777566426
+  "generated_at": 1777820664
 }

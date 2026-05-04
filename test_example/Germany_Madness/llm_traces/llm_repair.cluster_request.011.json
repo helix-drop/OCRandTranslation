@@ -2,156 +2,484 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-006-pilgrimsinsearchoftheirr:nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr:endnote\",\n  \"chapter_title\": \"Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    309,\n    309\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 309,\n      \"ocr_excerpt\": \"In the year [15]22 on the fourth Sunday after Pentecost the honorable Jorg Noezell from Auerswalde near Chemnitz reported that he had been ill for a long time and that during his illness he had lost his mind and reason. Completely naked and without clothes he was so mad that he ran into the forest, where he remained both day and night. In their sorrow his wife and family urged him to visit the church of Mary the Mother of God in Grimmental.50 But, more often than not, the truly wild and dangerous found themselves confined, either by their own families or by the authorities. “Seventy years ago there was a son of Schneeberg by the name of Christopher Eib, a vicar in Brussels, who fell into such a delirium that he spent several years locked in iron fetters and chains.” $ ^{51} $ Here, too, as in the Rhineland, many were brought on pilgrimage whose madness seemed to be due to demonic possession: “[P]lures putarent, ipsum esse obsessum a daemone.” $ ^{52} $ In 1590, the exorcist at Maria im Sand in Dettelbach relieved a woman of a whole host of demons: [He] began to exorcise the evil enemy and found that there were many more than he had at first assumed: that this possessed woman had mo ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"en-00021\",\n      \"marker\": \"50\",\n      \"page_no\": 309,\n      \"source_text\": \"Ibid.\"\n    },\n    {\n      \"note_item_id\": \"en-00022\",\n      \"marker\": \"51\",\n      \"page_no\": 309,\n      \"source_text\": \"Ibid.\"\n    },\n    {\n      \"note_item_id\": \"en-00023\",\n      \"marker\": \"52\",\n      \"page_no\": 309,\n      \"source_text\": \"Ibid.\"\n    },\n    {\n      \"note_item_id\": \"en-00024\",\n      \"marker\": \"53\",\n      \"page_no\": 309,\n      \"source_text\": \"Ibid., p. 74.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-004-4witchcraftandthemelanch:nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch:footnote\",\n  \"chapter_title\": \"4 Witchcraft and the Melancholy Interpretation of the Insanity Defense\",\n  \"page_range\": [\n    205,\n    237\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00548\",\n      \"anchor_id\": \"anchor-00479\",\n      \"marker\": \"6\",\n      \"note_excerpt\": \"Ibid.\",\n      \"anchor_excerpt\": \"geredt, gethan, unnd warmit er umb gangen, was auch mit im geredt worden\\\"). Over and over, the jurists remarked on the evidence of his \\\"good understanding\\\" both before and after his crime. He had apparently apologized to his wife for his su ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00549\",\n      \"anchor_id\": \"anchor-00482\",\n      \"marker\": \"7\",\n      \"note_excerpt\": \"Ibid., pp. 329-30.\",\n      \"anchor_excerpt\": \"And as concerns the melancholy, it can be seen that they are not to be classed with the insane at all, nor are they to be excused from punishment; indeed, certain people think that melancholy is the anger of the best geniuses. And the juris ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00546\",\n      \"marker\": \"4\",\n      \"page_no\": 205,\n      \"source_text\": \"Petrus Heigius, Quaestiones iuris tam civilis quam Saxonici . . . editae nunc primum cura Ludovici Person, (Wittenberg, 1601), vol. 2, question 38, p. 332.\"\n    },\n    {\n      \"note_item_id\": \"fn-00547\",\n      \"marker\": \"5\",\n      \"page_no\": 205,\n      \"source_text\": \"Ibid., p. 333.\"\n    },\n    {\n      \"note_item_id\": \"fn-00550\",\n      \"marker\": \"8\",\n      \"page_no\": 206,\n      \"source_text\": \"Ibid., pp. 334.\"\n    },\n    {\n      \"note_item_id\": \"fn-00551\",\n      \"marker\": \"9\",\n      \"page_no\": 206,\n      \"source_text\": \"Ibid., pp. 334-35.\"\n    },\n    {\n      \"note_item_id\": \"fn-00588\",\n      \"marker\": \"46\",\n      \"page_no\": 214,\n      \"source_text\": \"See, e.g., Ulrich Zasius’s discussion of the three kinds of furiosi, Opera omnia, vol. % cols. 336—-37, paras. 3—s5.\"\n    },\n    {\n      \"note_item_id\": \"fn-00589\",\n      \"marker\": \"47\",\n      \"page_no\": 214,\n      \"source_text\": \"H. C. Erik Midelfort, Witch Hunting in Southwestern Germany, 1562—-1684: The Social and Intellectual Foundations (Stanford, 1972), pp. 22-24, 114-17.\"\n    },\n    {\n      \"note_item_id\": \"fn-00609\",\n      \"marker\": \"67\",\n      \"page_no\": 220,\n      \"source_text\": \"See D. P. Walker, Spiritual and Demonic Magic from Ficino to Campanella (London, 1958); 1d., Music, Spirit and Language in the Renaissance (London, 1985); and H. A. Kelly, The Deuvil at Baptism: Ritual, Theology and Drama (Ithaca, N.Y., 198 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00610\",\n      \"marker\": \"68\",\n      \"page_no\": 220,\n      \"source_text\": \"Baxter, “Johann Weyer’s ‘De praestigiis daemonum,”” pp. 53-75.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00557\",\n      \"note_item_id\": \"fn-00548\",\n      \"current_anchor_id\": \"anchor-00479\",\n      \"marker\": \"6\",\n      \"note_page_no\": 205,\n      \"anchor_page_no\": 204,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ibid.\",\n      \"anchor_excerpt\": \"geredt, gethan, unnd warmit er umb gangen, was auch mit im geredt worden\\\"). Over and over, the jurists remarked on the evidence of his \\\"good understanding\\\" both before and after his crime. He had apparently apologized to his wife for his su ...\"\n    },\n    {\n      \"link_id\": \"link-00592\",\n      \"note_item_id\": \"fn-00583\",\n      \"current_anchor_id\": \"anchor-00520\",\n      \"marker\": \"41\",\n      \"note_page_no\": 213,\n      \"anchor_page_no\": 214,\n      \"current_anchor_marker\": \"41\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Erik Wolf, Grosse Rechtsdenker der deutschen Geistesgeschichte, 4th ed. (Tibingen, 1963), pp. 119—20; Schmidt, Einfiithrung, pp. 111-13.\",\n      \"anchor_excerpt\": \"course, traditional in Roman and canon law. Despite its obvious weaknesses as a general analogy, the comparison did make clear a common principle: culpability required that one be doli capax—that is, capable of a malicious intention. $ ^{41 ...\"\n    },\n    {\n      \"link_id\": \"link-00593\",\n      \"note_item_id\": \"fn-00584\",\n      \"current_anchor_id\": \"anchor-00521\",\n      \"marker\": \"42\",\n      \"note_page_no\": 213,\n      \"anchor_page_no\": 214,\n      \"current_anchor_marker\": \"42\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Wolf, Grosse Rechtsdenker, p. 120.\",\n      \"anchor_excerpt\": \"course, traditional in Roman and canon law. Despite its obvious weaknesses as a general analogy, the comparison did make clear a common principle: culpability required that one be doli capax—that is, capable of a malicious intention. $ ^{41 ...\"\n    },\n    {\n      \"link_id\": \"link-00616\",\n      \"note_item_id\": \"fn-00607\",\n      \"current_anchor_id\": \"anchor-00548\",\n      \"marker\": \"65\",\n      \"note_page_no\": 219,\n      \"anchor_page_no\": 220,\n      \"current_anchor_marker\": \"65\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"This effort has not yet ceased. See Rudolf van Nahl, Zauberglaube und Hexenwahn im Gebiet von Rhein und Maas: Spitmittelalterlicher Volksglaube im Werk Johan Weyers (1515-1588) (Bonn, 1983).\",\n      \"anchor_excerpt\": \"Weyer, in fact, represented at its fullest Lutheran pitch the conclusion that the devil was overwhelmingly powerful and deceptive: for those who thought that they could act with assurance, Weyer pointed out that the devil could exploit and ...\"\n    },\n    {\n      \"link_id\": \"link-00617\",\n      \"note_item_id\": \"fn-00608\",\n      \"current_anchor_id\": \"anchor-00549\",\n      \"marker\": \"66\",\n      \"note_page_no\": 219,\n      \"anchor_page_no\": 220,\n      \"current_anchor_marker\": \"66\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"These hitherto unnoticed remarks are to be found in Weyer’s Artzney Buch: Von\",\n      \"anchor_excerpt\": \"The third crucial influence on Weyer’s legal views was Erasmus, not the cardboard stereotype of a mild-mannered, liberal, right-thinking man recently ridiculed by Christopher Baxter, $ ^{66} $ but the serious religious thinker for whom the ...\"\n    },\n    {\n      \"link_id\": \"link-00623\",\n      \"note_item_id\": \"fn-00614\",\n      \"current_anchor_id\": \"anchor-00559\",\n      \"marker\": \"72\",\n      \"note_page_no\": 221,\n      \"anchor_page_no\": 222,\n      \"current_anchor_marker\": \"72\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Giambattista della Porta, Magia naturalis (1st ed., Naples, 1558); I have used the later edition, Magiae naturalis libri viginti (Naples, 1589); cf. Lynn Thorndike, A History of Magic and Experimental Science (New York, 1923-58), vol. 6: Th ...\",\n      \"anchor_excerpt\": \"bles from the worlds of Herodotus, Pliny, and Merlin. He called some of his tales true and others fabulous, and occasionally asserted that a story told straight-facedly should be just as firmly believed as a previous story that he had expli ...\"\n    },\n    {\n      \"link_id\": \"link-00624\",\n      \"note_item_id\": \"fn-00615\",\n      \"current_anchor_id\": \"anchor-00560\",\n      \"marker\": \"73\",\n      \"note_page_no\": 221,\n      \"anchor_page_no\": 222,\n      \"current_anchor_marker\": \"73\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Christopher Baxter calls the flavor “Rabelaisian,” a suggestion that would repay closer literary study (Baxter, “Johann Weyer’s ‘De praestigiis daemonum,”” p. 73, n.\",\n      \"anchor_excerpt\": \"By calling the legends, fables, and traditions of over two thousand years into question, Weyer made it clear that credibility depended on more than just the authority of the storyteller or the plausibility of the story. And he illustrated h ...\"\n    },\n    {\n      \"link_id\": \"link-00638\",\n      \"note_item_id\": \"fn-00629\",\n      \"current_anchor_id\": \"anchor-00574\",\n      \"marker\": \"87\",\n      \"note_page_no\": 227,\n      \"anchor_page_no\": 228,\n      \"current_anchor_marker\": \"87\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"See the perceptive remarks of Hans-Peter Duerr, Dreamtime, pp. 1-11.\",\n      \"anchor_excerpt\": \"because valid contracts depended on bona fides. $ ^{87} $ Therefore any contract with the devil was null on grounds that the devil fraudulently withheld information from his intended clients. $ ^{88} $ Moreover, the Roman law of partnership ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"Witchcraft and the Melancholy Interpretation of the Insanity Defense MEDICAL theories of melancholy mental disorder did not only affect medical treatment. By thinking of the mentally disordered as having a medical condition, one could also justify the consultation of medical authorities for advice on social policy, as occurs today, or even in legal matters, as began to occur more frequently in the late sixteenth century. To observe this process, one needs to look, not just at what the law said, but also at how it worked in practice. In the waning years of the twentieth century, people sometimes think that the insanity defense is one of the proud achievements of the Enlightenment and of the nineteenth century, or that it must be some sort of modern, \\\"liberal,\\\" weak-kneed, tenderhearted, and softheaded approach to crime—as if a tough-minded attitude would ignore a defendant's state of mind either during the commission of a crime or during a trial. It often surprises modern readers to learn that in the West the insanity defense is at least two thousand years old. The ancient Romans, who were not known for their tender hearts or soft heads, had a well-developed set of principles for dealing with insanity, and a careful criminal insanity defense. $ ^{1} $ This jurisprudential tradition was adopted by the Germans, along with most other Western Europeans, in the Middle Ages and applied throughout the early modern period. The largest exception was England, which preserved its common law and had no general \\\"reception\\\" of Roman law. The English therefore had to develop their own insanity defense. $ ^{2} $ This chapter approaches German legal attitudes toward madness by following the twists and turns of the insanity defense in sixteenth- and seventeenth-century Germany. ## Insanit ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
-      "chapter_title": "Pilgrims in Search of Their Reason",
-      "request_mode": "note_only",
+      "cluster_id": "toc-ch-004-4witchcraftandthemelanch:nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch:footnote",
+      "chapter_title": "4 Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
-        309,
-        309
+        205,
+        237
       ],
-      "matched_examples": [],
+      "matched_examples": [
+        {
+          "link_id": "link-00557",
+          "note_item_id": "fn-00548",
+          "anchor_id": "anchor-00479",
+          "marker": "6",
+          "note_excerpt": "Ibid.",
+          "anchor_excerpt": "geredt, gethan, unnd warmit er umb gangen, was auch mit im geredt worden\"). Over and over, the jurists remarked on the evidence of his \"good understanding\" both before and after his crime. He had apparently apologized to his wife for his suspicion of her, admitting that he was \"not always right in the head\" (\"das ime ettwan nit recht im Kopf were\") and promising to improve himself and to set their household on a new footing. Although his \"melancholy disorder\" had troubled him a few nights earlier to such an extent that he had not tolerated a single candle, he had seemed better on the twelfth, displaying his \"good understanding.\" The jurists of Tübingen were also troubled by the likelihood (as it seemed to them) that Conrad Herman was only pretending to be mad and had actually given<sup>6</sup> in to the suggestions of the evil spirit: \"das er solches vorsätzlich unnd wissentlich, auss angenommener weiss simulatione cuiusdam dementiae gleichwoll uss eingebung dess besen Geists (dem er auss gefastem neidt, unnd zorn, gegen seinem unschuldigen weib zuvil nachgehengt) gethon haben.\" Herman had killed his wife \"fiercely, but, in our opinion, knowingly and intentionally\" (\"grimmig doch unnsers erachtens wissentlich unnd vorsätzlich\")."
+        },
+        {
+          "link_id": "link-00558",
+          "note_item_id": "fn-00549",
+          "anchor_id": "anchor-00482",
+          "marker": "7",
+          "note_excerpt": "Ibid., pp. 329-30.",
+          "anchor_excerpt": "And as concerns the melancholy, it can be seen that they are not to be classed with the insane at all, nor are they to be excused from punishment; indeed, certain people think that melancholy is the anger of the best geniuses. And the jurisconsults Ulpian and Paul ... compare the melancholy with those who are immoderately timid, lustful, greedy, and angry; but no one could easily say that they are incapable of making a contract or a will or that they are immune from punishment<sup>7</sup>.7"
+        }
+      ],
       "unmatched_note_items": [
         {
-          "row_id": 855,
+          "row_id": 50880,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "en-00021",
-          "note_kind": "endnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "50",
-          "normalized_marker": "50",
+          "note_item_id": "fn-00546",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "4",
+          "normalized_marker": "4",
           "occurrence": 1,
-          "source_text": "Ibid.",
-          "page_no": 309,
-          "display_marker": "50",
-          "source_marker": "50",
+          "source_text": "Petrus Heigius, Quaestiones iuris tam civilis quam Saxonici . . . editae nunc primum cura Ludovici Person, (Wittenberg, 1601), vol. 2, question 38, p. 332.",
+          "page_no": 205,
+          "display_marker": "4",
+          "source_marker": "4",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 856,
+          "row_id": 50881,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "en-00022",
-          "note_kind": "endnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "51",
-          "normalized_marker": "51",
+          "note_item_id": "fn-00547",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "5",
+          "normalized_marker": "5",
           "occurrence": 1,
-          "source_text": "Ibid.",
-          "page_no": 309,
-          "display_marker": "51",
-          "source_marker": "51",
+          "source_text": "Ibid., p. 333.",
+          "page_no": 205,
+          "display_marker": "5",
+          "source_marker": "5",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 857,
+          "row_id": 50884,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "en-00023",
-          "note_kind": "endnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "52",
-          "normalized_marker": "52",
+          "note_item_id": "fn-00550",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "8",
+          "normalized_marker": "8",
           "occurrence": 1,
-          "source_text": "Ibid.",
-          "page_no": 309,
-          "display_marker": "52",
-          "source_marker": "52",
+          "source_text": "Ibid., pp. 334.",
+          "page_no": 206,
+          "display_marker": "8",
+          "source_marker": "8",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 858,
+          "row_id": 50885,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "en-00024",
-          "note_kind": "endnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "53",
-          "normalized_marker": "53",
+          "note_item_id": "fn-00551",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "9",
+          "normalized_marker": "9",
           "occurrence": 1,
-          "source_text": "Ibid., p. 74.",
-          "page_no": 309,
-          "display_marker": "53",
-          "source_marker": "53",
+          "source_text": "Ibid., pp. 334-35.",
+          "page_no": 206,
+          "display_marker": "9",
+          "source_marker": "9",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50922,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00588",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "46",
+          "normalized_marker": "46",
+          "occurrence": 1,
+          "source_text": "See, e.g., Ulrich Zasius’s discussion of the three kinds of furiosi, Opera omnia, vol. % cols. 336—-37, paras. 3—s5.",
+          "page_no": 214,
+          "display_marker": "46",
+          "source_marker": "46",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50923,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00589",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "47",
+          "normalized_marker": "47",
+          "occurrence": 1,
+          "source_text": "H. C. Erik Midelfort, Witch Hunting in Southwestern Germany, 1562—-1684: The Social and Intellectual Foundations (Stanford, 1972), pp. 22-24, 114-17.",
+          "page_no": 214,
+          "display_marker": "47",
+          "source_marker": "47",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50943,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00609",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "67",
+          "normalized_marker": "67",
+          "occurrence": 1,
+          "source_text": "See D. P. Walker, Spiritual and Demonic Magic from Ficino to Campanella (London, 1958); 1d., Music, Spirit and Language in the Renaissance (London, 1985); and H. A. Kelly, The Deuvil at Baptism: Ritual, Theology and Drama (Ithaca, N.Y., 1985).",
+          "page_no": 220,
+          "display_marker": "67",
+          "source_marker": "67",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50944,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00610",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+          "marker": "68",
+          "normalized_marker": "68",
+          "occurrence": 1,
+          "source_text": "Baxter, “Johann Weyer’s ‘De praestigiis daemonum,”” pp. 53-75.",
+          "page_no": 220,
+          "display_marker": "68",
+          "source_marker": "68",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         }
       ],
       "unmatched_anchors": [],
-      "rebind_candidates": []
+      "rebind_candidates": [
+        {
+          "link_id": "link-00557",
+          "note_item_id": "fn-00548",
+          "current_anchor_id": "anchor-00479",
+          "marker": "6",
+          "note_page_no": 205,
+          "anchor_page_no": 204,
+          "current_anchor_marker": "6",
+          "note_excerpt": "Ibid.",
+          "anchor_excerpt": "geredt, gethan, unnd warmit er umb gangen, was auch mit im geredt worden\"). Over and over, the jurists remarked on the evidence of his \"good understanding\" both before and after his crime. He had apparently apologized to his wife for his suspicion of her, admitting that he was \"not always right in the head\" (\"das ime ettwan nit recht im Kopf were\") and promising to improve himself and to set their household on a new footing. Although his \"melancholy disorder\" had troubled him a few nights earlier to such an extent that he had not tolerated a single candle, he had seemed better on the twelfth, displaying his \"good understanding.\" The jurists of Tübingen were also troubled by the likelihood (as it seemed to them) that Conrad Herman was only pretending to be mad and had actually given<sup>6</sup> in to the suggestions of the evil spirit: \"das er solches vorsätzlich unnd wissentlich, auss angenommener weiss simulatione cuiusdam dementiae gleichwoll uss eingebung dess besen Geists (dem er auss gefastem neidt, unnd zorn, gegen seinem unschuldigen weib zuvil nachgehengt) gethon haben.\" Herman had killed his wife \"fiercely, but, in our opinion, knowingly and intentionally\" (\"grimmig doch unnsers erachtens wissentlich unnd vorsätzlich\").",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00592",
+          "note_item_id": "fn-00583",
+          "current_anchor_id": "anchor-00520",
+          "marker": "41",
+          "note_page_no": 213,
+          "anchor_page_no": 214,
+          "current_anchor_marker": "41",
+          "note_excerpt": "Erik Wolf, Grosse Rechtsdenker der deutschen Geistesgeschichte, 4th ed. (Tibingen, 1963), pp. 119—20; Schmidt, Einfiithrung, pp. 111-13.",
+          "anchor_excerpt": "course, traditional in Roman and canon law. Despite its obvious weaknesses as a general analogy, the comparison did make clear a common principle: culpability required that one be doli capax—that is, capable of a malicious intention. $ ^{41} $ Because they could not have malice, it made no sense to punish madmen or “infants” below the age of seven. The traditional and complicated history of this rule contained at least one interesting wrinkle. If a child acted with so much cunning and understanding that he did seem to be doli capax, then one could claim that his malice filled out his majority, and such a child could be punished as an adolescent or even as an adult. $ ^{42} $ Charles V’s imperial criminal code of 1532 (the Carolina) picked up this point when it affirmed that malice could “make up for age.” $ ^{43} $ Unfortunately for the insanity defense, this scrupulosity with respect to infancy could have caused a great deal of confusion when it came to examining cases of raging or furious madmen. Some of these afflicted souls would surely have showed enough cunning, enough malice, to be treated as legally sane. That is, of course, the great danger with analogies or metaphors: they are often expected to illuminate more than they can.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00593",
+          "note_item_id": "fn-00584",
+          "current_anchor_id": "anchor-00521",
+          "marker": "42",
+          "note_page_no": 213,
+          "anchor_page_no": 214,
+          "current_anchor_marker": "42",
+          "note_excerpt": "Wolf, Grosse Rechtsdenker, p. 120.",
+          "anchor_excerpt": "course, traditional in Roman and canon law. Despite its obvious weaknesses as a general analogy, the comparison did make clear a common principle: culpability required that one be doli capax—that is, capable of a malicious intention. $ ^{41} $ Because they could not have malice, it made no sense to punish madmen or “infants” below the age of seven. The traditional and complicated history of this rule contained at least one interesting wrinkle. If a child acted with so much cunning and understanding that he did seem to be doli capax, then one could claim that his malice filled out his majority, and such a child could be punished as an adolescent or even as an adult. $ ^{42} $ Charles V’s imperial criminal code of 1532 (the Carolina) picked up this point when it affirmed that malice could “make up for age.” $ ^{43} $ Unfortunately for the insanity defense, this scrupulosity with respect to infancy could have caused a great deal of confusion when it came to examining cases of raging or furious madmen. Some of these afflicted souls would surely have showed enough cunning, enough malice, to be treated as legally sane. That is, of course, the great danger with analogies or metaphors: they are often expected to illuminate more than they can.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00616",
+          "note_item_id": "fn-00607",
+          "current_anchor_id": "anchor-00548",
+          "marker": "65",
+          "note_page_no": 219,
+          "anchor_page_no": 220,
+          "current_anchor_marker": "65",
+          "note_excerpt": "This effort has not yet ceased. See Rudolf van Nahl, Zauberglaube und Hexenwahn im Gebiet von Rhein und Maas: Spitmittelalterlicher Volksglaube im Werk Johan Weyers (1515-1588) (Bonn, 1983).",
+          "anchor_excerpt": "Weyer, in fact, represented at its fullest Lutheran pitch the conclusion that the devil was overwhelmingly powerful and deceptive: for those who thought that they could act with assurance, Weyer pointed out that the devil could exploit and manipulate even sincere actions and intentions. It was not only Lutherans, of course, who held that the devil was the ruler of this world, but Catholics had retained a large measure of confidence in the prescribed rituals of the Church, while Calvinists often argued that the age of miracles was over, and that the devil had a mainly spiritual influence on the world. $ ^{65} $ Lutherans, by way of contrast were often left with the disconcerting view that the devil was loose in the land, that he could indeed work wonders, and that ritual materials and ritual actions such as blessed salt, holy water, and exorcism were powerless. Prayer and fasting were all that could be recommended, and they provided no real assurance or guarantee. For such Lutherans, this world was a dangerous and deceptive place.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00617",
+          "note_item_id": "fn-00608",
+          "current_anchor_id": "anchor-00549",
+          "marker": "66",
+          "note_page_no": 219,
+          "anchor_page_no": 220,
+          "current_anchor_marker": "66",
+          "note_excerpt": "These hitherto unnoticed remarks are to be found in Weyer’s Artzney Buch: Von",
+          "anchor_excerpt": "The third crucial influence on Weyer’s legal views was Erasmus, not the cardboard stereotype of a mild-mannered, liberal, right-thinking man recently ridiculed by Christopher Baxter, $ ^{66} $ but the serious religious thinker for whom the views of the early Church retained an authority undiminished by 1,000 years of Constantinian Caesaro-papism. When Erasmus asked by what right the Church punished heresy with death, he was probing what he saw as the unwarranted merger of ecclesiastical and secular concerns. Jesus’ parable of the tares in Matt. 13 made it clear enough, to Erasmus at least, that heretics should not be uprooted from the Christian community for fear of eradicating true Christians as well. This was actually one of the most common arguments for religious toleration in the sixteenth century and one that we should not confuse with modern liberal arguments constructed on relativist or pluralist foundations. The point was that even on profoundly Christian grounds, Erasmus and others like him could not find religious warrant for eliminating those with whom the Church disagreed. Johann Weyer cited Erasmus with some frequency, but nowhere more fervently than on just this point, one that subsumed witchcraft under heresy (just as the late medieval Church had taught) but then asked by what right witch-heretics were to be executed. As we shall see, this Erasmian argument served a crucial function in Weyer’s general theory.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00623",
+          "note_item_id": "fn-00614",
+          "current_anchor_id": "anchor-00559",
+          "marker": "72",
+          "note_page_no": 221,
+          "anchor_page_no": 222,
+          "current_anchor_marker": "72",
+          "note_excerpt": "Giambattista della Porta, Magia naturalis (1st ed., Naples, 1558); I have used the later edition, Magiae naturalis libri viginti (Naples, 1589); cf. Lynn Thorndike, A History of Magic and Experimental Science (New York, 1923-58), vol. 6: The Sixteenth Century, pp. 418—23; Hans Peter Duerr, Dreamtime: Concerning the Boundary Between Wilderness and Civilization, trans. Felicitas Goodman (Oxford, 1985), pp. 1-11.",
+          "anchor_excerpt": "bles from the worlds of Herodotus, Pliny, and Merlin. He called some of his tales true and others fabulous, and occasionally asserted that a story told straight-facedly should be just as firmly believed as a previous story that he had explicitly called fiction. $ ^{72} $ The effect of such legend-mongering word-heaps was to call into question any story for which there was no firsthand evidence. It was an artful literary technique and one that deployed the grotesque as a weapon against the monstrous.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00624",
+          "note_item_id": "fn-00615",
+          "current_anchor_id": "anchor-00560",
+          "marker": "73",
+          "note_page_no": 221,
+          "anchor_page_no": 222,
+          "current_anchor_marker": "73",
+          "note_excerpt": "Christopher Baxter calls the flavor “Rabelaisian,” a suggestion that would repay closer literary study (Baxter, “Johann Weyer’s ‘De praestigiis daemonum,”” p. 73, n.",
+          "anchor_excerpt": "By calling the legends, fables, and traditions of over two thousand years into question, Weyer made it clear that credibility depended on more than just the authority of the storyteller or the plausibility of the story. And he illustrated his skepticism by personally investigating the local scandals and monstrous events of his region, emphasizing throughout his book that his accounts depended upon the testimony of his own eyes or those of other careful observers. In this turn to observational evidence against the dog-matizing of fable and theory, Weyer joined the ranks of the academic physicians who were just then expanding the literature of observations. In his now little-read medical writings, Weyer regularly emphasized the importance of eyewitness observation in detecting new diseases and new syndromes. $ ^{73} $ Experience could trump the whimsical claims of reason.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00638",
+          "note_item_id": "fn-00629",
+          "current_anchor_id": "anchor-00574",
+          "marker": "87",
+          "note_page_no": 227,
+          "anchor_page_no": 228,
+          "current_anchor_marker": "87",
+          "note_excerpt": "See the perceptive remarks of Hans-Peter Duerr, Dreamtime, pp. 1-11.",
+          "anchor_excerpt": "because valid contracts depended on bona fides. $ ^{87} $ Therefore any contract with the devil was null on grounds that the devil fraudulently withheld information from his intended clients. $ ^{88} $ Moreover, the Roman law of partnership disallowed “leonine” contracts, in which one party could only gain and the other only lose: “Iniquissimum enim genus societatis est ex qua quis damnum, non etiam lucrum spectet.” $ ^{89} $ This described exactly the position of witches, who often expected monetary gain or sexual favors, only to be disappointed by the failure of the devil to live up to his promises. Ultimately, the witch stood only to lose and the devil only to gain. Weyer also held that contracts did not bind if they were entered into with dolus malus (intentional deceit), $ ^{90} $ which certainly described the action of the devil, who used cunning, tricks, and deception to defraud and seduce the whole world. $ ^{91} $ Had not the ancient Roman jurist Labeo (obit ca. A.D. 10) ruled that contracts were worthless if they sprang from “calliditatem, fallaciam machinationem ad circum veniendum fallendum decipiendum alterum”? $ ^{92} $ In addition, Weyer insisted that pacts with the devil were void since they rested upon force and fear. $ ^{93} $ With a long string of references to Justinian’s Digest, Weyer made out a case for the sheer legal impossibility of witchcraft. Witches could not will what the devil willed; their intentions were necessarily incongruent, resting on the witches’ error, ignorance, and lack of a well-formed will (perfectae voluntati). $ ^{94} $ From these legal references, it is clear that Weyer’s argument was essentially that the devil was so potent, so overwhelming in strength and malice, that any contract with him would have no more force than would a contract between a grown man and an infant. No one would blame a small child for the damage done by an adult, even if the adult claimed that he was merely acting upon the orders of the child. The disparity of wills made the liaison void. $ ^{95} $ This was the relevance of citing the law on contracts made with minors. $ ^{96} $ “Ratione personarum: quia inter quos nulla est communio, inter eos quoque nullum potest esse",
+          "current_anchor_synthetic": false
+        }
+      ]
     },
-    "page_contexts": [
-      {
-        "page_no": 309,
-        "file_idx": 308,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "In the year [15]22 on the fourth Sunday after Pentecost the honorable Jorg Noezell from Auerswalde near Chemnitz reported that he had been ill for a long time and that during his illness he had lost his mind and reason. Completely naked and without clothes he was so mad that he ran into the forest, where he remained both day and night. In their sorrow his wife and family urged him to visit the church of Mary the Mother of God in Grimmental.50 But, more often than not, the truly wild and dangerous found themselves confined, either by their own families or by the authorities. “Seventy years ago there was a son of Schneeberg by the name of Christopher Eib, a vicar in Brussels, who fell into such a delirium that he spent several years locked in iron fetters and chains.” $ ^{51} $ Here, too, as in the Rhineland, many were brought on pilgrimage whose madness seemed to be due to demonic possession: “[P]lures putarent, ipsum esse obsessum a daemone.” $ ^{52} $ In 1590, the exorcist at Maria im Sand in Dettelbach relieved a woman of a whole host of demons: [He] began to exorcise the evil enemy and found that there were many more than he had at first assumed: that this possessed woman had more hellish spirits in her than the number of ravens that assemble around a dead animal. When she was asked where she came from and why she was here, they answered that they came from Sicily, \"where we ...",
-        "byte_size": 8199967,
-        "sha256": "53d1a692adf3e81916f56229888de510ce796c8317179087896aa347b0698807"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-en-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
-    "request_mode": "note_only",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-004-4witchcraftandthemelanch:nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"The provided image shows page 289, but the cluster metadata indicates page 309. The footnote markers (50-53) and note texts in the image match the unmatched items, but the page number discrepancy prevents automatic matching without verifying if this is a metadata error or if the notes belong to a different section.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 3547,
+    "output_tokens": 487,
+    "total_tokens": 4034,
+    "estimated_input_tokens": 3577,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00546\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 4, page 205, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00547\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 5, page 205, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00550\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 8, page 206, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00551\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 9, page 206, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00588\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 46, page 214, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00589\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 47, page 214, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00609\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 67, page 220, no clear anchor phrase in excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00610\",\n    \"confidence\": 0.7,\n    \"reason\": \"Unmatched footnote 68, page 220, no clear anchor phrase in excerpt.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "needs_review",
-      "note_item_id": "",
+      "note_item_id": "fn-00546",
       "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.0,
-      "reason": "The provided image shows page 289, but the cluster metadata indicates page 309. The footnote markers (50-53) and note texts in the image match the unmatched items, but the page number discrepancy prevents automatic matching without verifying if this is a metadata error or if the notes belong to a different section."
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 4, page 205, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00547",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 5, page 205, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00550",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 8, page 206, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00551",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 9, page 206, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00588",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 46, page 214, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00589",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 47, page 214, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00609",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 67, page 220, no clear anchor phrase in excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00610",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Unmatched footnote 68, page 220, no clear anchor phrase in excerpt."
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
         "action": "needs_review",
-        "note_item_id": "",
+        "note_item_id": "fn-00546",
         "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.0,
-        "reason": "The provided image shows page 289, but the cluster metadata indicates page 309. The footnote markers (50-53) and note texts in the image match the unmatched items, but the page number discrepancy prevents automatic matching without verifying if this is a metadata error or if the notes belong to a different section."
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 4, page 205, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00547",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 5, page 205, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00550",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 8, page 206, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00551",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 9, page 206, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00588",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 46, page 214, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00589",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 47, page 214, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00609",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 67, page 220, no clear anchor phrase in excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00610",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Unmatched footnote 68, page 220, no clear anchor phrase in excerpt."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 3533,
-    "completion_tokens": 98,
-    "total_tokens": 3631,
+    "prompt_tokens": 3547,
+    "completion_tokens": 487,
+    "total_tokens": 4034,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4810
+    "duration_ms": 5104
   }
 }

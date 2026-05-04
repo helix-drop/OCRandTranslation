@@ -1,0 +1,317 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-008-ghostsormucus:nr-fn-ch-0053-toc-ch-008-ghostsormucus:footnote\",\n  \"chapter_title\": \"8. Ghosts or mucus?\",\n  \"page_range\": [\n    348,\n    352\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00169\",\n      \"anchor_id\": \"anchor-01073\",\n      \"marker\": \"2\",\n      \"note_excerpt\": \"?3 have discussed Ghinese0medical0views0of0demonic0possession60Ghen expand ed on0her0previous0research0on0this subject 2see0Ghen0 340but0 0have0not0seen0her0recent0work6\",\n      \"anchor_excerpt\": \"which presents methods to “treat evil madness demons that have $ ^{11} $ See Daofa huiyuan 道法會元, respectively juan 59 (Shangqing yushu wulei zhenwen 上清玉樞五雷真文), “Li yu shou xie” 立獄收邪; and juan 267 (Taixuan Fengdu beili yige 泰玄酆都黑律儀格), “Xie j ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00170\",\n      \"marker\": \"3\",\n      \"page_no\": 348,\n      \"source_text\": \"Wee for0instance GT ZS]UZS0HU Z\\\\QZS0RaY[0P R 5Ʋéɷ[̰èƪ 2in [R 0TaUea Z ˜ƪűz =@6 ab34 which presents0methodsto0Utreat0evil0madness0demons0that0have0entered0the0bodyV Ʀ̚ǓĬ̬P̧ 6 Wee [R 0TaUea Z ˜ƪűz 4 respectivelyVa Z =A02 GT ZS]UZS0ea_Ta0caXQU ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00171\",\n      \"marker\": \"4\",\n      \"page_no\": 349,\n      \"source_text\": \"0. \\u0011\\u000f 1\\u0005\\u0001U\\u00196=:C:F>\\u00012?5\\u0001DH62E:?8V ʬʟɢƞ \\u0014/. \\u0006 \\u0013\\u0001\\u0011\\u0012\\u0017\\u0004\\u0007\\u001b@C >2?J\\u0001>@C6\\u00016I2>A=6D\\u00017C@>\\u000162C=:6C\\u0001E:>6D\\u0005\\u0001D66 \\u0011\\u0007 36=@H\\u0007\"\n    },\n    {\n      \"note_item_id\": \"fn-00172\",\n      \"marker\": \"5\",\n      \"page_no\": 349,\n      \"source_text\": \"2. +$!&\\u0001+& +-2 Ăŧ \\u0007 \\u00122\\u00063\\u0004\\u0007\\u0001 E\\u0001:DEC2?D=2E65\\u0001:? (:=2D\\u0001,F \\u0012\\u0010\\u0012\\u0013\\u0001 \\u0006 \\u000e\\u0007\"\n    },\n    {\n      \"note_item_id\": \"fn-00173\",\n      \"marker\": \"6\",\n      \"page_no\": 349,\n      \"source_text\": \"6. \\u0005\\u0001F?56C\\u0001 2?8I:\\u0001\\u000e \\u0001\\u0003 \\u0010 \\u0004\\u0014\\u0001A\\u0007\\u0001\\u000e\\u0011 \\u0007 \\u0007)96\\u00016>A6C@C =2>6?E65\\u0001E92E\\u0001U2 A6CD@?\\u0001H9@\\u0001:?;FC6D\\u0001D@>6@?6\\u0001:?\\u00015CF?<6??6DD\\u0001<?@HD\\u0001C68C6E\\u000127E6C\\u0001D@36C:?8\\u0001FA\\u0005\\u000103FE1\\u000196 0:\\u00076\\u0007\\u0005\\u0001.:?C6?1D66>D\\u0001E@\\u000136 A6C>2?6?E=J\\u00015CF?<\\u0001H:E9@FE 364@>:?8D@36CV\\u0001\\u0003^\\\"˭ēG\\\" ˮťȆħ +.́˭\\bˮ \\u0004\\u0007 \\u0011 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00174\",\n      \"marker\": \"7\",\n      \"page_no\": 350,\n      \"source_text\": \"3. and0 A6Aa5 b4 USn0there0being0depletion0illnesses0with0mucus0attached0that0look0like0affliction0by0evilVʦɾʪ íǲų]˦ȓ 2 ?>5??36 [ang0was0from0the0Wuzhou0area60Xhe0earliest0extant0edition0of0his0text0dates0to0 = @6\"\n    },\n    {\n      \"note_item_id\": \"fn-00175\",\n      \"marker\": \"8\",\n      \"page_no\": 352,\n      \"source_text\": \"TaZfU0eU ʀþ˯ 2first0preface from0 @@ 3C^] 5 B0A>@5>A60End0furtherB0Uto0treat0evil4 the0main0_method`0is0tochannelmucusV02Ʀ˦Wíǲǂ> C^] 5 B =36 > QfTU0eaXaZ Ƃɤ̠ʦ Escribing0mad0symptoms0to0mucuswas a0way0of0saying0they0were0not0caused0by 2 ?3 @ ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00179\",\n      \"note_item_id\": \"fn-00169\",\n      \"current_anchor_id\": \"anchor-01073\",\n      \"marker\": \"2\",\n      \"note_page_no\": 347,\n      \"anchor_page_no\": 348,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"?3 have discussed Ghinese0medical0views0of0demonic0possession60Ghen expand ed on0her0previous0research0on0this subject 2see0Ghen0 340but0 0have0not0seen0her0recent0work6\",\n      \"anchor_excerpt\": \"which presents methods to “treat evil madness demons that have $ ^{11} $ See Daofa huiyuan 道法會元, respectively juan 59 (Shangqing yushu wulei zhenwen 上清玉樞五雷真文), “Li yu shou xie” 立獄收邪; and juan 267 (Taixuan Fengdu beili yige 泰玄酆都黑律儀格), “Xie j ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"## 8 ## Ghosts or mucus? Possession symptoms and their treatments in Ming and Qing medicine I also saw a bearded figure lifting my oilcloth screen, but he suddenly disappeared. I was startled and I started to feel befuddled inside: I wanted to seek death. 又見一鬍子將油簾揭起 倏忽不見 吃了一驚 心內恍 惚起來 自欲尋死 Licentiate Xu Ding 徐鼎, recounting a vision (1768) $ ^{1} $ How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $ ### 8.1 Spectral affliction in late-imperial medicine Qing men and women often caught sight of “ghosts” and felt the result of their malicious actions. To banish these demons, the relatives of afflicted people could hire rituals specialist, doctors who claimed they could oust specters with drugs, or physicians like Yu Zhen who denied the demonic etiology altogether, but claimed they knew methods to cure possession symptoms. Chapter 13 will explain in more detail the ways in which common people tried to cure their mad-acting relatives, including cases in which they sought the help of both exorcists and physicians. In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposedly control the thoughts, acts, and speech of their victim. Possession was expressed by verbs like ping 憑, yi 依, or fu 附, which meant “attaching to” or “relying upon” a person. Ghosts were also often said to “enter” (ru 入) the body of their victims. All these terms were not part of specialized medical terminology, but physicians used them when they discussed cases of “possession.” Regardless of whether they ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0053-toc-ch-008-ghostsormucus:footnote",
+      "chapter_title": "8. Ghosts or mucus?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        348,
+        352
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00179",
+          "note_item_id": "fn-00169",
+          "anchor_id": "anchor-01073",
+          "marker": "2",
+          "note_excerpt": "?3 have discussed Ghinese0medical0views0of0demonic0possession60Ghen expand ed on0her0previous0research0on0this subject 2see0Ghen0 340but0 0have0not0seen0her0recent0work6",
+          "anchor_excerpt": "which presents methods to “treat evil madness demons that have $ ^{11} $ See Daofa huiyuan 道法會元, respectively juan 59 (Shangqing yushu wulei zhenwen 上清玉樞五雷真文), “Li yu shou xie” 立獄收邪; and juan 267 (Taixuan Fengdu beili yige 泰玄酆都黑律儀格), “Xie jing pin” 邪精品. $ ^{12} $ Yixue rumen, juan 4, “Zabing fenlei” 雜病分類, “Neishang lei” 内傷類, “Tanlei” 痰類, “Diankuang” 癲狂 (1995 [1575]: 395B). Descriptions of possession also appeared in the madness sections of Zhang Siwei’s Yimen mizhu 醫門秘旨 (ca. 1576; 6.19a; RBXC: 703) and Li Zhongzi’s Bingji shazhuan 病機沙篆 (1667; juan 2, sec. 6, “Madness” 癲狂; Li ZhYQ: 468B). An entry in the madness section of the anonymous Yifang biannan dacheng 醫方辨難大成 (1850) was devoted to possession (juan 92, “Diankuang biannan” 顛狂辨難, “Are some manic symptoms caused by harm done by evil spirits?” 狂證果有邪祟為害否; 2005 [1850]: 534-35)."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11742,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00170",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0053-toc-ch-008-ghostsormucus",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "Wee for0instance GT ZS]UZS0HU Z\\QZS0RaY[0P R 5Ʋéɷ[̰èƪ 2in [R 0TaUea Z ˜ƪűz =@6 ab34 which presents0methodsto0Utreat0evil0madness0demons0that0have0entered0the0bodyV Ʀ̚ǓĬ̬P̧ 6 Wee [R 0TaUea Z ˜ƪűz 4 respectivelyVa Z =A02 GT ZS]UZS0ea_Ta0caXQU0fTQZcQZ 5ƲǛƌ ̒Ȃŕ 34UPi0yu shou0xieVȢǘŋ˦ C0andVa Z >?02 H Uda Z0 QZSPa0TQUXg eUSQ ƫǚˬ˩̲ĒxƂ 34U\\ie0jing0pinV˦ȳÄ 6 UdaQ0^aYQZ 4 Va Z 40U^abing0fenleiV̏ǰ`̛ 40UReishang0leiVQv̛0 UXanleiVǲ̛0 UHiankuangV ǵǓ 2 AA=0_ =?=`B0 A=F36 Hescriptions0of0possession0also0appeared in0the0madness0sections0of0^hang0WiweiTs UYQZ YUfTU ˯̂ȘŜ 2ca60 =?>C >6 AaC VF\\GB0? 30and0Pi0^hongziTs7UZSVU0_T fTa Z ǰƍƤȭ 2 >>?C Va Z 40sec6 >4 UQadness V ǵǓ C Pi^h]UB0 >@F36En entry0in0the0madness0section0of0the0anonymous UR ZS0 U ZZ Z0P TQZS ˯ Ŗˍ̐èĶ 2 @= 3wa s0devoted0to0possession02 Va Z A 40UHiankuang0biannanV̚Ǔˍ̐ 40UE re0somemanic symptoms caused0by0harm0done0by0evil0spiritsDVǓʪſų˦ȓǂÜ½ C00 = _ @= `B = 5 =36 ^hang0Pu4 T ZS_TU0eU`[ZS Ďƚ˯˔ 2 >A=340juan0>4 UWhenzhi0menV Ȓĝ̂ 4 U uang V Ǔ 2^hangP]UB0 E3C ong0Xingxian4 T[ZSdUZS0dU ZR ZS XŻUŖ 2 =@ 34 Va Z 40UHiankuangV02 ong]UB0 =36",
+          "page_no": 348,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11743,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00171",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0053-toc-ch-008-ghostsormucus",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "0. \u0011\u000f 1\u0005\u0001U\u00196=:C:F>\u00012?5\u0001DH62E:?8V ʬʟɢƞ \u0014/. \u0006 \u0013\u0001\u0011\u0012\u0017\u0004\u0007\u001b@C >2?J\u0001>@C6\u00016I2>A=6D\u00017C@>\u000162C=:6C\u0001E:>6D\u0005\u0001D66 \u0011\u0007 36=@H\u0007",
+          "page_no": 349,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11744,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00172",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0053-toc-ch-008-ghostsormucus",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "2. +$!&\u0001+& +-2 Ăŧ \u0007 \u00122\u00063\u0004\u0007\u0001 E\u0001:DEC2?D=2E65\u0001:? (:=2D\u0001,F \u0012\u0010\u0012\u0013\u0001 \u0006 \u000e\u0007",
+          "page_no": 349,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11745,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00173",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0053-toc-ch-008-ghostsormucus",
+          "marker": "6",
+          "normalized_marker": "6",
+          "occurrence": 1,
+          "source_text": "6. \u0005\u0001F?56C\u0001 2?8I:\u0001\u000e \u0001\u0003 \u0010 \u0004\u0014\u0001A\u0007\u0001\u000e\u0011 \u0007 \u0007)96\u00016>A6C@C =2>6?E65\u0001E92E\u0001U2 A6CD@?\u0001H9@\u0001:?;FC6D\u0001D@>6@?6\u0001:?\u00015CF?<6??6DD\u0001<?@HD\u0001C68C6E\u000127E6C\u0001D@36C:?8\u0001FA\u0005\u000103FE1\u000196 0:\u00076\u0007\u0005\u0001.:?C6?1D66>D\u0001E@\u000136 A6C>2?6?E=J\u00015CF?<\u0001H:E9@FE 364@>:?8D@36CV\u0001\u0003^\"˭ēG\" ˮťȆħ +.́˭\bˮ \u0004\u0007 \u0011 .F2?\u0001\"6:\u0005 &\u0001 2\u000162 Ï\bʟ \u0005'2 + \u0010\u0005\u0001DE@CJ\u0001E:E=65 U!:\u0001/9F@V\u0014\u0005 \u0001",
+          "page_no": 349,
+          "display_marker": "6",
+          "source_marker": "6",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11746,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00174",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0053-toc-ch-008-ghostsormucus",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "3. and0 A6Aa5 b4 USn0there0being0depletion0illnesses0with0mucus0attached0that0look0like0affliction0by0evilVʦɾʪ íǲų]˦ȓ 2 ?>5??36 [ang0was0from0the0Wuzhou0area60Xhe0earliest0extant0edition0of0his0text0dates0to0 = @6",
+          "page_no": 350,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11747,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00175",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0053-toc-ch-008-ghostsormucus",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "TaZfU0eU ʀþ˯ 2first0preface from0 @@ 3C^] 5 B0A>@5>A60End0furtherB0Uto0treat0evil4 the0main0_method`0is0tochannelmucusV02Ʀ˦Wíǲǂ> C^] 5 B =36 > QfTU0eaXaZ Ƃɤ̠ʦ Escribing0mad0symptoms0to0mucuswas a0way0of0saying0they0were0not0caused0by 2 ?3 @b4 U\\ubing0tanbing0you0si0xiesui0lunVɾǰǲǰų]˦ȓʦ 2 ZdU0eUVU B0 ?36",
+          "page_no": 352,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00179",
+          "note_item_id": "fn-00169",
+          "current_anchor_id": "anchor-01073",
+          "marker": "2",
+          "note_page_no": 347,
+          "anchor_page_no": 348,
+          "current_anchor_marker": "2",
+          "note_excerpt": "?3 have discussed Ghinese0medical0views0of0demonic0possession60Ghen expand ed on0her0previous0research0on0this subject 2see0Ghen0 340but0 0have0not0seen0her0recent0work6",
+          "anchor_excerpt": "which presents methods to “treat evil madness demons that have $ ^{11} $ See Daofa huiyuan 道法會元, respectively juan 59 (Shangqing yushu wulei zhenwen 上清玉樞五雷真文), “Li yu shou xie” 立獄收邪; and juan 267 (Taixuan Fengdu beili yige 泰玄酆都黑律儀格), “Xie jing pin” 邪精品. $ ^{12} $ Yixue rumen, juan 4, “Zabing fenlei” 雜病分類, “Neishang lei” 内傷類, “Tanlei” 痰類, “Diankuang” 癲狂 (1995 [1575]: 395B). Descriptions of possession also appeared in the madness sections of Zhang Siwei’s Yimen mizhu 醫門秘旨 (ca. 1576; 6.19a; RBXC: 703) and Li Zhongzi’s Bingji shazhuan 病機沙篆 (1667; juan 2, sec. 6, “Madness” 癲狂; Li ZhYQ: 468B). An entry in the madness section of the anonymous Yifang biannan dacheng 醫方辨難大成 (1850) was devoted to possession (juan 92, “Diankuang biannan” 顛狂辨難, “Are some manic symptoms caused by harm done by evil spirits?” 狂證果有邪祟為害否; 2005 [1850]: 534-35).",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0053-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2988,
+    "output_tokens": 357,
+    "total_tokens": 3345,
+    "estimated_input_tokens": 2352,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00170\",\n    \"anchor_phrase\": \"which presents methods to “treat evil madness demons that have\",\n    \"confidence\": 0.9,\n    \"reason\": \"OCR text matches known anchor text fragment for marker 3.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00171\",\n    \"confidence\": 0.5,\n    \"reason\": \"Source text is garbled, cannot identify a unique phrase.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00172\",\n    \"confidence\": 0.5,\n    \"reason\": \"Source text is garbled, cannot identify a unique phrase.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00173\",\n    \"confidence\": 0.5,\n    \"reason\": \"Source text is garbled, cannot identify a unique phrase.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00174\",\n    \"anchor_phrase\": \"there being depletion illnesses with mucus attached\",\n    \"confidence\": 0.9,\n    \"reason\": \"Source text clearly shows a unique phrase matching note content.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00175\",\n    \"confidence\": 0.5,\n    \"reason\": \"Source text is fragmented, cannot confirm a unique phrase.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00170",
+      "anchor_id": "",
+      "anchor_phrase": "which presents methods to “treat evil madness demons that have",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "OCR text matches known anchor text fragment for marker 3."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00171",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.5,
+      "reason": "Source text is garbled, cannot identify a unique phrase."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00172",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.5,
+      "reason": "Source text is garbled, cannot identify a unique phrase."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00173",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.5,
+      "reason": "Source text is garbled, cannot identify a unique phrase."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00174",
+      "anchor_id": "",
+      "anchor_phrase": "there being depletion illnesses with mucus attached",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Source text clearly shows a unique phrase matching note content."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00175",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.5,
+      "reason": "Source text is fragmented, cannot confirm a unique phrase."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00170",
+        "anchor_id": "",
+        "anchor_phrase": "which presents methods to “treat evil madness demons that have",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "OCR text matches known anchor text fragment for marker 3."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00171",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.5,
+        "reason": "Source text is garbled, cannot identify a unique phrase."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00172",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.5,
+        "reason": "Source text is garbled, cannot identify a unique phrase."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00173",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.5,
+        "reason": "Source text is garbled, cannot identify a unique phrase."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00174",
+        "anchor_id": "",
+        "anchor_phrase": "there being depletion illnesses with mucus attached",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Source text clearly shows a unique phrase matching note content."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00175",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.5,
+        "reason": "Source text is fragmented, cannot confirm a unique phrase."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 2988,
+    "completion_tokens": 357,
+    "total_tokens": 3345,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 4000
+  }
+}

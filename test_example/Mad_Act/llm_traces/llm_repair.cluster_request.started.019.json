@@ -1,0 +1,194 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire:footnote",
+      "chapter_title": "4. From Wind to mucus and Fire",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        95,
+        101
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00035",
+          "note_item_id": "fn-00025",
+          "anchor_id": "anchor-00207",
+          "marker": "1",
+          "note_excerpt": "0. %=)6*16/\u0001;01 1\u0005\u0001( &(\u000165\u0007\u000e2\u0014 !:F,.&\u0013\u0001\u0011 \u0004\u0007 $?\u0001E9:D(@?8\u000165:E:@?\u0005\u0001D66\u0001&:2?\u0001\u001892@496?\u00012?5\u0001/92?8\u0001&:496?8\u0001 \u0012\u0012\u0010\u0005\u00012?5\u0001*?D49F=5\u0001 \u0013\u0001\u000e\u0012\u0006\u000f\u000f\u0007 @7\u0001E96\u0001S7:G6\u00014:C4F=2E@CJ\u0001A92D6D\u00012?5\u0001D:I\u0001D62D@?2=\u0001:?7=F6?46DT\u0001\u0003)96\u0001D6G6?\u0001S4@D>@=@8:42=\u0001492AE6CDT\u0001\u0003\u000f\u000f\u0006\u0010 \u00012?5\u0001\u0010 \u0004\u0005\u0001H9:49\u00012==\u00014@?E2:?\u0001S C2?5\u0001EC62E:D6T\u0001\u0003?=A=6\u000141=91 !ͅaǘ ,)4=6 Ë̛ \u0014\u0001@7E6? \u0004\u0001:?\u0001E96:C\u0001E:E=6\u0005 4@G6C\u00012AAC@I:>2E6=J\u0001@?6\u0001E9:C5\u0001@7\u0001E96\u000f);1+\u0001 =-;<176; 3FE\u0001E96J\u0001H6C6\u0001@7\u0001=2E6C\u0001@C:8:?\u0001E92?\u0001E96\u0001C6DE\u0001@7\u0001E963@@< \u0007\u0001)96J H6C6\u0001AC@323=J\u0001:?D6CE65\u0001E96C6:?\u00013J E96:C\u00016:89E9\u000646?EFCJ65:E@C\u00064F> \u00062??@E2E@C,2?8\u0001\u0017:?8 ȯf \u0007 C676CC65\u0001E@\u00012DA=691 \u0004\u00012D\u0001E96J\u00012AA=:65\u0001E@\u0001>65:4:?6\u0007",
+          "anchor_excerpt": "Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ From his mid-twenties, Liu pored through Wang Bing's annotated version of the Basic Questions and became engrossed in the complexity of its immensely influential cosmological chapters. $ ^{2} $ To those tenacious enough to decipher them, these chapters explained the convoluted workings of the “five circulatory phases and six seasonal influences” (wuyun liuqi 五運六氣; often referred to as yunqi) as they applied to medicine. $ ^{3} $ The “five circulatory phases” were Wood, Fire, Earth, Metal, and Water, the Five Agents familiar to those who have studied any aspect of Chinese thought. The six types of climatic Qi were Wind 風, Heat 熱, Dampness 濕, Fire 火 (or Summer Heat 署), Dryness 燥, and Cold 寒."
+        },
+        {
+          "link_id": "link-00036",
+          "note_item_id": "fn-00026",
+          "anchor_id": "anchor-00208",
+          "marker": "2",
+          "note_excerpt": "6. DA64:2=:DED\u0001@7\u0001E96\u000f);1+\u0001 =-;<176; \u0007 0-6/21\u0001B76/4= ʬȑʚ͙ \u0005 H9:49\u0001H2D 4@>A:=65\u0001F?56C\u00019:D\u0001C6:8?\u0005\u0001@A6?65\u0001H:E9\u0001EH@\u000172D4:4=6D\u0001@?A=691 \u0007\u0001\u00196DA6FI\u0001\u0003 \u0013\u0001 \u000e\u00012?5\u0001 \u0011\u0006 \u0004 D9@H 65 9@H\u0001>65:42=\u0001:562D\u0001FD:?8?=A=6\u000141=91 3642>6\u0001:?7=F6?E:2=\u00012E\u0001E96\u00014@FCE\u00012C@F?5\u0001E96\u0001E:>6\u0001E96\u000f);1+\u0001 =-;<176; H6C6\u000136:?8\u000165:E65\u0005\u00012?5 A@DEF=2E65E92E E96\u00014@FCE@77:4:2==J\u000125@AE65A=691 5@4EC:?6D36EH66?\u0001 \u000e \u00012?5\u0001 \u0010\u000f\u0001\u00031*1, \u0007\u0013 \u0011\u0004\u0007\u0001\u001b@C\u0001EC246D\u0001@7\u0001E96\u0001=:?86C:?8\u0001AC6D6?46\u0001@7\u0001E96\u000f);1+\u0001 =-;<176; R\u00014@D>@=@8:42=\u0001492AE6CD\u0001:?\u0001D@FE96C? (@?8\u0001>65:42= 6I2>:?2E:@?D\u0005\u0001D66!)1A12=\u0001B0=3-\u0001+0-6/?-6\u0001/- Í͓ą̜ɸɺƆƺ \u0003 \u0004\u0007\u0001\u001b@C\u0001>@C6\u0001@?\u0001(@?8\u0001>65:42=\u000165F42E:@? 2?5\u00016I2>:?2E:@?D\u0005\u0001D66\u0001#66592>\u00012?5\u0001!F\u0001 \u00010 \u0012\u0010 1\u0013\u0001 \u000e\u0006 \u0005\u0001!:2?8\u0001 F?\u0001 \u0013\u0001 \u000f\u0006 \u0012\u0005\u00012?5\u0001 @=5D49>:5E\u0001 \u0010\u0007 \u000e !:FRD\u00014=2:>23@FE E96\u0001:>A@CE2?46\u0001@7?=A=6\u000141=91 2AA62C65\u0001:?\u00019:D\u0001AC67246\u0001E@ %=)6*16/\u0001;01 ɇĥ \u0003!:F,.&\u0013\u0001\u0011 \u0004\u0005 H96C6\u000196\u00014@>A2C65\u0001S>65:42=\u0001E6249:?8DT\u0001\u0003͓Ɓ \u0004\u0001E@\u0001S\u0018@?7F4:2?\u0001E6249:?8DT\u0001\u0003SƁ \u0004\u00012?5 E@SE96\u0001E6249:?8D\u0001@7\u0001E96 \u00100)6/-; T\u0001\u0003 ƕƁ \u0004\u0005\u00014=2:>:?8\u0001E92E\u0001E96\u0001E9C66\u00017@C>65\u0001@?6\u0001\u00192@\u0001H:E9\u00014@>>@?\u00017@F?52E:@?D\u0007\u0001\"J\u00016?ECJ\u0001@?\u0001!:FRD\u001b-1216/ A=691\u0001A)7B01\u00014=6 :?\u0001S\u0017:3=:@8C2A9J\u0001\u0016T\u0001D@=G6D\u00012 76H\u0001AC@3=6>D\u0001>6?E:@?65\u0001:?\u0001,F\u0001.:J:\u0001 \u0012\u0012 \u0006\u0012 \u0013\u0001 ? \u000e\u0007 \u000f \u000125@AE\u0001\u00196DA6FIRD\u0001EC2?D=2E:@?\u0001@7@=)621 \u0003 \u0013\u0001 \u000e\u0011\u0004\u0007\u0001)96\u0001A2DD2867C@>\u0001E96\u000f);1+\u0001 =-;<176; @?\u0001H9:49 %=)6*16/\u0001;01 ɇĥ H2D\u000132D65\u00015:D4FDD65\u0001SE96\u0001>6492?:D>0D1\u0001@7\u0001:==?6DDTɇǇ \u0007\u0001!:FRD\u00012?5\u0001\"2\u0001/@?8DFRD\u0001AC67246D\u0001E@\u001b-1216/ A=691\u0001A)7B01\u00014=6 \\ʕͅǘ̀Ƒ̛ >6?E:@?65\u0001E96\u0001S\"JDE6C:@FD\u0001\"6492?:D>T\u0007\u0001!:FRD\u0001 \u0011\u000f\u0001AC67246\u0001E@ \u000f)7516/\u000121 ? ¥ͬ \u0003!:F,.&\u0013\u0001 \u0004 4=2:>65\u0001E92E\u0001>65:42=\u0001D<:==D\u00012==\u000142>6\u00017C@>\u0001E96\u0001S\"JDE6C:@FD\u0001\"6492?:D>T\u0001@7\u0001E96\u001666-:\u0001\u0010)676 \u0007",
+          "anchor_excerpt": "Liu Wansu was born in northern China under Song Huizong (r. 1100-1126), the famous painter-emperor whose sumptuous reign ended when he lost half of his empire to northern invaders, the Jurchens who founded the Jin dynasty in 1115. $ ^{1} $ From his mid-twenties, Liu pored through Wang Bing's annotated version of the Basic Questions and became engrossed in the complexity of its immensely influential cosmological chapters. $ ^{2} $ To those tenacious enough to decipher them, these chapters explained the convoluted workings of the “five circulatory phases and six seasonal influences” (wuyun liuqi 五運六氣; often referred to as yunqi) as they applied to medicine. $ ^{3} $ The “five circulatory phases” were Wood, Fire, Earth, Metal, and Water, the Five Agents familiar to those who have studied any aspect of Chinese thought. The six types of climatic Qi were Wind 風, Heat 熱, Dampness 濕, Fire 火 (or Summer Heat 署), Dryness 燥, and Cold 寒."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11599,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00027",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "9. Yuanbing shi 原病式 29b (LiuWYQ: 97A).",
+          "page_no": 95,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11600,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00028",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "3. \u0003\u0012 \u0016\u0017\u0004\u0014",
+          "page_no": 96,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11601,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00029",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "2. \u0003 \u0016\u0004\u0014 S\u00196=:C:F>T̤ \u0013\u0001 3 \u0003\u0012\u0010\u0017\u0004\u0014S!2F89E6CTʆ \u0013\u0001 3 \u0003\u0012\u0010\u0016 \u0004\u0007",
+          "page_no": 96,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11602,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00030",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire",
+          "marker": "6",
+          "normalized_marker": "6",
+          "occurrence": 1,
+          "source_text": "12. The other sections: Wind 風 (3b-4a), Dampness 濕 (31b-32b), Dryness 燥 (57b-60a), and Cold 寒 (60a-69a). [13] 3b-4a (LiuWYQ: 89B).",
+          "page_no": 97,
+          "display_marker": "6",
+          "source_marker": "6",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11603,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00031",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "16. 34b (LiuWYQ: 98B). And elsewhere: “The Will is the spirit of Kidney-Water” 志者腎水之神也 (29a; LiuWYQ: 97A).",
+          "page_no": 99,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11604,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00032",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "5. 30claimed that0this0shift0dated0back0to0the0Xang6 ^hang0reputedly0claimed0that0SXhose0who0excel0at0medicine trace0their0pedigree0solely0tothe0canon0the>Xj`Z l\\jk`fej T02 ͓AÛ ŐʑÙ1ʕșɳ 302 UXa`0a`ld\\e ͯ̈G͝ _Qiscellaneous0records0in0nine0sections`40S ao0ji chang0guTΐūĘä _Xhose0with0superior0skills0are0often0lonely`40in ld\\e0j_`h`e S͝ ̃ _Xhe0scholar serving0his0kin`0_hereafter0VQWU`40W UW0ed60A6>bCU`_\\0p`a` ßÕ͓ͬ B0 A5 360Xhe received0VQWU02in0 0or = alXe 30is0a0collection0of0shorter0works02see iang0 A@=and \\iao0 AA@B0 5 360^hang0wrote0the0original ld\\e j_`h`e 2fascicles 5 of0the0received0edition30with0the0help0of0his0friend0Qa0 iuchouΙGɃ 60Xhe0other0works0in VQWU0were compiled0by0disciples0and0admirers60 0cite0the0titles0of0these0works0first0before0indicating0where they0appear0in0the0standard0version60Elthough0Piu0[ansu0died0when0^hang0was0in0his0 s40there0is0no0evidence that0they0ever0met60Es0[u0]iyi02 AA 5 AA B0 0and0 30noted40^hangRs0biography0inD`jkfip0f]0k_\\0F`e 2 B @ 3 only0claimed0that0his0methods0Straced0their0ancestry0toT02qfe^ ì 30PiuRs60Pikeql ɳ 2see0beginning0of0this0note34 qfe^ referred0to0an0intellectual0pedigree0without0implying0transmission0between0a0teacher0and0a0pupil6 Wee0^hangRs0reasoning0in ld\\e0j_`h`e S͝ ̃ 40entry0 40S an0tu0xia0san0fa0gai0jin0zhi0bing0quanTǛÌ6 4Ǧ̒ɝǤɇ̑ _Wweating40vomiting40and0purging0should0treat0all0illnesses`02VQWU0 6Ab5 bCU`_\\0p`a` B0> 5>=36 Engela Peung02 aB0 ?@30called0^hangRs0Suse0of0aggressive0methods0of0purgationT0a0Sdeparture0from0Wong",
+          "page_no": 101,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0015-toc-ch-004-fromwindtomucusandfire:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 6626,
+    "estimated_prompt_tokens": 2197,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 6,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 2197,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

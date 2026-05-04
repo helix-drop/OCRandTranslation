@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-013-lifetrials:nr-fn-ch-0083-toc-ch-013-lifetrials:footnote",
+      "chapter_title": "13. Life trials",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        533,
+        534
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11875,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00304",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-lifetrials",
+          "region_id": "nr-fn-ch-0083-toc-ch-013-lifetrials",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "?@>23/who/was/found Vstanding/_next/to/his/victim`3/smiling/1laughingD2/stupidlyW/1ƺƹƘƼ 25 reports almost/invariably/noted that/the eyes/of/killers who/had/just/beenarrestedVwere Xhe/typical/sentence/stated/that/the/killerUs/Veyes/were/staring/blankly/and/his/words/were/incoherentA/no confession/can/be/extractedW/15Ǡg\\ 25/Xhis/is/a/good/example/of/how/the/functioning/of/legal/operations shaped/what/was/said/about/madness5/ or/more/on/this/theme/of/the/emergence/of/the/legal/object/Vmadness staring/straightW 1tƠơƧ or tƠơȌ 2 and that their Vwords/were/incoherentW 1Ȗųț illnessW/from/the/concerns/and/procedures/of/the/judicial/system3/see/Ghapters/ /and/ 5",
+          "page_no": 533,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11876,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00305",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-lifetrials",
+          "region_id": "nr-fn-ch-0083-toc-ch-013-lifetrials",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "case/of/Pi/ ongķŢ 5 Sther/common/formulas/wereZO UXP/XPU ZO\\HU ƭŗŧ ź 1Wong/]an Øȝ _ ?@ `2/and ZO UZ /QPHUXPU ƭǭŬŧ 1Pu/Fingjian ɞ æ _ ?@>`25 Xhe/phrase/on/intermittent/fits/could/beZOP/ H/ZOP/`\\ ĦƛĦö 3ZOP/ H/ZOP/OHV Í 3/orZOP/ H/ZOP/aOP Ŏ 3/in/which H ƛ 1VtoactupW2/was/on/the/odd/occasion/replaced/by HU ž 5/Ixpressions/likeZ\\P/ H/Z\\P/`\\ ɠƛɠö 1\\OXF3 memorial/dated/ =/ an5/ ? >3/case/of u/Wan 0/ 2/andI\\/ZOP/ H/a\\V 5ĦƛW 1\\OXF3/memorial dated /Eug5 > =/1UP 5>5=23/case/of ia/Ghandou iĞĖ 2were/more/unusual5",
+          "page_no": 534,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-013-lifetrials:nr-fn-ch-0083-toc-ch-013-lifetrials:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-013-lifetrials:nr-fn-ch-0083-toc-ch-013-lifetrials:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4107,
+    "estimated_prompt_tokens": 1463,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1463,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -661,22 +661,59 @@ def _overlay_repo_units_on_frozen(
     repo_units: list[dict] | None,
     overlay_doc_id: str,
 ) -> FrozenUnits:
+    """将 repo 中的旧 unit 数据叠加到 fresh frozen_units 上。
+
+    hash-guarded 模式：只有当 repo unit 的 source_hash 和 segment_plan_hash
+    与 fresh unit 完全匹配时，才复用 translated_text / page_segments。
+    否则该 unit 保留 fresh 状态（translated_text=""、status="pending"），
+    旧数据不污染 fresh rebuild。
+    """
     if not repo_units:
         return frozen_units
     payload = copy.deepcopy(frozen_units)
-    by_id = {
-        _normalize_overlay_unit_id(str(row.get("unit_id") or ""), overlay_doc_id=str(overlay_doc_id or "")): dict(row)
-        for row in list(repo_units or [])
-        if str(row.get("unit_id") or "").strip()
-    }
+    by_id: dict[str, dict] = {}
+    for row in list(repo_units or []):
+        uid = str(row.get("unit_id") or "").strip()
+        if not uid:
+            continue
+        key = _normalize_overlay_unit_id(uid, overlay_doc_id=str(overlay_doc_id or ""))
+        by_id[key] = dict(row)
+    overlaid_count = 0
+    stale_count = 0
     for unit in list(payload.body_units or []) + list(payload.note_units or []):
         repo_unit = by_id.get(str(unit.unit_id or "").strip())
         if not repo_unit:
+            continue
+        repo_src_hash = str(repo_unit.get("source_hash") or "")
+        repo_plan_hash = str(repo_unit.get("segment_plan_hash") or "")
+        fresh_src_hash = str(unit.source_hash or "")
+        fresh_plan_hash = str(unit.segment_plan_hash or "")
+        # 旧数据没有 hash → 视为 stale，不 overlay
+        if not repo_src_hash or not repo_plan_hash:
+            unit.status = "pending"
+            unit.translated_text = ""
+            unit.error_msg = ""
+            stale_count += 1
+            continue
+        # hash 不匹配 → 源文本或 chunk 边界已变化，旧数据不可复用
+        if repo_src_hash != fresh_src_hash or repo_plan_hash != fresh_plan_hash:
+            unit.status = "pending"
+            unit.translated_text = ""
+            unit.error_msg = ""
+            stale_count += 1
             continue
         unit.translated_text = str(repo_unit.get("translated_text") or "")
         unit.status = str(repo_unit.get("status") or unit.status or "pending")
         unit.error_msg = str(repo_unit.get("error_msg") or "")
         segment_payload = list(repo_unit.get("page_segments") or [])
         unit.page_segments = [dict(segment) for segment in segment_payload if isinstance(segment, dict)]
+        overlaid_count += 1
+    if stale_count or overlaid_count:
+        import logging
+        _log = logging.getLogger(__name__)
+        _log.info(
+            "overlay: overlaid=%d stale=%d total_repo=%d",
+            overlaid_count, stale_count, len(by_id),
+        )
     return payload
 

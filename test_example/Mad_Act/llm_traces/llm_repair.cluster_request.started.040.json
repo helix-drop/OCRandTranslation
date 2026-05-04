@@ -1,0 +1,123 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0062-toc-ch-009-genderedmania:footnote",
+      "chapter_title": "9. Gendered mania",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        398,
+        400
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11784,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00213",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0062-toc-ch-009-genderedmania",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "25/When became/QaQs/disciple/sometime/between/ ?@ /and/ ?@>/1see/^hang/[enzao3/RPiangxi/Whenjun/shishuSŪƣƌ °Cʩ _ @ ?`3/a/biography/appended/to/the/WW]W/edition/of YiQ^/ceYRY 25",
+          "page_no": 398,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11785,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00214",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0062-toc-ch-009-genderedmania",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "1. @ 23/case/cited/in/ \\Q]PEA/ <? F5 ei Ghengzu had/studied/medicine/from/his/grand4father ei/FoxiongʘW˖ 1 ? 4 ?>@23/who/had/learned/from/his/own father/ ei/[enjiʘŀș 1 >=>4 ? 25/Xhey/were/central/figures/of/RQenghe/medicineS/1for/more/on/which3 see/Wcheid/ >25 = Sne/scenario/often/noted/in/both/treatises/and/case/files/applied/exclusively/to/menA/the/attribution/ofTYQ^ to the/failure/of/ambitions/1jXY û or jXYieQ^ û˥ 25/ n/the/ethical/and/social/milieu/that/elite/physicians represented3/it/was/not/appropriate/for/women/to/have/Rambitions5S/Xhis/is/not/to/say/that/Ghinese/women/had neither/hopes/nor/desires3/but/that/their/aspirations/were/not/called/Rambitions5S",
+          "page_no": 399,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11786,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00215",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0062-toc-ch-009-genderedmania",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "5. 5 2B/YGHE3 httpA66catalog5digitalarchives5tw6DYVRC < @ redress/thisimbalance5 Xhe/attribution/of/moral/meanings/to/mad/behavior thus went/against B/retrieved/on/Qay/ 3/ @5/Xian/was/sentenced/to Rstrangulation/after/the/EssizesS/1ȝǬd 2/according/to/the/statute/that/covered/the/crime/of/Rkilling/oneQs/wife",
+          "page_no": 400,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0062-toc-ch-009-genderedmania:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0062-toc-ch-009-genderedmania:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4410,
+    "estimated_prompt_tokens": 1554,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 3,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1554,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,14 +1,16 @@
 {
   "doc_id": "bd05138cd773",
   "status": "blocked",
-  "reason": "semantic_export_blocked",
+  "reason": "structure_review_required",
   "blocking_reasons": [
-    "toc_pages_unclassified",
-    "toc_role_semantics_invalid",
+    "link_first_marker_not_one",
+    "link_endnote_not_all_matched",
+    "link_orphan_note_remaining",
     "contract_first_marker_not_one",
     "contract_marker_gap",
-    "contract_def_anchor_mismatch",
-    "link_quality_low"
+    "freeze_matched_ref_not_injected",
+    "merge_local_refs_unclosed",
+    "export_audit_blocking"
   ],
-  "generated_at": 1777567909
+  "generated_at": 1777756303
 }

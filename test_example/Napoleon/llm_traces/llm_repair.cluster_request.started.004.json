@@ -1,0 +1,194 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-002-uneinventionutiledansleg:nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg:footnote",
+      "chapter_title": "« Une invention utile dans le genre funeste »",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        41,
+        43
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00047",
+          "note_item_id": "fn-00047",
+          "anchor_id": "anchor-00074",
+          "marker": "6",
+          "note_excerpt": "François-René de Chateaubriand, Mémoires d’outre-tombe, 2 vol., t. I, Galli-mard, « Bibliothèque de la Pléiade », 1951, p. 184.",
+          "anchor_excerpt": "La mort de Louis XVI achève de consacrer par ailleurs cette évidence : la théâtralité du pouvoir, naguère confinée à Versailles, s'est déplacée à Paris. La révolution est un drame qui se déroule en public et au grand jour. Dès les premiers temps de 1789, Chateaubriand note l'effervescence des salons, des cafés, de la rue, où tout fait spectacle dans ces « fêtes de la destruction<sup>6</sup> 6 ». L'échafaud en devient, à partir de 1792, une des scènes privilégiées. « Le théâtre de la guillotine, renchérit Louis Sébastien Mercier, ne manqua jamais d'un cercle de spectateurs 7. » Sanson est le grand ordonnateur de ces « messes rouges », qui attire chaque jour les foules, mues par la curiosité pour « la pièce nouvelle qui ne pouvait avoir qu'une seule"
+        },
+        {
+          "link_id": "link-00052",
+          "note_item_id": "fn-00052",
+          "anchor_id": "anchor-00083",
+          "marker": "11",
+          "note_excerpt": "Eugène Fontenay, Les Bijoux anciens et modernes, Compagnie générale d'impression et d'édition, 1887, p. 128. Le musée Carnavalet conserve une paire de boucles d'oreilles semblable, reproduite dans le cahier hors-texte.",
+          "anchor_excerpt": "chanson populaire, qui enchaîne les refrains sur la veuve, le rasoir national, l'abbaye de monte-à-regret, le raccourcissement patriotique, la faux de l'égalité ou l'autel de la patrie. On ne dit plus : être guillotiné, mais mettre sa tête à la chatière, regarder par le vasisas, éternuer dans le sac. Les républicaines, soucieuses d'afficher leurs opinions, portent des boucles d'oreilles figurant une guillotine miniature, d'où se balance, en guise de pendeloque, une tête couronnée $ ^{11} $. Victor Hugo nous dit que le peintre Boze peignait ses filles adolescentes « “en guillotinées”, c'est-à-dire décolletées avec des chemises rouges $ ^{12} $ ». La Terreur passée, on organisera dans Paris ces fameux « bals des victimes », où les parents de guillotinés se retrouvaient en habits de deuil, un fil rouge au cou, les cheveux coupés ou relevés, pour exorciser, dans une danse macabre servant de catharsis, l'escalade tragique à laquelle Thermidor avait mis fin $ ^{13} $."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11575,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00045",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "Roi des Français à l'époque de sa mort, Louis XVI n'en demeure pas moins le dernier à avoir été roi de France, c'est-à-dire héritier de la monarchie de droit divin. Sur le double corps du roi, voir le livre d'Ernst Kantorowicz, Les Deux Corps du roi: essai sur la théologie politique au Moyen Âge, trad. de l'anglais par Jean-Philippe Genet et Nicole Genet, Gallimard, 1989.",
+          "page_no": 41,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11576,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00046",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "Cité par Pierre-Édouard Lemontey, Essai sur l'établissement monarchique de Louis XIV, in Œuvres, t. V, Sautelet et C° éditeurs, Brissot-Thivars libraire et Alexandre Mesnier libraire, 1829, p. 15, d'après le manuscrit d'un cours de droit public que Louis XIV avait fait composer pour l'instruction du duc de Bourgogne.",
+          "page_no": 41,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11578,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00048",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "Louis Sébastien Mercier, Le Nouveau Paris, t. I, A Brunswick, chez les principaux libraires, 1800, p. 43.",
+          "page_no": 42,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11579,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00049",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "Camille Desmoulins, Le Vieux Cordelier, n° IV, 20 décembre 1793, reproduit in Œuvres, t. II, Charpentier et Cie, 1874, p. 185.",
+          "page_no": 43,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11580,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00050",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Le couplet se poursuit : «Vous pouvez, citoyen bourreau, / M'assassiner, mais non m'abattre. / Ainsi finit la Royauté, / La valeur, la grâce enfantine... / Le niveau de l'égalité / C'est le fer de la guillotine. » Cité par Paul d'Estrées, Le Théâtre sous la Terreur (théâtre de la peur), 1793-1794, d'après des publications récentes et d'après les documents révolutionnaires du temps, imprimés ou inédits, Émile-Paul frères, 1913, p. 302.",
+          "page_no": 43,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11581,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00051",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "Révolutions de Paris, art. cité, p. 206.",
+          "page_no": 43,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-002-uneinventionutiledansleg:nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-002-uneinventionutiledansleg:nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 6272,
+    "estimated_prompt_tokens": 2082,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 6,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 2082,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

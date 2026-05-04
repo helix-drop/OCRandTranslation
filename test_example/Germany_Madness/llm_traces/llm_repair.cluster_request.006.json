@@ -2,314 +2,484 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-005-courtfoolsandtheirfollyi:nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi:endnote\",\n  \"chapter_title\": \"Court Fools and Their Folly: Image and Social Reality\",\n  \"page_range\": [\n    284,\n    290\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 284,\n      \"ocr_excerpt\": \"The first nine editions of Claus Narr continued to print these aesthetically dubious, flat, but supposedly edifying verses. It was only with the cheaper and smaller editions starting in 1645 that these Christianizing moral rhymes were dropped, and only then if at all that Claus Narr became a Volksbuch. I find Büttner's authorial decisions deeply interesting: Büttner chose to publish anonymously and subverted his text by adding insipid moral rhymes with the intention of castrating the humor or at least diverting attention from the frivolous nature of some of Claus's gestures, stupidities, and pranks. Over and over, Büttner found deep wisdom or simple piety in jokes that surely had a simpler or ruder meaning. When Claus talked to his hat when it fell off and expressed his worry that his head might fall off next, Büttner extracts the moral: \\\"What can't be cured must be endured\\\" (\\\"Laß fahren hin was nicht sein kan\\\"). $ ^{59} $ Sometimes, Büttner openly rejects the force of his own story. One one occasion, for example, Claus defended a man who had impregnated a maid, saying that she had previously been only a Mayd but was now Fraw Mutter. Pastor Büttner, however, drew the opposite concl ...\"\n    },\n    {\n      \"page_no\": 285,\n      \"ocr_excerpt\": \"ture or knowing clairvoyantly what was happening elsewhere; and (b) in being an amusing fellow to have around. We need to admit, frankly, that we do not understand the fool's supernatural knowledge, if indeed he ever possessed any gift of clairvoyance. But we may approach the second part of the fool's \\\"wisdom\\\" by asking what was so hilarious. My impression is that Claus Narr and most other court fools seemed funny because they defied the increasingly delicate standards of courtesy, of restrained courtly behavior, of Höflichkeit. Claus Narr had a childish ignorance of such adult realities as money, sex, adultery, counting and numbers, metaphoric language, religion, and death. Although Claus possessed a childish modesty, he was a naive and clumsy master of social transgression. According to the Grimm brothers' famous dictionary, even the German word unhöflich (discourteous) dates precisely from Sebastian Brant's Ship of Fools. Those new or newly rigorous standards of deportment have been famously studied by the German sociologist Norbert Elias, who found in courtly culture a new set of embarrassments about the body, about cleanliness, excretion, nakedness and sex, about food and drin ...\"\n    },\n    {\n      \"page_no\": 286,\n      \"ocr_excerpt\": \"Cleves, Duchess Jakobe von Baden was accused by the duke’s sister Sibylla of committing a variety of crimes and outrages ranging from the casting of magic spells to frequent acts of marital infidelity. But the duchess had, in addition, disgraced herself with the court fool, a man named Martin, whom she “secretly after dinner ordered to her rooms, where, behind closed doors, she tugged at his trousers for two or three hours.” Was she playing sexual games with a fool? These were dangerous indiscretions. Witnesses charged that she had “stroked him lovingly, clothed him delicately, painted his face, and given him baths twice a week.” $ ^{65} $ The princess had a reputation for frivolity but this was surely too much! The court in Düsseldorf was abuzz with rumors, but for our limited purposes here it is noteworthy that a fool had his part to play in this melodrama, a tragedy that only ended with the bedroom murder of Duchess Jakobe. $ ^{66} $ Here was a fool with whom a lady could play naughty games, but only at the risk of her life. The historian’s task in describing the life of court fools is to find more of this sort of credible evidence of life as it was actually lived, as distinct f ...\"\n    },\n    {\n      \"page_no\": 287,\n      \"ocr_excerpt\": \"went about barefoot summer and winter. Courtiers obviously had a good time abusing this unfortunate man, so much so that on one occasion he fell into a rage and took revenge by stuffing wood shavings into all the palace key holes. But this deed in turn irritated Count Johann so deeply that he banished his fool from Messkirch. According to this decree, Letzkopf was seized and led to the nearby monastery of Wald. To the astonishment of all, later that same day Letzkopf appeared in Messkirch at court again, returning even before the servant who had taken him into exile (the fool had known a shortcut through the woods). When asked to explain himself, Letzkopf set forth a touching confession. Once abandoned at the monastery, the poor man \\\"had sat down on a large stone and had looked around at the wide world in all directions\\\" and concluded that \\\"no place in all the world was so dear to him as Mösskirch.\\\" This touching story made Count Johann laugh, and he received Letzkopf back into his good graces again. The life of a natural fool at court was clearly not all beer and skittles, but Peter Letzkopf was evidently something more than a helpless imbecile. It was said that he had been four t ...\"\n    },\n    {\n      \"page_no\": 288,\n      \"ocr_excerpt\": \"Putting on his crab shell, he fancied the guests could not see him. \\\"Where, oh, where, has our Peter gone?\\\" (\\\"Ach, wo ist uns der Petter hinkommen?\\\"), the guests would then exclaim. This pleased Peter enormously, who then betook himself to a corner. One guest lamented, \\\"I fear that our Peter is lost,\\\" but another objected, \\\"Hah, that rascal, that thief is probably off stealing another sheep or skinning a cat so that he can sell the pelt to a furrier as if it were a buckskin.\\\" Such a charge was too much for the fool, but thinking that he could not be seen, he swallowed his anger. \\\"They kept up this kind of mummery with him a long time. Finally, someone came along and knocked the crab shell off his nose as if by accident and shouted, 'Look, Peter, are you here? We all thought you were away.'\\\" And then Peter laughed and exclaimed, \\\"'Ja, I just came from the fish market where I was doing this or that.'\\\" Our chronicler remarks that Peter had to be teased and enraged periodically, \\\"so that his spirit would get excited, for otherwise he would get sick because of his melancholy, as the proverb says: 'Fools have to be driven and exercised, or else they go rotten and soft from lying around.' ...\"\n    },\n    {\n      \"page_no\": 289,\n      \"ocr_excerpt\": \"oped a strong sense of family loyalty. Count Johann Wernher took a young, retarded boy named Junghans and raised him, \\\"for the sake of God.\\\" It should not surprise us, therefore, that when his widow, Countess Margarethe von Zimmern, was to be displaced from her residence by Count Haug von Werdenberg, Junghans, a \\\"poor, childish, silly person,\\\" felt it as an attack on his own mother. In defense of \\\"my dear mother,\\\" this \\\"senseless fool\\\" threatened to kill Count Haug with an ax, but he was disarmed by the countess before he could do any harm. $ ^{70} $ As we can see, the fools mentioned in the Zimmerische Chronik were not professional jesters, entertainers, or Schalksnarren. They were men with more or less serious mental troubles or deficiencies. Sometimes the idées fixes or “melancholy” delusions of such fools made life hard for everyone. The Chronik reports on Count Rudolf von Sulz’s fool, who on the face of it seemed normal but had a mania for collecting all sorts of papers. To humor this odd fixation, courtiers used to give him old letters and other irrelevant waste paper. Once, when Count Rudolf was trying to travel incognito, his companion, the fool, seized a package of confide ...\"\n    },\n    {\n      \"page_no\": 290,\n      \"ocr_excerpt\": \"As we have seen, fools were sometimes put to work with simple tasks, but there was always the risk that a fool would not perform as expected. The Zimmerische Chronik tells of a swineherd who deliberately led his pigs to feed on poisonous herbs so that he would have fewer pigs to guard. $ ^{73} $ Another fool, admired for his ability to play the bagpipe, fashioned a foxskin blanket for his instrument so that his pipes would not feel cold in the winter. $ ^{74} $ The most common expression used to describe a fool in the Zimmerische Chronik is ain lauters kindt, “nothing but a child,” a phrase that explains perhaps the amusement and the indulgence with which these unfortunatest were regarded. The counts of Zimmern did not, however, see their fools as licensed oracles or goofy critics of courtly convention. They were funny specimens of a distorted humanity. ## An Artificial Fool: Friedrich Taubmann One of the more remarkable academic careers in sixteenth-century Germany was that of Friedrich Taubmann (1565–1613), a poet, professor, and \\\"merry counselor\\\" (lustiger Rat) to the electors of Saxony (fig. 18). Over one hundred years ago, Friedrich Ebeling published an excellent study of Taub ...\"\n    },\n    {\n      \"page_no\": 304,\n      \"ocr_excerpt\": \"tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epileptics in particular because a folk etymology connected the “falling sickness” (vallendes siechtum) with Valentine. The miracle book for Diepoldskichen begins in 1420 and lists 2,914 miracles between that date and 1691, 95 percent of them from the period after 1535. $ ^{33} $ The shrine to St. Rasso in Grafrath (Wörth on the Amper, 18 miles west of Munich) recorded 5,173 miracles between 1444 and 1518, and another 7,000 by the end of the eighteenth century, with a characteristic steep decline between 1514 and about 1560. $ ^{34} $ The common claim among Erasmians and Protestant reformers that the age of miracles was over must have struck devout pilgrims from Bavaria and Austria as bizarre and easily disproved. Literally hundreds of shrines sprang up between 1400 and 1700, and each one could demonstrate its power with lists of wondrous cures and “miracles.” ## LATE MEDIEVAL MIRACLES IN ## THE RHINELAND We can get closer to the mad by looking at sev ...\"\n    }\n  ],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00756\",\n      \"anchor_id\": \"anchor-00229\",\n      \"marker\": \"50\",\n      \"note_excerpt\": \"Heinz-Gunter Schmitz, Physiologie des Scherzes: Bedeutung und Rechtfertiqung der Ars locandi im 16. Jahrhundert (Hildesheim, 1972).\",\n      \"anchor_excerpt\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00757\",\n      \"anchor_id\": \"anchor-00230\",\n      \"marker\": \"51\",\n      \"note_excerpt\": \"Wolfgang Sedelius, Wie sich ain Christenlicher Herr, so Landt unnd Leiit zuo Regieren under im hat, vor schedlicher Phantasey verhueten, unnd in allen noeten troesten soll (Munich, 1547). See Mad Princes, pp. 21—22.\",\n      \"anchor_excerpt\": \"The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00764\",\n      \"marker\": \"59\",\n      \"page_no\": 284,\n      \"source_text\": \"Buttner, Von Claus Narren (Frankfurt a/M, 1602), p. 13.\"\n    },\n    {\n      \"note_item_id\": \"fn-00765\",\n      \"marker\": \"60\",\n      \"page_no\": 284,\n      \"source_text\": \"Ibid., pp. 73—74, cf. pp. 174-75.\"\n    },\n    {\n      \"note_item_id\": \"fn-00766\",\n      \"marker\": \"61\",\n      \"page_no\": 284,\n      \"source_text\": \"Ibid., fol. Aiiiiv. |\"\n    },\n    {\n      \"note_item_id\": \"fn-00767\",\n      \"marker\": \"62\",\n      \"page_no\": 284,\n      \"source_text\": \"Despite Buttner’s disclaimer, however, excrement, farting, and defecation are a major theme of several stories in his collection. See ibid., pp. 5657, 71, 108—10, 15255, 185-86, 202, 204, 233, 239, 336, 446, 46768, 476.\"\n    },\n    {\n      \"note_item_id\": \"fn-00768\",\n      \"marker\": \"63\",\n      \"page_no\": 285,\n      \"source_text\": \"Ibid., p. 41.\"\n    },\n    {\n      \"note_item_id\": \"fn-00769\",\n      \"marker\": \"64\",\n      \"page_no\": 285,\n      \"source_text\": \"Adolf Schwammberger, “Von Hofnarren in und aus Franken,” Jahrbuch fiir frankische Landesforschung 3435 (1974-75): 975-81, at 976.\"\n    },\n    {\n      \"note_item_id\": \"fn-00770\",\n      \"marker\": \"65\",\n      \"page_no\": 286,\n      \"source_text\": \"Muschka, Opfergang einer Frau, p. 332.\"\n    },\n    {\n      \"note_item_id\": \"fn-00771\",\n      \"marker\": \"66\",\n      \"page_no\": 286,\n      \"source_text\": \"I sketch the episode in Mad Princes, pp. 100-118.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00507\",\n      \"note_item_id\": \"fn-00777\",\n      \"current_anchor_id\": \"anchor-00727\",\n      \"marker\": \"2\",\n      \"note_page_no\": 289,\n      \"anchor_page_no\": 304,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"This famous anecdote concerning the melancholic who thought himself dead was attributed also to Claus Narr (Biittner, Von Claus Narren [1602], pp. 486-87). Many such stories, originating with the ancient physician Rufus of Ephesus (fl. unde ...\",\n      \"anchor_excerpt\": \"tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epile ...\"\n    }\n  ]\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-001-1historicalproblemssinst:nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst:footnote\",\n  \"chapter_title\": \"1 Historical Problems: Sin, St. Vitus, and the Devil\",\n  \"page_range\": [\n    69,\n    82\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00083\",\n      \"anchor_id\": \"anchor-00099\",\n      \"marker\": \"82\",\n      \"note_excerpt\": \"Henricus Kornmann, Templum Naturae Historicum, . . . in quo de natura et miraculis quatuor elementorum . . . disseritur (Darmstadt, 1611); see also Allen G. Debus, The Chemical Philosophy: Paracelsan Science and Medicine in the Sixteenth an ...\",\n      \"anchor_excerpt\": \"had indeed eaten, but not in any normal fashion: \\\"[L]ittle, tiny men and maids, wearing beautiful ornaments (whom she alone of all the family could see), ran about every day under her bed and brought her food from whatever was being cooked ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00087\",\n      \"anchor_id\": \"anchor-00101\",\n      \"marker\": \"86\",\n      \"note_excerpt\": \"Barbara Konneker, Wesen und Wandlung der Narrenidee im Zeitalter des Humanismus: Brant, Murner, Erasmus (Wiesbaden, 1966); Joel Lefebvre, Les fols et la folie: Etude sur les genres du comique et la création littéraire en Allemagne pendant l ...\",\n      \"anchor_excerpt\": \"In the sixteenth century, many observers agreed that some kinds of spirit were bound to particular waters, others to particular mountains or caves or mines, others still to specific crystals or houses or forests. The writings of Paracelsus, ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00074\",\n      \"marker\": \"74\",\n      \"page_no\": 69,\n      \"source_text\": \"S. Kemp and K. Williams, “Demonic Possession and Mental Disorder in Medieval and Early Modern Europe,” Psychological Medicine 17 (1987): 21-29. In his study of “spiritual affliction” in early modern Bavaria, David Lederer emphasizes the oft ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00075\",\n      \"marker\": \"75\",\n      \"page_no\": 69,\n      \"source_text\": \"For an unconvincing effort to assimilate demoniacs and witches to the history of hysteria, see G. S. Rousseau, “’A Strange Pathology”: Hysteria in the Early Modern World,\"\n    },\n    {\n      \"note_item_id\": \"fn-00077\",\n      \"marker\": \"76\",\n      \"page_no\": 70,\n      \"source_text\": \"My account depends on Andreas Angelus, Wider Natur und Wunderbuch: Darin so wol in gemein von Wunderwercken dess Himmels, Luffts, Wassers und Erden, als insonderheit von allen widernaturlichen wunderlichen Geschichten grossern theils Europa ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00078\",\n      \"marker\": \"77\",\n      \"page_no\": 71,\n      \"source_text\": \"Ibid., p. 208: “aber kleine Manlein und Jungfrawlein, schon Geschmucket, welche keiner im Hause denn sie allein gesehen, weren alle Tage unter dem Bette her auff gangen, und hetten ihr Speise gebracht von allem was sonst im Hause Gekocht od ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00079\",\n      \"marker\": \"78\",\n      \"page_no\": 71,\n      \"source_text\": \"Ibid., p. 208: “Hetten sie auch gerne hinweg getragen, wenns nicht einer im Gelben Kleide widerrahten. Doch hetten sie sie hart gedruckt, unnd an der seiten gelahmt, unnd ihr die Augen zugedruckt, das sie nit hette sehen mussen, wie ihr den ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00080\",\n      \"marker\": \"79\",\n      \"page_no\": 71,\n      \"source_text\": \"Ibid., p. 209: “Item da sie sie auch zuletzt ehe sie in die Stadt gebracht gespeiset, hetten sie untereinander gesaget, Wenn sie im Dorff bliebe, wolten sie ihr wol Speise bringen, aber uber Landt Kondten sie sie nicht Speisen.” The substan ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00081\",\n      \"marker\": \"80\",\n      \"page_no\": 71,\n      \"source_text\": \"Johann Weyer, De lamiis liber: Item de commentitiis jejuniis (Basel, 1577); on the general phenomenon, see Rudolf M. Bell, Holy Anorexia (Chicago, 1985).\"\n    },\n    {\n      \"note_item_id\": \"fn-00082\",\n      \"marker\": \"81\",\n      \"page_no\": 72,\n      \"source_text\": \"Jodocus Hocker and Hermann Hammelmann, “Der Teuffel selbs,” in Theatrum diabolorum, das ist: Warhafftige eigentliche und kurtze Beschreibung allerley grewlicher, schrecklicher und abschewlicher Laster, so in diesen letzten, schweren, und bo ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00093\",\n      \"note_item_id\": \"fn-00083\",\n      \"current_anchor_id\": \"anchor-00099\",\n      \"marker\": \"82\",\n      \"note_page_no\": 72,\n      \"anchor_page_no\": 71,\n      \"current_anchor_marker\": \"82\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Henricus Kornmann, Templum Naturae Historicum, . . . in quo de natura et miraculis quatuor elementorum . . . disseritur (Darmstadt, 1611); see also Allen G. Debus, The Chemical Philosophy: Paracelsan Science and Medicine in the Sixteenth an ...\",\n      \"anchor_excerpt\": \"had indeed eaten, but not in any normal fashion: \\\"[L]ittle, tiny men and maids, wearing beautiful ornaments (whom she alone of all the family could see), ran about every day under her bed and brought her food from whatever was being cooked ...\"\n    },\n    {\n      \"link_id\": \"link-00097\",\n      \"note_item_id\": \"fn-00087\",\n      \"current_anchor_id\": \"anchor-00101\",\n      \"marker\": \"86\",\n      \"note_page_no\": 73,\n      \"anchor_page_no\": 72,\n      \"current_anchor_marker\": \"86\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Barbara Konneker, Wesen und Wandlung der Narrenidee im Zeitalter des Humanismus: Brant, Murner, Erasmus (Wiesbaden, 1966); Joel Lefebvre, Les fols et la folie: Etude sur les genres du comique et la création littéraire en Allemagne pendant l ...\",\n      \"anchor_excerpt\": \"In the sixteenth century, many observers agreed that some kinds of spirit were bound to particular waters, others to particular mountains or caves or mines, others still to specific crystals or houses or forests. The writings of Paracelsus, ...\"\n    },\n    {\n      \"link_id\": \"link-00100\",\n      \"note_item_id\": \"fn-00090\",\n      \"current_anchor_id\": \"anchor-00104\",\n      \"marker\": \"89\",\n      \"note_page_no\": 74,\n      \"anchor_page_no\": 73,\n      \"current_anchor_marker\": \"89\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Carlo Ginzburg, Ecstasies: Deciphering the Witches” Sabbath (London, 1990). Anthropologists have argued that cultures where ecstasy is highly valued may have “possession cults” in which men and the elite of society participate; but that cul ...\",\n      \"anchor_excerpt\": \"It is hard to find out much in detail about these spirits and goblins and elves, because literate people usually described such ideas as superstition. For orthodox Lutherans and Catholics alike, the world was not full of all sorts of spirit ...\"\n    },\n    {\n      \"link_id\": \"link-00103\",\n      \"note_item_id\": \"fn-00093\",\n      \"current_anchor_id\": \"anchor-00107\",\n      \"marker\": \"92\",\n      \"note_page_no\": 75,\n      \"anchor_page_no\": 74,\n      \"current_anchor_marker\": \"92\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"See Wolfgang Briickner, “Forschungsprobleme der Satanologie und Teufelserzahlungen,” in Volkserzihlung und Reformation, ed. id., pp. 393—416.\",\n      \"anchor_excerpt\": \"what the authors earnestly intended. If every vice had not just some foolish blindness at its base, as in the Ship of Fools, but a specific devil, then the devil himself could begin to seem foolish, consuming his destructive energies in the ...\"\n    },\n    {\n      \"link_id\": \"link-00104\",\n      \"note_item_id\": \"fn-00094\",\n      \"current_anchor_id\": \"anchor-00108\",\n      \"marker\": \"93\",\n      \"note_page_no\": 75,\n      \"anchor_page_no\": 74,\n      \"current_anchor_marker\": \"93\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"See Andreas Celichius, Notwendige Erinnerung Von des Sathans letzten Zornsturm, Und was es auff sich habe und bedeute, das nu zu dieser zeit so viel Menschen an Leib und Seel vom Teuffel besessen werden (Wittenberg, 1595), fol. G2.\",\n      \"anchor_excerpt\": \"The studies of Norman Cohn, Richard Kieckhefer, and Eva Labouvie suggest that the full European belief in witchcraft (with demonic pact, cannibalism, flight to the Sabbath, the devil’s mark, and sexual intercourse with the devil) was a lear ...\"\n    },\n    {\n      \"link_id\": \"link-00106\",\n      \"note_item_id\": \"fn-00096\",\n      \"current_anchor_id\": \"anchor-00110\",\n      \"marker\": \"95\",\n      \"note_page_no\": 76,\n      \"anchor_page_no\": 75,\n      \"current_anchor_marker\": \"95\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"See Steven Ozment, “The Social History of the Reformation: What Can We Learn from Pamphlets?” in Flugschriften als Massenmedium der Reformationszeit, ed. Hans-Joachim Kohler (Stuttgart, 1981), who seems to ignore some of the chief weaknesse ...\",\n      \"anchor_excerpt\": \"Pushed to unacceptable extremes in the overly schematic interpretation of Robert Muchembled, $ ^{95} $ this model of competing conceptions of witchcraft (roughly, scholastic vs. popular) has nonetheless prompted a great deal of important wo ...\"\n    },\n    {\n      \"link_id\": \"link-00107\",\n      \"note_item_id\": \"fn-00097\",\n      \"current_anchor_id\": \"anchor-00111\",\n      \"marker\": \"96\",\n      \"note_page_no\": 76,\n      \"anchor_page_no\": 75,\n      \"current_anchor_marker\": \"96\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"David Lederer (“Reforming the Spirit,” pp. 287-327) has studied the manuscript records of cases of demonic possession brought to the attention of the Bavarian shrines of Benediktbeuern and Purten during the seventeenth century. In these les ...\",\n      \"anchor_excerpt\": \"Pushed to unacceptable extremes in the overly schematic interpretation of Robert Muchembled, $ ^{95} $ this model of competing conceptions of witchcraft (roughly, scholastic vs. popular) has nonetheless prompted a great deal of important wo ...\"\n    },\n    {\n      \"link_id\": \"link-00108\",\n      \"note_item_id\": \"fn-00098\",\n      \"current_anchor_id\": \"anchor-00112\",\n      \"marker\": \"97\",\n      \"note_page_no\": 76,\n      \"anchor_page_no\": 75,\n      \"current_anchor_marker\": \"97\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"This is a point made repeatedly by recent scholars. See Cécile Ernst, Teufelaustreibungen: Die Praxis der katholischen Kirche im 16. und 17. Jahrhundert (Bern, 1972); D. P. Walker, “Demonic Possession Used as Propaganda in the Later Sixteen ...\",\n      \"anchor_excerpt\": \"And that brings us back to Judith Klatten. What were her own beliefs about the spirits who helped her? Evidently, as a pious girl, she did not share the view that such spirits must be devils, but our source, the Wider Natur und Wunderbuch ( ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"Historical Problems: Sin, St.Vitus, and the Devil A history of madness must confront three salient problems in the early modern period. The first is the problem of sources. In our efforts to see how the mad experienced their world and how the world experienced them, we are usually at the mercy of written evidence. In fact, we normally rejoice if we find a long and circumstantial account or a full archival dossier. But historians recognize that their texts can be opaque even when they seem to be unusually full and transparent. This will become clear in the case of the troubled late medieval painter Hugo van der Goes. A second basic problem is the possibility, even the likelihood, that the sixteenth century experienced certain disorders that no longer occur. In cases like the dancing mania, we encounter strange diseases that do not fit into modern diagnostic categories very well. The historian of madness is well advised, especially in such cases, to attend scrupulously to exactly what was said and done with such suffering, rather than leaping to fill the diagnostic vacuum with the confident assurances of the modern psychiatric manual. The third problem is the formidable force of religion in early modern Germany, a force that could encourage certain religious experiences, such as visions, voices, and raptures, that would surely suggest psychosis today. If one's culture encouraged visions and voices, however, it does not make full sense to see these \\\"symptoms\\\" as evidence of illness. Most Christians of the sixteenth century were aware, moreover, that the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness, driving his victims into frenzies and convulsions, and tempting them to suicide. Here was a religious madness that was of purely ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-005-courtfoolsandtheirfollyi:nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi:endnote",
-      "chapter_title": "Court Fools and Their Folly: Image and Social Reality",
-      "request_mode": "note_only",
+      "cluster_id": "toc-ch-001-1historicalproblemssinst:nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst:footnote",
+      "chapter_title": "1 Historical Problems: Sin, St. Vitus, and the Devil",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
-        284,
-        290
+        69,
+        82
       ],
       "matched_examples": [
         {
-          "link_id": "link-00486",
-          "note_item_id": "fn-00756",
-          "anchor_id": "anchor-00229",
-          "marker": "50",
-          "note_excerpt": "Heinz-Gunter Schmitz, Physiologie des Scherzes: Bedeutung und Rechtfertiqung der Ars locandi im 16. Jahrhundert (Hildesheim, 1972).",
-          "anchor_excerpt": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to"
+          "link_id": "link-00093",
+          "note_item_id": "fn-00083",
+          "anchor_id": "anchor-00099",
+          "marker": "82",
+          "note_excerpt": "Henricus Kornmann, Templum Naturae Historicum, . . . in quo de natura et miraculis quatuor elementorum . . . disseritur (Darmstadt, 1611); see also Allen G. Debus, The Chemical Philosophy: Paracelsan Science and Medicine in the Sixteenth and Seventeenth Centuries (New York, 1977); for a short introduction, see Lynn Thorndike, A History of Magic and Experimental Science, vol. 5: The Sixteenth Century (New York, 1941), pp. 617—51.",
+          "anchor_excerpt": "had indeed eaten, but not in any normal fashion: \"[L]ittle, tiny men and maids, wearing beautiful ornaments (whom she alone of all the family could see), ran about every day under her bed and brought her food from whatever was being cooked at home or roasted elsewhere.\" $ ^{82} $"
         },
         {
-          "link_id": "link-00487",
-          "note_item_id": "fn-00757",
-          "anchor_id": "anchor-00230",
-          "marker": "51",
-          "note_excerpt": "Wolfgang Sedelius, Wie sich ain Christenlicher Herr, so Landt unnd Leiit zuo Regieren under im hat, vor schedlicher Phantasey verhueten, unnd in allen noeten troesten soll (Munich, 1547). See Mad Princes, pp. 21—22.",
-          "anchor_excerpt": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to"
+          "link_id": "link-00097",
+          "note_item_id": "fn-00087",
+          "anchor_id": "anchor-00101",
+          "marker": "86",
+          "note_excerpt": "Barbara Konneker, Wesen und Wandlung der Narrenidee im Zeitalter des Humanismus: Brant, Murner, Erasmus (Wiesbaden, 1966); Joel Lefebvre, Les fols et la folie: Etude sur les genres du comique et la création littéraire en Allemagne pendant la Renaissance (Paris, 1968).",
+          "anchor_excerpt": "In the sixteenth century, many observers agreed that some kinds of spirit were bound to particular waters, others to particular mountains or caves or mines, others still to specific crystals or houses or forests. The writings of Paracelsus, for example, abound with nymphs, sprites, kobolds, elves, dwarves, and fairies. $ ^{86} $ He and his followers held that nature was full of such spirits. Heinrich Kornmann published a Latin treatise in 1611, firmly based on Paracelsan principles, in which he undertook to set forth all the kinds of spirits that inhabit the fires, airs, waters, and earths of our experience, and his example must stand for many. $ ^{87} $ It is equally well known that the miners of Germany had a rich mythology about the Little Men of the Mountain (Bergmännlein), who sometimes helped and sometimes exasperated them in their subterranean labors. $ ^{88} $ The world of ordinary experience"
         }
       ],
       "unmatched_note_items": [
         {
-          "row_id": 782,
+          "row_id": 50408,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00764",
+          "note_item_id": "fn-00074",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "59",
-          "normalized_marker": "59",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "74",
+          "normalized_marker": "74",
           "occurrence": 1,
-          "source_text": "Buttner, Von Claus Narren (Frankfurt a/M, 1602), p. 13.",
-          "page_no": 284,
-          "display_marker": "59",
-          "source_marker": "59",
+          "source_text": "S. Kemp and K. Williams, “Demonic Possession and Mental Disorder in Medieval and Early Modern Europe,” Psychological Medicine 17 (1987): 21-29. In his study of “spiritual affliction” in early modern Bavaria, David Lederer emphasizes the often religiously charged language for madness and then examines the vernacular categories then common for mental stress and disorder, finding that even the vague term Wahnsinn (madness) was but rarely employed (“Reforming the Spirit,” pp. 198-236, 337).",
+          "page_no": 69,
+          "display_marker": "74",
+          "source_marker": "74",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 783,
+          "row_id": 50409,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00765",
+          "note_item_id": "fn-00075",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "60",
-          "normalized_marker": "60",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "75",
+          "normalized_marker": "75",
           "occurrence": 1,
-          "source_text": "Ibid., pp. 73—74, cf. pp. 174-75.",
-          "page_no": 284,
-          "display_marker": "60",
-          "source_marker": "60",
+          "source_text": "For an unconvincing effort to assimilate demoniacs and witches to the history of hysteria, see G. S. Rousseau, “’A Strange Pathology”: Hysteria in the Early Modern World,",
+          "page_no": 69,
+          "display_marker": "75",
+          "source_marker": "75",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 784,
+          "row_id": 50410,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00766",
+          "note_item_id": "fn-00077",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "61",
-          "normalized_marker": "61",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "76",
+          "normalized_marker": "76",
           "occurrence": 1,
-          "source_text": "Ibid., fol. Aiiiiv. |",
-          "page_no": 284,
-          "display_marker": "61",
-          "source_marker": "61",
+          "source_text": "My account depends on Andreas Angelus, Wider Natur und Wunderbuch: Darin so wol in gemein von Wunderwercken dess Himmels, Luffts, Wassers und Erden, als insonderheit von allen widernaturlichen wunderlichen Geschichten grossern theils Europae, fiirnemlich der Churfiirstlichen Brandenburgischen Marck, vom Jahr 490. biss auff 1597. ablauffendes Jahr beschehen gehandelt wird (Frankfurt a/M, 1597), pp- 206—9.",
+          "page_no": 70,
+          "display_marker": "76",
+          "source_marker": "76",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 785,
+          "row_id": 50411,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00767",
+          "note_item_id": "fn-00078",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "62",
-          "normalized_marker": "62",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "77",
+          "normalized_marker": "77",
           "occurrence": 1,
-          "source_text": "Despite Buttner’s disclaimer, however, excrement, farting, and defecation are a major theme of several stories in his collection. See ibid., pp. 5657, 71, 108—10, 15255, 185-86, 202, 204, 233, 239, 336, 446, 46768, 476.",
-          "page_no": 284,
-          "display_marker": "62",
-          "source_marker": "62",
+          "source_text": "Ibid., p. 208: “aber kleine Manlein und Jungfrawlein, schon Geschmucket, welche keiner im Hause denn sie allein gesehen, weren alle Tage unter dem Bette her auff gangen, und hetten ihr Speise gebracht von allem was sonst im Hause Gekocht oder anderswo gebraten worden.”",
+          "page_no": 71,
+          "display_marker": "77",
+          "source_marker": "77",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 786,
+          "row_id": 50412,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00768",
+          "note_item_id": "fn-00079",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "63",
-          "normalized_marker": "63",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "78",
+          "normalized_marker": "78",
           "occurrence": 1,
-          "source_text": "Ibid., p. 41.",
-          "page_no": 285,
-          "display_marker": "63",
-          "source_marker": "63",
+          "source_text": "Ibid., p. 208: “Hetten sie auch gerne hinweg getragen, wenns nicht einer im Gelben Kleide widerrahten. Doch hetten sie sie hart gedruckt, unnd an der seiten gelahmt, unnd ihr die Augen zugedruckt, das sie nit hette sehen mussen, wie ihr denn die Augen braun gewesen.”",
+          "page_no": 71,
+          "display_marker": "78",
+          "source_marker": "78",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 787,
+          "row_id": 50413,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00769",
+          "note_item_id": "fn-00080",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "64",
-          "normalized_marker": "64",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "79",
+          "normalized_marker": "79",
           "occurrence": 1,
-          "source_text": "Adolf Schwammberger, “Von Hofnarren in und aus Franken,” Jahrbuch fiir frankische Landesforschung 3435 (1974-75): 975-81, at 976.",
-          "page_no": 285,
-          "display_marker": "64",
-          "source_marker": "64",
+          "source_text": "Ibid., p. 209: “Item da sie sie auch zuletzt ehe sie in die Stadt gebracht gespeiset, hetten sie untereinander gesaget, Wenn sie im Dorff bliebe, wolten sie ihr wol Speise bringen, aber uber Landt Kondten sie sie nicht Speisen.” The substantial town of Arnswalde (now Choszczno in Poland) lay ca. 30 miles north of Landsberg/Warthe (now Gorzow Wielkopolski) and ca. 37 miles east of Stettin (now Szczecin).",
+          "page_no": 71,
+          "display_marker": "79",
+          "source_marker": "79",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 788,
+          "row_id": 50414,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00770",
+          "note_item_id": "fn-00081",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "65",
-          "normalized_marker": "65",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "80",
+          "normalized_marker": "80",
           "occurrence": 1,
-          "source_text": "Muschka, Opfergang einer Frau, p. 332.",
-          "page_no": 286,
-          "display_marker": "65",
-          "source_marker": "65",
+          "source_text": "Johann Weyer, De lamiis liber: Item de commentitiis jejuniis (Basel, 1577); on the general phenomenon, see Rudolf M. Bell, Holy Anorexia (Chicago, 1985).",
+          "page_no": 71,
+          "display_marker": "80",
+          "source_marker": "80",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 789,
+          "row_id": 50415,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00771",
+          "note_item_id": "fn-00082",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
-          "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
-          "marker": "66",
-          "normalized_marker": "66",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+          "marker": "81",
+          "normalized_marker": "81",
           "occurrence": 1,
-          "source_text": "I sketch the episode in Mad Princes, pp. 100-118.",
-          "page_no": 286,
-          "display_marker": "66",
-          "source_marker": "66",
+          "source_text": "Jodocus Hocker and Hermann Hammelmann, “Der Teuffel selbs,” in Theatrum diabolorum, das ist: Warhafftige eigentliche und kurtze Beschreibung allerley grewlicher, schrecklicher und abschewlicher Laster, so in diesen letzten, schweren, und bosen Zeiten, an allen Orten und Enden fast brauchlich, ed. Sigmund Feyerabend (Frankfurt a/M, 1587), fol. 12V; Mechtild Josephi Jacob, “Die Hexenlehre des Paracelsus und ihre Bedeutung fiir die modernen Hexenprozesse: Ein Beitrag zur Geschichte der Entwicklung des Hexenglaubens seit dem Mittelalter unter besonderer Berticksichtigung der Uberlieferung aus dem Raum Gifhorn (Braunschweig)” (diss., Gottingen University, 1959); Charles Webster, “Paracelsus and Demons: Science as a Synthesis of Popular Belief,” in Istituto nazionale di studi sul Rinascimento, Scienze, credenze occulte, livelli di cultura: Convegno internazionale di studi, Firenze, 26—30 giugno 1980 (Florence, 1982), pp. 3—20.",
+          "page_no": 72,
+          "display_marker": "81",
+          "source_marker": "81",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         }
       ],
       "unmatched_anchors": [],
       "rebind_candidates": [
         {
-          "link_id": "link-00507",
-          "note_item_id": "fn-00777",
-          "current_anchor_id": "anchor-00727",
-          "marker": "2",
-          "note_page_no": 289,
-          "anchor_page_no": 304,
-          "current_anchor_marker": "2",
-          "note_excerpt": "This famous anecdote concerning the melancholic who thought himself dead was attributed also to Claus Narr (Biittner, Von Claus Narren [1602], pp. 486-87). Many such stories, originating with the ancient physician Rufus of Ephesus (fl. under Trajan) were collected by Jason Pratensis in De cerebri morbis (see pp. 152-56 above) and by Robert Burton in The Anatomy of Melancholy (London, 1621). On ancient psychiatry, see J. Pigeaud, La",
-          "anchor_excerpt": "tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epileptics in particular because a folk etymology connected the “falling sickness” (vallendes siechtum) with Valentine. The miracle book for Diepoldskichen begins in 1420 and lists 2,914 miracles between that date and 1691, 95 percent of them from the period after 1535. $ ^{33} $ The shrine to St. Rasso in Grafrath (Wörth on the Amper, 18 miles west of Munich) recorded 5,173 miracles between 1444 and 1518, and another 7,000 by the end of the eighteenth century, with a characteristic steep decline between 1514 and about 1560. $ ^{34} $ The common claim among Erasmians and Protestant reformers that the age of miracles was over must have struck devout pilgrims from Bavaria and Austria as bizarre and easily disproved. Literally hundreds of shrines sprang up between 1400 and 1700, and each one could demonstrate its power with lists of wondrous cures and “miracles.”",
+          "link_id": "link-00093",
+          "note_item_id": "fn-00083",
+          "current_anchor_id": "anchor-00099",
+          "marker": "82",
+          "note_page_no": 72,
+          "anchor_page_no": 71,
+          "current_anchor_marker": "82",
+          "note_excerpt": "Henricus Kornmann, Templum Naturae Historicum, . . . in quo de natura et miraculis quatuor elementorum . . . disseritur (Darmstadt, 1611); see also Allen G. Debus, The Chemical Philosophy: Paracelsan Science and Medicine in the Sixteenth and Seventeenth Centuries (New York, 1977); for a short introduction, see Lynn Thorndike, A History of Magic and Experimental Science, vol. 5: The Sixteenth Century (New York, 1941), pp. 617—51.",
+          "anchor_excerpt": "had indeed eaten, but not in any normal fashion: \"[L]ittle, tiny men and maids, wearing beautiful ornaments (whom she alone of all the family could see), ran about every day under her bed and brought her food from whatever was being cooked at home or roasted elsewhere.\" $ ^{82} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00097",
+          "note_item_id": "fn-00087",
+          "current_anchor_id": "anchor-00101",
+          "marker": "86",
+          "note_page_no": 73,
+          "anchor_page_no": 72,
+          "current_anchor_marker": "86",
+          "note_excerpt": "Barbara Konneker, Wesen und Wandlung der Narrenidee im Zeitalter des Humanismus: Brant, Murner, Erasmus (Wiesbaden, 1966); Joel Lefebvre, Les fols et la folie: Etude sur les genres du comique et la création littéraire en Allemagne pendant la Renaissance (Paris, 1968).",
+          "anchor_excerpt": "In the sixteenth century, many observers agreed that some kinds of spirit were bound to particular waters, others to particular mountains or caves or mines, others still to specific crystals or houses or forests. The writings of Paracelsus, for example, abound with nymphs, sprites, kobolds, elves, dwarves, and fairies. $ ^{86} $ He and his followers held that nature was full of such spirits. Heinrich Kornmann published a Latin treatise in 1611, firmly based on Paracelsan principles, in which he undertook to set forth all the kinds of spirits that inhabit the fires, airs, waters, and earths of our experience, and his example must stand for many. $ ^{87} $ It is equally well known that the miners of Germany had a rich mythology about the Little Men of the Mountain (Bergmännlein), who sometimes helped and sometimes exasperated them in their subterranean labors. $ ^{88} $ The world of ordinary experience",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00100",
+          "note_item_id": "fn-00090",
+          "current_anchor_id": "anchor-00104",
+          "marker": "89",
+          "note_page_no": 74,
+          "anchor_page_no": 73,
+          "current_anchor_marker": "89",
+          "note_excerpt": "Carlo Ginzburg, Ecstasies: Deciphering the Witches” Sabbath (London, 1990). Anthropologists have argued that cultures where ecstasy is highly valued may have “possession cults” in which men and the elite of society participate; but that cultures where ecstasy is discouraged or devalued often relegate possession to women and the marginal. This distinction seems to work in a rough way for European culture. See David N. Gellner’s discussion and application of work of I. M. Lewis in “Priests, Healers, Mediums, and Witches: The Context of Possession in Kathmandu Valley, Nepal,” Man 29 (1994): 27-48. For criticism of Ginzburg, see Behringer, Chonrad Stoeckhlin, pp- 145-50; Klaus Graf, “Carlo Ginzburgs ‘Hexensabbat’: Herausforderung an die Methodendiskussion der Geschichtswissen-",
+          "anchor_excerpt": "It is hard to find out much in detail about these spirits and goblins and elves, because literate people usually described such ideas as superstition. For orthodox Lutherans and Catholics alike, the world was not full of all sorts of spirits. Rather, there were, fundamentally, only two kinds of spirits in the world: good angels and bad; and of the two, devils were far the more active. Indeed, one of the most pervasive processes across the sixteenth century, and not just in Germany, was the growing demonization of the world. $ ^{89} $ The pious, learned, and literate found that it made better sense of their world to describe the apparent chaos of life and the prevalence of wickedness as a dramatic personal struggle between good and evil, of angels and demons. Because certain kinds of madness came to be experienced and described as demonic possession, we must acquaint ourselves with the rising tide of demons in the world of Reformation Germany.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00103",
+          "note_item_id": "fn-00093",
+          "current_anchor_id": "anchor-00107",
+          "marker": "92",
+          "note_page_no": 75,
+          "anchor_page_no": 74,
+          "current_anchor_marker": "92",
+          "note_excerpt": "See Wolfgang Briickner, “Forschungsprobleme der Satanologie und Teufelserzahlungen,” in Volkserzihlung und Reformation, ed. id., pp. 393—416.",
+          "anchor_excerpt": "what the authors earnestly intended. If every vice had not just some foolish blindness at its base, as in the Ship of Fools, but a specific devil, then the devil himself could begin to seem foolish, consuming his destructive energies in the effort to tempt mankind to wear large ruffled collars, pointed shoes, pleated shirts, and billowing pantaloons, or coaxing would-be Christians into un-Christian dancing, swearing, disobedience to masters, pensive melancholy, and general laziness. $ ^{92} $ It should be remembered that as the devil became ever more present in the sixteenth century, he assumed an increasingly amazing variety of shapes, ranging from these faintly ridiculous echoes of stock medieval vice and folly figures, on through the threatening sort of devil who seduced wives and widows into witchcraft, and up to figures of fully Satanic, apocalyptic terror. Before drawing too sharp a contrast between the devil of the learned and the demons of the people, therefore, we need to emphasize that even among the learned, and even during the process I have called the demonization of the world, the learned and literate had their own sharp disagreements over just what it meant to say that the devil was active everywhere. Despite divisions among the elite, however, it would be foolish to deny that popular and learned culture diverged even more sharply over just this issue, as the history of witchcraft suggests.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00104",
+          "note_item_id": "fn-00094",
+          "current_anchor_id": "anchor-00108",
+          "marker": "93",
+          "note_page_no": 75,
+          "anchor_page_no": 74,
+          "current_anchor_marker": "93",
+          "note_excerpt": "See Andreas Celichius, Notwendige Erinnerung Von des Sathans letzten Zornsturm, Und was es auff sich habe und bedeute, das nu zu dieser zeit so viel Menschen an Leib und Seel vom Teuffel besessen werden (Wittenberg, 1595), fol. G2.",
+          "anchor_excerpt": "The studies of Norman Cohn, Richard Kieckhefer, and Eva Labouvie suggest that the full European belief in witchcraft (with demonic pact, cannibalism, flight to the Sabbath, the devil’s mark, and sexual intercourse with the devil) was a learned fantasy, one that had few if any roots or resonance among “ignorant” villagers, whose witchcraft remained concentrated on the practical advantages to be obtained from cunning men and wise women and on the frightful damage that could be wrought through the maleficium of harmful witches. $ ^{93} $ Carlo Ginzburg has objected that ordinary people had their own mythic fantasies of flight and Sabbath and their own mythic terrors, too, but his line of interpretation seems strained. $ ^{94} $",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00106",
+          "note_item_id": "fn-00096",
+          "current_anchor_id": "anchor-00110",
+          "marker": "95",
+          "note_page_no": 76,
+          "anchor_page_no": 75,
+          "current_anchor_marker": "95",
+          "note_excerpt": "See Steven Ozment, “The Social History of the Reformation: What Can We Learn from Pamphlets?” in Flugschriften als Massenmedium der Reformationszeit, ed. Hans-Joachim Kohler (Stuttgart, 1981), who seems to ignore some of the chief weaknesses of these sources as windows into the popular mind, while at the same time proving their usefulness for other kinds of social history. On the problems of documentary sources for the study of popular culture, see Peter Burke, Popular Culture in Early Modern Europe (New York, 1978).",
+          "anchor_excerpt": "Pushed to unacceptable extremes in the overly schematic interpretation of Robert Muchembled, $ ^{95} $ this model of competing conceptions of witchcraft (roughly, scholastic vs. popular) has nonetheless prompted a great deal of important work. $ ^{96} $ No one can be content any longer with the bland generalizations of an earlier generation of scholars concerning the common beliefs of an undifferentiated “people.” Before we can tell what demonic possession meant in the sixteenth century, we need to clarify whose beliefs we are studying.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00107",
+          "note_item_id": "fn-00097",
+          "current_anchor_id": "anchor-00111",
+          "marker": "96",
+          "note_page_no": 76,
+          "anchor_page_no": 75,
+          "current_anchor_marker": "96",
+          "note_excerpt": "David Lederer (“Reforming the Spirit,” pp. 287-327) has studied the manuscript records of cases of demonic possession brought to the attention of the Bavarian shrines of Benediktbeuern and Purten during the seventeenth century. In these less polemically charged records, one can find numerous examples of unsuccessful exorcism.",
+          "anchor_excerpt": "Pushed to unacceptable extremes in the overly schematic interpretation of Robert Muchembled, $ ^{95} $ this model of competing conceptions of witchcraft (roughly, scholastic vs. popular) has nonetheless prompted a great deal of important work. $ ^{96} $ No one can be content any longer with the bland generalizations of an earlier generation of scholars concerning the common beliefs of an undifferentiated “people.” Before we can tell what demonic possession meant in the sixteenth century, we need to clarify whose beliefs we are studying.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00108",
+          "note_item_id": "fn-00098",
+          "current_anchor_id": "anchor-00112",
+          "marker": "97",
+          "note_page_no": 76,
+          "anchor_page_no": 75,
+          "current_anchor_marker": "97",
+          "note_excerpt": "This is a point made repeatedly by recent scholars. See Cécile Ernst, Teufelaustreibungen: Die Praxis der katholischen Kirche im 16. und 17. Jahrhundert (Bern, 1972); D. P. Walker, “Demonic Possession Used as Propaganda in the Later Sixteenth Century,” in Istituto nazionale di studi sul Rinascimento, Scienze, credenze occulte, livelli di cultura: Convegno in-",
+          "anchor_excerpt": "And that brings us back to Judith Klatten. What were her own beliefs about the spirits who helped her? Evidently, as a pious girl, she did not share the view that such spirits must be devils, but our source, the Wider Natur und Wunderbuch (\"Book of Miracles and of Things Contrary to Nature\") of Andreas Angelus (Engel), does not permit us to say much more about Klatten's understanding of what had happened to her. If we simply extended the conclusions of some recent witchcraft research, we might emphasize the extent to which Satan was a creature of learned or biblical invention, and minimize the extent to which ordinary, illiterate people feared or even believed in the devil. Such a simple contrast, however, would be unjustified. Just because the commonplace witchcraft beliefs of popular culture did not (or did not until relatively late) stress the devil, it does not follow that popular culture had no devil at all. In fact, the devil was a frequent figure in everyday speech, in slogans, curses, epithets, and aphorisms, $ ^{97} $ and we often find that an ordinary man or woman was regarded as demon-possessed after his or her spouse had invoked the devil by way of a curse. $ ^{98} $",
           "current_anchor_synthetic": false
         }
       ]
     },
-    "page_contexts": [
-      {
-        "page_no": 284,
-        "file_idx": 283,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "The first nine editions of Claus Narr continued to print these aesthetically dubious, flat, but supposedly edifying verses. It was only with the cheaper and smaller editions starting in 1645 that these Christianizing moral rhymes were dropped, and only then if at all that Claus Narr became a Volksbuch. I find Büttner's authorial decisions deeply interesting: Büttner chose to publish anonymously and subverted his text by adding insipid moral rhymes with the intention of castrating the humor or at least diverting attention from the frivolous nature of some of Claus's gestures, stupidities, and pranks. Over and over, Büttner found deep wisdom or simple piety in jokes that surely had a simpler or ruder meaning. When Claus talked to his hat when it fell off and expressed his worry that his head might fall off next, Büttner extracts the moral: \"What can't be cured must be endured\" (\"Laß fahren hin was nicht sein kan\"). $ ^{59} $ Sometimes, Büttner openly rejects the force of his own story. One one occasion, for example, Claus defended a man who had impregnated a maid, saying that she had previously been only a Mayd but was now Fraw Mutter. Pastor Büttner, however, drew the opposite conclusion and urged punishment for fornication (Unzucht). $ ^{60} $ Such editorializing suggests that Büttner was both fascinated by these stories but apprehensive that they might be turned to secular or ...",
-        "byte_size": 7543537,
-        "sha256": "b4a9cb6ee5b01285e2e5c15fe7ffbf5a788172a5cefed748262dadc79f60d5c7"
-      },
-      {
-        "page_no": 285,
-        "file_idx": 284,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "ture or knowing clairvoyantly what was happening elsewhere; and (b) in being an amusing fellow to have around. We need to admit, frankly, that we do not understand the fool's supernatural knowledge, if indeed he ever possessed any gift of clairvoyance. But we may approach the second part of the fool's \"wisdom\" by asking what was so hilarious. My impression is that Claus Narr and most other court fools seemed funny because they defied the increasingly delicate standards of courtesy, of restrained courtly behavior, of Höflichkeit. Claus Narr had a childish ignorance of such adult realities as money, sex, adultery, counting and numbers, metaphoric language, religion, and death. Although Claus possessed a childish modesty, he was a naive and clumsy master of social transgression. According to the Grimm brothers' famous dictionary, even the German word unhöflich (discourteous) dates precisely from Sebastian Brant's Ship of Fools. Those new or newly rigorous standards of deportment have been famously studied by the German sociologist Norbert Elias, who found in courtly culture a new set of embarrassments about the body, about cleanliness, excretion, nakedness and sex, about food and drink, about farting and sleeping, invasions of privacy and lapses from elegance, all deviations from smooth gracefulness and from an emerging conformity to aristocratic standards of appearance and deport ...",
-        "byte_size": 8241751,
-        "sha256": "81724485eaf0dc22d13c88e4175052238ac23d9960cfeb038f07b98d3478c1f0"
-      },
-      {
-        "page_no": 286,
-        "file_idx": 285,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "Cleves, Duchess Jakobe von Baden was accused by the duke’s sister Sibylla of committing a variety of crimes and outrages ranging from the casting of magic spells to frequent acts of marital infidelity. But the duchess had, in addition, disgraced herself with the court fool, a man named Martin, whom she “secretly after dinner ordered to her rooms, where, behind closed doors, she tugged at his trousers for two or three hours.” Was she playing sexual games with a fool? These were dangerous indiscretions. Witnesses charged that she had “stroked him lovingly, clothed him delicately, painted his face, and given him baths twice a week.” $ ^{65} $ The princess had a reputation for frivolity but this was surely too much! The court in Düsseldorf was abuzz with rumors, but for our limited purposes here it is noteworthy that a fool had his part to play in this melodrama, a tragedy that only ended with the bedroom murder of Duchess Jakobe. $ ^{66} $ Here was a fool with whom a lady could play naughty games, but only at the risk of her life. The historian’s task in describing the life of court fools is to find more of this sort of credible evidence of life as it was actually lived, as distinct from the heaps of literary and derivative fantasies that were collected in the jest books of Narrenliteratur. We have seen in the case of Claus Narr how quickly the sources fill up with literary stereo ...",
-        "byte_size": 8466226,
-        "sha256": "2736b6270e31751bd0b810a23f270b77252bca92c8b7aec68f37e26a6529efce"
-      },
-      {
-        "page_no": 287,
-        "file_idx": 286,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "went about barefoot summer and winter. Courtiers obviously had a good time abusing this unfortunate man, so much so that on one occasion he fell into a rage and took revenge by stuffing wood shavings into all the palace key holes. But this deed in turn irritated Count Johann so deeply that he banished his fool from Messkirch. According to this decree, Letzkopf was seized and led to the nearby monastery of Wald. To the astonishment of all, later that same day Letzkopf appeared in Messkirch at court again, returning even before the servant who had taken him into exile (the fool had known a shortcut through the woods). When asked to explain himself, Letzkopf set forth a touching confession. Once abandoned at the monastery, the poor man \"had sat down on a large stone and had looked around at the wide world in all directions\" and concluded that \"no place in all the world was so dear to him as Mösskirch.\" This touching story made Count Johann laugh, and he received Letzkopf back into his good graces again. The life of a natural fool at court was clearly not all beer and skittles, but Peter Letzkopf was evidently something more than a helpless imbecile. It was said that he had been four times to Santiago de Compostela, and that in Rome he had once tricked a blind beggar who had secreted a hoard of forty gold pieces in his cloak into jumping off a bridge into the Tiber (and drowning), ...",
-        "byte_size": 9576153,
-        "sha256": "dd545c01d19e5e166273c407cd53ab4b94298e2fc7a3e01c5288af5340b9e616"
-      },
-      {
-        "page_no": 288,
-        "file_idx": 287,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "Putting on his crab shell, he fancied the guests could not see him. \"Where, oh, where, has our Peter gone?\" (\"Ach, wo ist uns der Petter hinkommen?\"), the guests would then exclaim. This pleased Peter enormously, who then betook himself to a corner. One guest lamented, \"I fear that our Peter is lost,\" but another objected, \"Hah, that rascal, that thief is probably off stealing another sheep or skinning a cat so that he can sell the pelt to a furrier as if it were a buckskin.\" Such a charge was too much for the fool, but thinking that he could not be seen, he swallowed his anger. \"They kept up this kind of mummery with him a long time. Finally, someone came along and knocked the crab shell off his nose as if by accident and shouted, 'Look, Peter, are you here? We all thought you were away.'\" And then Peter laughed and exclaimed, \"'Ja, I just came from the fish market where I was doing this or that.'\" Our chronicler remarks that Peter had to be teased and enraged periodically, \"so that his spirit would get excited, for otherwise he would get sick because of his melancholy, as the proverb says: 'Fools have to be driven and exercised, or else they go rotten and soft from lying around.'\" The application of this proverb is of interest here, not only because it reveals that a kind of debased medical thinking had penetrated the nobility even in remote rural corners of Germany, but also ...",
-        "byte_size": 8015665,
-        "sha256": "64f3425271e361a8734b4dc7c505c715716f2ee2b6509af7f9b3b7cb270dd39e"
-      },
-      {
-        "page_no": 289,
-        "file_idx": 288,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "oped a strong sense of family loyalty. Count Johann Wernher took a young, retarded boy named Junghans and raised him, \"for the sake of God.\" It should not surprise us, therefore, that when his widow, Countess Margarethe von Zimmern, was to be displaced from her residence by Count Haug von Werdenberg, Junghans, a \"poor, childish, silly person,\" felt it as an attack on his own mother. In defense of \"my dear mother,\" this \"senseless fool\" threatened to kill Count Haug with an ax, but he was disarmed by the countess before he could do any harm. $ ^{70} $ As we can see, the fools mentioned in the Zimmerische Chronik were not professional jesters, entertainers, or Schalksnarren. They were men with more or less serious mental troubles or deficiencies. Sometimes the idées fixes or “melancholy” delusions of such fools made life hard for everyone. The Chronik reports on Count Rudolf von Sulz’s fool, who on the face of it seemed normal but had a mania for collecting all sorts of papers. To humor this odd fixation, courtiers used to give him old letters and other irrelevant waste paper. Once, when Count Rudolf was trying to travel incognito, his companion, the fool, seized a package of confidential letters from the count, prompting the count to strike the fool on the finger, sending the poor man off into such a rage that he was uncontrollable for a time. By charging that Count Rudolf had a ...",
-        "byte_size": 9352150,
-        "sha256": "e5f35e11e811fbd0ec082d44bce907262c625db9511ee18d1beb15ba0b854b1a"
-      },
-      {
-        "page_no": 290,
-        "file_idx": 289,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "As we have seen, fools were sometimes put to work with simple tasks, but there was always the risk that a fool would not perform as expected. The Zimmerische Chronik tells of a swineherd who deliberately led his pigs to feed on poisonous herbs so that he would have fewer pigs to guard. $ ^{73} $ Another fool, admired for his ability to play the bagpipe, fashioned a foxskin blanket for his instrument so that his pipes would not feel cold in the winter. $ ^{74} $ The most common expression used to describe a fool in the Zimmerische Chronik is ain lauters kindt, “nothing but a child,” a phrase that explains perhaps the amusement and the indulgence with which these unfortunatest were regarded. The counts of Zimmern did not, however, see their fools as licensed oracles or goofy critics of courtly convention. They were funny specimens of a distorted humanity. ## An Artificial Fool: Friedrich Taubmann One of the more remarkable academic careers in sixteenth-century Germany was that of Friedrich Taubmann (1565–1613), a poet, professor, and \"merry counselor\" (lustiger Rat) to the electors of Saxony (fig. 18). Over one hundred years ago, Friedrich Ebeling published an excellent study of Taubmann's life and writings, together with a collection of his jests and a bouquet of his Latin poems. It is still today the best work on Taubmann, who was born in 1565 in Wonsees, near Bayreuth in Franc ...",
-        "byte_size": 8090203,
-        "sha256": "401e40ab851380f30f2382b223d3bb27aa9ab6d9a5308ae790c3fa98fde59313"
-      },
-      {
-        "page_no": 304,
-        "file_idx": 303,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "tonished or incredulous in the face of hundreds of supposedly “miraculous” cures, but there were actually many more. The shrine to St. Valentine in Diepoldskirchen (in Lower Bavaria between Passau and Landshut), for example, attracted epileptics in particular because a folk etymology connected the “falling sickness” (vallendes siechtum) with Valentine. The miracle book for Diepoldskichen begins in 1420 and lists 2,914 miracles between that date and 1691, 95 percent of them from the period after 1535. $ ^{33} $ The shrine to St. Rasso in Grafrath (Wörth on the Amper, 18 miles west of Munich) recorded 5,173 miracles between 1444 and 1518, and another 7,000 by the end of the eighteenth century, with a characteristic steep decline between 1514 and about 1560. $ ^{34} $ The common claim among Erasmians and Protestant reformers that the age of miracles was over must have struck devout pilgrims from Bavaria and Austria as bizarre and easily disproved. Literally hundreds of shrines sprang up between 1400 and 1700, and each one could demonstrate its power with lists of wondrous cures and “miracles.” ## LATE MEDIEVAL MIRACLES IN ## THE RHINELAND We can get closer to the mad by looking at several specific miracle books in which we find vivid case histories. One of the most interesting miracle books is that of the monastery of Eberhardsklausen on the Mosel River, downstream from Trier. The ...",
-        "byte_size": 8036205,
-        "sha256": "ee6b085a7521f597308fc7293b83b76606c875b9c7d2d2b35deccd56c27fafa8"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-005-courtfoolsandtheirfollyi:nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi:endnote",
-    "request_mode": "note_only",
-    "page_context_count": 8,
+    "cluster_id": "toc-ch-001-1historicalproblemssinst:nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"The provided JSON input contains 'unmatched_note_items' (fn-00764 to fn-00771) but the 'unmatched_anchors' list is empty. This indicates that while the note texts are available, the corresponding structural anchor records for the superscript numbers (59-66) in the text are missing from the input data. Without valid anchor_ids in the input, I cannot perform 'match' actions which require an existing anchor_id. Additionally, the page images provided (264-270, 284) do not cover the full range of pages implied by the note items (up to page 286/290), preventing a complete verification of all notes via screenshot.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 4078,
+    "output_tokens": 591,
+    "total_tokens": 4669,
+    "estimated_input_tokens": 4249,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00074\",\n    \"anchor_phrase\": \"the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness\",\n    \"confidence\": 0.9,\n    \"reason\": \"Note discusses demonic possession and mental disorder, matching this unique phrase.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00075\",\n    \"anchor_phrase\": \"the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness\",\n    \"confidence\": 0.85,\n    \"reason\": \"Note discusses demoniacs, hysteria, and mental disorder, aligning with this phrase.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00077\",\n    \"reason\": \"No unique anchor phrase found for Andreas Angelus source in the excerpt.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00078\",\n    \"anchor_phrase\": \"ran about every day under her bed and brought her food from whatever was being cooked\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note quotes the identical German text describing the little men and maids.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00079\",\n    \"anchor_phrase\": \"ran about every day under her bed and brought her food from whatever was being cooked\",\n    \"confidence\": 0.9,\n    \"reason\": \"Note quotes the continuation of the same story about the little men and maids.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00080\",\n    \"anchor_phrase\": \"ran about every day under her bed and brought her food from whatever was being cooked\",\n    \"confidence\": 0.85,\n    \"reason\": \"Note quotes the same story about the little men and maids, adding final details.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00081\",\n    \"anchor_phrase\": \"the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness\",\n    \"confidence\": 0.8,\n    \"reason\": \"Note discusses possession and anorexia, fitting the religious madness context.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"note_item_id\": \"fn-00082\",\n    \"reason\": \"No unique anchor phrase found for 'Der Teuffel selbs' source in the excerpt.\"\n  }\n]",
   "response_parsed": [
     {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00074",
+      "anchor_id": "",
+      "anchor_phrase": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Note discusses demonic possession and mental disorder, matching this unique phrase."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00075",
+      "anchor_id": "",
+      "anchor_phrase": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.85,
+      "reason": "Note discusses demoniacs, hysteria, and mental disorder, aligning with this phrase."
+    },
+    {
       "action": "needs_review",
-      "note_item_id": "",
+      "note_item_id": "fn-00077",
       "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.0,
-      "reason": "The provided JSON input contains 'unmatched_note_items' (fn-00764 to fn-00771) but the 'unmatched_anchors' list is empty. This indicates that while the note texts are available, the corresponding structural anchor records for the superscript numbers (59-66) in the text are missing from the input data. Without valid anchor_ids in the input, I cannot perform 'match' actions which require an existing anchor_id. Additionally, the page images provided (264-270, 284) do not cover the full range of pages implied by the note items (up to page 286/290), preventing a complete verification of all notes via screenshot."
+      "confidence": 0.8,
+      "reason": "No unique anchor phrase found for Andreas Angelus source in the excerpt."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00078",
+      "anchor_id": "",
+      "anchor_phrase": "ran about every day under her bed and brought her food from whatever was being cooked",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Note quotes the identical German text describing the little men and maids."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00079",
+      "anchor_id": "",
+      "anchor_phrase": "ran about every day under her bed and brought her food from whatever was being cooked",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Note quotes the continuation of the same story about the little men and maids."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00080",
+      "anchor_id": "",
+      "anchor_phrase": "ran about every day under her bed and brought her food from whatever was being cooked",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.85,
+      "reason": "Note quotes the same story about the little men and maids, adding final details."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00081",
+      "anchor_id": "",
+      "anchor_phrase": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Note discusses possession and anorexia, fitting the religious madness context."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00082",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "No unique anchor phrase found for 'Der Teuffel selbs' source in the excerpt."
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00074",
+        "anchor_id": "",
+        "anchor_phrase": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Note discusses demonic possession and mental disorder, matching this unique phrase."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00075",
+        "anchor_id": "",
+        "anchor_phrase": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.85,
+        "reason": "Note discusses demoniacs, hysteria, and mental disorder, aligning with this phrase."
+      },
+      {
         "action": "needs_review",
-        "note_item_id": "",
+        "note_item_id": "fn-00077",
         "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.0,
-        "reason": "The provided JSON input contains 'unmatched_note_items' (fn-00764 to fn-00771) but the 'unmatched_anchors' list is empty. This indicates that while the note texts are available, the corresponding structural anchor records for the superscript numbers (59-66) in the text are missing from the input data. Without valid anchor_ids in the input, I cannot perform 'match' actions which require an existing anchor_id. Additionally, the page images provided (264-270, 284) do not cover the full range of pages implied by the note items (up to page 286/290), preventing a complete verification of all notes via screenshot."
+        "confidence": 0.8,
+        "reason": "No unique anchor phrase found for Andreas Angelus source in the excerpt."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00078",
+        "anchor_id": "",
+        "anchor_phrase": "ran about every day under her bed and brought her food from whatever was being cooked",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note quotes the identical German text describing the little men and maids."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00079",
+        "anchor_id": "",
+        "anchor_phrase": "ran about every day under her bed and brought her food from whatever was being cooked",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Note quotes the continuation of the same story about the little men and maids."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00080",
+        "anchor_id": "",
+        "anchor_phrase": "ran about every day under her bed and brought her food from whatever was being cooked",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.85,
+        "reason": "Note quotes the same story about the little men and maids, adding final details."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00081",
+        "anchor_id": "",
+        "anchor_phrase": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Note discusses possession and anorexia, fitting the religious madness context."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00082",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "No unique anchor phrase found for 'Der Teuffel selbs' source in the excerpt."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 24076,
-    "completion_tokens": 185,
-    "total_tokens": 24261,
+    "prompt_tokens": 4078,
+    "completion_tokens": 591,
+    "total_tokens": 4669,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 22751
+    "duration_ms": 5658
   }
 }

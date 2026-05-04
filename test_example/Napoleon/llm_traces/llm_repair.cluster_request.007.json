@@ -2,103 +2,175 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-006-lasileprisonpolitique:toc-ch-006-lasileprisonpolitique:endnote\",\n  \"chapter_title\": \"II. L’asile, prison politique ?\",\n  \"page_range\": [\n    105,\n    105\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 105,\n      \"ocr_excerpt\": \"# II L'asile, prison politique? Le 6 août 1793, jour de la nomination officielle de Pinel à Bicêtre, la maison Belhomme, où il exerçait à titre de médecin consultant depuis 1786, devient une prison sur ordre de la Terreur¹. Étonnante concomitance des dates, qui fait passer Pinel, le jour même, d'une maison de santé devenue geôle officielle de la Révolution à un hospice surtout connu pour être une maison de force de l'Ancien Régime. Prison et hospice, le couple est ancien, formalisé depuis la création de l’hôpital général par Louis XIV en 1656, qui liait le fou, le vénérien, le mendiant, le délinquant et le criminel dans des lieux de détention communs, dont Bicêtre et la Salpêtrière incarnent le symbole. L’abolition des lettres de cachet du 16 mars 1790, censée remédier à la confusion des genres entre malades et prisonniers, semblait promettre une nouvelle ère en médicalisant la folie. Mais les médecins compétents sont rares, et les établissements inadaptés. En réalité, la situation ne change guère. D’autant que, dès le mois d’août 1790, un nouveau décret\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00128\",\n      \"marker\": \"1\",\n      \"page_no\": 105,\n      \"paragraph_index\": 0,\n      \"source_text\": \"Le 6 août 1793, jour de la nomination officielle de Pinel à Bicêtre, la maison Belhomme, où il exerçait à titre de médecin consultant depuis 1786, devient une prison sur ordre de la Terreur¹. Étonnante concomitance des dates, qui fait passe ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-016-lasiledelamisère:nr-fn-ch-0055-toc-ch-016-lasiledelamisère:footnote\",\n  \"chapter_title\": \"L'asile de la misère\",\n  \"page_range\": [\n    298,\n    301\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00356\",\n      \"anchor_id\": \"anchor-00455\",\n      \"marker\": \"101\",\n      \"note_excerpt\": \"J.-E.-D. Esquirol, « Maison d'aliénés », Dictionnaire des sciences médicales, vol. XXX, Panckoucke, 1818, p. 84.\",\n      \"anchor_excerpt\": \"aliénés riches. Dans l'asile particulier, j'exerce une plus grande influence sur le quartier des femmes que sur celui des hommes ; mais cette influence est plus marquée encore sur nos aliénées de la Salpêtrière. Les habitantes de cette mais ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00357\",\n      \"anchor_id\": \"anchor-00456\",\n      \"marker\": \"102\",\n      \"note_excerpt\": \"Dr Auguste Voisin, Leçons cliniques sur les maladies mentales et sur les maladies nerveuses, Librairie J.-B. Baillière et fils, 1883, p. 428.\",\n      \"anchor_excerpt\": \"Cinquante ans plus tard, le docteur Voisin rapporte dans ses Leçons cliniques le cas d'une patiente de la Salpêtrière qui pleurait en s'approchant et disait ne pas oser venir parce qu'elle n'était pas « assez bien habillée pour entrer dans ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00368\",\n      \"marker\": \"113\",\n      \"page_no\": 298,\n      \"source_text\": \"Ibid., 5e division, 2e section, 1863-1865, 6R31, fo 252. Entrée le 5 août 1864, rendu à son mari le 6 novembre 1864.\"\n    },\n    {\n      \"note_item_id\": \"fn-00377\",\n      \"marker\": \"122\",\n      \"page_no\": 301,\n      \"source_text\": \"AAP-HP, Bicêtre, 5° division, 1° et 2° sections, 1858-1859, 6R12, f° 192. Entré le 3 juillet 1858.\"\n    },\n    {\n      \"note_item_id\": \"fn-00378\",\n      \"marker\": \"123\",\n      \"page_no\": 301,\n      \"source_text\": \"Ibid., 1860-1861, 6R17, f° 108. Entré le 17 septembre 1860.\"\n    },\n    {\n      \"note_item_id\": \"fn-00379\",\n      \"marker\": \"124\",\n      \"page_no\": 301,\n      \"source_text\": \"abd^ ybid^\\\\ ahei]ahf`\\\\ fRaf\\\\ fo ddh^ un¤¢é le ae a¦¢il ahf`^\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"Il y a vingt-et-un ans, je rendais compte dans les Annales médico-psychologiques (1850) d'une brochure allemande ayant pour titre Morbus democraticus. Frappé moi-même de la gravité des faits de 1848, car, dès cette époque j'habitais le haut du faubourg Saint-Antoine, je signalai dans cette analyse la folie démocratique, égalitaire et sociale, avec ses maniaques, ses monomanes, ses déments et ses idiots, que j'avais pu étudier à fond sur les ouvriers de ce quartier. [...] L'étude de ce monde m'a conduit à le considérer comme une collection de fous de la pire espèce, bien plus dangereux que les fous criminels. Le caractère distinctif des seconds consiste à tuer, à voler quelques individus et à incendier quelques bâtiments, tandis que celui des premiers est d'assassiner en entier la société et de brûler tous les monuments qui font l'orgueil d'une nation $ ^{94} $. La maladie démocratique est bel et bien une maladie grave, chronique. Et c'est une maladie de classe, celle du prolétariat, dont la psychiatrie, science bourgeoise, scrute le profil pathologique, l'anatomie et les symptômes, avec un effroi qui exprime, pour reprendre une formule de Louis Chevalier, « le caractère véritablement racial des antagonismes sociaux $ ^{95} $ ». ## L'ASILE DE LA MISÈRE En 1848, les ouvriers composent 40 % de la population parisienne, qui, avec plus d’un million d’habitants, a doublé en un demi-siècle, sous l'effet de l'industrialisation et de l'exode rural. La journée de travail, dans des conditions souvent malsaines et très dures, est fixée à un maximum de douze heures, ramenée à huit pour les enfants, qui commencent dès huit ans, l'âge légal. Mais en 1851, une nouvelle loi autorise de multiples dérogations. La journée atteint souvent quinze heures, pour un salaire qui passe de 3,82 fra ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-006-lasileprisonpolitique:toc-ch-006-lasileprisonpolitique:endnote",
-      "chapter_title": "II. L’asile, prison politique ?",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-016-lasiledelamisère:nr-fn-ch-0055-toc-ch-016-lasiledelamisère:footnote",
+      "chapter_title": "L'asile de la misère",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
-        105,
-        105
+        298,
+        301
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 153,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00128",
-          "chapter_id": "toc-ch-006-lasileprisonpolitique",
-          "page_no": 105,
-          "paragraph_index": 0,
-          "char_start": 189,
-          "char_end": 190,
-          "source_marker": "¹",
-          "normalized_marker": "1",
-          "anchor_kind": "endnote",
-          "certainty": 1.0,
-          "source_text": "Le 6 août 1793, jour de la nomination officielle de Pinel à Bicêtre, la maison Belhomme, où il exerçait à titre de médecin consultant depuis 1786, devient une prison sur ordre de la Terreur¹. Étonnante concomitance des dates, qui fait passer Pinel, le jour même, d'une maison de santé devenue geôle officielle de la Révolution à un hospice surtout connu pour être une maison de force de l'Ancien Régime.",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00356",
+          "note_item_id": "fn-00356",
+          "anchor_id": "anchor-00455",
+          "marker": "101",
+          "note_excerpt": "J.-E.-D. Esquirol, « Maison d'aliénés », Dictionnaire des sciences médicales, vol. XXX, Panckoucke, 1818, p. 84.",
+          "anchor_excerpt": "aliénés riches. Dans l'asile particulier, j'exerce une plus grande influence sur le quartier des femmes que sur celui des hommes ; mais cette influence est plus marquée encore sur nos aliénées de la Salpêtrière. Les habitantes de cette maison me regardent comme d'une condition bien supérieure à elles ; aussi m'est-il arrivé plusieurs fois de rendre, comme par enchantement, une aliénée à la raison, en lui accordant un entretien dans mon cabinet : plusieurs d'entre elles ont donné des signes de guérison dès l'instant même $ ^{101} $."
+        },
+        {
+          "link_id": "link-00357",
+          "note_item_id": "fn-00357",
+          "anchor_id": "anchor-00456",
+          "marker": "102",
+          "note_excerpt": "Dr Auguste Voisin, Leçons cliniques sur les maladies mentales et sur les maladies nerveuses, Librairie J.-B. Baillière et fils, 1883, p. 428.",
+          "anchor_excerpt": "Cinquante ans plus tard, le docteur Voisin rapporte dans ses Leçons cliniques le cas d'une patiente de la Salpêtrière qui pleurait en s'approchant et disait ne pas oser venir parce qu'elle n'était pas « assez bien habillée pour entrer dans la ville $ ^{102} $ »."
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11898,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00368",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-016-lasiledelamisère",
+          "region_id": "nr-fn-ch-0055-toc-ch-016-lasiledelamisère",
+          "marker": "113",
+          "normalized_marker": "113",
+          "occurrence": 1,
+          "source_text": "Ibid., 5e division, 2e section, 1863-1865, 6R31, fo 252. Entrée le 5 août 1864, rendu à son mari le 6 novembre 1864.",
+          "page_no": 298,
+          "display_marker": "113",
+          "source_marker": "113",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11907,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00377",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-016-lasiledelamisère",
+          "region_id": "nr-fn-ch-0055-toc-ch-016-lasiledelamisère",
+          "marker": "122",
+          "normalized_marker": "122",
+          "occurrence": 1,
+          "source_text": "AAP-HP, Bicêtre, 5° division, 1° et 2° sections, 1858-1859, 6R12, f° 192. Entré le 3 juillet 1858.",
+          "page_no": 301,
+          "display_marker": "122",
+          "source_marker": "122",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11908,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00378",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-016-lasiledelamisère",
+          "region_id": "nr-fn-ch-0055-toc-ch-016-lasiledelamisère",
+          "marker": "123",
+          "normalized_marker": "123",
+          "occurrence": 1,
+          "source_text": "Ibid., 1860-1861, 6R17, f° 108. Entré le 17 septembre 1860.",
+          "page_no": 301,
+          "display_marker": "123",
+          "source_marker": "123",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11909,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00379",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-016-lasiledelamisère",
+          "region_id": "nr-fn-ch-0055-toc-ch-016-lasiledelamisère",
+          "marker": "124",
+          "normalized_marker": "124",
+          "occurrence": 1,
+          "source_text": "abd^ ybid^\\ ahei]ahf`\\ fRaf\\ fo ddh^ un¤¢é le ae a¦¢il ahf`^",
+          "page_no": 301,
+          "display_marker": "124",
+          "source_marker": "124",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 105,
-        "file_idx": 104,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "# II L'asile, prison politique? Le 6 août 1793, jour de la nomination officielle de Pinel à Bicêtre, la maison Belhomme, où il exerçait à titre de médecin consultant depuis 1786, devient une prison sur ordre de la Terreur¹. Étonnante concomitance des dates, qui fait passer Pinel, le jour même, d'une maison de santé devenue geôle officielle de la Révolution à un hospice surtout connu pour être une maison de force de l'Ancien Régime. Prison et hospice, le couple est ancien, formalisé depuis la création de l’hôpital général par Louis XIV en 1656, qui liait le fou, le vénérien, le mendiant, le délinquant et le criminel dans des lieux de détention communs, dont Bicêtre et la Salpêtrière incarnent le symbole. L’abolition des lettres de cachet du 16 mars 1790, censée remédier à la confusion des genres entre malades et prisonniers, semblait promettre une nouvelle ère en médicalisant la folie. Mais les médecins compétents sont rares, et les établissements inadaptés. En réalité, la situation ne change guère. D’autant que, dès le mois d’août 1790, un nouveau décret",
-        "byte_size": 227194,
-        "sha256": "7946c59ae96a4d49deb63119bf8e913757a3e2c990d858e2d3046ad5d0b4a943"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-006-lasileprisonpolitique:toc-ch-006-lasileprisonpolitique:endnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-016-lasiledelamisère:nr-fn-ch-0055-toc-ch-016-lasiledelamisère:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00128\",\n    \"marker\": \"1\",\n    \"note_text\": \"D. B. Weiner, Comprendre et soigner, op. cit., p. 76.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text is clearly visible at the bottom of page 105 in the screenshot, corresponding to anchor marker '1', but no structured note item was generated by OCR.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1896,
+    "output_tokens": 38,
+    "total_tokens": 1934,
+    "estimated_input_tokens": 1794,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"无正文截图，无法确认锚点位置与编号对应关系\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
+      "action": "needs_review",
       "note_item_id": "",
-      "anchor_id": "anchor-00128",
+      "anchor_id": "",
       "anchor_phrase": "",
-      "marker": "1",
-      "note_text": "D. B. Weiner, Comprendre et soigner, op. cit., p. 76.",
-      "confidence": 1.0,
-      "reason": "The footnote text is clearly visible at the bottom of page 105 in the screenshot, corresponding to anchor marker '1', but no structured note item was generated by OCR."
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "无正文截图，无法确认锚点位置与编号对应关系"
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
+        "action": "needs_review",
         "note_item_id": "",
-        "anchor_id": "anchor-00128",
+        "anchor_id": "",
         "anchor_phrase": "",
-        "marker": "1",
-        "note_text": "D. B. Weiner, Comprendre et soigner, op. cit., p. 76.",
-        "confidence": 1.0,
-        "reason": "The footnote text is clearly visible at the bottom of page 105 in the screenshot, corresponding to anchor marker '1', but no structured note item was generated by OCR."
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "无正文截图，无法确认锚点位置与编号对应关系"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 1329,
-    "completion_tokens": 129,
-    "total_tokens": 1458,
+    "prompt_tokens": 1896,
+    "completion_tokens": 38,
+    "total_tokens": 1934,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4807
+    "duration_ms": 1541
   }
 }

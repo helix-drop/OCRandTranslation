@@ -1,0 +1,163 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0028-toc-ch-005-danxisaid:footnote",
+      "chapter_title": "5. “Danxi said…”",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        178,
+        185
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00087",
+          "note_item_id": "fn-00077",
+          "anchor_id": "anchor-00512",
+          "marker": "16",
+          "note_excerpt": "2. Z̝č \u0006\u0001 \u00183\u0005W\u0001\u0004 H6>8E\u0001 \u0013\u0012\u000f\u0014\u00018AGEL\u0001 \u0011 \u0005\b\u0001\u001a;8A\u00010<UF\u0001G<G?8\u0001<A\u0001 \u000e \u0012\u0001\u00044F @8AG<BA87\u0001<A\u0001G;8\u0001CE89468\u00016<G87\u000145BI8\u0005\u0001J4F\u0001-<68\u0001\u001a8AFBE\u0007<A\u0007\u001a;<89\u0001B9\u0001G;8\u0001)<:;G\b H6>8E\u0001FG4G87\u0001G;4G\u0001G;8;81)8 CBF<G<BA\u0001J4F\u0001<A<G<4G87\u0001<A\u0001 \u000e \u0006\u00015HG\u00011;4A:\u00011;8?4A:\u0001\u0004 \u0013\u0013\u000f\u0014\u0001 \u000e\u0005 <78AG<9<87;81)8 4F\u000184E?L\u00014F\u0001 \u000e \u0010\b !<A)HA6;8A: \u0004 \u0013\u0013\u0010\u0014\u0001\u000e\u0013\u0005 9BHA7\u00018I<78A68\u0001G;4G\u0001G;8\u000184E?<8FG\u0001*;44AK<\u0001 E4A7\u0001\u001aBBE7<A4GBEF\u0001J8AG\u0001GB\u0001G;8\u00019<8?7\u0001<A\u0001 \u000e \u0011\b\u001a;8A 0<\u0001;8?7 G;4G\u0001CBF<G<BA 9EB@\u0001 \u000e \u000f\u0001GB\u0001 \u000e\u000e \u00014A7\u00014:4<A\u00019EB@\u0001 \u000e\u000e \u0001GB\u0001 \u000e\u000e\u000f \u00041;4A: 1;8?4A: \u0013\u0013\u000f\u0014\u0001\u000f\u000f\u0007\u0010\u0006\u00016<G<A:\u0001$<A: +,/8 \u0005\b \u0010\u0013 \u001a;8AUF\u0001E868<I<A:\u00014\u00016BCLB9\u0001G;8 8-,\u0001:(,<, 9EB@ #<HUF\u000194@<?LJ4 F\u0001@8AG<BA87\u0001<AG;8CBFG9468\u0001GB\u00014A\u000187<G<BAB9\u0001G;4G 5BB> CH5?<F;87 <A\u0001/<U4ABA8\u0001L84E\u000149G8E\u0001\u001a;8AUF\u0004#<H\u001a;0(\u0014\u0001\u000e\u0010 \u0005\b+;4G\u0001F4@8\u0001CBFG9468\u0001<A7<64G8F\u0001G;4G 8-,\u0001:(,<, J4F 4\u0001@4AHF6E<CG\u0001G;4G\u000198J\u0001C8BC?8\u0001>A8J\u0001\u0004ƟųɂͅÃ ż˄ŝ ŐȲ\u0011ɴͨ \u0005\b\u001a;8A\u0001CEB545?L\u0001E868<I87\u0001G;8 ,-,1*\u0001;,$2;8( G;EBH:;\u0001G;8\u0001F4@8\u00016;4AA8?\b",
+          "anchor_excerpt": "Yongwen mubiao”蔣公用文墓表 [1424], in Yang's Dongli wenji 東里文集 [1440] 16.20b-22b. 71 Yang's preface to Yuji weiji 玉機微義 ended by praising Chen Yi for diffusing medical teachings, as medicine was “the art by which the sages display benevolence upon the people” (醫者聖人仁民之術也; LiuChYQ: 73). History of the Ming (138: 4137) indicates that in the early Zhengtong reign (in or soon after 1436), Yang “dispatched military and civil officials to zhenfu Jiangxi, Huguang, Henan, and Shandong” (分遣文武鎮撫江西湖廣 河南 山東). Yang was probably the one who sent Chen to Shaanxi in 1435. John Dardess (1996: 179-89) discussed Yang's patronizing of natives of Taihe, but said little about his relations with other court officials. 72 LiuChYQ: 463. In 1438 Yang Shiqi had been named Junior Preceptor (少師), a prestige title ranked 1b. Duxian 都憲 is not listed in Hucker 1985, but it probably referred to a post in the Censorate. A sample mistake in Chen's edition: “Wang Andao” 王安道 (Zhu's disciple Wang Liu) was turned into “Yu'an daoren” 玉安道人 (“Taoist master Yu'an”; juan 1, “Wind strokes,” “neiyin si zhongfeng lun” 内因似中風論; LiuChYQ: 117A). 73 Angela Leung (2003b: 132) postulated that Yang's writing a preface for it showed that the Yijing xianxue 醫經小學 was “an important introductory textbook during the early Ming,” but it appears that Yang's preface enabled rather than recognized the influence of this text."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11647,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00075",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-danxisaid",
+          "marker": "14",
+          "normalized_marker": "14",
+          "occurrence": 1,
+          "source_text": "5BB> JE<GG8A 5L /H;,$16+(1* 9EB@ H<=<W < 8 *;4BK<A: Ņ)ŶɁĉ@ȉĲʧų ó #<H E8CBEG87 G;4G /H <A ;<F LBHG; ;47 E8F<787 <A G;8 .H 4E84 J;8E8 ;8;47 G4H:;G G;8 35,1* $1' 87801 11$/6 GB ?B64? G4?8AGF ʽ ơÎ ) ũȻ ŔŅ̞ 0ą #< *;<M;8A ƂŬȀ ?4G8E 6?4<@87 G;4G V1;H 4AK<UF 7<F6<C?8 /H 04A6;HAW JEBG8 4 (1&$2 )$+8, žʢȠň <A G;8 BA:JH E8<:A F88 #<UF (1&$ 2 *$1*08 žʢɠȫ 2 3 4 V#<74< M;H=<4 58A64BWƢ(˨Òžʢ V (1&$2 )$+8, W /HJ4 F ABG @8AG<BA87 <A 4 E868AG 4EG<6?8 BA 94@BHF *;4BK<A: C;LF<6<4AF 1;H /<4BL<A: #<H <AGEB7H687 ;<F BJAABG8FJ<G; $1 ń 4A7 477<G<BA4? F86G<BAFJ<G;;87,$1 ɨ¦ +;8 G<G?8 ,;8( =+(=+21* ̡Çļˋ 5L J;<6;@BFG F6;B?4EFABJ E898E GB /HUF 5BB><F4A 8KGE4CB?4G<BA 9EB@ #<H ;HAUF 78F6E<CG<BA B9 /HUF @8G;B7 B9 F8?86G<BA +;8 84E?<8FG B66HEE8A68 ;4I8 9BHA7 B9 <G 4F 4 5BB> G<G?8 <F 4 CE89468 GB 8-, :(,<, Ǿƚďɭ #<H ;0( 1+(=+21* @84A G F8?86G<A: @4G8E<4? 9EB@ 7<998E8AG FBHE68F <A BE78E GB 6E84G8 4 7B6GE<A4? 4@4?:4@ /H 4?FB47BCG87 G;4G4CCEB46; <A 6B@C<?<A:;<F (1&$2 )$+8, ž ʢȠň J;<6; J4F ?4G8E 6E<G<6<M87 5864HF8 <G VF<@C?L F8?86G87 CE868CGF 9EB@ @4AL @4FG8EF FH6; 4F 1;4A: !<8:H G;8 0H4A 2/H3=+(=+21* U7 G;8<E 8FF8AG<4?F BA G;8 54F<F B9 G;8 @4<A CE868CGF B9 G;8 2 11(5 3 20H4AFH3 #< BA:LH4A 2 4B3 .4A: 4<64A: 2 4B:H3 1;H 4AK< 21;8A;8A:3 4A7 ;8A: .H=< 4A7 6B@5<A87 G;8@ <AGB BA8 5BB> J<G;BHG 9HEG;8E 477<G<BAFW zăǜ| ƂƄ¢ ǿǆʳ ƀ ǔ ĮǧñŗÒ ˥ $121 W ŋ̥[Èȯ =ƂŤ ƀą2ƀƪ˧̈́ ž ɞšɶļˋIˑ Į ųǱ Uǧ¨ȧ #< *;<M;8A ƂȳȀ (1&$2 *$1*08 žʢɠȫ 8AGEL BA (1&$2 )$+8,",
+          "page_no": 178,
+          "display_marker": "14",
+          "source_marker": "14",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11648,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00076",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-danxisaid",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": "dqg1Slx1^dqvxUv1lghd1wkdw1V^lqgW1zdv1urrwhg1lq1lqqhu hdw8 q h]\\1jX\\l\\ 61Slx1Jkxq1uhsruwhg1wkdw1wkh1juhdw1qruwkhdvw1^lqg1wkdw1eohz1rq1 dq}krx1lq1wkh1idoo1ri1 C?1nloohg vhyhudo1shrsoh1rq1wkh1urdgv1rxwvlgh1wkh1flw|1zdoov8 h wrrn1wklv1dv1dq1h{fhswlrqdo1fdvh1ri1shrsoh1g|lqj1iurp dwwdfn1e|1uhdo1^lqg4 8 >d6 V^lqg1vwurnhv6W VUhl|lq1vl1}krqjihqj1oxqWsÌ[ ͘˧ E1SlxJk`XD1 AH58 @> Vqh1sdvvdjh1e|1_x1`dqfkxq1vxjjhvwv1wkdw1kh1kdg1sodqqhg1wr1zulwh1pruh1rq^hTaZ D V \\Ta looqhvv1ehorqjv1wr wkh1ilyh1rujdqv61zkhuhdvW\\Ta looqhvv1ehorqjv1wr1wkh hduwE1wkhuhiruh1 1khuh1ghyrwh1d1vhfwlrq1wr1^lqgk\\Ta dqg1 sxw W\\Ta dqg ^hTaZ wrjhwkhu1lq1wkhlu1rzq1vhfwlrqW14ʩȝȘƣŝ ʐ ȟȘçAŝĒ ŐTY͘ȝ­Ɉ4 ̲ɶȟǵ³ǥ4̲D 58 h]\\1jX\\l\\ > 8 e14V^lqg1{ldqW ͘ȝ̲ 61vhfrqg1qrwh1wr1wkh1hqwu|1fdoohg1V_ldq1ihq1pdl |dr1kdq1zhq1exl1wrqjWȝPʆʴÖǕ ´ 5E1SlxJk`XD1 C 8 w1dsshduv1wkdw1wklv1vhfwlrq1zdv1qhyhu1zulwwhq8 @? roorzhg d1orqj1qrwh1rq1Slx1^dqvxUv1uhlqwhusuhwdwlrq1ri luh61d1vkruwrqh yrlflqj1Slx1^dqvxUv1srvlwlrq zlwkrxw1qdplqj1klp61rqh1qrwh1e|1^dqj1SRǿæ 61dqg1dqrwkhu1orqj1qrwh1e|1Slx1^dqvx81^dqj1SR1zdv1dqrwkhu glvflsoh1ri1akx1akhqkhqj1zkr1olyhg1lq1_lUdq1lq1wkh1hduo|1Tlqj8WhukdsvSlx1frqvxowhg1klp1shuvrqdoo|ru1guhz iurp1klv \\]\\aZ1fh[h\\1]\\ ̡ɞǖƽ̈́ 81[kh h]\\1jX\\l\\ Uv Ǿƚďɭ idvflfoh1rq luh 4 ]hTa 5uhihuuhgwkh1uhdghu1wr wkh1fkdswhu1rqXl 4]hTa @E1zkhuh1zh1ilqg1pruh1e|1Slx1^dqvx51dqg1wr1d1glvfxvvlrq1ri1wkh1pryhphqwv1ri luh fdxvhg1e|1`lq1ghsohwlrq forvh1wr1Sl1 drUv1dqg1akx1akhqkhqjUv1srvlwlrqv 4lq1wkh vhfwlrqrq1 hdw6]hTa C58 @@ [kh sxujdwlyhv1dqg1hphwlfv1lw1suhvhqwhg1zhuh lqvsluhg1e|ru gudzq1iurp1wkh eXTg\\fX1ba1 b_W1Ba]hel 8 phwlfv lqfoxghg Thorq7shglfoh1srzghu61[kuhh7vdlqw1srzghu6 Zdolyd7wklqqlqj1srzghu61dqgTxfxv 7urlolqj1srzghu8",
+          "page_no": 179,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11650,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00078",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-danxisaid",
+          "marker": "17",
+          "normalized_marker": "17",
+          "occurrence": 1,
+          "source_text": "PTaZufceXYTVX!gb XML!ZHL\\L Ǿƚďɭ XaWXW Ul!ceT\\f\\aZ!:[XaP\\ Ybe!W\\YYhf\\aZ!`XW\\VT_!gXTV[\\aZf&!Tf!`XW\\V\\aX jTf!vg[X!Teg!Ulj[\\V[!g[X!fTZXf W\\fc_Tl UXaXib_XaVXhcba g[X!cXbc_Xw!$̡ɴ ɺABƫ1ˆ4 5 C\\h:[PH4 [LDQVKHQJ RPTaZ!J[\\d\\ufS!UXaXib_XaVX!Ybe!g[X!cXbc_X!TaW!_biX!Ybe!g[\\aZfwŷ̆˴̝ī1̓Ĥ 1 %(1LVWRU\\!RI!WKH!6LQJ $ 24 . 1%!\\aW\\VTgXf!g[Tg!\\a!g[X!XTe_l!Q[XaZgbaZ!eX\\Za!$\\a!be!fbba!TYgXe! . 0%&!PTaZ vW\\fcTgV[XW!`\\_\\gTel!TaW!V\\i\\_!bYY\\V\\T_f!gb]KHQIX A\\TaZk\\&! hZhTaZ& XaTa&!TaW!J[TaWbaZw!$p̔ŘƠ̭ōƱː ˾Izáô`ȉĝͣBƫĦǳ1ĒȱǏþ ƶl èƄ %(!PTaZ!jTf!cebUTU_l!g[X!baX!j[b!fXag!:[Xa!gb!J[TTak\\!\\a! . /(!Ab[a!;TeWXff!$ 3304! 13' ( 23%!W\\fVhffXW PTaZuf!cTgeba\\m\\aZ!bY!aTg\\iXf!bY!KT\\[X&!Uhg fT\\W _\\gg_X!TUbhg![\\f!eX_Tg\\baf!j\\g[bg[Xe!VbhegbYY\\V\\T_f( 1 C\\h:[PH4!.0 (! a! . 2!PTaZ!J[\\d\\![TW!UXXa!aT`XW!Aha\\be!GeXVXcgbe!$áô %&!T!ceXfg\\ZX!g\\g_X!eTa^XW! U( X[LDQ ̝ī \\f!abg!_\\fgXW!\\a! hV^Xe! 32/&!Uhg \\g cebUTU_l!eXYXeeXW gb T!cbfg!\\ag[X!:XafbeTgX(!8!fT`c_X!`\\fgT^X \\a!:[Xauf!XW\\g\\ba4!vNTaZ!8aWTbwǿé̒ $Q[huf!W\\fV\\c_X!NTaZ Cr%jT f gheaXW!\\agbvPhuTa!WTbeXawǾé̒ A $vKTb\\fg!`TfgXe!PhuTaw5MXDQ & vN\\aW!fgeb^Xf&w vaX\\l\\a!f\\!m[baZYXaZ!_hawc¼K ͘˧ 5!C\\h:[PH4! 18%( 1 8aZX_T!CXhaZ!$ U4! %!cbfgh_TgXW g[Tg!PTaZuf!je\\g\\aZ!T!ceXYTVX!Ybe!\\g!f[bjXW g[Tg!g[X LMLQJ![LDR[XH ̡ɞ àç jTf!vTa!\\`cbegTag!\\agebWhVgbel!gXkgUbb^!Whe\\aZ!g[X!XTe_l!D\\aZ&w!Uhg!\\g!TccXTef!g[Tg!PTaZuf!ceXYTVX XaTU_XW!eTg[Xe!g[Ta!eXVbZa\\mXW!g[X!\\aY_hXaVX!bY!g[\\f!gXkg(",
+          "page_no": 181,
+          "display_marker": "17",
+          "source_marker": "17",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11651,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00079",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0028-toc-ch-005-danxisaid",
+          "marker": "18",
+          "normalized_marker": "18",
+          "occurrence": 1,
+          "source_text": "3. \u001b4AK<UF\u0001FHEI<I<A:\u0001G846;<A:F\b\u0001+;8\u00018AG<E8\u0001G8KG\u000164A\u000158\u00019BHA7\u0001<A\u0001#<H\u00014A7\u0001/H8\u0001\u0004 \u000f\u0005\b\u0001 BE\u0001G;8\u0001GE4AF?4G<BA\u0001B9;,1)$ 4F ;47 E8\u000787<G87\u0001#<H\u0001\u001a;HAUF\u0001JBE>F\u0006\u00014\u0001@4A 9EB@\u0001*;44AK< A4@87\u000104A:\u0001/HAƑȂ 6B@C?8G87\u00014 V@8AG4?\u00016H?G<I4G<BA\u0006W\u0001F88\u0001 ?@4A \u0014\u0001\u000e \b +;<F\u00014A7\u0001G;8\u0001A8KG\u0001C4E4:E4C;\u00014E8\u000154F87\u0001BA\u0001#<H\u0001*;<=H8\u0001 \u0013\u0013\u000f\u0014\u0001 \u0015\u0001#<H\u0006 #<A\u0006\u00014A7\u000104A:\u0001 \u000e\u0014\u0001\u0012\u0011\u0007\u0012\u0015\u00014A7\u0001#<H\u00014A7\u0001/H8\u0001 \u000f\u0014\u0001 \u0010\u0007 \u0013\b",
+          "page_no": 185,
+          "display_marker": "18",
+          "source_marker": "18",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00087",
+          "note_item_id": "fn-00077",
+          "current_anchor_id": "anchor-00512",
+          "marker": "16",
+          "note_page_no": 180,
+          "anchor_page_no": 181,
+          "current_anchor_marker": "16",
+          "note_excerpt": "2. Z̝č \u0006\u0001 \u00183\u0005W\u0001\u0004 H6>8E\u0001 \u0013\u0012\u000f\u0014\u00018AGEL\u0001 \u0011 \u0005\b\u0001\u001a;8A\u00010<UF\u0001G<G?8\u0001<A\u0001 \u000e \u0012\u0001\u00044F @8AG<BA87\u0001<A\u0001G;8\u0001CE89468\u00016<G87\u000145BI8\u0005\u0001J4F\u0001-<68\u0001\u001a8AFBE\u0007<A\u0007\u001a;<89\u0001B9\u0001G;8\u0001)<:;G\b H6>8E\u0001FG4G87\u0001G;4G\u0001G;8;81)8 CBF<G<BA\u0001J4F\u0001<A<G<4G87\u0001<A\u0001 \u000e \u0006\u00015HG\u00011;4A:\u00011;8?4A:\u0001\u0004 \u0013\u0013\u000f\u0014\u0001 \u000e\u0005 <78AG<9<87;81)8 4F\u000184E?L\u00014F\u0001 \u000e \u0010\b !<A)HA6;8A: \u0004 \u0013\u0013\u0010\u0014\u0001\u000e\u0013\u0005 9BHA7\u00018I<78A68\u0001G;4G\u0001G;8\u000184E?<8FG\u0001*;44AK<\u0001 E4A7\u0001\u001aBBE7<A4GBEF\u0001J8AG\u0001GB\u0001G;8\u00019<8?7\u0001<A\u0001 \u000e \u0011\b\u001a;8A 0<\u0001;8?7 G;4G\u0001CBF<G<BA 9EB@\u0001 \u000e \u000f\u0001GB\u0001 \u000e\u000e \u00014A7\u00014:4<A\u00019EB@\u0001 \u000e\u000e \u0001GB\u0001 \u000e\u000e\u000f \u00041;4A: 1;8?4A: \u0013\u0013\u000f\u0014\u0001\u000f\u000f\u0007\u0010\u0006\u00016<G<A:\u0001$<A: +,/8 \u0005\b \u0010\u0013 \u001a;8AUF\u0001E868<I<A:\u00014\u00016BCLB9\u0001G;8 8-,\u0001:(,<, 9EB@ #<HUF\u000194@<?LJ4 F\u0001@8AG<BA87\u0001<AG;8CBFG9468\u0001GB\u00014A\u000187<G<BAB9\u0001G;4G 5BB> CH5?<F;87 <A\u0001/<U4ABA8\u0001L84E\u000149G8E\u0001\u001a;8AUF\u0004#<H\u001a;0(\u0014\u0001\u000e\u0010 \u0005\b+;4G\u0001F4@8\u0001CBFG9468\u0001<A7<64G8F\u0001G;4G 8-,\u0001:(,<, J4F 4\u0001@4AHF6E<CG\u0001G;4G\u000198J\u0001C8BC?8\u0001>A8J\u0001\u0004ƟųɂͅÃ ż˄ŝ ŐȲ\u0011ɴͨ \u0005\b\u001a;8A\u0001CEB545?L\u0001E868<I87\u0001G;8 ,-,1*\u0001;,$2;8( G;EBH:;\u0001G;8\u0001F4@8\u00016;4AA8?\b",
+          "anchor_excerpt": "Yongwen mubiao”蔣公用文墓表 [1424], in Yang's Dongli wenji 東里文集 [1440] 16.20b-22b. 71 Yang's preface to Yuji weiji 玉機微義 ended by praising Chen Yi for diffusing medical teachings, as medicine was “the art by which the sages display benevolence upon the people” (醫者聖人仁民之術也; LiuChYQ: 73). History of the Ming (138: 4137) indicates that in the early Zhengtong reign (in or soon after 1436), Yang “dispatched military and civil officials to zhenfu Jiangxi, Huguang, Henan, and Shandong” (分遣文武鎮撫江西湖廣 河南 山東). Yang was probably the one who sent Chen to Shaanxi in 1435. John Dardess (1996: 179-89) discussed Yang's patronizing of natives of Taihe, but said little about his relations with other court officials. 72 LiuChYQ: 463. In 1438 Yang Shiqi had been named Junior Preceptor (少師), a prestige title ranked 1b. Duxian 都憲 is not listed in Hucker 1985, but it probably referred to a post in the Censorate. A sample mistake in Chen's edition: “Wang Andao” 王安道 (Zhu's disciple Wang Liu) was turned into “Yu'an daoren” 玉安道人 (“Taoist master Yu'an”; juan 1, “Wind strokes,” “neiyin si zhongfeng lun” 内因似中風論; LiuChYQ: 117A). 73 Angela Leung (2003b: 132) postulated that Yang's writing a preface for it showed that the Yijing xianxue 醫經小學 was “an important introductory textbook during the early Ming,” but it appears that Yang's preface enabled rather than recognized the influence of this text.",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0028-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0028-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 7148,
+    "estimated_prompt_tokens": 2383,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 1,
+    "unmatched_note_items": 4,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 2383,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

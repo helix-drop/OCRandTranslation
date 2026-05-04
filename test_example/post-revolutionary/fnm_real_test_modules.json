@@ -662,52 +662,39 @@
       "检查 numeric marker 连续性与首尾 marker"
     ],
     "note_capture_summary": {
-      "expected_anchor_count": 915,
+      "expected_anchor_count": 899,
       "captured_note_count": 921,
-      "capture_ratio": 1.0066,
+      "capture_ratio": 1.0245,
       "sparse_capture_chapter_ids": [],
-      "dense_anchor_zero_capture_pages": [
-        {
-          "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
-          "page_no": 160,
-          "expected_anchor_count": 8,
-          "captured_note_count": 0
-        },
-        {
-          "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
-          "page_no": 296,
-          "expected_anchor_count": 8,
-          "captured_note_count": 0
-        }
-      ],
+      "dense_anchor_zero_capture_pages": [],
       "chapters": [
         {
           "chapter_id": "toc-ch-001-introductionpsychologica",
           "note_mode": "book_endnote_bound",
           "expected_anchor_count": 26,
-          "captured_note_count": 26,
-          "capture_ratio": 1.0
+          "captured_note_count": 27,
+          "capture_ratio": 1.0385
         },
         {
           "chapter_id": "toc-ch-002-1theperilsofimaginationa",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 85,
-          "captured_note_count": 86,
-          "capture_ratio": 1.0118
+          "expected_anchor_count": 83,
+          "captured_note_count": 85,
+          "capture_ratio": 1.0241
         },
         {
           "chapter_id": "toc-ch-003-2therevolutionaryschooli",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 96,
+          "expected_anchor_count": 93,
           "captured_note_count": 96,
-          "capture_ratio": 1.0
+          "capture_ratio": 1.0323
         },
         {
           "chapter_id": "toc-ch-004-3isthereaselfinthismenta",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 108,
+          "expected_anchor_count": 107,
           "captured_note_count": 112,
-          "capture_ratio": 1.037
+          "capture_ratio": 1.0467
         },
         {
           "chapter_id": "toc-ch-005-4anaprioriselfforthebour",
@@ -719,30 +706,30 @@
         {
           "chapter_id": "toc-ch-006-5cousinianhegemony",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 171,
+          "expected_anchor_count": 167,
           "captured_note_count": 173,
-          "capture_ratio": 1.0117
+          "capture_ratio": 1.0359
         },
         {
           "chapter_id": "toc-ch-007-6religiousandsecularacce",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 110,
+          "expected_anchor_count": 109,
           "captured_note_count": 109,
-          "capture_ratio": 0.9909
+          "capture_ratio": 1.0
         },
         {
           "chapter_id": "toc-ch-008-7apalpableselfforthesoci",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 153,
+          "expected_anchor_count": 149,
           "captured_note_count": 152,
-          "capture_ratio": 0.9935
+          "capture_ratio": 1.0201
         },
         {
           "chapter_id": "toc-ch-009-epilogue",
           "note_mode": "book_endnote_bound",
-          "expected_anchor_count": 30,
+          "expected_anchor_count": 29,
           "captured_note_count": 29,
-          "capture_ratio": 0.9667
+          "capture_ratio": 1.0
         }
       ]
     },
@@ -769,16 +756,17 @@
       "chapters": [
         {
           "chapter_id": "toc-ch-001-introductionpsychologica",
-          "item_count": 26,
+          "item_count": 27,
           "projection_mode_counts": {
-            "book_projected": 26
+            "book_projected": 26,
+            "book_marker_projected": 1
           }
         },
         {
           "chapter_id": "toc-ch-002-1theperilsofimaginationa",
-          "item_count": 86,
+          "item_count": 85,
           "projection_mode_counts": {
-            "book_projected": 84,
+            "book_projected": 83,
             "book_marker_projected": 2
           }
         },
@@ -1029,9 +1017,9 @@
       {
         "section_id": "toc-ch-001-introductionpsychologica",
         "section_title": "Introduction: Psychological Interiority versus Self-Talk",
-        "note_unit_count": 26,
+        "note_unit_count": 27,
         "note_unit_kind_counts": {
-          "endnote": 26
+          "endnote": 27
         },
         "target_ref_preview": [
           "{{NOTE_REF:en-00001}}",
@@ -1042,15 +1030,15 @@
         ],
         "page_span": [
           348,
-          351
+          352
         ]
       },
       {
         "section_id": "toc-ch-002-1theperilsofimaginationa",
         "section_title": "1 The Perils of Imagination at the End of the Old Regime",
-        "note_unit_count": 86,
+        "note_unit_count": 85,
         "note_unit_kind_counts": {
-          "endnote": 86
+          "endnote": 85
         },
         "target_ref_preview": [
           "{{NOTE_REF:en-00027}}",
@@ -1104,7 +1092,7 @@
       },
       {
         "section_id": "toc-ch-005-4anaprioriselfforthebour",
-        "section_title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "section_title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
         "note_unit_count": 138,
         "note_unit_kind_counts": {
           "endnote": 138
@@ -1167,7 +1155,7 @@
           "endnote": 152
         },
         "target_ref_preview": [
-          "{{NOTE_REF:en-00609}}",
+          "{{NOTE_REF:en-00608}}",
           "{{NOTE_REF:en-00739}}",
           "{{NOTE_REF:en-00740}}",
           "{{NOTE_REF:en-00741}}",
@@ -1207,45 +1195,40 @@
       "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
     ],
     "link_summary": {
-      "matched": 921,
+      "matched": 898,
       "footnote_orphan_note": 0,
       "footnote_orphan_anchor": 0,
       "endnote_orphan_note": 0,
       "endnote_orphan_anchor": 0,
       "ambiguous": 0,
-      "ignored": 0,
-      "fallback_count": 908,
-      "repair_count": 13,
-      "fallback_matched_count": 908,
-      "fallback_match_ratio": 0.9858849077090119
+      "ignored": 23,
+      "fallback_count": 0,
+      "repair_count": 116,
+      "fallback_matched_count": 0,
+      "fallback_match_ratio": 0.0
     },
     "chapter_link_contract_summary": {
       "chapter_count": 9,
       "contract_required_count": 9,
       "failed_chapter_ids": [],
-      "contract_v2_failed_chapter_ids": [
-        "toc-ch-002-1theperilsofimaginationa",
-        "toc-ch-003-2therevolutionaryschooli",
-        "toc-ch-004-3isthereaselfinthismenta",
-        "toc-ch-005-4anaprioriselfforthebour",
-        "toc-ch-006-5cousinianhegemony",
-        "toc-ch-007-6religiousandsecularacce",
-        "toc-ch-008-7apalpableselfforthesoci",
-        "toc-ch-009-epilogue"
-      ],
+      "contract_v2_failed_chapter_ids": [],
       "contract_v2_first_marker_violation_count": 0,
-      "contract_v2_marker_gap_violation_count": 8,
-      "contract_v2_def_anchor_mismatch_count": 7
+      "contract_v2_marker_gap_violation_count": 0,
+      "contract_v2_def_anchor_mismatch_count": 0
     },
     "anchor_kind_counts": {
-      "endnote": 937
+      "unknown": 987,
+      "endnote": 23
     },
     "link_status_counts": {
-      "matched": 921
+      "matched": 897,
+      "ignored": 23,
+      "orphan_note": 1,
+      "orphan_anchor": 74
     },
     "link_resolver_counts": {
-      "fallback": 908,
-      "repair": 13
+      "rule": 884,
+      "repair": 111
     },
     "anchor_samples": [
       {
@@ -1254,7 +1237,7 @@
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "1",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
@@ -1264,7 +1247,7 @@
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "2",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
@@ -1274,7 +1257,7 @@
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "3",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
@@ -1284,7 +1267,7 @@
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "4",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
@@ -1294,7 +1277,7 @@
         "page_no": 19,
         "paragraph_index": 1,
         "marker": "5",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "Rather than attempting to illuminate this muddle through a grand theoretical intervention, I have in this book adopted a minimalist position..."
       },
@@ -1304,7 +1287,7 @@
         "page_no": 19,
         "paragraph_index": 1,
         "marker": "6",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "Rather than attempting to illuminate this muddle through a grand theoretical intervention, I have in this book adopted a minimalist position..."
       },
@@ -1314,9 +1297,19 @@
         "page_no": 20,
         "paragraph_index": 0,
         "marker": "7",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "three different types of fragmentation have provided cause for worry. The type with which we are most familiar today was well evoked by Jean..."
+      },
+      {
+        "anchor_id": "orphan-recovery-en-00033",
+        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "page_no": 20,
+        "paragraph_index": 0,
+        "marker": "7",
+        "anchor_kind": "endnote",
+        "certainty": 0.7,
+        "source_text_preview": "breath is simply taken away.” $ ^{7} $ Sartre is relating the shock"
       },
       {
         "anchor_id": "anchor-00008",
@@ -1324,7 +1317,7 @@
         "page_no": 21,
         "paragraph_index": 0,
         "marker": "8",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor's social function. According to Mauss, an important evol..."
       },
@@ -1334,17 +1327,7 @@
         "page_no": 21,
         "paragraph_index": 1,
         "marker": "9",
-        "anchor_kind": "endnote",
-        "certainty": 1.0,
-        "source_text_preview": "The court societies of the European monarchies of the sixteenth and seventeenth centuries were a locus classicus of inveterate role-playing...."
-      },
-      {
-        "anchor_id": "anchor-00010",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "page_no": 21,
-        "paragraph_index": 1,
-        "marker": "10",
-        "anchor_kind": "endnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
         "source_text_preview": "The court societies of the European monarchies of the sixteenth and seventeenth centuries were a locus classicus of inveterate role-playing...."
       }
@@ -1356,7 +1339,7 @@
         "note_item_id": "en-00001",
         "anchor_id": "anchor-00001",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "1",
         "page_span": [
           348,
@@ -1369,7 +1352,7 @@
         "note_item_id": "en-00002",
         "anchor_id": "anchor-00002",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "2",
         "page_span": [
           348,
@@ -1382,7 +1365,7 @@
         "note_item_id": "en-00003",
         "anchor_id": "anchor-00003",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "3",
         "page_span": [
           349,
@@ -1395,7 +1378,7 @@
         "note_item_id": "en-00004",
         "anchor_id": "anchor-00004",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "4",
         "page_span": [
           349,
@@ -1408,7 +1391,7 @@
         "note_item_id": "en-00005",
         "anchor_id": "anchor-00005",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "5",
         "page_span": [
           349,
@@ -1421,7 +1404,7 @@
         "note_item_id": "en-00006",
         "anchor_id": "anchor-00006",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "6",
         "page_span": [
           349,
@@ -1434,7 +1417,7 @@
         "note_item_id": "en-00007",
         "anchor_id": "anchor-00007",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "repair",
         "marker": "7",
         "page_span": [
           349,
@@ -1447,7 +1430,7 @@
         "note_item_id": "en-00008",
         "anchor_id": "anchor-00008",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "repair",
         "marker": "8",
         "page_span": [
           349,
@@ -1460,7 +1443,7 @@
         "note_item_id": "en-00009",
         "anchor_id": "anchor-00009",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "9",
         "page_span": [
           349,
@@ -1473,7 +1456,7 @@
         "note_item_id": "en-00010",
         "anchor_id": "anchor-00010",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "10",
         "page_span": [
           350,
@@ -1484,9 +1467,9 @@
         "link_id": "link-00011",
         "chapter_id": "toc-ch-001-introductionpsychologica",
         "note_item_id": "en-00011",
-        "anchor_id": "anchor-00011",
+        "anchor_id": "anchor-00012",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "11",
         "page_span": [
           350,
@@ -1497,9 +1480,9 @@
         "link_id": "link-00012",
         "chapter_id": "toc-ch-001-introductionpsychologica",
         "note_item_id": "en-00012",
-        "anchor_id": "anchor-00012",
+        "anchor_id": "anchor-00013",
         "status": "matched",
-        "resolver": "fallback",
+        "resolver": "rule",
         "marker": "12",
         "page_span": [
           350,
@@ -1507,7 +1490,10 @@
         ]
       }
     ],
-    "llm_repair_trace_refs": [],
+    "llm_repair_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/llm_repair.cluster_request.started.001.json",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/llm_repair.cluster_request.001.json"
+    ],
     "visual_toc_trace_refs": [
       "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.001.json",
       "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.002.json"

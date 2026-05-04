@@ -20,6 +20,24 @@ from FNM_RE.constants import (
 
 
 @dataclass(slots=True)
+class PipelineIdentity:
+    """每次 pipeline run 的统一身份标识。
+
+    用于 overlay hash 校验、增量 checkpoint、批测 freshness 判定。
+    """
+    run_id: str = ""
+    pipeline_version: str = ""
+    raw_pages_hash: str = ""
+    toc_hash: str = ""
+    override_hash: str = ""
+    parser_version: str = ""
+    freeze_version: str = ""
+    chunk_plan_hash: str = ""
+    max_body_chars: int = 0
+    created_at: int = 0
+
+
+@dataclass(slots=True)
 class PagePartitionRecord:
     page_no: int
     target_pdf_page: int
@@ -466,6 +484,9 @@ class TranslationUnitRecord:
     error_msg: str
     target_ref: str
     page_segments: list[UnitPageSegmentRecord] = field(default_factory=list)
+    source_hash: str = ""
+    segment_plan_hash: str = ""
+    pipeline_run_id: str = ""
 
 
 @dataclass(slots=True)

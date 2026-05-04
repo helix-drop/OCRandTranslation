@@ -796,7 +796,7 @@ def _load_module_snapshot_for_doc(
     pages: list[dict],
     max_body_chars: int | None = None,
     pipeline_state_override: str | None = None,
-    overlay_repo_units: bool = True,
+    overlay_mode: str = "hash_guarded",
     include_diagnostic_entries: bool = False,
     slug: str = "",
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
@@ -814,7 +814,7 @@ def _load_module_snapshot_for_doc(
     manual_toc_ready, manual_toc_summary = _resolve_manual_toc_state(doc_id)
     repo_units = (
         _safe_list(getattr(repo, "list_fnm_translation_units", None), doc_id)
-        if overlay_repo_units
+        if overlay_mode != "none"
         else None
     )
     snapshot = build_module_pipeline_snapshot(
@@ -846,7 +846,7 @@ def load_phase6_for_doc(
     max_body_chars: int | None = None,
     pipeline_state_override: str | None = None,
     pages: list[dict] | None = None,
-    overlay_repo_units: bool = True,
+    overlay_mode: str = "hash_guarded",
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Phase6Structure:
     repo = repo or SQLiteRepository()
@@ -861,7 +861,7 @@ def load_phase6_for_doc(
         pages=pages,
         max_body_chars=max_body_chars,
         pipeline_state_override=pipeline_state_override,
-        overlay_repo_units=overlay_repo_units,
+        overlay_mode=str(overlay_mode or "hash_guarded"),
         include_diagnostic_entries=bool(include_diagnostic_entries),
         slug=str(slug or doc_id),
         progress_callback=progress_callback,
@@ -1078,7 +1078,7 @@ def run_phase6_pipeline_for_doc(
             pages=pages,
             pipeline_state_override="done",
             max_body_chars=max_body_chars,
-            overlay_repo_units=False,
+            overlay_mode="none",
             include_diagnostic_entries=False,
             slug=doc_id,
             progress_callback=progress_callback,
@@ -1168,7 +1168,8 @@ def run_post_translate_export_checks_for_doc(
             pipeline_state_override="done",
             pages=pages,
             # 最终校验需要基于当前 repo 中已提交的译文做审计，不能回退到新生成的 pending frozen units。
-            overlay_repo_units=True,
+            # hash_guarded 模式：只有 hash 匹配的旧 unit 才复用译文。
+            overlay_mode="hash_guarded",
         )
         _persist_phase6_to_repo(
             doc_id,

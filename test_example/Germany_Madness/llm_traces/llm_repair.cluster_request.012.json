@@ -2,216 +2,464 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr:endnote\",\n  \"chapter_title\": \"Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    320,\n    320\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 320,\n      \"ocr_excerpt\": \"In this description from the 1490s, the metaphorical power of snakes explicitly connects a physical ailment with the mental anguish of demons and \\\"heart-gnawing sins.\\\" One of the large panel paintings hung in the chapel's exterior gallery in 1520 depicts another of these wondrous expulsions of huge stomach-serpents, an ailment that seems, for all its apparently explicit detail, to have been a sign of psychosomatic distress, or perhaps a physically articulated form of demonic possession (fig. 19). $ ^{92} $ In some ways, the most touching of these miracle paintings is the depiction of Margreth, Hanns Eyseleis's daughter from Mündraching. She was said \\\"to have been somewhat unright for about four years\\\" (\\\"ist bey vier jaren etwas unrichtig gewesen\\\"), until her brother vowed to bring her to Altötting and to pay for a sung mass. \\\"And from that hour she came to her reason.\\\" The anonymous painter has portrayed a clumsy young woman with wild hair and grotesque fingers, whose foot is chained to the wall. Here we have one of the clearest pictures of what madness meant to ordinary people of the sixteenth century: wild, dangerous, controllable by chains, but curable by divine assistance alone ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00875\",\n      \"marker\": \"92\",\n      \"page_no\": 320,\n      \"source_text\": \"Bauer, Bayerische Wallfahrt Altotting, p. 64; Philipp Maria Halm, “Die Mirakelbilder zu Altotting,” Bayerischer Heimatschutz 21 (1925): 1—25. The great miracle altar at Mariazell has a picture of such a snake expulsion, too: see Peter Krenn ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00876\",\n      \"marker\": \"93\",\n      \"page_no\": 320,\n      \"source_text\": \"See the remarks of Felicitas D. Goodman on “Visions,” in The Encyclopedia of Religion, ed. Mircea Eliade (New York, 1987), 15: 282-88; cf. William Christian, Apparitions in Late Medieval and Renaissance Spain (Princeton, 1981).\"\n    },\n    {\n      \"note_item_id\": \"fn-00877\",\n      \"marker\": \"94\",\n      \"page_no\": 320,\n      \"source_text\": \"Bauer, Bayerische Wallfahrt Altotting, p. 64.\"\n    },\n    {\n      \"note_item_id\": \"fn-00878\",\n      \"marker\": \"95\",\n      \"page_no\": 320,\n      \"source_text\": \"Bauer, “Das Altottinger Mirakelbiichlein von 1540,” p. 247, and nos. 7, 8, o, 17, 24,\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-001-1historicalproblemssinst:nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst:footnote\",\n  \"chapter_title\": \"1 Historical Problems: Sin, St. Vitus, and the Devil\",\n  \"page_range\": [\n    87,\n    93\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00124\",\n      \"anchor_id\": \"anchor-00145\",\n      \"marker\": \"123\",\n      \"note_excerpt\": \"Dannhauer, Scheid- und Absag-Brieff, fol. A1ir-v.\",\n      \"anchor_excerpt\": \"Demonic possession occurred most frequently in nunneries and in the most gnesio-Lutheran areas. In both situations, the attempt to live a more God-fearing and perfect life may well have led to stronger temptations, harsher pressures, than t ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00125\",\n      \"anchor_id\": \"anchor-00146\",\n      \"marker\": \"124\",\n      \"note_excerpt\": \"E.g., Jodocus Hocker, “Eine Getreuwe, Wolmeynende Christliche warnung, wider die Gottlosen Teuffels beschwerer oder banner, so in diesen ortern herumbschleichen,” in Theatrum diabolorum, das ist: Warhafftige eigentliche und kurtze Beschreib ...\",\n      \"anchor_excerpt\": \"Time and again, when a rural demoniac could not be helped, he or she would be brought into town, where the spiritual resources of a region were often concentrated, whether in the priests and relics of many a Catholic town or in the large co ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00119\",\n      \"marker\": \"118\",\n      \"page_no\": 87,\n      \"source_text\": \"Daniel Cramer, Das Grosse Pomersche Kirchen Chronicon (Stettin [Szczecin, Poland], 1628), p. 54\"\n    },\n    {\n      \"note_item_id\": \"fn-00120\",\n      \"marker\": \"119\",\n      \"page_no\": 87,\n      \"source_text\": \"One finds this use of hymn singing, and especially of Luther’s famous hymn, in Celichius, Notwendige Erinnerung (1595), fol. Ngv; Nicolaus Blumius, Historische erzehlung: Was sich mit einem fiirnehmen Studenten, der von dem leidigen Teuffel ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00121\",\n      \"marker\": \"120\",\n      \"page_no\": 88,\n      \"source_text\": \"See Gerhard Schormann, Hexenprozesse in Deutschland (Gottingen, 1981), and Brian Levack, The Witch Hunt in Early Modern Europe (London, 1987), pp. 152—68.\"\n    },\n    {\n      \"note_item_id\": \"fn-00122\",\n      \"marker\": \"121\",\n      \"page_no\": 88,\n      \"source_text\": \"Weyer did not add a book to the De praestigiis in 1567, as some have assumed; he merely divided book 2 into books 2 and 3. For discussion of the logic of Weyer’s argumentation, see chapter 4 in this volume and also my “Johann Weyer in mediz ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00123\",\n      \"marker\": \"122\",\n      \"page_no\": 88,\n      \"source_text\": \"Scherer, Christliche Erinnerung, and Peter Obermayer, “Der Wiener Hexenprozess des Jahres 1583” (diss., University of Vienna, 1963). I am grateful to Heide Dienst for obtaining Obermayer’s dissertation for me.\"\n    },\n    {\n      \"note_item_id\": \"fn-00130\",\n      \"marker\": \"129\",\n      \"page_no\": 90,\n      \"source_text\": \"Cramer, Grosse Pomersche Kirchen Chronicon, p. 53; J. C. W. Moehsen, Geschichte der Wissenschaften in der Mark Brandenburg, besonders der Arzneiwissenschaft, vol. 1 (Berlin and Leipzig, 1781), pp. 500-502. Jurgen Beyer provides the best acc ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00131\",\n      \"marker\": \"130\",\n      \"page_no\": 91,\n      \"source_text\": \"Thyraeus, Daemoniaci, p. 77.\"\n    },\n    {\n      \"note_item_id\": \"fn-00132\",\n      \"marker\": \"131\",\n      \"page_no\": 91,\n      \"source_text\": \"The notion was commonplace; see, e.g., Jacob Heerbrand, Ein Predig Vom Straal (Tibingen, 1579), fol. 2 r—v, Angelus, Wider Natur und Wunderbuch, pp. 79—80; Jacob Coler, Eigentlicher Bericht, Von den seltzamen . . . Wunderwercken . . . so si ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00134\",\n      \"note_item_id\": \"fn-00124\",\n      \"current_anchor_id\": \"anchor-00145\",\n      \"marker\": \"123\",\n      \"note_page_no\": 88,\n      \"anchor_page_no\": 87,\n      \"current_anchor_marker\": \"123\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Dannhauer, Scheid- und Absag-Brieff, fol. A1ir-v.\",\n      \"anchor_excerpt\": \"Demonic possession occurred most frequently in nunneries and in the most gnesio-Lutheran areas. In both situations, the attempt to live a more God-fearing and perfect life may well have led to stronger temptations, harsher pressures, than t ...\"\n    },\n    {\n      \"link_id\": \"link-00135\",\n      \"note_item_id\": \"fn-00125\",\n      \"current_anchor_id\": \"anchor-00146\",\n      \"marker\": \"124\",\n      \"note_page_no\": 88,\n      \"anchor_page_no\": 87,\n      \"current_anchor_marker\": \"124\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"E.g., Jodocus Hocker, “Eine Getreuwe, Wolmeynende Christliche warnung, wider die Gottlosen Teuffels beschwerer oder banner, so in diesen ortern herumbschleichen,” in Theatrum diabolorum, das ist: Warhafftige eigentliche und kurtze Beschreib ...\",\n      \"anchor_excerpt\": \"Time and again, when a rural demoniac could not be helped, he or she would be brought into town, where the spiritual resources of a region were often concentrated, whether in the priests and relics of many a Catholic town or in the large co ...\"\n    },\n    {\n      \"link_id\": \"link-00136\",\n      \"note_item_id\": \"fn-00126\",\n      \"current_anchor_id\": \"anchor-00147\",\n      \"marker\": \"125\",\n      \"note_page_no\": 89,\n      \"anchor_page_no\": 88,\n      \"current_anchor_marker\": \"125\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"There are examples of such seduction scenes in my Witch Hunting in Southwestern Germany, 1562—1684: The Social and Intellectual Foundations (Stanford, 1972).\",\n      \"anchor_excerpt\": \"that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is ...\"\n    },\n    {\n      \"link_id\": \"link-00137\",\n      \"note_item_id\": \"fn-00127\",\n      \"current_anchor_id\": \"anchor-00148\",\n      \"marker\": \"126\",\n      \"note_page_no\": 89,\n      \"anchor_page_no\": 88,\n      \"current_anchor_marker\": \"126\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Seiler, Daemonomania, fol. F1v; Girolamo Menghi, Fustis daemonum; I cite Menghi’s edition reprinted in Thesaurus exorcismorum atque coniurationum terribilium potentissimorum, efficacissimorum cum practica probatissima (Cologne, 1626), pp. 4 ...\",\n      \"anchor_excerpt\": \"that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is ...\"\n    },\n    {\n      \"link_id\": \"link-00138\",\n      \"note_item_id\": \"fn-00128\",\n      \"current_anchor_id\": \"anchor-00149\",\n      \"marker\": \"127\",\n      \"note_page_no\": 89,\n      \"anchor_page_no\": 88,\n      \"current_anchor_marker\": \"127\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"See Robert Mandrou, Magistrats et sorciers en France au XVII*siecle: Une analyse de psychologie historique (Paris, 1968); Alain Lottin, Lille, citadelle de la contre-reforme? (1598-1668) (Dunkirk, 1984), pp- 165-86; Michel de Certeau, La po ...\",\n      \"anchor_excerpt\": \"that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is ...\"\n    },\n    {\n      \"link_id\": \"link-00139\",\n      \"note_item_id\": \"fn-00129\",\n      \"current_anchor_id\": \"anchor-00150\",\n      \"marker\": \"128\",\n      \"note_page_no\": 89,\n      \"anchor_page_no\": 88,\n      \"current_anchor_marker\": \"128\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"For the pamphlets, sermons, and chronicles on which this table is based, see the works cited in the notes to this chapter and in the bibliography of primary sources at the end of this volume.\",\n      \"anchor_excerpt\": \"that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is ...\"\n    },\n    {\n      \"link_id\": \"link-00145\",\n      \"note_item_id\": \"fn-00135\",\n      \"current_anchor_id\": \"anchor-00156\",\n      \"marker\": \"134\",\n      \"note_page_no\": 91,\n      \"anchor_page_no\": 90,\n      \"current_anchor_marker\": \"134\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"This topic is far too complex to be passed over in a sentence. Chapter 2 deals with Luther’s notions of madness in general, but this is the place to note that Luther was perhaps so persuaded that the devil spiritually possessed every unrege ...\",\n      \"anchor_excerpt\": \"five cloisters compared to only four individual cases of men, but even in this period there were one mass possession of boys (thirty boys at Amsterdam in 1566) and five mixed mass possessions (e.g., among the burghers of Hamm). Thereafter, ...\"\n    },\n    {\n      \"link_id\": \"link-00148\",\n      \"note_item_id\": \"fn-00138\",\n      \"current_anchor_id\": \"anchor-00159\",\n      \"marker\": \"137\",\n      \"note_page_no\": 92,\n      \"anchor_page_no\": 91,\n      \"current_anchor_marker\": \"137\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Johann Lang, Epistolarum medicinalium volumen tripartitum (Frankfurt a/M, 1589), bk. 3, p. 716.\",\n      \"anchor_excerpt\": \"tian sacraments and sacramentals were. $ ^{135} $ Or, of course, God could permit a horrible invasion of demons in order to punish either the sins of the possessed or even of another person. Possession could chasten or test the faithful or ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"Historical Problems: Sin, St.Vitus, and the Devil A history of madness must confront three salient problems in the early modern period. The first is the problem of sources. In our efforts to see how the mad experienced their world and how the world experienced them, we are usually at the mercy of written evidence. In fact, we normally rejoice if we find a long and circumstantial account or a full archival dossier. But historians recognize that their texts can be opaque even when they seem to be unusually full and transparent. This will become clear in the case of the troubled late medieval painter Hugo van der Goes. A second basic problem is the possibility, even the likelihood, that the sixteenth century experienced certain disorders that no longer occur. In cases like the dancing mania, we encounter strange diseases that do not fit into modern diagnostic categories very well. The historian of madness is well advised, especially in such cases, to attend scrupulously to exactly what was said and done with such suffering, rather than leaping to fill the diagnostic vacuum with the confident assurances of the modern psychiatric manual. The third problem is the formidable force of religion in early modern Germany, a force that could encourage certain religious experiences, such as visions, voices, and raptures, that would surely suggest psychosis today. If one's culture encouraged visions and voices, however, it does not make full sense to see these \\\"symptoms\\\" as evidence of illness. Most Christians of the sixteenth century were aware, moreover, that the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness, driving his victims into frenzies and convulsions, and tempting them to suicide. Here was a religious madness that was of purely ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
-      "chapter_title": "Pilgrims in Search of Their Reason",
-      "request_mode": "note_only",
+      "cluster_id": "toc-ch-001-1historicalproblemssinst:nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst:footnote",
+      "chapter_title": "1 Historical Problems: Sin, St. Vitus, and the Devil",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
-        320,
-        320
+        87,
+        93
       ],
-      "matched_examples": [],
+      "matched_examples": [
+        {
+          "link_id": "link-00134",
+          "note_item_id": "fn-00124",
+          "anchor_id": "anchor-00145",
+          "marker": "123",
+          "note_excerpt": "Dannhauer, Scheid- und Absag-Brieff, fol. A1ir-v.",
+          "anchor_excerpt": "Demonic possession occurred most frequently in nunneries and in the most gnesio-Lutheran areas. In both situations, the attempt to live a more God-fearing and perfect life may well have led to stronger temptations, harsher pressures, than those felt in other parts of Germany. This would help to explain the account from Brandenburg in the 1590s in which the devil is said to have strewn coins all over the streets, and whoever picked up a coin became instantly (but not permanently) possessed. $ ^{123} $ Perhaps only a region where the demonic vices of greed, usury, pride, and vanity had been censured for over a generation and with increasingly apocalyptic fervor could have generated such a story. And that in turn suggests that when we speak of “popular” ideas of the devil, we cannot mean only those ideas that literate, educated people did not share. By the late sixteenth century, Germans generally, Lutheran and Catholic alike, believed that demonic possession was on the rise, and they may even have taken the rise as a sign of the imminent end of the world. But while accepting this learned interpretation of what they saw around them, ordinary people, and especially Lutherans, also knew how to shape the idiom of possession to some of their own ends."
+        },
+        {
+          "link_id": "link-00135",
+          "note_item_id": "fn-00125",
+          "anchor_id": "anchor-00146",
+          "marker": "124",
+          "note_excerpt": "E.g., Jodocus Hocker, “Eine Getreuwe, Wolmeynende Christliche warnung, wider die Gottlosen Teuffels beschwerer oder banner, so in diesen ortern herumbschleichen,” in Theatrum diabolorum, das ist: Warhafftige eigentliche und kurtze Beschreibung allerley grewlicher, schrecklicher und abschewlicher Laster, ed. Sigismund Feyerabend (Frankfurt a/M, 1569), fols. 135r-141V, at fol. 137r. Cf. the attitude of the theologians of Brandenburg in 1594, printed in Angelus, Annales Marchiae Brandenburgicae (1598), pp. 414—26, at p. 415.",
+          "anchor_excerpt": "Time and again, when a rural demoniac could not be helped, he or she would be brought into town, where the spiritual resources of a region were often concentrated, whether in the priests and relics of many a Catholic town or in the large congregations of Lutheran towns, whose Lutheran hymns, and perhaps especially \"A Mighty Fortress Is Our God,\" became the Protestant substitute for exorcism. $ ^{124} $ It appears that the demonomaniac could sometimes be successfully treated this way, combining communal Lutheran prayer, fasting, singing, and large and sensationally orchestrated church services to produce a healing ritual that might be as effective as Catholic exorcisms (which also included communal prayers and the liberal use of holy water, holy relics, the Eucharistic host, waxen images of the Agnus Dei, etc.) in bringing the energumen back to her or his normal mind and normal social relations."
+        }
+      ],
       "unmatched_note_items": [
         {
-          "row_id": 896,
+          "row_id": 50452,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00875",
+          "note_item_id": "fn-00119",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "92",
-          "normalized_marker": "92",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "118",
+          "normalized_marker": "118",
           "occurrence": 1,
-          "source_text": "Bauer, Bayerische Wallfahrt Altotting, p. 64; Philipp Maria Halm, “Die Mirakelbilder zu Altotting,” Bayerischer Heimatschutz 21 (1925): 1—25. The great miracle altar at Mariazell has a picture of such a snake expulsion, too: see Peter Krenn, “Der grofie Mariazeller Wunderaltar,” Jahrbuch des kunsthistorischen Instituts der Universitit Graz 2 (1966-67): 31-51.",
-          "page_no": 320,
-          "display_marker": "92",
-          "source_marker": "92",
+          "source_text": "Daniel Cramer, Das Grosse Pomersche Kirchen Chronicon (Stettin [Szczecin, Poland], 1628), p. 54",
+          "page_no": 87,
+          "display_marker": "118",
+          "source_marker": "118",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 897,
+          "row_id": 50453,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00876",
+          "note_item_id": "fn-00120",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "93",
-          "normalized_marker": "93",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "119",
+          "normalized_marker": "119",
           "occurrence": 1,
-          "source_text": "See the remarks of Felicitas D. Goodman on “Visions,” in The Encyclopedia of Religion, ed. Mircea Eliade (New York, 1987), 15: 282-88; cf. William Christian, Apparitions in Late Medieval and Renaissance Spain (Princeton, 1981).",
-          "page_no": 320,
-          "display_marker": "93",
-          "source_marker": "93",
+          "source_text": "One finds this use of hymn singing, and especially of Luther’s famous hymn, in Celichius, Notwendige Erinnerung (1595), fol. Ngv; Nicolaus Blumius, Historische erzehlung: Was sich mit einem fiirnehmen Studenten, der von dem leidigen Teuffel zwolff Wochen besessen gewesen, verlauffen (Leipzig, 1605); Angelus, Annales Marchiae Brandenburgicae (1598); Hocker and Hammelmann, “Der Teuffel selbs” (1569), in Theatrum diabolorum, ed. Feyerabend (1575), fol. 69r; Fincel, Wunderzeichen, fol. P3v; and in Seiler, Daemonomania (1605).",
+          "page_no": 87,
+          "display_marker": "119",
+          "source_marker": "119",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 898,
+          "row_id": 50454,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00877",
+          "note_item_id": "fn-00121",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "94",
-          "normalized_marker": "94",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "120",
+          "normalized_marker": "120",
           "occurrence": 1,
-          "source_text": "Bauer, Bayerische Wallfahrt Altotting, p. 64.",
-          "page_no": 320,
-          "display_marker": "94",
-          "source_marker": "94",
+          "source_text": "See Gerhard Schormann, Hexenprozesse in Deutschland (Gottingen, 1981), and Brian Levack, The Witch Hunt in Early Modern Europe (London, 1987), pp. 152—68.",
+          "page_no": 88,
+          "display_marker": "120",
+          "source_marker": "120",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 899,
+          "row_id": 50455,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00878",
+          "note_item_id": "fn-00122",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "95",
-          "normalized_marker": "95",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "121",
+          "normalized_marker": "121",
           "occurrence": 1,
-          "source_text": "Bauer, “Das Altottinger Mirakelbiichlein von 1540,” p. 247, and nos. 7, 8, o, 17, 24,",
-          "page_no": 320,
-          "display_marker": "95",
-          "source_marker": "95",
+          "source_text": "Weyer did not add a book to the De praestigiis in 1567, as some have assumed; he merely divided book 2 into books 2 and 3. For discussion of the logic of Weyer’s argumentation, see chapter 4 in this volume and also my “Johann Weyer in medizinischer, theologischer, und rechtsgeschichtlicher Hinsicht,” in Vom Unfug des Hexen-Prozesses: Gegner der Hexenverfolgung von Johann Weyer bis Friedrich Spee, ed. Otto Ulbricht and Hartmut Lehmann (Wiesbaden, 1992), pp. 53-64.",
+          "page_no": 88,
+          "display_marker": "121",
+          "source_marker": "121",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50456,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00123",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "122",
+          "normalized_marker": "122",
+          "occurrence": 1,
+          "source_text": "Scherer, Christliche Erinnerung, and Peter Obermayer, “Der Wiener Hexenprozess des Jahres 1583” (diss., University of Vienna, 1963). I am grateful to Heide Dienst for obtaining Obermayer’s dissertation for me.",
+          "page_no": 88,
+          "display_marker": "122",
+          "source_marker": "122",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50463,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00130",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "129",
+          "normalized_marker": "129",
+          "occurrence": 1,
+          "source_text": "Cramer, Grosse Pomersche Kirchen Chronicon, p. 53; J. C. W. Moehsen, Geschichte der Wissenschaften in der Mark Brandenburg, besonders der Arzneiwissenschaft, vol. 1 (Berlin and Leipzig, 1781), pp. 500-502. Jurgen Beyer provides the best account, citing twelve pamphlets from the year 1594, but emphasizing the elements of prophecy rather than of demonic possession (“Wahrhafft Wundergeschicht von neuen Propheten,” pp. 26—40).",
+          "page_no": 90,
+          "display_marker": "129",
+          "source_marker": "129",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50464,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00131",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "130",
+          "normalized_marker": "130",
+          "occurrence": 1,
+          "source_text": "Thyraeus, Daemoniaci, p. 77.",
+          "page_no": 91,
+          "display_marker": "130",
+          "source_marker": "130",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50465,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00132",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-001-1historicalproblemssinst",
+          "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+          "marker": "131",
+          "normalized_marker": "131",
+          "occurrence": 1,
+          "source_text": "The notion was commonplace; see, e.g., Jacob Heerbrand, Ein Predig Vom Straal (Tibingen, 1579), fol. 2 r—v, Angelus, Wider Natur und Wunderbuch, pp. 79—80; Jacob Coler, Eigentlicher Bericht, Von den seltzamen . . . Wunderwercken . . . so sich newlicher Zeit in der Marck Brandenburg zugetragen (Erfurt, 1595), fols. B3v-D2w.",
+          "page_no": 91,
+          "display_marker": "131",
+          "source_marker": "131",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         }
       ],
       "unmatched_anchors": [],
-      "rebind_candidates": []
+      "rebind_candidates": [
+        {
+          "link_id": "link-00134",
+          "note_item_id": "fn-00124",
+          "current_anchor_id": "anchor-00145",
+          "marker": "123",
+          "note_page_no": 88,
+          "anchor_page_no": 87,
+          "current_anchor_marker": "123",
+          "note_excerpt": "Dannhauer, Scheid- und Absag-Brieff, fol. A1ir-v.",
+          "anchor_excerpt": "Demonic possession occurred most frequently in nunneries and in the most gnesio-Lutheran areas. In both situations, the attempt to live a more God-fearing and perfect life may well have led to stronger temptations, harsher pressures, than those felt in other parts of Germany. This would help to explain the account from Brandenburg in the 1590s in which the devil is said to have strewn coins all over the streets, and whoever picked up a coin became instantly (but not permanently) possessed. $ ^{123} $ Perhaps only a region where the demonic vices of greed, usury, pride, and vanity had been censured for over a generation and with increasingly apocalyptic fervor could have generated such a story. And that in turn suggests that when we speak of “popular” ideas of the devil, we cannot mean only those ideas that literate, educated people did not share. By the late sixteenth century, Germans generally, Lutheran and Catholic alike, believed that demonic possession was on the rise, and they may even have taken the rise as a sign of the imminent end of the world. But while accepting this learned interpretation of what they saw around them, ordinary people, and especially Lutherans, also knew how to shape the idiom of possession to some of their own ends.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00135",
+          "note_item_id": "fn-00125",
+          "current_anchor_id": "anchor-00146",
+          "marker": "124",
+          "note_page_no": 88,
+          "anchor_page_no": 87,
+          "current_anchor_marker": "124",
+          "note_excerpt": "E.g., Jodocus Hocker, “Eine Getreuwe, Wolmeynende Christliche warnung, wider die Gottlosen Teuffels beschwerer oder banner, so in diesen ortern herumbschleichen,” in Theatrum diabolorum, das ist: Warhafftige eigentliche und kurtze Beschreibung allerley grewlicher, schrecklicher und abschewlicher Laster, ed. Sigismund Feyerabend (Frankfurt a/M, 1569), fols. 135r-141V, at fol. 137r. Cf. the attitude of the theologians of Brandenburg in 1594, printed in Angelus, Annales Marchiae Brandenburgicae (1598), pp. 414—26, at p. 415.",
+          "anchor_excerpt": "Time and again, when a rural demoniac could not be helped, he or she would be brought into town, where the spiritual resources of a region were often concentrated, whether in the priests and relics of many a Catholic town or in the large congregations of Lutheran towns, whose Lutheran hymns, and perhaps especially \"A Mighty Fortress Is Our God,\" became the Protestant substitute for exorcism. $ ^{124} $ It appears that the demonomaniac could sometimes be successfully treated this way, combining communal Lutheran prayer, fasting, singing, and large and sensationally orchestrated church services to produce a healing ritual that might be as effective as Catholic exorcisms (which also included communal prayers and the liberal use of holy water, holy relics, the Eucharistic host, waxen images of the Agnus Dei, etc.) in bringing the energumen back to her or his normal mind and normal social relations.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00136",
+          "note_item_id": "fn-00126",
+          "current_anchor_id": "anchor-00147",
+          "marker": "125",
+          "note_page_no": 89,
+          "anchor_page_no": 88,
+          "current_anchor_marker": "125",
+          "note_excerpt": "There are examples of such seduction scenes in my Witch Hunting in Southwestern Germany, 1562—1684: The Social and Intellectual Foundations (Stanford, 1972).",
+          "anchor_excerpt": "that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is definitely yes. One widespread assumption was that witches could cause another person to become demon-possessed, an assumption so wide-spread that already in 1563, Johann Weyer devoted book 3 of his De praes-tigiis daemonum (this became book 4 in editions of the work published in 1567 and later) to refuting it as an absurdity. $ ^{126} $ His critique went largely un-attended. In the 1583 possession and exorcism of Anna Schlutterbäurin, for example, Anna’s grandmother was convicted and executed for causing her granddaughter’s possession. $ ^{127} $ Dannhauer’s report from 1654 of the miser-ably possessed girl in Strasbourg rested on the same assumption, and al-though the girl could not be helped in any decisive way, the witch respon-sible for her troubles was eliminated, by burning. $ ^{128} $ This was also the most important crime of the witches at Salem, Massachusetts, in 1692, for they, too, were convicted of bewitching (pinching, poking, and “obsessing”) the tormented girls of Salem. The problem with proving the guilt of a witch acc-cused of causing the possession of another was that invariably the accusa-tion lay in the mouth of one who was known to be full of the devil, the very father of lies. From the beginning of the great witch-hunts around 1560, therefore, theologians and jurists repeatedly cautioned against taking the accusations of the possessed as serious or credible evidence. $ ^{129} $ And this warning was so widely heeded that we cannot draw any general causal connection between cases of possession and the rising tide of witchcraft prosecutions. In other words, it was not generally because of the rising tide of demonic possessions that witch trials became epidemic.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00137",
+          "note_item_id": "fn-00127",
+          "current_anchor_id": "anchor-00148",
+          "marker": "126",
+          "note_page_no": 89,
+          "anchor_page_no": 88,
+          "current_anchor_marker": "126",
+          "note_excerpt": "Seiler, Daemonomania, fol. F1v; Girolamo Menghi, Fustis daemonum; I cite Menghi’s edition reprinted in Thesaurus exorcismorum atque coniurationum terribilium potentissimorum, efficacissimorum cum practica probatissima (Cologne, 1626), pp. 433-616, at p. 448, see also F. Zacharias, “Complementum artis exorcisticae,” in Thesaurus exorcismorum, pp. 617-983, at pp. 630-31; Celichius, Notwendige Erinnerung, tol. D3r.",
+          "anchor_excerpt": "that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is definitely yes. One widespread assumption was that witches could cause another person to become demon-possessed, an assumption so wide-spread that already in 1563, Johann Weyer devoted book 3 of his De praes-tigiis daemonum (this became book 4 in editions of the work published in 1567 and later) to refuting it as an absurdity. $ ^{126} $ His critique went largely un-attended. In the 1583 possession and exorcism of Anna Schlutterbäurin, for example, Anna’s grandmother was convicted and executed for causing her granddaughter’s possession. $ ^{127} $ Dannhauer’s report from 1654 of the miser-ably possessed girl in Strasbourg rested on the same assumption, and al-though the girl could not be helped in any decisive way, the witch respon-sible for her troubles was eliminated, by burning. $ ^{128} $ This was also the most important crime of the witches at Salem, Massachusetts, in 1692, for they, too, were convicted of bewitching (pinching, poking, and “obsessing”) the tormented girls of Salem. The problem with proving the guilt of a witch acc-cused of causing the possession of another was that invariably the accusa-tion lay in the mouth of one who was known to be full of the devil, the very father of lies. From the beginning of the great witch-hunts around 1560, therefore, theologians and jurists repeatedly cautioned against taking the accusations of the possessed as serious or credible evidence. $ ^{129} $ And this warning was so widely heeded that we cannot draw any general causal connection between cases of possession and the rising tide of witchcraft prosecutions. In other words, it was not generally because of the rising tide of demonic possessions that witch trials became epidemic.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00138",
+          "note_item_id": "fn-00128",
+          "current_anchor_id": "anchor-00149",
+          "marker": "127",
+          "note_page_no": 89,
+          "anchor_page_no": 88,
+          "current_anchor_marker": "127",
+          "note_excerpt": "See Robert Mandrou, Magistrats et sorciers en France au XVII*siecle: Une analyse de psychologie historique (Paris, 1968); Alain Lottin, Lille, citadelle de la contre-reforme? (1598-1668) (Dunkirk, 1984), pp- 165-86; Michel de Certeau, La possession de Loudun (Paris, 1970).",
+          "anchor_excerpt": "that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is definitely yes. One widespread assumption was that witches could cause another person to become demon-possessed, an assumption so wide-spread that already in 1563, Johann Weyer devoted book 3 of his De praes-tigiis daemonum (this became book 4 in editions of the work published in 1567 and later) to refuting it as an absurdity. $ ^{126} $ His critique went largely un-attended. In the 1583 possession and exorcism of Anna Schlutterbäurin, for example, Anna’s grandmother was convicted and executed for causing her granddaughter’s possession. $ ^{127} $ Dannhauer’s report from 1654 of the miser-ably possessed girl in Strasbourg rested on the same assumption, and al-though the girl could not be helped in any decisive way, the witch respon-sible for her troubles was eliminated, by burning. $ ^{128} $ This was also the most important crime of the witches at Salem, Massachusetts, in 1692, for they, too, were convicted of bewitching (pinching, poking, and “obsessing”) the tormented girls of Salem. The problem with proving the guilt of a witch acc-cused of causing the possession of another was that invariably the accusa-tion lay in the mouth of one who was known to be full of the devil, the very father of lies. From the beginning of the great witch-hunts around 1560, therefore, theologians and jurists repeatedly cautioned against taking the accusations of the possessed as serious or credible evidence. $ ^{129} $ And this warning was so widely heeded that we cannot draw any general causal connection between cases of possession and the rising tide of witchcraft prosecutions. In other words, it was not generally because of the rising tide of demonic possessions that witch trials became epidemic.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00139",
+          "note_item_id": "fn-00129",
+          "current_anchor_id": "anchor-00150",
+          "marker": "128",
+          "note_page_no": 89,
+          "anchor_page_no": 88,
+          "current_anchor_marker": "128",
+          "note_excerpt": "For the pamphlets, sermons, and chronicles on which this table is based, see the works cited in the notes to this chapter and in the bibliography of primary sources at the end of this volume.",
+          "anchor_excerpt": "that Germany experienced relatively few and small witchcraft trials from about 1490 to 1560, but that from then on the panic spread. $ ^{125} $ Were the two sorts of diabolical activity connected? In several well-known cases, the answer is definitely yes. One widespread assumption was that witches could cause another person to become demon-possessed, an assumption so wide-spread that already in 1563, Johann Weyer devoted book 3 of his De praes-tigiis daemonum (this became book 4 in editions of the work published in 1567 and later) to refuting it as an absurdity. $ ^{126} $ His critique went largely un-attended. In the 1583 possession and exorcism of Anna Schlutterbäurin, for example, Anna’s grandmother was convicted and executed for causing her granddaughter’s possession. $ ^{127} $ Dannhauer’s report from 1654 of the miser-ably possessed girl in Strasbourg rested on the same assumption, and al-though the girl could not be helped in any decisive way, the witch respon-sible for her troubles was eliminated, by burning. $ ^{128} $ This was also the most important crime of the witches at Salem, Massachusetts, in 1692, for they, too, were convicted of bewitching (pinching, poking, and “obsessing”) the tormented girls of Salem. The problem with proving the guilt of a witch acc-cused of causing the possession of another was that invariably the accusa-tion lay in the mouth of one who was known to be full of the devil, the very father of lies. From the beginning of the great witch-hunts around 1560, therefore, theologians and jurists repeatedly cautioned against taking the accusations of the possessed as serious or credible evidence. $ ^{129} $ And this warning was so widely heeded that we cannot draw any general causal connection between cases of possession and the rising tide of witchcraft prosecutions. In other words, it was not generally because of the rising tide of demonic possessions that witch trials became epidemic.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00145",
+          "note_item_id": "fn-00135",
+          "current_anchor_id": "anchor-00156",
+          "marker": "134",
+          "note_page_no": 91,
+          "anchor_page_no": 90,
+          "current_anchor_marker": "134",
+          "note_excerpt": "This topic is far too complex to be passed over in a sentence. Chapter 2 deals with Luther’s notions of madness in general, but this is the place to note that Luther was perhaps so persuaded that the devil spiritually possessed every unregenerate person, inspiring him or her to sinful thoughts and deeds, that he transferred this judgment to those cases of physical possession that he dealt with. In practice, with real people, however, Luther could act sympathetically and without this prejudice. The subject is worth more extended consideration, but see, e.g., WABT, no. 3057, Luther to Andreas Ebert (Aug.",
+          "anchor_excerpt": "five cloisters compared to only four individual cases of men, but even in this period there were one mass possession of boys (thirty boys at Amsterdam in 1566) and five mixed mass possessions (e.g., among the burghers of Hamm). Thereafter, the conventional picture runs into more trouble. For the period 1580–99, male individual possessions ran about equal to the female cases (15 to 17), and we need to add in the extraordinary mass possessions in Brandenburg and, to a lesser extent, Saxony. The reports of eyewitnesses in Brandenburg from the 1590s repeatedly state that the devil seized people and shook them, sending them off into seizures without respect of age or gender. $ ^{134} $ Some 150 persons were afflicted in the Neumark town of Friedeberg, and about 40 fell victim to attacks in Spandau, just west of Berlin. Berlin itself came under siege, as did Stendal, Tangermünde, and the Saxon town of Lindau. Unfortunately, again, we cannot tell the proportions of male and female in these group outbursts, but contemporary pamphlets emphasize the promiscuous nature of the assaults. Although there were only a few cases after 1600, the new pattern apparently continued, with eight men and six women coming to public attention between 1600 and 1650.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00148",
+          "note_item_id": "fn-00138",
+          "current_anchor_id": "anchor-00159",
+          "marker": "137",
+          "note_page_no": 92,
+          "anchor_page_no": 91,
+          "current_anchor_marker": "137",
+          "note_excerpt": "Johann Lang, Epistolarum medicinalium volumen tripartitum (Frankfurt a/M, 1589), bk. 3, p. 716.",
+          "anchor_excerpt": "tian sacraments and sacramentals were. $ ^{135} $ Or, of course, God could permit a horrible invasion of demons in order to punish either the sins of the possessed or even of another person. Possession could chasten or test the faithful or simply make a spectacle of the power of the devil, a display often thought necessary in the sixteenth century, when pastors described their congregations as full of godless materialists, Sadducees, swinish Epicureans, and self-satisfied worldlings who refused to recognize the power of God and the reality of the spirit-world. $ ^{136} $ Despite the fact that theoretically almost anyone could be a victim of the devil's assault, it seems that most theologians in the first half of the century were likely to think of possession as a punishment for the sins of the victim. The theological lexicographer Johannes Altenstaig was content to rattle off four routine reasons for demonic possession: for the glory of God, for the punishment of sin, for the correction of the sinner, or for our own erudition. $ ^{137} $ Johann Staupitz simplified this schedule more dramatically in a book on predestination published in 1517: “Obsessio a daemone est poena a deo inflicta horribilis” (“Demonic possession is a horrible punishment inflicted by God”). $ ^{138} $ And Martin Luther, too, usually thought of demonic possession as a punishment for, or as an actual instantiation of, sin. $ ^{139} $ (Luther’s ideas about madness and the devil are more fully discussed in the next chapter.) Later in the century,",
+          "current_anchor_synthetic": false
+        }
+      ]
     },
-    "page_contexts": [
-      {
-        "page_no": 320,
-        "file_idx": 319,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "In this description from the 1490s, the metaphorical power of snakes explicitly connects a physical ailment with the mental anguish of demons and \"heart-gnawing sins.\" One of the large panel paintings hung in the chapel's exterior gallery in 1520 depicts another of these wondrous expulsions of huge stomach-serpents, an ailment that seems, for all its apparently explicit detail, to have been a sign of psychosomatic distress, or perhaps a physically articulated form of demonic possession (fig. 19). $ ^{92} $ In some ways, the most touching of these miracle paintings is the depiction of Margreth, Hanns Eyseleis's daughter from Mündraching. She was said \"to have been somewhat unright for about four years\" (\"ist bey vier jaren etwas unrichtig gewesen\"), until her brother vowed to bring her to Altötting and to pay for a sung mass. \"And from that hour she came to her reason.\" The anonymous painter has portrayed a clumsy young woman with wild hair and grotesque fingers, whose foot is chained to the wall. Here we have one of the clearest pictures of what madness meant to ordinary people of the sixteenth century: wild, dangerous, controllable by chains, but curable by divine assistance alone (fig. 20). ## THE FORMS OF MADNESS: MIRACLES ## AND PROPAGANDA In trying to characterize the ideas of madness found in the miracle books of early modern Germany, we are also struck by the lack of cer ...",
-        "byte_size": 7730787,
-        "sha256": "51b42075db29ff80a75d1151e156f4c01be23ee2e69b712087d574d277cafb96"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0035-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
-    "request_mode": "note_only",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-001-1historicalproblemssinst:nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00875\",\n    \"anchor_phrase\": \"(fig. 19).92\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor '92' is clearly visible in the text after '(fig. 19)', but no structured anchor exists for it.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00876\",\n    \"anchor_phrase\": \"Blessed Virgin.93 Rather,\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor '93' is clearly visible in the text after 'Blessed Virgin.', but no structured anchor exists for it.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00877\",\n    \"anchor_phrase\": \"to all others.94 In\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor '94' is clearly visible in the text after 'to all others.', but no structured anchor exists for it.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00878\",\n    \"anchor_phrase\": \"miracles reported;95 four\",\n    \"confidence\": 1.0,\n    \"reason\": \"The anchor '95' is clearly visible in the text after 'miracles reported;', but no structured anchor exists for it.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 3964,
+    "output_tokens": 307,
+    "total_tokens": 4271,
+    "estimated_input_tokens": 4001,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00119\",\n    \"anchor_phrase\": \"Hugo van der Goes\",\n    \"confidence\": 0.9,\n    \"reason\": \"The note about Cramer's chronicle likely references the case of Hugo van der Goes mentioned in the text.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00120\",\n    \"anchor_phrase\": \"encouraged visions and voices\",\n    \"confidence\": 0.85,\n    \"reason\": \"The note about hymn singing and Luther's hymn likely relates to the religious experiences mentioned.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cannot determine the unique anchor phrase for the note in chapter_body_excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cannot determine the unique anchor phrase for the note in chapter_body_excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cannot determine the unique anchor phrase for the note in chapter_body_excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cannot determine the unique anchor phrase for the note in chapter_body_excerpt.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cannot determine the unique anchor phrase for the note in chapter_body_excerpt.\"\n  }\n]",
   "response_parsed": [
     {
       "action": "synthesize_anchor",
-      "note_item_id": "fn-00875",
+      "note_item_id": "fn-00119",
       "anchor_id": "",
-      "anchor_phrase": "(fig. 19).92",
+      "anchor_phrase": "Hugo van der Goes",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The anchor '92' is clearly visible in the text after '(fig. 19)', but no structured anchor exists for it."
+      "confidence": 0.9,
+      "reason": "The note about Cramer's chronicle likely references the case of Hugo van der Goes mentioned in the text."
     },
     {
       "action": "synthesize_anchor",
-      "note_item_id": "fn-00876",
+      "note_item_id": "fn-00120",
       "anchor_id": "",
-      "anchor_phrase": "Blessed Virgin.93 Rather,",
+      "anchor_phrase": "encouraged visions and voices",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The anchor '93' is clearly visible in the text after 'Blessed Virgin.', but no structured anchor exists for it."
+      "confidence": 0.85,
+      "reason": "The note about hymn singing and Luther's hymn likely relates to the religious experiences mentioned."
     },
     {
-      "action": "synthesize_anchor",
-      "note_item_id": "fn-00877",
+      "action": "needs_review",
+      "note_item_id": "",
       "anchor_id": "",
-      "anchor_phrase": "to all others.94 In",
+      "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The anchor '94' is clearly visible in the text after 'to all others.', but no structured anchor exists for it."
+      "confidence": 0.8,
+      "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
     },
     {
-      "action": "synthesize_anchor",
-      "note_item_id": "fn-00878",
+      "action": "needs_review",
+      "note_item_id": "",
       "anchor_id": "",
-      "anchor_phrase": "miracles reported;95 four",
+      "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The anchor '95' is clearly visible in the text after 'miracles reported;', but no structured anchor exists for it."
+      "confidence": 0.8,
+      "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
         "action": "synthesize_anchor",
-        "note_item_id": "fn-00875",
+        "note_item_id": "fn-00119",
         "anchor_id": "",
-        "anchor_phrase": "(fig. 19).92",
+        "anchor_phrase": "Hugo van der Goes",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor '92' is clearly visible in the text after '(fig. 19)', but no structured anchor exists for it."
+        "confidence": 0.9,
+        "reason": "The note about Cramer's chronicle likely references the case of Hugo van der Goes mentioned in the text."
       },
       {
         "action": "synthesize_anchor",
-        "note_item_id": "fn-00876",
+        "note_item_id": "fn-00120",
         "anchor_id": "",
-        "anchor_phrase": "Blessed Virgin.93 Rather,",
+        "anchor_phrase": "encouraged visions and voices",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor '93' is clearly visible in the text after 'Blessed Virgin.', but no structured anchor exists for it."
+        "confidence": 0.85,
+        "reason": "The note about hymn singing and Luther's hymn likely relates to the religious experiences mentioned."
       },
       {
-        "action": "synthesize_anchor",
-        "note_item_id": "fn-00877",
+        "action": "needs_review",
+        "note_item_id": "",
         "anchor_id": "",
-        "anchor_phrase": "to all others.94 In",
+        "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor '94' is clearly visible in the text after 'to all others.', but no structured anchor exists for it."
+        "confidence": 0.8,
+        "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
       },
       {
-        "action": "synthesize_anchor",
-        "note_item_id": "fn-00878",
+        "action": "needs_review",
+        "note_item_id": "",
         "anchor_id": "",
-        "anchor_phrase": "miracles reported;95 four",
+        "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The anchor '95' is clearly visible in the text after 'miracles reported;', but no structured anchor exists for it."
+        "confidence": 0.8,
+        "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Cannot determine the unique anchor phrase for the note in chapter_body_excerpt."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 3709,
-    "completion_tokens": 366,
-    "total_tokens": 4075,
+    "prompt_tokens": 3964,
+    "completion_tokens": 307,
+    "total_tokens": 4271,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 9159
+    "duration_ms": 3955
   }
 }

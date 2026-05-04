@@ -2,103 +2,190 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-012-lusurpateur:toc-ch-012-lusurpateur:footnote\",\n  \"chapter_title\": \"L’Usurpateur\",\n  \"page_range\": [\n    220,\n    220\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 220,\n      \"ocr_excerpt\": \"négligée. Elle n'aura pas échappé en revanche à Jacques Lacan qui, abordant l'infatuation du sujet, remarque : « [S]i un homme qui se croit un roi est fou, un roi qui se croit un roi ne l'est pas moins. » Qu'insinue Lacan par là? Que se prendre pour un roi lorsqu'on est employé de bureau, c'est à l'évidence délirer et avoir perdu pied avec la réalité. Mais le roi qui se croit roi tombe lui aussi dans un piège, puisqu'il se prend pour l'image du personnage que lui renvoie le monde. Le leurre n'est pas équivalent, mais il est analogue. L'un se prend pour un souverain, l'autre se prend pour une fiction de souverain. Napoléon, que l'on penserait être l'exemple caricatural de cette folie du pouvoir renvoyée à elle-même, aurait justement évité cette erreur, grâce à l'existence de Bonaparte. « Qu'on n'aille pas me dire que je fais de l'esprit, ajoute Lacan par prétérition, et de la qualité qui se montre dans ce mot que Napoléon était un type qui se croyait Napoléon. Car Napoléon ne se croyait pas du tout Napoléon, pour fort bien savoir par quels moyens Bonaparte avait produit Napoléon, et comment Napoléon, comme le dieu de Malebranche, en soutenait à chaque instant l'existence 87. » D'apr ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00272\",\n      \"marker\": \"87\",\n      \"page_no\": 220,\n      \"paragraph_index\": 0,\n      \"source_text\": \"négligée. Elle n'aura pas échappé en revanche à Jacques Lacan qui, abordant l'infatuation du sujet, remarque : « [S]i un homme qui se croit un roi est fou, un roi qui se croit un roi ne l'est pas moins. » Qu'insinue Lacan par là? Que se pre ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar:footnote\",\n  \"chapter_title\": \"Maisons de santé, maisons d'arrêt\",\n  \"page_range\": [\n    111,\n    112\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00129\",\n      \"anchor_id\": \"anchor-00186\",\n      \"marker\": \"6\",\n      \"note_excerpt\": \"AN, F74592. Précisons que le patronyme complet des Breteuil est Le Tonnelier de Breteuil — sans doute la citoyenne avait-elle trouvé prudent de s'inscrire sous la première partie de son nom uniquement.\",\n      \"anchor_excerpt\": \"puis à la prison de la Force, dans l'attente d'un jugement qui tombe le 5 floréal an II (24 avril 1794) : Belhomme est condamné à six années de fers pour crime de concussion $ ^{6} $.\"\n    },\n    {\n      \"note_item_id\": \"fn-00130\",\n      \"anchor_id\": \"anchor-00187\",\n      \"marker\": \"7\",\n      \"note_excerpt\": \"Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210.\",\n      \"anchor_excerpt\": \"déborder par l'arrivée des 132 Nantais modérés, accusés de complot, en partie logés chez lui, qui l'aurait contraint à augmenter ses tarifs pour faire face à des dépenses considérables? Cette seconde hypothèse, qui n'exclut pas la corruptio ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00131\",\n      \"marker\": \"8\",\n      \"page_no\": 111,\n      \"source_text\": \"Sur la maison Belhomme, voir Olivier Vincienne, «La maison de santé Belhomme. Légende et réalité, Paris et Île-de-France. Mémoires publiés par la Fédération des sociétés historiques et archéologiques de Paris et de l'Île-de-France, t. XXXVI ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00132\",\n      \"marker\": \"9\",\n      \"page_no\": 112,\n      \"source_text\": \"Voir Jean Tulard, « 1800-1815, l'organisation de la police », in Histoire et dictionnaire de la police du Moyen Âge à nos jours, Robert Laffont, « Bouquins », p. 268-305.\"\n    },\n    {\n      \"note_item_id\": \"fn-00133\",\n      \"marker\": \"10\",\n      \"page_no\": 112,\n      \"source_text\": \"AN, F7 8752. Lettre du préfet du Puy-de-Dôme au conseiller d'État chargé de la deuxième division de la police générale de l'Empire, 9 septembre 1807.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00130\",\n      \"note_item_id\": \"fn-00130\",\n      \"current_anchor_id\": \"anchor-00187\",\n      \"marker\": \"7\",\n      \"note_page_no\": 110,\n      \"anchor_page_no\": 111,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210.\",\n      \"anchor_excerpt\": \"déborder par l'arrivée des 132 Nantais modérés, accusés de complot, en partie logés chez lui, qui l'aurait contraint à augmenter ses tarifs pour faire face à des dépenses considérables? Cette seconde hypothèse, qui n'exclut pas la corruptio ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"vient « corriger » la louable et première intention des législateurs, en confiant à la police « le soin d’obvier ou de remédier aux événements fâcheux qui pourroient être occasionnés par les insensés et les furieux laissés en liberté, et par la divagation des animaux malfaisants ou féroces² ». À peine a-t-on entrouvert la grille qu’elle se referme déjà sur le fou, toujours assimilé à la bête à enfermer. Sous la Terreur, le pouvoir politique resserre encore l'étrange mariage entre aliénation et répression, en réquisitionnant les établissements de soins privés, qui présentent l'avantage d'être déjà des lieux d'enfermement, pour les transformer en maisons d'arrêt. Or ce qui aurait pu représenter une solution opportuniste et temporaire répondant à une conjoncture politique d'exception, va au contraire s'institutionnaliser. Sous l'Empire, la Restauration et la monarchie de Juillet, l'assimilation entre maison de santé et prison politique ne relève plus de l'ambiguïté, mais d'une réalité banale, dont le pouvoir n'a aucunement pris la peine de se cacher. ## MAISONS DE SANTÉ, MAISONS D'ARRÊT Entre pension bourgeoise et clinique, la maison de santé jouit à la fin du XVIIIe siècle d'une réputation singulière, tout entière dans l'ambivalence d'un mot qu'elle semble s’être donné pour devise : la discrétion. Alternative de luxe aux hôpitaux-mouroirs de la capitale, elle permet aux familles aisées d’éviter la honte d’une déchéance publique. Là, pas de dortoirs mais des chambres individuelles, pas de cours sinistres mais des jardins d’agrément et, surtout, un personnel médical attentif. La maison de santé est, sous ce rapport, inespérée. Mais son statut hybride, sans cadre législatif, la rend suspecte. Ordinairement élevée loin du centre de Paris, dans les faubourgs de la capitale, el ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-012-lusurpateur:toc-ch-012-lusurpateur:footnote",
-      "chapter_title": "L’Usurpateur",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+      "chapter_title": "Maisons de santé, maisons d'arrêt",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        220,
-        220
+        111,
+        112
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 358,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00272",
-          "chapter_id": "toc-ch-012-lusurpateur",
-          "page_no": 220,
-          "paragraph_index": 0,
-          "char_start": 1189,
-          "char_end": 1191,
-          "source_marker": "87",
-          "normalized_marker": "87",
-          "anchor_kind": "footnote",
-          "certainty": 0.6,
-          "source_text": "négligée. Elle n'aura pas échappé en revanche à Jacques Lacan qui, abordant l'infatuation du sujet, remarque : « [S]i un homme qui se croit un roi est fou, un roi qui se croit un roi ne l'est pas moins. » Qu'insinue Lacan par là? Que se prendre pour un roi lorsqu'on est employé de bureau, c'est à l'évidence délirer et avoir perdu pied avec la réalité. Mais le roi qui se croit roi tombe lui aussi dans un piège, puisqu'il se prend pour l'image du personnage que lui renvoie le monde. Le leurre n'est pas équivalent, mais il est analogue. L'un se prend pour un souverain, l'autre se prend pour une fiction de souverain. Napoléon, que l'on penserait être l'exemple caricatural de cette folie du pouvoir renvoyée à elle-même, aurait justement évité cette erreur, grâce à l'existence de Bonaparte. « Qu'on n'aille pas me dire que je fais de l'esprit, ajoute Lacan par prétérition, et de la qualité qui se montre dans ce mot que Napoléon était un type qui se croyait Napoléon. Car Napoléon ne se croyait pas du tout Napoléon, pour fort bien savoir par quels moyens Bonaparte avait produit Napoléon, et comment Napoléon, comme le dieu de Malebranche, en soutenait à chaque instant l'existence 87. » D'après le psychanalyste, c'est à Sainte-Hélène que, dictant à Las Cases ses exploits et bâtissant sa légende, Napoléon se serait finalement pris pour Napoléon — et aurait donc basculé dans une forme de folie. Metteur en scène de lui-même, l'empereur déchu aurait alors aboli cette forme de dissociation si salutaire et serait entré en adhésion avec le mythe de Napoléon, dont il a ordonné le récit dans ce chef-d'œuvre de propagande qu'est le Mémorial.",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00129",
+          "note_item_id": "fn-00129",
+          "anchor_id": "anchor-00186",
+          "marker": "6",
+          "note_excerpt": "AN, F74592. Précisons que le patronyme complet des Breteuil est Le Tonnelier de Breteuil — sans doute la citoyenne avait-elle trouvé prudent de s'inscrire sous la première partie de son nom uniquement.",
+          "anchor_excerpt": "puis à la prison de la Force, dans l'attente d'un jugement qui tombe le 5 floréal an II (24 avril 1794) : Belhomme est condamné à six années de fers pour crime de concussion $ ^{6} $."
+        },
+        {
+          "link_id": "link-00130",
+          "note_item_id": "fn-00130",
+          "anchor_id": "anchor-00187",
+          "marker": "7",
+          "note_excerpt": "Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210.",
+          "anchor_excerpt": "déborder par l'arrivée des 132 Nantais modérés, accusés de complot, en partie logés chez lui, qui l'aurait contraint à augmenter ses tarifs pour faire face à des dépenses considérables? Cette seconde hypothèse, qui n'exclut pas la corruption, semble prévaloir. Comment expliquer que Belhomme se soit retrouvé sous les verrous, s'il était réellement en cheville avec Fouquier-Tinville? L'inculpé se défend, se pourvoit en cassation et remporte gain de cause. Il est libéré le 7 septembre 1794, lavé de tout soupçon, et reprend dès le surlendemain la direction de sa maison, où Gabriel de Talleyrand, oncle de l'évêque d'Autun, Volney et la «citoyenne Penthièvre», autrement dit la duchesse d'Orléans, veuve de Philippe-Égalité, traverseront la Révo<sup>7</sup>lution $ ^{8} $."
         }
       ],
-      "rebind_candidates": []
+      "unmatched_note_items": [
+        {
+          "row_id": 11661,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00131",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "Sur la maison Belhomme, voir Olivier Vincienne, «La maison de santé Belhomme. Légende et réalité, Paris et Île-de-France. Mémoires publiés par la Fédération des sociétés historiques et archéologiques de Paris et de l'Île-de-France, t. XXXVI, 1985, p. 135-208. Cet article défait la légende colportée par G. Lenôtre dans Paris révolutionnaire : vieilles maisons, vieux papiers, 3° série, Librairie académique Perrin, 1922, p. 119-141. Il est vrai que l'histoire de Belhomme se prête au romanesque. Cécil Saint-Laurent (Jacques Laurent) sauvera ainsi sa Caroline chérie de la guillotine, grâce au séjour qu'elle obtient chez le cynique « docteur » Belhomme, interprété par Raymond Souplex, dans le film de Richard Pottier (1951), avec Martine Carol dans le rôle-titre. L'extrait du film à ce sujet est disponible à: http://www.dailymotion.com/video/x3kyg5_caroline-cherie-martine-carol_shortfilms.",
+          "page_no": 111,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11662,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00132",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Voir Jean Tulard, « 1800-1815, l'organisation de la police », in Histoire et dictionnaire de la police du Moyen Âge à nos jours, Robert Laffont, « Bouquins », p. 268-305.",
+          "page_no": 112,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11663,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00133",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "AN, F7 8752. Lettre du préfet du Puy-de-Dôme au conseiller d'État chargé de la deuxième division de la police générale de l'Empire, 9 septembre 1807.",
+          "page_no": 112,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00130",
+          "note_item_id": "fn-00130",
+          "current_anchor_id": "anchor-00187",
+          "marker": "7",
+          "note_page_no": 110,
+          "anchor_page_no": 111,
+          "current_anchor_marker": "7",
+          "note_excerpt": "Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210.",
+          "anchor_excerpt": "déborder par l'arrivée des 132 Nantais modérés, accusés de complot, en partie logés chez lui, qui l'aurait contraint à augmenter ses tarifs pour faire face à des dépenses considérables? Cette seconde hypothèse, qui n'exclut pas la corruption, semble prévaloir. Comment expliquer que Belhomme se soit retrouvé sous les verrous, s'il était réellement en cheville avec Fouquier-Tinville? L'inculpé se défend, se pourvoit en cassation et remporte gain de cause. Il est libéré le 7 septembre 1794, lavé de tout soupçon, et reprend dès le surlendemain la direction de sa maison, où Gabriel de Talleyrand, oncle de l'évêque d'Autun, Volney et la «citoyenne Penthièvre», autrement dit la duchesse d'Orléans, veuve de Philippe-Égalité, traverseront la Révo<sup>7</sup>lution $ ^{8} $.",
+          "current_anchor_synthetic": false
+        }
+      ]
     },
-    "page_contexts": [
-      {
-        "page_no": 220,
-        "file_idx": 219,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "négligée. Elle n'aura pas échappé en revanche à Jacques Lacan qui, abordant l'infatuation du sujet, remarque : « [S]i un homme qui se croit un roi est fou, un roi qui se croit un roi ne l'est pas moins. » Qu'insinue Lacan par là? Que se prendre pour un roi lorsqu'on est employé de bureau, c'est à l'évidence délirer et avoir perdu pied avec la réalité. Mais le roi qui se croit roi tombe lui aussi dans un piège, puisqu'il se prend pour l'image du personnage que lui renvoie le monde. Le leurre n'est pas équivalent, mais il est analogue. L'un se prend pour un souverain, l'autre se prend pour une fiction de souverain. Napoléon, que l'on penserait être l'exemple caricatural de cette folie du pouvoir renvoyée à elle-même, aurait justement évité cette erreur, grâce à l'existence de Bonaparte. « Qu'on n'aille pas me dire que je fais de l'esprit, ajoute Lacan par prétérition, et de la qualité qui se montre dans ce mot que Napoléon était un type qui se croyait Napoléon. Car Napoléon ne se croyait pas du tout Napoléon, pour fort bien savoir par quels moyens Bonaparte avait produit Napoléon, et comment Napoléon, comme le dieu de Malebranche, en soutenait à chaque instant l'existence 87. » D'après le psychanalyste, c'est à Sainte-Hélène que, dictant à Las Cases ses exploits et bâtissant sa légende, Napoléon se serait finalement pris pour Napoléon — et aurait donc basculé dans une forme de fo ...",
-        "byte_size": 305753,
-        "sha256": "02b37fe6438c49436f3acd18851c606e9d55788af3ceed4fbd815d2bbea05aee"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-012-lusurpateur:toc-ch-012-lusurpateur:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00272\",\n    \"marker\": \"87\",\n    \"note_text\": \"Jacques Lacan, Écrit I [1966], Seuil, « Points », 1999, p. 170.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text is clearly visible at the bottom of the page (labeled 87), but no structured note item was produced by the OCR/processing pipeline.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2063,
+    "output_tokens": 127,
+    "total_tokens": 2190,
+    "estimated_input_tokens": 2025,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00131\",\n    \"anchor_phrase\": \"Sur la maison Belhomme, voir Olivier Vincienne\",\n    \"confidence\": 0.95,\n    \"reason\": \"正文包含与注释完全匹配的唯一短语作为锚点。\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"未找到与fn-00132、fn-00133正文匹配的锚点短语。\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00131",
+      "anchor_id": "",
+      "anchor_phrase": "Sur la maison Belhomme, voir Olivier Vincienne",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "正文包含与注释完全匹配的唯一短语作为锚点。"
+    },
+    {
+      "action": "needs_review",
       "note_item_id": "",
-      "anchor_id": "anchor-00272",
+      "anchor_id": "",
       "anchor_phrase": "",
-      "marker": "87",
-      "note_text": "Jacques Lacan, Écrit I [1966], Seuil, « Points », 1999, p. 170.",
-      "confidence": 1.0,
-      "reason": "The footnote text is clearly visible at the bottom of the page (labeled 87), but no structured note item was produced by the OCR/processing pipeline."
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "未找到与fn-00132、fn-00133正文匹配的锚点短语。"
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00131",
+        "anchor_id": "",
+        "anchor_phrase": "Sur la maison Belhomme, voir Olivier Vincienne",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "正文包含与注释完全匹配的唯一短语作为锚点。"
+      },
+      {
+        "action": "needs_review",
         "note_item_id": "",
-        "anchor_id": "anchor-00272",
+        "anchor_id": "",
         "anchor_phrase": "",
-        "marker": "87",
-        "note_text": "Jacques Lacan, Écrit I [1966], Seuil, « Points », 1999, p. 170.",
-        "confidence": 1.0,
-        "reason": "The footnote text is clearly visible at the bottom of the page (labeled 87), but no structured note item was produced by the OCR/processing pipeline."
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "未找到与fn-00132、fn-00133正文匹配的锚点短语。"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 1389,
-    "completion_tokens": 136,
-    "total_tokens": 1525,
+    "prompt_tokens": 2063,
+    "completion_tokens": 127,
+    "total_tokens": 2190,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4086
+    "duration_ms": 1734
   }
 }

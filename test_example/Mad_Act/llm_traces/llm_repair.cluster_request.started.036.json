@@ -1,0 +1,123 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0039-toc-ch-006-replenishorattack:footnote",
+      "chapter_title": "6. Replenish or attack?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        251,
+        253
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11687,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00115",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0039-toc-ch-006-replenishorattack",
+          "marker": "14",
+          "normalized_marker": "14",
+          "occurrence": 1,
+          "source_text": "_UO/CaQ_`U[Z_ 1 5 25 P ]a Z ©O̕ɑÒw>= aVUZ/eU`[ZS/P ]a Z ©O̕ɑÒw 1 <<=2A @3/VHiankuangW Ȑǣ̥ 3 V llness/mechanismsWȃƆ 3/VSn/there/being resemblances/and/differencesbetween PU Z and Wa ZS illnessesW ˔Ȑǣȃš¯ǽ>U 1 @@ /_ <<=`A 25",
+          "page_no": 251,
+          "display_marker": "14",
+          "source_marker": "14",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11688,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00116",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0039-toc-ch-006-replenishorattack",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": "Analects 13.21; Waley (1989 [1938]: 177) translates kuang as “the impetuous,” Ames and Rosemont (1998: 168) as “the rash.”",
+          "page_no": 252,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11689,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00117",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0039-toc-ch-006-replenishorattack",
+          "marker": "16",
+          "normalized_marker": "16",
+          "occurrence": 1,
+          "source_text": "79. Jin qu 進取 was from Analects 13.21. Waley (1989 [1938]: 177): “assert themselves,” Ames/Rosemont (1998: 168): “forge ahead in their actions.”",
+          "page_no": 253,
+          "display_marker": "16",
+          "source_marker": "16",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0039-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0039-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4243,
+    "estimated_prompt_tokens": 1518,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 3,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1518,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

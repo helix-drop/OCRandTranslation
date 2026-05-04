@@ -1,0 +1,388 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-005-lhumanismedanslesturbule:nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule:footnote\",\n  \"chapter_title\": \"4. L'humanisme dans les turbulences\",\n  \"page_range\": [\n    118,\n    133\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00311\",\n      \"anchor_id\": \"anchor-00170\",\n      \"marker\": \"10\",\n      \"note_excerpt\": \"Maurice ME!u.EAu-PoNJY, Humanisme et terrlmr. Essai sur le problème commu­ niste, Paris, Gallimard, 1947.\",\n      \"anchor_excerpt\": \"Pour se convaincre de l'immense distance qui sépare encore alors l'intelligentsia parisienne des thèmes véritablement heideggé-riens, il suffit de se reporter à l'essai publié en 1947 par Merleau-Ponty, Humanisme et terreur $ ^{10} $.\"\n    },\n    {\n      \"note_item_id\": \"fn-00315\",\n      \"anchor_id\": \"anchor-00173\",\n      \"marker\": \"14\",\n      \"note_excerpt\": \"Ibid., p. 203.\",\n      \"anchor_excerpt\": \"Le contraste est poignant entre la finesse des analyses de Merleau-Ponty et la violence qu'il doit affronter. En est-il de même chez Heidegger dans sa Lettre ? Les quelques lignes qui suivent vont indiquer une fragile «passerelle» entre les ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00312\",\n      \"marker\": \"11\",\n      \"page_no\": 118,\n      \"source_text\": \"Citation tirée de la Critique de la philosophie du Droit de Hegel, donnée par M. MERLEAu-PONlY, Humanisme et terreur ... , op. dt.~ p. 109.\"\n    },\n    {\n      \"note_item_id\": \"fn-00313\",\n      \"marker\": \"12\",\n      \"page_no\": 118,\n      \"source_text\": \"Ibid., p. 205. Cette allusion aux procès de Moscou est reprise de manière non moins contestable par G. LUKACS (Existentialisme ou: marxisme?, Paris, Nagel, 1948) pour qui l'univers des accusés correspond à celui de S(dn und Zeit, « \\\"ce gran ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00314\",\n      \"marker\": \"13\",\n      \"page_no\": 118,\n      \"source_text\": \"«Le comportement communiste n'a pas cha.qgé: c'est toujours la même atti~ tude de lutte, les mêmes ruses de gu=, la même méchanceté méthodique, la même\"\n    },\n    {\n      \"note_item_id\": \"fn-00316\",\n      \"marker\": \"15\",\n      \"page_no\": 119,\n      \"source_text\": \"HEIDEGGER, Lettre sur l'humanisme, op. dt., pp. 98-99.\"\n    },\n    {\n      \"note_item_id\": \"fn-00317\",\n      \"marker\": \"16\",\n      \"page_no\": 119,\n      \"source_text\": \"«Die Heimatlosigkeit wird ein Weltschicksal » (ibid.).\"\n    },\n    {\n      \"note_item_id\": \"fn-00319\",\n      \"marker\": \"18\",\n      \"page_no\": 120,\n      \"source_text\": \"Lœwith a été un ami presque intime de Heid~er et il a été <<habilité>> par lui Voir ibid., pp. 61-64; cf. H.:G. GADAMER, Philosop'bische Lehtjahre, op. dt., pp. 23123 9 et passim.\"\n    },\n    {\n      \"note_item_id\": \"fn-00323\",\n      \"marker\": \"22\",\n      \"page_no\": 121,\n      \"source_text\": \"Ibid., p. 351.\"\n    },\n    {\n      \"note_item_id\": \"fn-00324\",\n      \"marker\": \"23\",\n      \"page_no\": 121,\n      \"source_text\": \"Ibid., p. 347 et p. 351.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"# 4. L'humanisme dans les turbulences LA LETTRE À JEAN BEAUFRET ET LE DÉBAT SUR L'HUMANISME Il n'est pas fréquent qu'un auteur organise sa propre réception à l'étranger. C'est pourtant ce qui est advenu avec la grande réponse à Jean Beaufret, devenue célèbre sous le titre de Lettre sur l'humanisme¹. On doit à Jean Beaufret lui-même quelques détails sur les circonstances qui sont à l'origine de ce texte. Nous sommes en novembre 1946. C'est à l'improviste et sur une table de café que Beaufret rédige, à l'intention du Maître, des questions qu'il entend confier à un ami en partance pour Fribourg. Il a déjà eu avec le Maître un premier échange épistolaire qui lui laisse espérer une réponse, mais il est encore loin de se douter que Heidegger se donnera la peine de méditer longuement ses questions en composant un texte dense et mûrement pensé, qui deviendra célèbre. Il désire surtout donner un contenu philosophique au dialogue qui se noue avec le Maître. Dans sa question initiale, Beaufret citait une phrase de Paul Valéry à propos des « zélateurs de l'action », ayant évidemment à l’esprit la théorie sartienne de l’engagement. Cette précision permet de comprendre pourquoi la Lettre sur l’humanisme commence aussi abruptement : «Nous sommes bien loin de méditer d’une manière décisive l’essence de l’agir? » La deuxième question apparaît rapidement dans le texte de la Lettre à laquelle elle va donner son titre : «Comment redonner un sens au mot “humanisme” ? » Tout en récusant catégoriquement le projet que cette interrogation dénote (garder un mot-étiquette en isme, source de malentendus et de ce qu’il nomme gravement un «malheur* »), c’est à cette question que Heidegger répond le plus longuement, mais non sans la replacer dans sa propre perspective, l’intelligence de l’oubli métap ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-lhumanismedanslesturbule:nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule:footnote",
+      "chapter_title": "4. L'humanisme dans les turbulences",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        118,
+        133
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00311",
+          "note_item_id": "fn-00311",
+          "anchor_id": "anchor-00170",
+          "marker": "10",
+          "note_excerpt": "Maurice ME!u.EAu-PoNJY, Humanisme et terrlmr. Essai sur le problème commu­ niste, Paris, Gallimard, 1947.",
+          "anchor_excerpt": "Pour se convaincre de l'immense distance qui sépare encore alors l'intelligentsia parisienne des thèmes véritablement heideggé-riens, il suffit de se reporter à l'essai publié en 1947 par Merleau-Ponty, Humanisme et terreur $ ^{10} $."
+        },
+        {
+          "link_id": "link-00315",
+          "note_item_id": "fn-00315",
+          "anchor_id": "anchor-00173",
+          "marker": "14",
+          "note_excerpt": "Ibid., p. 203.",
+          "anchor_excerpt": "Le contraste est poignant entre la finesse des analyses de Merleau-Ponty et la violence qu'il doit affronter. En est-il de même chez Heidegger dans sa Lettre ? Les quelques lignes qui suivent vont indiquer une fragile «passerelle» entre les deux pensées à ce moment historique bien précis : «Ce genre de conclusion déplait, écrit Merleau-Ponty. Parler pour l'humanisme sans être pour le \"socialisme humaniste\" à la manière anglo-saxonne, \"comprendre\" les communistes sans être communiste, c'est apparemment se placer bien haut et en tout cas au-dessus de la mêlée. En réalité, c'est simplement refuser de s'engager dans la confusion et hors de la vérité. Est-ce notre faute si l'humanisme occidental est faussé parce qu'il est aussi une machine de guerre<sup>14</sup>? » Aveu ou prémonition ? C'est évidemment dans cette dernière phrase que Merleau-Ponty se rapproche le plus, sans le savoir, de la mise en question heideggé-rienne ; il se veut, en même temps, plus « haut » qu'il ne réussit à se placer, restant trop collé à l'actualité politique. Pourtant, Heidegger lui-même fait indirectement écho à cette actualité quand, pour l'unique fois dans son œuvre, il envisage la possibilité d'«un dialogue fructueux avec le marxisme\" ». Quoique très fragile, un rapprochement possible entre les deux penseurs est alors discer-nable, à cette différence près (d'où vient l'intérêt singulier de sa nouvelle tentative) que Heidegger ouvre l'horizon sur l'ensemble de l'histoire occidentale : «L'absence de patrie devient un destin mondial4. » On ne décèle pas une telle pensée en France à l'époque, ni la moindre interrogation sur le sens de la Technique (ni non plus l'accent mis sur l'importance du langage comme «maison de l'être»)."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 43182,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00312",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "Citation tirée de la Critique de la philosophie du Droit de Hegel, donnée par M. MERLEAu-PONlY, Humanisme et terreur ... , op. dt.~ p. 109.",
+          "page_no": 118,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43183,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00313",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 205. Cette allusion aux procès de Moscou est reprise de manière non moins contestable par G. LUKACS (Existentialisme ou: marxisme?, Paris, Nagel, 1948) pour qui l'univers des accusés correspond à celui de S(dn und Zeit, « \"ce grand-guignol de la philosophie\", co=ele dit si bien Henri Lefebvre (sic)>> (p. 23).",
+          "page_no": 118,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43184,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00314",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "13",
+          "normalized_marker": "13",
+          "occurrence": 1,
+          "source_text": "«Le comportement communiste n'a pas cha.qgé: c'est toujours la même atti~ tude de lutte, les mêmes ruses de gu=, la même méchanceté méthodique, la même",
+          "page_no": 118,
+          "display_marker": "13",
+          "source_marker": "13",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43186,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00316",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": "HEIDEGGER, Lettre sur l'humanisme, op. dt., pp. 98-99.",
+          "page_no": 119,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43187,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00317",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "16",
+          "normalized_marker": "16",
+          "occurrence": 1,
+          "source_text": "«Die Heimatlosigkeit wird ein Weltschicksal » (ibid.).",
+          "page_no": 119,
+          "display_marker": "16",
+          "source_marker": "16",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43189,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00319",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "18",
+          "normalized_marker": "18",
+          "occurrence": 1,
+          "source_text": "Lœwith a été un ami presque intime de Heid~er et il a été <<habilité>> par lui Voir ibid., pp. 61-64; cf. H.:G. GADAMER, Philosop'bische Lehtjahre, op. dt., pp. 23123 9 et passim.",
+          "page_no": 120,
+          "display_marker": "18",
+          "source_marker": "18",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43193,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00323",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "22",
+          "normalized_marker": "22",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 351.",
+          "page_no": 121,
+          "display_marker": "22",
+          "source_marker": "22",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43194,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00324",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-lhumanismedanslesturbule",
+          "region_id": "nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule",
+          "marker": "23",
+          "normalized_marker": "23",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 347 et p. 351.",
+          "page_no": 121,
+          "display_marker": "23",
+          "source_marker": "23",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-lhumanismedanslesturbule:nr-fn-ch-0009-toc-ch-005-lhumanismedanslesturbule:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2128,
+    "output_tokens": 622,
+    "total_tokens": 2750,
+    "estimated_input_tokens": 2041,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00312\",\n    \"anchor_phrase\": \"Citation tirée de la Critique de la philosophie du Droit de Hegel\",\n    \"confidence\": 0.9,\n    \"reason\": \"Citation exacte dans le texte, correspondance directe avec la note.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00313\",\n    \"anchor_phrase\": \"Cette allusion aux procès de Moscou est reprise\",\n    \"confidence\": 0.9,\n    \"reason\": \"Phrase unique identifiant clairement le passage commenté.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00314\",\n    \"anchor_phrase\": \"Le comportement communiste n'a pas changé: c'est toujours la même attitude de lutte\",\n    \"confidence\": 0.85,\n    \"reason\": \"Citation longue et spécifique, correspondance probable.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00316\",\n    \"anchor_phrase\": \"Les quelques lignes qui suivent vont indiquer une fragile passerelle\",\n    \"confidence\": 0.8,\n    \"reason\": \"Référence contextuelle probable à la Lettre de Heidegger.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00317\",\n    \"anchor_phrase\": \"Die Heimatlosigkeit wird ein Weltschicksal\",\n    \"confidence\": 0.95,\n    \"reason\": \"Citation allemande identique dans le texte et la note.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00319\",\n    \"anchor_phrase\": \"Lœwith a été un ami presque intime de Heidegger\",\n    \"confidence\": 0.9,\n    \"reason\": \"Phrase unique identifiant clairement le passage commenté.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00323\",\n    \"anchor_phrase\": \"Ibid., p. 351\",\n    \"confidence\": 0.5,\n    \"reason\": \"Référence page seule, pas de phrase unique identifiée dans l'extrait.\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00324\",\n    \"anchor_phrase\": \"Ibid., p. 347 et p. 351\",\n    \"confidence\": 0.5,\n    \"reason\": \"Référence page seule, pas de phrase unique identifiée dans l'extrait.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00312",
+      "anchor_id": "",
+      "anchor_phrase": "Citation tirée de la Critique de la philosophie du Droit de Hegel",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Citation exacte dans le texte, correspondance directe avec la note."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00313",
+      "anchor_id": "",
+      "anchor_phrase": "Cette allusion aux procès de Moscou est reprise",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Phrase unique identifiant clairement le passage commenté."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00314",
+      "anchor_id": "",
+      "anchor_phrase": "Le comportement communiste n'a pas changé: c'est toujours la même attitude de lutte",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.85,
+      "reason": "Citation longue et spécifique, correspondance probable."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00316",
+      "anchor_id": "",
+      "anchor_phrase": "Les quelques lignes qui suivent vont indiquer une fragile passerelle",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Référence contextuelle probable à la Lettre de Heidegger."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00317",
+      "anchor_id": "",
+      "anchor_phrase": "Die Heimatlosigkeit wird ein Weltschicksal",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Citation allemande identique dans le texte et la note."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00319",
+      "anchor_id": "",
+      "anchor_phrase": "Lœwith a été un ami presque intime de Heidegger",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Phrase unique identifiant clairement le passage commenté."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00323",
+      "anchor_id": "",
+      "anchor_phrase": "Ibid., p. 351",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.5,
+      "reason": "Référence page seule, pas de phrase unique identifiée dans l'extrait."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00324",
+      "anchor_id": "",
+      "anchor_phrase": "Ibid., p. 347 et p. 351",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.5,
+      "reason": "Référence page seule, pas de phrase unique identifiée dans l'extrait."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00312",
+        "anchor_id": "",
+        "anchor_phrase": "Citation tirée de la Critique de la philosophie du Droit de Hegel",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Citation exacte dans le texte, correspondance directe avec la note."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00313",
+        "anchor_id": "",
+        "anchor_phrase": "Cette allusion aux procès de Moscou est reprise",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Phrase unique identifiant clairement le passage commenté."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00314",
+        "anchor_id": "",
+        "anchor_phrase": "Le comportement communiste n'a pas changé: c'est toujours la même attitude de lutte",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.85,
+        "reason": "Citation longue et spécifique, correspondance probable."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00316",
+        "anchor_id": "",
+        "anchor_phrase": "Les quelques lignes qui suivent vont indiquer une fragile passerelle",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Référence contextuelle probable à la Lettre de Heidegger."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00317",
+        "anchor_id": "",
+        "anchor_phrase": "Die Heimatlosigkeit wird ein Weltschicksal",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Citation allemande identique dans le texte et la note."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00319",
+        "anchor_id": "",
+        "anchor_phrase": "Lœwith a été un ami presque intime de Heidegger",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Phrase unique identifiant clairement le passage commenté."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00323",
+        "anchor_id": "",
+        "anchor_phrase": "Ibid., p. 351",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.5,
+        "reason": "Référence page seule, pas de phrase unique identifiée dans l'extrait."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00324",
+        "anchor_id": "",
+        "anchor_phrase": "Ibid., p. 347 et p. 351",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.5,
+        "reason": "Référence page seule, pas de phrase unique identifiée dans l'extrait."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 2128,
+    "completion_tokens": 622,
+    "total_tokens": 2750,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 6176
+  }
+}

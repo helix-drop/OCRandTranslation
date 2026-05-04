@@ -1,0 +1,303 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-002-2tworeformersandaworldgo:nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo:footnote",
+      "chapter_title": "2 Two Reformers and a World Gone Mad: Luther and Paracelsus",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        105,
+        120
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00171",
+          "note_item_id": "fn-00161",
+          "anchor_id": "anchor-00192",
+          "marker": "1",
+          "note_excerpt": "See the brilliant evocation by Lucien Febvre, Life in Renaissance France (Cambridge, Mass., 1977).",
+          "anchor_excerpt": "When we voyage to the sixteenth century without the conceptual comforts of the twentieth, the first differences we are likely to notice are physical. Life was then rougher; hunger, disease and death were closer, transportation more arduous. Because roads were often just rutted paths, even noble ladies rode on horseback rather than in carriages; and ordinary people walked everywhere. The dark of night was not lit up by street lights. The cold of winter was seldom effectively shut out. Smells of rotting manure permeated the bourgeois courtyards of even large towns, while even the finest inns provided only chamber pots for their guests, who slept, often naked, sweaty, and louse-infested, several to a bed. $ ^{1} $"
+        },
+        {
+          "link_id": "link-00172",
+          "note_item_id": "fn-00162",
+          "anchor_id": "anchor-00193",
+          "marker": "2",
+          "note_excerpt": "Luther and Paracelsus have been compared theologically in Hartmut Rudolph, “Einige Gesichtspunkte zum Thema ‘Paracelsus und Luther,”” Archiv fiir Reformationsgeschichte 72 (1981): 34—53, and in Andrew Weeks, Paracelsus: Speculative Theory and the Crisis of the Early Reformation (Albany, N.Y., 1997), pp. 1—4, 9—18, 142—44, 161-62.",
+          "anchor_excerpt": "On the surface, any comparison of Luther and Paracelsus would seem destined to failure; they exhibited such obvious and extreme differences. $ ^{2} $ Luther was a man of institutions, bound to his university and invoking the privileges and obligations imposed upon him by his doctoral degree, even when he no longer felt bound to the Augustinian order of hermits; he was also bound in marriage to a new vision of the dignity of secular life, and dependent on the most ancient sources of the Christian tradition. Even when he felt driven in 1520 to burn the canon law and the papal bull that threatened him with excommunication, Luther was an “obedient rebel.” $ ^{3} $"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 50507,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00174",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "14",
+          "normalized_marker": "14",
+          "occurrence": 1,
+          "source_text": "Ad dialogam Silvestri Prieritatis de potestate papae responsio (1518): WA, 1: 674. For Luther’s attitude toward reason in theology, see generally Brian Gerrish, Grace and Reason: A Study in the Theology of Luther (Oxford, 1962); and Herbert Olsson, Schopfung, Vernunft und Gesetz in Luthers Theologie (Uppsala, 1971).",
+          "page_no": 105,
+          "display_marker": "14",
+          "source_marker": "14",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50508,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00175",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": "Lectures on Genesis: WA, 44: 377, LW, 7: 105.",
+          "page_no": 105,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50513,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00180",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "20",
+          "normalized_marker": "20",
+          "occurrence": 1,
+          "source_text": "Ibid.: WA, 43: 96; cf. LW, 3: 300.",
+          "page_no": 107,
+          "display_marker": "20",
+          "source_marker": "20",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50516,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00183",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "23",
+          "normalized_marker": "23",
+          "occurrence": 1,
+          "source_text": "Ibid.: WA, 43: 520; LW, 5: 134.",
+          "page_no": 107,
+          "display_marker": "23",
+          "source_marker": "23",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50517,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00184",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "24",
+          "normalized_marker": "24",
+          "occurrence": 1,
+          "source_text": "Ibid.: WA, 43: 635-36; LW, 5: 300.",
+          "page_no": 108,
+          "display_marker": "24",
+          "source_marker": "24",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50518,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00185",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "25",
+          "normalized_marker": "25",
+          "occurrence": 1,
+          "source_text": "Michael Baylor, Action and Person: Conscience in Late Scholasticism and the Young Luther (Leiden, 1977), pp. 122, 152-53, 243—45.",
+          "page_no": 108,
+          "display_marker": "25",
+          "source_marker": "25",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50519,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00186",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "26",
+          "normalized_marker": "26",
+          "occurrence": 1,
+          "source_text": "“In the affairs of government there is room for invincible ignorance, as when someone is at fault because he is encumbered by sickness or is insane. But these ideas should not be carried over into religion and matters of conscience” (Lectures on Genesis: WA, 42: 486; LW, 2: 334).",
+          "page_no": 108,
+          "display_marker": "26",
+          "source_marker": "26",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50539,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00206",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "46",
+          "normalized_marker": "46",
+          "occurrence": 1,
+          "source_text": "“[M]an wolle denn allein fur Besessene rechnen, die leiblich vom Teufel geplaget und gepeiniget werden, nicht die Mondstichtigen, Narren, Sinnlosen etc.” (WATR, no. 830 [1: 403)).",
+          "page_no": 113,
+          "display_marker": "46",
+          "source_marker": "46",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00222",
+          "note_item_id": "fn-00212",
+          "current_anchor_id": "anchor-00251",
+          "marker": "52",
+          "note_page_no": 114,
+          "anchor_page_no": 113,
+          "current_anchor_marker": "52",
+          "note_excerpt": "Ibid.: WA, 43: 58; LW, 3: 255-56. Nero and Caligula provided further examples of men whose “satanic madness” drove them to effeminacy and uncontrollable desire (Sathanico furore prorsus effoeminati) (WA, 44: 443; LW, 7: 195).",
+          "anchor_excerpt": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00223",
+          "note_item_id": "fn-00213",
+          "current_anchor_id": "anchor-00252",
+          "marker": "53",
+          "note_page_no": 114,
+          "anchor_page_no": 113,
+          "current_anchor_marker": "53",
+          "note_excerpt": "Ibid.: WA, 44: 26-28, 47; LW, 6: 37-38, 65: “Ideo recte dicit, non humano more iIrasceris aut saevis: sed plane diabolica et infernali furia percitus es, steckts vol hellisch fewrs.”",
+          "anchor_excerpt": "The next major atrocity in history was the killing of Abel by Cain, a mad murder, which prompted Luther to imagine Cain’s furor in some detail. Cain was so incensed at Abel that his mind gave him no rest; he was consumed with a “diabolical madness” (diabolicum furorem) that “distorts the eyes, wrinkles the brow, puffs up the mouth, and supplies the hands with weapons.” $ ^{50} $ “Possessed by Satan” (animus a Satana obsessus), Cain craftily lured Abel to his destruction; and we, too, whenever our nature is without the Holy Spirit, are “impelled by the same evil spirit.” $ ^{51} $ Amazingly, the modern descendants of Cain, the pope, bishops, and cardinals rage with the same Satanic hatred and murderous intent. $ ^{52} $ Luther repeated the point in countless examples. Satan takes advantage of man in his enfeebled, corrupt, and sinful condition, driving him to further excesses. That explained the wickedness of Sodom, where the men were so mad and frenzied that they spurned women, “as frenzied men are wont to do” (ut furiosi homines solvent, sexum contemnunt). $ ^{53} $ It was Satan who produced the madness of Sodom, for when people turn from God, Satan takes over and powerfully suppresses nature, turning men to bestial and unnatural acts. God had to",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00244",
+          "note_item_id": "fn-00234",
+          "current_anchor_id": "anchor-00277",
+          "marker": "74",
+          "note_page_no": 119,
+          "anchor_page_no": 118,
+          "current_anchor_marker": "74",
+          "note_excerpt": "Ibid.: WA, 44: 432—33; LW, 7: 179-80.",
+          "anchor_excerpt": "Luther was not tempted as were some Protestants to deny the reality of demon possession. Instead, as we have seen, he conceded that there were in his day easily as many possessed as in the time of Christ. In reflecting on the reasons for the resurgence of the devil, Luther's thoughts were repeatedly drawn to the Apocalypse. Although the devil was not, strictly speaking, harder to drive out than in earlier days, it was true that men had grown so uncertain and weak in their faith that no one could effectively oppose the devil anymore. Luther held that Christ was allowing evil to multiply in the last days of history. It almost seemed that Christ was no longer guarding his little flock of faithful. The only possible conclusion was obvious to Luther: the Second Coming was at hand. $ ^{73} $ In fact, it appears that Luther's sense of the impending eschaton kept him from skepticism about the awesome power of the devil. He continued to live in a world filled with the demons and apocalyptic expectations of the New Testament. Those Protestants who lost Luther's apocalyptic expectations, however, often found themselves unable to refute Catholic polemicists on their own terms and gave in to the ad hominem suspicion that only human fraud could explain the supposed successes of exorcism. $ ^{74} $ Luther's eschatology thus insulated him in a way from despair when he saw the devil's realm expanding everywhere. Knowing that Christ would soon triumph, Luther could view the rampage of the devil with some equanimity.",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00245",
+          "note_item_id": "fn-00235",
+          "current_anchor_id": "anchor-00278",
+          "marker": "75",
+          "note_page_no": 119,
+          "anchor_page_no": 118,
+          "current_anchor_marker": "75",
+          "note_excerpt": "Ibid.: WA, 44: 434; LW, 7: 182.",
+          "anchor_excerpt": "As we have seen, the insanity of the world was not merely due to physical illness on the one hand and demonic possession on the other. Rather, men seemed bent on driving their own sinful desires out of control, exaggerating their vices to the point of no return. Pride was a good example. Although all men and women should know that they were children of wrath, of sin, death, and the devil, still they puffed themselves up. It was \"impossible not to detest the madness and insanity of the proud. Such people,\" Luther exclaimed, \"rather than those whose mind has been [naturally] disturbed, should be restrained with fetters and chains.\" $ ^{75} $ Lacking even common sense, the proud did not know themselves, who they were, whence",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00257",
+          "note_item_id": "fn-00247",
+          "current_anchor_id": "anchor-00291",
+          "marker": "87",
+          "note_page_no": 121,
+          "anchor_page_no": 120,
+          "current_anchor_marker": "87",
+          "note_excerpt": "Ibid., WA, 44: 763; LW, 8: 252; see also WA, 44: 770; LW, 8: 260-61, and De abroganda missa privata (1521): WA, 8: 432. 9o. Kirchenpostille (1522): WA, 10, pt.",
+          "anchor_excerpt": "Unreason did have its uses. For one thing, what the world called folly was often the basis of Christian wisdom. Luther was well aware that both John the Baptist and Jesus had been thought possessed by the devil (John 7:20). $ ^{86} $ Indeed, the Jews had often been ready to hurl this charge at those who were immoderate in their attack on the Pharisees. $ ^{87} $ The earliest Christians had seemed drunk and foolish. “Here reason was compelled to conclude that they were completely mad, and the only thing wise men thought was that they were driven along.” $ ^{88} $ And yet this was not madness at all, but what Paul had called the “inebriation of faith.” Now in the time of the Second Coming, Christians again scoffed at the devil and death: “[T]he world will regard them as insane and out of their senses. . . . But we laugh",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00258",
+          "note_item_id": "fn-00248",
+          "current_anchor_id": "anchor-00292",
+          "marker": "88",
+          "note_page_no": 121,
+          "anchor_page_no": 120,
+          "current_anchor_marker": "88",
+          "note_excerpt": "WA, 10, pt.",
+          "anchor_excerpt": "Unreason did have its uses. For one thing, what the world called folly was often the basis of Christian wisdom. Luther was well aware that both John the Baptist and Jesus had been thought possessed by the devil (John 7:20). $ ^{86} $ Indeed, the Jews had often been ready to hurl this charge at those who were immoderate in their attack on the Pharisees. $ ^{87} $ The earliest Christians had seemed drunk and foolish. “Here reason was compelled to conclude that they were completely mad, and the only thing wise men thought was that they were driven along.” $ ^{88} $ And yet this was not madness at all, but what Paul had called the “inebriation of faith.” Now in the time of the Second Coming, Christians again scoffed at the devil and death: “[T]he world will regard them as insane and out of their senses. . . . But we laugh",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-002-2tworeformersandaworldgo:nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-002-2tworeformersandaworldgo:nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 10552,
+    "estimated_prompt_tokens": 3305,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 8,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 3305,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

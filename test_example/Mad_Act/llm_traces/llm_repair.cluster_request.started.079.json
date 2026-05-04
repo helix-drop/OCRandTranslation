@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0043-toc-ch-006-replenishorattack:footnote",
+      "chapter_title": "6. Replenish or attack?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        280,
+        280
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11707,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00135",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0043-toc-ch-006-replenishorattack",
+          "marker": "34",
+          "normalized_marker": "34",
+          "occurrence": 1,
+          "source_text": "7. 8AD\u00013@\u0001;>>@7EE\u0001FA\u000147\u0001;67@F;8;76\u00013EEG5:\u0007\u00193DF7D EFG6;7EF:7 7?7D97@57 A8\u0001F:;E\u00018A5GE\u0001A@\u0001@757EE3DK\u000153GE7E\u0001;@ ?3@K\u00018;7>6E\u0001A8 @;@7F77@F:\u000657@FGDK\u0001?76;5;@7\u0007 \u000f \u0018K\u00015A@FD3EF\u0005\u0001@;@7F77@F:\u000657@FGDK\u0001\u001bGDAB73@\u0001BEK5:;3FD;EFE\u000187>F\u00015A?B7>>76\u0001FA\u0001?3=7\u00017H7D\u00068;@7D\u00016;EF;@5F;A@E 47FI77@\u0001B3F:A>A9;53>\u0001FKB7E\u0001I:7@7H7D\u0001F:7K\u00017@5AG@F7D76\u000153E7E\u0001F:3F\u00016;6\u0001@AF\u00018;F\u0001;@FA\u00015GDD7@F\u000153F79AD;7E\u0007 AD\u0001?AD7 A@\u0001F:7E7\u0001@AEA9D3B:;5\u0001BD7F7@E;A@E\u0005\u0001E77 A>6EF7;@ \u00011 \u0012\u0011\u00102\u0005 3E\u0001I7>>\u00013E \u00187DD;AE 3@6\u0001&ADF7D\u0001 \u0012\u0012\u000e\u0007 \u000f #K\u00015A??7@F :7D76;887DE\u0001E>;9:F>K\u00018DA?\u0001\u0019:3D>AFF7\u0001 GDF:UEEF3F7?7@F\u0003;@\u0001 GDF:\u0001 \u00103\u0013\u0001 \u0011\u0004\u0001F:3F\u0001VF:7\u00013DF\u0001A8 6;39@AE;E\u0001I3E\u0001G@67DEFAA6\u00013E\u0001A@7\u0001A8\u0001D75A9@;L;@9\u0001F:7\u0001E:;8F;@9\u00016K@3?;5E\u0001A8\u00013\u0001E?3>>\u0001@G?47D\u0001A8\u0001677B\u0001B3FF7D@E\u0001A8 6;EAD67D\u0001I:;>7\u0001?3;@F3;@;@9\u00017?B:3E;E\u0001A@\u0001F:7\u0001;@6;H;6G3>\u00015:3D35F7D\u0001A8\u0001735:\u00015>;@;53>\u0001E;FG3F;A@\u0007W\u0001 GDF:UE\u0001V677B B3FF7D@EW5AG>6 3BB>K\u0001FA\u00013@K\u0001;>>@7EE\u0005\u0001I:7D73E\u0001I:3F\u0001 \u000153>>\u0001VBDAFAFKB;53>\u000153GE7EW\u0001I7D7\u0001F:7\u000153GE7E\u0001A8\u0001EB75;8;5 6;EAD67DE\u0005\u00013@6\u0001I7D7\u0001@AF\u0001@757EE3D;>K\u00013E\u0001V677BW\u00013E\u0001F:7\u0001B3FF7D@E\u0001 GDF:\u00016;E5GEE76\u0007 *:7K\u00015AG>6\u0001;@5>G67\u0005 8AD\u0001;@EF3@57\u0005 53GE7E\u0001>;=7 V?G5GE 5A@8GE;@9F:7\u0001AB7@;@9E\u0001A8\u0001F:7 7 3DF\u0005W 3\u0001B3F:A>A9K\u0001F:3F\u0001B:KE;5;3@E\u0001GEG3>>K\u0001;67@F;8;76\u00013E EGB7D8;5;3>\u0005\u0001F:3F\u0001;E\u0005\u00019DAG@676\u0001;@\u0001677B7D\u0001B3F:A97@;5\u0001;?43>3@57E\u0007",
+          "page_no": 280,
+          "display_marker": "34",
+          "source_marker": "34",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0043-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0043-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3940,
+    "estimated_prompt_tokens": 1430,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1430,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

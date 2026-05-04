@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0049-toc-ch-007-shapesofpractices:footnote",
+      "chapter_title": "7. Shapes of practices",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        334,
+        334
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11733,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00161",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0049-toc-ch-007-shapesofpractices",
+          "marker": "26",
+          "normalized_marker": "26",
+          "occurrence": 1,
+          "source_text": "9. \u0005\u0001;@\u0001F:7\u00015GD7\u0006\u00018A>>AI76\u00014K\u00013@\u00013BB3D7@F\u0001VD79D7EE;A@W\u0001\u0004:;/ 6 \u0005\b @ ?;>;F3DK\u0001EFD3F79K\u00060/4:;/ ͳͯ 3>EA\u0001?73@F\u0001?AH;@9\u00018ADI3D6\u0001I:7@\u0001F:7\u00017@7?K\u0001I3E\u0001I73=\u00013@6\u0001BDG67@F>K\u0001D7FD73F;@9\u0001FA 3HA;6\u00015A@8>;5F\u0001I:7@\u0001F:7\u00017@7?K\u0001I3E\u0001EFDA@9\b\u0001\u0018GFF:7\u0001E3?7\u0001B:D3E73>EAD787DD76\u0001FAVF:7\u0001BDAB7D\u000147:3H;ADWFA\u000136ABF ;@\u00013\u00019;H7@\u0001E;FG3F;A@\u0006 3E\u0001;@\u0001F:7\u00017JBD7EE;A@(;\u0001@./\u00010/4\u0001:;/ \u0007ɾͳͯ \u0004V@AF\u0001=@AI;@9\u0001I:3F\u0001;E\u00013BBDABD;3F7W\u0005\b -G\u0001FA>6 \u00183AUE\u0001D7>3F;H7E\u00043@6 :;E\u0001D7367DE\u0005 F:3F\u0001:7\u0001=@7I\u0001I:3F\u0001:7\u0001I3E\u00016A;@9\u00013@6\u0001F:3F\u0001:;E\u000135F;A@E\u0001I7D7\u0001363BF76\u0001FA\u0001F:7\u0001;>>@7EE 3F\u0001:3@6SSF:7\u0001BDA9D7EE\u0001;@\u0001F:7\u0001B3F;7@FUE\u00015A@6;F;A@\u00018A>>AI76\u00014K\u00013@\u00013BB3D7@F\u000167F7D;AD3F;A@\u0001I3E\u0001FA\u000147\u00017JB75F76\u00013@6 I3E\u0001@757EE3DK\u0001FA\u0001D7B>7@;E:\u0001\u00183AUE\u0001I73=7@76\u0001/;@\u00013EB75FE\b3Ʋ \u0007ȫ iɏΊqˊÛƌ ʾɏͥqt̝ΥˊÛΊ £ɾͳͯɽ ł̮",
+          "page_no": 334,
+          "display_marker": "26",
+          "source_marker": "26",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0049-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0049-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3955,
+    "estimated_prompt_tokens": 1421,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1421,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

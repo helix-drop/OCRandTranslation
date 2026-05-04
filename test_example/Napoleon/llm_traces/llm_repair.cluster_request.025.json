@@ -1,0 +1,122 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad:footnote\",\n  \"chapter_title\": \"« Cet homme n'est pas aliéné » : Sade à Charenton\",\n  \"page_range\": [\n    147,\n    147\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00170\",\n      \"anchor_id\": \"anchor-00236\",\n      \"marker\": \"50\",\n      \"note_excerpt\": \"Cité in Journal inédit de Sade, op. cit., p. 116.\",\n      \"anchor_excerpt\": \"Quelle confiance peut inspirer un Directeur auprès duquel on a souvent accès et faveur par un être auquel je ne puis donner le nom d'homme ; un Directeur qui consent à prendre un tel panégyriste ; qui fait jouer publiquement sur son théâtre ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00172\",\n      \"anchor_id\": \"anchor-00238\",\n      \"marker\": \"52\",\n      \"note_excerpt\": \"Charles-François Giraudy, Mémoire sur la Maison nationale de Charenton, Imprimerie de la Société de médecine, 1804, p. 7.\",\n      \"anchor_excerpt\": \"vociférations des malades qu’on y amène ne puissent être que faiblement entendus de ceux dont la tranquillité serait troublée par les impressions pénibles qu’ils en éprouveraient $ ^{52} $.»\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00171\",\n      \"marker\": \"51\",\n      \"page_no\": 147,\n      \"source_text\": \"«Une visite des établissements d'aliénés parisïens en 1808» par August-Friedrich Schweigger, trad. de l'allemand par Michel Caire et mis en ligne sur son site : http://psychiatrie.histoire.free.fr/index.htm.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"point de Dieu $ ^{38} $!», est-il écrit dans le Livre des Psaumes. Au Moyen Âge, l’athée, l’impie, est assimilé au fou. Mais, depuis la Déclaration des droits de l’homme, la France a entériné la liberté d’opinion religieuse à condition, toute-fois, qu’elle ne trouble pas l’ordre public. Le cas de Jacob Dupont est assez clair à cet égard : c’est pour avoir parlé, écrit et proféré l’athéisme dans l’espace public que le fau- teur de trouble est considéré comme aliéné, envoyé à Charenton. Charenton où, à la même époque, languit le plus illustres des « prisonniers » de cette institution et le plus athée des philosophes, le marquis de Sade. ## « CET HOMME N'EST PAS ALIÉNÉ» : SADE À CHARENTON Sade, ce prisonnier que tout le monde réclame et dont aucune forteresse ne veut. Saumur, Pierre-Scise, Forl'Evêque, Miolans, Vincennes, la Bastille, Charenton, les Madelonnettes, les Carmes, Saint-Lazare, Picpus, Sainte-Pélagie, Bicêtre : Sade l'encombrant, qui embarrasse tous les régimes politiques, aura connu la plupart des grandes maisons de détention du royaume, de la République et de l'Empire. Plaintiffs, lettres de cachet ou ordres de police, on l'arrête, on le séquestre, on le transfère de prison en asile; jusqu'à ces geôliers, honteux d'abriter un homme aussi infâme, personne ne veut d'un pareil scélérat, en état d'insubordination permanente. « Littéralement et dans tous les sens », Sade est celui dont on ne sait pas quoi faire. Louis-Nicolas Dubois, le préfet de police du Consulat puis de l'Empire, décidé à mettre au secret le scandaleux auteur de justine, l'avait envoyé à Sainte-Pélagie en 1801, puis à Bicêtre ; sa famille obtient finalement de le faire entrer à Charenton le 27 avril 1803, où il meurt au terme de onze ans de réclusion, le 2 décembre 1814, sans avoir jamais perdu ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad:footnote",
+      "chapter_title": "« Cet homme n'est pas aliéné » : Sade à Charenton",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        147,
+        147
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00170",
+          "note_item_id": "fn-00170",
+          "anchor_id": "anchor-00236",
+          "marker": "50",
+          "note_excerpt": "Cité in Journal inédit de Sade, op. cit., p. 116.",
+          "anchor_excerpt": "Quelle confiance peut inspirer un Directeur auprès duquel on a souvent accès et faveur par un être auquel je ne puis donner le nom d'homme ; un Directeur qui consent à prendre un tel panégyriste ; qui fait jouer publiquement sur son théâtre une pièce faite par lui et à sa louange, dans laquelle on trouve les flatteries les plus basses et où on le compare aux dieux mêmes ; que dis-je? qui lui a permis de jouer un rôle dans une autre pièce, et quel rôle encore ? Celui du méchant qu'il rend avec toute la vérité du crime qu'il porte dans son cœur. J'ai vu tout un public frémir d'horreur à ce spectacle, tandis que le Directeur général rougissait de colère de n'entendre aucun applaudissement dans la salle $ ^{50} $."
+        },
+        {
+          "link_id": "link-00172",
+          "note_item_id": "fn-00172",
+          "anchor_id": "anchor-00238",
+          "marker": "52",
+          "note_excerpt": "Charles-François Giraudy, Mémoire sur la Maison nationale de Charenton, Imprimerie de la Société de médecine, 1804, p. 7.",
+          "anchor_excerpt": "vociférations des malades qu’on y amène ne puissent être que faiblement entendus de ceux dont la tranquillité serait troublée par les impressions pénibles qu’ils en éprouveraient $ ^{52} $.»"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11701,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00171",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+          "region_id": "nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad",
+          "marker": "51",
+          "normalized_marker": "51",
+          "occurrence": 1,
+          "source_text": "«Une visite des établissements d'aliénés parisïens en 1808» par August-Friedrich Schweigger, trad. de l'allemand par Michel Caire et mis en ligne sur son site : http://psychiatrie.histoire.free.fr/index.htm.",
+          "page_no": 147,
+          "display_marker": "51",
+          "source_marker": "51",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1647,
+    "output_tokens": 47,
+    "total_tokens": 1694,
+    "estimated_input_tokens": 1631,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Unmatched note item 'fn-00171' has no clear anchor in excerpt; screenshot needed.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Unmatched note item 'fn-00171' has no clear anchor in excerpt; screenshot needed."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Unmatched note item 'fn-00171' has no clear anchor in excerpt; screenshot needed."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1647,
+    "completion_tokens": 47,
+    "total_tokens": 1694,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2080
+  }
+}

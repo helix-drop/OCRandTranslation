@@ -2,273 +2,197 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr:endnote\",\n  \"chapter_title\": \"Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    310,\n    318\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 121,\n      \"ocr_excerpt\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \\\"be a fool, poor, worthless and despised.\\\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \\\"What? Do you, reader, think me insane or drunk?\\\" Echoing St. Paul (Acts 26:25), he asserted: \\\"I am not mad, for I speak words of soberness.\\\"$^{92}$ He admitted that he sometimes acted foolishly, \\\"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\\\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life. Far from admiring the insensate or contented tranquillity of a satisfied mind, Luther held that true wisdom was found among “those who are oppressed and in conflict with ...\"\n    },\n    {\n      \"page_no\": 310,\n      \"ocr_excerpt\": \"Marienweiher, and as soon as he got there, his understanding cleared, he praised God and thanked Him for the grace He had bestowed. $ ^{54} $ Here we find a real-life example of what was only fantasy in the Lalebuch of 1597, in which the pretense of folly became the real thing. \\\"Consuetudo secunda natura,\\\" said the moralists of the day, suggesting that immorality or excess could become a permanent mental or moral disorder. These colorful stories bring us close to the way madness was perceived and understood in the sixteenth century, as mysterious, uncanny, sudden in onset and in remission, possibly of divine or demonic origin, but sometimes \\\"credibly from a drink that he was given,\\\" $ ^{55} $ or from other merely physical causes. In contrast to the learned treatises of physicians and theologians, the simple reports in the early miracle books use a folksy language with which to describe the wonders of a local shrine. They did not aim to impress anyone with their style or expertise but aimed at creating thankful, awestruck devotion to the saint and his or her shrine. ## Bavaria: Land of Miracles Farther to the south, the miracle books are even more numerous, and recorded wonders lie ...\"\n    },\n    {\n      \"page_no\": 311,\n      \"ocr_excerpt\": \"<div style=\\\"text-align: center;\\\">TABLE 6.3</div> <div style=\\\"text-align: center;\\\">Pilgrimage Shrines in the Bishopric of Passau</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td rowspan=\\\"2\\\"></td><td rowspan=\\\"2\\\">(N)</td><td colspan=\\\"3\\\">Dedication:</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>To Christ and The Trinity</td><td style='text-align: center; word-wrap: break-word;'>To Saints</td><td style='text-align: center; word-wrap: break-word;'>To Mary</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Founded before the Reformation</td><td style='text-align: center; word-wrap: break-word;'>(53)</td><td style='text-align: center; word-wrap: break-word;'>7</td><td style='text-align: center; word-wrap: break-word;'>29</td><td style='text-align: center; word-wrap: break-word;'>17</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Founded after the Reformation</td><td style='text-align: center; word-wrap: break-word;'>(127)</td><td style='text-align: center; word-wrap: break-word;'>13</td><td style='text-align: center; word-wrap: break-word;'>35</td><td style='text-align: center; word-wrap: break-word;'>79</ ...\"\n    },\n    {\n      \"page_no\": 312,\n      \"ocr_excerpt\": \"tion, only 17 were devoted to the Virgin (32%), but among the shrines founded after the Reformation, Mary was the focus of 79 out of 127 (62%). The rise of Mary was, of course, a pan-European phenomenon. $ ^{61} $ As in many other areas, in German regions, Mary was sought out as a kind of “general practitioner,” whom one could invoke in any time of need. In contrast to other saints, who often had specialized areas of responsibility, Mary was available no matter what went wrong. Perhaps it is for this reason that the first printed miracle books were mostly from shrines dedicated to Mary, for these shrines may well have felt that they were in competition with one another. $ ^{62} $ In the southern German and Austrian area, we find advertising campaigns employing printed books, printed pictures, and special pictorial miracle cycles at the major shrines of Mariazell in Styria (the “national shrine of Austria”), Tuntenhausen (southeast of Munich), Altötting (50 miles east of Munich), and Regensburg on the Danube. Between 1490 and 1535, these four Marian centers of devotion developed new means of extending their catchment basins and of attracting pilgrims. Fortunately for the historian, ...\"\n    },\n    {\n      \"page_no\": 313,\n      \"ocr_excerpt\": \"see the advantages of print. We should remember, however, that among the earliest uses of print were the indulgences whose popularity triggered Martin Luther's protest. And in printed miracle books, we have another exceedingly popular Catholic means of cultivating the piety of pilgrimage. Interestingly, this first Bavarian advertisement featured the cure of madness in three or four of its twenty-five cases. They deserve to be savored here for their folksy idiom. $ ^{66} $ We learn for example that “Hainrich Reicherczsamer, a journeyman weaver from Zlabing [in Lower Austria] fell into a serious disease and lost his reason for three whole days and nights. Vowed [a pilgrimage] here and got well after his oath.” $ ^{67} $ Or take Agnes Freybergerin, from the district of Mosburg: “For seven straight years she has been robbed of her reason [Vernunft]. So they [her friends and relatives?] invoked Our Lady of Altötting and promised to take her there with a worthy gift. After this vow she got right again [ist wieder richtig worden] and told her story. [In the year 14]93.” $ ^{68} $ In that same year, “Hanns Jaeger of Würzburg [about 180 miles to the northwest] was robbed of his reason, and ...\"\n    },\n    {\n      \"page_no\": 314,\n      \"ocr_excerpt\": \"closely associated with madness, and recovery could mean the recovery of speech. In another case, recovery was described as “becoming right again” (ist wieder richtig worden). In the early chapters of this book, we have examined the professional idioms of physicians, lawyers, and theologians. We might have expected that because these stories were recorded and published by priests at the shrine, the language of these reports would reflect theological learning or biblical prejudice. But the fifteenth- and sixteenth-century miracle reports are virtually devoid of technical terms and priestly learning. We may surmise that these miracle reports were surprisingly close to the everyday language and thought of weavers and peasants from southern Germany and Upper Austria. $ ^{72} $ In 1497, the Altötting canon Jacob Issickemer published a much larger account of the miracles of Altötting (54 pages as against only 8). He presents 77 miracles, now organized into edifying chapters on the seven ways in which Mary helps sinful men, women, and children. $ ^{73} $ Aside from the fact that Issickemer’s devotional thoughts took up more than one quarter of his book, his text also described the miracle ...\"\n    },\n    {\n      \"page_no\": 315,\n      \"ocr_excerpt\": \"cidal despair, which was the worst spiritual condition known to late medieval people. Fortunately, Mary came to the rescue. By 1496, her shrine in Altötting was evidently well known even in Nuremberg, over 100 miles off to the northwest. Or take the case of Anna Sewsin, the owner of a hammer works in Traus-nitz, north of Regensburg: She was robbed of her senses [ihrer Sinne] for a year and a half, and because of her great fury [grosses Toben], she was put in chains and well secured [to the wall?]. During the first holy days of 1497, her husband called on Mary, etc., promising [to take] her to old Öding with [a votive gift of] a skull made of wax. From that moment on, she began to feel better, so that on the Friday after Pentecost of that year, she came to old Öding with the perfect use of her reason. $ ^{75} $ Here we notice the now familiar response of chaining and “securing” the mad if they went totally out of control. It is also worth noting that even the ex voto waxen gift symbolized Anna’s brain as the source of her madness. At Easter in 1496, Cuntz Schuster of Plauen (180 miles to the north, in Thuringia) and Katharina Hafnerin, from Wertingen (northwest of Augsburg) arrived ...\"\n    },\n    {\n      \"page_no\": 316,\n      \"ocr_excerpt\": \"pray three Hail Marys, and when she did, she was released.\\\" When these attacks did not cease, however, she vowed a pilgrimage of some 180 miles to Altötting, and once there, she felt totally relieved of her suicidal urges. $ ^{78} $ Hans Hochstetter, a Franconian serving as the city secretary of Pettau (Ptuj) also came to Altötting in 1495 to express his thanks to Mary for relief from the “calamity and distress in which I stood, not knowing then how I should escape,” as he wrote in the document that he displayed in the chapel for all to see. $ ^{79} $ Here began the remarkable tradition at Altötting of leaving behind personal descriptions of one’s miraculous cures. In this case, then, we are not dependent on the words of some priest, for we have Hochstetter’s own description, and it is doubly impressive that he chose words like those we have seen before, “calamity and distress” (Widerwärtigkeit und Triibsal), rather than some other more technical vocabulary. We are probably safe in concluding that these early printed miracle books from Altötting preserve the language of the pilgrims themselves, even though the accounts were, of course, abridged to fit the requirements of space on t ...\"\n    }\n  ],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00874\",\n      \"anchor_id\": \"anchor-00267\",\n      \"marker\": \"90\",\n      \"note_excerpt\": \"Bauer, “Das Buchlein der Zuflucht zu Maria,” pp. 22627, no. 74.\",\n      \"anchor_excerpt\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00838\",\n      \"marker\": \"54\",\n      \"page_no\": 310,\n      \"source_text\": \"Ibid., p 69.\"\n    },\n    {\n      \"note_item_id\": \"fn-00839\",\n      \"marker\": \"55\",\n      \"page_no\": 310,\n      \"source_text\": \"Ibid., p. 73. )\"\n    },\n    {\n      \"note_item_id\": \"fn-00840\",\n      \"marker\": \"56\",\n      \"page_no\": 310,\n      \"source_text\": \"Fritz Meingast, Marienwallfahrten in Bayern und Osterreich (Munich, 1979), p. 56.\"\n    },\n    {\n      \"note_item_id\": \"fn-00841\",\n      \"marker\": \"57\",\n      \"page_no\": 310,\n      \"source_text\": \"Mons Sanctus Andechs, Das ist. Kurtzer Begriff oder Innhalt von den Gnadenreichen H. Berg Andechs (Munich, 1682).\"\n    },\n    {\n      \"note_item_id\": \"fn-00842\",\n      \"marker\": \"58\",\n      \"page_no\": 311,\n      \"source_text\": \"Ibid., and Almut Amereller, Votif-Bilder: Volkskunst als Dokument menschlicher Hilfsbediirftigkeit, dargestellt am Beispiel der Votif-Bilder des Klosters Andechs (Munich, 1965): “Summarische Inhalt der Gnaden und Wunderwerken so sich von An ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00843\",\n      \"marker\": \"59\",\n      \"page_no\": 311,\n      \"source_text\": \"Sargent, “Miracle Bcoks,” pp. 457—58.\"\n    },\n    {\n      \"note_item_id\": \"fn-00844\",\n      \"marker\": \"60\",\n      \"page_no\": 311,\n      \"source_text\": \"Scholars have noticed the phenomenon without explaining it: see, e.g., Romuald Bauerreiss, Pie Jesu (Munich, 1931); Josef Staber, Volksfrommigkeit und Wallfahrtswesen des Spdtmittelalters im Bistum Freising (Munich, 1955); Richard van Dilme ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00845\",\n      \"marker\": \"61\",\n      \"page_no\": 312,\n      \"source_text\": \"Nolan and Nolan, Christian Pilgrimage, pp. 116—17, 152—56.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00607\",\n      \"note_item_id\": \"fn-00874\",\n      \"current_anchor_id\": \"anchor-00267\",\n      \"marker\": \"90\",\n      \"note_page_no\": 318,\n      \"anchor_page_no\": 121,\n      \"current_anchor_marker\": \"90\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Bauer, “Das Buchlein der Zuflucht zu Maria,” pp. 22627, no. 74.\",\n      \"anchor_excerpt\": \"at the devil and at the pope.\\\"$^{89}$ The gospel showed that the \\\"wise\\\" were fools and the \\\"fools\\\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's ...\"\n    }\n  ]\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-006-6pilgrimsinsearchoftheir:nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir:footnote\",\n  \"chapter_title\": \"6 Pilgrims in Search of Their Reason\",\n  \"page_range\": [\n    322,\n    330\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00876\",\n      \"marker\": \"88\",\n      \"page_no\": 322,\n      \"source_text\": \"Hoffmann and Dohms, eds., Mirakelbiicher, nos. 106, 107,111, 137, 177,184,234, 272, 452, 590, 627, 674, 741.\"\n    },\n    {\n      \"note_item_id\": \"fn-00877\",\n      \"marker\": \"89\",\n      \"page_no\": 322,\n      \"source_text\": \"Foucault, Histoire de la folie, p. 549; id., Madness and Civilization, p. 264.\"\n    },\n    {\n      \"note_item_id\": \"fn-00878\",\n      \"marker\": \"90\",\n      \"page_no\": 322,\n      \"source_text\": \"See p. 286 above. Hoffmann and Dohms, eds., Mirakelbiicher, no. 380.\"\n    },\n    {\n      \"note_item_id\": \"fn-00879\",\n      \"marker\": \"91\",\n      \"page_no\": 322,\n      \"source_text\": \"Konig, Weihegaben; Bauer, Bayerische Wallfahrt Altotting, pp. 66-67.\"\n    },\n    {\n      \"note_item_id\": \"fn-00880\",\n      \"marker\": \"92\",\n      \"page_no\": 323,\n      \"source_text\": \"Only forty-seven miracles survive today in the altar as preserved in the Johanneum in Graz. See Peter Krenn, “Der grofie Mariazeller Wunderaltar von 1519 und sein Meister,” Jahrbuch des Kunsthistorischen Instituts der Universitit Graz 2 (19 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00881\",\n      \"marker\": \"93\",\n      \"page_no\": 323,\n      \"source_text\": \"Krenn, “Der grofse Mariazeller Wunderaltar,” p. 31.\"\n    },\n    {\n      \"note_item_id\": \"fn-00882\",\n      \"marker\": \"94\",\n      \"page_no\": 323,\n      \"source_text\": \"Ibid., illustration 17 and p. 33.\"\n    },\n    {\n      \"note_item_id\": \"fn-00883\",\n      \"marker\": \"95\",\n      \"page_no\": 324,\n      \"source_text\": \"Ibid., illustrations 3, 6; p. 33.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"<div style=\\\"text-align: center;\\\"><img src=\\\"imgs/img_in_image_box_237_1453_473_1692.jpg\\\" alt=\\\"Image\\\" width=\\\"5%\\\" /></div> Pilgrims in Search of Their Reason IN THE late Middle Ages, a popular piety flourished so vigorously that some churchmen worried about how to retain control over the sacred. $ ^{1} $ It was the age of the “children’s pilgrimage” to Mont St. Michel (1456–59) and of the mass enthusiasm surrounding Drummer of Niklashausen (1476), of bleeding hosts and the cult of Corpus Christi, of the new devotion of the Rosary and an apparently insatiable appetite for preaching. $ ^{2} $ The reader of such accounts could easily come away with the impression that this florid display of religious excess fell victim in the sixteenth century to the combined forces of Protestant and Catholic Reformation, and to what Peter Burke has called the “triumph of Lent.” $ ^{3} $ Reading in English, especially, one would conclude that pilgrimage was an essentially medieval form of piety, and that after 1500 the ridicule of Erasmus and Luther’s systematic critique undid the venerable practice of pilgrimage. $ ^{4} $ Certainly, this is what Michel Foucault had in mind when he characterized the life of the mad in the late Middle Ages as a wandering quest for reason on the pilgrimage roads and rivers of Europe: The mad, then had an existence easily wandering [facilement errante]. Towns gladly drove them beyond their walls; they were allowed to ramble in the remote countryside or else they were entrusted to a group of merchants and pilgrims. . . . It is possible that those ships of fools that haunted the imagination of the whole early Renaissance were pilgrimage ships, highly symbolic ships of madmen in quest of their reason.\\\"5 Pilgrimage has seemed so fundamentally medieval that many obse ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
-      "chapter_title": "Pilgrims in Search of Their Reason",
-      "request_mode": "note_only",
+      "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir:footnote",
+      "chapter_title": "6 Pilgrims in Search of Their Reason",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
-        310,
-        318
+        322,
+        330
       ],
-      "matched_examples": [
-        {
-          "link_id": "link-00607",
-          "note_item_id": "fn-00874",
-          "anchor_id": "anchor-00267",
-          "marker": "90",
-          "note_excerpt": "Bauer, “Das Buchlein der Zuflucht zu Maria,” pp. 22627, no. 74.",
-          "anchor_excerpt": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life."
-        }
-      ],
+      "matched_examples": [],
       "unmatched_note_items": [
         {
-          "row_id": 859,
+          "row_id": 51218,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00838",
+          "note_item_id": "fn-00876",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "54",
-          "normalized_marker": "54",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "88",
+          "normalized_marker": "88",
           "occurrence": 1,
-          "source_text": "Ibid., p 69.",
-          "page_no": 310,
-          "display_marker": "54",
-          "source_marker": "54",
+          "source_text": "Hoffmann and Dohms, eds., Mirakelbiicher, nos. 106, 107,111, 137, 177,184,234, 272, 452, 590, 627, 674, 741.",
+          "page_no": 322,
+          "display_marker": "88",
+          "source_marker": "88",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 860,
+          "row_id": 51219,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00839",
+          "note_item_id": "fn-00877",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "55",
-          "normalized_marker": "55",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "89",
+          "normalized_marker": "89",
           "occurrence": 1,
-          "source_text": "Ibid., p. 73. )",
-          "page_no": 310,
-          "display_marker": "55",
-          "source_marker": "55",
+          "source_text": "Foucault, Histoire de la folie, p. 549; id., Madness and Civilization, p. 264.",
+          "page_no": 322,
+          "display_marker": "89",
+          "source_marker": "89",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 861,
+          "row_id": 51220,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00840",
+          "note_item_id": "fn-00878",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "56",
-          "normalized_marker": "56",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "90",
+          "normalized_marker": "90",
           "occurrence": 1,
-          "source_text": "Fritz Meingast, Marienwallfahrten in Bayern und Osterreich (Munich, 1979), p. 56.",
-          "page_no": 310,
-          "display_marker": "56",
-          "source_marker": "56",
+          "source_text": "See p. 286 above. Hoffmann and Dohms, eds., Mirakelbiicher, no. 380.",
+          "page_no": 322,
+          "display_marker": "90",
+          "source_marker": "90",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 862,
+          "row_id": 51221,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00841",
+          "note_item_id": "fn-00879",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "57",
-          "normalized_marker": "57",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "91",
+          "normalized_marker": "91",
           "occurrence": 1,
-          "source_text": "Mons Sanctus Andechs, Das ist. Kurtzer Begriff oder Innhalt von den Gnadenreichen H. Berg Andechs (Munich, 1682).",
-          "page_no": 310,
-          "display_marker": "57",
-          "source_marker": "57",
+          "source_text": "Konig, Weihegaben; Bauer, Bayerische Wallfahrt Altotting, pp. 66-67.",
+          "page_no": 322,
+          "display_marker": "91",
+          "source_marker": "91",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 863,
+          "row_id": 51222,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00842",
+          "note_item_id": "fn-00880",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "58",
-          "normalized_marker": "58",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "92",
+          "normalized_marker": "92",
           "occurrence": 1,
-          "source_text": "Ibid., and Almut Amereller, Votif-Bilder: Volkskunst als Dokument menschlicher Hilfsbediirftigkeit, dargestellt am Beispiel der Votif-Bilder des Klosters Andechs (Munich, 1965): “Summarische Inhalt der Gnaden und Wunderwerken so sich von Anno 1454 bis auff Anno 1657 zu getragen.”",
-          "page_no": 311,
-          "display_marker": "58",
-          "source_marker": "58",
+          "source_text": "Only forty-seven miracles survive today in the altar as preserved in the Johanneum in Graz. See Peter Krenn, “Der grofie Mariazeller Wunderaltar von 1519 und sein Meister,” Jahrbuch des Kunsthistorischen Instituts der Universitit Graz 2 (1966-67): 31-51; Leopold Schmidt, “Via sacra: Zur Geschichte der ‘Heiligen Strafie” zwischen Wien und Mariazell,” in Via sacra: Das Wallfahrtsmuseum in Kleinmariazell, ed. Helene Griinn, Veroffentlichungen des Osterreichischen Museums fur Volkskunde, vol. 15 (Vienna, 1977), pp73-83, at p. 80; Gustav Gugitz, Osterreichs Gnadenstitten in Kult und Brauch (Vienna, 1955-58), vol. 4: Kirnten und Steiermark, pp. 197—201; Peter Krenn, “Die Wunder von Mariazell und Steiermark,” in Die Kunst der Donauschule, 1490—1540: Ausstellung des Landes Oberosterreich, ed. Otto Wutzel (Linz, 1965), pp. 164—68.",
+          "page_no": 323,
+          "display_marker": "92",
+          "source_marker": "92",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 864,
+          "row_id": 51223,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00843",
+          "note_item_id": "fn-00881",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "59",
-          "normalized_marker": "59",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "93",
+          "normalized_marker": "93",
           "occurrence": 1,
-          "source_text": "Sargent, “Miracle Bcoks,” pp. 457—58.",
-          "page_no": 311,
-          "display_marker": "59",
-          "source_marker": "59",
+          "source_text": "Krenn, “Der grofse Mariazeller Wunderaltar,” p. 31.",
+          "page_no": 323,
+          "display_marker": "93",
+          "source_marker": "93",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 865,
+          "row_id": 51224,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00844",
+          "note_item_id": "fn-00882",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "60",
-          "normalized_marker": "60",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "94",
+          "normalized_marker": "94",
           "occurrence": 1,
-          "source_text": "Scholars have noticed the phenomenon without explaining it: see, e.g., Romuald Bauerreiss, Pie Jesu (Munich, 1931); Josef Staber, Volksfrommigkeit und Wallfahrtswesen des Spdtmittelalters im Bistum Freising (Munich, 1955); Richard van Dilmen, “Volksfrommigkeit und konfessionelles Christentum in 16. und 17. Jahrhundert,” in Volksreligiositat in der modernen Sozialgeschichte, ed. Wolfgang Schieder, Geschichte und Gesellschaft, special no., 11 (Gottingen, 1986), pp. 14—30; Ludwig Andreas Veit and Ludwig Lenhart, Kirche und Volksfrommigkeit im Zeitalter des Barock (Freiburg im Breisgau, 1956), pp. 59—63, 178-79.",
-          "page_no": 311,
-          "display_marker": "60",
-          "source_marker": "60",
+          "source_text": "Ibid., illustration 17 and p. 33.",
+          "page_no": 323,
+          "display_marker": "94",
+          "source_marker": "94",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 866,
+          "row_id": 51225,
           "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00845",
+          "note_item_id": "fn-00883",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
-          "region_id": "nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr",
-          "marker": "61",
-          "normalized_marker": "61",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "95",
+          "normalized_marker": "95",
           "occurrence": 1,
-          "source_text": "Nolan and Nolan, Christian Pilgrimage, pp. 116—17, 152—56.",
-          "page_no": 312,
-          "display_marker": "61",
-          "source_marker": "61",
+          "source_text": "Ibid., illustrations 3, 6; p. 33.",
+          "page_no": 324,
+          "display_marker": "95",
+          "source_marker": "95",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         }
       ],
       "unmatched_anchors": [],
-      "rebind_candidates": [
-        {
-          "link_id": "link-00607",
-          "note_item_id": "fn-00874",
-          "current_anchor_id": "anchor-00267",
-          "marker": "90",
-          "note_page_no": 318,
-          "anchor_page_no": 121,
-          "current_anchor_marker": "90",
-          "note_excerpt": "Bauer, “Das Buchlein der Zuflucht zu Maria,” pp. 22627, no. 74.",
-          "anchor_excerpt": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life.",
-          "current_anchor_synthetic": false
-        }
-      ]
+      "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 121,
-        "file_idx": 120,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "at the devil and at the pope.\"$^{89}$ The gospel showed that the \"wise\" were fools and the \"fools\" were truly wise.$^{90}$ The sacraments, which seemed so foolish to reason, were actually instituted to suppress reason: Therefore, for God's sake, the Christian must \"be a fool, poor, worthless and despised.\"$^{91}$ Luther was also well aware that he had himself been branded mad and possessed. \"What? Do you, reader, think me insane or drunk?\" Echoing St. Paul (Acts 26:25), he asserted: \"I am not mad, for I speak words of soberness.\"$^{92}$ He admitted that he sometimes acted foolishly, \"but it is the wild madness of the papists and the deplorable insanity of the prostitutes, that is the schools of Paris, Louvain, and elsewhere, that extort folly from me.\"$^{93}$ Properly speaking, Christians needed to cultivate a Christian folly, which was at its heart the mystery of Christian faith. This was not really madness. Yet Luther did also concede a genuine role to mental illness and mental disturbance in the religious life. Far from admiring the insensate or contented tranquillity of a satisfied mind, Luther held that true wisdom was found among “those who are oppressed and in conflict with spiritual trials.” $ ^{94} $ Only they could recognize their need for God’s consolation. In the Last Days, moreover, not all men would suffer the anxiety and terror of knowing that the end was fast ap ...",
-        "byte_size": 8834453,
-        "sha256": "1937b177d7f9fbaf6a33ae4e88e63d95b0ebcf0b0635039f974a7f4d67d72172"
-      },
-      {
-        "page_no": 310,
-        "file_idx": 309,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "Marienweiher, and as soon as he got there, his understanding cleared, he praised God and thanked Him for the grace He had bestowed. $ ^{54} $ Here we find a real-life example of what was only fantasy in the Lalebuch of 1597, in which the pretense of folly became the real thing. \"Consuetudo secunda natura,\" said the moralists of the day, suggesting that immorality or excess could become a permanent mental or moral disorder. These colorful stories bring us close to the way madness was perceived and understood in the sixteenth century, as mysterious, uncanny, sudden in onset and in remission, possibly of divine or demonic origin, but sometimes \"credibly from a drink that he was given,\" $ ^{55} $ or from other merely physical causes. In contrast to the learned treatises of physicians and theologians, the simple reports in the early miracle books use a folksy language with which to describe the wonders of a local shrine. They did not aim to impress anyone with their style or expertise but aimed at creating thankful, awestruck devotion to the saint and his or her shrine. ## Bavaria: Land of Miracles Farther to the south, the miracle books are even more numerous, and recorded wonders lie thick on the ground. The 1657 miracle book for the \"Holy Mountain of Andechs,\" southwest of Munich, states that between 1454 and 1657, a remarkable 23,050 miracles were granted to faithful pilgrims wh ...",
-        "byte_size": 7619394,
-        "sha256": "1df2b554a8dd459bad296728eec9e5eb39c140746de0fcbf732546f2e71e9eb2"
-      },
-      {
-        "page_no": 311,
-        "file_idx": 310,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "<div style=\"text-align: center;\">TABLE 6.3</div> <div style=\"text-align: center;\">Pilgrimage Shrines in the Bishopric of Passau</div> <table border=1 style='margin: auto; word-wrap: break-word;'><tr><td rowspan=\"2\"></td><td rowspan=\"2\">(N)</td><td colspan=\"3\">Dedication:</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>To Christ and The Trinity</td><td style='text-align: center; word-wrap: break-word;'>To Saints</td><td style='text-align: center; word-wrap: break-word;'>To Mary</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Founded before the Reformation</td><td style='text-align: center; word-wrap: break-word;'>(53)</td><td style='text-align: center; word-wrap: break-word;'>7</td><td style='text-align: center; word-wrap: break-word;'>29</td><td style='text-align: center; word-wrap: break-word;'>17</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Founded after the Reformation</td><td style='text-align: center; word-wrap: break-word;'>(127)</td><td style='text-align: center; word-wrap: break-word;'>13</td><td style='text-align: center; word-wrap: break-word;'>35</td><td style='text-align: center; word-wrap: break-word;'>79</td></tr><tr><td style='text-align: center; word-wrap: break-word;'>Total</td><td style='text-align: center; word-wrap: break-word;'>(180)</td><td style='text-align: center; word-wrap: break-word;'>20< ...",
-        "byte_size": 7921583,
-        "sha256": "a4fd29acba2f733ba4fdab82d623422554398512300cedd85158acd7104db8e4"
-      },
-      {
-        "page_no": 312,
-        "file_idx": 311,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "tion, only 17 were devoted to the Virgin (32%), but among the shrines founded after the Reformation, Mary was the focus of 79 out of 127 (62%). The rise of Mary was, of course, a pan-European phenomenon. $ ^{61} $ As in many other areas, in German regions, Mary was sought out as a kind of “general practitioner,” whom one could invoke in any time of need. In contrast to other saints, who often had specialized areas of responsibility, Mary was available no matter what went wrong. Perhaps it is for this reason that the first printed miracle books were mostly from shrines dedicated to Mary, for these shrines may well have felt that they were in competition with one another. $ ^{62} $ In the southern German and Austrian area, we find advertising campaigns employing printed books, printed pictures, and special pictorial miracle cycles at the major shrines of Mariazell in Styria (the “national shrine of Austria”), Tuntenhausen (southeast of Munich), Altötting (50 miles east of Munich), and Regensburg on the Danube. Between 1490 and 1535, these four Marian centers of devotion developed new means of extending their catchment basins and of attracting pilgrims. Fortunately for the historian, these activities produced a permanent residue of records that we can examine not just for the history of piety but for the history of madness as well. The first printed miracle book in Bavaria was pri ...",
-        "byte_size": 8447324,
-        "sha256": "a23211de4876f060598015dcaee267590280ede284c9525edc192674dc89af34"
-      },
-      {
-        "page_no": 313,
-        "file_idx": 312,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "see the advantages of print. We should remember, however, that among the earliest uses of print were the indulgences whose popularity triggered Martin Luther's protest. And in printed miracle books, we have another exceedingly popular Catholic means of cultivating the piety of pilgrimage. Interestingly, this first Bavarian advertisement featured the cure of madness in three or four of its twenty-five cases. They deserve to be savored here for their folksy idiom. $ ^{66} $ We learn for example that “Hainrich Reicherczsamer, a journeyman weaver from Zlabing [in Lower Austria] fell into a serious disease and lost his reason for three whole days and nights. Vowed [a pilgrimage] here and got well after his oath.” $ ^{67} $ Or take Agnes Freybergerin, from the district of Mosburg: “For seven straight years she has been robbed of her reason [Vernunft]. So they [her friends and relatives?] invoked Our Lady of Altötting and promised to take her there with a worthy gift. After this vow she got right again [ist wieder richtig worden] and told her story. [In the year 14]93.” $ ^{68} $ In that same year, “Hanns Jaeger of Würzburg [about 180 miles to the northwest] was robbed of his reason, and for three-quarters of a year, he could not speak. But when Hans Schedelrait from Rattensandtt [Rothensand, south of Bamberg] promised [to bring] the first-named Hanns here, his speech returned and he ...",
-        "byte_size": 9255684,
-        "sha256": "c5d5062b89ed2cee480a53ca36d1dc545688efb52ce244d8891c432ff76269f8"
-      },
-      {
-        "page_no": 314,
-        "file_idx": 313,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "closely associated with madness, and recovery could mean the recovery of speech. In another case, recovery was described as “becoming right again” (ist wieder richtig worden). In the early chapters of this book, we have examined the professional idioms of physicians, lawyers, and theologians. We might have expected that because these stories were recorded and published by priests at the shrine, the language of these reports would reflect theological learning or biblical prejudice. But the fifteenth- and sixteenth-century miracle reports are virtually devoid of technical terms and priestly learning. We may surmise that these miracle reports were surprisingly close to the everyday language and thought of weavers and peasants from southern Germany and Upper Austria. $ ^{72} $ In 1497, the Altötting canon Jacob Issickemer published a much larger account of the miracles of Altötting (54 pages as against only 8). He presents 77 miracles, now organized into edifying chapters on the seven ways in which Mary helps sinful men, women, and children. $ ^{73} $ Aside from the fact that Issickemer’s devotional thoughts took up more than one quarter of his book, his text also described the miracles of 1495–97 in much more detail than the telegraphic staccato in the book of 1494–95. Read, for example, the story of “an honorable woman of Nuremberg” who wrote “in her own handwriting” that during ...",
-        "byte_size": 8958669,
-        "sha256": "44f206b59c7566a66dc680e9240e95dea54d6099b3dd57f65db7aa7edc7d9382"
-      },
-      {
-        "page_no": 315,
-        "file_idx": 314,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "cidal despair, which was the worst spiritual condition known to late medieval people. Fortunately, Mary came to the rescue. By 1496, her shrine in Altötting was evidently well known even in Nuremberg, over 100 miles off to the northwest. Or take the case of Anna Sewsin, the owner of a hammer works in Traus-nitz, north of Regensburg: She was robbed of her senses [ihrer Sinne] for a year and a half, and because of her great fury [grosses Toben], she was put in chains and well secured [to the wall?]. During the first holy days of 1497, her husband called on Mary, etc., promising [to take] her to old Öding with [a votive gift of] a skull made of wax. From that moment on, she began to feel better, so that on the Friday after Pentecost of that year, she came to old Öding with the perfect use of her reason. $ ^{75} $ Here we notice the now familiar response of chaining and “securing” the mad if they went totally out of control. It is also worth noting that even the ex voto waxen gift symbolized Anna’s brain as the source of her madness. At Easter in 1496, Cuntz Schuster of Plauen (180 miles to the north, in Thuringia) and Katharina Hafnerin, from Wertingen (northwest of Augsburg) arrived in Altötting, both with letters officially signed and sealed from their respective cities, documents that praised the Mother of God and explained that each had gone mad, but that through a vow to the ...",
-        "byte_size": 9424963,
-        "sha256": "5041b57ed76992362219f7fd68f389b38f359333cb9c35642c26dd8c5c29d70f"
-      },
-      {
-        "page_no": 316,
-        "file_idx": 315,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "pray three Hail Marys, and when she did, she was released.\" When these attacks did not cease, however, she vowed a pilgrimage of some 180 miles to Altötting, and once there, she felt totally relieved of her suicidal urges. $ ^{78} $ Hans Hochstetter, a Franconian serving as the city secretary of Pettau (Ptuj) also came to Altötting in 1495 to express his thanks to Mary for relief from the “calamity and distress in which I stood, not knowing then how I should escape,” as he wrote in the document that he displayed in the chapel for all to see. $ ^{79} $ Here began the remarkable tradition at Altötting of leaving behind personal descriptions of one’s miraculous cures. In this case, then, we are not dependent on the words of some priest, for we have Hochstetter’s own description, and it is doubly impressive that he chose words like those we have seen before, “calamity and distress” (Widerwärtigkeit und Triibsal), rather than some other more technical vocabulary. We are probably safe in concluding that these early printed miracle books from Altötting preserve the language of the pilgrims themselves, even though the accounts were, of course, abridged to fit the requirements of space on the printed page. One of the pilgrims to Altötting in 1497 came from distant Kassel in Hesse, where she had borne a defective baby who lacked hands, legs and feet. She was so appalled \"that she got the ...",
-        "byte_size": 8169721,
-        "sha256": "e6007a1c5b1ddaf10a3833d167f18440e51a6e22367802ef2e41aba96fe2fb2a"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-006-pilgrimsinsearchoftheirr:nr-fn-ch-0034-toc-ch-006-pilgrimsinsearchoftheirr:endnote",
-    "request_mode": "note_only",
-    "page_context_count": 8,
+    "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"The cluster contains unmatched note items (markers 54-61) and no corresponding structured anchors in the provided JSON, although clear anchor markers are visible in the page images (e.g., p. 290 for 54-57, p. 291 for 58-60, p. 292 for 61). The allowed_actions list strictly restricts output to 'needs_review', preventing the use of synthesize_anchor or match actions required to resolve these clearly visible links.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1724,
+    "output_tokens": 39,
+    "total_tokens": 1763,
+    "estimated_input_tokens": 1733,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"page_contexts为空，无法判断脚注在页面上的确切位置\"\n  }\n]\n```",
   "response_parsed": [
     {
       "action": "needs_review",
@@ -277,8 +201,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.0,
-      "reason": "The cluster contains unmatched note items (markers 54-61) and no corresponding structured anchors in the provided JSON, although clear anchor markers are visible in the page images (e.g., p. 290 for 54-57, p. 291 for 58-60, p. 292 for 61). The allowed_actions list strictly restricts output to 'needs_review', preventing the use of synthesize_anchor or match actions required to resolve these clearly visible links."
+      "confidence": 0.8,
+      "reason": "page_contexts为空，无法判断脚注在页面上的确切位置"
     }
   ],
   "derived_truth": {
@@ -290,18 +214,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.0,
-        "reason": "The cluster contains unmatched note items (markers 54-61) and no corresponding structured anchors in the provided JSON, although clear anchor markers are visible in the page images (e.g., p. 290 for 54-57, p. 291 for 58-60, p. 292 for 61). The allowed_actions list strictly restricts output to 'needs_review', preventing the use of synthesize_anchor or match actions required to resolve these clearly visible links."
+        "confidence": 0.8,
+        "reason": "page_contexts为空，无法判断脚注在页面上的确切位置"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 23935,
-    "completion_tokens": 139,
-    "total_tokens": 24074,
+    "prompt_tokens": 1724,
+    "completion_tokens": 39,
+    "total_tokens": 1763,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 24469
+    "duration_ms": 1311
   }
 }

@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0029-toc-ch-005-danxisaid:footnote",
+      "chapter_title": "5. “Danxi said…”",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        187,
+        187
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11652,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00080",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0029-toc-ch-005-danxisaid",
+          "marker": "19",
+          "normalized_marker": "19",
+          "occurrence": 1,
+          "source_text": "H UF ?46> B9 4 FC86<4?<M87 7<F6HFF<BA B9 <AF4A<GL <A ;<F BG;8E JBE>F @4L ;4I8 6B@8 9EB@ G;8 A887?8FFA8FF GB J4F BA8 GB 6B@CBF8 FH6; 4 F86G<BA J;8A 1;H ;47 ABG ?89G 4AL 9B6HF87 7<F6HFF<BA B9?45BE G;8 B5I<BHF 4F G;8 5($7,6( 21 2/' 1-85< F4<7 G;4G .8$1* J4F 64HF87 5L <E8 3,$1 B9 G;8 $6,& 8(67,216.8$1* 4:E887 4A7 FB 7<7 #<H .4AFH <A 4 C4FF4:8 G;4G 1;H 6<G87 E8C84G87?L <A ;<F 8FF4L V&A $<A<FG8E<4? <E8 W $1;, ;,1)$ F86G<BA V <4A>H4A:W ȟǵ <A-8$1 #<H 4A7 /H8 .<G;BHG 6?4<@<A: GB E8CE8F8AG 1;HUF CB<AG B9 I<8J #BH 0<A: ;47 DHBG87 C4FF4:8F 9EB@ +;8F8 J8E8 G;8 ?<A8F /H ;HA9H <AGEB7H687 5L V 4AK< F4<7W <A G;8 JBE> 6<G87 GB BC8A G;<F 6;4CG8E",
+          "page_no": 187,
+          "display_marker": "19",
+          "source_marker": "19",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0029-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0029-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3748,
+    "estimated_prompt_tokens": 1392,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1392,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

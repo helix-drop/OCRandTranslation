@@ -1,0 +1,114 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-016-lasiledelamisère:nr-fn-ch-0056-toc-ch-016-lasiledelamisère:footnote\",\n  \"chapter_title\": \"L'asile de la misère\",\n  \"page_range\": [\n    307,\n    307\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00392\",\n      \"anchor_id\": \"anchor-00487\",\n      \"marker\": \"1\",\n      \"note_excerpt\": \"Pour plus d'informations sur la situation de la Salpêtrière et de Bicêtre, voir AAP-HP, Fonds Fossoyeux, « Évacuations d'établissements hospitaliers sous la Commune », 542 FOSS 78, et « Admissions dans les hôpitaux des blessés militaires », ...\",\n      \"anchor_excerpt\": \"Les ravages de la guerre puis de la guerre civile touchent de plein fouet les asiles. À l'approche des troupes, la Salpêtrière ferme sa consultation, et libère 240 lits ; Bicêtre, évaccué et confié à l'administration militaire, disperse ses ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00393\",\n      \"marker\": \"2\",\n      \"page_no\": 307,\n      \"source_text\": \"Drs Bouchereau et Magnan, «Statistiques des malades entrés en 1870 et 1871 au bureau d'admission des aliénés de la Seine», Annales médico-psychologiques, 5° série, t. VIII, 1872, p. 385.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"Il y a vingt-et-un ans, je rendais compte dans les Annales médico-psychologiques (1850) d'une brochure allemande ayant pour titre Morbus democraticus. Frappé moi-même de la gravité des faits de 1848, car, dès cette époque j'habitais le haut du faubourg Saint-Antoine, je signalai dans cette analyse la folie démocratique, égalitaire et sociale, avec ses maniaques, ses monomanes, ses déments et ses idiots, que j'avais pu étudier à fond sur les ouvriers de ce quartier. [...] L'étude de ce monde m'a conduit à le considérer comme une collection de fous de la pire espèce, bien plus dangereux que les fous criminels. Le caractère distinctif des seconds consiste à tuer, à voler quelques individus et à incendier quelques bâtiments, tandis que celui des premiers est d'assassiner en entier la société et de brûler tous les monuments qui font l'orgueil d'une nation $ ^{94} $. La maladie démocratique est bel et bien une maladie grave, chronique. Et c'est une maladie de classe, celle du prolétariat, dont la psychiatrie, science bourgeoise, scrute le profil pathologique, l'anatomie et les symptômes, avec un effroi qui exprime, pour reprendre une formule de Louis Chevalier, « le caractère véritablement racial des antagonismes sociaux $ ^{95} $ ». ## L'ASILE DE LA MISÈRE En 1848, les ouvriers composent 40 % de la population parisienne, qui, avec plus d’un million d’habitants, a doublé en un demi-siècle, sous l'effet de l'industrialisation et de l'exode rural. La journée de travail, dans des conditions souvent malsaines et très dures, est fixée à un maximum de douze heures, ramenée à huit pour les enfants, qui commencent dès huit ans, l'âge légal. Mais en 1851, une nouvelle loi autorise de multiples dérogations. La journée atteint souvent quinze heures, pour un salaire qui passe de 3,82 fra ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-016-lasiledelamisère:nr-fn-ch-0056-toc-ch-016-lasiledelamisère:footnote",
+      "chapter_title": "L'asile de la misère",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        307,
+        307
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00392",
+          "note_item_id": "fn-00392",
+          "anchor_id": "anchor-00487",
+          "marker": "1",
+          "note_excerpt": "Pour plus d'informations sur la situation de la Salpêtrière et de Bicêtre, voir AAP-HP, Fonds Fossoyeux, « Évacuations d'établissements hospitaliers sous la Commune », 542 FOSS 78, et « Admissions dans les hôpitaux des blessés militaires », 542 FOSS 112. Hôpital fondé par Anne d'Autriche, Sainte-Anne avait servi de cadre à une ferme expérimentale imaginée par le docteur Ferrus en 1833, où les aliénés de Bicêtre venaient travailler à des tâches agricoles. Le Second Empire choisira ce lieu pour pourvoir Paris de l'asile moderne qui lui manquait. Voir la thèse de Michel Caire, Contribution à l'histoire de l'hôpital Sainte-Anne (Paris): des origines au début du XXe siècle, thèse de médecine, Paris-V, Cochin - Port-Royal, 1981, n° 20, 160-VII p. disponible sur son irremplaçable site : http://psychiatrie.histoire.free.fr/index.htm.",
+          "anchor_excerpt": "Les ravages de la guerre puis de la guerre civile touchent de plein fouet les asiles. À l'approche des troupes, la Salpêtrière ferme sa consultation, et libère 240 lits ; Bicêtre, évaccué et confié à l'administration militaire, disperse ses malades dans une dizaine d'établissements en province. Établissement fondé en 1867 accueillant les aliénés des deux sexes, Sainte-Anne, dont plus des deux tiers des patients ont été transférés dans divers asiles de la Seine pour ménager de la place, devient le seul hôpital à accueillir la folie à Paris — et ses registres, par voie de conséquence, le principal fonds d'archives à rendre compte de la maladie mentale dans la capitale à cette époque¹. Et encore, pas toute la folie, mais les cas les plus urgents, certaines admis-"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11923,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00393",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-016-lasiledelamisère",
+          "region_id": "nr-fn-ch-0056-toc-ch-016-lasiledelamisère",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "Drs Bouchereau et Magnan, «Statistiques des malades entrés en 1870 et 1871 au bureau d'admission des aliénés de la Seine», Annales médico-psychologiques, 5° série, t. VIII, 1872, p. 385.",
+          "page_no": 307,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-016-lasiledelamisère:nr-fn-ch-0056-toc-ch-016-lasiledelamisère:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1511,
+    "output_tokens": 103,
+    "total_tokens": 1614,
+    "estimated_input_tokens": 1533,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00393\",\n        \"anchor_phrase\": \"Drs Bouchereau et Magnan, «Statistiques des malades entrés en 1870 et 1871\",\n        \"confidence\": 0.9,\n        \"reason\": \"Note text cites a specific source that likely supports claims about asylum statistics in the body.\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00393",
+      "anchor_id": "",
+      "anchor_phrase": "Drs Bouchereau et Magnan, «Statistiques des malades entrés en 1870 et 1871",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Note text cites a specific source that likely supports claims about asylum statistics in the body."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00393",
+        "anchor_id": "",
+        "anchor_phrase": "Drs Bouchereau et Magnan, «Statistiques des malades entrés en 1870 et 1871",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Note text cites a specific source that likely supports claims about asylum statistics in the body."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1511,
+    "completion_tokens": 103,
+    "total_tokens": 1614,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1810
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0052-toc-ch-008-ghostsormucus:footnote",
+      "chapter_title": "8. Ghosts or mucus?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        345,
+        345
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11740,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00168",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0052-toc-ch-008-ghostsormucus",
+          "marker": "1",
+          "normalized_marker": "1",
+          "occurrence": 1,
+          "source_text": "in0their0treatises0or0case0collections6 Encient0texts0had ood examples0can0be0found0in0the0Qawangdui medical manuscripts 2 arper0 AA@36 = Jor0a0discussion0of0Uthe0Whang0graph0identified0asattributed0all0kinds0of0ailments0to0spirits40from0toothaches0to0painful0childbirth6_aU ȓ 4Vsee tPand0Xakashima AA>40vol60 B0 =5 > 2cited0in arper0 =B0 =An 36 arper02 =B0 > n 30gives0early0graphic0equivalents0of_aU 40a0term0he0translates0as UcalamityV02 =B0 5 =3or Uspirit5caused0calamityV02 = 340in0line0with0the definition0of_aU asUmisfortune _brought0about`0by0spiritsV02ȒȔ 3 in0\\u0WhenTsʚı GTa[cQZ0VUQfU ʣŕʖÑ 2completed0in0 GI 36",
+          "page_no": 345,
+          "display_marker": "1",
+          "source_marker": "1",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0052-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0052-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3757,
+    "estimated_prompt_tokens": 1398,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1398,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,122 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0028-toc-ch-008-cethommenestpasaliénésad:footnote\",\n  \"chapter_title\": \"« Cet homme n'est pas aliéné » : Sade à Charenton\",\n  \"page_range\": [\n    158,\n    158\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00180\",\n      \"anchor_id\": \"anchor-00246\",\n      \"marker\": \"60\",\n      \"note_excerpt\": \"Chapron est bien mentionné dans les archives comme le secrétaire de Coulmier. Son ignorance de l'orthographe m'engage à penser que, faute de pouvoir remplir techniquement cette fonction, il était plutôt le factotum du directeur.\",\n      \"anchor_excerpt\": \"protecteur pour qu'il vienne la sortir de l'asile. Le directeur l'aurait attiré dans son cabinet sous prétexte de parler de sa santé et se serait « jetté [sic] sur elle comme un furieux ». Elle se serait évanouie et Chapron, le secrétaire d ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00181\",\n      \"anchor_id\": \"anchor-00247\",\n      \"marker\": \"61\",\n      \"note_excerpt\": \"AN, F¹⁵ 2608. Tous les témoignages cités figurent sous cette cote. J'ai respecté les italiques originales.\",\n      \"anchor_excerpt\": \"La pédophilie du directeur relève-t-elle de la simple présomption, comme le scrupule ou la prudence pousse l’honnête Chapron à le préciser? Dans le même dossier, une autre lettre anonyme, signée d’un « malheureux de l’hôpital de Charenton » ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00184\",\n      \"marker\": \"64\",\n      \"page_no\": 158,\n      \"source_text\": \"AN, F15 2608.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"point de Dieu $ ^{38} $!», est-il écrit dans le Livre des Psaumes. Au Moyen Âge, l’athée, l’impie, est assimilé au fou. Mais, depuis la Déclaration des droits de l’homme, la France a entériné la liberté d’opinion religieuse à condition, toute-fois, qu’elle ne trouble pas l’ordre public. Le cas de Jacob Dupont est assez clair à cet égard : c’est pour avoir parlé, écrit et proféré l’athéisme dans l’espace public que le fau- teur de trouble est considéré comme aliéné, envoyé à Charenton. Charenton où, à la même époque, languit le plus illustres des « prisonniers » de cette institution et le plus athée des philosophes, le marquis de Sade. ## « CET HOMME N'EST PAS ALIÉNÉ» : SADE À CHARENTON Sade, ce prisonnier que tout le monde réclame et dont aucune forteresse ne veut. Saumur, Pierre-Scise, Forl'Evêque, Miolans, Vincennes, la Bastille, Charenton, les Madelonnettes, les Carmes, Saint-Lazare, Picpus, Sainte-Pélagie, Bicêtre : Sade l'encombrant, qui embarrasse tous les régimes politiques, aura connu la plupart des grandes maisons de détention du royaume, de la République et de l'Empire. Plaintiffs, lettres de cachet ou ordres de police, on l'arrête, on le séquestre, on le transfère de prison en asile; jusqu'à ces geôliers, honteux d'abriter un homme aussi infâme, personne ne veut d'un pareil scélérat, en état d'insubordination permanente. « Littéralement et dans tous les sens », Sade est celui dont on ne sait pas quoi faire. Louis-Nicolas Dubois, le préfet de police du Consulat puis de l'Empire, décidé à mettre au secret le scandaleux auteur de justine, l'avait envoyé à Sainte-Pélagie en 1801, puis à Bicêtre ; sa famille obtient finalement de le faire entrer à Charenton le 27 avril 1803, où il meurt au terme de onze ans de réclusion, le 2 décembre 1814, sans avoir jamais perdu ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0028-toc-ch-008-cethommenestpasaliénésad:footnote",
+      "chapter_title": "« Cet homme n'est pas aliéné » : Sade à Charenton",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        158,
+        158
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00180",
+          "note_item_id": "fn-00180",
+          "anchor_id": "anchor-00246",
+          "marker": "60",
+          "note_excerpt": "Chapron est bien mentionné dans les archives comme le secrétaire de Coulmier. Son ignorance de l'orthographe m'engage à penser que, faute de pouvoir remplir techniquement cette fonction, il était plutôt le factotum du directeur.",
+          "anchor_excerpt": "protecteur pour qu'il vienne la sortir de l'asile. Le directeur l'aurait attiré dans son cabinet sous prétexte de parler de sa santé et se serait « jetté [sic] sur elle comme un furieux ». Elle se serait évanouie et Chapron, le secrétaire de Coulmier, serait intervenu $ ^{60} $. Fidèle à ses méthodes de rétor-sion, Coulmier l'aurait dès lors reléguée dans une chambre isolée."
+        },
+        {
+          "link_id": "link-00181",
+          "note_item_id": "fn-00181",
+          "anchor_id": "anchor-00247",
+          "marker": "61",
+          "note_excerpt": "AN, F¹⁵ 2608. Tous les témoignages cités figurent sous cette cote. J'ai respecté les italiques originales.",
+          "anchor_excerpt": "La pédophilie du directeur relève-t-elle de la simple présomption, comme le scrupule ou la prudence pousse l’honnête Chapron à le préciser? Dans le même dossier, une autre lettre anonyme, signée d’un « malheureux de l’hôpital de Charenton », signale, outre les mauvais traitements et la brutalité des infirmiers, les conditions déplorables qui règnent à l’asile. « Quant au chef, je n’ai eu l’avantage de le voir qu’une seule fois, il me fit venir dans sa chambre, à peine si j’ai pu lui parler, car il était entouré de cinq ou six petites filles<sup>61</sup> ». « Ailleurs, c’est un autre pensionnaire, militaire invalide et alcoolique qui, dans un style fleuri, dénonce Dumoustier, ex-prémontré à la solde de Coulmier, un scélérat « plus absolu mille fois qu’un"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11714,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00184",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+          "region_id": "nr-fn-ch-0028-toc-ch-008-cethommenestpasaliénésad",
+          "marker": "64",
+          "normalized_marker": "64",
+          "occurrence": 1,
+          "source_text": "AN, F15 2608.",
+          "page_no": 158,
+          "display_marker": "64",
+          "source_marker": "64",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-cethommenestpasaliénésad:nr-fn-ch-0028-toc-ch-008-cethommenestpasaliénésad:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1652,
+    "output_tokens": 89,
+    "total_tokens": 1741,
+    "estimated_input_tokens": 1638,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00184\",\n    \"anchor_phrase\": \"AN, F15 2608.\",\n    \"confidence\": 0.95,\n    \"reason\": \"Note 64 引用档案编号，在当前正文片段中未找到唯一锚点短语。\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00184",
+      "anchor_id": "",
+      "anchor_phrase": "AN, F15 2608.",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Note 64 引用档案编号，在当前正文片段中未找到唯一锚点短语。"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00184",
+        "anchor_id": "",
+        "anchor_phrase": "AN, F15 2608.",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note 64 引用档案编号，在当前正文片段中未找到唯一锚点短语。"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1652,
+    "completion_tokens": 89,
+    "total_tokens": 1741,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2288
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-003-leçondu24janvier1979:nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979:footnote\",\n  \"chapter_title\": \"Leçon du 24 janvier 1979\",\n  \"page_range\": [\n    76,\n    76\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00023\",\n      \"anchor_id\": \"anchor-00079\",\n      \"marker\": \"**\",\n      \"note_excerpt\": \"M. F.: l’Angleterre\",\n      \"anchor_excerpt\": \"l’Europe elle-même soit, au fond, modelée sur ce schéma ancien qui était une multiplicité d’États de police équilibrés entre eux. L’Europe devait être à l’image de l’Autriche pour que l’Autriche elle-même puisse subsister telle qu’elle étai ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00022\",\n      \"marker\": \"*\",\n      \"page_no\": 76,\n      \"source_text\": \"Le manuscrit précise, p. 10 : « Castelreagh » [Henry Robert Stewart Castelreagh (1762-1822), ministre tory des Affaires étrangères britannique de 1812 à 1822, qui joua un rôle essentiel lors du congrès de Vienne en freinant les ambitions de ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"# LECON DU 24 JANVIER 1979 Les traits spécifiques de l'art libéral de gouverner (II) : (3) Le problème de l'équilibre européen et des rapports internationaux. - Le calcul économique et politique dans le mercantilisme. Le principe de la liberté du marché selon les physiocrates et Adam Smith : naissance d'un nouveau modèle européen. - L'apparition d'une rationalité gouvernementale étendue à l'échelle mondiale. Exemples : la question du droit de la mer ; les projets de paix perpétuelle au x/111\\\" siècle. - Les principes du nouvel art libéral de gouverner : un « naturalisme gouvernemental « ; la production de la liberté. - Le problème de l'arbitrage libéral. Ses instruments : (1) la gestion des dangers et la mise en œuvre de mécanismes de sécurité ; (2) les contrôles disciplinaires (le panoptisme de Bentham) ; (3) les politiques interventionnistes. - La gestion de la liberté et ses crises. La dernière fois, j'avais essayé de préciser quelques-uns de ce qui me paraît être les caractères fondamentaux de l'art libéral de gouverner. D'abord, j'avais parlé du problème de la vérité économique et de la véridiction du marché. et puis du problème de la limitation de la gouvernementalité par le calcul d'utilité. Je voudrais maintenant aborder un troisième aspect. lui aussi je crois, fondamental, celui des équilibres internationaux, enfin l'Europe et l'espace international dans le libéralisme. Vous vous souvenez, quand on avait parlé l'an dernier de la raison d'État*, j'avais essayé de vous montrer qu'il y avait comme un équilibre, un système de contrepoids entre ce qu'on pourrait appeler les objectifs illimités à l'intérieur même de l'État et, d'autre part, les objectifs limités à l'extérieur. Objectifs illimités à l'intérieur par le mécanisme même en quoi consiste l'État de police, c ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-leçondu24janvier1979:nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979:footnote",
+      "chapter_title": "Leçon du 24 janvier 1979",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        76,
+        76
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00516",
+          "note_item_id": "fn-00023",
+          "anchor_id": "anchor-00079",
+          "marker": "**",
+          "note_excerpt": "M. F.: l’Angleterre",
+          "anchor_excerpt": "l’Europe elle-même soit, au fond, modelée sur ce schéma ancien qui était une multiplicité d’États de police équilibrés entre eux. L’Europe devait être à l’image de l’Autriche pour que l’Autriche elle-même puisse subsister telle qu’elle était. Et dans cette mesure-là, le calcul de l’équilibre européen, pour Metternich $ ^{19} $, on peut dire que c’était encore et toujours le calcul du XVIII $ ^{e} $ siècle. Au contraire pour l’Angleterre, $ ^{*} $ l’équilibre européen qu’elle a cherché et qu’elle a imposé de concert avec l’Autriche au traité de Vienne, qu’est-ce que c’était? C’était une manière de régionaliser l’Europe, de limiter, bien sûr, la puissance de chacun des États européens, mais pour laisser à l’Angleterre un rôle politique et économique, le rôle de médiateur économique entre l’Europe et le marché mondial, de manière à mondialiser en quelque sorte l’économie européenne par la médiation, par le relais de la puissance économique de l’Angleterre. De sorte que, là, on a un tout autre calcul de l’équilibre européen, qui est bien fondé sur ce principe de l’Europe comme région économique particulière en face, ou à l’intérieur, d’un monde qui doit constituer pour elle un marché. Et le calcul de l’équilibre européen par l’[Autriche] $ ^{**} $ dans ce même traité de Vienne est tout à fait différent. De sorte que vous voyez qu’à l’intérieur d’une réalité historique unique vous pouvez très bien trouver deux types de rationalité et de calcul politique entièrement différents."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 57,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "fn-00022",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-leçondu24janvier1979",
+          "region_id": "nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979",
+          "marker": "*",
+          "normalized_marker": "",
+          "occurrence": 3,
+          "source_text": "Le manuscrit précise, p. 10 : « Castelreagh » [Henry Robert Stewart Castelreagh (1762-1822), ministre tory des Affaires étrangères britannique de 1812 à 1822, qui joua un rôle essentiel lors du congrès de Vienne en freinant les ambitions de la Russie et de la Prusse].",
+          "page_no": 76,
+          "display_marker": "*",
+          "source_marker": "*",
+          "title_hint": "",
+          "created_at": 1777820124,
+          "updated_at": 1777820124
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-leçondu24janvier1979:nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1429,
+    "output_tokens": 47,
+    "total_tokens": 1476,
+    "estimated_input_tokens": 1489,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"注释文本提到Castelreagh，但正文摘录未出现该名字或清晰锚点。\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "注释文本提到Castelreagh，但正文摘录未出现该名字或清晰锚点。"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "注释文本提到Castelreagh，但正文摘录未出现该名字或清晰锚点。"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1429,
+    "completion_tokens": 47,
+    "total_tokens": 1476,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1619
+  }
+}

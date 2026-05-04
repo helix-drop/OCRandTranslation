@@ -347,8 +347,9 @@ class FnmRepoMixin:
                         unit_id, doc_id, kind, owner_kind, owner_id, section_id, section_title, section_start_page, section_end_page,
                         note_id, page_start, page_end, char_count,
                         source_text, translated_text, status, error_msg, target_ref, page_segments_json,
+                        source_hash, segment_plan_hash, pipeline_run_id, stale_reason,
                         created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         unit.get("unit_id"),
@@ -383,6 +384,10 @@ class FnmRepoMixin:
                         unit.get("error_msg"),
                         unit.get("target_ref"),
                         json.dumps(unit.get("page_segments") or [], ensure_ascii=False),
+                        str(unit.get("source_hash") or ""),
+                        str(unit.get("segment_plan_hash") or ""),
+                        str(unit.get("pipeline_run_id") or ""),
+                        str(unit.get("stale_reason") or ""),
                         now,
                         now,
                     ),
@@ -1553,3 +1558,80 @@ class FnmRepoMixin:
             conn.execute(
                 "DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id = ?", (doc_id,)
             )
+
+    # ── 增量 checkpoint 支持 ────────────────────────────────
+
+    def create_phase_run(
+        self, doc_id: str, *, run_id: str, phase: int, gate_report: dict | None = None,
+        counts: dict | None = None, hashes: dict | None = None,
+    ) -> int:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            cur = conn.execute(
+                """INSERT INTO fnm_phase_runs(doc_id, run_id, phase, status,
+                   gate_report_json, counts_json, hash_json, started_at)
+                   VALUES (?, ?, ?, 'running', ?, ?, ?, ?)""",
+                (doc_id, run_id, int(phase),
+                 json.dumps(gate_report or {}, ensure_ascii=False),
+                 json.dumps(counts or {}, ensure_ascii=False),
+                 json.dumps(hashes or {}, ensure_ascii=False),
+                 now),
+            )
+            return cur.lastrowid or 0
+
+    def finish_phase_run(self, doc_id: str, run_id: str, phase: int, status: str = "done") -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "UPDATE fnm_phase_runs SET status=?, finished_at=? WHERE doc_id=? AND run_id=? AND phase=?",
+                (str(status), now, doc_id, run_id, int(phase)),
+            )
+
+    def save_dev_snapshot(self, doc_id: str, *, run_id: str, phase: int, snapshot: dict) -> None:
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "INSERT INTO fnm_dev_snapshots(doc_id, run_id, phase, snapshot_json, created_at) VALUES (?, ?, ?, ?, ?)",
+                (doc_id, run_id, int(phase), json.dumps(snapshot, ensure_ascii=False), now),
+            )
+
+    def list_dev_snapshots(self, doc_id: str, phase: int | None = None) -> list[dict]:
+        rows = []
+        with transaction(self.db_path) as conn:
+            if phase is not None:
+                cur = conn.execute(
+                    "SELECT * FROM fnm_dev_snapshots WHERE doc_id=? AND phase=? ORDER BY created_at DESC",
+                    (doc_id, int(phase)),
+                )
+            else:
+                cur = conn.execute(
+                    "SELECT * FROM fnm_dev_snapshots WHERE doc_id=? ORDER BY created_at DESC",
+                    (doc_id,),
+                )
+            for row in cur.fetchall():
+                rows.append(dict(row))
+        return rows
+
+    def reset_from_phase(self, doc_id: str, phase: int) -> dict[str, int]:
+        """清除 phase >= N 的所有产物。返回清除行数统计。"""
+        counts: dict[str, int] = {}
+        phase = int(phase)
+        with transaction(self.db_path) as conn:
+            if phase <= 3:
+                conn.execute("DELETE FROM fnm_note_links WHERE doc_id=?", (doc_id,))
+                conn.execute("DELETE FROM fnm_body_anchors WHERE doc_id=?", (doc_id,))
+                conn.execute("DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id=?", (doc_id,))
+                conn.execute("DELETE FROM fnm_paragraph_footnotes WHERE doc_id=?", (doc_id,))
+                conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id=?", (doc_id,))
+                counts["phase3"] = conn.total_changes
+            if phase <= 4:
+                conn.execute("DELETE FROM fnm_translation_units WHERE doc_id=?", (doc_id,))
+                counts["phase4"] = conn.total_changes - counts.get("phase3", 0)
+            if phase <= 2:
+                conn.execute("DELETE FROM fnm_note_items WHERE doc_id=?", (doc_id,))
+                conn.execute("DELETE FROM fnm_note_regions WHERE doc_id=?", (doc_id,))
+                conn.execute("DELETE FROM fnm_chapter_note_modes WHERE doc_id=?", (doc_id,))
+                counts["phase2"] = conn.total_changes - counts.get("phase3", 0) - counts.get("phase4", 0)
+            conn.execute("DELETE FROM fnm_phase_runs WHERE doc_id=?", (doc_id,))
+            conn.execute("DELETE FROM fnm_dev_snapshots WHERE doc_id=?", (doc_id,))
+        return counts

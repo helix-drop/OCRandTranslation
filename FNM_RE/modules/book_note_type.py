@@ -146,6 +146,16 @@ def build_book_note_profile(
         is_heading_endnote = _has_notes_heading(markdown)
         is_weak_endnote = (page_kind == "endnote_collection" or _is_endnote_page(markdown)) and not is_heading_endnote
         has_endnote = is_heading_endnote or is_weak_endnote
+        # post_body fnBlocks endnote 重分类：_reclassify_post_body_fnblocks_as_endnote
+        # 将 _note_scan 中连续编号的 fnBlocks footnote item 标记为 endnote。
+        # 这些页面没有 ## NOTES 标题 / endnote_collection page_kind，常规信号检测不到。
+        _reclassified_endnote = any(
+            str(item.get("kind") or "") == "endnote"
+            and str(item.get("reclassified_from") or "") == "footnote"
+            for item in (note_scan.get("items") or [])
+        )
+        if _reclassified_endnote:
+            has_endnote = True
         if has_endnote and has_footnote:
             has_endnote = False
         elif is_weak_endnote and not toc_has_endnotes_entry:

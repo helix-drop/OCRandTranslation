@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0056-toc-ch-008-ghostsormucus:footnote",
+      "chapter_title": "8. Ghosts or mucus?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        362,
+        362
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11754,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00182",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0056-toc-ch-008-ghostsormucus",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": ">==5 >A@30is a well5documented0example0of0how0a0scholar0dealt0with0his0despondency0and0how0his friends0responded0to0his0eventual0suicide2see0Jang0FaoŖɰ 4 ZS07 [0VU Ŗɰ̍ _ A@ `B0 >40 = 5= 40> 5 =4 >?=5??C0and0Hai0QingshiĹº",
+          "page_no": 362,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11755,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00183",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0056-toc-ch-008-ghostsormucus",
+          "marker": "16",
+          "normalized_marker": "16",
+          "occurrence": 1,
+          "source_text": "U0BUZS_TU0VU Ĺº ̍ _ A@>`B0==5=>40 @5 A360 became0aware0of\\u RianzuTs0casethroughHurand0 AA 6 = =aUdU0eU Z ƬƸ˯ƃ 40UWpectral0illnessesV 2ȓǰ 3C0\\u]UB0 @ F60Qessner02 B 5 3 translated0this0story6 = \\ieTs0criticism02made0in0a0clinical0case3 appeared0in QdUZVU0eUi Z Ėě̍˯ƃ 2 @> 34 Va Z =4 UHelirium0and sweatingVʬʟɢƞ 2^] 5 B0@AF36",
+          "page_no": 362,
+          "display_marker": "16",
+          "source_marker": "16",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0056-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0056-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4096,
+    "estimated_prompt_tokens": 1495,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1495,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

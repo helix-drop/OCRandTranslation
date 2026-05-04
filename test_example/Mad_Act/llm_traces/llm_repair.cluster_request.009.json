@@ -2,340 +2,198 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-manual-2-14-14-distress-and-power-be:toc-manual-2-14-14-distress-and-power-be:footnote\",\n  \"chapter_title\": \"14. Distress and power Being (considered) mad in Qing China\",\n  \"page_range\": [\n    564,\n    588\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 564,\n      \"ocr_excerpt\": \"### 14.1 Grievances and reproaches As we have seen, some individuals in Chinese villages were identified as madmen (瘋子) or fools (痴子). More than a simple act of naming, this identification was a diagnosis sustained by the community—close relatives, neighbors, classmates, etc., who probably thought they were simply stating the obvious. \\\"The local community called [Yang Huaizhen] a madman and stopped interacting with him\\\" (鄉黨呼為瘋子 不與往來). $ ^{2} $ Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. The commonest grievance I found in mad people's statements was a disagreement with this informal but persistent identification as mad or idiotic. Some people emphasized that this diagnosis came from others. Deng Tingmei 鄧廷梅 (1736): \\\"My son had poxes and died. At once I became so angry that my mind became confused. My ears also became deaf. They said I had gone mad.\\\" $ ^{3} $ (出痘死了 一時把心氣成昏迷 耳朵也氣韜了 他們說我瘋了) Ding Wenbin 丁文彬 (1753), whose trial I discuss in 15.4, claimed to have been designated the Son of Heaven ...\"\n    },\n    {\n      \"page_no\": 565,\n      \"ocr_excerpt\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 (1762): \\\"everybody says I am a fool and nobody believes me\\\" (人人說我是痴子都不信我). $ ^{6} $ The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\\\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it. People whom others considered mad often objected to the way their relatives beat them, ignored them, wronged them, locked them up, and (maybe above all else) called them what they insisted they were not: mad. Any rough treatment received under the pretext that they were insane probably intens ...\"\n    },\n    {\n      \"page_no\": 567,\n      \"ocr_excerpt\": \"Many people who were identified as mad constructed a superlative persona that made them glorious and excellent. Either before they were socially diagnosed as crazy or as a reaction to this label, they spoke of their dreams and visions and often sought official or imperial recognition for their mission or their virtue. Here I use a few cases to illustrate what a “crazy” persona could be like. Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $ Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \\\"abandoned books for commerce\\\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documented, let me recount at some length what happened to him and what compell ...\"\n    },\n    {\n      \"page_no\": 569,\n      \"ocr_excerpt\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵ It turned out that Bai's motives for presenting the slips were far from those of a rebel. Asked what his intentions were (究屬何心), he answered as follows: I lost my clothes and things in the Han River and no one pursued [this matter]. I have also been locked up for many years, which has been ghastly and difficult to bear. I wrote the names of people I know on bamboo strips and paper slips, and filled out the official posts, hoping ...\"\n    },\n    {\n      \"page_no\": 571,\n      \"ocr_excerpt\": \"to emperorship or if the self-aggrandizing “fifth year of Liqi” only sounded comforting in distressing times. $ ^{16} $ Zhang Tingyong 張廷用 also managed to sound politically subversive even as he constructed his \\\"delirium\\\" from daily objects and local names of people and organizations. $ ^{17} $ Of course his words were also designed to sound politically meaningful. As a youth, \\\"Zhang Tingyong had participated in a [semi-annual local] examination to become a licentiate but had not been admitted. $ ^{18} $ This turned into madness/idiocy: he would constantly chant the Buddha's name; [the illness was] intermittent\\\" (張廷用曾考試式童未能進取 染成瘋癡隨口念佛 時發時止). In 1748, having shaved his hair and queue (自剃髮辦), he went to Wutai Mountain to become a monk, but the bonzes in charge (當處僧人) made him return home. In 1756, when Zhang's illness became more serious, his family declared him to the county office through the head of the local community compact (經鄉約報官). The county issued chains and locks and delivered Zhang to his relatives, who were instructed to lock him up and keep watch over him (發給鎖封 交伊親屬鎖錮看守). $ ^{19} $ In 1760, he twisted his locks open and managed to flee to the city (扭鎖脫身 奔入城市), where he w ...\"\n    },\n    {\n      \"page_no\": 572,\n      \"ocr_excerpt\": \"manuscript notes that he may have written over the years or along the road (the report did not tell). He was caught again. As the magistrate in charge of his case reported: The text is mediocre and pedestrian, preposterous and confused, constantly redundant and not forming full sentences. But among the words we find \\\"White-rain dragon-king association,\\\" \\\"Society of the Ten Buddhas,\\\" and the names of people in those associations, such as \\\"Liu Guangrong,\\\" \\\"Association Leader Cao,\\\" and \\\"Association Leader Wang.\\\" I am very afraid that [these names] hide something else, such as [sutra?] reading associations. 閱其鄙俚誕妄迷係重複雷同 不成語句 惟字內載有白雨龍王會、十佛會及會中人劉光榮 曹會長 王會長名 甚恐有念□會別情 Symbolically loaded language made officials apprehensive. Zhang Tingyong's slips seemed to mention the kind of religious association that was often banned under the label of “devious cult” (邪教). Such religious groups were common in Qing China, but the state feared they might develop into large-scale organizations that could rival the state in their sway over “people’s hearts.” $ ^{20} $ The officials who interrogated the local leaders and the people Zhang Tingyong named in his notes soon found that there was no rebellion in t ...\"\n    },\n    {\n      \"page_no\": 573,\n      \"ocr_excerpt\": \"who sought his services and chose auspicious days for marriages and funerals (代人酹神祈禱 并選擇婚葬日期), but practiced no occult arts. The lofty-sounding “dragon-king association” turned out to be an agricultural cult and “white rain” the name local peasants gave to hailstones (冰雹). From the fourth to the eighth lunar month, the villagers went to the neighboring temple of the dragon spirit.... to burn incense and paper to [?] and pray (村農至附近龍神廟內□帶香褚靼流祈禱) that the hail would not harm the crops: “there are in fact no such things as gatherings of crowds to read sutras or the establishment of devious cults” (實無聚眾念經、創立邪教情事). The practice of presenting incense at the local dragon-god temple was in fact consistent with what the Code called “charitable societies that conduct prayers in the spring and fall” (在本村神龍廟靼月進香 與律載春秋義社以行祈报者相同 似無庸置議). $ ^{21} $ The Governor of Shanxi clarified small details: under interrogation in Zhili soon after he was caught, Zhang Tingyong had mentioned the existence of “one effortless knife kept by xianzi [i.e., a sage]” (顺刀一把是賢子收著). The “knife kept by the sage” was not the fantastic weapon or religious object that officials feared it might be. The Shanxi Governor, who ha ...\"\n    },\n    {\n      \"page_no\": 574,\n      \"ocr_excerpt\": \"Because Zhang had not impinged on the sanctity of imperial symbols, he was not physically punished. As the 1767 report concluded, “it has been established that this criminal Zhang Tingyong is indeed mad; according to the [1762] sub-statute [on those who have committed a killing because of madness], the Yingzhou magistrate shall be ordered to confine him and take the proper precautions, so that [Zhang] will not be allowed to break out and stir up trouble again” (该犯张廷用實屬瘋癲 應飭令應州知州照例嚴加鎖禁防範 毋使再以出境滋事). We know of Bai Shengqi and Zhang Tingyong through third-person reports on their words and acts. We now turn to someone who left his own writings, and whose view on life we therefore know much more about than Bai’s and Zhang’s. ### 14.3 “Idle steed” Lin Zhigong and his writings Lin Zhigong's 林志功 case is one of the most interesting to have survived in the records. $ ^{22} $ Lin was born in 1708 in Changshan 常山 county in Quzhou 衢州, the westernmost prefecture of Zhejiang, near the border of Jiangxi province. He became mad with grief after his wife and one of his two sons died of disease early in 1735. His relatives tried to have him exorcized, but without success. A new marriage was nonethele ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01663\",\n      \"marker\": \"4\",\n      \"page_no\": 564,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. T ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01664\",\n      \"marker\": \"5\",\n      \"page_no\": 565,\n      \"paragraph_index\": 0,\n      \"source_text\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 ( ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01666\",\n      \"marker\": \"7\",\n      \"page_no\": 565,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01667\",\n      \"marker\": \"8\",\n      \"page_no\": 565,\n      \"paragraph_index\": 1,\n      \"source_text\": \"The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \\\"In the third month of last year [1762], ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01670\",\n      \"marker\": \"11\",\n      \"page_no\": 567,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01671\",\n      \"marker\": \"12\",\n      \"page_no\": 567,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01672\",\n      \"marker\": \"13\",\n      \"page_no\": 567,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \\\"abandoned books for commerce\\\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documente ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01673\",\n      \"marker\": \"14\",\n      \"page_no\": 569,\n      \"paragraph_index\": 0,\n      \"source_text\": \"The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00544\",\n      \"note_item_id\": \"fn-00536\",\n      \"current_anchor_id\": \"anchor-01665\",\n      \"marker\": \"6\",\n      \"note_page_no\": 564,\n      \"anchor_page_no\": 565,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"6 A3by Fcting0Xhandong0 overnor Gai0^hongshanƾʋÜ and Xhandong0Jducation0commissioner \\\\ie0WongshengɑƎƯ 2V[I B0?> 36 S ^ªb¬ S XzTq[ memo¡ial da£ed `a p¤g] `fbe WQ{`]f]eX] rom0Iing~s0confession02V[IB 36\",\n      \"anchor_excerpt\": \"were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \\\"the fool who speaks his dream\\\" 痴人說夢). $ ^{5} $ This was the case of \\\"Great King of Shanxi\\\" Lin Zhigong 林志功 ( ...\"\n    },\n    {\n      \"link_id\": \"link-00548\",\n      \"note_item_id\": \"fn-00540\",\n      \"current_anchor_id\": \"synthetic-footnote-00271\",\n      \"marker\": \"3\",\n      \"note_page_no\": 572,\n      \"anchor_page_no\": 572,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfillin ...\",\n      \"anchor_excerpt\": \"3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfillin ...\"\n    },\n    {\n      \"link_id\": \"link-00549\",\n      \"note_item_id\": \"fn-00541\",\n      \"current_anchor_id\": \"synthetic-footnote-00272\",\n      \"marker\": \"*\",\n      \"note_page_no\": 579,\n      \"anchor_page_no\": 579,\n      \"current_anchor_marker\": \"*\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"0. 9C66') H2D\\u0001E96\\u0001P<:5Q\\u0001\\u0003Ç \\u0004\\u0005\\u0001D6G6?') H2D\\u0001E96P49:=5Q \\u0003M \\u0004\\u0007\\u0001*96\\u0001562E9\\u0001@7\\u0001E96J@F?86DE\\u0001@?6H2D\\u0001E96\\u0001562E9\\u0001@7 \\\":?OD\\u0001@H?\\u0001D@?\\u0007\\u0001*96\\u0001D6G6?\\u0006J62C\\u0006@=5\\u0001H2D\\u0001E96\\u000149:=5\\u0001H9@\\u0001D6CG65\\u00012D\\u0001>65:F>\\u000136EH66?\\u0001\\\":?\\u0001/9:8@?8\\u00012?5\\u0001 F2?5:\\u0001\\u0003D66 36=@H\\u0004\\u0007 \\\":?OD\\u00012??@E2E:@?\\u00014=2:>6 ...\",\n      \"anchor_excerpt\": \"0. 9C66') H2D\\u0001E96\\u0001P<:5Q\\u0001\\u0003Ç \\u0004\\u0005\\u0001D6G6?') H2D\\u0001E96P49:=5Q \\u0003M \\u0004\\u0007\\u0001*96\\u0001562E9\\u0001@7\\u0001E96J@F?86DE\\u0001@?6H2D\\u0001E96\\u0001562E9\\u0001@7 \\\":?OD\\u0001@H?\\u0001D@?\\u0007\\u0001*96\\u0001D6G6?\\u0006J62C\\u0006@=5\\u0001H2D\\u0001E96\\u000149:=5\\u0001H9@\\u0001D6CG65\\u00012D\\u0001>65:F>\\u000136EH66?\\u0001\\\":?\\u0001/9:8@?8\\u00012?5\\u0001 F2?5:\\u0001\\u0003D66 36=@H\\u0004\\u0007 \\\":?OD\\u00012??@E2E:@?\\u00014=2:>6 ...\"\n    },\n    {\n      \"link_id\": \"link-00550\",\n      \"note_item_id\": \"fn-00542\",\n      \"current_anchor_id\": \"anchor-01693\",\n      \"marker\": \"2\",\n      \"note_page_no\": 579,\n      \"anchor_page_no\": 578,\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. \\u0017\\u000192=36C5\\u00013FC:65\\u0001724:?8\\u0001E96\\u0001>@F?E2:?\\u0013\\u0001 F2?OD\\u00014=@F5D\\u00012C6\\u0001=@?8Üd Ęʒʟʎ ?2>6\\u0001\\\":?\\u00014=2:>65\\u0001D9@F=5\\u000136\\u0001C625\\u00012D P,6DE\\u0001C:G6CQ \\u0003ȶŽ \\u0004\\u0007\\u0001 \\u00012>\\u0001?@E\\u000146CE2:?\\u0001H9J P,6DE\\u0001(:G6CQ C676CC65\\u0001E@\\u0001\\\":?OD A=246\\u0001@7\\u0001@C:8:?\\u0005\\u0001H9:49\\u0001\\\":?OD\\u0001E6IED\\u00012=D@\\u000156D:8?2E65\\u00012D\\u0001,6DE\\u0001#@F ...\",\n      \"anchor_excerpt\": \"逐句註解出來), as one would a canonical book or a sacred text. Lin worked on the text of this revelation on many occasions, rewriting and re-annotating it at least three times. $ ^{32} $ Here is a translation of the main text, which was written i ...\"\n    },\n    {\n      \"link_id\": \"link-00551\",\n      \"note_item_id\": \"fn-00543\",\n      \"current_anchor_id\": \"anchor-01714\",\n      \"marker\": \"3\",\n      \"note_page_no\": 582,\n      \"anchor_page_no\": 581,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"claimsthatby @ 0they0had0become PubiquitousQ even in0\\\\injiang cities0on0the0northwestern0reaches0of0the0Ving0empire6 Fround0 ? =40the0Ving0government0also0started0to0integrate0 uandi0into0the0official0state0cult02see0Iuara0 A@@36 =@ F WRQJ] ...\",\n      \"anchor_excerpt\": \"The flames and oil fire kept coming at me $ ^{53} $ 炎 \\\" 油火不離身\"\n    },\n    {\n      \"link_id\": \"link-00552\",\n      \"note_item_id\": \"fn-00544\",\n      \"current_anchor_id\": \"anchor-01717\",\n      \"marker\": \"6\",\n      \"note_page_no\": 584,\n      \"anchor_page_no\": 582,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"> 0suggested0in 6 thatcommon0people~s depositions0aboutthe0words0or0acts0ofmad0people0must0be understood0in0the0context0of0the0case0under0investigation60Yhe0fact0that0Qin~s0case partly0concerned0his fantasies about officialdomprodded invest ...\",\n      \"anchor_excerpt\": \"In the first month of yimao my relatives believed words $ ^{56} $ 乙卯正月親信言\"\n    }\n  ]\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-005-danxisaid:nr-fn-ch-0035-toc-ch-005-danxisaid:footnote\",\n  \"chapter_title\": \"5. “Danxi said…”\",\n  \"page_range\": [\n    209,\n    215\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00094\",\n      \"marker\": \"33\",\n      \"page_no\": 209,\n      \"source_text\": \"04A: BA <GF BJA J<G;BHG G;8 FHCCBEG B9 0<A3 64AABG 58:8G ?BA8 0<A 64AABG :EBJW ǹ́ ȉ ǹ̾ ̱ L 6BAGE4FG 0H 789<A87 (< 78C?8G<BA 4F V78C?8G<BA B9 G;8 0<A 4FC86G B9 (<W Ƭ ̾ʹ GE84G45?8 J<G; G;8 BHE :8AG?8@8A 786B6G<BA :<AF8A: ?<6BE<68 ;<A4 EBBG 4A ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00095\",\n      \"marker\": \"34\",\n      \"page_no\": 210,\n      \"source_text\": \"3. <A G;8 )8A4?GE46GW ʉɞ ȯ̾ʹ 04A: 78C?8G<BA J4F @4A<98FG87 5L 984E B9 6B?7 64HF87 5L ?46> B9 <E8 G;8 4:8AG 4FFB6<4G87 J<G; G;8 84EG 4A7 6HE45?8 J<G; (< E8C?8A<F;<A: 7EH:F FHCC?8@8AG87 J<G; ;BG 7EH:F ?<>8 46BA<G8 0<A 78C?8G<BA J4F 6;4E46G8E< ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00096\",\n      \"marker\": \"35\",\n      \"page_no\": 212,\n      \"source_text\": \"9. G;8 *C<E<G ;4F J<G;7E4JA 4A7 G;8 8L8F 4E8 FG4E<A: 4F <9 BA8 J8E8 FGHC<7 8I8A 4 F4:8?L C;LF<6<4A J<?? 9<A7 AB GE84G@8AGW ʞȹʇȫȰ»ĥȞɴ ͅɺ̡ ʄƸ SS<A G;8 E8FG B9 G;8 F86G<BA 0H F<@C?L 6BC<87 G;8 $1;, =8$1<$2 UF ǔɧˑ 8KC?4A4G<BAF B9 @47A8FF 6<G8 9 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00097\",\n      \"marker\": \"36\",\n      \"page_no\": 213,\n      \"source_text\": \"4B 4AG<6<C4G87 *HA 0<>H<UFÅ · 4A7 1;4A: !<85<AUF 6B@CE8;8AF<I84E:H@8AGF GB G;8 F4@8 89986G +;4G 6?4<@ ;47 4CC84E87 <A G;8 F86G<BA BA @H6HF B9 G;8 $1;, ;,1)$ 8<, -,1*<$2 ;̡ɓˑ 5 4 ) / . ,A78E G;8 F4@8 8AGEL 1;4B 6E<G<6<M87G;8 <784 G;4G 4?? ?H ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00098\",\n      \"marker\": \"37\",\n      \"page_no\": 214,\n      \"source_text\": \"157. Ruyi jingyao 儒醫精要 22a-b (RBXC: 258; HWHG 12: 473).\"\n    },\n    {\n      \"note_item_id\": \"fn-00099\",\n      \"marker\": \"38\",\n      \"page_no\": 214,\n      \"source_text\": \"160. Ruyi jingyao 儒醫精要 27b, “Lun Erchen tang” 論二陳湯, RBXC: 261; HWHG 12: 477-8.\"\n    },\n    {\n      \"note_item_id\": \"fn-00100\",\n      \"marker\": \"39\",\n      \"page_no\": 214,\n      \"source_text\": \"161. Ruyi jingyao 儒醫精要 28a; RBXC: 261; HWHG 12: 478.\"\n    },\n    {\n      \"note_item_id\": \"fn-00101\",\n      \"marker\": \"40\",\n      \"page_no\": 215,\n      \"source_text\": \"5. 5 ) / . +;8 C;E4F8 V?8 GE4I4<? 7H G8KG8W 6B@8F 9EB@ B@<A<6> #4 4CE4 A\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"“Danxi said…” The textual life of medical ideas on madness, 1360-1530 Danxi said that dian belongs to Yin and kuang to Yang, that dian is excessive joy and kuang excessive anger. He also stated that the doubling of Yin is dian and the doubling of Yang is kuang. 丹溪謂癲屬陰 狂屬陽 癲多喜 狂多怒 又云重陰者癲 重陽者狂 Xu Chunfu 徐春甫 in Gujin yitong daquan 古今醫統大全 (1556) $ ^{1} $ Chapters 3 and 4 traced a momentous transformation in the etiology of madness from Wind to internal Fire and mucus between the twelfth and the fourteenth century. The Ming dynasty (1368-1644) was not a period of strong epistemological breaks in medicine, but one in which physicians re-orchestrated earlier approaches to form new doctrinal and therapeutic emphases. Xu Chunfu above was citing the Danxi xinfa 丹溪心法, a composite work compiled and printed in his own Huizhou Prefecture (Anhui) in the early 1480s and that quickly became the most influential work attributed to Zhu Zhenheng 朱震亨 (\\\"Danxi\\\" 丹溪: 1282-1358). This and the next chapter show how the development of Ming medical thinking on dian and kuang was shaped by three important trends that are well symbolized by Xu's quotation: the rising influence of precepts attributed to Danxi, the importance of Huizhou as a center of medical theorizing and publication, and the profound intertextuality of the elite medical tradition. ### 5.1 Intertextual composition and the Danxi corpus The “Danxi corpus” in the history of medical thinking on madness The rise to prominence of a body of teachings attributed to Zhu Zhenheng deeply shaped Ming medical thinking and practice. Zhu's teachings appeared in a wide array of texts books and manuscripts by Zhu, notes by his disciples, works attributed to Zhu that were collated after his death by people who had known him, and later anthologies base ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-manual-2-14-14-distress-and-power-be:toc-manual-2-14-14-distress-and-power-be:footnote",
-      "chapter_title": "14. Distress and power Being (considered) mad in Qing China",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0035-toc-ch-005-danxisaid:footnote",
+      "chapter_title": "5. “Danxi said…”",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "match",
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        564,
-        588
+        209,
+        215
       ],
       "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "unmatched_note_items": [
         {
-          "row_id": 3461,
+          "row_id": 11666,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01663",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 564,
-          "paragraph_index": 1,
-          "char_start": 957,
-          "char_end": 965,
-          "source_marker": "$ ^{4} $",
-          "normalized_marker": "4",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. The commonest grievance I found in mad people's statements was a disagreement with this informal but persistent identification as mad or idiotic. Some people emphasized that this diagnosis came from others. Deng Tingmei 鄧廷梅 (1736): \"My son had poxes and died. At once I became so angry that my mind became confused. My ears also became deaf. They said I had gone mad.\" $ ^{3} $ (出痘死了 一時把心氣成昏迷 耳朵也氣韜了 他們說我瘋了) Ding Wenbin 丁文彬 (1753), whose trial I discuss in 15.4, claimed to have been designated the Son of Heaven by the descendant of Confucius on orders of Shangdi the Lord on High, a title Ding's relatives did not recognize: \"[My older brother] is an unreasonable person; he often calls me a fool\" (他是不明道理的人 常罵我癡子). $ ^{4} $ And elsewhere: \"I am not a fool, damn it! At home everybody says I'm a fool.\" (並不是癡子 可恨 家裏人人說我是癡子) \"Fools\" (癡子) were not necessarily persons of low intelligence. Those called \"fools\"",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00094",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "33",
+          "normalized_marker": "33",
+          "occurrence": 1,
+          "source_text": "04A: BA <GF BJA J<G;BHG G;8 FHCCBEG B9 0<A3 64AABG 58:8G ?BA8 0<A 64AABG :EBJW ǹ́ ȉ ǹ̾ ̱ L 6BAGE4FG 0H 789<A87 (< 78C?8G<BA 4F V78C?8G<BA B9 G;8 0<A 4FC86G B9 (<W Ƭ ̾ʹ GE84G45?8 J<G; G;8 BHE :8AG?8@8A 786B6G<BA :<AF8A: ?<6BE<68 ;<A4 EBBG 4A7 4GE46GL?B78F V ?BB7 78C?8G<BAW E898EE87 GB G;8 78C?8G<BA B9 G;8 0<A 4FC86G B9 ?BB7 ˁ ̾ʹ 4A7 6BH?7 58 FB?I87 J<G;G;8 BHE <A:E87<8AG 786B6G<BA 4A:8?<64 *<6;H4A ?BI4:8 C8BAL EBBG 4A7 6BB>87 E8;@4AA<4 BHE :8AG?8@4A 786B6G<BA J4F G;8",
+          "page_no": 209,
+          "display_marker": "33",
+          "source_marker": "33",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3462,
+          "row_id": 11667,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01664",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 565,
-          "paragraph_index": 0,
-          "char_start": 170,
-          "char_end": 178,
-          "source_marker": "$ ^{5} $",
-          "normalized_marker": "5",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \"the fool who speaks his dream\" 痴人說夢). $ ^{5} $ This was the case of \"Great King of Shanxi\" Lin Zhigong 林志功 (1762): \"everybody says I am a fool and nobody believes me\" (人人說我是痴子都不信我). $ ^{6} $",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00095",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "34",
+          "normalized_marker": "34",
+          "occurrence": 1,
+          "source_text": "3. <A G;8 )8A4?GE46GW ʉɞ ȯ̾ʹ 04A: 78C?8G<BA J4F @4A<98FG87 5L 984E B9 6B?7 64HF87 5L ?46> B9 <E8 G;8 4:8AG 4FFB6<4G87 J<G; G;8 84EG 4A7 6HE45?8 J<G; (< E8C?8A<F;<A: 7EH:F FHCC?8@8AG87 J<G; ;BG 7EH:F ?<>8 46BA<G8 0<A 78C?8G<BA J4F 6;4E46G8E<M87 5L EB5HFG ;84G Ǵǭ 64HF87 5L ?46> B9 .4G8E 4FFB6<4G87 J<G; G;8 \"<7A8LF 4A7 F;BH?7 58 GE84G87 J<G; ?BB7 E8C?8A<F;<A: E8@87<8F 6B@C?8@8AG87 5L 6BB?<A: 7EH:F ?<>8 A8@4EE;8A4 ȲƧ 4A7 ';8??B78A7EBA ͬƆ BE J<G; E86<C8F ?<>8 V E84G 0<A E8C?8A<F;<A: C<??W 4A7 V0<A ABHE<F;<A: :E84G E8C?8A<F;<A: C<??W Ǘ̾¯ˎ 0H 4?FB 4:E887 G;4G <A 64F8F B9 78C?8G<BA B9 V+EH8 .4G8EW < 8 \"<7A8L 54F87 +EH8 0<A 04A: E8C?8A<F;<A: 7EH:F ?<>8 46BA<G8 F;BH?7 ABG 58 HF87 ?8FG G;8L ABHE<F;87 4 <E8 G;4G JBH?7 9HEG;8E 6BAFH@8 +EH8 0<A *<@<?4E?L 46E<7 4A7 7<FC8EF<A: ̅ŕ 7EH:F FH6; 4F *<6;H4A ?BI4:8 4A7 ;<A4 EBBG F;BH?7 58 4IB<787 J;8A CE<@BE7<4? 04A: J4F 789<6<8AG 9BE 984E G;8L @<:;G BC8A G;8 F><A ̳ʋȃ 4A7 9HEG;8E 7E4<A +EH8 (< ƹȯƬ +;<F 6E<G<6<F@ B9 .4A: #HAUF I<8JF CE8I4<?87 4@BA: <A9?H8AG<4? ?4G8E G;<A>8EF ?<>8 .4A: !<Ʋƚ /H8 !<ʲñ *HA 0<>H<Å · 4A7 BG;8E 47IB64G8F B9 64?BE<9<6 E8C?8A<F;<A: 45BHG J;<6; 4A7 J;B@ F4L @BE8 <A ;4CG8E",
+          "page_no": 210,
+          "display_marker": "34",
+          "source_marker": "34",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3464,
+          "row_id": 11668,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01666",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 565,
-          "paragraph_index": 1,
-          "char_start": 148,
-          "char_end": 156,
-          "source_marker": "$ ^{7} $",
-          "normalized_marker": "7",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it.",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00096",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "35",
+          "normalized_marker": "35",
+          "occurrence": 1,
+          "source_text": "9. G;8 *C<E<G ;4F J<G;7E4JA 4A7 G;8 8L8F 4E8 FG4E<A: 4F <9 BA8 J8E8 FGHC<7 8I8A 4 F4:8?L C;LF<6<4A J<?? 9<A7 AB GE84G@8AGW ʞȹʇȫȰ»ĥȞɴ ͅɺ̡ ʄƸ SS<A G;8 E8FG B9 G;8 F86G<BA 0H F<@C?L 6BC<87 G;8 $1;, =8$1<$2 UF ǔɧˑ 8KC?4A4G<BAF B9 @47A8FF 6<G8 9EB@ G;8 C;BGB?<G;B:E4C;<6 E8CEB7H6G<BA B9 J;4G @4L 58 <GF FB?8 FHEI<I<A: 6BCL 4 !4C4A8F8 87<G<BA >8CG 4G G;8 <8G #<5E4ELC̵Řü <A !4C4A ) / F<@C?<9<87 6;4E46G8E 87<G<BA 54F87 BA G;8 F4@8 6BCL 4CC84EF <A . #<>8 .4A: #HA 1;4B J4F 9EB@ <K<Ĩǔ ABEG; B9 %<A:5B 5HG ;<F B99<6<4? 64E88E J4F ?8FF FH668FF9H? G;4A .4A:UF F<A68 ;8 J4F 64F;<8E87 <A G;8 84E?L F 9BE 8<G;8E 6BEEHCG<BA BE <AFH5BE7<A4G<BA A 84E?L 1;4B ;47 588A CEB@BG87 9EB@ @4:<FGE4G8 B9 04BM;BH¿î <A 0HAA4A GB 4 ;<:;8E CBFG <A H4A:7BA: ,1* 8=21* ƠÌ 6+,/8 -8 $1 C 1;8A:78 G; @BAG; -,$6+(1 ȍȎ 74L",
+          "page_no": 212,
+          "display_marker": "35",
+          "source_marker": "35",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3465,
+          "row_id": 11669,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01667",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 565,
-          "paragraph_index": 1,
-          "char_start": 375,
-          "char_end": 383,
-          "source_marker": "$ ^{8} $",
-          "normalized_marker": "8",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it.",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00097",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "36",
+          "normalized_marker": "36",
+          "occurrence": 1,
+          "source_text": "4B 4AG<6<C4G87 *HA 0<>H<UFÅ · 4A7 1;4A: !<85<AUF 6B@CE8;8AF<I84E:H@8AGF GB G;8 F4@8 89986G +;4G 6?4<@ ;47 4CC84E87 <A G;8 F86G<BA BA @H6HF B9 G;8 $1;, ;,1)$ 8<, -,1*<$2 ;̡ɓˑ 5 4 ) / . ,A78E G;8 F4@8 8AGEL 1;4B 6E<G<6<M87G;8 <784 G;4G 4?? ?H@CF 4A7 FJ8??<A:FJ8 E8 64HF87 5L @H6HF 4A7 G;8 <784 G;4G @H6HF 6<E6H?4G87G;EBH:;BHG G;8 5B7L 4?BA: J<G;(< ?? G;E88 FG4G8@8AGF 9<:HE87 CEB@<A8AG?L <A G;8 @H6HF F86G<BAB9 G;8 $1;, ;,1)$",
+          "page_no": 213,
+          "display_marker": "36",
+          "source_marker": "36",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3468,
+          "row_id": 11670,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01670",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 567,
-          "paragraph_index": 1,
-          "char_start": 413,
-          "char_end": 422,
-          "source_marker": "$ ^{11} $",
-          "normalized_marker": "11",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00098",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "37",
+          "normalized_marker": "37",
+          "occurrence": 1,
+          "source_text": "157. Ruyi jingyao 儒醫精要 22a-b (RBXC: 258; HWHG 12: 473).",
+          "page_no": 214,
+          "display_marker": "37",
+          "source_marker": "37",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3469,
+          "row_id": 11671,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01671",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 567,
-          "paragraph_index": 1,
-          "char_start": 485,
-          "char_end": 494,
-          "source_marker": "$ ^{12} $",
-          "normalized_marker": "12",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00099",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "38",
+          "normalized_marker": "38",
+          "occurrence": 1,
+          "source_text": "160. Ruyi jingyao 儒醫精要 27b, “Lun Erchen tang” 論二陳湯, RBXC: 261; HWHG 12: 477-8.",
+          "page_no": 214,
+          "display_marker": "38",
+          "source_marker": "38",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3470,
+          "row_id": 11672,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01672",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 567,
-          "paragraph_index": 2,
-          "char_start": 196,
-          "char_end": 205,
-          "source_marker": "$ ^{13} $",
-          "normalized_marker": "13",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \"abandoned books for commerce\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documented, let me recount at some length what happened to him and what compelled him to seek the help of Qing officials to justify himself. On his way south to Sichuan to sell pottery (販賣瓷器) in 1751, his boat had capsized and he had been greatly frightened. While traveling back home on the Han river, he had lost his belongings and his luggage (將衣物行李遺失). This loss was either the first sign of his madness or the event that triggered it. When Bai returned, his father confined him at home because he thought his son was mad.",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00100",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "39",
+          "normalized_marker": "39",
+          "occurrence": 1,
+          "source_text": "161. Ruyi jingyao 儒醫精要 28a; RBXC: 261; HWHG 12: 478.",
+          "page_no": 214,
+          "display_marker": "39",
+          "source_marker": "39",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3471,
+          "row_id": 11673,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01673",
-          "chapter_id": "toc-manual-2-14-14-distress-and-power-be",
-          "page_no": 569,
-          "paragraph_index": 0,
-          "char_start": 179,
-          "char_end": 181,
-          "source_marker": "¹⁴",
-          "normalized_marker": "14",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00101",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0035-toc-ch-005-danxisaid",
+          "marker": "40",
+          "normalized_marker": "40",
+          "occurrence": 1,
+          "source_text": "5. 5 ) / . +;8 C;E4F8 V?8 GE4I4<? 7H G8KG8W 6B@8F 9EB@ B@<A<6> #4 4CE4 A",
+          "page_no": 215,
+          "display_marker": "40",
+          "source_marker": "40",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         }
       ],
-      "rebind_candidates": [
-        {
-          "link_id": "link-00544",
-          "note_item_id": "fn-00536",
-          "current_anchor_id": "anchor-01665",
-          "marker": "6",
-          "note_page_no": 564,
-          "anchor_page_no": 565,
-          "current_anchor_marker": "6",
-          "note_excerpt": "6 A3by Fcting0Xhandong0 overnor Gai0^hongshanƾʋÜ and Xhandong0Jducation0commissioner \\ie0WongshengɑƎƯ 2V[I B0?> 36 S ^ªb¬ S XzTq[ memo¡ial da£ed `a p¤g] `fbe WQ{`]f]eX] rom0Iing~s0confession02V[IB 36",
-          "anchor_excerpt": "were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \"the fool who speaks his dream\" 痴人說夢). $ ^{5} $ This was the case of \"Great King of Shanxi\" Lin Zhigong 林志功 (1762): \"everybody says I am a fool and nobody believes me\" (人人說我是痴子都不信我). $ ^{6} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00548",
-          "note_item_id": "fn-00540",
-          "current_anchor_id": "synthetic-footnote-00271",
-          "marker": "3",
-          "note_page_no": 572,
-          "anchor_page_no": 572,
-          "current_anchor_marker": "3",
-          "note_excerpt": "3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfilling6 Iavid0Twnby 2 AA>3 has arguedthat0some0rebellions0started0only0after0the0statehad bann ed organizationsIRU IHDU0W H\\0ZRX G0UHEH 6 or0explanations0of0why0the0Ving0state0saw0it0as0its0duty0to Prectify0people~s0heartsQ in ordinary0times0and Pawe0people~s0heartsQ in0cases0of0sedition40see0 =6>6",
-          "anchor_excerpt": "3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfilling6 Iavid0Twnby 2 AA>3 has arguedthat0some0rebellions0started0only0after0the0statehad bann ed organizationsIRU IHDU0W H\\0ZRX G0UHEH 6 or0explanations0of0why0the0Ving0state0saw0it0as0its0duty0to Prectify0people~s0heartsQ in ordinary0times0and Pawe0people~s0heartsQ in0cases0of0sedition40see0 =6>6",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00549",
-          "note_item_id": "fn-00541",
-          "current_anchor_id": "synthetic-footnote-00272",
-          "marker": "*",
-          "note_page_no": 579,
-          "anchor_page_no": 579,
-          "current_anchor_marker": "*",
-          "note_excerpt": "0. 9C66') H2D\u0001E96\u0001P<:5Q\u0001\u0003Ç \u0004\u0005\u0001D6G6?') H2D\u0001E96P49:=5Q \u0003M \u0004\u0007\u0001*96\u0001562E9\u0001@7\u0001E96J@F?86DE\u0001@?6H2D\u0001E96\u0001562E9\u0001@7 \":?OD\u0001@H?\u0001D@?\u0007\u0001*96\u0001D6G6?\u0006J62C\u0006@=5\u0001H2D\u0001E96\u000149:=5\u0001H9@\u0001D6CG65\u00012D\u0001>65:F>\u000136EH66?\u0001\":?\u0001/9:8@?8\u00012?5\u0001 F2?5:\u0001\u0003D66 36=@H\u0004\u0007 \":?OD\u00012??@E2E:@?\u00014=2:>65\u0001E92E\u0001E96J\u00013@E9\u00015:65\u0001:?\u0001 \u0010 \u0001\u0003Ƽ é \u0004\u0007",
-          "anchor_excerpt": "0. 9C66') H2D\u0001E96\u0001P<:5Q\u0001\u0003Ç \u0004\u0005\u0001D6G6?') H2D\u0001E96P49:=5Q \u0003M \u0004\u0007\u0001*96\u0001562E9\u0001@7\u0001E96J@F?86DE\u0001@?6H2D\u0001E96\u0001562E9\u0001@7 \":?OD\u0001@H?\u0001D@?\u0007\u0001*96\u0001D6G6?\u0006J62C\u0006@=5\u0001H2D\u0001E96\u000149:=5\u0001H9@\u0001D6CG65\u00012D\u0001>65:F>\u000136EH66?\u0001\":?\u0001/9:8@?8\u00012?5\u0001 F2?5:\u0001\u0003D66 36=@H\u0004\u0007 \":?OD\u00012??@E2E:@?\u00014=2:>65\u0001E92E\u0001E96J\u00013@E9\u00015:65\u0001:?\u0001 \u0010 \u0001\u0003Ƽ é \u0004\u0007",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-00550",
-          "note_item_id": "fn-00542",
-          "current_anchor_id": "anchor-01693",
-          "marker": "2",
-          "note_page_no": 579,
-          "anchor_page_no": 578,
-          "current_anchor_marker": "2",
-          "note_excerpt": "2. \u0017\u000192=36C5\u00013FC:65\u0001724:?8\u0001E96\u0001>@F?E2:?\u0013\u0001 F2?OD\u00014=@F5D\u00012C6\u0001=@?8Üd Ęʒʟʎ ?2>6\u0001\":?\u00014=2:>65\u0001D9@F=5\u000136\u0001C625\u00012D P,6DE\u0001C:G6CQ \u0003ȶŽ \u0004\u0007\u0001 \u00012>\u0001?@E\u000146CE2:?\u0001H9J P,6DE\u0001(:G6CQ C676CC65\u0001E@\u0001\":?OD A=246\u0001@7\u0001@C:8:?\u0005\u0001H9:49\u0001\":?OD\u0001E6IED\u00012=D@\u000156D:8?2E65\u00012D\u0001,6DE\u0001#@F?E2:?\u0001\u0003D66\u0001?@E6\u0001 \u0012 23@G6\u0004\u0007\u0017=E9@F89\u0001E96C6\u0001:D\u00012?#$( ! )' 2E\u00016G6CJ\u0001D6DD:@?",
-          "anchor_excerpt": "逐句註解出來), as one would a canonical book or a sacred text. Lin worked on the text of this revelation on many occasions, rewriting and re-annotating it at least three times. $ ^{32} $ Here is a translation of the main text, which was written in rhymed seven-character stanzas, with explanations of how Lin thought the prophecy was about himself:",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00551",
-          "note_item_id": "fn-00543",
-          "current_anchor_id": "anchor-01714",
-          "marker": "3",
-          "note_page_no": 582,
-          "anchor_page_no": 581,
-          "current_anchor_marker": "3",
-          "note_excerpt": "claimsthatby @ 0they0had0become PubiquitousQ even in0\\injiang cities0on0the0northwestern0reaches0of0the0Ving0empire6 Fround0 ? =40the0Ving0government0also0started0to0integrate0 uandi0into0the0official0state0cult02see0Iuara0 A@@36 =@ F WRQJ] Ǧò was0the0young0servant0of0a0deity0who0could0channel0this0deity~s0words6 or0more0on0their0roles in0local0religion40with0a0focus0on0exorcistic0ceremonies0in0the0Xong0dynasty4 see0Iavis0 B0@?5 ? 6 =A Haoping0was0a0mountain0village0west0of0Hhangshan on0the0border0of0^hejiang0and0 iangxi6",
-          "anchor_excerpt": "The flames and oil fire kept coming at me $ ^{53} $ 炎 \" 油火不離身",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00552",
-          "note_item_id": "fn-00544",
-          "current_anchor_id": "anchor-01717",
-          "marker": "6",
-          "note_page_no": 584,
-          "anchor_page_no": 582,
-          "current_anchor_marker": "6",
-          "note_excerpt": "> 0suggested0in 6 thatcommon0people~s depositions0aboutthe0words0or0acts0ofmad0people0must0be understood0in0the0context0of0the0case0under0investigation60Yhe0fact0that0Qin~s0case partly0concerned0his fantasies about officialdomprodded investigatorsto record0pastbehavior0that0appeared0to0adumbrate the0case0at0hand6",
-          "anchor_excerpt": "In the first month of yimao my relatives believed words $ ^{56} $ 乙卯正月親信言",
-          "current_anchor_synthetic": false
-        }
-      ]
+      "unmatched_anchors": [],
+      "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 564,
-        "file_idx": 563,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "### 14.1 Grievances and reproaches As we have seen, some individuals in Chinese villages were identified as madmen (瘋子) or fools (痴子). More than a simple act of naming, this identification was a diagnosis sustained by the community—close relatives, neighbors, classmates, etc., who probably thought they were simply stating the obvious. \"The local community called [Yang Huaizhen] a madman and stopped interacting with him\" (鄉黨呼為瘋子 不與往來). $ ^{2} $ Too much is missing from these people's local worlds to understand the difficulties they faced, the way people related to them daily, and the way their treatment differed from the way other poor people were treated. But some themes recur. The commonest grievance I found in mad people's statements was a disagreement with this informal but persistent identification as mad or idiotic. Some people emphasized that this diagnosis came from others. Deng Tingmei 鄧廷梅 (1736): \"My son had poxes and died. At once I became so angry that my mind became confused. My ears also became deaf. They said I had gone mad.\" $ ^{3} $ (出痘死了 一時把心氣成昏迷 耳朵也氣韜了 他們說我瘋了) Ding Wenbin 丁文彬 (1753), whose trial I discuss in 15.4, claimed to have been designated the Son of Heaven by the descendant of Confucius on orders of Shangdi the Lord on High, a title Ding's relatives did not recognize: \"[My older brother] is an unreasonable person; he often calls me a fool\" (他是不明道理的人 常罵我 ...",
-        "byte_size": 133140,
-        "sha256": "e7a2c77cbe306245b122b56c6c7e02be7621f911778a2746bcedd937bf68e568"
-      },
-      {
-        "page_no": 565,
-        "file_idx": 564,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "were often people who harbored fantasies that their abilities or positions would never allow them to fulfill (as in the expression \"the fool who speaks his dream\" 痴人說夢). $ ^{5} $ This was the case of \"Great King of Shanxi\" Lin Zhigong 林志功 (1762): \"everybody says I am a fool and nobody believes me\" (人人說我是痴子都不信我). $ ^{6} $ The fact that protests did not change their neighbors' and relatives' opinions probably vindicated or intensified some people's sense of injustice. $ ^{7} $ Lin Shiyuan's 林時元 statement was vehement: \"In the third month of last year [1762], I suffered from some dizziness. They all said I was crazy and they invited a Daoist master to treat me. I am really not crazy at all!\" $ ^{8} $ (我舊年三月有些頭暈的病 祇他們都說我瘋癲 叫道士替我醫治 我實在並不瘋) These men were caught in a language game they resented but could not escape, because the words they uttered to dispute their diagnosis only worked to confirm it. People whom others considered mad often objected to the way their relatives beat them, ignored them, wronged them, locked them up, and (maybe above all else) called them what they insisted they were not: mad. Any rough treatment received under the pretext that they were insane probably intensified their feelings of injustice. Lin Zhigong wrote in a poem that \"turning human relations upside-down, the younger brother beats his elder\" (顛倒人倫弟打兄). He Cheng'ao's 何成敖 words (1817), recorded after ...",
-        "byte_size": 145621,
-        "sha256": "2f65e5013dbaa4714cc7fab01f683e0ff2a03fdb749c40f3725dbad955d7fe1f"
-      },
-      {
-        "page_no": 567,
-        "file_idx": 566,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Many people who were identified as mad constructed a superlative persona that made them glorious and excellent. Either before they were socially diagnosed as crazy or as a reaction to this label, they spoke of their dreams and visions and often sought official or imperial recognition for their mission or their virtue. Here I use a few cases to illustrate what a “crazy” persona could be like. Yao Zeng 姚增 came to Beijing from Zhejiang in search of the emperor. He “claimed that he could know the heavenly periods and the earthly principles; his words were empty and boastful” (自稱能知天時地理 言語虛誇). $ ^{10} $ In remembrance of his father, Liu Yuhou 劉裕後 wrote a book he called Dajiang pangshu 大江滂書 [Book of the torrential great river?], in which he compared his father to the sages, to immortals, and to Buddhas. $ ^{11} $ Lin Shiyuan called himself “the prime-teacher worthy” (第一師賢). $ ^{12} $ Bai Shengqi 白升奇 was born in Xianning 咸寧 (modern Xi'an, Shaanxi) in 1724 and had acquired some literacy when he was young, but soon \"abandoned books for commerce\" (棄書貿易), said the official report. $ ^{13} $ Since his case is better documented, let me recount at some length what happened to him and what compelled him to seek the help of Qing officials to justify himself. On his way south to Sichuan to sell pottery (販賣瓷器) in 1751, his boat had capsized and he had been greatly frightened. While traveling back ...",
-        "byte_size": 141118,
-        "sha256": "c5a7c2bf1708c31e17fca087476a78e3f154f0403fa3c05de3891eceeebadd96"
-      },
-      {
-        "page_no": 569,
-        "file_idx": 568,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "The officials in charge first found Yang Xuan, the person to whom the slips were originally destined, but Yang did not know anyone called Li Ⅶ. He only knew two people called Bai:¹⁴ the head of a “community compact” (郷約) and “Bai the madman” (Bai fēngzi 白瘋子), who Yang claimed knew how to write. Governor Zhong Yin 鍾音 sent deputies to arrest Bai and search his house, where they found eleven bamboo strips and five slips of paper with the same handwriting as on the slips that had been delivered to the treasurer’s office. Bai Shengqi was then taken to the Governor’s complex, where, as was customary in cases of possible sedition, he was interrogated by the three highest officials in the province—the governor, the provincial judge, and the provincial treasurer.¹⁵ It turned out that Bai's motives for presenting the slips were far from those of a rebel. Asked what his intentions were (究屬何心), he answered as follows: I lost my clothes and things in the Han River and no one pursued [this matter]. I have also been locked up for many years, which has been ghastly and difficult to bear. I wrote the names of people I know on bamboo strips and paper slips, and filled out the official posts, hoping to make them look for the lost objects for me. Because I do not see many people from year to year, I had [the slips] sent to the provincial treasurer's yamen, so that he could help me search the thing ...",
-        "byte_size": 138271,
-        "sha256": "44e38289a23c3d85895cef9e8d31d91207e973931c334a56199cd5650d19e0a8"
-      },
-      {
-        "page_no": 571,
-        "file_idx": 570,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "to emperorship or if the self-aggrandizing “fifth year of Liqi” only sounded comforting in distressing times. $ ^{16} $ Zhang Tingyong 張廷用 also managed to sound politically subversive even as he constructed his \"delirium\" from daily objects and local names of people and organizations. $ ^{17} $ Of course his words were also designed to sound politically meaningful. As a youth, \"Zhang Tingyong had participated in a [semi-annual local] examination to become a licentiate but had not been admitted. $ ^{18} $ This turned into madness/idiocy: he would constantly chant the Buddha's name; [the illness was] intermittent\" (張廷用曾考試式童未能進取 染成瘋癡隨口念佛 時發時止). In 1748, having shaved his hair and queue (自剃髮辦), he went to Wutai Mountain to become a monk, but the bonzes in charge (當處僧人) made him return home. In 1756, when Zhang's illness became more serious, his family declared him to the county office through the head of the local community compact (經鄉約報官). The county issued chains and locks and delivered Zhang to his relatives, who were instructed to lock him up and keep watch over him (發給鎖封 交伊親屬鎖錮看守). $ ^{19} $ In 1760, he twisted his locks open and managed to flee to the city (扭鎖脫身 奔入城市), where he was captured by the magistrate's men. He was sent back home with new locks (仍發鎖封看守). The county government had files on both events (各有案). In 1767, while everybody was working in the fields, Zhang brok ...",
-        "byte_size": 138322,
-        "sha256": "11927cc67ca707d6253532ad07fcc5abd53f93771d4de03f6264720ce3aca1f7"
-      },
-      {
-        "page_no": 572,
-        "file_idx": 571,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "manuscript notes that he may have written over the years or along the road (the report did not tell). He was caught again. As the magistrate in charge of his case reported: The text is mediocre and pedestrian, preposterous and confused, constantly redundant and not forming full sentences. But among the words we find \"White-rain dragon-king association,\" \"Society of the Ten Buddhas,\" and the names of people in those associations, such as \"Liu Guangrong,\" \"Association Leader Cao,\" and \"Association Leader Wang.\" I am very afraid that [these names] hide something else, such as [sutra?] reading associations. 閱其鄙俚誕妄迷係重複雷同 不成語句 惟字內載有白雨龍王會、十佛會及會中人劉光榮 曹會長 王會長名 甚恐有念□會別情 Symbolically loaded language made officials apprehensive. Zhang Tingyong's slips seemed to mention the kind of religious association that was often banned under the label of “devious cult” (邪教). Such religious groups were common in Qing China, but the state feared they might develop into large-scale organizations that could rival the state in their sway over “people’s hearts.” $ ^{20} $ The officials who interrogated the local leaders and the people Zhang Tingyong named in his notes soon found that there was no rebellion in the making. The “Society of the Ten Buddhas” was the name of a long-banned association that was named after ten days representing the birthdays of ten gods and Buddhas (神佛誕日 十項相傳). The report specified ...",
-        "byte_size": 143075,
-        "sha256": "882b68d428bb840fdbc52020583ee221e878c1c95a737d2ba21385f9c81989a7"
-      },
-      {
-        "page_no": 573,
-        "file_idx": 572,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "who sought his services and chose auspicious days for marriages and funerals (代人酹神祈禱 并選擇婚葬日期), but practiced no occult arts. The lofty-sounding “dragon-king association” turned out to be an agricultural cult and “white rain” the name local peasants gave to hailstones (冰雹). From the fourth to the eighth lunar month, the villagers went to the neighboring temple of the dragon spirit.... to burn incense and paper to [?] and pray (村農至附近龍神廟內□帶香褚靼流祈禱) that the hail would not harm the crops: “there are in fact no such things as gatherings of crowds to read sutras or the establishment of devious cults” (實無聚眾念經、創立邪教情事). The practice of presenting incense at the local dragon-god temple was in fact consistent with what the Code called “charitable societies that conduct prayers in the spring and fall” (在本村神龍廟靼月進香 與律載春秋義社以行祈报者相同 似無庸置議). $ ^{21} $ The Governor of Shanxi clarified small details: under interrogation in Zhili soon after he was caught, Zhang Tingyong had mentioned the existence of “one effortless knife kept by xianzi [i.e., a sage]” (顺刀一把是賢子收著). The “knife kept by the sage” was not the fantastic weapon or religious object that officials feared it might be. The Shanxi Governor, who had a copy of Zhang’s statement, discovered that Zhang’s house was near a mountain and that the family owned an old knife for protection against wild animals, which was kept in the house of “this crimin ...",
-        "byte_size": 138785,
-        "sha256": "036b336bd60e9cbea9855587293d98e4cbe6fb271b4cee325ba94ce4a6fa7547"
-      },
-      {
-        "page_no": 574,
-        "file_idx": 573,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Because Zhang had not impinged on the sanctity of imperial symbols, he was not physically punished. As the 1767 report concluded, “it has been established that this criminal Zhang Tingyong is indeed mad; according to the [1762] sub-statute [on those who have committed a killing because of madness], the Yingzhou magistrate shall be ordered to confine him and take the proper precautions, so that [Zhang] will not be allowed to break out and stir up trouble again” (该犯张廷用實屬瘋癲 應飭令應州知州照例嚴加鎖禁防範 毋使再以出境滋事). We know of Bai Shengqi and Zhang Tingyong through third-person reports on their words and acts. We now turn to someone who left his own writings, and whose view on life we therefore know much more about than Bai’s and Zhang’s. ### 14.3 “Idle steed” Lin Zhigong and his writings Lin Zhigong's 林志功 case is one of the most interesting to have survived in the records. $ ^{22} $ Lin was born in 1708 in Changshan 常山 county in Quzhou 衢州, the westernmost prefecture of Zhejiang, near the border of Jiangxi province. He became mad with grief after his wife and one of his two sons died of disease early in 1735. His relatives tried to have him exorcized, but without success. A new marriage was nonetheless arranged between Lin and a young bride from Yushan 玉山, a county west of Changshan in Jiangxi. At an unspecified time, Lin's relatives declared him to the county government and confined him at home, ...",
-        "byte_size": 143452,
-        "sha256": "769d5eedd778efe1c64d967a85f64dd709d1812ff79c1fc4f2c9b6d1137b9ce6"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-manual-2-14-14-distress-and-power-be:toc-manual-2-14-14-distress-and-power-be:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 8,
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0035-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00536\",\n    \"anchor_id\": \"anchor-01664\",\n    \"confidence\": 0.95,\n    \"reason\": \"Anchor marker '6' on page 565 (Image 2) matches note marker '6' in the footnote area of the same page. The rebind candidate correctly identifies this pair.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00540\",\n    \"anchor_id\": \"anchor-01665\",\n    \"confidence\": 0.95,\n    \"reason\": \"Anchor marker '3' is visible in the text on page 564 (Image 1) after '...gone mad.'. Footnote 3 is visible at the bottom of page 564. The current binding to a synthetic anchor on page 572 is incorrect; it should bind to the explicit anchor on page 564.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Footnote markers 4, 7, 8, 11, 12, 13, and 14 are present in the text images, but the corresponding footnote texts are not visible in the provided screenshots (which only show the bottom of pages 564, 565, 567, 569, 571, 572, 573, 574). Cannot synthesize or match without seeing the note content.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2435,
+    "output_tokens": 48,
+    "total_tokens": 2483,
+    "estimated_input_tokens": 1916,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"confidence\": 0.2,\n        \"reason\": \"无法确定注释标记在正文中的位置，信息不明确。\"\n    }\n]\n```",
   "response_parsed": [
-    {
-      "action": "match",
-      "note_item_id": "fn-00536",
-      "anchor_id": "anchor-01664",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Anchor marker '6' on page 565 (Image 2) matches note marker '6' in the footnote area of the same page. The rebind candidate correctly identifies this pair."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00540",
-      "anchor_id": "anchor-01665",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "Anchor marker '3' is visible in the text on page 564 (Image 1) after '...gone mad.'. Footnote 3 is visible at the bottom of page 564. The current binding to a synthetic anchor on page 572 is incorrect; it should bind to the explicit anchor on page 564."
-    },
     {
       "action": "needs_review",
       "note_item_id": "",
@@ -343,32 +201,12 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.0,
-      "reason": "Footnote markers 4, 7, 8, 11, 12, 13, and 14 are present in the text images, but the corresponding footnote texts are not visible in the provided screenshots (which only show the bottom of pages 564, 565, 567, 569, 571, 572, 573, 574). Cannot synthesize or match without seeing the note content."
+      "confidence": 0.2,
+      "reason": "无法确定注释标记在正文中的位置，信息不明确。"
     }
   ],
   "derived_truth": {
     "parsed_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00536",
-        "anchor_id": "anchor-01664",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Anchor marker '6' on page 565 (Image 2) matches note marker '6' in the footnote area of the same page. The rebind candidate correctly identifies this pair."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00540",
-        "anchor_id": "anchor-01665",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "Anchor marker '3' is visible in the text on page 564 (Image 1) after '...gone mad.'. Footnote 3 is visible at the bottom of page 564. The current binding to a synthetic anchor on page 572 is incorrect; it should bind to the explicit anchor on page 564."
-      },
       {
         "action": "needs_review",
         "note_item_id": "",
@@ -376,18 +214,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.0,
-        "reason": "Footnote markers 4, 7, 8, 11, 12, 13, and 14 are present in the text images, but the corresponding footnote texts are not visible in the provided screenshots (which only show the bottom of pages 564, 565, 567, 569, 571, 572, 573, 574). Cannot synthesize or match without seeing the note content."
+        "confidence": 0.2,
+        "reason": "无法确定注释标记在正文中的位置，信息不明确。"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 13242,
-    "completion_tokens": 373,
-    "total_tokens": 13615,
+    "prompt_tokens": 2435,
+    "completion_tokens": 48,
+    "total_tokens": 2483,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 9476
+    "duration_ms": 1705
   }
 }

@@ -1,0 +1,117 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-2unknowabilityandtheconc:nr-fn-ch-0008-toc-ch-003-2unknowabilityandtheconc:footnote",
+      "chapter_title": "2 Unknowability and the Concept of the Brain",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        67,
+        67
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00017",
+          "note_item_id": "fn-00017",
+          "anchor_id": "anchor-00024",
+          "marker": "5",
+          "note_excerpt": "Metzinger ( 2003 , pp. 177, 294) also recognizes our inability to subjectively experience our own brain as brain.",
+          "anchor_excerpt": "I define ALB as the epistemic inability to subjectively experience and thus to directly access one's brain as brain from FPP. $ ^{5} $ For example, we have no subjective experience of brain pain along the lines \"My brain hurts\" or \"My brain aches.\" Even in the case of migraine we speak of headache, rather than of \"brain ache.\" This inability to subjectively experience one's brain as such has been nicely described by Todd Feinberg: \"Now here comes the tricky part. What is it about the"
+        },
+        {
+          "link_id": "link-00018",
+          "note_item_id": "fn-00018",
+          "anchor_id": "anchor-00025",
+          "marker": "6",
+          "note_excerpt": "In the following account I distinguish between brain and body, although I am of course well aware that the",
+          "anchor_excerpt": "brain, what neurological factor or property allows the brain to create subjective neural activities? There is a simple fact about the brain that is often neglected that provides the answer to this question. The conscious brain has no sensation of itself. It has been known since the time of Aristotle that the brain is insensate. For instance, sticking a pin in the cortex itself evokes no pain that is referable to the brain itself. The brain has no sensory apparatus directed towards itself. As Globus outs it, the brain does not ‘represent in any way its own structure to the subject.’ There is no way that the subject can become aware of his own neurons ‘from the inside.’ They can be known objectively ‘from the outside.’ We have already seen that there is no ‘inner eye,’ no inner homunculus watching the brain itself, perceiving its own neurons, no ‘brain-skin’ which feels the neurosurgeon’s knife. When I test a patient’s pinprick sensitivity by applying a pin to the hand, and I ask them to localize where on the body the sensation is, no one has ever pointed to their head. Conscious neural activity refers to things, not to the brain itself. Conscious neural states are about things, not about the neurons themselves” (Feinberg, 2001, p. 147). $ ^{6} $"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 1906,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00016",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-2unknowabilityandtheconc",
+          "region_id": "nr-fn-ch-0008-toc-ch-003-2unknowabilityandtheconc",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "At this point I presuppose a broad definition of FPP that includes both subjective experience and introspection. Some authors (see Northoff 2004a ,b for details) distinguish the second-person perspective people are not conscious of all the processes going on in their heads. . . . While you may be aware",
+          "page_no": 67,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00017",
+          "note_item_id": "fn-00017",
+          "current_anchor_id": "anchor-00024",
+          "marker": "5",
+          "note_page_no": 68,
+          "anchor_page_no": 67,
+          "current_anchor_marker": "5",
+          "note_excerpt": "Metzinger ( 2003 , pp. 177, 294) also recognizes our inability to subjectively experience our own brain as brain.",
+          "anchor_excerpt": "I define ALB as the epistemic inability to subjectively experience and thus to directly access one's brain as brain from FPP. $ ^{5} $ For example, we have no subjective experience of brain pain along the lines \"My brain hurts\" or \"My brain aches.\" Even in the case of migraine we speak of headache, rather than of \"brain ache.\" This inability to subjectively experience one's brain as such has been nicely described by Todd Feinberg: \"Now here comes the tricky part. What is it about the",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-2unknowabilityandtheconc:nr-fn-ch-0008-toc-ch-003-2unknowabilityandtheconc:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-003-2unknowabilityandtheconc:nr-fn-ch-0008-toc-ch-003-2unknowabilityandtheconc:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5514,
+    "estimated_prompt_tokens": 1865,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1865,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

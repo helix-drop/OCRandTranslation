@@ -1,0 +1,104 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-unmédecinauchevetducorps:nr-fn-ch-0012-toc-ch-003-unmédecinauchevetducorps:footnote",
+      "chapter_title": "Un médecin au chevet du corps de l'État",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        70,
+        70
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00078",
+          "note_item_id": "fn-00078",
+          "anchor_id": "anchor-00114",
+          "marker": "40",
+          "note_excerpt": "G. W. F. Hegel, Encyclopédie des sciences philosophiques, t. III, La Philosophie de l'esprit, § 408, trad. et annoté par Bernard Bourgeois, Vrin, 1992, p. 213. Dans le même passage, Hegel rend hommage à l'inventeur du traitement moral en ces termes: « Ce traitement humain, c'est-à-dire tout aussi bienveillant que rationnel — Pinel mérite la plus haute reconnaissance pour les mérites qu'il s'est acquis à son sujet —, présuppose le malade comme un être rationnel et à la le point d'appui ferme par lequel il peut le saisir suivant ce côté, de même que, suivant la corporéité, il l'a dans la vitalité, qui, comme telle, contient encore en elle de la santé. » Michel Foucault, qui rapporte cette phrase dans son Histoire de la folie à l'âge classique (op. cit., p. 501), a supprimé la phrase entre tirets. Voir également Gladys Swain, Dialogue avec l'insensé, Gallimard, 1994, p. 1-28.",
+          "anchor_excerpt": "Affection la plupart du temps momentanée, curable, ayant son siège dans les passions, la folie, susceptible de s'introduire chez tout homme sain, n'est plus, sous la plume nuancée de Pinel, cette fatalité ou cette malédiction qui corromprait intégralement l'esprit. En ce sens, Pinel marque ce basculement capital d'une conception kantienne de la folie comme Autre de la raison à une vision hégélienne de la folie, considérée comme un « dérangement de l'esprit », une simple « contradiction dans la raison encore présente $ ^{40} $ » — à l'image de la maladie physique entrant en contradiction avec la santé"
+        },
+        {
+          "link_id": "link-00079",
+          "note_item_id": "fn-00079",
+          "anchor_id": "anchor-00115",
+          "marker": "41",
+          "note_excerpt": "Philippe Pinel, « Observations sur la manie pour servir l'Histoire naturelle de l'homme », cité par Jacques Postel, Genèse de la psychiatrie. Les premiers écrits de Philippe Pinel, Institut Synthélabo / Les Empêcheurs de penser en rond, 1998, p. 235. Jacques Postel a été le premier à publier l'intégralité de ce document, avec ses variantes. Je ne me servirai que de cette édition.",
+          "anchor_excerpt": "L'idée de manie doit être loin de porter avec elle celle d'un renversement total des facultés de l'entendement; le désordre au contraire n'attaque le plus souvent qu'une faculté partielle comme la perception seule des idées, le jugement, le raisonnement, l'imagination, la mémoire ou la sensibilité morale. Un fou qui est mort cette année et qui se croyait Louis XVI était un exemple vivant de la nonconformité des idées avec les objets qui les faisaient naître, puisqu'il voyait dans toutes les personnes qui entraient dans l'hospice autant de Pages ou des Gardes du corps qui venaient recevoir des ordres $ ^{41} $."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11611,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00081",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+          "region_id": "nr-fn-ch-0012-toc-ch-003-unmédecinauchevetducorps",
+          "marker": "43",
+          "normalized_marker": "43",
+          "occurrence": 1,
+          "source_text": "Voir Jacques Guilhaumou, «La terreur à l'ordre du jour (juillet 1793-mars 1794)», Dictionnaire des usages socio-politiques (1770-1815), fascicule 2, Champion, 1987, dont on trouvera une version augmentée à cette adresse: http://revolution-francaise.net/2007/01/06/94-la-terreur-a-lordre-du-jour-un-parcours-en-revolution-juillet-1793-mars-1794.",
+          "page_no": 70,
+          "display_marker": "43",
+          "source_marker": "43",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-unmédecinauchevetducorps:nr-fn-ch-0012-toc-ch-003-unmédecinauchevetducorps:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-003-unmédecinauchevetducorps:nr-fn-ch-0012-toc-ch-003-unmédecinauchevetducorps:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5089,
+    "estimated_prompt_tokens": 1744,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1744,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,104 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-019-lesbégaiementsdelhistoir:nr-fn-ch-0060-toc-ch-019-lesbégaiementsdelhistoir:footnote",
+      "chapter_title": "Les bégaiements de l’Histoire",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        336,
+        336
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00441",
+          "note_item_id": "fn-00441",
+          "anchor_id": "anchor-00544",
+          "marker": "52",
+          "note_excerpt": "Benedict-Augustin Morel, «La dégénérescence du peuple français, son caractère pathologique, ses symptômes et ses causes. Contribution de médecine mentale à l'histoire médicale des peuples», in Annales médico-psychologiques, 5e série, t. VI, 1871, p. 291.",
+          "anchor_excerpt": "Distinctes sans être séparées, la guerre et la Commune sont traitées pour la première fois dès le second semestre 1871 par Benedict-Augustin Morel, qui déclare faire « œuvre de patriotisme $ ^{52} $ » en montant à l’assaut contre un livre du docteur Carl Starck, dont le titre résume la visée : La Dégénérescence du peuple français, son caractère pathologique, ses symptômes et ses causes. Contribution de médecine mentale à l’histoire médicale des peuples. Selon Starck, les brutalités et les horreurs de la guerre seraient à mettre sur le compte d’un peuple abâtardi, décadent et corrompu, dont l’orgueil natif (et légendaire) est devenu « une monomanie, une idée fixe, un vrai délire $ ^{53} $ ... ». Toujours persuadée d’être à la tête de la civilisation, la nation française ressemble à un aliéné atteint de « folie raisonnante », un « paralytique général couché sur son grabat annonçant qu’il est plein de force et de santé $ ^{54} $ ». Comble des humiliations, le docteur Starck a pour elle la commisération du médecin devant un organisme débile. « Les Français, dit-il, ont un cerveau organisé d’une manière spéciale, et Huschke (un autre savant) a démontré que le poids des cerveaux français était inférieur à celui des cerveaux allemands ; et, chose curieuse, les"
+        },
+        {
+          "link_id": "link-00442",
+          "note_item_id": "fn-00442",
+          "anchor_id": "anchor-00545",
+          "marker": "53",
+          "note_excerpt": "Ibid., p. 292.",
+          "anchor_excerpt": "Distinctes sans être séparées, la guerre et la Commune sont traitées pour la première fois dès le second semestre 1871 par Benedict-Augustin Morel, qui déclare faire « œuvre de patriotisme $ ^{52} $ » en montant à l’assaut contre un livre du docteur Carl Starck, dont le titre résume la visée : La Dégénérescence du peuple français, son caractère pathologique, ses symptômes et ses causes. Contribution de médecine mentale à l’histoire médicale des peuples. Selon Starck, les brutalités et les horreurs de la guerre seraient à mettre sur le compte d’un peuple abâtardi, décadent et corrompu, dont l’orgueil natif (et légendaire) est devenu « une monomanie, une idée fixe, un vrai délire $ ^{53} $ ... ». Toujours persuadée d’être à la tête de la civilisation, la nation française ressemble à un aliéné atteint de « folie raisonnante », un « paralytique général couché sur son grabat annonçant qu’il est plein de force et de santé $ ^{54} $ ». Comble des humiliations, le docteur Starck a pour elle la commisération du médecin devant un organisme débile. « Les Français, dit-il, ont un cerveau organisé d’une manière spéciale, et Huschke (un autre savant) a démontré que le poids des cerveaux français était inférieur à celui des cerveaux allemands ; et, chose curieuse, les"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11982,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00452",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+          "region_id": "nr-fn-ch-0060-toc-ch-019-lesbégaiementsdelhistoir",
+          "marker": "63",
+          "normalized_marker": "63",
+          "occurrence": 1,
+          "source_text": "Dr Baume, «Les Hommes et les actes de l'Insurrection de Paris devant la psychologie morbide, par le Dr Laborde», Annales médico-psychologiques, 5° série, t. VII, 1872, p. 304.",
+          "page_no": 336,
+          "display_marker": "63",
+          "source_marker": "63",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-019-lesbégaiementsdelhistoir:nr-fn-ch-0060-toc-ch-019-lesbégaiementsdelhistoir:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-019-lesbégaiementsdelhistoir:nr-fn-ch-0060-toc-ch-019-lesbégaiementsdelhistoir:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4783,
+    "estimated_prompt_tokens": 1657,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1657,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

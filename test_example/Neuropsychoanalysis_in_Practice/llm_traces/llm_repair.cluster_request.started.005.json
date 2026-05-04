@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-001-introduction:nr-fn-ch-0001-toc-ch-001-introduction:footnote",
+      "chapter_title": "Introduction",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        26,
+        26
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 1891,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00001",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-001-introduction",
+          "region_id": "nr-fn-ch-0001-toc-ch-001-introduction",
+          "marker": "1",
+          "normalized_marker": "1",
+          "occurrence": 1,
+          "source_text": "What I here call brain–self and brain–object differentiation, within the neuropsychodynamic context, may perceive a self that is different from our brain (and our body)? How can objects be distinguished brain (i.e. brain–self and brain–object differentiation). We therefore need to investigate how the resurface in different gestalts in different contexts (see Chapter 3 for details of the concept of context). For from our brain and its neuronal processes that enable and predispose to the constitution of neural predispositions that are provided by the brain itself are related to the constitution of self objects in our mental states? and objects as distinct from the brain. Based on the preceding section, I consider the brain’s intrinsic activity and its specific impact on stimulus-induced activity, i.e. rest-stimulus interac- So long as self and object are not distinguished from the brain in our perception and experience, and thus in our mental states, we could not even speak of self and object. This means that tion, as necessary (but non-sufficient) condition and thus as neural predisposition to brain-object they must be distinguished from the brain. This amounts to what I call “brain–self differentiation” and “brain–object differentiation.” The concepts of brain–self differentiation and brain–object differentiation refer to and describe those processes that enable and predispose to the constitu-",
+          "page_no": 26,
+          "display_marker": "1",
+          "source_marker": "1",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-001-introduction:nr-fn-ch-0001-toc-ch-001-introduction:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-001-introduction:nr-fn-ch-0001-toc-ch-001-introduction:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3748,
+    "estimated_prompt_tokens": 1361,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1361,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,135 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-007-6defensemechanismsandbra:nr-fn-ch-0026-toc-ch-007-6defensemechanismsandbra:footnote\",\n  \"chapter_title\": \"6 Defense Mechanisms and Brain–Object and Brain–Self Differentiation\",\n  \"page_range\": [\n    172,\n    172\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00048\",\n      \"anchor_id\": \"anchor-00057\",\n      \"marker\": \"4\",\n      \"note_excerpt\": \"This might be interesting to consider for the specific case of self-objects as intermediate between mere ral, with both presupposing a different temporal framework, the self being associated with a more objects and the self (see Chapter 7). ...\",\n      \"anchor_excerpt\": \"In summary, I characterized the “hybrid neural activity” by two main features, namely a specific stimulus constellation and a specific temporal constellation. Depending on which stimulus type (intero- or exteroceptive or neural) predominate ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00049\",\n      \"anchor_id\": \"anchor-00058\",\n      \"marker\": \"5\",\n      \"note_excerpt\": \"One may finally raise the question for the body (see also the end of Chapter 7 for further discussion of this neither from the body nor from the environment, but from the brain itself. Their continuous occurrence implies a continuous rather ...\",\n      \"anchor_excerpt\": \"I postulate that the temporal difference between mental and environmental objects corresponds to the distinction between brain–self and brain–object differentiation and thus to the difference between self and object (self–object differentia ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00047\",\n      \"marker\": \"3\",\n      \"page_no\": 172,\n      \"source_text\": \"I am aware that here again I use the term object in a rather blurred way that does not fully correspond type (intero- or exteroceptive or neural) predominates, neuronal–mental and stimulus–object to the narrow meaning of the term object out ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00048\",\n      \"note_item_id\": \"fn-00048\",\n      \"current_anchor_id\": \"anchor-00057\",\n      \"marker\": \"4\",\n      \"note_page_no\": 173,\n      \"anchor_page_no\": 172,\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"This might be interesting to consider for the specific case of self-objects as intermediate between mere ral, with both presupposing a different temporal framework, the self being associated with a more objects and the self (see Chapter 7). ...\",\n      \"anchor_excerpt\": \"In summary, I characterized the “hybrid neural activity” by two main features, namely a specific stimulus constellation and a specific temporal constellation. Depending on which stimulus type (intero- or exteroceptive or neural) predominate ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"# Defense Mechanisms and Brain–Object and Brain–Self Differentiation ## Defense mechanisms and internalization The concept of defense mechanisms was introduced in Sigmund Freud's early work, where he regarded them as mental operations that keep painful thoughts and affects out of awareness. Freud considered repression to be the most significant defense mechanism that describes how painful thoughts and affects can be suppressed in order to prevent them from entering consciousness, and thus to remain in the unconscious. Anna Freud (1946) broadened the concept of defense mechanisms and described them as psychological mechanisms (e.g. the unconscious part of the ego) for coping with intrapsychic conflict in order to protect the ego and the self from psychological damage. More recently, the original psychodynamic concept of defense mechanisms has aroused the interest of empirical researchers who aim to associate them with specific psychological and/or neuronal mechanisms (Vaillant, 1992; Cramer, 2000; Northoff et al., 2007c; Feinberg, 2010). What does the concept of a defense mechanism represent? This concept was originally intended to refer to psychological mechanisms that adapt and defend the structure and organization of the ego, or the self (using the two terms synonymously for the sake of operational simplicity; see Chapter 9 for details of their exact definition and differentiation), in the face of conflict arising from threat and danger. This means that defense mechanisms have what may be called an “adaptive function.” At the same time, however, the concept of defense mechanisms may go beyond mere defense by contributing to the building and constructing, or re-building and re-constructing, of the structure and organization of the ego (the self). The adaptive function ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-007-6defensemechanismsandbra:nr-fn-ch-0026-toc-ch-007-6defensemechanismsandbra:footnote",
+      "chapter_title": "6 Defense Mechanisms and Brain–Object and Brain–Self Differentiation",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        172,
+        172
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00048",
+          "note_item_id": "fn-00048",
+          "anchor_id": "anchor-00057",
+          "marker": "4",
+          "note_excerpt": "This might be interesting to consider for the specific case of self-objects as intermediate between mere ral, with both presupposing a different temporal framework, the self being associated with a more objects and the self (see Chapter 7). Self-objects are supposed to exert a stabilizing, preserving, and maincontinuous and less periodic framework than objects. stimulus and temporal constellations).",
+          "anchor_excerpt": "In summary, I characterized the “hybrid neural activity” by two main features, namely a specific stimulus constellation and a specific temporal constellation. Depending on which stimulus type (intero- or exteroceptive or neural) predominates, neuronal–mental and stimulus–object transformation will yield the corresponding mental state and object. If, for instance, the interoceptive stimuli predominate, our own body as object will dominate our mental states as “bodily object.” If exteroceptive stimuli predominate, the respectively associated environmental event, person, or object will become the dominating object, an “environmental object.” In the case of predominant neural stimuli, the respectively associated objects will outbalance intero- and exteroceptive inputs in our mental states, resulting in mind-wandering, daydreaming, or dreams that have what one might call “mental objects” $ ^{4} $ (see Part III for details)."
+        },
+        {
+          "link_id": "link-00049",
+          "note_item_id": "fn-00049",
+          "anchor_id": "anchor-00058",
+          "marker": "5",
+          "note_excerpt": "One may finally raise the question for the body (see also the end of Chapter 7 for further discussion of this neither from the body nor from the environment, but from the brain itself. Their continuous occurrence implies a continuous rather than discontinuous time frame. Put in the psychodytaining function for the self, and it may be argued that this could be enabled and predisposed to by a",
+          "anchor_excerpt": "I postulate that the temporal difference between mental and environmental objects corresponds to the distinction between brain–self and brain–object differentiation and thus to the difference between self and object (self–object differentiation). Due to the continuous presence of mental objects, $ ^{5} $ we distinguish them from environmental objects and associate the former with our own organism and person (i.e. what we conceptualize by the term “self”), and the latter with everything that is not self (i.e. objects). I therefore postulate that the different time frames of the different forms of hybrid neural activity may enable and predispose to brain–self differentiation as distinct from brain–object differentiation."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 1937,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00047",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-6defensemechanismsandbra",
+          "region_id": "nr-fn-ch-0026-toc-ch-007-6defensemechanismsandbra",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "I am aware that here again I use the term object in a rather blurred way that does not fully correspond type (intero- or exteroceptive or neural) predominates, neuronal–mental and stimulus–object to the narrow meaning of the term object outline in footnote 3; but again this conceptual confusion is transformation will yield the corresponding mental state and object. If, for instance, the interobetween different objects, including their differentiation from the brain. However, there hs ceptive stimuli predominate, our own body as object will dominate our mental states as “bodily not yet been any mention of the self, which means that that the hybrid neural activity falls short",
+          "page_no": 172,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00048",
+          "note_item_id": "fn-00048",
+          "current_anchor_id": "anchor-00057",
+          "marker": "4",
+          "note_page_no": 173,
+          "anchor_page_no": 172,
+          "current_anchor_marker": "4",
+          "note_excerpt": "This might be interesting to consider for the specific case of self-objects as intermediate between mere ral, with both presupposing a different temporal framework, the self being associated with a more objects and the self (see Chapter 7). Self-objects are supposed to exert a stabilizing, preserving, and maincontinuous and less periodic framework than objects. stimulus and temporal constellations).",
+          "anchor_excerpt": "In summary, I characterized the “hybrid neural activity” by two main features, namely a specific stimulus constellation and a specific temporal constellation. Depending on which stimulus type (intero- or exteroceptive or neural) predominates, neuronal–mental and stimulus–object transformation will yield the corresponding mental state and object. If, for instance, the interoceptive stimuli predominate, our own body as object will dominate our mental states as “bodily object.” If exteroceptive stimuli predominate, the respectively associated environmental event, person, or object will become the dominating object, an “environmental object.” In the case of predominant neural stimuli, the respectively associated objects will outbalance intero- and exteroceptive inputs in our mental states, resulting in mind-wandering, daydreaming, or dreams that have what one might call “mental objects” $ ^{4} $ (see Part III for details).",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-007-6defensemechanismsandbra:nr-fn-ch-0026-toc-ch-007-6defensemechanismsandbra:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1608,
+    "output_tokens": 88,
+    "total_tokens": 1696,
+    "estimated_input_tokens": 1986,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00047\",\n        \"anchor_phrase\": \"I am aware that here again I use the term object in a rather blurred way that does not fully correspond\",\n        \"confidence\": 0.95,\n        \"reason\": \"OCR text contains exact unique phrase from chapter_body_excerpt\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00047",
+      "anchor_id": "",
+      "anchor_phrase": "I am aware that here again I use the term object in a rather blurred way that does not fully correspond",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "OCR text contains exact unique phrase from chapter_body_excerpt"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00047",
+        "anchor_id": "",
+        "anchor_phrase": "I am aware that here again I use the term object in a rather blurred way that does not fully correspond",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "OCR text contains exact unique phrase from chapter_body_excerpt"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1608,
+    "completion_tokens": 88,
+    "total_tokens": 1696,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2041
+  }
+}

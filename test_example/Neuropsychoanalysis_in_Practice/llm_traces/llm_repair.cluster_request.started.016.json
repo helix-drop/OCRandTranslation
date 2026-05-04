@@ -1,0 +1,96 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-012-11psychosisipsychodynami:nr-fn-ch-0044-toc-ch-012-11psychosisipsychodynami:footnote",
+      "chapter_title": "11 Psychosis I: Psychodynamics and Phenomenology",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        289,
+        289
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00079",
+          "note_item_id": "fn-00079",
+          "anchor_id": "anchor-00089",
+          "marker": "8",
+          "note_excerpt": "Due to their strong affective assignment, the projected parts may be prone to be introjected again and thus",
+          "anchor_excerpt": "How can the self react to the perception and experience of itself as fragmented, disintegrated, and incoherent? The answer is very simple. It can try to get rid of the fragments and parts of itself that are associated with negative affects. This it does by projecting those parts that pertain to either the self or the body to the environment. More specifically, it can project its own affects, cognitions, and eventually bodily parts onto objects within its external environment. Such projection $ ^{8} $ allows the psychotic patient to attribute his own predominantly negative affects, cognitions, and bodily parts to objects outside his own self (e.g. people or events in the environment), by means of which he tries to distance his self from his own negative affects and their existential anxieties that he subjectively perceives and experiences. However, the negative affects are not lost by such projection, but are only shifted from the self to the object and more specifically to external people and events. This means that the psychotic patient cannot avoid encountering them again in the gestalt of delusions of persecution, delusions of alien control, hallucinations, and bodily or brain manipulation (Benedetti, 1983; Dümpelmann, 2009). $ ^{9} $"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 1968,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00078",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-012-11psychosisipsychodynami",
+          "region_id": "nr-fn-ch-0044-toc-ch-012-11psychosisipsychodynami",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "One should be careful, though. Due to the reasons discussed below (e.g. the breakdown of defense mechaanything that the psychotic patient can associate with his self when perceiving and experiencing nisms as such), this is, strictly speaking, no projection in the proper sense of the term (e.g. as defense himself. His existence is not only negative but also empty or non-existent in his subjective percep-",
+          "page_no": 289,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-012-11psychosisipsychodynami:nr-fn-ch-0044-toc-ch-012-11psychosisipsychodynami:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-012-11psychosisipsychodynami:nr-fn-ch-0044-toc-ch-012-11psychosisipsychodynami:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4318,
+    "estimated_prompt_tokens": 1524,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 1,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1524,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

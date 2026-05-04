@@ -1,0 +1,104 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-013-théroignedeméricourtoula:nr-fn-ch-0044-toc-ch-013-théroignedeméricourtoula:footnote",
+      "chapter_title": "Théroigne de Méricourt ou la mélancolie révolutionnaire",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        235,
+        235
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00272",
+          "note_item_id": "fn-00272",
+          "anchor_id": "anchor-00362",
+          "marker": "11",
+          "note_excerpt": "Ibid., p. 222.",
+          "anchor_excerpt": "fois sur sa nudité : « Tout sentiment de pudeur semble éteint en elle, et elle est habituellement nue, sans rougir, à la vue des hommes. » Si l’écriture et la pudeur sont bien ce qui nous distingue des animaux, que reste-t-il à Théroigne ? Elle incarne un univers d’idées mortes, dépassées, quand son indifférence à ce qui l’entoure signe son retrait du monde des vivants : « L’ayant fait dessiner en 1816, elle s’est prêtée à cette opération ; elle n’a paru attacher aucune importance à ce que faisait le dessinateur $ ^{11} $. »"
+        },
+        {
+          "link_id": "link-00274",
+          "note_item_id": "fn-00274",
+          "anchor_id": "anchor-00363",
+          "marker": "13",
+          "note_excerpt": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 218.",
+          "anchor_excerpt": "La troisième section du texte d'Esquirol est consacrée à l'autopsie de Théroigne de Méricourt, autopsie de plus en plus pratiquée dans les asiles, où les aliénistes, adeptes d'une physiologie matérialiste, cherchent à localiser dans les organes le siège de la maladie mentale. Esquirol est le grand promoteur de cette école, bien qu'il soit contraint de reconnaître que « l'anatomie pathologique n'a rien appris de positif sur la siège de la mélancolie $ ^{13} $ ». Et, en effet, l'ouverture du corps et l'exploration du cerveau de Théroigne n'expliquent rien. Tout au plus Esquirol remarquant-il un déplacement du côlon transverse, qu'il a observé chez de nombreux aliénés, et dont il a songé à faire un très improbable critère anatomique de la folie."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11803,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00273",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-théroignedeméricourtoula",
+          "region_id": "nr-fn-ch-0044-toc-ch-013-théroignedeméricourtoula",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "Les deux séries de dessins de Gabriel sont consultables à la Bibliothèque nationale de France. Le carnet des portraits de fous compte 95 dessins, sous la cote Res-JF-29-4. En 1818, Esquirol écrivait: « [...] l'étude de la physionomie des",
+          "page_no": 235,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-013-théroignedeméricourtoula:nr-fn-ch-0044-toc-ch-013-théroignedeméricourtoula:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-013-théroignedeméricourtoula:nr-fn-ch-0044-toc-ch-013-théroignedeméricourtoula:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4691,
+    "estimated_prompt_tokens": 1630,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1630,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,145 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-005-danxisaid:nr-fn-ch-0030-toc-ch-005-danxisaid:footnote\",\n  \"chapter_title\": \"5. “Danxi said…”\",\n  \"page_range\": [\n    189,\n    189\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00083\",\n      \"anchor_id\": \"anchor-00537\",\n      \"marker\": \"22\",\n      \"note_excerpt\": \"2. ?34/cvu/ /dpvme/opu/gjoe/ju/uifsf6/Fmfvsjuft/tffet/tfswfe up/qsfqbsf/uvoh/pjm4 xijdi/xbt vtfe/up/nblf wbsojtift4/dbvml/cpbut4/ps/nblf/qbqfs/xbufsqsppg6 `_X ƍ dpvme/sfgfs/up/nboz/ljoet/pg/usfft4f6h64Ubxmpojb4 gspn/xijdi/mvuft/boe/dpggjot/ ...\",\n      \"anchor_excerpt\": \"Divine Pivot 22). The etiologies proposed were Fire (or Heat) and mucus, and the treatments\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00081\",\n      \"marker\": \"20\",\n      \"page_no\": 189,\n      \"source_text\": \"vJ\\\\_^jbe`!cTcXew cebUTU_leXYXeeXWgb!g[X!cTcXe!ba!j[\\\\V[!g[X!f\\\\_^jbe`!`bg[!_T\\\\WXZZf$0UDQG!;LFFL &!Xagel 5 ib_(M 4 39%(! !T`!abg!fheX!TUbhg!g[X!be\\\\Z\\\\a!bY!g[\\\\f!aTgheT_!XkbeV\\\\fg\\\\V!ceTVg\\\\VX&!TaW! !YbhaW!ab!geTVX!bY!\\\\g \\\\a!Q[h!Q[Xa[XaZuf!^abja!je\\\\g ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00082\",\n      \"marker\": \"21\",\n      \"page_no\": 189,\n      \"source_text\": \"K[\\\\fjT f!H\\\\a!:[XaZmhufȽĹȸ `Xg[bW&!j[\\\\V[[TW!UXXaV\\\\gXW!\\\\a g[X!1/ DLWDL!EL\\\\DR Íʖȼˑ ( a L[XH JDQJPX ̡çɠȫ $ 30%&!Cbh!P\\\\aZ![TW!VT__XW!\\\\g T v`Xg[bW!Ybe!VThgXe\\\\m\\\\aZ!Rv`bk\\\\'Uhfg\\\\aZw7S!Z[bfgfw!$ǣͦƺ %(\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00093\",\n      \"note_item_id\": \"fn-00083\",\n      \"current_anchor_id\": \"anchor-00537\",\n      \"marker\": \"22\",\n      \"note_page_no\": 190,\n      \"anchor_page_no\": 189,\n      \"current_anchor_marker\": \"22\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"2. ?34/cvu/ /dpvme/opu/gjoe/ju/uifsf6/Fmfvsjuft/tffet/tfswfe up/qsfqbsf/uvoh/pjm4 xijdi/xbt vtfe/up/nblf wbsojtift4/dbvml/cpbut4/ps/nblf/qbqfs/xbufsqsppg6 `_X ƍ dpvme/sfgfs/up/nboz/ljoet/pg/usfft4f6h64Ubxmpojb4 gspn/xijdi/mvuft/boe/dpggjot/ ...\",\n      \"anchor_excerpt\": \"Divine Pivot 22). The etiologies proposed were Fire (or Heat) and mucus, and the treatments\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"“Danxi said…” The textual life of medical ideas on madness, 1360-1530 Danxi said that dian belongs to Yin and kuang to Yang, that dian is excessive joy and kuang excessive anger. He also stated that the doubling of Yin is dian and the doubling of Yang is kuang. 丹溪謂癲屬陰 狂屬陽 癲多喜 狂多怒 又云重陰者癲 重陽者狂 Xu Chunfu 徐春甫 in Gujin yitong daquan 古今醫統大全 (1556) $ ^{1} $ Chapters 3 and 4 traced a momentous transformation in the etiology of madness from Wind to internal Fire and mucus between the twelfth and the fourteenth century. The Ming dynasty (1368-1644) was not a period of strong epistemological breaks in medicine, but one in which physicians re-orchestrated earlier approaches to form new doctrinal and therapeutic emphases. Xu Chunfu above was citing the Danxi xinfa 丹溪心法, a composite work compiled and printed in his own Huizhou Prefecture (Anhui) in the early 1480s and that quickly became the most influential work attributed to Zhu Zhenheng 朱震亨 (\\\"Danxi\\\" 丹溪: 1282-1358). This and the next chapter show how the development of Ming medical thinking on dian and kuang was shaped by three important trends that are well symbolized by Xu's quotation: the rising influence of precepts attributed to Danxi, the importance of Huizhou as a center of medical theorizing and publication, and the profound intertextuality of the elite medical tradition. ### 5.1 Intertextual composition and the Danxi corpus The “Danxi corpus” in the history of medical thinking on madness The rise to prominence of a body of teachings attributed to Zhu Zhenheng deeply shaped Ming medical thinking and practice. Zhu's teachings appeared in a wide array of texts books and manuscripts by Zhu, notes by his disciples, works attributed to Zhu that were collated after his death by people who had known him, and later anthologies base ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0030-toc-ch-005-danxisaid:footnote",
+      "chapter_title": "5. “Danxi said…”",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        189,
+        189
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00093",
+          "note_item_id": "fn-00083",
+          "anchor_id": "anchor-00537",
+          "marker": "22",
+          "note_excerpt": "2. ?34/cvu/ /dpvme/opu/gjoe/ju/uifsf6/Fmfvsjuft/tffet/tfswfe up/qsfqbsf/uvoh/pjm4 xijdi/xbt vtfe/up/nblf wbsojtift4/dbvml/cpbut4/ps/nblf/qbqfs/xbufsqsppg6 `_X ƍ dpvme/sfgfs/up/nboz/ljoet/pg/usfft4f6h64Ubxmpojb4 gspn/xijdi/mvuft/boe/dpggjot/xfsf/nbef6 `_XkZ dpvme/bmtp/ibwf/sfgfssfe/up/Xufsdvmjbub/2Ɛƍï 3/tffet6 ĿŃȍ6nƝ ͘ȟāʅȚ ȠWɸͩ ȊÞ̲z¢Ē űC[Ž ̠ŹŜ AA H ibqufs/>fyqmbjot/ipxUZR_ xbt/fwfouvbmmz/ejtujohvjtife/gspn\\fR_X po/uif/cbtjt/pg/uifjs/jefoujgjfe/fujpmphz4 boe/ipx/uxp/cspbe/ljoet/pg/uifsbqz/2sfqmfojtijoh/boe/buubdljoh3/xfsf/bwbjmbcmf/gps/uifjs/usfbunfou6 Yijt/mptu/fejujpo/xbt/nfoujpofe/jo/Hifoh/HipohUt/ <@ /qsfgbdf/up/uif/ vj{ipv R_iZ/iZ_WR 2 R_iZ/jZ[Z B/ ?36",
+          "anchor_excerpt": "Divine Pivot 22). The etiologies proposed were Fire (or Heat) and mucus, and the treatments"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11653,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00081",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0030-toc-ch-005-danxisaid",
+          "marker": "20",
+          "normalized_marker": "20",
+          "occurrence": 1,
+          "source_text": "vJ\\_^jbe`!cTcXew cebUTU_leXYXeeXWgb!g[X!cTcXe!ba!j[\\V[!g[X!f\\_^jbe`!`bg[!_T\\WXZZf$0UDQG!;LFFL &!Xagel 5 ib_(M 4 39%(! !T`!abg!fheX!TUbhg!g[X!be\\Z\\a!bY!g[\\f!aTgheT_!XkbeV\\fg\\V!ceTVg\\VX&!TaW! !YbhaW!ab!geTVX!bY!\\g \\a!Q[h!Q[Xa[XaZuf!^abja!je\\g\\aZf(",
+          "page_no": 189,
+          "display_marker": "20",
+          "source_marker": "20",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11654,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00082",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0030-toc-ch-005-danxisaid",
+          "marker": "21",
+          "normalized_marker": "21",
+          "occurrence": 1,
+          "source_text": "K[\\fjT f!H\\a!:[XaZmhufȽĹȸ `Xg[bW&!j[\\V[[TW!UXXaV\\gXW!\\a g[X!1/ DLWDL!EL\\DR Íʖȼˑ ( a L[XH JDQJPX ̡çɠȫ $ 30%&!Cbh!P\\aZ![TW!VT__XW!\\g T v`Xg[bW!Ybe!VThgXe\\m\\aZ!Rv`bk\\'Uhfg\\aZw7S!Z[bfgfw!$ǣͦƺ %(",
+          "page_no": 189,
+          "display_marker": "21",
+          "source_marker": "21",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00093",
+          "note_item_id": "fn-00083",
+          "current_anchor_id": "anchor-00537",
+          "marker": "22",
+          "note_page_no": 190,
+          "anchor_page_no": 189,
+          "current_anchor_marker": "22",
+          "note_excerpt": "2. ?34/cvu/ /dpvme/opu/gjoe/ju/uifsf6/Fmfvsjuft/tffet/tfswfe up/qsfqbsf/uvoh/pjm4 xijdi/xbt vtfe/up/nblf wbsojtift4/dbvml/cpbut4/ps/nblf/qbqfs/xbufsqsppg6 `_X ƍ dpvme/sfgfs/up/nboz/ljoet/pg/usfft4f6h64Ubxmpojb4 gspn/xijdi/mvuft/boe/dpggjot/xfsf/nbef6 `_XkZ dpvme/bmtp/ibwf/sfgfssfe/up/Xufsdvmjbub/2Ɛƍï 3/tffet6 ĿŃȍ6nƝ ͘ȟāʅȚ ȠWɸͩ ȊÞ̲z¢Ē űC[Ž ̠ŹŜ AA H ibqufs/>fyqmbjot/ipxUZR_ xbt/fwfouvbmmz/ejtujohvjtife/gspn\\fR_X po/uif/cbtjt/pg/uifjs/jefoujgjfe/fujpmphz4 boe/ipx/uxp/cspbe/ljoet/pg/uifsbqz/2sfqmfojtijoh/boe/buubdljoh3/xfsf/bwbjmbcmf/gps/uifjs/usfbunfou6 Yijt/mptu/fejujpo/xbt/nfoujpofe/jo/Hifoh/HipohUt/ <@ /qsfgbdf/up/uif/ vj{ipv R_iZ/iZ_WR 2 R_iZ/jZ[Z B/ ?36",
+          "anchor_excerpt": "Divine Pivot 22). The etiologies proposed were Fire (or Heat) and mucus, and the treatments",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0030-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2051,
+    "output_tokens": 42,
+    "total_tokens": 2093,
+    "estimated_input_tokens": 1818,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Unmatched footnotes 20,21 have garbled text; cannot reliably identify unique anchor phrases.\"\n  }\n]",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Unmatched footnotes 20,21 have garbled text; cannot reliably identify unique anchor phrases."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Unmatched footnotes 20,21 have garbled text; cannot reliably identify unique anchor phrases."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 2051,
+    "completion_tokens": 42,
+    "total_tokens": 2093,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1322
+  }
+}

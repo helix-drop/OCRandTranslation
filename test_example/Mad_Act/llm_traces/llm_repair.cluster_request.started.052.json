@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0050-toc-ch-007-shapesofpractices:footnote",
+      "chapter_title": "7. Shapes of practices",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        336,
+        337
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11734,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00162",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0050-toc-ch-007-shapesofpractices",
+          "marker": "27",
+          "normalized_marker": "27",
+          "occurrence": 1,
+          "source_text": "^iUb 4/VUiuzaoW ʍȵ C [uX]U B/ E3/and/2with/some/slight/differences3/inOi/Bihcb[/m]Ub Ïμͱ·ǌ 2 ^iUb 4/VHysphagiaW æϋ C [uX]U B/ A F36/ n/the/latter/book4/[u/explained/that/the/paste/was/designed/to/replenish/the/]in/aspects/of the/Piver/and/Oidney/systems4/whereas/inOYbV]b[/h]UcV]Ub 4/he/claimed/the/paste/could/replenish/Vthe/]in/of/the lower^]Uc W 4Ȫ<Υ 6 A n/Ghinese/medical/history4[u/]i 5li/2 AA@3/mentioned/the/issue in/her/study/of/a/temple/specializing/in treating womenUs/illnesses4/but/her/argument/quickly/veered/away/from/the/negotiated/perceptions/of/efficacy]b WcbWfYhY/WUgYg to a discussion/ofhow/practitioners/promoted/themselves/as/efficient/healersin/general6Whe ƺć˅Ûɍˢ/ƓˊÛÕ 4ʎʚ ɽ pursued/this/problem/further/in/a/later/article/2 B/<@5= 34/but/still/did/not/analyze/specific/cases6 A Wee/Oleinman/ A@@4/chapter/titled/V ow/Hoes/Tsychiatry/ ealDW R ^©_ga« R See yleinman _gffZ chap¢e ¢i¢led “vo¥ roe¡ ~¡§chia¢ § vealm”",
+          "page_no": 336,
+          "display_marker": "27",
+          "source_marker": "27",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11735,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00163",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0050-toc-ch-007-shapesofpractices",
+          "marker": "28",
+          "normalized_marker": "28",
+          "occurrence": 1,
+          "source_text": "6. A> or/more/on/these/shifts/in/anthropology4/see/Gsordas/ AA<b/and/Xurner/ AA<6/GsordasUs/theorizing/on VembodimentW/has/paralleled/recent/development/in/cognitive/science/toward/the/notion/of/the/Vembodied mindWB/see/Q6/ ohnson/ A@?4/ AA 4/and/ AA C/Zarela/and/Vosch/ AA C/Pakoff/and/ ohnson/ AAAC/ ibbs/ =6 A? n @ =/and/ @ >/in InglandSSabout/the/same/time/[u/Xang/was/activeSSmad 5doctors/andasylum/keepers told/a Tarliamentary/commission that/vomits/and/purgeshad/beenproven/effective by/a/long/experience/in/the cure/of/madpeople 2Wcull AA B/ A 5A<36/Fefore/vomiting/therapy/was/brought/into/definite/disrepute/in/the nineteenth/century4/Inglish/and/continental5Iuropean/physicians/commonly/prescribed/protracted/courses/of emetics/to/cure/madness/2Wcull/ A?=CUu}teland/Qorel A?AB/?A5@ 36 onathan Endrews and Endrew WcullUs book/on/a leading Vmad 5doctorW provides/details/on/controversies/concerning/the/taking/of/VvomitsW/in/the eighteenth/century/2 B/ @4/ A4/=A5> 4/><5=36 Zenesection 2bloodletting by/opening/the/veins3/was/another common/Vdepleting/therapyW/for/madness/in/nineteenth5century/Ingland6/Xo/cure/insane/behavior4/ancient reeks/used/hellebore4whose/toxic/nature/caused violent vomiting/2Tadel/ AA=B <@5= 36",
+          "page_no": 337,
+          "display_marker": "28",
+          "source_marker": "28",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0050-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0050-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4127,
+    "estimated_prompt_tokens": 1471,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1471,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

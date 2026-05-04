@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-psychobehavioralpatholog:nr-fn-ch-0013-toc-ch-003-psychobehavioralpatholog:footnote",
+      "chapter_title": "3. Psycho-behavioral pathology in Chinese medicine",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        63,
+        63
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11590,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00018",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-psychobehavioralpatholog",
+          "region_id": "nr-fn-ch-0013-toc-ch-003-psychobehavioralpatholog",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "b6 possession60Sther0manifestations0were0UstupefactionV02 > 0argue0in0Ghapter @ that0this0similarity0between0possession0and0madness0created0rivalries0between0exorcists Āĉ 30and0hallucinations02ßŘĚʄ 36 and0physicians40and eventually prodded0some0doctors0to0develop0medical0explanations0of0possession0symptoms6",
+          "page_no": 63,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-psychobehavioralpatholog:nr-fn-ch-0013-toc-ch-003-psychobehavioralpatholog:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-003-psychobehavioralpatholog:nr-fn-ch-0013-toc-ch-003-psychobehavioralpatholog:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3813,
+    "estimated_prompt_tokens": 1379,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1379,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

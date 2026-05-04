@@ -241,40 +241,43 @@ def _build_endnote_regions_raw(
                 current_start_reason = ""
             continue
         # 有 fnBlock 的页是正文页（含页底脚注），不能作为尾注 region 候选。
+        # 例外：post_body 章节中被 _reclassify_post_body_fnblocks_as_endnote 重分类的页面
         page_data = page_by_no.get(page_no) or {}
         fnb = page_data.get("fnBlocks")
         if isinstance(fnb, list) and len(fnb) > 0:
-            if current_pages:
-                start_page = current_pages[0]
-                end_page = current_pages[-1]
-                regions.append(
-                    NoteRegionRecord(
-                        region_id=f"region-endnote-{len(regions) + 1:04d}",
-                        chapter_id=current_chapter_id,
-                        page_start=start_page,
-                        page_end=end_page,
-                        pages=list(current_pages),
-                        note_kind="endnote",
-                        scope=current_scope if current_scope in {"chapter", "book"} else "chapter",
-                        source="heading_scan",
-                        heading_text=current_heading_text,
-                        start_reason=current_start_reason or "candidate_page",
-                        end_reason="contiguous_break",
-                        region_marker_alignment_ok=True,
-                        region_start_first_source_marker=first_source_marker(
-                            page_by_no.get(start_page),
-                            kind="endnote",
-                        ),
-                        region_first_note_item_marker="",
-                        review_required=False,
+            scan_data = dict(page_data.get("_note_scan") or {})
+            if not scan_data.get("has_reclassified_endnotes"):
+                if current_pages:
+                    start_page = current_pages[0]
+                    end_page = current_pages[-1]
+                    regions.append(
+                        NoteRegionRecord(
+                            region_id=f"region-endnote-{len(regions) + 1:04d}",
+                            chapter_id=current_chapter_id,
+                            page_start=start_page,
+                            page_end=end_page,
+                            pages=list(current_pages),
+                            note_kind="endnote",
+                            scope=current_scope if current_scope in {"chapter", "book"} else "chapter",
+                            source="heading_scan",
+                            heading_text=current_heading_text,
+                            start_reason=current_start_reason or "candidate_page",
+                            end_reason="contiguous_break",
+                            region_marker_alignment_ok=True,
+                            region_start_first_source_marker=first_source_marker(
+                                page_by_no.get(start_page),
+                                kind="endnote",
+                            ),
+                            region_first_note_item_marker="",
+                            review_required=False,
+                        )
                     )
-                )
-                current_pages = []
-                current_scope = ""
-                current_chapter_id = ""
-                current_heading_text = ""
-                current_start_reason = ""
-            continue
+                    current_pages = []
+                    current_scope = ""
+                    current_chapter_id = ""
+                    current_heading_text = ""
+                    current_start_reason = ""
+                continue
 
         scope, chapter_id = _endnote_scope_for_page(
             page_no,
@@ -283,7 +286,8 @@ def _build_endnote_regions_raw(
         )
         if scope == "chapter" and chapter_id in chapters_with_footnote_band:
             page_role = str(page_role_by_no.get(page_no) or "")
-            if page_role != "note" and not first_notes_heading(page_by_no.get(page_no)):
+            _reclass_guard = dict((page_by_no.get(page_no) or {}).get("_note_scan") or {}).get("has_reclassified_endnotes")
+            if page_role != "note" and not first_notes_heading(page_by_no.get(page_no)) and not _reclass_guard:
                 continue
         heading_text = first_notes_heading(page_by_no.get(page_no))
         start_reason = _start_reason_for_page(
@@ -575,6 +579,97 @@ def _normalize_region_ids(regions: list[NoteRegionRecord]) -> list[NoteRegionRec
     return normalized
 
 
+def _reclassify_post_body_fnblocks_as_endnote(
+    phase1: Phase1Structure,
+    page_by_no: Mapping[int, Mapping[str, Any]],
+    page_role_by_no: Mapping[int, str],
+) -> int:
+    """将 post_body 章节中 fnBlocks 来源的连续编号 footnote 重分类为 endnote。
+
+    四重守卫（全部通过才重分类）：
+    G1 — 书有 page_role="note" 的页面（排除纯 footnote 书如 Napoleon）
+    G2 — chapter.title in phase1.summary.post_body_titles
+    G3 — band 内 numeric marker items ≥ 3
+    G4 — numeric markers 形成连续序列
+    """
+    if not any(str(page_role_by_no.get(pn) or "") == "note" for pn in page_role_by_no):
+        return 0
+    _summary = phase1.summary
+    _post_body_raw = _summary.post_body_titles if _summary and hasattr(_summary, "post_body_titles") else []
+    post_body_titles = {str(title or "").strip().casefold() for title in _post_body_raw}
+    if not post_body_titles:
+        return 0
+    post_body_chapter_ids: set[str] = set()
+    post_body_start_pages: dict[str, int] = {}
+    for chapter in phase1.chapters:
+        if str(chapter.title or "").strip().casefold() in post_body_titles:
+            post_body_chapter_ids.add(str(chapter.chapter_id or ""))
+            post_body_start_pages[str(chapter.chapter_id or "")] = int(chapter.start_page or 0)
+    if not post_body_chapter_ids:
+        return 0
+    reclassified_count = 0
+    for chapter_id, chap_start in sorted(post_body_start_pages.items(), key=lambda kv: kv[1]):
+        chap_end = max(
+            (int(ch.end_page) for ch in phase1.chapters if str(ch.chapter_id or "") == chapter_id),
+            default=chap_start,
+        )
+        page_fn_items: dict[int, list[dict]] = {}
+        for page_no in sorted(page_by_no.keys()):
+            if page_no < chap_start or page_no > chap_end:
+                continue
+            page = page_by_no.get(page_no)
+            if page is None:
+                continue
+            note_scan = dict(page.get("_note_scan") or {})
+            scan_items = list(note_scan.get("items") or [])
+            fn_items: list[dict] = []
+            for item in scan_items:
+                if str(item.get("source") or "") != "fnBlocks":
+                    continue
+                marker = str(item.get("marker") or "").strip(" .")
+                try:
+                    number = int(marker)
+                except (ValueError, TypeError):
+                    continue
+                fn_items.append(item)
+            if fn_items:
+                page_fn_items[page_no] = fn_items
+        if not page_fn_items:
+            continue
+        sorted_pages = sorted(page_fn_items.keys())
+        bands: list[list[int]] = []
+        current_band: list[int] = [sorted_pages[0]]
+        for pn in sorted_pages[1:]:
+            if pn - current_band[-1] <= 1:
+                current_band.append(pn)
+            else:
+                bands.append(current_band)
+                current_band = [pn]
+        bands.append(current_band)
+        for band in bands:
+            if len(band) < 2:
+                continue
+            numeric_items: list[dict] = []
+            for pn in band:
+                numeric_items.extend(page_fn_items[pn])
+            if len(numeric_items) < 3:
+                continue
+            numbers = sorted(item["number"] for item in numeric_items)
+            expected = list(range(numbers[0], numbers[0] + len(numbers)))
+            if numbers != expected:
+                continue
+            for item in numeric_items:
+                item["kind"] = "endnote"
+                item["reclassified_from"] = "footnote"
+            for pn in band:
+                page = page_by_no.get(pn)
+                if page is not None:
+                    note_scan = page.setdefault("_note_scan", {})
+                    note_scan["has_reclassified_endnotes"] = True
+            reclassified_count += len(numeric_items)
+    return reclassified_count
+
+
 def build_note_regions(
     phase1: Phase1Structure,
     *,
@@ -593,6 +688,8 @@ def build_note_regions(
         for row in phase1.pages
         if int(row.page_no) > 0
     }
+
+    _reclassify_post_body_fnblocks_as_endnote(phase1, page_by_no, page_role_by_no)
 
     footnote_regions, chapters_with_footnote_band = _build_footnote_band_regions(phase1, page_by_no)
     endnote_regions = _build_endnote_regions_raw(

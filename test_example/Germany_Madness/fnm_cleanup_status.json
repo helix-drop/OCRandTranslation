@@ -1,17 +1,14 @@
 {
-  "cleaned_at": "2026-05-01T00:12:48",
+  "cleaned_at": "2026-05-03T04:30:18",
   "example_dir": "/Users/hao/OCRandTranslation/test_example/Germany_Madness",
   "removed": [
     "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces",
     "/Users/hao/OCRandTranslation/test_example/Germany_Madness/fnm_real_test_progress.json",
     "/Users/hao/OCRandTranslation/test_example/Germany_Madness/fnm_real_test_result.json",
-    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/FNM_REAL_TEST_REPORT.md",
-    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/latest_export_status.json",
-    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/latest.fnm.obsidian.Germany_Madness.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/latest.fnm.obsidian.test.zip",
-    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/latest.fnm.obsidian.zip"
+    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/fnm_real_test_modules.json",
+    "/Users/hao/OCRandTranslation/test_example/Germany_Madness/FNM_REAL_TEST_REPORT.md"
   ],
-  "removed_count": 8,
+  "removed_count": 5,
   "failed": [],
   "failed_count": 0
 }

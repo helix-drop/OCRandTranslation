@@ -565,6 +565,53 @@ def _visible_paragraphs(paragraphs: list[dict]) -> list[dict]:
     return [dict(para) for para in (paragraphs or []) if not para.get("consumed_by_prev")]
 
 
+def _parse_md_lines_to_segments(lines: list[str], bp: int) -> list[dict]:
+    """将单页 markdown 行列表解析为段落 segments（Step 1+2 共享逻辑）。
+
+    每行先标准化 LaTeX 脚注标记、过滤 meta 行、识别 heading，
+    再按空行将连续 text 行合并为段落。两个调用方共享此逻辑以确保
+    merged_next 链扫描与主页解析使用一致的标记标准化。
+    """
+    items: list[dict] = []
+    for line in lines:
+        stripped = normalize_latex_footnote_markers(line)
+        if not stripped:
+            items.append({"type": "blank", "level": 0, "text": ""})
+            continue
+        if _is_meta_line(stripped):
+            continue
+        hl, clean = extract_heading_level(stripped)
+        if hl > 0:
+            items.append({"type": "heading", "level": hl, "text": clean})
+        else:
+            items.append({"type": "text", "level": 0, "text": stripped})
+
+    segments: list[dict] = []
+    buf: list[str] = []
+
+    def _flush() -> None:
+        if buf:
+            combined = " ".join(buf)
+            if len(combined.strip()) > 1:
+                segments.append(
+                    {"heading_level": 0, "text": combined.strip(), "startBP": bp, "endBP": bp}
+                )
+            buf.clear()
+
+    for item in items:
+        if item["type"] == "heading":
+            _flush()
+            segments.append(
+                {"heading_level": item["level"], "text": item["text"], "startBP": bp, "endBP": bp}
+            )
+        elif item["type"] == "text":
+            buf.append(item["text"])
+        elif item["type"] == "blank":
+            _flush()
+    _flush()
+    return segments
+
+
 def parse_page_markdown(pages: list, bp: int) -> list[dict]:
     """
     逐行解析某页的 markdown 文本，返回段落结构。
@@ -600,45 +647,8 @@ def parse_page_markdown(pages: list, bp: int) -> list[dict]:
     prev_md = _prepare_markdown_for_note_page(prev_raw_md, _get_page_note_scan(prev_pg))
     next_md = _prepare_markdown_for_note_page(next_raw_md, _get_page_note_scan(next_pg))
 
-    # ====== Step 1: 逐行分类 ======
     lines = md.split("\n")
-    items = []
-
-    for line in lines:
-        stripped = normalize_latex_footnote_markers(line)
-        if not stripped:
-            items.append({"type": "blank", "level": 0, "text": ""})
-            continue
-        if _is_meta_line(stripped):
-            continue
-
-        hl, clean = extract_heading_level(stripped)
-        if hl > 0:
-            items.append({"type": "heading", "level": hl, "text": clean})
-        else:
-            items.append({"type": "text", "level": 0, "text": stripped})
-
-    # ====== Step 2: 将连续 text 行合并为段落 ======
-    segments = []
-    buf = []
-
-    def flush_buf():
-        if buf:
-            combined = " ".join(buf)
-            if len(combined.strip()) > 1:
-                segments.append({"heading_level": 0, "text": combined.strip(), "startBP": bp, "endBP": bp})
-            buf.clear()
-
-    for item in items:
-        if item["type"] == "heading":
-            flush_buf()
-            segments.append({"heading_level": item["level"], "text": item["text"], "startBP": bp, "endBP": bp})
-        elif item["type"] == "text":
-            buf.append(item["text"])
-        elif item["type"] == "blank":
-            flush_buf()
-
-    flush_buf()
+    segments = _parse_md_lines_to_segments(lines, bp)
 
     if not segments:
         return _fallback_blocks_to_paragraphs(cur, bp)
@@ -853,46 +863,18 @@ def _looks_like_colon_section_title(text: str) -> bool:
 
 
 def _parse_single_page_md(pg: dict | None, md: str) -> list[dict]:
-    """解析单页 markdown 为段落列表（不做跨页合并，避免递归）。"""
+    """解析单页 markdown 为段落列表（不做跨页合并，避免递归）。
+
+    与 parse_page_markdown 共享 _parse_md_lines_to_segments，
+    保证 merged_next 链扫描使用一致的 LaTeX 标记标准化。
+    """
     if not pg or not md:
         return []
-
+    bp = int(pg.get("bookPage", 0) or 0)
     lines = md.split("\n")
-    items = []
-    for line in lines:
-        stripped = line.strip()
-        if not stripped:
-            items.append({"type": "blank", "level": 0, "text": ""})
-            continue
-        if _is_meta_line(stripped):
-            continue
-        hl, clean = extract_heading_level(stripped)
-        if hl > 0:
-            items.append({"type": "heading", "level": hl, "text": clean})
-        else:
-            items.append({"type": "text", "level": 0, "text": stripped})
-
-    segments = []
-    buf = []
-
-    def flush():
-        if buf:
-            combined = " ".join(buf)
-            if len(combined.strip()) > 1:
-                segments.append({"heading_level": 0, "text": combined.strip()})
-            buf.clear()
-
-    for item in items:
-        if item["type"] == "heading":
-            flush()
-            segments.append({"heading_level": item["level"], "text": item["text"]})
-        elif item["type"] == "text":
-            buf.append(item["text"])
-        else:
-            flush()
-    flush()
-
-    return segments
+    raw = _parse_md_lines_to_segments(lines, bp)
+    # 去掉 startBP/endBP，保持与旧接口兼容
+    return [{"heading_level": s["heading_level"], "text": s["text"]} for s in raw]
 
 
 def _is_continuation_from_prev(text: str, prev_md: str) -> bool:

@@ -2,103 +2,159 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-019-lesbégaiementsdelhistoir:toc-ch-019-lesbégaiementsdelhistoir:footnote\",\n  \"chapter_title\": \"Les bégaiements de l’Histoire\",\n  \"page_range\": [\n    338,\n    338\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 338,\n      \"ocr_excerpt\": \"demeure une mesure indispensable de salubrité publique. La moralisation du débat va de pair avec sa dépolitisation. À aucun moment les aliénistes ne s'interrogent sur les idées de la Commune ou sur ses motivations, réduites au pur instinct aveugle et sauvage de destruction d'une bande d'ivrognes. On mesure ici la saute opérée par rapport à 1848 : le délirant politique de Juin, le « monomane communiste » dont pouvait encore se moquer Brierre de Boismont, est devenu en 1871 un animal sanguinaire dont la parole est décrédibilisée à la source. La séparation des Églises et de l'État, l'enseignement laïque, gratuit et obligatoire, l'égalité salariale entre hommes et femmes dont bénéficieront les institutrices, la gratuité des actes notariés, la suppression du travail de nuit pour les boulangers : en deux mois, « l'émancipation des travailleurs par les travailleurs eux-mêmes » a pourtant produit une œuvre décisive. Mais elle n'est jamais interrogée, comme ne seront jamais questionnés, à titre de folie collective, les actes de barbarie de la répression par les Versaillais. En cela, les aliénistes confortent l'opinion bourgeoise, prompte à assimiler la Commune à un pur acte de démence. L'év ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00461\",\n      \"marker\": \"66\",\n      \"page_no\": 338,\n      \"paragraph_index\": 1,\n      \"source_text\": \"En cela, les aliénistes confortent l'opinion bourgeoise, prompte à assimiler la Commune à un pur acte de démence. L'évidence est en particulier admise chez les écrivains, unanimes, à quelques rares exceptions près, à condamner l'insurrectio ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-005-spectresdelaguillotine:nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine:footnote\",\n  \"chapter_title\": \"Spectres de la guillotine\",\n  \"page_range\": [\n    87,\n    88\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00103\",\n      \"anchor_id\": \"anchor-00147\",\n      \"marker\": \"67\",\n      \"note_excerpt\": \"Victor Hugo, Les Misérables [1862], Gallimard, «Bibliothèque de la Pléiade», 1951, p. 18.\",\n      \"anchor_excerpt\": \"L'échafaud, dit Hugo, « a quelque chose qui hallucine ». « L'échafaud est vision. » Cette « sorte d'être qui a je ne sais quelle sombre initiative » semble doué d'une vie autonome, qui jette l'âme dans « une rêverie affreuse<sup>67</sup> ». ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00105\",\n      \"anchor_id\": \"anchor-00150\",\n      \"marker\": \"69\",\n      \"note_excerpt\": \"Révolutions de Paris, n° 185, 15° trimestre, du 19 au 26 janvier 1793, p. 203.\",\n      \"anchor_excerpt\": \"la mort que la certitude de ce démembrement public, abolissant l'intégrité physique dans un flot de sang. La mort du roi avait déjà donné lieu à des actes de désespoir, rapportés par les Révolutions de Paris : « On a su qu'un militaire, anc ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00104\",\n      \"marker\": \"68\",\n      \"page_no\": 87,\n      \"source_text\": \"Lettre de Sade à son avocat, 21 janvier 1795, citée par Gilbert Lely, Vie du marquis de Sade, nouv. éd. entièrement refondue, Jean-Jacques Pauvert, 1965, p. 539.\"\n    },\n    {\n      \"note_item_id\": \"fn-00106\",\n      \"marker\": \"70\",\n      \"page_no\": 88,\n      \"source_text\": \"« Sont réputés suspects les ci-devant nobles et leurs parents, les personnes qui se sont vu refuser des certificats de civisme, et tous ceux qui \\\"par leur conduite, leurs relations, leurs propos, leurs écrits se montrent partisans du fédéra ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"## SPECTRES DE LA GUILLOTINE L'échafaud, dit Hugo, « a quelque chose qui hallucine ». « L'échafaud est vision. » Cette « sorte d'être qui a je ne sais quelle sombre initiative » semble doué d'une vie autonome, qui jette l'âme dans « une rêverie affreuse ». La guillotine est une image dont la puissance formelle n'a pas d'équivalent, un symbole, avant d'être un mode d'exécution, qui viendra hanter les consciences et peupler les nuits de cauchemars. En 1794, le marquis de Sade, incarcéré à la maison Coignard à Picpus, voit de ses fenêtres la place du Trône renversé (actuelle place de la Nation) où l'on procède aux exécutions. Les cadavres sont ensuite jetés dans les fosses creusées au beau milieu du jardin de sa prison. « Ma détention nationale, écrira-t-il, la guillotine sous les yeux, m'a fait cent fois plus de mal que ne m'en avaient fait toutes les bastilles imaginables $ ^{68} $. » La familiarité avec la mort sous la Révolution laisse intact l’effroi face à l’horreur de la décollation. Cette forme inédite, mécanisée, de dissection à vif provoque une frayeur parente de la crainte obscurantiste qui présida longtemps à l’ouverture des cadavres. Elle est transgression d’un même interdit. Ce que redoutent les prisonniers qui attendent l’exécution de leur verdict, ce n’est pas tant la mort que la certitude de ce démembrement public, abolissant l'intégrité physique dans un flot de sang. La mort du roi avait déjà donné lieu à des actes de désespoir, rapportés par les Révolutions de Paris : « On a su qu'un militaire, anciennement décoré de la croix de Saint-Louis, est mort de douleur en apprenant le supplice de Louis ; qu'un libraire, nommé Vente, ci-devant attaché aux Menus-Plaisirs, en est devenu fou ; qu'un perruquier de la rue Culture-Sainte-Catherine, connu pour zélé roya ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-019-lesbégaiementsdelhistoir:toc-ch-019-lesbégaiementsdelhistoir:footnote",
-      "chapter_title": "Les bégaiements de l’Histoire",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-005-spectresdelaguillotine:nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine:footnote",
+      "chapter_title": "Spectres de la guillotine",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        338,
-        338
+        87,
+        88
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 733,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00461",
-          "chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
-          "page_no": 338,
-          "paragraph_index": 1,
-          "char_start": 277,
-          "char_end": 286,
-          "source_marker": "$ ^{66} $",
-          "normalized_marker": "66",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "En cela, les aliénistes confortent l'opinion bourgeoise, prompte à assimiler la Commune à un pur acte de démence. L'évidence est en particulier admise chez les écrivains, unanimes, à quelques rares exceptions près, à condamner l'insurrection, comme l'a bien montré Paul Lidsky $ ^{66} $. Le plus violent d'entre eux, Maxime Du Camp, recourt d'ailleurs volontiers, on l'a vu, à la référence alié-niste. Ce fils de médecin, décoré des mains de Cavaignac pour sa participation dans la garde mobile en juin 1848, n'a",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00103",
+          "note_item_id": "fn-00103",
+          "anchor_id": "anchor-00147",
+          "marker": "67",
+          "note_excerpt": "Victor Hugo, Les Misérables [1862], Gallimard, «Bibliothèque de la Pléiade», 1951, p. 18.",
+          "anchor_excerpt": "L'échafaud, dit Hugo, « a quelque chose qui hallucine ». « L'échafaud est vision. » Cette « sorte d'être qui a je ne sais quelle sombre initiative » semble doué d'une vie autonome, qui jette l'âme dans « une rêverie affreuse<sup>67</sup> ». La guillotine est une image dont la puissance formelle n'a pas d'équivalent, un symbole, avant d'être un mode d'exécution, qui viendra hanter les consciences et peupler les nuits de cauchemars. En 1794, le marquis de Sade, incarcéré à la maison Coignard à Picpus, voit de ses fenêtres la place du Trône renversé (actuelle place de la Nation) où l'on procède aux exécutions. Les cadavres sont ensuite jetés dans les fosses creusées au beau milieu du jardin de sa prison. « Ma détention nationale, écrira-t-il, la guillotine sous les yeux, m'a fait cent fois plus de mal que ne m'en avaient fait toutes les bastilles imaginables $ ^{68} $. »"
+        },
+        {
+          "link_id": "link-00105",
+          "note_item_id": "fn-00105",
+          "anchor_id": "anchor-00150",
+          "marker": "69",
+          "note_excerpt": "Révolutions de Paris, n° 185, 15° trimestre, du 19 au 26 janvier 1793, p. 203.",
+          "anchor_excerpt": "la mort que la certitude de ce démembrement public, abolissant l'intégrité physique dans un flot de sang. La mort du roi avait déjà donné lieu à des actes de désespoir, rapportés par les Révolutions de Paris : « On a su qu'un militaire, anciennement décoré de la croix de Saint-Louis, est mort de douleur en apprenant le supplice de Louis ; qu'un libraire, nommé Vente, ci-devant attaché aux Menus-Plaisirs, en est devenu fou ; qu'un perruquier de la rue Culture-Sainte-Catherine, connu pour zélé royaliste, s'est de désespoir coupé le cou avec un rasoir<sup>69</sup> 69 ∞, répétant par ce geste mimétique le martyre de son souverain. La pression s'accentue à partir de la loi des suspects 70. Elle est votée le 17 septembre 1793. Le 11, Pinel a pris ses fonctions à Bicêtre."
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11634,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00104",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-spectresdelaguillotine",
+          "region_id": "nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine",
+          "marker": "68",
+          "normalized_marker": "68",
+          "occurrence": 1,
+          "source_text": "Lettre de Sade à son avocat, 21 janvier 1795, citée par Gilbert Lely, Vie du marquis de Sade, nouv. éd. entièrement refondue, Jean-Jacques Pauvert, 1965, p. 539.",
+          "page_no": 87,
+          "display_marker": "68",
+          "source_marker": "68",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11636,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00106",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-spectresdelaguillotine",
+          "region_id": "nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine",
+          "marker": "70",
+          "normalized_marker": "70",
+          "occurrence": 1,
+          "source_text": "« Sont réputés suspects les ci-devant nobles et leurs parents, les personnes qui se sont vu refuser des certificats de civisme, et tous ceux qui \"par leur conduite, leurs relations, leurs propos, leurs écrits se montrent partisans du fédéralisme et des ennemis de la liberté\" » (J. Tulard et al., Histoire et dictionnaire de la Révolution française, op. cit., p. 1105). À la veille de Thermidor, selon l'estimation d'Albert Mathiez, il y aurait eu 300 000 suspects en France, dont 8 000 à Paris.",
+          "page_no": 88,
+          "display_marker": "70",
+          "source_marker": "70",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 338,
-        "file_idx": 337,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "demeure une mesure indispensable de salubrité publique. La moralisation du débat va de pair avec sa dépolitisation. À aucun moment les aliénistes ne s'interrogent sur les idées de la Commune ou sur ses motivations, réduites au pur instinct aveugle et sauvage de destruction d'une bande d'ivrognes. On mesure ici la saute opérée par rapport à 1848 : le délirant politique de Juin, le « monomane communiste » dont pouvait encore se moquer Brierre de Boismont, est devenu en 1871 un animal sanguinaire dont la parole est décrédibilisée à la source. La séparation des Églises et de l'État, l'enseignement laïque, gratuit et obligatoire, l'égalité salariale entre hommes et femmes dont bénéficieront les institutrices, la gratuité des actes notariés, la suppression du travail de nuit pour les boulangers : en deux mois, « l'émancipation des travailleurs par les travailleurs eux-mêmes » a pourtant produit une œuvre décisive. Mais elle n'est jamais interrogée, comme ne seront jamais questionnés, à titre de folie collective, les actes de barbarie de la répression par les Versaillais. En cela, les aliénistes confortent l'opinion bourgeoise, prompte à assimiler la Commune à un pur acte de démence. L'évidence est en particulier admise chez les écrivains, unanimes, à quelques rares exceptions près, à condamner l'insurrection, comme l'a bien montré Paul Lidsky $ ^{66} $. Le plus violent d'entre eux, M ...",
-        "byte_size": 305063,
-        "sha256": "154edb2cc33502e2cdaee94bb49caff6c3adbc6af7c6ce6742e97390f9da2489"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-019-lesbégaiementsdelhistoir:toc-ch-019-lesbégaiementsdelhistoir:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-005-spectresdelaguillotine:nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00461\",\n    \"marker\": \"66\",\n    \"note_text\": \"Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.\",\n    \"confidence\": 0.95,\n    \"reason\": \"Footnote 66 is clearly visible at the bottom of page 328 (OCR misread as 338). The text matches the anchor marker '66' in the main body ('Paul Lidsky⁶⁶'). Since there is no structured note item, I am synthesizing it from the screenshot.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1738,
+    "output_tokens": 124,
+    "total_tokens": 1862,
+    "estimated_input_tokens": 1726,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00104\",\n    \"anchor_phrase\": \"« Ma détention nationale, écrira-t-il, la guillotine sous les yeux\",\n    \"confidence\": 0.95,\n    \"reason\": \"Sade quote with marker 68 in text, matches note source.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Cannot confirm marker 70 location on page 88 from excerpt.\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00461",
-      "anchor_phrase": "",
-      "marker": "66",
-      "note_text": "Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.",
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00104",
+      "anchor_id": "",
+      "anchor_phrase": "« Ma détention nationale, écrira-t-il, la guillotine sous les yeux",
+      "marker": "",
+      "note_text": "",
       "confidence": 0.95,
-      "reason": "Footnote 66 is clearly visible at the bottom of page 328 (OCR misread as 338). The text matches the anchor marker '66' in the main body ('Paul Lidsky⁶⁶'). Since there is no structured note item, I am synthesizing it from the screenshot."
+      "reason": "Sade quote with marker 68 in text, matches note source."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Cannot confirm marker 70 location on page 88 from excerpt."
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00461",
-        "anchor_phrase": "",
-        "marker": "66",
-        "note_text": "Paul Lidsky, Les Écrivains contre la Commune, Maspero, 1970.",
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00104",
+        "anchor_id": "",
+        "anchor_phrase": "« Ma détention nationale, écrira-t-il, la guillotine sous les yeux",
+        "marker": "",
+        "note_text": "",
         "confidence": 0.95,
-        "reason": "Footnote 66 is clearly visible at the bottom of page 328 (OCR misread as 338). The text matches the anchor marker '66' in the main body ('Paul Lidsky⁶⁶'). Since there is no structured note item, I am synthesizing it from the screenshot."
+        "reason": "Sade quote with marker 68 in text, matches note source."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Cannot confirm marker 70 location on page 88 from excerpt."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 1360,
-    "completion_tokens": 164,
-    "total_tokens": 1524,
+    "prompt_tokens": 1738,
+    "completion_tokens": 124,
+    "total_tokens": 1862,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4052
+    "duration_ms": 2558
   }
 }

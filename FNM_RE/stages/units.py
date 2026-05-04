@@ -8,6 +8,13 @@ from typing import Any
 
 from document.text_processing import parse_page_markdown
 
+from FNM_RE.shared.anchors import (
+    _HTML_SUP_RE,
+    _LATEX_SUP_RE,
+    _NOTE_DEFINITION_LINE_RE,
+    _UNICODE_SUP_RE,
+)
+
 from FNM_RE.models import (
     BodyAnchorRecord,
     ChapterRecord,
@@ -415,9 +422,35 @@ def _build_structured_body_pages_for_chapter(
             and note_split is not None
             and bool(str(raw_text or "").strip())
         )
-        if page_role not in {"body", "front_matter"} and not allow_mixed_note_start_body:
+        # post-note-start 页面可能有 body 内容（如 ch-014 p.346-348：
+        # markdown 是纯 body 文本，endnote 定义在 fnBlocks 中）。
+        # 统计非 note-definition 行数；若检测到 LaTeX/HTML sup 则单行也保留。
+        has_post_note_body = False
+        if (
+            not allow_mixed_note_start_body
+            and note_start_page > 0
+            and page_no > note_start_page
+            and raw_text
+        ):
+            body_lines = 0
+            has_sup_signal = False
+            for line in str(raw_text).split("\n"):
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                if _NOTE_DEFINITION_LINE_RE.match(stripped):
+                    continue
+                body_lines += 1
+                if not has_sup_signal and (
+                    _LATEX_SUP_RE.search(stripped)
+                    or _HTML_SUP_RE.search(stripped)
+                    or _UNICODE_SUP_RE.search(stripped)
+                ):
+                    has_sup_signal = True
+            has_post_note_body = body_lines >= 2 or (body_lines >= 1 and has_sup_signal)
+        if page_role not in {"body", "front_matter"} and not allow_mixed_note_start_body and not has_post_note_body:
             continue
-        if note_start_page > 0 and page_no > note_start_page:
+        if note_start_page > 0 and page_no > note_start_page and not has_post_note_body:
             continue
         _append_page_text(page_no, raw_text)
 

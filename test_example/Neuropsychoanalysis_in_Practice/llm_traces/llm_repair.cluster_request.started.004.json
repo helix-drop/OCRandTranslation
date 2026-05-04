@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-013-12psychosisiineuropsycho:nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho:footnote",
+      "chapter_title": "12 Psychosis II: Neuropsychodynamic Hypotheses",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        321,
+        322
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 1977,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00087",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+          "region_id": "nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "Whether this confusion of difference is related to the described deficit in GABA-ergic mediated neural inhibition can only be speculated at this point. The deficit in GABA may lead to decreased neural inhibiferred from the insula to the aCMS where it lets the originally trilateral interaction degenerate into a bilateral one. What does this mean within the psychological context of the self? I characterized the aCMS tion and, in conjunction with faulty glutamatergic mediation via NMDA-receptors to neuronal disinhibipsychologically by self-related processing (see Chapter 9 and Qin and Northoff, 2010 ; Qin et al., ing comes from the Mismatch negativity (MMN) as described in the first section here. Studies with tion (Lismann et al., 2008 ). Decreased neural inhibition and subsequent neuronal disinhibition in aCMS NMDA-receptor antagonists like Ketamine reported significant reductions of the MMN amplitudes. The",
+          "page_no": 321,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        },
+        {
+          "row_id": 1978,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00088",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-12psychosisiineuropsycho",
+          "region_id": "nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Relying on Freud, Carhart-Harris and Friston ( 2010 ) characterize psychosis by increased primary process thinking and reduced secondary process thinking (see also Rosenbaum et al., 2005 ). Based on",
+          "page_no": 322,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-013-12psychosisiineuropsycho:nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-013-12psychosisiineuropsycho:nr-fn-ch-0050-toc-ch-013-12psychosisiineuropsycho:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4118,
+    "estimated_prompt_tokens": 1467,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1467,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

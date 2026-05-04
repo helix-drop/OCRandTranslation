@@ -1,0 +1,153 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+      "chapter_title": "Maisons de santé, maisons d'arrêt",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        111,
+        112
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00129",
+          "note_item_id": "fn-00129",
+          "anchor_id": "anchor-00186",
+          "marker": "6",
+          "note_excerpt": "AN, F74592. Précisons que le patronyme complet des Breteuil est Le Tonnelier de Breteuil — sans doute la citoyenne avait-elle trouvé prudent de s'inscrire sous la première partie de son nom uniquement.",
+          "anchor_excerpt": "puis à la prison de la Force, dans l'attente d'un jugement qui tombe le 5 floréal an II (24 avril 1794) : Belhomme est condamné à six années de fers pour crime de concussion $ ^{6} $."
+        },
+        {
+          "link_id": "link-00130",
+          "note_item_id": "fn-00130",
+          "anchor_id": "anchor-00187",
+          "marker": "7",
+          "note_excerpt": "Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210.",
+          "anchor_excerpt": "déborder par l'arrivée des 132 Nantais modérés, accusés de complot, en partie logés chez lui, qui l'aurait contraint à augmenter ses tarifs pour faire face à des dépenses considérables? Cette seconde hypothèse, qui n'exclut pas la corruption, semble prévaloir. Comment expliquer que Belhomme se soit retrouvé sous les verrous, s'il était réellement en cheville avec Fouquier-Tinville? L'inculpé se défend, se pourvoit en cassation et remporte gain de cause. Il est libéré le 7 septembre 1794, lavé de tout soupçon, et reprend dès le surlendemain la direction de sa maison, où Gabriel de Talleyrand, oncle de l'évêque d'Autun, Volney et la «citoyenne Penthièvre», autrement dit la duchesse d'Orléans, veuve de Philippe-Égalité, traverseront la Révo<sup>7</sup>lution $ ^{8} $."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11661,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00131",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "Sur la maison Belhomme, voir Olivier Vincienne, «La maison de santé Belhomme. Légende et réalité, Paris et Île-de-France. Mémoires publiés par la Fédération des sociétés historiques et archéologiques de Paris et de l'Île-de-France, t. XXXVI, 1985, p. 135-208. Cet article défait la légende colportée par G. Lenôtre dans Paris révolutionnaire : vieilles maisons, vieux papiers, 3° série, Librairie académique Perrin, 1922, p. 119-141. Il est vrai que l'histoire de Belhomme se prête au romanesque. Cécil Saint-Laurent (Jacques Laurent) sauvera ainsi sa Caroline chérie de la guillotine, grâce au séjour qu'elle obtient chez le cynique « docteur » Belhomme, interprété par Raymond Souplex, dans le film de Richard Pottier (1951), avec Martine Carol dans le rôle-titre. L'extrait du film à ce sujet est disponible à: http://www.dailymotion.com/video/x3kyg5_caroline-cherie-martine-carol_shortfilms.",
+          "page_no": 111,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11662,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00132",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Voir Jean Tulard, « 1800-1815, l'organisation de la police », in Histoire et dictionnaire de la police du Moyen Âge à nos jours, Robert Laffont, « Bouquins », p. 268-305.",
+          "page_no": 112,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11663,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00133",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "AN, F7 8752. Lettre du préfet du Puy-de-Dôme au conseiller d'État chargé de la deuxième division de la police générale de l'Empire, 9 septembre 1807.",
+          "page_no": 112,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00130",
+          "note_item_id": "fn-00130",
+          "current_anchor_id": "anchor-00187",
+          "marker": "7",
+          "note_page_no": 110,
+          "anchor_page_no": 111,
+          "current_anchor_marker": "7",
+          "note_excerpt": "Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210.",
+          "anchor_excerpt": "déborder par l'arrivée des 132 Nantais modérés, accusés de complot, en partie logés chez lui, qui l'aurait contraint à augmenter ses tarifs pour faire face à des dépenses considérables? Cette seconde hypothèse, qui n'exclut pas la corruption, semble prévaloir. Comment expliquer que Belhomme se soit retrouvé sous les verrous, s'il était réellement en cheville avec Fouquier-Tinville? L'inculpé se défend, se pourvoit en cassation et remporte gain de cause. Il est libéré le 7 septembre 1794, lavé de tout soupçon, et reprend dès le surlendemain la direction de sa maison, où Gabriel de Talleyrand, oncle de l'évêque d'Autun, Volney et la «citoyenne Penthièvre», autrement dit la duchesse d'Orléans, veuve de Philippe-Égalité, traverseront la Révo<sup>7</sup>lution $ ^{8} $.",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 6071,
+    "estimated_prompt_tokens": 2025,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 3,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 2025,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,114 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-005-5courtfoolsandtheirfolly:nr-fn-ch-0018-toc-ch-005-5courtfoolsandtheirfolly:footnote\",\n  \"chapter_title\": \"5 Court Fools and Their Folly: Image and Social Reality\",\n  \"page_range\": [\n    259,\n    259\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00732\",\n      \"anchor_id\": \"anchor-00690\",\n      \"marker\": \"21\",\n      \"note_excerpt\": \"Burgkmair, Triumph of Maximilian I, ed. and trans. Appelbaum, p. 6. have modified two lines of Appelbaum’s translation, which, for my purposes here, deviate too far from the text. Appelbaum translates: “Their sayings and deeds without reaso ...\",\n      \"anchor_excerpt\": \"Lustigmacher, although he apparently did enjoy the privilege of telling other courtiers exactly what he thought. His portrait (fig. 4) conveys a sense of his strength and seriousness, and even if one supposes that he actually must have look ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00731\",\n      \"marker\": \"20\",\n      \"page_no\": 259,\n      \"source_text\": \"J. Franck, “Kunz von der Rosen,” in Allgemeine deutsche Biographie (Leipzig, 1875-1912), 29: 195—97; Flogel, Hofnarren, pp. 190—203. Charles V favored as “fools” men who were well above average in literacy and achievements: see Gustav Wolf, ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"Court Fools and Their Folly: Image and Social Reality LONG ago a wise people called the “Lalen” grew so tired of being constantly asked to solve the problems of their princes and neighbors that they decided to dispel their reputation for wisdom and to behave in as foolish a manner as they could. They built a new triangular town hall with no proper doors and no windows; they then tried to bring in sunshine in baskets and buckets, and finally solved the problem of darkness by taking off the roof. When the emperor came to visit, they recognized that he must already have gold and silver aplenty, and so presented him with a common pot of sour mustard. Noticing his unmarried son, they offered the swine-herd’s daughter to him in marriage. In due course, their cleverly planned foolishness became habitual, and habit became second nature to them: “Consuetudo est altera natura.” In the end, they found that they could not be other than the fools they had become. Fear of a cat (a “mousedog”) led them finally to burn down their whole town and to scatter to the four corners of the world, spreading their folly to every tribe of the race of man: “And so the name and tribe of Lalen from Laleburg disappeared and was extinguished. And yet their nonsense and folly, which was their best part, survived. Perhaps you and I have even inherited a good portion of it. Who knows if it’s not true?” $ ^{1} $ This story of the Lalen was first published anonymously in Strasbourg in 1597, and immediately in the next year, it appeared with many editorial changes as the story of a people now known as Schildbürger. In one form or the other, in at least twenty-six editions before 1800, the tale was reprinted, retold, refashioned, and even translated into Yiddish, becoming one of the best-selling “folk-books” ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-5courtfoolsandtheirfolly:nr-fn-ch-0018-toc-ch-005-5courtfoolsandtheirfolly:footnote",
+      "chapter_title": "5 Court Fools and Their Folly: Image and Social Reality",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        259,
+        259
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00741",
+          "note_item_id": "fn-00732",
+          "anchor_id": "anchor-00690",
+          "marker": "21",
+          "note_excerpt": "Burgkmair, Triumph of Maximilian I, ed. and trans. Appelbaum, p. 6. have modified two lines of Appelbaum’s translation, which, for my purposes here, deviate too far from the text. Appelbaum translates: “Their sayings and deeds without reason or rhyme / Have occasioned great laughter many a time.” The original verse reads: “Sy haben manche kurtzweil gemacht / so artlich das man Ir hat gelacht” (Schestag, “Kaiser Maximilian I. Triumph,” p. 160). Prosaically this could be translated as: “They have often been so entertaining that one laughed at them.” In producing a rhyme, however, I too have been unable to avoid deviating from the text.",
+          "anchor_excerpt": "Lustigmacher, although he apparently did enjoy the privilege of telling other courtiers exactly what he thought. His portrait (fig. 4) conveys a sense of his strength and seriousness, and even if one supposes that he actually must have looked different from this idealized image, it is nonetheless good evidence of how he was perceived, and of how he wanted to be perceived. $ ^{21} $"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 51065,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00731",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+          "region_id": "nr-fn-ch-0018-toc-ch-005-5courtfoolsandtheirfolly",
+          "marker": "20",
+          "normalized_marker": "20",
+          "occurrence": 1,
+          "source_text": "J. Franck, “Kunz von der Rosen,” in Allgemeine deutsche Biographie (Leipzig, 1875-1912), 29: 195—97; Flogel, Hofnarren, pp. 190—203. Charles V favored as “fools” men who were well above average in literacy and achievements: see Gustav Wolf, “Uber den Hofnarren Kaiser Karls V., genannt El Conde don Frances de Zuniga und seine Chronik,” Sitzungsberichte der kaiserlichen Akademie der Wissenschaften. Philosophisch-historische Classe, vol. 5, sec. 2 (1850), fasc. 6-10, pp. 21-63.",
+          "page_no": 259,
+          "display_marker": "20",
+          "source_marker": "20",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-5courtfoolsandtheirfolly:nr-fn-ch-0018-toc-ch-005-5courtfoolsandtheirfolly:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1383,
+    "output_tokens": 94,
+    "total_tokens": 1477,
+    "estimated_input_tokens": 1565,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00731\",\n        \"anchor_phrase\": \"Schildbürger. In one form or the other, in at least twenty-six editions before 1800\",\n        \"confidence\": 0.9,\n        \"reason\": \"Anchor phrase uniquely identifies the footnote's discussion of Schildbürger editions.\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00731",
+      "anchor_id": "",
+      "anchor_phrase": "Schildbürger. In one form or the other, in at least twenty-six editions before 1800",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Anchor phrase uniquely identifies the footnote's discussion of Schildbürger editions."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00731",
+        "anchor_id": "",
+        "anchor_phrase": "Schildbürger. In one form or the other, in at least twenty-six editions before 1800",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Anchor phrase uniquely identifies the footnote's discussion of Schildbürger editions."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1383,
+    "completion_tokens": 94,
+    "total_tokens": 1477,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 3171
+  }
+}

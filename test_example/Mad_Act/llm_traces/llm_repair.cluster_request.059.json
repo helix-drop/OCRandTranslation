@@ -1,0 +1,123 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-014-distressandpower:nr-fn-ch-0089-toc-ch-014-distressandpower:footnote\",\n  \"chapter_title\": \"14. Distress and power\",\n  \"page_range\": [\n    571,\n    572\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00342\",\n      \"marker\": \"5\",\n      \"page_no\": 571,\n      \"source_text\": \"0and0Fppendix0@0under0 ?>>36\"\n    },\n    {\n      \"note_item_id\": \"fn-00343\",\n      \"marker\": \"6\",\n      \"page_no\": 572,\n      \"source_text\": \"3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfillin ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"## 14 ## Distress and power Being (considered) mad in Qing China I emulate Guandi, behaving loyally and uprightly; therefore I style myself the Great King of Shanxi. 我學關帝做人忠直 所以自稱山西大王的 Lin Zhigong 林志功 (1762) Because it imagines power, madness is both impotence and omnipotence. Roy Porter (1987b: 39) Meaning is inescapable: that is to say, illness always has meaning. Arthur Kleinman (1988: 144) In Chapter 13 I explored the ways in which ordinary people treated their insane relatives, described and explained their madness, and coped with their disorder. Here I try to view the situation from the point of view of the men (I have no data on women) who were considered mad. Again, my main source of information is legal documents, “palace memorials” that reported on crimes that the authorities considered serious. Since these crimes were committed through speech, writing, and fantasy, officials tended to record more details about the words and fancies of the “criminals” involved than in homicide cases. The plight of the eighteenth-century people I study in this chapter was not purely private anguish, the inner torments of the self, madness as “the most solitary of afflictions.” $ ^{1} $ Much of their vexation arose from being taken as mad, an inflexible diagnosis they fervently disputed. The little that has survived of their voices was recorded during trials and in a few texts they had written that were seized during criminal investigations. It may be impossible to understand their outlook on life, but these texts still give us the best glimpse we will ever get on the world of people that their contemporaries considered mad. Unlike the “madmen” that official homicide reports described, those I discuss here and in Chapter 15 were quite “aware of human affairs.” “Unaware of human ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-014-distressandpower:nr-fn-ch-0089-toc-ch-014-distressandpower:footnote",
+      "chapter_title": "14. Distress and power",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        571,
+        572
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11913,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00342",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-014-distressandpower",
+          "region_id": "nr-fn-ch-0089-toc-ch-014-distressandpower",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "0and0Fppendix0@0under0 ?>>36",
+          "page_no": 571,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11914,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00343",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-014-distressandpower",
+          "region_id": "nr-fn-ch-0089-toc-ch-014-distressandpower",
+          "marker": "6",
+          "normalized_marker": "6",
+          "occurrence": 1,
+          "source_text": "3. indeed0went0into0open rebellion0in0the0late0eighteenth0century60Xusan0Saquin0has0recounted0the0socialrootsand0unfolding0of0smaller5 scale0uprisings0in0two0books 2 A?>a0and0 A@ 36 Yo0some0extent40the0government~s0fears0were0self5fulfilling6 Iavid0Twnby 2 AA>3 has arguedthat0some0rebellions0started0only0after0the0statehad bann ed organizationsIRU IHDU0W H\\0ZRX G0UHEH 6 or0explanations0of0why0the0Ving0state0saw0it0as0its0duty0to Prectify0people~s0heartsQ in ordinary0times0and Pawe0people~s0heartsQ in0cases0of0sedition40see0 =6>6",
+          "page_no": 572,
+          "display_marker": "6",
+          "source_marker": "6",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-014-distressandpower:nr-fn-ch-0089-toc-ch-014-distressandpower:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1266,
+    "output_tokens": 37,
+    "total_tokens": 1303,
+    "estimated_input_tokens": 1421,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"Footer markers unclear in OCR; need page screenshots for accurate matching.\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Footer markers unclear in OCR; need page screenshots for accurate matching."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Footer markers unclear in OCR; need page screenshots for accurate matching."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1266,
+    "completion_tokens": 37,
+    "total_tokens": 1303,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1259
+  }
+}

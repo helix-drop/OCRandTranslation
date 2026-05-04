@@ -1,0 +1,104 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-011-lemairedelunivers:nr-fn-ch-0036-toc-ch-011-lemairedelunivers:footnote",
+      "chapter_title": "Le maire de l'Univers",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        189,
+        189
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00215",
+          "note_item_id": "fn-00215",
+          "anchor_id": "anchor-00292",
+          "marker": "33",
+          "note_excerpt": "Thierry Haustgen, Observations & certificats psychiatriques au XIXe siècle, Rueil-Malmaison, Ciba, 1985, p. 238-239.",
+          "anchor_excerpt": "la fragilité de leurs arguments — la plupart tiraient leurs informations d'un roman populaire et très fantaisiste, Le Gimetière de la Madeleine, spéculant sur la substitution de Louis XVII. Tandis que les faux Napoléons sont des fous qui délivrent de toute évidence puisque chacun sait que l'original languit à Sainte-Hélène. Rares, en effet, sont ceux qui parviennent à convaincre leur entourage de leur impériale identité, si ce n'est ce monomanique, interné en 1826 (soit cinq ans après la mort de l'empereur), qui « se croit Bonaparte père de Napoléon II » et dont « les prétentions sont fortifiées par la croyance de quelques dupes qui ajoutent foi à ce qu'il dit et qui le regardent comme victime des persécutions $ ^{33} $ ». Mais le médecin ne précise pas si ces dupes sont les autres aliénés de l'asile."
+        },
+        {
+          "link_id": "link-00216",
+          "note_item_id": "fn-00216",
+          "anchor_id": "anchor-00293",
+          "marker": "34",
+          "note_excerpt": "Au début du XXe siècle, Anna Anderson, parmi d'autres candidates, a prétendu être la grande-duchesse Anastasia, fille de Nicolas II, qui avait été massacrée avec toute sa famille par les bolcheviks. Les tests ADN pratiqués sur",
+          "anchor_excerpt": "Ce qui sépare les faux dauphins des faux Napoléons est à la fois infime et gigantesque, difficile à cerner et gros comme une maison. Dans les deux cas, il y a bien usur-pation d'identité. La première serait une imposture représentant un danger politique, une escroquerie lucide, la seconde une folie sans conséquences (sinon pour l'entourage) qui ressemble à une farce. Mais les choses sont-elles aussi tranchées? Car rien ne dit que les faux dauphins ne délirent pas aussi et ne se croient pas réellement les héritiers de la Couronne, à l'image de ces mythomanes pris à leur propre mensonge, dont l'Histoire a donné tant d'exemples, du mystère Anastasia à l'affaire Wilkormiski $ ^{34} $. Comment expliquer, par ailleurs, qu'à"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11748,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00218",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-011-lemairedelunivers",
+          "region_id": "nr-fn-ch-0036-toc-ch-011-lemairedelunivers",
+          "marker": "36",
+          "normalized_marker": "36",
+          "occurrence": 1,
+          "source_text": "ADVDM, Charenton, Registre d'observations médicales, hommes et femmes, 1831, 4X699, f° 77. Entré le 10 juin 1831, sorti pas entièrement guéri le 7 septembre.",
+          "page_no": 189,
+          "display_marker": "36",
+          "source_marker": "36",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-011-lemairedelunivers:nr-fn-ch-0036-toc-ch-011-lemairedelunivers:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-011-lemairedelunivers:nr-fn-ch-0036-toc-ch-011-lemairedelunivers:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4827,
+    "estimated_prompt_tokens": 1669,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1669,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

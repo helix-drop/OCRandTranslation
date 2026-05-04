@@ -1,0 +1,97 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-018-deschacalsdespiesdessing:toc-ch-018-deschacalsdespiesdessing:footnote",
+      "chapter_title": "Des chacals, des pies, des singes et du pétrole",
+      "request_mode": "ref_only_visual",
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        324,
+        324
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [],
+      "unmatched_anchors": [
+        {
+          "row_id": 22588,
+          "doc_id": "5df1d3d7f9c1",
+          "anchor_id": "anchor-00523",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "page_no": 324,
+          "paragraph_index": 1,
+          "char_start": 137,
+          "char_end": 146,
+          "source_marker": "$ ^{31} $",
+          "normalized_marker": "31",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "source_text": "Dans ses Mémoires, Louise Michel témoigne que de nombreux communards ont, sous ses yeux, perdu la raison par « l’horreur des choses vues $ ^{31} $ » durant la lutte à mort avec les Versaillais. Le climat de délation, encouragée par Versailles qui promet des récompenses à quiconque dénonce les repaires des membres de la Commune ou du Comité central, justifie sans doute aussi cette panique de passer pour un mouchard. À titre indicatif, les autorités recevront 379 823 dénonciations anonymes écrites, rien qu’entre le 22 mai et le 13 juin 1871 $ ^{32} $.",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "rebind_candidates": []
+    },
+    "page_contexts": [
+      {
+        "page_no": 324,
+        "file_idx": 323,
+        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
+        "ocr_excerpt": "Paris révolutionnaire, sont-ce les souvenirs de la guerre franco-prussienne ou les actes de la Commune que ces patients invoquent? Soldat, sergent, colonel, maréchal, général, de l’armée régulière ou de la garde nationale fédérée, nul ne sait. Ce qu’exaltent ces délires, c’est, d’abord, le combat, l’affrontement, dans un idéal qui semble avoir pour unique objet l’héroïsme et la virilité — galvanisés (prendre le commandement) ou pris à défaut (passer pour un mouchard), comme le résume de façon saissante ce commentaire : « Il veut être chef de la République; il est masculin, il veut du masculin pour tout le monde³⁰. » Dans ses Mémoires, Louise Michel témoigne que de nombreux communards ont, sous ses yeux, perdu la raison par « l’horreur des choses vues $ ^{31} $ » durant la lutte à mort avec les Versaillais. Le climat de délation, encouragée par Versailles qui promet des récompenses à quiconque dénonce les repaires des membres de la Commune ou du Comité central, justifie sans doute aussi cette panique de passer pour un mouchard. À titre indicatif, les autorités recevront 379 823 dénonciations anonymes écrites, rien qu’entre le 22 mai et le 13 juin 1871 $ ^{32} $. Dans les mois qui suivent la Semaine sanglante, les délires en relation avec les événements s'atténuent. De 25 %, ils tombent à 12 % à Sainte-Anne. De même, la fré-",
+        "byte_size": 113319,
+        "sha256": "cac0780d8813717f51d87eb0cec50baf01deaf56f183b09f6b2b7e7338e08e0e"
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-018-deschacalsdespiesdessing:toc-ch-018-deschacalsdespiesdessing:footnote",
+    "request_mode": "ref_only_visual",
+    "page_context_count": 1,
+    "image_count": 1
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-018-deschacalsdespiesdessing:toc-ch-018-deschacalsdespiesdessing:footnote",
+    "request_mode": "ref_only_visual",
+    "allowed_actions": [
+      "ignore_ref",
+      "synthesize_note_item",
+      "needs_review"
+    ],
+    "chars": 2763,
+    "estimated_prompt_tokens": 1072,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 0,
+    "unmatched_anchors": 1,
+    "page_context_count": 1,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1072,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

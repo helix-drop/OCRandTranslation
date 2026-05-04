@@ -1,0 +1,122 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-012-11psychosisipsychodynami:nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami:footnote",
+      "chapter_title": "11 Psychosis I: Psychodynamics and Phenomenology",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        281,
+        281
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00074",
+          "note_item_id": "fn-00074",
+          "anchor_id": "anchor-00084",
+          "marker": "3",
+          "note_excerpt": "I shall use the terms “psychosis” and “schizophrenia” interchangeably, since I here focus more on the",
+          "anchor_excerpt": "In his writings about psychosis, Freud considered the notion of cathexis to be crucial in understanding the psychodynamic processes underlying psychosis $ ^{3} $ (Freud, 1924). Let me briefly recall what is meant by the concept of cathexis, which will then serve as the basis for understanding its changes in psychosis. Cathexis describes the investment of energy in something in general and in another person, event, or idea in particular (see Chapter 4). This entails three characteristic features of cathexis, namely non-specificity with regard to contents, constitution and construction of objects by means of establishing a special relationship between self and content, and multiple psychological manifestations."
+        },
+        {
+          "link_id": "link-00075",
+          "note_item_id": "fn-00075",
+          "anchor_id": "anchor-00085",
+          "marker": "4",
+          "note_excerpt": "In this first section I do not distinguish between the terms “object” and “self-object,” thus listing them toms as indicated by the term “schizophrenia,” which refers to a specific disorder with a specific (although formed into personally specific objects that as such bears a special relation to the respective to be necessary in view of the complexity of psychosis. Discussion of the neuropsychodynamic hypotheses",
+          "anchor_excerpt": "The concept of cathexis remains non-specific with regards to the contents, as the energy can possibly be invested in any kind of content, be it other people and their self, the person's own self, ideas, bodies, cognitions, events, etc. While remaining non-specific with regard to the content, the concept of cathexis must be regarded as specific for the constitution and construction of objects. The characteristic of objects, including self-objects, $ ^{4} $ is that they are (or represent) specific contents for a specific person, meaning that they are specifically related to the self of the person in question (i.e. they are, as I said, self-related). Cathexis as the investment of energy is supposed to enable and predispose to self-related processing by means of which stimuli, i.e. person, idea, cognition, body, events, etc. that do not bear any special relation to the person's self are transformed into personally specific objects that as such bears a special relation to the respective person's self (e.g. \"self-relatedness\") (see Chapter 9)."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 1962,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00072",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-012-11psychosisipsychodynami",
+          "region_id": "nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami",
+          "marker": "1",
+          "normalized_marker": "1",
+          "occurrence": 1,
+          "source_text": "I here and in the following account (in both this and the next chapter) deliberately use the term “psychosis” enable and predispose to self-related processing by means of which stimuli, i.e. person, idea, to cover the broad range of symptoms, rather than focusing on a specific etiology or cause of these symppsychological manifestations. cognition, body, events, etc. that do not bear any special relation to the person’s self are transThe concept of cathexis remains non-specific with regards to the contents, as the energy can",
+          "page_no": 281,
+          "display_marker": "1",
+          "source_marker": "1",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        },
+        {
+          "row_id": 1963,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00073",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-012-11psychosisipsychodynami",
+          "region_id": "nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "I here devote an entire chapter to the psychodynamics (and phenomenology) of psychosis, which I deem possibly be invested in any kind of content, be it other people and their self, the person’s own self, ideas, bodies, cognitions, events, etc. While remaining non-specific with regard to the content, the concept of cathexis must be regarded as specific for the constitution and construction of",
+          "page_no": 281,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-012-11psychosisipsychodynami:nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-012-11psychosisipsychodynami:nr-fn-ch-0042-toc-ch-012-11psychosisipsychodynami:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5314,
+    "estimated_prompt_tokens": 1808,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1808,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

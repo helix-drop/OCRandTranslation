@@ -385,6 +385,13 @@ def build_note_items(
     page_text_map: Mapping[int | str, str] | None = None,
 ) -> tuple[list[NoteItemRecord], dict]:
     page_by_no = _annotated_page_by_no(pages)
+    from FNM_RE.stages.note_regions import _reclassify_post_body_fnblocks_as_endnote
+    _page_role_by_no = {
+        int(row.page_no): str(row.page_role)
+        for row in phase1.pages
+        if int(row.page_no) > 0
+    }
+    _reclassify_post_body_fnblocks_as_endnote(phase1, page_by_no, _page_role_by_no)
     normalized_page_text_map: dict[int, str] = {}
     for raw_key, raw_value in dict(page_text_map or {}).items():
         try:
@@ -505,11 +512,14 @@ def build_note_items(
                 page_text_map=normalized_page_text_map,
                 pdf_text_by_page=pdf_text_by_page,
             )
+            _has_reclassified = bool(
+                (page_payload.get("_note_scan") or {}).get("has_reclassified_endnotes")
+            )
             parsed_from_text, marker_state = parse_note_items_from_text(
                 text,
                 last_marker_value=last_marker_value,
             )
-            if parsed_from_text:
+            if parsed_from_text and not _has_reclassified:
                 parsed_rows.extend(
                     {
                         "page_no": page_no,

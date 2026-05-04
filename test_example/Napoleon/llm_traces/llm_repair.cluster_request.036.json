@@ -1,0 +1,114 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-015-1848oulapestedémocratiqu:nr-fn-ch-0048-toc-ch-015-1848oulapestedémocratiqu:footnote\",\n  \"chapter_title\": \"1848 ou la peste démocratique\",\n  \"page_range\": [\n    258,\n    258\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00309\",\n      \"anchor_id\": \"anchor-00403\",\n      \"marker\": \"51\",\n      \"note_excerpt\": \"Pour une synthèse, voir l'article de Michelle Perrot, « 1848 : la révolution des femmes », L'Histoire, n° 218, 1998. Voir également les travaux de Michèle Riot-Sarcey et notamment Parcours des femmes dans l'apprentissage de la démocratie. D ...\",\n      \"anchor_excerpt\": \"confirment leur rôle en tant qu’«actrices de l’histoire<sup>51</sup>51 ». Cibles rêvées, elles suscitent davantage la haine ou la «conspiration du silence » que l’admiration, excitent l’irritation et le sarcasme, y compris dans leur camp po ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00310\",\n      \"marker\": \"52\",\n      \"page_no\": 258,\n      \"source_text\": \"Alexandre Dumas, Le Mois. Revue historique et politique jour par jour de tous les événements qui se produisent en France et à l'étranger depuis Février 1848, 2° année, n° 17, 1er mai 1849, p. 141.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"révolution et folie soit à l'époque un sujet surtout réservé aux excentriques et aux pamphlétaires, comme le médecin grenoblois Sylvain Eymard, auteur d'un brûlot ultraconservateur intitulé La Politicomanie ou De la folie actuelle-ment régnante en France (1832), fustigeant, pêle-mêle et dans une langue boursouflée, la peste révolutionnaire, la manie de la souveraineté populaire et l'obsession démocratique et républicaine. On peut douter que l'ouvrage ait trouvé de nombreux lecteurs. Il connaîtra en revanche, dans une édition refondue, plusieurs réimpressions au début du Second Empire, sous un titre plus ambitieux, signalant à quel point la révolution est désormais perçue comme un phénomène structurel : La Politicomanie ou Coup d'œil critique sur la folie révolutionnaire qui a régné en Europe depuis 1789 jusqu'au 2 décembre 1851. ## 1848 OU LA PESTE DÉMOCRATIQUE ## Les chiffres et les lettres Plus longue, plus convulsive et infiniment plus meurtière que les Trois Glorieuses, la révolution de 1848 relance l'attention des aliénistes. Dès le mois de mai, le docteur Jacques-Étienne Belhomme, le fils du même Belhomme qui tenait pension sous la Terreur, présente à l'Académie de médecine un mémoire, Influence des événements et des commotions politiques sur le développement de la folie. L'étude s'inscrit dans le sillon de travaux antérieurs élaborés à la suite de la révolution de 1830 et aboutit aux mêmes conclusions : le nombre d'aliénés augmente en temps de révolution, les événements agissant sur les « têtes faibles » ou les tempéraments fragiles, prédisposés à la maladie mentale. « La révolution de Février a été subite, déclare-t-il, et s'est opérée avec une incroyable rapidité ; la population de Paris s'est profondément émue des dispositions armées, des détonations de coups ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-015-1848oulapestedémocratiqu:nr-fn-ch-0048-toc-ch-015-1848oulapestedémocratiqu:footnote",
+      "chapter_title": "1848 ou la peste démocratique",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        258,
+        258
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00309",
+          "note_item_id": "fn-00309",
+          "anchor_id": "anchor-00403",
+          "marker": "51",
+          "note_excerpt": "Pour une synthèse, voir l'article de Michelle Perrot, « 1848 : la révolution des femmes », L'Histoire, n° 218, 1998. Voir également les travaux de Michèle Riot-Sarcey et notamment Parcours des femmes dans l'apprentissage de la démocratie. Désirée Gay, Jeanne Deroin, Eugénie Niboyet, 1830-1870, thèse de doctorat, Paris-I, 1990, et, avec Maurizio Gribaudi, 1848, la révolution oubliée, La Découverte, 2008.",
+          "anchor_excerpt": "confirment leur rôle en tant qu’«actrices de l’histoire<sup>51</sup>51 ». Cibles rêvées, elles suscitent davantage la haine ou la «conspiration du silence » que l’admiration, excitent l’irritation et le sarcasme, y compris dans leur camp politique, où les barricadières sont jugées déplacées, et les plus militantes accusées de revendications intempestives quand les efforts doivent se porter en priorité, et sans distinction, sur le sort du prolétariat. « Où sont les mots qui expriment le dégoût, le mépris, avec le plus de virulence, pour les jeter à la tête de ces mégères échappées du foyer domestique ou plutôt des cabanons de Bicêtre52! » s’exclame en 1849 Alexandre Dumas, candidat malheureux aux élections et républicain déçu, qui s’est rapproché du parti de l’Ordre."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11840,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00310",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+          "region_id": "nr-fn-ch-0048-toc-ch-015-1848oulapestedémocratiqu",
+          "marker": "52",
+          "normalized_marker": "52",
+          "occurrence": 1,
+          "source_text": "Alexandre Dumas, Le Mois. Revue historique et politique jour par jour de tous les événements qui se produisent en France et à l'étranger depuis Février 1848, 2° année, n° 17, 1er mai 1849, p. 141.",
+          "page_no": 258,
+          "display_marker": "52",
+          "source_marker": "52",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-015-1848oulapestedémocratiqu:nr-fn-ch-0048-toc-ch-015-1848oulapestedémocratiqu:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1531,
+    "output_tokens": 38,
+    "total_tokens": 1569,
+    "estimated_input_tokens": 1544,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Unmatched footnote marker 52 not visible in provided body excerpt.\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Unmatched footnote marker 52 not visible in provided body excerpt."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Unmatched footnote marker 52 not visible in provided body excerpt."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1531,
+    "completion_tokens": 38,
+    "total_tokens": 1569,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2350
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-002-1transcendentalapproacht:nr-fn-ch-0004-toc-ch-002-1transcendentalapproacht:footnote",
+      "chapter_title": "1 Transcendental Approach to the Brain",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        50,
+        50
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 1902,
+          "doc_id": "e7f8a1b6c2d3",
+          "note_item_id": "fn-00012",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-1transcendentalapproacht",
+          "region_id": "nr-fn-ch-0004-toc-ch-002-1transcendentalapproacht",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "The rejection of possible neural correlates and the consecutive shift to neural predispositions is also well documented in the following quote: “We can avoid any possible abuse of this method of representation by exposed to the world and its input, the libidinal drive generates conflict with opposing wishes and demands. Broadly speaking, this leads to the subsequent development and constitution of the ego, and ultimately the tripartite structure of the psychic apparatus, including its various cognirecollecting that ideas, thoughts and psychical structures in general must never be regarded as localized in",
+          "page_no": 50,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "",
+          "created_at": 1777756831,
+          "updated_at": 1777756831
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-002-1transcendentalapproacht:nr-fn-ch-0004-toc-ch-002-1transcendentalapproacht:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-002-1transcendentalapproacht:nr-fn-ch-0004-toc-ch-002-1transcendentalapproacht:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3798,
+    "estimated_prompt_tokens": 1375,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1375,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

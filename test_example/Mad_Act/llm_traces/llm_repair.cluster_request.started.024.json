@@ -1,0 +1,159 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0037-toc-ch-006-replenishorattack:footnote",
+      "chapter_title": "6. Replenish or attack?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        232,
+        239
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11677,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00105",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-replenishorattack",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "< @3/but/a`U ͇ by his/discipleGhen/ ue ̱Ŷ at/the/beginning/of [angUs G UWQ/XUXU ÏȰǯ] 1[ang ]UA/ >2/indicates/thathe died/on anuary/ < 1 iajing ?5 5 25 Ghapter <2 and/discussed/the/writings/of/illustrious/authors/like/[ang/Pun or/more/on/the/books/and/physicians/of/which/[ang/ i/was/aware3/see/ rant/ A/ </and/ 4 =5Ǫɕ 1 < 4 < B",
+          "page_no": 232,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11678,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00106",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-replenishorattack",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "1. ,*' - hõ\u0003ȍ \u0003EAA@\u000138F7D\u0001 \u0011\u0004\u00013@6\u00010:G\u00010:7@:7@9UE ,6'\u00017' , ƽ̕ŵ \u00033F\u0001>3F7EF\u0001 \u0010\u0010\u0004\u0007",
+          "page_no": 233,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11679,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00107",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-replenishorattack",
+          "marker": "6",
+          "normalized_marker": "6",
+          "occurrence": 1,
+          "source_text": "VEppendixW ̛̬ a4>bB/[ang ]UA/ F4 E2/and/VSn/using/ginseng/and/astragalus/_to/treat` illnessW/1ȃǵ ¡ʕ˔ BU UP 53VEppendixW >b4 aB/[ang ]UA/ F4 <25/Xhe/latter/was/written/in/ < /by/[ang/and/his disciple/Gheng/Uiaoȴ̡ 5/[ang/proposed similar/arguments/in/a/long/case/called/Vregulating/the/mensesW/_˓ ɒ `3/but/without/naming/[ang/Pun/1ETU_T Z/eU Z 5 b4 aB/[ang ]UA/?@E25 @ [ang/ i also/drew/support/from/Pi/ aoUs/claim/that/]ang/could/generate/Flood5/ n/her/excellent/summaries of/[angUs/interpretation/of/replenishing/1 @@@A/ = n /and/ ?n 23/Gharlotte/ urth/claimed/that/[angwas criticizing/^hu/^henheng3/but/since/[ang/supported/his/own/position/with/citations/from/^hu3/ /prefer/to/say that/his/critiques/targeted/[ang/PunUs/interpretation/of/ ire3/which/itself/purported/to/represent/^huUs/position5 Gompare/with/Xable <5 /1p5 ?=25/]u/Xuan/had/argued/thatUi depletion/meant/Vdepletion/of/the/]in/aspect of UiW/and/VFlood/depletionW/the/depletion/of/the/]in/aspect/of/Flood 1<5>25[angUs argument3 which/opened theETU_T Z/eU Z ȤØ̕Ŵ 1VSn/Gonstructive/and/Trotective/_Ui`W Ǜʺ˔ BETU_T Z/eU Z 5 bB/[ang ]UA/=<23 did/not/unambiguously/Vunderlie/the/basis/of/all/of/[ang/ iUs/clinical/practiceW/1 rant/ @@?A/< 2/and/Vgovern his/preferred/choice/of/treatment/for/depletionW/1U UP 5A/< 25 is/two/refutations/of/[ang/Pun3/for/instance3/did not mention/his/interpretation/of/constructiveUi5 Pi/ aoUs/claim/that/replenishingUi could/generate/Flood gave [ang/sufficient/reasons/to/prescribe/ginseng/and/astragalus/in/cases/of/]in/depletion5/ e/may/have developed his/theory/of/constructive/and/protectiveUi as/a/retrospective/doctrinal/explanation/ofhis therapeutic/success5",
+          "page_no": 234,
+          "display_marker": "6",
+          "source_marker": "6",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11680,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00108",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-replenishorattack",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "5. a25/Hai/had/used/astragalus/and/ginseng/to replenish/a/man who/suffered/from/extreme/]ang/depletionB/he/had/also/recommended/Pi/ aoUs/Vmethod/of removing/great/ eat/with/sweet/and/warming/_drugs`Wǲƾ̯ÒǗ>ƥ 1Wong/Pian3/VWong/Hai/]uanli/huan Tujiang/xuW˼ĩpȭ̐ƬƜä 3E[ZS/GQZdU Z/S[ZS/]a ZVU çŇġyw̷ ?5 @b25/Wince/^hu/^henheng/had warned/that/grayish4dark people/should/not/ingest/too/much/ginseng/lest/it/nourished/ ire/and/consumed/true ]in/1ʿƘǵ ¡ Ǖʣͣ ÐŢ> Ď¤aǎ̑ɭǜ Ȟ̰ 23/[ang/ i/claimed/that/it/was/then/Vnatural that/it/is/best/for/fat/and/pale/people/to/take/much/of/itW/1ɴȓ> ÐŢşÚ ƍÃǕȠ 2/_ ETU_T Z/eU Z ȤØ ̕Ŵ 3 VEppendixW̛̬ B [ang ]UA/ `5 an/Qao ͂ģ recorded/having/cured/a/fat/and/pale/1õɴʓȓ 2 man/with/warming/drugs/1cited/inETU_T Z/eU Z 5 @a3/VVeplenishing/]inW ʿ̰ B/[ang ]UA/@@E 25 @ [ang/called/the/last/two/ingredients/the/VassistantW/1W 2/and/the/VmessengerW/1[ 25Xhe/mucus/section/of/the ZdU/dUZR had recommended/bamboo/juice/to/cure/mucus3/including/when/mucus/caused/madness/by/lodging itself/in/the/chest5 [ang/explained/elsewhere/that/coolants/could/balance/the/heat/provoked/by/ginseng/and astragalus5 Hai/Wigong/had/recommended/sweet/and/cooling/drugs/to/bring/down/depletion/ ire3/and/the=UZSaU S[ada Z ̙g̚Ǩ claimed/that/Faikal/skullcap/could/treat/ eat4mucus/1ƣǗȇ 2/1 5 a3 VQucus WB ZdU/eUVU A @ 25 Xhe/potential/synergy/or/mutual/effects/of/plants/are/exponential/and/impossible/to/calculate/1see/Sbringer @@>25/Iven/if/we/had/complete/understanding/of the/pharmacological/effects/of each/individual/plant [ang used 1including/the/effect/of/plant/origin3/part/of/plant/used3/time/of/collection3/method/of/preparation3 time/of decoction3/way/of/ingestion3/and/synergetic/effects23/it/would/still/be difficult to/connectthese/effectswith/the symptoms/at/hand3/sinceindeed Vone/cannot/extrapolate/with/confidence/from/the/analysis/of/plant/chemistry to/the/human/experienceW/1Itkin/ @@=A = n 25 aced/with/this Vvirtual/chaos/of/pharmacologic/potentialW 1idemA/ <>23 limit myself to/a/study/of/the/intended/effect/of/the/plants/in/question5 Xhismay have/been/a/reference/to/^hu/^henhengUs/precept/1originally/drawn/from5 _UO/CaQ_`U[Z_ =A ʶƘɬ >ȫ 2/that/consciousness/and/vitality/were/based/on/Flood/andUi 1Ƙʶɬ ˰>ȫC B QfTU/eaXaZ űʊ͓",
+          "page_no": 237,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11681,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00109",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-replenishorattack",
+          "region_id": "nr-fn-ch-0037-toc-ch-006-replenishorattack",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "and/in briefer/form/in/Pi/GhanUsŨŸ IUdaQ/^aYQZ ̕äu̥ 1 <><23 Va Z _T[a n͔ 3 VVu/yiW l̕ 3 V[ang/ iW ƝƆ 1 @@<A F4 <E25/ /cite/from@UZSeU/XQU Z 5 V ecal/juicesW/1ɇƶ 2/was/a/preparation/based/on/human/excrements/thathad alreadybeen discussed/by/Xao ongjing ̲ðř 1 <=4< =2 in/his/works/on Y `Q^U YQPUO 1seecitation/from/Xao/and/other/medical/authors/in Pi/WhizhenUsŨŗǫ 5QZO [/S ZSYa ťʝɔț _ <>?` < 5 a4b3/V uman/fecesW Õ 25/ f/we/are/to/believe/a story/by/]uan/Qeiʾŭ 1 > =4 >@>23/Vfecal juicesW/could/be/purchased/in/stores and/were/used/as/emetics/in cases/of/emergencies/like/poisoning1see U/ a/ea à4ˏ 3Va Z",
+          "page_no": 239,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0037-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-replenishorattack:nr-fn-ch-0037-toc-ch-006-replenishorattack:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5120,
+    "estimated_prompt_tokens": 1767,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 5,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1767,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

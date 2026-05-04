@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-002-prologue:nr-fn-ch-0006-toc-ch-002-prologue:footnote",
+      "chapter_title": "2. Prologue",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        42,
+        42
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11580,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00008",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-prologue",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-prologue",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "8. These are the dates proposed in Nathan Sivin 1993.",
+          "page_no": 42,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11581,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00009",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-prologue",
+          "region_id": "nr-fn-ch-0006-toc-ch-002-prologue",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "9. This is when the imperial government had the two main versions of the Canon re-edited, printed, and distributed (3.6).",
+          "page_no": 42,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-002-prologue:nr-fn-ch-0006-toc-ch-002-prologue:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-002-prologue:nr-fn-ch-0006-toc-ch-002-prologue:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3779,
+    "estimated_prompt_tokens": 1370,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1370,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

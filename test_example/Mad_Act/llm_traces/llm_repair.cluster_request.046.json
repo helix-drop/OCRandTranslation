@@ -1,0 +1,143 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-003-psychobehavioralpatholog:nr-fn-ch-0011-toc-ch-003-psychobehavioralpatholog:footnote\",\n  \"chapter_title\": \"3. Psycho-behavioral pathology in Chinese medicine\",\n  \"page_range\": [\n    56,\n    57\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00015\",\n      \"marker\": \"2\",\n      \"page_no\": 56,\n      \"source_text\": \"ǀ˚ 3C0^hangP]UB0 >?F6\"\n    },\n    {\n      \"note_item_id\": \"fn-00016\",\n      \"marker\": \"3\",\n      \"page_no\": 57,\n      \"source_text\": \"was0called0Umedical recipesV 2ˌļ 3C0almost0half0the0works0listed0therein0contained0the0word0UrecipesV0in0their0title6 E0passage0from0theVmgr`mYf Ôg 2first0year0of0Huke0^haoŇu 3 also0identified0six0forms0ofUi that0could common description40[ ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"I noted in Chapter 1 that Martha Li Chiu (1986) scoured the Inner Canon to find a Chinese medical object comparable to mental illness, and that she settled on kuang because it was mostly characterized by \\\"mental symptoms.\\\" But by describing symptoms (rather than illnesses) as either mental or physical, she reproduced a problematic dichotomy at a lower level without uncovering the assumptions it hides. Below, I propose an alternative way of comparing Chinese medical approaches with psychiatric ones. My goal is to foster our understanding of medical discourse on kuang by breaking free from the preconceptions that lurk beneath the notions of \\\"mental\\\" and \\\"physical.\\\" ### 3.2 Psycho-behavioral pathology in Chinese medicine Comparisons: why not “mental illness”? Most scholars (Chinese and Western alike) who have written on insanity in Chinese history since the 1950s have used the phrase “mental illness” either to describe their object or to pose this notion as the basis for comparing psychiatry with Chinese medicine. $ ^{14} $ But the pure notion of “mental illness” with which Chinese conceptions are so often contrasted (or deemed incomparable) may never have existed. From the era of “mad-doctoring” to the latest edition of the Diagnostic and Statistical Manual of Mental Disorders (or DSM; see APA 1994), behavioral symptoms have been at the center of psychiatric attention. The preconception that the notion “mental illness” depends on a mind-body dualism has also hindered comparisons. There are indeed many distinct ways (symptomatic, etiological, and therapeutic) in which illnesses can be called “mental” without implying a dualism of substance: their symptoms may be defined cognitively (defects of reason, representation, or perception, which are widely held to be “mental” prop ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-psychobehavioralpatholog:nr-fn-ch-0011-toc-ch-003-psychobehavioralpatholog:footnote",
+      "chapter_title": "3. Psycho-behavioral pathology in Chinese medicine",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        56,
+        57
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11587,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00015",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-psychobehavioralpatholog",
+          "region_id": "nr-fn-ch-0011-toc-ch-003-psychobehavioralpatholog",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "ǀ˚ 3C0^hangP]UB0 >?F6",
+          "page_no": 56,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11588,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00016",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-psychobehavioralpatholog",
+          "region_id": "nr-fn-ch-0011-toc-ch-003-psychobehavioralpatholog",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "was0called0Umedical recipesV 2ˌļ 3C0almost0half0the0works0listed0therein0contained0the0word0UrecipesV0in0their0title6 E0passage0from0theVmgr`mYf Ôg 2first0year0of0Huke0^haoŇu 3 also0identified0six0forms0ofUi that0could common description40[indwas one0of0six kinds0of0Ui0that0were harmful when0excessive4 instigate0illness0when0UexcessiveV02qafƛ 3Bthe0Ui0of ]in02˥ 34]ang02˧ 34 wind02̆ 340rain02˱ 340darkness2ŋ 30and brightness2Ł 360[indUi was0said0to0cause0Udisorders0of0the0extremitiesV02ŚǛ 40or0Ulimb disordersV340and0dark the0other0five0being0Gold02and0brightUi to0trigger0respectively0Udisorders0involving0mental0confusionV02`Yf ð 340Wummer0 eat02k`m Ȣ 340Hampness02ćǛ 30and0Udisorders0ofthe0heart k`aƪ 340Hryness02rYg and0mindV02ôǛ 360Xhe0translations0are0from0Wivin A@?B0==6 = >Yka[0 m]klagfk 0and0> C@anaf]0 angl A60 n>Yka[0 m]klagfk A0and0 40[ind0was0called0Uthe0chief0of0the Ƹ 340and0Jire02`mg Ʈ 36 hundred0illnessesV02Ǯǜ ˙ 360 owever4>Yka[0 m]klagfk A0claimed0that0Uthe0hundred0illnesses0are0produced0by UiV02ǮǜǏĽƆ 30and@anaf]0 angl A0assigned0illness5causing0power0to0the0four0seasonalUi 2¿ŉ Ɔ 36 > Sn0[ind0as0a0bringer0of0illnessB0Ynschuld0 A@=B0>?5? C0 shida0 AA C0 uriyama0 AA 0and0 AAAC0]amada0 6",
+          "page_no": 57,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-psychobehavioralpatholog:nr-fn-ch-0011-toc-ch-003-psychobehavioralpatholog:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1238,
+    "output_tokens": 118,
+    "total_tokens": 1356,
+    "estimated_input_tokens": 1418,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00015\",\n    \"anchor_phrase\": \"Martha Li Chiu (1986) scoured the Inner Canon\",\n    \"confidence\": 0.75,\n    \"reason\": \"Marker 2 appears near mention of Li Chiu and Inner Canon\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Marker 3 text is garbled OCR; no clear anchor in excerpt\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00015",
+      "anchor_id": "",
+      "anchor_phrase": "Martha Li Chiu (1986) scoured the Inner Canon",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.75,
+      "reason": "Marker 2 appears near mention of Li Chiu and Inner Canon"
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Marker 3 text is garbled OCR; no clear anchor in excerpt"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00015",
+        "anchor_id": "",
+        "anchor_phrase": "Martha Li Chiu (1986) scoured the Inner Canon",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.75,
+        "reason": "Marker 2 appears near mention of Li Chiu and Inner Canon"
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Marker 3 text is garbled OCR; no clear anchor in excerpt"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1238,
+    "completion_tokens": 118,
+    "total_tokens": 1356,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2334
+  }
+}

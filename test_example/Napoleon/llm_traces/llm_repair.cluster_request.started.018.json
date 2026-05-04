@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-020-postambule:nr-fn-ch-0064-toc-ch-020-postambule:footnote",
+      "chapter_title": "Postambule",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        346,
+        347
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11988,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00458",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-020-postambule",
+          "region_id": "nr-fn-ch-0064-toc-ch-020-postambule",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "Pour un remarquable état des lieux de la psychiatrie actuelle en France, on se reportera au film de Philippe Borrel, Un monde sans fous (67 min), coproduit par Cinétélé et le Forum des images, et diffusé sur France 5 le 13 avril 2010. Au 2 décembre 2010, il était toujours en ligne sur le site de Mediapart, avec l'intégralité des entretiens, dont le montage du film a retenu seulement quelques extraits : http://www.mediapart.fr/content/un-monde-sans-fous-ou-les-derives-dela-psychiatrie",
+          "page_no": 346,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11989,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00459",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-020-postambule",
+          "region_id": "nr-fn-ch-0064-toc-ch-020-postambule",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "Ces questionnaires à choix multiples, destinés à dépister chez l'enfant d'éventuels troubles psychiques (dépression, phobie, anxiété, etc.), sont fondés sur le DSM-IV. L'enfant doit en général répondre par oui ou par non à des questions posées par l'ordinateur, comme par exemple: «Es-tu tout le temps triste?», «As-tu parfois envie de mourir?», «Veux-tu rester chez tes parents plutôt que d'aller à l'école?».",
+          "page_no": 347,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-020-postambule:nr-fn-ch-0064-toc-ch-020-postambule:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-020-postambule:nr-fn-ch-0064-toc-ch-020-postambule:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4099,
+    "estimated_prompt_tokens": 1461,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1461,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

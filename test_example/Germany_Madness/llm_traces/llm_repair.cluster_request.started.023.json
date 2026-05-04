@@ -1,0 +1,141 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir:footnote",
+      "chapter_title": "6 Pilgrims in Search of Their Reason",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        320,
+        320
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 51209,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00872",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "84",
+          "normalized_marker": "84",
+          "occurrence": 1,
+          "source_text": "Bauer, Bayerische Wallfahrt Altotting, p. 64; Philipp Maria Halm, “Die Mirakelbilder zu Altotting,” Bayerischer Heimatschutz 21 (1925): 1—25. The great miracle altar at Mariazell has a picture of such a snake expulsion, too: see Peter Krenn, “Der grofie Mariazeller Wunderaltar,” Jahrbuch des kunsthistorischen Instituts der Universitit Graz 2 (1966-67): 31-51.",
+          "page_no": 320,
+          "display_marker": "84",
+          "source_marker": "84",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 51210,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00873",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "85",
+          "normalized_marker": "85",
+          "occurrence": 1,
+          "source_text": "See the remarks of Felicitas D. Goodman on “Visions,” in The Encyclopedia of Religion, ed. Mircea Eliade (New York, 1987), 15: 282-88; cf. William Christian, Apparitions in Late Medieval and Renaissance Spain (Princeton, 1981).",
+          "page_no": 320,
+          "display_marker": "85",
+          "source_marker": "85",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 51211,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00874",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "86",
+          "normalized_marker": "86",
+          "occurrence": 1,
+          "source_text": "Bauer, Bayerische Wallfahrt Altotting, p. 64.",
+          "page_no": 320,
+          "display_marker": "86",
+          "source_marker": "86",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 51212,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00875",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "87",
+          "normalized_marker": "87",
+          "occurrence": 1,
+          "source_text": "Bauer, “Das Altottinger Mirakelbiichlein von 1540,” p. 247, and nos. 7, 8, o, 17, 24,",
+          "page_no": 320,
+          "display_marker": "87",
+          "source_marker": "87",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4508,
+    "estimated_prompt_tokens": 1578,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 4,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1578,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

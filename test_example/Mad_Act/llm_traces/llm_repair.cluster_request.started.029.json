@@ -1,0 +1,141 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0025-toc-ch-005-danxisaid:footnote",
+      "chapter_title": "5. “Danxi said…”",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        166,
+        170
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11640,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00068",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0025-toc-ch-005-danxisaid",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "C;E4F8 ;8 5BEEBJ87 9EB@ G;8 $121 2) 52%/(06 G; CEB5?8@ J;<6; J4F <GF8?9 54F87 BA3,$1 B9 G;8 $6,& 8(67,216 ʹWˎ #BHUF BA?L 6B@@8AG GB1;4A: !<UFV 4A:=< 4A7 9BK:?BI8 786B6G<BAWJ4F V.<A7 W 7<F6HFF87 G;8 .<A7 8G<B?B:L B9 @47A8FF 4A7 G;8 ABG<BA B9 V.<A7 <??A8FF8FW <A 4A7 G;8 E8C?468@8AG B9 G;8 .<A7 8G<B?B:L B9 @47A8FF J<G; BA8 54F87 BA <E8 4A7 @H6HF <A ;4CG8EF 4A7 .<G;BHG 6BHAG<A: G;E88 64F8F 5L /H *;HJ8< J;<6;J8 E8 6<G87 4F <??HFGE4G<BAF GB 4 E86<C8 F88 CC8A7<K 'BJ78E87 @8?BA C87<6?8 J4F FB@8G<@8F 64??87 V#BA8 F4<AG CBJ78EW ǹɺŕ",
+          "page_no": 166,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11641,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00069",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0025-toc-ch-005-danxisaid",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "8A: 0< ̟ƴ V$<A: 98A: M;8A: 749H G4<L<LH4AF;< /<4AL< 9H =HA K<A: M;H4A:W Ť¶ƞ¯²±̡̼.͗ C8E<B7 5HG J8 64A GE468 G;8 @87<64? 4A7 87<G<A: 46G<I<G<8F B9 FB@8 B9 1;HUF <??HFGE<BHF û˄Ǵ 2;8E849G8E V/<A:M;H4A:W3 6?4<@87 G;4G 4< *<:BA: J4F V54E8?L 68, J;8A ;8 9B??BJ87 ;<F 94G;8E GB I<F<G 21;H3 4AK<W ĴĂKČû˩ ǔ <A 8<$1* ,$1;, $,6+, =21*38 Ǆ́ÿǔıªÌˮ 6<G87 7<F6<C?8F 4A7 G;8 8IB?HG<BA B9 F86G<BAF B9 @47A8FF <A G;8<E E8?8I4AG JBE>F +;8 CE8I<BHF <A $1;, <,-, 3 *<:BA:UF LBHA:8E 5EBG;8E *<J8AęǕ 4A7 4< #<4A:UF FBA *<?8ęƖ J8E8 4?FB 1;HUF 7<F6<C?8F +;8 6?4<@ G;4G 4< J4F CE<I<?8:87 5L 1;H 64A 58 9BHA7 <A GJB G8KGF 5L *BA: #<4AÊǞ V+<",
+          "page_no": 168,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11642,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00070",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0025-toc-ch-005-danxisaid",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "$1* )$+8, äŜȠň 4 $1;, <,-, 4??H7<A: GB 4 C4FF4:8 9EB@ 04A: /<BA:UFƑ͂ S $<$1 ƺ˖ ʦǳɖ̬Wĭ˨° ˃˖ǃ Wļ˨ɺ F88 %L?4A 4A7 %L?4A 4A7 *<I<A 4<UF 8C<G4C; 6?4<@87 G;4G 4< 4A7 1;H;47 8K6;4A:87 ?8A:G;L ?8GG8EF ćĎųɯƨĵȔȔhȢ˖ 1;HUF 8C<G4C; <A7<64G87 G;4G V;,$16+(1* UF G;8E4C<8F JBE>87 JBA78E9H??L G;8E8 4E8 F6BE8F B9 FH6; 264F8F3 2;<F3 7<F6<C?8F",
+          "page_no": 169,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11643,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00071",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-danxisaid",
+          "region_id": "nr-fn-ch-0025-toc-ch-005-danxisaid",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "2. $1;,\u0001<,-, \u0014 \u00103\u0005\b G\u0001J4F\u00016B@@BA\u00019BE\u00017<F6<C?8F B9\u0001G;8\u00017LA4FGLW\u0001\u0004GB G4>8 ABG8F\u0001J;<?8\u0001G;8<E\u0001@4FG8EF\u0001J8E8\u0001GE84G<A:\u0001C4G<8AGF\b1;4A: \u001aBA:M; 8A:UF̳Řʑ\u0011͝ \u0015\u0016,1*6+, \u0012\u0014\u0001 \u0011\u0012\u0011\u0007\u0012\u0012\u0005\u0006\u0001J4F G;8A 4G\u0001G;8 4C8K B9\u0001;<F\u0001CBJ8E\b +,;,1*\u00016$1/,$2 gĄ\u0006Ȝ \u000464\b\u0001 \u0012\u0015 -8$1 \u0010\u0007\u0012\u0001B9\u0001G;8\u0001E868<I87\u001b80(1\u00016+,4,1 ;̲\u0019˓ \u0005\u0001J4F\u00014\u00016B??86G<BA\u0001B9\u000164F8\u0001E86BE7F$9$17\u0001/$\u0001/(775( \b #HB\u0001+<4AL<UF ɬ° ȧ (,6+(1*\u0001%$2-,$1 ˇȉÜ̯ \u0004 \u0012 \u0005\u00014A7 21*<8$1\u00016+,;,$2\u0001)$1* Ƅ¢˝őŜ \u00044\u00015BB>BA #<\u0001 4BUF\u0001@87<6<A8G;4G .;8A\u0001\u001b4<\u0001E8GHEA87\u0001;B@8 G;4G\u0001L84E49G8E;4I<A:\u0001786?<A87 E86B@@8A74G<BA\u0001GB\u0001586B@8\u00014\u00016BHEG #HB\u0001+<4AL<\u000187<G87\u0001<A\u0001 \u0012 \u0005\u0006\u00014?FB\u00016BAG4<A87\u0001@4AL\u000164F8F\u00015L\u0001#HBUF\u0001@4FG8E\u0001#<\u0001 4B\u0001G;4G\u0001#HB\u0001;47\u0001JE<GG8A\u00017BJA\b \u0013 A\u0001;<F\u0001BA?L\u0001FHEI<I<A:\u0001?8GG8E\u0001\u0004JE<GG8A\u0001<A\u0001 \u000f \u0001GB\u00014\u0001@<ABE\u0001 7H64G<BA\u0001B99<6<4?\u0001A4@87\u0001#BH\u0001#<Ɨq <A\u0001A8<:;5BE<A: C;LF<6<4A\u0006\u0001*BA:\u0001#<4A 6B@CBF87 4 ?BA:\u0001C<868 64??87\u0001V,CBA\u0001*8A7<A:\u0001&99\u0001\u001b4<\u00010H4A?<\u0001BA\u0001;<F \u001a;HM;BH\u0001)BHG8 ʸî˿ \u0005\u0006\u00011;H\u00014AFJ8E87\u0001;<F\u00016BEE8FCBA78AGUF\u0001DH8FG<BAF\u0001BA\u0001@87<64?\u00017B6GE<A8\u0001\u00046<G<A:\u0001;<F\u0001BJA \u0010(=+,\u0001<8/81 Ɖʕ͜˧ 4F\u0001J8??\u00014F\u0001G;8 \u001211(5\u0001 $121 \u0005\u0006\u0001BA\u0001G;8\u000189986GF\u0001B9\u0001I4E<BHF\u00017EH:F\u0006\u0001BA\u00017<8G\u0001\u00048FC86<4??L\u0001@84G\u0005\u0006\u0001BA ;BJ\u0001GB\u0001@4>8\u0001 <E8\u000178F68A7\u0006\u00014A7\u0001BA\u0001;BJ\u0001GB\u0001GE84G\u000145F68FF8F\u0006\u0001CE4<F<A:\u0001#<\u0001 4BUF\u0001@8G;B7F\u0001BA\u0001G;8\u0001?4GG8E\u0001<FFH8\b BHA7 <A\u0001G;8\u00011;H\u00016?4AUF\u0001:8A84?B:L\u0001\u0004 +,B$1\u0001!+86+,\u0001=21*38 ˹ëƀƪÌˮ \u0005\u0006\u0001G;8\u0001?8GG8E\u0001<F\u0001E8CEB7H687\u0001<A $1;,\u0001<,-, \u0004 \u0014 \u0011 \u0005\b\u0001 A\u00014\u00016B?BC;BA\u0001GB\u0001G;<F\u0001?8GG8E\u0006\u0001#BH\u0001#<UF\u0001FBA\u00016?4<@87\u0001G;4G\u0001;<F\u000194G;8E\u0001;47\u00018K6;4A:87\u0001@BE8\u0001G;4A\u00019BEGL\u0001?8GG8EF J<G;\u00011;H\b\u0001\u001aBAF<78E<A:\u0001G;8\u0001IB?H@8 B9\u0001G;8\u00016BEE8FCBA78A68\u00011;H\u00018K6;4A:87\u0001J<G;\u0001\u001b4<\u0001*<:BA:\u0006\u0001#BH\u0001#<\u0006\u00014A7 CEB545?L\u0001@4AL\u0001BG;8EF\u0006\u0001?8GG8EF\u0001@HFG\u0001;4I8\u0001588A\u0001<@CBEG4AG\u00016;4AA8?F\u0001<A\u0001G;8\u00017<FF8@<A4G<BA\u0001B9\u0001@87<64?\u00017B6GE<A8F\b \u000e V+<\u00011;H\u000104AK<H\u0001L<\u0001@B\u0001;BHW͓ƀą2̕©Ĉ \u0004 (1;,$1\u0001-, Řī̈́ \b \u00104\u0005\b\u0001\u001b4<8A=B<A87\u0001*BA:\u0001#<4AGB\u0001JE<G8 G;<F\u0001G8KG49G8E\u001b4< ;47\u0001F;BJA *BA:\u00019<I8\u0001<AF6E<587\u0001F;88GF\u0001G;4G\u00011;H1;8A;8A: ;47\u0001:<I8A\u001b4<\b",
+          "page_no": 170,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0025-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-005-danxisaid:nr-fn-ch-0025-toc-ch-005-danxisaid:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5056,
+    "estimated_prompt_tokens": 1765,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 4,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1765,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

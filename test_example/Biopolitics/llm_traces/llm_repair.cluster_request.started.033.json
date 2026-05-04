@@ -1,0 +1,96 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-leçondu24janvier1979:nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979:footnote",
+      "chapter_title": "Leçon du 24 janvier 1979",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        76,
+        76
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00516",
+          "note_item_id": "fn-00023",
+          "anchor_id": "anchor-00079",
+          "marker": "**",
+          "note_excerpt": "M. F.: l’Angleterre",
+          "anchor_excerpt": "l’Europe elle-même soit, au fond, modelée sur ce schéma ancien qui était une multiplicité d’États de police équilibrés entre eux. L’Europe devait être à l’image de l’Autriche pour que l’Autriche elle-même puisse subsister telle qu’elle était. Et dans cette mesure-là, le calcul de l’équilibre européen, pour Metternich $ ^{19} $, on peut dire que c’était encore et toujours le calcul du XVIII $ ^{e} $ siècle. Au contraire pour l’Angleterre, $ ^{*} $ l’équilibre européen qu’elle a cherché et qu’elle a imposé de concert avec l’Autriche au traité de Vienne, qu’est-ce que c’était? C’était une manière de régionaliser l’Europe, de limiter, bien sûr, la puissance de chacun des États européens, mais pour laisser à l’Angleterre un rôle politique et économique, le rôle de médiateur économique entre l’Europe et le marché mondial, de manière à mondialiser en quelque sorte l’économie européenne par la médiation, par le relais de la puissance économique de l’Angleterre. De sorte que, là, on a un tout autre calcul de l’équilibre européen, qui est bien fondé sur ce principe de l’Europe comme région économique particulière en face, ou à l’intérieur, d’un monde qui doit constituer pour elle un marché. Et le calcul de l’équilibre européen par l’[Autriche] $ ^{**} $ dans ce même traité de Vienne est tout à fait différent. De sorte que vous voyez qu’à l’intérieur d’une réalité historique unique vous pouvez très bien trouver deux types de rationalité et de calcul politique entièrement différents."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 57,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "fn-00022",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-leçondu24janvier1979",
+          "region_id": "nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979",
+          "marker": "*",
+          "normalized_marker": "",
+          "occurrence": 3,
+          "source_text": "Le manuscrit précise, p. 10 : « Castelreagh » [Henry Robert Stewart Castelreagh (1762-1822), ministre tory des Affaires étrangères britannique de 1812 à 1822, qui joua un rôle essentiel lors du congrès de Vienne en freinant les ambitions de la Russie et de la Prusse].",
+          "page_no": 76,
+          "display_marker": "*",
+          "source_marker": "*",
+          "title_hint": "",
+          "created_at": 1777820124,
+          "updated_at": 1777820124
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-leçondu24janvier1979:nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-003-leçondu24janvier1979:nr-fn-ch-0017-toc-ch-003-leçondu24janvier1979:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4196,
+    "estimated_prompt_tokens": 1489,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 1,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1489,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

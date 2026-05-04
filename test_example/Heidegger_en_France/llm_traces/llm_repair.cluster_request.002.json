@@ -2,277 +2,296 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-014-entreéruditionettechnosc:toc-ch-014-entreéruditionettechnosc:footnote\",\n  \"chapter_title\": \"11. Entre érudition et techno-science\",\n  \"page_range\": [\n    420,\n    436\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 420,\n      \"ocr_excerpt\": \"formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent relayer et prolonger nos capacités physiques limitées[66. » Cette concession partielle est cependant contrebalancée par un par bien différent de celui de Heidegger : remettre la science « en culture »; y réintroduire la réflexivité critique pour faire pièce à l'hyperspécialisation des disciplines et à la hiérarchisation des fonctions. Ainsi prend forme, grâce au travail sur les grands couples d'antinomies qui sous-tendent la science contemporaine, un « plaidoyer pour la pensée dans la science[67». » entendant illustrer le fait que la pratique de la science — loin d'exclure l'exercice de la pensée — le rend possible et l'appelle[68]. Que signifie alors penser ? Non pas une méditation sur la portée destinale de la science elle-même, comme c'est le cas chez Heidegger, mais une exploitation réflexive et critique des grandes apories de la science contemporaine. On revient ainsi à un sens en fait plus classique de l'exercice de la pensée, grâce au détour produit par le choc de la « provocation » heideggerienne. Nous allons voir que ce choc doit être ...\"\n    },\n    {\n      \"page_no\": 435,\n      \"ocr_excerpt\": \"nière $ ^{60} $). Malgré de nombreuses citations, Meschonnic semble surtout s'attacher à dénoncer les mirages produits par «l'effet Heidegger» dans la pensée contemporaine. Au passage, il pose cependant des questions importantes : Heidegger ne surestime-t-il pas la langue comme telle, mais aussi, bien entendu, la langue allemande en sa germanité même ? Ne sacrifice-t-il pas le syntaxique au monstratif ? Son manque d'intérêt pour la positivité en matière linguistique n'est-il pas plus un handicap qu'une aide ? De son côté, Dionys Mascolo est un auteur $ ^{61} $ qui s'est fait connaître depuis longtemps dans d'autres domaines (surtout le marxisme critique) et dont on ignorait l'intérêt pour Heidegger. Il est vrai que cet intérêt est tout négatif. En prenant Heidegger pour «modèle», Mascolo ne cache pas son jeu et n'enrobe pas l'antiphrase dans un excès de précautions oratoires. Pourquoi Heidegger devient-il un véritable repoussoir? Moins parce qu'il a été nazi (avec quelques années de retard, Mascolo proclame son insatisfaction et son désarroi devant les déchaînements passionnels provoqués par la publication du livre de Farias) qu'en raison du rôle d'archétype joué par sa pensée dans ...\"\n    },\n    {\n      \"page_no\": 436,\n      \"ocr_excerpt\": \"rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n'y a pas d'amour chez Heidegger $ ^{68} $»), Mascolo ajoute que rire, jeu, sexe (et femmes !) y sont également exclus et il oppose au chemin heideggerien la grand-route du poète vagabond du 7° art (Charlie Chaplin) $ ^{69} $. Préférence respectable et même sympathique qui ne justifie cependant pas la lecture désinvolte de textes scrupuleux (peut-être trop «sérieux» !) où se révèle un sens du «jeu» peut-être plus grand que ne le croit Mascolo. Surtout, pourquoi avoir confondu Heidegger avec «l'âme; philosophante»? C'est, en voulant trop embrasser, mal étreindre le «modèle» heideggerien, pour finalement méconnaître l'étonnante diversité des philosophies du XX<sup>e</sup> siècle. À ce propos, en revanche, Jeffrey Barash présente un bilan soigneux de l'« exception » heideggérienne resituée en son siècle™, Barash, universitaire américain qui a choisi de vivre et d'enseigner en France, a réussi un exploit assez rare : se faire accepter par l'Université française (il enseigne à l'université d'Amiens). Auteur d'une excellente thèse des Hautes Études, p ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00602\",\n      \"marker\": \"68\",\n      \"page_no\": 420,\n      \"paragraph_index\": 0,\n      \"source_text\": \"formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent relayer et prolonger nos capacités physiques limitées[66. » Cette concession partielle est cependan ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00642\",\n      \"marker\": \"68\",\n      \"page_no\": 436,\n      \"paragraph_index\": 0,\n      \"source_text\": \"rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n'y a pas d'amour chez Heidegger $ ^{68} $»), Mascolo ajoute que rire, jeu, sexe (et femmes !) y sont ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-01295\",\n      \"note_item_id\": \"fn-01295\",\n      \"current_anchor_id\": \"synthetic-footnote-00846\",\n      \"marker\": \"106\",\n      \"note_page_no\": 420,\n      \"anchor_page_no\": 420,\n      \"current_anchor_marker\": \"106\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Jean-Marc LÉVY- LEBLOND, Aux contrair~s. L' exerdce de la pensée et la pratique de la sdence, Paris, Gallimard, 1996, p. 16.\",\n      \"anchor_excerpt\": \"Jean-Marc LÉVY- LEBLOND, Aux contrair~s. L' exerdce de la pensée et la pratique de la sdence, Paris, Gallimard, 1996, p. 16.\"\n    },\n    {\n      \"link_id\": \"link-01296\",\n      \"note_item_id\": \"fn-01296\",\n      \"current_anchor_id\": \"synthetic-footnote-00847\",\n      \"marker\": \"107\",\n      \"note_page_no\": 420,\n      \"anchor_page_no\": 420,\n      \"current_anchor_marker\": \"107\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Ibid., p. 21.\",\n      \"anchor_excerpt\": \"Ibid., p. 21.\"\n    },\n    {\n      \"link_id\": \"link-01297\",\n      \"note_item_id\": \"fn-01297\",\n      \"current_anchor_id\": \"synthetic-footnote-00848\",\n      \"marker\": \"108\",\n      \"note_page_no\": 420,\n      \"anchor_page_no\": 420,\n      \"current_anchor_marker\": \"108\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Par ailleurs, Jean-Marc Lévy-Leblond et moi-même avons tenu à l'université de Nice, en 1989-1990, un sêminaire en co=im sur le thême: <<La science pense­ t-elle?>> ll était moins axé Sut la pensée heideggérienoe elle-même que Sut J'ouvertut ...\",\n      \"anchor_excerpt\": \"Par ailleurs, Jean-Marc Lévy-Leblond et moi-même avons tenu à l'université de Nice, en 1989-1990, un sêminaire en co=im sur le thême: <<La science pense­ t-elle?>> ll était moins axé Sut la pensée heideggérienoe elle-même que Sut J'ouvertut ...\"\n    },\n    {\n      \"link_id\": \"link-01357\",\n      \"note_item_id\": \"fn-01357\",\n      \"current_anchor_id\": \"anchor-00637\",\n      \"marker\": \"170\",\n      \"note_page_no\": 436,\n      \"anchor_page_no\": 435,\n      \"current_anchor_marker\": \"170\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Jeffrey Andrew BARASH, Heidegger et son siècle. Temps de l'être et temps de l'histoire, Paris, PUF, 1995. ·\",\n      \"anchor_excerpt\": \"De son côté, Dionys Mascolo est un auteur $ ^{61} $ qui s'est fait connaître depuis longtemps dans d'autres domaines (surtout le marxisme critique) et dont on ignorait l'intérêt pour Heidegger. Il est vrai que cet intérêt est tout négatif. ...\"\n    },\n    {\n      \"link_id\": \"link-01358\",\n      \"note_item_id\": \"fn-01358\",\n      \"current_anchor_id\": \"synthetic-footnote-00882\",\n      \"marker\": \"171\",\n      \"note_page_no\": 436,\n      \"anchor_page_no\": 436,\n      \"current_anchor_marker\": \"171\",\n      \"current_anchor_synthetic\": true,\n      \"note_excerpt\": \"Id., Martin Heidegger and the Problem of historical Meaning, DordrechtBoston, Nijhoff, 1988. '\",\n      \"anchor_excerpt\": \"Id., Martin Heidegger and the Problem of historical Meaning, DordrechtBoston, Nijhoff, 1988. '\"\n    }\n  ]\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-006-lembelliedesannées1950:nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950:footnote\",\n  \"chapter_title\": \"5. L'embellie des années 1950\",\n  \"page_range\": [\n    136,\n    178\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00369\",\n      \"anchor_id\": \"anchor-00231\",\n      \"marker\": \"3\",\n      \"note_excerpt\": \"Éric WEIL, Logique de la philosophie, Paris, Vrin, 1951.\",\n      \"anchor_excerpt\": \"dont on n'oublie pas le remarquable article des Temps modernes sur « Le cas Heidegger », publie-t-il en 1951 sa thèse intitulée Logique de la philosophie<sup>3</sup> à dont ni le style ni le contenu ne font de réelles concessions ni à l'exi ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00370\",\n      \"anchor_id\": \"anchor-00232\",\n      \"marker\": \"4\",\n      \"note_excerpt\": \"Ibid., p. 391, n. 3.\",\n      \"anchor_excerpt\": \"dont on n'oublie pas le remarquable article des Temps modernes sur « Le cas Heidegger », publie-t-il en 1951 sa thèse intitulée Logique de la philosophie<sup>3</sup> à dont ni le style ni le contenu ne font de réelles concessions ni à l'exi ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00367\",\n      \"marker\": \"1\",\n      \"page_no\": 136,\n      \"source_text\": \"Parmi ceux-ci, signalons Walter Bierne! quj fait paraître en 1950 Le Concept de monde chez Heidegger {Louvain-Paris, Nauwelaérts-Vrin). Cet essai fort sérieux et précis se situe dans le sillage des travaux d'Alphonse de Waelhens (dont Biern ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00368\",\n      \"marker\": \"2\",\n      \"page_no\": 136,\n      \"source_text\": \"On en trouve encore un tétnoignage en 1956 chez Jean-Toussaint DESANTI (Introduction à l'histoire de la philosophie, Paris, Éditions de la Nouvelle Critique) qui ne se montre pas tendre envers l'interprétation d<i Kant par Heidegger: <<On p ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00371\",\n      \"marker\": \"5\",\n      \"page_no\": 137,\n      \"source_text\": \"Ibid., p. 377.\"\n    },\n    {\n      \"note_item_id\": \"fn-00374\",\n      \"marker\": \"8\",\n      \"page_no\": 138,\n      \"source_text\": \"Gabriel MARCEL, La Dimension Florestan, Paris, Plon, 1958, p. 11. il fa)lt préciser que l'expression Die Wacht am Sein est le décalque du titre d'une chanson patriotique allemande Die Wacht am Rhein («La garde du Rhin>>). Notons également q ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00375\",\n      \"marker\": \"9\",\n      \"page_no\": 138,\n      \"source_text\": \"Ihid.\"\n    },\n    {\n      \"note_item_id\": \"fn-00377\",\n      \"marker\": \"11\",\n      \"page_no\": 139,\n      \"source_text\": \"Martin HEIDEGGER, Vortriige und Aufsiitze, Pfullingen, Neske, 1954, pp. 163186. On lit, entre autres, à la p. 179: «Dar Ding dingtWelt»; littéralement: «La chose chosise le monde>>. Préau traduit plus élégamment: <<La chose rassemble le mon ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00378\",\n      \"marker\": \"12\",\n      \"page_no\": 139,\n      \"source_text\": \"Jahrbuch der Akademie, Band I, Gestalt und Gedanke, 1951, p. 128 sq. (voir ibid., p. 284).\"\n    },\n    {\n      \"note_item_id\": \"fn-00379\",\n      \"marker\": \"13\",\n      \"page_no\": 139,\n      \"source_text\": \"Ces rérlcences, rejoignant celles du sens commun, seront fortement exprimées quelques années plus tard dans un pamphlet retentissant où l'hermétisme de la pensée de Heidegger sera brocardé; en particulier, la distinction entre l'être et l'é ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00372\",\n      \"note_item_id\": \"fn-00372\",\n      \"current_anchor_id\": \"anchor-00227\",\n      \"marker\": \"6\",\n      \"note_page_no\": 137,\n      \"anchor_page_no\": 136,\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Ibid.\",\n      \"anchor_excerpt\": \"D'autre part, on n'a peut-être pas jusqu'ici donné assez de place aux rejets ou aux réactions hostiles qui ont accompagné les premières vagues de la réception de Heidegger en France. La raison en est simple : même si des pionniers comme Geo ...\"\n    },\n    {\n      \"link_id\": \"link-00394\",\n      \"note_item_id\": \"fn-00394\",\n      \"current_anchor_id\": \"anchor-00236\",\n      \"marker\": \"28\",\n      \"note_page_no\": 142,\n      \"anchor_page_no\": 141,\n      \"current_anchor_marker\": \"28\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Mais en précisant la différence entre la contemplation aristotélicienne de l'étant en tant que tel et!e <<dire>> de l'ontologiemoderrie: ibid., pp. 367-368.\",\n      \"anchor_excerpt\": \"C'est en effet dans un second appendice, publié en 1962 mais certainement conçu antérieurement $ ^{8} $, que Gilson a cru nécessaire de répondre à « plusieurs questions » concernant l'existentialisme. Cette réponse fait d'abord une concessi ...\"\n    },\n    {\n      \"link_id\": \"link-00510\",\n      \"note_item_id\": \"fn-00510\",\n      \"current_anchor_id\": \"anchor-00311\",\n      \"marker\": \"144\",\n      \"note_page_no\": 171,\n      \"anchor_page_no\": 172,\n      \"current_anchor_marker\": \"144\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Beda ALLEMANN, Holderlin et Heidegger. Recherche de la relation entre poésie et pensée, trad. François Fédier, Paris, PUF, coll. <<Épiméthée>>, 1959.\",\n      \"anchor_excerpt\": \"En définitive, si le bilan de cette décennie est impressionnant, il est aussi très ambigu. L'image magistrale de Heidegger s'est imposée, mais elle s'est aussi brouillée en s'enrichissant. Les divergences sur l'orientation à suivre en matiè ...\"\n    },\n    {\n      \"link_id\": \"link-00526\",\n      \"note_item_id\": \"fn-00526\",\n      \"current_anchor_id\": \"anchor-00351\",\n      \"marker\": \"160\",\n      \"note_page_no\": 174,\n      \"anchor_page_no\": 175,\n      \"current_anchor_marker\": \"160\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"il est aussi le seul Français à figurer, avec îvlaurice Blanchot, dans la Festschrift offerte à Heidegger à l'occasion de son soixante-dixième anniversaire (voir <<La Fable du monde», in Martin Heidegger mm siebzigsten Geburtstag, Pfullinge ...\",\n      \"anchor_excerpt\": \"Il <sup>160</sup>semble bien, d'après tous les témoignages, qu'il ait ainsi « conquis » un auditoire patient, écoutant ensuite attentivement le texte allemand, traduit paragraphe après paragraphe par Pierre-Paul Sagave $ ^{166} $ et Jean Be ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"# L’embellie des années 1950 En quel sens les années 1950 révèlent-elles une réception surtout favorable, mais inévitablement ambiguë, de la pensée de Heidegger en France? Bien qu'on doive le découvrir peu à peu au fil de ce chapitre, on décèle déjà cependant que le critérium principal de cette ambiguïté ne saurait résider uniquement dans le partage entre partisans et adversaires de cette pensée: ce serait confondre le rayonnement d'une philosophie avec le type d'influence d'une idéologie ou d'un parti politique. Bien entendu, il faudra faire leur place aux réserves ou aux attaques. Mais il faut tenir compte d'autres lignes de fracture, savoir aussi discerner les orientations qui vont motiver les différentes prises de position et leurs éventuelles ambiguïtés. Le thème existentiel va se voir accompagné ou supplanté par d'autres points de vue : l'approche du Sacré, l'interprétation de la métaphysique et même (quoique encore timidement) la question de la technique planétaire. À pensée riche, réception complexe : de plus en plus, la pensée heideggerienne se révèle à plusieurs entrées. Au fur et à mesure qu'on s'éloigne de la Libération et de la mode existentialiste, la question de la spécificité de cette pensée se dégage nettement : c'est un facteur tout à fait favorable au travail de Jean Beaufret et c'est en ce sens qu'on peut parler d'une certaine « embelleix » (d'autant plus que la décennie 1950, tournée vers la reconstruction de l'économie et la constitution d'une nouvelle Europe résistant à la menace soviétique, se détourne des vieux démons du fascisme et se libère de l'obsession de l'éruption politique). Sans doute l'Université française reste-t-elle encore très majoritairement étrangère à la pénétration de cette pensée, mais de nouvelles traductions vont faire décou ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-014-entreéruditionettechnosc:toc-ch-014-entreéruditionettechnosc:footnote",
-      "chapter_title": "11. Entre érudition et techno-science",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-006-lembelliedesannées1950:nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950:footnote",
+      "chapter_title": "5. L'embellie des années 1950",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "match",
-        "ignore_ref",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        420,
-        436
+        136,
+        178
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 2217,
-          "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00602",
-          "chapter_id": "toc-ch-014-entreéruditionettechnosc",
-          "page_no": 420,
-          "paragraph_index": 0,
-          "char_start": 776,
-          "char_end": 780,
-          "source_marker": "[68]",
-          "normalized_marker": "68",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent relayer et prolonger nos capacités physiques limitées[66. » Cette concession partielle est cependant contrebalancée par un par bien différent de celui de Heidegger : remettre la science « en culture »; y réintroduire la réflexivité critique pour faire pièce à l'hyperspécialisation des disciplines et à la hiérarchisation des fonctions. Ainsi prend forme, grâce au travail sur les grands couples d'antinomies qui sous-tendent la science contemporaine, un « plaidoyer pour la pensée dans la science[67». » entendant illustrer le fait que la pratique de la science — loin d'exclure l'exercice de la pensée — le rend possible et l'appelle[68].",
-          "created_at": 1777566667,
-          "updated_at": 1777566667
+          "link_id": "link-00369",
+          "note_item_id": "fn-00369",
+          "anchor_id": "anchor-00231",
+          "marker": "3",
+          "note_excerpt": "Éric WEIL, Logique de la philosophie, Paris, Vrin, 1951.",
+          "anchor_excerpt": "dont on n'oublie pas le remarquable article des Temps modernes sur « Le cas Heidegger », publie-t-il en 1951 sa thèse intitulée Logique de la philosophie<sup>3</sup> à dont ni le style ni le contenu ne font de réelles concessions ni à l'existentialisme en général ni à Heidegger en particulier. Certes, l'importance et la « complexité » de la philosophie de ce dernier sont reconnues au passage<sup>4</sup>, mais pour mieux les cantonner dans les limites de la catégorie du fini et plus précisément d'une philosophie de la réflexion transcendantale sur les « conditions de possibilité » de l'existence. Weil renvoie aux analyses heideggeriennes de la temporalité, non sans souligner leur caractère « discutable », du fait que leur horizon est borné à la conscience individuelle. Il était difficile de marquer, en quelques lignes, une résistance plus décidée, nette et ferme aux thèmes heideggeriens et à leur pénétration en France."
         },
         {
-          "row_id": 2343,
-          "doc_id": "a5d9a08d6871",
-          "anchor_id": "anchor-00642",
-          "chapter_id": "toc-ch-014-entreéruditionettechnosc",
-          "page_no": 436,
-          "paragraph_index": 0,
-          "char_start": 172,
-          "char_end": 181,
-          "source_marker": "$ ^{68} $",
-          "normalized_marker": "68",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n'y a pas d'amour chez Heidegger $ ^{68} $»), Mascolo ajoute que rire, jeu, sexe (et femmes !) y sont également exclus et il oppose au chemin heideggerien la grand-route du poète vagabond du 7° art (Charlie Chaplin) $ ^{69} $. Préférence respectable et même sympathique qui ne justifie cependant pas la lecture désinvolte de textes scrupuleux (peut-être trop «sérieux» !) où se révèle un sens du «jeu» peut-être plus grand que ne le croit Mascolo. Surtout, pourquoi avoir confondu Heidegger avec «l'âme; philosophante»? C'est, en voulant trop embrasser, mal étreindre le «modèle» heideggerien, pour finalement méconnaître l'étonnante diversité des philosophies du XX<sup>e</sup> siècle.",
-          "created_at": 1777566667,
-          "updated_at": 1777566667
+          "link_id": "link-00370",
+          "note_item_id": "fn-00370",
+          "anchor_id": "anchor-00232",
+          "marker": "4",
+          "note_excerpt": "Ibid., p. 391, n. 3.",
+          "anchor_excerpt": "dont on n'oublie pas le remarquable article des Temps modernes sur « Le cas Heidegger », publie-t-il en 1951 sa thèse intitulée Logique de la philosophie<sup>3</sup> à dont ni le style ni le contenu ne font de réelles concessions ni à l'existentialisme en général ni à Heidegger en particulier. Certes, l'importance et la « complexité » de la philosophie de ce dernier sont reconnues au passage<sup>4</sup>, mais pour mieux les cantonner dans les limites de la catégorie du fini et plus précisément d'une philosophie de la réflexion transcendantale sur les « conditions de possibilité » de l'existence. Weil renvoie aux analyses heideggeriennes de la temporalité, non sans souligner leur caractère « discutable », du fait que leur horizon est borné à la conscience individuelle. Il était difficile de marquer, en quelques lignes, une résistance plus décidée, nette et ferme aux thèmes heideggeriens et à leur pénétration en France."
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 43237,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00367",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "1",
+          "normalized_marker": "1",
+          "occurrence": 1,
+          "source_text": "Parmi ceux-ci, signalons Walter Bierne! quj fait paraître en 1950 Le Concept de monde chez Heidegger {Louvain-Paris, Nauwelaérts-Vrin). Cet essai fort sérieux et précis se situe dans le sillage des travaux d'Alphonse de Waelhens (dont Bierne! a été le collaborateur) : il consiste essentiellement en une lecture de passages-clés de Sein und Zeit et ne s'en tient nullement aux problèmes techniques du rapport entre spatialité et << mondanéité >>. C'est pourquoi ce petit livre a ét~ très lu, dans les années cinquante, par un public estudiantin frustré de ne pouvoir étudier Sein und Zeit dans le texte et avide de compléter la lecture du livre d'Alphonse,de Waelhens.",
+          "page_no": 136,
+          "display_marker": "1",
+          "source_marker": "1",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43238,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00368",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "On en trouve encore un tétnoignage en 1956 chez Jean-Toussaint DESANTI (Introduction à l'histoire de la philosophie, Paris, Éditions de la Nouvelle Critique) qui ne se montre pas tendre envers l'interprétation d<i Kant par Heidegger: <<On pourrait appeler \"inipressionniste\" cette manière d'écrire ]:histoire. Chaque philosophe est pris",
+          "page_no": 136,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43241,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00371",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 377.",
+          "page_no": 137,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43244,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00374",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "Gabriel MARCEL, La Dimension Florestan, Paris, Plon, 1958, p. 11. il fa)lt préciser que l'expression Die Wacht am Sein est le décalque du titre d'une chanson patriotique allemande Die Wacht am Rhein («La garde du Rhin>>). Notons également que les noms des personnages ne sont pas choisis au hasard: Dokh veut dire << poigoard >> ou« stylet>>; Schmuck sigoifie «parure>> ou<< ornement».",
+          "page_no": 138,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43245,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00375",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Ihid.",
+          "page_no": 138,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43247,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00377",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "Martin HEIDEGGER, Vortriige und Aufsiitze, Pfullingen, Neske, 1954, pp. 163186. On lit, entre autres, à la p. 179: «Dar Ding dingtWelt»; littéralement: «La chose chosise le monde>>. Préau traduit plus élégamment: <<La chose rassemble le monde>> (HEIDEGGER, Essais et conférences, Paris, Gallimard, 1958, p. 215).",
+          "page_no": 139,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43248,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00378",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "Jahrbuch der Akademie, Band I, Gestalt und Gedanke, 1951, p. 128 sq. (voir ibid., p. 284).",
+          "page_no": 139,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        },
+        {
+          "row_id": 43249,
+          "doc_id": "a5d9a08d6871",
+          "note_item_id": "fn-00379",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-lembelliedesannées1950",
+          "region_id": "nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950",
+          "marker": "13",
+          "normalized_marker": "13",
+          "occurrence": 1,
+          "source_text": "Ces rérlcences, rejoignant celles du sens commun, seront fortement exprimées quelques années plus tard dans un pamphlet retentissant où l'hermétisme de la pensée de Heidegger sera brocardé; en particulier, la distinction entre l'être et l'étant sera prise co=e exemple typique d'une logomachie vide, stérile et coupée des réalités humaines: voir Jean-François REvEL, Pourquoi des philasophes ?, Paris, Juiliard, 1957, pp. 56-59.",
+          "page_no": 139,
+          "display_marker": "13",
+          "source_marker": "13",
+          "title_hint": "",
+          "created_at": 1777755640,
+          "updated_at": 1777755640
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": [
         {
-          "link_id": "link-01295",
-          "note_item_id": "fn-01295",
-          "current_anchor_id": "synthetic-footnote-00846",
-          "marker": "106",
-          "note_page_no": 420,
-          "anchor_page_no": 420,
-          "current_anchor_marker": "106",
-          "note_excerpt": "Jean-Marc LÉVY- LEBLOND, Aux contrair~s. L' exerdce de la pensée et la pratique de la sdence, Paris, Gallimard, 1996, p. 16.",
-          "anchor_excerpt": "Jean-Marc LÉVY- LEBLOND, Aux contrair~s. L' exerdce de la pensée et la pratique de la sdence, Paris, Gallimard, 1996, p. 16.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01296",
-          "note_item_id": "fn-01296",
-          "current_anchor_id": "synthetic-footnote-00847",
-          "marker": "107",
-          "note_page_no": 420,
-          "anchor_page_no": 420,
-          "current_anchor_marker": "107",
-          "note_excerpt": "Ibid., p. 21.",
-          "anchor_excerpt": "Ibid., p. 21.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01297",
-          "note_item_id": "fn-01297",
-          "current_anchor_id": "synthetic-footnote-00848",
-          "marker": "108",
-          "note_page_no": 420,
-          "anchor_page_no": 420,
-          "current_anchor_marker": "108",
-          "note_excerpt": "Par ailleurs, Jean-Marc Lévy-Leblond et moi-même avons tenu à l'université de Nice, en 1989-1990, un sêminaire en co=im sur le thême: <<La science pense­ t-elle?>> ll était moins axé Sut la pensée heideggérienoe elle-même que Sut J'ouvertute de nouvelles perspectives ou de croisements inédits le long de la<< frontière co=une >> entre science et philosophie. Y ont participé hata=ent Henri Atlan, Jean-Pi= Du puy, Jean-Yves Girard, Marc Richir, Clêment Rosset et Isabelle Stengers.",
-          "anchor_excerpt": "Par ailleurs, Jean-Marc Lévy-Leblond et moi-même avons tenu à l'université de Nice, en 1989-1990, un sêminaire en co=im sur le thême: <<La science pense­ t-elle?>> ll était moins axé Sut la pensée heideggérienoe elle-même que Sut J'ouvertute de nouvelles perspectives ou de croisements inédits le long de la<< frontière co=une >> entre science et philosophie. Y ont participé hata=ent Henri Atlan, Jean-Pi= Du puy, Jean-Yves Girard, Marc Richir, Clêment Rosset et Isabelle Stengers.",
-          "current_anchor_synthetic": true
-        },
-        {
-          "link_id": "link-01357",
-          "note_item_id": "fn-01357",
-          "current_anchor_id": "anchor-00637",
-          "marker": "170",
-          "note_page_no": 436,
-          "anchor_page_no": 435,
-          "current_anchor_marker": "170",
-          "note_excerpt": "Jeffrey Andrew BARASH, Heidegger et son siècle. Temps de l'être et temps de l'histoire, Paris, PUF, 1995. ·",
-          "anchor_excerpt": "De son côté, Dionys Mascolo est un auteur $ ^{61} $ qui s'est fait connaître depuis longtemps dans d'autres domaines (surtout le marxisme critique) et dont on ignorait l'intérêt pour Heidegger. Il est vrai que cet intérêt est tout négatif. En prenant Heidegger pour «modèle», Mascolo ne cache pas son jeu et n'enrobe pas l'antiphrase dans un excès de précautions oratoires. Pourquoi Heidegger devient-il un véritable repoussoir? Moins parce qu'il a été nazi (avec quelques années de retard, Mascolo proclame son insatisfaction et son désarroi devant les déchaînements passionnels provoqués par la publication du livre de Farias) qu'en raison du rôle d'archétype joué par sa pensée dans le champ philosophique. Démasquant en Heidegger «l'incarnation de l'âme philosophiante $ ^{62} $», Mascolo lui reproche tout à la fois son abstraction schématisante, son caractère scolastique $ ^{10} $, sa niaiserie $ ^{164} $, ses vains jeux de mots $ ^{165} $; et il dresse tout un «sottisier heideggerien $ ^{166} $». L'exercice aurait pu être fort drôle, s'il avait été mené avec toute la précision requise et surtout avec esprit. Malheureusement Mascolo ne fait que dresser un catalogue de ses allergies, en donnant à ses",
+          "link_id": "link-00372",
+          "note_item_id": "fn-00372",
+          "current_anchor_id": "anchor-00227",
+          "marker": "6",
+          "note_page_no": 137,
+          "anchor_page_no": 136,
+          "current_anchor_marker": "6",
+          "note_excerpt": "Ibid.",
+          "anchor_excerpt": "D'autre part, on n'a peut-être pas jusqu'ici donné assez de place aux rejets ou aux réactions hostiles qui ont accompagné les premières vagues de la réception de Heidegger en France. La raison en est simple : même si des pionniers comme Georges Gurvitch ou Rachel Bespaloff faisaient état de réserves, c'est la curiosité ou l'admiration qui l'emportaient ; et il en était de même <sup>6</sup>dans le public cultivé. Une franche hostilité ne se fait jour que du côté marxiste, et encore seulement après l'entrée en guerre de l'U.R.S.S. En fait, c'est à la Libération que la mode existentialiste suscite, presque mécaniquement, par son intensité même, des réactions et des rejets dont les manifestations immédiates ou bruyantes dans la presse n'ont pas été forcément les plus intéressantes ni les plus significatives pour l'avenir.",
           "current_anchor_synthetic": false
         },
         {
-          "link_id": "link-01358",
-          "note_item_id": "fn-01358",
-          "current_anchor_id": "synthetic-footnote-00882",
-          "marker": "171",
-          "note_page_no": 436,
-          "anchor_page_no": 436,
-          "current_anchor_marker": "171",
-          "note_excerpt": "Id., Martin Heidegger and the Problem of historical Meaning, DordrechtBoston, Nijhoff, 1988. '",
-          "anchor_excerpt": "Id., Martin Heidegger and the Problem of historical Meaning, DordrechtBoston, Nijhoff, 1988. '",
-          "current_anchor_synthetic": true
+          "link_id": "link-00394",
+          "note_item_id": "fn-00394",
+          "current_anchor_id": "anchor-00236",
+          "marker": "28",
+          "note_page_no": 142,
+          "anchor_page_no": 141,
+          "current_anchor_marker": "28",
+          "note_excerpt": "Mais en précisant la différence entre la contemplation aristotélicienne de l'étant en tant que tel et!e <<dire>> de l'ontologiemoderrie: ibid., pp. 367-368.",
+          "anchor_excerpt": "C'est en effet dans un second appendice, publié en 1962 mais certainement conçu antérieurement $ ^{8} $, que Gilson a cru nécessaire de répondre à « plusieurs questions » concernant l'existentialisme. Cette réponse fait d'abord une concession terminologique d'importance : s'il avait à réécrire le livre, l'auteur traduitrait ens par « étant ». Modification qui ne change rien au fond, mais qui révèle la pénétration dans le vocabulaire philosophique français, durant les années 1950, de ce terme dont l'introduction est évidemment imputable aux traducteurs de Heidegger et, au premier chef, à Jean Beaufret (qui a relevé cette évolution terminologique à partir de 1946 $ ^{9} $).",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00510",
+          "note_item_id": "fn-00510",
+          "current_anchor_id": "anchor-00311",
+          "marker": "144",
+          "note_page_no": 171,
+          "anchor_page_no": 172,
+          "current_anchor_marker": "144",
+          "note_excerpt": "Beda ALLEMANN, Holderlin et Heidegger. Recherche de la relation entre poésie et pensée, trad. François Fédier, Paris, PUF, coll. <<Épiméthée>>, 1959.",
+          "anchor_excerpt": "En définitive, si le bilan de cette décennie est impressionnant, il est aussi très ambigu. L'image magistrale de Heidegger s'est imposée, mais elle s'est aussi brouillée en s'enrichissant. Les divergences sur l'orientation à suivre en matière de traduction ne constituent que l'un des axes de cette ambiguïté (décelable chez Beaufret lui-même, oscillant entre l'effort de clarté pédagogique et une certaine recherche ésotérique)<sup>16</sup>. Le <sup>144</sup>statut de l'ontologie, l'interprétation de l'histoire de la philosophie, et en particulier de la pensée présocratique, le sens et le non-sens de la technique désormais planétaire constituent de nouveaux enjeux de discussion. On l'a vu à Cerisy. Ces nouveaux Developpements sont fort variés, mais il ne s'en dégage pas une lecture majeure qui se mesure avec le fond même du projet heideggérien. À côté du Poème de Parménide<sup>147</sup><sup>17</sup>, essai très personnel, où Jean Beaufret met son brio au service des thèses heideggériennes dans leur ensemble (la réinterprétation du schématisme transcendantal de Kant venant même éclairer rétrospectivement la réévaluation de la portée de la doxa chez Parménide), signalons le rapprochement inattendu opéré par Mikel Dufrenne entre « la mentalité primitive et Heidegger »<sup>18</sup> et la perplexité d'Alphonse de Waelhens qui multiplie les questions au terme d'une présentation assez embarrassée des Holzwege<sup>149</sup><sup>19</sup>. De",
+          "current_anchor_synthetic": false
+        },
+        {
+          "link_id": "link-00526",
+          "note_item_id": "fn-00526",
+          "current_anchor_id": "anchor-00351",
+          "marker": "160",
+          "note_page_no": 174,
+          "anchor_page_no": 175,
+          "current_anchor_marker": "160",
+          "note_excerpt": "il est aussi le seul Français à figurer, avec îvlaurice Blanchot, dans la Festschrift offerte à Heidegger à l'occasion de son soixante-dixième anniversaire (voir <<La Fable du monde», in Martin Heidegger mm siebzigsten Geburtstag, Pfullingen, Neske, 1959, p. 11-18).",
+          "anchor_excerpt": "Il <sup>160</sup>semble bien, d'après tous les témoignages, qu'il ait ainsi « conquis » un auditoire patient, écoutant ensuite attentivement le texte allemand, traduit paragraphe après paragraphe par Pierre-Paul Sagave $ ^{166} $ et Jean Beaufret.",
+          "current_anchor_synthetic": false
         }
       ]
     },
-    "page_contexts": [
-      {
-        "page_no": 420,
-        "file_idx": 419,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a5d9a08d6871/source.pdf",
-        "ocr_excerpt": "formelles qui prennent en charge les difficultés et les fatigues de la pensée, tout comme nos machines/domestiques et industrielles viennent relayer et prolonger nos capacités physiques limitées[66. » Cette concession partielle est cependant contrebalancée par un par bien différent de celui de Heidegger : remettre la science « en culture »; y réintroduire la réflexivité critique pour faire pièce à l'hyperspécialisation des disciplines et à la hiérarchisation des fonctions. Ainsi prend forme, grâce au travail sur les grands couples d'antinomies qui sous-tendent la science contemporaine, un « plaidoyer pour la pensée dans la science[67». » entendant illustrer le fait que la pratique de la science — loin d'exclure l'exercice de la pensée — le rend possible et l'appelle[68]. Que signifie alors penser ? Non pas une méditation sur la portée destinale de la science elle-même, comme c'est le cas chez Heidegger, mais une exploitation réflexive et critique des grandes apories de la science contemporaine. On revient ainsi à un sens en fait plus classique de l'exercice de la pensée, grâce au détour produit par le choc de la « provocation » heideggerienne. Nous allons voir que ce choc doit être analysé encore plus complètement, car il ne s'est pas bornié à mettre en cause les limitations constitutives de la science : il a mis en relief ses liens intimes avec la technique. Si la science « ne ...",
-        "byte_size": 117645,
-        "sha256": "ac63fefb990de3d4d70ff23e97c558bd6f3b25b069d1e6b103186c627029f6aa"
-      },
-      {
-        "page_no": 435,
-        "file_idx": 434,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a5d9a08d6871/source.pdf",
-        "ocr_excerpt": "nière $ ^{60} $). Malgré de nombreuses citations, Meschonnic semble surtout s'attacher à dénoncer les mirages produits par «l'effet Heidegger» dans la pensée contemporaine. Au passage, il pose cependant des questions importantes : Heidegger ne surestime-t-il pas la langue comme telle, mais aussi, bien entendu, la langue allemande en sa germanité même ? Ne sacrifice-t-il pas le syntaxique au monstratif ? Son manque d'intérêt pour la positivité en matière linguistique n'est-il pas plus un handicap qu'une aide ? De son côté, Dionys Mascolo est un auteur $ ^{61} $ qui s'est fait connaître depuis longtemps dans d'autres domaines (surtout le marxisme critique) et dont on ignorait l'intérêt pour Heidegger. Il est vrai que cet intérêt est tout négatif. En prenant Heidegger pour «modèle», Mascolo ne cache pas son jeu et n'enrobe pas l'antiphrase dans un excès de précautions oratoires. Pourquoi Heidegger devient-il un véritable repoussoir? Moins parce qu'il a été nazi (avec quelques années de retard, Mascolo proclame son insatisfaction et son désarroi devant les déchaînements passionnels provoqués par la publication du livre de Farias) qu'en raison du rôle d'archétype joué par sa pensée dans le champ philosophique. Démasquant en Heidegger «l'incarnation de l'âme philosophiante $ ^{62} $», Mascolo lui reproche tout à la fois son abstraction schématisante, son caractère scolastique $ ^{10} ...",
-        "byte_size": 136392,
-        "sha256": "f04e1c4c7246088485975f48ae23a9c732e083713d4910f44354e174057bc893"
-      },
-      {
-        "page_no": 436,
-        "file_idx": 435,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/a5d9a08d6871/source.pdf",
-        "ocr_excerpt": "rejets un forme emphatique qui leur ôte une grande partie de leur intérêt $ ^{67} $, Citant une confidence de Queneau à Michel Leiris («Il n'y a pas d'amour chez Heidegger $ ^{68} $»), Mascolo ajoute que rire, jeu, sexe (et femmes !) y sont également exclus et il oppose au chemin heideggerien la grand-route du poète vagabond du 7° art (Charlie Chaplin) $ ^{69} $. Préférence respectable et même sympathique qui ne justifie cependant pas la lecture désinvolte de textes scrupuleux (peut-être trop «sérieux» !) où se révèle un sens du «jeu» peut-être plus grand que ne le croit Mascolo. Surtout, pourquoi avoir confondu Heidegger avec «l'âme; philosophante»? C'est, en voulant trop embrasser, mal étreindre le «modèle» heideggerien, pour finalement méconnaître l'étonnante diversité des philosophies du XX<sup>e</sup> siècle. À ce propos, en revanche, Jeffrey Barash présente un bilan soigneux de l'« exception » heideggérienne resituée en son siècle™, Barash, universitaire américain qui a choisi de vivre et d'enseigner en France, a réussi un exploit assez rare : se faire accepter par l'Université française (il enseigne à l'université d'Amiens). Auteur d'une excellente thèse des Hautes Études, publiée en anglais et préfacée par Paul Ricœur™, Barash n'innove certes pas en écrivant sur la question de l'historicité chez Heidegger ; autre handicap : son livre est un recueil d'articles, ce qui pa ...",
-        "byte_size": 138998,
-        "sha256": "544cd2dccb68a7ae391131cfe9bedd4f336713fa21532c3ecceb139e1ffcc284"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-014-entreéruditionettechnosc:toc-ch-014-entreéruditionettechnosc:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 3,
+    "cluster_id": "toc-ch-006-lembelliedesannées1950:nr-fn-ch-0010-toc-ch-006-lembelliedesannées1950:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01295\",\n    \"anchor_id\": \"anchor-00602\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 420 screenshot shows footnote 106 at the bottom of the page, corresponding to the superscript '106' in the text (OCR'd as [66.). The note item fn-01295 has marker 106 and matches the text exactly.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01296\",\n    \"anchor_id\": \"synthetic-footnote-00847\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 420 screenshot shows footnote 107 ('Ibid., p. 21.') immediately following footnote 106. Although the anchor is synthetic, the note item exists and corresponds to this position in the sequence.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01297\",\n    \"anchor_id\": \"synthetic-footnote-00848\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 420 screenshot shows footnote 108 starting with 'Par ailleurs...'. This matches the content of fn-01297 (marker 108).\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01357\",\n    \"anchor_id\": \"anchor-00637\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 435 screenshot shows footnote 170 at the bottom, citing Jeffrey Andrew BARASH. This matches fn-01357 (marker 170). The current binding to anchor-00637 (which likely corresponds to the mention of Barash or the relevant context on p.435/436) is correct.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-01358\",\n    \"anchor_id\": \"synthetic-footnote-00882\",\n    \"confidence\": 1.0,\n    \"reason\": \"Page 436 screenshot shows footnote 171 ('Id., Martin Heidegger...') following footnote 170. This matches fn-01358 (marker 171).\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 3131,
+    "output_tokens": 35,
+    "total_tokens": 3166,
+    "estimated_input_tokens": 2977,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"Unmatched notes require page screenshots to locate anchor phrases.\"\n    }\n]\n```",
   "response_parsed": [
     {
-      "action": "match",
-      "note_item_id": "fn-01295",
-      "anchor_id": "anchor-00602",
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Page 420 screenshot shows footnote 106 at the bottom of the page, corresponding to the superscript '106' in the text (OCR'd as [66.). The note item fn-01295 has marker 106 and matches the text exactly."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01296",
-      "anchor_id": "synthetic-footnote-00847",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Page 420 screenshot shows footnote 107 ('Ibid., p. 21.') immediately following footnote 106. Although the anchor is synthetic, the note item exists and corresponds to this position in the sequence."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01297",
-      "anchor_id": "synthetic-footnote-00848",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Page 420 screenshot shows footnote 108 starting with 'Par ailleurs...'. This matches the content of fn-01297 (marker 108)."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01357",
-      "anchor_id": "anchor-00637",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Page 435 screenshot shows footnote 170 at the bottom, citing Jeffrey Andrew BARASH. This matches fn-01357 (marker 170). The current binding to anchor-00637 (which likely corresponds to the mention of Barash or the relevant context on p.435/436) is correct."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-01358",
-      "anchor_id": "synthetic-footnote-00882",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 1.0,
-      "reason": "Page 436 screenshot shows footnote 171 ('Id., Martin Heidegger...') following footnote 170. This matches fn-01358 (marker 171)."
+      "confidence": 0.8,
+      "reason": "Unmatched notes require page screenshots to locate anchor phrases."
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "match",
-        "note_item_id": "fn-01295",
-        "anchor_id": "anchor-00602",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 420 screenshot shows footnote 106 at the bottom of the page, corresponding to the superscript '106' in the text (OCR'd as [66.). The note item fn-01295 has marker 106 and matches the text exactly."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01296",
-        "anchor_id": "synthetic-footnote-00847",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 420 screenshot shows footnote 107 ('Ibid., p. 21.') immediately following footnote 106. Although the anchor is synthetic, the note item exists and corresponds to this position in the sequence."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01297",
-        "anchor_id": "synthetic-footnote-00848",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 420 screenshot shows footnote 108 starting with 'Par ailleurs...'. This matches the content of fn-01297 (marker 108)."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01357",
-        "anchor_id": "anchor-00637",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 435 screenshot shows footnote 170 at the bottom, citing Jeffrey Andrew BARASH. This matches fn-01357 (marker 170). The current binding to anchor-00637 (which likely corresponds to the mention of Barash or the relevant context on p.435/436) is correct."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-01358",
-        "anchor_id": "synthetic-footnote-00882",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 1.0,
-        "reason": "Page 436 screenshot shows footnote 171 ('Id., Martin Heidegger...') following footnote 170. This matches fn-01358 (marker 171)."
+        "confidence": 0.8,
+        "reason": "Unmatched notes require page screenshots to locate anchor phrases."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 3547,
-    "completion_tokens": 593,
-    "total_tokens": 4140,
+    "prompt_tokens": 3131,
+    "completion_tokens": 35,
+    "total_tokens": 3166,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 11918
+    "duration_ms": 1688
   }
 }

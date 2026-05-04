@@ -1,0 +1,141 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir:endnote",
+      "chapter_title": "6 Pilgrims in Search of Their Reason",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        309,
+        309
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 51169,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "en-00003",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "50",
+          "normalized_marker": "50",
+          "occurrence": 1,
+          "source_text": "Ibid.",
+          "page_no": 309,
+          "display_marker": "50",
+          "source_marker": "50",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 51170,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "en-00004",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "51",
+          "normalized_marker": "51",
+          "occurrence": 1,
+          "source_text": "Ibid.",
+          "page_no": 309,
+          "display_marker": "51",
+          "source_marker": "51",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 51171,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "en-00005",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "52",
+          "normalized_marker": "52",
+          "occurrence": 1,
+          "source_text": "Ibid.",
+          "page_no": 309,
+          "display_marker": "52",
+          "source_marker": "52",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 51172,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "en-00006",
+          "note_kind": "endnote",
+          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+          "region_id": "nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir",
+          "marker": "53",
+          "normalized_marker": "53",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 74.",
+          "page_no": 309,
+          "display_marker": "53",
+          "source_marker": "53",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir:endnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-006-6pilgrimsinsearchoftheir:nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir:endnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3933,
+    "estimated_prompt_tokens": 1414,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 4,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1414,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,181 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-008-ghostsormucus:nr-fn-ch-0055-toc-ch-008-ghostsormucus:footnote\",\n  \"chapter_title\": \"8. Ghosts or mucus?\",\n  \"page_range\": [\n    358,\n    358\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00179\",\n      \"marker\": \"12\",\n      \"page_no\": 358,\n      \"source_text\": \"? ?36 > ]uan0Qei4 U\\\\u0Pingtai0xiansheng0zhuanVĔ̔ɑ|Ǥu 2 ?? 340in0]uanTs JU [ ZS0_T ZR ZS0_TUcQZ VU înö Ļʝŕ̍ 4GU a0 QUe [ Ô˨tʏ ed64 Va Z 6 ? Jour0of0his0texts0were0includedBA Z` U0SaUR Z ɼɥ˅Ȭ 4GTQZZ[ZS0 QZ [0VUZS0 UfT[ZS0Xa ȒˎŸɲȻǹș˷\"\n    },\n    {\n      \"note_item_id\": \"fn-00180\",\n      \"marker\": \"13\",\n      \"page_no\": 358,\n      \"source_text\": \"GT ZST Z0XQUR ZS vä̛Ŗ 40and UdaQ0ea ZXUa0XaZ ˯Õ¨ƭʦ 6 Pate0in0his0life40\\\\uHachun was0invited0by0the Uianlong0emperor0totreata0member0of0the0imperial0family6 @ t0was0titledJa_TU0eU_Ta0 fT[ZS Ĕƚ˯ůSș 2see0Fibliography E for0details0on0editions3 ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00181\",\n      \"marker\": \"14\",\n      \"page_no\": 358,\n      \"source_text\": \"UdaQ0ea ZXUa0XaZ ˯ÕƷƭʦ _Hiscourses0on0the0origins0and0transmission0of0medical0studiesC0 ?=?`4Va Z 2\\\\u]UB0 ?5 @360Taul0Ynschuld02 AA 3 has0translated \\\\uTs0treatise40butthe0following0translations0are0mine6\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"## 8 ## Ghosts or mucus? Possession symptoms and their treatments in Ming and Qing medicine I also saw a bearded figure lifting my oilcloth screen, but he suddenly disappeared. I was startled and I started to feel befuddled inside: I wanted to seek death. 又見一鬍子將油簾揭起 倏忽不見 吃了一驚 心內恍 惚起來 自欲尋死 Licentiate Xu Ding 徐鼎, recounting a vision (1768) $ ^{1} $ How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $ ### 8.1 Spectral affliction in late-imperial medicine Qing men and women often caught sight of “ghosts” and felt the result of their malicious actions. To banish these demons, the relatives of afflicted people could hire rituals specialist, doctors who claimed they could oust specters with drugs, or physicians like Yu Zhen who denied the demonic etiology altogether, but claimed they knew methods to cure possession symptoms. Chapter 13 will explain in more detail the ways in which common people tried to cure their mad-acting relatives, including cases in which they sought the help of both exorcists and physicians. In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposedly control the thoughts, acts, and speech of their victim. Possession was expressed by verbs like ping 憑, yi 依, or fu 附, which meant “attaching to” or “relying upon” a person. Ghosts were also often said to “enter” (ru 入) the body of their victims. All these terms were not part of specialized medical terminology, but physicians used them when they discussed cases of “possession.” Regardless of whether they ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0055-toc-ch-008-ghostsormucus:footnote",
+      "chapter_title": "8. Ghosts or mucus?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        358,
+        358
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11751,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00179",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0055-toc-ch-008-ghostsormucus",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "? ?36 > ]uan0Qei4 U\\u0Pingtai0xiansheng0zhuanVĔ̔ɑ|Ǥu 2 ?? 340in0]uanTs JU [ ZS0_T ZR ZS0_TUcQZ VU înö Ļʝŕ̍ 4GU a0 QUe [ Ô˨tʏ ed64 Va Z 6 ? Jour0of0his0texts0were0includedBA Z` U0SaUR Z ɼɥ˅Ȭ 4GTQZZ[ZS0 QZ [0VUZS0 UfT[ZS0Xa ȒˎŸɲȻǹș˷",
+          "page_no": 358,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11752,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00180",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0055-toc-ch-008-ghostsormucus",
+          "marker": "13",
+          "normalized_marker": "13",
+          "occurrence": 1,
+          "source_text": "GT ZST Z0XQUR ZS vä̛Ŗ 40and UdaQ0ea ZXUa0XaZ ˯Õ¨ƭʦ 6 Pate0in0his0life40\\uHachun was0invited0by0the Uianlong0emperor0totreata0member0of0the0imperial0family6 @ t0was0titledJa_TU0eU_Ta0 fT[ZS Ĕƚ˯ůSș 2see0Fibliography E for0details0on0editions36 A include the0times in0which they0appeared0in0compendia0of0\\uTs0works60\\uTs0case0collection0was0edited0by [ang0Whixiongǜá̌ 2 @ @5 @>@340an0important0figure0in0the[arm 5factor0disorder0movementwho had also compiled0an0annotated0selection0from0]u0^henTs aVUZ0eU Z0 Z 2 ??@30titled aVUZ0eU Z0 Z0da Z °S˯ƃłˡ",
+          "page_no": 358,
+          "display_marker": "13",
+          "source_marker": "13",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11753,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00181",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0055-toc-ch-008-ghostsormucus",
+          "marker": "14",
+          "normalized_marker": "14",
+          "occurrence": 1,
+          "source_text": "UdaQ0ea ZXUa0XaZ ˯ÕƷƭʦ _Hiscourses0on0the0origins0and0transmission0of0medical0studiesC0 ?=?`4Va Z 2\\u]UB0 ?5 @360Taul0Ynschuld02 AA 3 has0translated \\uTs0treatise40butthe0following0translations0are0mine6",
+          "page_no": 358,
+          "display_marker": "14",
+          "source_marker": "14",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0055-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1617,
+    "output_tokens": 200,
+    "total_tokens": 1817,
+    "estimated_input_tokens": 1589,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00179\",\n    \"anchor_phrase\": \"Licentiate Xu Ding 徐鼎, recounting a vision (1768)\",\n    \"confidence\": 0.9,\n    \"reason\": \"脚注12对应正文中标记为1的引文来源。\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00180\",\n    \"anchor_phrase\": \"Yu Zhen 俞震 in a note to a medical case file (1778)\",\n    \"confidence\": 0.9,\n    \"reason\": \"脚注13对应正文中标记为2的引文来源。\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"脚注14的来源在正文中无明确对应标记。\"\n  }\n]",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00179",
+      "anchor_id": "",
+      "anchor_phrase": "Licentiate Xu Ding 徐鼎, recounting a vision (1768)",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "脚注12对应正文中标记为1的引文来源。"
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00180",
+      "anchor_id": "",
+      "anchor_phrase": "Yu Zhen 俞震 in a note to a medical case file (1778)",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "脚注13对应正文中标记为2的引文来源。"
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "脚注14的来源在正文中无明确对应标记。"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00179",
+        "anchor_id": "",
+        "anchor_phrase": "Licentiate Xu Ding 徐鼎, recounting a vision (1768)",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "脚注12对应正文中标记为1的引文来源。"
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00180",
+        "anchor_id": "",
+        "anchor_phrase": "Yu Zhen 俞震 in a note to a medical case file (1778)",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "脚注13对应正文中标记为2的引文来源。"
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "脚注14的来源在正文中无明确对应标记。"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1617,
+    "completion_tokens": 200,
+    "total_tokens": 1817,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2687
+  }
+}

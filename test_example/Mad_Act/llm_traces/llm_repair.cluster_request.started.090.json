@@ -1,0 +1,87 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-014-distressandpower:nr-fn-ch-0092-toc-ch-014-distressandpower:footnote",
+      "chapter_title": "14. Distress and power",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        584,
+        584
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11918,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00347",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-014-distressandpower",
+          "region_id": "nr-fn-ch-0092-toc-ch-014-distressandpower",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "> 0suggested0in 6 thatcommon0people~s depositions0aboutthe0words0or0acts0ofmad0people0must0be understood0in0the0context0of0the0case0under0investigation60Yhe0fact0that0Qin~s0case partly0concerned0his fantasies about officialdomprodded investigatorsto record0pastbehavior0that0appeared0to0adumbrate the0case0at0hand6",
+          "page_no": 584,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-014-distressandpower:nr-fn-ch-0092-toc-ch-014-distressandpower:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-014-distressandpower:nr-fn-ch-0092-toc-ch-014-distressandpower:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3766,
+    "estimated_prompt_tokens": 1380,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1380,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

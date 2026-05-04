@@ -1,0 +1,159 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0046-toc-ch-007-shapesofpractices:footnote",
+      "chapter_title": "7. Shapes of practices",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        311,
+        316
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11715,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00143",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0046-toc-ch-007-shapesofpractices",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "<@?5 ==A3 Ucm]b[/WicmUc kéƅ̡ 2authorUs/preface/from/ ==>34 ^iUb 4/VPiverW ː 4/under VPiver5inhibiting/powderWŵːƐ 2\\ue]UB/= E36 A> uaUs/explanation/appearsat/the/end/of/theVQu/cheng/tuW I1= section/in ^iUb /2]e]UB/A 5A<36 A? Eccording/to/the/order/of/conquest/of/the/ ive/Thases4/[ood/was/said/to VovercomeW 2g\\Yb[ ¦ 3/Iarth6",
+          "page_no": 311,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11716,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00144",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0046-toc-ch-007-shapesofpractices",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "2 D]bn\\Yb[/n\\]bUb/m]Ub ˧͂Ž´·ǌ 4^iUb C/]e]UB/A F36 Frief presentations/of/the/evolution/of/Piver/etiologies/in/Ghinese/medicine/can/be/found/in/ ong/ iahe/2ed6/in/chief3 AA B/<5 C/and/Pi/^hengquan/and/Tang/]ouqing/ B/ 5 >6/Foth/are/chronological/juxtapositions/of documents6 AA DY]n\\Yb[/n\\]WU] φ͂ǻ̛ 2authorUs/preface/ @ A4 first/printed/in/ @= 34^iUb 4/first/line/of/the/section/on VPiver/UiWːǲ 2QU\\G/ed6B/ @@36/ n/the/fanli/of/the/same/book4 Pin/expressed his/admiration/for/the?i]XY/hc `]b]WU`/HfUWh]WY 2QU\\G/ed64/p6/ /of/prefatory/material36 ̾ɜØ˨ːe 6 R\\]/m]/V]/V]Ub ɾ·Ňͪ 4/VSn/Piver/UiW̽ːǲ 4/first/line 2Q]] B/ <36/Pi/[enrongUs/discussions/of/the ?i]XY/hc/ `]b]WU`/HfUWh]WY can/be/found/throughout/his R\\]/m]/V]/V]Ub ɾ·Ňͪ 2 @<@36/Wee/also/his/introduction/to >Ub[/Qim]/WUc YĀŢ˺ 2preface/from/ @ =4/with/later/content36",
+          "page_no": 312,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11717,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00145",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0046-toc-ch-007-shapesofpractices",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "109. Leizeng zhi cai 類證治裁, Juan 4, “Diankuang,” “Medical case files” 醫案, last case (MQXC ed.: 243).",
+          "page_no": 314,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11718,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00146",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0046-toc-ch-007-shapesofpractices",
+          "marker": "11",
+          "normalized_marker": "11",
+          "occurrence": 1,
+          "source_text": "7. 3E\u0001D7H7DE7\u00018>AI\u0001\u00043E\u0001;@ F:7\u0001D7H7DE7\u00018>AI\u0001A8\u0001\";H7D\u0001 ;D7 ;@FA\u0001F:7\u00015:7EF\u0005 I;F: ;FE\u0001>793>\u00013@6\u0001BA>;F;53>\u0001?73@;@9\u00013E\u0001VE76;F;A@W\u0001AD\u0001D7HA>F\b\u0001 AD\u0001?AD7\u0001A@\u0001F:7\u0001>793>\u0001?73@;@9\u0001A84/ \u0006 E77\u0001 \u000f\b\u000e\b",
+          "page_no": 315,
+          "display_marker": "11",
+          "source_marker": "11",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11719,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00147",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-007-shapesofpractices",
+          "region_id": "nr-fn-ch-0046-toc-ch-007-shapesofpractices",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "4. VReishang/leiWUyφ 4/VXan/leiW ɡφ 4/VHian/kuangWɨȾ 2 AA=B/ A=E36 > eng/^haozhang n4A 2fl6/late/ ? th century3/citedtheS<Ubl]T R\\]ZU/l]bmUc B ȚƲ ɨĔΥ ȾĔΪ ɨØáˊȾØŌ 2 >Yb[g\\]/^]bbUb[/a]`i/nUn\\Yb[/XUl]Uc/\\YWUb ϒÔΓçʏΑᾶÛċÉ½ _authorUs/preface from/ >A<`4^iUb =4/V ang/mai/dian/kuang/he/canWƗ˙ɨȾÉ½ C/ eng]UB/ ? F36",
+          "page_no": 316,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0046-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-007-shapesofpractices:nr-fn-ch-0046-toc-ch-007-shapesofpractices:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5165,
+    "estimated_prompt_tokens": 1771,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 5,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1771,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

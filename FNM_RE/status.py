@@ -521,6 +521,7 @@ def build_module_gate_status(
         getattr(snapshot, "export_result", None),
     ]
     blocking_reasons: list[str] = []
+    warning_reasons: list[str] = []
     review_counts: dict[str, int] = {}
     hard_all_true = True
     for result in module_results:
@@ -532,7 +533,13 @@ def build_module_gate_status(
             hard_all_true = False
             continue
         hard = dict(getattr(gate, "hard", {}) or {})
-        reasons = [str(item).strip() for item in list(getattr(gate, "reasons", []) or []) if str(item).strip()]
+        gate_blockers = [str(item).strip() for item in list(getattr(gate, "blockers", []) or []) if str(item).strip()]
+        gate_reasons = [str(item).strip() for item in list(getattr(gate, "reasons", []) or []) if str(item).strip()]
+        # 向后兼容：没有 blockers 字段的旧 gate 仍然用 reasons
+        if gate_blockers:
+            active_blockers = gate_blockers
+        else:
+            active_blockers = gate_reasons
         module_hard_failed = False
         if not hard:
             module_hard_failed = True
@@ -542,9 +549,9 @@ def build_module_gate_status(
                 continue
             module_hard_failed = True
             hard_all_true = False
-        if module_hard_failed and reasons:
-            blocking_reasons.extend(reasons)
-            for reason in reasons:
+        if module_hard_failed and active_blockers:
+            blocking_reasons.extend(active_blockers)
+            for reason in active_blockers:
                 review_counts[reason] = int(review_counts.get(reason, 0) or 0) + 1
     if not bool(manual_toc_ready):
         blocking_reasons.append("toc_manual_toc_required")

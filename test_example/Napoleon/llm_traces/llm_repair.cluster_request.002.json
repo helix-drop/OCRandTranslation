@@ -2,230 +2,387 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote\",\n  \"chapter_title\": \"La monomanie orgueilleuse ou le mal du siècle\",\n  \"page_range\": [\n    173,\n    182\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 173,\n      \"ocr_excerpt\": \"lysie générale incomplète des aliénés $ ^{13} $», assure Calmeil, médecin de Charenton et spécialiste de la question. Il faudra attendre 1922, soit un siècle après la découverte de Bayle, pour établir définitivement que la paralysie générale était en réalité une conséquence de la syphilis. Elle ne sera donc éradiquée qu’avec la découverte de la pénicillinothérapie, au lendemain de la Seconde Guerre mondiale. Mais pour le XIXe siècle, la paralysie générale est une vésanie qui relève exclusivement de la psychiatrie. En 1841, Calmeil estime qu’elle affecte plus de 25 % des hommes à Charenton, et une femme sur quinze, soit 6,6 %^{14}. Exactement à la même époque, dans l’année 1841-1842, la monomanie orgueilleuse affecte à Bicêtre à plus de 25 % des hommes et 10 % des femmes à la Salpêtrière^{15}... Qu’il soit\"\n    },\n    {\n      \"page_no\": 178,\n      \"ocr_excerpt\": \"trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ». La monomanie orgueilleuse, maladie romantique et littéraire? En partie. Sans compter que la pathologie figure aussi au titre de motif dans les récits de l'époque, comme l'illustre une belle nouvelle de Nerval où le thème poétique du double et du reflet se confond avec une véritable description clinique de la monomanie orgueilleuse: « Le Roi de Bicêtre (xvr siècle) : Raoul Spifame », parue dans La Presse en 1839. Raoul Spifame est avocat au parlement de Paris. Lors d'une rentrée des Chambres en présence de Henri II, l'assistance se rend compte que Spifame est le sosie parfait du roi, lequel est lui-même frappé par la ressemblance. Dès lors, dans les couloirs du palais, on ne l'appelle plus en riant que Sire ou Votre Majesté, railleries malheureuses qui finissent par convaincre Spifame qu'il est réellement le souverain. Sa royale attitude, ses harangues et ses projets de réforme finissent par le conduire à la maison des fous. À l'asile, Spifame est plus que jamais persuadé d'être Henri II. Il gouverne, décrète, festoie, convaincu que « ses rêves étaient sa vie et que sa p ...\"\n    },\n    {\n      \"page_no\": 182,\n      \"ocr_excerpt\": \"incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes. Ramené aux dimensions « moyennes » de cette classe qu'il défend, Louis-Philippe devient dans les asiles un homme abordable, même s'il conserve son statut de chef d'État. Cette accessibilité s'étend à sa famille et à son entourage. « Ce fut en nous recommandant le plus grand silence que M. P. nous confia ses secrets », raconte le médecin de Charenton en 1831, au sujet d'un propriétaire de quarante-cinq ans, que Bicêtre a renvoyé sans renseignement sur son cas. « En venant de son pays, il s'est trouvé en diligence avec le roi et son fils, il les connaît beaucoup, a écrit en leur faveur, est reçu au palais-royal &. Pendant son séjour à Bicêtre, il a vu Louis-Philippe déguisé confondu avec les aliénés ; il couchait dans la même chambre que le prince royal qui était également déguisé et qui lui a confié les secrets du ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00198\",\n      \"marker\": \"6\",\n      \"page_no\": 173,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Mais pour le XIXe siècle, la paralysie générale est une vésanie qui relève exclusivement de la psychiatrie. En 1841, Calmeil estime qu’elle affecte plus de 25 % des hommes à Charenton, et une femme sur quinze, soit 6,6 %^{14}. Exactement à ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-00206\",\n      \"marker\": \"21\",\n      \"page_no\": 178,\n      \"paragraph_index\": 1,\n      \"source_text\": \"Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».\"\n    },\n    {\n      \"anchor_id\": \"anchor-00207\",\n      \"marker\": \"21\",\n      \"page_no\": 178,\n      \"paragraph_index\": 5,\n      \"source_text\": \"trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».\"\n    },\n    {\n      \"anchor_id\": \"anchor-00211\",\n      \"marker\": \"25\",\n      \"page_no\": 182,\n      \"paragraph_index\": 0,\n      \"source_text\": \"incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identific ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-018-deschacalsdespiesdessing:nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing:footnote\",\n  \"chapter_title\": \"Des chacals, des pies, des singes et du pétrole\",\n  \"page_range\": [\n    321,\n    329\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00410\",\n      \"anchor_id\": \"anchor-00506\",\n      \"marker\": \"20\",\n      \"note_excerpt\": \"Claude Quétel et Jean-Yves Simon, « L'aliénation alcoolique en France (XIXe siècle et 1re moitié du XXe siècle) », Histoire, économie et société, 7e année, n° 4, 1988, p. 507-533.\",\n      \"anchor_excerpt\": \"Le reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui oc ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00411\",\n      \"anchor_id\": \"anchor-00507\",\n      \"marker\": \"21\",\n      \"note_excerpt\": \"Drs Magnan et Bouchereau, « Statistiques des alcooliques entrés au bureau d'admission à Sainte-Anne, pendant les mois de mars, avril, mai, juin 1870 et les mois correspondants de 1871 », Annales médico-psychologiques, 5° série, n° 7, Masson ...\",\n      \"anchor_excerpt\": \"Le reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui oc ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00413\",\n      \"marker\": \"23\",\n      \"page_no\": 321,\n      \"source_text\": \"AP, Sainte-Anne, Registre de suivi mensuel femmes (15 février-31 mars 1871), D3X3176, f°s 112, 113, 117, 127, 132, 133, 139, 140, 142.\"\n    },\n    {\n      \"note_item_id\": \"fn-00414\",\n      \"marker\": \"24\",\n      \"page_no\": 321,\n      \"source_text\": \"Ibid., Registre de suivi mensuel femmes (31 mars 1871-6 juin 1871), D3X3 177, f° 19, 28, 53, 66, 78, 81, 100, 117, 129.\"\n    },\n    {\n      \"note_item_id\": \"fn-00416\",\n      \"marker\": \"26\",\n      \"page_no\": 322,\n      \"source_text\": \"Charles Simond, Paris de 1800 à 1900, t. III, Librairie Plon, 1901, p. 25.\"\n    },\n    {\n      \"note_item_id\": \"fn-00417\",\n      \"marker\": \"27\",\n      \"page_no\": 322,\n      \"source_text\": \"AP, Sainte-Anne, Registre de suivi mensuel femmes (31 mars-6 juin 1871), D3X3 177, f° 42.\"\n    },\n    {\n      \"note_item_id\": \"fn-00418\",\n      \"marker\": \"28\",\n      \"page_no\": 323,\n      \"source_text\": \"Ibid., Registre de suivi mensuel hommes (15 mars-1er mai 1871), D3X3 172, f° 23, 39, 42, 62, 70, 72, 73, 75, 77, 81, 87, 88, 93, 120, 136, 142.\"\n    },\n    {\n      \"note_item_id\": \"fn-00419\",\n      \"marker\": \"29\",\n      \"page_no\": 323,\n      \"source_text\": \"Ibid., Registre de suivi mensuel hommes (1er mai-17 juillet 1871), D3X3 173, f° 7, 28.\"\n    },\n    {\n      \"note_item_id\": \"fn-00420\",\n      \"marker\": \"30\",\n      \"page_no\": 324,\n      \"source_text\": \"Ibid., fo\"\n    },\n    {\n      \"note_item_id\": \"fn-00438\",\n      \"marker\": \"49\",\n      \"page_no\": 329,\n      \"source_text\": \"AAP-HP, Bicêtre, Registre d'observations médicales, $ 5^{\\\\circ} $ division, $ 1^{\\\\circ} $ et $ 2^{\\\\circ} $ sections, 1871-1872, 6R34, $ f^{\\\\circ} $ 54.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"dit assez le climat d'anéantissement moral de la population à la suite de la défaite, tout comme son refus de la reddition, point de départ de la Commune de Paris. ## DES CHACALS, DES PIES, DES SINGES ET DU PÉTROLE Le 10 mars 1871, l’Assemblée réfugiée à Versailles vote la fin du moratoire sur les effets de commerce, les loyers et les dettes, et supprime la solde de la garde nationale. Cette série de mesures condamne les ouvriers, les artisans et les petits commerçants à l’asphyxie, dans une population déjà obligée de supporter les conditions draconiennes de l’armistice et d’endurer la honte d’une capitulation vécue comme une trahison. Dans les comités de vigilance, créés pendant le siège, on parle de soulèvement. L’appel à la constitution de la Commune de Paris, rédigé dès le 7 janvier et diffusé par l’Affiche rouge placardée sur les murs de la ville, est en passe de devenir réalité. Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui le 17 mars et envoie l’armée récupérer les canons de Belleville et de Montmartre. Mais les habitants, qui considèrent ces canons payés par souscription nationale comme leur propriété, s’y opposent. Devant la foule de femmes et d’enfants leur interdisant l’accès, les troupes arrivées à Montmartre le 18 mars refusent d’obéir aux ordres et, crosses en l’air, fraternisent avec le peuple. C’est le début de l’insurrection et d’une révolution prolé tarienne qui va donner naissance à la Commune de Paris, écrasée dans le sang le 28 mai. 18 mars-28 mai. Entre ces deux dates, les registres de Sainte-Anne, consignant au jour le jour les diagnostics, constituent un étrange sismographe des délires à Paris sous la Commune. L'asile a reçu, durant cette période de deux mois et demi, 353 patients de deux sexes — chiffre très inf ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote",
-      "chapter_title": "La monomanie orgueilleuse ou le mal du siècle",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-018-deschacalsdespiesdessing:nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing:footnote",
+      "chapter_title": "Des chacals, des pies, des singes et du pétrole",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        173,
-        182
+        321,
+        329
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 280,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00198",
-          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
-          "page_no": 173,
-          "paragraph_index": 1,
-          "char_start": 215,
-          "char_end": 216,
-          "source_marker": "6",
-          "normalized_marker": "6",
-          "anchor_kind": "footnote",
-          "certainty": 0.6,
-          "source_text": "Mais pour le XIXe siècle, la paralysie générale est une vésanie qui relève exclusivement de la psychiatrie. En 1841, Calmeil estime qu’elle affecte plus de 25 % des hommes à Charenton, et une femme sur quinze, soit 6,6 %^{14}. Exactement à la même époque, dans l’année 1841-1842, la monomanie orgueilleuse affecte à Bicêtre à plus de 25 % des hommes et 10 % des femmes à la Salpêtrière^{15}... Qu’il soit",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00410",
+          "note_item_id": "fn-00410",
+          "anchor_id": "anchor-00506",
+          "marker": "20",
+          "note_excerpt": "Claude Quétel et Jean-Yves Simon, « L'aliénation alcoolique en France (XIXe siècle et 1re moitié du XXe siècle) », Histoire, économie et société, 7e année, n° 4, 1988, p. 507-533.",
+          "anchor_excerpt": "Le reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui occupe dans le tableau nosologique la première place, qu'il ne quittera pas avant le xx<sup>e</sup> siècle<sup>20</sup>... Le taux d'alcooliques entrés à Bicêtre, par exemple, n'avait pas cessé d'augmenter sous le Second Empire, passant de 12,78 % en 1855 à 25,24 % en 1862. À Sainte-Anne, Bouchereau et Magnan établissent des statistiques comparatives pour les périodes de mars-juin 1870 (21,2 % d'alcooliques internés) et mars-juin 1871 (22,6 %) qui montrent que, contrairement à ce que la propagande a voulu faire accroire, la Commune n'a pas été cette période d'inflation morbide du délire alcoolique — les chiffres marquent même une baisse en mars 1871 par rapport à l'année précédente<sup>21</sup>."
         },
         {
-          "row_id": 289,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00206",
-          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
-          "page_no": 178,
-          "paragraph_index": 1,
-          "char_start": 44,
-          "char_end": 53,
-          "source_marker": "$ ^{21} $",
-          "normalized_marker": "21",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
-        },
-        {
-          "row_id": 290,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00207",
-          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
-          "page_no": 178,
-          "paragraph_index": 5,
-          "char_start": 101,
-          "char_end": 110,
-          "source_marker": "$ ^{21} $",
-          "normalized_marker": "21",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ».",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
-        },
-        {
-          "row_id": 294,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00211",
-          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
-          "page_no": 182,
-          "paragraph_index": 0,
-          "char_start": 40,
-          "char_end": 49,
-          "source_marker": "$ ^{25} $",
-          "normalized_marker": "25",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes.",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00411",
+          "note_item_id": "fn-00411",
+          "anchor_id": "anchor-00507",
+          "marker": "21",
+          "note_excerpt": "Drs Magnan et Bouchereau, « Statistiques des alcooliques entrés au bureau d'admission à Sainte-Anne, pendant les mois de mars, avril, mai, juin 1870 et les mois correspondants de 1871 », Annales médico-psychologiques, 5° série, n° 7, Masson, 1872, p. 52-57. Voir également Michel Caire, « Du Morbus democraticus à l'Idéalisme passionné. Quelques réactions des aliénistes français aux lendemains de la Commune de Paris », Annales médico-psychologiques, 1990, 4, p. 379-386, également disponible sur : http://psychiatrie.histoire.free.fr/index.htm",
+          "anchor_excerpt": "Le reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui occupe dans le tableau nosologique la première place, qu'il ne quittera pas avant le xx<sup>e</sup> siècle<sup>20</sup>... Le taux d'alcooliques entrés à Bicêtre, par exemple, n'avait pas cessé d'augmenter sous le Second Empire, passant de 12,78 % en 1855 à 25,24 % en 1862. À Sainte-Anne, Bouchereau et Magnan établissent des statistiques comparatives pour les périodes de mars-juin 1870 (21,2 % d'alcooliques internés) et mars-juin 1871 (22,6 %) qui montrent que, contrairement à ce que la propagande a voulu faire accroire, la Commune n'a pas été cette période d'inflation morbide du délire alcoolique — les chiffres marquent même une baisse en mars 1871 par rapport à l'année précédente<sup>21</sup>."
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11943,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00413",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "23",
+          "normalized_marker": "23",
+          "occurrence": 1,
+          "source_text": "AP, Sainte-Anne, Registre de suivi mensuel femmes (15 février-31 mars 1871), D3X3176, f°s 112, 113, 117, 127, 132, 133, 139, 140, 142.",
+          "page_no": 321,
+          "display_marker": "23",
+          "source_marker": "23",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11944,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00414",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "24",
+          "normalized_marker": "24",
+          "occurrence": 1,
+          "source_text": "Ibid., Registre de suivi mensuel femmes (31 mars 1871-6 juin 1871), D3X3 177, f° 19, 28, 53, 66, 78, 81, 100, 117, 129.",
+          "page_no": 321,
+          "display_marker": "24",
+          "source_marker": "24",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11946,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00416",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "26",
+          "normalized_marker": "26",
+          "occurrence": 1,
+          "source_text": "Charles Simond, Paris de 1800 à 1900, t. III, Librairie Plon, 1901, p. 25.",
+          "page_no": 322,
+          "display_marker": "26",
+          "source_marker": "26",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11947,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00417",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "27",
+          "normalized_marker": "27",
+          "occurrence": 1,
+          "source_text": "AP, Sainte-Anne, Registre de suivi mensuel femmes (31 mars-6 juin 1871), D3X3 177, f° 42.",
+          "page_no": 322,
+          "display_marker": "27",
+          "source_marker": "27",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11948,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00418",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "28",
+          "normalized_marker": "28",
+          "occurrence": 1,
+          "source_text": "Ibid., Registre de suivi mensuel hommes (15 mars-1er mai 1871), D3X3 172, f° 23, 39, 42, 62, 70, 72, 73, 75, 77, 81, 87, 88, 93, 120, 136, 142.",
+          "page_no": 323,
+          "display_marker": "28",
+          "source_marker": "28",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11949,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00419",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "29",
+          "normalized_marker": "29",
+          "occurrence": 1,
+          "source_text": "Ibid., Registre de suivi mensuel hommes (1er mai-17 juillet 1871), D3X3 173, f° 7, 28.",
+          "page_no": 323,
+          "display_marker": "29",
+          "source_marker": "29",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11950,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00420",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "30",
+          "normalized_marker": "30",
+          "occurrence": 1,
+          "source_text": "Ibid., fo",
+          "page_no": 324,
+          "display_marker": "30",
+          "source_marker": "30",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11968,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00438",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "49",
+          "normalized_marker": "49",
+          "occurrence": 1,
+          "source_text": "AAP-HP, Bicêtre, Registre d'observations médicales, $ 5^{\\circ} $ division, $ 1^{\\circ} $ et $ 2^{\\circ} $ sections, 1871-1872, 6R34, $ f^{\\circ} $ 54.",
+          "page_no": 329,
+          "display_marker": "49",
+          "source_marker": "49",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 173,
-        "file_idx": 172,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "lysie générale incomplète des aliénés $ ^{13} $», assure Calmeil, médecin de Charenton et spécialiste de la question. Il faudra attendre 1922, soit un siècle après la découverte de Bayle, pour établir définitivement que la paralysie générale était en réalité une conséquence de la syphilis. Elle ne sera donc éradiquée qu’avec la découverte de la pénicillinothérapie, au lendemain de la Seconde Guerre mondiale. Mais pour le XIXe siècle, la paralysie générale est une vésanie qui relève exclusivement de la psychiatrie. En 1841, Calmeil estime qu’elle affecte plus de 25 % des hommes à Charenton, et une femme sur quinze, soit 6,6 %^{14}. Exactement à la même époque, dans l’année 1841-1842, la monomanie orgueilleuse affecte à Bicêtre à plus de 25 % des hommes et 10 % des femmes à la Salpêtrière^{15}... Qu’il soit",
-        "byte_size": 311560,
-        "sha256": "a7860ca3214e818272819df9d31b422b4d062271ed3a0d9cdd0ea2fe06cd5ede"
-      },
-      {
-        "page_no": 178,
-        "file_idx": 177,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "trace pervertie et faussée des ouvrages de Georges [sic] Sand qu’elles [ont] lus sans les comprendre $ ^{21} $ ». La monomanie orgueilleuse, maladie romantique et littéraire? En partie. Sans compter que la pathologie figure aussi au titre de motif dans les récits de l'époque, comme l'illustre une belle nouvelle de Nerval où le thème poétique du double et du reflet se confond avec une véritable description clinique de la monomanie orgueilleuse: « Le Roi de Bicêtre (xvr siècle) : Raoul Spifame », parue dans La Presse en 1839. Raoul Spifame est avocat au parlement de Paris. Lors d'une rentrée des Chambres en présence de Henri II, l'assistance se rend compte que Spifame est le sosie parfait du roi, lequel est lui-même frappé par la ressemblance. Dès lors, dans les couloirs du palais, on ne l'appelle plus en riant que Sire ou Votre Majesté, railleries malheureuses qui finissent par convaincre Spifame qu'il est réellement le souverain. Sa royale attitude, ses harangues et ses projets de réforme finissent par le conduire à la maison des fous. À l'asile, Spifame est plus que jamais persuadé d'être Henri II. Il gouverne, décrète, festoie, convaincu que « ses rêves étaient sa vie et que sa prison n'était qu'un rêve ». Jusqu'au jour où le gardien décide d'accrocher au mur de sa cellule un miroir d'acier dépoli. Spifame s'en approche et croit alors voir le roi venir à lui et lui parler, « ...",
-        "byte_size": 291872,
-        "sha256": "c1cf48580746a315dd16320219d4d335c603894ae4bbc7e46dd3a0eacd3920d2"
-      },
-      {
-        "page_no": 182,
-        "file_idx": 181,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "incarnation de « la transition régnante $ ^{25} $ ». Or on ne s'identifie pas à une transition. Trop humain, trop simple, trop bourgeois, ce père de famille plein de bonhomie, qui promeut un idéal conservateur, désamorce le délire identificatoire. Il est le contraire de la grandeur. En dédaignant avec fermeté son modèle, c'est exactement ce qu'exempli-fient les monomanes. Ramené aux dimensions « moyennes » de cette classe qu'il défend, Louis-Philippe devient dans les asiles un homme abordable, même s'il conserve son statut de chef d'État. Cette accessibilité s'étend à sa famille et à son entourage. « Ce fut en nous recommandant le plus grand silence que M. P. nous confia ses secrets », raconte le médecin de Charenton en 1831, au sujet d'un propriétaire de quarante-cinq ans, que Bicêtre a renvoyé sans renseignement sur son cas. « En venant de son pays, il s'est trouvé en diligence avec le roi et son fils, il les connaît beaucoup, a écrit en leur faveur, est reçu au palais-royal &. Pendant son séjour à Bicêtre, il a vu Louis-Philippe déguisé confondu avec les aliénés ; il couchait dans la même chambre que le prince royal qui était également déguisé et qui lui a confié les secrets du gouvernement. À la messe, il s'est trouvé à côté de la reine qui avait un costume de paysanne, il a vu le préfet de police déguisé en cuisinier. Lafayette et une vingtaine de républicains se trouvaien ...",
-        "byte_size": 304116,
-        "sha256": "6944acbf2ba5b955b67395756da1751d367fe88402059234da5f26a8ae4219f7"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-010-lamonomanieorgueilleuseo:toc-ch-010-lamonomanieorgueilleuseo:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 3,
+    "cluster_id": "toc-ch-018-deschacalsdespiesdessing:nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00198\",\n    \"confidence\": 1.0,\n    \"reason\": \"The marker '6' in the source text is a typo for '14' (context: 'soit 6,6 %^{14}'). The actual footnote 14 exists on page 171 but is not linked to this broken anchor.\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00206\",\n    \"marker\": \"21\",\n    \"note_text\": \"Al. Esquiros, Paris ou Les Sciences..., op. cit., p. 119-120.\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 21 is clearly visible at the bottom of page 176 corresponding to the anchor on that page.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00207\",\n    \"confidence\": 1.0,\n    \"reason\": \"Duplicate anchor for footnote 21 on page 176; the note item is synthesized from the primary anchor (anchor-00206).\"\n  },\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00211\",\n    \"marker\": \"25\",\n    \"note_text\": \"V. Hugo, Les Misérables, op. cit., p. 848-849.\",\n    \"confidence\": 1.0,\n    \"reason\": \"Footnote 25 is clearly visible at the bottom of page 180 corresponding to the anchor on that page.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2428,
+    "output_tokens": 648,
+    "total_tokens": 3076,
+    "estimated_input_tokens": 2120,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00413\",\n        \"anchor_phrase\": \"dans une population déjà obligée de supporter les conditions draconiennes\",\n        \"confidence\": 0.85,\n        \"reason\": \"Page 321 note 23 likely cites source for earlier context on draconiennes conditions.\"\n    },\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00414\",\n        \"anchor_phrase\": \"dans une population déjà obligée de supporter les conditions draconiennes\",\n        \"confidence\": 0.8,\n        \"reason\": \"Page 321 note 24 likely cites source for earlier context on draconiennes conditions.\"\n    },\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00416\",\n        \"anchor_phrase\": \"Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui\",\n        \"confidence\": 0.75,\n        \"reason\": \"Page 322 note 26 likely cites source for Thiers' actions in March 1871.\"\n    },\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00417\",\n        \"anchor_phrase\": \"Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui\",\n        \"confidence\": 0.7,\n        \"reason\": \"Page 322 note 27 likely cites source for Thiers' actions in March 1871.\"\n    },\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00418\",\n        \"anchor_phrase\": \"L’asile a reçu, durant cette période de deux mois et demi, 353 patients\",\n        \"confidence\": 0.9,\n        \"reason\": \"Page 323 note 28 likely cites source for asylum admission statistics.\"\n    },\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00419\",\n        \"anchor_phrase\": \"L’asile a reçu, durant cette période de deux mois et demi, 353 patients\",\n        \"confidence\": 0.9,\n        \"reason\": \"Page 323 note 29 likely cites source for asylum admission statistics.\"\n    },\n    {\n        \"action\": \"needs_review\",\n        \"note_item_id\": \"fn-00420\",\n        \"reason\": \"Page 324 note 30 source_text truncated, unclear context for anchor synthesis.\"\n    },\n    {\n        \"action\": \"needs_review\",\n        \"note_item_id\": \"fn-00438\",\n        \"reason\": \"Page 329 note 49 source text unclear, no clear anchor phrase in excerpt.\"\n    }\n]\n```",
   "response_parsed": [
     {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00198",
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00413",
+      "anchor_id": "",
+      "anchor_phrase": "dans une population déjà obligée de supporter les conditions draconiennes",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.85,
+      "reason": "Page 321 note 23 likely cites source for earlier context on draconiennes conditions."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00414",
+      "anchor_id": "",
+      "anchor_phrase": "dans une population déjà obligée de supporter les conditions draconiennes",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Page 321 note 24 likely cites source for earlier context on draconiennes conditions."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00416",
+      "anchor_id": "",
+      "anchor_phrase": "Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.75,
+      "reason": "Page 322 note 26 likely cites source for Thiers' actions in March 1871."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00417",
+      "anchor_id": "",
+      "anchor_phrase": "Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.7,
+      "reason": "Page 322 note 27 likely cites source for Thiers' actions in March 1871."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00418",
+      "anchor_id": "",
+      "anchor_phrase": "L’asile a reçu, durant cette période de deux mois et demi, 353 patients",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Page 323 note 28 likely cites source for asylum admission statistics."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00419",
+      "anchor_id": "",
+      "anchor_phrase": "L’asile a reçu, durant cette période de deux mois et demi, 353 patients",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "Page 323 note 29 likely cites source for asylum admission statistics."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "fn-00420",
+      "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "The marker '6' in the source text is a typo for '14' (context: 'soit 6,6 %^{14}'). The actual footnote 14 exists on page 171 but is not linked to this broken anchor."
+      "confidence": 0.8,
+      "reason": "Page 324 note 30 source_text truncated, unclear context for anchor synthesis."
     },
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00206",
-      "anchor_phrase": "",
-      "marker": "21",
-      "note_text": "Al. Esquiros, Paris ou Les Sciences..., op. cit., p. 119-120.",
-      "confidence": 1.0,
-      "reason": "Footnote 21 is clearly visible at the bottom of page 176 corresponding to the anchor on that page."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-00207",
+      "action": "needs_review",
+      "note_item_id": "fn-00438",
+      "anchor_id": "",
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 1.0,
-      "reason": "Duplicate anchor for footnote 21 on page 176; the note item is synthesized from the primary anchor (anchor-00206)."
-    },
-    {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00211",
-      "anchor_phrase": "",
-      "marker": "25",
-      "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
-      "confidence": 1.0,
-      "reason": "Footnote 25 is clearly visible at the bottom of page 180 corresponding to the anchor on that page."
+      "confidence": 0.8,
+      "reason": "Page 329 note 49 source text unclear, no clear anchor phrase in excerpt."
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00198",
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00413",
+        "anchor_id": "",
+        "anchor_phrase": "dans une population déjà obligée de supporter les conditions draconiennes",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.85,
+        "reason": "Page 321 note 23 likely cites source for earlier context on draconiennes conditions."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00414",
+        "anchor_id": "",
+        "anchor_phrase": "dans une population déjà obligée de supporter les conditions draconiennes",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Page 321 note 24 likely cites source for earlier context on draconiennes conditions."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00416",
+        "anchor_id": "",
+        "anchor_phrase": "Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.75,
+        "reason": "Page 322 note 26 likely cites source for Thiers' actions in March 1871."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00417",
+        "anchor_id": "",
+        "anchor_phrase": "Craignant les réactions du peuple de Paris, Adolphe Thiers fait arrêter Blanqui",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.7,
+        "reason": "Page 322 note 27 likely cites source for Thiers' actions in March 1871."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00418",
+        "anchor_id": "",
+        "anchor_phrase": "L’asile a reçu, durant cette période de deux mois et demi, 353 patients",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Page 323 note 28 likely cites source for asylum admission statistics."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00419",
+        "anchor_id": "",
+        "anchor_phrase": "L’asile a reçu, durant cette période de deux mois et demi, 353 patients",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "Page 323 note 29 likely cites source for asylum admission statistics."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "fn-00420",
+        "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "The marker '6' in the source text is a typo for '14' (context: 'soit 6,6 %^{14}'). The actual footnote 14 exists on page 171 but is not linked to this broken anchor."
+        "confidence": 0.8,
+        "reason": "Page 324 note 30 source_text truncated, unclear context for anchor synthesis."
       },
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00206",
-        "anchor_phrase": "",
-        "marker": "21",
-        "note_text": "Al. Esquiros, Paris ou Les Sciences..., op. cit., p. 119-120.",
-        "confidence": 1.0,
-        "reason": "Footnote 21 is clearly visible at the bottom of page 176 corresponding to the anchor on that page."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-00207",
+        "action": "needs_review",
+        "note_item_id": "fn-00438",
+        "anchor_id": "",
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 1.0,
-        "reason": "Duplicate anchor for footnote 21 on page 176; the note item is synthesized from the primary anchor (anchor-00206)."
-      },
-      {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00211",
-        "anchor_phrase": "",
-        "marker": "25",
-        "note_text": "V. Hugo, Les Misérables, op. cit., p. 848-849.",
-        "confidence": 1.0,
-        "reason": "Footnote 25 is clearly visible at the bottom of page 180 corresponding to the anchor on that page."
+        "confidence": 0.8,
+        "reason": "Page 329 note 49 source text unclear, no clear anchor phrase in excerpt."
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 2904,
-    "completion_tokens": 414,
-    "total_tokens": 3318,
+    "prompt_tokens": 2428,
+    "completion_tokens": 648,
+    "total_tokens": 3076,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 8952
+    "duration_ms": 5422
   }
 }

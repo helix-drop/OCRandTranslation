@@ -2,103 +2,175 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-001-préambule:toc-ch-001-préambule:footnote\",\n  \"chapter_title\": \"Préambule\",\n  \"page_range\": [\n    34,\n    34\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 34,\n      \"ocr_excerpt\": \"souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance publique comme « manquant $ ^{39} $ ». Les observations de Pinel publiées dans son Traité médico-philosophique sur l'aliénation mentale ou la manie sur son expérience à Bicêtre entre 1793 et 1795, les archives de Charenton à partir de 1798, les registres de placements volontaires et d'office, commençant en 1838, ne combient pas à proprement parler ce manque mais le pallient en partie. De même, les registres d'observations médicales de Bicêtre et de la Salpêtrière, asiles évacués au cours de la guerre de 1870, n'offrent que des pages blanches pour la période de la Commune. Mais les registres de Sainte-Anne, commentés durant cette période, prennent une manière de relais. Si bien que, chronologiquement, il est possible de rapiécer bon an mal an, avec quelques sautes géographiques, les pans de la période 1793-1871. Le second trait saillant de cette masse documentaire est, à la fois, son homogénéité et sa disparité. Homogénéité, car tous ces document ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00035\",\n      \"marker\": \"39\",\n      \"page_no\": 34,\n      \"paragraph_index\": 0,\n      \"source_text\": \"souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-004-lesévénementsdelarévolut:nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut:footnote\",\n  \"chapter_title\": \"Les « événements de la Révolution »\",\n  \"page_range\": [\n    82,\n    86\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00092\",\n      \"anchor_id\": \"anchor-00132\",\n      \"marker\": \"56\",\n      \"note_excerpt\": \"P.-J.-B. Buchez et P.-C. Roux, Histoire de la Révolution française ou Journal des Assemblées nationales depuis 1789 jusqu'en 1815, t. XXV, Paulin Libraire, 1836, p. 135.\",\n      \"anchor_excerpt\": \"de Septembre ou l’« élargissement » de la princesse de Lamballe, dans une escalade de l’horreur, ne font-ils pas figure de folie collective? Lecointre-Puyraveau n’a-t-il pas demandé, lors de la séance du 21 mars 1793 de la Convention nation ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00093\",\n      \"anchor_id\": \"anchor-00133\",\n      \"marker\": \"57\",\n      \"note_excerpt\": \"Voyage du Diable et de la Folie comme causes des Révolutions de France, Braband, Liège & autres, Imprimé dans la Lune, Mai 1793, l'an quatrième du Règne des Cannibales & se trouve chez la pluspart des Libraires en Europe.\",\n      \"anchor_excerpt\": \"Que la formidable libération des énergies sous la Révolution ait favorisé l'effervescence des esprits et le désordre des comportements ne fait de doute pour personne. Mais de là à prononcer à tout-va le diagnostic de « folie » prouve, s'il ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00095\",\n      \"marker\": \"59\",\n      \"page_no\": 82,\n      \"source_text\": \"Pinel, Traité... [1809/2005], p. 62.\"\n    },\n    {\n      \"note_item_id\": \"fn-00099\",\n      \"marker\": \"63\",\n      \"page_no\": 84,\n      \"source_text\": \"Pinel, Traité... [1809/2005], p. 228.\"\n    },\n    {\n      \"note_item_id\": \"fn-00101\",\n      \"marker\": \"65\",\n      \"page_no\": 85,\n      \"source_text\": \"Ibid., p. 168.\"\n    },\n    {\n      \"note_item_id\": \"fn-00102\",\n      \"marker\": \"66\",\n      \"page_no\": 86,\n      \"source_text\": \"Laurence Mall, «Révolution, traumatisme et non-savoir: la “longue surprise” dans Le Nouveau Paris de Mercier», Études littéraires, vol. XXXVIII, n° 1, automne 2006, p. 11-23. Louis Sébastien Mercier est jeté en prison après la chute des Gir ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"répond : «Non. Tous les fours envoyés à Bicestre y restent in statu quo, jusqu’à ce qu’il plaise à la nature de les favoriser 50. » LES « ÉVÉNEMENTS DE LA RÉVOLUTION » Lorsqu'il arrive à Bicêtre en septembre 1793 pour prendre ses fonctions, Pinel se met au travail et dresse un tableau des 200 fous qu'il a sous sa garde, élaboré à partir des renseignements que lui fournit Pussin. Pour 80 patients, il parvient à isoler les « causes occasionnelles connues » de leur folie, regroupées en quatre grandes catégories : ## Chagrins domestiques Des dérangements de fortune, de jalousie, le divorce forcé, la perte de quelque enfant chéri, sont souvent des causes de la manie et on compte à Bicêtre 27 fous de cette espèce. [Soit 33,75 %] ## Amour On en compte 8 devenus fous par une trop grande sensibilité morale et 5 par la fougue du tempérament. Ces derniers se livrent à des actes indécents à la vue des femmes. [Soit 10%] ## Dévotion ou fanatisme On en compte 18 dont les uns se croient des dieux ou des prophètes, d'autres se livrent à des actes puérils de religion et quelquefois se laissent exténuer par l'abstinence et le jeune. [Soit 22,5%] ## Événements de la Révolution Il y en a 27 dont la raison a été aliénée par les événements de la Révolution, soit par des renversements de fortune soit par la crainte de la réquisition ou autres accidents $ ^{51} $. [Soit 33,75%] Notons que ce classement, qui n'est ni alphabetique ni numérique, place en dernier une catégorie qui mériterait quantitativement d'être placée en tête, surtout si l'on considère qu'elle en recoupe au moins deux autres : les « dérangements de fortune » sont en général imputables au chaos révolutionnaire, le divorce — forcé ou non — date du 20 septembre 1792. Par ailleurs, combien sont tombés dans une dévotion excessive o ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-001-préambule:toc-ch-001-préambule:footnote",
-      "chapter_title": "Préambule",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-004-lesévénementsdelarévolut:nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut:footnote",
+      "chapter_title": "Les « événements de la Révolution »",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        34,
-        34
+        82,
+        86
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 40,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00035",
-          "chapter_id": "toc-ch-001-préambule",
-          "page_no": 34,
-          "paragraph_index": 0,
-          "char_start": 267,
-          "char_end": 276,
-          "source_marker": "$ ^{39} $",
-          "normalized_marker": "39",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance publique comme « manquant $ ^{39} $ ». Les observations de Pinel publiées dans son Traité médico-philosophique sur l'aliénation mentale ou la manie sur son expérience à Bicêtre entre 1793 et 1795, les archives de Charenton à partir de 1798, les registres de placements volontaires et d'office, commençant en 1838, ne combient pas à proprement parler ce manque mais le pallient en partie. De même, les registres d'observations médicales de Bicêtre et de la Salpêtrière, asiles évacués au cours de la guerre de 1870, n'offrent que des pages blanches pour la période de la Commune. Mais les registres de Sainte-Anne, commentés durant cette période, prennent une manière de relais. Si bien que, chronologiquement, il est possible de rapiécer bon an mal an, avec quelques sautes géographiques, les pans de la période 1793-1871.",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00092",
+          "note_item_id": "fn-00092",
+          "anchor_id": "anchor-00132",
+          "marker": "56",
+          "note_excerpt": "P.-J.-B. Buchez et P.-C. Roux, Histoire de la Révolution française ou Journal des Assemblées nationales depuis 1789 jusqu'en 1815, t. XXV, Paulin Libraire, 1836, p. 135.",
+          "anchor_excerpt": "de Septembre ou l’« élargissement » de la princesse de Lamballe, dans une escalade de l’horreur, ne font-ils pas figure de folie collective? Lecointre-Puyraveau n’a-t-il pas demandé, lors de la séance du 21 mars 1793 de la Convention nationale, que Marat soit déclaré « en état de démence $ ^{56} $ »? L’accélération de la Terreur, culminant dans une frénésie paranoïaque et une série d’exécutions sommaires, contribuera largement à cette assimilation triviale de la Révolution à un vent de folie."
+        },
+        {
+          "link_id": "link-00093",
+          "note_item_id": "fn-00093",
+          "anchor_id": "anchor-00133",
+          "marker": "57",
+          "note_excerpt": "Voyage du Diable et de la Folie comme causes des Révolutions de France, Braband, Liège & autres, Imprimé dans la Lune, Mai 1793, l'an quatrième du Règne des Cannibales & se trouve chez la pluspart des Libraires en Europe.",
+          "anchor_excerpt": "Que la formidable libération des énergies sous la Révolution ait favorisé l'effervescence des esprits et le désordre des comportements ne fait de doute pour personne. Mais de là à prononcer à tout-va le diagnostic de « folie » prouve, s'il en était besoin, l'inquiétante élasticité d'un mot dont la culture populaire, toutes tendances politiques confondues, s'est très vite emparée à des fins de propagande idéologique. En témoigne ce conte monarchiste paru en mai 1793, intitulé Voyage du Diable et de la Folie comme causes des Révolutions, où Lucifer et son affreuse compagne, inféodée au ministre Insania, appellent au crime et à toutes les scélératesses $ ^{57} $. Les révolutionnaires ne sont pas en reste, qui diffusent de leur côté de pédagogiques estampes, montrant, ici, à l'occasion de la suppression des vœux monastiques, un moine et une religieuse s'embrassant sur l'autel de l'amour, avec ce titre : « L'Erreur et la folie nous avoit jette [sic] dans des cloîtres, mais la raison nous rend au"
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11625,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00095",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut",
+          "marker": "59",
+          "normalized_marker": "59",
+          "occurrence": 1,
+          "source_text": "Pinel, Traité... [1809/2005], p. 62.",
+          "page_no": 82,
+          "display_marker": "59",
+          "source_marker": "59",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11629,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00099",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut",
+          "marker": "63",
+          "normalized_marker": "63",
+          "occurrence": 1,
+          "source_text": "Pinel, Traité... [1809/2005], p. 228.",
+          "page_no": 84,
+          "display_marker": "63",
+          "source_marker": "63",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11631,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00101",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut",
+          "marker": "65",
+          "normalized_marker": "65",
+          "occurrence": 1,
+          "source_text": "Ibid., p. 168.",
+          "page_no": 85,
+          "display_marker": "65",
+          "source_marker": "65",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11632,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00102",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+          "region_id": "nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut",
+          "marker": "66",
+          "normalized_marker": "66",
+          "occurrence": 1,
+          "source_text": "Laurence Mall, «Révolution, traumatisme et non-savoir: la “longue surprise” dans Le Nouveau Paris de Mercier», Études littéraires, vol. XXXVIII, n° 1, automne 2006, p. 11-23. Louis Sébastien Mercier est jeté en prison après la chute des Girondins. Il y restera du 8 octobre 1793 au 28 octobre 1794.",
+          "page_no": 86,
+          "display_marker": "66",
+          "source_marker": "66",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 34,
-        "file_idx": 33,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "souffrance, dans tous les sens du terme. Car ces registres sont lacunaires à plus d'un titre. Le premier volume d'observations médicales de Bicêtre, par exemple, concernant les dates de 1795-1853, est inventorié aux Archives de l'Assistance publique comme « manquant $ ^{39} $ ». Les observations de Pinel publiées dans son Traité médico-philosophique sur l'aliénation mentale ou la manie sur son expérience à Bicêtre entre 1793 et 1795, les archives de Charenton à partir de 1798, les registres de placements volontaires et d'office, commençant en 1838, ne combient pas à proprement parler ce manque mais le pallient en partie. De même, les registres d'observations médicales de Bicêtre et de la Salpêtrière, asiles évacués au cours de la guerre de 1870, n'offrent que des pages blanches pour la période de la Commune. Mais les registres de Sainte-Anne, commentés durant cette période, prennent une manière de relais. Si bien que, chronologiquement, il est possible de rapiécer bon an mal an, avec quelques sautes géographiques, les pans de la période 1793-1871. Le second trait saillant de cette masse documentaire est, à la fois, son homogénéité et sa disparité. Homogénéité, car tous ces documents, de loin, se ressemblent : dates d'entrée, de sortie, état civil, numéros de matricules, diagnostics, anatomies cadavériques — le cas échéant —, c'est toujours le même vocabulaire et les mêmes critè ...",
-        "byte_size": 307606,
-        "sha256": "fdba816a42fa60f3dcc609cec4b915f8d8c98d79c12dcf8889dab3994c1d454d"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-001-préambule:toc-ch-001-préambule:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-004-lesévénementsdelarévolut:nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00035\",\n    \"marker\": \"39\",\n    \"note_text\": \"Cote 6R1. Mais le volume suivant (6R2) commence en 1847.\",\n    \"confidence\": 0.99,\n    \"reason\": \"The footnote text is clearly visible at the bottom of the page in the screenshot. The marker '39' matches the anchor in the body text. Since there is no structured note item provided, I am synthesizing it from the visual evidence.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1905,
+    "output_tokens": 56,
+    "total_tokens": 1961,
+    "estimated_input_tokens": 1837,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"无法在提供的章节正文摘录中找到与注释59、63、65、66明确对应的独一无二短语锚点。\"\n    }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
+      "action": "needs_review",
       "note_item_id": "",
-      "anchor_id": "anchor-00035",
+      "anchor_id": "",
       "anchor_phrase": "",
-      "marker": "39",
-      "note_text": "Cote 6R1. Mais le volume suivant (6R2) commence en 1847.",
-      "confidence": 0.99,
-      "reason": "The footnote text is clearly visible at the bottom of the page in the screenshot. The marker '39' matches the anchor in the body text. Since there is no structured note item provided, I am synthesizing it from the visual evidence."
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "无法在提供的章节正文摘录中找到与注释59、63、65、66明确对应的独一无二短语锚点。"
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
+        "action": "needs_review",
         "note_item_id": "",
-        "anchor_id": "anchor-00035",
+        "anchor_id": "",
         "anchor_phrase": "",
-        "marker": "39",
-        "note_text": "Cote 6R1. Mais le volume suivant (6R2) commence en 1847.",
-        "confidence": 0.99,
-        "reason": "The footnote text is clearly visible at the bottom of the page in the screenshot. The marker '39' matches the anchor in the body text. Since there is no structured note item provided, I am synthesizing it from the visual evidence."
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "无法在提供的章节正文摘录中找到与注释59、63、65、66明确对应的独一无二短语锚点。"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 1352,
-    "completion_tokens": 146,
-    "total_tokens": 1498,
+    "prompt_tokens": 1905,
+    "completion_tokens": 56,
+    "total_tokens": 1961,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 4774
+    "duration_ms": 3712
   }
 }

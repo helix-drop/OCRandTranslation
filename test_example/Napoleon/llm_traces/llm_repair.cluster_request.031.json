@@ -1,0 +1,122 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-012-lusurpateur:nr-fn-ch-0039-toc-ch-012-lusurpateur:footnote\",\n  \"chapter_title\": \"L'Usurpateur\",\n  \"page_range\": [\n    216,\n    216\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00241\",\n      \"anchor_id\": \"anchor-00329\",\n      \"marker\": \"65\",\n      \"note_excerpt\": \"E. de Las Cases (père), Mémorial de Sainte-Hélène [1823], t. II, Garnier frères, 1961, p. 58, cité par Marc Renneville, Le Langage des crânes. Une histoire de la phénologie, Institut d'édition Sanofi-Synthélabo / Les Empêcheurs de penser en ...\",\n      \"anchor_excerpt\": \"chants et des crimes qui ne sont pas dans la nature, qui ne viennent que de la société et de la convention des hommes : que devient la bosse du vol s'il n'y avait point de propriétés ? La bosse de l'ivrognerie, s'il n'existait point de liqu ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00242\",\n      \"anchor_id\": \"anchor-00330\",\n      \"marker\": \"66\",\n      \"note_excerpt\": \"David Richard, La Phrénologie et Napoléon, Imprimerie Pihan Delaforest, 1835, p. 3.\",\n      \"anchor_excerpt\": \"Dans une étude publiée en 1835 consacrée à La Phrénologie et Napoléon, le docteur David Richard, aliéniste, magnétiseur et phrénologiste ami de George Sand, suggère que l'hostilité de l'empereur envers le matérialisme de la théorie de Gall ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00257\",\n      \"marker\": \"81\",\n      \"page_no\": 216,\n      \"source_text\": \"Maurice Beaujeu, Psychologie des premiers Césars. Une étude de médecine légale dans l'Histoire, faculté de médecine et de pharmacie de Lyon, n° 796, thèse pour obtenir le grade de docteur en médecine, Lyon, Imprimerie de A. Storck, 1893, p. ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"après son arrivée à l’asile, en 1868 : « Il s’est associé avec l’Empereur pour acheter l’Europe et l’Asie. Il fera la guerre avec des fleurs et des pièces d’or. Il fera pousser le fourrage sur les rochers etc. 54... » Les revendications à monter sur le trône sont souvent justifiées par une filiation imaginaire. Elle renvoie toujours à la même figure : « Il est le fils du grand Napoléon. On lui a pris son trône $ ^{55} $ »; « Il est le fils de l'Empereur, il le sait par instinct $ ^{56} $ »; « Il est le fils de Napoléon et vient à Paris réclamer ses titres $ ^{57} $ »; « Il est le prince de Reichstadt [sic], parent du pape $ ^{58} $ »; « Il se croit et se dit Napoléon II $ ^{59} $ ». Dans ce schéma, Napoléon III se trouve doublement renvoyé à l'illégitimité par deux fantômes. Il ne peut se prévaloir ni du degré de filiation de l'Aiglon (mort en 1832), qui occupe encore la fonction du dauphin dans les imaginaires, ni du rayonnement de Napoléon l'er représentant, dans tous les cas de figures, l'ultime et écrasante référence. ## L'USURPATEUR Ce tour d'horizon des délires attachés à la personne de Napoléon ou à sa légende laisse en suspens une question : pourquoi ? Pourquoi s'identifie-t-on à Napoléon I<sup>er</sup>, mieux qu'à n'importe quel autre monarque? La réponse tombe d'abord sous le sens. Quitte à choisir un rôle, autant prendre celui du plus fort, du plus craint — qui se trouve être aussi le plus proche dans le temps. Et Napoléon est la figure par excellence du surhomme, le symbole même de la domination et de la toute-puissance moderne. Soit. Mais la singularité du cas repose encore sur un autre trait qui l'isole de tous les autres souverains l'ayant précédé et qui le suivront. Face aux rois, incarnations d'une histoire dynastique fondée sur une monarchie de droit d ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-012-lusurpateur:nr-fn-ch-0039-toc-ch-012-lusurpateur:footnote",
+      "chapter_title": "L'Usurpateur",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        216,
+        216
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00241",
+          "note_item_id": "fn-00241",
+          "anchor_id": "anchor-00329",
+          "marker": "65",
+          "note_excerpt": "E. de Las Cases (père), Mémorial de Sainte-Hélène [1823], t. II, Garnier frères, 1961, p. 58, cité par Marc Renneville, Le Langage des crânes. Une histoire de la phénologie, Institut d'édition Sanofi-Synthélabo / Les Empêcheurs de penser en rond, 2000, p. 82. L'ouvrage de Marc Renneville a constitué ma principale référence sur l'histoire de la phénologie pour ce chapitre. On se reportera notamment aux pages 165-173.",
+          "anchor_excerpt": "chants et des crimes qui ne sont pas dans la nature, qui ne viennent que de la société et de la convention des hommes : que devient la bosse du vol s'il n'y avait point de propriétés ? La bosse de l'ivrognerie, s'il n'existait point de liqueurs fermentées ? Celle de l'ambition, s'il n'existait point de société $ ^{65} $ ?"
+        },
+        {
+          "link_id": "link-00242",
+          "note_item_id": "fn-00242",
+          "anchor_id": "anchor-00330",
+          "marker": "66",
+          "note_excerpt": "David Richard, La Phrénologie et Napoléon, Imprimerie Pihan Delaforest, 1835, p. 3.",
+          "anchor_excerpt": "Dans une étude publiée en 1835 consacrée à La Phrénologie et Napoléon, le docteur David Richard, aliéniste, magnétiseur et phrénologiste ami de George Sand, suggère que l'hostilité de l'empereur envers le matérialisme de la théorie de Gall relevait d'un mélange de convictions philosophiques, de superstition et d'un certain opportunisme politique — et l'on est bien prêt de le suivre sur cette pente : « L'opinion métaphysique que l'âme et ses opérations ne peuvent se manifester par des formes extérieures, caressait le penchant de Napoléon pour le merveilleux, et tendait de plus à renforcer le préjugé populaire, qui s'imaginait l'empereur animé d'un esprit insaisissable, surnaturel, divin, qu'on trouvait en lui seul et devant lequel on devait se prosterner en silence $ ^{66} $. » Nul doute que Napoléon trouvait la phrénologie inepte et intellectuellement nulle ; mais l'intérêt personnel de ce grand propagandiste était également d'entretenir le mystère de son génie, qu'il n'aurait jamais risqué de voir réduit à une vulgaire cranioscopie. Sa défiance était telle qu'il avait même interdit à"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11787,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00257",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-012-lusurpateur",
+          "region_id": "nr-fn-ch-0039-toc-ch-012-lusurpateur",
+          "marker": "81",
+          "normalized_marker": "81",
+          "occurrence": 1,
+          "source_text": "Maurice Beaujeu, Psychologie des premiers Césars. Une étude de médecine légale dans l'Histoire, faculté de médecine et de pharmacie de Lyon, n° 796, thèse pour obtenir le grade de docteur en médecine, Lyon, Imprimerie de A. Storck, 1893, p. 52.",
+          "page_no": 216,
+          "display_marker": "81",
+          "source_marker": "81",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-012-lusurpateur:nr-fn-ch-0039-toc-ch-012-lusurpateur:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1721,
+    "output_tokens": 44,
+    "total_tokens": 1765,
+    "estimated_input_tokens": 1683,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Unmatched note item fn-00257 lacks a clear anchor phrase in the provided body excerpt for synthesis.\"\n  }\n]",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "Unmatched note item fn-00257 lacks a clear anchor phrase in the provided body excerpt for synthesis."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "Unmatched note item fn-00257 lacks a clear anchor phrase in the provided body excerpt for synthesis."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1721,
+    "completion_tokens": 44,
+    "total_tokens": 1765,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1350
+  }
+}

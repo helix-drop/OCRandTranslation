@@ -1,0 +1,230 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-018-deschacalsdespiesdessing:nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing:footnote",
+      "chapter_title": "Des chacals, des pies, des singes et du pétrole",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        321,
+        329
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00410",
+          "note_item_id": "fn-00410",
+          "anchor_id": "anchor-00506",
+          "marker": "20",
+          "note_excerpt": "Claude Quétel et Jean-Yves Simon, « L'aliénation alcoolique en France (XIXe siècle et 1re moitié du XXe siècle) », Histoire, économie et société, 7e année, n° 4, 1988, p. 507-533.",
+          "anchor_excerpt": "Le reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui occupe dans le tableau nosologique la première place, qu'il ne quittera pas avant le xx<sup>e</sup> siècle<sup>20</sup>... Le taux d'alcooliques entrés à Bicêtre, par exemple, n'avait pas cessé d'augmenter sous le Second Empire, passant de 12,78 % en 1855 à 25,24 % en 1862. À Sainte-Anne, Bouchereau et Magnan établissent des statistiques comparatives pour les périodes de mars-juin 1870 (21,2 % d'alcooliques internés) et mars-juin 1871 (22,6 %) qui montrent que, contrairement à ce que la propagande a voulu faire accroire, la Commune n'a pas été cette période d'inflation morbide du délire alcoolique — les chiffres marquent même une baisse en mars 1871 par rapport à l'année précédente<sup>21</sup>."
+        },
+        {
+          "link_id": "link-00411",
+          "note_item_id": "fn-00411",
+          "anchor_id": "anchor-00507",
+          "marker": "21",
+          "note_excerpt": "Drs Magnan et Bouchereau, « Statistiques des alcooliques entrés au bureau d'admission à Sainte-Anne, pendant les mois de mars, avril, mai, juin 1870 et les mois correspondants de 1871 », Annales médico-psychologiques, 5° série, n° 7, Masson, 1872, p. 52-57. Voir également Michel Caire, « Du Morbus democraticus à l'Idéalisme passionné. Quelques réactions des aliénistes français aux lendemains de la Commune de Paris », Annales médico-psychologiques, 1990, 4, p. 379-386, également disponible sur : http://psychiatrie.histoire.free.fr/index.htm",
+          "anchor_excerpt": "Le reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui occupe dans le tableau nosologique la première place, qu'il ne quittera pas avant le xx<sup>e</sup> siècle<sup>20</sup>... Le taux d'alcooliques entrés à Bicêtre, par exemple, n'avait pas cessé d'augmenter sous le Second Empire, passant de 12,78 % en 1855 à 25,24 % en 1862. À Sainte-Anne, Bouchereau et Magnan établissent des statistiques comparatives pour les périodes de mars-juin 1870 (21,2 % d'alcooliques internés) et mars-juin 1871 (22,6 %) qui montrent que, contrairement à ce que la propagande a voulu faire accroire, la Commune n'a pas été cette période d'inflation morbide du délire alcoolique — les chiffres marquent même une baisse en mars 1871 par rapport à l'année précédente<sup>21</sup>."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11943,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00413",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "23",
+          "normalized_marker": "23",
+          "occurrence": 1,
+          "source_text": "AP, Sainte-Anne, Registre de suivi mensuel femmes (15 février-31 mars 1871), D3X3176, f°s 112, 113, 117, 127, 132, 133, 139, 140, 142.",
+          "page_no": 321,
+          "display_marker": "23",
+          "source_marker": "23",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11944,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00414",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "24",
+          "normalized_marker": "24",
+          "occurrence": 1,
+          "source_text": "Ibid., Registre de suivi mensuel femmes (31 mars 1871-6 juin 1871), D3X3 177, f° 19, 28, 53, 66, 78, 81, 100, 117, 129.",
+          "page_no": 321,
+          "display_marker": "24",
+          "source_marker": "24",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11946,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00416",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "26",
+          "normalized_marker": "26",
+          "occurrence": 1,
+          "source_text": "Charles Simond, Paris de 1800 à 1900, t. III, Librairie Plon, 1901, p. 25.",
+          "page_no": 322,
+          "display_marker": "26",
+          "source_marker": "26",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11947,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00417",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "27",
+          "normalized_marker": "27",
+          "occurrence": 1,
+          "source_text": "AP, Sainte-Anne, Registre de suivi mensuel femmes (31 mars-6 juin 1871), D3X3 177, f° 42.",
+          "page_no": 322,
+          "display_marker": "27",
+          "source_marker": "27",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11948,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00418",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "28",
+          "normalized_marker": "28",
+          "occurrence": 1,
+          "source_text": "Ibid., Registre de suivi mensuel hommes (15 mars-1er mai 1871), D3X3 172, f° 23, 39, 42, 62, 70, 72, 73, 75, 77, 81, 87, 88, 93, 120, 136, 142.",
+          "page_no": 323,
+          "display_marker": "28",
+          "source_marker": "28",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11949,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00419",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "29",
+          "normalized_marker": "29",
+          "occurrence": 1,
+          "source_text": "Ibid., Registre de suivi mensuel hommes (1er mai-17 juillet 1871), D3X3 173, f° 7, 28.",
+          "page_no": 323,
+          "display_marker": "29",
+          "source_marker": "29",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11950,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00420",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "30",
+          "normalized_marker": "30",
+          "occurrence": 1,
+          "source_text": "Ibid., fo",
+          "page_no": 324,
+          "display_marker": "30",
+          "source_marker": "30",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11968,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00438",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+          "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+          "marker": "49",
+          "normalized_marker": "49",
+          "occurrence": 1,
+          "source_text": "AAP-HP, Bicêtre, Registre d'observations médicales, $ 5^{\\circ} $ division, $ 1^{\\circ} $ et $ 2^{\\circ} $ sections, 1871-1872, 6R34, $ f^{\\circ} $ 54.",
+          "page_no": 329,
+          "display_marker": "49",
+          "source_marker": "49",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-018-deschacalsdespiesdessing:nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-018-deschacalsdespiesdessing:nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 6405,
+    "estimated_prompt_tokens": 2120,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 8,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 2120,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -135,7 +135,7 @@
       "检查 numeric marker 连续性与首尾 marker"
     ],
     "note_capture_summary": {
-      "expected_anchor_count": 4,
+      "expected_anchor_count": 1,
       "captured_note_count": 0,
       "capture_ratio": 0.0,
       "sparse_capture_chapter_ids": [],
@@ -149,51 +149,51 @@
           "capture_ratio": 1.0
         },
         {
-          "chapter_id": "toc-ch-002-1selfandnarcissism",
+          "chapter_id": "toc-ch-002-selfandnarcissism",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-003-attachmentandtrauma",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-004-defensemechanismsanddiss",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-005-cathexisandfreeenergy",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-006-unconsciousandconscious",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-007-dreams",
+          "note_mode": "no_notes",
+          "expected_anchor_count": 0,
+          "captured_note_count": 0,
+          "capture_ratio": 1.0
+        },
+        {
+          "chapter_id": "toc-ch-008-schizophreniaanddepressi",
           "note_mode": "no_notes",
           "expected_anchor_count": 1,
-          "captured_note_count": 0,
-          "capture_ratio": 0.0
-        },
-        {
-          "chapter_id": "toc-ch-003-2attachmentandtrauma",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-004-3defensemechanismsanddis",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-005-4cathexisandfreeenergy",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-006-5unconsciousandconscious",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 1,
-          "captured_note_count": 0,
-          "capture_ratio": 0.0
-        },
-        {
-          "chapter_id": "toc-ch-007-6dreams",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-008-7schizophreniaanddepress",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 2,
           "captured_note_count": 0,
           "capture_ratio": 0.0
         },
@@ -228,7 +228,107 @@
       "unresolved_note_item_ids_preview": []
     },
     "note_unit_rows": [],
-    "export_merge_rows": []
+    "export_merge_rows": [
+      {
+        "title": "Introduction",
+        "path": "chapters/001-Introduction.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Self and narcissism",
+        "path": "chapters/002-Self and narcissism.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Attachment and trauma",
+        "path": "chapters/003-Attachment and trauma.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Defense mechanisms and dissociation",
+        "path": "chapters/004-Defense mechanisms and dissociation.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Cathexis and free energy",
+        "path": "chapters/005-Cathexis and free energy.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Unconscious and conscious",
+        "path": "chapters/006-Unconscious and conscious.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Dreams",
+        "path": "chapters/007-Dreams.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Schizophrenia and depression",
+        "path": "chapters/008-Schizophrenia and depression.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Conclusion",
+        "path": "chapters/009-Conclusion.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      }
+    ]
   },
   "anchor_resolution": {
     "decision_basis": [
@@ -243,9 +343,9 @@
       "endnote_orphan_note": 0,
       "endnote_orphan_anchor": 0,
       "ambiguous": 0,
-      "ignored": 4,
+      "ignored": 0,
       "fallback_count": 0,
-      "repair_count": 4,
+      "repair_count": 0,
       "fallback_matched_count": 0,
       "fallback_match_ratio": 0.0
     },
@@ -253,58 +353,24 @@
       "chapter_count": 9,
       "contract_required_count": 0,
       "failed_chapter_ids": [],
-      "contract_v2_failed_chapter_ids": [
-        "toc-ch-002-1selfandnarcissism",
-        "toc-ch-006-5unconsciousandconscious",
-        "toc-ch-008-7schizophreniaanddepress"
-      ],
+      "contract_v2_failed_chapter_ids": [],
       "contract_v2_first_marker_violation_count": 0,
       "contract_v2_marker_gap_violation_count": 0,
-      "contract_v2_def_anchor_mismatch_count": 3
+      "contract_v2_def_anchor_mismatch_count": 0
     },
     "anchor_kind_counts": {
-      "unknown": 4
+      "unknown": 1
     },
     "link_status_counts": {
-      "ignored": 4
+      "orphan_anchor": 1
     },
     "link_resolver_counts": {
-      "repair": 4
+      "rule": 1
     },
     "anchor_samples": [
       {
         "anchor_id": "anchor-00001",
-        "chapter_id": "toc-ch-002-1selfandnarcissism",
-        "page_no": 39,
-        "paragraph_index": 5,
-        "marker": "29",
-        "anchor_kind": "unknown",
-        "certainty": 0.6,
-        "source_text_preview": "Scalabrini A, Ebisch SJH, Huang Z, Di Plinio S, Perrucci MG, Romani GL, et al (2019) Spontaneous brain activity predicts task-evoked activit..."
-      },
-      {
-        "anchor_id": "anchor-00002",
-        "chapter_id": "toc-ch-006-5unconsciousandconscious",
-        "page_no": 111,
-        "paragraph_index": 0,
-        "marker": "10",
-        "anchor_kind": "unknown",
-        "certainty": 0.6,
-        "source_text_preview": "Zhang J, Huang Z, Tumati S, Northoff G (2020) Rest-task modulation of fMRI-derived global signal topography is mediated by transient coactiv..."
-      },
-      {
-        "anchor_id": "anchor-00003",
-        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
-        "page_no": 146,
-        "paragraph_index": 1,
-        "marker": "3",
-        "anchor_kind": "unknown",
-        "certainty": 0.6,
-        "source_text_preview": "We first observed that OC neural activity is indeed not fast enough; that is, it is too slow. In fMRI we could observe decreased representat..."
-      },
-      {
-        "anchor_id": "anchor-00004",
-        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
+        "chapter_id": "toc-ch-008-schizophreniaanddepressi",
         "page_no": 149,
         "paragraph_index": 10,
         "marker": "2",
@@ -316,50 +382,11 @@
     "link_samples": [
       {
         "link_id": "link-00001",
-        "chapter_id": "toc-ch-002-1selfandnarcissism",
+        "chapter_id": "toc-ch-008-schizophreniaanddepressi",
         "note_item_id": "",
         "anchor_id": "anchor-00001",
-        "status": "ignored",
-        "resolver": "repair",
-        "marker": "29",
-        "page_span": [
-          39,
-          39
-        ]
-      },
-      {
-        "link_id": "link-00002",
-        "chapter_id": "toc-ch-006-5unconsciousandconscious",
-        "note_item_id": "",
-        "anchor_id": "anchor-00002",
-        "status": "ignored",
-        "resolver": "repair",
-        "marker": "10",
-        "page_span": [
-          111,
-          111
-        ]
-      },
-      {
-        "link_id": "link-00003",
-        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
-        "note_item_id": "",
-        "anchor_id": "anchor-00003",
-        "status": "ignored",
-        "resolver": "repair",
-        "marker": "3",
-        "page_span": [
-          146,
-          146
-        ]
-      },
-      {
-        "link_id": "link-00004",
-        "chapter_id": "toc-ch-008-7schizophreniaanddepress",
-        "note_item_id": "",
-        "anchor_id": "anchor-00004",
-        "status": "ignored",
-        "resolver": "repair",
+        "status": "orphan_anchor",
+        "resolver": "rule",
         "marker": "2",
         "page_span": [
           149,
@@ -367,11 +394,7 @@
         ]
       }
     ],
-    "llm_repair_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/llm_repair.cluster_request.003.json"
-    ],
+    "llm_repair_trace_refs": [],
     "visual_toc_trace_refs": [
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
       "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.sangfor.aTrustTunnel</key>
+	<true/>
+	<key>com.sangfor.aTrustUninstallMonitor</key>
+	<true/>
+	<key>com.apple.CSCSupportd</key>
+	<true/>
+	<key>com.apple.ftpd</key>
+	<true/>
+	<key>com.apple.mdmclient.daemon.runatboot</key>
+	<true/>
+	<key>com.docker.socket</key>
+	<false/>
+	<key>com.apple.inboxupdaterd</key>
+	<true/>
+	<key>com.docker.vmnetd</key>
+	<false/>
+	<key>com.apple.smbd</key>
+	<false/>
+	<key>com.bitgapp.eqmac.helper</key>
+	<false/>
+	<key>com.microsoft.office.licensingV2.helper</key>
+	<false/>
+	<key>com.apple.bootpd</key>
+	<true/>
+	<key>com.sangfor.aTrustDaemon</key>
+	<true/>
+	<key>io.github.clash-verge-rev.clash-verge-rev.service</key>
+	<false/>
+	<key>com.sangfor.aTrustTunnelWatchDog</key>
+	<true/>
+	<key>com.sangfor.limit.maxfiles</key>
+	<true/>
+	<key>com.sangfor.eaio.service</key>
+	<true/>
+	<key>com.apple.ftp-proxy</key>
+	<false/>
+	<key>com.microsoft.autoupdate.helper</key>
+	<false/>
+</dict>
+</plist>

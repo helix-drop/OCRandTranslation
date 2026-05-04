@@ -1,0 +1,141 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-013-lifetrials:nr-fn-ch-0086-toc-ch-013-lifetrials:footnote",
+      "chapter_title": "13. Life trials",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        556,
+        559
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11905,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00334",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-lifetrials",
+          "region_id": "nr-fn-ch-0086-toc-ch-013-lifetrials",
+          "marker": "33",
+          "normalized_marker": "33",
+          "occurrence": 1,
+          "source_text": "n chap5 3/a/character/become s confused/and/then/recovers consciousness/by/the/simple movement/of/mucusA/VQucus/gushed/upward/and/confused/the/openings/of/his/heartX5/Wtartled3/he/vomited mucus/and/became/lucid/again5W/1congratulated/him/on/passing/the/examinations/and/explained/to/him/that/his/joy/Vhad Ɣũ3Y ȷAâƷɽɽɽ ¨ȹ/« ĈƔ¢A}Y çĠƜA 2 ?= Xhis/information/and/the/following/citation/are/drawn/from C UaVU /Y\\P/O\\HU P/ZOPS\\ ÙƦƞôßɐ 3Q\\HU > 3/ iaqing/ <5>3/xia4 3^ \\`PU þÝ and QPTHV ò` days/1 /and/ /Wept5/ ? 25",
+          "page_no": 556,
+          "display_marker": "33",
+          "source_marker": "33",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11906,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00335",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-lifetrials",
+          "region_id": "nr-fn-ch-0086-toc-ch-013-lifetrials",
+          "marker": "34",
+          "normalized_marker": "34",
+          "occurrence": 1,
+          "source_text": "89. Palace memorial from Shanxi governor Nong Qi 農起, dated 6 Apr. 1783 (QL48.3.5), in QWD: 861.",
+          "page_no": 558,
+          "display_marker": "34",
+          "source_marker": "34",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11907,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00336",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-lifetrials",
+          "region_id": "nr-fn-ch-0086-toc-ch-013-lifetrials",
+          "marker": "35",
+          "normalized_marker": "35",
+          "occurrence": 1,
+          "source_text": "91. Palace memorial by Guangdong governor Li Hu 李湖, dated 13 Apr. 1781 (QL46.3.20) (QWD: 715-19).",
+          "page_no": 558,
+          "display_marker": "35",
+          "source_marker": "35",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11908,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00337",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-013-lifetrials",
+          "region_id": "nr-fn-ch-0086-toc-ch-013-lifetrials",
+          "marker": "36",
+          "normalized_marker": "36",
+          "occurrence": 1,
+          "source_text": "0. \u0005\u0001?8\u0001 \u0011\u000f\u0007 \u0007 \u0001:3H7 *:7\u0001A88;5;3>\u0001I:A\u0001?367\u0001EG5:\u00013\u00015>73D\u00016;EF;@5F;A@\u000147FI77@\u0001I;>6\u000135FE\u00013@6\u0001@A@E7@E;53>\u0001EB775:\u0001\u00033 6;E5GEE76\u0001 ;3@9UE\u0001BDABAE3> VFA\u000143>3@57\u0001F:7\u0001EG4\u0006EF3FGF7\u0001A@\u0001=;>>;@9\u00014753GE7\u0001A8\u0001?36@7EEW\u0001\u0003ËƖƐŒ\u001b\u0010, \u0004 ;@ \u0007 \u0005\u0001BB\u0007 \u0010\u001088\u0007",
+          "page_no": 559,
+          "display_marker": "36",
+          "source_marker": "36",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-013-lifetrials:nr-fn-ch-0086-toc-ch-013-lifetrials:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-013-lifetrials:nr-fn-ch-0086-toc-ch-013-lifetrials:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4740,
+    "estimated_prompt_tokens": 1647,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 4,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1647,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

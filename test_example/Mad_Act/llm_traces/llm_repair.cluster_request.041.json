@@ -1,0 +1,181 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-009-genderedmania:nr-fn-ch-0064-toc-ch-009-genderedmania:footnote\",\n  \"chapter_title\": \"9. Gendered mania\",\n  \"page_range\": [\n    418,\n    421\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00230\",\n      \"marker\": \"26\",\n      \"page_no\": 418,\n      \"source_text\": \"A/ ?5 ? Y]U^/ReiQ_ ˀˊɸɼ 3ZeQ^ 3/RWurvey/of/treatment/methods/for/postpartum/_disorders`SǐíƑƕÕǖ B ^] 4 A/ > E5\"\n    },\n    {\n      \"note_item_id\": \"fn-00231\",\n      \"marker\": \"27\",\n      \"page_no\": 420,\n      \"source_text\": \"1. eng]UA/< F25Xhere3/ engalso/reiterated/the Hanxi/guidelines/to/Rtake/depletion/as/the/root/and/the/illness/as/the/branchS/1ǗSɫƭŜ ȯǙƭŲ? 25 ?? YheU/hY^ge ˀé÷Ć 1 > 23 ZeQ^ <3/RGhanhou/diankuangSǐíǣǀ 1QU\\\\G/ed5A/ @ 25 ?@ Flockage/of/the/ eart ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00232\",\n      \"marker\": \"28\",\n      \"page_no\": 421,\n      \"source_text\": \"93. Shen Juren yian 沈菊仁 醫案, section 56, “Postpartum” 產後, case 3 (ZGZC-17: 169).\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"# Gendered mania? Women's madness in late-imperial case records A notorious adage circulating in late imperial medical circles declared that the women's illnesses were more difficult to cure than men's. $ ^{1} $ Two other sayings claimed that women's bodies were \\\"governed by Blood\\\" (以血為主 or a variant) and that treating women necessitated \\\"separate prescriptions\\\" (别方). Ming and Qing physicians cited these sayings to set up concurring arguments, to introduce objections or qualifications, or to clinch points with the help of a well-formulated piece of common knowledge. In this chapter, I want to explore whether the gender of the sufferer was one of the fault lines along which the understanding and treatment of mad acts and mad people were divided. Did physicians from the Song (960-1279) to the Qing (1644-1911) describe madness as occurring to women by different mechanisms than to men? Did the treatments they prescribed differ according to the gender of the patient? What other aspects of medical approaches to insanity were “gendered”? Since mad behavior was obviously less frequent than menses and pregnancy, relatively few cases of madness where the patient was a woman have survived. Many arguments in this chapter are based on 35 case files—from 23 physicians—of female patients who suffered from mad symptoms (see Table 9.1 next page), as well as a few general comments in medical treatises about how madness occurred to women. I selected cases from the twelfth to the early twentieth century that appeared in sections on madness of case collections, as well as other cases in which women were said to be suffering from kuang or dian or in which their behavior was described as kuang or dian, and finally cases that did not conform with the above criteria but in which the symptoms co ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0064-toc-ch-009-genderedmania:footnote",
+      "chapter_title": "9. Gendered mania",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        418,
+        421
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11801,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00230",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0064-toc-ch-009-genderedmania",
+          "marker": "26",
+          "normalized_marker": "26",
+          "occurrence": 1,
+          "source_text": "A/ ?5 ? Y]U^/ReiQ_ ˀˊɸɼ 3ZeQ^ 3/RWurvey/of/treatment/methods/for/postpartum/_disorders`SǐíƑƕÕǖ B ^] 4 A/ > E5",
+          "page_no": 418,
+          "display_marker": "26",
+          "source_marker": "26",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11802,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00231",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0064-toc-ch-009-genderedmania",
+          "marker": "27",
+          "normalized_marker": "27",
+          "occurrence": 1,
+          "source_text": "1. eng]UA/< F25Xhere3/ engalso/reiterated/the Hanxi/guidelines/to/Rtake/depletion/as/the/root/and/the/illness/as/the/branchS/1ǗSɫƭŜ ȯǙƭŲ? 25 ?? YheU/hY^ge ˀé÷Ć 1 > 23 ZeQ^ <3/RGhanhou/diankuangSǐíǣǀ 1QU\\G/ed5A/ @ 25 ?@ Flockage/of/the/ eart3/the/ eartQs/opening3/or/the/ eartQs/Invelope/was/the/most/important/explanation/of insanity/and/disorders/of/consciousness/in/Qing/and/Uing/medicine5 @ When/Xongfang/ /presents/a/brief/biography/of/[ang^hizheng excerpted/from/When/ oruQsƌ^Þ EY^WTQY/]Y^WiY/SXYTe ƟQ®ˀþƻ 3/a/book/ have/been/unable/to identify5/ orreferencesto/more/works/on [ang 3/see/Wcheid/ >A/ n=>5",
+          "page_no": 420,
+          "display_marker": "27",
+          "source_marker": "27",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11803,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00232",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0064-toc-ch-009-genderedmania",
+          "marker": "28",
+          "normalized_marker": "28",
+          "occurrence": 1,
+          "source_text": "93. Shen Juren yian 沈菊仁 醫案, section 56, “Postpartum” 產後, case 3 (ZGZC-17: 169).",
+          "page_no": 421,
+          "display_marker": "28",
+          "source_marker": "28",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0064-toc-ch-009-genderedmania:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1402,
+    "output_tokens": 179,
+    "total_tokens": 1581,
+    "estimated_input_tokens": 1493,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00232\",\n        \"anchor_phrase\": \"93. Shen Juren yian 沈菊仁 醫案, section 56, “Postpartum” 產後, case 3\",\n        \"confidence\": 0.95,\n        \"reason\": \"Note text is clear and matches the exact citation in the body.\"\n    },\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"OCR for fn-00230 is too garbled to identify a unique anchor phrase.\"\n    },\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"OCR for fn-00231 is garbled; cannot reliably extract a unique anchor phrase.\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00232",
+      "anchor_id": "",
+      "anchor_phrase": "93. Shen Juren yian 沈菊仁 醫案, section 56, “Postpartum” 產後, case 3",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "Note text is clear and matches the exact citation in the body."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "OCR for fn-00230 is too garbled to identify a unique anchor phrase."
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "OCR for fn-00231 is garbled; cannot reliably extract a unique anchor phrase."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00232",
+        "anchor_id": "",
+        "anchor_phrase": "93. Shen Juren yian 沈菊仁 醫案, section 56, “Postpartum” 產後, case 3",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "Note text is clear and matches the exact citation in the body."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "OCR for fn-00230 is too garbled to identify a unique anchor phrase."
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "OCR for fn-00231 is garbled; cannot reliably extract a unique anchor phrase."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1402,
+    "completion_tokens": 179,
+    "total_tokens": 1581,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2278
+  }
+}

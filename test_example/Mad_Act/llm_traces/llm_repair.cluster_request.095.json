@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-015-madmentalking:nr-fn-ch-0099-toc-ch-015-madmentalking:footnote\",\n  \"chapter_title\": \"15. Madmen talking?\",\n  \"page_range\": [\n    612,\n    612\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00357\",\n      \"marker\": \"10\",\n      \"page_no\": 612,\n      \"source_text\": \"41. In 1749, the formulation had been “Master Ding said” (see above, p. 592).\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"# 15 # Madmen talking? Symbolic subversion in the eighteenth century ### 15.1 The fear of mad speech? “If his madness is averred, will there be anything he cannot say, anyone he cannot slander?” $ ^{1} $ 設使瘋病果實 又何事不可言 何人不可毀 Yue Zhongqi 岳鍾琪, Governor-general of Shaanxi and Sichuan, 1727 Yue Zhongqi's lamentation is a typical expression of the intriguing anxieties that form the core of this chapter: officials' and the emperor's fear that mad people could speak subversively, and their ensuing concern to distinguish between real and faked insanity. These misgivings are best observed through legal cases in which \\\"mad people\\\" were sentenced for the allegedly subversive content of their words or writings. Many of the men who faced these trials were dismissed as crazy even as they were executed for sedition. The gesture of executing \\\"madmen\\\" for what they said or wrote may go against our sensibilities, but simply pointing that they may have been mad still fails to explain why they were put to death. Many of the documents I use in this chapter come from Archival Documents on Qing-Dynasty Literary Trials (Qingdai wenziyu dang 清代文字獄檔; hereafter QWD), an early anthology documenting trials that involved writings. $ ^{2} $ But I find misleading the category of “literary trials” (文字獄) under which these cases have been classified and analyzed. Since the term “literary trials” was a nineteenth-century creation, QWD gives an artificial unity to a wide array of legal cases that were not classified together when they occurred. $ ^{3} $ The writings condemned could be an entire text or an isolated passage, or even a single character in a poem. Reasons for condemnation and the severity of punishment also varied significantly. The scholars who have attempted to categorize these cases as “type ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-015-madmentalking:nr-fn-ch-0099-toc-ch-015-madmentalking:footnote",
+      "chapter_title": "15. Madmen talking?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        612,
+        612
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11928,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00357",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-015-madmentalking",
+          "region_id": "nr-fn-ch-0099-toc-ch-015-madmentalking",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "41. In 1749, the formulation had been “Master Ding said” (see above, p. 592).",
+          "page_no": 612,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-015-madmentalking:nr-fn-ch-0099-toc-ch-015-madmentalking:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1144,
+    "output_tokens": 46,
+    "total_tokens": 1190,
+    "estimated_input_tokens": 1338,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"脚注10内容引用592页，但当前页612无明确对应短语锚点。\"\n  }\n]",
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "脚注10内容引用592页，但当前页612无明确对应短语锚点。"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "脚注10内容引用592页，但当前页612无明确对应短语锚点。"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1144,
+    "completion_tokens": 46,
+    "total_tokens": 1190,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 1742
+  }
+}

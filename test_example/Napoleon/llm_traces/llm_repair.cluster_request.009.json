@@ -2,103 +2,189 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"cluster_id\": \"toc-ch-011-lemaîtredelunivers:toc-ch-011-lemaîtredelunivers:footnote\",\n  \"chapter_title\": \"Le maître de l’Univers\",\n  \"page_range\": [\n    186,\n    186\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"ref_only_visual\",\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 186,\n      \"ocr_excerpt\": \"mort au Temple en 1795 à l'âge de dix ans, mais prétendument enlevé ou évadé, a suscité une centaine de vocations à travers l'Europe, dont celle d'un fils de sabotier angevin, Mathurin Bruneau, jugé en février 1818 et incarcéré au Mont-Saint-Michel. Victor Hugo prétendait que Louis XVIII était hanté par deux figures : Mathurin Bruneau et Napoléon. Autrement dit, les deux fantômes dont il craignait par-dessus tout le retour $ ^{32} $. Pourquoi ces imposteurs royalistes remplissent-ils les tribunaux et pas les asiles? Jean Hervagault, Mathurin Bruneau, Claude Perrin, le baron de Richemont, Karl-Wilhelm Naundorff, tous passeront par la prison. Pour-quoi sont-ils poursuivis par la justice et non par la Faculté ? La réponse semble aller de soi : la survie de Louis XVII reste, dans les mentalités, une probabilité infinitésimale mais néanmoins crédible, servie par la difficulté d'identifier un enfant sous les traits d'un homme d'une trentaine d'années — ou plus, selon les époques où il se manifeste. Mettre ces prétendants au trône chez les fous, ce serait reconnaître l'absurdité d'une telle éventualité historique. Le fait que la famille royale a tenu à les faire juger plutôt qu'interner t ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00218\",\n      \"marker\": \"32\",\n      \"page_no\": 186,\n      \"paragraph_index\": 0,\n      \"source_text\": \"mort au Temple en 1795 à l'âge de dix ans, mais prétendument enlevé ou évadé, a suscité une centaine de vocations à travers l'Europe, dont celle d'un fils de sabotier angevin, Mathurin Bruneau, jugé en février 1818 et incarcéré au Mont-Sain ...\"\n    }\n  ],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar:footnote\",\n  \"chapter_title\": \"Maisons de santé, maisons d'arrêt\",\n  \"page_range\": [\n    106,\n    108\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00128\",\n      \"anchor_id\": \"anchor-00185\",\n      \"marker\": \"5\",\n      \"note_excerpt\": \"Archives nationales, DV5, n° 58. J'ai établi ces statistiques à partir des données du registre, où un cas (2%) n'est pas précisé. Sur les années de Pinel chez Belhomme, voir notamment A. Ferroni, Une maison de santé pour le traitement des a ...\",\n      \"anchor_excerpt\": \"En 1791, on compte chez Belhomme 47 patients, 30 hommes et 17 femmes, dont la moyenne d'âge se situe autour de quarante ans. De quoi souffre cette clientèle bourgeoise (banquier, orfèvre, chirurgien, curé, prêtre, épouses de négociants, rel ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00125\",\n      \"marker\": \"2\",\n      \"page_no\": 106,\n      \"source_text\": \"Décret du 16-24 août, titre XI, article 3. Voir le site de Michel Caire, sous l’onglet « Législation » et la rubrique « Internements », qui détaille les modalités d’internement des aliénés, de l’Ancien Régime à la loi du 27 juin 1990 : http ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00126\",\n      \"marker\": \"3\",\n      \"page_no\": 107,\n      \"source_text\": \"Mona Ozouf, «Saint-Just», Dictionnaire critique de la Révolution française, vol. «Acteurs», Flammarion, «Champs», 2007, p. 273-293.\"\n    },\n    {\n      \"note_item_id\": \"fn-00127\",\n      \"marker\": \"4\",\n      \"page_no\": 108,\n      \"source_text\": \"Pinel, Traité... [1800], p. 51.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"vient « corriger » la louable et première intention des législateurs, en confiant à la police « le soin d’obvier ou de remédier aux événements fâcheux qui pourroient être occasionnés par les insensés et les furieux laissés en liberté, et par la divagation des animaux malfaisants ou féroces² ». À peine a-t-on entrouvert la grille qu’elle se referme déjà sur le fou, toujours assimilé à la bête à enfermer. Sous la Terreur, le pouvoir politique resserre encore l'étrange mariage entre aliénation et répression, en réquisitionnant les établissements de soins privés, qui présentent l'avantage d'être déjà des lieux d'enfermement, pour les transformer en maisons d'arrêt. Or ce qui aurait pu représenter une solution opportuniste et temporaire répondant à une conjoncture politique d'exception, va au contraire s'institutionnaliser. Sous l'Empire, la Restauration et la monarchie de Juillet, l'assimilation entre maison de santé et prison politique ne relève plus de l'ambiguïté, mais d'une réalité banale, dont le pouvoir n'a aucunement pris la peine de se cacher. ## MAISONS DE SANTÉ, MAISONS D'ARRÊT Entre pension bourgeoise et clinique, la maison de santé jouit à la fin du XVIIIe siècle d'une réputation singulière, tout entière dans l'ambivalence d'un mot qu'elle semble s’être donné pour devise : la discrétion. Alternative de luxe aux hôpitaux-mouroirs de la capitale, elle permet aux familles aisées d’éviter la honte d’une déchéance publique. Là, pas de dortoirs mais des chambres individuelles, pas de cours sinistres mais des jardins d’agrément et, surtout, un personnel médical attentif. La maison de santé est, sous ce rapport, inespérée. Mais son statut hybride, sans cadre législatif, la rend suspecte. Ordinairement élevée loin du centre de Paris, dans les faubourgs de la capitale, el ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-011-lemaîtredelunivers:toc-ch-011-lemaîtredelunivers:footnote",
-      "chapter_title": "Le maître de l’Univers",
-      "request_mode": "ref_only_visual",
+      "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+      "chapter_title": "Maisons de santé, maisons d'arrêt",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "ignore_ref",
-        "synthesize_note_item",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        186,
-        186
+        106,
+        108
       ],
-      "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "matched_examples": [
         {
-          "row_id": 301,
-          "doc_id": "5df1d3d7f9c1",
-          "anchor_id": "anchor-00218",
-          "chapter_id": "toc-ch-011-lemaîtredelunivers",
-          "page_no": 186,
-          "paragraph_index": 0,
-          "char_start": 427,
-          "char_end": 436,
-          "source_marker": "$ ^{32} $",
-          "normalized_marker": "32",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "mort au Temple en 1795 à l'âge de dix ans, mais prétendument enlevé ou évadé, a suscité une centaine de vocations à travers l'Europe, dont celle d'un fils de sabotier angevin, Mathurin Bruneau, jugé en février 1818 et incarcéré au Mont-Saint-Michel. Victor Hugo prétendait que Louis XVIII était hanté par deux figures : Mathurin Bruneau et Napoléon. Autrement dit, les deux fantômes dont il craignait par-dessus tout le retour $ ^{32} $.",
-          "created_at": 1777568010,
-          "updated_at": 1777568010
+          "link_id": "link-00128",
+          "note_item_id": "fn-00128",
+          "anchor_id": "anchor-00185",
+          "marker": "5",
+          "note_excerpt": "Archives nationales, DV5, n° 58. J'ai établi ces statistiques à partir des données du registre, où un cas (2%) n'est pas précisé. Sur les années de Pinel chez Belhomme, voir notamment A. Ferroni, Une maison de santé pour le traitement des aliénés à la fin du XVIIIe siècle : La maison Belhomme, Paris, thèse de médecine, 1954, et Jacques Postel, « Les premières expériences psychiatriques de Philippe Pinel à la maison de santé Belhomme », Revue canadienne de psychiatrie, vol. XXVIII, n° 7, novembre 1983, p. 571-575.",
+          "anchor_excerpt": "En 1791, on compte chez Belhomme 47 patients, 30 hommes et 17 femmes, dont la moyenne d'âge se situe autour de quarante ans. De quoi souffre cette clientèle bourgeoise (banquier, orfèvre, chirurgien, curé, prêtre, épouses de négociants, religieuses), dont la pension est généralement payée par la famille? Pour les trois quarts d'entre eux, de troubles de l'esprit : « aliénation » ou « folie » (38%), « démence » (25,5 %) ou « imbécillité » (13 %). Le quart restant est entré « de bonne volonté » (12,7 %) ou souffre du grand âge ou d'infirmités (8,50 %) $ ^{5} $. Le registre est muet sur les thérapies mises en œuvre — ni indications pharmaceutiques ni précisions sur un éventuel traitement moral, que Pinel tente alors à grand-peine d'expérimenter."
         }
       ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11655,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00125",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "Décret du 16-24 août, titre XI, article 3. Voir le site de Michel Caire, sous l’onglet « Législation » et la rubrique « Internements », qui détaille les modalités d’internement des aliénés, de l’Ancien Régime à la loi du 27 juin 1990 : http://psychiatrie.histoire.free.fr/index.htm.",
+          "page_no": 106,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11656,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00126",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "Mona Ozouf, «Saint-Just», Dictionnaire critique de la Révolution française, vol. «Acteurs», Flammarion, «Champs», 2007, p. 273-293.",
+          "page_no": 107,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11657,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00127",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+          "region_id": "nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "Pinel, Traité... [1800], p. 51.",
+          "page_no": 108,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
       "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 186,
-        "file_idx": 185,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/5df1d3d7f9c1/source.pdf",
-        "ocr_excerpt": "mort au Temple en 1795 à l'âge de dix ans, mais prétendument enlevé ou évadé, a suscité une centaine de vocations à travers l'Europe, dont celle d'un fils de sabotier angevin, Mathurin Bruneau, jugé en février 1818 et incarcéré au Mont-Saint-Michel. Victor Hugo prétendait que Louis XVIII était hanté par deux figures : Mathurin Bruneau et Napoléon. Autrement dit, les deux fantômes dont il craignait par-dessus tout le retour $ ^{32} $. Pourquoi ces imposteurs royalistes remplissent-ils les tribunaux et pas les asiles? Jean Hervagault, Mathurin Bruneau, Claude Perrin, le baron de Richemont, Karl-Wilhelm Naundorff, tous passeront par la prison. Pour-quoi sont-ils poursuivis par la justice et non par la Faculté ? La réponse semble aller de soi : la survie de Louis XVII reste, dans les mentalités, une probabilité infinitésimale mais néanmoins crédible, servie par la difficulté d'identifier un enfant sous les traits d'un homme d'une trentaine d'années — ou plus, selon les époques où il se manifeste. Mettre ces prétendants au trône chez les fous, ce serait reconnaître l'absurdité d'une telle éventualité historique. Le fait que la famille royale a tenu à les faire juger plutôt qu'interner tendrait-elle à prouver qu'elle-même, première menacée par cette réapparition miraculeuse, ne considérait pas l'hypothèse comme tout à fait déraisonnable? Ou sont-ce les médecins qui auraient refusé de ...",
-        "byte_size": 301857,
-        "sha256": "998201a97e4b238b0ee8d67e9c621211a3da16fb007c8c30540de07a2f2e7192"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-011-lemaîtredelunivers:toc-ch-011-lemaîtredelunivers:footnote",
-    "request_mode": "ref_only_visual",
-    "page_context_count": 1,
+    "cluster_id": "toc-ch-006-maisonsdesantémaisonsdar:nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_note_item\",\n    \"anchor_id\": \"anchor-00218\",\n    \"marker\": \"32\",\n    \"note_text\": \"V. Hugo, Les Misérables, op. cit., p. 123.\",\n    \"confidence\": 1.0,\n    \"reason\": \"The footnote text is clearly visible at the bottom of page 184 in the screenshot, but no corresponding note item exists in the structured data.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1655,
+    "output_tokens": 259,
+    "total_tokens": 1914,
+    "estimated_input_tokens": 1670,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00125\",\n    \"anchor_phrase\": \"Décret du 16-24 août, titre XI, article 3\",\n    \"confidence\": 0.9,\n    \"reason\": \"脚注2在正文中紧随引文，该引文出自该法令\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00126\",\n    \"anchor_phrase\": \"Mona Ozouf, «Saint-Just», Dictionnaire critique\",\n    \"confidence\": 0.85,\n    \"reason\": \"脚注3在正文中用于引用Ozouf对Saint-Just的讨论\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00127\",\n    \"anchor_phrase\": \"Pinel, Traité... [1800], p. 51\",\n    \"confidence\": 0.95,\n    \"reason\": \"脚注4在正文中直接引用Pinel的《Traité》第51页\"\n  }\n]\n```",
   "response_parsed": [
     {
-      "action": "synthesize_note_item",
-      "note_item_id": "",
-      "anchor_id": "anchor-00218",
-      "anchor_phrase": "",
-      "marker": "32",
-      "note_text": "V. Hugo, Les Misérables, op. cit., p. 123.",
-      "confidence": 1.0,
-      "reason": "The footnote text is clearly visible at the bottom of page 184 in the screenshot, but no corresponding note item exists in the structured data."
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00125",
+      "anchor_id": "",
+      "anchor_phrase": "Décret du 16-24 août, titre XI, article 3",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "脚注2在正文中紧随引文，该引文出自该法令"
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00126",
+      "anchor_id": "",
+      "anchor_phrase": "Mona Ozouf, «Saint-Just», Dictionnaire critique",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.85,
+      "reason": "脚注3在正文中用于引用Ozouf对Saint-Just的讨论"
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00127",
+      "anchor_id": "",
+      "anchor_phrase": "Pinel, Traité... [1800], p. 51",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "脚注4在正文中直接引用Pinel的《Traité》第51页"
     }
   ],
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "synthesize_note_item",
-        "note_item_id": "",
-        "anchor_id": "anchor-00218",
-        "anchor_phrase": "",
-        "marker": "32",
-        "note_text": "V. Hugo, Les Misérables, op. cit., p. 123.",
-        "confidence": 1.0,
-        "reason": "The footnote text is clearly visible at the bottom of page 184 in the screenshot, but no corresponding note item exists in the structured data."
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00125",
+        "anchor_id": "",
+        "anchor_phrase": "Décret du 16-24 août, titre XI, article 3",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "脚注2在正文中紧随引文，该引文出自该法令"
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00126",
+        "anchor_id": "",
+        "anchor_phrase": "Mona Ozouf, «Saint-Just», Dictionnaire critique",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.85,
+        "reason": "脚注3在正文中用于引用Ozouf对Saint-Just的讨论"
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00127",
+        "anchor_id": "",
+        "anchor_phrase": "Pinel, Traité... [1800], p. 51",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "脚注4在正文中直接引用Pinel的《Traité》第51页"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 1384,
-    "completion_tokens": 122,
-    "total_tokens": 1506,
+    "prompt_tokens": 1655,
+    "completion_tokens": 259,
+    "total_tokens": 1914,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 3415
+    "duration_ms": 4399
   }
 }

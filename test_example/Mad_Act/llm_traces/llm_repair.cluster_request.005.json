@@ -2,443 +2,198 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-manual-2-11-11-errors-and-projection:toc-manual-2-11-11-errors-and-projection:footnote\",\n  \"chapter_title\": \"11. Errors and projections The emergence of “madness illness” in Qing law, 1654-1750\",\n  \"page_range\": [\n    443,\n    486\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"anchor_rebind\",\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 443,\n      \"ocr_excerpt\": \"intention was deployed particularly clearly in the network of laws on homicides in which “killing because of madness” would be integrated. The six killings: a hierarchy of intentions Unlike modern Western legal systems, which distinguish between murder and manslaughter or between degrees of homicide, Chinese law in imperial times called all homicides “killings” (sha 殺). Legal commentators customarily divided killings into sub-types. In descending order of gravity, the “Six killings” (六殺) were mou sha 謀殺 (“Killing by design” or “Plotting to kill”), gu sha 故殺 (“Killing intentionally”), dou sha 鬭殺 (“Killing in an affray”), wu sha 誤殺 (“Killing by mistake”), xi sha 戲殺 (“Killing in play”), and guoshi sha 過失殺 (“Killing accidentally”). Three statutes (lǔ 律) sufficed to define killings in the Ming and Qing codes. $ ^{7} $ Here I explain how the “Six killings” applied to the killing of a single person unrelated to the killer. “Killing by design” (謀殺), which was understood as the result of prior scheming (謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected such plots to occur in vendettas, fights over property, or schemes to kill one's own spouse. “ ...\"\n    },\n    {\n      \"page_no\": 444,\n      \"ocr_excerpt\": \"person was what differentiated “killing by design” from “intentional killing” (故殺), which applied when a killer’s homicidal intent was “not known to others” (非人所知). $ ^{10} $ No matter whether this intent to kill was premeditated or arose during a fight (臨時有意欲殺), the lone culprit was judged as having committed “intentional killing” and was sentenced to the same punishment as for “Killing by design”: effective decapitation after the Assizes. “Killing in an affray” (鬪殺) meant killing unintentionally during a fight. $ ^{11} $ In Qing law, intent to kill had become the main difference between “killing in an affray” and “intentional killing.” As a result, those who had killed during a fight had to demonstrate that they had not intended to kill their victim. $ ^{12} $ Under most circumstances, the ensuing sentence of “strangulation after the Assizes” (絞監候) was eventually commuted to the highest sentence below death, namely exile to 3000 li preceded by 100 strokes of the heavy bamboo. In the three remaining killings, which were all discussed in a single statute, death was understood as being inflicted involuntarily. $ ^{13} $ “Killing in play” (戲殺) occurred in the course of dangerous acti ...\"\n    },\n    {\n      \"page_no\": 445,\n      \"ocr_excerpt\": \"mischance had occurred, or, as commentator Shen Zhiqi 沈之奇 specified in the early eighteenth century, on the intention that motivated the act that led to the mistaken killing. $ ^{15} $ “Accidental killing” (過失殺) could be redeemed by conferring 12.42 ounces of silver to the family of the victim to provide for burial fees. $ ^{16} $ This punishment was mild because the law recognized that the culprit had lacked any will to kill, harm, or even partake in dangerous activities. Compensation for a life taken was paid with money, not with one’s own life. Since “Killing because of madness” in the early Qing was sentenced in the same way as “accidental killing,” let me cite the entire text of the relevant statute. $ ^{17} $ Anyone who kills or injures another accidentally $ ^{18} $ (this is comparatively less serious than killing in play) will be sentenced as if for killing or injuring in an affray. [The privilege of] monetary redemption will be granted according to law, and the money will be given to the family (of the person who was killed or injured). (Accident means that which the ear or eye does not extend to, or what was not contemplated. For example, when one is shooting wild animals ...\"\n    },\n    {\n      \"page_no\": 446,\n      \"ocr_excerpt\": \"fright, or is driving a cart at a rapid speed on a descent, when the situation makes it so that one cannot stop; $ ^{19} $ or if several persons are carrying a heavy object and the strength [of one] is insufficient to control it so that the other persons carrying it are hurt. In all [these] cases where initially there was no intention to $ barm^{20} $ another, but which led by chance to the killing or injuring of another, sentence as if for killing or wounding in an affray, and grant [the privilege of] monetary redemption according to law. [The silver] will be given to the household [of the person] who was killed or injured, to serve as funds for burial or medical treatment.) 若過失殺傷人者 （較戲殺愈輕） 各准鬥殺傷罪 依律收贖 給付其 （被殺傷之） 家 （過失 謂耳目所不及 思慮所不到 如彈射禽獸 因事投擲甎瓦 不期而殺人者 或因升高險足有蹉跌 累及同伴 或駕船使風乘馬驚走 馳車下坡 勢不能止 或共舉重物 力不能制 損及同舉物者 凡初無害人之意 而偶致殺傷人者 皆准鬬毆殺傷人罪 依律收贖 給付被殺傷之家 以為營葬及醫藥之資） <div style=\\\"text-align: center;\\\">The clause specifying that death could not be foreseen pointed to the difference between accidental killing and “Killing in play.” Accidental death was entirely coincidental.</div> ### 11.2 The first Qing laws on madness: creating a new legal object An early case of parricide The earliest Qing case of ...\"\n    },\n    {\n      \"page_no\": 447,\n      \"ocr_excerpt\": \"because it was sentenced in a way that differed from (as far as I know) all earlier and later cases of parricide in a state of madness in Chinese imperial history, and because it involved a particular class of people that was unique to the early Qing. $ ^{22} $ Xu San 徐三, son of Xu Jiuwei 徐九緯, was a “hunter” (打牲人) under the supervision of Palace eunuch Shen Maode 沈茂德. “Hunters” (Manchu: butha; Ch.: buteba 布特哈) was the generic name given to several non-Manchu tribes in an area that is now at the confines of Inner Mongolia and Heilongjiang in northern China. $ ^{23} $ One day with a knife Xu San stabbed (戳) his father, who died shortly thereafter, but before he died, the father had time to testify that “his son had been suffering from madness illness” (伊子原有瘋疾). The Ministry of Punishments approved the sentence that an original memorial (now lost) had proposed: Xu San was exempted of any crime (免罪) because he was judged to have killed “because of madness illness” (因瘋疾). This decision had no other legal repercussions because it was not established as a precedent for judging future cases of a similar nature. $ ^{24} $ Since this affair concerned tribes under the direct supervision of Ma ...\"\n    },\n    {\n      \"page_no\": 448,\n      \"ocr_excerpt\": \"Shunzhi-era (1644-1662) memorials were translations from Manchu. The use of feng bing in these Chinese reports may then have pushed the government to adopt feng bing as the official Chinese term for \\\"madness\\\" instead of the more common feng dian 風癲 and feng kuang 風狂, or the more classical diankuang 癲狂 that had been used in Tang and Song law and was still being used in seventeenth-century medicine. A momentous inaccuracy: the 1667 creation of “killing because of madness” The earliest Qing law concerning madness was a terse rule from 1667 mandating that, “Whenever [people with] madness illness kill or injure another, exempt from sentencing” (凡瘋病殺傷人者免議). $ ^{25} $ In its lack of both context and definition, this rule was typical of the “Currently operative regulations of the Ministry of Punishments” (Xingbu xianxing zeli 刑部現行則例) of the Kangxi era (1662-1722), but unlike most Kangxi rules, which usually consisted in precedent-based guidelines for modulating the punishment of existing crimes, the 1667 law created a new penal denomination (罪名): “[people with] madness illness killing another” (瘋病殺人), which I shall render as “killing because of madness.” $ ^{26} $\"\n    },\n    {\n      \"page_no\": 449,\n      \"ocr_excerpt\": \"In imperial Chinese law, a “penal denomination” was not the charge brought against one at the onset of a trial, but the name of the crime for which one was sentenced. Officials selected the fittest “crime name” by assessing the circumstances of the crime, but “[o]nce an offense was judged to fall into a certain category of crime [罪名], the punishment was predetermined.” $ ^{27} $ Both ideally and in practice, the officials who administered this system of fixed punishments were concerned “to maintain a balance between the offense and the penalty.” This judicial approach differed from that of physicians, who gave little importance to denominations in identifying the cause of an illness, and who aimed to put an end to pathological acts rather than find an apt punishment for them. Like the 1654 judgment in the parricide case involving a “hunter,” the 1667 rule on “killing and injuring another because of madness” disregarded the way in which the code dealt with homicides. As we saw above, even those found guilty of “Killing by accident,” the least serious of the six killings, still had to pay compensation to the family of their victim. If the officials who reviewed the 1667 case had been ...\"\n    },\n    {\n      \"page_no\": 450,\n      \"ocr_excerpt\": \"of madness” was integrated into the network of the six killings. $ ^{30} $ From then on, and until the end of the Qing, killings committed in a fit of insanity were legally viewed as lacking both awareness and criminal intention. The 1667 and 1669 laws concerned only homicides, not madness and mad people in general. The 1669 rule in particular integrated “killing because of madness” within the six killings. Note that in both rate and rationale, the compensation the 1669 rule sought for “killing because of madness” differed significantly from the privilege of monetary redemption granted to some disabled people in statute 22 of the Qing code, which was called “Allowing redemption for the old, the young, and the disabled” (老小廢疾收贖). $ ^{31} $ Under statute 22, one could redeem a death sentence with 0.525 ounces of silver, much less that the 12.42 ounces sought for “killing because of madness.” $ ^{32} $ People who were the object of legalized pity under statute 22 could redeem a real sentence with money; whereas in the case of “[people with] madness illness killing another,” the payment was the sentence, imposed for an inadvertent act that had led to a grave outcome. Compassion was not ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [],\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-01316\",\n      \"marker\": \"9\",\n      \"page_no\": 443,\n      \"paragraph_index\": 8,\n      \"source_text\": \"main plotter had not taken part in the actual killing. $ ^{9} $ The participation of more than one\"\n    },\n    {\n      \"anchor_id\": \"anchor-01317\",\n      \"marker\": \"8\",\n      \"page_no\": 443,\n      \"paragraph_index\": 9,\n      \"source_text\": \"“Killing by design” (謀殺), which was understood as the result of prior scheming (謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected such plots to occur in vendettas, fights over property, or schem ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01318\",\n      \"marker\": \"9\",\n      \"page_no\": 443,\n      \"paragraph_index\": 9,\n      \"source_text\": \"“Killing by design” (謀殺), which was understood as the result of prior scheming (謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected such plots to occur in vendettas, fights over property, or schem ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01322\",\n      \"marker\": \"13\",\n      \"page_no\": 444,\n      \"paragraph_index\": 2,\n      \"source_text\": \"In the three remaining killings, which were all discussed in a single statute, death was understood as being inflicted involuntarily. $ ^{13} $ “Killing in play” (戲殺) occurred in the course of dangerous activities in which people engaged pu ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01323\",\n      \"marker\": \"14\",\n      \"page_no\": 444,\n      \"paragraph_index\": 2,\n      \"source_text\": \"In the three remaining killings, which were all discussed in a single statute, death was understood as being inflicted involuntarily. $ ^{13} $ “Killing in play” (戲殺) occurred in the course of dangerous activities in which people engaged pu ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01324\",\n      \"marker\": \"15\",\n      \"page_no\": 445,\n      \"paragraph_index\": 0,\n      \"source_text\": \"mischance had occurred, or, as commentator Shen Zhiqi 沈之奇 specified in the early eighteenth century, on the intention that motivated the act that led to the mistaken killing. $ ^{15} $\"\n    },\n    {\n      \"anchor_id\": \"anchor-01326\",\n      \"marker\": \"16\",\n      \"page_no\": 445,\n      \"paragraph_index\": 1,\n      \"source_text\": \"“Accidental killing” (過失殺) could be redeemed by conferring 12.42 ounces of silver to the family of the victim to provide for burial fees. $ ^{16} $ This punishment was mild because the law recognized that the culprit had lacked any will to ...\"\n    },\n    {\n      \"anchor_id\": \"anchor-01328\",\n      \"marker\": \"18\",\n      \"page_no\": 445,\n      \"paragraph_index\": 2,\n      \"source_text\": \"Anyone who kills or injures another accidentally $ ^{18} $ (this is comparatively less serious than killing in play) will be sentenced as if for killing or injuring in an affray. [The privilege of] monetary redemption will be granted accord ...\"\n    }\n  ],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00450\",\n      \"note_item_id\": \"fn-00442\",\n      \"current_anchor_id\": \"anchor-01315\",\n      \"marker\": \"5\",\n      \"note_page_no\": 445,\n      \"anchor_page_no\": 443,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5. 0ounces of0silver represented0a0considerable0sumto0payfor0a0common0family3and3asWusan0Raquin kindly remindedme 3 was0far0more0than0was0needed0in0Uingtimesfor0a0common0burial5 > Xhiswa s0statute0 @ 0of0the0code01HPG]0 25 Xhe0text0in0paren ...\",\n      \"anchor_excerpt\": \"(謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected\"\n    },\n    {\n      \"link_id\": \"link-00451\",\n      \"note_item_id\": \"fn-00443\",\n      \"current_anchor_id\": \"anchor-01327\",\n      \"marker\": \"7\",\n      \"note_page_no\": 446,\n      \"anchor_page_no\": 445,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Xhe0phrase0Wor0killX0that ones0added hereappears in0none0of0the0editions0of0the Gode0that0 0consulted5 Qemorial0by0the0Qinistry0of0Tunishments30dated0 0Wept50 = 01W^ 5?5 21YGHE 3 httpA66catalog5digitalarchives5tw6DYVRC = >> =B retrieved0on ...\",\n      \"anchor_excerpt\": \"“Accidental killing” (過失殺) could be redeemed by conferring 12.42 ounces of silver to the family of the victim to provide for burial fees. $ ^{16} $ This punishment was mild because the law recognized that the culprit had lacked any will to ...\"\n    },\n    {\n      \"link_id\": \"link-00452\",\n      \"note_item_id\": \"fn-00444\",\n      \"current_anchor_id\": \"anchor-01331\",\n      \"marker\": \"1\",\n      \"note_page_no\": 447,\n      \"anchor_page_no\": 446,\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"1. =:DE65 EF\\u00012D\\u000192G:?8\\u00014@>6\\u0001E@\\u0001E9:D\\u0001A@DE\\u0001@? \\u0011\\u0016F8 \\u0006 \\u000e 0(/ \\u0006\\u000f\\u0006<,6,\\u000f× 52J1\\u0003\\u0006 \\u001b@C\\u00012\\u00013C:67\\u00015:D4FDD:@?\\u0001@7\\u0001A2CC:4:56D\\u0001:?\\u0001E96\\u0001.F2?\\u00015J?2DEJ\\u0001\\u0002 \\u000e\\b\\u0005 \\u000e\\u0010\\u0003\\u0004\\u0001D66 \\b\\u0006 !F42\\u0001 233:2?:VD\\u0001\\u00027@CE94@>:?8\\u0003 DEF5J\\u0001@7\\u0001>25\\u0001A2CC:4:56D\\u0001:?\\u0001E96\\u0001&:?8\\u00015J?2DEJ\\u00016IA=2:?D\\u0001H9J\\u0001A2CC ...\",\n      \"anchor_excerpt\": \"The earliest Qing case of madness I have identified was a somewhat enigmatic parricide that took place in 1654, about ten years after the Manchus had seized Beijing and officially named it the capital of the newly established Qing dynasty. ...\"\n    },\n    {\n      \"link_id\": \"link-00453\",\n      \"note_item_id\": \"fn-00445\",\n      \"current_anchor_id\": \"anchor-01333\",\n      \"marker\": \"3\",\n      \"note_page_no\": 448,\n      \"anchor_page_no\": 447,\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"uangxu0ed53\\\\gS`?7 30W\\\\inglRXTñ 30WVenmingXJ± 3 W\\\\isha3 wusha30guoshisha0shang0renXėŻɎŻɿ Ż 30 angxi0=f[0lZg`ʾ~\",\n      \"anchor_excerpt\": \"Xu San 徐三, son of Xu Jiuwei 徐九緯, was a “hunter” (打牲人) under the supervision of Palace eunuch Shen Maode 沈茂德. “Hunters” (Manchu: butha; Ch.: buteba 布特哈) was the generic name given to several non-Manchu tribes in an area that is now at the co ...\"\n    },\n    {\n      \"link_id\": \"link-00454\",\n      \"note_item_id\": \"fn-00446\",\n      \"current_anchor_id\": \"anchor-01341\",\n      \"marker\": \"0\",\n      \"note_page_no\": 449,\n      \"anchor_page_no\": 450,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"0. \\u0011\\u000e\\b1\\u0012\\u0001 \\u000e\\u0006 W :==:?8\\u0001244:56?E2==JX2?5 W :==:?8\\u0001@?6VD\\u0001A2C6?ED 244:56?E2==JXH6C6 EH@ 5:776C6?E\\u0001A6?2=\\u000156?@>:?2E:@?D\\u0001E92E\\u000142==65\\u00017@C\\u00015:776C6?E\\u0001AF?:D9>6?ED\\u0006!:<6\\u0001E96\\u0001 \\u000e \\u0001;F58>6?E\\u0001:?\\u0001E96\\u0001A2CC:4:5642D6:?G@=G:?8\\u00012 W9F?E6C\\u0004X E96\\u0001 \\u000e\\u000e\\u000f CF=6\\u0001@? \\u0010 )96\\u0001E ...\",\n      \"anchor_excerpt\": \"of madness” was integrated into the network of the six killings. $ ^{30} $ From then on, and until the end of the Qing, killings committed in a fit of insanity were legally viewed as lacking both awareness and criminal intention.\"\n    },\n    {\n      \"link_id\": \"link-00457\",\n      \"note_item_id\": \"fn-00449\",\n      \"current_anchor_id\": \"anchor-01359\",\n      \"marker\": \"7\",\n      \"note_page_no\": 459,\n      \"anchor_page_no\": 458,\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Xhis0case0appears0in0a \\\\ XF memorial dated0 70 an50 > >01UP5 5 5 7B pack0 25 n0a0clear0example0of0oral0language0in0a0written0document30the0childVs0older0brother explained0that0he0scolded the0boyA¹ȎmêùÔĜ WÁʄȼȜDɷHƑɉYĲü˔\",\n      \"anchor_excerpt\": \"After determining that Jia had hit his wife in anger and intentionally set his house afire, the magistrate had to select the most fitting penal denomination. \\\"Killing three junior relatives in the same family who are not [guilty of a crime ...\"\n    },\n    {\n      \"link_id\": \"link-00458\",\n      \"note_item_id\": \"fn-00450\",\n      \"current_anchor_id\": \"anchor-01362\",\n      \"marker\": \"0\",\n      \"note_page_no\": 460,\n      \"anchor_page_no\": 459,\n      \"current_anchor_marker\": \"0\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"0. uly0 > =01UP 5=5 B pack0 >25 t0took0place0in Whichengǡ defining0feature0of0Wintentional0killingX0in0the0code50 iaVs0father0clarified0that0Wafter0]icaiVs Æ countyin uangdong0province5\",\n      \"anchor_excerpt\": \"Just as someone who had suffered from madness could be punished severely if his acts were considered intentional, the law also distinguished mad acts from acts committed by simpletons. Like Jia Chandou, Jia Yicai 叚一才, who also lived in the ...\"\n    },\n    {\n      \"link_id\": \"link-00462\",\n      \"note_item_id\": \"fn-00454\",\n      \"current_anchor_id\": \"anchor-01380\",\n      \"marker\": \"5\",\n      \"note_page_no\": 468,\n      \"anchor_page_no\": 466,\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"5. 75 =`230^hang0 uiheëɠ² 1> uly0 ? =0_ U 5=5 `230Pi0]uśʱ 1 0Epr50 ? =0_ U 5 5>`230Wun0IráF 1 0Qar50 ? =0_ U 5 5 `230and]ang Whao0]uan had0been Wconfused and0unawareX0at0the0moment0of0committing0his0crime3 they uicheng ūŐɍ 1 0Hec50 ? =0_ U ...\",\n      \"anchor_excerpt\": \"According to most medical treatises, the symptoms of “fits of madness [caused by] Cold injury” (傷寒發狂) resembled those of regular madness, but they were often discussed separately because they appeared under special circumstances: high fever ...\"\n    }\n  ]\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire:footnote\",\n  \"chapter_title\": \"4. From Wind to mucus and Fire\",\n  \"page_range\": [\n    134,\n    145\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00051\",\n      \"marker\": \"27\",\n      \"page_no\": 134,\n      \"source_text\": \">aC @Xeo`0p`a` B0 360 e0contrasted0this0method0with0present physiciansR0habit0of0composing0remedies0with0large0amounts0of0drugs40each0of0which0had0detrimental0effects6 n Ghinese0writing4 Sthe0ancientsT0usually0referred0to0people0from0the0pa ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00052\",\n      \"marker\": \"28\",\n      \"page_no\": 135,\n      \"source_text\": \"Ni Weide, from Kaifeng, moved to the Suzhou region at some unknown date. He was there in the 1320s looking for a teacher when he found books by Liu Wansu, Zhang Congzheng, and Li Gao. See Wu Yiyi 1993-94: 56-7, citing the Wu county gazettee ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00053\",\n      \"marker\": \"29\",\n      \"page_no\": 136,\n      \"source_text\": \"150. “Direct therapy” consisted in attacking Fire directly with a depleting treatment.\"\n    },\n    {\n      \"note_item_id\": \"fn-00054\",\n      \"marker\": \"30\",\n      \"page_no\": 136,\n      \"source_text\": \"7. 3=) 6/ 0C6DF=ED\\u00017C@>1\\u0001E96\\u0001@G6C\\u00067=@FC:D9:?8\\u0001@7\\u0001&:\\u0001:?\\u00012\\u000156A=6E65 A6CD@?T'˰ǘɜȨʨ \\u0003 2=)6 \\u0005\\u0001S\\u001b:C6T\\u0014\\u0001 , \\u0006\\u000e\\u0013\\u0001 \\u000f\\u0012\\u0004\\u0007\"\n    },\n    {\n      \"note_item_id\": \"fn-00055\",\n      \"marker\": \"31\",\n      \"page_no\": 137,\n      \"source_text\": \"154. Gezhi yulun 格致餘論 56b-59b (Danxi yiji: 28-29).\"\n    },\n    {\n      \"note_item_id\": \"fn-00056\",\n      \"marker\": \"32\",\n      \"page_no\": 138,\n      \"source_text\": \"158. Jufang fabui 局方發揮 1.8a (Danxi yiji: 39).\"\n    },\n    {\n      \"note_item_id\": \"fn-00057\",\n      \"marker\": \"33\",\n      \"page_no\": 140,\n      \"source_text\": \"2. appeared0in>Xj`Z0 l\\\\jk `fej >6\"\n    },\n    {\n      \"note_item_id\": \"fn-00058\",\n      \"marker\": \"34\",\n      \"page_no\": 141,\n      \"source_text\": \"which0identified0the0patient0as0the0son0of a0man0surnamed0Ju4o`Xedl of0^hedong02 ǭƲśę|ǖß 340a0high0provincial0official6S`Xe ś suggests0that his0post0was0associated0with0the0Gensorate0or0the0Qinistry0of0Tunishments6 >? En0SemptyT0pulse0was0w ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"## 4 ## From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360 In Chapter 3, I traced the increasingly widespread association of mucus with Wind disorders from the tenth to the twelfth century and showed that several illnesses whose pathomechanisms had been considered close to those of kuang—Wind strokes and xian 痈 seizures—were often treated with anti-mucus remedies by the end of that period. Let me now explain how the mucus-and-Fire etiology of madness that dominated late-imperial conceptions of insanity developed. The mucus-and-Fire script emerged among doctrinally minded physicians who lived in north China under the Jin dynasty (1115-1234), and was consolidated by southern doctors who were influenced by these northerners in the early fourteenth century under the Yuan dynasty (1260-1368), after the Mongol conquest of both the Jin and the southern Song (1127-1279) had re-established contacts between north and south China. The innovations these medical thinkers proposed built on the trends I outlined in Chapter 3, but it was their doctrinal and therapeutic precepts that came to dominate later medical thinking. During these men's lives (and partly thanks to their efforts), \\\"Cold Injury\\\" (shangban 傷寒) replaced \\\"Wind illnesses\\\" as the new dominant class of illnesses. The way Jin-Yuan physicians interpreted madness and handled mad people depended on their broader understanding of illness and vitality. The development of Cold- Injury medicine, for example, enhanced the importance of Heat and Fire as etiological factors and motivated a number of doctors to use Cold-Injury remedies to treat psycho- behavioral symptoms. Part 4.1 discusses Liu Wansu's 劉完素 (ca. 1120-1200) general emphasis on the etiology of Fire and his reinterpretation of \\\"Wind\\\" a ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-manual-2-11-11-errors-and-projection:toc-manual-2-11-11-errors-and-projection:footnote",
-      "chapter_title": "11. Errors and projections The emergence of “madness illness” in Qing law, 1654-1750",
-      "request_mode": "anchor_rebind",
+      "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire:footnote",
+      "chapter_title": "4. From Wind to mucus and Fire",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
-        "match",
-        "ignore_ref",
+        "synthesize_anchor",
         "needs_review"
       ],
       "note_system": "footnote",
       "page_range": [
-        443,
-        486
+        134,
+        145
       ],
       "matched_examples": [],
-      "unmatched_note_items": [],
-      "unmatched_anchors": [
+      "unmatched_note_items": [
         {
-          "row_id": 3062,
+          "row_id": 11623,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01316",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 443,
-          "paragraph_index": 8,
-          "char_start": 55,
-          "char_end": 63,
-          "source_marker": "$ ^{9} $",
-          "normalized_marker": "9",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "main plotter had not taken part in the actual killing. $ ^{9} $ The participation of more than one",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00051",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "27",
+          "normalized_marker": "27",
+          "occurrence": 1,
+          "source_text": ">aC @Xeo`0p`a` B0 360 e0contrasted0this0method0with0present physiciansR0habit0of0composing0remedies0with0large0amounts0of0drugs40each0of0which0had0detrimental0effects6 n Ghinese0writing4 Sthe0ancientsT0usually0referred0to0people0from0the0past0who0agreed0with0the0present0writer6 0suspectthata`e0Y`e^ Yɇ here0meant0less0Sillnesses0of0the0presentT0than0Sthe0illnesses0presently0at0hand6T Xhe0idea0that0Sold02^l 30remedies0cannot0treat0present0illnessesT0could0have0meant0that0times0had0changed40but also0that0remedies0recorded0in0old0books0were0not0adequate0to0treat0specific0illness0cases6 ^huRs Fl]Xe^0]X_l` ąƋɔŹ _SIlucidations0on0the \\Z`g\\j0f]0k_\\0 \\im`Z\\ T`0appeared0in0 ?6 = \\iangRs0family0was0from0]ongjiaǚÝ 2[enzhou340but0they0had0moved0to0]uyao·Ú 2east0of0Whaoxing3 when0\\iang0\\in0was0a0child60Jor0more0on0him40see0Piu0Whijue0 A@@40as0well0as Engela0Peung0 aB0 @ 5@ and the0sources0cited0therein6 > \\iang0later0discussed0Piu0[ansuRs0and0Pi0 aoRs0doctrines0with0 e0Uiansun˦Iå 2 5 = 340whose father0]inglei0had0also0received0some0of0PiuRs0texts0before0 2see0note > above360Engela0Peung 2 aB A 3 explains that0\\iang0\\in0Swas0acquainted0with0and0learned0from0at0least0seven0of0his0colleagues0in0the iangnan0region4T0citing0Hai0PiangRs0SFaoyi0weng0zhuanTnorthern0medicine6 ŭ1ʣ~ 4F`lc`e^j_Xe0]Xe^0a` GͶĈťͬ A6Ab5 a36",
+          "page_no": 134,
+          "display_marker": "27",
+          "source_marker": "27",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3063,
+          "row_id": 11624,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01317",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 443,
-          "paragraph_index": 9,
-          "char_start": 150,
-          "char_end": 158,
-          "source_marker": "$ ^{8} $",
-          "normalized_marker": "8",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "“Killing by design” (謀殺), which was understood as the result of prior scheming (謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected such plots to occur in vendettas, fights over property, or schemes to kill one's own spouse. “The one who devised the idea” (造意者) was to be sentenced to decapitation after the Autumn Assizes (斬監後), where it would be classified as “effective” (情實) even if the main plotter had not taken part in the actual killing. $ ^{9} $ The participation of more than one",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00052",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "28",
+          "normalized_marker": "28",
+          "occurrence": 1,
+          "source_text": "Ni Weide, from Kaifeng, moved to the Suzhou region at some unknown date. He was there in the 1320s looking for a teacher when he found books by Liu Wansu, Zhang Congzheng, and Li Gao. See Wu Yiyi 1993-94: 56-7, citing the Wu county gazetteer (1642; 53.24a-b), Wuzhong renwu zhi 吳中人物志 (1570), and Song Lian's \"Gu Ni fujun muzhiming\" 故倪府君墓誌銘 (Song Wenxian gong quanji 宋文憲公全集 25.5b-6a). $ ^{148} $ Hua was from Xiangcheng 襄城 (southwest of Kaifeng); he later moved to nearby Yizhen 儀真, and finally to Yuyao 餘姚 (northern Zhejiang, where Xiang Xin's family also lived, at the end of a canal connected to the Grand Canal). The data concerning Hua's moves comes from his biography in History of the Ming (299: 7634-35). Apart from the Basic Questions and the Canon of Problems that his master had made him read, Hua developed his doctrines and skills with the books of Zhang Ji, Liu Wansu, and Li Gao.",
+          "page_no": 135,
+          "display_marker": "28",
+          "source_marker": "28",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3064,
+          "row_id": 11625,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01318",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 443,
-          "paragraph_index": 9,
-          "char_start": 490,
-          "char_end": 498,
-          "source_marker": "$ ^{9} $",
-          "normalized_marker": "9",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "“Killing by design” (謀殺), which was understood as the result of prior scheming (謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected such plots to occur in vendettas, fights over property, or schemes to kill one's own spouse. “The one who devised the idea” (造意者) was to be sentenced to decapitation after the Autumn Assizes (斬監後), where it would be classified as “effective” (情實) even if the main plotter had not taken part in the actual killing. $ ^{9} $ The participation of more than one",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00053",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "29",
+          "normalized_marker": "29",
+          "occurrence": 1,
+          "source_text": "150. “Direct therapy” consisted in attacking Fire directly with a depleting treatment.",
+          "page_no": 136,
+          "display_marker": "29",
+          "source_marker": "29",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3068,
+          "row_id": 11626,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01322",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 444,
-          "paragraph_index": 2,
-          "char_start": 134,
-          "char_end": 143,
-          "source_marker": "$ ^{13} $",
-          "normalized_marker": "13",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "In the three remaining killings, which were all discussed in a single statute, death was understood as being inflicted involuntarily. $ ^{13} $ “Killing in play” (戲殺) occurred in the course of dangerous activities in which people engaged purposely, like sword-practice. $ ^{14} $ This rare crime was punished by “strangulation after the Assizes,” but classified as “suspended” (緩決) at the Assizes, resulting in an automatic commutation to exile at 3,000 li. “Strangulation after the Assizes” was also the basic sentence for “mistakenly killing” (誤殺) a bystander while fighting somebody else. Since this crime was committed during a deliberate act of violence, the sentence was adjusted depending on the gravity of the act during which the lethal",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00054",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "30",
+          "normalized_marker": "30",
+          "occurrence": 1,
+          "source_text": "7. 3=) 6/ 0C6DF=ED\u00017C@>1\u0001E96\u0001@G6C\u00067=@FC:D9:?8\u0001@7\u0001&:\u0001:?\u00012\u000156A=6E65 A6CD@?T'˰ǘɜȨʨ \u0003 2=)6 \u0005\u0001S\u001b:C6T\u0014\u0001 , \u0006\u000e\u0013\u0001 \u000f\u0012\u0004\u0007",
+          "page_no": 136,
+          "display_marker": "30",
+          "source_marker": "30",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3069,
+          "row_id": 11627,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01323",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 444,
-          "paragraph_index": 2,
-          "char_start": 270,
-          "char_end": 279,
-          "source_marker": "$ ^{14} $",
-          "normalized_marker": "14",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "In the three remaining killings, which were all discussed in a single statute, death was understood as being inflicted involuntarily. $ ^{13} $ “Killing in play” (戲殺) occurred in the course of dangerous activities in which people engaged purposely, like sword-practice. $ ^{14} $ This rare crime was punished by “strangulation after the Assizes,” but classified as “suspended” (緩決) at the Assizes, resulting in an automatic commutation to exile at 3,000 li. “Strangulation after the Assizes” was also the basic sentence for “mistakenly killing” (誤殺) a bystander while fighting somebody else. Since this crime was committed during a deliberate act of violence, the sentence was adjusted depending on the gravity of the act during which the lethal",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00055",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "31",
+          "normalized_marker": "31",
+          "occurrence": 1,
+          "source_text": "154. Gezhi yulun 格致餘論 56b-59b (Danxi yiji: 28-29).",
+          "page_no": 137,
+          "display_marker": "31",
+          "source_marker": "31",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3070,
+          "row_id": 11628,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01324",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 445,
-          "paragraph_index": 0,
-          "char_start": 175,
-          "char_end": 184,
-          "source_marker": "$ ^{15} $",
-          "normalized_marker": "15",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "mischance had occurred, or, as commentator Shen Zhiqi 沈之奇 specified in the early eighteenth century, on the intention that motivated the act that led to the mistaken killing. $ ^{15} $",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00056",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "32",
+          "normalized_marker": "32",
+          "occurrence": 1,
+          "source_text": "158. Jufang fabui 局方發揮 1.8a (Danxi yiji: 39).",
+          "page_no": 138,
+          "display_marker": "32",
+          "source_marker": "32",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3072,
+          "row_id": 11629,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01326",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 445,
-          "paragraph_index": 1,
-          "char_start": 138,
-          "char_end": 147,
-          "source_marker": "$ ^{16} $",
-          "normalized_marker": "16",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "“Accidental killing” (過失殺) could be redeemed by conferring 12.42 ounces of silver to the family of the victim to provide for burial fees. $ ^{16} $ This punishment was mild because the law recognized that the culprit had lacked any will to kill, harm, or even partake in dangerous activities. Compensation for a life taken was paid with money, not with one’s own life. Since “Killing because of madness” in the early Qing was sentenced in the same way as “accidental killing,” let me cite the entire text of the relevant statute. $ ^{17} $",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00057",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "33",
+          "normalized_marker": "33",
+          "occurrence": 1,
+          "source_text": "2. appeared0in>Xj`Z0 l\\jk `fej >6",
+          "page_no": 140,
+          "display_marker": "33",
+          "source_marker": "33",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         },
         {
-          "row_id": 3074,
+          "row_id": 11630,
           "doc_id": "bd05138cd773",
-          "anchor_id": "anchor-01328",
-          "chapter_id": "toc-manual-2-11-11-errors-and-projection",
-          "page_no": 445,
-          "paragraph_index": 2,
-          "char_start": 49,
-          "char_end": 58,
-          "source_marker": "$ ^{18} $",
-          "normalized_marker": "18",
-          "anchor_kind": "footnote",
-          "certainty": 1.0,
-          "source_text": "Anyone who kills or injures another accidentally $ ^{18} $ (this is comparatively less serious than killing in play) will be sentenced as if for killing or injuring in an affray. [The privilege of] monetary redemption will be granted according to law, and the money will be given to the family (of the person who was killed or injured). (Accident means that which the ear or eye does not extend to, or what was not contemplated. For example, when one is shooting wild animals or when, for a reason, one is tossing bricks or tiles and unexpectedly kills another; or again if, when one is climbing on precipitous [terrain], one's foot slips and one falls, thus involving [i.e., harming] others; or if one is aboard a ship that has been driven by the wind, or is riding a horse that runs [wildly] in a",
-          "created_at": 1777566988,
-          "updated_at": 1777566988
+          "note_item_id": "fn-00058",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire",
+          "marker": "34",
+          "normalized_marker": "34",
+          "occurrence": 1,
+          "source_text": "which0identified0the0patient0as0the0son0of a0man0surnamed0Ju4o`Xedl of0^hedong02 ǭƲśę|ǖß 340a0high0provincial0official6S`Xe ś suggests0that his0post0was0associated0with0the0Gensorate0or0the0Qinistry0of0Tunishments6 >? En0SemptyT0pulse0was0weak0to0the0touch60Xhe0feeling0of0a0SstrungT0pulse0was0that0of0a0stretched0zither string0forming0a0single0pulse0wave0under0the0three0fingers02Wivin0 A@?B0 360SWunkenT0pulse0movements0could be0felt only0when0the0fingers0press0down0on0the0radial0artery40as0opposed0to0a0SfloatingT02]l ǯ 30pulse40which was0discernible0without0pressing60SEcceleratedT0referred0to0the0rate0of0the0pulse6 >@ Thysicians0of0the0time0generally0believed0that0ingested0food0and0liquids 2as0well0as0mucus3 could0remain0in the0body0for0extended0periods0and0create0congestion6U_fe^nXe ʾ 2Supper0WtomachT30was0the0name0of0an acupuncture0point0in0the0middle0of0the0upper0belly40below0the0sternum60Qiddle5a`Xf 40mentioned0in0the0first passage 0translated0above40probably0referred0approximately0to0the0same0area40but0inside0the0body6śęAß|V Ĝ¬3_ ƚƟƨ âú§ʪǸ ń΄ƽȊ º̀Ĵú΍4",
+          "page_no": 141,
+          "display_marker": "34",
+          "source_marker": "34",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
         }
       ],
-      "rebind_candidates": [
-        {
-          "link_id": "link-00450",
-          "note_item_id": "fn-00442",
-          "current_anchor_id": "anchor-01315",
-          "marker": "5",
-          "note_page_no": 445,
-          "anchor_page_no": 443,
-          "current_anchor_marker": "5",
-          "note_excerpt": "5. 0ounces of0silver represented0a0considerable0sumto0payfor0a0common0family3and3asWusan0Raquin kindly remindedme 3 was0far0more0than0was0needed0in0Uingtimesfor0a0common0burial5 > Xhiswa s0statute0 @ 0of0the0code01HPG]0 25 Xhe0text0in0parentheses0is0that0of0the0Wsmall0commentary5X0Xhe translation0is0by0 ones01 @@ A0 >?4>@230with0minor0modifications50 talics0are0mine5 ? onesmistakenlytranslated WYga0eZ[X0as0WunintentionallyXhere5",
-          "anchor_excerpt": "(謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00451",
-          "note_item_id": "fn-00443",
-          "current_anchor_id": "anchor-01327",
-          "marker": "7",
-          "note_page_no": 446,
-          "anchor_page_no": 445,
-          "current_anchor_marker": "7",
-          "note_excerpt": "Xhe0phrase0Wor0killX0that ones0added hereappears in0none0of0the0editions0of0the Gode0that0 0consulted5 Qemorial0by0the0Qinistry0of0Tunishments30dated0 0Wept50 = 01W^ 5?5 21YGHE 3 httpA66catalog5digitalarchives5tw6DYVRC = >> =B retrieved0on Qay0 >30 77@250 0have0notseenthe0original3 only0its0summary0on0YGHE5 tsauthor0was0 ioro0 tu 1PUƝêJ ċ ȖeȨŻgJȕ Iȏèr B more0conventionally transliterated0asɀȏ QÀ 23 a0Qanchu0from0the0imperial0clan50[hen0he0wrote0thereport3he had0beenWEcting0Qinister0of",
-          "anchor_excerpt": "“Accidental killing” (過失殺) could be redeemed by conferring 12.42 ounces of silver to the family of the victim to provide for burial fees. $ ^{16} $ This punishment was mild because the law recognized that the culprit had lacked any will to kill, harm, or even partake in dangerous activities. Compensation for a life taken was paid with money, not with one’s own life. Since “Killing because of madness” in the early Qing was sentenced in the same way as “accidental killing,” let me cite the entire text of the relevant statute. $ ^{17} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00452",
-          "note_item_id": "fn-00444",
-          "current_anchor_id": "anchor-01331",
-          "marker": "1",
-          "note_page_no": 447,
-          "anchor_page_no": 446,
-          "current_anchor_marker": "1",
-          "note_excerpt": "1. =:DE65 EF\u00012D\u000192G:?8\u00014@>6\u0001E@\u0001E9:D\u0001A@DE\u0001@? \u0011\u0016F8 \u0006 \u000e 0(/ \u0006\u000f\u0006<,6,\u000f× 52J1\u0003\u0006 \u001b@C\u00012\u00013C:67\u00015:D4FDD:@?\u0001@7\u0001A2CC:4:56D\u0001:?\u0001E96\u0001.F2?\u00015J?2DEJ\u0001\u0002 \u000e\b\u0005 \u000e\u0010\u0003\u0004\u0001D66 \b\u0006 !F42\u0001 233:2?:VD\u0001\u00027@CE94@>:?8\u0003 DEF5J\u0001@7\u0001>25\u0001A2CC:4:56D\u0001:?\u0001E96\u0001&:?8\u00015J?2DEJ\u00016IA=2:?D\u0001H9J\u0001A2CC:4:56\u0001H2D\u0001E96\u0001@?=J\u0001<:?5\u0001@7\u0001<:==:?8\u00017@C\u0001H9:49\u0001&:?8 =68:D=2E@CD\u0001>256\u0001?@\u00015:776C6?4636EH66?\u0001>25\u00012?5\u0001?@?\u0005>25\u0001<:==6CD\u0006",
-          "anchor_excerpt": "The earliest Qing case of madness I have identified was a somewhat enigmatic parricide that took place in 1654, about ten years after the Manchus had seized Beijing and officially named it the capital of the newly established Qing dynasty. $ ^{21} $ I find it enigmatic",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00453",
-          "note_item_id": "fn-00445",
-          "current_anchor_id": "anchor-01333",
-          "marker": "3",
-          "note_page_no": 448,
-          "anchor_page_no": 447,
-          "current_anchor_marker": "3",
-          "note_excerpt": "uangxu0ed53\\gS`?7 30W\\inglRXTñ 30WVenmingXJ± 3 W\\isha3 wusha30guoshisha0shang0renXėŻɎŻɿ Ż 30 angxi0=f[0lZg`ʾ~",
-          "anchor_excerpt": "Xu San 徐三, son of Xu Jiuwei 徐九緯, was a “hunter” (打牲人) under the supervision of Palace eunuch Shen Maode 沈茂德. “Hunters” (Manchu: butha; Ch.: buteba 布特哈) was the generic name given to several non-Manchu tribes in an area that is now at the confines of Inner Mongolia and Heilongjiang in northern China. $ ^{23} $ One day with a knife Xu San stabbed (戳) his father, who died shortly thereafter, but before he died, the father had time to testify that “his son had been suffering from madness illness” (伊子原有瘋疾). The Ministry of Punishments approved the sentence that an original memorial (now lost) had proposed: Xu San was exempted of any crime (免罪) because he was judged to have killed “because of madness illness” (因瘋疾). This decision had no other legal repercussions because it was not established as a precedent for judging future cases of a similar nature. $ ^{24} $",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00454",
-          "note_item_id": "fn-00446",
-          "current_anchor_id": "anchor-01341",
-          "marker": "0",
-          "note_page_no": 449,
-          "anchor_page_no": 450,
-          "current_anchor_marker": "0",
-          "note_excerpt": "0. \u0011\u000e\b1\u0012\u0001 \u000e\u0006 W :==:?8\u0001244:56?E2==JX2?5 W :==:?8\u0001@?6VD\u0001A2C6?ED 244:56?E2==JXH6C6 EH@ 5:776C6?E\u0001A6?2=\u000156?@>:?2E:@?D\u0001E92E\u000142==65\u00017@C\u00015:776C6?E\u0001AF?:D9>6?ED\u0006!:<6\u0001E96\u0001 \u000e \u0001;F58>6?E\u0001:?\u0001E96\u0001A2CC:4:5642D6:?G@=G:?8\u00012 W9F?E6C\u0004X E96\u0001 \u000e\u000e\u000f CF=6\u0001@? \u0010 )96\u0001EH@\u00014@\u0005AC6D:56?ED\u0001@7\u0001E96 \":?:DECJ @7\u0001%F?:D9>6?ED \u0002H9:49\u00012AAC@G65\u0001E96\u0001>62DFC6\u0003 H6C6\u0001\u0019F:<2?2Èǽ W<:==:?8\u00012?5\u0001:?;FC:?8\u00012?@E96C 3642FD6\u0001@7 >25?6DDX 5:DC682C565\u0001E96\u0001H2J :?\u0001H9:49E96\u00014@56 \u0002\"2?49F\u0003\u00012?5\u0001 2@\u0001,6:?2ʆćɆ \u0002 2?\u0003 \u0002E96:C\u0001A@D:E:@?\u0001:D\u00014@?7:C>65\u00013J ,1*6+,\u0001*$2 \u0010\b\u0012 \u000e \u0010 \u0003\u0006 \u0011 W ?\u000142D6D\u0001@70A6@A=6\u0001H:E91\u0001>25?6DD\u0001:==?6DD\u0001<:==:?8\u00012?@E96C\u0004 D66<\u0001 \u0006 \u0001@F?46D\u0001@7\u0001D:=G6C\u00017C@>\u0001E96\u0001@776?56C\u00017@C 7F?6C2=\u00016IA6?D6D\u0004\u0001E@\u000136\u00018:G6?\u0001E@\u0001E96\u0001G:4E:>VD\u000172>:=JX\u0001\u0002562=E\u0001H:E9 9@>:4:56D\u0006\u0001\u0016D\u0001H6\u0001D2H\u000123@G6\u0004\u00016G6?\u0001E9@D6\u00017@F?5\u00018F:=EJ\u0001@7\u0001W :==:?8\u00013J\u0001244:56?E\u0004X\u0001E96 ǊǅŻ\u001bȕ õƫ\u001b~\u0006ɵqȴʔf\u0017Fʕ\u0017 S Ȅȩźȕ ¼ \u0003\u0006 ? W\u0018FCC6?E=J\u0001@A6C2E:G6\u0001C68F=2E:@?D\u0001@7\u0001E96\u0001\":?:DECJ\u0001@7\u0001%F?:D9>6?EDX \u0002!,1*%8\u0001;,$1;,1*\u0001=(/, =62DE\u0001D6C:@FD\u0001@7\u0001E96\u0001D:I <:==:?8D\u0004\u0001DE:==\u0001925\u0001E@\u0001A2J\u00014@>A6?D2E:@?\u0001E@\u0001E96\u000172>:=J\u0001@7\u0001E96:C\u0001G:4E:>\u0006\u0001 7 TʇƴȺY+ \u0003\u0004\u0001 \u000e\u0010\b\u0004-8$1 \u0006\u0001\u001b@F?5\u0001:?\u0001!:F\u00012?5\u0001.2?8 \u0002 \u0011\u0011 \u0003\u0004 A2CE\u0001 \u0004\u0001G@=\u0006\u0001 \u0012 \u0013\u00012=D@\u0001:?\u00128-,1\u0001786+8\u0001-,&+(1*u ŎʬĔ \u0002 \u000f \u0003\u0004 W%@=:E:42=\u000164@?@>JX\u0001\u0002 ȅƘ \u0003\u0004\u0001W\u0016FDA:4:@FD\u0001AF?:D9>6?EDX \u0002ǧT \u0003\u0006",
-          "anchor_excerpt": "of madness” was integrated into the network of the six killings. $ ^{30} $ From then on, and until the end of the Qing, killings committed in a fit of insanity were legally viewed as lacking both awareness and criminal intention.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00457",
-          "note_item_id": "fn-00449",
-          "current_anchor_id": "anchor-01359",
-          "marker": "7",
-          "note_page_no": 459,
-          "anchor_page_no": 458,
-          "current_anchor_marker": "7",
-          "note_excerpt": "Xhis0case0appears0in0a \\ XF memorial dated0 70 an50 > >01UP5 5 5 7B pack0 25 n0a0clear0example0of0oral0language0in0a0written0document30the0childVs0older0brother explained0that0he0scolded the0boyA¹ȎmêùÔĜ WÁʄȼȜDɷHƑɉYĲü˔",
-          "anchor_excerpt": "After determining that Jia had hit his wife in anger and intentionally set his house afire, the magistrate had to select the most fitting penal denomination. \"Killing three junior relatives in the same family who are not [guilty of a crime that deserves] the death penalty\" $ ^{47} $ (殺期服卑幼一家非死罪三人) did not apply, because neither Jia's wife nor his elder daughter had died from his hands. A more suitable law was: \"Whenever one intentionally sets fire and burns the house of an official or a commoner, and thereby kills or injures someone, sentence like 'intentional killing'\" 凡放火故燒官民房屋者 致殺人者 以故殺論. $ ^{48} $ Killing one's wife intentionally was punished by \"strangulation after the Assizes.\"",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00458",
-          "note_item_id": "fn-00450",
-          "current_anchor_id": "anchor-01362",
-          "marker": "0",
-          "note_page_no": 460,
-          "anchor_page_no": 459,
-          "current_anchor_marker": "0",
-          "note_excerpt": "0. uly0 > =01UP 5=5 B pack0 >25 t0took0place0in Whichengǡ defining0feature0of0Wintentional0killingX0in0the0code50 iaVs0father0clarified0that0Wafter0]icaiVs Æ countyin uangdong0province5",
-          "anchor_excerpt": "Just as someone who had suffered from madness could be punished severely if his acts were considered intentional, the law also distinguished mad acts from acts committed by simpletons. Like Jia Chandou, Jia Yicai 叚一才, who also lived in the Yongzheng period (1723-1735), had suffered from fits of insanity, during which he would go crazy and run around wildly (病發起來就痴痴癲癲 胡走亂跑了).⁵⁰ When his fits stopped occurring for good, his father released him from confinement (從先原是鎖禁的 後因他不瘋了纔放開了), but by then Jia had become \"stupid by nature\" (賦性愍獸). He spent most of his time with the children of his small village (有些愍頭愍腦的 好與村裡娃娃們頑耍). An eight-year-old boy often called him a wangba 忘八 or an idiot (你是個獃子), and insulted him by saying that his five-year-old daughter was someone else's (你的女兒是別人養的).⁵¹ Having heard these words, Jia Yicai started suspecting that his wife had engaged in lecherous behavior (淫行). Many times, he cornered the boy and asked him to explain where he had heard this rumor, but the child would not respond.",
-          "current_anchor_synthetic": false
-        },
-        {
-          "link_id": "link-00462",
-          "note_item_id": "fn-00454",
-          "current_anchor_id": "anchor-01380",
-          "marker": "5",
-          "note_page_no": 468,
-          "anchor_page_no": 466,
-          "current_anchor_marker": "5",
-          "note_excerpt": "5. 75 =`230^hang0 uiheëɠ² 1> uly0 ? =0_ U 5=5 `230Pi0]uśʱ 1 0Epr50 ? =0_ U 5 5>`230Wun0IráF 1 0Qar50 ? =0_ U 5 5 `230and]ang Whao0]uan had0been Wconfused and0unawareX0at0the0moment0of0committing0his0crime3 they uicheng ūŐɍ 1 0Hec50 ? =0_ U 5 5 `25 y0 ? 30the0punishment0for Wkilling0because0of0madnessXwas no0longer0monetary0compensation30but0a0nominal0sentence0of Wstrangulation0after0the0EssizesXthat0was routinely0converted0into0permanent imprisonment50Jor0more0on0the0emergence0of0this0new0way0of0sentencing3 argued0that his0case was0Wno0differentX from0cases of0Wkilling0because0of0madnessX01ȩ¿Ǌ see 5 30as0well0as0Eppendix ?under W ?7 0_ `5X",
-          "anchor_excerpt": "According to most medical treatises, the symptoms of “fits of madness [caused by] Cold injury” (傷寒發狂) resembled those of regular madness, but they were often discussed separately because they appeared under special circumstances: high fevers. $ ^{65} $ After kuang had become increasingly attributed to Fire in medical circles, the boundaries between insanity and fits of madness caused by fever had become more blurred, but the distinction between outwardly contracted and inwardly developed madness had been preserved. Seventeenth-century Huizhou doctor Luo Mei 羅美, for example, claimed that madness, “like becoming",
-          "current_anchor_synthetic": false
-        }
-      ]
+      "unmatched_anchors": [],
+      "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 443,
-        "file_idx": 442,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "intention was deployed particularly clearly in the network of laws on homicides in which “killing because of madness” would be integrated. The six killings: a hierarchy of intentions Unlike modern Western legal systems, which distinguish between murder and manslaughter or between degrees of homicide, Chinese law in imperial times called all homicides “killings” (sha 殺). Legal commentators customarily divided killings into sub-types. In descending order of gravity, the “Six killings” (六殺) were mou sha 謀殺 (“Killing by design” or “Plotting to kill”), gu sha 故殺 (“Killing intentionally”), dou sha 鬭殺 (“Killing in an affray”), wu sha 誤殺 (“Killing by mistake”), xi sha 戲殺 (“Killing in play”), and guoshi sha 過失殺 (“Killing accidentally”). Three statutes (lǔ 律) sufficed to define killings in the Ming and Qing codes. $ ^{7} $ Here I explain how the “Six killings” applied to the killing of a single person unrelated to the killer. “Killing by design” (謀殺), which was understood as the result of prior scheming (謀) between two or more people, was considered the gravest of the six. $ ^{8} $ The law expected such plots to occur in vendettas, fights over property, or schemes to kill one's own spouse. “The one who devised the idea” (造意者) was to be sentenced to decapitation after the Autumn Assizes (斬監後), where it would be classified as “effective” (情實) even if the main plotter had not taken part in ...",
-        "byte_size": 134724,
-        "sha256": "5fea489bc8400cfd3898a119e9144aa52525fe6b5c939a78a166faf22294a389"
-      },
-      {
-        "page_no": 444,
-        "file_idx": 443,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "person was what differentiated “killing by design” from “intentional killing” (故殺), which applied when a killer’s homicidal intent was “not known to others” (非人所知). $ ^{10} $ No matter whether this intent to kill was premeditated or arose during a fight (臨時有意欲殺), the lone culprit was judged as having committed “intentional killing” and was sentenced to the same punishment as for “Killing by design”: effective decapitation after the Assizes. “Killing in an affray” (鬪殺) meant killing unintentionally during a fight. $ ^{11} $ In Qing law, intent to kill had become the main difference between “killing in an affray” and “intentional killing.” As a result, those who had killed during a fight had to demonstrate that they had not intended to kill their victim. $ ^{12} $ Under most circumstances, the ensuing sentence of “strangulation after the Assizes” (絞監候) was eventually commuted to the highest sentence below death, namely exile to 3000 li preceded by 100 strokes of the heavy bamboo. In the three remaining killings, which were all discussed in a single statute, death was understood as being inflicted involuntarily. $ ^{13} $ “Killing in play” (戲殺) occurred in the course of dangerous activities in which people engaged purposely, like sword-practice. $ ^{14} $ This rare crime was punished by “strangulation after the Assizes,” but classified as “suspended” (緩決) at the Assizes, resulting ...",
-        "byte_size": 146013,
-        "sha256": "6c5dfaf83725735a7832d591ea74515e27553297c64a1a7bcabd7f5f3c725fc2"
-      },
-      {
-        "page_no": 445,
-        "file_idx": 444,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "mischance had occurred, or, as commentator Shen Zhiqi 沈之奇 specified in the early eighteenth century, on the intention that motivated the act that led to the mistaken killing. $ ^{15} $ “Accidental killing” (過失殺) could be redeemed by conferring 12.42 ounces of silver to the family of the victim to provide for burial fees. $ ^{16} $ This punishment was mild because the law recognized that the culprit had lacked any will to kill, harm, or even partake in dangerous activities. Compensation for a life taken was paid with money, not with one’s own life. Since “Killing because of madness” in the early Qing was sentenced in the same way as “accidental killing,” let me cite the entire text of the relevant statute. $ ^{17} $ Anyone who kills or injures another accidentally $ ^{18} $ (this is comparatively less serious than killing in play) will be sentenced as if for killing or injuring in an affray. [The privilege of] monetary redemption will be granted according to law, and the money will be given to the family (of the person who was killed or injured). (Accident means that which the ear or eye does not extend to, or what was not contemplated. For example, when one is shooting wild animals or when, for a reason, one is tossing bricks or tiles and unexpectedly kills another; or again if, when one is climbing on precipitous [terrain], one's foot slips and one falls, thus involving [i.e., ...",
-        "byte_size": 161025,
-        "sha256": "101c248fe268fe120de05d310e6b0b0230c12503b4f5f6241eb8996f1d8ac48f"
-      },
-      {
-        "page_no": 446,
-        "file_idx": 445,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "fright, or is driving a cart at a rapid speed on a descent, when the situation makes it so that one cannot stop; $ ^{19} $ or if several persons are carrying a heavy object and the strength [of one] is insufficient to control it so that the other persons carrying it are hurt. In all [these] cases where initially there was no intention to $ barm^{20} $ another, but which led by chance to the killing or injuring of another, sentence as if for killing or wounding in an affray, and grant [the privilege of] monetary redemption according to law. [The silver] will be given to the household [of the person] who was killed or injured, to serve as funds for burial or medical treatment.) 若過失殺傷人者 （較戲殺愈輕） 各准鬥殺傷罪 依律收贖 給付其 （被殺傷之） 家 （過失 謂耳目所不及 思慮所不到 如彈射禽獸 因事投擲甎瓦 不期而殺人者 或因升高險足有蹉跌 累及同伴 或駕船使風乘馬驚走 馳車下坡 勢不能止 或共舉重物 力不能制 損及同舉物者 凡初無害人之意 而偶致殺傷人者 皆准鬬毆殺傷人罪 依律收贖 給付被殺傷之家 以為營葬及醫藥之資） <div style=\"text-align: center;\">The clause specifying that death could not be foreseen pointed to the difference between accidental killing and “Killing in play.” Accidental death was entirely coincidental.</div> ### 11.2 The first Qing laws on madness: creating a new legal object An early case of parricide The earliest Qing case of madness I have identified was a somewhat enigmatic parricide that took place in 1654, about ten years after the Manchus had seized Beijing and officially named it the capital of the newly established ...",
-        "byte_size": 148655,
-        "sha256": "95277913c717a0e21662f83dd174cd60f16263efa4087f88f13d29056f2eae95"
-      },
-      {
-        "page_no": 447,
-        "file_idx": 446,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "because it was sentenced in a way that differed from (as far as I know) all earlier and later cases of parricide in a state of madness in Chinese imperial history, and because it involved a particular class of people that was unique to the early Qing. $ ^{22} $ Xu San 徐三, son of Xu Jiuwei 徐九緯, was a “hunter” (打牲人) under the supervision of Palace eunuch Shen Maode 沈茂德. “Hunters” (Manchu: butha; Ch.: buteba 布特哈) was the generic name given to several non-Manchu tribes in an area that is now at the confines of Inner Mongolia and Heilongjiang in northern China. $ ^{23} $ One day with a knife Xu San stabbed (戳) his father, who died shortly thereafter, but before he died, the father had time to testify that “his son had been suffering from madness illness” (伊子原有瘋疾). The Ministry of Punishments approved the sentence that an original memorial (now lost) had proposed: Xu San was exempted of any crime (免罪) because he was judged to have killed “because of madness illness” (因瘋疾). This decision had no other legal repercussions because it was not established as a precedent for judging future cases of a similar nature. $ ^{24} $ Since this affair concerned tribes under the direct supervision of Manchu institutions like the Imperial Clan and Imperial Household Departments, the memorial reporting the crime may have been written in Manchu before it was translated into Chinese. As I suggested abov ...",
-        "byte_size": 159469,
-        "sha256": "2ec8b6df114900d032a776896956ed2c23f78cb399401fa6647d928d27bbce54"
-      },
-      {
-        "page_no": 448,
-        "file_idx": 447,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "Shunzhi-era (1644-1662) memorials were translations from Manchu. The use of feng bing in these Chinese reports may then have pushed the government to adopt feng bing as the official Chinese term for \"madness\" instead of the more common feng dian 風癲 and feng kuang 風狂, or the more classical diankuang 癲狂 that had been used in Tang and Song law and was still being used in seventeenth-century medicine. A momentous inaccuracy: the 1667 creation of “killing because of madness” The earliest Qing law concerning madness was a terse rule from 1667 mandating that, “Whenever [people with] madness illness kill or injure another, exempt from sentencing” (凡瘋病殺傷人者免議). $ ^{25} $ In its lack of both context and definition, this rule was typical of the “Currently operative regulations of the Ministry of Punishments” (Xingbu xianxing zeli 刑部現行則例) of the Kangxi era (1662-1722), but unlike most Kangxi rules, which usually consisted in precedent-based guidelines for modulating the punishment of existing crimes, the 1667 law created a new penal denomination (罪名): “[people with] madness illness killing another” (瘋病殺人), which I shall render as “killing because of madness.” $ ^{26} $",
-        "byte_size": 153694,
-        "sha256": "6a4e533558be2ad7528bcce64d104836d0c4f35c8c3fb55039260ee9081842d9"
-      },
-      {
-        "page_no": 449,
-        "file_idx": 448,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "In imperial Chinese law, a “penal denomination” was not the charge brought against one at the onset of a trial, but the name of the crime for which one was sentenced. Officials selected the fittest “crime name” by assessing the circumstances of the crime, but “[o]nce an offense was judged to fall into a certain category of crime [罪名], the punishment was predetermined.” $ ^{27} $ Both ideally and in practice, the officials who administered this system of fixed punishments were concerned “to maintain a balance between the offense and the penalty.” This judicial approach differed from that of physicians, who gave little importance to denominations in identifying the cause of an illness, and who aimed to put an end to pathological acts rather than find an apt punishment for them. Like the 1654 judgment in the parricide case involving a “hunter,” the 1667 rule on “killing and injuring another because of madness” disregarded the way in which the code dealt with homicides. As we saw above, even those found guilty of “Killing by accident,” the least serious of the six killings, still had to pay compensation to the family of their victim. If the officials who reviewed the 1667 case had been more concerned with the general structure of the code, they should have rejected the verdict of complete exemption. $ ^{28} $ The imbalance in sentencing introduced by the ad hoc 1667 rule was quickl ...",
-        "byte_size": 154349,
-        "sha256": "795a0a2a4d6e2f67a9160bc7f6dbc5bb4faddc7606f92b80950f9b80c5068035"
-      },
-      {
-        "page_no": 450,
-        "file_idx": 449,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/bd05138cd773/source.pdf",
-        "ocr_excerpt": "of madness” was integrated into the network of the six killings. $ ^{30} $ From then on, and until the end of the Qing, killings committed in a fit of insanity were legally viewed as lacking both awareness and criminal intention. The 1667 and 1669 laws concerned only homicides, not madness and mad people in general. The 1669 rule in particular integrated “killing because of madness” within the six killings. Note that in both rate and rationale, the compensation the 1669 rule sought for “killing because of madness” differed significantly from the privilege of monetary redemption granted to some disabled people in statute 22 of the Qing code, which was called “Allowing redemption for the old, the young, and the disabled” (老小廢疾收贖). $ ^{31} $ Under statute 22, one could redeem a death sentence with 0.525 ounces of silver, much less that the 12.42 ounces sought for “killing because of madness.” $ ^{32} $ People who were the object of legalized pity under statute 22 could redeem a real sentence with money; whereas in the case of “[people with] madness illness killing another,” the payment was the sentence, imposed for an inadvertent act that had led to a grave outcome. Compassion was not a factor in the 1669 rule, which likened “killing because of madness” to “accidental killing” on the basis of their common lack of criminal intention. $ ^{33} $ For decades, the 1669 law governed the ...",
-        "byte_size": 147986,
-        "sha256": "cecf85eac98971b331e4a3382260c7d3db5adee019bc8808015a2ba70dcb115e"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-manual-2-11-11-errors-and-projection:toc-manual-2-11-11-errors-and-projection:footnote",
-    "request_mode": "anchor_rebind",
-    "page_context_count": 8,
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0020-toc-ch-004-fromwindtomucusandfire:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00442\",\n    \"anchor_id\": \"anchor-01317\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00442 has marker '5' but its text content ('...statute @ of the code...') and context clearly correspond to footnote 8 in the screenshot (p. 425), which discusses statute 282 of the Qing code. The anchor-01317 is the explicit structural anchor for footnote 8 on page 443 (screenshot p. 425). The marker '5' in the note item is likely an OCR error or metadata artifact, but the semantic match to anchor 8 is definitive.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00443\",\n    \"anchor_id\": \"anchor-01326\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00443 has marker '7' but its text content ('The phrase 'or kill' that Jones added here appears in none of the editions...') corresponds exactly to footnote 20 in the screenshot (p. 428, image 4). Footnote 20 is anchored at 'anchor-01326' (marker 20) in the source text on page 446 (screenshot p. 428). The marker '7' is incorrect; the content match to anchor 20 is exact.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00444\",\n    \"anchor_id\": \"anchor-01328\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00444 has marker '1' but its text content ('...brief discussion of parricides in the Yuan dynasty...') corresponds to footnote 22 in the screenshot (p. 429, image 5). Footnote 22 is anchored at 'anchor-01328' (marker 22) in the source text on page 447 (screenshot p. 429). The marker '1' is incorrect; the content match to anchor 22 is exact.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00445\",\n    \"anchor_id\": \"anchor-01331\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00445 has marker '3' but its text content (listing statutes like 'mou sha', 'gu sha') corresponds to footnote 23 in the screenshot (p. 429, image 5). Footnote 23 is anchored at 'anchor-01331' (marker 23) in the source text on page 447 (screenshot p. 429). The marker '3' is incorrect; the content match to anchor 23 is exact.\"\n  },\n  {\n    \"action\": \"match\",\n    \"note_item_id\": \"fn-00446\",\n    \"anchor_id\": \"anchor-01341\",\n    \"confidence\": 0.95,\n    \"reason\": \"The note item fn-00446 has marker '0' but its text content ('Killing accidentally and Killing one's parents accidentally were two different penal denominations...') corresponds to footnote 30 in the screenshot (p. 432, image 8). Footnote 30 is anchored at 'anchor-01341' (marker 30) in the source text on page 450 (screenshot p. 432). The marker '0' is incorrect; the content match to anchor 30 is exact.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01316\",\n    \"confidence\": 0.9,\n    \"reason\": \"Anchor 9 (page 443/screenshot 425) has no corresponding note item in the provided list. The footnote 9 visible in the screenshot is not represented in the unmatched_note_items. No action can be taken to create it.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01318\",\n    \"confidence\": 0.9,\n    \"reason\": \"Duplicate anchor for marker 9. Same reason as above.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01322\",\n    \"confidence\": 0.9,\n    \"reason\": \"Anchor 13 (page 444/screenshot 426) has no corresponding note item in the provided list. Footnote 13 is visible in the screenshot but not in the data.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01323\",\n    \"confidence\": 0.9,\n    \"reason\": \"Duplicate anchor for marker 14. Footnote 14 is visible in the screenshot but not in the data.\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-01324\",\n    \"confidence\": 0.9,\n    \"reason\": \"Anchor 15 (page 445/screenshot 427) has no corresponding note item in the provided list.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Several anchors (9, 13, 14, 15, 18, and potentially others like 21, 24-29, 31-33) have visible footnotes in the screenshots but no corresponding note items in the 'unmatched_note_items' list. The provided rebind candidates only cover a subset of the errors (markers 5, 7, 1, 3, 0 mapping to 8, 20, 22, 23, 30). The remaining unresolved clusters cannot be auto-matched without the missing note item data.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 2004,
+    "output_tokens": 35,
+    "total_tokens": 2039,
+    "estimated_input_tokens": 1879,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"OCR文本混乱，无法确定锚点位置。\"\n    }\n]\n```",
   "response_parsed": [
-    {
-      "action": "match",
-      "note_item_id": "fn-00442",
-      "anchor_id": "anchor-01317",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The note item fn-00442 has marker '5' but its text content ('...statute @ of the code...') and context clearly correspond to footnote 8 in the screenshot (p. 425), which discusses statute 282 of the Qing code. The anchor-01317 is the explicit structural anchor for footnote 8 on page 443 (screenshot p. 425). The marker '5' in the note item is likely an OCR error or metadata artifact, but the semantic match to anchor 8 is definitive."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00443",
-      "anchor_id": "anchor-01326",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The note item fn-00443 has marker '7' but its text content ('The phrase 'or kill' that Jones added here appears in none of the editions...') corresponds exactly to footnote 20 in the screenshot (p. 428, image 4). Footnote 20 is anchored at 'anchor-01326' (marker 20) in the source text on page 446 (screenshot p. 428). The marker '7' is incorrect; the content match to anchor 20 is exact."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00444",
-      "anchor_id": "anchor-01328",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The note item fn-00444 has marker '1' but its text content ('...brief discussion of parricides in the Yuan dynasty...') corresponds to footnote 22 in the screenshot (p. 429, image 5). Footnote 22 is anchored at 'anchor-01328' (marker 22) in the source text on page 447 (screenshot p. 429). The marker '1' is incorrect; the content match to anchor 22 is exact."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00445",
-      "anchor_id": "anchor-01331",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The note item fn-00445 has marker '3' but its text content (listing statutes like 'mou sha', 'gu sha') corresponds to footnote 23 in the screenshot (p. 429, image 5). Footnote 23 is anchored at 'anchor-01331' (marker 23) in the source text on page 447 (screenshot p. 429). The marker '3' is incorrect; the content match to anchor 23 is exact."
-    },
-    {
-      "action": "match",
-      "note_item_id": "fn-00446",
-      "anchor_id": "anchor-01341",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.95,
-      "reason": "The note item fn-00446 has marker '0' but its text content ('Killing accidentally and Killing one's parents accidentally were two different penal denominations...') corresponds to footnote 30 in the screenshot (p. 432, image 8). Footnote 30 is anchored at 'anchor-01341' (marker 30) in the source text on page 450 (screenshot p. 432). The marker '0' is incorrect; the content match to anchor 30 is exact."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-01316",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "Anchor 9 (page 443/screenshot 425) has no corresponding note item in the provided list. The footnote 9 visible in the screenshot is not represented in the unmatched_note_items. No action can be taken to create it."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-01318",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "Duplicate anchor for marker 9. Same reason as above."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-01322",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "Anchor 13 (page 444/screenshot 426) has no corresponding note item in the provided list. Footnote 13 is visible in the screenshot but not in the data."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-01323",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "Duplicate anchor for marker 14. Footnote 14 is visible in the screenshot but not in the data."
-    },
-    {
-      "action": "ignore_ref",
-      "note_item_id": "",
-      "anchor_id": "anchor-01324",
-      "anchor_phrase": "",
-      "marker": "",
-      "note_text": "",
-      "confidence": 0.9,
-      "reason": "Anchor 15 (page 445/screenshot 427) has no corresponding note item in the provided list."
-    },
     {
       "action": "needs_review",
       "note_item_id": "",
@@ -446,112 +201,12 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.0,
-      "reason": "Several anchors (9, 13, 14, 15, 18, and potentially others like 21, 24-29, 31-33) have visible footnotes in the screenshots but no corresponding note items in the 'unmatched_note_items' list. The provided rebind candidates only cover a subset of the errors (markers 5, 7, 1, 3, 0 mapping to 8, 20, 22, 23, 30). The remaining unresolved clusters cannot be auto-matched without the missing note item data."
+      "confidence": 0.8,
+      "reason": "OCR文本混乱，无法确定锚点位置。"
     }
   ],
   "derived_truth": {
     "parsed_actions": [
-      {
-        "action": "match",
-        "note_item_id": "fn-00442",
-        "anchor_id": "anchor-01317",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The note item fn-00442 has marker '5' but its text content ('...statute @ of the code...') and context clearly correspond to footnote 8 in the screenshot (p. 425), which discusses statute 282 of the Qing code. The anchor-01317 is the explicit structural anchor for footnote 8 on page 443 (screenshot p. 425). The marker '5' in the note item is likely an OCR error or metadata artifact, but the semantic match to anchor 8 is definitive."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00443",
-        "anchor_id": "anchor-01326",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The note item fn-00443 has marker '7' but its text content ('The phrase 'or kill' that Jones added here appears in none of the editions...') corresponds exactly to footnote 20 in the screenshot (p. 428, image 4). Footnote 20 is anchored at 'anchor-01326' (marker 20) in the source text on page 446 (screenshot p. 428). The marker '7' is incorrect; the content match to anchor 20 is exact."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00444",
-        "anchor_id": "anchor-01328",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The note item fn-00444 has marker '1' but its text content ('...brief discussion of parricides in the Yuan dynasty...') corresponds to footnote 22 in the screenshot (p. 429, image 5). Footnote 22 is anchored at 'anchor-01328' (marker 22) in the source text on page 447 (screenshot p. 429). The marker '1' is incorrect; the content match to anchor 22 is exact."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00445",
-        "anchor_id": "anchor-01331",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The note item fn-00445 has marker '3' but its text content (listing statutes like 'mou sha', 'gu sha') corresponds to footnote 23 in the screenshot (p. 429, image 5). Footnote 23 is anchored at 'anchor-01331' (marker 23) in the source text on page 447 (screenshot p. 429). The marker '3' is incorrect; the content match to anchor 23 is exact."
-      },
-      {
-        "action": "match",
-        "note_item_id": "fn-00446",
-        "anchor_id": "anchor-01341",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.95,
-        "reason": "The note item fn-00446 has marker '0' but its text content ('Killing accidentally and Killing one's parents accidentally were two different penal denominations...') corresponds to footnote 30 in the screenshot (p. 432, image 8). Footnote 30 is anchored at 'anchor-01341' (marker 30) in the source text on page 450 (screenshot p. 432). The marker '0' is incorrect; the content match to anchor 30 is exact."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01316",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Anchor 9 (page 443/screenshot 425) has no corresponding note item in the provided list. The footnote 9 visible in the screenshot is not represented in the unmatched_note_items. No action can be taken to create it."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01318",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Duplicate anchor for marker 9. Same reason as above."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01322",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Anchor 13 (page 444/screenshot 426) has no corresponding note item in the provided list. Footnote 13 is visible in the screenshot but not in the data."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01323",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Duplicate anchor for marker 14. Footnote 14 is visible in the screenshot but not in the data."
-      },
-      {
-        "action": "ignore_ref",
-        "note_item_id": "",
-        "anchor_id": "anchor-01324",
-        "anchor_phrase": "",
-        "marker": "",
-        "note_text": "",
-        "confidence": 0.9,
-        "reason": "Anchor 15 (page 445/screenshot 427) has no corresponding note item in the provided list."
-      },
       {
         "action": "needs_review",
         "note_item_id": "",
@@ -559,18 +214,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.0,
-        "reason": "Several anchors (9, 13, 14, 15, 18, and potentially others like 21, 24-29, 31-33) have visible footnotes in the screenshots but no corresponding note items in the 'unmatched_note_items' list. The provided rebind candidates only cover a subset of the errors (markers 5, 7, 1, 3, 0 mapping to 8, 20, 22, 23, 30). The remaining unresolved clusters cannot be auto-matched without the missing note item data."
+        "confidence": 0.8,
+        "reason": "OCR文本混乱，无法确定锚点位置。"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 13251,
-    "completion_tokens": 1453,
-    "total_tokens": 14704,
+    "prompt_tokens": 2004,
+    "completion_tokens": 35,
+    "total_tokens": 2039,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 29607
+    "duration_ms": 1904
   }
 }

@@ -1,0 +1,117 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-3academicpsychiatryandth:nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth:footnote",
+      "chapter_title": "3 Academic \"Psychiatry\" and the Rise of Galenic Observation",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        180,
+        180
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00491",
+          "note_item_id": "fn-00482",
+          "anchor_id": "anchor-00402",
+          "marker": "57",
+          "note_excerpt": "For a reported use of a split rooster, see the account of Felix Platter, P. 176 below.",
+          "anchor_excerpt": "held at Heidelberg in 1584 with Johann Kuhn (Cuno) as respondent. $ ^{57} $ Beginning with the theological proposition that man was made in God’s image, having the use of reason, the formal quaestio asked how it was that phrenesis, or brain fever, could push man so far from reason that he became like the wild beasts. Although this opening statement seemed to invite theological commentary on the human nature of the mad, the dissertation quickly entered calmer medical waters by asserting that the cause and cure of such metamorphoses were matters for the physician. Revealing a firm grasp of philosophical complexities, however, Moegling and Kuhn noted that, strictly speaking, the human mind was not liable to death or disease; but so long as it was trapped in this prison of a body (in hoc ergastulo), it had to abandon its integrity and attach itself to the inferior faculties of the soul and use the ministry of the interior and exterior senses. Being in this way a composite construction, it became capable of suffering (thesis 1). Here then was a disputation in which major theological and philosophical issues did break the surface, but only in such a way as to justify the medical concern with physical things."
+        },
+        {
+          "link_id": "link-00492",
+          "note_item_id": "fn-00483",
+          "anchor_id": "anchor-00407",
+          "marker": "58",
+          "note_excerpt": "Disputatio de Phrenetide (Tlibingen, 1588).",
+          "anchor_excerpt": "Phrenesis was defined as inflammation of the brain with acute fever and delirium (thesis 4). After distinguishing various sorts of phrenesis, Moegling and Kuhn turned to a detailed consideration of its etiology, symptomatology, and prognosis. Since cure was exceedingly difficult, they noted that the prudent physician would rather avoid the disease altogether (thesis 38). Still, a cure could be effected if the matter of the disease (i.e., the corrupt phlegm) were destroyed or if the source of the corruption itself were corrected. All of these procedures required the use of purges “with a skilled moderation” (docta moderatione) (theses 38, 43, 46), or diet, or venesection, or baths (theses 46, 47, 52, 54, 55, 57). Only when the crisis was past and the disease was in retreat did Moegling and Kuhn concede the utility of applying to a feverish head such ancient remedies as split chickens, capons, piglets, and dogs (all alive but with their spines cut), or the fresh lung of a ram, or warm mother’s milk (thesis 60). It seems unlikely that Moegling actually held these steps to be effective, and it is noteworthy that he relegated this advice to the stage when the patient was already on the mend. $ ^{58} $ Ultimately, diet and soothing surroundings were of prime importance in helping the patient. Friends, too, could help to calm and flatter him. But if these measures failed to cool the rage, the patient might need chains to confine him. Even so, it was not for the physician to take this last step but for the sick man himself and the attending officials “to make sure that all is done in right order” (thesis 64). This last statement seems to reveal an awareness"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 50815,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00481",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-3academicpsychiatryandth",
+          "region_id": "nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth",
+          "marker": "56",
+          "normalized_marker": "56",
+          "occurrence": 1,
+          "source_text": "Theses de Phrenetide (Heidelberg, 1584).",
+          "page_no": 180,
+          "display_marker": "56",
+          "source_marker": "56",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00492",
+          "note_item_id": "fn-00483",
+          "current_anchor_id": "anchor-00407",
+          "marker": "58",
+          "note_page_no": 181,
+          "anchor_page_no": 180,
+          "current_anchor_marker": "58",
+          "note_excerpt": "Disputatio de Phrenetide (Tlibingen, 1588).",
+          "anchor_excerpt": "Phrenesis was defined as inflammation of the brain with acute fever and delirium (thesis 4). After distinguishing various sorts of phrenesis, Moegling and Kuhn turned to a detailed consideration of its etiology, symptomatology, and prognosis. Since cure was exceedingly difficult, they noted that the prudent physician would rather avoid the disease altogether (thesis 38). Still, a cure could be effected if the matter of the disease (i.e., the corrupt phlegm) were destroyed or if the source of the corruption itself were corrected. All of these procedures required the use of purges “with a skilled moderation” (docta moderatione) (theses 38, 43, 46), or diet, or venesection, or baths (theses 46, 47, 52, 54, 55, 57). Only when the crisis was past and the disease was in retreat did Moegling and Kuhn concede the utility of applying to a feverish head such ancient remedies as split chickens, capons, piglets, and dogs (all alive but with their spines cut), or the fresh lung of a ram, or warm mother’s milk (thesis 60). It seems unlikely that Moegling actually held these steps to be effective, and it is noteworthy that he relegated this advice to the stage when the patient was already on the mend. $ ^{58} $ Ultimately, diet and soothing surroundings were of prime importance in helping the patient. Friends, too, could help to calm and flatter him. But if these measures failed to cool the rage, the patient might need chains to confine him. Even so, it was not for the physician to take this last step but for the sick man himself and the attending officials “to make sure that all is done in right order” (thesis 64). This last statement seems to reveal an awareness",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-3academicpsychiatryandth:nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-003-3academicpsychiatryandth:nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5174,
+    "estimated_prompt_tokens": 1768,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 1,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1768,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -1,0 +1,143 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire:footnote\",\n  \"chapter_title\": \"4. From Wind to mucus and Fire\",\n  \"page_range\": [\n    110,\n    111\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00033\",\n      \"marker\": \"9\",\n      \"page_no\": 110,\n      \"source_text\": \"Qutual0conquest0and0mutual0production0of0the0Jive0Egents40with0their g`e^Z_Xe^ _common40ordinary`60Sne0is0frightened0because0one0suddenly0comes0upon0something60Qake0one0see and0hear0this0thing0habitually40and0one0will0no0longer0be0frightene ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00034\",\n      \"marker\": \"10\",\n      \"page_no\": 111,\n      \"source_text\": \"2. @ 5 = 3C0see 6 below6 == _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SfrightT΍ 2VQWU0?6 a6 aCU`_\\\\0p`a` B0 ?5@360Sther0physicians0had treated0this0case0asan Sillness0of0the0 eartTĹɇ 40and0ineffectively0prescribed0Sginseng40pearls40and0[ill5 settling0pi ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"## 4 ## From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360 In Chapter 3, I traced the increasingly widespread association of mucus with Wind disorders from the tenth to the twelfth century and showed that several illnesses whose pathomechanisms had been considered close to those of kuang—Wind strokes and xian 痈 seizures—were often treated with anti-mucus remedies by the end of that period. Let me now explain how the mucus-and-Fire etiology of madness that dominated late-imperial conceptions of insanity developed. The mucus-and-Fire script emerged among doctrinally minded physicians who lived in north China under the Jin dynasty (1115-1234), and was consolidated by southern doctors who were influenced by these northerners in the early fourteenth century under the Yuan dynasty (1260-1368), after the Mongol conquest of both the Jin and the southern Song (1127-1279) had re-established contacts between north and south China. The innovations these medical thinkers proposed built on the trends I outlined in Chapter 3, but it was their doctrinal and therapeutic precepts that came to dominate later medical thinking. During these men's lives (and partly thanks to their efforts), \\\"Cold Injury\\\" (shangban 傷寒) replaced \\\"Wind illnesses\\\" as the new dominant class of illnesses. The way Jin-Yuan physicians interpreted madness and handled mad people depended on their broader understanding of illness and vitality. The development of Cold- Injury medicine, for example, enhanced the importance of Heat and Fire as etiological factors and motivated a number of doctors to use Cold-Injury remedies to treat psycho- behavioral symptoms. Part 4.1 discusses Liu Wansu's 劉完素 (ca. 1120-1200) general emphasis on the etiology of Fire and his reinterpretation of \\\"Wind\\\" a ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire:footnote",
+      "chapter_title": "4. From Wind to mucus and Fire",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        110,
+        111
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11605,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00033",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire",
+          "marker": "9",
+          "normalized_marker": "9",
+          "occurrence": 1,
+          "source_text": "Qutual0conquest0and0mutual0production0of0the0Jive0Egents40with0their g`e^Z_Xe^ _common40ordinary`60Sne0is0frightened0because0one0suddenly0comes0upon0something60Qake0one0see and0hear0this0thing0habitually40and0one0will0no0longer0be0frightened6T02associated0organs0and0emotions ʕƢ ΍ʨěA _W[? ` ě̝ěĘH ý΍[bĽȝʪ̈́AH fʤ́ʤʮ¡7΍ɨ 3",
+          "page_no": 110,
+          "display_marker": "9",
+          "source_marker": "9",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11606,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00034",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-004-fromwindtomucusandfire",
+          "region_id": "nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire",
+          "marker": "10",
+          "normalized_marker": "10",
+          "occurrence": 1,
+          "source_text": "2. @ 5 = 3C0see 6 below6 == _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SfrightT΍ 2VQWU0?6 a6 aCU`_\\0p`a` B0 ?5@360Sther0physicians0had treated0this0case0asan Sillness0of0the0 eartTĹɇ 40and0ineffectively0prescribed0Sginseng40pearls40and0[ill5 settling0pillT02V¹Ȱȱ»îĻ 360Xhe0[ill5settling0pill0was0a0typical0treatment0for0fright6 => _`o`e^0jXec`Xf ¬Ĭ4ɐ 40case0 40SinsomniaT7÷ 2VQWU0?6 a4 U`_\\0p`a` B0 ?360^hangRs0version0claimed patient0sweating0with0outrage6 that0heonly Sfeigned0drunkennessT02w͒ 302 ld\\e0j_`h`e S͝ ̃ 40entry0 >C0VQWU0 6 ?b4U`_\\0p`a` B0 36 =? _`o`e^ jXec`Xf ¬Ĭ4ɐ 40case0 40SPumps0caused0by0sorrowT âřʔî 2VQWU0?6 aC U`_\\0p`a` B0 >36 =@ t0is0unclear0whether0the0exorcist0was0in0collusion6 =A Es0^hang0was0quoted0to0have0said40theEee\\i0?Xefe already0contained0information0on0this0method0when0it said0that0Swhen0one0is0sorrowful4Ui congeals0into0knotsT02ř¡ǘʔ 340that0Swhen0one0is0joyous40all0the0vessels are0in0harmonyT02Ü¡ɖʽ˔Õ 34and0that0Sjoy0overcomes0sorrowT02Ü¦ō 36Xhe0third0phrase0was0taken directly0fromg`Xe =02and0>?30of0the>Xj`Z0 l\\jk`fej 60E0sentence0toward0the0end0of >Xj`Z0 l\\jk`fej A gave0a0slightly different0version0of0the0effect0on0Ui0of0various0emotions60S[hen0one0is0joyous40all0the0vessels0are0in0harmonyT appeared0verbatim0in0^hangRs0entry0on0the0nine0types0of Ui and0explained0why0joy0rarelyproduced illness 2 ld\\e0j_`h`e S͝ ̃ 40entry0 >CVQWU0 6 ?b5 @a4U`_\\0p`a` B0 36",
+          "page_no": 111,
+          "display_marker": "10",
+          "source_marker": "10",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-004-fromwindtomucusandfire:nr-fn-ch-0016-toc-ch-004-fromwindtomucusandfire:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1391,
+    "output_tokens": 129,
+    "total_tokens": 1520,
+    "estimated_input_tokens": 1481,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-00033\",\n    \"anchor_phrase\": \"The innovations of Jin and Yuan physicians, ca. 1150-1360\",\n    \"confidence\": 0.95,\n    \"reason\": \"章节副标题，与注释主题（金元医家创新）完全对应\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"注释标记10对应文本混乱，无法在正文中找到明确锚点\"\n  }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00033",
+      "anchor_id": "",
+      "anchor_phrase": "The innovations of Jin and Yuan physicians, ca. 1150-1360",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "章节副标题，与注释主题（金元医家创新）完全对应"
+    },
+    {
+      "action": "needs_review",
+      "note_item_id": "",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.8,
+      "reason": "注释标记10对应文本混乱，无法在正文中找到明确锚点"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00033",
+        "anchor_id": "",
+        "anchor_phrase": "The innovations of Jin and Yuan physicians, ca. 1150-1360",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "章节副标题，与注释主题（金元医家创新）完全对应"
+      },
+      {
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.8,
+        "reason": "注释标记10对应文本混乱，无法在正文中找到明确锚点"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1391,
+    "completion_tokens": 129,
+    "total_tokens": 1520,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2319
+  }
+}

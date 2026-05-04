@@ -1,0 +1,143 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-008-ghostsormucus:nr-fn-ch-0056-toc-ch-008-ghostsormucus:footnote\",\n  \"chapter_title\": \"8. Ghosts or mucus?\",\n  \"page_range\": [\n    362,\n    362\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00182\",\n      \"marker\": \"15\",\n      \"page_no\": 362,\n      \"source_text\": \">==5 >A@30is a well5documented0example0of0how0a0scholar0dealt0with0his0despondency0and0how0his friends0responded0to0his0eventual0suicide2see0Jang0FaoŖɰ 4 ZS07 [0VU Ŗɰ̍ _ A@ `B0 >40 = 5= 40> 5 =4 >?=5??C0and0Hai0QingshiĹº\"\n    },\n    {\n      \"note_item_id\": \"fn-00183\",\n      \"marker\": \"16\",\n      \"page_no\": 362,\n      \"source_text\": \"U0BUZS_TU0VU Ĺº ̍ _ A@>`B0==5=>40 @5 A360 became0aware0of\\\\u RianzuTs0casethroughHurand0 AA 6 = =aUdU0eU Z ƬƸ˯ƃ 40UWpectral0illnessesV 2ȓǰ 3C0\\\\u]UB0 @ F60Qessner02 B 5 3 translated0this0story6 = \\\\ieTs0criticism02made0in0a0clinical0case3 appe ...\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"## 8 ## Ghosts or mucus? Possession symptoms and their treatments in Ming and Qing medicine I also saw a bearded figure lifting my oilcloth screen, but he suddenly disappeared. I was startled and I started to feel befuddled inside: I wanted to seek death. 又見一鬍子將油簾揭起 倏忽不見 吃了一驚 心內恍 惚起來 自欲尋死 Licentiate Xu Ding 徐鼎, recounting a vision (1768) $ ^{1} $ How can demonic affliction make people sick! It is just that some disorders look like demonic affliction. 鬼祟豈能病人 不過病似鬼祟耳 Yu Zhen 俞震 in a note to a medical case file (1778) $ ^{2} $ ### 8.1 Spectral affliction in late-imperial medicine Qing men and women often caught sight of “ghosts” and felt the result of their malicious actions. To banish these demons, the relatives of afflicted people could hire rituals specialist, doctors who claimed they could oust specters with drugs, or physicians like Yu Zhen who denied the demonic etiology altogether, but claimed they knew methods to cure possession symptoms. Chapter 13 will explain in more detail the ways in which common people tried to cure their mad-acting relatives, including cases in which they sought the help of both exorcists and physicians. In this chapter, I discuss the ways in which physicians explained and handled symptoms that resembled those of involuntary possession. $ ^{3} $ By possession, I refer to invasion by a non-human (or no longer human) force that could supposedly control the thoughts, acts, and speech of their victim. Possession was expressed by verbs like ping 憑, yi 依, or fu 附, which meant “attaching to” or “relying upon” a person. Ghosts were also often said to “enter” (ru 入) the body of their victims. All these terms were not part of specialized medical terminology, but physicians used them when they discussed cases of “possession.” Regardless of whether they ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0056-toc-ch-008-ghostsormucus:footnote",
+      "chapter_title": "8. Ghosts or mucus?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        362,
+        362
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11754,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00182",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0056-toc-ch-008-ghostsormucus",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": ">==5 >A@30is a well5documented0example0of0how0a0scholar0dealt0with0his0despondency0and0how0his friends0responded0to0his0eventual0suicide2see0Jang0FaoŖɰ 4 ZS07 [0VU Ŗɰ̍ _ A@ `B0 >40 = 5= 40> 5 =4 >?=5??C0and0Hai0QingshiĹº",
+          "page_no": 362,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11755,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00183",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-008-ghostsormucus",
+          "region_id": "nr-fn-ch-0056-toc-ch-008-ghostsormucus",
+          "marker": "16",
+          "normalized_marker": "16",
+          "occurrence": 1,
+          "source_text": "U0BUZS_TU0VU Ĺº ̍ _ A@>`B0==5=>40 @5 A360 became0aware0of\\u RianzuTs0casethroughHurand0 AA 6 = =aUdU0eU Z ƬƸ˯ƃ 40UWpectral0illnessesV 2ȓǰ 3C0\\u]UB0 @ F60Qessner02 B 5 3 translated0this0story6 = \\ieTs0criticism02made0in0a0clinical0case3 appeared0in QdUZVU0eUi Z Ėě̍˯ƃ 2 @> 34 Va Z =4 UHelirium0and sweatingVʬʟɢƞ 2^] 5 B0@AF36",
+          "page_no": 362,
+          "display_marker": "16",
+          "source_marker": "16",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-008-ghostsormucus:nr-fn-ch-0056-toc-ch-008-ghostsormucus:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1443,
+    "output_tokens": 207,
+    "total_tokens": 1650,
+    "estimated_input_tokens": 1495,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00182\",\n        \"anchor_phrase\": \"A well-documented example of how a scholar dealt with his despondency\",\n        \"confidence\": 0.85,\n        \"reason\": \"OCR text 'A@30is a well5documented0example0of0how0a0scholar0dealt0with0his0despondency' clearly maps to this phrase.\"\n    },\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00183\",\n        \"anchor_phrase\": \"Hai Qingshi's case through Huran\",\n        \"confidence\": 0.9,\n        \"reason\": \"OCR text 'Hai0QingshiĹº...0became0aware0of\\\\u RianzuTs0casethroughHurand' indicates this anchor.\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00182",
+      "anchor_id": "",
+      "anchor_phrase": "A well-documented example of how a scholar dealt with his despondency",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.85,
+      "reason": "OCR text 'A@30is a well5documented0example0of0how0a0scholar0dealt0with0his0despondency' clearly maps to this phrase."
+    },
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00183",
+      "anchor_id": "",
+      "anchor_phrase": "Hai Qingshi's case through Huran",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.9,
+      "reason": "OCR text 'Hai0QingshiĹº...0became0aware0of\\u RianzuTs0casethroughHurand' indicates this anchor."
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00182",
+        "anchor_id": "",
+        "anchor_phrase": "A well-documented example of how a scholar dealt with his despondency",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.85,
+        "reason": "OCR text 'A@30is a well5documented0example0of0how0a0scholar0dealt0with0his0despondency' clearly maps to this phrase."
+      },
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00183",
+        "anchor_id": "",
+        "anchor_phrase": "Hai Qingshi's case through Huran",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.9,
+        "reason": "OCR text 'Hai0QingshiĹº...0became0aware0of\\u RianzuTs0casethroughHurand' indicates this anchor."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1443,
+    "completion_tokens": 207,
+    "total_tokens": 1650,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2690
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-005-spectresdelaguillotine:nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine:footnote",
+      "chapter_title": "Spectres de la guillotine",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        87,
+        88
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00103",
+          "note_item_id": "fn-00103",
+          "anchor_id": "anchor-00147",
+          "marker": "67",
+          "note_excerpt": "Victor Hugo, Les Misérables [1862], Gallimard, «Bibliothèque de la Pléiade», 1951, p. 18.",
+          "anchor_excerpt": "L'échafaud, dit Hugo, « a quelque chose qui hallucine ». « L'échafaud est vision. » Cette « sorte d'être qui a je ne sais quelle sombre initiative » semble doué d'une vie autonome, qui jette l'âme dans « une rêverie affreuse<sup>67</sup> ». La guillotine est une image dont la puissance formelle n'a pas d'équivalent, un symbole, avant d'être un mode d'exécution, qui viendra hanter les consciences et peupler les nuits de cauchemars. En 1794, le marquis de Sade, incarcéré à la maison Coignard à Picpus, voit de ses fenêtres la place du Trône renversé (actuelle place de la Nation) où l'on procède aux exécutions. Les cadavres sont ensuite jetés dans les fosses creusées au beau milieu du jardin de sa prison. « Ma détention nationale, écrira-t-il, la guillotine sous les yeux, m'a fait cent fois plus de mal que ne m'en avaient fait toutes les bastilles imaginables $ ^{68} $. »"
+        },
+        {
+          "link_id": "link-00105",
+          "note_item_id": "fn-00105",
+          "anchor_id": "anchor-00150",
+          "marker": "69",
+          "note_excerpt": "Révolutions de Paris, n° 185, 15° trimestre, du 19 au 26 janvier 1793, p. 203.",
+          "anchor_excerpt": "la mort que la certitude de ce démembrement public, abolissant l'intégrité physique dans un flot de sang. La mort du roi avait déjà donné lieu à des actes de désespoir, rapportés par les Révolutions de Paris : « On a su qu'un militaire, anciennement décoré de la croix de Saint-Louis, est mort de douleur en apprenant le supplice de Louis ; qu'un libraire, nommé Vente, ci-devant attaché aux Menus-Plaisirs, en est devenu fou ; qu'un perruquier de la rue Culture-Sainte-Catherine, connu pour zélé royaliste, s'est de désespoir coupé le cou avec un rasoir<sup>69</sup> 69 ∞, répétant par ce geste mimétique le martyre de son souverain. La pression s'accentue à partir de la loi des suspects 70. Elle est votée le 17 septembre 1793. Le 11, Pinel a pris ses fonctions à Bicêtre."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11634,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00104",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-spectresdelaguillotine",
+          "region_id": "nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine",
+          "marker": "68",
+          "normalized_marker": "68",
+          "occurrence": 1,
+          "source_text": "Lettre de Sade à son avocat, 21 janvier 1795, citée par Gilbert Lely, Vie du marquis de Sade, nouv. éd. entièrement refondue, Jean-Jacques Pauvert, 1965, p. 539.",
+          "page_no": 87,
+          "display_marker": "68",
+          "source_marker": "68",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        },
+        {
+          "row_id": 11636,
+          "doc_id": "5df1d3d7f9c1",
+          "note_item_id": "fn-00106",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-005-spectresdelaguillotine",
+          "region_id": "nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine",
+          "marker": "70",
+          "normalized_marker": "70",
+          "occurrence": 1,
+          "source_text": "« Sont réputés suspects les ci-devant nobles et leurs parents, les personnes qui se sont vu refuser des certificats de civisme, et tous ceux qui \"par leur conduite, leurs relations, leurs propos, leurs écrits se montrent partisans du fédéralisme et des ennemis de la liberté\" » (J. Tulard et al., Histoire et dictionnaire de la Révolution française, op. cit., p. 1105). À la veille de Thermidor, selon l'estimation d'Albert Mathiez, il y aurait eu 300 000 suspects en France, dont 8 000 à Paris.",
+          "page_no": 88,
+          "display_marker": "70",
+          "source_marker": "70",
+          "title_hint": "",
+          "created_at": 1777756563,
+          "updated_at": 1777756563
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-005-spectresdelaguillotine:nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-005-spectresdelaguillotine:nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5026,
+    "estimated_prompt_tokens": 1726,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 2,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": true
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1726,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

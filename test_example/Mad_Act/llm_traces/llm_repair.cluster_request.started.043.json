@@ -1,0 +1,123 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-015-madmentalking:nr-fn-ch-0095-toc-ch-015-madmentalking:footnote",
+      "chapter_title": "15. Madmen talking?",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        596,
+        598
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11921,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00350",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-015-madmentalking",
+          "region_id": "nr-fn-ch-0095-toc-ch-015-madmentalking",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "5/ tsfourth/entrystatedA ~ f/an/unruly/person3/under/the/pretext/of/presenting/a/memorial3/uses clever/words/and/_a/calculatedly`/amiable/appearance/with/the/hope/of/seeking/employment3/_sentence/to`/ blows/of/the/heavy/stickQɑȮƔ@ĐoT6ż îɵSɐ òƧʽǤȸ Ƅ4Ƕ 1my/translationB/cf5 ones/ @@ A/ >?25",
+          "page_no": 596,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11922,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00351",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-015-madmentalking",
+          "region_id": "nr-fn-ch-0095-toc-ch-015-madmentalking",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": ">7FF7D FA AH7D@AD 97@7D3> /G7 0:A@9C; EG997EF;@9 :7 D;E7 ;@ D747>>;A@ $ ^{11} $ The “criminals” in eight of the cases I found presented letters to an Education commissioner: Wang Zhaoji (1751), Ding Wenbin (1753), Liu Yuhou (1755), Yang Huaizhen (1756), Wang Jiyuan (1761), Liu Qifeng (1762), Xu Shukui (1778), and Yin Baoshan (1778). %@7 EF3FGF7 5A@57D@76 F:7 BAEE7EE;A@ A8 P8AD4;667@ F7JFEQ EF3FGF7 P!77B;@9 BDA:;4;F76 4AA=EQŚɞȋ ż \" / 3@AF:7D A@7 8AD4367 FA ID;F7 AD AI@ 4AA=E 5A@57D@;@9 EAD57DK EF3FGF7 P-D;F;@9 AA=E A@ )AD57DK AD )B73=;@9 4AGF )AD57DKQʻ¿ż¿ɵ \" / @ F:7 53E7E 3? 6;E5GEE;@9 A88;5;3>E 3>EA >AA=76 8AD 6D38FE A8 F:7 ID;F;@9E F:7K :36 3>D736K E7;L76 FA ?3=7 EGD7 F:3F F:7 F7JF ;@ CG7EF;A@ IAG>6 @AF 5;D5G>3F7 8GDF:7D $ ^{13} $ Palace memorial by Shanxi governor Asiha 阿斯哈, dated 15 Oct. 1751 (QL16.8.27); QWD: 7.",
+          "page_no": 597,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11923,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00352",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-015-madmentalking",
+          "region_id": "nr-fn-ch-0095-toc-ch-015-madmentalking",
+          "marker": "5",
+          "normalized_marker": "5",
+          "occurrence": 1,
+          "source_text": "foster/disorder3 Ghen proposed to/imprison/asstrictlyas/violent madmen/those insane > amilies/had/had/to/keep/watch/over/their/mad/relatives/since/ =?@5/E/law/that/was/promulgated/in/ > ordered/families/to/declare/their/mad/members/to/the/local/government/and/to/confine/them/at/home5 Wee/ 5 5 people/who/were/meek/but/literate5/Xhey/shouldalsobe/denied/access/to/writing/implements5 ? Ghen}s/assessment/of/the/preventive/confinement/policy/was/probably/accurate1see 5 25",
+          "page_no": 598,
+          "display_marker": "5",
+          "source_marker": "5",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-015-madmentalking:nr-fn-ch-0095-toc-ch-015-madmentalking:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-015-madmentalking:nr-fn-ch-0095-toc-ch-015-madmentalking:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4477,
+    "estimated_prompt_tokens": 1590,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 3,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1590,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

@@ -779,7 +779,45 @@ OCR 的 marker 提取器扫描这段文本时，会把 "1997" 或 "1976" 识别�
 
 **教训**：Obsidian 的 `[^N]` 语法是一个扁平的全局脚注命名空间，不支持"局部编号 + 按类型分区"。学术书需要的却是"endnote 独占 [^N] 空间从 1 开始 + footnote 用独立标记不参与编号"。这个张力必须在导出层解决——不能把两种类型塞进同一个编号池。解决方案：在 body 替换阶段用 `note_kind_by_id` 分流，而不是等到了 `### NOTES` 区段再靠内容区分。
 
+### 10. 数据分层与持久化语义
+
+**背景**：FNM Pipeline 产出的数据分布在四层，每层有不同的生命周期和用途。混淆各层会导致"旧数据被当成新事实"——如 body unit 重叠排查时，问题实际来自 DB 中缓存的旧 unit 数据而非 fresh rebuild。
+
+**四层定义**：
+
+| 层 | 存储位置 | 用途 | 生命周期 |
+|---|---------|------|---------|
+| **Fresh Pipeline Truth** | 内存 ModulePipelineSnapshot | 结构验证、Phase gate 判断、bug 修复验证 | 每次 rebuild 重新生成 |
+| **Production Persisted State** | `doc.db` → `fnm_*` 表 | UI、翻译续跑、最终导出 | 跨 pipeline run 持久 |
+| **Incremental Checkpoints** | `doc.db` → `fnm_dev_snapshots` / `fnm_phase_runs` | Phase 级冻结确认、增量推进 | 手动 checkpoint，reset 时清除 |
+| **Batch/Test Artifacts** | `FNM_REAL_TEST_REPORT.md` / `fnm_real_test_modules.json` | 测试报告和回归记录 | 不参与 pipeline truth |
+
+**关键技术决策**：
+
+1. **PipelineIdentity**：每个 pipeline run 生成唯一 `pipeline_run_id`（sha256 of doc_id + timestamp + random）。记录 `raw_pages_hash`、`toc_hash`、`max_body_chars` 等上下文。
+
+2. **Hash-guarded overlay**：`_overlay_repo_units_on_frozen()` 不再按 unit_id 裸匹配旧 page_segments。改为三元校验：unit_id 相同 + `source_hash` 相同 + `segment_plan_hash` 相同。任一不满足则该 unit 进入 stale/pending，不复用旧 translated_text/page_segments。
+
+3. **source_hash**：sha256 of source_text[:200]，轻量指纹判定源文本是否变化。
+4. **segment_plan_hash**：sha256 of `page_start|page_end|char_count|page_nos`，判定 chunk 边界是否变化。
+
+5. **overlay_mode**：`"none"`（fresh rebuild，用于结构验证和批测 truth）、`"hash_guarded"`（正式续跑，只复用 hash 匹配的译文）。不保留裸 overlay 入口。
+
+6. **Freshness 标识**：所有批测产物写 `generated_at`、`overlay_mode`、`based_on_latest_fnm_run`、`stale`。报告时间早于最新 `fnm_runs.created_at` 时标过期。
+
+7. **增量 checkpoint**：`test_fnm_incremental.py --checkpoint` 保存 `fnm_dev_snapshots` 快照（含 gate_report、counts、hash、run_id）。`--reset-from N` 清除 phase ≥ N 的所有产物。`--check` 只读不写。
+
+**Parser 修复后的 hash 行为**：
+
+| 场景 | source_hash | segment_plan_hash | 旧 unit 可复用？ |
+|------|------------|-------------------|----------------|
+| parser 修复，同 unit_id，source_text 头 200 字符不变 | 相同 | 相同 | ✅ 是 |
+| parser 修复，source_text 头 200 字符变化 | 不同 | — | ❌ 否 |
+| chunk 边界变化（body unit 重新切分） | — | 不同 | ❌ 否 |
+| 只改翻译文本不改源文本 | 相同 | 相同 | ✅ 是 |
+
 ---
+
 
 ## 维护原则
 

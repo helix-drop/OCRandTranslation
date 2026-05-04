@@ -14,6 +14,8 @@ class GateReport:
     hard: dict[str, bool] = field(default_factory=dict)
     soft: dict[str, bool] = field(default_factory=dict)
     reasons: list[str] = field(default_factory=list)
+    blockers: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     evidence: dict[str, Any] = field(default_factory=dict)
     overrides_used: list[dict[str, Any]] = field(default_factory=list)
 

@@ -1,0 +1,105 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-002-leçondu17janvier1979:nr-fn-ch-0010-toc-ch-002-leçondu17janvier1979:footnote",
+      "chapter_title": "Leçon du 17 janvier 1979",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        51,
+        51
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 31,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "fn-00013",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-leçondu17janvier1979",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-leçondu17janvier1979",
+          "marker": "*",
+          "normalized_marker": "",
+          "occurrence": 3,
+          "source_text": "M.F.: juridiction",
+          "page_no": 51,
+          "display_marker": "*",
+          "source_marker": "*",
+          "title_hint": "",
+          "created_at": 1777820124,
+          "updated_at": 1777820124
+        },
+        {
+          "row_id": 32,
+          "doc_id": "0d285c0800db",
+          "note_item_id": "fn-00014",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-leçondu17janvier1979",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-leçondu17janvier1979",
+          "marker": "**",
+          "normalized_marker": "",
+          "occurrence": 4,
+          "source_text": "Le manuscrit ajoute, p. 10bis : « politique ».",
+          "page_no": 51,
+          "display_marker": "**",
+          "source_marker": "**",
+          "title_hint": "",
+          "created_at": 1777820124,
+          "updated_at": 1777820124
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-002-leçondu17janvier1979:nr-fn-ch-0010-toc-ch-002-leçondu17janvier1979:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-002-leçondu17janvier1979:nr-fn-ch-0010-toc-ch-002-leçondu17janvier1979:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 3705,
+    "estimated_prompt_tokens": 1349,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 2,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1349,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

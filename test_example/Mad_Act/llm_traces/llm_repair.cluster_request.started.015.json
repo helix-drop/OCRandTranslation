@@ -1,0 +1,217 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0061-toc-ch-009-genderedmania:footnote",
+      "chapter_title": "9. Gendered mania",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        388,
+        396
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00218",
+          "note_item_id": "fn-00209",
+          "anchor_id": "anchor-01188",
+          "marker": "5",
+          "note_excerpt": "16. In ZGZC-7: 9.",
+          "anchor_excerpt": "Juan 5, \"Diankuang\" (GongYQ: 629A). I explained the popularity of Shoushi baoyuan in 7.3, pp. 277ff. I have not found the compound \"constructive Blood\" (營血) in other writings in Gong's time, though this notion became an important concept in the medicine of Warm-factor disorders in the eighteenth century."
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 11776,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00205",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "1",
+          "normalized_marker": "1",
+          "occurrence": 1,
+          "source_text": ">@23/and/that/glimpses/of/gendered",
+          "page_no": 388,
+          "display_marker": "1",
+          "source_marker": "1",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11777,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00206",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "2",
+          "normalized_marker": "2",
+          "occurrence": 1,
+          "source_text": "= Xhe/earliest/surviving/edition/of/GhenQs hSU\\\\U^d/FUSY`Uc is/a/]uan/1 = 4 =?2/edition/that/has/beenre4edited in/Ghen^]U5 > >eQ^ 3/sec5/ 3 RHiscussions/and/recipes/on/womenQsTYQ^ and [eQ^W caused/by/the/deviant/_Ui/of`/[indSä ˩ʷ˦ǀłʎ 1Ghen^]UA/ =FB/section/ /of/\\ue/ iQs/edition3/WOUW/ed53/ >5= b4=<b25/Iach/section/in GhenQs/work/was/introduced/by/an/interpretive/RdiscussionS/1\\e^ 2/ofthe/disorder/at/hand5 ? GhenQsexplanation was/based/on/one/found/in/earlier/worksAR[ind TYQ^ is/caused/when/deviant/_Ui`/enters the]in/tracts/because/of/depletion/of/Ui/and/FloodS/1˩ǣȮ ǔɮƅɫ ʷsŃ˒Ƞĸ? 2/1 XeRY^W ieQ^X_e/\\e^ ʏǙ iʎ _= `3 WOUW/ed53/ 5 b25/Xhatsame/text/also/traced[eQ^W to/invasion/by/Rdeviant/_Ui of`[indS ˩ʷ 1 5 a25/ or/more/on/the/[ind/etiology/of/madness3/see/ 5 5",
+          "page_no": 389,
+          "display_marker": "2",
+          "source_marker": "2",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11778,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00207",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "3",
+          "normalized_marker": "3",
+          "occurrence": 1,
+          "source_text": "3. R uren/fengxie/diankuang/fanglunS ä ˩ʷ˦ǀłʎ 1Ghen^]UA/ >E25 Ghen/presented/the/elixir/as an/equivalent/of/the/R allbladder4embracing/pillS/1ĥɈÉ 23/the/name/by/which this/remedy/was/best/known5 /explained/the/collapse/of/R[ind/illnessesS/in/ 5>3/and/the/dominance/of/the/mucus/and/ ire/script/in/the following/two/chapters5 better/than/to/men5/[u/Uiu±ǈ 1fl5/ < s4 s2/traced/a young/womanQs/strange/behavior n AY^WiY/\\UYQ^ ®ˀ˧Ũ 1 <@ 2 ?5? a4b3 RHiankuang/xinbingS˦ǀ÷Ǚ",
+          "page_no": 390,
+          "display_marker": "3",
+          "source_marker": "3",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11779,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00208",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "4",
+          "normalized_marker": "4",
+          "occurrence": 1,
+          "source_text": "6. EB7DE76\u0001ID;F;@9E\u0001;@6;53F7\u0001F:3F\u00013F\u0001>73EF\u0001EA?7\u0001B:KE;5;3@E\u0001F:AG9:F\u0001F:3F\u0001IA?7@\u0001EG887D76\u00018DA? \u000e +:7'\u000147/'0 ˀ»Eˊ \u0005,7#0 \u0005\u0001R034;@9\u000187@>7;S˙ǙU˧ \u0005\u0001R$7;E:3@9\u0001>7;SF@˧ \u0005\u0001R*3@\u0001>7;Sǜ˧ \u0005 R\u001a;3@=G3@9S ǣǀ \u0003 \u0012\u0012\u000e\u00011 \u000e\u0010\u000e2\u0013 \u0012\u000e\u0018\u0004\u0007 ?36@7EE\u00018AD\u0001D73EA@E\u0001B3DF;5G>3D\u0001FA\u0001F:7?\u0007\u00010:G3@9\u0001\"MK3@QEɜÕ 7-'\u0001$#+$+#0 ¶ȀǦʦ",
+          "page_no": 392,
+          "display_marker": "4",
+          "source_marker": "4",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11781,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00210",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "6",
+          "normalized_marker": "6",
+          "occurrence": 1,
+          "source_text": "1. <>=23 ZeQ^ >3/RHiankuangS/1 ong]UA/ < E23/where/the/original madness/and [ind/disordersS/1recommendation/and/ ong/XingxianQs/comments/are/found5/Gase/ AƑ/Vǣǀ˩ǘ ŒǤ<ǚ 25 Q^RY^W/XeYSXe^ ɟǙÅŊ 1 <?>23 ZeQ^",
+          "page_no": 393,
+          "display_marker": "6",
+          "source_marker": "6",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11782,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00211",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "7",
+          "normalized_marker": "7",
+          "occurrence": 1,
+          "source_text": "23. Of these, I discuss a case by Gu Jinshou 顧金壽 (fl. ca. 1822) in 8.4 (p. 346) and one by Wu Tang 吳瑭 (1758-1836) in 9.3 below.",
+          "page_no": 394,
+          "display_marker": "7",
+          "source_marker": "7",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11783,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00212",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-009-genderedmania",
+          "region_id": "nr-fn-ch-0061-toc-ch-009-genderedmania",
+          "marker": "8",
+          "normalized_marker": "8",
+          "occurrence": 1,
+          "source_text": "27. I cite Fang's cases as they are cited in 2XMYLA: 1572B-1573A.",
+          "page_no": 396,
+          "display_marker": "8",
+          "source_marker": "8",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00218",
+          "note_item_id": "fn-00209",
+          "current_anchor_id": "anchor-01188",
+          "marker": "5",
+          "note_page_no": 392,
+          "anchor_page_no": 393,
+          "current_anchor_marker": "5",
+          "note_excerpt": "16. In ZGZC-7: 9.",
+          "anchor_excerpt": "Juan 5, \"Diankuang\" (GongYQ: 629A). I explained the popularity of Shoushi baoyuan in 7.3, pp. 277ff. I have not found the compound \"constructive Blood\" (營血) in other writings in Gong's time, though this notion became an important concept in the medicine of Warm-factor disorders in the eighteenth century.",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0061-toc-ch-009-genderedmania:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-009-genderedmania:nr-fn-ch-0061-toc-ch-009-genderedmania:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 6600,
+    "estimated_prompt_tokens": 2186,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 1,
+    "unmatched_note_items": 7,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 2186,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

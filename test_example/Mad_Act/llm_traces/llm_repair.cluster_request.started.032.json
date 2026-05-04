@@ -1,0 +1,141 @@
+{
+  "stage": "llm_repair.cluster_request.started",
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-011-errorsandprojections:nr-fn-ch-0071-toc-ch-011-errorsandprojections:footnote",
+      "chapter_title": "11. Errors and projections",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        459,
+        463
+      ],
+      "matched_examples": [],
+      "unmatched_note_items": [
+        {
+          "row_id": 11823,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00252",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-011-errorsandprojections",
+          "region_id": "nr-fn-ch-0071-toc-ch-011-errorsandprojections",
+          "marker": "12",
+          "normalized_marker": "12",
+          "occurrence": 1,
+          "source_text": "Xhis0case0appears0in0a \\ XF memorial dated0 70 an50 > >01UP5 5 5 7B pack0 25 n0a0clear0example0of0oral0language0in0a0written0document30the0childVs0older0brother explained0that0he0scolded the0boyA¹ȎmêùÔĜ WÁʄȼȜDɷHƑɉYĲü˔",
+          "page_no": 459,
+          "display_marker": "12",
+          "source_marker": "12",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11824,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00253",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-011-errorsandprojections",
+          "region_id": "nr-fn-ch-0071-toc-ch-011-errorsandprojections",
+          "marker": "13",
+          "normalized_marker": "13",
+          "occurrence": 1,
+          "source_text": "0. uly0 > =01UP 5=5 B pack0 >25 t0took0place0in Whichengǡ defining0feature0of0Wintentional0killingX0in0the0code50 iaVs0father0clarified0that0Wafter0]icaiVs Æ countyin uangdong0province5",
+          "page_no": 460,
+          "display_marker": "13",
+          "source_marker": "13",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11825,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00254",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-011-errorsandprojections",
+          "region_id": "nr-fn-ch-0071-toc-ch-011-errorsandprojections",
+          "marker": "14",
+          "normalized_marker": "14",
+          "occurrence": 1,
+          "source_text": "3. Pauwaert0 @@@30and0 abbiani01forthcoming25 Pater0in0the0eighteenth0century30Uing0legislators imposed0more0severe0punishments0on people0who0had0killed punished^Weeseverely0than0the0same0crime0committed0against0an0unrelated0person5 senior relatives0in0a0fit0of0madness1see0Ghapter0 25 Wee0also0the =@>0caseof a0wifewho0had killed0her0husband01above3p5 2and0who was0sentencedfor Wkilling0because0of0madness3Xbut did0not have0topay0compensation0to0her0husbandVs0family because0wife0and husband0were0considered0part0of0one0family0unit5",
+          "page_no": 461,
+          "display_marker": "14",
+          "source_marker": "14",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        },
+        {
+          "row_id": 11826,
+          "doc_id": "bd05138cd773",
+          "note_item_id": "fn-00255",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-011-errorsandprojections",
+          "region_id": "nr-fn-ch-0071-toc-ch-011-errorsandprojections",
+          "marker": "15",
+          "normalized_marker": "15",
+          "occurrence": 1,
+          "source_text": "5. 50 0also0argue0in 5= that0the0mucus0explanation0of madness0had0been0widely0adopted0outside0medical0circles0by0the0eighteenth0century5 @ W[hen0an0article0has0a0different0penal0denomination0_from0the0one0specified0in0the0section0of0the0Gode0on URames0and0denominationsV`XřŪVŒȌ­ 1Ert5 BHPG]0 A 23entry B0the0passages0in0parentheses representtheWsmall0commentaryX 1ùƋ 230an0inline0commentary0that0had0been0included0into0the0Gode0in0 = =5 =7 Xhat0is30when0a0crimewa s0committed0against0a senior relative30thus0deserving0a0heavier0sentence0than0the same0crime0committed0against0an0unrelated0person5",
+          "page_no": 463,
+          "display_marker": "15",
+          "source_marker": "15",
+          "title_hint": "",
+          "created_at": 1777755996,
+          "updated_at": 1777755996
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": []
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-011-errorsandprojections:nr-fn-ch-0071-toc-ch-011-errorsandprojections:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_count": 0
+  },
+  "request_metrics": {
+    "cluster_id": "toc-ch-011-errorsandprojections:nr-fn-ch-0071-toc-ch-011-errorsandprojections:footnote",
+    "request_mode": "note_only_with_body",
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4770,
+    "estimated_prompt_tokens": 1653,
+    "soft_input_token_budget": 2048,
+    "model_max_input_tokens_thinking": 983616,
+    "model_max_input_tokens_no_think": 991808,
+    "matched_examples": 0,
+    "unmatched_note_items": 4,
+    "unmatched_anchors": 0,
+    "page_context_count": 0,
+    "image_refused": false,
+    "skipped": false,
+    "skip_reason": "",
+    "truncated": false
+  },
+  "token_accounting": {
+    "request_count": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "estimated_input_tokens": 1653,
+    "source": "local_estimate",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "usage": {}
+}

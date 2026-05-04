@@ -1,0 +1,135 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "model": {
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-003-3academicpsychiatryandth:nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth:footnote\",\n  \"chapter_title\": \"3 Academic \\\"Psychiatry\\\" and the Rise of Galenic Observation\",\n  \"page_range\": [\n    180,\n    180\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [\n    {\n      \"note_item_id\": \"fn-00482\",\n      \"anchor_id\": \"anchor-00402\",\n      \"marker\": \"57\",\n      \"note_excerpt\": \"For a reported use of a split rooster, see the account of Felix Platter, P. 176 below.\",\n      \"anchor_excerpt\": \"held at Heidelberg in 1584 with Johann Kuhn (Cuno) as respondent. $ ^{57} $ Beginning with the theological proposition that man was made in God’s image, having the use of reason, the formal quaestio asked how it was that phrenesis, or brain ...\"\n    },\n    {\n      \"note_item_id\": \"fn-00483\",\n      \"anchor_id\": \"anchor-00407\",\n      \"marker\": \"58\",\n      \"note_excerpt\": \"Disputatio de Phrenetide (Tlibingen, 1588).\",\n      \"anchor_excerpt\": \"Phrenesis was defined as inflammation of the brain with acute fever and delirium (thesis 4). After distinguishing various sorts of phrenesis, Moegling and Kuhn turned to a detailed consideration of its etiology, symptomatology, and prognosi ...\"\n    }\n  ],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00481\",\n      \"marker\": \"56\",\n      \"page_no\": 180,\n      \"source_text\": \"Theses de Phrenetide (Heidelberg, 1584).\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [\n    {\n      \"link_id\": \"link-00492\",\n      \"note_item_id\": \"fn-00483\",\n      \"current_anchor_id\": \"anchor-00407\",\n      \"marker\": \"58\",\n      \"note_page_no\": 181,\n      \"anchor_page_no\": 180,\n      \"current_anchor_marker\": \"58\",\n      \"current_anchor_synthetic\": false,\n      \"note_excerpt\": \"Disputatio de Phrenetide (Tlibingen, 1588).\",\n      \"anchor_excerpt\": \"Phrenesis was defined as inflammation of the brain with acute fever and delirium (thesis 4). After distinguishing various sorts of phrenesis, Moegling and Kuhn turned to a detailed consideration of its etiology, symptomatology, and prognosi ...\"\n    }\n  ],\n  \"chapter_body_excerpt\": \"# Academic \\\"Psychiatry\\\" and the Rise of Galenic Observation The Early Sixteenth Century STUDIES of Renaissance psychology, especially when inspired by great Renaissance poets, such as Shakespeare, or painters, such as Albrecht Dürer, have often assumed that starting with Marsiglio Ficino in fifteenth-century Florence, and continuing for almost two hundred years, intellectuals operated unquestioningly with a basic humoral psychology, which they mixed variously with the Platonic writings, Aristotle's De anima, and sometimes with Pseudo-Aristotle's Problems. Renaissance humanists and academics, we are told, all agreed in finding the roots of madness in an excess of the melancholy humor (black bile). We usually think of this as a crucial \\\"background\\\" for understanding the art and literature of the Renaissance, but as a result, the medical history of the sixteenth century flattens out. Although historians of medicine have celebrated the important innovations in anatomical studies, they have mainly agreed that sixteenth-century medicine and psychology stagnated, trapped in a stultifying humanist scientific tradition and not yet able to muster the imagination required for the medical revolution of the seventeenth century. With no scientific breakthroughs to report, historians of psychology have described the gloomy and virtually static dominance of black bile. $ ^{1} $ Dürer's canonical engraving Melencolia I, that brooding portrait of Renaissance genius (Fig. 2), has be- come for many an emblem for the whole age, reinforcing an uninformed assumption that madness in general and melancholy in particular were prominent as cultural and medical illnesses in early sixteenth-century Germany. Despite the prominence of folly as a theme in German literature and painting, however, and d ...\"\n}"
+  },
+  "request_content": {
+    "cluster": {
+      "cluster_id": "toc-ch-003-3academicpsychiatryandth:nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth:footnote",
+      "chapter_title": "3 Academic \"Psychiatry\" and the Rise of Galenic Observation",
+      "request_mode": "note_only_with_body",
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        180,
+        180
+      ],
+      "matched_examples": [
+        {
+          "link_id": "link-00491",
+          "note_item_id": "fn-00482",
+          "anchor_id": "anchor-00402",
+          "marker": "57",
+          "note_excerpt": "For a reported use of a split rooster, see the account of Felix Platter, P. 176 below.",
+          "anchor_excerpt": "held at Heidelberg in 1584 with Johann Kuhn (Cuno) as respondent. $ ^{57} $ Beginning with the theological proposition that man was made in God’s image, having the use of reason, the formal quaestio asked how it was that phrenesis, or brain fever, could push man so far from reason that he became like the wild beasts. Although this opening statement seemed to invite theological commentary on the human nature of the mad, the dissertation quickly entered calmer medical waters by asserting that the cause and cure of such metamorphoses were matters for the physician. Revealing a firm grasp of philosophical complexities, however, Moegling and Kuhn noted that, strictly speaking, the human mind was not liable to death or disease; but so long as it was trapped in this prison of a body (in hoc ergastulo), it had to abandon its integrity and attach itself to the inferior faculties of the soul and use the ministry of the interior and exterior senses. Being in this way a composite construction, it became capable of suffering (thesis 1). Here then was a disputation in which major theological and philosophical issues did break the surface, but only in such a way as to justify the medical concern with physical things."
+        },
+        {
+          "link_id": "link-00492",
+          "note_item_id": "fn-00483",
+          "anchor_id": "anchor-00407",
+          "marker": "58",
+          "note_excerpt": "Disputatio de Phrenetide (Tlibingen, 1588).",
+          "anchor_excerpt": "Phrenesis was defined as inflammation of the brain with acute fever and delirium (thesis 4). After distinguishing various sorts of phrenesis, Moegling and Kuhn turned to a detailed consideration of its etiology, symptomatology, and prognosis. Since cure was exceedingly difficult, they noted that the prudent physician would rather avoid the disease altogether (thesis 38). Still, a cure could be effected if the matter of the disease (i.e., the corrupt phlegm) were destroyed or if the source of the corruption itself were corrected. All of these procedures required the use of purges “with a skilled moderation” (docta moderatione) (theses 38, 43, 46), or diet, or venesection, or baths (theses 46, 47, 52, 54, 55, 57). Only when the crisis was past and the disease was in retreat did Moegling and Kuhn concede the utility of applying to a feverish head such ancient remedies as split chickens, capons, piglets, and dogs (all alive but with their spines cut), or the fresh lung of a ram, or warm mother’s milk (thesis 60). It seems unlikely that Moegling actually held these steps to be effective, and it is noteworthy that he relegated this advice to the stage when the patient was already on the mend. $ ^{58} $ Ultimately, diet and soothing surroundings were of prime importance in helping the patient. Friends, too, could help to calm and flatter him. But if these measures failed to cool the rage, the patient might need chains to confine him. Even so, it was not for the physician to take this last step but for the sick man himself and the attending officials “to make sure that all is done in right order” (thesis 64). This last statement seems to reveal an awareness"
+        }
+      ],
+      "unmatched_note_items": [
+        {
+          "row_id": 50815,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00481",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-003-3academicpsychiatryandth",
+          "region_id": "nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth",
+          "marker": "56",
+          "normalized_marker": "56",
+          "occurrence": 1,
+          "source_text": "Theses de Phrenetide (Heidelberg, 1584).",
+          "page_no": 180,
+          "display_marker": "56",
+          "source_marker": "56",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        }
+      ],
+      "unmatched_anchors": [],
+      "rebind_candidates": [
+        {
+          "link_id": "link-00492",
+          "note_item_id": "fn-00483",
+          "current_anchor_id": "anchor-00407",
+          "marker": "58",
+          "note_page_no": 181,
+          "anchor_page_no": 180,
+          "current_anchor_marker": "58",
+          "note_excerpt": "Disputatio de Phrenetide (Tlibingen, 1588).",
+          "anchor_excerpt": "Phrenesis was defined as inflammation of the brain with acute fever and delirium (thesis 4). After distinguishing various sorts of phrenesis, Moegling and Kuhn turned to a detailed consideration of its etiology, symptomatology, and prognosis. Since cure was exceedingly difficult, they noted that the prudent physician would rather avoid the disease altogether (thesis 38). Still, a cure could be effected if the matter of the disease (i.e., the corrupt phlegm) were destroyed or if the source of the corruption itself were corrected. All of these procedures required the use of purges “with a skilled moderation” (docta moderatione) (theses 38, 43, 46), or diet, or venesection, or baths (theses 46, 47, 52, 54, 55, 57). Only when the crisis was past and the disease was in retreat did Moegling and Kuhn concede the utility of applying to a feverish head such ancient remedies as split chickens, capons, piglets, and dogs (all alive but with their spines cut), or the fresh lung of a ram, or warm mother’s milk (thesis 60). It seems unlikely that Moegling actually held these steps to be effective, and it is noteworthy that he relegated this advice to the stage when the patient was already on the mend. $ ^{58} $ Ultimately, diet and soothing surroundings were of prime importance in helping the patient. Friends, too, could help to calm and flatter him. But if these measures failed to cool the rage, the patient might need chains to confine him. Even so, it was not for the physician to take this last step but for the sick man himself and the attending officials “to make sure that all is done in right order” (thesis 64). This last statement seems to reveal an awareness",
+          "current_anchor_synthetic": false
+        }
+      ]
+    },
+    "page_contexts": []
+  },
+  "request_context_summary": {
+    "cluster_id": "toc-ch-003-3academicpsychiatryandth:nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
+    "image_refused": false
+  },
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1536,
+    "output_tokens": 100,
+    "total_tokens": 1636,
+    "estimated_input_tokens": 1768,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"synthesize_anchor\",\n        \"note_item_id\": \"fn-00481\",\n        \"anchor_phrase\": \"held at Heidelberg in 1584 with Johann Kuhn (Cuno) as respondent\",\n        \"confidence\": 0.95,\n        \"reason\": \"截图显示脚注56位于脚注57之前，锚点短语唯一且无结构化记录\"\n    }\n]\n```",
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "note_item_id": "fn-00481",
+      "anchor_id": "",
+      "anchor_phrase": "held at Heidelberg in 1584 with Johann Kuhn (Cuno) as respondent",
+      "marker": "",
+      "note_text": "",
+      "confidence": 0.95,
+      "reason": "截图显示脚注56位于脚注57之前，锚点短语唯一且无结构化记录"
+    }
+  ],
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "note_item_id": "fn-00481",
+        "anchor_id": "",
+        "anchor_phrase": "held at Heidelberg in 1584 with Johann Kuhn (Cuno) as respondent",
+        "marker": "",
+        "note_text": "",
+        "confidence": 0.95,
+        "reason": "截图显示脚注56位于脚注57之前，锚点短语唯一且无结构化记录"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 1536,
+    "completion_tokens": 100,
+    "total_tokens": 1636,
+    "request_count": 1
+  },
+  "timing": {
+    "duration_ms": 2131
+  }
+}

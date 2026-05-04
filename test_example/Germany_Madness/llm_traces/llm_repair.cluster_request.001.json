@@ -2,23 +2,24 @@
   "stage": "llm_repair.cluster_request",
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "model": {
-    "provider": "qwen",
-    "model_id": "qwen3.6-plus",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "provider": "mimo_token_plan",
+    "model_id": "mimo-v2.5",
+    "base_url": "https://token-plan-sgp.xiaomimimo.com/v1"
   },
   "request_prompt": {
-    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
-    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：needs_review。\n若截图已经能明确判断坏掉的数字或同页注释，请直接输出可自动落地的动作，不要退回 needs_review。\n\n{\n  \"cluster_id\": \"toc-ch-002-tworeformersandaworldgon:nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon:endnote\",\n  \"chapter_title\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n  \"page_range\": [\n    140,\n    158\n  ],\n  \"note_system\": \"endnote\",\n  \"request_mode\": \"note_only\",\n  \"allowed_actions\": [\n    \"needs_review\"\n  ],\n  \"page_contexts\": [\n    {\n      \"page_no\": 140,\n      \"ocr_excerpt\": \"mus could in the Praise of Folly by blasting the infatuations of his age, not as mere follies, but as forms of full-fledged madness. Although still human, the sidereally drunk were so far from truth, so persuaded of their own wisdom, and inevitably so popular, that they were dangerous. The highest wisdom of man in this tripartite scheme resided in his immortal soul, the image of the divine. It was not, strictly speaking, subject to disease or corruption, but sinful men often forgot their highest wisdom and became little better than pigs, unworthy of life. $ ^{180} $ The devil was able to take control of the soul in such cases, producing the madness and states of possession cured by Christ. Like Luther, Paracelsus thought that the devil could take control in two distinct ways, effecting either a total loss of reason and self-control (the classic image of the demoniac foaming at the mouth and thrashing on the ground), or an even more dangerous partial takeover in which the demon-possessed person appeared rational and even saintly but was now full of devilish teachings. Thus the devil controlled greedy merchants, liars, and deceivers more effectively than if he took charge of their bo ...\"\n    },\n    {\n      \"page_no\": 141,\n      \"ocr_excerpt\": \"hot disease, Paracelsus conceded, but it was not dependent on an imagined choleric complexion. Similarly, Paracelsus agreed with the Galenists that hydrophobia was a moist disease, but he contended it was not particularly hot or cold. $ ^{184} $ Treatment of such physical ailments had to go beyond the Galenic treatment of symptoms. Attacking the cause of the disease by letting blood was far more effective than cooling the maniac with herbs or ice, Paracelsus thought. $ ^{185} $ Although the Galenic idea of a melancholy disposition was gaining in medical popularity as he wrote, he thought it was nonsense, “for the Light of Nature does not even know what melancholy is.” Modern scholars have sometimes highlighted such passages as premonitions of a more scientific and empirical medicine, but in the same breath, Paracelsus could turn to the truths of astrology. Thus if one’s diagnosis found the patient “saturnine or lunatic in his attitudes, that would be well said,” since mores were indeed formed by the Star (Gestirn). $ ^{186} $ Considered in this way, diseases were separate entities with a form and anatomy that could be studied by virtuous physicians ready to trust the Light of Natur ...\"\n    },\n    {\n      \"page_no\": 142,\n      \"ocr_excerpt\": \"borum invisibilium. $ ^{189} $ Admitting that judging by the visible light of nature alone, the idea of a person being possessed by demons was incredible, Paracelsus appealed to what he here called the invisible reason (a kind of natural intuition) to grasp a whole series of diseases now labeled Geist krankheiten (diseases of the spirit). $ ^{190} $ As noted, Luther's thinking in places adumbrates modern ideas of mental illness, as opposed to the belief that madness is a somatic disorder. Such foreshadowings are even more evident in Paracelsus's De causis morborum invisibilium. As he now imagined matters, this disease complex embraced ailments of spirit (leibliche Vernunft) and of the soul, and consequently only nonmaterial remedies came under consideration. To that extent, the treatise is more systematic or coherent, but also more limited, than Paracelsus's earlier treatise Von den krankheiten die der vernunft berauben (\\\"Diseases That Rob Men of Reason\\\"). Although he announced a program for dealing in five books with diseases of faith, with impressions of the hidden heaven, with diseases of imagination, with heresy, and with the secret forces that attack corporeal reason, the trea ...\"\n    },\n    {\n      \"page_no\": 143,\n      \"ocr_excerpt\": \"down to “wooden gods.” $ ^{192} $ The devil used such perversions to his own advantage, strengthening belief in the divinity of stars or saints. The chief result of such false beliefs was the spread of sects. Lashing out at the Anabaptists, for example, Paracelsus claimed that they became so attached to particular verses of the Bible that they went mad. $ ^{193} $ “Abusing their mad faith,” he asserted, the Anabaptists baptized each other two and three times, saw visions, and eagerly went to their deaths in a way that God had never ordered. “Those who are possessed of the [St. Vitus’] dance have so completely lost their reason that they are reduced to nature, like the Anabaptists, and from their enthusiasm they (both) allow themselves to be burned.” $ ^{194} $ In one of his writings on the blessed life, entitled De religione perpetua, Paracelsus suggested that music was a potent weapon in the fight against such morbid heresy. Music not only lifted the depressed spirits of melancholy, withdrawn, and despairing persons, as we have already seen; it could also “drive away the spirit ‘Afernoch,’” from whom the Anabaptists and similar sects of melancholics arose—those who thought that th ...\"\n    },\n    {\n      \"page_no\": 144,\n      \"ocr_excerpt\": \"and profoundly biblical foundation of much of Paracelsus's thinking on mental illness. In the last book of this treatise, Paracelsus returned to the subject of heresy, examining those with what he called a morbidly rigid interpretation of Scripture. The devil was always ready to encourage superstition and to foster belief in ceremonies. Although ringing bells, for example, was harmless or even good in itself, and although the pope and his priests enjoyed ceremonies, God wanted the heart. That was why the only effective action against demonic possession was prayer and fasting (Matt. 17:21), a theme to which we shall return. $ ^{199} $ In this treatise, we observe the metaphor of disease extended to heretical beliefs and sinful desires. In affecting the means of salvation, it appears that Paracelsus was now conceding, the highest realm of the soul could indeed be corrupted, or at least subjected to a dangerous forgetfulness. Yet in general one can say that the implicit tripartite view of man, with its animal, as-tral, and divine reason or understanding, gave Paracelsus conceptual room in which to describe mental and spiritual illnesses without being constrained by his own framework t ...\"\n    },\n    {\n      \"page_no\": 145,\n      \"ocr_excerpt\": \"vesani) again and even touched on cases that Paracelsus did not regard strictly as lunacy (Narren and Tauben). Repeatedly, this dualist framework imposed a real difference. Since man’s human reason was actually the image of God, it “does not go crazy, and is not subject of disease.” $ ^{202} $ Madness was to be found instead among people who either lived according to their natural animal reason or possessed an animal reason that was itself diseased. Paracelsus hastened to point out, for example, that dogs have a reason of their own that leads them naturally to bark and bite when provoked; but when mad, a dog loses even this lower-level “canine reason” and goes about biting indiscriminately. This metaphor clearly isolates what Paracelsus now meant by lunatics: “those who go mad in their bestial reason.” $ ^{203} $ Indeed, the difference between folly and madness was that fools (Narren, the retarded) were born into an animal spirit and “live like reasoning bestial cattle,” while the mad “live in a crazed bestial spirit; thus fools go mad with reason, what they do is bestial shrewdness. . . . The mad [Tauben, from toben], however, have that [bestial] reason too, but deranged in its na ...\"\n    },\n    {\n      \"page_no\": 146,\n      \"ocr_excerpt\": \"is. The impressiones, influences, constellations, etc., or whatever they may be called, are all applied to the animal and not to the man. If man lives as befits a man, they are all without effect; if he lives as a beast, however, he is affected like a beast. $ ^{208} $ Thus fools were led about by a star, and the reasonable or clever (witzig) were liable to go mad with their excessive reason, falling into rages like mad dogs during the dog days. $ ^{209} $ Physicians, therefore, had to be learned in astronomy in order to understand disease; but this was no warrant for dabbling in fortune-telling, auxiliary, and other heathen arts, $ ^{210} $ for these bestial sciences should be deferential and eager to learn from their superior, the image of God. Every one is taught by God, everyone enlightened who prays and requests in the spirit and not from his animal [nature] from whose spirit one gains nothing. Thus man remains pure and clean, he cannot go mad, cannot go crazy, for he has no cares, no fears, regrets nothing, and is harmed by no one. $ ^{211} $ With these words Paracelsus here betrayed a basically Stoic view of mental health as a state of ataraxia, the freedom from passion, aff ...\"\n    },\n    {\n      \"page_no\": 147,\n      \"ocr_excerpt\": \"Pursuing this theme with relentless logic, Paracelsus pointed out that in contrast to Jesus’ language regarding unregenerate men, the Lord had used only similes or analogies for his true followers, saying in Matt. 10:16, “I send you forth like sheep among wolves” (my emphasis). Christians were truly a new creation, different from (and not just ethically superior to) the blind, sinful, cursed race of reprobates who had not “set aside the bestial,” and who therefore drowned in their bestial spirit, becoming “senseless, mad, foolish, deranged.” Madness has here become a moral-substantial category to describe the unregenerate. $ ^{215} $ This was a theme to which Paracelsus often returned. In an unpublished work, “On the Secrets of the Secrets of Theology,” for example, he glossed Matt. 23:33 by asserting that: Your names are serpents and vipers, because the new birth of Christians (John 3:3–7) transforms the [true] Christian, who is or will be born of God, like unto the angels. But you are not and will not be of that birth, but of a contrary one. You will become snakes and adders, just as the devil's angels did, and as happened to Leviathan in Paradise. $ ^{216} $ Addressing the clerg ...\"\n    }\n  ],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00331\",\n      \"marker\": \"180\",\n      \"page_no\": 140,\n      \"source_text\": \"Ibid., p. 306.\"\n    },\n    {\n      \"note_item_id\": \"fn-00332\",\n      \"marker\": \"181\",\n      \"page_no\": 140,\n      \"source_text\": \"Ibid., p. 438.\"\n    },\n    {\n      \"note_item_id\": \"fn-00333\",\n      \"marker\": \"182\",\n      \"page_no\": 140,\n      \"source_text\": \"Opus paramirum, in SW, pt.\"\n    },\n    {\n      \"note_item_id\": \"fn-00335\",\n      \"marker\": \"183\",\n      \"page_no\": 140,\n      \"source_text\": \"In the Opus paragranum of 1530, Paracelsus remarked: “Ist alles nur Wenen bei\"\n    },\n    {\n      \"note_item_id\": \"fn-00336\",\n      \"marker\": \"184\",\n      \"page_no\": 141,\n      \"source_text\": \"Opus paramirum, in SW, pt.\"\n    },\n    {\n      \"note_item_id\": \"fn-00337\",\n      \"marker\": \"185\",\n      \"page_no\": 141,\n      \"source_text\": \"Ibid., pp. 59—60. Five years earlier, Paracelsus had recommended herbal remedies himself.\"\n    },\n    {\n      \"note_item_id\": \"fn-00338\",\n      \"marker\": \"186\",\n      \"page_no\": 141,\n      \"source_text\": \"Ibid., p. 60.\"\n    },\n    {\n      \"note_item_id\": \"fn-00339\",\n      \"marker\": \"187\",\n      \"page_no\": 141,\n      \"source_text\": \"Ibid., p. 64.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": []\n}"
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编）、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"cluster_id\": \"toc-ch-002-2tworeformersandaworldgo:nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo:footnote\",\n  \"chapter_title\": \"2 Two Reformers and a World Gone Mad: Luther and Paracelsus\",\n  \"page_range\": [\n    140,\n    158\n  ],\n  \"note_system\": \"footnote\",\n  \"request_mode\": \"note_only_with_body\",\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"page_contexts\": [],\n  \"matched_examples\": [],\n  \"unmatched_note_items\": [\n    {\n      \"note_item_id\": \"fn-00331\",\n      \"marker\": \"171\",\n      \"page_no\": 140,\n      \"source_text\": \"Ibid., p. 306.\"\n    },\n    {\n      \"note_item_id\": \"fn-00332\",\n      \"marker\": \"172\",\n      \"page_no\": 140,\n      \"source_text\": \"Ibid., p. 438.\"\n    },\n    {\n      \"note_item_id\": \"fn-00333\",\n      \"marker\": \"173\",\n      \"page_no\": 140,\n      \"source_text\": \"Opus paramirum, in SW, pt.\"\n    },\n    {\n      \"note_item_id\": \"fn-00334\",\n      \"marker\": \"174\",\n      \"page_no\": 140,\n      \"source_text\": \"9: 41.\"\n    },\n    {\n      \"note_item_id\": \"fn-00335\",\n      \"marker\": \"175\",\n      \"page_no\": 140,\n      \"source_text\": \"In the Opus paragranum of 1530, Paracelsus remarked: “Ist alles nur Wenen bei\"\n    },\n    {\n      \"note_item_id\": \"fn-00336\",\n      \"marker\": \"176\",\n      \"page_no\": 141,\n      \"source_text\": \"Opus paramirum, in SW, pt.\"\n    },\n    {\n      \"note_item_id\": \"fn-00337\",\n      \"marker\": \"177\",\n      \"page_no\": 141,\n      \"source_text\": \"Ibid., pp. 59—60. Five years earlier, Paracelsus had recommended herbal remedies himself.\"\n    },\n    {\n      \"note_item_id\": \"fn-00338\",\n      \"marker\": \"178\",\n      \"page_no\": 141,\n      \"source_text\": \"Ibid., p. 60.\"\n    }\n  ],\n  \"unmatched_anchors\": [],\n  \"rebind_candidates\": [],\n  \"chapter_body_excerpt\": \"Two Reformers and a World Gone Mad: Luther and Paracelsus ONE of the reasons the experience of madness in the sixteenth century seems so strange to us is that we have mainly lost the appropriate terms, images, and metaphors with which early modern Europeans looked at and understood the insane. To recover these ideas is the major task of the next few chapters, which deal with religious, medical, and legal attitudes toward mental disorder. The problems highlighted in chapter 1 make it clear that getting at the history of madness requires a detailed knowledge of a spiritual world in which the devil was as much a reality as death. When we voyage to the sixteenth century without the conceptual comforts of the twentieth, the first differences we are likely to notice are physical. Life was then rougher; hunger, disease and death were closer, transportation more arduous. Because roads were often just rutted paths, even noble ladies rode on horseback rather than in carriages; and ordinary people walked everywhere. The dark of night was not lit up by street lights. The cold of winter was seldom effectively shut out. Smells of rotting manure permeated the bourgeois courtyards of even large towns, while even the finest inns provided only chamber pots for their guests, who slept, often naked, sweaty, and louse-infested, several to a bed. $ ^{1} $ Spiritually, the age was just as harsh. Traditional and unorthodox think- ers alike agreed that the devil was loose in the world, that Christ's return was, although strictly unpredictable, as imminent as the reign of Antichrist was palpable. In the decrepit waning years of the world, sin was raging as never before. In short, the world was mad. To prove the point, one could pile up anecdotes and quotations from the length and breadth of the ...\"\n}"
   },
   "request_content": {
     "cluster": {
-      "cluster_id": "toc-ch-002-tworeformersandaworldgon:nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon:endnote",
-      "chapter_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
-      "request_mode": "note_only",
+      "cluster_id": "toc-ch-002-2tworeformersandaworldgo:nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo:footnote",
+      "chapter_title": "2 Two Reformers and a World Gone Mad: Luther and Paracelsus",
+      "request_mode": "note_only_with_body",
       "allowed_actions": [
+        "synthesize_anchor",
         "needs_review"
       ],
-      "note_system": "endnote",
+      "note_system": "footnote",
       "page_range": [
         140,
         158
@@ -26,227 +27,172 @@
       "matched_examples": [],
       "unmatched_note_items": [
         {
-          "row_id": 338,
+          "row_id": 50666,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00331",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "180",
-          "normalized_marker": "180",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "171",
+          "normalized_marker": "171",
           "occurrence": 1,
           "source_text": "Ibid., p. 306.",
           "page_no": 140,
-          "display_marker": "180",
-          "source_marker": "180",
+          "display_marker": "171",
+          "source_marker": "171",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 339,
+          "row_id": 50667,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00332",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "181",
-          "normalized_marker": "181",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "172",
+          "normalized_marker": "172",
           "occurrence": 1,
           "source_text": "Ibid., p. 438.",
           "page_no": 140,
-          "display_marker": "181",
-          "source_marker": "181",
+          "display_marker": "172",
+          "source_marker": "172",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 340,
+          "row_id": 50668,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00333",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "182",
-          "normalized_marker": "182",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "173",
+          "normalized_marker": "173",
           "occurrence": 1,
           "source_text": "Opus paramirum, in SW, pt.",
           "page_no": 140,
-          "display_marker": "182",
-          "source_marker": "182",
+          "display_marker": "173",
+          "source_marker": "173",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 342,
+          "row_id": 50669,
+          "doc_id": "67356d1f7d9a",
+          "note_item_id": "fn-00334",
+          "note_kind": "footnote",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "174",
+          "normalized_marker": "174",
+          "occurrence": 1,
+          "source_text": "9: 41.",
+          "page_no": 140,
+          "display_marker": "174",
+          "source_marker": "174",
+          "title_hint": "",
+          "created_at": 1777754576,
+          "updated_at": 1777754576
+        },
+        {
+          "row_id": 50670,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00335",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "183",
-          "normalized_marker": "183",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "175",
+          "normalized_marker": "175",
           "occurrence": 1,
           "source_text": "In the Opus paragranum of 1530, Paracelsus remarked: “Ist alles nur Wenen bei",
           "page_no": 140,
-          "display_marker": "183",
-          "source_marker": "183",
+          "display_marker": "175",
+          "source_marker": "175",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 343,
+          "row_id": 50671,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00336",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "184",
-          "normalized_marker": "184",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "176",
+          "normalized_marker": "176",
           "occurrence": 1,
           "source_text": "Opus paramirum, in SW, pt.",
           "page_no": 141,
-          "display_marker": "184",
-          "source_marker": "184",
+          "display_marker": "176",
+          "source_marker": "176",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 344,
+          "row_id": 50672,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00337",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "185",
-          "normalized_marker": "185",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "177",
+          "normalized_marker": "177",
           "occurrence": 1,
           "source_text": "Ibid., pp. 59—60. Five years earlier, Paracelsus had recommended herbal remedies himself.",
           "page_no": 141,
-          "display_marker": "185",
-          "source_marker": "185",
+          "display_marker": "177",
+          "source_marker": "177",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         },
         {
-          "row_id": 345,
+          "row_id": 50673,
           "doc_id": "67356d1f7d9a",
           "note_item_id": "fn-00338",
           "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "186",
-          "normalized_marker": "186",
+          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+          "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+          "marker": "178",
+          "normalized_marker": "178",
           "occurrence": 1,
           "source_text": "Ibid., p. 60.",
           "page_no": 141,
-          "display_marker": "186",
-          "source_marker": "186",
+          "display_marker": "178",
+          "source_marker": "178",
           "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
-        },
-        {
-          "row_id": 346,
-          "doc_id": "67356d1f7d9a",
-          "note_item_id": "fn-00339",
-          "note_kind": "footnote",
-          "chapter_id": "toc-ch-002-tworeformersandaworldgon",
-          "region_id": "nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon",
-          "marker": "187",
-          "normalized_marker": "187",
-          "occurrence": 1,
-          "source_text": "Ibid., p. 64.",
-          "page_no": 141,
-          "display_marker": "187",
-          "source_marker": "187",
-          "title_hint": "",
-          "created_at": 1777565678,
-          "updated_at": 1777565678
+          "created_at": 1777754576,
+          "updated_at": 1777754576
         }
       ],
       "unmatched_anchors": [],
       "rebind_candidates": []
     },
-    "page_contexts": [
-      {
-        "page_no": 140,
-        "file_idx": 139,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "mus could in the Praise of Folly by blasting the infatuations of his age, not as mere follies, but as forms of full-fledged madness. Although still human, the sidereally drunk were so far from truth, so persuaded of their own wisdom, and inevitably so popular, that they were dangerous. The highest wisdom of man in this tripartite scheme resided in his immortal soul, the image of the divine. It was not, strictly speaking, subject to disease or corruption, but sinful men often forgot their highest wisdom and became little better than pigs, unworthy of life. $ ^{180} $ The devil was able to take control of the soul in such cases, producing the madness and states of possession cured by Christ. Like Luther, Paracelsus thought that the devil could take control in two distinct ways, effecting either a total loss of reason and self-control (the classic image of the demoniac foaming at the mouth and thrashing on the ground), or an even more dangerous partial takeover in which the demon-possessed person appeared rational and even saintly but was now full of devilish teachings. Thus the devil controlled greedy merchants, liars, and deceivers more effectively than if he took charge of their bodies and caused them to be thrown into chains. \"Only those whom he cannot use at all does he drive on to [full] possession, rage, and madness.\" $ ^{181} $ Thus at the highest level Paracelsus accorded ...",
-        "byte_size": 8377165,
-        "sha256": "cf36674aadc8d4adc4f7d1974d889b275efc3a8afe36ed63479b77a3c095d0cc"
-      },
-      {
-        "page_no": 141,
-        "file_idx": 140,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "hot disease, Paracelsus conceded, but it was not dependent on an imagined choleric complexion. Similarly, Paracelsus agreed with the Galenists that hydrophobia was a moist disease, but he contended it was not particularly hot or cold. $ ^{184} $ Treatment of such physical ailments had to go beyond the Galenic treatment of symptoms. Attacking the cause of the disease by letting blood was far more effective than cooling the maniac with herbs or ice, Paracelsus thought. $ ^{185} $ Although the Galenic idea of a melancholy disposition was gaining in medical popularity as he wrote, he thought it was nonsense, “for the Light of Nature does not even know what melancholy is.” Modern scholars have sometimes highlighted such passages as premonitions of a more scientific and empirical medicine, but in the same breath, Paracelsus could turn to the truths of astrology. Thus if one’s diagnosis found the patient “saturnine or lunatic in his attitudes, that would be well said,” since mores were indeed formed by the Star (Gestirn). $ ^{186} $ Considered in this way, diseases were separate entities with a form and anatomy that could be studied by virtuous physicians ready to trust the Light of Nature. $ ^{187} $ Well beyond the reach of reason and the stars, however, lay the realm of divine diseases, like leprosy, for which God has provided divine remedies (i.e., the apostles). We find in this t ...",
-        "byte_size": 8967216,
-        "sha256": "ac15ecc48b562bd4e296f5f6d5c9eeeba4738b0861a58d7dee33cc7673897796"
-      },
-      {
-        "page_no": 142,
-        "file_idx": 141,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "borum invisibilium. $ ^{189} $ Admitting that judging by the visible light of nature alone, the idea of a person being possessed by demons was incredible, Paracelsus appealed to what he here called the invisible reason (a kind of natural intuition) to grasp a whole series of diseases now labeled Geist krankheiten (diseases of the spirit). $ ^{190} $ As noted, Luther's thinking in places adumbrates modern ideas of mental illness, as opposed to the belief that madness is a somatic disorder. Such foreshadowings are even more evident in Paracelsus's De causis morborum invisibilium. As he now imagined matters, this disease complex embraced ailments of spirit (leibliche Vernunft) and of the soul, and consequently only nonmaterial remedies came under consideration. To that extent, the treatise is more systematic or coherent, but also more limited, than Paracelsus's earlier treatise Von den krankheiten die der vernunft berauben (\"Diseases That Rob Men of Reason\"). Although he announced a program for dealing in five books with diseases of faith, with impressions of the hidden heaven, with diseases of imagination, with heresy, and with the secret forces that attack corporeal reason, the treatise as we have it has only four books, covering four of these subjects, omitting secret heavenly impressions. Just as Von den krankheiten die der vernunft berauben moves easily back and forth across ...",
-        "byte_size": 8733271,
-        "sha256": "1daef8d2a82216285b4bb8948bd8290cba416b3bb9bb9e9a23dffc769f79309e"
-      },
-      {
-        "page_no": 143,
-        "file_idx": 142,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "down to “wooden gods.” $ ^{192} $ The devil used such perversions to his own advantage, strengthening belief in the divinity of stars or saints. The chief result of such false beliefs was the spread of sects. Lashing out at the Anabaptists, for example, Paracelsus claimed that they became so attached to particular verses of the Bible that they went mad. $ ^{193} $ “Abusing their mad faith,” he asserted, the Anabaptists baptized each other two and three times, saw visions, and eagerly went to their deaths in a way that God had never ordered. “Those who are possessed of the [St. Vitus’] dance have so completely lost their reason that they are reduced to nature, like the Anabaptists, and from their enthusiasm they (both) allow themselves to be burned.” $ ^{194} $ In one of his writings on the blessed life, entitled De religione perpetua, Paracelsus suggested that music was a potent weapon in the fight against such morbid heresy. Music not only lifted the depressed spirits of melancholy, withdrawn, and despairing persons, as we have already seen; it could also “drive away the spirit ‘Afernoch,’” from whom the Anabaptists and similar sects of melancholics arose—those who thought that they had seen heaven and God. For Paracelsus, these were all diseases of the brain and of reason. Just as herbs grew in a garden and could drive out particular diseases, so music was an “herb garden for ...",
-        "byte_size": 9480465,
-        "sha256": "b87b0bec54ef7d26b0006d20a12e7a1230b9eade6ddcbcec53c6ddbcce3e0a8f"
-      },
-      {
-        "page_no": 144,
-        "file_idx": 143,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "and profoundly biblical foundation of much of Paracelsus's thinking on mental illness. In the last book of this treatise, Paracelsus returned to the subject of heresy, examining those with what he called a morbidly rigid interpretation of Scripture. The devil was always ready to encourage superstition and to foster belief in ceremonies. Although ringing bells, for example, was harmless or even good in itself, and although the pope and his priests enjoyed ceremonies, God wanted the heart. That was why the only effective action against demonic possession was prayer and fasting (Matt. 17:21), a theme to which we shall return. $ ^{199} $ In this treatise, we observe the metaphor of disease extended to heretical beliefs and sinful desires. In affecting the means of salvation, it appears that Paracelsus was now conceding, the highest realm of the soul could indeed be corrupted, or at least subjected to a dangerous forgetfulness. Yet in general one can say that the implicit tripartite view of man, with its animal, as-tral, and divine reason or understanding, gave Paracelsus conceptual room in which to describe mental and spiritual illnesses without being constrained by his own framework to regard them all as life-threatening attacks on divine salvation. This extra conceptual space becomes more evident by comparison with a dualist scheme, which did not give Paracelsus the same conceptu ...",
-        "byte_size": 8002141,
-        "sha256": "84f70e883cf74f236f3ab6d29754594fa41a927904569564b40dbf6c4b70016d"
-      },
-      {
-        "page_no": 145,
-        "file_idx": 144,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "vesani) again and even touched on cases that Paracelsus did not regard strictly as lunacy (Narren and Tauben). Repeatedly, this dualist framework imposed a real difference. Since man’s human reason was actually the image of God, it “does not go crazy, and is not subject of disease.” $ ^{202} $ Madness was to be found instead among people who either lived according to their natural animal reason or possessed an animal reason that was itself diseased. Paracelsus hastened to point out, for example, that dogs have a reason of their own that leads them naturally to bark and bite when provoked; but when mad, a dog loses even this lower-level “canine reason” and goes about biting indiscriminately. This metaphor clearly isolates what Paracelsus now meant by lunatics: “those who go mad in their bestial reason.” $ ^{203} $ Indeed, the difference between folly and madness was that fools (Narren, the retarded) were born into an animal spirit and “live like reasoning bestial cattle,” while the mad “live in a crazed bestial spirit; thus fools go mad with reason, what they do is bestial shrewdness. . . . The mad [Tauben, from toben], however, have that [bestial] reason too, but deranged in its nature.” $ ^{204} $ Although man had two natures, he was responsible for holding his animal nature in check. When successful in setting aside or controlling his bovine, lupine (wolflike), porcine and ot ...",
-        "byte_size": 7853545,
-        "sha256": "ca4ca448d55432b2608979dbb8bf805c09efcefae3b8aafd0efc7aa915bf13ea"
-      },
-      {
-        "page_no": 146,
-        "file_idx": 145,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "is. The impressiones, influences, constellations, etc., or whatever they may be called, are all applied to the animal and not to the man. If man lives as befits a man, they are all without effect; if he lives as a beast, however, he is affected like a beast. $ ^{208} $ Thus fools were led about by a star, and the reasonable or clever (witzig) were liable to go mad with their excessive reason, falling into rages like mad dogs during the dog days. $ ^{209} $ Physicians, therefore, had to be learned in astronomy in order to understand disease; but this was no warrant for dabbling in fortune-telling, auxiliary, and other heathen arts, $ ^{210} $ for these bestial sciences should be deferential and eager to learn from their superior, the image of God. Every one is taught by God, everyone enlightened who prays and requests in the spirit and not from his animal [nature] from whose spirit one gains nothing. Thus man remains pure and clean, he cannot go mad, cannot go crazy, for he has no cares, no fears, regrets nothing, and is harmed by no one. $ ^{211} $ With these words Paracelsus here betrayed a basically Stoic view of mental health as a state of ataraxia, the freedom from passion, affection, and disturbance. Unfortunately, in Paracelsus's view, the rebellious animal spirit of man was full of cares, fears, and regrets and if uncontrolled he easily \"became mad, silly, senseless, foo ...",
-        "byte_size": 7179523,
-        "sha256": "fc0e2b754477c73d50b1ccb6c2184bee10885f383e49676d345bd5d0170a958b"
-      },
-      {
-        "page_no": 147,
-        "file_idx": 146,
-        "source_pdf_path": "/Users/hao/OCRandTranslation/local_data/user_data/data/documents/67356d1f7d9a/source.pdf",
-        "ocr_excerpt": "Pursuing this theme with relentless logic, Paracelsus pointed out that in contrast to Jesus’ language regarding unregenerate men, the Lord had used only similes or analogies for his true followers, saying in Matt. 10:16, “I send you forth like sheep among wolves” (my emphasis). Christians were truly a new creation, different from (and not just ethically superior to) the blind, sinful, cursed race of reprobates who had not “set aside the bestial,” and who therefore drowned in their bestial spirit, becoming “senseless, mad, foolish, deranged.” Madness has here become a moral-substantial category to describe the unregenerate. $ ^{215} $ This was a theme to which Paracelsus often returned. In an unpublished work, “On the Secrets of the Secrets of Theology,” for example, he glossed Matt. 23:33 by asserting that: Your names are serpents and vipers, because the new birth of Christians (John 3:3–7) transforms the [true] Christian, who is or will be born of God, like unto the angels. But you are not and will not be of that birth, but of a contrary one. You will become snakes and adders, just as the devil's angels did, and as happened to Leviathan in Paradise. $ ^{216} $ Addressing the clergy, Paracelsus applied Matt. 3:7 again, saying, \"You are an adulterous lot, adders and proud vipers, a race of serpents. Man is not made from animals, but men become snakes and basilisks, not sent from ...",
-        "byte_size": 9367202,
-        "sha256": "1b585f221c3661732e5614a4ad588b6e13b736d390c666103fddf7b3c9966e35"
-      }
-    ]
+    "page_contexts": []
   },
   "request_context_summary": {
-    "cluster_id": "toc-ch-002-tworeformersandaworldgon:nr-fn-ch-0011-toc-ch-002-tworeformersandaworldgon:endnote",
-    "request_mode": "note_only",
-    "page_context_count": 8,
+    "cluster_id": "toc-ch-002-2tworeformersandaworldgo:nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo:footnote",
+    "request_mode": "note_only_with_body",
+    "page_context_count": 0,
     "image_refused": false
   },
-  "response_raw_text": "```json\n[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"The cluster contains unresolved endnote items (markers 180-187) and corresponding anchors in the text, but no structural anchor records are provided in the input. The system instructions prohibit using 'synthesize_anchor' when 'allowed_actions' is restricted to ['needs_review']. Additionally, some note items (e.g., fn-00335/marker 183) have truncated text in the OCR data compared to the clear screenshots, requiring manual verification or synthesis which is not permitted under the current action constraints.\"\n  }\n]\n```",
+  "token_accounting": {
+    "request_count": 1,
+    "input_tokens": 1513,
+    "output_tokens": 39,
+    "total_tokens": 1552,
+    "estimated_input_tokens": 1619,
+    "source": "provider_usage",
+    "skipped": false,
+    "skip_reason": ""
+  },
+  "response_raw_text": "```json\n[\n    {\n        \"action\": \"needs_review\",\n        \"reason\": \"缺少页面截图，无法判断脚注标记在正文中的具体位置\"\n    }\n]\n```",
   "response_parsed": [
     {
       "action": "needs_review",
@@ -255,8 +201,8 @@
       "anchor_phrase": "",
       "marker": "",
       "note_text": "",
-      "confidence": 0.0,
-      "reason": "The cluster contains unresolved endnote items (markers 180-187) and corresponding anchors in the text, but no structural anchor records are provided in the input. The system instructions prohibit using 'synthesize_anchor' when 'allowed_actions' is restricted to ['needs_review']. Additionally, some note items (e.g., fn-00335/marker 183) have truncated text in the OCR data compared to the clear screenshots, requiring manual verification or synthesis which is not permitted under the current action constraints."
+      "confidence": 0.8,
+      "reason": "缺少页面截图，无法判断脚注标记在正文中的具体位置"
     }
   ],
   "derived_truth": {
@@ -268,18 +214,18 @@
         "anchor_phrase": "",
         "marker": "",
         "note_text": "",
-        "confidence": 0.0,
-        "reason": "The cluster contains unresolved endnote items (markers 180-187) and corresponding anchors in the text, but no structural anchor records are provided in the input. The system instructions prohibit using 'synthesize_anchor' when 'allowed_actions' is restricted to ['needs_review']. Additionally, some note items (e.g., fn-00335/marker 183) have truncated text in the OCR data compared to the clear screenshots, requiring manual verification or synthesis which is not permitted under the current action constraints."
+        "confidence": 0.8,
+        "reason": "缺少页面截图，无法判断脚注标记在正文中的具体位置"
       }
     ]
   },
   "usage": {
-    "prompt_tokens": 23316,
-    "completion_tokens": 138,
-    "total_tokens": 23454,
+    "prompt_tokens": 1513,
+    "completion_tokens": 39,
+    "total_tokens": 1552,
     "request_count": 1
   },
   "timing": {
-    "duration_ms": 23231
+    "duration_ms": 1747
   }
 }

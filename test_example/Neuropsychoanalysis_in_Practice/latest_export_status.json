@@ -3,7 +3,7 @@
   "status": "blocked",
   "reason": "structure_review_required",
   "blocking_reasons": [
-    "contract_def_anchor_mismatch"
+    "freeze_matched_ref_not_injected"
   ],
-  "generated_at": 1777568394
+  "generated_at": 1777756890
 }
