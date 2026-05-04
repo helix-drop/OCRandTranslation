@@ -117,6 +117,7 @@ def build_export_chapters(
     phase5: Phase5Structure,
     *,
     include_diagnostic_entries: bool,
+    skipped_note_ids: set[str] | None = None,
 ) -> tuple[list[ExportChapterRecord], dict[str, Any]]:
     chapters = sorted(
         list(phase5.chapters or []),
@@ -179,6 +180,7 @@ def build_export_chapters(
             diagnostic_machine_by_page=diagnostic_machine_by_page,
             book_type=book_type,
             chapter_note_mode=str(chapter_note_mode_by_id.get(chapter_id) or "no_notes"),
+            skipped_note_ids=skipped_note_ids or set(),
         )
         inline_footnote_paragraph_attach_count += int(contract_summary.get("inline_footnote_paragraph_attach_count") or 0)
         inline_footnote_page_fallback_count += int(contract_summary.get("inline_footnote_page_fallback_count") or 0)

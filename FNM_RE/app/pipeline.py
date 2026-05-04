@@ -1215,6 +1215,10 @@ def build_module_pipeline_snapshot(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
     visual_toc_bundle: Mapping[str, Any] | None = None,
 ) -> ModulePipelineSnapshot:
+    import hashlib, time, uuid
+    _pipeline_run_id = hashlib.sha256(
+        f"{str(doc_id or '')}-{int(time.time())}-{uuid.uuid4().hex[:8]}".encode()
+    ).hexdigest()[:16]
     grouped_overrides = _group_review_overrides(review_overrides)
     toc_result = _run_stage(
         progress_callback=progress_callback,
@@ -1338,7 +1342,9 @@ def build_module_pipeline_snapshot(
         runner=lambda: build_frozen_units(
             effective_split_layers,
             link_result.data,
+            book_structure_model=effective_split_layers.book_structure,
             max_body_chars=int(max_body_chars or 6000),
+            pipeline_run_id=str(_pipeline_run_id or ""),
         ),
     )
     export_link_table = _link_table_with_uninjected_refs_reopened(
@@ -1389,6 +1395,7 @@ def build_module_pipeline_snapshot(
             frozen_units_effective,
             export_link_table,
             split_result.data,
+            book_structure_model=split_result.data.book_structure,
             diagnostic_machine_by_page=_diagnostic_machine_by_page(diagnostic_pages),
             include_diagnostic_entries=bool(include_diagnostic_entries),
             section_heads=_phase_section_heads_from_toc(toc_result.data),
@@ -1403,6 +1410,7 @@ def build_module_pipeline_snapshot(
         runner=lambda: build_module_export_bundle(
             merge_result.data,
             toc_result.data,
+            book_structure_model=split_result.data.book_structure,
             slug=str(slug or ""),
             doc_id=str(doc_id or ""),
         ),

@@ -23,6 +23,7 @@ from FNM_RE.models import (
 )
 from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.types import (
+    BookStructureModel,
     ChapterLayers,
     ChapterMarkdownEntry,
     ChapterMarkdownSet,
@@ -198,6 +199,9 @@ def _to_translation_unit_records(frozen_units: FrozenUnits) -> list[TranslationU
                 error_msg=str(unit.error_msg or ""),
                 target_ref=str(unit.target_ref or ""),
                 page_segments=_to_page_segments(unit),
+                source_hash=str(getattr(unit, "source_hash", "") or ""),
+                segment_plan_hash=str(getattr(unit, "segment_plan_hash", "") or ""),
+                pipeline_run_id=str(getattr(unit, "pipeline_run_id", "") or ""),
             )
         )
     return rows
@@ -624,6 +628,7 @@ def _build_chapter_issue_diagnostics(
     chapters: list[ChapterMarkdownEntry],
     *,
     chapter_contract_summary: dict[str, Any],
+    book_structure_model: BookStructureModel | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, int]]:
     contract_by_section = _chapter_contract_items_by_section(chapter_contract_summary)
     chapter_issue_summary: list[dict[str, Any]] = []
@@ -676,6 +681,7 @@ def build_chapter_markdown_set(
     note_link_table: NoteLinkTable,
     chapter_layers: ChapterLayers,
     *,
+    book_structure_model: BookStructureModel | None = None,
     diagnostic_machine_by_page: Mapping[int | str, str] | None = None,
     include_diagnostic_entries: bool = False,
     section_heads: list[SectionHeadRecord] | None = None,
@@ -689,9 +695,33 @@ def build_chapter_markdown_set(
         section_heads=section_heads,
     )
     from FNM_RE.stages.export_contract import build_export_chapters
+
+    # 收集所有没有 body ref 的 note：
+    # (a) Phase 4 ref_map 中 decision="skipped" 的 note
+    # (b) Phase 3 effective_links 中 status=orphan_note/ignored 的 note
+    # (c) 有 note_unit 但 effective_links 中完全无 entry 的"ghost" note
+    unlinked_note_ids: set[str] = {
+        str(r.note_item_id or "").strip()
+        for r in (frozen_units.ref_map or [])
+        if str(r.decision or "") == "skipped" and str(r.note_item_id or "").strip()
+    }
+    linked_note_ids: set[str] = set()
+    for link in (note_link_table.effective_links or []):
+        nid = str(link.note_item_id or "").strip()
+        if nid:
+            linked_note_ids.add(nid)
+            if str(link.status or "") in {"orphan_note", "ignored"}:
+                unlinked_note_ids.add(nid)
+    # ghost notes: 有 note_unit 但完全没有 link entry
+    for unit in (frozen_units.note_units or []):
+        nid = str(unit.note_id or "").strip()
+        if nid and nid not in linked_note_ids:
+            unlinked_note_ids.add(nid)
+
     export_chapters, export_summary = build_export_chapters(
         phase5,
         include_diagnostic_entries=bool(include_diagnostic_entries),
+        skipped_note_ids=unlinked_note_ids,
     )
     chapters = [
         ChapterMarkdownEntry(
@@ -732,6 +762,7 @@ def build_chapter_markdown_set(
     chapter_issue_summary, chapter_issue_counts = _build_chapter_issue_diagnostics(
         chapters,
         chapter_contract_summary=chapter_contract_summary,
+        book_structure_model=book_structure_model,
     )
     local_refs_closed = int(chapter_issue_counts.get("local_ref_contract_broken_chapter_count") or 0) == 0
     no_frozen_ref_leak = int(chapter_issue_counts.get("frozen_ref_leak_chapter_count") or 0) == 0

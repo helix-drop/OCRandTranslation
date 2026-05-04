@@ -9,12 +9,13 @@ import json
 import re
 import shutil
 import sys
+import time
 import traceback
 from collections import Counter
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEST_EXAMPLE_ROOT = REPO_ROOT / "test_example"
@@ -1009,7 +1010,38 @@ def _write_book_outputs(example_dir: Path, result: dict[str, Any]) -> None:
 
 
 def _write_batch_outputs(output_dir: Path, results: list[dict[str, Any]]) -> dict[str, Any]:
+    import hashlib
     token_summary = _merge_usage_summaries(*[dict(item.get("usage_summary") or {}) for item in results])
+    # ── freshness 元数据 ──
+    freshness_meta = {
+        "generated_at": int(time.time()),
+        "generated_at_iso": _now_iso(),
+        "overlay_mode": "none",
+        "source_hash_available": False,  # batch test mode doesn't persist hashes
+        "pipeline_version": "dev",
+    }
+    # 检查是否基于最新 fnm_run
+    try:
+        from persistence.sqlite_store import SQLiteRepository as _Repo
+        _repo = _Repo()
+        latest_run_time = 0
+        for item in results:
+            doc_id = str(item.get("doc_id") or "").strip()
+            if not doc_id:
+                continue
+            run = _repo.list_fnm_runs(doc_id) if hasattr(_repo, "list_fnm_runs") else []
+            if isinstance(run, list):
+                for r in run:
+                    if isinstance(r, dict):
+                        latest_run_time = max(latest_run_time, int(r.get("updated_at") or r.get("created_at") or 0))
+        freshness_meta["based_on_latest_fnm_run"] = bool(latest_run_time > 0)
+        freshness_meta["latest_fnm_run_at"] = latest_run_time
+        freshness_meta["stale"] = bool(
+            latest_run_time > 0 and freshness_meta["generated_at"] < latest_run_time
+        )
+    except Exception:
+        freshness_meta["based_on_latest_fnm_run"] = False
+        freshness_meta["stale"] = None
 
     def _rank_by_total_tokens(item: dict[str, Any]) -> int:
         usage = dict(item.get("usage_summary") or {})
@@ -1037,12 +1069,19 @@ def _write_batch_outputs(output_dir: Path, results: list[dict[str, Any]]) -> dic
         "per_book_token_ranking": per_book_token_ranking,
         "model_token_ranking": model_token_ranking,
     }
+    results_with_freshness = {
+        "freshness": freshness_meta,
+        "results": results,
+    }
     results_path = output_dir / "results.json"
     token_path = output_dir / "token_summary.json"
     report_path = output_dir / "batch_report.md"
-    _json_dump(results_path, results)
+    _json_dump(results_path, results_with_freshness)
     _json_dump(token_path, token_summary_with_ranking)
-    report_path.write_text(_build_batch_report_markdown(results, token_summary_with_ranking), encoding="utf-8")
+    report_path.write_text(
+        _build_batch_report_markdown(results, token_summary_with_ranking, freshness_meta),
+        encoding="utf-8",
+    )
     return {
         "results_path": str(results_path),
         "token_summary_path": str(token_path),
@@ -1206,9 +1245,22 @@ def _build_book_report_markdown(result: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _build_batch_report_markdown(results: list[dict[str, Any]], token_summary: dict[str, Any]) -> str:
+def _build_batch_report_markdown(
+    results: list[dict[str, Any]],
+    token_summary: dict[str, Any],
+    freshness: dict[str, Any] | None = None,
+) -> str:
+    freshness = dict(freshness or {})
     lines = [
         "# FNM Real Batch Report",
+        "",
+        "## Freshness",
+        f"- generated_at: `{freshness.get('generated_at_iso', '?')}`",
+        f"- overlay_mode: `{freshness.get('overlay_mode', '?')}`",
+        f"- source_hash_available: `{freshness.get('source_hash_available', False)}`",
+        f"- based_on_latest_fnm_run: `{freshness.get('based_on_latest_fnm_run', False)}`",
+        f"- stale: `{freshness.get('stale', '?')}`",
+        f"- pipeline_version: `{freshness.get('pipeline_version', '?')}`",
         "",
         "| slug | status | total_tokens | llm_repair_requests | endnotes | endnotes_page | blocking |",
         "|---|---:|---:|---:|---:|---:|---|",
@@ -1261,6 +1313,7 @@ def _process_book(
     *,
     stage_callback=None,
     skip_translation: bool = False,
+    verbose: bool = False,
 ) -> dict[str, Any]:
     asset_check = _check_required_assets(book)
     example_dir = _resolve_example_dir(book)
@@ -1286,6 +1339,26 @@ def _process_book(
     }
     trace_counters: dict[str, int] = defaultdict(int)
     stage_errors: list[dict[str, Any]] = []
+
+    pipeline_progress: Callable[[dict[str, Any]], None] | None = None
+    if verbose:
+        _stage_start: dict[str, float] = {}
+        def _on_pipeline_progress(payload: dict[str, Any]) -> None:
+            stage = str(payload.get("stage") or "")
+            label = str(payload.get("label") or "")
+            event = str(payload.get("event") or "")
+            pct = float(payload.get("pct") or 0)
+            elapsed_ms = payload.get("elapsed_ms")
+            if event == "start":
+                _stage_start[stage] = time.time()
+                print(f"    [{pct:6.2f}%] {stage:30s} {label}", flush=True)
+            elif event == "done":
+                ms = elapsed_ms or (
+                    int((time.time() - _stage_start[stage]) * 1000) if stage in _stage_start else None
+                )
+                elapsed = f" ({ms}ms)" if ms is not None else ""
+                print(f"    [{pct:6.2f}%] {stage:30s} done{elapsed}", flush=True)
+        pipeline_progress = _on_pipeline_progress
 
     def _advance(stage: str, status: str, detail: str = "") -> None:
         _append_stage_history(base_result["progress"], stage=stage, status=status, detail=detail)
@@ -1360,7 +1433,7 @@ def _process_book(
         _record_stage_error("visual_toc", "visual_toc_exception", exc)
 
     try:
-        pipeline_result = run_fnm_pipeline(book.doc_id) or {}
+        pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
         base_result["pipeline"] = pipeline_result
         _advance("fnm_pipeline", "done", str(pipeline_result.get("structure_state") or ""))
         if not bool(pipeline_result.get("ok")):
@@ -1414,7 +1487,7 @@ def _process_book(
 
     try:
         if int(repair_result.get("auto_applied_count") or 0) > 0:
-            rebuild_result = run_fnm_pipeline(book.doc_id) or {}
+            rebuild_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
         base_result["rebuild"] = rebuild_result
         _advance("fnm_pipeline_rebuild", "done", str(rebuild_result.get("structure_state") or "skipped"))
     except Exception as exc:
@@ -1551,6 +1624,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int, default=0, help="仅处理前 N 本")
     parser.add_argument("--skip-translation", action="store_true", help="跳过 placeholder 翻译步骤")
     parser.add_argument("--batch-tag", default="", help="输出目录标签；默认时间戳")
+    parser.add_argument("--verbose", action="store_true", help="输出 pipeline 各阶段实时进度")
     return parser.parse_args()
 
 
@@ -1606,7 +1680,7 @@ def main() -> int:
     batch_outputs: dict[str, Any] = {}
     for book in books:
         print(f"[{book.slug}] running...", flush=True)
-        result = _process_book(book, stage_callback=_stage_callback, skip_translation=args.skip_translation)
+        result = _process_book(book, stage_callback=_stage_callback, skip_translation=args.skip_translation, verbose=args.verbose)
         results.append(result)
         batch_outputs = _write_batch_outputs(output_dir, results) or {}
         _write_batch_runtime_status(

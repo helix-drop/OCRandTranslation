@@ -145,6 +145,7 @@ def _is_exportable_section_head(head: SectionHeadRecord) -> bool:
 
 
 from FNM_RE.shared.note_lookup import _sanitize_note_text  # noqa: E402
+from FNM_RE.shared.notes import _safe_int  # noqa: E402
 
 
 def _build_note_text_by_id_for_chapter(
@@ -381,6 +382,7 @@ def _build_section_markdown(
     diagnostic_machine_by_page: dict[int, str],
     book_type: str,
     chapter_note_mode: str,
+    skipped_note_ids: set[str] | None = None,
 ) -> tuple[str, dict[str, int]]:
     if str(book_type or "") == "mixed" and str(chapter_note_mode or "") == "footnote_primary":
         from FNM_RE.stages.export_footnote import _build_inline_footnote_section_markdown  # lazy to avoid circular import
@@ -394,6 +396,7 @@ def _build_section_markdown(
             body_anchors_by_id=body_anchors_by_id,
             include_diagnostic_entries=include_diagnostic_entries,
             diagnostic_machine_by_page=diagnostic_machine_by_page,
+            skipped_note_ids=skipped_note_ids or set(),
         )
 
     chapter_id = str(getattr(chapter, "chapter_id", "") or "")
@@ -522,13 +525,35 @@ def _build_section_markdown(
     )
 
     def _emit_definitions(ids: list[str]) -> None:
+        _skip_ids = skipped_note_ids or set()
+
+        def _sort_key(nid: str) -> tuple[int, str]:
+            item = note_items_by_id.get(nid)
+            if item and str(item.marker or "").strip():
+                val = _safe_int(item.marker)
+                if val > 0:
+                    return (val, str(nid))
+            return (999999, str(nid))
+
+        sorted_ids = sorted(ids, key=_sort_key)
         rendered: list[str] = []
-        for note_id in ids:
-            number = int(local_ref_numbers.get(note_id) or 0)
-            text = str(note_text_by_id.get(note_id) or global_note_text_by_id.get(note_id) or "").strip()
-            if number <= 0 or not text:
+        for note_id in sorted_ids:
+            text = str(
+                note_text_by_id.get(note_id)
+                or global_note_text_by_id.get(note_id)
+                or ""
+            ).strip()
+            if not text:
                 continue
-            rendered.append(f"[^{number}]: {text}")
+            if note_id in _skip_ids:
+                item = note_items_by_id.get(note_id)
+                display_marker = str(item.marker or "").strip() if item else ""
+                rendered.append(f"> **{display_marker}**. {text}")
+            else:
+                number = int(local_ref_numbers.get(note_id) or 0)
+                if number <= 0:
+                    continue
+                rendered.append(f"[^{number}]: {text}")
         if not rendered:
             return
         lines.append("### NOTES")

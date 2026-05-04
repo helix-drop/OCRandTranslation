@@ -6,16 +6,20 @@ import re
 from dataclasses import asdict, replace
 from typing import Any, Mapping
 
-from FNM_RE.models import ChapterRecord, PagePartitionRecord, Phase1Structure, SectionHeadRecord
+from FNM_RE.models import ChapterRecord, PagePartitionRecord, Phase1Structure, Phase1Summary, SectionHeadRecord
 from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.types import (
     BodyPageLayer,
     BodySegmentLayer,
     BookNoteProfile,
+    BookStructureModel,
     ChapterLayer,
     ChapterLayers,
+    ChapterStructureModel,
     LayerNoteItem,
     LayerNoteRegion,
+    NumberingTopology,
+    OCRProfile,
     TocStructure,
 )
 from FNM_RE.shared.anchors import scan_anchor_markers
@@ -105,12 +109,18 @@ def _phase1_from_toc_structure_with_evidence(
         )
         for row in toc_structure.section_heads
     ]
+    post_body_titles = [
+        str(chapter.title or "")
+        for chapter in toc_structure.chapters
+        if str(getattr(chapter, "role", "") or "").strip().lower() == "post_body"
+    ]
     return Phase1Structure(
         pages=pages,
         heading_candidates=list(heading_candidates or []),
         chapters=chapters,
         section_heads=section_heads,
         endnote_explorer_hints=dict(endnote_explorer_hints or {}),
+        summary=Phase1Summary(post_body_titles=post_body_titles),
     )
 
 def _to_layer_regions(regions: list[Any]) -> list[LayerNoteRegion]:
@@ -692,6 +702,67 @@ def _chapter_binding_summary(
         "unassigned_item_ids_preview": unassigned_item_ids[:16],
     }
 
+
+def _infer_numbering_topology(book_note_profile: BookNoteProfile) -> NumberingTopology:
+    chapter_modes = [
+        str(row.note_mode or "") for row in book_note_profile.chapter_modes
+    ]
+    has_book_endnote = any(m == "book_endnote_bound" for m in chapter_modes)
+    return "book_continuous" if has_book_endnote else "per_chapter_reset"
+
+
+def _build_book_structure_model(
+    book_note_profile: BookNoteProfile,
+    chapter_layers: list[ChapterLayer],
+    phase1: Phase1Structure,
+    chapter_marker_counts: dict[str, int],
+) -> BookStructureModel:
+    chapter_models: list[ChapterStructureModel] = []
+    for layer in chapter_layers:
+        ch_id = str(layer.chapter_id or "")
+        chapter_policy = dict(layer.policy_applied or {})
+        note_mode_str = str(chapter_policy.get("note_mode") or "no_notes")
+
+        primary_kind = None
+        if note_mode_str == "footnote_primary":
+            primary_kind = "footnote"
+        elif note_mode_str in {"chapter_endnote_primary", "book_endnote_bound"}:
+            primary_kind = "endnote"
+
+        phase1_ch = next(
+            (ch for ch in phase1.chapters if str(ch.chapter_id or "") == ch_id),
+            None,
+        )
+
+        captured = len(layer.footnote_items) + len(layer.endnote_items)
+        expected = int(chapter_marker_counts.get(ch_id) or 0)
+
+        has_heading = any(
+            "### NOTES" in (pg.text or "") or "### Endnotes" in (pg.text or "")
+            for pg in layer.body_pages
+        )
+
+        chapter_models.append(
+            ChapterStructureModel(
+                chapter_id=ch_id,
+                note_mode=note_mode_str,
+                primary_note_kind=primary_kind,
+                page_start=phase1_ch.start_page if phase1_ch else 0,
+                page_end=phase1_ch.end_page if phase1_ch else 0,
+                expected_anchor_count=expected,
+                captured_note_count=captured,
+                has_explicit_notes_heading=has_heading,
+            )
+        )
+
+    return BookStructureModel(
+        book_type=book_note_profile.book_type,
+        numbering_topology=_infer_numbering_topology(book_note_profile),
+        chapters=chapter_models,
+        ocr_profile=OCRProfile(),
+    )
+
+
 def build_chapter_layers(
     toc_structure: TocStructure,
     book_note_profile: BookNoteProfile,
@@ -940,6 +1011,12 @@ def build_chapter_layers(
             "footnote_synthesis_summary": dict(footnote_synthesis_summary),
         },
         chapter_marker_counts=dict(layer_diag.get("chapter_marker_counts") or {}),
+        book_structure=_build_book_structure_model(
+            book_note_profile=book_note_profile,
+            chapter_layers=chapter_layers,
+            phase1=phase1,
+            chapter_marker_counts=dict(layer_diag.get("chapter_marker_counts") or {}),
+        ),
     )
     return ModuleResult(
         data=data,

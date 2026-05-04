@@ -31,6 +31,37 @@ FrozenSkipReason = Literal[
     "token_not_found",
 ]
 
+NumberingTopology = Literal["per_chapter_reset", "book_continuous"]
+SkipCategory = Literal["ceiling_skip", "policy_skip", "structural_skip", "error_skip"]
+
+
+@dataclass(slots=True)
+class OCRProfile:
+    estimated_sup_detection_rate: float = 0.0
+    known_ceiling_orphans: int = 0
+    unrecovered_marker_ids: list[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ChapterStructureModel:
+    chapter_id: str = ""
+    chapter_type: Literal["chapter", "post_body", "front_matter", "back_matter"] = "chapter"
+    note_mode: NoteMode = "no_notes"
+    primary_note_kind: NoteKind | None = None
+    page_start: int = 0
+    page_end: int = 0
+    expected_anchor_count: int = 0
+    captured_note_count: int = 0
+    has_explicit_notes_heading: bool = False
+
+
+@dataclass(slots=True)
+class BookStructureModel:
+    book_type: BookNoteType = "no_notes"
+    numbering_topology: NumberingTopology = "per_chapter_reset"
+    chapters: list[ChapterStructureModel] = field(default_factory=list)
+    ocr_profile: OCRProfile = field(default_factory=OCRProfile)
+
 
 @dataclass(slots=True)
 class TocPageRole:
@@ -187,6 +218,7 @@ class ChapterLayers:
     # 由 chapter_split._chapter_body_marker_sets 累积：每章正文中识别到的 anchor marker 唯一数。
     # 工单 #3 契约 v2 用作 def_anchor_mismatch 的"对地"基线。
     chapter_marker_counts: dict[str, int] = field(default_factory=dict)
+    book_structure: BookStructureModel = field(default_factory=BookStructureModel)
 
 
 @dataclass(slots=True)
@@ -262,6 +294,7 @@ class FrozenRefEntry:
     target_ref: str
     decision: FreezeDecision
     reason: FrozenSkipReason | str = ""
+    skip_category: SkipCategory | str = ""
     page_no: int = 0
 
 
@@ -285,6 +318,9 @@ class FrozenUnit:
     error_msg: str
     target_ref: str
     page_segments: list[dict[str, Any]] = field(default_factory=list)
+    source_hash: str = ""
+    segment_plan_hash: str = ""
+    pipeline_run_id: str = ""
 
 
 @dataclass(slots=True)

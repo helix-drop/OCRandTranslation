@@ -28,7 +28,7 @@ import argparse
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -183,10 +183,13 @@ def _check_persisted_note_links(doc_id: str) -> dict[str, Any]:
     }
 
 
-def _run_pipeline_and_report(doc_id: str, slug: str, with_repair: bool = False) -> dict[str, Any]:
+def _run_pipeline_and_report(
+    doc_id: str, slug: str, with_repair: bool = False,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> dict[str, Any]:
     """跑 pipeline 并汇总各 phase 状态。"""
     print(f"  Pipeline...", flush=True)
-    result = run_doc_pipeline(doc_id)
+    result = run_doc_pipeline(doc_id, progress_callback=progress_callback)
 
     if with_repair:
         print(f"  LLM repair...", flush=True)
@@ -195,7 +198,7 @@ def _run_pipeline_and_report(doc_id: str, slug: str, with_repair: bool = False) 
               f"suggestions={repair_result.get('suggestion_count')}, "
               f"auto_applied={repair_result.get('auto_applied_count')}", flush=True)
         print(f"  Rebuild...", flush=True)
-        result = run_doc_pipeline(doc_id)
+        result = run_doc_pipeline(doc_id, progress_callback=progress_callback)
 
     blocking = list(result.get("blocking_reasons") or [])
 
@@ -327,16 +330,49 @@ def _print_report(report: dict[str, Any]) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="FNM 增量测试（Phase 1 已冻结）")
+    parser = argparse.ArgumentParser(description="FNM 增量测试（Phase 冻结 + checkpoint）")
     parser.add_argument("--slug", required=True, help="书名 slug，逗号分隔多个")
     parser.add_argument("--repair", action="store_true", help="同时跑 LLM repair")
     parser.add_argument("--check", action="store_true", help="只检查已有 DB 数据，不跑 pipeline")
+    parser.add_argument("--run-phase", type=int, default=0, help="只跑到指定 phase (1-6)，0=全量")
+    parser.add_argument("--checkpoint", action="store_true", help="保存 fnm_dev_snapshots 快照")
+    parser.add_argument("--reset-from", type=int, default=0, help="清除 phase >= N 的产物后退出")
+    parser.add_argument("--verbose", action="store_true", help="输出 pipeline 各阶段实时进度")
     args = parser.parse_args()
 
     slugs = [s.strip() for s in args.slug.split(",")]
     reports: list[dict] = []
     run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     print(f"run_ts={run_ts}", flush=True)
+
+    progress_callback = None
+    if args.verbose:
+        _stage_start: dict[str, float] = {}
+        def _on_progress(payload: dict[str, Any]) -> None:
+            stage = str(payload.get("stage") or "")
+            label = str(payload.get("label") or "")
+            event = str(payload.get("event") or "")
+            pct = float(payload.get("pct") or 0)
+            if event == "start":
+                _stage_start[stage] = datetime.now(timezone.utc).timestamp()
+                print(f"  [{pct:6.2f}%] {stage:30s} {label}", flush=True)
+            elif event == "done":
+                elapsed = ""
+                started = _stage_start.pop(stage, None)
+                if started is not None:
+                    ms = int((datetime.now(timezone.utc).timestamp() - started) * 1000)
+                    elapsed = f" ({ms}ms)"
+                print(f"  [{pct:6.2f}%] {stage:30s} done{elapsed}", flush=True)
+        progress_callback = _on_progress
+
+    # ── reset-from 模式 ──
+    if args.reset_from > 0:
+        repo = SQLiteRepository()
+        for slug in slugs:
+            doc_id = _resolve_doc_id(slug)
+            counts = repo.reset_from_phase(doc_id, int(args.reset_from))
+            print(f"{slug}: reset from phase {args.reset_from} → {counts}", flush=True)
+        return 0
 
     for slug in slugs:
         print(f"\n{'='*50}", flush=True)
@@ -364,9 +400,27 @@ def main() -> int:
             _print_report(report)
             continue
 
-        report = _run_pipeline_and_report(doc_id, slug, with_repair=args.repair)
+        report = _run_pipeline_and_report(doc_id, slug, with_repair=args.repair, progress_callback=progress_callback)
         reports.append(report)
         _print_report(report)
+
+        # ── checkpoint 保存 ──
+        if args.checkpoint:
+            import hashlib, uuid
+            run_id = hashlib.sha256(f"{doc_id}-{run_ts}".encode()).hexdigest()[:12]
+            repo = SQLiteRepository()
+            repo.save_dev_snapshot(doc_id, run_id=run_id, phase=0, snapshot={
+                "slug": slug,
+                "run_ts": run_ts,
+                "run_id": run_id,
+                "structure_state": report.get("structure_state"),
+                "blocking_reasons": report.get("blocking_reasons", []),
+                "module_phase2": report.get("module_phase2_detail", {}),
+                "module_phase3": report.get("module_phase3_detail", {}),
+                "run_counts": report.get("run_counts", {}),
+                "by_phase": report.get("by_phase", {}),
+            })
+            print(f"  checkpoint saved: run_id={run_id}", flush=True)
 
     # 汇总
     print(f"\n{'='*50}", flush=True)

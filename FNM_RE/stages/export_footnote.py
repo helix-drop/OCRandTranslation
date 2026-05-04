@@ -74,14 +74,27 @@ def _emit_local_note_definitions(
     emitted_note_ids: set[str],
     local_ref_numbers: dict[str, int],
     note_text_by_id: dict[str, str],
+    skipped_note_ids: set[str] | None = None,
+    note_items_by_id: dict[str, Any] | None = None,
 ) -> int:
+    _skip_ids = skipped_note_ids or set()
     emitted = 0
     for note_id in note_ids:
         if note_id in emitted_note_ids:
             continue
-        number = int(local_ref_numbers.get(note_id) or 0)
         text = str(note_text_by_id.get(note_id) or "").strip()
-        if number <= 0 or not text:
+        if not text:
+            continue
+        if note_id in _skip_ids:
+            item = (note_items_by_id or {}).get(note_id) if note_items_by_id else None
+            display_marker = str(item.marker or "").strip() if item and hasattr(item, 'marker') else ""
+            lines.append(f"> **{display_marker}**. {_escape_leading_asterisks(text)}")
+            lines.append("")
+            emitted_note_ids.add(note_id)
+            emitted += 1
+            continue
+        number = int(local_ref_numbers.get(note_id) or 0)
+        if number <= 0:
             continue
         lines.append(f"[^{number}]: {_escape_leading_asterisks(text)}")
         lines.append("")
@@ -150,6 +163,7 @@ def _build_inline_footnote_section_markdown(
     body_anchors_by_id: dict[str, BodyAnchorRecord],
     include_diagnostic_entries: bool,
     diagnostic_machine_by_page: dict[int, str],
+    skipped_note_ids: set[str] | None = None,
 ) -> tuple[str, dict[str, int]]:
     chapter_id = str(getattr(chapter, "chapter_id", "") or "")
     chapter_title = _format_chapter_title(getattr(chapter, "title", "") or chapter_id)
@@ -273,6 +287,8 @@ def _build_inline_footnote_section_markdown(
                 emitted_note_ids=emitted_note_ids,
                 local_ref_numbers=local_ref_numbers,
                 note_text_by_id=note_text_by_id,
+                skipped_note_ids=skipped_note_ids or set(),
+                note_items_by_id=note_items_by_id,
             )
             body_paragraph_index += 1
 
@@ -290,6 +306,8 @@ def _build_inline_footnote_section_markdown(
                 emitted_note_ids=emitted_note_ids,
                 local_ref_numbers=local_ref_numbers,
                 note_text_by_id=note_text_by_id,
+                skipped_note_ids=skipped_note_ids or set(),
+                note_items_by_id=note_items_by_id,
             )
 
     if not chapter_has_body:
@@ -302,6 +320,8 @@ def _build_inline_footnote_section_markdown(
         emitted_note_ids=emitted_note_ids,
         local_ref_numbers=local_ref_numbers,
         note_text_by_id=note_text_by_id,
+        skipped_note_ids=skipped_note_ids or set(),
+        note_items_by_id=note_items_by_id,
     )
     content = _strip_trailing_image_only_block("\n".join(lines).strip())
     refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", content)))

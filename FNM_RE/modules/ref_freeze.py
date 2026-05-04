@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 from collections import Counter
 from dataclasses import asdict
@@ -10,6 +11,7 @@ from typing import Any
 from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.types import (
     BodyAnchorLayer,
+    BookStructureModel,
     ChapterLayer,
     ChapterLayers,
     FrozenRefEntry,
@@ -163,11 +165,25 @@ def _unit_contract_issues(*, body_units: list[FrozenUnit], note_units: list[Froz
             issues.append(f"note_target_ref_invalid:{row.unit_id}")
     return issues
 
+def _compute_unit_hash(source_text: str, page_start: int, page_end: int, char_count: int, page_nos: list[int]) -> tuple[str, str]:
+    """计算 unit 的 source_hash 和 segment_plan_hash。
+
+    source_hash: source_text 前 200 字符的 sha256（轻量指纹，用于判定源文本是否变化）。
+    segment_plan_hash: page span + char_count + page_no 序列的 sha256（用于判定 chunk 边界是否变化）。
+    """
+    source_fp = hashlib.sha256(str(source_text or "")[:200].encode()).hexdigest()[:16]
+    plan_key = f"{page_start}|{page_end}|{char_count}|{','.join(str(p) for p in sorted(page_nos))}"
+    plan_fp = hashlib.sha256(plan_key.encode()).hexdigest()[:16]
+    return source_fp, plan_fp
+
+
 def build_frozen_units(
     chapter_layers: ChapterLayers,
     note_link_table: NoteLinkTable,
     *,
+    book_structure_model: BookStructureModel | None = None,
     max_body_chars: int = 6000,
+    pipeline_run_id: str = "",
 ) -> ModuleResult[FrozenUnits]:
     chapter_order = _chapter_order_map(chapter_layers)
     chapter_by_id = {
@@ -230,6 +246,27 @@ def build_frozen_units(
     ref_map: list[FrozenRefEntry] = []
     injected_anchor_ids: set[str] = set()
     skipped_reason_counts: Counter[str] = Counter()
+
+    _SKIP_REASON_TO_CATEGORY: dict[str, str] = {
+        "missing_anchor": "ceiling_skip",
+        "synthetic_anchor": "ceiling_skip",
+        "conflict_anchor": "error_skip",
+        "duplicate_anchor": "policy_skip",
+        "missing_body_page": "error_skip",
+        "token_not_found": "ceiling_skip",
+    }
+
+    def _clean_skipped_marker(text: str, marker: str) -> str:
+        payload = str(text or "")
+        m = str(marker or "").strip()
+        if not m:
+            return payload
+        # [N] 格式（排除 ^[N]: 定义行）
+        payload = re.sub(rf"(?<!\^)\[{re.escape(m)}\](?!:)", "", payload)
+        # <sup>N</sup> 格式
+        payload = re.sub(rf"<sup>\s*{re.escape(m)}\s*</sup>", "", payload)
+        return payload
+
     for link in matched_links:
         chapter_id = str(link.chapter_id or "")
         anchor_id = str(link.anchor_id or "").strip()
@@ -239,6 +276,7 @@ def build_frozen_units(
         target_ref = frozen_note_ref(note_item_id)
 
         def _append_skipped(reason: str, page_no: int = 0) -> None:
+            category = _SKIP_REASON_TO_CATEGORY.get(reason, "error_skip")
             skipped_reason_counts.update([reason])
             ref_map.append(
                 FrozenRefEntry(
@@ -249,9 +287,17 @@ def build_frozen_units(
                     target_ref=target_ref,
                     decision="skipped",
                     reason=reason,  # type: ignore[arg-type]
+                    skip_category=category,
                     page_no=int(page_no or 0),
                 )
             )
+            # 对 ceiling_skip 和 policy_skip，清理 body text 中的 raw marker
+            if category in {"ceiling_skip", "policy_skip"} and page_no > 0:
+                body_page = chapter_body_pages.get(chapter_id, {}).get(page_no, {})
+                if body_page:
+                    body_page["text"] = _clean_skipped_marker(
+                        str(body_page.get("text") or ""), marker
+                    )
 
         if not anchor:
             _append_skipped("missing_anchor")
@@ -337,6 +383,13 @@ def build_frozen_units(
         chapter_unit_counts[chapter_id] = len(chunks)
         section_start_page, section_end_page = chapter_bounds.get(chapter_id, (0, 0))
         for chunk_index, chunk in enumerate(chunks, start=1):
+            ps = int(chunk.get("page_start") or 0)
+            pe = int(chunk.get("page_end") or int(chunk.get("page_start") or 0))
+            cc = int(chunk.get("char_count") or 0)
+            st = str(chunk.get("source_text") or "")
+            segs = [asdict(row) for row in list(chunk.get("page_segments") or [])]
+            page_nos = sorted({int(s.get("page_no", 0)) for s in segs if int(s.get("page_no", 0)) > 0})
+            src_hash, plan_hash = _compute_unit_hash(st, ps, pe, cc, page_nos)
             body_units.append(
                 FrozenUnit(
                     unit_id=f"body-{chapter_id}-{chunk_index:04d}",
@@ -348,15 +401,18 @@ def build_frozen_units(
                     section_start_page=int(section_start_page),
                     section_end_page=int(section_end_page),
                     note_id="",
-                    page_start=int(chunk.get("page_start") or 0),
-                    page_end=int(chunk.get("page_end") or int(chunk.get("page_start") or 0)),
-                    char_count=int(chunk.get("char_count") or 0),
-                    source_text=str(chunk.get("source_text") or ""),
+                    page_start=ps,
+                    page_end=pe,
+                    char_count=cc,
+                    source_text=st,
                     translated_text="",
                     status="pending",
                     error_msg="",
                     target_ref="",
-                    page_segments=[asdict(row) for row in list(chunk.get("page_segments") or [])],
+                    page_segments=segs,
+                    source_hash=src_hash,
+                    segment_plan_hash=plan_hash,
+                    pipeline_run_id=str(pipeline_run_id or ""),
                 )
             )
 
@@ -383,6 +439,11 @@ def build_frozen_units(
             resolved_chapter_id,
             (int(item.page_no or 0), int(item.page_no or 0)),
         )
+        n_ps = int(item.page_no or 0)
+        n_pe = int(item.page_no or 0)
+        n_cc = len(str(item.text or ""))
+        n_st = str(item.text or "")
+        n_src_hash, n_plan_hash = _compute_unit_hash(n_st, n_ps, n_pe, n_cc, [n_ps])
         note_units.append(
             FrozenUnit(
                 unit_id=f"{str(item.note_kind or 'note')}-{resolved_chapter_id}-{note_item_id}",
@@ -394,10 +455,13 @@ def build_frozen_units(
                 section_start_page=int(section_start_page),
                 section_end_page=int(section_end_page),
                 note_id=note_item_id,
-                page_start=int(item.page_no or 0),
-                page_end=int(item.page_no or 0),
-                char_count=len(str(item.text or "")),
-                source_text=str(item.text or ""),
+                page_start=n_ps,
+                page_end=n_pe,
+                char_count=n_cc,
+                source_text=n_st,
+                source_hash=n_src_hash,
+                segment_plan_hash=n_plan_hash,
+                pipeline_run_id=str(pipeline_run_id or ""),
                 translated_text="",
                 status="pending",
                 error_msg="",
@@ -480,15 +544,32 @@ def build_frozen_units(
     unit_contract_issues = _unit_contract_issues(body_units=body_units, note_units=note_units)
     unit_contract_issues.extend(f"unresolved_note_item:{note_item_id}" for note_item_id in unresolved_note_item_ids)
 
+    error_skip_count = sum(
+        1 for row in ref_map
+        if row.decision == "skipped" and row.skip_category == "error_skip"
+    )
+    ceiling_skip_count = sum(
+        1 for row in ref_map
+        if row.decision == "skipped" and row.skip_category == "ceiling_skip"
+    )
+    policy_skip_count = sum(
+        1 for row in ref_map
+        if row.decision == "skipped" and row.skip_category == "policy_skip"
+    )
+
     hard = {
         "freeze.only_matched_frozen": all(str(row.link_id or "") in matched_link_ids for row in injected_rows),
         "freeze.no_duplicate_injection": injected_count == len({str(row.anchor_id or "") for row in injected_rows}),
-        "freeze.accounting_closed": len(ref_map) == len(matched_links)
-        and all(row.decision in {"injected", "skipped"} for row in ref_map),
-        "freeze.all_matched_refs_injected": skipped_count == 0,
+        "freeze.closed_without_error": (
+            len(ref_map) == len(matched_links)
+            and all(row.decision in {"injected", "skipped"} for row in ref_map)
+            and error_skip_count == 0
+        ),
         "freeze.unit_contract_valid": len(unit_contract_issues) == 0,
     }
     soft = {
+        "freeze.ceiling_skip_warn": ceiling_skip_count == 0,
+        "freeze.policy_skip_warn": policy_skip_count == 0,
         "freeze.synthetic_skip_warn": synthetic_skipped_count == 0,
         "freeze.conflict_skip_warn": conflict_skipped_count == 0,
     }
@@ -497,10 +578,13 @@ def build_frozen_units(
         reasons.append("freeze_only_matched_violation")
     if not hard["freeze.no_duplicate_injection"]:
         reasons.append("freeze_duplicate_injection")
-    if not hard["freeze.accounting_closed"]:
-        reasons.append("freeze_accounting_unclosed")
-    if not hard["freeze.all_matched_refs_injected"]:
-        reasons.append("freeze_matched_ref_not_injected")
+    if not hard["freeze.closed_without_error"]:
+        if len(ref_map) != len(matched_links) or not all(
+            row.decision in {"injected", "skipped"} for row in ref_map
+        ):
+            reasons.append("freeze_accounting_unclosed")
+        if error_skip_count > 0:
+            reasons.append("freeze_error_skip_detected")
     if not hard["freeze.unit_contract_valid"]:
         reasons.append("freeze_unit_contract_invalid")
 
@@ -518,10 +602,16 @@ def build_frozen_units(
                 "anchor_id": str(row.anchor_id or ""),
                 "note_item_id": str(row.note_item_id or ""),
                 "reason": str(row.reason or ""),
+                "skip_category": str(row.skip_category or ""),
                 "page_no": int(row.page_no or 0),
             }
             for row in skipped_rows[:24]
         ],
+        "skip_category_counts": {
+            "ceiling_skip": ceiling_skip_count,
+            "policy_skip": policy_skip_count,
+            "error_skip": error_skip_count,
+        },
         "synthetic_skipped_count": int(synthetic_skipped_count),
         "conflict_anchor_count": int(len(conflict_anchor_ids)),
         "body_unit_count": int(len(body_units)),

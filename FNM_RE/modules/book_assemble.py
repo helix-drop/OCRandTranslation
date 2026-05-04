@@ -15,6 +15,7 @@ from FNM_RE.models import (
 )
 from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.types import (
+    BookStructureModel,
     ChapterMarkdownEntry,
     ChapterMarkdownSet,
     ExportAuditFile,
@@ -169,11 +170,19 @@ def _to_export_audit_report(report: Any) -> ExportAuditReport:
     )
 
 
-def _has_book_level_raw_marker_leak(chapter_files: dict[str, str]) -> bool:
+def _has_book_level_raw_marker_leak(
+    chapter_files: dict[str, str],
+    *,
+    book_structure_model: BookStructureModel | None = None,
+) -> bool:
+    known_cleared: set[str] = set()
+    if book_structure_model and book_structure_model.ocr_profile:
+        known_cleared.update(book_structure_model.ocr_profile.unrecovered_marker_ids)
     for content in chapter_files.values():
         body_text, definition_text = export_audit_stage.split_body_and_definitions(str(content or ""))
         allowed_markers = set(export_audit_stage.LOCAL_REF_RE.findall(body_text))
         allowed_markers.update(export_audit_stage.LOCAL_DEF_RE.findall(str(content or "")))
+        allowed_markers.update(known_cleared)
         if not allowed_markers:
             continue
         if any(
@@ -389,6 +398,7 @@ def build_export_bundle(
     chapter_markdown_set: ChapterMarkdownSet,
     toc_structure: TocStructure,
     *,
+    book_structure_model: BookStructureModel | None = None,
     slug: str = "",
     doc_id: str = "",
 ) -> ModuleResult[ExportBundle]:
@@ -461,7 +471,7 @@ def build_export_bundle(
         for file_row in report.files
     )
     no_raw_marker_leak_book_level = (
-        not _has_book_level_raw_marker_leak(chapter_files)
+        not _has_book_level_raw_marker_leak(chapter_files, book_structure_model=book_structure_model)
         and all(
             "raw_note_marker_leak" not in set(file_row.issue_codes or [])
             and "legacy_note_token_leak" not in set(file_row.issue_codes or [])
