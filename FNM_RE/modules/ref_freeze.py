@@ -62,18 +62,6 @@ _NESTED_NOTE_REF_RE = re.compile(
 )
 
 
-def _normalize_legacy_refs(text: str) -> str:
-    """将旧格式 ref（[EN-xxx], [FN-xxx], [^en-xxx]）转为标准 {{NOTE_REF:xxx}}。"""
-    import re as _re
-    payload = str(text or "")
-    # [EN-en-00018] → {{NOTE_REF:en-00018}}
-    payload = _re.sub(r'\[EN-(en-\d+)\]', r'{{NOTE_REF:\1}}', payload, flags=_re.IGNORECASE)
-    # [FN-fn-00001] → {{NOTE_REF:fn-00001}}
-    payload = _re.sub(r'\[FN-(fn-\d+)\]', r'{{NOTE_REF:\1}}', payload, flags=_re.IGNORECASE)
-    # [^en-00001] → {{NOTE_REF:en-00001}}
-    payload = _re.sub(r'\[\^(en-\d+)\]', r'{{NOTE_REF:\1}}', payload, flags=_re.IGNORECASE)
-    return payload
-
 
 def _cleanup_nested_note_refs(text: str) -> str:
     """修复嵌套的 {{NOTE_REF:...{{NOTE_REF:...}}...}} 结构。
