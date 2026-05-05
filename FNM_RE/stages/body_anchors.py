@@ -7,7 +7,6 @@ from typing import Any
 
 from FNM_RE.models import BodyAnchorRecord, Phase2Structure
 from FNM_RE.shared.chapters import chapter_id_for_page, chapter_id_for_page as _chapter_id_for_page
-from FNM_RE.shared.notes import _chapter_mode_map
 from FNM_RE.shared.anchors import (
     anchor_dedupe_key,
     page_body_paragraphs,
@@ -119,97 +118,6 @@ def _marker_in_expected_range(
     return marker_min <= marker_val <= marker_max + tolerance
 
 
-def _fill_marker_gaps(
-    anchors: list[BodyAnchorRecord],
-    *,
-    chapter_marker_range: dict[str, tuple[int, int]],
-    mode_by_chapter: dict[str, str],
-    footnote_band_pages: set[tuple[str, int]],
-    anchor_counter: int,
-) -> list[BodyAnchorRecord]:
-    """填补 marker 序列中的 OCR 丢失缺口。
-
-    对每个章节，比对已检测 anchor 的 marker 集合和 note_items 的预期范围。
-    缺失的 marker 在相邻已检测 marker 之间创建 synthetic anchor。
-    """
-    synthetic: list[BodyAnchorRecord] = []
-    anchors_by_chapter: dict[str, list[BodyAnchorRecord]] = {}
-    for anchor in anchors:
-        anchors_by_chapter.setdefault(anchor.chapter_id, []).append(anchor)
-
-    counter = anchor_counter
-    for chapter_id, chapter_anchors in anchors_by_chapter.items():
-        marker_range = chapter_marker_range.get(chapter_id)
-        if not marker_range or marker_range[1] <= 0:
-            continue
-        marker_min, marker_max = marker_range
-        detected = sorted(
-            int(a.normalized_marker)
-            for a in chapter_anchors
-            if a.normalized_marker.isdigit() and marker_min <= int(a.normalized_marker) <= marker_max + 5
-        )
-        if not detected:
-            continue
-        detected_set = set(detected)
-        expected = set(range(marker_min, marker_max + 1))
-        missing = sorted(expected - detected_set)
-        if not missing:
-            continue
-
-        # 建立已检测 marker → anchor 的快速查找（取每个 marker 最后出现的 anchor 作为位置参考）
-        anchor_by_marker: dict[int, BodyAnchorRecord] = {}
-        for a in sorted(chapter_anchors, key=lambda a: (a.page_no, a.paragraph_index, a.char_start)):
-            m = int(a.normalized_marker) if a.normalized_marker.isdigit() else 0
-            if m > 0:
-                anchor_by_marker[m] = a
-
-        note_mode = str(mode_by_chapter.get(chapter_id) or "no_notes")
-        for missing_marker in missing:
-            prev_anchor = anchor_by_marker.get(missing_marker - 1)
-            next_anchor = anchor_by_marker.get(missing_marker + 1)
-            if prev_anchor is None and next_anchor is None:
-                continue
-            if prev_anchor is None and missing_marker < detected[0]:
-                if detected[0] - missing_marker > 3:
-                    continue
-            elif prev_anchor is not None and missing_marker > detected[-1]:
-                if missing_marker - detected[-1] > 3:
-                    continue
-            elif prev_anchor is None:
-                continue
-            reference_anchor = prev_anchor or next_anchor
-            if reference_anchor is None:
-                continue
-            has_footnote_band = (chapter_id, reference_anchor.page_no) in footnote_band_pages
-            anchor_kind = resolve_anchor_kind(has_page_footnote_band=has_footnote_band)
-            if prev_anchor is not None:
-                char_start = int(prev_anchor.char_end or 0) + 1
-                char_end = int(prev_anchor.char_end or 0) + 2
-            else:
-                char_end = max(0, int(reference_anchor.char_start or 0) - 1)
-                char_start = max(0, char_end - 1)
-            counter += 1
-            new_anchor = BodyAnchorRecord(
-                anchor_id=f"anchor-{counter:05d}",
-                chapter_id=chapter_id,
-                page_no=reference_anchor.page_no,
-                paragraph_index=reference_anchor.paragraph_index,
-                char_start=char_start,
-                char_end=char_end,
-                source_marker="",
-                normalized_marker=str(missing_marker),
-                anchor_kind=anchor_kind,
-                certainty=0.55,
-                source_text=reference_anchor.source_text,
-                source="gap_fill",
-                synthetic=True,
-                ocr_repaired_from_marker="",
-            )
-            synthetic.append(new_anchor)
-            anchor_by_marker[missing_marker] = new_anchor
-    return synthetic
-
-
 def build_body_anchors(
     phase2: Phase2Structure,
     *,
@@ -222,7 +130,6 @@ def build_body_anchors(
         for row in phase2.pages
         if int(row.page_no) > 0
     }
-    mode_by_chapter = _chapter_mode_map(phase2)
     footnote_band_pages = _footnote_band_page_keys(phase2)
     chapter_marker_range = _build_chapter_marker_range(phase2)
 
@@ -291,16 +198,6 @@ def build_body_anchors(
                     )
                 )
                 anchor_counter += 1
-
-    gap_filled = _fill_marker_gaps(
-        anchors,
-        chapter_marker_range=chapter_marker_range,
-        mode_by_chapter=mode_by_chapter,
-        footnote_band_pages=footnote_band_pages,
-        anchor_counter=anchor_counter,
-    )
-    anchors.extend(gap_filled)
-    anchor_counter += len(gap_filled)
 
     anchors.sort(
         key=lambda row: (

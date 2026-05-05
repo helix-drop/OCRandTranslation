@@ -301,6 +301,41 @@ class FnmReModule3SplitTest(unittest.TestCase):
         self.assertIn("note_capture_summary", result.data.item_summary)
         self.assertIn("footnote_synthesis_summary", result.data.item_summary)
 
+    def test_multi_endnote_region_start_pages_not_disjoint_violation(self):
+        """单章含多个 endnote region 时，后续 region 起始页（混合 body+NOTES）不应触发 disjoint。
+
+        模拟 Biopolitics fallback mega-chapter：一章包含两段 lecture，
+        各有独立 ## NOTES section。page 5 是第二段 endnote region 的起始页，
+        同时含正文末尾，role 为 body。修复前会因 page_no(5) > note_start_page(2) 误报。
+        """
+        pages = [
+            _make_page(
+                1,
+                markdown="# Chapter One\nBody [1] [2] [3] paragraph.",
+                block_text="Chapter One",
+            ),
+            _make_page(
+                2,
+                markdown="## Notes\n1. First note.\n2. Second note.\n3. Third note.",
+            ),
+            _make_page(3, markdown="4. Fourth note.\n5. Fifth note."),
+            _make_page(4, markdown="Lecture two body [1] [2] text continues here."),
+            _make_page(
+                5,
+                markdown="End of lecture two [3] [4] [5].\n\n## Notes\n1. Note A.\n2. Note B.\n3. Note C.\n4. Note D.\n5. Note E.",
+            ),
+        ]
+        toc_items = [
+            {"item_id": "toc-1", "title": "Chapter One", "level": 1, "target_pdf_page": 1},
+        ]
+        toc = build_toc_structure(pages, toc_items).data
+        profile = build_book_note_profile(toc, pages).data
+        result = build_chapter_layers(toc, profile, pages)
+        self.assertTrue(
+            result.gate_report.hard["split.body_note_disjoint"],
+            f"disjoint violations: {result.evidence.get('chapter_disjoint_violations')}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

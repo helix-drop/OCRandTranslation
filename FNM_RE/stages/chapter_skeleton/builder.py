@@ -290,16 +290,11 @@ def build_chapter_skeleton(
         )
         source_hint: ChapterSource = "visual_toc"
     else:
-        chapters_raw = list(fallback_chapters_raw)
-        merged_section_fallbacks = list(fallback_section_heads_raw)
-        chapter_source_summary = {
-            "source": "fallback",
-            "chapter_level": None,
-            "visual_toc_chapter_count": 0,
-            "legacy_chapter_count": len(fallback_chapters_raw),
-            "fallback_used": True,
-        }
-        source_hint = "fallback"
+        raise RuntimeError(
+            "无法构建章节结构：视觉目录和手动目录均为空。"
+            "请确保 test_example/<book>/ 目录下存在 目录.pdf，"
+            "或 visual_toc 成功生成了 items。"
+        )
 
     preserved_post_body_title_keys = {
         chapter_title_match_key(title)

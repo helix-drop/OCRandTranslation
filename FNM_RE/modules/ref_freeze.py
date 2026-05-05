@@ -114,7 +114,7 @@ def _inject_token_once(
             continue
         if candidate in payload:
             return payload.replace(candidate, token, 1), True
-    if str(anchor.source or "").strip() == "llm":
+    if str(anchor.source or "").strip() in {"llm", "visual_repair"}:
         phrase = str(anchor.source_text or "").strip()
         if phrase and phrase in payload:
             return payload.replace(phrase, f"{phrase}{token}", 1), True
@@ -291,6 +291,10 @@ def build_frozen_units(
         if bool(anchor.synthetic):
             sm = str(anchor.source_marker or "").strip()
             nm = str(anchor.normalized_marker or "").strip()
+            # source_marker 为空 → 无原文可匹配，直接跳过
+            if not sm:
+                _append_skipped("synthetic_anchor", page_no=int(anchor.page_no))
+                continue
             if sm == nm:
                 # bare digit source_marker 太宽泛，_inject_token_once 会在
                 # 整页文本中裸搜 "7"，容易误匹配。只有带格式的 source_marker

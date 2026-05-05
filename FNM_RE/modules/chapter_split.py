@@ -172,7 +172,7 @@ def _to_layer_items(
         source_scope = str(source_scope_by_region.get(region_id, "chapter") or "chapter")
         source_marker = str(row.marker or "")
         normalized_marker = normalize_note_marker(source_marker)
-        note_kind = str(note_kind_by_region.get(str(row.region_id or ""), "footnote"))
+        note_kind = str(note_kind_by_region.get(str(row.region_id or ""), ""))
         rows.append(
             LayerNoteItem(
                 note_item_id=str(row.note_item_id or ""),
@@ -377,6 +377,14 @@ def _build_chapter_layers(
     }
     page_role_by_no = {int(row.page_no): str(row.page_role) for row in phase1.pages if int(row.page_no) > 0}
     chapter_endnote_start_map = _chapter_endnote_start_page_map(regions)
+    endnote_start_pages_by_chapter: dict[str, set[int]] = {}
+    for region in regions:
+        if str(region.note_kind or "") != "endnote":
+            continue
+        cid = str(region.chapter_id or "").strip()
+        sp = int(region.page_start or 0)
+        if cid and sp > 0:
+            endnote_start_pages_by_chapter.setdefault(cid, set()).add(sp)
     mode_by_chapter = {str(row.chapter_id or ""): str(row.note_mode or "no_notes") for row in book_note_profile.chapter_modes}
 
     # 先按 item 归类，用于后续 mode override 的安全校验
@@ -386,7 +394,7 @@ def _build_chapter_layers(
         chapter_key = str(item.owner_chapter_id or item.chapter_id or "")
         if item.note_kind == "footnote":
             footnotes_by_chapter.setdefault(chapter_key, []).append(item)
-        else:
+        elif item.note_kind == "endnote":
             endnotes_by_chapter.setdefault(chapter_key, []).append(item)
 
     # 阶段3.A：endnote region 优先——若有 chapter_endnotes region，覆盖 footnote_primary → chapter_endnote_primary
@@ -450,6 +458,7 @@ def _build_chapter_layers(
                 and page_no > note_start_page
                 and source_role == "body"
                 and bool(_NOTES_HEADING_RE.search(source_text))
+                and page_no not in endnote_start_pages_by_chapter.get(chapter_id, set())
             ):
                 chapter_disjoint_violations.append(chapter_id)
             split_reason = "note_start_split" if page_no == note_start_page and note_start_page > 0 else "body_page"

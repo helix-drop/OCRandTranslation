@@ -1320,6 +1320,31 @@ def build_module_pipeline_snapshot(
                 if page and page.get("enriched_markdown"):
                     bp.text = page["enriched_markdown"]
 
+    # —— 视觉 anchor 缺口恢复 → overrides ——
+    if str(pdf_path or "").strip():
+        try:
+            from FNM_RE.modules.visual_anchor_recovery import build_visual_recovery_overrides
+            from FNM_RE.modules.note_linking import _phase2_from_chapter_layers as _resolve_phase2
+            from FNM_RE.stages.body_anchors import build_body_anchors as _build_body_anchors_for_gap
+            phase2_for_gap, _, _ = _resolve_phase2(effective_split_layers)
+            gap_anchors, _ = _build_body_anchors_for_gap(phase2_for_gap, pages=pages, pdf_path=str(pdf_path))
+            vr_overrides = build_visual_recovery_overrides(
+                phase2=phase2_for_gap,
+                body_anchors=gap_anchors,
+                pages=pages,
+                pdf_path=str(pdf_path),
+            )
+            if vr_overrides:
+                for scope, items in vr_overrides.items():
+                    target = grouped_overrides_for_link.setdefault(str(scope), {})
+                    for key, payload in items.items():
+                        if key not in target:
+                            target[key] = payload
+        except Exception as _e:
+            print(f"[visual_recovery] override build failed: {_e}")
+            import traceback
+            traceback.print_exc()
+
     link_result = _run_stage(
         progress_callback=progress_callback,
         stage="note_link_table",

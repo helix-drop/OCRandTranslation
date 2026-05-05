@@ -627,8 +627,20 @@ def _materialize_refs_for_chapter(
         if not anchor:
             continue
         if bool(anchor.synthetic):
-            synthetic_skipped += 1
-            continue
+            sm = str(anchor.source_marker or "").strip()
+            # 空 source_marker → 无原文可匹配
+            if not sm:
+                synthetic_skipped += 1
+                continue
+            nm = str(anchor.normalized_marker or "").strip()
+            if sm == nm:
+                # bare digit source_marker 在整页文本中裸搜易误匹配，
+                # 只有带格式的 source_marker（如 [7]、<sup>7</sup>）才安全
+                synthetic_skipped += 1
+                continue
+            # source_marker 非空且 != normalized_marker → 有实际数据来源
+            #（如 orphan_recovery 从页面匹配到的 $^{96}$、LLM repair 产生的 anchor）
+            # 允许继续注入
         page_no = int(anchor.page_no or 0)
         payload = page_payload_by_no.get(page_no)
         if not payload:
