@@ -10,10 +10,10 @@ from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.types import BookNoteProfile, BookNoteTypeEvidence, ChapterNoteMode, TocStructure
 from FNM_RE.shared.text import page_markdown_text
 from FNM_RE.stages.page_partition import annotate_pages_with_note_scans
-from FNM_RE.shared.notes import _safe_int
+from FNM_RE.shared.notes import _NOTE_DEF_RE, _safe_int
 
 _NOTES_HEADING_RE = re.compile(r"^\s*(?:#+\s*)?(?:notes?|endnotes?|notes to pages?.*)\s*$", re.IGNORECASE)
-_NOTE_DEF_RE = re.compile(r"^\s*(?:\d{1,4}[A-Za-z]?)\s*[\.\)\]]\s+")
+
 
 def _chapter_by_page(toc_structure: TocStructure) -> dict[int, str]:
     mapped: dict[int, str] = {}
@@ -56,14 +56,84 @@ def _has_notes_heading(markdown: str) -> bool:
 
 
 def _is_endnote_page(markdown: str) -> bool:
-    """页首有 NOTES 标题或 ≥4 条编号定义——后者可能是脚注，不可靠。"""
+    """页首有 NOTES 标题、≥4 条编号定义、或从1开始的连续编号序列。"""
     lines = [line.strip() for line in str(markdown or "").splitlines() if line.strip()]
     if not lines:
         return False
     if _NOTES_HEADING_RE.match(lines[0]):
         return True
     note_lines = sum(1 for line in lines[:16] if _NOTE_DEF_RE.match(line))
-    return note_lines >= 4
+    if note_lines >= 4:
+        return True
+    return _has_consecutive_note_sequence(markdown)
+
+
+def _has_consecutive_note_sequence(markdown: str) -> bool:
+    """检测页面是否有从 1（或接近 1）开始的连续编号序列。
+
+    这是章末尾注区最可靠的物理信号——比 ## NOTES 标题和
+    endnote_collection page_kind 都强。不依赖显式标题，不受
+    脚注数字干扰（脚注标记通常不连续，也不用从 1 开始的序列）。"""
+    markers = _extract_note_markers(markdown)
+    if len(markers) < 3:
+        return False
+    unique = sorted(set(markers))
+    if unique[0] not in (1, 2):
+        return False
+    gaps = sum(1 for i in range(len(unique) - 1) if unique[i + 1] - unique[i] != 1)
+    return gaps <= 1
+
+
+def _extract_note_markers(markdown: str) -> list[int]:
+    """从页面 markdown 中提取所有编号注释标记。"""
+    markers: list[int] = []
+    for line in str(markdown or "").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        m = _NOTE_DEF_RE.match(line)
+        if not m:
+            continue
+        gd = m.groupdict()
+        num_str = gd.get("bracket") or gd.get("num") or gd.get("loose") or ""
+        if num_str and num_str.isdigit():
+            markers.append(int(num_str))
+    return markers
+
+
+def _chapter_has_consecutive_endnote_sequence(
+    pages: list[dict],
+    chapter_start: int,
+    chapter_end: int,
+    next_chapter_start: int | None,
+) -> bool:
+    """检查章末页面是否构成从 1 开始的连续编号序列。
+
+    取章末最后若干页（不超过下一章起始），提取所有编号标记，
+    检查是否构成从 1 开始、基本连续的序列。这是章末尾注区最
+    强的物理信号——比 ## NOTES 标题可靠得多。"""
+    tail_pages = [
+        p for p in pages
+        if chapter_start <= _safe_int(p.get("bookPage") or p.get("pdfPage") or 0) <= chapter_end
+    ]
+    if not tail_pages:
+        return False
+    # 只看章末最后 8 页（尾注区通常 2-5 页，留余量）
+    tail_pages = tail_pages[-8:]
+    all_markers: list[int] = []
+    for page in tail_pages:
+        md = page_markdown_text(page)
+        all_markers.extend(_extract_note_markers(md))
+    if len(all_markers) < 3:
+        return False
+    unique = sorted(set(all_markers))
+    # 序列必须从 1（或接近 1）开始
+    if unique[0] not in (1, 2):
+        return False
+    # 检查连续性：允许 ≤ max(1, 总数*10%) 个 gap
+    max_gaps = max(1, int(len(unique) * 0.1))
+    gaps = sum(1 for i in range(len(unique) - 1) if unique[i + 1] - unique[i] != 1)
+    return gaps <= max_gaps
 
 def _resolve_book_type(*, has_footnote: bool, has_endnote: bool) -> str:
     if has_footnote and has_endnote:
@@ -195,6 +265,29 @@ def build_book_note_profile(
         chapter_id = str(chapter.chapter_id or "")
         chapter_footnote_pages = chapter_has_footnote.get(chapter_id, set())
         chapter_endnote_pages = chapter_has_endnote.get(chapter_id, set())
+        # 补检：章末连续编号序列是最强的尾注物理信号，不依赖 ## NOTES 标题或
+        # endnote_collection page_kind。特别处理 ch12 这类无标题但有完整 1..N 编号的章。
+        if not chapter_endnote_pages:
+            ch_start = int(chapter.start_page or 0)
+            ch_end = int(chapter.end_page or 0)
+            next_start: int | None = None
+            for ch2 in chapters:
+                s2 = int(ch2.start_page or 0)
+                if s2 > ch_start and (next_start is None or s2 < next_start):
+                    next_start = s2
+            if _chapter_has_consecutive_endnote_sequence(
+                annotated_pages, ch_start, ch_end, next_start
+            ):
+                # 将章末被检测到的页面加入 endnote_pages
+                for page in annotated_pages:
+                    pn = _safe_int(page.get("bookPage") or page.get("pdfPage") or 0)
+                    if pn <= 0:
+                        continue
+                    if ch_start <= pn <= ch_end:
+                        md = page_markdown_text(page)
+                        if _extract_note_markers(md):
+                            endnote_pages.add(pn)
+                            chapter_endnote_pages.add(pn)
         # 工单 #6：endnote 容器页（_is_endnote_page 命中 / page_kind=endnote_collection）
         # 是该章 endnote 主导的强信号（NOTES 容器 1 页可含 7-8 条 endnote）；
         # page footnote（手稿星号等）是辅助补充。endnote 优先，避免按"页数比较"

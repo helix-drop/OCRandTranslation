@@ -486,6 +486,9 @@ def _finalize_current_note(items: list[dict], current: dict | None) -> None:
 
 def _split_followup_notes(items: list[dict], current: dict) -> tuple[dict, int | None]:
     marker_state: int | None = None
+    current_marker = normalize_note_marker(current.get("marker") or "")
+    if not current_marker.isdigit():
+        return current, None
     while True:
         body, followup_marker, followup_body = _split_inline_followup_marker(
             str(current.get("text") or ""),
@@ -731,6 +734,7 @@ def parse_note_items_from_text(
         if (
             pending_gap_lines
             and len(pending_gap_lines) <= 2
+            and current_value > 0
             and _looks_like_complete_note_text(str(current.get("text") or ""))
             and all(
                 _looks_like_ocr_missing_note_body_line(candidate)

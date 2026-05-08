@@ -62,6 +62,7 @@ from FNM_RE.app.pipeline_converters import (
     _phase_links_from_layers,
     _phase_note_items_from_layers,
     _phase_note_items_from_split,
+    _phase_chapter_note_modes_from_layers,
     _phase_note_modes_from_book_type,
     _phase_note_regions_from_layers,
     _phase_note_regions_from_split,
@@ -74,7 +75,13 @@ from FNM_RE.app.pipeline_converters import (
 from FNM_RE.shared.review_overrides import group_review_overrides as _group_review_overrides, empty_grouped_overrides as _empty_grouped_overrides
 from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.contracts import ModuleResult
-from FNM_RE.modules.note_linking import build_note_link_table
+from FNM_RE.modules.note_linking import (
+    FOOTNOTE_OVERRIDE_PAGE_PADDING,
+    _find_existing_explicit_anchor_for_link_override,
+    _infer_note_kind_from_anchor,
+    _materialize_anchor_overrides,
+    build_note_link_table,
+)
 from FNM_RE.modules.ref_freeze import build_frozen_units
 from FNM_RE.stages.paragraph_footnotes import build_paragraph_footnotes
 from FNM_RE.stages.paragraph_endnotes import build_paragraph_endnotes
@@ -137,40 +144,6 @@ def _note_link_summary_from_layers(links: list[Any]) -> dict[str, int]:
         "ambiguous": sum(1 for row in links if str(getattr(row, "status", "") or "") == "ambiguous"),
         "ignored": sum(1 for row in links if str(getattr(row, "status", "") or "") == "ignored"),
     }
-
-
-def _link_table_with_uninjected_refs_reopened(
-    note_link_table: NoteLinkTable,
-    frozen_units: FrozenUnits,
-) -> NoteLinkTable:
-    skipped_link_ids = {
-        str(row.link_id or "")
-        for row in list(frozen_units.ref_map or [])
-        if str(row.decision or "") == "skipped"
-        and str(row.link_id or "").strip()
-        and str(row.note_item_id or "").strip()
-    }
-    if not skipped_link_ids:
-        return note_link_table
-    adjusted_effective_links = []
-    for row in note_link_table.effective_links:
-        if str(row.link_id or "") in skipped_link_ids and str(row.status or "") == "matched":
-            adjusted_effective_links.append(
-                replace(
-                    row,
-                    anchor_id="",
-                    status="orphan_note",  # type: ignore[arg-type]
-                    resolver="repair",  # type: ignore[arg-type]
-                    confidence=0.0,
-                )
-            )
-        else:
-            adjusted_effective_links.append(row)
-    return replace(
-        note_link_table,
-        effective_links=adjusted_effective_links,
-        link_summary=_note_link_summary_from_layers(adjusted_effective_links),
-    )
 
 
 def _resolve_endnotes_start_page(visual_toc_bundle: Mapping[str, Any] | None) -> int | None:
@@ -596,73 +569,30 @@ def _apply_anchor_overrides(
 ) -> tuple[list[BodyAnchorRecord], dict[str, Any]]:
     """把 scope='anchor' 的 override（主要来自 LLM synthesize_anchor）合入 body_anchors。
 
-    - action='create'：根据 payload 构造 BodyAnchorRecord 并追加；若 anchor_id 已存在则跳过。
+    - action='create'：根据 payload 构造 BodyAnchorRecord 并追加；若 anchor_id 已存在或
+      同章同页同 marker 已有显式锚点则跳过。
     - 其它 action：忽略（当前只支持创建；删除/修改留给后续）。
     """
-    effective_anchors: list[BodyAnchorRecord] = list(body_anchors or [])
-    overrides = dict(anchor_overrides or {})
-    existing_ids = {str(a.anchor_id) for a in effective_anchors if str(a.anchor_id or "").strip()}
-    created_count = 0
-    skipped_duplicate = 0
-    invalid_count = 0
-    invalid_flags: list[str] = []
-    for target_id, payload in overrides.items():
-        data = dict(payload or {})
-        action = str(data.get("action") or "").strip().lower()
-        if action != "create":
-            continue
-        anchor_id = str(data.get("anchor_id") or target_id or "").strip()
-        if not anchor_id:
-            invalid_count += 1
-            invalid_flags.append(f"invalid_anchor_override:{target_id}:no_id")
-            continue
-        if anchor_id in existing_ids:
-            skipped_duplicate += 1
-            continue
-        try:
-            page_no = int(data.get("page_no") or 0)
-        except (TypeError, ValueError):
-            page_no = 0
-        try:
-            paragraph_index = int(data.get("paragraph_index") or 0)
-        except (TypeError, ValueError):
-            paragraph_index = 0
-        try:
-            char_start = int(data.get("char_start") or 0)
-        except (TypeError, ValueError):
-            char_start = 0
-        try:
-            char_end = int(data.get("char_end") or 0)
-        except (TypeError, ValueError):
-            char_end = 0
-        try:
-            certainty = float(data.get("certainty") or 0.0)
-        except (TypeError, ValueError):
-            certainty = 0.0
-        record = BodyAnchorRecord(
-            anchor_id=anchor_id,
-            chapter_id=str(data.get("chapter_id") or ""),
-            page_no=page_no,
-            paragraph_index=paragraph_index,
-            char_start=char_start,
-            char_end=char_end,
-            source_marker=str(data.get("source_marker") or data.get("normalized_marker") or ""),
-            normalized_marker=str(data.get("normalized_marker") or ""),
-            anchor_kind=str(data.get("anchor_kind") or "endnote"),  # type: ignore[arg-type]
-            certainty=certainty,
-            source_text=str(data.get("source_text") or ""),
-            source=str(data.get("source") or "llm"),
-            synthetic=bool(data.get("synthetic") or False),
-            ocr_repaired_from_marker=str(data.get("ocr_repaired_from_marker") or ""),
-        )
-        effective_anchors.append(record)
-        existing_ids.add(anchor_id)
-        created_count += 1
+    effective_anchors, materialize_summary, _logs = _materialize_anchor_overrides(
+        list(body_anchors or []),
+        anchor_overrides=anchor_overrides,
+    )
+    rejected_reasons = list(materialize_summary.get("rejected_reasons") or [])
+    duplicate_reasons = [
+        reason
+        for reason in rejected_reasons
+        if str(reason).endswith(":anchor_id_conflict")
+        or str(reason).endswith(":existing_explicit_anchor")
+    ]
+    invalid_count = max(
+        0,
+        int(materialize_summary.get("rejected_count") or 0) - len(duplicate_reasons),
+    )
     summary = {
-        "created_anchor_count": created_count,
-        "skipped_duplicate_count": skipped_duplicate,
+        "created_anchor_count": int(materialize_summary.get("created_count") or 0),
+        "skipped_duplicate_count": len(duplicate_reasons),
         "invalid_anchor_override_count": invalid_count,
-        "invalid_anchor_override_flags": invalid_flags,
+        "invalid_anchor_override_flags": rejected_reasons,
     }
     return effective_anchors, summary
 
@@ -708,13 +638,41 @@ def _apply_link_overrides(
         note_item_id = str(override.get("note_item_id") or override.get("definition_id") or "").strip()
         anchor_id = str(override.get("anchor_id") or override.get("ref_id") or "").strip()
         note_item = note_items_by_id.get(note_item_id)
-        anchor = anchors_by_id.get(anchor_id)
-        if not note_item or not anchor:
+        if not note_item:
             invalid_count += 1
             invalid_flags.append(f"invalid_link_override:{link.link_id}:target")
             continue
         region = regions_by_id.get(str(note_item.region_id or ""))
         note_kind = str((region.note_kind if region else link.note_kind) or "")
+        anchor = anchors_by_id.get(anchor_id)
+        if anchor is None and str(anchor_id or "").startswith("llm-anchor-"):
+            anchor = _find_existing_explicit_anchor_for_link_override(
+                note_item=note_item,
+                body_anchors=body_anchors,
+                expected_note_kind=note_kind,
+            )
+        if not anchor:
+            invalid_count += 1
+            invalid_flags.append(f"invalid_link_override:{link.link_id}:target")
+            continue
+        inferred_note_kind = _infer_note_kind_from_anchor(anchor)
+        same_chapter = str(note_item.chapter_id or "") == str(anchor.chapter_id or "")
+        same_kind = note_kind in {"footnote", "endnote"} and note_kind == inferred_note_kind
+        if not same_chapter or not same_kind:
+            invalid_count += 1
+            invalid_flags.append(f"invalid_link_override:{link.link_id}:consistency")
+            continue
+        if note_kind == "footnote":
+            note_page = int(note_item.page_no or 0)
+            anchor_page = int(anchor.page_no or 0)
+            if (
+                note_page > 0
+                and anchor_page > 0
+                and abs(anchor_page - note_page) > FOOTNOTE_OVERRIDE_PAGE_PADDING
+            ):
+                invalid_count += 1
+                invalid_flags.append(f"invalid_link_override:{link.link_id}:page_window")
+                continue
         marker = str(note_item.marker or anchor.normalized_marker or link.marker or "")
         page_no = int(anchor.page_no or note_item.page_no or link.page_no_start or 0)
         chapter_id = str(note_item.chapter_id or anchor.chapter_id or link.chapter_id or "")
@@ -1372,10 +1330,7 @@ def build_module_pipeline_snapshot(
             pipeline_run_id=str(_pipeline_run_id or ""),
         ),
     )
-    export_link_table = _link_table_with_uninjected_refs_reopened(
-        link_result.data,
-        freeze_result.data,
-    )
+    export_link_table = link_result.data
     frozen_units_effective = _overlay_repo_units_on_frozen(
         freeze_result.data,
         repo_units=repo_units,
@@ -1389,7 +1344,7 @@ def build_module_pipeline_snapshot(
         section_heads=_phase_section_heads_from_toc(toc_result.data),
         note_regions=_phase_note_regions_from_layers(effective_split_layers),
         note_items=_phase_note_items_from_layers(effective_split_layers),
-        chapter_note_modes=_phase_note_modes_from_book_type(book_type_result),
+        chapter_note_modes=_phase_chapter_note_modes_from_layers(effective_split_layers),
         body_anchors=_phase_anchors_from_links(link_result),
         note_links=_phase_links_from_layers(export_link_table.links),
         effective_note_links=_phase_links_from_layers(export_link_table.effective_links),

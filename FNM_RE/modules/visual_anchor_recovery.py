@@ -22,6 +22,7 @@ from FNM_RE.shared.notes import normalize_note_marker
 VISUAL_RECOVERY_MAX_IMAGES = 5
 VISUAL_RECOVERY_MAX_OUTPUT_TOKENS = 1024
 VISUAL_RECOVERY_ANCHOR_CERTAINTY = 0.85
+VISUAL_RECOVERY_MAX_RETRY_MARKERS = 4
 
 # —— CLI 可开关常量，保持模块级以利测试 ——
 VISUAL_RECOVERY_ENABLED = True
@@ -47,9 +48,17 @@ def compute_chapter_anchor_gaps(
     phase2: Phase2Structure,
     body_anchors: list[BodyAnchorRecord],
 ) -> list[ChapterAnchorGap]:
-    """计算每章的 anchor 缺口：expected (note_items) vs detected (body_anchors)。"""
+    """计算每章尾注 anchor 缺口：expected (endnote items) vs detected (body anchors)。"""
+    endnote_region_ids = {
+        str(region.region_id or "").strip()
+        for region in phase2.note_regions
+        if str(region.note_kind or "").strip() == "endnote"
+        and str(region.region_id or "").strip()
+    }
     expected_by_chapter: dict[str, set[int]] = {}
     for item in phase2.note_items:
+        if str(item.region_id or "").strip() not in endnote_region_ids:
+            continue
         chapter_id = str(item.chapter_id or "").strip()
         if not chapter_id:
             continue
@@ -63,6 +72,8 @@ def compute_chapter_anchor_gaps(
 
     detected_by_chapter: dict[str, set[int]] = {}
     for anchor in body_anchors:
+        if str(anchor.anchor_kind or "").strip() == "footnote":
+            continue
         chapter_id = str(anchor.chapter_id or "").strip()
         if not chapter_id:
             continue
@@ -141,25 +152,31 @@ def _chapter_body_page_range(
     return (0, 0)
 
 
+def _representative_marker_page(pages: list[int]) -> int:
+    cleaned = sorted(int(page) for page in pages if int(page or 0) > 0)
+    if not cleaned:
+        return 0
+    return cleaned[len(cleaned) // 2]
+
+
 def _resolve_gap_page_range(
     gap: ChapterAnchorGap,
     body_anchors: list[BodyAnchorRecord],
 ) -> tuple[int, int]:
-    """根据相邻已检测 marker 缩小搜索范围，带 ±1 页缓冲。"""
+    """根据编号相邻的已检测 marker 缩小搜索范围，带 ±1 页缓冲。"""
     chapter_id = gap.chapter_id
-    marker_page: dict[int, int] = {}
+    marker_pages: dict[int, list[int]] = {}
     for a in body_anchors:
         if str(a.chapter_id or "").strip() != chapter_id:
+            continue
+        if str(a.anchor_kind or "").strip() == "footnote":
             continue
         try:
             m = int(a.normalized_marker)
         except (ValueError, TypeError):
             continue
         if m > 0:
-            # 保留每个 marker 的最小 page_no
-            prev = marker_page.get(m)
-            if prev is None or int(a.page_no) < prev:
-                marker_page[m] = int(a.page_no)
+            marker_pages.setdefault(m, []).append(int(a.page_no))
 
     body_min, body_max = gap.body_page_range
     if body_min <= 0 or body_max <= 0:
@@ -171,24 +188,37 @@ def _resolve_gap_page_range(
     first_missing = gap.missing_markers[0]
     last_missing = gap.missing_markers[-1]
 
-    lower_bound = 0
-    for m, page in marker_page.items():
-        if m < first_missing and page > lower_bound:
-            lower_bound = page
-
-    upper_bound = 0
-    for m, page in marker_page.items():
-        if m > last_missing:
-            if upper_bound == 0 or page < upper_bound:
-                upper_bound = page
+    lower_marker = max((m for m in marker_pages if m < first_missing), default=0)
+    upper_marker = min((m for m in marker_pages if m > last_missing), default=0)
+    lower_bound = (
+        _representative_marker_page(marker_pages.get(lower_marker, []))
+        if lower_marker > 0
+        else 0
+    )
+    upper_bound = (
+        _representative_marker_page(marker_pages.get(upper_marker, []))
+        if upper_marker > 0
+        else 0
+    )
 
     min_page = max(body_min, lower_bound - 1) if lower_bound > 0 else body_min
     max_page = min(body_max, upper_bound + 1) if upper_bound > 0 else body_max
+    if min_page > max_page:
+        if lower_bound > 0 and upper_bound > 0:
+            lo, hi = sorted((lower_bound, upper_bound))
+            min_page = max(body_min, lo - 1)
+            max_page = min(body_max, hi + 1)
+        else:
+            min_page, max_page = body_min, body_max
+    if min_page > max_page:
+        return (body_min, body_max)
     return (min_page, max_page)
 
 
 def _sample_page_range(page_min: int, page_max: int, max_images: int) -> list[int]:
     """从连续页面范围抽样，确保不超过 max_images 页。"""
+    if page_min <= 0 or page_max < page_min:
+        return []
     if page_max - page_min + 1 <= max_images:
         return list(range(page_min, page_max + 1))
     step = (page_max - page_min) / max_images
@@ -476,6 +506,8 @@ def _materialize_visual_findings(
     findings: list[dict[str, Any]],
     gap: ChapterAnchorGap,
     page_by_no: dict[int, dict],
+    *,
+    candidate_pages: list[int] | None = None,
 ) -> tuple[list[BodyAnchorRecord], dict[str, Any]]:
     """将 VLM 返回的 findings 转为 BodyAnchorRecord 列表。"""
     anchors: list[BodyAnchorRecord] = []
@@ -483,6 +515,11 @@ def _materialize_visual_findings(
     found = 0
     mapped = 0
     match_failed = 0
+    allowed_pages = [
+        int(page_no)
+        for page_no in (candidate_pages or [])
+        if int(page_no or 0) > 0
+    ]
 
     for item in findings:
         try:
@@ -510,40 +547,65 @@ def _materialize_visual_findings(
             page_no = int(item.get("page_no") or 0)
         except (ValueError, TypeError):
             page_no = 0
-        if page_no <= 0:
-            page_no = gap.body_page_range[0]
-        page = page_by_no.get(page_no, {})
 
         para_index = 0
         char_start = 0
         char_end = 0
+        resolved_page_no = page_no if page_no > 0 else 0
 
-        if anchor_phrase and page:
-            loc = _fuzzy_find_phrase_in_page(anchor_phrase, page)
-            if loc is not None:
+        search_pages: list[int] = []
+        if resolved_page_no > 0 and (
+            not allowed_pages or resolved_page_no in allowed_pages
+        ):
+            search_pages.append(resolved_page_no)
+        for candidate_page in allowed_pages:
+            if candidate_page not in search_pages:
+                search_pages.append(candidate_page)
+        if not search_pages and gap.body_page_range[0] > 0:
+            search_pages.append(gap.body_page_range[0])
+
+        if anchor_phrase:
+            loc: tuple[int, int, int] | None = None
+            matched_page_no = 0
+            for search_page_no in search_pages:
+                page = page_by_no.get(search_page_no, {})
+                if not page:
+                    continue
+                loc = _fuzzy_find_phrase_in_page(anchor_phrase, page)
+                if loc is not None:
+                    matched_page_no = search_page_no
+                    break
+            if loc is not None and matched_page_no > 0:
                 para_index, char_start, char_end = loc
                 char_start = char_end  # anchor 位于 phrase 之后
                 char_end = char_start + len(source_marker)
+                resolved_page_no = matched_page_no
                 mapped += 1
             else:
                 match_failed += 1
                 # 截取页面文本前 200 字符用于诊断
-                page_preview = (
-                    str(page.get("markdown") or page.get("enriched_markdown") or "")[:200]
-                )
+                preview_page_no = search_pages[0] if search_pages else page_no
+                preview_page = page_by_no.get(preview_page_no, {})
+                page_preview = str(
+                    preview_page.get("markdown")
+                    or preview_page.get("enriched_markdown")
+                    or ""
+                )[:200]
                 print(
                     f"[visual_recovery] phrase not found: marker={marker} "
-                    f"page={page_no} phrase={anchor_phrase!r} "
+                    f"page={preview_page_no} phrase={anchor_phrase!r} "
                     f"page_preview={page_preview!r}"
                 )
+                continue
         else:
             match_failed += 1
+            continue
 
         normalized_marker = normalize_note_marker(str(marker))
         anchor = BodyAnchorRecord(
             anchor_id=_next_visual_anchor_id(),
             chapter_id=gap.chapter_id,
-            page_no=page_no if page_no > 0 else gap.body_page_range[0],
+            page_no=resolved_page_no if resolved_page_no > 0 else gap.body_page_range[0],
             paragraph_index=para_index,
             char_start=char_start,
             char_end=char_end,
@@ -599,80 +661,24 @@ def _render_page_image(pdf_path: str, page_no: int) -> tuple[bytes, str]:
             return (b"", "")
 
 
-def _resolve_model_args() -> dict | None:
-    try:
-        from persistence.storage import resolve_fnm_model_pool_specs
-
-        specs = resolve_fnm_model_pool_specs()
-    except Exception:
-        return None
-    if not specs:
-        return None
-    spec = specs[0]
-    if not str(spec.api_key or "").strip():
-        return None
-    return {
-        "provider": str(spec.provider or "").strip(),
-        "model_id": str(spec.model_id or "").strip(),
-        "api_key": str(spec.api_key or "").strip(),
-        "base_url": str(spec.base_url or "").strip(),
-        "request_overrides": dict(spec.request_overrides or {}),
-    }
-
-
-def run_visual_anchor_recovery(
-    gap: ChapterAnchorGap,
-    phase2: Phase2Structure,
-    pages: list[dict],
-    pdf_path: str,
-) -> list[BodyAnchorRecord]:
-    """对单个章节缺口执行视觉 anchor 恢复。"""
-    if not VISUAL_RECOVERY_ENABLED:
-        return []
-    if not pdf_path or not gap.missing_markers:
-        return []
-
-    page_by_no = _page_payload_by_no(pages)
-    min_page, max_page = _resolve_gap_page_range(gap, [])
-
-    if min_page <= 0 or max_page <= 0:
-        return []
-
-    sample_pages = _sample_page_range(min_page, max_page, VISUAL_RECOVERY_MAX_IMAGES)
-
-    # 渲染页面
-    rendered: list[dict] = []
-    for pno in sample_pages:
-        img_bytes, mime = _render_page_image(pdf_path, pno)
-        if img_bytes and mime:
-            encoded = base64.b64encode(img_bytes).decode("ascii")
-            rendered.append(
-                {"page_no": pno, "image_url": f"data:{mime};base64,{encoded}"}
-            )
-
-    if not rendered:
-        print(
-            f"[visual_recovery] 无可渲染页面 chapter={gap.chapter_id} 跳过"
-        )
-        return []
-
-    # 模型配置
-    model_args = _resolve_model_args()
-    if not model_args:
-        print("[visual_recovery] 无可用模型配置，跳过")
-        return []
-
+def _request_visual_findings(
+    *,
+    model_args: dict,
+    rendered: list[dict],
+    missing_markers: list[int],
+    page_start: int,
+    page_end: int,
+) -> list[dict[str, Any]]:
     client = OpenAI(
         api_key=str(model_args.get("api_key") or ""),
         base_url=str(model_args.get("base_url") or ""),
         timeout=180.0,
     )
-
     user_content: list[dict[str, Any]] = [
         {
             "type": "text",
             "text": _build_visual_recovery_user_prompt(
-                gap.missing_markers, min_page, max_page
+                missing_markers, page_start, page_end
             ),
         }
     ]
@@ -702,16 +708,7 @@ def run_visual_anchor_recovery(
         else:
             create_kwargs[key] = value
 
-    started = time.time()
-    try:
-        response = client.chat.completions.create(**create_kwargs)
-    except Exception as exc:
-        print(
-            f"[visual_recovery] VLM 调用失败 (chapter={gap.chapter_id}): {exc}"
-        )
-        return []
-
-    duration_ms = int(max(0.0, (time.time() - started) * 1000.0))
+    response = client.chat.completions.create(**create_kwargs)
     raw_text = ""
     if response.choices and getattr(response.choices[0], "message", None):
         try:
@@ -721,21 +718,96 @@ def run_visual_anchor_recovery(
                 getattr(response.choices[0].message, "content", "")
             )
         except Exception:
-            raw_text = str(
-                getattr(response.choices[0].message, "content", "") or ""
-            )
+            raw_text = str(getattr(response.choices[0].message, "content", "") or "")
 
     if not raw_text:
+        return []
+    return _parse_visual_findings(raw_text)
+
+
+def _resolve_model_args() -> dict | None:
+    try:
+        from persistence.storage import resolve_fnm_model_pool_specs
+
+        specs = resolve_fnm_model_pool_specs()
+    except Exception:
+        return None
+    if not specs:
+        return None
+    spec = specs[0]
+    if not str(spec.api_key or "").strip():
+        return None
+    return {
+        "provider": str(spec.provider or "").strip(),
+        "model_id": str(spec.model_id or "").strip(),
+        "api_key": str(spec.api_key or "").strip(),
+        "base_url": str(spec.base_url or "").strip(),
+        "request_overrides": dict(spec.request_overrides or {}),
+    }
+
+
+def run_visual_anchor_recovery(
+    gap: ChapterAnchorGap,
+    phase2: Phase2Structure,
+    pages: list[dict],
+    pdf_path: str,
+    body_anchors: list[BodyAnchorRecord] | None = None,
+) -> list[BodyAnchorRecord]:
+    """对单个章节缺口执行视觉 anchor 恢复。"""
+    if not VISUAL_RECOVERY_ENABLED:
+        return []
+    if not pdf_path or not gap.missing_markers:
+        return []
+
+    page_by_no = _page_payload_by_no(pages)
+    min_page, max_page = _resolve_gap_page_range(gap, list(body_anchors or []))
+
+    if min_page <= 0 or max_page <= 0:
+        return []
+
+    sample_pages = _sample_page_range(min_page, max_page, VISUAL_RECOVERY_MAX_IMAGES)
+
+    # 渲染页面
+    rendered: list[dict] = []
+    for pno in sample_pages:
+        img_bytes, mime = _render_page_image(pdf_path, pno)
+        if img_bytes and mime:
+            encoded = base64.b64encode(img_bytes).decode("ascii")
+            rendered.append(
+                {"page_no": pno, "image_url": f"data:{mime};base64,{encoded}"}
+            )
+
+    if not rendered:
         print(
-            f"[visual_recovery] VLM 返回空响应 (chapter={gap.chapter_id})"
+            f"[visual_recovery] 无可渲染页面 chapter={gap.chapter_id} 跳过"
         )
         return []
 
+    # 模型配置
+    model_args = _resolve_model_args()
+    if not model_args:
+        print("[visual_recovery] 无可用模型配置，跳过")
+        return []
+
+    started = time.time()
     try:
-        findings = _parse_visual_findings(raw_text)
+        findings = _request_visual_findings(
+            model_args=model_args,
+            rendered=rendered,
+            missing_markers=gap.missing_markers,
+            page_start=min_page,
+            page_end=max_page,
+        )
     except Exception as exc:
         print(
-            f"[visual_recovery] VLM 响应解析失败 (chapter={gap.chapter_id}): {exc}"
+            f"[visual_recovery] VLM 调用失败 (chapter={gap.chapter_id}): {exc}"
+        )
+        return []
+
+    duration_ms = int(max(0.0, (time.time() - started) * 1000.0))
+    if not findings:
+        print(
+            f"[visual_recovery] VLM 返回空响应 (chapter={gap.chapter_id})"
         )
         return []
 
@@ -755,7 +827,66 @@ def run_visual_anchor_recovery(
         findings=findings,
         gap=gap,
         page_by_no=page_by_no,
+        candidate_pages=sample_pages,
     )
+    recovered_markers = {
+        int(anchor.normalized_marker)
+        for anchor in anchors
+        if str(anchor.normalized_marker or "").isdigit()
+    }
+    retry_markers = [
+        marker
+        for marker in gap.missing_markers
+        if marker not in recovered_markers
+    ][:VISUAL_RECOVERY_MAX_RETRY_MARKERS]
+    if retry_markers:
+        retry_findings: list[dict[str, Any]] = []
+        retry_started = time.time()
+        for marker in retry_markers:
+            try:
+                retry_findings.extend(
+                    _request_visual_findings(
+                        model_args=model_args,
+                        rendered=rendered,
+                        missing_markers=[marker],
+                        page_start=min_page,
+                        page_end=max_page,
+                    )
+                )
+            except Exception as exc:
+                print(
+                    f"[visual_recovery] VLM 重试失败 "
+                    f"(chapter={gap.chapter_id}, marker={marker}): {exc}"
+                )
+        if retry_findings:
+            retry_gap = ChapterAnchorGap(
+                chapter_id=gap.chapter_id,
+                expected_markers=set(gap.expected_markers),
+                detected_markers=set(gap.detected_markers),
+                missing_markers=retry_markers,
+                gap_count=len(retry_markers),
+                gap_rate=gap.gap_rate,
+                body_page_range=gap.body_page_range,
+            )
+            retry_anchors, retry_summary = _materialize_visual_findings(
+                findings=retry_findings,
+                gap=retry_gap,
+                page_by_no=page_by_no,
+                candidate_pages=sample_pages,
+            )
+            for anchor in retry_anchors:
+                try:
+                    marker = int(anchor.normalized_marker)
+                except (ValueError, TypeError):
+                    continue
+                if marker in recovered_markers:
+                    continue
+                recovered_markers.add(marker)
+                anchors.append(anchor)
+            summary["found"] += int(retry_summary.get("found") or 0)
+            summary["mapped"] += int(retry_summary.get("mapped") or 0)
+            summary["match_failed"] += int(retry_summary.get("match_failed") or 0)
+            duration_ms += int(max(0.0, (time.time() - retry_started) * 1000.0))
 
     if summary.get("found"):
         print(
@@ -813,6 +944,7 @@ def build_visual_recovery_overrides(
                 phase2=phase2,
                 pages=pages,
                 pdf_path=pdf_path,
+                body_anchors=body_anchors,
             )
         except Exception as exc:
             print(

@@ -58,6 +58,8 @@ def _run_export(*, body_text: str, notes: list[tuple[str, str, str]],
                 matched_links: list[NoteLinkRecord] | None = None,
                 note_section_id: str | None = None,
                 chapter_id: str = "ch1", chapter_title: str = "Test Chapter",
+                skipped_note_ids: set[str] | None = None,
+                note_items_by_id: dict[str, object] | None = None,
                 return_summary: bool = False) -> str | tuple[str, dict[str, int]]:
     chapter = SimpleNamespace(chapter_id=chapter_id, title=chapter_title, pages=[1])
     body_units = [_make_body_unit(chapter_id, body_text)]
@@ -67,10 +69,11 @@ def _run_export(*, body_text: str, notes: list[tuple[str, str, str]],
     ]
     content, summary = _build_section_markdown(
         chapter, section_heads=[], body_units=body_units,
-        note_units=note_units, matched_links=list(matched_links or []), note_items_by_id={},
+        note_units=note_units, matched_links=list(matched_links or []), note_items_by_id=note_items_by_id or {},
         body_anchors_by_id={}, include_diagnostic_entries=False,
         diagnostic_machine_by_page={},
         book_type="mixed", chapter_note_mode="chapter_endnote_primary",
+        skipped_note_ids=skipped_note_ids or set(),
     )
     if return_summary:
         return content, summary
@@ -201,6 +204,41 @@ class ExportNotesSectionSplitTest(unittest.TestCase):
         self.assertNotIn("### NOTES", content)
         self.assertNotIn("[^1]:", content)
         self.assertNotRegex(content, r"(?m)^\[\^1\]$")
+
+    def test_unreferenced_same_chapter_endnote_is_not_exported(self):
+        content, summary = _run_export(
+            body_text="Body{{NOTE_REF:en-001}} with one real reference.",
+            notes=[
+                ("en-001", "endnote", "1. Referenced note."),
+                ("en-002", "endnote", "2. Unreferenced note."),
+            ],
+            return_summary=True,
+        )
+
+        self.assertIn("[^1]:", content)
+        self.assertNotIn("[^2]:", content)
+        self.assertEqual(int(summary.get("orphan_definition_count") or 0), 0)
+
+    def test_skipped_endnote_keeps_text_without_orphan_definition(self):
+        content, summary = _run_export(
+            body_text="Body{{NOTE_REF:en-001}} with one injected reference.",
+            notes=[
+                ("en-001", "endnote", "1. Referenced note."),
+                ("en-002", "endnote", "2. Known uninjected note."),
+            ],
+            skipped_note_ids={"en-002"},
+            note_items_by_id={
+                "en-001": SimpleNamespace(note_item_id="en-001", marker="1", chapter_id="ch1", page_no=1, note_kind="endnote"),
+                "en-002": SimpleNamespace(note_item_id="en-002", marker="2", chapter_id="ch1", page_no=1, note_kind="endnote"),
+            },
+            return_summary=True,
+        )
+
+        self.assertIn("[^1]:", content)
+        self.assertIn("> 2. Known uninjected note.", content)
+        self.assertNotIn("[^2]:", content)
+        self.assertEqual(int(summary.get("orphan_definition_count") or 0), 0)
+        self.assertEqual(int(summary.get("known_unlinked_definition_count") or 0), 1)
 
     def test_footnote_marks_body_with_star_not_bracket(self):
         """footnote ref 在正文中以 * 呈现，不在 ### NOTES 中。"""

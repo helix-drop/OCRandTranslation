@@ -8,6 +8,7 @@ from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.note_linking import (
     _apply_link_overrides,
     _chapter_contracts,
+    _materialize_anchor_overrides,
     _phase2_from_chapter_layers,
     _repair_explicit_footnote_anchor_ocr_variants,
     build_note_link_table,
@@ -199,6 +200,8 @@ class FnmReModule4LinkingTest(unittest.TestCase):
 
     def test_biopolitics_contract_v2_def_anchor_mismatch_is_resolved(self):
         """Biopolitics 的定义数与正文 anchor 数应保持对齐。"""
+        if not load_auto_visual_toc("Biopolitics"):
+            self.skipTest("Biopolitics fixture 缺少 visual TOC，fallback 结构不用于 contract 对齐断言")
         pages, layers = self._build_biopolitics_inputs()
         result = build_note_link_table(layers, pages)
         self.assertTrue(result.gate_report.hard["link.def_anchor_aligned"])
@@ -323,6 +326,136 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             int(dict(second_result.diagnostics.get("override_summary") or {}).get("invalid_override_count") or 0),
             0,
         )
+
+    def test_anchor_override_does_not_duplicate_existing_explicit_anchor(self):
+        explicit_anchor = BodyAnchorRecord(
+            anchor_id="anchor-explicit-1",
+            chapter_id="ch-1",
+            page_no=10,
+            paragraph_index=0,
+            char_start=24,
+            char_end=36,
+            source_marker="<sup>1</sup>",
+            normalized_marker="1",
+            anchor_kind="footnote",
+            certainty=1.0,
+            source_text="A paragraph with marker <sup>1</sup>.",
+            source="markdown:html",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+
+        anchors, summary, logs = _materialize_anchor_overrides(
+            [explicit_anchor],
+            anchor_overrides={
+                "llm-anchor-fn-1": {
+                    "action": "create",
+                    "anchor_id": "llm-anchor-fn-1",
+                    "chapter_id": "ch-1",
+                    "page_no": 10,
+                    "paragraph_index": 0,
+                    "char_start": 8,
+                    "char_end": 9,
+                    "normalized_marker": "1",
+                    "anchor_kind": "footnote",
+                    "certainty": 0.9,
+                    "source": "llm",
+                }
+            },
+            chapter_body_text_by_page={
+                ("ch-1", 10): "A paragraph with marker <sup>1</sup>."
+            },
+        )
+
+        self.assertEqual([row.anchor_id for row in anchors], ["anchor-explicit-1"])
+        self.assertEqual(int(summary.get("created_count") or 0), 0)
+        self.assertEqual(int(summary.get("rejected_count") or 0), 1)
+        self.assertIn(
+            "llm-anchor-fn-1:existing_explicit_anchor",
+            list(summary.get("rejected_reasons") or []),
+        )
+        self.assertEqual(logs, [])
+
+    def test_link_override_canonicalizes_rejected_llm_anchor_to_existing_explicit_anchor(self):
+        explicit_anchor = BodyAnchorRecord(
+            anchor_id="anchor-explicit-1",
+            chapter_id="ch-1",
+            page_no=10,
+            paragraph_index=0,
+            char_start=24,
+            char_end=36,
+            source_marker="<sup>1</sup>",
+            normalized_marker="1",
+            anchor_kind="footnote",
+            certainty=1.0,
+            source_text="A paragraph with marker <sup>1</sup>.",
+            source="markdown:html",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+        note_item = NoteItemRecord(
+            note_item_id="fn-1",
+            region_id="rg-1",
+            chapter_id="ch-1",
+            page_no=10,
+            marker="1",
+            marker_type="numeric",
+            text="Footnote one.",
+            source="footnotes",
+            source_page_label="10",
+            is_reconstructed=False,
+            review_required=False,
+        )
+        region = NoteRegionRecord(
+            region_id="rg-1",
+            chapter_id="ch-1",
+            page_start=10,
+            page_end=10,
+            pages=[10],
+            note_kind="footnote",
+            scope="chapter",
+            source="fnBlocks",
+            heading_text="",
+            start_reason="unit-test",
+            end_reason="unit-test",
+            region_marker_alignment_ok=True,
+            region_start_first_source_marker="1",
+            region_first_note_item_marker="1",
+            review_required=False,
+        )
+        link = NoteLinkRecord(
+            link_id="link-1",
+            chapter_id="ch-1",
+            region_id="rg-1",
+            note_item_id="fn-1",
+            anchor_id="",
+            status="orphan_note",
+            resolver="rule",
+            confidence=0.0,
+            note_kind="footnote",
+            marker="1",
+            page_no_start=10,
+            page_no_end=10,
+        )
+
+        links, summary, _logs = _apply_link_overrides(
+            [link],
+            link_overrides={
+                "link-1": {
+                    "action": "match",
+                    "note_item_id": "fn-1",
+                    "anchor_id": "llm-anchor-fn-1",
+                }
+            },
+            note_items=[note_item],
+            body_anchors=[explicit_anchor],
+            note_regions=[region],
+        )
+
+        self.assertEqual(links[0].status, "matched")
+        self.assertEqual(links[0].anchor_id, "anchor-explicit-1")
+        self.assertEqual(int(summary.get("matched_link_override_count") or 0), 1)
+        self.assertEqual(int(summary.get("invalid_override_count") or 0), 0)
 
     def test_missing_footnote_anchor_creates_synthetic_warn(self):
         pages = [
@@ -544,7 +677,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
         self.assertEqual(note_link.status, "orphan_note")
         self.assertEqual(note_link.anchor_id, "")
 
-    def test_gap_fill_recovers_small_leading_and_trailing_endnote_anchor_gaps(self):
+    def test_gap_fill_does_not_synthesize_leading_or_trailing_anchor_gaps_without_evidence(self):
         pages = [
             _make_page(1, markdown="# Chapter One\nOnly the middle marker [2] survived OCR.", block_text="Chapter One"),
         ]
@@ -613,10 +746,11 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             for row in result.data.anchors
             if row.chapter_id == "toc-ch-001"
         }
-        self.assertEqual(set(anchors_by_marker), {"1", "2", "3"})
-        self.assertTrue(anchors_by_marker["1"].synthetic)
+        self.assertEqual(set(anchors_by_marker), {"2"})
         self.assertFalse(anchors_by_marker["2"].synthetic)
-        self.assertTrue(anchors_by_marker["3"].synthetic)
+        # bracket [2] → resolve_anchor_kind → "unknown" (无脚注带)。
+        # anchor_kind="endnote" 的锚点数为 0，anchor_total=0 时不触发
+        # def_anchor_mismatch，contract 层面无假阳性。
         self.assertTrue(result.gate_report.hard["link.def_anchor_aligned"])
 
     def test_chapter_endnote_first_marker_ignores_cross_chapter_stale_anchor_order(self):

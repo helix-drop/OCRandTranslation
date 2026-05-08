@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import replace
 import re
 from typing import Any
 
@@ -32,6 +33,9 @@ from FNM_RE.shared.text import page_markdown_text
 
 _NOTE_HEADING_RE = re.compile(r"(?im)^\s{0,3}(?:##\s*)?(NOTES|ENDNOTES)\s*$")
 _MARKDOWN_HEADING_LINE_RE = re.compile(r"^\s{0,3}#{1,6}\s*(.+?)\s*$")
+_REF_TOKEN_FOR_DEDUPE_RE = re.compile(
+    r"\{\{(?:NOTE|FN|EN)_REF:[^}]+\}\}|\[\^[^\]]+\]"
+)
 _MARKDOWN_NOTE_DEF_START_RE = re.compile(
     r"^\s*(?:"
     r"\$\s*\^\{\s*\d{1,4}[A-Za-z]?\s*\}\s*\$"
@@ -286,6 +290,35 @@ def _segment_paragraphs_from_body_pages(section: dict) -> list[UnitPageSegmentRe
     return page_segments
 
 
+def _chunk_visible_paragraphs(
+    segment: UnitPageSegmentRecord,
+    *,
+    current_parts: list[str],
+) -> list[UnitParagraphRecord]:
+    prior_text = "\n\n".join(current_parts[-2:])
+    prior_key = _paragraph_content_dedupe_key(prior_text)
+    paragraphs: list[UnitParagraphRecord] = []
+    for paragraph in segment.paragraphs:
+        source_text = str(paragraph.source_text or "").strip()
+        if not paragraph.consumed_by_prev:
+            paragraphs.append(paragraph)
+            continue
+        if "{{NOTE_REF:" not in source_text:
+            continue
+        source_key = _paragraph_content_dedupe_key(source_text)
+        if source_key and prior_key and source_key in prior_key:
+            continue
+        paragraphs.append(replace(paragraph, consumed_by_prev=False))
+    return paragraphs
+
+
+def _paragraph_content_dedupe_key(text: str) -> str:
+    normalized = _REF_TOKEN_FOR_DEDUPE_RE.sub(" ", str(text or ""))
+    normalized = re.sub(r"<[^>]+>", " ", normalized)
+    normalized = re.sub(r"\s+", " ", normalized).strip().lower()
+    return normalized
+
+
 def _chunk_body_page_segments(
     page_segments: list[UnitPageSegmentRecord],
     *,
@@ -321,7 +354,7 @@ def _chunk_body_page_segments(
 
     for segment in page_segments:
         page_no = int(segment.page_no or 0)
-        visible_paragraphs = [paragraph for paragraph in segment.paragraphs if not paragraph.consumed_by_prev]
+        visible_paragraphs = _chunk_visible_paragraphs(segment, current_parts=current_parts)
         segment_source = "\n\n".join(
             paragraph.source_text.strip()
             for paragraph in visible_paragraphs
@@ -337,7 +370,7 @@ def _chunk_body_page_segments(
             paragraph_count=len(visible_paragraphs),
             source_text=segment_source,
             display_text=segment_display or segment.source_text,
-            paragraphs=list(segment.paragraphs),
+            paragraphs=list(visible_paragraphs),
         )
         if page_no <= 0:
             continue

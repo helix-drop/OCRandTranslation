@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from FNM_RE.app.pipeline import build_phase3_structure, build_phase4_structure
-from FNM_RE.models import ChapterNoteModeRecord
+from FNM_RE.app.pipeline import (
+    _apply_anchor_overrides,
+    _apply_link_overrides,
+    build_phase3_structure,
+    build_phase4_structure,
+)
+from FNM_RE.models import BodyAnchorRecord, ChapterNoteModeRecord, NoteItemRecord, NoteLinkRecord, NoteRegionRecord
 from FNM_RE.status import build_phase4_status
 from FNM_RE.stages.reviews import build_structure_reviews
 
@@ -96,6 +101,132 @@ def _phase3_signature(phase3) -> tuple:
 
 
 class FnmRePhase4Test(unittest.TestCase):
+    def test_anchor_override_does_not_duplicate_existing_explicit_anchor(self):
+        explicit_anchor = BodyAnchorRecord(
+            anchor_id="anchor-explicit-1",
+            chapter_id="ch-1",
+            page_no=10,
+            paragraph_index=0,
+            char_start=24,
+            char_end=36,
+            source_marker="<sup>1</sup>",
+            normalized_marker="1",
+            anchor_kind="footnote",
+            certainty=1.0,
+            source_text="A paragraph with marker <sup>1</sup>.",
+            source="markdown:html",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+
+        anchors, summary = _apply_anchor_overrides(
+            [explicit_anchor],
+            anchor_overrides={
+                "llm-anchor-fn-1": {
+                    "action": "create",
+                    "anchor_id": "llm-anchor-fn-1",
+                    "chapter_id": "ch-1",
+                    "page_no": 10,
+                    "paragraph_index": 0,
+                    "char_start": 8,
+                    "char_end": 9,
+                    "normalized_marker": "1",
+                    "anchor_kind": "footnote",
+                    "certainty": 0.9,
+                    "source": "llm",
+                }
+            },
+        )
+
+        self.assertEqual([row.anchor_id for row in anchors], ["anchor-explicit-1"])
+        self.assertEqual(int(summary.get("created_anchor_count") or 0), 0)
+        self.assertEqual(int(summary.get("skipped_duplicate_count") or 0), 1)
+        self.assertIn(
+            "llm-anchor-fn-1:existing_explicit_anchor",
+            list(summary.get("invalid_anchor_override_flags") or []),
+        )
+
+    def test_link_override_canonicalizes_rejected_llm_anchor_to_existing_explicit_anchor(self):
+        explicit_anchor = BodyAnchorRecord(
+            anchor_id="anchor-explicit-1",
+            chapter_id="ch-1",
+            page_no=10,
+            paragraph_index=0,
+            char_start=24,
+            char_end=36,
+            source_marker="<sup>1</sup>",
+            normalized_marker="1",
+            anchor_kind="footnote",
+            certainty=1.0,
+            source_text="A paragraph with marker <sup>1</sup>.",
+            source="markdown:html",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+        note_item = NoteItemRecord(
+            note_item_id="fn-1",
+            region_id="rg-1",
+            chapter_id="ch-1",
+            page_no=10,
+            marker="1",
+            marker_type="numeric",
+            text="Footnote one.",
+            source="footnotes",
+            source_page_label="10",
+            is_reconstructed=False,
+            review_required=False,
+        )
+        region = NoteRegionRecord(
+            region_id="rg-1",
+            chapter_id="ch-1",
+            page_start=10,
+            page_end=10,
+            pages=[10],
+            note_kind="footnote",
+            scope="chapter",
+            source="fnBlocks",
+            heading_text="",
+            start_reason="unit-test",
+            end_reason="unit-test",
+            region_marker_alignment_ok=True,
+            region_start_first_source_marker="1",
+            region_first_note_item_marker="1",
+            review_required=False,
+        )
+        link = NoteLinkRecord(
+            link_id="link-1",
+            chapter_id="ch-1",
+            region_id="rg-1",
+            note_item_id="fn-1",
+            anchor_id="",
+            status="orphan_note",
+            resolver="rule",
+            confidence=0.0,
+            note_kind="footnote",
+            marker="1",
+            page_no_start=10,
+            page_no_end=10,
+        )
+
+        links, summary = _apply_link_overrides(
+            [link],
+            link_overrides={
+                "link-1": {
+                    "action": "match",
+                    "note_item_id": "fn-1",
+                    "anchor_id": "llm-anchor-fn-1",
+                }
+            },
+            note_items=[note_item],
+            body_anchors=[explicit_anchor],
+            note_regions=[region],
+        )
+
+        self.assertEqual(links[0].status, "matched")
+        self.assertEqual(links[0].anchor_id, "anchor-explicit-1")
+        self.assertEqual(int(summary.get("matched_link_override_count") or 0), 1)
+        self.assertEqual(int(summary.get("invalid_override_count") or 0), 0)
+
     def test_boundary_review_required_from_chapter_state(self):
         phase3 = build_phase3_structure(_endnote_pages(), page_overrides=_endnote_overrides())
         phase3.chapters[0].boundary_state = "review_required"

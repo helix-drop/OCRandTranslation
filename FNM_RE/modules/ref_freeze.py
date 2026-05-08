@@ -25,6 +25,11 @@ from FNM_RE.stages.units import _chunk_body_page_segments, _segment_paragraphs_f
 from FNM_RE.shared.notes import _collect_chapter_page_numbers, _safe_int
 
 _TOKEN_CANDIDATE_RE_TEMPLATE = r"\[\s*(?:\^)?\s*{marker}\s*\]"
+# Unicode 上标数字 → 普通数字的反向映射，供 _inject_token_once 生成候选变体
+_UNICODE_SUPERSCRIPT_DIGITS = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
+}
 
 def _chapter_order_map(chapter_layers: ChapterLayers) -> dict[str, int]:
     return {
@@ -60,6 +65,11 @@ def _resolve_note_item_owner(
 _NESTED_NOTE_REF_RE = re.compile(
     r"\{\{NOTE_REF:([^}]*?)\{\{NOTE_REF:([^}]+)\}\}([^}]*?)\}\}", re.IGNORECASE
 )
+_NOTE_REF_TOKEN_RE = re.compile(r"\{\{NOTE_REF:[^}]+\}\}", re.IGNORECASE)
+_SPLIT_NOTE_REF_RE = re.compile(
+    r"\{\{NO(\{\{NOTE_REF:([^}]+)\}\})TE_REF:([^}]+)\}\}",
+    re.IGNORECASE,
+)
 
 
 
@@ -73,6 +83,20 @@ def _cleanup_nested_note_refs(text: str) -> str:
     changed = True
     while changed:
         changed = False
+        split_match = _SPLIT_NOTE_REF_RE.search(payload)
+        if split_match:
+            inner_token = str(split_match.group(1) or "")
+            outer_id = str(split_match.group(3) or "")
+            outer_token = f"{{{{NOTE_REF:{outer_id}}}}}"
+            replacement = _SPLIT_NOTE_REF_RE.sub(
+                lambda _m: f"{outer_token} {inner_token}",
+                payload,
+                count=1,
+            )
+            if replacement != payload:
+                payload = replacement
+                changed = True
+                continue
         match = _NESTED_NOTE_REF_RE.search(payload)
         if match:
             outer_prefix = str(match.group(1) or "")
@@ -92,6 +116,23 @@ def _cleanup_nested_note_refs(text: str) -> str:
     return payload
 
 
+def _shift_coords_out_of_note_ref_token(
+    payload: str,
+    coord_start: int,
+    coord_end: int,
+) -> tuple[int, int]:
+    """避免后续注入把已有 NOTE_REF token 切开。"""
+    for match in _NOTE_REF_TOKEN_RE.finditer(str(payload or "")):
+        token_start, token_end = match.span()
+        overlaps = coord_start < token_end and coord_end > token_start
+        insertion_inside = coord_start == coord_end and token_start < coord_start < token_end
+        starts_inside = token_start < coord_start < token_end
+        ends_inside = token_start < coord_end < token_end
+        if overlaps or insertion_inside or starts_inside or ends_inside:
+            return token_end, token_end
+    return coord_start, coord_end
+
+
 def _inject_token_once(
     text: str,
     *,
@@ -105,10 +146,43 @@ def _inject_token_once(
     token = frozen_note_ref(note_id)
     if not token:
         return payload, False
+    if token in payload:
+        return payload, True
+    normalized_marker = str(marker or "").strip()
+    source_marker = str(anchor.source_marker or "").strip()
+    anchor_source = str(anchor.source or "").strip()
+    try:
+        coord_start = int(anchor.char_start or 0)
+        coord_end = int(anchor.char_end or 0)
+    except (TypeError, ValueError):
+        coord_start = 0
+        coord_end = 0
+    if 0 <= coord_start <= coord_end <= len(payload):
+        coord_start, coord_end = _shift_coords_out_of_note_ref_token(
+            payload, coord_start, coord_end
+        )
+        if anchor_source == "llm" and coord_end >= coord_start and coord_end > 0:
+            return payload[:coord_end] + token + payload[coord_end:], True
+        if anchor_source == "visual_repair" and coord_start > 0:
+            return payload[:coord_start] + token + payload[coord_start:], True
+        if coord_end > coord_start:
+            coord_slice = payload[coord_start:coord_end]
+            if (
+                (source_marker and source_marker in coord_slice)
+                or (normalized_marker and normalized_marker in coord_slice)
+            ):
+                return payload[:coord_start] + token + payload[coord_end:], True
     candidates = [
-        str(anchor.source_marker or "").strip(),
         f"[{str(marker or '').strip()}]",
     ]
+    if source_marker and not source_marker.isdigit():
+        candidates.insert(0, source_marker)
+    # Unicode 上标变体：Goldstein ch5 marker 96 原文为 ⁹⁶，source_marker
+    # 是 <sup>96</sup>，需逐个尝试所有上标字符组合。
+    if str(marker or "").strip().isdigit():
+        uni_sup = "".join(_UNICODE_SUPERSCRIPT_DIGITS.get(d, d) for d in str(marker))
+        if uni_sup != str(marker):
+            candidates.append(uni_sup)
     for candidate in candidates:
         if not candidate:
             continue
@@ -118,12 +192,14 @@ def _inject_token_once(
         phrase = str(anchor.source_text or "").strip()
         if phrase and phrase in payload:
             return payload.replace(phrase, f"{phrase}{token}", 1), True
-    normalized_marker = str(marker or "").strip()
     if normalized_marker:
         pattern = re.compile(_TOKEN_CANDIDATE_RE_TEMPLATE.format(marker=re.escape(normalized_marker)))
         replaced, count = pattern.subn(token, payload, count=1)
         if count > 0:
             return replaced, True
+    # 最后兜底：直接搜 token marker 串
+    if str(marker or "").strip() and str(marker).strip() in payload:
+        return payload.replace(str(marker).strip(), token, 1), True
     return payload, False
 
 def _unit_contract_issues(*, body_units: list[FrozenUnit], note_units: list[FrozenUnit]) -> list[str]:
@@ -225,7 +301,8 @@ def build_frozen_units(
             if page_no <= 0:
                 continue
             page_map[page_no] = {"page_no": page_no, "text": str(page.text or "")}
-            page_order.append(page_no)
+            if page_no not in page_order:
+                page_order.append(page_no)
         chapter_body_pages[chapter_id] = page_map
         chapter_body_page_order[chapter_id] = page_order
 

@@ -100,6 +100,31 @@ def _normalize_markdown_content(content: str) -> str:
     return f"{text}\n" if text else ""
 
 
+# 匹配 <sup> 内非数字内容（法语序数上标 e, er, re, ème 等）
+_ORDINAL_SUP_RE = re.compile(r"<sup>\s*([^\d<]+?)\s*</sup>", re.IGNORECASE)
+# 匹配剩余所有 <sup>...</sup> 标签（安全网）
+_ANY_SUP_RE = re.compile(r"</?sup[^>]*>", re.IGNORECASE)
+# 匹配 <div> / </div> 标签
+_DIV_TAG_RE = re.compile(r"</?div[^>]*>", re.IGNORECASE)
+
+
+def _clean_export_html(text: str) -> str:
+    """清理导出文本中残留的 HTML 标签。
+
+    (1) <sup>e</sup> / <sup>er</sup> → e / er（法语序数上标还原）
+    (2) <div> / </div> → 移除标签，保留内容
+    (3) 任何残留 <sup> / </sup> → 移除标签，保留内容
+    """
+    cleaned = str(text or "")
+    # 序数上标：<sup>e</sup> → e, <sup>er</sup> → er
+    cleaned = _ORDINAL_SUP_RE.sub(r"\1", cleaned)
+    # <div> 标签直接移除
+    cleaned = _DIV_TAG_RE.sub("", cleaned)
+    # 残留 <sup> / </sup> 标签移除
+    cleaned = _ANY_SUP_RE.sub("", cleaned)
+    return cleaned
+
+
 def _strip_trailing_image_only_block(text: str) -> str:
     candidate = str(text or "").strip()
     if not candidate:
@@ -265,6 +290,7 @@ def _rewrite_body_text_with_local_refs(
     local_ref_numbers: dict[str, int],
     ordered_note_ids: list[str],
     footnote_ids_seen: list[str] | None = None,
+    note_marker_by_id: dict[str, str] | None = None,
 ) -> str:
     updated = _replace_note_refs_with_local_labels(
         text,
@@ -273,6 +299,7 @@ def _rewrite_body_text_with_local_refs(
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
         footnote_ids_seen=footnote_ids_seen,
+        note_marker_by_id=note_marker_by_id,
     )
     marker_usage_index: dict[str, int] = {}
     updated = _replace_raw_bracket_refs_with_local_labels(
@@ -283,6 +310,7 @@ def _rewrite_body_text_with_local_refs(
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
         footnote_ids_seen=footnote_ids_seen,
+        note_marker_by_id=note_marker_by_id,
     )
     updated = _replace_raw_superscript_refs_with_local_labels(
         updated,
@@ -292,6 +320,7 @@ def _rewrite_body_text_with_local_refs(
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
         footnote_ids_seen=footnote_ids_seen,
+        note_marker_by_id=note_marker_by_id,
     )
     updated = _replace_raw_unicode_superscript_refs_with_local_labels(
         updated,
@@ -301,6 +330,7 @@ def _rewrite_body_text_with_local_refs(
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
         footnote_ids_seen=footnote_ids_seen,
+        note_marker_by_id=note_marker_by_id,
     )
     updated = replace_frozen_refs(updated)
     for match in re.finditer(r"\{\{NOTE_REF:([^}]+)\}\}", str(updated or "")):
@@ -424,6 +454,38 @@ def _build_section_markdown(
     footnote_ids_written: list[str] = []
     chapter_has_body = False
 
+    # note_id → 原始标记号（数字），供 ref_rewriter 使用原始编号避免偏移。
+    # 仅包含当前章的 note_items，避免跨章标记号污染。
+    note_marker_by_id: dict[str, str] = {}
+    for nid, item in (note_items_by_id or {}).items():
+        item_chapter = str(getattr(item, "chapter_id", "") or "").strip()
+        if item_chapter and item_chapter != chapter_id:
+            continue
+        marker = str(item.marker or "").strip()
+        if marker.isdigit():
+            note_marker_by_id[nid] = marker
+
+    # 预占 skipped note 的原始标记号，防止后续顺序编号挤压造成偏移。
+    # skipped note 在正文中无对应 body ref，但必须保留其原始编号位置。
+    # 必须按当前章过滤：全书级 skipped_note_ids 若不加过滤，其他章的 skipped
+    # marker 会进入本章 local_ref_numbers，造成编号漂移（ch7 出现 [^62]...[^74]）。
+    # 只预占 endnote——footnote 有自己的 inline 编号体系，不应占用 endnote 号码。
+    for nid in (skipped_note_ids or set()):
+        item = note_items_by_id.get(nid)
+        if not item:
+            continue
+        if str(getattr(item, "note_kind", "") or "").strip() != "endnote":
+            continue
+        item_chapter = str(getattr(item, "chapter_id", "") or "").strip()
+        if item_chapter and item_chapter != chapter_id:
+            continue
+        marker = str(item.marker or "").strip()
+        if marker.isdigit():
+            reserved = int(marker)
+            if reserved > 0 and nid not in local_ref_numbers:
+                local_ref_numbers[nid] = reserved
+                ordered_note_ids.append(nid)
+
     sorted_units = sorted(
         [unit for unit in body_units if str(unit.section_id or "") == chapter_id],
         key=lambda row: (int(row.page_start or 0), int(row.page_end or int(row.page_start or 0)), str(row.unit_id or "")),
@@ -463,6 +525,7 @@ def _build_section_markdown(
             local_ref_numbers=local_ref_numbers,
             ordered_note_ids=ordered_note_ids,
             footnote_ids_seen=footnote_ids_written,
+            note_marker_by_id=note_marker_by_id,
         )
         if (
             not str(unit.translated_text or "").strip()
@@ -506,25 +569,17 @@ def _build_section_markdown(
         lines.append(f"### {title}")
         lines.append("")
 
-    # 将章内有 note_unit 但 body 中未遇到的 endnote 补入序列末尾，
-    # 避免因某个 orphan endnote 缺失导致后续所有编号偏移（Biopolitics  marker 18→17）。
-    chapter_endnote_ids = sorted(
-        [nid for nid, kind in note_kind_by_id.items() if kind == "endnote"],
-        key=lambda nid: str(note_text_by_id.get(nid, "") or ""),
-    )
-    for nid in chapter_endnote_ids:
-        if nid not in local_ref_numbers:
-            local_ref_numbers[nid] = len(local_ref_numbers) + 1
-            ordered_note_ids.append(nid)
-
+    # 只用当前章的 endnote note_id；泄漏的跨章 id 不在 note_kind_by_id 中，
+    # .get(nid) 返回 None ≠ \"endnote\"，不会被误渲染。
     endnote_ids = [nid for nid in ordered_note_ids
-                   if note_kind_by_id.get(nid, "") in ("endnote", "")]
-    unknown_ids = [nid for nid in ordered_note_ids if nid not in note_kind_by_id]
+                   if note_kind_by_id.get(nid) == "endnote"]
     global_note_text_by_id = _build_note_text_by_id_for_chapter(
         None, note_units=note_units
     )
+    known_unlinked_definition_count = 0
 
     def _emit_definitions(ids: list[str]) -> None:
+        nonlocal known_unlinked_definition_count
         _skip_ids = skipped_note_ids or set()
 
         def _sort_key(nid: str) -> tuple[int, str]:
@@ -548,7 +603,14 @@ def _build_section_markdown(
             if note_id in _skip_ids:
                 item = note_items_by_id.get(note_id)
                 display_marker = str(item.marker or "").strip() if item else ""
-                rendered.append(f"> **{display_marker}**. {text}")
+                # 已知未注入的注释保留内容，但不渲染成 Markdown footnote
+                # definition；否则 Phase 5/6 会把同一个已知缺口升级成
+                # orphan_local_definition hard blocker。
+                known_unlinked_definition_count += 1
+                if display_marker:
+                    rendered.append(f"> {display_marker}. {text}")
+                else:
+                    rendered.append(f"> {text}")
             else:
                 number = int(local_ref_numbers.get(note_id) or 0)
                 if number <= 0:
@@ -560,9 +622,10 @@ def _build_section_markdown(
         lines.append("")
         lines.extend(rendered)
 
-    _emit_definitions(endnote_ids + unknown_ids)
+    _emit_definitions(endnote_ids)
 
     content = _strip_trailing_image_only_block("\n".join(lines).strip())
+    content = _clean_export_html(content)
     body_part = content.split("### NOTES", 1)[0] if "### NOTES" in content else content
     refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", body_part)))
     defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
@@ -574,6 +637,7 @@ def _build_section_markdown(
         "local_definition_count": len(defs) + len(footnote_defs),
         "missing_definition_count": effective_missing,
         "orphan_definition_count": len(set(defs) - set(refs)),
+        "known_unlinked_definition_count": known_unlinked_definition_count,
         "inline_footnote_paragraph_attach_count": 0,
         "inline_footnote_page_fallback_count": 0,
         "chapter_end_footnote_definition_count": len(defs) + len(footnote_defs),

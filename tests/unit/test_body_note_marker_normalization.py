@@ -35,6 +35,16 @@ class BodyNoteMarkerNormalizationTest(unittest.TestCase):
         text = "à cette notion [6]. Ce que j'avais essayé de repérer"
         self.assertIn("6", self._markers(text))
 
+    def test_broken_left_bracket_form(self):
+        """OCR 漏掉右方括号时，紧贴正文的 `[N.»` 仍是注号。"""
+        text = "les formes de la société civile se rapportent à une origine obscure et lointaine[25.» Bref"
+        self.assertIn("25", self._markers(text))
+
+    def test_spaced_broken_left_bracket_is_not_marker(self):
+        """带空格的残缺引用更像文献/页码引用，不按正文上标处理。"""
+        text = "voir Ferguson [25.» puis comparer avec Smith"
+        self.assertEqual(self._markers(text), [])
+
     def test_unicode_superscript_form(self):
         """Unicode 上标 ¹²³⁴⁵ 识别为对应数字（章 1 注 1-5 形态）。"""
         markers = self._markers("« Acheronta movebo¹. » ... Walpole² ... « Quieta non movere³ » ... folie ?⁴ ... ensuite⁵.")
@@ -77,6 +87,11 @@ class BodyNoteMarkerNormalizationTest(unittest.TestCase):
     def test_year_in_brackets_filtered(self):
         """[1789] 四位数年份不识别为 marker。"""
         text = "voir [1789] et [1810], puis Walpole[^2]"
+        self.assertEqual(self._markers(text), ["2"])
+
+    def test_bracket_fragment_inside_year_not_marker(self):
+        """OCR 将年份切成 [19]33 / 1960-[19]70 时，括号片段不是注号。"""
+        text = "Eucken avait dès 1930, [19]33, puis autour des années 1960-[19]70, voir Walpole[^2]."
         self.assertEqual(self._markers(text), ["2"])
 
     # ── 真实 Biopolitics 章 1 段落 ─────────────

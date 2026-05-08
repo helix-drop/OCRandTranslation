@@ -586,7 +586,8 @@ def _reclassify_post_body_fnblocks_as_endnote(
 ) -> int:
     """将 post_body 章节中 fnBlocks 来源的连续编号 footnote 重分类为 endnote。
 
-    四重守卫（全部通过才重分类）：
+    五重守卫（全部通过才重分类）：
+    G0 — band 内页面没有正文文本（排除 ch14 这类正文+页底脚注的 post_body 页）
     G1 — 书有 page_role="note" 的页面（排除纯 footnote 书如 Napoleon）
     G2 — chapter.title in phase1.summary.post_body_titles
     G3 — band 内 numeric marker items ≥ 3
@@ -648,6 +649,17 @@ def _reclassify_post_body_fnblocks_as_endnote(
         bands.append(current_band)
         for band in bands:
             if len(band) < 2:
+                continue
+            # G0：post_body 的 fnBlocks 只有在该页是纯注释页时才允许重分类为
+            # endnote。正文页 + 页底 fnBlocks（ch14 pp.345-348）是编辑脚注。
+            # 判断依据：page_role="note" 或 页首有 ## NOTES 标题 = 纯注释页；
+            # 否则（page_role="body" 或无 page_role）= 正文页，不重分类。
+            band_is_note_only = all(
+                str(page_role_by_no.get(pn) or "") == "note"
+                or bool(first_notes_heading(page_by_no.get(pn) or {}))
+                for pn in band
+            )
+            if not band_is_note_only:
                 continue
             numeric_items: list[dict] = []
             for pn in band:

@@ -289,12 +289,43 @@ def build_chapter_skeleton(
             max(0, len(fallback_section_heads_raw)),
         )
         source_hint: ChapterSource = "visual_toc"
+    elif fallback_chapters_raw:
+        chapters_raw = list(fallback_chapters_raw)
+        merged_section_fallbacks = list(fallback_section_heads_raw)
+        chapter_source_summary = {
+            "source": "fallback",
+            "chapter_level": None,
+            "visual_toc_chapter_count": 0,
+            "legacy_chapter_count": len(fallback_chapters_raw),
+            "fallback_used": True,
+            "body_section_fallback_suppressed": 0,
+        }
+        source_hint = "fallback"
+        visual_meta = dict(visual_meta or {})
+        visual_meta.setdefault("chapter_title_alignment_ok", True)
+        visual_meta.setdefault("chapter_section_alignment_ok", True)
+        visual_meta.setdefault("toc_semantic_contract_ok", True)
     else:
-        raise RuntimeError(
-            "无法构建章节结构：视觉目录和手动目录均为空。"
-            "请确保 test_example/<book>/ 目录下存在 目录.pdf，"
-            "或 visual_toc 成功生成了 items。"
-        )
+        chapters_raw = []
+        merged_section_fallbacks = []
+        chapter_source_summary = {
+            "source": "fallback",
+            "chapter_level": None,
+            "visual_toc_chapter_count": 0,
+            "legacy_chapter_count": 0,
+            "fallback_used": False,
+            "body_section_fallback_suppressed": 0,
+            "no_chapter_candidate": True,
+        }
+        source_hint = "fallback"
+        visual_meta = dict(visual_meta or {})
+        visual_meta.setdefault("chapter_title_alignment_ok", True)
+        visual_meta.setdefault("chapter_section_alignment_ok", True)
+        blocking_reasons = list(visual_meta.get("toc_semantic_blocking_reasons") or [])
+        if "toc_no_exportable_chapter" not in blocking_reasons:
+            blocking_reasons.append("toc_no_exportable_chapter")
+        visual_meta["toc_semantic_blocking_reasons"] = blocking_reasons
+        visual_meta["toc_semantic_contract_ok"] = False
 
     preserved_post_body_title_keys = {
         chapter_title_match_key(title)

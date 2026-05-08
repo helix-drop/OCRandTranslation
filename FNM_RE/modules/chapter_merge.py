@@ -34,7 +34,6 @@ from FNM_RE.modules.types import (
 from FNM_RE.shared.export_constants import (
     _ANY_NOTE_REF_RE,
     _TRAILING_IMAGE_ONLY_BLOCK_RE,
-    _UNICODE_SUPERSCRIPT_TRANSLATION,
     _should_replace_definition_text,
 )
 from FNM_RE.shared.note_lookup import _sanitize_note_text
@@ -42,13 +41,14 @@ from FNM_RE.shared.ref_rewriter import (
     _marker_aliases,
     _resolve_note_id,
     replace_note_refs_with_local_labels as _replace_note_refs_with_local_labels,
-    replace_raw_bracket_refs_with_local_labels as _replace_raw_bracket_refs_with_local_labels,
-    replace_raw_superscript_refs_with_local_labels as _replace_raw_superscript_refs_with_local_labels,
-    replace_raw_unicode_superscript_refs_with_local_labels as _replace_raw_unicode_superscript_refs_with_local_labels,
 )
 from FNM_RE.stages import export as export_stage
 from FNM_RE.stages import export_audit as export_audit_stage
 from FNM_RE.shared.notes import _collect_chapter_page_numbers, _safe_int
+
+
+_LEGACY_EN_NOTE_REF_RE = re.compile(r"\[EN-([^\]]+)\]", re.IGNORECASE)
+
 
 def _chapter_pages_from_layer(chapter: Any) -> list[int]:
     return _collect_chapter_page_numbers(chapter)
@@ -206,14 +206,26 @@ def _to_translation_unit_records(frozen_units: FrozenUnits) -> list[TranslationU
         )
     return rows
 
+def _effective_note_mode_from_layer(chapter: Any) -> str:
+    has_endnote = bool(getattr(chapter, "endnote_items", []) or [])
+    has_footnote = bool(getattr(chapter, "footnote_items", []) or [])
+    if has_endnote:
+        if any(str(getattr(region, "scope", "") or "") == "book" for region in list(getattr(chapter, "endnote_regions", []) or [])):
+            return "book_endnote_bound"
+        return "chapter_endnote_primary"
+    if has_footnote:
+        return "footnote_primary"
+    return "no_notes"
+
+
 def _to_chapter_note_mode_records(chapter_layers: ChapterLayers) -> list[ChapterNoteModeRecord]:
     rows: list[ChapterNoteModeRecord] = []
     for chapter in chapter_layers.chapters:
-        policy = dict(chapter.policy_applied or {})
+        note_mode = _effective_note_mode_from_layer(chapter)
         rows.append(
             ChapterNoteModeRecord(
                 chapter_id=str(chapter.chapter_id or ""),
-                note_mode=str(policy.get("note_mode") or "no_notes"),  # type: ignore[arg-type]
+                note_mode=note_mode,  # type: ignore[arg-type]
                 region_ids=[
                     str(region.region_id or "")
                     for region in list(chapter.endnote_regions or [])
@@ -226,11 +238,15 @@ def _to_chapter_note_mode_records(chapter_layers: ChapterLayers) -> list[Chapter
     return rows
 
 def _phase5_book_type(chapter_layers: ChapterLayers) -> str:
-    for chapter in chapter_layers.chapters:
-        policy = dict(chapter.policy_applied or {})
-        book_type = str(policy.get("book_type") or "").strip()
-        if book_type:
-            return book_type
+    modes = {_effective_note_mode_from_layer(chapter) for chapter in chapter_layers.chapters}
+    has_footnote = "footnote_primary" in modes
+    has_endnote = bool({"chapter_endnote_primary", "book_endnote_bound"} & modes)
+    if has_footnote and has_endnote:
+        return "mixed"
+    if has_endnote:
+        return "endnote_only"
+    if has_footnote:
+        return "footnote_only"
     return "no_notes"
 
 def _to_diagnostic_pages(diagnostic_machine_by_page: Mapping[int | str, str] | None) -> list[DiagnosticPageRecord]:
@@ -399,65 +415,14 @@ def _rewrite_residual_raw_markers_for_chapter(
     )
     local_ref_numbers: dict[str, int] = {f"__reserved_{num}": int(num) for num in existing_numbers}
     ordered_note_ids: list[str] = [f"__reserved_{num}" for num in existing_numbers]
-    marker_usage_index: dict[str, int] = {}
 
+    tokenized_body = _LEGACY_EN_NOTE_REF_RE.sub(r"{{NOTE_REF:\1}}", body_text)
     updated_body = _replace_note_refs_with_local_labels(
-        body_text,
+        tokenized_body,
         note_text_by_id=resolved_note_text_by_id,
         note_kind_by_id={},
         local_ref_numbers=local_ref_numbers,
         ordered_note_ids=ordered_note_ids,
-    )
-    updated_body = _replace_raw_bracket_refs_with_local_labels(
-        updated_body,
-        marker_note_sequences=marker_note_sequences,
-        marker_usage_index=marker_usage_index,
-        note_kind_by_id={},
-        local_ref_numbers=local_ref_numbers,
-        ordered_note_ids=ordered_note_ids,
-    )
-    updated_body = _replace_raw_superscript_refs_with_local_labels(
-        updated_body,
-        marker_note_sequences=marker_note_sequences,
-        marker_usage_index=marker_usage_index,
-        note_kind_by_id={},
-        local_ref_numbers=local_ref_numbers,
-        ordered_note_ids=ordered_note_ids,
-    )
-    updated_body = _replace_raw_unicode_superscript_refs_with_local_labels(
-        updated_body,
-        marker_note_sequences=marker_note_sequences,
-        marker_usage_index=marker_usage_index,
-        note_kind_by_id={},
-        local_ref_numbers=local_ref_numbers,
-        ordered_note_ids=ordered_note_ids,
-    )
-    local_number_tokens = {
-        str(token)
-        for token in (
-            list(export_audit_stage.LOCAL_REF_RE.findall(updated_body))
-            + list(export_audit_stage.LOCAL_DEF_RE.findall(markdown_text))
-        )
-        if str(token).strip().isdigit()
-    }
-
-    def _replace_raw_bracket_with_existing_local_ref(match: re.Match) -> str:
-        marker = str(match.group(1) or "").strip()
-        return f"[^{marker}]" if marker in local_number_tokens else match.group(0)
-
-    def _replace_raw_sup_with_existing_local_ref(match: re.Match) -> str:
-        marker = str(match.group(1) or match.group(2) or "").strip()
-        if not marker:
-            marker = str(match.group(3) or "").translate(_UNICODE_SUPERSCRIPT_TRANSLATION).strip()
-        return f"[^{marker}]" if marker in local_number_tokens else match.group(0)
-
-    updated_body = export_audit_stage.RAW_BRACKET_NOTE_REF_RE.sub(
-        _replace_raw_bracket_with_existing_local_ref,
-        updated_body,
-    )
-    updated_body = export_audit_stage.RAW_SUPERSCRIPT_NOTE_REF_RE.sub(
-        _replace_raw_sup_with_existing_local_ref,
-        updated_body,
     )
     if updated_body == body_text:
         return markdown_text

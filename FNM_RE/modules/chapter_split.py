@@ -649,7 +649,7 @@ def _note_capture_summary(
                 captured_pages.add(pn)
         # 对 book_endnote_bound 章，尾注条目在全书尾注区（不在正文页），逐页比对无意义，
         # 跳过 dense_anchor_zero_capture_pages 检查。
-        skip_page_check = note_mode == "book_endnote_bound"
+        skip_page_check = note_mode in {"book_endnote_bound", "chapter_endnote_primary"}
         for page_no_str, expected_page_count in page_counts.items():
             try:
                 page_no = int(page_no_str)
@@ -894,6 +894,21 @@ def build_chapter_layers(
 
     book_type = str(book_note_profile.book_type or "")
     chapter_mode_by_id = {str(row.chapter_id or ""): str(row.note_mode or "no_notes") for row in book_note_profile.chapter_modes}
+    # 用 chapter_layers 的实际 items/regions 覆盖 provisional 分类。
+    # book_note_type 的 chapter_modes 是 region 检测前的预判；这里基于真实数据重新推导，
+    # 不依赖 layer.policy_applied（post_body 章可能是 "no_notes"，但实际有 15 个 footnote）。
+    for layer in chapter_layers:
+        cid = str(layer.chapter_id or "")
+        has_endnote = bool(layer.endnote_regions) and bool(layer.endnote_items)
+        has_footnote = bool(layer.footnote_items)
+        if has_endnote:
+            effective = "chapter_endnote_primary"
+        elif has_footnote:
+            effective = "footnote_primary"
+        else:
+            effective = "no_notes"
+        if effective != chapter_mode_by_id.get(cid, ""):
+            chapter_mode_by_id[cid] = effective
     if book_type == "footnote_only":
         footnote_only_ok, footnote_only_evidence = _synthesize_footnote_only_markers(
             chapter_layers=chapter_layers,

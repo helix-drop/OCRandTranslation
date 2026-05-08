@@ -26,6 +26,7 @@ from FNM_RE.stages.export import (
     _build_note_text_by_id_for_chapter,
     _build_section_heads_by_page,
     _chapter_page_numbers,
+    _clean_export_html,
     _escape_leading_asterisks,
     _format_chapter_title,
     _normalized_paragraph_key,
@@ -151,6 +152,54 @@ def _build_inline_footnote_targets(
     return attached, page_fallback
 
 
+def _note_marker(note_id: str, note_items_by_id: dict[str, NoteItemRecord]) -> str:
+    item = note_items_by_id.get(str(note_id or "").strip())
+    return str(getattr(item, "marker", "") or "").strip() if item else ""
+
+
+def _is_numeric_note(note_id: str, note_items_by_id: dict[str, NoteItemRecord]) -> bool:
+    return _note_marker(note_id, note_items_by_id).isdigit()
+
+
+def _split_numeric_note_ids(
+    note_ids: list[str],
+    *,
+    note_items_by_id: dict[str, NoteItemRecord],
+) -> tuple[list[str], list[str]]:
+    numeric: list[str] = []
+    symbolic: list[str] = []
+    for note_id in note_ids:
+        if _is_numeric_note(note_id, note_items_by_id):
+            numeric.append(note_id)
+        else:
+            symbolic.append(note_id)
+    return numeric, symbolic
+
+
+def _emit_symbol_footnotes(
+    note_ids: list[str],
+    *,
+    lines: list[str],
+    emitted_note_ids: set[str],
+    note_text_by_id: dict[str, str],
+    note_items_by_id: dict[str, NoteItemRecord],
+) -> int:
+    emitted = 0
+    for note_id in note_ids:
+        if note_id in emitted_note_ids:
+            continue
+        text = str(note_text_by_id.get(note_id) or "").strip()
+        if not text:
+            continue
+        marker = _note_marker(note_id, note_items_by_id) or "*"
+        display_marker = f"\\{marker}" if marker.startswith("*") else marker
+        lines.append(f"[footnote] {display_marker} {_escape_leading_asterisks(text)}")
+        lines.append("")
+        emitted_note_ids.add(note_id)
+        emitted += 1
+    return emitted
+
+
 
 def _build_inline_footnote_section_markdown(
     chapter: Any,
@@ -169,7 +218,7 @@ def _build_inline_footnote_section_markdown(
     chapter_title = _format_chapter_title(getattr(chapter, "title", "") or chapter_id)
     chapter_pages = set(_chapter_page_numbers(chapter))
     note_text_by_id = _build_note_text_by_id_for_chapter(chapter_id, note_units=note_units)
-    # 纯 footnote 章：无 endnote 冲突，保留 [^N] 编号（传空 note_kind_by_id = 全当 endnote 处理）
+    # 数字脚注按 Obsidian 本地引用导出；符号脚注仍以内联 [footnote] 渲染。
     _inline_note_kind_by_id: dict[str, str] = {}
     marker_note_sequences = _build_raw_marker_note_sequences(
         chapter_id,
@@ -223,6 +272,15 @@ def _build_inline_footnote_section_markdown(
     seen_section_heads: set[tuple[int, str]] = set()
     local_ref_numbers: dict[str, int] = {}
     ordered_note_ids: list[str] = []
+    note_marker_by_id: dict[str, str] = {}
+    for note_id, item in (note_items_by_id or {}).items():
+        if str(getattr(item, "chapter_id", "") or "") != chapter_id:
+            continue
+        marker = str(getattr(item, "marker", "") or "").strip()
+        if marker.isdigit():
+            note_marker_by_id[str(note_id)] = marker
+        else:
+            _inline_note_kind_by_id[str(note_id)] = "footnote"
     emitted_note_ids: set[str] = set()
     chapter_has_body = False
     inline_attach_count = 0
@@ -265,6 +323,7 @@ def _build_inline_footnote_section_markdown(
                 marker_note_sequences=marker_note_sequences,
                 local_ref_numbers=local_ref_numbers,
                 ordered_note_ids=ordered_note_ids,
+                note_marker_by_id=note_marker_by_id,
             )
             if (
                 not str(_paragraph_attr(paragraph, "translated_text", "") or "").strip()
@@ -281,13 +340,15 @@ def _build_inline_footnote_section_markdown(
             lines.append("")
             chapter_has_body = True
             page_has_body = True
-            inline_attach_count += _emit_local_note_definitions(
+            _numeric_note_ids, symbol_note_ids = _split_numeric_note_ids(
                 list(attached_note_ids.get((page_no, body_paragraph_index), []) or []),
+                note_items_by_id=note_items_by_id,
+            )
+            inline_attach_count += _emit_symbol_footnotes(
+                symbol_note_ids,
                 lines=lines,
                 emitted_note_ids=emitted_note_ids,
-                local_ref_numbers=local_ref_numbers,
                 note_text_by_id=note_text_by_id,
-                skipped_note_ids=skipped_note_ids or set(),
                 note_items_by_id=note_items_by_id,
             )
             body_paragraph_index += 1
@@ -300,13 +361,15 @@ def _build_inline_footnote_section_markdown(
                 remaining_page_note_ids.extend(note_ids)
         remaining_page_note_ids.extend(list(page_fallback_note_ids.get(page_no) or []))
         if page_has_body:
-            page_fallback_count += _emit_local_note_definitions(
+            _numeric_remaining_note_ids, symbol_remaining_note_ids = _split_numeric_note_ids(
                 remaining_page_note_ids,
+                note_items_by_id=note_items_by_id,
+            )
+            page_fallback_count += _emit_symbol_footnotes(
+                symbol_remaining_note_ids,
                 lines=lines,
                 emitted_note_ids=emitted_note_ids,
-                local_ref_numbers=local_ref_numbers,
                 note_text_by_id=note_text_by_id,
-                skipped_note_ids=skipped_note_ids or set(),
                 note_items_by_id=note_items_by_id,
             )
 
@@ -314,8 +377,13 @@ def _build_inline_footnote_section_markdown(
         lines.append(PENDING_TRANSLATION_TEXT)
         lines.append("")
 
+    numeric_ordered_note_ids = [
+        note_id
+        for note_id in ordered_note_ids
+        if _is_numeric_note(note_id, note_items_by_id)
+    ]
     chapter_end_count = _emit_local_note_definitions(
-        list(ordered_note_ids),
+        numeric_ordered_note_ids,
         lines=lines,
         emitted_note_ids=emitted_note_ids,
         local_ref_numbers=local_ref_numbers,
@@ -324,6 +392,7 @@ def _build_inline_footnote_section_markdown(
         note_items_by_id=note_items_by_id,
     )
     content = _strip_trailing_image_only_block("\n".join(lines).strip())
+    content = _clean_export_html(content)
     refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", content)))
     defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
     contract_summary = {
@@ -336,4 +405,3 @@ def _build_inline_footnote_section_markdown(
         "chapter_end_footnote_definition_count": int(chapter_end_count),
     }
     return content, contract_summary
-

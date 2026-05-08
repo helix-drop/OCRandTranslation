@@ -71,6 +71,19 @@ class SharedNoteParserTest(unittest.TestCase):
         self.assertIn("la distinction", items[1]["text"])
         self.assertTrue(items[1]["is_reconstructed"])
 
+    def test_symbol_note_does_not_synthesize_numeric_marker_from_body(self):
+        text = (
+            "* Michel Senellart est professeur de Philosophie politique. Il a également "
+            "traduit l'Histoire du droit public en Allemagne, 1 600-1800. Théorie du "
+            "droit public et science de la police, de M. Stolleis (Paris, PUF, 1998).\n"
+            "[Les pages qui suivent sont extraites de la Situation accompagnant le cours.]"
+        )
+
+        items, _ = parse_note_items_from_text(text)
+
+        self.assertEqual([item["marker"] for item in items], ["*"])
+        self.assertIn("Les pages qui suivent", items[0]["text"])
+
 
 if __name__ == "__main__":
     unittest.main()

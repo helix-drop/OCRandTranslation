@@ -119,7 +119,7 @@ class FnmRePhase5Test(unittest.TestCase):
         self.assertIn("Body paragraph.", source)
         self.assertNotIn("Note definition should be removed.", source)
 
-    def test_chunking_skips_consumed_text_but_keeps_paragraph_metadata(self):
+    def test_chunking_materializes_unmerged_consumed_text_with_note_ref(self):
         segment = UnitPageSegmentRecord(
             page_no=1,
             paragraph_count=1,
@@ -130,8 +130,8 @@ class FnmRePhase5Test(unittest.TestCase):
                     order=1,
                     kind="body",
                     heading_level=0,
-                    source_text="Consumed by prev page",
-                    display_text="Consumed by prev page",
+                    source_text="Consumed by prev page {{NOTE_REF:en-1}}",
+                    display_text="Consumed by prev page[^en-1]",
                     cross_page="prev",
                     consumed_by_prev=True,
                     section_path=["Chapter One"],
@@ -163,9 +163,72 @@ class FnmRePhase5Test(unittest.TestCase):
         chunks = _chunk_body_page_segments([segment], max_body_chars=6000)
         self.assertEqual(len(chunks), 1)
         chunk = chunks[0]
-        self.assertNotIn("Consumed by prev page", chunk["source_text"])
+        self.assertIn("Consumed by prev page {{NOTE_REF:en-1}}", chunk["source_text"])
         self.assertIn("Visible paragraph", chunk["source_text"])
-        self.assertTrue(any(paragraph.consumed_by_prev for paragraph in chunk["page_segments"][0].paragraphs))
+        segment_paragraphs = chunk["page_segments"][0].paragraphs
+        self.assertEqual(
+            [paragraph.display_text for paragraph in segment_paragraphs],
+            ["Consumed by prev page[^en-1]", "Visible paragraph"],
+        )
+        self.assertTrue(all(not paragraph.consumed_by_prev for paragraph in segment_paragraphs))
+
+    def test_chunking_does_not_duplicate_consumed_text_already_merged_with_ref_token(self):
+        prior_segment = UnitPageSegmentRecord(
+            page_no=1,
+            paragraph_count=1,
+            source_text="The second 600 francs if the sales reached the expected level.",
+            display_text="The second 600 francs if the sales reached the expected level.",
+            paragraphs=[
+                UnitParagraphRecord(
+                    order=1,
+                    kind="body",
+                    heading_level=0,
+                    source_text="The second 600 francs if the sales reached the expected level.",
+                    display_text="The second 600 francs if the sales reached the expected level.",
+                    cross_page="merged_next",
+                    consumed_by_prev=False,
+                    section_path=["Chapter One"],
+                    print_page_label="1",
+                    translated_text="",
+                    translation_status="pending",
+                    attempt_count=0,
+                    last_error="",
+                    manual_resolved=False,
+                )
+            ],
+        )
+        consumed_segment = UnitPageSegmentRecord(
+            page_no=2,
+            paragraph_count=1,
+            source_text="The {{NOTE_REF:en-1}} second 600 francs if the sales reached the expected level.",
+            display_text="The [^1] second 600 francs if the sales reached the expected level.",
+            paragraphs=[
+                UnitParagraphRecord(
+                    order=1,
+                    kind="body",
+                    heading_level=0,
+                    source_text="The {{NOTE_REF:en-1}} second 600 francs if the sales reached the expected level.",
+                    display_text="The [^1] second 600 francs if the sales reached the expected level.",
+                    cross_page="cont_prev",
+                    consumed_by_prev=True,
+                    section_path=["Chapter One"],
+                    print_page_label="2",
+                    translated_text="",
+                    translation_status="pending",
+                    attempt_count=0,
+                    last_error="",
+                    manual_resolved=False,
+                )
+            ],
+        )
+
+        chunks = _chunk_body_page_segments([prior_segment, consumed_segment], max_body_chars=6000)
+
+        self.assertEqual(len(chunks), 1)
+        source_text = chunks[0]["source_text"]
+        self.assertEqual(source_text.count("second 600 francs if the sales reached"), 1)
+        consumed_paragraphs = chunks[0]["page_segments"][1].paragraphs
+        self.assertEqual(consumed_paragraphs, [])
 
     def test_matched_explicit_link_materializes_note_ref_token(self):
         pages = [

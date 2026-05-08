@@ -14,6 +14,7 @@ from FNM_RE.models import (
 )
 from FNM_RE.shared.anchors import resolve_anchor_kind, scan_anchor_markers
 from FNM_RE.shared.notes import normalize_note_marker
+from FNM_RE.stages.body_anchors import build_body_anchors
 from FNM_RE.stages.note_links import build_note_links
 
 
@@ -222,6 +223,54 @@ class FnmRePhase3Test(unittest.TestCase):
         # 树状原则：无逐页 evidence 时一律 unknown。has_page_footnote_band 是唯一信号。
         self.assertEqual(resolve_anchor_kind(), "unknown")
         self.assertEqual(resolve_anchor_kind(has_page_footnote_band=True), "footnote")
+        self.assertEqual(
+            resolve_anchor_kind(
+                normalized_marker="1",
+                chapter_endnote_markers={1},
+                pattern="html",
+            ),
+            "endnote",
+        )
+        self.assertEqual(
+            resolve_anchor_kind(
+                normalized_marker="1",
+                chapter_endnote_markers={1},
+                pattern="bracket",
+            ),
+            "unknown",
+        )
+        self.assertEqual(
+            resolve_anchor_kind(
+                has_page_footnote_band=True,
+                normalized_marker="1",
+                chapter_endnote_markers={1},
+                pattern="bracket",
+            ),
+            "footnote",
+        )
+
+    def test_bracket_anchor_is_not_promoted_to_endnote_by_marker_set(self):
+        phase2 = _phase2_fixture(
+            pages=[_partition(1, "body")],
+            chapters=[_chapter("ch-1", "Chapter 1", [1])],
+            note_regions=[
+                _region("rg-en", "ch-1", page_start=2, note_kind="endnote")
+            ],
+            note_items=[_item("en-1", "rg-en", "ch-1", page_no=2, marker="1")],
+            chapter_modes=[_mode("ch-1", "chapter_endnote_primary")],
+        )
+        page = _make_page(
+            1,
+            markdown="# Chapter One\nBibliographic bracket [1] is not an endnote anchor.",
+            block_label="doc_title",
+            block_text="Chapter One",
+        )
+
+        anchors, _summary = build_body_anchors(phase2, pages=[page])
+
+        bracket_anchor = next(row for row in anchors if row.source == "markdown:bracket")
+        self.assertEqual(bracket_anchor.normalized_marker, "1")
+        self.assertEqual(bracket_anchor.anchor_kind, "unknown")
 
     def test_note_and_other_pages_do_not_generate_body_anchors(self):
         pages = [
@@ -242,6 +291,47 @@ class FnmRePhase3Test(unittest.TestCase):
         self.assertIn(1, anchor_pages)
         self.assertNotIn(2, anchor_pages)
         self.assertNotIn(3, anchor_pages)
+
+    def test_enriched_markdown_dedupes_stale_ocr_superscript_block(self):
+        phase2 = _phase2_fixture(
+            pages=[_partition(1, "body")],
+            chapters=[_chapter("ch-1", "Chapter 1", [1])],
+            note_regions=[
+                _region(
+                    "rg-fn", "ch-1", page_start=1, note_kind="footnote", scope="chapter"
+                )
+            ],
+            note_items=[
+                _item("fn-1", "rg-fn", "ch-1", page_no=1, marker="1"),
+                _item("fn-2", "rg-fn", "ch-1", page_no=1, marker="2"),
+            ],
+            chapter_modes=[_mode("ch-1", "footnote_primary")],
+        )
+        page = _make_page(
+            1,
+            markdown=(
+                "Same paragraph uses old OCR marker¹ and already normalized "
+                "<sup>2</sup> marker."
+            ),
+            block_label="text",
+            block_text=(
+                "Same paragraph uses old OCR marker¹ and already normalized "
+                "<sup>2</sup> marker."
+            ),
+        )
+        page["enriched_markdown"] = (
+            "Same paragraph uses old OCR marker<sup>1</sup> and already normalized "
+            "<sup>2</sup> marker."
+        )
+
+        anchors, _summary = build_body_anchors(phase2, pages=[page])
+
+        markers = [
+            (row.normalized_marker, row.source)
+            for row in anchors
+            if row.normalized_marker in {"1", "2"}
+        ]
+        self.assertEqual(markers, [("1", "markdown:html"), ("2", "markdown:html")])
 
     def test_synthetic_footnote_anchor_is_created_and_not_orphaned(self):
         phase2 = _phase2_fixture(
@@ -424,6 +514,108 @@ class FnmRePhase3Test(unittest.TestCase):
         self.assertEqual(target.status, "matched")
         # anchor_kind="endnote" same chapter → 直接 rule 匹配，不经过 fallback
         self.assertEqual(target.resolver, "rule")
+
+    def test_expected_gap_recovery_keeps_weak_endnote_digits_under_positive_gate(self):
+        phase2 = _phase2_fixture(
+            pages=[
+                _partition(1, "body"),
+                _partition(2, "body"),
+                _partition(3, "body"),
+            ],
+            chapters=[_chapter("ch-1", "Chapter 1", [1, 2, 3])],
+            note_regions=[
+                _region(
+                    "rg-en",
+                    "ch-1",
+                    page_start=10,
+                    note_kind="endnote",
+                    scope="chapter",
+                )
+            ],
+            note_items=[
+                _item("en-8", "rg-en", "ch-1", page_no=10, marker="8"),
+                _item("en-9", "rg-en", "ch-1", page_no=10, marker="9"),
+                _item("en-10", "rg-en", "ch-1", page_no=10, marker="10"),
+                _item("en-11", "rg-en", "ch-1", page_no=10, marker="11"),
+            ],
+            chapter_modes=[_mode("ch-1", "chapter_endnote_primary")],
+        )
+        pages = [
+            _make_page(1, markdown="Known start marker $ ^{8} $."),
+            _make_page(
+                2,
+                markdown=(
+                    "Alors un économiste canadien qui s'appelle Jean-Luc Migué 9 "
+                    "et qui écrivait ceci, un texte qui mérite d'être lu 10."
+                ),
+            ),
+            _make_page(3, markdown="Known later marker $ ^{11} $."),
+        ]
+
+        anchors, _summary = build_body_anchors(phase2, pages=pages)
+
+        by_marker = {row.normalized_marker: row for row in anchors}
+        self.assertEqual(by_marker["9"].page_no, 2)
+        self.assertEqual(by_marker["10"].page_no, 2)
+        self.assertEqual(by_marker["9"].anchor_kind, "endnote")
+        self.assertTrue(by_marker["9"].source.endswith(":expected_gap_bare_digit"))
+
+    def test_expected_gap_recovery_can_disambiguate_symbol_ocr_by_note_text(self):
+        endnote_region = _region(
+            "rg-en",
+            "ch-1",
+            page_start=10,
+            note_kind="endnote",
+            scope="chapter",
+        )
+        phase2 = _phase2_fixture(
+            pages=[
+                _partition(1, "body"),
+                _partition(2, "body"),
+                _partition(3, "body"),
+            ],
+            chapters=[_chapter("ch-1", "Chapter 1", [1, 2, 3])],
+            note_regions=[endnote_region],
+            note_items=[
+                _item("en-7", "rg-en", "ch-1", page_no=10, marker="7"),
+                NoteItemRecord(
+                    note_item_id="en-8",
+                    region_id="rg-en",
+                    chapter_id="ch-1",
+                    page_no=10,
+                    marker="8",
+                    marker_type="numeric",
+                    text="Mise en intelligibilité, donc, mais sans principe de fermeture.",
+                    source="test",
+                    source_page_label="p10",
+                    is_reconstructed=False,
+                    review_required=False,
+                ),
+                _item("en-9", "rg-en", "ch-1", page_no=10, marker="9"),
+            ],
+            chapter_modes=[_mode("ch-1", "chapter_endnote_primary")],
+        )
+        pages = [
+            _make_page(1, markdown="Known start marker $ ^{7} $."),
+            _make_page(
+                2,
+                markdown=(
+                    "On ne doit pas chercher la cause* de la constitution du marché. "
+                    "Il faut passer par la mise en intelligibilité* de ce processus."
+                ),
+                footnotes="* editorial footnote",
+            ),
+            _make_page(3, markdown="Known later marker $ ^{9} $."),
+        ]
+
+        anchors, _summary = build_body_anchors(phase2, pages=pages)
+
+        recovered = [row for row in anchors if row.normalized_marker == "8"]
+        self.assertEqual(len(recovered), 1)
+        self.assertEqual(recovered[0].page_no, 2)
+        self.assertEqual(recovered[0].anchor_kind, "endnote")
+        self.assertTrue(recovered[0].source.endswith(":expected_gap_symbol"))
+        self.assertIn("intelligibilité*", recovered[0].source_text)
 
     def test_ambiguous_candidates_return_ambiguous_status(self):
         phase2 = _phase2_fixture(
@@ -670,13 +862,13 @@ class FnmRePhase3Test(unittest.TestCase):
             page_no=9,
             paragraph_index=0,
             char_start=1,
-            char_end=4,
-            source_marker="[5]",
+            char_end=12,
+            source_marker="<sup>5</sup>",
             normalized_marker="5",
-            anchor_kind="unknown",
-            certainty=0.6,
-            source_text="Body [5]",
-            source="markdown:bracket",
+            anchor_kind="endnote",
+            certainty=1.0,
+            source_text="Body <sup>5</sup>",
+            source="markdown:html",
             synthetic=False,
             ocr_repaired_from_marker="",
         )

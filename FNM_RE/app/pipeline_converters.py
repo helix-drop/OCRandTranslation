@@ -373,6 +373,37 @@ def _phase_note_modes_from_book_type(book_type_result: ModuleResult[BookNoteProf
     ]
 
 
+def _phase_chapter_note_modes_from_layers(chapter_layers: ChapterLayers) -> list[ChapterNoteModeRecord]:
+    """从 chapter_layers 推导有效 note_mode——基于实际 region/item。
+
+    优先级：endnote_regions + endnote_items → chapter_endnote_primary；
+            footnote_items → footnote_primary；
+            否则 no_notes。
+    """
+    rows: list[ChapterNoteModeRecord] = []
+    for layer in chapter_layers.chapters:
+        cid = str(layer.chapter_id or "")
+        has_endnote = bool(layer.endnote_regions) and bool(layer.endnote_items)
+        has_footnote = bool(layer.footnote_items)
+        if has_endnote:
+            effective = "chapter_endnote_primary"
+        elif has_footnote:
+            effective = "footnote_primary"
+        else:
+            effective = "no_notes"
+        rows.append(
+            ChapterNoteModeRecord(
+                chapter_id=cid,
+                note_mode=effective,  # type: ignore[arg-type]
+                region_ids=[],
+                primary_region_scope="",
+                has_footnote_band=bool(layer.footnote_items),
+                has_endnote_region=bool(layer.endnote_items or layer.endnote_regions),
+            )
+        )
+    return rows
+
+
 def _phase_anchors_from_links(link_result: ModuleResult[NoteLinkTable]) -> list[BodyAnchorRecord]:
     return [
         BodyAnchorRecord(

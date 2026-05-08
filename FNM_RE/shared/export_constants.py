@@ -48,7 +48,8 @@ _RAW_BRACKET_NOTE_REF_RE = re.compile(r"(?<!\d)\[(\d{1,4}[A-Za-z]?)\](?!\d)")
 _RAW_SUPERSCRIPT_NOTE_REF_RE = re.compile(
     r"\$\s*\^\{\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*\}\s*\$"
     r"|\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$"
-    r"|<sup>\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*</sup>",
+    r"|<sup>\s*\[?(\d{1,4}[A-Za-z]?)\]?\s*</sup>"
+    r"|\^\{(\d{1,4})\}",
     re.IGNORECASE,
 )
 _RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE = re.compile(r"([⁰¹²³⁴⁵⁶⁷⁸⁹]+)")

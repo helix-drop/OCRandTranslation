@@ -113,7 +113,13 @@ def _filter_shared_page_rows_for_region(
     if not section_keys:
         return rows
     target_keys = _region_title_keys(region, chapter_title_by_id=chapter_title_by_id)
-    matched_keys = target_keys & section_keys
+    # 用模糊标题匹配替代 exact set intersection。Goldstein page 393 上
+    # ch7 标题 "6. Religious..." 可能被 OCR 截断为 "6. Religious and Secular Access
+    # to the Vie Intérieure Ren..."，exact match 会失败导致 ch7 丢失 markers 1-5。
+    matched_keys = {
+        sk for sk in section_keys
+        if any(_title_key_matches(sk, tk) for tk in target_keys)
+    }
     if matched_keys:
         return [
             row

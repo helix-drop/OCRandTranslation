@@ -14,7 +14,7 @@ from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.note_linking import build_note_link_table
 from FNM_RE.modules.ref_freeze import build_frozen_units
 from FNM_RE.modules.toc_structure import build_toc_structure
-from FNM_RE.modules.types import ChapterMarkdownEntry
+from FNM_RE.modules.types import ChapterLayer, ChapterMarkdownEntry, LayerNoteItem, LayerNoteRegion
 from FNM_RE.stages.export_audit import (
     _iter_raw_note_marker_hits,
     _iter_raw_superscript_note_marker_hits,
@@ -52,14 +52,52 @@ def _build_stage5_inputs(pages: list[dict], toc_items: list[dict]):
     return layers, note_link_table, frozen_units
 
 
+def _add_real_endnote_chapter_fact(layers):
+    region = LayerNoteRegion(
+        region_id="en-region-ch-2",
+        chapter_id="ch-2",
+        page_start=2,
+        page_end=2,
+        pages=[2],
+        note_kind="endnote",
+        scope="chapter",
+        source="notes_heading",
+        heading_text="NOTES",
+        review_required=False,
+    )
+    item = LayerNoteItem(
+        note_item_id="en-00001",
+        region_id=region.region_id,
+        chapter_id="ch-2",
+        page_no=2,
+        marker="1",
+        marker_type="number",
+        text="Endnote fact for mixed-book dispatch.",
+        source="test",
+        is_reconstructed=False,
+        review_required=False,
+        note_kind="endnote",
+    )
+    layers.chapters.append(
+        ChapterLayer(
+            chapter_id="ch-2",
+            title="Chapter Two",
+            endnote_items=[item],
+            endnote_regions=[region],
+        )
+    )
+    layers.regions.append(region)
+    layers.note_items.append(item)
+
+
 class FnmReModule6MergeTest(unittest.TestCase):
-    def test_rewrite_raw_markers_uses_existing_local_defs_when_sequences_missing(self):
+    def test_rewrite_residual_does_not_guess_raw_numeric_markers(self):
         chapter = ChapterMarkdownEntry(
             order=1,
             chapter_id="ch-1",
             title="Chapter One",
             path="chapters/001-Chapter-One.md",
-            markdown_text="Body [1] and $^{1}$ and <sup>1</sup> and ¹.\n\n[^1]: Note one.",
+            markdown_text="Body [1] and $^{1}$ and <sup>1</sup> and ¹ and 1960-¹970.\n\n[^1]: Note one.",
             start_page=1,
             end_page=1,
             pages=[1],
@@ -71,7 +109,7 @@ class FnmReModule6MergeTest(unittest.TestCase):
             marker_note_sequences={},
         )
 
-        self.assertIn("Body [^1] and [^1] and [^1] and [^1].", rewritten)
+        self.assertIn("Body [1] and $^{1}$ and <sup>1</sup> and ¹ and 1960-¹970.", rewritten)
         self.assertIn("[^1]: Note one.", rewritten)
 
     def test_rewrite_legacy_en_token_uses_book_level_fallback_note_text(self):
@@ -338,7 +376,7 @@ class FnmReModule6MergeTest(unittest.TestCase):
         self.assertFalse(result.gate_report.hard["merge.chapter_files_emitted"])
         self.assertIn("merge_chapter_files_emitted_failed", result.gate_report.reasons)
 
-    def test_mixed_footnote_primary_attaches_definition_after_owning_paragraph(self):
+    def test_mixed_footnote_primary_numeric_definition_goes_to_chapter_end(self):
         pages = [
             _make_page(
                 1,
@@ -349,8 +387,7 @@ class FnmReModule6MergeTest(unittest.TestCase):
         ]
         toc_items = [{"item_id": "toc-1", "title": "Chapter One", "level": 1, "target_pdf_page": 1}]
         layers, note_link_table, frozen_units = _build_stage5_inputs(pages, toc_items)
-        layers.chapters[0].policy_applied["book_type"] = "mixed"
-        layers.chapters[0].policy_applied["note_mode"] = "footnote_primary"
+        _add_real_endnote_chapter_fact(layers)
 
         result = build_chapter_markdown_set(frozen_units, note_link_table, layers)
         content = result.data.chapters[0].markdown_text
@@ -359,11 +396,11 @@ class FnmReModule6MergeTest(unittest.TestCase):
         # 工单 #7b：定义行带 `N. ` 印刷前缀（`_apply_notes_block_format` 应用后）
         self.assertIn("[^1]: 1. Used note.", content)
         self.assertLess(content.index("First paragraph[^1]."), content.index("[^1]: 1. Used note."))
-        self.assertLess(content.index("[^1]: 1. Used note."), content.index("Second paragraph."))
-        self.assertEqual(int(result.data.merge_summary.get("inline_footnote_paragraph_attach_count") or 0), 1)
-        self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 0)
+        self.assertLess(content.index("Second paragraph."), content.index("[^1]: 1. Used note."))
+        self.assertEqual(int(result.data.merge_summary.get("inline_footnote_paragraph_attach_count") or 0), 0)
+        self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 1)
 
-    def test_mixed_footnote_primary_falls_back_to_page_tail_when_paragraph_is_ambiguous(self):
+    def test_mixed_footnote_primary_numeric_definition_ignores_page_tail_fallback(self):
         pages = [
             _make_page(
                 1,
@@ -374,16 +411,15 @@ class FnmReModule6MergeTest(unittest.TestCase):
         ]
         toc_items = [{"item_id": "toc-1", "title": "Chapter One", "level": 1, "target_pdf_page": 1}]
         layers, note_link_table, frozen_units = _build_stage5_inputs(pages, toc_items)
-        layers.chapters[0].policy_applied["book_type"] = "mixed"
-        layers.chapters[0].policy_applied["note_mode"] = "footnote_primary"
+        _add_real_endnote_chapter_fact(layers)
         note_link_table.anchors[0].paragraph_index = 99
 
         result = build_chapter_markdown_set(frozen_units, note_link_table, layers)
         content = result.data.chapters[0].markdown_text
 
         self.assertLess(content.index("Second paragraph."), content.index("[^1]: 1. Used note."))
-        self.assertEqual(int(result.data.merge_summary.get("inline_footnote_page_fallback_count") or 0), 1)
-        self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 0)
+        self.assertEqual(int(result.data.merge_summary.get("inline_footnote_page_fallback_count") or 0), 0)
+        self.assertEqual(int(result.data.merge_summary.get("chapter_end_footnote_definition_count") or 0), 1)
 
     def test_footnote_only_book_keeps_definitions_at_chapter_end(self):
         pages = [

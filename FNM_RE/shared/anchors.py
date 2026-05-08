@@ -25,43 +25,27 @@ _HTML_SUP_RE = re.compile(r"<sup>\s*(\d{1,4})\s*</sup>", re.IGNORECASE)
 _LATEX_SUP_RE = re.compile(r"\$\s*\^\{(\d{1,4})\}\s*\$")
 _PLAIN_SUP_RE = re.compile(r"\^\{(\d{1,4})\}")
 _FOOTNOTE_REF_RE = re.compile(r"\[\^(\d{1,4})\]")
-_BRACKET_REF_RE = re.compile(r"\[(\d{1,4})\]")
+_BRACKET_REF_RE = re.compile(r"(?<!\d)\[(\d{1,4})\](?!\d)")
+_BROKEN_LEFT_BRACKET_REF_RE = re.compile(
+    r"(?<=[A-Za-zàâäéèêëïîôöùûüÿçœÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇŒ»”’\)])"
+    r"\[(\d{1,4})(?=[\.,;:!\?…»”’\)])"
+)
 _UNICODE_SUP_RE = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+")
 _BARE_DIGIT_RE = re.compile(r"\s(\d{1,3})(?=[\.\,\;\:\)\]\}»]|\s+[\-–—])")
 _BARE_DIGIT_LEFT_WORD_RE = re.compile(
     r"([A-Za-zàâäéèêëïîôöùûüÿçœÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇŒ]+)\s*$"
 )
-# 这些缩写/介词后的数字几乎肯定不是 note marker（页码/卷号/章号/引文锚）。
-_BARE_DIGIT_LEFT_WORD_BLACKLIST = frozenset(
+# 段落级最小化预过滤：只排除必定不是 marker 的结构性前缀词。
+# 真正的 gate 在 body_anchors 阶段通过正向证据（note_items 精确集合 +
+# 非冗余 + 单次出现）完成，不依赖黑名单。
+_BARE_DIGIT_STRUCTURAL_PREFIX = frozenset(
     {
-        "p", "pp", "f", "ff", "vol", "t", "tome", "chap", "chapitre",
-        "art", "article", "fig", "figure", "tableau", "tabl", "no",
-        "sect", "section", "cf", "voir", "see", "infra", "supra",
-        "loc", "op", "n",
-        "et", "ou", "de", "du", "la", "le", "les", "un", "une",
-        "il", "elle", "ils", "elles", "on", "y", "a", "as", "ai",
-        "au", "aux", "ce", "ces", "ma", "ta", "sa", "mes", "tes", "ses",
-        "in", "by", "to", "of", "at",
-        "letter", "letters", "lettre", "lettres",
-        "page", "pages", "para", "paragraph", "paragraphe",
-        "number", "numbers", "numéro", "numéros",
-        "ligne", "lignes", "line", "lines",
-        "colonne", "col", "colonne",
-        "note", "notes",
-        "chapter", "chapters", "part", "partie",
-        "book", "livre", "livres",
-        "strophe", "stanza",
-        "act", "scene", "scène",
-        "épître", "epistle",
-        # 学术书常见非 marker 上下文——月份/日期/文档编号/数量词
-        "january", "february", "march", "april", "may", "june",
-        "july", "august", "september", "october", "november", "december",
-        "janvier", "février", "mars", "avril", "mai", "juin",
-        "juillet", "août", "septembre", "octobre", "novembre", "décembre",
-        "lesson", "leçon", "leçons",
-        "mémoire", "memoir", "number", "numéro",
-        "needs", "expect", "about", "some", "almost", "nearly",
-        "volume", "volumes", "tome", "tomes",
+        "p", "pp", "vol", "fig", "no", "n",
+        "chap", "chapter", "section", "sect",
+        "page", "pages", "line", "lines",
+        "note", "notes", "part", "thesis",
+        "problem", "table", "tableau",
+        "article", "act", "scene",
     }
 )
 # OCR 常见上标乱码：'12、' 3、`45 等，数字前有一个孤立的撇号/反引号。
@@ -81,17 +65,21 @@ _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
     }
 )
 _LATEX_SYMBOL_SUP_RE = re.compile(r"\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$")
+# HTML 符号型脚注上标：<sup>*</sup>、<sup>**</sup>、<sup>***</sup>、<sup>****</sup>
+_HTML_SYMBOL_SUP_RE = re.compile(r"<sup>\s*(\*{1,4})\s*</sup>", re.IGNORECASE)
 _TRAILING_SYMBOL_AFTER_BRACKET_RE = re.compile(r"[\]](\*{1,4})")
 _TRAILING_SYMBOL_AFTER_QUOTE_RE = re.compile(r"[»](\*{1,4})")
 _REF_PATTERN_PRIORITY = {
     "footnote_ref": 0,
     "latex": 0,
     "latex_symbol_sup": 0,
+    "html_symbol_sup": 0,
     "plain": 1,
     "html": 2,
     "unicode": 3,
     "apostrophe_sup": 3,
     "bracket": 4,
+    "broken_left_bracket": 4,
     "trailing_symbol": 5,
     "bare_digit": 6,
 }
@@ -99,7 +87,9 @@ _REF_PATTERN_CERTAINTY = {
     "footnote_ref": 1.0,
     "latex": 1.0,
     "html": 1.0,
+    "html_symbol_sup": 1.0,
     "bracket": 1.0,
+    "broken_left_bracket": 0.85,
     "unicode": 1.0,
     "plain": 0.4,
     "latex_symbol_sup": 1.0,
@@ -123,13 +113,22 @@ def looks_like_year_marker(marker: str) -> bool:
 def resolve_anchor_kind(
     *,
     has_page_footnote_band: bool = False,
+    normalized_marker: str = "",
+    chapter_endnote_markers: set[int] | None = None,
+    pattern: str = "",
 ) -> str:
-    # 页上已经确认存在脚注带时，按脚注处理；
-    # 这能兜住 post_body / 未显式建模章节中的真实页脚脚注。
+    source_pattern = str(pattern or "").strip()
+    if source_pattern in {"bracket", "broken_left_bracket"}:
+        return "footnote" if has_page_footnote_band else "unknown"
+
+    # 优先级：格式分支 > endnote marker set 精匹配 > footnote band > unknown。
+    # 对普通上标，即使页面有 footnote band，如果 marker 明确在本章 endnote
+    # item set 中，仍应归为 endnote——单页可同时有脚注和尾注标记，不能整页广播。
+    if normalized_marker.isdigit() and chapter_endnote_markers:
+        if int(normalized_marker) in chapter_endnote_markers:
+            return "endnote"
     if has_page_footnote_band:
         return "footnote"
-    # 无逐页 evidence 时返回 unknown——同一章内
-    # 可以同时有 footnote 和 endnote marker，不能按章 mode 广播。
     return "unknown"
 
 
@@ -185,6 +184,20 @@ def _paragraphs_from_ocr_blocks(page: Mapping[str, Any] | None) -> list[dict]:
     return paragraphs
 
 
+def _paragraph_dedupe_key(text: str) -> str:
+    canonical = str(text or "")
+    canonical = _FOOTNOTE_REF_RE.sub(lambda m: m.group(1), canonical)
+    canonical = _LATEX_SUP_RE.sub(lambda m: m.group(1), canonical)
+    canonical = _PLAIN_SUP_RE.sub(lambda m: m.group(1), canonical)
+    canonical = _HTML_SUP_RE.sub(lambda m: m.group(1), canonical)
+    canonical = _UNICODE_SUP_RE.sub(
+        lambda m: m.group(0).translate(_UNICODE_SUPERSCRIPT_TO_DIGITS),
+        canonical,
+    )
+    canonical = re.sub(r"<[^>]+>", "", canonical)
+    return re.sub(r"\W+", "", canonical).lower()
+
+
 def page_body_paragraphs(page: Mapping[str, Any] | None) -> list[dict]:
     merged: list[dict] = []
     seen: set[str] = set()
@@ -192,7 +205,7 @@ def page_body_paragraphs(page: Mapping[str, Any] | None) -> list[dict]:
         text = str(row.get("text") or "").strip()
         if not text:
             continue
-        key = re.sub(r"\W+", "", text).lower()
+        key = _paragraph_dedupe_key(text)
         if not key or key in seen:
             continue
         seen.add(key)
@@ -207,27 +220,25 @@ def page_body_paragraphs(page: Mapping[str, Any] | None) -> list[dict]:
 
 
 def _is_bare_digit_marker_context(content: str, digit_start: int, digit_end: int) -> bool:
-    """裸数字（"Encyclopédie 11"）守卫。
+    """段落级廉价预过滤——只排除必定为噪声的候选。
 
-    左侧：紧邻词长度 ≥ 4 且不在引用前缀黑名单。
-    右侧：跳过标点后紧跟数字（列表/日期/千分位）则拒绝。
-    "needs 4, 5 or 6"、"August 4, 1789"、"2,000 copies" 都是非 marker。
+    真正的正向验证在 body_anchors._positive_gate_bare_digit 完成。
+    这里只做三件事：
+      1. 左侧必须有 >=3 字符的词（排除 "p 5"、"de 68"）
+      2. 左侧词是结构性前缀（"thesis"、"page"、"chapter"）-> 拒绝
+      3. 右侧标点后紧跟数字 -> 列表/日期/千分位 -> 拒绝
     """
     left = content[:digit_start].rstrip()
     word_match = _BARE_DIGIT_LEFT_WORD_RE.search(left)
     if not word_match:
         return False
     word = word_match.group(1).lower()
-    if len(word) < 4:
+    if len(word) < 3:
         return False
-    if word in _BARE_DIGIT_LEFT_WORD_BLACKLIST:
+    if word in _BARE_DIGIT_STRUCTURAL_PREFIX:
         return False
-    # 右侧守卫：跳过标点后如果紧跟数字，说明是列表/日期/千分位
     right = content[digit_end:].lstrip()
-    # \u4f5c\u8005\u9996\u5b57\u6bcd+\u5e74\u4efd\u6a21\u5f0f\uff1a"Z (2017)"\u3001"X 1999)"\u2014\u2014\u4e0d\u662f note marker
-    if len(word) == 1 and word.isalpha():
-        return False
-    punctuation = set(".,;:)]}\u00bb\u201d\u2019")
+    punctuation = set(".,;:)]}»”’")
     while right and right[0] in punctuation:
         right = right[1:].lstrip()
     if right and right[0].isdigit():
@@ -242,9 +253,11 @@ def _scan_inline_refs(text: str) -> list[dict]:
         (_FOOTNOTE_REF_RE, "footnote_ref"),
         (_LATEX_SUP_RE, "latex"),
         (_LATEX_SYMBOL_SUP_RE, "latex_symbol_sup"),
+        (_HTML_SYMBOL_SUP_RE, "html_symbol_sup"),
         (_PLAIN_SUP_RE, "plain"),
         (_HTML_SUP_RE, "html"),
         (_BRACKET_REF_RE, "bracket"),
+        (_BROKEN_LEFT_BRACKET_REF_RE, "broken_left_bracket"),
         (_APOSTROPHE_SUP_RE, "apostrophe_sup"),
         (_TRAILING_SYMBOL_AFTER_BRACKET_RE, "trailing_symbol"),
         (_TRAILING_SYMBOL_AFTER_QUOTE_RE, "trailing_symbol"),

@@ -31,6 +31,7 @@ from translation.translator import (
 
 _JSON_BLOCK_RE = re.compile(r"```json\s*(.*?)```", re.IGNORECASE | re.DOTALL)
 _CJK_CHAR_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+_BODY_CONTEXT_WORD_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?:[-'][A-Za-zÀ-ÖØ-öø-ÿ0-9]+)?")
 
 # 官方模型列表写明 qwen3.5-plus 上下文长度为 1,000,000 token，
 # 最大输入在思考模式下为 983,616 token、非思考模式下为 991,808 token。
@@ -487,14 +488,82 @@ def _should_request_llm_for_cluster(request_cluster: dict) -> bool:
 
 def _should_attach_repair_images(request_cluster: dict) -> bool:
     allowed_actions = [str(item or "").strip() for item in (request_cluster.get("allowed_actions") or [])]
-    return "synthesize_note_item" in allowed_actions
+    return "synthesize_note_item" in allowed_actions or "synthesize_anchor" in allowed_actions
 
 
 def _should_include_page_context_text(request_cluster: dict) -> bool:
-    return _should_attach_repair_images(request_cluster)
+    # 需要截图时（synthesize_note_item）必须带页面上下文
+    if _should_attach_repair_images(request_cluster):
+        return True
+    # ref_only / ref_only_visual 模式：LLM 需要 OCR 文本上下文来判定
+    # anchor 是假阳性（去重），不需要截图但需要页面文字
+    allowed = [str(item or "").strip() for item in (request_cluster.get("allowed_actions") or [])]
+    if "ignore_ref" in allowed:
+        return True
+    return False
+
+
+def _marker_int(value: Any) -> int | None:
+    try:
+        marker = int(normalize_note_marker(str(value or "")))
+    except (TypeError, ValueError):
+        return None
+    return marker if marker > 0 else None
+
+
+def _endnote_synthesize_focus_pages(cluster: dict) -> list[int]:
+    if str(cluster.get("note_system") or "").strip().lower() != "endnote":
+        return []
+    missing_markers = [
+        marker
+        for marker in (
+            _marker_int(item.get("marker") or item.get("normalized_marker"))
+            for item in (cluster.get("unmatched_note_items") or [])
+        )
+        if marker is not None
+    ]
+    if not missing_markers:
+        return []
+    known_pages_by_marker: dict[int, list[int]] = {}
+    for item in cluster.get("rebind_candidates") or []:
+        marker = _marker_int(item.get("marker") or item.get("current_anchor_marker"))
+        try:
+            page_no = int(item.get("anchor_page_no") or 0)
+        except (TypeError, ValueError):
+            page_no = 0
+        if marker is not None and page_no > 0:
+            known_pages_by_marker.setdefault(marker, []).append(page_no)
+    if not known_pages_by_marker:
+        return []
+
+    pages: set[int] = set()
+    known_markers = sorted(known_pages_by_marker)
+    for marker in missing_markers:
+        lower = max((value for value in known_markers if value < marker), default=None)
+        upper = min((value for value in known_markers if value > marker), default=None)
+        if lower is None and upper is None:
+            continue
+        if lower is not None and upper is not None:
+            start = min(known_pages_by_marker[lower])
+            end = max(known_pages_by_marker[upper])
+            for page_no in range(max(1, min(start, end) - 1), max(start, end) + 2):
+                pages.add(page_no)
+            continue
+        if lower is not None:
+            anchor_page = max(known_pages_by_marker[lower])
+            for page_no in range(max(1, anchor_page - 1), anchor_page + 4):
+                pages.add(page_no)
+            continue
+        anchor_page = min(known_pages_by_marker[upper])  # type: ignore[index]
+        for page_no in range(max(1, anchor_page - 3), anchor_page + 2):
+            pages.add(page_no)
+    return sorted(pages)[:LLM_REPAIR_MAX_FOCUS_PAGES]
 
 
 def _priority_pages_for_visual_context(request_cluster: dict) -> list[int]:
+    focus_pages = _endnote_synthesize_focus_pages(request_cluster)
+    if focus_pages:
+        return focus_pages
     pages: list[int] = []
     for item in request_cluster.get("unmatched_anchors") or []:
         try:
@@ -503,13 +572,14 @@ def _priority_pages_for_visual_context(request_cluster: dict) -> list[int]:
             page_no = 0
         if page_no > 0:
             pages.append(page_no)
-    for item in request_cluster.get("unmatched_note_items") or []:
-        try:
-            page_no = int(item.get("page_no") or 0)
-        except (TypeError, ValueError):
-            page_no = 0
-        if page_no > 0:
-            pages.append(page_no)
+    if str(request_cluster.get("note_system") or "").strip().lower() != "endnote":
+        for item in request_cluster.get("unmatched_note_items") or []:
+            try:
+                page_no = int(item.get("page_no") or 0)
+            except (TypeError, ValueError):
+                page_no = 0
+            if page_no > 0:
+                pages.append(page_no)
     ordered: list[int] = []
     seen: set[int] = set()
     for page_no in pages:
@@ -547,15 +617,20 @@ def _slice_cluster_for_request(
     unmatched_note_items = list(cluster.get("unmatched_note_items") or [])[:cap_notes]
     unmatched_anchors = list(cluster.get("unmatched_anchors") or [])[:cap_anchors]
     rebind_candidates = list(cluster.get("rebind_candidates") or [])[:cap_notes]
-    has_body_text = bool(str(cluster.get("chapter_body_text") or "").strip())
-    # 兜底：chapter_body_text 为空时，检查 page_contexts 的 ocr_excerpt 是否能提供正文上下文，
-    # 确保 book_endnote_bound 模式也能拿到 synthesize_anchor 所需的最小正文摘录。
+    body_text_raw = str(cluster.get("chapter_body_text") or "").strip()
+    body_words = _BODY_CONTEXT_WORD_RE.findall(body_text_raw)
+    has_body_text = len(body_text_raw) >= 30 and len(body_words) >= 5
+    # 兜底：chapter_body_text 不足时，检查 page_contexts 的 ocr_excerpt 是否有足够上下文。
+    # synthesize_anchor 需要正文文本才能找到 anchor_phrase；正文不足时 LLM 会用
+    # note_text 倒推幻觉 phrase（fuzzy_score 50~73），所以这里要求至少像一小段正文。
     if not has_body_text:
-        has_body_text = any(
-            str(ctx.get("ocr_excerpt") or "").strip()
-            for ctx in (cluster.get("page_contexts") or [])
-            if isinstance(ctx, dict)
-        )
+        excerpt_texts: list[str] = []
+        for ctx in (cluster.get("page_contexts") or []):
+            if isinstance(ctx, dict):
+                excerpt_texts.append(str(ctx.get("ocr_excerpt") or "").strip())
+        excerpt_body = "\n".join(text for text in excerpt_texts if text)
+        excerpt_words = _BODY_CONTEXT_WORD_RE.findall(excerpt_body)
+        has_body_text = len(excerpt_body) >= 120 and len(excerpt_words) >= 20
     has_page_context = bool(list(cluster.get("page_contexts") or []))
     allowed_actions = ["needs_review"]
     request_mode = "review_only"
@@ -700,6 +775,19 @@ def _repair_user_prompt(
             "优先用 synthesize_note_item；marker 必须是截图上可见的数字，"
             "note_text 只抄注释正文，不要自编，不要补全看不清的部分。"
         )
+    if "ignore_ref" in allowed_actions and "synthesize_note_item" not in allowed_actions:
+        extra_rules += (
+            "\n去重任务：判断 unmatched_anchors 中哪些是假阳性 ref。"
+            "参考 page_contexts 的 OCR 文本片段和 matched_examples 的正例模式。"
+            "以下情况应判定为假阳性（ignore_ref, confidence>=0.9）："
+            "(1) 同一 marker 在同一页或相邻页重复出现（取与 matched_examples 模式一致的那个，其余忽略）"
+            "(2) marker 出现在明显非注释上下文中（如 'p. 15' 是页码、'n 9' 是编号、日期年份等）"
+            "(3) marker 所在段落已有同编号的 matched anchor（该 unmatched 是重复检测）"
+            "(4) marker 周围文字模式与同章 matched_examples 的锚点上下文明显不同"
+            "以下情况应保留（needs_review, confidence<=0.5）："
+            "(1) marker 周围文字可能是注释引用，但 OCR 文本不足以确认"
+            "(2) 该页的 OCR 文本损坏严重"
+        )
     return (
         "/no_think\n"
         "下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n"
@@ -765,6 +853,9 @@ def select_auto_applicable_actions(
     *,
     confidence_threshold: float = 0.9,
     chapter_unmatched_count: int = 0,
+    note_system: str = "",
+    note_page_by_id: dict[str, int] | None = None,
+    allowed_synthesize_pages: set[int] | None = None,
 ) -> list[dict]:
     """筛选可自动应用的 LLM 动作。
 
@@ -783,7 +874,17 @@ def select_auto_applicable_actions(
             confidence = float(action.get("confidence", 0.0) or 0.0)
         except (TypeError, ValueError):
             confidence = 0.0
-        if confidence < confidence_threshold:
+        # synthesize_anchor 在 fuzzy_score 极高时（phrase 客观存在于正文），
+        # LLM 的 confidence 主观评分不应成为唯一拦截条件。
+        if kind == "synthesize_anchor":
+            try:
+                _pre_fuzzy = float(action.get("fuzzy_score", 0.0) or 0.0)
+            except (TypeError, ValueError):
+                _pre_fuzzy = 0.0
+            effective_threshold = 0.80 if _pre_fuzzy >= 95 else confidence_threshold
+        else:
+            effective_threshold = confidence_threshold
+        if confidence < effective_threshold:
             continue
         if kind == "match":
             note_item_id = str(action.get("note_item_id") or "").strip()
@@ -817,6 +918,16 @@ def select_auto_applicable_actions(
                 continue
             if int(chapter_unmatched_count or 0) < MIN_CHAPTER_UNMATCHED_FOR_AUTO:
                 continue
+            try:
+                page_no = int(action.get("page_no") or 0)
+            except (TypeError, ValueError):
+                page_no = 0
+            if allowed_synthesize_pages is not None and page_no not in allowed_synthesize_pages:
+                continue
+            if str(note_system or "").strip().lower() == "footnote" and note_page_by_id:
+                note_page = int(note_page_by_id.get(note_item_id) or 0)
+                if note_page > 0 and page_no > 0 and abs(page_no - note_page) > LLM_REPAIR_FOOTNOTE_PAGE_PADDING:
+                    continue
             used_definitions.add(note_item_id)
             selected.append(dict(action))
         elif kind == "synthesize_note_item":
@@ -854,14 +965,18 @@ def _resolve_repair_model_args() -> dict:
 
 
 def _cluster_focus_pages(cluster: dict) -> list[int]:
+    synth_focus_pages = _endnote_synthesize_focus_pages(cluster)
+    if synth_focus_pages:
+        return synth_focus_pages
     pages: list[int] = []
-    for item in cluster.get("unmatched_note_items") or []:
-        try:
-            page_no = int(item.get("page_no") or 0)
-        except (TypeError, ValueError):
-            page_no = 0
-        if page_no > 0:
-            pages.append(page_no)
+    if str(cluster.get("note_system") or "").strip().lower() != "endnote":
+        for item in cluster.get("unmatched_note_items") or []:
+            try:
+                page_no = int(item.get("page_no") or 0)
+            except (TypeError, ValueError):
+                page_no = 0
+            if page_no > 0:
+                pages.append(page_no)
     for item in cluster.get("unmatched_anchors") or []:
         try:
             page_no = int(item.get("page_no") or 0)
@@ -880,7 +995,8 @@ def _cluster_focus_pages(cluster: dict) -> list[int]:
         except (TypeError, ValueError):
             anchor_page_no = 0
         if note_page_no > 0:
-            pages.append(note_page_no)
+            if str(cluster.get("note_system") or "").strip().lower() != "endnote":
+                pages.append(note_page_no)
         if anchor_page_no > 0:
             pages.append(anchor_page_no)
         if note_page_no > 0 and anchor_page_no > 0 and note_page_no != anchor_page_no:
@@ -911,6 +1027,28 @@ def _trim_page_text(text: str, limit: int = 1400) -> str:
     return raw[:limit].rstrip() + " ..."
 
 
+def _fnm_page_role_by_no(doc_id: str, *, repo: SQLiteRepository) -> dict[int, str]:
+    loader = getattr(repo, "list_fnm_pages", None)
+    if not callable(loader):
+        return {}
+    try:
+        rows = loader(doc_id)
+    except Exception:
+        return {}
+    roles: dict[int, str] = {}
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        try:
+            page_no = int(row.get("page_no") or row.get("book_page") or 0)
+        except (TypeError, ValueError):
+            page_no = 0
+        role = str(row.get("page_role") or "").strip()
+        if page_no > 0 and role:
+            roles[page_no] = role
+    return roles
+
+
 def _build_chapter_body_text(
     doc_id: str,
     chapter: dict,
@@ -937,12 +1075,16 @@ def _build_chapter_body_text(
     sep = "\n\n"
     if start > 0 and end >= start:
         raw_pages = repo.load_pages(doc_id)
+        page_role_by_no = _fnm_page_role_by_no(doc_id, repo=repo)
+        enforce_page_roles = bool(page_role_by_no)
         by_page = {
             int(p.get("bookPage") or 0): p
             for p in (raw_pages or [])
             if int(p.get("bookPage") or 0) > 0
         }
         for page_no in range(start, end + 1):
+            if enforce_page_roles and page_role_by_no.get(page_no) not in {"body", "front_matter"}:
+                continue
             page = by_page.get(page_no) or {}
             md = page.get("markdown")
             text = str(md.get("text") if isinstance(md, dict) else (md or "")).strip()
@@ -994,6 +1136,17 @@ def _resolve_page_from_offset(spans: list[tuple[int, int, int]], offset: int) ->
     if spans:
         return spans[-1][0]
     return 0
+
+
+def _resolve_page_span_from_range(
+    spans: list[tuple[int, int, int]],
+    start_offset: int,
+    end_offset: int,
+) -> tuple[int, int] | None:
+    for page_no, span_start, span_end in spans:
+        if span_start <= start_offset < span_end and span_start < end_offset <= span_end:
+            return int(page_no), int(span_start)
+    return None
 
 
 def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepository) -> list[dict]:
@@ -1470,7 +1623,36 @@ def _find_link_id_for_match(note_links: list[dict], *, note_item_id: str, anchor
 
 
 def _resolve_chapter_id_for_page(chapters: list, page_no: int) -> str:
-    return __import__('FNM_RE.shared.chapters', fromlist=['chapter_id_for_page']).chapter_id_for_page(chapters, page_no)
+    try:
+        target_page = int(page_no or 0)
+    except (TypeError, ValueError):
+        target_page = 0
+    if target_page <= 0:
+        return ""
+    valid: list[tuple[int, int, str]] = []
+    for chapter in chapters or []:
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = str(chapter.get("chapter_id") or "").strip()
+        try:
+            start = int(chapter.get("start_page") or 0)
+            end = int(chapter.get("end_page") or start or 0)
+        except (TypeError, ValueError):
+            continue
+        if not chapter_id or start <= 0 or end <= 0:
+            continue
+        valid.append((start, max(start, end), chapter_id))
+    if not valid:
+        return ""
+    valid.sort(key=lambda row: (row[0], row[1], row[2]))
+    for start, end, chapter_id in valid:
+        if start <= target_page <= end:
+            return chapter_id
+    nearest = min(
+        valid,
+        key=lambda row: min(abs(target_page - row[0]), abs(target_page - row[1])),
+    )
+    return nearest[2]
 
 
 def _find_link_id_for_ignore(note_links: list[dict], *, anchor_id: str) -> str:
@@ -1524,13 +1706,54 @@ def _enrich_synthesize_anchor_actions(
         located = locate_anchor_phrase_in_body(body_text, str(item.get("anchor_phrase") or ""))
         item["fuzzy_score"] = float(located.get("score") or 0.0)
         item["ambiguous"] = bool(located.get("ambiguous"))
-        item["char_start"] = int(located.get("char_start") or -1)
-        item["char_end"] = int(located.get("char_end") or -1)
+        global_start = int(located.get("char_start") or -1)
+        global_end = int(located.get("char_end") or -1)
+        item["char_start"] = global_start
+        item["char_end"] = global_end
         item["matched_text"] = str(located.get("matched_text") or "")
-        if bool(located.get("hit")) and int(item["char_start"]) >= 0:
-            item["page_no"] = _resolve_page_from_offset(spans, int(item["char_start"]))
+        if bool(located.get("hit")) and global_start >= 0:
+            page_span = _resolve_page_span_from_range(spans, global_start, global_end)
+            if page_span is not None:
+                page_no, span_start = page_span
+                item["page_no"] = page_no
+                item["char_start"] = global_start - span_start
+                item["char_end"] = global_end - span_start
+            else:
+                item["page_no"] = _resolve_page_from_offset(spans, global_start)
         enriched.append(item)
     return enriched
+
+
+def _prefilter_duplicate_anchors(cluster: dict) -> int:
+    """启发式去重：同页同 marker 且已有 matched_example 的 unmatched_anchor 直接忽略。
+
+    返回被过滤的 anchor 数量。
+    """
+    matched = list(cluster.get("matched_examples") or [])
+    unmatched = list(cluster.get("unmatched_anchors") or [])
+    if not matched or not unmatched:
+        return 0
+    # 构建 (page_no, marker) → 是否有 matched 的索引
+    matched_keys: set[tuple[int, str]] = set()
+    for m in matched:
+        pn = int(m.get("page_no") or m.get("anchor_page_no") or 0)
+        marker = str(m.get("marker") or "").strip()
+        if pn > 0 and marker:
+            matched_keys.add((pn, marker))
+
+    filtered: list[dict] = []
+    removed = 0
+    for anchor in unmatched:
+        pn = int(anchor.get("page_no") or 0)
+        marker = str(anchor.get("normalized_marker") or anchor.get("source_marker") or "").strip()
+        if (pn, marker) in matched_keys:
+            removed += 1
+        else:
+            filtered.append(anchor)
+    if removed:
+        cluster["unmatched_anchors"] = filtered
+        cluster["_prefilter_duplicates_removed"] = removed
+    return removed
 
 
 def run_llm_repair(
@@ -1588,6 +1811,11 @@ def run_llm_repair(
             fallback_contexts=list(cluster.get("page_contexts") or []),
         )
         cluster["chapter_body_text"] = chapter_body_text
+        # 启发式预过滤：同一页上同 marker 的 unmatched_anchor 若已有 matched_example，
+        # 直接判定为重复检测，省去 LLM 调用。
+        _prefilter_duplicate_anchors(cluster)
+        if not cluster.get("unmatched_anchors") and not cluster.get("unmatched_note_items"):
+            continue
         llm_result = request_llm_repair_actions(
             cluster,
             model_args=model_args,
@@ -1610,10 +1838,28 @@ def run_llm_repair(
             usage_events.append(dict(llm_result.get("usage_event") or {}))
         if llm_result.get("llm_trace"):
             llm_traces.append(llm_result["llm_trace"])
+        note_page_by_id = {
+            str(item.get("note_item_id") or "").strip(): int(item.get("page_no") or 0)
+            for item in (cluster.get("unmatched_note_items") or [])
+            if str(item.get("note_item_id") or "").strip()
+        }
+        note_system = str(cluster.get("note_system") or "endnote").strip()
+        allowed_synthesize_pages = {
+            int(item.get("page_no") or 0)
+            for item in (cluster.get("page_contexts") or [])
+            if int(item.get("page_no") or 0) > 0
+        }
         auto_actions = select_auto_applicable_actions(
             actions,
             confidence_threshold=confidence_threshold,
             chapter_unmatched_count=len(list(cluster.get("unmatched_note_items") or [])),
+            note_system=note_system,
+            note_page_by_id=note_page_by_id,
+            allowed_synthesize_pages=(
+                allowed_synthesize_pages
+                if note_system == "endnote" and allowed_synthesize_pages
+                else None
+            ),
         )
         for action_index, action in enumerate(actions, start=1):
             suggestion_id = f"llm-{cluster_index:02d}-{action_index:03d}"
@@ -1639,7 +1885,6 @@ def run_llm_repair(
 
         if not auto_apply:
             continue
-        note_system = str(cluster.get("note_system") or "endnote").strip()
         if note_system not in {"endnote", "footnote"}:
             note_system = "endnote"
         # 同一 cluster 内禁止多个 note 复用同一正文位置，避免 Biopolitics 式的多对一绑定。

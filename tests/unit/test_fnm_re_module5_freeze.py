@@ -7,9 +7,12 @@ from FNM_RE.modules.book_note_type import build_book_note_profile
 from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.note_linking import build_note_link_table
 from FNM_RE.modules.ref_freeze import build_frozen_units
+from FNM_RE.modules.ref_freeze import _inject_token_once
+from FNM_RE.modules.ref_freeze import _cleanup_nested_note_refs
 from FNM_RE.modules.toc_structure import build_toc_structure
 from FNM_RE.modules.types import (
     BodyPageLayer,
+    BodyAnchorLayer,
     ChapterLayer,
     ChapterLayers,
     LayerNoteItem,
@@ -109,6 +112,107 @@ class FnmReModule5FreezeTest(unittest.TestCase):
         body_text = "\n".join(row.source_text for row in freeze_result.data.body_units)
         self.assertIn("{{NOTE_REF:", body_text)
         self.assertGreater(int(freeze_result.data.freeze_summary.get("injected_count") or 0), 0)
+
+    def test_llm_anchor_uses_coordinates_before_bare_digit_fallback(self):
+        text = "In 2020, Walpole qui disait."
+        start = text.index("Walpole")
+        end = start + len("Walpole")
+        anchor = BodyAnchorLayer(
+            anchor_id="llm-anchor-en-2",
+            chapter_id="ch-1",
+            page_no=1,
+            paragraph_index=0,
+            char_start=start,
+            char_end=end,
+            source_marker="2",
+            normalized_marker="2",
+            anchor_kind="endnote",
+            certainty=0.95,
+            source_text="Walpole",
+            source="llm",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+
+        updated, injected = _inject_token_once(
+            text,
+            anchor=anchor,
+            marker="2",
+            note_id="en-2",
+        )
+
+        self.assertTrue(injected)
+        self.assertIn("2020, Walpole{{NOTE_REF:en-2}} qui", updated)
+
+    def test_visual_anchor_uses_phrase_end_coordinate(self):
+        text = "En 2020, le texte reste fermé avant la suite."
+        phrase_end = text.index("fermé") + len("fermé")
+        anchor = BodyAnchorLayer(
+            anchor_id="visual-1",
+            chapter_id="ch-1",
+            page_no=1,
+            paragraph_index=0,
+            char_start=phrase_end,
+            char_end=phrase_end + len("²⁰"),
+            source_marker="²⁰",
+            normalized_marker="20",
+            anchor_kind="endnote",
+            certainty=0.85,
+            source_text="fermé",
+            source="visual_repair",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+
+        updated, injected = _inject_token_once(
+            text,
+            anchor=anchor,
+            marker="20",
+            note_id="en-20",
+        )
+
+        self.assertTrue(injected)
+        self.assertIn("fermé{{NOTE_REF:en-20}} avant", updated)
+        self.assertIn("2020", updated)
+
+    def test_injection_never_splits_existing_note_ref_token(self):
+        text = "tous{{NOTE_REF:en-00323}} 44."
+        inside_token = text.index("{{NOTE_REF") + 4
+        anchor = BodyAnchorLayer(
+            anchor_id="llm-anchor-fn-62",
+            chapter_id="ch-1",
+            page_no=1,
+            paragraph_index=0,
+            char_start=inside_token,
+            char_end=inside_token,
+            source_marker="*",
+            normalized_marker="*",
+            anchor_kind="footnote",
+            certainty=0.95,
+            source_text="tous",
+            source="llm",
+            synthetic=False,
+            ocr_repaired_from_marker="",
+        )
+
+        updated, injected = _inject_token_once(
+            text,
+            anchor=anchor,
+            marker="*",
+            note_id="fn-00062",
+        )
+
+        self.assertTrue(injected)
+        self.assertIn("{{NOTE_REF:en-00323}}{{NOTE_REF:fn-00062}}", updated)
+        self.assertNotIn("{{NO{{NOTE_REF", updated)
+
+    def test_cleanup_repairs_split_note_ref_token(self):
+        text = "tous{{NO{{NOTE_REF:fn-00062}}TE_REF:en-00323}} 44."
+
+        cleaned = _cleanup_nested_note_refs(text)
+
+        self.assertIn("{{NOTE_REF:en-00323}} {{NOTE_REF:fn-00062}}", cleaned)
+        self.assertNotIn("{{NO{{NOTE_REF", cleaned)
 
     def test_only_matched_links_are_frozen(self):
         pages = load_pages("Biopolitics")

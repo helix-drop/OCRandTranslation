@@ -39,6 +39,8 @@ from FNM_RE.shared.review_overrides import group_review_overrides as _group_revi
 from FNM_RE.stages.body_anchors import build_body_anchors
 from FNM_RE.stages.note_links import build_note_links
 
+FOOTNOTE_OVERRIDE_PAGE_PADDING = 1
+
 
 def _refresh_anchor_summary(
     *,
@@ -244,14 +246,109 @@ def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord) -> str:
         return "endnote"
     return "unknown"
 
+
+def _chapter_body_text_by_page(chapter_layers: ChapterLayers) -> dict[tuple[str, int], str]:
+    rows: dict[tuple[str, int], str] = {}
+    for chapter in chapter_layers.chapters or []:
+        chapter_id = str(chapter.chapter_id or "").strip()
+        if not chapter_id:
+            continue
+        for page in chapter.body_pages or []:
+            try:
+                page_no = int(page.page_no or 0)
+            except (TypeError, ValueError):
+                page_no = 0
+            if page_no <= 0:
+                continue
+            rows[(chapter_id, page_no)] = str(page.text or "")
+    return rows
+
+
+def _is_explicit_body_anchor(anchor: BodyAnchorRecord) -> bool:
+    anchor_id = str(anchor.anchor_id or "")
+    source = str(anchor.source or "").strip().lower()
+    if bool(anchor.synthetic):
+        return False
+    if source == "llm" or anchor_id.startswith(("llm-anchor-", "synthetic-")):
+        return False
+    return True
+
+
+def _anchor_kind_compatible(left: str, right: str) -> bool:
+    left_kind = str(left or "").strip() or "unknown"
+    right_kind = str(right or "").strip() or "unknown"
+    return left_kind == right_kind or "unknown" in {left_kind, right_kind}
+
+
+def _has_existing_explicit_anchor_for_override(
+    anchors: list[BodyAnchorRecord],
+    *,
+    chapter_id: str,
+    page_no: int,
+    normalized_marker: str,
+    anchor_kind: str,
+) -> bool:
+    marker = normalize_note_marker(normalized_marker)
+    if not marker:
+        return False
+    return any(
+        _is_explicit_body_anchor(anchor)
+        and str(anchor.chapter_id or "") == chapter_id
+        and int(anchor.page_no or 0) == page_no
+        and normalize_note_marker(str(anchor.normalized_marker or "")) == marker
+        and _anchor_kind_compatible(str(anchor.anchor_kind or ""), anchor_kind)
+        for anchor in anchors
+    )
+
+
+def _find_existing_explicit_anchor_for_link_override(
+    *,
+    note_item: NoteItemRecord,
+    body_anchors: list[BodyAnchorRecord],
+    expected_note_kind: str,
+) -> BodyAnchorRecord | None:
+    marker = normalize_note_marker(str(note_item.marker or ""))
+    chapter_id = str(note_item.chapter_id or "").strip()
+    note_kind = str(expected_note_kind or "").strip()
+    if not marker or not chapter_id or note_kind not in {"footnote", "endnote"}:
+        return None
+
+    candidates: list[BodyAnchorRecord] = []
+    for anchor in body_anchors:
+        if not _is_explicit_body_anchor(anchor):
+            continue
+        if str(anchor.chapter_id or "").strip() != chapter_id:
+            continue
+        if normalize_note_marker(str(anchor.normalized_marker or "")) != marker:
+            continue
+        if not _anchor_kind_compatible(str(anchor.anchor_kind or ""), note_kind):
+            continue
+        if note_kind == "footnote":
+            note_page = int(note_item.page_no or 0)
+            anchor_page = int(anchor.page_no or 0)
+            if (
+                note_page > 0
+                and anchor_page > 0
+                and abs(anchor_page - note_page) > FOOTNOTE_OVERRIDE_PAGE_PADDING
+            ):
+                continue
+        candidates.append(anchor)
+
+    if len(candidates) != 1:
+        return None
+    return candidates[0]
+
+
 def _materialize_anchor_overrides(
     body_anchors: list[BodyAnchorRecord],
     *,
     anchor_overrides: Mapping[str, Mapping[str, Any]] | None,
+    chapter_body_text_by_page: Mapping[tuple[str, int], str] | None = None,
 ) -> tuple[list[BodyAnchorRecord], dict[str, Any], list[dict[str, Any]]]:
     """消费 scope="anchor" override，物化成 BodyAnchorRecord 追加到 anchors 尾部。
 
     仅支持 `action == "create"` 的 LLM 合成锚点；已有 anchor_id 冲突的 override 会被丢弃。
+    若 Phase 3 已在同章同页捕获同 marker/kind 的显式锚点，LLM 不再重复造锚点。
     新 anchor 保留 `source="llm", synthetic=False`，以便后续 ref_freeze / 占位符链路接纳。
     """
     overrides = dict(anchor_overrides or {})
@@ -293,7 +390,32 @@ def _materialize_anchor_overrides(
             summary["rejected_count"] += 1
             summary["rejected_reasons"].append(f"{target_id}:invalid_coords")
             continue
+        if chapter_body_text_by_page is not None:
+            body_text = chapter_body_text_by_page.get((chapter_id, page_no))
+            if body_text is None:
+                summary["rejected_count"] += 1
+                summary["rejected_reasons"].append(f"{target_id}:non_body_page")
+                continue
+            if char_end > len(str(body_text or "")):
+                summary["rejected_count"] += 1
+                summary["rejected_reasons"].append(f"{target_id}:coords_out_of_page")
+                continue
         anchor_kind = str(data.get("anchor_kind") or "endnote").strip() or "endnote"
+        normalized_marker = normalize_note_marker(str(data.get("normalized_marker") or ""))
+        if not normalized_marker:
+            summary["rejected_count"] += 1
+            summary["rejected_reasons"].append(f"{target_id}:missing_marker")
+            continue
+        if _has_existing_explicit_anchor_for_override(
+            new_anchors,
+            chapter_id=chapter_id,
+            page_no=page_no,
+            normalized_marker=normalized_marker,
+            anchor_kind=anchor_kind,
+        ):
+            summary["rejected_count"] += 1
+            summary["rejected_reasons"].append(f"{target_id}:existing_explicit_anchor")
+            continue
         record = BodyAnchorRecord(
             anchor_id=anchor_id,
             chapter_id=chapter_id,
@@ -301,8 +423,8 @@ def _materialize_anchor_overrides(
             paragraph_index=paragraph_index,
             char_start=char_start,
             char_end=char_end,
-            source_marker=str(data.get("normalized_marker") or ""),
-            normalized_marker=str(data.get("normalized_marker") or ""),
+            source_marker=normalized_marker,
+            normalized_marker=normalized_marker,
             anchor_kind=anchor_kind,  # type: ignore[arg-type]
             certainty=certainty,
             source_text=str(data.get("source_text") or ""),
@@ -536,14 +658,25 @@ def _apply_link_overrides(
             continue
 
         note_item = note_items_by_id.get(note_item_id)
-        anchor = anchors_by_id.get(anchor_id)
-        if not note_item or not anchor:
+        if not note_item:
             invalid_count += 1
             invalid_flags.append(f"invalid_link_override:{target_id}:target")
             continue
 
         region = regions_by_id.get(str(note_item.region_id or ""))
         expected_note_kind = str((region.note_kind if region else "") or "")
+        anchor = anchors_by_id.get(anchor_id)
+        if anchor is None and str(anchor_id or "").startswith("llm-anchor-"):
+            anchor = _find_existing_explicit_anchor_for_link_override(
+                note_item=note_item,
+                body_anchors=body_anchors,
+                expected_note_kind=expected_note_kind,
+            )
+        if not anchor:
+            invalid_count += 1
+            invalid_flags.append(f"invalid_link_override:{target_id}:target")
+            continue
+
         inferred_note_kind = _infer_note_kind_from_anchor(anchor)
         same_chapter = str(note_item.chapter_id or "") == str(anchor.chapter_id or "")
         same_kind = expected_note_kind in {"footnote", "endnote"} and expected_note_kind == inferred_note_kind
@@ -551,6 +684,17 @@ def _apply_link_overrides(
             invalid_count += 1
             invalid_flags.append(f"invalid_link_override:{target_id}:consistency")
             continue
+        if expected_note_kind == "footnote":
+            note_page = int(note_item.page_no or 0)
+            anchor_page = int(anchor.page_no or 0)
+            if (
+                note_page > 0
+                and anchor_page > 0
+                and abs(anchor_page - note_page) > FOOTNOTE_OVERRIDE_PAGE_PADDING
+            ):
+                invalid_count += 1
+                invalid_flags.append(f"invalid_link_override:{target_id}:page_window")
+                continue
 
         marker = str(note_item.marker or anchor.normalized_marker or link.marker or "")
         page_no = int(anchor.page_no or note_item.page_no or link.page_no_start or 0)
@@ -1025,6 +1169,8 @@ def _chapter_contracts(
     # 的分段扫描+OCR blocks 是两个不同路径，计数会有微小差异，导致假阳性 mismatch）。
     _anchor_total_by_chapter: dict[str, int] = {}
     for anchor in body_anchors:
+        if str(anchor.anchor_kind or "") != "endnote":
+            continue
         cid = str(anchor.chapter_id or "")
         marker = normalize_note_marker(str(anchor.normalized_marker or ""))
         if not cid or not marker or not marker.isdigit():
@@ -1319,6 +1465,7 @@ def build_note_link_table(
     materialized_anchors, anchor_override_summary, anchor_override_logs = _materialize_anchor_overrides(
         repaired_anchors,
         anchor_overrides=grouped_overrides.get("anchor"),
+        chapter_body_text_by_page=_chapter_body_text_by_page(chapter_layers),
     )
     anchor_summary = _refresh_anchor_summary(base_summary=base_anchor_summary, anchors=materialized_anchors)
     effective_links, override_summary, override_logs = _apply_link_overrides(
@@ -1493,11 +1640,6 @@ def build_note_link_table(
         anchor_summary=anchor_summary,
         link_summary=effective_link_summary,
     )
-    for l in effective_links:
-        if str(l.note_item_id or "") == "en-00007":
-            print(f"[DEBUG build_note_link_table] FINAL en-00007: anchor={l.anchor_id} status={l.status} resolver={l.resolver}")
-            break
-
     return ModuleResult(
         data=data,
         gate_report=gate_report,

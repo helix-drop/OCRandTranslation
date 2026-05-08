@@ -31,6 +31,7 @@ _BODY_SIZE_RATIO = 0.72
 _FN_AREA_RATIO   = 0.65
 _MAX_GAP_CHARS   = 15
 _SUP_FMT         = "<sup>{}</sup>"
+_VISION_TIMEOUT_SECONDS = 45.0
 
 _UNICODE_SUP_MAP = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 _UNICODE_SUP_RE  = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+")
@@ -42,8 +43,8 @@ _HAS_MARKER_RE_TEMPLATE = (
     r"|\[\^{marker}\]"
 )
 
-# 视觉调用缓存
-_LAYER3_CACHE: dict[tuple, list[dict]] = {}
+# 视觉调用缓存。key 必须包含 target_marker；同页不同 marker 不能共享负结果。
+_LAYER3_CACHE: dict[tuple, dict | None] = {}
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -149,6 +150,14 @@ def recover_book_chapter_scoped(
                 # Layer 2: raw block 文本对齐
                 if not recovered:
                     for r in _layer2_raw_blocks(page.get("blocks") or [], {str(marker)}):
+                        replaced = _apply_layer2_recovery(md, r)
+                        if replaced is not None:
+                            md = replaced
+                            page["enriched_markdown"] = md
+                            stats["layer2_raw_blocks"] += 1
+                            stats["pages_enriched"] += 1
+                            recovered = True
+                            break
                         pos = _find_insert_pos(md, r["before"], r["after"])
                         if pos >= 0:
                             md = _apply_insertions(md, [(pos, r["marker"], "layer2")])
@@ -162,25 +171,36 @@ def recover_book_chapter_scoped(
                     break
 
             # Layer 3: 视觉模型裁剪扫描（逐候选页尝试）
+            # 注意：L3 阶段不信任 _has_marker 预检——到达这里说明 L0-L2 已
+            # 穷尽且 marker 仍未恢复，_has_marker 的假阳性（如 OCR 把上标 8
+            # 误读为 6 而裸数字 8 出现在 \"XVIIIe\" 中）不应阻断视觉扫描。
             if not recovered and pdf_path and candidates:
                 for cp in candidates[:3]:  # 最多试 3 个候选页
                     cpn = int(_page_no(cp))
                     cp_md = cp.get("enriched_markdown") or cp.get("markdown") or ""
-                    if _has_marker(cp_md, str(marker)):
-                        recovered = True
-                        break
                     existing_on_page = [m for m in found_map if found_map[m] == cpn]
                     print(f"[sup_recovery] L3 scan ch={ch_id[:40]} marker={marker} page={cpn} existing={existing_on_page[:3]}")
                     r = _vision_find_superscript(pdf_path, cpn, marker)
                     if not r:
                         print(f"[sup_recovery] L3 not found marker={marker} page={cpn}")
                         continue
-                    found_marker = r["marker"]
+                    found_marker = str(r.get("marker") or "").strip()
+                    if not found_marker.isdigit():
+                        print(f"[sup_recovery] L3 REJECTED page={cpn}: marker missing")
+                        continue
+                    if int(found_marker) != int(marker):
+                        print(
+                            f"[sup_recovery] L3 REJECTED page={cpn}: "
+                            f"requested marker {marker}, found {found_marker}"
+                        )
+                        continue
                     if int(found_marker) in existing_on_page:
                         print(f"[sup_recovery] L3 REJECTED page={cpn}: marker {found_marker} already exists")
                         continue
-                    # 交叉验证：before/after 上下文必须在 markdown 中能找到
-                    pos = _find_insert_pos(cp_md, r["before"], r["after"])
+                    # L3 来自视觉模型，必须用双侧上下文唯一定位；不能落回
+                    # after-only/before-only 的宽松文本搜索，否则会把模型给出的
+                    # 常见词误插到同页另一处相似正文。
+                    pos = _find_layer3_insert_pos(cp_md, r["before"], r["after"])
                     if pos < 0:
                         print(f"[sup_recovery] L3 REJECTED page={cpn}: context not found")
                         continue
@@ -231,7 +251,7 @@ def _narrow_candidates(
     """用前后已知 marker 的页码框定缺失 marker 的候选页区间。"""
     prev_pn = max((pn for m, pn in found_map.items() if m < marker), default=None)
     next_pn = min((pn for m, pn in found_map.items() if m > marker), default=None)
-    lo = (prev_pn + 1) if prev_pn else _page_no(body_pages[0])
+    lo = prev_pn if prev_pn else _page_no(body_pages[0])
     hi = next_pn if next_pn else _page_no(body_pages[-1])
     return [p for p in body_pages if lo <= _page_no(p) <= hi]
 
@@ -364,7 +384,95 @@ def _layer2_raw_blocks(blocks: list, missing: set[str]) -> list[dict]:
             seen_markers.add(m)
             results.append({"marker": m, "before": before, "after": after})
 
+        for m in sorted(missing, key=lambda x: -len(x)):
+            if not m.isdigit() or m in seen_markers:
+                continue
+            surrogate = _ocr_surrogate_for_marker(m)
+            if not surrogate:
+                continue
+            pattern = rf"(?P<before>[A-Za-zÀ-ÿ])\s*(?P<surrogate>{surrogate})(?=\s+[A-Za-zÀ-ÿ])"
+            match = re.search(pattern, text)
+            if not match:
+                continue
+            pos = match.start("surrogate")
+            before = text[max(0, pos - 40):pos].rstrip()
+            after = text[match.end("surrogate"): match.end("surrogate") + 40]
+            seen_markers.add(m)
+            results.append({"marker": m, "before": before, "after": after})
+
+        for m in sorted(missing, key=lambda x: -len(x)):
+            if not m.isdigit() or m in seen_markers:
+                continue
+            suffix = _ocr_suffix_surrogate_for_marker(m)
+            if not suffix:
+                continue
+            pattern = (
+                rf"(?P<word>[A-Za-zÀ-ÿ]{{3,}})\s+"
+                rf"(?P<suffix>{re.escape(suffix)})(?P<trail>[•·,;:\.\)\]])"
+            )
+            for match in re.finditer(pattern, text):
+                pos = match.start("suffix")
+                before = text[max(0, pos - 40):pos].rstrip()
+                after = text[match.end("suffix"): match.end("suffix") + 40]
+                seen_markers.add(m)
+                results.append({
+                    "marker": m,
+                    "before": before,
+                    "after": after,
+                    "suffix": suffix,
+                    "mode": "ocr_suffix",
+                })
+                break
+
+        for m in sorted(missing, key=lambda x: -len(x)):
+            if not m.isdigit() or m in seen_markers:
+                continue
+            symbol = _ocr_symbol_surrogate_for_marker(m)
+            if not symbol:
+                continue
+            marker = re.escape(m)
+            pattern = (
+                rf"(?P<year>(?:\[\d{{2}}\]|(?:1[5-9]|20)\d{{0,2}}){marker})"
+                rf"\s+(?P<symbol>{symbol})(?=\s+[A-Za-zÀ-ÿ])"
+            )
+            for match in re.finditer(pattern, text):
+                pos = match.start("symbol")
+                before = text[max(0, pos - 50):pos].rstrip()
+                after = text[match.end("symbol"): match.end("symbol") + 50]
+                seen_markers.add(m)
+                results.append({
+                    "marker": m,
+                    "before": before,
+                    "after": after,
+                    "symbol": match.group("symbol"),
+                    "mode": "ocr_symbol_after_year",
+                })
+                break
+
     return results
+
+
+def _ocr_surrogate_for_marker(marker: str) -> str:
+    normalized = str(marker or "").strip()
+    if len(normalized) < 2 or set(normalized) != {"1"}:
+        return ""
+    return r"!{" + str(len(normalized)) + r",}"
+
+
+def _ocr_suffix_surrogate_for_marker(marker: str) -> str:
+    normalized = str(marker or "").strip()
+    if len(normalized) != 2 or not normalized.isdigit():
+        return ""
+    if normalized[0] == normalized[1]:
+        return ""
+    return normalized[-1]
+
+
+def _ocr_symbol_surrogate_for_marker(marker: str) -> str:
+    normalized = str(marker or "").strip()
+    if len(normalized) != 2 or not normalized.isdigit():
+        return ""
+    return r"[*#%?]{1,2}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -377,12 +485,10 @@ def _vision_find_superscript(
     target_marker: int,
 ) -> dict | None:
     """5x 文本区裁剪 → 视觉模型找特定上标 → 返回 {marker, before, after} 或 None。"""
-    cache_key = ("vision", pdf_path, page_no)
+    cache_key = ("vision", pdf_path, page_no, int(target_marker))
     if cache_key in _LAYER3_CACHE:
-        for r in _LAYER3_CACHE[cache_key]:
-            if r["marker"] == str(target_marker):
-                return r
-        return None
+        cached = _LAYER3_CACHE[cache_key]
+        return dict(cached) if cached else None
 
     # 渲染 5x 精度文本区裁剪
     try:
@@ -421,11 +527,14 @@ def _vision_find_superscript(
         client = OpenAI(
             api_key=str(getattr(spec, "api_key", "") or "").strip(),
             base_url=str(getattr(spec, "base_url", "") or "").strip(),
+            timeout=_VISION_TIMEOUT_SECONDS,
+            max_retries=0,
         )
         extra_body = dict(getattr(spec, "request_overrides", {}).get("extra_body", {}) or {})
         response = client.chat.completions.create(
             model=str(getattr(spec, "model_id", "") or "").strip(),
             max_tokens=400,
+            timeout=_VISION_TIMEOUT_SECONDS,
             extra_body=extra_body,
             messages=[{
                 "role": "user",
@@ -449,13 +558,14 @@ def _vision_find_superscript(
             marker = str(parsed.get("marker", "") or "").strip()
             before = str(parsed.get("before", "") or "").strip()
             after = str(parsed.get("after", "") or "").strip()
-            if marker and marker.isdigit():
+            if marker and marker.isdigit() and int(marker) == int(target_marker):
                 result = {"marker": marker, "before": before[-40:], "after": after[:40]}
-                _LAYER3_CACHE.setdefault(cache_key, []).append(result)
+                _LAYER3_CACHE[cache_key] = result
                 return result
     except (_json.JSONDecodeError, TypeError, AttributeError):
         pass
 
+    _LAYER3_CACHE[cache_key] = None
     return None
 
 
@@ -492,6 +602,85 @@ def _find_insert_pos(markdown: str, before_ctx: str, after_ctx: str) -> int:
             return pos
 
     return -1
+
+
+def _context_word_pattern(words: list[str]) -> str:
+    return r"\b" + r".{0,12}".join(re.escape(word) for word in words) + r"\b"
+
+
+def _find_layer3_insert_pos(markdown: str, before_ctx: str, after_ctx: str) -> int:
+    before_words = re.findall(r"[A-Za-zÀ-ÿ]{3,}", str(before_ctx or ""))
+    after_words = re.findall(r"[A-Za-zÀ-ÿ]{3,}", str(after_ctx or ""))
+    if not before_words or not after_words:
+        return -1
+
+    max_before = min(3, len(before_words))
+    max_after = min(3, len(after_words))
+    for before_len in range(max_before, 0, -1):
+        before_tail = before_words[-before_len:]
+        before_pat = _context_word_pattern(before_tail)
+        for after_len in range(max_after, 0, -1):
+            after_head = after_words[:after_len]
+            after_pat = _context_word_pattern(after_head)
+            pattern = (
+                rf"(?P<before>{before_pat})"
+                rf"(?P<gap>.{{0,{_MAX_GAP_CHARS}}})"
+                rf"(?P<after>{after_pat})"
+            )
+            matches = list(re.finditer(pattern, markdown, re.IGNORECASE | re.DOTALL))
+            if len(matches) == 1:
+                return int(matches[0].end("before"))
+            if len(matches) > 1:
+                return -1
+    return -1
+
+
+def _apply_layer2_recovery(markdown: str, recovery: dict) -> str | None:
+    marker = str(recovery.get("marker") or "").strip()
+    if not marker:
+        return None
+    mode = str(recovery.get("mode") or "")
+    if mode not in {"ocr_suffix", "ocr_symbol_after_year"}:
+        return None
+
+    after_words = re.findall(r"[A-Za-zÀ-ÿ]{3,}", str(recovery.get("after") or ""))
+    if mode == "ocr_suffix":
+        suffix = str(recovery.get("suffix") or "").strip()
+        if not suffix:
+            return None
+        before_words = re.findall(r"[A-Za-zÀ-ÿ]{3,}", str(recovery.get("before") or ""))
+        if not before_words:
+            return None
+        before_word = re.escape(before_words[-1])
+        pattern = (
+            rf"(?P<before>\b{before_word})"
+            rf"(?P<gap>\s+)"
+            rf"(?P<target>{re.escape(suffix)})"
+            rf"(?P<trail>[•·,;:\.\)\]])"
+            rf"(?P<after>.{{0,80}})"
+        )
+    else:
+        symbol = str(recovery.get("symbol") or "").strip()
+        if not symbol:
+            return None
+        marker_esc = re.escape(marker)
+        pattern = (
+            rf"(?P<before>(?:\[\d{{2}}\]|(?:1[5-9]|20)\d{{0,2}}){marker_esc})"
+            rf"(?P<gap>\s+)"
+            rf"(?P<target>{re.escape(symbol)})"
+            rf"(?P<after>.{{0,80}})"
+        )
+    matches = list(re.finditer(pattern, markdown, re.IGNORECASE | re.DOTALL))
+    if after_words:
+        after_word = re.compile(rf"\b{re.escape(after_words[0])}\b", re.IGNORECASE)
+        matches = [m for m in matches if after_word.search(m.group("after"))]
+    if len(matches) != 1:
+        return None
+
+    match = matches[0]
+    start = int(match.start("gap"))
+    end = int(match.end("target"))
+    return markdown[:start] + _SUP_FMT.format(marker) + markdown[end:]
 
 
 def _apply_insertions(markdown: str, insertions: list[tuple[int, str, str]]) -> str:

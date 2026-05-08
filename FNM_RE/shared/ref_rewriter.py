@@ -85,12 +85,25 @@ def _local_endnote_ref_number(
     note_kind_by_id: dict[str, str],
     local_ref_numbers: dict[str, int],
     ordered_note_ids: list[str],
+    note_marker_by_id: dict[str, str] | None = None,
 ) -> int | None:
     kind = _resolve_note_kind(note_id, note_kind_by_id=note_kind_by_id)
     if kind == "footnote":
         return None
     if note_id not in local_ref_numbers:
-        local_ref_numbers[note_id] = len(local_ref_numbers) + 1
+        # 优先使用原始标记号，避免顺序编号因 skipped note 产生偏移
+        original = (note_marker_by_id or {}).get(note_id, "")
+        if original and original.isdigit():
+            candidate = int(original)
+            if candidate > 0 and candidate not in local_ref_numbers.values():
+                local_ref_numbers[note_id] = candidate
+                ordered_note_ids.append(note_id)
+                return candidate
+        # non-digit marker（如 *, **）的 endnote 不应消耗数字编号。
+        # 返回 None 使调用方输出 "*" 而非 [^20]。
+        if not original and kind == "endnote":
+            return None
+        local_ref_numbers[note_id] = max(local_ref_numbers.values(), default=0) + 1
         ordered_note_ids.append(note_id)
     return int(local_ref_numbers[note_id])
 
@@ -122,6 +135,7 @@ def replace_note_refs_with_local_labels(
     local_ref_numbers: dict[str, int],
     ordered_note_ids: list[str],
     footnote_ids_seen: list[str] | None = None,
+    note_marker_by_id: dict[str, str] | None = None,
 ) -> str:
     text = _CORRUPTED_NOTE_REF_RE.sub(r"{{NOTE_REF:\1}}", str(text or ""))
 
@@ -145,7 +159,8 @@ def replace_note_refs_with_local_labels(
             return match.group(0)
         ref_num = _local_endnote_ref_number(resolved, note_kind_by_id=note_kind_by_id,
                                             local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
+                                            ordered_note_ids=ordered_note_ids,
+                                            note_marker_by_id=note_marker_by_id)
         if ref_num is None:
             if footnote_ids_seen is not None and resolved not in footnote_ids_seen:
                 footnote_ids_seen.append(resolved)
@@ -164,6 +179,7 @@ def replace_raw_bracket_refs_with_local_labels(
     local_ref_numbers: dict[str, int],
     ordered_note_ids: list[str],
     footnote_ids_seen: list[str] | None = None,
+    note_marker_by_id: dict[str, str] | None = None,
 ) -> str:
     def _replace(match: re.Match) -> str:
         note_id = _consume_marker_note_id(
@@ -175,7 +191,8 @@ def replace_raw_bracket_refs_with_local_labels(
             return match.group(0)
         ref_num = _local_endnote_ref_number(note_id, note_kind_by_id=note_kind_by_id,
                                             local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
+                                            ordered_note_ids=ordered_note_ids,
+                                            note_marker_by_id=note_marker_by_id)
         if ref_num is None:
             if footnote_ids_seen is not None and note_id not in footnote_ids_seen:
                 footnote_ids_seen.append(note_id)
@@ -194,9 +211,10 @@ def replace_raw_superscript_refs_with_local_labels(
     local_ref_numbers: dict[str, int],
     ordered_note_ids: list[str],
     footnote_ids_seen: list[str] | None = None,
+    note_marker_by_id: dict[str, str] | None = None,
 ) -> str:
     def _replace(match: re.Match) -> str:
-        marker = str(match.group(1) or match.group(2) or match.group(3) or "")
+        marker = str(match.group(1) or match.group(2) or match.group(3) or match.group(4) or "")
         note_id = _consume_marker_note_id(
             marker,
             marker_note_sequences=marker_note_sequences,
@@ -206,7 +224,8 @@ def replace_raw_superscript_refs_with_local_labels(
             return match.group(0)
         ref_num = _local_endnote_ref_number(note_id, note_kind_by_id=note_kind_by_id,
                                             local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
+                                            ordered_note_ids=ordered_note_ids,
+                                            note_marker_by_id=note_marker_by_id)
         if ref_num is None:
             if footnote_ids_seen is not None and note_id not in footnote_ids_seen:
                 footnote_ids_seen.append(note_id)
@@ -225,6 +244,7 @@ def replace_raw_unicode_superscript_refs_with_local_labels(
     local_ref_numbers: dict[str, int],
     ordered_note_ids: list[str],
     footnote_ids_seen: list[str] | None = None,
+    note_marker_by_id: dict[str, str] | None = None,
 ) -> str:
     def _replace(match: re.Match) -> str:
         marker = str(match.group(1) or "").translate(_UNICODE_SUPERSCRIPT_TRANSLATION)
@@ -237,7 +257,8 @@ def replace_raw_unicode_superscript_refs_with_local_labels(
             return match.group(0)
         ref_num = _local_endnote_ref_number(note_id, note_kind_by_id=note_kind_by_id,
                                             local_ref_numbers=local_ref_numbers,
-                                            ordered_note_ids=ordered_note_ids)
+                                            ordered_note_ids=ordered_note_ids,
+                                            note_marker_by_id=note_marker_by_id)
         if ref_num is None:
             if footnote_ids_seen is not None and note_id not in footnote_ids_seen:
                 footnote_ids_seen.append(note_id)

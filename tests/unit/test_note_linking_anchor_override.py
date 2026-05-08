@@ -131,6 +131,63 @@ class MaterializeAnchorOverridesTest(unittest.TestCase):
         self.assertEqual(new_anchors[0].source, "llm")
         self.assertFalse(new_anchors[0].synthetic)
 
+    def test_body_page_validation_rejects_note_page_override(self):
+        new_anchors, summary, _ = _materialize_anchor_overrides(
+            [],
+            anchor_overrides={
+                "x": self._valid_payload(
+                    chapter_id="c-1",
+                    page_no=174,
+                    char_start=4,
+                    char_end=16,
+                )
+            },
+            chapter_body_text_by_page={("c-1", 159): "valid body page text"},
+        )
+
+        self.assertEqual(new_anchors, [])
+        self.assertEqual(summary["rejected_count"], 1)
+        self.assertIn("x:non_body_page", summary["rejected_reasons"])
+
+    def test_body_page_validation_rejects_global_chapter_offset(self):
+        new_anchors, summary, _ = _materialize_anchor_overrides(
+            [],
+            anchor_overrides={
+                "x": self._valid_payload(
+                    chapter_id="c-1",
+                    page_no=159,
+                    char_start=75997,
+                    char_end=76009,
+                )
+            },
+            chapter_body_text_by_page={("c-1", 159): "Autant les ordolibéraux cherchent"},
+        )
+
+        self.assertEqual(new_anchors, [])
+        self.assertEqual(summary["rejected_count"], 1)
+        self.assertIn("x:coords_out_of_page", summary["rejected_reasons"])
+
+    def test_body_page_validation_accepts_page_local_offset(self):
+        body_text = "Autant les ordolibéraux cherchent autre chose"
+        start = body_text.index("ordolibéraux")
+        end = start + len("ordolibéraux")
+        new_anchors, summary, _ = _materialize_anchor_overrides(
+            [],
+            anchor_overrides={
+                "x": self._valid_payload(
+                    chapter_id="c-1",
+                    page_no=159,
+                    char_start=start,
+                    char_end=end,
+                )
+            },
+            chapter_body_text_by_page={("c-1", 159): body_text},
+        )
+
+        self.assertEqual(summary["created_count"], 1)
+        self.assertEqual(summary["rejected_count"], 0)
+        self.assertEqual(new_anchors[0].char_start, start)
+
 
 if __name__ == "__main__":
     unittest.main()
