@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import asdict
 from typing import Any, Mapping
 
@@ -298,6 +299,24 @@ def _chapter_order_monotonic(chapters: list[TocChapter], toc_tree: list[TocNode]
         return all(chapter_targets[index - 1] <= chapter_targets[index] for index in range(1, len(chapter_targets)))
     return all(chapters[index - 1].start_page <= chapters[index].start_page for index in range(1, len(chapters)))
 
+def _toc_items_look_garbled(toc_items: list[dict] | None) -> bool:
+    """检测 TOC 条目是否包含 OCR 乱码（控制字符比例过高）。"""
+    if not toc_items:
+        return False
+    garbled_count = 0
+    for item in toc_items:
+        title = str(item.get("title") or "")
+        if not title:
+            continue
+        total = len(title)
+        if total == 0:
+            continue
+        ctrl_count = sum(1 for ch in title if unicodedata.category(ch) == "Cc")
+        if ctrl_count > 0 and ctrl_count / max(1, total) > 0.05:
+            garbled_count += 1
+    return garbled_count > 0 and garbled_count >= len(toc_items) * 0.3
+
+
 def build_toc_structure(
     pages: list[dict],
     toc_items: list[dict] | None,
@@ -306,6 +325,19 @@ def build_toc_structure(
     pdf_path: str = "",
     visual_toc_bundle: Mapping[str, Any] | None = None,
 ) -> ModuleResult[TocStructure]:
+    # 自动 TOC 乱码检测：如 ≥30% 条目含控制字符，尝试改用 visual_toc_bundle 的 manual_input 数据
+    if _toc_items_look_garbled(toc_items) and visual_toc_bundle:
+        _manual_debug = visual_toc_bundle.get("manual_page_items_debug") or []
+        if isinstance(_manual_debug, list):
+            _flattened: list[dict] = []
+            for _part in _manual_debug:
+                if isinstance(_part, list):
+                    _flattened.extend(_part)
+            if _flattened and not _toc_items_look_garbled(_flattened):
+                toc_items = _flattened
+                # 同时替换 visual_toc_bundle 中的 items，防止下游误用乱码数据
+                visual_toc_bundle = dict(visual_toc_bundle)
+                visual_toc_bundle["items"] = _flattened
     endnotes_start_page = _resolve_endnotes_start_page(visual_toc_bundle)
     page_partitions = build_page_partitions(
         pages,
