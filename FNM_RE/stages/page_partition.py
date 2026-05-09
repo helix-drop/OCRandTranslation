@@ -446,12 +446,18 @@ def _looks_like_note_continuation_page(text: str, *, page_no: int, total_pages: 
     note_def_count = sum(1 for line in lines if _note_def_match(line))
     if note_def_count < 2:
         return False
+    # OCR 行数太少时信号不可靠——可能是 OCR 截断导致脚注行看起来像页顶编号。
+    if len(lines) < 5:
+        return False
     first_note_index = next((idx for idx, line in enumerate(lines) if _note_def_match(line)), -1)
+    # 尾注延续页的标志：编号行靠近页顶（first_note_index <= 3）。
+    # 脚注页的编号行在页底，first_note_index 通常较大。
+    if first_note_index < 0 or first_note_index > 3:
+        return False
     if first_note_index >= 0:
         prelude_lines = lines[:first_note_index]
         if (
             note_def_count >= 2
-            and first_note_index <= 4
             and prelude_lines
             and all(
                 _MARKDOWN_HEADING_RE.match(line)
