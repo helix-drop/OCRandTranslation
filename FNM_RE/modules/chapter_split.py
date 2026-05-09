@@ -54,12 +54,10 @@ def _scan_body_anchor_markers(text: str) -> list[str]:
 
 def _toc_role_to_page_role(toc_role: str) -> str:
     role = str(toc_role or "").strip().lower()
-    if role in {"chapter", "post_body"}:
+    if role in {"chapter", "post_body", "back_matter", "body"}:
         return "body"
     if role == "front_matter":
         return "front_matter"
-    # 工单 #5：note 角色直接透传，让下游 note_regions._is_endnote_candidate_page
-    # 与 chapter_split._chapter_body_marker_sets 都能识别 NOTES 容器页。
     if role == "note":
         return "note"
     return "other"
