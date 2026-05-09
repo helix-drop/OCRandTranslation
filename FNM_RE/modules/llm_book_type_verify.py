@@ -470,37 +470,52 @@ _LLM_VERIFY_SYSTEM_PROMPT = """\
 You are an expert at analyzing book page layouts to determine the annotation \
 (footnote/endnote) system of an academic book.
 
-Your task: examine several scanned pages and verify the book's classification.
+Your task: examine pages from DIFFERENT CHAPTERS of a book and classify each \
+chapter's annotation mode. Then aggregate to determine the book's overall type.
 
 CRITICAL — page number distinction:
 - "PDF file page": sequential page number in the PDF file (1-based).
   These are the numbers shown in the page labels like "p0100".
 - "Printed book page": the number physically printed on the book page itself.
-  Pages before chapter 1 often use Roman numerals (i, ii, ...) or are unnumbered.
-- The Table of Contents (TOC) reports PRINTED book page numbers, NOT PDF file pages.
-- There is often an offset: PDF page = printed page + offset.
 - When you report page numbers in your JSON response, ALWAYS use PDF file page numbers.
+
+CHAPTER MODE values (choose one per chapter):
+  "chapter_endnote_primary" — chapter has endnotes clustered at its end (usually
+    numbered, restarting from 1), body pages may also have footnotes
+  "footnote_primary" — chapter only has footnotes (at bottom of body pages),
+    no endnote collection at chapter end
+  "book_endnote_bound" — chapter's endnotes are in a unified Notes section
+    at the back of the book (not at this chapter's end)
+  "no_notes" — chapter has no annotations of either kind
+
+BOOK TYPE values (derived from chapter modes):
+  "endnote_only" — ALL sampled chapters use endnotes (chapter_end or book_end)
+  "footnote_only" — ALL sampled chapters use only footnotes
+  "mixed" — some chapters use endnotes, others use footnotes
 
 For each page image, note:
 - Whether there are footnote markers or footnote text at the bottom of the page
-  (typically separated by a horizontal line, smaller font)
-- Whether there are superscript markers (numbers, asterisks, letters) in the body text
-- Whether the page appears to be a dedicated endnote page
-  (with ## NOTES / Notes heading, or a list of numbered citations)
+- Whether there are superscript markers in the body text
+- Whether the page appears to be a dedicated endnote page (numbered citation list)
 - Whether body text transitions into a notes section
 
-Return ONLY a JSON object.  No markdown fences, no explanations outside the JSON.
-Use EXACTLY these values for book_type:
-  "endnote_only" — all notes are endnotes
-  "footnote_only" — all notes are footnotes
-  "mixed" — both footnotes AND endnotes appear
+Return ONLY a JSON object. No markdown fences, no explanations outside the JSON.
 
 JSON schema:
 {
   "book_type": "endnote_only" | "footnote_only" | "mixed",
   "confidence": "high" | "medium" | "low",
   "agrees_with_pipeline": true | false,
-  "reasoning": "brief explanation of your decision (1-3 sentences)",
+  "reasoning": "brief explanation (1-3 sentences)",
+  "per_chapter": [
+    {
+      "chapter_label": "Ch1",
+      "chapter_mode": "chapter_endnote_primary" | "footnote_primary" | "book_endnote_bound" | "no_notes",
+      "has_body_footnotes": true | false,
+      "has_endnote_region": true | false,
+      "evidence": "one sentence describing what you saw"
+    }
+  ],
   "toc_notes_page_verified": true | false,
   "toc_notes_actual_pdf_page": <integer or null>,
   "suspected_false_positive_pages": [<integer, ...>]
@@ -517,6 +532,7 @@ def _build_user_prompt(
     mode_types: list[str],
     endnote_region_count: int,
     endnote_item_count: int,
+    chapter_modes_by_page: dict[int, str],
 ) -> str:
     lines = [
         "The automated pipeline classified this book as:",
@@ -533,30 +549,43 @@ def _build_user_prompt(
         lines.append(
             f"  TOC says Notes/Endnotes at PRINTED page {toc_notes_page}"
         )
-        lines.append(
-            "  (IMPORTANT: this is the printed book page number,"
-            " NOT the PDF file page number)"
-        )
 
-    lines.extend([
-        "",
-        "Pages to examine (PDF file page → printed book page):",
-    ])
+    # Group pages by chapter
+    ch_pages: dict[str, list[dict]] = {}
     for info in page_infos:
-        lines.append(
-            f"  PDF p.{info['pdf_page']:04d}"
-            f"  (printed page {info.get('printed_page', '?')})"
-        )
+        ch_label = info.get("chapter_label", f"ch_{info['pdf_page']}")
+        ch_pages.setdefault(ch_label, []).append(info)
 
     lines.extend([
         "",
-        "Verify whether the pipeline's book_type is correct.",
-        "If the TOC claims a Notes section at a certain printed page number,",
-        "check whether that printed page number appears on the correct PDF file page.",
-        "Report the ACTUAL PDF file page where the Notes section starts"
-        " (if different from what the pipeline detected).",
-        "If endnote items are very few (< 50), check whether they are real endnotes"
-        " or high-numbered footnotes / appendix legal references misdetected.",
+        "Pages to examine, grouped by chapter:",
+    ])
+    for ch_label, infos in sorted(ch_pages.items()):
+        pipeline_mode = chapter_modes_by_page.get(infos[0]["pdf_page"], "?") if infos else "?"
+        lines.append(f"  [{ch_label}] pipeline says: {pipeline_mode}")
+        for info in infos:
+            lines.append(
+                f"    PDF p.{info['pdf_page']:04d}"
+                f" (printed {info.get('printed_page', '?')})"
+            )
+
+    lines.extend([
+        "",
+        "For EACH chapter above, determine its annotation mode:",
+        "  chapter_endnote_primary — endnotes clustered at this chapter's end",
+        "  footnote_primary — only footnotes, no endnote collection",
+        "  book_endnote_bound — endnotes in unified Notes section at book back",
+        "  no_notes — no annotations at all",
+        "",
+        "Then derive the book's overall book_type:",
+        "  mixed — if some chapters use endnotes AND others use footnotes",
+        "  endnote_only — if ALL chapters use endnotes (no footnote-only chapters)",
+        "  footnote_only — if ALL chapters use footnotes (no endnote chapters)",
+        "",
+        "If the TOC claims a Notes section, check whether the printed page number",
+        "on the physical page matches the TOC claim.",
+        "If endnote items are very few (< 50), check whether they are real endnotes",
+        "or high-numbered footnotes / appendix legal references.",
         "",
         "Return JSON.",
     ])
@@ -753,8 +782,8 @@ def _handle_content_filter_retry(
     """送检 + 审核拒绝时换页重试（最多 3 次）。"""
     offsets_to_try = [
         None,  # 原始页面
-        [(-2, 2)],  # 第 1 次换页: 前后 ±2
-        [(-1, 3)],  # 第 2 次换页: 前后 -1/+3
+        [-2, 2],  # 第 1 次换页: 前后 ±2
+        [-1, 3],  # 第 2 次换页: 前后 -1/+3
     ]
 
     for attempt, offsets in enumerate(offsets_to_try):
@@ -838,8 +867,25 @@ def verify_book_type_with_llm(
             ),
         )
 
-    # Step 4: 构建 prompt
-    page_infos = _build_page_info_list(page_numbers, pages)
+    # Step 4: 构建 prompt（含逐章映射）
+    chapter_modes_by_page: dict[int, str] = {}
+    page_chapter_map: dict[int, str] = {}
+    if toc_structure is not None:
+        for ch in getattr(toc_structure, "chapters", []) or []:
+            cid = str(getattr(ch, "chapter_id", "") or "")
+            for pn in getattr(ch, "pages", []) or []:
+                try:
+                    page_chapter_map[int(pn)] = cid
+                except (TypeError, ValueError):
+                    pass
+    for pn in page_numbers:
+        cid = page_chapter_map.get(pn, "")
+        if cid:
+            chapter_modes_by_page[pn] = profile.chapter_modes.get(cid, "?")
+    page_infos = _build_page_info_list(
+        page_numbers, pages,
+        toc_structure=toc_structure, chapter_modes=profile.chapter_modes,
+    )
     user_prompt = _build_user_prompt(
         book_type=str(book_type_profile.book_type),
         page_infos=page_infos,
@@ -850,6 +896,7 @@ def verify_book_type_with_llm(
         endnote_region_count=profile.chapter_endnote_count
         + profile.book_endnote_count,
         endnote_item_count=profile.endnote_item_count,
+        chapter_modes_by_page=chapter_modes_by_page,
     )
 
     # Step 5: 调用 VLM（含审核拒绝换页重试）
@@ -862,11 +909,39 @@ def verify_book_type_with_llm(
         model_args=resolved_args,
     )
 
-    # Step 6: 构建 gate report
-    llm_responded = result.get("book_type") is not None
+    # Step 6: 从逐章结果推导 book_type，再和 pipeline 比较
+    per_chapter = result.get("per_chapter") or []
+    llm_chapter_modes = {
+        str(ch.get("chapter_label", "")): str(ch.get("chapter_mode", ""))
+        for ch in per_chapter
+        if ch.get("chapter_mode") in {
+            "chapter_endnote_primary", "footnote_primary",
+            "book_endnote_bound", "no_notes",
+        }
+    }
+    # 逐章聚合 → book_type
+    llm_has_endnote = any(
+        m in {"chapter_endnote_primary", "book_endnote_bound"}
+        for m in llm_chapter_modes.values()
+    )
+    llm_has_footnote = any(
+        m == "footnote_primary" for m in llm_chapter_modes.values()
+    )
+    if llm_has_endnote and llm_has_footnote:
+        derived_book_type = "mixed"
+    elif llm_has_endnote:
+        derived_book_type = "endnote_only"
+    elif llm_has_footnote:
+        derived_book_type = "footnote_only"
+    else:
+        derived_book_type = result.get("book_type")  # fallback to LLM's own
+
+    result["derived_book_type"] = derived_book_type
+    result["llm_chapter_modes"] = llm_chapter_modes
+
+    llm_responded = bool(llm_chapter_modes)
     pipeline_type = str(book_type_profile.book_type)
-    llm_type = str(result.get("book_type") or "")
-    disagreement = llm_responded and (llm_type != pipeline_type)
+    disagreement = llm_responded and (derived_book_type != pipeline_type)
 
     evidence: dict[str, Any] = dict(result)
     evidence["pages_selected"] = page_numbers
@@ -901,11 +976,25 @@ def verify_book_type_with_llm(
 def _build_page_info_list(
     page_numbers: list[int],
     pages: list[dict],
+    *,
+    toc_structure: Any = None,
+    chapter_modes: dict[str, str] | None = None,
 ) -> list[dict]:
-    """为每页生成 PDF 页码 → 印刷页码 的对照信息。"""
+    """为每页生成 PDF 页码 → 印刷页码 + 所属章 的对照信息。"""
+    # Build page → chapter mapping from toc_structure
+    page_chapter: dict[int, str] = {}
+    if toc_structure is not None:
+        for ch in getattr(toc_structure, "chapters", []) or []:
+            cid = str(getattr(ch, "chapter_id", "") or "")
+            for pn in getattr(ch, "pages", []) or []:
+                try:
+                    page_chapter[int(pn)] = cid
+                except (TypeError, ValueError):
+                    pass
+
     infos: list[dict] = []
     for pn in page_numbers:
-        printed = pn  # 默认等于 PDF 页码
+        printed = pn
         for p in pages:
             try:
                 if int(p.get("bookPage") or 0) == pn:
@@ -917,5 +1006,14 @@ def _build_page_info_list(
                     break
             except (TypeError, ValueError):
                 continue
-        infos.append({"pdf_page": pn, "printed_page": printed})
+        ch_id = page_chapter.get(pn, "")
+        ch_label = ch_id[:30] if ch_id else f"p{pn}"
+        ch_mode = (chapter_modes or {}).get(ch_id, "?") if ch_id else "?"
+        infos.append({
+            "pdf_page": pn,
+            "printed_page": printed,
+            "chapter_id": ch_id,
+            "chapter_label": ch_label,
+            "chapter_mode": ch_mode,
+        })
     return infos
