@@ -23,7 +23,9 @@ def _unicode_superscript_pattern(num_str: str) -> str | None:
     chars = [superscript_map.get(c) for c in num_str]
     if None in chars:
         return None
-    return ''.join(chars)
+    # 负向前瞻：确保匹配的 Unicode 上标字符后面不是另一个上标数字，
+    # 防止 "¹" 匹配 "¹²³" 的子串（假阳性恢复锚点）。
+    return ''.join(chars) + r'(?![⁰¹²³⁴⁵⁶⁷⁸⁹])'
 
 
 def _find_marker_in_body(body_text: str, marker: str) -> dict | None:

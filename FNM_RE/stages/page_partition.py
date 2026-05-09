@@ -676,9 +676,9 @@ def _resolve_page_role(ctx: _PageScanContext) -> _RuleMatch:
         _rule_early_other_list,
         _rule_rear_toc_tail,
         _rule_rear_author_blurb,
+        _rule_note_scan,              # note rules before rear_sparse_other
+        _rule_notes_heading,          # so endnote pages aren't misclassified
         _rule_rear_sparse_other,
-        _rule_note_scan,
-        _rule_notes_heading,
         _rule_title_page,
         _rule_title_family,
         _rule_blank_front_page,

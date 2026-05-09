@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict
 from typing import Any, Mapping
 
@@ -56,6 +57,10 @@ def _normalize_toc_node_role(value: Any) -> str:
         return "endnotes"
     if role == "book_title":
         return "front_matter"
+    # visual_toc manual_input_extract 用 "content" 标记所有内容条目。
+    # 此时保留原值让 _map_toc_role 用标题启发式推断（比返回空串更优）。
+    if role == "content":
+        return "content"
     return ""
 
 def _map_toc_role(
@@ -68,9 +73,11 @@ def _map_toc_role(
     post_body_keys: set[str],
     back_matter_keys: set[str],
     chapter_keys: set[str],
+    is_likely_chapter: bool = False,
 ) -> str:
     normalized_explicit_role = _normalize_toc_node_role(explicit_role)
-    if normalized_explicit_role:
+    # "content" 是 visual_toc manual_input_extract 的通用标记，需要走标题启发式推断
+    if normalized_explicit_role and normalized_explicit_role != "content":
         return normalized_explicit_role
     if title_key in container_keys:
         return "container"
@@ -80,14 +87,17 @@ def _map_toc_role(
         return "post_body"
     if title_key in back_matter_keys:
         return "back_matter"
+    # chapter_keys 仅当条目本身有章节特征时才采信为 chapter，
+    # 否则降级为 section。防止 skeleton builder 把所有条目都变成 chapter。
     if title_key in chapter_keys:
-        return "chapter"
+        return "chapter" if is_likely_chapter else "section"
     normalized = normalize_title(title).lower()
     if "endnote" in normalized or normalized == "notes" or normalized.startswith("notes "):
         return "endnotes"
     if any(token in normalized for token in ("bibliograph", "index", "appendix", "references")):
         return "back_matter"
-    return "chapter"
+    # 不在 chapter_keys 中且无章节特征 → section（而非盲猜 chapter）
+    return "chapter" if is_likely_chapter else "section"
 
 def _build_toc_tree(
     toc_items: list[dict] | None,
@@ -103,6 +113,18 @@ def _build_toc_tree(
     back_matter_keys = {chapter_title_match_key(title) for title in list(meta.get("back_matter_titles") or [])}
     nodes: list[TocNode] = []
     source_rows = normalized_toc_rows if normalized_toc_rows else list(toc_items or [])
+    # normalized_toc_rows 可能缺少 target_pdf_page 和 role_hint；从原始 toc_items 补全
+    _page_by_title_key: dict[str, int] = {}
+    _hint_by_title_key: dict[str, str] = {}
+    for _item in (toc_items or []):
+        _pn = _safe_int(_item.get("target_pdf_page") or _item.get("page_no") or 0)
+        _tk = chapter_title_match_key(normalize_title(str(_item.get("title") or "")))
+        if _pn > 0 and _tk:
+            _page_by_title_key[_tk] = _pn
+        _rh = str(_item.get("role_hint") or _item.get("role") or "").strip()
+        if _rh and _tk:
+            _hint_by_title_key[_tk] = _rh
+    prev_page: int | None = None
     for index, item in enumerate(source_rows, start=1):
         title = normalize_title(str(item.get("title") or ""))
         if not title:
@@ -114,6 +136,29 @@ def _build_toc_tree(
             or item.get("explicit_role_hint")
             or ""
         )
+        # skeleton 的 semantic_role="chapter" 不可靠（它把所有标题都当章）。
+        # 仅当 visual_toc 明确标记为 "content" 时才丢弃 skeleton 的章分类，
+        # 改用后续启发式推断（is_likely_chapter）。
+        if str(item.get("semantic_role") or "").strip().lower() == "chapter":
+            _hint = str(item.get("role_hint") or _hint_by_title_key.get(title_key, "") or "").strip().lower()
+            if _hint == "content":
+                explicit_role = "content"
+        target_pdf_page = _safe_int(
+            item.get("target_pdf_page")
+            or item.get("page_no")
+            or _page_by_title_key.get(title_key, 0)
+            or 0
+        )
+        # 判断是否疑似章标题：编号前缀 / 章关键词 / 与上一项不同页
+        _normalized = title.lower()
+        _has_number_prefix = bool(re.match(r"^\d{1,2}\.", _normalized))
+        _has_chapter_kw = any(
+            kw in _normalized
+            for kw in ("chapter", "chapitre", "leçon", "lecture", "prologue", "epilogue")
+        )
+        _page_changed = target_pdf_page > 0 and (prev_page is None or target_pdf_page != prev_page)
+        is_likely_chapter = _has_number_prefix or _has_chapter_kw or _page_changed
+
         role = _map_toc_role(
             title,
             explicit_role=explicit_role,
@@ -123,8 +168,10 @@ def _build_toc_tree(
             post_body_keys=post_body_keys,
             back_matter_keys=back_matter_keys,
             chapter_keys=title_keys,
+            is_likely_chapter=is_likely_chapter,
         )
-        target_pdf_page = _safe_int(item.get("target_pdf_page") or item.get("page_no") or 0)
+        if target_pdf_page > 0:
+            prev_page = target_pdf_page
         nodes.append(
             TocNode(
                 node_id=str(item.get("item_id") or f"toc-node-{index:04d}"),
@@ -203,7 +250,8 @@ def _build_page_roles(
             role = "note"
             chapter_id = chapter.chapter_id if chapter is not None else ""
         elif chapter is not None:
-            role = chapter.role
+            # post_body 视为 body 页面（导出时作为正文章处理）
+            role = "body" if chapter.role in {"post_body", "back_matter"} else chapter.role
             chapter_id = chapter.chapter_id
         elif page_no > 0 and back_matter_start > 0 and page_no >= back_matter_start:
             role = "back_matter"
@@ -282,6 +330,58 @@ def build_toc_structure(
 
     toc_chapters = _build_chapters(phase1_chapters, meta=chapter_meta)
     toc_tree = _build_toc_tree(toc_items, chapter_rows=toc_chapters, meta=chapter_meta)
+    # 用 TOC 树剔除被判定为非 chapter（section/front_matter/back_matter）的 skeleton 候选章。
+    # 只删除 TOC 树有明确意见的条目；TOC 树中无对应节点的候选章保留（skeleton 从正文标题发现）。
+    toc_non_chapter_keys = {
+        chapter_title_match_key(node.title)
+        for node in toc_tree
+        if node.role not in {"chapter", "container", "endnotes"}
+    }
+    if toc_non_chapter_keys:
+        toc_chapters = [
+            ch for ch in toc_chapters
+            if chapter_title_match_key(ch.title) not in toc_non_chapter_keys
+        ]
+    # 将 TOC 树中的 post_body 和 back_matter 条目补入导出章列表。
+    # skeleton 可能未检测到这些条目（非典型章标题），但它们应在导出中。
+    _existing_keys = {chapter_title_match_key(ch.title) for ch in toc_chapters}
+    _all_starts = sorted(
+        [int(ch.start_page) for ch in toc_chapters if int(ch.start_page) > 0]
+        + [n.target_pdf_page for n in toc_tree if n.target_pdf_page and int(n.target_pdf_page) > 0]
+    )
+    _all_starts.sort()
+    _total_pages = max(
+        [int(ch.end_page) for ch in toc_chapters if int(ch.end_page) > 0] + [_all_starts[-1] if _all_starts else 0],
+        default=0,
+    )
+    _max_ch_id = max((_safe_int(getattr(ch, "chapter_id", "0") or "0") for ch in toc_chapters), default=0)
+    # 按 target_pdf_page 排序，保持与 TOC 顺序一致
+    _extra_nodes = sorted(
+        [n for n in toc_tree if n.role in {"post_body", "back_matter"}],
+        key=lambda n: (n.target_pdf_page if n.target_pdf_page > 0 else 9999, n.title),
+    )
+    for node in _extra_nodes:
+        _tk = chapter_title_match_key(node.title)
+        if _tk in _existing_keys:
+            continue
+        _existing_keys.add(_tk)
+        _start = node.target_pdf_page if node.target_pdf_page > 0 else 0
+        # 用下一个章的 start_page 或全书末页推算 end_page
+        _next_starts = [s for s in _all_starts if s > _start]
+        _end = (_next_starts[0] - 1) if _next_starts else _total_pages
+        _max_ch_id += 1
+        toc_chapters.append(
+            TocChapter(
+                chapter_id=f"toc-ch-{_max_ch_id:03d}-{_tk[:20]}",
+                title=node.title,
+                start_page=_start,
+                end_page=_end,
+                pages=list(range(_start, _end + 1)) if _start > 0 and _end >= _start else [],
+                source="toc_tree",
+                boundary_state="ready",
+                role=node.role,  # type: ignore[arg-type]
+            )
+        )
     toc_pages = _build_page_roles(
         page_partitions,
         chapters=toc_chapters,

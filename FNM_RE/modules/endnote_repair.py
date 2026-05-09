@@ -221,10 +221,15 @@ def repair_endnote_links_for_contract(
                 confidence=1.0,
             )
 
-    if str(book_type or "") == "endnote_only":
+    # 数据驱动：仅当全书无 footnote link 时做 endnote-only 配对。
+    # 不用 book_type（Phase 1 分类），用 Phase 3 自身的 link 数据。
+    has_footnote_links = any(
+        str(row.note_kind or "") == "footnote" for row in repaired_links
+    )
+    if not has_footnote_links:
         # 按 (chapter_id, marker) 分组，禁止跨章配对。
         # 全书 marker-only 配对会把 note_item 的 chapter ownership 改成
-        # anchor 所在的章，违反“上游事实不可变”原则。
+        # anchor 所在的章，违反"上游事实不可变"原则。
         orphan_note_by_chapter_marker: dict[tuple[str, str], list[int]] = {}
         orphan_anchor_by_chapter_marker: dict[tuple[str, str], list[int]] = {}
         for index, row in enumerate(repaired_links):
@@ -292,7 +297,11 @@ def suppress_endnote_residual_orphans(
     links: list[NoteLinkRecord],
     book_type: str,
 ) -> tuple[list[NoteLinkRecord], dict[str, int]]:
-    if str(book_type or "") != "endnote_only":
+    # 数据驱动：存在 footnote link 时不抑制（非纯尾注书）。
+    has_footnote = any(
+        str(row.note_kind or "") == "footnote" for row in links
+    )
+    if has_footnote:
         return list(links), {"suppressed_orphan_note_count": 0, "suppressed_orphan_anchor_count": 0}
     updated: list[NoteLinkRecord] = [replace(row) for row in links]
     suppressed_orphan_note_count = 0

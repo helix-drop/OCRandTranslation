@@ -17,7 +17,6 @@ from openai import OpenAI
 from rapidfuzz.fuzz import partial_ratio_alignment
 
 from document.pdf_extract import render_pdf_page
-from FNM_RE.shared.chapters import chapter_id_for_page as _shared_chapter_id_for_page
 from FNM_RE.shared.notes import normalize_note_marker
 from persistence.sqlite_store import SQLiteRepository
 from persistence.storage import get_pdf_path, resolve_fnm_model_pool_specs

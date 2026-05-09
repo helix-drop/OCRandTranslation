@@ -103,7 +103,11 @@ def _local_endnote_ref_number(
         # 返回 None 使调用方输出 "*" 而非 [^20]。
         if not original and kind == "endnote":
             return None
-        local_ref_numbers[note_id] = max(local_ref_numbers.values(), default=0) + 1
+        # 分配下一个可用编号，跳过已被占用的值以防止重复
+        next_num = max(local_ref_numbers.values(), default=0) + 1
+        while next_num in local_ref_numbers.values():
+            next_num += 1
+        local_ref_numbers[note_id] = next_num
         ordered_note_ids.append(note_id)
     return int(local_ref_numbers[note_id])
 

@@ -258,6 +258,10 @@ def _project_endnotes_by_marker(
         if not candidates:
             continue
         current = str(item.owner_chapter_id or item.chapter_id or "")
+        # 如果当前章不在候选列表中，说明 body anchor 扫描未在本文中找到该 marker，
+        # 可能是扫描遗漏。保守不投影，保留当前章归属。
+        if current and current not in candidates:
+            continue
         if len(candidates) == 1:
             chosen = str(candidates[0])
         else:
@@ -630,7 +634,7 @@ def _note_capture_summary(
             book_type in {"endnote_only"}
             or (book_type == "no_notes" and note_mode == "no_notes")
         )
-        if should_block_sparse and expected_count >= 10 and ratio < 0.6:
+        if should_block_sparse and captured_count > 0 and expected_count >= 10 and ratio < 0.6:
             sparse_chapter_ids.append(chapter_id)
             chapter_row["sparse_capture"] = True
         chapter_rows.append(chapter_row)

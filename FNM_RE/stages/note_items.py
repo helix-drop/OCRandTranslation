@@ -21,6 +21,17 @@ from FNM_RE.shared.title import chapter_title_match_key
 
 
 _MARKDOWN_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s*(.+?)\s*$")
+_SYM_RE = re.compile(r"^[\*†‡§¶]{1,4}$")
+_LTR_RE = re.compile(r"^[a-zA-Z]$")
+
+
+def _infer_marker_type(marker: str) -> str:
+    """从 marker 值推断类型：symbolic / letter / numeric。"""
+    if _SYM_RE.match(marker):
+        return "symbolic"
+    if _LTR_RE.match(marker):
+        return "letter"
+    return "numeric"
 
 
 def _annotated_page_by_no(pages: list[dict]) -> dict[int, dict]:
@@ -397,6 +408,9 @@ def build_note_items(
         for row in phase1.pages
         if int(row.page_no) > 0
     }
+    # 必须在此调用：_annotated_page_by_no 内部调用了 annotate_pages_with_note_scans，
+    # 会覆盖 _note_scan 并丢失 note_regions.build_note_regions 中设置的重分类标记。
+    # 两个模块各有独立的 page_by_no 副本，都需要独立调用此函数。
     _reclassify_post_body_fnblocks_as_endnote(phase1, page_by_no, _page_role_by_no)
     normalized_page_text_map: dict[int, str] = {}
     for raw_key, raw_value in dict(page_text_map or {}).items():
@@ -616,7 +630,7 @@ def build_note_items(
                     chapter_id=chapter_id,
                     page_no=int(row.get("page_no") or 0),
                     marker=marker,
-                    marker_type="numeric",
+                    marker_type=_infer_marker_type(marker),
                     text=text,
                     source=str(row.get("source") or "markdown"),
                     source_page_label=f"p{int(row.get('page_no') or 0)}",

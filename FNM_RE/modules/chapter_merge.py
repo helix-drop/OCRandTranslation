@@ -673,10 +673,14 @@ def build_chapter_markdown_set(
     linked_note_ids: set[str] = set()
     for link in (note_link_table.effective_links or []):
         nid = str(link.note_item_id or "").strip()
-        if nid:
-            linked_note_ids.add(nid)
-            if str(link.status or "") in {"orphan_note", "ignored"}:
-                unlinked_note_ids.add(nid)
+        if not nid:
+            continue
+        linked_note_ids.add(nid)
+        if str(link.status or "") in {"orphan_note", "ignored"}:
+            unlinked_note_ids.add(nid)
+        elif str(link.status or "") == "matched":
+            # matched 优先：若 ref_map 标记为 skipped 但 effective_links 已匹配，移除
+            unlinked_note_ids.discard(nid)
     # ghost notes: 有 note_unit 但完全没有 link entry
     for unit in (frozen_units.note_units or []):
         nid = str(unit.note_id or "").strip()
@@ -732,14 +736,14 @@ def build_chapter_markdown_set(
     local_refs_closed = int(chapter_issue_counts.get("local_ref_contract_broken_chapter_count") or 0) == 0
     no_frozen_ref_leak = int(chapter_issue_counts.get("frozen_ref_leak_chapter_count") or 0) == 0
     no_raw_marker_leak_in_body = int(chapter_issue_counts.get("raw_marker_leak_chapter_count") or 0) == 0
-    chapter_files_emitted = len(chapters) == len(expected_chapters) and all(
+    chapter_files_emitted = len(chapters) > 0 and len(chapters) == len(expected_chapters) and all(
         str(row.path or "").endswith(".md") for row in chapters
     )
-    image_tail_warn = all(
+    image_tail_warn = len(chapters) > 0 and all(
         not bool(_TRAILING_IMAGE_ONLY_BLOCK_RE.search(str(row.markdown_text or "")))
         for row in chapters
     )
-    section_heading_warn = all(
+    section_heading_warn = len(chapters) > 0 and all(
         not export_audit_stage._detect_mid_paragraph_heading(
             export_audit_stage.split_body_and_definitions(str(row.markdown_text or ""))[0]
         )

@@ -30,14 +30,6 @@ def _region_map(phase2: Phase2Structure) -> dict[str, Any]:
     }
 
 
-def _infer_note_kind_from_anchor(anchor: BodyAnchorRecord) -> str:
-    if anchor.anchor_kind == "footnote":
-        return "footnote"
-    if anchor.anchor_kind == "endnote":
-        return "endnote"
-    return "unknown"
-
-
 # ── 编排入口 ──
 
 def build_note_links(
@@ -127,7 +119,8 @@ def build_note_links(
         normalized_marker = normalize_note_marker(anchor.normalized_marker)
         if not normalized_marker:
             continue
-        inferred_kind = _infer_note_kind_from_anchor(anchor)
+        ak = str(anchor.anchor_kind or "")
+        inferred_kind = "footnote" if ak == "footnote" else ("endnote" if ak == "endnote" else "unknown")
         if (str(anchor.chapter_id or ""), inferred_kind, normalized_marker) in matched_marker_keys:
             continue
         if (str(anchor.chapter_id or ""), inferred_kind, normalized_marker) in note_item_marker_keys:
@@ -163,6 +156,7 @@ def build_note_links(
         "footnote_orphan_anchor": sum(1 for row in links if row.note_kind == "footnote" and row.status == "orphan_anchor"),
         "endnote_orphan_note": sum(1 for row in links if row.note_kind == "endnote" and row.status == "orphan_note"),
         "endnote_orphan_anchor": sum(1 for row in links if row.note_kind == "endnote" and row.status == "orphan_anchor"),
+        "unknown_orphan": sum(1 for row in links if row.note_kind not in {"footnote", "endnote"} and row.status in {"orphan_note", "orphan_anchor"}),
         "ambiguous": sum(1 for row in links if row.status == "ambiguous"),
         "ignored": sum(1 for row in links if row.status == "ignored"),
         "fallback_count": sum(1 for row in links if row.resolver == "fallback"),

@@ -141,7 +141,15 @@ def _is_endnote_candidate_page(
         return False
     page_role = str(page_role_by_no.get(page_no) or "")
     if page_role == "note":
-        return True
+        # page_role="note" 来自 Phase 1 规则判定。延续页可能不含独立 endnote
+        # scan items，但 page_role 本身（含 note_continuation_fix）是多规则
+        # 级联的可靠结果。守卫只过滤完全无内容的假阳性 note 页。
+        if first_notes_heading(page):
+            return True
+        note_scan = dict(page.get("_note_scan") or {})
+        if note_scan.get("items") or note_scan.get("page_kind"):
+            return True
+        return False
     if first_body_page > 0 and page_no < first_body_page:
         return bool(first_notes_heading(page))
     if page_role == "other":
@@ -241,43 +249,51 @@ def _build_endnote_regions_raw(
                 current_start_reason = ""
             continue
         # 有 fnBlock 的页是正文页（含页底脚注），不能作为尾注 region 候选。
-        # 例外：post_body 章节中被 _reclassify_post_body_fnblocks_as_endnote 重分类的页面
+        # 例外：页面同时有尾注信号（endnote scan items、endnote_collection page_kind、
+        # 或 NOTES 标题）时，视为过渡页，允许进入尾注 region。
+        # 例外2：post_body 章节中被 _reclassify_post_body_fnblocks_as_endnote 重分类的页面
         page_data = page_by_no.get(page_no) or {}
         fnb = page_data.get("fnBlocks")
         if isinstance(fnb, list) and len(fnb) > 0:
             scan_data = dict(page_data.get("_note_scan") or {})
             if not scan_data.get("has_reclassified_endnotes"):
-                if current_pages:
-                    start_page = current_pages[0]
-                    end_page = current_pages[-1]
-                    regions.append(
-                        NoteRegionRecord(
-                            region_id=f"region-endnote-{len(regions) + 1:04d}",
-                            chapter_id=current_chapter_id,
-                            page_start=start_page,
-                            page_end=end_page,
-                            pages=list(current_pages),
-                            note_kind="endnote",
-                            scope=current_scope if current_scope in {"chapter", "book"} else "chapter",
-                            source="heading_scan",
-                            heading_text=current_heading_text,
-                            start_reason=current_start_reason or "candidate_page",
-                            end_reason="contiguous_break",
-                            region_marker_alignment_ok=True,
-                            region_start_first_source_marker=first_source_marker(
-                                page_by_no.get(start_page),
-                                kind="endnote",
-                            ),
-                            region_first_note_item_marker="",
-                            review_required=False,
+                has_endnote_signal = (
+                    bool(first_notes_heading(page_data))
+                    or bool(scan_items_by_kind(page_data, kind="endnote"))
+                    or str(scan_data.get("page_kind") or "").strip().lower() == "endnote_collection"
+                )
+                if not has_endnote_signal:
+                    if current_pages:
+                        start_page = current_pages[0]
+                        end_page = current_pages[-1]
+                        regions.append(
+                            NoteRegionRecord(
+                                region_id=f"region-endnote-{len(regions) + 1:04d}",
+                                chapter_id=current_chapter_id,
+                                page_start=start_page,
+                                page_end=end_page,
+                                pages=list(current_pages),
+                                note_kind="endnote",
+                                scope=current_scope if current_scope in {"chapter", "book"} else "chapter",
+                                source="heading_scan",
+                                heading_text=current_heading_text,
+                                start_reason=current_start_reason or "candidate_page",
+                                end_reason="contiguous_break",
+                                region_marker_alignment_ok=True,
+                                region_start_first_source_marker=first_source_marker(
+                                    page_by_no.get(start_page),
+                                    kind="endnote",
+                                ),
+                                region_first_note_item_marker="",
+                                review_required=False,
+                            )
                         )
-                    )
-                    current_pages = []
-                    current_scope = ""
-                    current_chapter_id = ""
-                    current_heading_text = ""
-                    current_start_reason = ""
-                continue
+                        current_pages = []
+                        current_scope = ""
+                        current_chapter_id = ""
+                        current_heading_text = ""
+                        current_start_reason = ""
+                    continue
 
         scope, chapter_id = _endnote_scope_for_page(
             page_no,
@@ -701,6 +717,9 @@ def build_note_regions(
         if int(row.page_no) > 0
     }
 
+    # 必须在 _build_footnote_band_regions 和 _build_endnote_regions_raw 之前调用，
+    # 因为 annotate_pages_with_note_scans 会覆盖 _note_scan，丢失上游重分类标记。
+    # 注意：note_items.build_note_items 有自己的 page_by_no 副本，也需要独立调用。
     _reclassify_post_body_fnblocks_as_endnote(phase1, page_by_no, page_role_by_no)
 
     footnote_regions, chapters_with_footnote_band = _build_footnote_band_regions(phase1, page_by_no)

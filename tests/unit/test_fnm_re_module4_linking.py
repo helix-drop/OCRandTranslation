@@ -633,6 +633,20 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             review_required=False,
             note_kind="endnote",
         )
+        # 混合书必须包含 footnote item 和 region，确保 has_footnote_links=True
+        fn_region = LayerNoteRegion(
+            region_id="r-fn", chapter_id="toc-ch-001", page_start=1, page_end=1,
+            pages=[1], note_kind="footnote", scope="chapter", source_scope="chapter",
+            source="unit-test", bind_method="manual", bind_confidence=1.0,
+            heading_text="", review_required=False,
+        )
+        fn_item = LayerNoteItem(
+            note_item_id="fn-1", region_id="r-fn", chapter_id="toc-ch-001",
+            page_no=1, marker="*", source_marker="*", normalized_marker="*",
+            synth_marker="", projection_mode="native", marker_type="symbolic",
+            text="A footnote.", source="unit-test", is_reconstructed=False,
+            review_required=False, note_kind="footnote",
+        )
         ch1 = ChapterLayer(
             chapter_id="toc-ch-001",
             title="Chapter One",
@@ -646,6 +660,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             ],
             endnote_items=[note],
             endnote_regions=[region],
+            footnote_items=[fn_item],
             policy_applied={"note_mode": "chapter_endnote_primary", "book_type": "mixed"},
         )
         ch2 = ChapterLayer(
@@ -665,8 +680,8 @@ class FnmReModule4LinkingTest(unittest.TestCase):
         )
         layers = ChapterLayers(
             chapters=[ch1, ch2],
-            regions=[region],
-            note_items=[note],
+            regions=[region, fn_region],
+            note_items=[note, fn_item],
             region_summary={},
             item_summary={},
         )

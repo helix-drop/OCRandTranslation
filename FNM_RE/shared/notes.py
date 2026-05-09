@@ -173,15 +173,31 @@ _UNICODE_SUPERSCRIPT_TO_DIGITS = str.maketrans(
 )
 
 
+# OCR 常见误读：数字被识别为字母（仅高置信度映射）
+_OCR_DIGIT_RECOVERY = str.maketrans({
+    "l": "1",  # 小写 L → 1
+    "I": "1",  # 大写 I → 1
+    "O": "0",  # 大写 O → 0
+})
+
+# 字母型尾注标记（a, b, c, ...）
+_LETTER_MARKER_RE = re.compile(r"^[a-zA-Z]$")
+
+
 def normalize_note_marker(marker: Any) -> str:
     raw = str(marker or "").strip()
     if not raw:
         return ""
-    # 符号型标记（*, ** 等）原样保留
+    # 符号型标记（*, **, † 等）原样保留
     if _SYMBOLIC_MARKER_RE.match(raw):
         return raw
+    # 字母型标记（a, b, c, A, B, C）保留，不丢弃
+    if _LETTER_MARKER_RE.match(raw):
+        return raw
     translated = raw.translate(_UNICODE_SUPERSCRIPT_TO_DIGITS)
-    digits = re.sub(r"\D+", "", translated)
+    # OCR 纠错：常见数字→字母误读恢复
+    ocr_fixed = translated.translate(_OCR_DIGIT_RECOVERY)
+    digits = re.sub(r"\D+", "", ocr_fixed)
     if not digits:
         return ""
     return digits.lstrip("0") or "0"
@@ -222,7 +238,7 @@ def scan_items_by_kind(page: Mapping[str, Any] | None, *, kind: str) -> list[dic
             {
                 "marker": marker,
                 "text": re.sub(r"\s+", " ", text).strip(),
-                "is_reconstructed": False,
+                "is_reconstructed": bool(item.get("is_reconstructed")),
                 "source": "note_scan",
             }
         )

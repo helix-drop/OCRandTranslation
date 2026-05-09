@@ -7,6 +7,10 @@ from FNM_RE.modules.chapter_split import build_chapter_layers
 from FNM_RE.modules.contracts import GateReport, ModuleResult
 from FNM_RE.modules.note_linking import build_note_link_table
 from FNM_RE.modules.ref_freeze import build_frozen_units
+from FNM_RE.modules.llm_book_type_verify import (
+    select_verification_pages,
+    verify_book_type_with_llm,
+)
 from FNM_RE.modules.toc_structure import build_toc_structure
 from FNM_RE.modules.types import (
     BodyAnchorLayer,
@@ -73,4 +77,6 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "verify_book_type_with_llm",
+    "select_verification_pages",
 ]

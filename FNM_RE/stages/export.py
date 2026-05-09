@@ -459,7 +459,7 @@ def _build_section_markdown(
     note_marker_by_id: dict[str, str] = {}
     for nid, item in (note_items_by_id or {}).items():
         item_chapter = str(getattr(item, "chapter_id", "") or "").strip()
-        if item_chapter and item_chapter != chapter_id:
+        if not item_chapter or item_chapter != chapter_id:
             continue
         marker = str(item.marker or "").strip()
         if marker.isdigit():
@@ -477,7 +477,7 @@ def _build_section_markdown(
         if str(getattr(item, "note_kind", "") or "").strip() != "endnote":
             continue
         item_chapter = str(getattr(item, "chapter_id", "") or "").strip()
-        if item_chapter and item_chapter != chapter_id:
+        if not item_chapter or item_chapter != chapter_id:
             continue
         marker = str(item.marker or "").strip()
         if marker.isdigit():
@@ -629,9 +629,9 @@ def _build_section_markdown(
     body_part = content.split("### NOTES", 1)[0] if "### NOTES" in content else content
     refs = sorted(set(re.findall(r"\[\^([0-9]+)\]", body_part)))
     defs = sorted(set(re.findall(r"^\[\^([0-9]+)\]:", content, re.MULTILINE)))
-    footnote_defs = re.findall(r"^\[footnote\]:", content, re.MULTILINE)
+    footnote_defs = re.findall(r"^\[footnote\] ", content, re.MULTILINE)
     missing = len(set(refs) - set(defs))
-    effective_missing = max(0, missing - len(footnote_defs))
+    effective_missing = max(0, missing - len(footnote_defs) - known_unlinked_definition_count)
     contract_summary = {
         "local_ref_count": len(refs),
         "local_definition_count": len(defs) + len(footnote_defs),
@@ -651,7 +651,8 @@ def _build_index_markdown(chapters: list[ExportChapterRecord]) -> str:
         if not str(chapter.path or "").strip():
             continue
         title = str(chapter.title or "Untitled").strip() or "Untitled"
-        lines.append(f"- [{title}]({chapter.path})")
+        safe_title = title.replace("[", "\\[").replace("]", "\\]")
+        lines.append(f"- [{safe_title}]({chapter.path})")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -670,9 +671,17 @@ def build_export_bundle(
 ) -> tuple[list[ExportChapterRecord], ExportBundleRecord, dict[str, Any]]:
     from FNM_RE.stages.export_contract import build_export_chapters, _compute_export_semantic_contract
     del pages
+    # 收集所有无正文引用的 note（orphan_note / ignored），传递给导出层用于编号占位和清理
+    skipped_note_ids: set[str] = {
+        str(link.note_item_id or "").strip()
+        for link in (phase5.effective_note_links or [])
+        if str(link.status or "") in {"orphan_note", "ignored"}
+        and str(link.note_item_id or "").strip()
+    }
     export_chapters, chapter_summary = build_export_chapters(
         phase5,
         include_diagnostic_entries=bool(include_diagnostic_entries),
+        skipped_note_ids=skipped_note_ids,
     )
     chapter_files = {
         chapter.path: _normalize_markdown_content(chapter.content)

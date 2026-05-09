@@ -197,9 +197,13 @@ def _inject_token_once(
         replaced, count = pattern.subn(token, payload, count=1)
         if count > 0:
             return replaced, True
-    # 最后兜底：直接搜 token marker 串
-    if str(marker or "").strip() and str(marker).strip() in payload:
-        return payload.replace(str(marker).strip(), token, 1), True
+    # 最后兜底：词边界内搜 marker 串（防止 "7" 匹配 "27" 或 "71"）
+    marker_str = str(marker or "").strip()
+    if marker_str:
+        pattern = re.compile(rf"\b{re.escape(marker_str)}\b")
+        replaced, count = pattern.subn(token, payload, count=1)
+        if count > 0:
+            return replaced, True
     return payload, False
 
 def _unit_contract_issues(*, body_units: list[FrozenUnit], note_units: list[FrozenUnit]) -> list[str]:

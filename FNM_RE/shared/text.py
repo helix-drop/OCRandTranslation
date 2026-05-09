@@ -8,7 +8,10 @@ from typing import Any, Mapping
 from FNM_RE.shared.title import normalize_title, normalized_title_key
 
 _MARKDOWN_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s*(.+?)\s*$")
-_NOTES_HEADER_RE = re.compile(r"^\s*(?:#+\s*)?(notes?|endnotes?|notes to pages?.*)\s*$", re.IGNORECASE)
+_NOTES_HEADER_RE = re.compile(
+    r"^\s*(?:#+\s*)?(?:notes?|endnotes?|notes to pages?.*|注释|脚注|尾注)\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
 
 
 def page_markdown_text(page: Mapping[str, Any] | None) -> str:

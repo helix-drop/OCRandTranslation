@@ -90,7 +90,8 @@ def _reorder_chapters(
         if str(row.chapter_id or "").strip()
     }
     toc_ids = [str(row.chapter_id or "") for row in toc_structure.chapters if str(row.chapter_id or "").strip()]
-    expected_export_ids = [chapter_id for chapter_id in toc_ids if chapter_id in chapter_by_id]
+    # dict.fromkeys 去重同时保持顺序，防止 TOC 中重复 chapter_id 导致同章导出两次
+    expected_export_ids = list(dict.fromkeys(chapter_id for chapter_id in toc_ids if chapter_id in chapter_by_id))
 
     ordered: list[ChapterMarkdownEntry] = []
     for chapter_id in expected_export_ids:

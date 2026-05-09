@@ -206,8 +206,11 @@ def build_paragraph_endnotes(
                 except (TypeError, ValueError):
                     mv = 0
                 if mv > 0 and last_marker_value is not None and mv < last_marker_value - 5:
-                    # marker 大幅回退 → 可能跨越到新序列
-                    continue
+                    # marker 大幅回退 → 如果新值在 1-3（序列重置）则接受，否则丢弃
+                    if mv not in (1, 2, 3):
+                        continue
+                    # 序列重置：重置 last_marker_value 让后续条目从新起点继续
+                    last_marker_value = mv - 1
                 ordinal += 1
                 last_marker_value = mv
                 used_items.append(item)

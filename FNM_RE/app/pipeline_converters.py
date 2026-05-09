@@ -374,18 +374,39 @@ def _phase_note_modes_from_book_type(book_type_result: ModuleResult[BookNoteProf
 
 
 def _phase_chapter_note_modes_from_layers(chapter_layers: ChapterLayers) -> list[ChapterNoteModeRecord]:
-    """从 chapter_layers 推导有效 note_mode——基于实际 region/item。
+    """从 chapter_layers 推导有效 note_mode——基于实际 region/item 和 scope。
 
-    优先级：endnote_regions + endnote_items → chapter_endnote_primary；
+    优先级：book scope 的 endnote → book_endnote_bound；
+            chapter scope 的 endnote → chapter_endnote_primary；
             footnote_items → footnote_primary；
             否则 no_notes。
     """
     rows: list[ChapterNoteModeRecord] = []
     for layer in chapter_layers.chapters:
         cid = str(layer.chapter_id or "")
-        has_endnote = bool(layer.endnote_regions) and bool(layer.endnote_items)
+        region_ids: list[str] = []
+        primary_scope = ""
+        # 区分 book scope vs chapter scope 的 endnote region
+        has_book_endnote = False
+        has_chapter_endnote = False
+        for r in (layer.endnote_regions or []):
+            rid = str(r.region_id or "")
+            if rid:
+                region_ids.append(rid)
+            if str(getattr(r, "scope", "") or "").strip().lower() == "book":
+                has_book_endnote = True
+                if not primary_scope:
+                    primary_scope = "book"
+            else:
+                has_chapter_endnote = True
+                if not primary_scope:
+                    primary_scope = "chapter"
+        has_endnote = bool(layer.endnote_items)
         has_footnote = bool(layer.footnote_items)
-        if has_endnote:
+
+        if has_book_endnote and has_endnote:
+            effective = "book_endnote_bound"
+        elif has_chapter_endnote and has_endnote:
             effective = "chapter_endnote_primary"
         elif has_footnote:
             effective = "footnote_primary"
@@ -395,8 +416,8 @@ def _phase_chapter_note_modes_from_layers(chapter_layers: ChapterLayers) -> list
             ChapterNoteModeRecord(
                 chapter_id=cid,
                 note_mode=effective,  # type: ignore[arg-type]
-                region_ids=[],
-                primary_region_scope="",
+                region_ids=region_ids,
+                primary_region_scope=primary_scope,
                 has_footnote_band=bool(layer.footnote_items),
                 has_endnote_region=bool(layer.endnote_items or layer.endnote_regions),
             )

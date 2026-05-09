@@ -843,9 +843,13 @@ def build_phase4_structure(
         phase3.body_anchors,
         anchor_overrides=grouped_overrides.get("anchor"),
     )
-    if int(anchor_override_summary.get("created_anchor_count") or 0) > 0:
-        # 让后续 phase / 最终 DB 持久化都能看见 LLM 合成的 anchor。
-        phase3.body_anchors = effective_body_anchors
+    # 使用覆盖后的 anchor（含 LLM 合成的），但不写回 phase3。
+    # 下游通过本局部变量消费，保持树状原则：不修改上游对象。
+    body_anchors_for_phase4 = (
+        effective_body_anchors
+        if int(anchor_override_summary.get("created_anchor_count") or 0) > 0
+        else phase3.body_anchors
+    )
     effective_note_links, link_override_summary = _apply_link_overrides(
         phase3.note_links,
         link_overrides=grouped_overrides.get("link"),
@@ -891,7 +895,7 @@ def build_phase4_structure(
         note_regions=phase3.note_regions,
         note_items=phase3.note_items,
         chapter_note_modes=phase3.chapter_note_modes,
-        body_anchors=phase3.body_anchors,
+        body_anchors=body_anchors_for_phase4,
         note_links=phase3.note_links,
         effective_note_links=effective_note_links,
         structure_reviews=structure_reviews,
@@ -1204,6 +1208,47 @@ def build_module_pipeline_snapshot(
             overrides={"chapter_modes": grouped_overrides.get("chapter")},
         ),
     )
+    # === LLM 书型交叉验证（必经步骤）===
+    if str(pdf_path or "").strip():
+        try:
+            from FNM_RE.modules.llm_book_type_verify import verify_book_type_with_llm
+            _emit_progress(
+                progress_callback=progress_callback,
+                stage="llm_book_type_verify",
+                label="LLM交叉验证书型",
+                pct=98.63,
+                event="start",
+            )
+            llm_verify_result = verify_book_type_with_llm(
+                toc_structure=toc_result.data,
+                book_type_profile=book_type_result.data,
+                pages=pages,
+                pdf_path=str(pdf_path or ""),
+            )
+            book_type_result.gate_report.evidence["llm_verification"] = llm_verify_result.data
+            if llm_verify_result.gate_report.soft.get("llm.disagreement"):
+                book_type_result.gate_report.soft["llm_disagreement"] = True
+                book_type_result.gate_report.reasons.append("llm_verification_disagreement")
+            _emit_progress(
+                progress_callback=progress_callback,
+                stage="llm_book_type_verify",
+                label="LLM交叉验证书型",
+                pct=98.68,
+                event="done",
+            )
+        except Exception as _llm_err:
+            _emit_progress(
+                progress_callback=progress_callback,
+                stage="llm_book_type_verify",
+                label="LLM书型验证失败（非阻断）",
+                pct=98.65,
+                event="warn",
+            )
+            book_type_result.gate_report.evidence["llm_verification"] = {
+                "error": str(_llm_err),
+                "fallback": "trust_rules",
+            }
+    # ================================================
     split_result = _run_stage(
         progress_callback=progress_callback,
         stage="chapter_layers",
