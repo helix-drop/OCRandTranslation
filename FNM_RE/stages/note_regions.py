@@ -201,8 +201,22 @@ def _build_endnote_regions_raw(
     sorted_page_nos = sorted(int(row.page_no) for row in phase1.pages if int(row.page_no) > 0)
     if not sorted_page_nos:
         return []
-    last_chapter_end_page = max((int(chapter.end_page) for chapter in phase1.chapters), default=0)
-    first_body_page = min((int(chapter.start_page) for chapter in phase1.chapters if int(chapter.start_page) > 0), default=0)
+    # back_matter 章（Index/Bibliography）的 end_page 远超正文章，会导致
+    # Notes 区被误判为 chapter scope。按 end_page 排序后找最大间隙作为正文/辅文分界。
+    _sorted_chapters = sorted(phase1.chapters, key=lambda ch: int(ch.end_page))
+    _end_pages = [int(ch.end_page) for ch in _sorted_chapters if int(ch.end_page) > 0]
+    _cut_idx = len(_end_pages)
+    if len(_end_pages) >= 3:
+        _gaps = [
+            (_end_pages[i + 1] - _end_pages[i], i)
+            for i in range(len(_end_pages) - 1)
+        ]
+        _max_gap, _gap_idx = max(_gaps, key=lambda x: x[0])
+        if _max_gap > 30:
+            _cut_idx = _gap_idx + 1
+    _body_chapters = _sorted_chapters[:_cut_idx]
+    last_chapter_end_page = max((int(ch.end_page) for ch in _body_chapters), default=0)
+    first_body_page = min((int(ch.start_page) for ch in _body_chapters if int(ch.start_page) > 0), default=0)
 
     regions: list[NoteRegionRecord] = []
     current_pages: list[int] = []
@@ -395,7 +409,15 @@ def _promote_post_body_regions(
     *,
     phase1: Phase1Structure,
 ) -> tuple[list[NoteRegionRecord], int]:
-    last_chapter_end_page = max((int(chapter.end_page) for chapter in phase1.chapters), default=0)
+    _sorted_chapters = sorted(phase1.chapters, key=lambda ch: int(ch.end_page))
+    _end_pages = [int(ch.end_page) for ch in _sorted_chapters if int(ch.end_page) > 0]
+    _cut_idx = len(_end_pages)
+    if len(_end_pages) >= 3:
+        _gaps = [(_end_pages[i+1]-_end_pages[i], i) for i in range(len(_end_pages)-1)]
+        _max_gap, _gap_idx = max(_gaps, key=lambda x: x[0])
+        if _max_gap > 30: _cut_idx = _gap_idx + 1
+    _body_chapters = _sorted_chapters[:_cut_idx]
+    last_chapter_end_page = max((int(ch.end_page) for ch in _body_chapters), default=0)
     promoted = 0
     normalized: list[NoteRegionRecord] = []
     for region in regions:
