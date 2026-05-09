@@ -250,8 +250,7 @@ def _build_page_roles(
             role = "note"
             chapter_id = chapter.chapter_id if chapter is not None else ""
         elif chapter is not None:
-            # post_body 视为 body 页面（导出时作为正文章处理）
-            role = "body" if chapter.role == "post_body" else chapter.role
+            role = chapter.role
             chapter_id = chapter.chapter_id
         elif page_no > 0 and back_matter_start > 0 and page_no >= back_matter_start:
             role = "back_matter"
