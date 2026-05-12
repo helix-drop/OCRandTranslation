@@ -804,6 +804,7 @@ def extract_pdf_text_by_page(
     except OSError:
         return {}
     payloads = extract_pdf_text(file_bytes)
+    del file_bytes  # 立即释放 PDF 二进制
     if not payloads:
         return {}
     file_idx_to_page: dict[int, int] = {}

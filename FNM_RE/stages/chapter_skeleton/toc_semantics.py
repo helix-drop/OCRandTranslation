@@ -152,6 +152,7 @@ def _compute_toc_role_summary(
     *,
     page_rows: list[dict],
     toc_offset: int,
+    file_idx_map: dict[int, int] | None = None,
 ) -> dict[str, int]:
     counts = {
         "container": 0,
@@ -162,8 +163,12 @@ def _compute_toc_role_summary(
         "back_matter": 0,
         "front_matter": 0,
     }
-    raw_pages = [dict(row.get("_page") or {}) for row in page_rows]
-    file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
+    raw_pages = None
+    if file_idx_map is not None:
+        pass
+    else:
+        raw_pages = [row.get("_page") or {} for row in page_rows]
+        file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
     total_pages = max(1, len(page_rows))
     for item in toc_items or []:
         title = normalize_title(item.get("title") or "")
@@ -252,15 +257,21 @@ def _trim_exportable_chapter_pages(
     *,
     page_by_no: dict[int, dict],
     total_pages: int,
+    page_texts: dict[int, dict] | None = None,
 ) -> list[int]:
     trimmed = [int(page_no) for page_no in page_numbers if int(page_no) > 0]
     while trimmed:
         page_no = int(trimmed[0])
-        row = dict(page_by_no.get(page_no) or {})
+        row = page_by_no.get(page_no) or {}
         role = str(row.get("page_role") or "")
-        page = dict(row.get("_page") or {})
-        text = _page_markdown_text(page)
-        headings = _extract_page_headings(page)
+        if page_texts is not None:
+            pt = page_texts.get(page_no, {})
+            text = str(pt.get("markdown") or "")
+            headings = list(pt.get("headings") or [])
+        else:
+            page = row.get("_page") or {}
+            text = _page_markdown_text(page)
+            headings = _extract_page_headings(page)
         if role in {"noise", "other"}:
             trimmed.pop(0)
             continue
@@ -1028,16 +1039,21 @@ def _collect_visual_toc_rows(
     visual_toc_bundle: Mapping[str, Any] | None = None,
     toc_offset: int,
     heading_candidates: list[dict] | None = None,
+    file_idx_map: dict[int, int] | None = None,
 ) -> list[dict]:
     source_items = list((visual_toc_bundle or {}).get("items") or toc_items or [])
     if not source_items:
         return []
-    raw_pages = [dict(row.get("_page") or {}) for row in page_rows or []]
+    raw_pages = None
+    if file_idx_map is not None:
+        pass
+    else:
+        raw_pages = [row.get("_page") or {} for row in page_rows or []]
+        file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
     page_role_by_no = {
         int(row.get("page_no") or 0): str(row.get("page_role") or "")
         for row in page_rows or []
     }
-    file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
     total_pages = max(1, len(page_rows or []))
     rows: list[dict] = []
     for index, item in enumerate(source_items, start=1):
@@ -1146,6 +1162,8 @@ def _build_visual_toc_chapters_and_section_heads(
     visual_toc_bundle: Mapping[str, Any] | None = None,
     toc_offset: int,
     heading_candidates: list[dict],
+    file_idx_map: dict[int, int] | None = None,
+    page_texts: dict[int, dict] | None = None,
 ) -> tuple[list[dict], list[dict], dict[str, Any]]:
     source_items = list((visual_toc_bundle or {}).get("items") or toc_items or [])
     rows = _sanitize_visual_toc_semantic_rows(
@@ -1155,6 +1173,7 @@ def _build_visual_toc_chapters_and_section_heads(
             visual_toc_bundle=visual_toc_bundle,
             toc_offset=toc_offset,
             heading_candidates=heading_candidates,
+            file_idx_map=file_idx_map,
         )
     )
 
@@ -1636,6 +1655,7 @@ def _build_visual_toc_chapters_and_section_heads(
             span_pages,
             page_by_no=page_row_by_no,
             total_pages=total_pages,
+            page_texts=page_texts,
         )
         if not span_pages:
             span_pages = [start_page]

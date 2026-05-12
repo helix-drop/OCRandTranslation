@@ -8,7 +8,7 @@ from __future__ import annotations
 import copy
 import re
 import time
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from collections import Counter
 from typing import Any, Callable, Mapping
 
@@ -84,6 +84,14 @@ from FNM_RE.stages.reviews import build_structure_reviews
 from FNM_RE.stages.section_heads import build_section_heads
 from FNM_RE.stages.units import build_translation_units
 from FNM_RE.status import build_module_gate_status, build_phase4_status, build_phase6_status
+
+
+@dataclass(slots=True)
+class PipelineBuildResult:
+    """轻量 pipeline 构建结果：只含 phase6 和诊断投影。"""
+    phase6: Phase6Structure
+    diagnostic_pages: list[Any] = field(default_factory=list)
+    diagnostic_notes: list[Any] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -646,7 +654,13 @@ def _phase6_summary_from_modules(
         toc_semantic_contract_ok=bool(toc_result.gate_report.hard.get("toc.role_semantics_valid", True)),
         toc_semantic_blocking_reasons=[],
         note_region_summary=dict(split_result.data.region_summary or {}),
-        note_item_summary=dict(split_result.data.item_summary or {}),
+        note_item_summary={
+            **dict(split_result.data.item_summary or {}),
+            "total_items": len(split_result.data.note_items),
+            "item_kind_counts": dict(
+                Counter(str(row.note_kind or "") for row in split_result.data.note_items)
+            ),
+        },
         chapter_note_mode_summary={
             "mode_counts": dict(book_type_result.data.evidence.chapter_mode_counts or {}),
             "review_required_chapters": list(book_type_result.data.evidence.chapter_review_required or []),
@@ -654,7 +668,10 @@ def _phase6_summary_from_modules(
         chapter_endnote_region_alignment_ok=bool(split_result.gate_report.hard.get("split.regions_bound", True)),
         chapter_endnote_start_page_map={},
         body_anchor_summary=dict(link_result.data.anchor_summary or {}),
-        note_link_summary=dict(link_result.data.link_summary or {}),
+        note_link_summary={
+            **dict(link_result.data.link_summary or {}),
+            "gate_reasons": list(link_result.gate_report.reasons or []),
+        },
         review_seed_summary={},
         review_type_counts={},
         override_summary={
@@ -722,7 +739,8 @@ def _overlay_repo_units_on_frozen(
     """
     if not repo_units:
         return frozen_units
-    payload = copy.deepcopy(frozen_units)
+    # directly modify frozen_units — its .data is not read by anyone after overlay
+    payload = frozen_units
     by_id: dict[str, dict] = {}
     for row in list(repo_units or []):
         uid = str(row.get("unit_id") or "").strip()

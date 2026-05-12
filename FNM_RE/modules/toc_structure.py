@@ -318,13 +318,19 @@ def _toc_items_look_garbled(toc_items: list[dict] | None) -> bool:
 
 
 def build_toc_structure(
-    pages: list[dict],
-    toc_items: list[dict] | None,
+    pages: list[dict] | None = None,
+    toc_items: list[dict] | None = None,
     *,
     manual_page_overrides: Mapping[str, Mapping[str, Any]] | None = None,
     pdf_path: str = "",
     visual_toc_bundle: Mapping[str, Any] | None = None,
+    repo: Any = None,
+    doc_id: str = "",
 ) -> ModuleResult[TocStructure]:
+    """构建目录结构。支持两种模式：
+    - 全量模式：传入 pages(list)，兼容旧调用
+    - 流式模式：传入 repo + doc_id，逐页从 DB 加载（内存峰值更低）
+    """
     # 自动 TOC 乱码检测：如 ≥30% 条目含控制字符，尝试改用 visual_toc_bundle 的 manual_input 数据
     if _toc_items_look_garbled(toc_items) and visual_toc_bundle:
         _manual_debug = visual_toc_bundle.get("manual_page_items_debug") or []
@@ -339,11 +345,38 @@ def build_toc_structure(
                 visual_toc_bundle = dict(visual_toc_bundle)
                 visual_toc_bundle["items"] = _flattened
     endnotes_start_page = _resolve_endnotes_start_page(visual_toc_bundle)
-    page_partitions = build_page_partitions(
-        pages,
-        page_overrides=manual_page_overrides,
-        endnotes_start_page=endnotes_start_page,
-    )
+
+    if repo is not None and doc_id:
+        # 流式模式：逐页从 DB 加载
+        from FNM_RE.stages.page_partition import build_page_partitions_streaming
+        page_stream = repo.stream_pages(doc_id)
+        total_pages = repo.count_pages(doc_id)
+        page_partitions, pre_extracted_page_candidates, file_idx_map, _page_texts, _light_pages = build_page_partitions_streaming(
+            page_stream, total_pages,
+            page_overrides=manual_page_overrides,
+            endnotes_start_page=endnotes_start_page,
+        )
+        _streaming_light_pages = _light_pages
+    else:
+        _streaming_light_pages = None
+        page_partitions, pre_extracted_page_candidates, file_idx_map = build_page_partitions(
+            pages,
+            page_overrides=manual_page_overrides,
+            endnotes_start_page=endnotes_start_page,
+        )
+        from FNM_RE.shared.text import extract_page_headings, page_markdown_text
+        _page_texts: dict[int, dict] = {}
+        for p in pages:
+            pn = int(p.get("bookPage") or 0)
+            if pn > 0:
+                _page_texts[pn] = {
+                    "markdown": page_markdown_text(p),
+                    "headings": extract_page_headings(p),
+                }
+        pages.clear()
+        import gc as _gc
+        _gc.collect()
+
     heading_candidates, phase1_chapters, chapter_meta = build_chapter_skeleton(
         page_partitions,
         toc_items=toc_items,
@@ -351,6 +384,9 @@ def build_toc_structure(
         pdf_path=str(pdf_path or ""),
         pages=pages,
         visual_toc_bundle=visual_toc_bundle,
+        pre_extracted_page_candidates=pre_extracted_page_candidates,
+        file_idx_map=file_idx_map,
+        page_texts=_page_texts,
     )
     section_heads, heading_review_summary = build_section_heads(
         phase1_chapters,
@@ -479,6 +515,7 @@ def build_toc_structure(
         "endnote_explorer_hints": dict(chapter_meta.get("endnote_explorer_hints") or {}),
         "heading_candidates": list(heading_candidates or []),
         "chapter_meta": dict(chapter_meta or {}),
+        "light_pages": _streaming_light_pages,
     }
 
     gate_report = GateReport(

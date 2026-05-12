@@ -93,6 +93,28 @@ def run_doc_pipeline(*args, **kwargs):
     return impl(*args, **kwargs)
 
 
+def run_doc_pipeline_subprocess(doc_id: str, **kwargs) -> dict:
+    """子进程运行完整 pipeline，主进程仅 30 MB。子进程结束后 OS 强制回收内存。"""
+    import json, os, subprocess, sys as _sys
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "subprocess_pipeline.py")
+    payload = json.dumps({"doc_id": doc_id, "pdf_path": kwargs.get("pdf_path", "")})
+    proc = subprocess.run(
+        [_sys.executable, script],
+        input=payload, capture_output=True, text=True, timeout=900,
+        env={**os.environ, "PYTHONUNBUFFERED": "1"},
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"Pipeline subprocess failed: {(proc.stderr or '')[-500:]}")
+    lines = [l for l in (proc.stdout or "").strip().split("\n") if l.strip().startswith("{")]
+    return json.loads(lines[-1]) if lines else {"status": "empty_output"}
+
+
+def run_doc_pipeline_phased_subprocess(doc_id: str, **kwargs) -> dict:
+    """两段子进程 pipeline：Phase 1-2 子进程 → OS 回收 → Phase 3-6 子进程。"""
+    from FNM_RE.subprocess_phases import run_pipeline_subprocess_phases
+    return run_pipeline_subprocess_phases(doc_id, pdf_path=kwargs.get("pdf_path", ""))
+
+
 def load_doc_structure(*args, **kwargs):
     from FNM_RE.app.mainline import load_phase6_for_doc as impl
 

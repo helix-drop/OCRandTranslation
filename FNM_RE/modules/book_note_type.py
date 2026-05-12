@@ -157,13 +157,21 @@ def _mode_compatible(book_type: str, mode: str) -> bool:
 
 def build_book_note_profile(
     toc_structure: TocStructure,
-    pages: list[dict],
+    pages: list[dict] | None = None,
     *,
     pdf_path: str = "",
     page_text_map: Mapping[int | str, str] | None = None,
     overrides: Mapping[str, Any] | None = None,
+    page_loader: Any = None,
 ) -> ModuleResult[BookNoteProfile]:
+    """构建全书注释类型判定。
+
+    优先使用 page_loader（按需加载），其次使用 pages（全量传入，兼容旧路径）。
+    page_loader 签名: () -> list[dict]，返回全书页面列表。
+    """
     del pdf_path, page_text_map
+    if page_loader is not None:
+        pages = page_loader()
     annotated_pages = annotate_pages_with_note_scans(list(pages or []))
     chapter_by_page = _chapter_by_page(toc_structure)
     chapters = [row for row in toc_structure.chapters if row.role == "chapter"]

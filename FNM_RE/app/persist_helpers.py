@@ -92,7 +92,7 @@ def serialize_pages_for_repo(rows: list[Any]) -> list[dict[str, Any]]:
             {
                 "page_no": int(row.get("page_no") or 0),
                 "target_pdf_page": int(row.get("target_pdf_page") or 0),
-                "page_role": str(row.get("page_role") or "other"),
+                "page_role": str(row.get("page_role") or row.get("role") or "other"),
                 "role_confidence": float(row.get("confidence", 0.0) or 0.0),
                 "role_reason": str(row.get("reason") or ""),
                 "section_hint": str(row.get("section_hint") or ""),

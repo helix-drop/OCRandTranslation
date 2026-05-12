@@ -198,16 +198,8 @@ def _segment_paragraphs_from_body_pages(section: dict) -> list[UnitPageSegmentRe
                     UnitPageSegmentRecord(
                         page_no=int(page_no),
                         paragraph_count=len(visible_fallback),
-                        source_text="\n\n".join(
-                            paragraph.source_text.strip()
-                            for paragraph in visible_fallback
-                            if paragraph.source_text.strip()
-                        ).strip(),
-                        display_text="\n\n".join(
-                            paragraph.display_text.strip()
-                            for paragraph in visible_fallback
-                            if paragraph.display_text.strip()
-                        ).strip(),
+                        source_text="",     # 序列化省略
+                        display_text="",    # 序列化省略
                         paragraphs=fallback_paragraphs,
                     )
                 )
@@ -253,7 +245,7 @@ def _segment_paragraphs_from_body_pages(section: dict) -> list[UnitPageSegmentRe
                     kind=kind,
                     heading_level=heading_level,
                     source_text=source_text,
-                    display_text=display_text or source_text,
+                    display_text="" if (display_text or source_text) == source_text else (display_text or source_text),
                     cross_page=display_para.get("cross_page", source_para.get("cross_page")),
                     consumed_by_prev=bool(
                         display_para.get("consumed_by_prev") or source_para.get("consumed_by_prev")
@@ -274,16 +266,8 @@ def _segment_paragraphs_from_body_pages(section: dict) -> list[UnitPageSegmentRe
             UnitPageSegmentRecord(
                 page_no=int(page_no),
                 paragraph_count=len(visible_paragraphs),
-                source_text="\n\n".join(
-                    paragraph.source_text.strip()
-                    for paragraph in visible_paragraphs
-                    if paragraph.source_text.strip()
-                ).strip(),
-                display_text="\n\n".join(
-                    paragraph.display_text.strip()
-                    for paragraph in visible_paragraphs
-                    if paragraph.display_text.strip()
-                ).strip(),
+                source_text="",    # 序列化省略，反序列化从 paragraphs 推导
+                display_text="",   # 序列化省略，反序列化从 paragraphs 推导
                 paragraphs=normalized_paragraphs,
             )
         )
@@ -368,8 +352,8 @@ def _chunk_body_page_segments(
         normalized_segment = UnitPageSegmentRecord(
             page_no=page_no,
             paragraph_count=len(visible_paragraphs),
-            source_text=segment_source,
-            display_text=segment_display or segment.source_text,
+            source_text="",      # 序列化省略
+            display_text="",     # 序列化省略
             paragraphs=list(visible_paragraphs),
         )
         if page_no <= 0:

@@ -9,6 +9,18 @@ import time
 from persistence.sqlite_schema import read_connection, transaction
 
 
+def _serialize_segments_for_db(segments):
+    from FNM_RE.shared.segment_codec import serialize_segments
+    return serialize_segments(segments)
+
+
+def _deserialize_segments(raw):
+    import json as _json
+    raw_list = _json.loads(raw) if isinstance(raw, str) else (raw or [])
+    from FNM_RE.shared.segment_codec import deserialize_segments_to_dicts
+    return deserialize_segments_to_dicts(raw_list)
+
+
 class FnmRepoMixin:
     def _row_to_fnm_run(self, row: sqlite3.Row | None) -> dict | None:
         if not row:
@@ -44,7 +56,8 @@ class FnmRepoMixin:
         if not row:
             return None
         payload = dict(row)
-        payload["page_segments"] = json.loads(payload.pop("page_segments_json") or "[]")
+        from FNM_RE.shared.segment_codec import deserialize_segments_to_dicts
+        payload["page_segments"] = deserialize_segments_to_dicts(json.loads(payload.pop("page_segments_json") or "[]"))
         owner_kind = str(payload.get("owner_kind") or "").strip().lower()
         if not owner_kind:
             owner_kind = (
@@ -383,7 +396,7 @@ class FnmRepoMixin:
                         unit.get("status", "pending"),
                         unit.get("error_msg"),
                         unit.get("target_ref"),
-                        json.dumps(unit.get("page_segments") or [], ensure_ascii=False),
+                        json.dumps(_serialize_segments_for_db(unit.get("page_segments") or []), ensure_ascii=False),
                         str(unit.get("source_hash") or ""),
                         str(unit.get("segment_plan_hash") or ""),
                         str(unit.get("pipeline_run_id") or ""),
@@ -391,6 +404,42 @@ class FnmRepoMixin:
                         now,
                         now,
                     ),
+                )
+
+    def replace_fnm_translation_units(
+        self, doc_id: str, *, units: list[dict]
+    ) -> None:
+        """只替换 fnm_translation_units 表，不动 structure/notes。"""
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_translation_units WHERE doc_id = ?", (doc_id,)
+            )
+            if units:
+                FnmRepoMixin._batch_insert(conn,
+                    """INSERT INTO fnm_translation_units(
+                        unit_id, doc_id, kind, owner_kind, owner_id, section_id, section_title,
+                        section_start_page, section_end_page,
+                        note_id, page_start, page_end, char_count,
+                        source_text, translated_text, status, error_msg, target_ref, page_segments_json,
+                        source_hash, segment_plan_hash, pipeline_run_id, stale_reason,
+                        created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    [(
+                        unit.get("unit_id"), doc_id,
+                        unit.get("kind"), unit.get("owner_kind"), unit.get("owner_id"),
+                        unit.get("section_id"), unit.get("section_title"),
+                        int(unit.get("section_start_page") or 0), int(unit.get("section_end_page") or 0),
+                        unit.get("note_id"),
+                        int(unit.get("page_start") or 0), int(unit.get("page_end") or 0),
+                        int(unit.get("char_count") or 0),
+                        str(unit.get("source_text") or ""), str(unit.get("translated_text") or ""),
+                        unit.get("status", "pending"), unit.get("error_msg"), unit.get("target_ref"),
+                        json.dumps(_serialize_segments_for_db(unit.get("page_segments") or []), ensure_ascii=False),
+                        str(unit.get("source_hash") or ""), str(unit.get("segment_plan_hash") or ""),
+                        str(unit.get("pipeline_run_id") or ""), str(unit.get("stale_reason") or ""),
+                        now, now,
+                    ) for unit in (units or [])]
                 )
 
     def replace_fnm_structure(
@@ -700,218 +749,195 @@ class FnmRepoMixin:
                     ),
                 )
 
+    @staticmethod
+    def _batch_insert(conn, sql, params_list):
+        """批量插入，替代逐行 execute。"""
+        if params_list:
+            conn.executemany(sql, params_list)
+
     # ------------------- 分阶段写入 -------------------
 
     @staticmethod
     def _insert_fnm_pages(conn, doc_id: str, rows: list[dict], now: int) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_pages(
-                    doc_id, page_no, target_pdf_page, page_role, role_confidence, role_reason,
-                    section_hint, has_note_heading, note_scan_summary_json, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    int(row.get("page_no") or 0),
-                    int(row.get("target_pdf_page") or 0)
-                    if row.get("target_pdf_page") is not None
-                    else None,
-                    row.get("page_role"),
-                    float(row.get("role_confidence", 0.0) or 0.0),
-                    row.get("role_reason"),
-                    row.get("section_hint"),
-                    1 if bool(row.get("has_note_heading")) else 0,
-                    json.dumps(row.get("note_scan_summary") or {}, ensure_ascii=False),
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_pages(
+                doc_id, page_no, target_pdf_page, page_role, role_confidence, role_reason,
+                section_hint, has_note_heading, note_scan_summary_json, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                int(row.get("page_no") or 0),
+                int(row.get("target_pdf_page") or 0) if row.get("target_pdf_page") is not None else None,
+                row.get("page_role"),
+                float(row.get("role_confidence", 0.0) or 0.0),
+                row.get("role_reason"),
+                row.get("section_hint"),
+                1 if bool(row.get("has_note_heading")) else 0,
+                json.dumps(row.get("note_scan_summary") or {}, ensure_ascii=False),
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     @staticmethod
     def _insert_fnm_chapters(conn, doc_id: str, rows: list[dict], now: int) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_chapters(
-                    doc_id, chapter_id, title, start_page, end_page, pages_json, source, boundary_state,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    row.get("chapter_id"),
-                    row.get("title"),
-                    int(row.get("start_page") or 0),
-                    int(row.get("end_page") or 0),
-                    json.dumps(row.get("pages") or [], ensure_ascii=False),
-                    row.get("source"),
-                    row.get("boundary_state") or "ready",
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_chapters(
+                doc_id, chapter_id, title, start_page, end_page, pages_json, source, boundary_state,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                row.get("chapter_id"),
+                row.get("title"),
+                int(row.get("start_page") or 0),
+                int(row.get("end_page") or 0),
+                json.dumps(row.get("pages") or [], ensure_ascii=False),
+                row.get("source"),
+                row.get("boundary_state") or "ready",
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     @staticmethod
     def _insert_fnm_heading_candidates(
         conn, doc_id: str, rows: list[dict], now: int
     ) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_heading_candidates(
-                    doc_id, heading_id, page_no, text, normalized_text, source, block_label,
-                    top_band, font_height, x, y, width_estimate, font_name, font_weight_hint,
-                    align_hint, width_ratio, heading_level_hint, confidence, heading_family_guess,
-                    suppressed_as_chapter, reject_reason, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    row.get("heading_id"),
-                    int(row.get("page_no") or 0),
-                    row.get("text") or "",
-                    row.get("normalized_text") or "",
-                    row.get("source"),
-                    row.get("block_label"),
-                    1 if bool(row.get("top_band")) else 0,
-                    float(row.get("font_height"))
-                    if row.get("font_height") is not None
-                    else None,
-                    float(row.get("x")) if row.get("x") is not None else None,
-                    float(row.get("y")) if row.get("y") is not None else None,
-                    float(row.get("width_estimate"))
-                    if row.get("width_estimate") is not None
-                    else None,
-                    row.get("font_name") or "",
-                    row.get("font_weight_hint") or "unknown",
-                    row.get("align_hint") or "unknown",
-                    float(row.get("width_ratio"))
-                    if row.get("width_ratio") is not None
-                    else None,
-                    int(row.get("heading_level_hint") or 0),
-                    float(row.get("confidence", 0.0) or 0.0),
-                    row.get("heading_family_guess") or "unknown",
-                    1 if bool(row.get("suppressed_as_chapter")) else 0,
-                    row.get("reject_reason"),
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_heading_candidates(
+                doc_id, heading_id, page_no, text, normalized_text, source, block_label,
+                top_band, font_height, x, y, width_estimate, font_name, font_weight_hint,
+                align_hint, width_ratio, heading_level_hint, confidence, heading_family_guess,
+                suppressed_as_chapter, reject_reason, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                row.get("heading_id"),
+                int(row.get("page_no") or 0),
+                row.get("text") or "",
+                row.get("normalized_text") or "",
+                row.get("source"),
+                row.get("block_label"),
+                1 if bool(row.get("top_band")) else 0,
+                float(row.get("font_height")) if row.get("font_height") is not None else None,
+                float(row.get("x")) if row.get("x") is not None else None,
+                float(row.get("y")) if row.get("y") is not None else None,
+                float(row.get("width_estimate")) if row.get("width_estimate") is not None else None,
+                row.get("font_name") or "",
+                row.get("font_weight_hint") or "unknown",
+                row.get("align_hint") or "unknown",
+                float(row.get("width_ratio")) if row.get("width_ratio") is not None else None,
+                int(row.get("heading_level_hint") or 0),
+                float(row.get("confidence", 0.0) or 0.0),
+                row.get("heading_family_guess") or "unknown",
+                1 if bool(row.get("suppressed_as_chapter")) else 0,
+                row.get("reject_reason"),
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     @staticmethod
     def _insert_fnm_section_heads(
         conn, doc_id: str, rows: list[dict], now: int
     ) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_section_heads(
-                    doc_id, section_head_id, chapter_id, page_no, text, normalized_text, source,
-                    confidence, heading_family_guess, rejected_chapter_candidate, reject_reason,
-                    derived_from_heading_id, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    row.get("section_head_id"),
-                    row.get("chapter_id"),
-                    int(row.get("page_no") or 0),
-                    row.get("text") or "",
-                    row.get("normalized_text") or "",
-                    row.get("source"),
-                    float(row.get("confidence", 0.0) or 0.0),
-                    row.get("heading_family_guess") or "section",
-                    1 if bool(row.get("rejected_chapter_candidate")) else 0,
-                    row.get("reject_reason"),
-                    row.get("derived_from_heading_id"),
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_section_heads(
+                doc_id, section_head_id, chapter_id, page_no, text, normalized_text, source,
+                confidence, heading_family_guess, rejected_chapter_candidate, reject_reason,
+                derived_from_heading_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                row.get("section_head_id"),
+                row.get("chapter_id"),
+                int(row.get("page_no") or 0),
+                row.get("text") or "",
+                row.get("normalized_text") or "",
+                row.get("source"),
+                float(row.get("confidence", 0.0) or 0.0),
+                row.get("heading_family_guess") or "section",
+                1 if bool(row.get("rejected_chapter_candidate")) else 0,
+                row.get("reject_reason"),
+                row.get("derived_from_heading_id"),
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     @staticmethod
     def _insert_fnm_note_regions(conn, doc_id: str, rows: list[dict], now: int) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_note_regions(
-                    doc_id, region_id, region_kind, start_page, end_page, pages_json, title_hint, bound_chapter_id,
-                    region_start_first_source_marker, region_first_note_item_marker, region_marker_alignment_ok,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    row.get("region_id"),
-                    row.get("region_kind"),
-                    int(row.get("start_page") or 0),
-                    int(row.get("end_page") or 0),
-                    json.dumps(row.get("pages") or [], ensure_ascii=False),
-                    row.get("title_hint"),
-                    row.get("bound_chapter_id"),
-                    row.get("region_start_first_source_marker"),
-                    row.get("region_first_note_item_marker"),
-                    1 if bool(row.get("region_marker_alignment_ok")) else 0,
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_note_regions(
+                doc_id, region_id, region_kind, start_page, end_page, pages_json, title_hint, bound_chapter_id,
+                region_start_first_source_marker, region_first_note_item_marker, region_marker_alignment_ok,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                row.get("region_id"),
+                row.get("region_kind"),
+                int(row.get("start_page") or 0),
+                int(row.get("end_page") or 0),
+                json.dumps(row.get("pages") or [], ensure_ascii=False),
+                row.get("title_hint"),
+                row.get("bound_chapter_id"),
+                row.get("region_start_first_source_marker"),
+                row.get("region_first_note_item_marker"),
+                1 if bool(row.get("region_marker_alignment_ok")) else 0,
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     @staticmethod
     def _insert_fnm_chapter_note_modes(
         conn, doc_id: str, rows: list[dict], now: int
     ) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_chapter_note_modes(
-                    doc_id, chapter_id, chapter_title, note_mode, sampled_pages_json, detection_confidence,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    row.get("chapter_id"),
-                    row.get("chapter_title"),
-                    row.get("note_mode"),
-                    json.dumps(row.get("sampled_pages") or [], ensure_ascii=False),
-                    float(row.get("detection_confidence", 0.0) or 0.0),
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_chapter_note_modes(
+                doc_id, chapter_id, chapter_title, note_mode, sampled_pages_json, detection_confidence,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                row.get("chapter_id"),
+                row.get("chapter_title"),
+                row.get("note_mode"),
+                json.dumps(row.get("sampled_pages") or [], ensure_ascii=False),
+                float(row.get("detection_confidence", 0.0) or 0.0),
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     @staticmethod
     def _insert_fnm_note_items(conn, doc_id: str, rows: list[dict], now: int) -> None:
-        for row in rows or []:
-            conn.execute(
-                """
-                INSERT INTO fnm_note_items(
-                    doc_id, note_item_id, note_kind, chapter_id, region_id, marker, normalized_marker,
-                    occurrence, source_text, page_no, display_marker, source_marker, title_hint,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    doc_id,
-                    row.get("note_item_id"),
-                    row.get("note_kind"),
-                    row.get("chapter_id"),
-                    row.get("region_id"),
-                    row.get("marker"),
-                    row.get("normalized_marker"),
-                    int(row.get("occurrence", 0) or 0),
-                    row.get("source_text"),
-                    int(row.get("page_no") or 0),
-                    row.get("display_marker"),
-                    row.get("source_marker"),
-                    row.get("title_hint"),
-                    now,
-                    now,
-                ),
-            )
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_note_items(
+                doc_id, note_item_id, note_kind, chapter_id, region_id, marker, normalized_marker,
+                occurrence, source_text, page_no, display_marker, source_marker, title_hint,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                row.get("note_item_id"),
+                row.get("note_kind"),
+                row.get("chapter_id"),
+                row.get("region_id"),
+                row.get("marker"),
+                row.get("normalized_marker"),
+                int(row.get("occurrence", 0) or 0),
+                row.get("source_text"),
+                int(row.get("page_no") or 0),
+                row.get("display_marker"),
+                row.get("source_marker"),
+                row.get("title_hint"),
+                now,
+                now,
+            ) for row in (rows or [])]
+        )
 
     # 清理：phase>=N 的产物表；保证下游也被清空
     @staticmethod
@@ -999,6 +1025,73 @@ class FnmRepoMixin:
             self._insert_fnm_chapter_note_modes(conn, doc_id, chapter_note_modes, now)
             self._insert_fnm_note_items(conn, doc_id, note_items, now)
 
+    def replace_fnm_phase3_products(
+        self,
+        doc_id: str,
+        *,
+        body_anchors: list[dict],
+        note_links: list[dict],
+        preserve: bool = False,
+    ) -> None:
+        """Phase 3 产物写入。默认清 phase>=3 的产物后写入；preserve=True 时追加。"""
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            if not preserve:
+                self._delete_fnm_products_from_phase(conn, doc_id, 3)
+            self._insert_fnm_body_anchors(conn, doc_id, body_anchors, now)
+            self._insert_fnm_note_links(conn, doc_id, note_links, now)
+
+    @staticmethod
+    def _insert_fnm_body_anchors(conn, doc_id: str, rows: list[dict], now: int) -> None:
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_body_anchors(
+                doc_id, anchor_id, chapter_id, page_no, paragraph_index, char_start, char_end,
+                source_marker, normalized_marker, anchor_kind, certainty, source_text,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                str(row.get("anchor_id") or ""),
+                str(row.get("chapter_id") or ""),
+                int(row.get("page_no") or 0),
+                int(row.get("paragraph_index") or 0),
+                int(row.get("char_start") or 0),
+                int(row.get("char_end") or 0),
+                str(row.get("source_marker") or ""),
+                str(row.get("normalized_marker") or ""),
+                str(row.get("anchor_kind") or ""),
+                float(row.get("certainty", 0.0) or 0.0),
+                str(row.get("source_text") or ""),
+                now, now,
+            ) for row in (rows or [])]
+        )
+
+    @staticmethod
+    def _insert_fnm_note_links(conn, doc_id: str, rows: list[dict], now: int) -> None:
+        FnmRepoMixin._batch_insert(conn,
+            """INSERT INTO fnm_note_links(
+                doc_id, link_id, chapter_id, region_id, note_item_id, anchor_id,
+                status, resolver, confidence, note_kind, marker,
+                page_no_start, page_no_end, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(
+                doc_id,
+                str(row.get("link_id") or ""),
+                str(row.get("chapter_id") or ""),
+                str(row.get("region_id") or ""),
+                str(row.get("note_item_id") or ""),
+                str(row.get("anchor_id") or ""),
+                str(row.get("status") or ""),
+                str(row.get("resolver") or ""),
+                float(row.get("confidence", 0.0) or 0.0),
+                str(row.get("note_kind") or ""),
+                str(row.get("marker") or ""),
+                int(row.get("page_no_start") or 0),
+                int(row.get("page_no_end") or 0),
+                now, now,
+            ) for row in (rows or [])]
+        )
+
     def delete_fnm_products_from_phase(self, doc_id: str, phase_from: int) -> None:
         """级联清理 phase>=phase_from 的 FNM 产物表。对外暴露，方便 dev 模式 reset 走 facade。"""
         with transaction(self.db_path) as conn:
@@ -1026,6 +1119,40 @@ class FnmRepoMixin:
                     unit_id ASC
                 """,
                 (doc_id,),
+            ).fetchall()
+            return [self._row_to_fnm_unit(row) for row in rows]
+
+    # ── 按章过滤的 list 方法（供逐章 DB 驱动 Phase 使用） ──
+
+    def list_fnm_note_items_by_chapter(self, doc_id: str, chapter_id: str) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT * FROM fnm_note_items WHERE doc_id = ? AND chapter_id = ? ORDER BY page_no ASC, row_id ASC",
+                (doc_id, chapter_id),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def list_fnm_body_anchors_by_chapter(self, doc_id: str, chapter_id: str) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT * FROM fnm_body_anchors WHERE doc_id = ? AND chapter_id = ? ORDER BY page_no ASC, paragraph_index ASC, char_start ASC, row_id ASC",
+                (doc_id, chapter_id),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def list_fnm_note_links_by_chapter(self, doc_id: str, chapter_id: str) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT * FROM fnm_note_links WHERE doc_id = ? AND chapter_id = ? ORDER BY row_id ASC",
+                (doc_id, chapter_id),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def list_fnm_translation_units_by_chapter(self, doc_id: str, chapter_id: str) -> list[dict]:
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT * FROM fnm_translation_units WHERE doc_id = ? AND owner_id = ? ORDER BY page_start ASC, unit_id ASC",
+                (doc_id, chapter_id),
             ).fetchall()
             return [self._row_to_fnm_unit(row) for row in rows]
 
@@ -1057,9 +1184,11 @@ class FnmRepoMixin:
                     payload.get("error_msg"),
                     payload.get("target_ref"),
                     json.dumps(
-                        fields.get(
-                            "page_segments",
-                            json.loads(payload.get("page_segments_json") or "[]"),
+                        _serialize_segments_for_db(
+                            fields.get(
+                                "page_segments",
+                                _deserialize_segments(payload.get("page_segments_json") or "[]"),
+                            )
                         ),
                         ensure_ascii=False,
                     ),
@@ -1274,6 +1403,28 @@ class FnmRepoMixin:
                 ),
             )
 
+    def batch_save_fnm_review_overrides(
+        self, doc_id: str, rows: list[tuple[str, str, dict]]
+    ) -> None:
+        """批量写入 overrides，单事务完成。rows: [(scope, target_id, payload), ...]"""
+        if not rows:
+            return
+        now = int(time.time())
+        params = [
+            (doc_id, scope, target_id, json.dumps(payload or {}, ensure_ascii=False), now, now)
+            for scope, target_id, payload in rows
+        ]
+        with transaction(self.db_path) as conn:
+            conn.executemany(
+                """INSERT INTO fnm_review_overrides_v2(
+                    doc_id, scope, target_id, payload_json, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(doc_id, scope, target_id) DO UPDATE SET
+                    payload_json = excluded.payload_json,
+                    updated_at = excluded.updated_at""",
+                params,
+            )
+
     def delete_fnm_review_override(
         self, doc_id: str, scope: str, target_id: str
     ) -> None:
@@ -1306,6 +1457,109 @@ class FnmRepoMixin:
                     """,
                     (doc_id,),
                 )
+
+    # ── 分章缓存：body_pages 读写 ──
+
+    def save_chapter_body_pages(self, doc_id: str, chapter_id: str, body_pages_json: str) -> None:
+        """写入单章 body_pages/body_segments JSON。先删后插兼容旧表结构。"""
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_chapter_body_pages WHERE doc_id = ? AND chapter_id = ?",
+                (doc_id, chapter_id),
+            )
+            conn.execute(
+                "INSERT INTO fnm_chapter_body_pages(doc_id, chapter_id, body_pages_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                (doc_id, chapter_id, body_pages_json, now, now),
+            )
+
+    def load_chapter_body_pages(self, doc_id: str, chapter_id: str) -> dict | None:
+        """读取单章 body_pages JSON，返回解析后的 dict 或 None。"""
+        import json as _json
+        with read_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT body_pages_json FROM fnm_chapter_body_pages WHERE doc_id = ? AND chapter_id = ?",
+                (doc_id, chapter_id),
+            ).fetchone()
+            if row:
+                try:
+                    return _json.loads(row[0])
+                except Exception:
+                    return None
+        return None
+
+    def delete_chapter_body_pages(self, doc_id: str) -> None:
+        """删除文档所有分章缓存。"""
+        with transaction(self.db_path) as conn:
+            conn.execute("DELETE FROM fnm_chapter_body_pages WHERE doc_id = ?", (doc_id,))
+
+    def list_fnm_chapter_body_pages_all(self, doc_id: str) -> list[dict]:
+        """列出文档所有分章缓存行，返回 [{chapter_id, body_pages_json}, ...]."""
+        import json as _json
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT chapter_id, body_pages_json FROM fnm_chapter_body_pages WHERE doc_id = ? ORDER BY row_id",
+                (doc_id,),
+            ).fetchall()
+            return [
+                {"chapter_id": r[0], "body_pages_json": r[1]}
+                for r in rows
+            ]
+
+    # ── 分章缓存：翻译单元读写 ──
+
+    def save_chapter_units(self, doc_id: str, chapter_id: str, units: list[dict]) -> None:
+        """写入单章翻译单元（先删后插）。"""
+        now = int(time.time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "DELETE FROM fnm_translation_units WHERE doc_id = ? AND chapter_id = ?",
+                (doc_id, chapter_id),
+            )
+            if units:
+                params = [
+                    (
+                        doc_id,
+                        u.get("unit_id"),
+                        chapter_id,
+                        u.get("section_id"),
+                        u.get("kind"),
+                        u.get("owner_kind"),
+                        u.get("order"),
+                        u.get("source_text"),
+                        u.get("translated_text"),
+                        u.get("status"),
+                        u.get("target_ref"),
+                        u.get("source_hash"),
+                        u.get("segment_plan_hash"),
+                        u.get("page_start"),
+                        u.get("page_end"),
+                        u.get("section_title"),
+                        json.dumps(_serialize_segments_for_db(u.get("page_segments") or []), ensure_ascii=False),
+                        json.dumps(u.get("payload") or {}, ensure_ascii=False),
+                        now,
+                        now,
+                    )
+                    for u in (units or [])
+                ]
+                conn.executemany(
+                    """INSERT INTO fnm_translation_units(
+                        doc_id, unit_id, chapter_id, section_id, kind, owner_kind, \"order\",
+                        source_text, translated_text, status, target_ref,
+                        source_hash, segment_plan_hash, page_start, page_end, section_title,
+                        page_segments_json, payload_json, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    params,
+                )
+
+    def load_chapter_units(self, doc_id: str, chapter_id: str) -> list[dict]:
+        """读取单章翻译单元。"""
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT * FROM fnm_translation_units WHERE doc_id = ? AND chapter_id = ? ORDER BY \"order\" ASC",
+                (doc_id, chapter_id),
+            ).fetchall()
+            return [dict(row) for row in rows]
 
     def get_fnm_section_for_page(self, doc_id: str, book_page: int) -> dict | None:
         with read_connection(self.db_path) as conn:

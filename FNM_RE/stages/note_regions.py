@@ -35,7 +35,7 @@ def _nearest_prior_chapter(phase1: Phase1Structure, page_no: int) -> str:
 
 
 def _page_payload_by_no(pages: list[dict]) -> dict[int, dict]:
-    annotated = annotate_pages_with_note_scans(list(pages or []))
+    annotated = annotate_pages_with_note_scans(list(pages or []))  # list() 保留：Phase 2 不需要极致优化
     payload: dict[int, dict] = {}
     for page in annotated:
         try:

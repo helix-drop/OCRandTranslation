@@ -191,30 +191,35 @@ def _build_pdf_page_by_file_idx(pages: list[dict]) -> dict[int, int]:
             mapping[file_idx] = page_no
     return mapping
 
-def _legacy_page_rows(page_partitions: list[PagePartitionRecord], pages: list[dict] | None) -> list[dict]:
+def _legacy_page_rows(
+    page_partitions: list[PagePartitionRecord],
+    pages: list[dict] | None = None,
+) -> list[dict]:
+    """从 page_partitions 构建 page_rows；若提供 pages 则附加 _page 引用（兼容旧路径）。"""
     page_by_no: dict[int, dict] = {}
-    for page in pages or []:
-        try:
-            page_no = int(page.get("bookPage") or 0)
-        except (TypeError, ValueError):
-            continue
-        if page_no > 0:
-            page_by_no[page_no] = dict(page)
+    if pages:
+        for page in pages:
+            try:
+                page_no = int(page.get("bookPage") or 0)
+            except (TypeError, ValueError):
+                continue
+            if page_no > 0:
+                page_by_no[page_no] = page  # 直接引用，不复制
     rows: list[dict] = []
     for row in sorted(page_partitions, key=lambda item: item.page_no):
-        rows.append(
-            {
-                "page_no": int(row.page_no),
-                "target_pdf_page": int(row.target_pdf_page),
-                "page_role": str(row.page_role),
-                "role_confidence": float(row.confidence),
-                "role_reason": str(row.reason),
-                "section_hint": str(row.section_hint),
-                "has_note_heading": bool(row.has_note_heading),
-                "note_scan_summary": dict(row.note_scan_summary),
-                "_page": dict(page_by_no.get(int(row.page_no), {})),
-            }
-        )
+        r = {
+            "page_no": int(row.page_no),
+            "target_pdf_page": int(row.target_pdf_page),
+            "page_role": str(row.page_role),
+            "role_confidence": float(row.confidence),
+            "role_reason": str(row.reason),
+            "section_hint": str(row.section_hint),
+            "has_note_heading": bool(row.has_note_heading),
+            "note_scan_summary": dict(row.note_scan_summary),
+        }
+        if page_by_no:
+            r["_page"] = page_by_no.get(int(row.page_no), {})
+        rows.append(r)
     return rows
 
 def _heading_family_guess(
@@ -313,7 +318,107 @@ def _append_heading_candidate(
         payload["heading_id"] = str(current.get("heading_id") or "")
         target[dedupe[key]] = payload
 
+def extract_heading_candidates_from_page(
+    page: dict,
+    page_no: int,
+    total_pages: int,
+    page_role: str = "",
+) -> list[dict]:
+    """从单页提取 heading candidate（OCR block + markdown heading + note heading）。
+
+    返回 list[dict]，每项包含 heading candidate 所需字段。调用方负责跨页去重和 ID 分配。
+    """
+    candidates: list[dict] = []
+    dedupe: dict[tuple[int, str, str, str], int] = {}
+    page_h = _safe_float((page.get("prunedResult") or {}).get("height")) or 1200.0
+    page_w = _safe_float((page.get("prunedResult") or {}).get("width")) or 1000.0
+
+    for block in page_blocks(page):
+        label = str(block.get("block_label") or "").strip().lower()
+        if label not in {"doc_title", "paragraph_title"}:
+            continue
+        raw_content = str(block.get("block_content") or "")
+        if "\x01" in raw_content:
+            from document.text_layer_fixer import detect_and_fix_text
+            fixed_content, _ = detect_and_fix_text(raw_content, raise_on_failure=False)
+            if fixed_content:
+                raw_content = fixed_content
+        text = normalize_title(raw_content)
+        if not text:
+            continue
+        bbox = list(block.get("block_bbox") or [])
+        left = _safe_float(bbox[0]) if len(bbox) >= 1 else None
+        top = _safe_float(bbox[1]) if len(bbox) >= 2 else None
+        right = _safe_float(bbox[2]) if len(bbox) >= 3 else None
+        bottom = _safe_float(bbox[3]) if len(bbox) >= 4 else None
+        width = max(0.0, (right or 0.0) - (left or 0.0)) if left is not None and right is not None else None
+        font_h = max(0.0, (bottom or 0.0) - (top or 0.0)) if top is not None and bottom is not None else None
+        top_band = bool(top is not None and top <= page_h * 0.30)
+        confidence = 0.72 if label == "doc_title" else 0.58
+        if top_band:
+            confidence += 0.12
+        family = _heading_family_guess(
+            text, page_no=page_no, total_pages=total_pages, page_role=page_role,
+            source="ocr_block", block_label=label, top_band=top_band,
+        )
+        _append_heading_candidate(
+            candidates, dedupe,
+            page_no=page_no, text=text, source="ocr_block", block_label=label,
+            top_band=top_band, confidence=confidence, heading_family_guess=family,
+            font_height=font_h, x=left, y=top, width_estimate=width,
+            align_hint=_align_hint(left, width, page_w),
+            width_ratio=_width_ratio(width, page_w),
+            heading_level_hint=_heading_level_hint(source="ocr_block", block_label=label, top_band=top_band),
+        )
+
+    markdown = page_markdown_text(page)
+    if "\x01" in markdown:
+        from document.text_layer_fixer import detect_and_fix_text
+        fixed_md, _ = detect_and_fix_text(markdown, raise_on_failure=False)
+        if fixed_md:
+            markdown = fixed_md
+
+    for index, raw_line in enumerate(markdown.splitlines()[:12]):
+        line = str(raw_line or "").strip()
+        if not line:
+            continue
+        if _NOTES_HEADER_RE.match(line):
+            family = _heading_family_guess(
+                line, page_no=page_no, total_pages=total_pages, page_role=page_role,
+                source="note_heading", top_band=index <= 3,
+            )
+            _append_heading_candidate(
+                candidates, dedupe,
+                page_no=page_no, text=line, source="note_heading",
+                top_band=index <= 3, confidence=0.96,
+                heading_family_guess=family, heading_level_hint=0,
+            )
+            continue
+        match = _MARKDOWN_HEADING_RE.match(raw_line)
+        if not match:
+            continue
+        heading = normalize_title(match.group(1))
+        if not heading:
+            continue
+        markdown_prefix = re.match(r"^\s{0,3}(#{1,6})", str(raw_line or ""))
+        markdown_level = len(markdown_prefix.group(1)) if markdown_prefix else 1
+        family = _heading_family_guess(
+            heading, page_no=page_no, total_pages=total_pages, page_role=page_role,
+            source="markdown_heading", top_band=index <= 2,
+        )
+        _append_heading_candidate(
+            candidates, dedupe,
+            page_no=page_no, text=heading, source="markdown_heading",
+            top_band=index <= 2,
+            confidence=0.62 if index <= 2 else 0.54,
+            heading_family_guess=family,
+            heading_level_hint=_heading_level_hint(source="markdown_heading", top_band=index <= 2, markdown_level=markdown_level),
+        )
+    return candidates
+
+
 def _collect_page_heading_candidates(page_rows: list[dict]) -> list[dict]:
+    """（兼容包装）遍历 page_rows，从每页的 _page 引用提取 heading candidate。"""
     candidates: list[dict] = []
     dedupe: dict[tuple[int, str, str, str], int] = {}
     total_pages = max(1, len(page_rows or []))
@@ -322,127 +427,19 @@ def _collect_page_heading_candidates(page_rows: list[dict]) -> list[dict]:
         if page_no <= 0:
             continue
         page_role = str(row.get("page_role") or "")
-        page = dict(row.get("_page") or {})
-        page_h = _safe_float((dict(page.get("prunedResult") or {})).get("height")) or 1200.0
-        page_w = _safe_float((dict(page.get("prunedResult") or {})).get("width")) or 1000.0
-        for block in page_blocks(page):
-            label = str(block.get("block_label") or "").strip().lower()
-            if label not in {"doc_title", "paragraph_title"}:
-                continue
-            raw_content = str(block.get("block_content") or "")
-            if "\x01" in raw_content:
-                from document.text_layer_fixer import detect_and_fix_text
-                fixed_content, _ = detect_and_fix_text(raw_content, raise_on_failure=False)
-                if fixed_content:
-                    raw_content = fixed_content
-            text = normalize_title(raw_content)
-            if not text:
-                continue
-            bbox = list(block.get("block_bbox") or [])
-            left = _safe_float(bbox[0]) if len(bbox) >= 1 else None
-            top = _safe_float(bbox[1]) if len(bbox) >= 2 else None
-            right = _safe_float(bbox[2]) if len(bbox) >= 3 else None
-            bottom = _safe_float(bbox[3]) if len(bbox) >= 4 else None
-            width = max(0.0, (right or 0.0) - (left or 0.0)) if left is not None and right is not None else None
-            font_h = max(0.0, (bottom or 0.0) - (top or 0.0)) if top is not None and bottom is not None else None
-            top_band = bool(top is not None and top <= page_h * 0.30)
-            confidence = 0.72 if label == "doc_title" else 0.58
-            if top_band:
-                confidence += 0.12
-            family = _heading_family_guess(
-                text,
-                page_no=page_no,
-                total_pages=total_pages,
-                page_role=page_role,
-                source="ocr_block",
-                block_label=label,
-                top_band=top_band,
+        page = row.get("_page") or {}
+        for c in extract_heading_candidates_from_page(
+            page, page_no=page_no, total_pages=total_pages, page_role=page_role,
+        ):
+            key = (
+                int(c.get("page_no") or 0),
+                str(c.get("source") or "").strip().lower(),
+                chapter_title_match_key(str(c.get("text") or "")),
+                str(c.get("block_label") or "").strip().lower(),
             )
-            _append_heading_candidate(
-                candidates,
-                dedupe,
-                page_no=page_no,
-                text=text,
-                source="ocr_block",
-                block_label=label,
-                top_band=top_band,
-                confidence=confidence,
-                heading_family_guess=family,
-                font_height=font_h,
-                x=left,
-                y=top,
-                width_estimate=width,
-                align_hint=_align_hint(left, width, page_w),
-                width_ratio=_width_ratio(width, page_w),
-                heading_level_hint=_heading_level_hint(
-                    source="ocr_block",
-                    block_label=label,
-                    top_band=top_band,
-                ),
-            )
-        markdown = page_markdown_text(page)
-        if "\x01" in markdown:
-            from document.text_layer_fixer import detect_and_fix_text
-            fixed_md, _ = detect_and_fix_text(markdown, raise_on_failure=False)
-            if fixed_md:
-                markdown = fixed_md
-
-        for index, raw_line in enumerate(markdown.splitlines()[:12]):
-            line = str(raw_line or "").strip()
-            if not line:
-                continue
-            if _NOTES_HEADER_RE.match(line):
-                family = _heading_family_guess(
-                    line,
-                    page_no=page_no,
-                    total_pages=total_pages,
-                    page_role=page_role,
-                    source="note_heading",
-                    top_band=index <= 3,
-                )
-                _append_heading_candidate(
-                    candidates,
-                    dedupe,
-                    page_no=page_no,
-                    text=line,
-                    source="note_heading",
-                    top_band=index <= 3,
-                    confidence=0.96,
-                    heading_family_guess=family,
-                    heading_level_hint=0,
-                )
-                continue
-            match = _MARKDOWN_HEADING_RE.match(raw_line)
-            if not match:
-                continue
-            heading = normalize_title(match.group(1))
-            if not heading:
-                continue
-            markdown_prefix = re.match(r"^\s{0,3}(#{1,6})", str(raw_line or ""))
-            markdown_level = len(markdown_prefix.group(1)) if markdown_prefix else 1
-            family = _heading_family_guess(
-                heading,
-                page_no=page_no,
-                total_pages=total_pages,
-                page_role=page_role,
-                source="markdown_heading",
-                top_band=index <= 2,
-            )
-            _append_heading_candidate(
-                candidates,
-                dedupe,
-                page_no=page_no,
-                text=heading,
-                source="markdown_heading",
-                top_band=index <= 2,
-                confidence=0.62 if index <= 2 else 0.54,
-                heading_family_guess=family,
-                heading_level_hint=_heading_level_hint(
-                    source="markdown_heading",
-                    top_band=index <= 2,
-                    markdown_level=markdown_level,
-                ),
-            )
+            if key not in dedupe:
+                dedupe[key] = len(candidates)
+                candidates.append(c)
     return candidates
 
 def _collect_toc_heading_candidates(
@@ -450,11 +447,16 @@ def _collect_toc_heading_candidates(
     *,
     toc_items: list[dict] | None,
     toc_offset: int,
+    file_idx_map: dict[int, int] | None = None,
 ) -> list[dict]:
     if not toc_items:
         return []
-    raw_pages = [dict(row.get("_page") or {}) for row in page_rows]
-    file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
+    # 优先用预构建的 file_idx_map；否则从 _page 引用构建（兼容旧路径）
+    if file_idx_map is not None:
+        raw_pages = None
+    else:
+        raw_pages = [row.get("_page") or {} for row in page_rows]
+        file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
     page_role_by_no = {int(row.get("page_no") or 0): str(row.get("page_role") or "") for row in page_rows}
     total_pages = max(1, len(page_rows or []))
     candidates: list[dict] = []
@@ -503,6 +505,7 @@ def _collect_pdf_font_band_candidates(
     pdf_path: str,
     toc_items: list[dict] | None,
     toc_offset: int,
+    file_idx_map: dict[int, int] | None = None,
 ) -> list[dict]:
     path = Path(str(pdf_path or "").strip())
     if not path.exists() or not path.is_file():
@@ -512,14 +515,20 @@ def _collect_pdf_font_band_candidates(
         for row in heading_candidates
         if int(row.get("page_no") or 0) > 0
     }
-    raw_pages = [dict(row.get("_page") or {}) for row in page_rows]
-    file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
+    # 优先用预构建的 file_idx_map；否则从 _page 引用构建（兼容旧路径）
+    raw_pages: list[dict] | None = None
+    file_idx_to_page_no: dict[int, int]
+    if file_idx_map is not None:
+        file_idx_to_page_no = file_idx_map
+    else:
+        raw_pages = [row.get("_page") or {} for row in page_rows]
+        file_idx_to_page_no = _build_pdf_page_by_file_idx(raw_pages)
     for item in toc_items or []:
         page_no = resolve_toc_item_target_pdf_page(
             item,
             offset=int(toc_offset or 0),
             pages=raw_pages,
-            pdf_page_by_file_idx=file_idx_map,
+            pdf_page_by_file_idx=file_idx_to_page_no,
         )
         try:
             resolved = int(page_no)
@@ -533,12 +542,21 @@ def _collect_pdf_font_band_candidates(
         file_bytes = path.read_bytes()
     except OSError:
         return []
-    pdf_pages = extract_pdf_text(file_bytes)
+    candidate_file_indices: set[int] = set()
+    for file_idx, page_no in file_idx_to_page_no.items():
+        try:
+            normalized_file_idx = int(file_idx)
+            normalized_page_no = int(page_no or 0)
+        except (TypeError, ValueError):
+            continue
+        if normalized_file_idx >= 0 and normalized_page_no in candidate_pages:
+            candidate_file_indices.add(normalized_file_idx)
+    pdf_pages = extract_pdf_text(file_bytes, page_indices=candidate_file_indices)
+    del file_bytes  # 立即释放 PDF 二进制 (~33MB)
     if not pdf_pages:
         return []
     page_role_by_no = {int(row.get("page_no") or 0): str(row.get("page_role") or "") for row in page_rows}
     total_pages = max(1, len(page_rows))
-    file_idx_to_page_no = _build_pdf_page_by_file_idx(raw_pages)
     candidates: list[dict] = []
     dedupe: dict[tuple[int, str, str, str], int] = {}
     for page in pdf_pages:
@@ -645,10 +663,18 @@ def _collect_heading_candidate_rows(
     toc_items: list[dict] | None,
     toc_offset: int,
     pdf_path: str,
+    pre_extracted_page_candidates: list[dict] | None = None,
+    file_idx_map: dict[int, int] | None = None,
 ) -> list[dict]:
     candidates: list[dict] = []
-    candidates.extend(_collect_page_heading_candidates(page_rows))
-    candidates.extend(_collect_toc_heading_candidates(page_rows, toc_items=toc_items, toc_offset=toc_offset))
+
+    # 页面级 heading candidates：优先用预提取的（避免依赖 _page 引用）
+    if pre_extracted_page_candidates is not None:
+        candidates.extend(pre_extracted_page_candidates)
+    else:
+        candidates.extend(_collect_page_heading_candidates(page_rows))
+
+    candidates.extend(_collect_toc_heading_candidates(page_rows, toc_items=toc_items, toc_offset=toc_offset, file_idx_map=file_idx_map))
     candidates.extend(
         _collect_pdf_font_band_candidates(
             page_rows,
@@ -656,6 +682,7 @@ def _collect_heading_candidate_rows(
             pdf_path=pdf_path,
             toc_items=toc_items,
             toc_offset=toc_offset,
+            file_idx_map=file_idx_map,
         )
     )
     candidates.sort(

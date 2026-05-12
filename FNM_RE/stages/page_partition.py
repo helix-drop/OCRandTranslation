@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
 
-from document.note_detection import annotate_pages_with_note_scans
+from document.note_detection import annotate_pages_with_note_scans, annotate_single_page
 
 from FNM_RE.constants import PageRole, is_valid_page_role
 from FNM_RE.models import PagePartitionRecord
@@ -838,51 +838,416 @@ def build_page_partitions(
     *,
     page_overrides: Mapping[str, Mapping[str, Any]] | None = None,
     endnotes_start_page: int | None = None,
-) -> list[PagePartitionRecord]:
-    annotated_pages = annotate_pages_with_note_scans(list(pages or []))
+) -> tuple[list[PagePartitionRecord], list[dict], dict[int, int]]:
+    """构建页分区，同时预提取 heading candidates 和 fileIdx→bookPage 映射。
+
+    使用 page_info_cache（轻量 dict）替代 page_by_no（完整 page dict）传递 continuation fix 数据。
+    """
+    from FNM_RE.stages.chapter_skeleton.heading_candidates import extract_heading_candidates_from_page
+
+    annotated_pages = annotate_pages_with_note_scans(pages)
     total_pages = len(annotated_pages)
     records: list[PagePartitionRecord] = []
-    page_by_no: dict[int, dict[str, Any]] = {}
+    heading_candidates: list[dict] = []
+    file_idx_map: dict[int, int] = {}
+    page_info_cache: dict[int, dict] = {}
     for page in annotated_pages:
-        try:
-            page_no = int(page.get("bookPage") or 0)
-        except (TypeError, ValueError):
-            continue
+        page_no = int(page.get("bookPage") or 0)
         if page_no <= 0:
             continue
-        page_payload = dict(page)
-        page_by_no[page_no] = page_payload
-        note_scan = dict(page_payload.get("_note_scan") or {})
-        headings = extract_page_headings(page_payload)
+        note_scan = dict(page.get("_note_scan") or {})
+        headings = extract_page_headings(page)
+        text = page_markdown_text(page)
         matched = _resolve_page_role(
             _PageScanContext(
-                page=page_payload,
-                page_no=page_no,
-                total_pages=max(1, total_pages),
-                text=page_markdown_text(page_payload),
-                note_scan=note_scan,
-                headings=headings,
+                page=page, page_no=page_no, total_pages=max(1, total_pages),
+                text=text, note_scan=note_scan, headings=headings,
             )
         )
         records.append(
             PagePartitionRecord(
-                page_no=page_no,
-                target_pdf_page=page_no,
-                page_role=matched.role,
-                confidence=float(matched.confidence),
+                page_no=page_no, target_pdf_page=page_no,
+                page_role=matched.role, confidence=float(matched.confidence),
                 reason=matched.reason,
-                section_hint=first_section_hint(page_payload, note_scan),
-                has_note_heading=has_note_heading(page_payload),
+                section_hint=first_section_hint(page, note_scan),
+                has_note_heading=has_note_heading(page),
                 note_scan_summary=note_scan_summary(note_scan),
             )
         )
+        heading_candidates.extend(
+            extract_heading_candidates_from_page(
+                page, page_no=page_no, total_pages=max(1, total_pages),
+                page_role=str(matched.role),
+            )
+        )
+        try:
+            file_idx = int(page.get("fileIdx") or -1)
+            if file_idx >= 0:
+                file_idx_map[file_idx] = page_no
+        except (TypeError, ValueError):
+            pass
+        # 轻量缓存（替代 page_by_no 存储完整 page dict）
+        page_info_cache[page_no] = {
+            "markdown": text,
+            "headings": headings,
+            "page_role": str(matched.role),
+            "role_reason": str(matched.reason),
+        }
+
     records.sort(key=lambda item: item.page_no)
+    # 用轻量缓存构建合成 page_by_no（兼容原始 continuation fix）
+    _synthetic_page_by_no: dict[int, dict] = _build_synthetic_page_by_no(page_info_cache)
     _apply_endnotes_start_page_hint(records, endnotes_start_page=endnotes_start_page)
-    _apply_front_matter_continuation_fix(records, page_by_no=page_by_no, total_pages=max(1, total_pages))
-    _apply_back_matter_continuation_fix(records, page_by_no=page_by_no, total_pages=max(1, total_pages))
-    _apply_note_continuation_fix(records, page_by_no=page_by_no, total_pages=max(1, total_pages))
+    _apply_front_matter_continuation_fix(records, page_by_no=_synthetic_page_by_no, total_pages=max(1, total_pages))
+    _apply_back_matter_continuation_fix(records, page_by_no=_synthetic_page_by_no, total_pages=max(1, total_pages))
+    _apply_note_continuation_fix(records, page_by_no=_synthetic_page_by_no, total_pages=max(1, total_pages))
     _apply_manual_overrides(records, page_overrides=page_overrides)
-    return records
+    return records, heading_candidates, file_idx_map
+
+
+def _build_synthetic_page_by_no(page_info_cache: dict[int, dict]) -> dict[int, dict]:
+    """用缓存的 headings 注入 prunedResult 格式，使原始 continuation fix 可正常读取。"""
+    result: dict[int, dict] = {}
+    for page_no, info in page_info_cache.items():
+        headings = info.get("headings") or []
+        synthetic_page = {"markdown": info.get("markdown", "")}
+        if headings:
+            synthetic_page["prunedResult"] = {
+                "parsing_res_list": [
+                    {"block_label": "doc_title", "block_content": h}
+                    for h in headings
+                ],
+                "height": 1200,
+                "width": 1000,
+            }
+        result[page_no] = {
+            "_page": synthetic_page,
+            "page_no": page_no,
+            "page_role": info.get("page_role", ""),
+            "section_hint": headings[0] if headings else "",
+            "has_note_heading": False,
+        }
+    return result
+
+
+def build_page_partitions_streaming(
+    page_stream: Iterator[dict],
+    total_pages: int,
+    *,
+    page_overrides: Mapping[str, Mapping[str, Any]] | None = None,
+    endnotes_start_page: int | None = None,
+) -> tuple[list[PagePartitionRecord], list[dict], dict[int, int], dict[int, dict], list[dict]]:
+    """流式处理：逐页 annotate → extract → classify → 释放。
+
+    逐页从 page_stream 读取，处理完立即释放。需要 total_pages 用于比例阈值。
+    Returns: (records, heading_candidates, file_idx_map, page_info_cache, light_pages)
+      - light_pages: llm_book_type_verify 需要的轻量页元数据
+    """
+    from FNM_RE.stages.chapter_skeleton.heading_candidates import extract_heading_candidates_from_page
+
+    records: list[PagePartitionRecord] = []
+    heading_candidates: list[dict] = []
+    file_idx_map: dict[int, int] = {}
+    page_info_cache: dict[int, dict] = {}
+    light_pages: list[dict] = []
+
+    # 滑动窗口策略（2 页窗口）：
+    # - 逐页到达，窗口保持最多 3 个未处理页
+    # - 当 window[0] 有 next (window[1]) 且未处理时，立即处理并释放
+    # - prev_page 在流式模式下不可用（已释放），传 None（可接受的精度损失）
+    # - 尾页无 next，在循环结束后单独处理
+    window: list[dict] = []
+    processed: set[int] = set()
+    for next_page in page_stream:
+        window.append(next_page)
+        while len(window) >= 2:
+            curr = window[0]
+            pn = int(curr.get("bookPage") or 0)
+            if pn in processed or pn <= 0:
+                del window[0]
+                continue
+            _process_one_page_streaming(
+                curr, None, window[1],
+                total_pages, records, heading_candidates, file_idx_map, page_info_cache, light_pages,
+            )
+            processed.add(pn)
+            del window[0]
+        # 限制窗口大小，防止极端情况堆积
+        if len(window) > 3:
+            del window[:-3]
+    # 处理尾页（无 next）
+    for p in window:
+        pn = int(p.get("bookPage") or 0)
+        if pn not in processed and pn > 0:
+            _process_one_page_streaming(
+                p, None, None,
+                total_pages, records, heading_candidates, file_idx_map, page_info_cache, light_pages,
+            )
+
+    records.sort(key=lambda item: item.page_no)
+    # 用 page_info_cache 构建轻量 page_by_no（兼容原始 continuation fix）
+    # 将缓存的 headings 注入 prunedResult 格式，使 extract_page_headings 可正常读取
+    _synthetic_page_by_no: dict[int, dict] = {}
+    for page_no, info in page_info_cache.items():
+        _headings = info.get("headings") or []
+        _synthetic_page = {
+            "markdown": info.get("markdown", ""),
+        }
+        if _headings:
+            _synthetic_page["prunedResult"] = {
+                "parsing_res_list": [
+                    {"block_label": "doc_title", "block_content": h}
+                    for h in _headings
+                ],
+                "height": 1200,
+                "width": 1000,
+            }
+        _synthetic_page_by_no[page_no] = {
+            "_page": _synthetic_page,
+            "page_no": page_no,
+            "page_role": info.get("page_role", ""),
+            "section_hint": "",
+            "has_note_heading": bool(_headings and any("notes" in h.lower() for h in _headings)),
+        }
+    _apply_endnotes_start_page_hint(records, endnotes_start_page=endnotes_start_page)
+    _apply_front_matter_continuation_fix(records, page_by_no=_synthetic_page_by_no, total_pages=max(1, total_pages))
+    _apply_back_matter_continuation_fix(records, page_by_no=_synthetic_page_by_no, total_pages=max(1, total_pages))
+    _apply_note_continuation_fix(records, page_by_no=_synthetic_page_by_no, total_pages=max(1, total_pages))
+    _apply_manual_overrides(records, page_overrides=page_overrides)
+    return records, heading_candidates, file_idx_map, page_info_cache, light_pages
+
+
+def _process_one_page_streaming(
+    page: dict,
+    prev_page: dict | None,
+    next_page: dict | None,
+    total_pages: int,
+    records: list[PagePartitionRecord],
+    heading_candidates: list[dict],
+    file_idx_map: dict[int, int],
+    page_info_cache: dict[int, dict],
+    light_pages: list[dict] | None = None,
+) -> None:
+    from FNM_RE.stages.chapter_skeleton.heading_candidates import extract_heading_candidates_from_page
+
+    page_no = int(page.get("bookPage") or 0)
+    if page_no <= 0:
+        return
+
+    # 标注（in-place）：窗口缓存提供物理邻页（书中实际前后页）
+    annotate_single_page(page, prev_page, next_page)
+
+    note_scan = dict(page.get("_note_scan") or {})
+    headings = extract_page_headings(page)
+    text = page_markdown_text(page)
+
+    # 页面角色判定
+    matched = _resolve_page_role(
+        _PageScanContext(
+            page=page, page_no=page_no, total_pages=max(1, total_pages),
+            text=text, note_scan=note_scan, headings=headings,
+        )
+    )
+    records.append(
+        PagePartitionRecord(
+            page_no=page_no, target_pdf_page=page_no,
+            page_role=matched.role, confidence=float(matched.confidence),
+            reason=matched.reason,
+            section_hint=first_section_hint(page, note_scan),
+            has_note_heading=has_note_heading(page),
+            note_scan_summary=note_scan_summary(note_scan),
+        )
+    )
+
+    # 预提取 heading candidates
+    heading_candidates.extend(
+        extract_heading_candidates_from_page(
+            page, page_no=page_no, total_pages=max(1, total_pages),
+            page_role=str(matched.role),
+        )
+    )
+
+    # fileIdx 映射
+    try:
+        file_idx = int(page.get("fileIdx") or -1)
+        if file_idx >= 0:
+            file_idx_map[file_idx] = page_no
+    except (TypeError, ValueError):
+        pass
+
+    # 缓存轻量页面信息（供 continuation fix）
+    page_info_cache[page_no] = {
+        "markdown": text,
+        "headings": headings,
+        "page_role": str(matched.role),
+        "role_reason": str(matched.reason),
+    }
+
+    # 收集 llm_book_type_verify 需要的轻量页元数据
+    if light_pages is not None:
+        light_pages.append({
+            "bookPage": page.get("bookPage"),
+            "pdfPage": page.get("pdfPage", page.get("bookPage")),
+            "fileIdx": page.get("fileIdx"),
+            "_note_scan": page.get("_note_scan"),
+            "fnBlocks": page.get("fnBlocks"),
+        })
+
+
+# ── 流式版本的 continuation fixes（用 page_info_cache 替代 page_by_no） ──
+
+def _apply_front_matter_continuation_fix_streaming(
+    records: list[PagePartitionRecord],
+    *,
+    page_info_cache: dict[int, dict],
+    total_pages: int,
+) -> None:
+    early_limit = max(20, int(total_pages * 0.08))
+    in_front_matter_run = False
+    for record in records:
+        if record.page_no <= 0 or record.page_no > early_limit:
+            continue
+        if record.page_role == "front_matter":
+            in_front_matter_run = True
+            continue
+        if record.page_role in {"noise", "other"}:
+            continue
+        info = page_info_cache.get(record.page_no, {})
+        is_body_entry = _is_body_entry_page_from_info(info, record, total_pages=max(1, total_pages))
+        if record.page_role == "body" and in_front_matter_run and not is_body_entry:
+            record.page_role = "front_matter"
+            record.confidence = max(float(record.confidence), 0.78)
+            record.reason = "front_matter_continuation"
+            continue
+        if record.page_role == "body" and is_body_entry:
+            in_front_matter_run = False
+
+
+def _apply_note_continuation_fix_streaming(
+    records: list[PagePartitionRecord],
+    *,
+    page_info_cache: dict[int, dict],
+    total_pages: int,
+) -> None:
+    for record in records:
+        if record.page_role not in {"body", "front_matter"}:
+            continue
+        info = page_info_cache.get(record.page_no, {})
+        if not info:
+            continue
+        text = str(info.get("markdown") or "")
+        if _looks_like_note_continuation_page(text, page_no=record.page_no, total_pages=max(1, total_pages)):
+            record.page_role = "note"
+            record.confidence = max(float(record.confidence), 0.74)
+            record.reason = "note_continuation"
+
+
+def _apply_back_matter_continuation_fix_streaming(
+    records: list[PagePartitionRecord],
+    *,
+    page_info_cache: dict[int, dict],
+    total_pages: int,
+) -> None:
+    active_family: str = ""
+    active_reason: str = ""
+    for record in records:
+        if record.page_role in {"noise", "other"}:
+            if not active_family:
+                continue
+            info = page_info_cache.get(record.page_no, {})
+            if not info:
+                continue
+            text = str(info.get("markdown") or "")
+            if not _looks_like_back_matter_continuation_page(text, family=active_family):
+                active_family = ""
+                active_reason = ""
+            continue
+        if record.page_role == "body":
+            active_family = ""
+            active_reason = ""
+            if record.page_no > max(24, int(total_pages * 0.45)):
+                info = page_info_cache.get(record.page_no, {})
+                headings = list(info.get("headings") or [])
+                family = _seed_back_matter_family_from_headings(headings, record, total_pages=total_pages)
+                if family:
+                    record.page_role = "other"
+                    record.confidence = max(float(record.confidence), 0.72)
+                    record.reason = family
+                    active_family = family
+                    active_reason = family
+        elif record.page_role == "other" and record.page_no > max(24, int(total_pages * 0.45)):
+            active_family = str(record.reason or "")
+            active_reason = active_family
+            # 续页
+            for sub in records:
+                if sub.page_no > record.page_no and sub.page_role == "body":
+                    sub_info = page_info_cache.get(sub.page_no, {})
+                    sub_text = str(sub_info.get("markdown") or "")
+                    if _looks_like_back_matter_continuation_page(sub_text, family=active_family):
+                        sub.page_role = "other"
+                        sub.confidence = max(float(sub.confidence), 0.68)
+                        sub.reason = f"{active_reason}_continuation"
+
+
+def _is_body_entry_page_from_info(
+    info: dict,
+    record: PagePartitionRecord,
+    *,
+    total_pages: int,
+) -> bool:
+    if _is_strong_body_boundary_page_from_record(record, total_pages=total_pages):
+        return True
+    page_no = int(record.page_no)
+    text = str(info.get("markdown") or "")
+    headings = list(info.get("headings") or [])
+    first_heading = normalize_title(headings[0] if headings else "")
+    if not first_heading:
+        return False
+    if _NOTES_HEADER_RE.match(first_heading):
+        return False
+    if _looks_like_course_listing_page(text, page_no=page_no, total_pages=total_pages):
+        return False
+    if _looks_like_copyright_front_matter_page(text, page_no=page_no, total_pages=total_pages):
+        return False
+    return _looks_like_prose_after_heading(text)
+
+
+def _is_strong_body_boundary_page_from_record(
+    record: PagePartitionRecord,
+    *,
+    total_pages: int,
+) -> bool:
+    page_no = record.page_no
+    if page_no <= max(6, int(total_pages * 0.03)):
+        return False
+    if str(record.page_role) not in {"body", "front_matter"}:
+        return False
+    section_hint = str(record.section_hint or "")
+    if not section_hint:
+        return False
+    heading_family = guess_title_family(section_hint, page_no=page_no, total_pages=total_pages)
+    return heading_family in {"chapter", "section", "container"}
+
+
+def _seed_back_matter_family_from_headings(
+    headings: list[str],
+    record: PagePartitionRecord,
+    *,
+    total_pages: int,
+) -> str:
+    safe_total_pages = max(1, int(total_pages))
+    safe_page_no = max(1, int(record.page_no))
+    if safe_total_pages > 20 and safe_page_no < max(20, int(safe_total_pages * 0.6)):
+        return ""
+    if record.page_role == "other" and str(record.reason or "") in {"bibliography", "index", "illustrations"}:
+        return str(record.reason or "")
+    first_heading = normalize_title(headings[0] if headings else "")
+    if not first_heading:
+        return ""
+    family = guess_title_family(first_heading, page_no=record.page_no, total_pages=total_pages)
+    if family in {"bibliography", "index", "illustrations"}:
+        return str(family)
+    return ""
 
 
 def summarize_page_partitions(records: list[PagePartitionRecord]) -> dict[str, Any]:

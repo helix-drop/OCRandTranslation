@@ -181,7 +181,10 @@ def _font_weight_hint_from_name(font_name: str) -> str:
     return "regular"
 
 
-def extract_pdf_text(file_bytes: bytes) -> list[dict]:
+def extract_pdf_text(
+    file_bytes: bytes,
+    page_indices: set[int] | list[int] | tuple[int, ...] | None = None,
+) -> list[dict]:
     """
     从PDF文件提取文字层信息。
 
@@ -197,7 +200,26 @@ def extract_pdf_text(file_bytes: bytes) -> list[dict]:
     pdf_pages = []
     usable_chars = 0
 
-    for i, page in enumerate(reader.pages):
+    requested_indices = None
+    if page_indices is not None:
+        requested_indices = {
+            int(index)
+            for index in page_indices
+            if isinstance(index, int) or str(index).strip().lstrip("-").isdigit()
+        }
+        requested_indices = {index for index in requested_indices if index >= 0}
+        if not requested_indices:
+            return []
+
+    page_count = len(reader.pages)
+    indices = (
+        range(page_count)
+        if requested_indices is None
+        else sorted(index for index in requested_indices if index < page_count)
+    )
+
+    for i in indices:
+        page = reader.pages[i]
         try:
             mediabox = page.mediabox
             pdf_w = float(mediabox.width)
@@ -256,8 +278,9 @@ def extract_pdf_text(file_bytes: bytes) -> list[dict]:
             "fullText": full_text,
         })
 
-    # 只要最终没有留下任何可用文字层，就整体回退到 OCR
-    if usable_chars < 20:
+    # 全书抽取时需要足够文字层才保留；按候选页抽取时，单页短标题也有价值。
+    min_usable_chars = 1 if requested_indices is not None else 20
+    if usable_chars < min_usable_chars:
         return []
 
     return pdf_pages

@@ -56,7 +56,7 @@ CUSTOM_MODEL_DEFAULT = {
     "extra_body": {},
     "thinking_enabled": False,
 }
-MODEL_POOL_SLOT_COUNT = 3
+MODEL_POOL_SLOT_COUNT = 4
 MODEL_POOL_MODE_VALUES = {"builtin", "custom", "empty"}
 MIMO_BASE_URL = "https://api.xiaomimimo.com/v1"
 MIMO_TOKEN_PLAN_BASE_URL_DEFAULT = "https://token-plan-sgp.xiaomimimo.com/v1"

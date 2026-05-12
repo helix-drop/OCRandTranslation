@@ -851,7 +851,7 @@ def load_phase6_for_doc(
 ) -> Phase6Structure:
     repo = repo or SQLiteRepository()
     if pages is None:
-        pages = _safe_list(getattr(repo, "load_pages", None), doc_id)
+        pages = _safe_list(getattr(repo, "load_pages_light", None) or getattr(repo, "load_pages", None), doc_id)
     else:
         pages = list(pages or [])
 
@@ -866,12 +866,14 @@ def load_phase6_for_doc(
         slug=str(slug or doc_id),
         progress_callback=progress_callback,
     )
-    return snapshot.phase6_shadow
+    return snapshot.phase6
 
 
 def _resolve_phase6_from_snapshot(snapshot: Any) -> Phase6Structure | None:
     if isinstance(snapshot, Phase6Structure):
         return snapshot
+    if hasattr(snapshot, "phase6") and isinstance(getattr(snapshot, "phase6", None), Phase6Structure):
+        return snapshot.phase6
 
     if isinstance(snapshot, dict):
         for key in ("phase6", "phase6_shadow", "_phase6"):
@@ -1065,7 +1067,7 @@ def run_phase6_pipeline_for_doc(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     repo = repo or SQLiteRepository()
-    pages = _safe_list(getattr(repo, "load_pages", None), doc_id)
+    pages = _safe_list(getattr(repo, "load_pages_phase1", None) or getattr(repo, "load_pages", None), doc_id)
     run_id = int(getattr(repo, "create_fnm_run")(doc_id, status="running"))
     if not pages:
         repo.update_fnm_run(doc_id, run_id, status="error", error_msg="未找到 OCR 页面数据")
@@ -1107,13 +1109,11 @@ def run_phase6_pipeline_for_doc(
             "review_counts": dict(status_payload.get("review_counts") or {}),
             "export_ready_real": bool(status_payload.get("export_ready_real")),
             "module_phase2_detail": {
-                "total_items": len(snapshot.split_result.data.note_items),
-                "item_kind_counts": dict(
-                    Counter(str(row.note_kind or "") for row in snapshot.split_result.data.note_items)
-                ),
+                "total_items": phase6.summary.note_item_summary.get("total_items", 0),
+                "item_kind_counts": dict(phase6.summary.note_item_summary.get("item_kind_counts") or {}),
             },
-            "module_phase3_detail": dict(snapshot.link_result.data.link_summary or {}),
-            "module_phase3_reasons": list(snapshot.link_result.gate_report.reasons or []),
+            "module_phase3_detail": dict(phase6.summary.note_link_summary or {}),
+            "module_phase3_reasons": list(phase6.summary.note_link_summary.get("gate_reasons") or []),
         }
     except Exception as exc:
         repo.update_fnm_run(doc_id, run_id, status="error", error_msg=str(exc))

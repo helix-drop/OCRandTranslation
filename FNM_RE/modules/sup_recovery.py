@@ -15,9 +15,11 @@
 from __future__ import annotations
 
 import re
+import gc
+import os
 import zlib
 import struct
-from typing import Optional
+from typing import Optional, Callable
 
 try:
     import fitz as _fitz
@@ -33,6 +35,31 @@ _MAX_GAP_CHARS   = 15
 _SUP_FMT         = "<sup>{}</sup>"
 _VISION_TIMEOUT_SECONDS = 45.0
 
+# ── 内存守卫 ──
+_MEMORY_LIMIT_PCT = float(os.environ.get("SUP_RECOVERY_MEMORY_LIMIT", "90"))  # 默认 90%
+
+def _check_memory():
+    """当系统内存使用率 >= _MEMORY_LIMIT_PCT% 时，主动抛异常终止当前阶段。"""
+    try:
+        with open("/proc/meminfo") as f:
+            mem = {}
+            for line in f:
+                k, v = line.split(":", 1)
+                mem[k.strip()] = int(v.split()[0])
+        total = mem.get("MemTotal", 0)
+        avail = mem.get("MemAvailable", 0)
+        if total > 0:
+            used_pct = (total - avail) / total * 100
+            if used_pct >= _MEMORY_LIMIT_PCT:
+                raise MemoryError(
+                    f"内存使用率 {used_pct:.1f}% >= {_MEMORY_LIMIT_PCT:.0f}%，"
+                    f" 主动终止 sup_recovery（已完成的结果已写入 pages）"
+                )
+    except MemoryError:
+        raise
+    except Exception:
+        pass  # 非 Linux 环境跳过
+
 _UNICODE_SUP_MAP = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 _UNICODE_SUP_RE  = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+")
 
@@ -46,6 +73,34 @@ _HAS_MARKER_RE_TEMPLATE = (
 # 视觉调用缓存。key 必须包含 target_marker；同页不同 marker 不能共享负结果。
 _LAYER3_CACHE: dict[tuple, dict | None] = {}
 
+_vision_client: object | None = None
+_vision_client_spec_hash: int = 0
+
+
+def _get_or_create_vision_client(spec: object) -> object:
+    """返回复用的 OpenAI vision client，避免每次调用重建导致 TCP 连接泄漏。"""
+    global _vision_client, _vision_client_spec_hash
+    spec_hash = hash((
+        str(getattr(spec, "api_key", "") or ""),
+        str(getattr(spec, "base_url", "") or ""),
+        str(getattr(spec, "model_id", "") or ""),
+    ))
+    if _vision_client is None or _vision_client_spec_hash != spec_hash:
+        if _vision_client is not None:
+            try:
+                _vision_client.close()
+            except Exception:
+                pass
+        from openai import OpenAI
+        _vision_client = OpenAI(
+            api_key=str(getattr(spec, "api_key", "") or "").strip(),
+            base_url=str(getattr(spec, "base_url", "") or "").strip(),
+            timeout=_VISION_TIMEOUT_SECONDS,
+            max_retries=0,
+        )
+        _vision_client_spec_hash = spec_hash
+    return _vision_client
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 公共 API
@@ -57,12 +112,16 @@ def recover_book_chapter_scoped(
     chapter_page_ranges: dict[str, tuple[int, int]],  # chapter_id → (start, end)
     *,
     pdf_path: str = "",
+    persist_fn: Callable[[list[int]], None] | None = None,
 ) -> dict:
     """
     章级上标恢复。
 
     对每个 chapter，找出 marker 缺失的 body 页，逐级尝试恢复。
     返回 stats dict，同时原位修改 pages[i]['enriched_markdown']。
+
+    若提供 persist_fn，每章处理后调用 persist_fn(modified_page_numbers)，
+    调用方可写入 DB 并清理对应页面的 markdown 字段以释放内存。
     """
     _load_markdown_from_raw_pages(pages, pdf_path)
 
@@ -85,6 +144,7 @@ def recover_book_chapter_scoped(
     for ch_id, expected_markers in chapter_note_markers.items():
         if ch_id not in chapter_page_ranges:
             continue
+        _check_memory()
         start_page, end_page = chapter_page_ranges[ch_id]
         body_pages = _body_pages_in_range(pages, start_page, end_page)
         if not body_pages:
@@ -175,7 +235,8 @@ def recover_book_chapter_scoped(
             # 穷尽且 marker 仍未恢复，_has_marker 的假阳性（如 OCR 把上标 8
             # 误读为 6 而裸数字 8 出现在 \"XVIIIe\" 中）不应阻断视觉扫描。
             if not recovered and pdf_path and candidates:
-                for cp in candidates[:3]:  # 最多试 3 个候选页
+                for cp in candidates[:3]:
+                    _check_memory()  # 每次 L3 视觉 API 调用前检查内存
                     cpn = int(_page_no(cp))
                     cp_md = cp.get("enriched_markdown") or cp.get("markdown") or ""
                     existing_on_page = [m for m in found_map if found_map[m] == cpn]
@@ -215,8 +276,26 @@ def recover_book_chapter_scoped(
 
             if not recovered:
                 stats["unrecovered"] += 1
-                if marker <= 18:  # only log low markers (most important)
+                if marker <= 18:
                     print(f"[sup_recovery] UNRECOVERED ch={ch_id[:40]} marker={marker}")
+
+        # 每章结束：持久化已修改页面 + 释放内存
+        if persist_fn and start_page > 0:
+            modified_pns = [
+                int(_page_no(p)) for p in body_pages
+                if p.get("enriched_markdown")
+            ]
+            if modified_pns:
+                try:
+                    persist_fn(modified_pns)
+                    # 释放已持久化页面的 markdown 文本以回收内存
+                    for p in body_pages:
+                        p.pop("markdown", None)
+                        p.pop("enriched_markdown", None)
+                except Exception:
+                    pass  # 持久化失败不阻断流程
+        _LAYER3_CACHE.clear()
+        gc.collect()
 
     if doc:
         doc.close()
@@ -490,7 +569,7 @@ def _vision_find_superscript(
         cached = _LAYER3_CACHE[cache_key]
         return dict(cached) if cached else None
 
-    # 渲染 5x 精度文本区裁剪
+    # 渲染页面图片（3x 精度，JPEG 格式省内存）
     try:
         doc = _fitz.open(pdf_path)
         page = doc[page_no - 1]
@@ -498,13 +577,16 @@ def _vision_find_superscript(
         text_rect = _fitz.Rect(rect.x0 + 30, rect.y0 + 40, rect.x1 - 30, rect.y1 - 50)
         mat = _fitz.Matrix(5.0, 5.0)
         pix = page.get_pixmap(matrix=mat, clip=text_rect)
-        img_bytes = pix.tobytes("png")
+        img_bytes = pix.tobytes("png")  # PNG 无损，保证上标清晰
+        pix = None
         doc.close()
     except Exception:
         return None
 
     import base64
-    data_url = "data:image/png;base64," + base64.b64encode(img_bytes).decode()
+    b64 = base64.b64encode(img_bytes).decode()
+    img_bytes = None
+    data_url = "data:image/png;base64," + b64
 
     try:
         from persistence.storage import resolve_visual_model_spec
@@ -523,13 +605,7 @@ def _vision_find_superscript(
     )
 
     try:
-        from openai import OpenAI
-        client = OpenAI(
-            api_key=str(getattr(spec, "api_key", "") or "").strip(),
-            base_url=str(getattr(spec, "base_url", "") or "").strip(),
-            timeout=_VISION_TIMEOUT_SECONDS,
-            max_retries=0,
-        )
+        client = _get_or_create_vision_client(spec)
         extra_body = dict(getattr(spec, "request_overrides", {}).get("extra_body", {}) or {})
         response = client.chat.completions.create(
             model=str(getattr(spec, "model_id", "") or "").strip(),
@@ -703,7 +779,7 @@ def _apply_insertions(markdown: str, insertions: list[tuple[int, str, str]]) -> 
 # ═══════════════════════════════════════════════════════════════════════════
 
 def _load_markdown_from_raw_pages(pages: list[dict], pdf_path: str) -> None:
-    """从 pdf_path 同目录的 raw_pages.json 加载 markdown 文本到 pages 中。"""
+    """从 raw_pages.json 逐页流式加载 markdown，只提取需要字段，避免全量加载。"""
     import os as _os, json as _json
 
     if pages and any(p.get("markdown") or p.get("enriched_markdown") for p in pages[:1]):
@@ -723,22 +799,74 @@ def _load_markdown_from_raw_pages(pages: list[dict], pdf_path: str) -> None:
         raw_path = _os.path.join(candidate_dir, "raw_pages.json")
         if not _os.path.isfile(raw_path):
             continue
-        try:
-            with open(raw_path, encoding="utf-8") as fh:
-                loaded = _json.load(fh)
-        except Exception:
-            continue
-        loaded_pages = loaded.get("pages") or []
+
+        # 建目标页号集合
+        target_pns = set()
+        for page in pages:
+            pn = page.get("pdfPage") or page.get("page_no")
+            if pn:
+                target_pns.add(int(pn))
+
+        if not target_pns:
+            return
+
+        # 流式解析：只读需要页面的 markdown/blocks/fnBlocks，不加载整个 JSON
         md_map: dict[int, str] = {}
         block_map: dict[int, list] = {}
         fn_map: dict[int, list] = {}
-        for lp in loaded_pages:
-            pn = lp.get("pdfPage") or lp.get("bookPage")
-            md = lp.get("markdown", "")
-            if pn and md:
-                md_map[int(pn)] = md
-                block_map[int(pn)] = lp.get("blocks") or []
-                fn_map[int(pn)] = lp.get("fnBlocks") or []
+        try:
+            with open(raw_path, encoding="utf-8") as fh:
+                # 跳过文件头 {"pages": [
+                buf = ""
+                in_pages = False
+                decoder = _json.JSONDecoder()
+                for line in fh:
+                    buf += line
+                    # 找到 pages 数组开始
+                    if not in_pages:
+                        idx = buf.find('"pages"')
+                        if idx >= 0:
+                            idx = buf.find("[", idx)
+                            if idx >= 0:
+                                buf = buf[idx+1:]  # 跳过 [
+                                in_pages = True
+                        continue
+
+                    # 逐页解析：每次找到完整的 page 对象
+                    while True:
+                        # 跳过空白和逗号
+                        stripped = buf.lstrip()
+                        if not stripped:
+                            break
+                        if stripped[0] == "]":
+                            buf = ""
+                            break
+                        if stripped[0] == ",":
+                            buf = stripped[1:]
+                            continue
+                        if stripped[0] != "{":
+                            buf = stripped
+                            break
+
+                        try:
+                            obj, idx = decoder.raw_decode(stripped)
+                            buf = stripped[idx:]
+                            pn = obj.get("pdfPage") or obj.get("bookPage")
+                            if pn and int(pn) in target_pns:
+                                md = obj.get("markdown", "")
+                                if md:
+                                    md_map[int(pn)] = md
+                                    block_map[int(pn)] = obj.get("blocks") or []
+                                    fn_map[int(pn)] = obj.get("fnBlocks") or []
+                                # 如果已收集完所有目标页，提前退出
+                                if len(md_map) >= len(target_pns):
+                                    buf = ""
+                                    break
+                        except _json.JSONDecodeError:
+                            # 数据不完整，等下一行
+                            break
+        except Exception:
+            continue
 
         if not md_map:
             continue
@@ -751,4 +879,9 @@ def _load_markdown_from_raw_pages(pages: list[dict], pdf_path: str) -> None:
                     page["blocks"] = block_map.get(int(pn), [])
                 if not page.get("fnBlocks"):
                     page["fnBlocks"] = fn_map.get(int(pn), [])
+
+        # 显式释放
+        md_map.clear()
+        block_map.clear()
+        fn_map.clear()
         return

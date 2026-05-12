@@ -881,6 +881,19 @@ def _migrate_fnm_schema(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_fnm_structure_reviews_doc_type
             ON fnm_structure_reviews(doc_id, review_type, severity);
 
+        -- 分章处理缓存：存 ChapterLayer body_pages/body_segments 文本
+        CREATE TABLE IF NOT EXISTS fnm_chapter_body_pages (
+            row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            chapter_id TEXT NOT NULL,
+            body_pages_json TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_fnm_chapter_body_pages_doc_ch
+            ON fnm_chapter_body_pages(doc_id, chapter_id);
+
         CREATE TABLE IF NOT EXISTS fnm_phase_runs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             doc_id TEXT NOT NULL,

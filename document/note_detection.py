@@ -961,14 +961,15 @@ def annotate_pages_with_note_scans(
     reviewer=None,
     target_bps: set[int] | None = None,
 ) -> list[dict]:
-    normalized_pages = [dict(page or {}) for page in (pages or [])]
-    page_by_bp = {
-        int(page.get("bookPage") or 0): page
-        for page in normalized_pages
-        if int(page.get("bookPage") or 0) > 0
-    }
-
-    for idx, page in enumerate(normalized_pages):
+    # 直接在原列表上工作，不创建全量浅拷贝（调用方不应再依赖原列表不变）
+    page_by_bp: dict[int, dict] = {}
+    for page in pages or []:
+        bp = int(page.get("bookPage") or 0)
+        if bp > 0:
+            page_by_bp[bp] = page
+    for idx, page in enumerate(pages or []):
+        if not isinstance(page, dict):
+            continue
         bp = int(page.get("bookPage") or 0)
         if bp <= 0:
             continue
@@ -989,4 +990,17 @@ def annotate_pages_with_note_scans(
                 selected_scan = normalized_review
         page["_note_scan_version"] = NOTE_SCAN_VERSION
         page["_note_scan"] = selected_scan
-    return normalized_pages
+    return pages
+
+
+def annotate_single_page(page: dict, prev_page: dict | None, next_page: dict | None) -> None:
+    """对单页做 note scan（in-place 修改 page），需要邻页上下文。
+
+    供流式 pipeline 使用：调用方逐页加载，传入 prev/next 邻页即可。
+    """
+    bp = int(page.get("bookPage") or 0)
+    if bp <= 0:
+        return
+    rule_scan = _build_rule_scan(page, prev_page, next_page)
+    page["_note_scan_version"] = NOTE_SCAN_VERSION
+    page["_note_scan"] = rule_scan

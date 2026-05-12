@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import re
 from dataclasses import asdict, replace
 from typing import Any, Mapping
@@ -371,6 +372,8 @@ def _build_chapter_layers(
     layer_regions: list[LayerNoteRegion],
     layer_items: list[LayerNoteItem],
     book_note_profile: BookNoteProfile,
+    repo: Any | None = None,
+    doc_id: str = "",
 ) -> tuple[list[ChapterLayer], dict[str, int], dict[str, Any]]:
     raw_page_by_no = {
         int(page.get("bookPage") or 0): dict(page)
@@ -525,8 +528,8 @@ def _build_chapter_layers(
             ChapterLayer(
                 chapter_id=chapter_id,
                 title=str(chapter.title or ""),
-                body_pages=body_pages,
-                body_segments=body_segments,
+                body_pages=list(body_pages),
+                body_segments=list(body_segments),
                 footnote_items=sorted(footnotes_by_chapter.get(chapter_id, []), key=lambda item: (item.page_no, item.note_item_id)),
                 endnote_items=sorted(endnotes_by_chapter.get(chapter_id, []), key=lambda item: (item.page_no, item.note_item_id)),
                 endnote_regions=sorted(
@@ -536,7 +539,29 @@ def _build_chapter_layers(
                 policy_applied=chapter_policy,
             )
         )
+        # 分章持久化：body_pages/body_segments 写入 DB 后释放文本
+        if doc_id:
+            try:
+                _repo = repo
+                if _repo is None:
+                    from persistence.sqlite_store import SQLiteRepository
+                    _repo = SQLiteRepository()
+                import json as _json
+                payload = _json.dumps({
+                    "body_pages": [asdict(bp) for bp in body_pages],
+                    "body_segments": [asdict(bs) for bs in body_segments],
+                }, ensure_ascii=False)
+                _repo.save_chapter_body_pages(doc_id, chapter_id, payload)
+                body_pages.clear()
+                body_segments.clear()
+            except Exception:
+                import sys as _sys, traceback as _tb
+                print(f"[chapter_split] body_pages persist failed for {chapter_id}:", file=_sys.stderr)
+                _tb.print_exc(file=_sys.stderr)
 
+    # 释放 raw_page_by_no 全量副本（已在 ChapterLayer 中保留所需文本）
+    raw_page_by_no.clear()
+    gc.collect()
     return chapter_layers, cross_page_counts, {
         "chapter_endnote_start_map": {str(key): int(value) for key, value in dict(chapter_endnote_start_map).items()},
         "chapter_disjoint_violations": sorted(set(chapter_disjoint_violations)),
@@ -784,7 +809,17 @@ def build_chapter_layers(
     max_body_chars: int = 6000,
     endnote_explorer_hints: Mapping[str, Any] | None = None,
     heading_candidates: list[Any] | None = None,
+    repo: Any | None = None,
+    doc_id: str = "",
 ) -> ModuleResult[ChapterLayers]:
+    # 若 pages 为空或为轻量加载（缺少 blocks），自动重载完整数据
+    if doc_id and (not pages or not any(p.get("blocks") for p in pages[:3] if p)):
+        from persistence.sqlite_store import SQLiteRepository
+        _r = repo or SQLiteRepository()
+        loader = getattr(_r, "load_pages", None)
+        if callable(loader):
+            pages = loader(doc_id) or pages
+
     phase1 = _phase1_from_toc_structure_with_evidence(
         toc_structure,
         heading_candidates=heading_candidates,
@@ -871,6 +906,8 @@ def build_chapter_layers(
         layer_regions=layer_regions,
         layer_items=layer_items,
         book_note_profile=book_note_profile,
+        repo=repo,
+        doc_id=doc_id,
     )
 
     allow_empty_region_ids, empty_region_override_logs = _normalize_empty_region_overrides(overrides)

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import copy
+import gc
+import os
 import re
 import time
 from dataclasses import dataclass, replace
@@ -48,6 +50,7 @@ from FNM_RE.modules.book_note_type import build_book_note_profile
 from FNM_RE.modules.chapter_merge import build_chapter_markdown_set
 from FNM_RE.app.pipeline_converters import (
     ModulePipelineSnapshot,
+    PipelineBuildResult,
     _apply_note_item_overrides_to_chapter_layers,
     _diagnostic_machine_by_page,
     _export_audit_record_from_module,
@@ -103,7 +106,7 @@ from FNM_RE.stages.export import build_export_bundle
 from FNM_RE.stages.export_audit import audit_phase6_export
 from FNM_RE.stages.body_anchors import build_body_anchors
 from FNM_RE.stages.chapter_skeleton import build_chapter_skeleton
-from FNM_RE.stages.diagnostics import build_diagnostic_projection
+from FNM_RE.stages.diagnostics import build_diagnostic_projection, build_print_page_map
 from FNM_RE.stages.note_items import build_note_items
 from FNM_RE.stages.note_links import build_note_links
 from FNM_RE.stages.note_regions import build_note_regions
@@ -981,7 +984,7 @@ def build_phase5_structure(
     diagnostic_pages, diagnostic_notes, diagnostic_summary = build_diagnostic_projection(
         phase4,
         translation_units,
-        pages=pages,
+        print_page_map=build_print_page_map(pages),
         only_pages=None,
     )
     summary = _assemble_phase5_summary(
@@ -1120,6 +1123,116 @@ def build_phase6_structure(
     return phase6
 
 
+def _convert_page_segments_to_dicts(segments):
+    """将 dataclass page_segments 转为可序列化的 dict 列表。"""
+    from dataclasses import asdict as _asdict
+    result = []
+    for seg in (segments or []):
+        if isinstance(seg, dict):
+            result.append(seg)
+        else:
+            result.append(_asdict(seg))
+    return result
+
+
+def _build_note_links_per_chapter(
+    chapter_layers: ChapterLayers,
+    pages: list[dict],
+    *,
+    pdf_path: str = "",
+    doc_id: str = "",
+    overrides: Any = None,
+) -> ModuleResult[NoteLinkTable]:
+    """逐章构建 anchors + links，聚合后应用全局修复，返回 NoteLinkTable。"""
+    from FNM_RE.modules.note_linking import (
+        _phase2_from_chapter_layers, build_note_links_for_chapter,
+        _apply_link_overrides,
+    )
+    from FNM_RE.modules.endnote_repair import suppress_endnote_residual_orphans
+    from FNM_RE.modules.contracts import GateReport
+
+    phase2_full, _, _ = _phase2_from_chapter_layers(chapter_layers)
+    chapter_summaries: list[dict] = []
+    all_anchors: list[Any] = []
+    all_links: list[Any] = []
+
+    anchor_counter = 0
+    link_counter = 0
+    for ch in chapter_layers.chapters:
+        cid = str(getattr(ch, "chapter_id", "") or "")
+        if not cid:
+            continue
+        ch_pages = []
+        if pages and hasattr(ch, "start_page"):
+            sp = int(getattr(ch, "start_page", 0) or 0)
+            ep = int(getattr(ch, "end_page", 0) or 0)
+            ch_pages = [p for p in pages if sp <= int(p.get("bookPage") or 0) <= ep]
+        anchors, links = build_note_links_for_chapter(
+            phase2_full, cid, pages=ch_pages or pages, pdf_path=pdf_path,
+        )
+        # 确保跨章 ID 唯一
+        for a in anchors:
+            anchor_counter += 1
+            try:
+                setattr(a, "anchor_id", f"fa-{anchor_counter:05d}")
+            except Exception:
+                pass
+        for l in links:
+            link_counter += 1
+            try:
+                setattr(l, "link_id", f"fl-{link_counter:05d}")
+            except Exception:
+                pass
+        all_anchors.extend(anchors)
+        all_links.extend(links)
+        m = sum(1 for l in links if str(getattr(l, "status", "") or "") == "matched")
+        o = sum(1 for l in links if str(getattr(l, "status", "") or "") == "orphan_note")
+        chapter_summaries.append({"chapter_id": cid, "matched": m, "orphan_note": o})
+        del anchors, links, ch_pages
+
+    grouped_overrides = dict(overrides or {})
+    effective_links, _override_summary, _override_logs = _apply_link_overrides(
+        all_links,
+        link_overrides=grouped_overrides.get("link"),
+        note_items=phase2_full.note_items,
+        body_anchors=all_anchors,
+        note_regions=phase2_full.note_regions,
+    )
+    book_type = str(getattr(chapter_layers.book_structure, "book_type", "") or "")
+    effective_links, _suppress_summary = suppress_endnote_residual_orphans(
+        links=effective_links,
+        book_type=book_type,
+    )
+
+    matched = sum(1 for l in effective_links if str(getattr(l, "status", "") or "") == "matched")
+    orphan_note = sum(1 for l in effective_links if str(getattr(l, "status", "") or "") == "orphan_note")
+    orphan_anchor = sum(1 for l in effective_links if str(getattr(l, "status", "") or "") == "orphan_anchor")
+    fn_orphan_note = sum(1 for l in effective_links if str(getattr(l, "note_kind", "") or "") == "footnote" and str(getattr(l, "status", "") or "") == "orphan_note")
+    en_orphan_note = sum(1 for l in effective_links if str(getattr(l, "note_kind", "") or "") == "endnote" and str(getattr(l, "status", "") or "") == "orphan_note")
+    fn_orphan_anchor = sum(1 for l in effective_links if str(getattr(l, "note_kind", "") or "") == "footnote" and str(getattr(l, "status", "") or "") == "orphan_anchor")
+    en_orphan_anchor = sum(1 for l in effective_links if str(getattr(l, "note_kind", "") or "") == "endnote" and str(getattr(l, "status", "") or "") == "orphan_anchor")
+    total_links = len(effective_links)
+    link_summary = {
+        "matched": matched,
+        "footnote_orphan_note": fn_orphan_note, "footnote_orphan_anchor": fn_orphan_anchor,
+        "endnote_orphan_note": en_orphan_note, "endnote_orphan_anchor": en_orphan_anchor,
+        "fallback_match_ratio": round(matched / max(1, total_links), 4) if total_links else 0.0,
+    }
+    gate_report = GateReport(module="note_link_table")
+    if en_orphan_note > 0:
+        gate_report.reasons.append("link_endnote_not_all_matched")
+    if orphan_note > 0:
+        gate_report.reasons.append("link_orphan_note_remaining")
+    return ModuleResult(
+        data=NoteLinkTable(
+            anchors=all_anchors, links=all_links, effective_links=effective_links,
+            link_summary=link_summary, chapter_link_contracts=[],
+        ),
+        gate_report=gate_report,
+        diagnostics={"chapter_summaries": chapter_summaries},
+    )
+
+
 def _emit_progress(
     *,
     progress_callback: Callable[[dict[str, Any]], None] | None,
@@ -1196,6 +1309,15 @@ def build_module_pipeline_snapshot(
             visual_toc_bundle=visual_toc_bundle,
         ),
     )
+    # 提取 llm_verify 轻量元数据；book_note_profile 用 page_loader 按需加载
+    _need_llm = bool(str(pdf_path or "").strip())
+    _light_pages: list[dict] = []
+    if _need_llm:
+        _light_pages = [
+            {"bookPage": p.get("bookPage"), "pdfPage": p.get("pdfPage", p.get("bookPage")),
+             "fileIdx": p.get("fileIdx"), "_note_scan": p.get("_note_scan"), "fnBlocks": p.get("fnBlocks")}
+            for p in pages
+        ]
     book_type_result = _run_stage(
         progress_callback=progress_callback,
         stage="book_note_profile",
@@ -1204,12 +1326,12 @@ def build_module_pipeline_snapshot(
         end_pct=98.6,
         runner=lambda: build_book_note_profile(
             toc_result.data,
-            pages,
+            page_loader=(lambda: __import__("persistence.sqlite_store", fromlist=["SQLiteRepository"]).SQLiteRepository().load_pages(doc_id)) if doc_id else (lambda: []),
             overrides={"chapter_modes": grouped_overrides.get("chapter")},
         ),
     )
     # === LLM 书型交叉验证（必经步骤）===
-    if str(pdf_path or "").strip():
+    if _need_llm:
         try:
             from FNM_RE.modules.llm_book_type_verify import verify_book_type_with_llm
             _emit_progress(
@@ -1222,7 +1344,7 @@ def build_module_pipeline_snapshot(
             llm_verify_result = verify_book_type_with_llm(
                 toc_structure=toc_result.data,
                 book_type_profile=book_type_result.data,
-                pages=pages,
+                pages=_light_pages or [],
                 pdf_path=str(pdf_path or ""),
             )
             book_type_result.gate_report.evidence["llm_verification"] = llm_verify_result.data
@@ -1248,7 +1370,30 @@ def build_module_pipeline_snapshot(
                 "error": str(_llm_err),
                 "fallback": "trust_rules",
             }
-    # ================================================
+    # Phase 1 完成 → 持久化 → 释放轻量页 → Phase 2 重载完整页
+    if doc_id:
+        try:
+            from persistence.sqlite_store import SQLiteRepository as _SR
+            from FNM_RE.app.persist_helpers import (
+                serialize_pages_for_repo, serialize_heading_candidates_for_repo,
+                serialize_section_heads_for_repo, to_plain,
+            )
+            _repo = _SR()
+            _repo.replace_fnm_phase1_products(
+                doc_id,
+                pages=serialize_pages_for_repo(list(toc_result.data.pages or [])),
+                chapters=[to_plain(r) for r in (toc_result.data.chapters or [])],
+                heading_candidates=serialize_heading_candidates_for_repo(
+                    list(toc_result.diagnostics.get("heading_candidates") or [])),
+                section_heads=serialize_section_heads_for_repo(list(toc_result.data.section_heads or [])),
+            )
+            pages.clear()
+            gc.collect()
+            pages.extend(_repo.load_pages(doc_id))
+        except Exception:
+            import sys as _sys, traceback as _tb
+            print("[pipeline] Phase1 persist failed:", file=_sys.stderr)
+            _tb.print_exc(file=_sys.stderr)
     split_result = _run_stage(
         progress_callback=progress_callback,
         stage="chapter_layers",
@@ -1261,6 +1406,7 @@ def build_module_pipeline_snapshot(
             pages,
             endnote_explorer_hints=dict(toc_result.diagnostics.get("endnote_explorer_hints") or {}),
             heading_candidates=list(toc_result.diagnostics.get("heading_candidates") or []),
+            doc_id=str(doc_id or ""),
         ),
     )
     effective_split_layers = _apply_note_item_overrides_to_chapter_layers(
@@ -1275,7 +1421,8 @@ def build_module_pipeline_snapshot(
 
     # ── sup_recovery：恢复 OCR 丢失的正文上标标记 ──
     # 必须在 Phase 2（note_items 已产出）之后、Phase 3（读 enriched_markdown）之前
-    if str(pdf_path or "").strip():
+    # SKIP_SUP_RECOVERY=1 跳过 L3 vision API 调用以加速非生产测试
+    if str(pdf_path or "").strip() and not os.environ.get("SKIP_SUP_RECOVERY"):
         try:
             from FNM_RE.modules.sup_recovery import recover_book_chapter_scoped
             chapter_note_markers: dict[str, set[str]] = {}
@@ -1354,13 +1501,56 @@ def build_module_pipeline_snapshot(
         label="建立正文锚点与注释链接",
         start_pct=99.3,
         end_pct=99.55,
-        runner=lambda: build_note_link_table(
-            effective_split_layers,
-            pages,
-            overrides=grouped_overrides_for_link,
+        runner=lambda: _build_note_links_per_chapter(
+            effective_split_layers, pages,
             pdf_path=str(pdf_path or ""),
+            doc_id=str(doc_id or ""),
+            overrides=grouped_overrides_for_link,
         ),
     )
+    # Phase 3 产物立即落盘（幂等覆盖写，后续 _persist_phase6_to_repo 可再次写入）
+    if doc_id:
+        try:
+            from persistence.sqlite_store import SQLiteRepository as _R
+            _R().replace_fnm_phase3_products(
+                doc_id,
+                body_anchors=[{
+                    "anchor_id": str(getattr(a, "anchor_id", "") or ""),
+                    "chapter_id": str(getattr(a, "chapter_id", "") or ""),
+                    "page_no": int(getattr(a, "page_no", 0) or 0),
+                    "paragraph_index": int(getattr(a, "paragraph_index", 0) or 0),
+                    "char_start": int(getattr(a, "char_start", 0) or 0),
+                    "char_end": int(getattr(a, "char_end", 0) or 0),
+                    "source_marker": str(getattr(a, "source_marker", "") or ""),
+                    "normalized_marker": str(getattr(a, "normalized_marker", "") or ""),
+                    "anchor_kind": str(getattr(a, "anchor_kind", "") or ""),
+                    "certainty": float(getattr(a, "certainty", 0.0) or 0.0),
+                    "source_text": str(getattr(a, "source_text", "") or ""),
+                } for a in link_result.data.anchors],
+                note_links=[{
+                    "link_id": str(getattr(l, "link_id", "") or ""),
+                    "chapter_id": str(getattr(l, "chapter_id", "") or ""),
+                    "region_id": str(getattr(l, "region_id", "") or ""),
+                    "note_item_id": str(getattr(l, "note_item_id", "") or ""),
+                    "anchor_id": str(getattr(l, "anchor_id", "") or ""),
+                    "status": str(getattr(l, "status", "") or ""),
+                    "resolver": str(getattr(l, "resolver", "") or ""),
+                    "confidence": float(getattr(l, "confidence", 0.0) or 0.0),
+                    "note_kind": str(getattr(l, "note_kind", "") or ""),
+                    "marker": str(getattr(l, "marker", "") or ""),
+                    "page_no_start": int(getattr(l, "page_no_start", 0) or 0),
+                    "page_no_end": int(getattr(l, "page_no_end", 0) or 0),
+                } for l in link_result.data.effective_links],
+            )
+        except Exception:
+            import sys as _sys, traceback as _tb
+            print("[pipeline] Phase3 DB persist failed:", file=_sys.stderr)
+            _tb.print_exc(file=_sys.stderr)
+    # pages 最后消费者（_build_note_links_per_chapter）已完成 → 释放 pages
+    from FNM_RE.stages.diagnostics import build_print_page_map
+    _print_page_map = build_print_page_map(pages)
+    pages.clear()
+    gc.collect()
     freeze_result = _run_stage(
         progress_callback=progress_callback,
         stage="frozen_units",
@@ -1382,6 +1572,43 @@ def build_module_pipeline_snapshot(
         overlay_doc_id=str(doc_id or ""),
     )
     translation_units = _phase_translation_units_from_frozen(frozen_units_effective)
+
+    # Phase 4 产物立即落盘（幂等覆盖写）
+    if doc_id:
+        try:
+            from persistence.sqlite_store import SQLiteRepository as _R
+            _R().replace_fnm_translation_units(
+                doc_id,
+                units=[{
+                    "unit_id": str(getattr(u, "unit_id", "") or ""),
+                    "kind": str(getattr(u, "kind", "") or ""),
+                    "owner_kind": str(getattr(u, "owner_kind", "") or ""),
+                    "owner_id": str(getattr(u, "owner_id", "") or ""),
+                    "section_id": str(getattr(u, "section_id", "") or ""),
+                    "section_title": str(getattr(u, "section_title", "") or ""),
+                    "section_start_page": int(getattr(u, "section_start_page", 0) or 0),
+                    "section_end_page": int(getattr(u, "section_end_page", 0) or 0),
+                    "note_id": str(getattr(u, "note_id", "") or ""),
+                    "page_start": int(getattr(u, "page_start", 0) or 0),
+                    "page_end": int(getattr(u, "page_end", 0) or 0),
+                    "char_count": int(getattr(u, "char_count", 0) or 0),
+                    "source_text": str(getattr(u, "source_text", "") or ""),
+                    "translated_text": str(getattr(u, "translated_text", "") or ""),
+                    "status": str(getattr(u, "status", "pending") or "pending"),
+                    "error_msg": str(getattr(u, "error_msg", "") or ""),
+                    "target_ref": str(getattr(u, "target_ref", "") or ""),
+                    "page_segments": _convert_page_segments_to_dicts(getattr(u, "page_segments", []) or []),
+                    "source_hash": str(getattr(u, "source_hash", "") or ""),
+                    "segment_plan_hash": str(getattr(u, "segment_plan_hash", "") or ""),
+                    "pipeline_run_id": str(getattr(u, "pipeline_run_id", "") or ""),
+                    "stale_reason": str(getattr(u, "stale_reason", "") or ""),
+                } for u in translation_units],
+            )
+        except Exception:
+            import sys as _sys, traceback as _tb
+            print("[pipeline] Phase4 DB persist failed:", file=_sys.stderr)
+            _tb.print_exc(file=_sys.stderr)
+
     phase4_shadow = Phase4Structure(
         pages=_phase_pages_from_toc(toc_result.data),
         heading_candidates=list(toc_result.diagnostics.get("heading_candidates") or []),
@@ -1406,7 +1633,7 @@ def build_module_pipeline_snapshot(
         runner=lambda: build_diagnostic_projection(
             phase4_shadow,
             translation_units,
-            pages=pages,
+            print_page_map=_print_page_map,
             only_pages=None,
         ),
     )
@@ -1426,6 +1653,10 @@ def build_module_pipeline_snapshot(
             section_heads=_phase_section_heads_from_toc(toc_result.data),
         ),
     )
+    # Phase 5 完成 → 释放 body page_segments（Phase 6 export 不读）
+    for unit in frozen_units_effective.body_units:
+        unit.page_segments = []
+    gc.collect()
     export_result = _run_stage(
         progress_callback=progress_callback,
         stage="export_bundle",
@@ -1492,4 +1723,15 @@ def build_module_pipeline_snapshot(
         manual_toc_summary=manual_toc_summary,
         pipeline_state=str(pipeline_state or "done"),
     )
-    return snapshot
+    # 重型对象已投射到 phase6 → 提取后释放 snapshot（snapshot 持有所有 ModuleResult 引用）
+    _final_phase6 = snapshot.phase6
+    del snapshot
+    del toc_result, book_type_result, split_result, link_result
+    del freeze_result, merge_result, export_result
+    del frozen_units_effective, effective_split_layers
+    gc.collect()
+    return PipelineBuildResult(
+        phase6=_final_phase6,
+        diagnostic_pages=list(diagnostic_pages or []),
+        diagnostic_notes=list(diagnostic_notes or []),
+    )

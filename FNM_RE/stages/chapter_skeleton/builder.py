@@ -242,8 +242,12 @@ def build_chapter_skeleton(
     pdf_path: str = "",
     pages: list[dict] | None = None,
     visual_toc_bundle: Mapping[str, Any] | None = None,
+    pre_extracted_page_candidates: list[dict] | None = None,
+    file_idx_map: dict[int, int] | None = None,
+    page_texts: dict[int, dict] | None = None,
 ) -> tuple[list[HeadingCandidate], list[ChapterRecord], dict[str, Any]]:
-    page_rows = _legacy_page_rows(page_partitions, pages)
+    # page_texts 非 None 表示上游已提取轻量数据 → 不需要 _page 引用
+    page_rows = _legacy_page_rows(page_partitions, pages if page_texts is None else None)
     page_roles = {int(row.get("page_no") or 0): str(row.get("page_role") or "") for row in page_rows}
     visual_toc_items = list((visual_toc_bundle or {}).get("items") or toc_items or [])
     heading_candidate_rows = _collect_heading_candidate_rows(
@@ -251,6 +255,8 @@ def build_chapter_skeleton(
         toc_items=toc_items,
         toc_offset=int(toc_offset or 0),
         pdf_path=str(pdf_path or ""),
+        pre_extracted_page_candidates=pre_extracted_page_candidates,
+        file_idx_map=file_idx_map,
     )
 
     section_rows = _candidate_section_rows(heading_candidate_rows, page_rows=page_rows, page_roles=page_roles)
@@ -273,6 +279,8 @@ def build_chapter_skeleton(
         visual_toc_bundle=visual_toc_bundle,
         toc_offset=int(toc_offset or 0),
         heading_candidates=heading_candidate_rows,
+        file_idx_map=file_idx_map,
+        page_texts=page_texts,
     )
 
     if visual_chapters_raw:
@@ -336,6 +344,7 @@ def build_chapter_skeleton(
         page_rows,
         toc_items=visual_toc_items,
         toc_offset=int(toc_offset or 0),
+        file_idx_map=file_idx_map,
     )
     chapters_raw = _trim_chapter_rows(
         chapters_raw,
@@ -402,6 +411,7 @@ def build_chapter_skeleton(
         visual_toc_items,
         page_rows=page_rows,
         toc_offset=int(toc_offset or 0),
+        file_idx_map=file_idx_map,
     )
     for role, count in computed_roles.items():
         toc_role_summary[role] = max(int(toc_role_summary.get(role) or 0), int(count or 0))

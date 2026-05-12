@@ -21,7 +21,28 @@ _ERROR_TRANSLATION_STATUSES = {"error", "retry_pending", "retrying", "manual_req
 _DONE_UNIT_STATUSES = {"done", "done_manual"}
 
 
-def _raw_print_page_label(page_no: int, pages: list[dict]) -> str:
+def build_print_page_map(pages: list[dict]) -> dict[int, str]:
+    """从 pages 提取 {bookPage: printPageLabel} 轻量映射。"""
+    result: dict[int, str] = {}
+    for page in pages or []:
+        bp = int(page.get("bookPage") or 0)
+        if bp <= 0:
+            continue
+        label = str(page.get("printPageLabel") or "").strip()
+        if not label:
+            try:
+                pp = int(page.get("printPage") or 0)
+                label = str(pp) if pp > 0 else ""
+            except (TypeError, ValueError):
+                label = ""
+        result[bp] = label or str(bp)
+    return result
+
+
+def _raw_print_page_label(page_no: int, pages: list[dict] | dict[int, str]) -> str:
+    if isinstance(pages, dict):
+        return pages.get(int(page_no), str(page_no))
+    # 兼容旧路径
     for page in pages or []:
         if int(page.get("bookPage") or 0) != int(page_no):
             continue
@@ -39,7 +60,7 @@ def _raw_print_page_label(page_no: int, pages: list[dict]) -> str:
     return str(page_no)
 
 
-def _display_pages_label(page_no: int, pages: list[dict]) -> str:
+def _display_pages_label(page_no: int, pages: list[dict] | dict[int, str]) -> str:
     raw = _raw_print_page_label(page_no, pages)
     if not raw:
         return ""
@@ -94,7 +115,7 @@ def _build_diagnostic_entry(
     *,
     page_no: int,
     paragraph: UnitParagraphRecord,
-    pages: list[dict],
+    pages: list[dict] | dict[int, str],
 ) -> DiagnosticEntryRecord:
     source_text = str(paragraph.display_text or paragraph.source_text or "").strip()
     translated_text = str(paragraph.translated_text or "").strip()
@@ -177,9 +198,12 @@ def build_diagnostic_projection(
     phase4: Phase4Structure,
     translation_units: list[TranslationUnitRecord],
     *,
-    pages: list[dict],
+    pages: list[dict] | dict[int, str] | None = None,
     only_pages: list[int] | None = None,
+    print_page_map: dict[int, str] | None = None,
 ) -> tuple[list[DiagnosticPageRecord], list[DiagnosticNoteRecord], dict[str, Any]]:
+    # print_page_map 替代 pages（轻量 dict lookup）；pages 参数保留兼容旧路径
+    _print_pages = print_page_map if print_page_map is not None else pages
     visible_page_filter = {int(page_no) for page_no in (only_pages or []) if int(page_no) > 0}
     page_rows: dict[int, DiagnosticPageRecord] = {}
 
@@ -205,7 +229,7 @@ def build_diagnostic_projection(
                 DiagnosticPageRecord(
                     _pageBP=page_no,
                     _status="pending",
-                    pages=_display_pages_label(page_no, pages),
+                    pages=_display_pages_label(page_no, _print_pages),
                     _page_entries=[],
                     _fnm_source=dict(source_meta),
                 ),
@@ -217,7 +241,7 @@ def build_diagnostic_projection(
                     _build_diagnostic_entry(
                         page_no=page_no,
                         paragraph=paragraph,
-                        pages=pages,
+                        pages=_print_pages,
                     )
                 )
             if any(entry._status == "error" for entry in page_row._page_entries):

@@ -1647,3 +1647,68 @@ def build_note_link_table(
         overrides_used=list(override_logs),
         diagnostics=diagnostics,
     )
+
+
+# ── 逐章处理 ──
+
+def build_note_links_for_chapter(
+    phase2_full: Any,
+    chapter_id: str,
+    *,
+    pages: list[dict] | None = None,
+    pdf_path: str = "",
+) -> tuple[list[Any], list[Any]]:
+    """从完整 Phase2Structure 筛单章 → build_body_anchors → build_note_links。
+
+    Returns (enhanced_anchors, note_links) 供调用方聚合或写 DB。
+    """
+    from FNM_RE.models import Phase2Structure, Phase2Summary
+
+    ch_records = [c for c in phase2_full.chapters
+                  if str(getattr(c, "chapter_id", "") or "") == chapter_id]
+
+    if not ch_records:
+        return [], []
+
+    # 从 Phase2Structure ChapterRecord 获取章范围
+    start_p = int(getattr(ch_records[0], "start_page", 0) or 0)
+    end_p = int(getattr(ch_records[0], "end_page", 0) or 0)
+
+    ch_pp: list[dict] = []
+    if pages and start_p > 0 and end_p >= start_p:
+        ch_pp = [p for p in pages if start_p <= int(p.get("bookPage") or 0) <= end_p]
+
+    from FNM_RE.models import PagePartitionRecord
+    ch_page_records = [
+        PagePartitionRecord(
+            page_no=int(p.get("bookPage") or 0), target_pdf_page=int(p.get("bookPage") or 0),
+            page_role="body", confidence=1.0, reason="per_chapter",
+            section_hint="", has_note_heading=False, note_scan_summary={},
+        )
+        for p in ch_pp
+    ]
+
+    ch_items = [ni for ni in phase2_full.note_items
+                if str(getattr(ni, "chapter_id", "") or "") in {chapter_id, ""}]
+    ch_regions = [nr for nr in phase2_full.note_regions
+                  if str(getattr(nr, "chapter_id", "") or "") in {chapter_id, ""}
+                  or str(getattr(nr, "scope", "") or "") == "book"]
+    p2 = Phase2Structure(
+        pages=ch_page_records, chapters=ch_records,
+        note_regions=ch_regions, note_items=ch_items,
+        chapter_note_modes=phase2_full.chapter_note_modes,
+        summary=Phase2Summary(),
+    )
+
+    from FNM_RE.stages.body_anchors import build_body_anchors
+    from FNM_RE.stages.note_links import build_note_links
+    anchors, _ = build_body_anchors(p2, pages=ch_pp or [], pdf_path=str(pdf_path or ""))
+    enhanced, links, _ = build_note_links(anchors, p2, pages=ch_pp or [])
+    return enhanced, links
+
+
+def _chapter_id_for_page_in_phase2(phase2: Any, page_no: int) -> str:
+    for ch in phase2.chapters:
+        if int(getattr(ch, "start_page", 0) or 0) <= page_no <= int(getattr(ch, "end_page", 0) or 0):
+            return str(getattr(ch, "chapter_id", "") or "")
+    return ""

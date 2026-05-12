@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from typing import Any
 
 from config import get_sqlite_db_path
 from persistence.sqlite_schema import (
@@ -314,3 +315,173 @@ class DocumentRepoMixin:
                 })
                 pages.append(payload)
             return pages
+
+    @staticmethod
+    def _json_value(raw: Any, fallback: Any) -> Any:
+        if raw is None or raw == "":
+            return fallback
+        if isinstance(raw, (dict, list)):
+            return raw
+        if not isinstance(raw, str):
+            return fallback
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            return fallback
+        return parsed
+
+    def load_pages_phase1(self, doc_id: str) -> list[dict]:
+        """加载 Phase 1 所需的轻量页视图。
+
+        Phase 1 只依赖 markdown/footnotes/fnBlocks 与 OCR 标题块。这里避免
+        json.loads(payload_json) 生成每页完整 OCR block 树，只从 SQLite JSON1
+        抽取 doc_title/paragraph_title 块，保留 TOC/heading 质量同时降低峰值内存。
+        """
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT
+                    p.book_page,
+                    p.file_idx,
+                    p.img_w,
+                    p.img_h,
+                    p.markdown,
+                    p.footnotes,
+                    p.text_source,
+                    json_extract(p.payload_json, '$.pdfPage') AS pdf_page,
+                    json_extract(p.payload_json, '$.page_no') AS page_no,
+                    json_extract(p.payload_json, '$.fnBlocks') AS fn_blocks_json,
+                    json_extract(p.payload_json, '$._note_scan') AS note_scan_json,
+                    json_extract(p.payload_json, '$._note_scan_version') AS note_scan_version,
+                    json_extract(p.payload_json, '$.prunedResult.height') AS pruned_height,
+                    json_extract(p.payload_json, '$.prunedResult.width') AS pruned_width,
+                    (
+                        SELECT json_group_array(j.value)
+                        FROM json_each(p.payload_json, '$.prunedResult.parsing_res_list') AS j
+                        WHERE json_extract(j.value, '$.block_label') IN ('doc_title', 'paragraph_title')
+                    ) AS heading_blocks_json
+                FROM pages AS p
+                WHERE p.doc_id = ?
+                ORDER BY p.book_page ASC
+                """,
+                (doc_id,),
+            ).fetchall()
+            pages: list[dict] = []
+            for row in rows:
+                book_page = int(row["book_page"] or 0)
+                page = {
+                    "bookPage": book_page,
+                    "pdfPage": int(row["pdf_page"] or book_page),
+                    "page_no": int(row["page_no"] or book_page),
+                    "fileIdx": row["file_idx"],
+                    "imgW": row["img_w"],
+                    "imgH": row["img_h"],
+                    "markdown": row["markdown"],
+                    "footnotes": row["footnotes"],
+                    "textSource": row["text_source"],
+                }
+                fn_blocks = self._json_value(row["fn_blocks_json"], [])
+                if isinstance(fn_blocks, list):
+                    page["fnBlocks"] = fn_blocks
+                note_scan = self._json_value(row["note_scan_json"], None)
+                if isinstance(note_scan, dict):
+                    page["_note_scan"] = note_scan
+                    page["_note_scan_version"] = row["note_scan_version"]
+                heading_blocks = self._json_value(row["heading_blocks_json"], [])
+                if isinstance(heading_blocks, list) and heading_blocks:
+                    page["prunedResult"] = {
+                        "height": row["pruned_height"],
+                        "width": row["pruned_width"],
+                        "parsing_res_list": [
+                            block for block in heading_blocks if isinstance(block, dict)
+                        ],
+                    }
+                pages.append(page)
+            return pages
+
+    def load_pages_light(self, doc_id: str) -> list[dict]:
+        """轻量加载：仅 DB 列 + _note_scan（不入 full JSON 解析），用于 Phase 1。"""
+        import re as _re
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT book_page, file_idx, img_w, img_h, markdown, footnotes, text_source,
+                       COALESCE(payload_json, '{}') AS payload_json
+                FROM pages
+                WHERE doc_id = ?
+                ORDER BY book_page ASC
+                """,
+                (doc_id,),
+            ).fetchall()
+            pages = []
+            for row in rows:
+                p = {
+                    "bookPage": row["book_page"],
+                    "pdfPage": row["book_page"],
+                    "page_no": row["book_page"],
+                    "fileIdx": row["file_idx"],
+                    "imgW": row["img_w"],
+                    "imgH": row["img_h"],
+                    "markdown": row["markdown"],
+                    "footnotes": row["footnotes"],
+                    "textSource": row["text_source"],
+                    "_note_scan": None,
+                }
+                # 仅从 JSON 提取 _note_scan（避免全量 json.loads）
+                raw = row["payload_json"]
+                if raw and raw != "{}":
+                    idx = raw.find('"_note_scan"')
+                    if idx >= 0:
+                        try:
+                            # 找到 _note_scan 值
+                            start = raw.index(":", idx) + 1
+                            depth = 0; end = start
+                            for i in range(start, len(raw)):
+                                if raw[i] == "{": depth += 1
+                                elif raw[i] == "}":
+                                    if depth == 0: end = i + 1; break
+                                    depth -= 1
+                            if end > start:
+                                p["_note_scan"] = json.loads(raw[start:end].strip())
+                        except Exception:
+                            pass
+                pages.append(p)
+            return pages
+
+    def stream_pages(self, doc_id: str):
+        """逐页 yield，每页含完整 DB 列 + 解析后的 payload_json。调用方应立即释放每页。"""
+        import json as _json
+        with read_connection(self.db_path) as conn:
+            cursor = conn.execute(
+                """
+                SELECT book_page, file_idx, img_w, img_h, markdown, footnotes, text_source,
+                       COALESCE(payload_json, '{}') AS payload_json
+                FROM pages
+                WHERE doc_id = ?
+                ORDER BY book_page ASC
+                """,
+                (doc_id,),
+            )
+            for row in cursor:
+                payload = _json.loads(row["payload_json"]) if row["payload_json"] and row["payload_json"] != "{}" else {}
+                if not isinstance(payload, dict):
+                    payload = {}
+                payload.update({
+                    "bookPage": row["book_page"],
+                    "pdfPage": row["book_page"],
+                    "page_no": row["book_page"],
+                    "fileIdx": row["file_idx"],
+                    "imgW": row["img_w"],
+                    "imgH": row["img_h"],
+                    "markdown": row["markdown"],
+                    "footnotes": row["footnotes"],
+                    "textSource": row["text_source"],
+                })
+                yield payload
+
+    def count_pages(self, doc_id: str) -> int:
+        with read_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT COUNT(*) FROM pages WHERE doc_id = ?", (doc_id,)
+            ).fetchone()
+            return int(row[0]) if row else 0

@@ -557,6 +557,7 @@ def _infer_back_matter_start_page(
     *,
     toc_items: list[dict] | None,
     toc_offset: int,
+    file_idx_map: dict[int, int] | None = None,
 ) -> int:
     candidate_pages: list[int] = []
     total_pages = max(1, len(page_rows))
@@ -595,8 +596,12 @@ def _infer_back_matter_start_page(
         )
         if page_no >= rear_page_role_force_page or has_neighboring_rear_page:
             candidate_pages.append(page_no)
-    raw_pages = [dict(row.get("_page") or {}) for row in page_rows]
-    file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
+    raw_pages = None
+    if file_idx_map is not None:
+        pass
+    else:
+        raw_pages = [dict(row.get("_page") or {}) for row in page_rows]
+        file_idx_map = _build_pdf_page_by_file_idx(raw_pages)
     for item in toc_items or []:
         page_no = resolve_toc_item_target_pdf_page(
             item,

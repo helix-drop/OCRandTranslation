@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import sys
@@ -30,6 +31,8 @@ from FNM_RE import (  # noqa: E402
     list_diagnostic_entries_for_doc,
     load_doc_structure as load_fnm_doc_structure,
     run_doc_pipeline as run_fnm_pipeline,
+    run_doc_pipeline_phased_subprocess as run_fnm_pipeline_phased,
+    run_doc_pipeline_subprocess as run_fnm_pipeline_subprocess,
     run_llm_repair,
 )
 from persistence.sqlite_store import SQLiteRepository  # noqa: E402
@@ -1386,6 +1389,31 @@ def _process_book(
         _advance("reingest", "blocked", "缺少必需输入文件")
         return base_result
 
+    # 子进程模式：全部处理在独立进程完成，主进程仅取结果
+    if os.environ.get("FNM_USE_SUBPROCESS", "") in ("1", "2"):
+        import subprocess as _sp, json as _json
+        script = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "FNM_RE", "subprocess_book.py"
+        )
+        payload = _json.dumps({"book_slug": book.slug})
+        proc = _sp.run(
+            [sys.executable, script],
+            input=payload, capture_output=True, text=True, timeout=900,
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        )
+        if proc.returncode != 0:
+            err = (proc.stderr or "")[-500:]
+            base_result["blocking_reasons"] = [f"subprocess_failed: {err}"]
+            return base_result
+        lines = [l for l in (proc.stdout or "").strip().split("\n") if l.strip().startswith("{")]
+        sub_result = _json.loads(lines[-1]) if lines else {}
+        base_result["all_ok"] = not sub_result.get("error")
+        base_result["blocked"] = False
+        base_result["subprocess_result"] = sub_result
+        base_result["blocking_reasons"] = [sub_result.get("error")] if sub_result.get("error") else []
+        return base_result
+
     reingest_result: dict[str, Any] = {}
     visual_result: dict[str, Any] = {}
     pipeline_result: dict[str, Any] = {}
@@ -1433,7 +1461,10 @@ def _process_book(
         _record_stage_error("visual_toc", "visual_toc_exception", exc)
 
     try:
-        pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
+        if os.environ.get("FNM_USE_SUBPROCESS", "") in ("1", "2"):
+            pipeline_result = run_fnm_pipeline_subprocess(book.doc_id) or {}
+        else:
+            pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
         base_result["pipeline"] = pipeline_result
         _advance("fnm_pipeline", "done", str(pipeline_result.get("structure_state") or ""))
         if not bool(pipeline_result.get("ok")):

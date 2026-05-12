@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import gc
 import hashlib
 import json
 import math
@@ -51,6 +52,45 @@ LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS = 700
 # 脚注/尾注标号通常很小；这里保留接近旧 PNG 路径的分辨率，
 # 体积优化主要依赖按场景少发图和 JPEG，而不是降低可读性。
 LLM_REPAIR_IMAGE_SCALE = 1.3
+
+# ── 复用 OpenAI client ──
+_llm_repair_client = None
+_llm_repair_client_args_hash = 0
+
+def _get_repair_client(resolved_args: dict) -> object:
+    global _llm_repair_client, _llm_repair_client_args_hash
+    new_hash = hash((
+        str(resolved_args.get("api_key") or ""),
+        str(resolved_args.get("base_url") or ""),
+        str(resolved_args.get("model_id") or ""),
+    ))
+    if _llm_repair_client is None or _llm_repair_client_args_hash != new_hash:
+        if _llm_repair_client is not None:
+            try: _llm_repair_client.close()
+            except Exception: pass
+        _llm_repair_client = OpenAI(
+            api_key=str(resolved_args.get("api_key") or ""),
+            base_url=str(resolved_args.get("base_url") or ""),
+            timeout=180.0,
+        )
+        _llm_repair_client_args_hash = new_hash
+    return _llm_repair_client
+
+_llm_repair_fitz_doc = None
+_llm_repair_fitz_path = ""
+
+def _get_repair_fitz_doc(pdf_path: str) -> object:
+    """复用 PyMuPDF 文档对象，避免每页重复打开。"""
+    global _llm_repair_fitz_doc, _llm_repair_fitz_path
+    if _llm_repair_fitz_doc is None or _llm_repair_fitz_path != pdf_path:
+        if _llm_repair_fitz_doc is not None:
+            try: _llm_repair_fitz_doc.close()
+            except Exception: pass
+        import fitz
+        _llm_repair_fitz_doc = fitz.open(pdf_path)
+        _llm_repair_fitz_path = pdf_path
+    return _llm_repair_fitz_doc
+
 LLM_REPAIR_FOOTNOTE_PAGE_PADDING = 1
 
 # Tier 1 fuzzy anchor synthesis:
@@ -1054,14 +1094,10 @@ def _build_chapter_body_text(
     *,
     repo: SQLiteRepository,
     fallback_contexts: list[dict] | None = None,
+    pages: list[dict] | None = None,
+    page_roles: dict[int, str] | None = None,
 ) -> tuple[str, list[tuple[int, int, int]]]:
-    """拼接章节正文，同时返回 (page_no, char_start, char_end) 片段映射。
-
-    当章节的 raw page markdown 全部为空（典型情况：page markdown 字段缺失或全被去掉）时，
-    若调用方提供了 `fallback_contexts`（来自 `_build_cluster_page_contexts` 的 `ocr_excerpt`），
-    则用 excerpt 拼接一个兜底正文，保证 synthesize_anchor 路径仍有模糊匹配的依据。
-    兜底结果同样返回 spans，只不过 char 偏移只相对于 excerpt，无法还原到真实行。
-    """
+    """拼接章节正文，同时返回 (page_no, char_start, char_end) 片段映射。"""
     try:
         start = int(chapter.get("start_page") or 0)
         end = int(chapter.get("end_page") or 0)
@@ -1073,8 +1109,11 @@ def _build_chapter_body_text(
     cursor = 0
     sep = "\n\n"
     if start > 0 and end >= start:
-        raw_pages = repo.load_pages(doc_id)
-        page_role_by_no = _fnm_page_role_by_no(doc_id, repo=repo)
+        raw_pages = pages if pages is not None else repo.load_pages(doc_id)
+        if page_roles is not None:
+            page_role_by_no = page_roles
+        else:
+            page_role_by_no = _fnm_page_role_by_no(doc_id, repo=repo)
         enforce_page_roles = bool(page_role_by_no)
         by_page = {
             int(p.get("bookPage") or 0): p
@@ -1148,13 +1187,14 @@ def _resolve_page_span_from_range(
     return None
 
 
-def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepository) -> list[dict]:
-    raw_pages = repo.load_pages(doc_id)
-    page_map = {
-        int(page.get("bookPage") or 0): dict(page)
-        for page in (raw_pages or [])
-        if int(page.get("bookPage") or 0) > 0
-    }
+def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepository, pages: list[dict] | None = None, page_map: dict[int, dict] | None = None) -> list[dict]:
+    if page_map is None:
+        raw_pages = pages if pages is not None else repo.load_pages(doc_id)
+        page_map = {
+            int(page.get("bookPage") or 0): dict(page)
+            for page in (raw_pages or [])
+            if int(page.get("bookPage") or 0) > 0
+        }
     pdf_path = get_pdf_path(doc_id)
     contexts: list[dict] = []
     for page_no in _cluster_focus_pages(cluster):
@@ -1180,17 +1220,14 @@ def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepo
 
 def _render_repair_page_image(pdf_path: str, file_idx: int) -> tuple[bytes, str]:
     try:
-        import fitz  # PyMuPDF
-
-        doc = fitz.open(pdf_path)
-        try:
-            if file_idx < 0 or file_idx >= len(doc):
-                return (b"", "")
-            page = doc[file_idx]
-            pix = page.get_pixmap(matrix=fitz.Matrix(LLM_REPAIR_IMAGE_SCALE, LLM_REPAIR_IMAGE_SCALE), alpha=False)
-            return (pix.tobytes("jpg"), "image/jpeg")
-        finally:
-            doc.close()
+        doc = _get_repair_fitz_doc(pdf_path)
+        if file_idx < 0 or file_idx >= len(doc):
+            return (b"", "")
+        page = doc[file_idx]
+        pix = page.get_pixmap(matrix=fitz.Matrix(LLM_REPAIR_IMAGE_SCALE, LLM_REPAIR_IMAGE_SCALE), alpha=False)
+        img = pix.tobytes("jpg")
+        pix = None
+        return (img, "image/jpeg")
     except Exception:
         try:
             rendered = render_pdf_page(pdf_path, file_idx, scale=LLM_REPAIR_IMAGE_SCALE)
@@ -1449,11 +1486,7 @@ def request_llm_repair_actions(
         "usage": {},
     }
     _emit_llm_trace(trace_callback, started_trace)
-    client = OpenAI(
-        api_key=str(resolved_args.get("api_key") or ""),
-        base_url=str(resolved_args.get("base_url") or ""),
-        timeout=180.0,
-    )
+    client = _get_repair_client(resolved_args)
     image_refused = False
     started = time.time()
 
@@ -1799,16 +1832,28 @@ def run_llm_repair(
     usage_events: list[dict] = []
     token_accounting: list[dict] = []
 
+    raw_pages = repo.load_pages(doc_id)
+    # 预缓存：跨 cluster 不变的数据只查一次
+    _cached_page_roles = _fnm_page_role_by_no(doc_id, repo=repo) or {}
+    _cached_page_map = {
+        int(p.get("bookPage") or 0): p
+        for p in (raw_pages or [])
+        if int(p.get("bookPage") or 0) > 0
+    }
     for cluster_index, cluster in enumerate(clusters, start=1):
         cluster = dict(cluster)
-        cluster["page_contexts"] = _build_cluster_page_contexts(doc_id, cluster, repo=repo)
+        cluster["page_contexts"] = _build_cluster_page_contexts(
+            doc_id, cluster, repo=repo, pages=raw_pages, page_map=_cached_page_map)
         chapter_for_body = _chapter_for_cluster(cluster, chapters_plain)
         chapter_body_text, body_spans = _build_chapter_body_text(
             doc_id,
             chapter_for_body,
             repo=repo,
             fallback_contexts=list(cluster.get("page_contexts") or []),
+            pages=raw_pages,
+            page_roles=_cached_page_roles,
         )
+        gc.collect()  # 每 cluster 释放临时对象
         cluster["chapter_body_text"] = chapter_body_text
         # 启发式预过滤：同一页上同 marker 的 unmatched_anchor 若已有 matched_example，
         # 直接判定为重复检测，省去 LLM 调用。
@@ -1860,6 +1905,8 @@ def run_llm_repair(
                 else None
             ),
         )
+        # 收集本 cluster 所有 override，最后批量提交
+        _cluster_overrides: list[tuple[str, str, dict]] = []
         for action_index, action in enumerate(actions, start=1):
             suggestion_id = f"llm-{cluster_index:02d}-{action_index:03d}"
             auto_selected = action in auto_actions
@@ -1879,7 +1926,7 @@ def run_llm_repair(
                 "reason": action.get("reason"),
                 "auto_selected": auto_selected,
             }
-            repo.save_fnm_review_override(doc_id, "llm_suggestion", suggestion_id, payload)
+            _cluster_overrides.append(("llm_suggestion", suggestion_id, payload))
             suggestions.append({"suggestion_id": suggestion_id, **payload})
 
         if not auto_apply:
@@ -1897,16 +1944,11 @@ def run_llm_repair(
                 )
                 if not link_id:
                     continue
-                repo.save_fnm_review_override(
-                    doc_id,
-                    "link",
-                    link_id,
-                    {
-                        "action": "match",
-                        "note_item_id": str(action.get("note_item_id") or "").strip(),
-                        "anchor_id": str(action.get("anchor_id") or "").strip(),
-                    },
-                )
+                _cluster_overrides.append(("link", link_id, {
+                    "action": "match",
+                    "note_item_id": str(action.get("note_item_id") or "").strip(),
+                    "anchor_id": str(action.get("anchor_id") or "").strip(),
+                }))
                 auto_applied.append({"link_id": link_id, **action})
             elif action["action"] == "ignore_ref":
                 link_id = _find_link_id_for_ignore(
@@ -1915,7 +1957,7 @@ def run_llm_repair(
                 )
                 if not link_id:
                     continue
-                repo.save_fnm_review_override(doc_id, "link", link_id, {"action": "ignore"})
+                _cluster_overrides.append(("link", link_id, {"action": "ignore"}))
                 auto_applied.append({"link_id": link_id, **action})
             elif action["action"] == "synthesize_anchor":
                 note_item_id = str(action.get("note_item_id") or "").strip()
@@ -1944,43 +1986,33 @@ def run_llm_repair(
                 matched_text = str(action.get("matched_text") or action.get("anchor_phrase") or "").strip()
                 if not matched_text:
                     continue
-                repo.save_fnm_review_override(
-                    doc_id,
-                    "anchor",
-                    anchor_id,
-                    {
-                        "action": "create",
-                        "anchor_id": anchor_id,
-                        "chapter_id": chapter_id,
-                        "page_no": page_no,
-                        "paragraph_index": 0,
-                        "char_start": max(0, char_start),
-                        "char_end": max(char_start + 1, char_end),
-                        "source_text": matched_text,
-                        "source_marker": marker,
-                        "normalized_marker": marker,
-                        "anchor_kind": note_system,
-                        "certainty": _safe_float(action.get("confidence"), 0.8),
-                        "source": "llm",
-                        "synthetic": False,
-                    },
-                )
+                _cluster_overrides.append(("anchor", anchor_id, {
+                    "action": "create",
+                    "anchor_id": anchor_id,
+                    "chapter_id": chapter_id,
+                    "page_no": page_no,
+                    "paragraph_index": 0,
+                    "char_start": max(0, char_start),
+                    "char_end": max(char_start + 1, char_end),
+                    "source_text": matched_text,
+                    "source_marker": marker,
+                    "normalized_marker": marker,
+                    "anchor_kind": note_system,
+                    "certainty": _safe_float(action.get("confidence"), 0.8),
+                    "source": "llm",
+                    "synthetic": False,
+                }))
                 link_id = _find_link_id_for_match(
                     links_plain,
                     note_item_id=note_item_id,
                     anchor_id="",
                 )
                 if link_id:
-                    repo.save_fnm_review_override(
-                        doc_id,
-                        "link",
-                        link_id,
-                        {
-                            "action": "match",
-                            "note_item_id": note_item_id,
-                            "anchor_id": anchor_id,
-                        },
-                    )
+                    _cluster_overrides.append(("link", link_id, {
+                        "action": "match",
+                        "note_item_id": note_item_id,
+                        "anchor_id": anchor_id,
+                    }))
                 auto_applied.append({"link_id": link_id, "anchor_id": anchor_id, **action})
             elif action["action"] == "synthesize_note_item":
                 anchor_id = str(action.get("anchor_id") or "").strip()
@@ -1996,34 +2028,28 @@ def run_llm_repair(
                 if not chapter_id or page_no <= 0:
                     continue
                 note_item_id = f"llm-note-{_slug_token(anchor_id)}-{_slug_token(marker)}"
-                repo.save_fnm_review_override(
-                    doc_id,
-                    "note_item",
-                    note_item_id,
-                    {
-                        "action": "create",
-                        "note_item_id": note_item_id,
-                        "chapter_id": chapter_id,
-                        "page_no": page_no,
-                        "marker": marker,
-                        "note_text": note_text,
-                        "note_kind": note_system,
-                        "source": "llm",
-                    },
-                )
+                _cluster_overrides.append(("note_item", note_item_id, {
+                    "action": "create",
+                    "note_item_id": note_item_id,
+                    "chapter_id": chapter_id,
+                    "page_no": page_no,
+                    "marker": marker,
+                    "note_text": note_text,
+                    "note_kind": note_system,
+                    "source": "llm",
+                }))
                 link_id = _find_link_id_for_ignore(links_plain, anchor_id=anchor_id)
                 if link_id:
-                    repo.save_fnm_review_override(
-                        doc_id,
-                        "link",
-                        link_id,
-                        {
-                            "action": "match",
-                            "note_item_id": note_item_id,
-                            "anchor_id": anchor_id,
-                        },
-                    )
+                    _cluster_overrides.append(("link", link_id, {
+                        "action": "match",
+                        "note_item_id": note_item_id,
+                        "anchor_id": anchor_id,
+                    }))
                 auto_applied.append({"link_id": link_id, "note_item_id": note_item_id, **action})
+
+        # 批量提交本 cluster 的所有 overrides（单事务）
+        if _cluster_overrides:
+            repo.batch_save_fnm_review_overrides(doc_id, _cluster_overrides)
 
     return {
         "cluster_count": len(clusters),
