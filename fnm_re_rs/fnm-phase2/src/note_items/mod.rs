@@ -49,11 +49,48 @@ pub fn build_note_items(
         // Phase A: 解析页文本 → ParsedNoteRow
         let mut rows: Vec<ParsedNoteRow> = Vec::new();
         for page in &region_pages {
-            let text = &page.markdown;
+            let mut text = page.markdown.clone();
+
+            // footnote region：fnBlocks 里的脚注文本不在 markdown 中，需显式拼接。
+            // ←→ Python annotate_pages_with_note_scans 在 Phase 1 提前完成此步骤，
+            // 但 Rust 无此预注释，在此补读。
+            if region.note_kind == NoteKind::Footnote {
+                if let Some(fn_blocks) = page.fn_blocks.as_array() {
+                    let fn_texts: Vec<&str> = fn_blocks
+                        .iter()
+                        .filter(|b| {
+                            // Python 的 _looks_garbled 守卫：跳过 PDF 隐藏文字层乱码
+                            let is_pdf = b
+                                .get("textSource")
+                                .and_then(|v| v.as_str())
+                                .map(|s| s == "pdf")
+                                .unwrap_or(false);
+                            let text = b.get("text").and_then(|v| v.as_str()).unwrap_or("");
+                            if is_pdf && text.len() > 3 {
+                                let alpha_ratio = text.chars().filter(|c| c.is_alphabetic()).count()
+                                    as f64
+                                    / text.len().max(1) as f64;
+                                if alpha_ratio < 0.3 {
+                                    return false; // 乱码文本
+                                }
+                            }
+                            true
+                        })
+                        .filter_map(|b| b.get("text").and_then(|v| v.as_str()))
+                        .collect();
+                    if !fn_texts.is_empty() {
+                        if !text.is_empty() {
+                            text.push('\n');
+                        }
+                        text.push_str(&fn_texts.join("\n"));
+                    }
+                }
+            }
+
             if text.is_empty() {
                 continue;
             }
-            rows.extend(parse_page(text, page.book_page, region));
+            rows.extend(parse_page(&text, page.book_page, region));
         }
 
         // Phase B: endnote 序列修复
