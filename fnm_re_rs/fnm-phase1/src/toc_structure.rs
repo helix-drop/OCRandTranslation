@@ -3,7 +3,7 @@
 
 use crate::book_note_type::build_book_note_profile;
 use crate::chapter_skeleton::builder::build_chapter_skeleton;
-use crate::heading_graph::build_heading_graph_simple;
+use crate::heading_graph::build_heading_graph;
 use crate::input::{ManualPageOverride, RawPage, TocItem, VisualTocBundle};
 use crate::page_partition::build_page_partitions;
 use crate::section_heads::build_section_heads;
@@ -60,8 +60,27 @@ pub fn build_phase1_structure(
     // 4. build_section_heads
     let (section_heads, _) = build_section_heads(&[], &heading_candidates, &page_partitions, None);
 
-    // 5. build_heading_graph
-    let heading_graph = build_heading_graph_simple(&heading_candidates);
+    // 5. build_heading_graph（完整版：local_exact + expanded_exact 锚点解析）
+    let toc_exportable: Vec<(String, i64, String)> = toc_items
+        .map(|items| {
+            items
+                .iter()
+                .filter(|item| item.export_candidate.unwrap_or(true))
+                .map(|item| {
+                    (
+                        item.title.clone(),
+                        item.target_pdf_page.unwrap_or(0),
+                        item.role_hint.clone(),
+                    )
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let page_role_pairs: Vec<(i64, String)> = page_partitions
+        .iter()
+        .map(|p| (p.page_no, p.page_role.as_str().to_string()))
+        .collect();
+    let heading_graph = build_heading_graph(&toc_exportable, &heading_candidates, &page_role_pairs);
 
     // 6. build_chapter_skeleton
     let skeleton = build_chapter_skeleton(

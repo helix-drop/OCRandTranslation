@@ -34,20 +34,43 @@ pub fn build_chapter_skeleton(
         if items.is_empty() {
             (vec![], "fallback")
         } else {
+            // 用 heading_graph 的 anchor_page 确定真实章节起始页。
+            // TOC target 与 anchor_page 差异过大时以 heading 实际检测位置为准，
+            // 同时按 anchor_page 重排（Python heading_graph 可发现章顺序与 TOC 不同）。
+            let anchors: std::collections::HashMap<String, i64> = heading_graph
+                .graph_rows
+                .iter()
+                .filter(|r| r.anchor_state == "resolved" && r.anchor_page > 0)
+                .map(|r| (r.title.clone(), r.anchor_page))
+                .collect();
+
             let mut chs: Vec<ChapterRecord> = items
                 .iter()
                 .filter(|item| item.export_candidate.unwrap_or(true))
                 .enumerate()
-                .map(|(i, item)| ChapterRecord {
-                    chapter_id: format!("toc-ch-{}", i + 1),
-                    title: item.title.clone(),
-                    start_page: item.target_pdf_page.unwrap_or(1),
-                    end_page: 0,
-                    pages: vec![],
-                    source: ChapterSource::VisualToc,
-                    boundary_state: BoundaryState::Ready,
+                .map(|(i, item)| {
+                    let start_page = anchors
+                        .get(&item.title)
+                        .copied()
+                        .unwrap_or(item.target_pdf_page.unwrap_or(1));
+                    ChapterRecord {
+                        chapter_id: format!("toc-ch-{}", i + 1),
+                        title: item.title.clone(),
+                        start_page,
+                        end_page: 0,
+                        pages: vec![],
+                        source: ChapterSource::VisualToc,
+                        boundary_state: BoundaryState::Ready,
+                    }
                 })
                 .collect();
+
+            // 按起始页排序（heading_graph 可能重排章顺序）
+            chs.sort_by_key(|ch| ch.start_page);
+            for (i, ch) in chs.iter_mut().enumerate() {
+                ch.chapter_id = format!("toc-ch-{}", i + 1);
+            }
+
             // fill end_page
             for i in 0..chs.len() {
                 let next_start = if i + 1 < chs.len() {
