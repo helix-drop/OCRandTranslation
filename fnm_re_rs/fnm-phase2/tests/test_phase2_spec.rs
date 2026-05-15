@@ -11,6 +11,7 @@ use fnm_phase2::chapter_split::build_chapter_layers;
 use fnm_phase2::chapter_split::endnote_project::compute_endnote_projections;
 use fnm_phase2::note_items::build_note_items;
 use fnm_phase2::note_regions::build_note_regions;
+use std::collections::HashSet;
 
 // ── 辅助函数 ──────────────────────────────────────────────────────────────────
 
@@ -112,7 +113,7 @@ fn spec_chapter_endnote_regions_exist() {
         make_page_partition(6, PageRole::Note),
     ];
 
-    let regions = build_note_regions(&chapters, &pages, &partitions);
+    let regions = build_note_regions(&chapters, &pages, &partitions, &HashSet::new());
     let endnote_regions: Vec<_> = regions
         .iter()
         .filter(|r| r.note_kind == NoteKind::Endnote)
@@ -296,7 +297,7 @@ fn spec_note_regions_heading_detection() {
         make_page_partition(2, PageRole::Note),
     ];
 
-    let regions = build_note_regions(&chapters, &pages, &partitions);
+    let regions = build_note_regions(&chapters, &pages, &partitions, &HashSet::new());
     assert!(!regions.is_empty(), "Should detect at least 1 note region");
     let endnote = regions.iter().find(|r| r.note_kind == NoteKind::Endnote);
     assert!(

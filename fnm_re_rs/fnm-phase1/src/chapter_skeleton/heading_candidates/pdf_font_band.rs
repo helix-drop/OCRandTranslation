@@ -1,11 +1,10 @@
 //! ←→ heading_candidates.py: _collect_pdf_font_band_candidates / _extract_candidates_from_pdf_pages
 //!
 //! PDF 字体项 ranking 与 heading candidate 生成。
-//! `collect_pdf_font_band_candidates` 当前为 stub（等 PDFIUM 可用后激活）。
 
 use fnm_core::records::HeadingCandidate;
 use fnm_core::title::normalize_title;
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
 use super::family_guess::heading_family_guess;
@@ -15,18 +14,115 @@ use super::font_features::{
 use super::safe_float;
 
 /// PDF font band 候选收集入口。
-/// 当前返回空列表（底层 PDF 字体提取尚为 stub）。
-/// 等 C1 合入后可用 `fnm_core::vision::PDFIUM` 激活。
+/// ←→ Python `_collect_pdf_font_band_candidates`
+///
+/// 调用底层 PDFIUM 提取字体项，经 `extract_candidates_from_pdf_pages` 筛选排名后返回。
+/// 若 PDF 不存在或 PDFIUM 不可用则返回空列表。
 pub fn collect_pdf_font_band_candidates(
-    _page_rows: &[Value],
+    page_rows: &[Value],
     _heading_candidates: &[HeadingCandidate],
-    _pdf_path: &str,
+    pdf_path: &str,
     _toc_items: Option<&[crate::input::TocItem]>,
     _toc_offset: i64,
-    _file_idx_map: Option<&HashMap<i64, i64>>,
+    file_idx_map: Option<&HashMap<i64, i64>>,
     _doc_id: &str,
 ) -> Vec<HeadingCandidate> {
-    vec![]
+    if pdf_path.is_empty() {
+        return vec![];
+    }
+
+    // 构建 file_idx_to_page_no（fileIdx → bookPage）
+    let file_idx_to_page_no: HashMap<i64, i64> = match file_idx_map {
+        Some(m) => m.clone(),
+        None => {
+            // 从 page_rows 中 fallback 构建
+            let mut m = HashMap::new();
+            for row in page_rows {
+                if let (Some(file_idx), Some(page_no)) = (
+                    row.get("file_idx").and_then(|v| v.as_i64()),
+                    row.get("page_no").and_then(|v| v.as_i64()),
+                ) {
+                    if file_idx >= 0 {
+                        m.insert(file_idx, page_no);
+                    }
+                }
+            }
+            m
+        }
+    };
+
+    if file_idx_to_page_no.is_empty() {
+        return vec![];
+    }
+
+    // 确定 candidate_pages（所有 page_row 的 page_no）
+    let candidate_pages: HashSet<i64> = page_rows
+        .iter()
+        .filter_map(|r| r.get("page_no").and_then(|v| v.as_i64()))
+        .filter(|&pn| pn > 0)
+        .collect();
+
+    let total_pages = page_rows.len().max(1) as i64;
+
+    // page_role_by_no
+    let page_role_by_no: HashMap<i64, String> = page_rows
+        .iter()
+        .filter_map(|r| {
+            let pn = r.get("page_no").and_then(|v| v.as_i64())?;
+            let role = r
+                .get("page_role")
+                .and_then(|v| v.as_str())
+                .unwrap_or("body");
+            Some((pn, role.to_string()))
+        })
+        .collect();
+
+    // 确定要提取的 PDF 页索引
+    let page_indices: Vec<i64> = file_idx_to_page_no.keys().copied().collect();
+
+    // 调用 PDF 字体提取
+    let font_candidates =
+        match crate::chapter_skeleton::pdf_font::extract_font_candidates(pdf_path, &page_indices) {
+            Ok(c) => c,
+            Err(_) => return vec![],
+        };
+
+    if font_candidates.is_empty() {
+        return vec![];
+    }
+
+    // 将 FontCandidate 转换为 extract_candidates_from_pdf_pages 期望的 Value 格式
+    let mut pdf_pages: Vec<Value> = Vec::new();
+    for (file_idx, items) in &font_candidates {
+        let vals: Vec<Value> = items
+            .iter()
+            .map(|fc| {
+                json!({
+                    "str": fc.text,
+                    "x": fc.x,
+                    "y": fc.y,
+                    "w": fc.width,
+                    "h": fc.height,
+                    "font_name": fc.font_name,
+                    "font_weight_hint": if fc.is_bold { "bold" } else { "regular" },
+                })
+            })
+            .collect();
+        pdf_pages.push(json!({
+            "pageIdx": file_idx,
+            "pdfW": 0.0,
+            "pdfH": 0.0,
+            "items": vals,
+        }));
+    }
+
+    extract_candidates_from_pdf_pages(
+        &pdf_pages,
+        &candidate_pages,
+        &file_idx_to_page_no,
+        &page_role_by_no,
+        total_pages,
+    )
 }
 
 /// 从 PDF 字体提取结果中筛选 heading candidates（纯计算）。

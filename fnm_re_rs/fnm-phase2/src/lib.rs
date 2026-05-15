@@ -24,8 +24,12 @@ use std::collections::{HashMap, HashSet};
 /// 同步入口（不含 LLM）。
 pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2Output> {
     // 1. build_note_regions
-    let note_regions =
-        build_note_regions(input.phase1_chapters, input.raw_pages, input.phase1_pages);
+    let note_regions = build_note_regions(
+        input.phase1_chapters,
+        input.raw_pages,
+        input.phase1_pages,
+        &input.post_body_titles,
+    );
 
     // 2. build_note_items
     let note_items = build_note_items(input.raw_pages, &note_regions);
@@ -126,6 +130,7 @@ mod tests {
             raw_pages: &[],
             pdf_path: None,
             config: crate::input::Phase2Config::default(),
+            post_body_titles: HashSet::new(),
         };
         let output = build_phase2_structure_sync(input).unwrap();
         assert!(output.note_regions.is_empty());
@@ -157,6 +162,7 @@ mod tests {
             raw_pages: &pages,
             pdf_path: None,
             config: crate::input::Phase2Config::default(),
+            post_body_titles: HashSet::new(),
         };
         let output = build_phase2_structure_sync(input).unwrap();
         assert_eq!(output.note_regions.len(), 1);

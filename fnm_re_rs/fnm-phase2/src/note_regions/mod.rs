@@ -34,6 +34,7 @@ pub fn build_note_regions(
     phase1_chapters: &[ChapterRecord],
     pages: &[RawPage],
     page_partitions: &[PagePartitionRecord],
+    post_body_titles: &HashSet<String>,
 ) -> Vec<NoteRegionRecord> {
     // 构建 page_by_no 和 page_role_by_no
     let page_by_no: HashMap<i64, &RawPage> = pages.iter().map(|p| (p.book_page, p)).collect();
@@ -49,16 +50,12 @@ pub fn build_note_regions(
             .or_insert_with(|| "unknown".into());
     }
 
-    // post_body_titles 当前为空集（待 Phase1Summary 接入后激活）
-    let post_body_titles: HashSet<String> = HashSet::new();
-
-    // 重分类 post_body fnBlocks（修改 page_by_no 的 note_scan 内部状态）
-    // 当前 post_body_titles 为空，实际是 no-op。
+    // 重分类 post_body fnBlocks（修改 page_role_by_no 将 post-body 章节的 fnBlocks footnote → endnote）
     reclassify_post_body_fnblocks(
         phase1_chapters,
         &mut page_role_by_no,
         &page_by_no,
-        &post_body_titles,
+        post_body_titles,
     );
 
     // 1. Footnote band regions
@@ -162,7 +159,7 @@ mod tests {
             has_note_heading: false,
             note_scan_summary: serde_json::json!({}),
         }];
-        let regions = build_note_regions(&chapters, &pages, &pp);
+        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new());
         assert!(!regions.is_empty());
         assert_eq!(regions[0].note_kind, NoteKind::Endnote);
     }
@@ -185,7 +182,7 @@ mod tests {
             has_note_heading: false,
             note_scan_summary: serde_json::json!({}),
         }];
-        let regions = build_note_regions(&chapters, &pages, &pp);
+        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new());
         assert!(!regions.is_empty());
         assert_eq!(regions[0].note_kind, NoteKind::Endnote);
         assert!(!regions[0].heading_text.is_empty());
@@ -193,7 +190,7 @@ mod tests {
 
     #[test]
     fn empty_input() {
-        let regions = build_note_regions(&[], &[], &[]);
+        let regions = build_note_regions(&[], &[], &[], &HashSet::new());
         assert!(regions.is_empty());
     }
 

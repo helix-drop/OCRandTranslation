@@ -49,6 +49,7 @@ fn full_pipeline_endnote_book() {
         raw_pages: &raw_pages,
         pdf_path: None,
         config: Phase2Config::default(),
+        post_body_titles: std::collections::HashSet::new(),
     };
 
     let output = fnm_phase2::build_phase2_structure_sync(input).unwrap();
