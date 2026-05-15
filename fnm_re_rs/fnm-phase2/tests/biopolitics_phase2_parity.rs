@@ -4,7 +4,7 @@
 //!
 //! 差异文档：tests/known_python_bugs.md
 
-use fnm_core::records::ChapterRecord;
+use fnm_core::records::{ChapterRecord, NoteRegionRecord};
 use fnm_core::types::{BoundaryState, ChapterSource};
 use fnm_phase2::build_phase2_structure_sync;
 use fnm_phase2::input::{Phase2Config, Phase2Input};
@@ -634,4 +634,133 @@ fn biopolitics_phase2_smoke() {
             item.region_id
         );
     }
+}
+
+// ── SPEC 5: Per-chapter region alignment (no semantic matching) ─
+
+#[test]
+fn biopolitics_regions_per_chapter_alignment() {
+    let golden = load_golden();
+    let pages = load_biopolitics_pages();
+    let toc_items = build_toc_items();
+    let phase1 = fnm_phase1::toc_structure::build_phase1_structure(
+        &pages,
+        Some(&toc_items),
+        &fnm_phase1::toc_structure::Phase1Config::default(),
+    )
+    .expect("Phase 1 should build");
+
+    let input = Phase2Input {
+        phase1_chapters: &phase1.structure.chapters,
+        phase1_pages: &phase1.structure.pages,
+        phase1_section_heads: &[],
+        raw_pages: &pages,
+        pdf_path: None,
+        config: Phase2Config::default(),
+        post_body_titles: HashSet::new(),
+    };
+    let output = build_phase2_structure_sync(input).expect("Phase 2 should build");
+
+    // 第 1 步：按 page_no 构建 Rust region 索引（(key=(page_no, kind)) → region）
+    let mut rust_by_page: HashMap<(i64, String), Vec<&NoteRegionRecord>> = HashMap::new();
+    for r in &output.note_regions {
+        for &pn in &r.pages {
+            let kind = format!("{:?}", r.note_kind).to_lowercase();
+            rust_by_page.entry((pn, kind)).or_default().push(r);
+        }
+    }
+
+    let mut py_by_page: HashMap<(i64, String), Vec<&GoldenRegion>> = HashMap::new();
+    for r in &golden.note_regions {
+        for &pn in &r.pages {
+            let kind = r.note_kind.to_lowercase();
+            py_by_page.entry((pn, kind)).or_default().push(r);
+        }
+    }
+
+    // 第 2 步：检查每个 page_no 的覆盖一致性
+    let mut kind_mismatch_pages: Vec<(i64, String, String)> = Vec::new();
+    let mut rust_only_pages: Vec<i64> = Vec::new();
+    let mut py_only_pages: Vec<i64> = Vec::new();
+    let mut matched_pages = 0usize;
+
+    for pn in 1..=370i64 {
+        let rust_kinds: std::collections::BTreeSet<String> = rust_by_page
+            .get(&(pn, "footnote".into()))
+            .map(|_| "footnote".into())
+            .into_iter()
+            .chain(
+                rust_by_page
+                    .get(&(pn, "endnote".into()))
+                    .map(|_| "endnote".into()),
+            )
+            .collect();
+        let py_kinds: std::collections::BTreeSet<String> = py_by_page
+            .get(&(pn, "footnote".into()))
+            .map(|_| "footnote".into())
+            .into_iter()
+            .chain(
+                py_by_page
+                    .get(&(pn, "endnote".into()))
+                    .map(|_| "endnote".into()),
+            )
+            .collect();
+
+        if rust_kinds.is_empty() && py_kinds.is_empty() {
+            matched_pages += 1;
+            continue;
+        }
+        if rust_kinds == py_kinds {
+            matched_pages += 1;
+        } else if rust_kinds.is_empty() {
+            py_only_pages.push(pn);
+        } else if py_kinds.is_empty() {
+            rust_only_pages.push(pn);
+        } else {
+            let rust_str: Vec<String> = rust_kinds.into_iter().collect();
+            let py_str: Vec<String> = py_kinds.into_iter().collect();
+            kind_mismatch_pages.push((pn, rust_str.join(","), py_str.join(",")));
+        }
+    }
+
+    eprintln!("=== Per-page region kind alignment ===");
+    eprintln!(
+        "  Matched (same kinds or both empty): {}/370 ({:.1}%)",
+        matched_pages,
+        100.0 * matched_pages as f64 / 370.0
+    );
+    if !kind_mismatch_pages.is_empty() {
+        eprintln!(
+            "  Kind mismatch pages: {} — Rust and Python assign different note_kind to same page",
+            kind_mismatch_pages.len()
+        );
+        for (pn, rust, py) in &kind_mismatch_pages[..kind_mismatch_pages.len().min(15)] {
+            eprintln!("    page {}: Rust=[{}] Python=[{}]", pn, rust, py);
+        }
+    }
+    if !rust_only_pages.is_empty() {
+        eprintln!(
+            "  Rust-only note pages: {} — Rust creates region but Python doesn't",
+            rust_only_pages.len()
+        );
+        eprintln!(
+            "    pages: {:?}",
+            &rust_only_pages[..rust_only_pages.len().min(20)]
+        );
+    }
+    if !py_only_pages.is_empty() {
+        eprintln!(
+            "  Python-only note pages: {} — Python creates region but Rust doesn't",
+            py_only_pages.len()
+        );
+        eprintln!(
+            "    pages: {:?}",
+            &py_only_pages[..py_only_pages.len().min(20)]
+        );
+    }
+
+    assert!(
+        kind_mismatch_pages.is_empty(),
+        "kind_mismatch_pages must be empty — same page must have same note_kind"
+    );
 }

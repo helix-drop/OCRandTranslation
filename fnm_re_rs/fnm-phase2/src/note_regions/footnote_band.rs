@@ -11,7 +11,8 @@ use std::collections::HashSet;
 ///
 /// 两路信号：
 /// 1. note_scan.items 有 kind=footnote（强信号，Biopolitics ~16 页）
-/// 2. fnBlocks 非空（弱信号，Biopolitics ~102 页——漏读这条导致 Rust 10 vs Python 62 footnote regions）
+/// 2. fnBlocks 含编号脚注文本（弱信号，须通过 numbered-marker 守卫——
+///    Biopolitics 有 7 页 fnBlocks 是 OCR 误标的正文，不含脚注编号）
 fn has_footnote_items(page: &RawPage) -> bool {
     let has_scan_footnote = page
         .note_scan
@@ -25,13 +26,29 @@ fn has_footnote_items(page: &RawPage) -> bool {
         })
         .unwrap_or(false);
 
-    let has_fn_blocks = page
+    let has_valid_fn_blocks = page
         .fn_blocks
         .as_array()
-        .map(|a| !a.is_empty())
+        .map(|arr| {
+            arr.iter().any(|block| {
+                let text = block.get("text").and_then(|v| v.as_str()).unwrap_or("");
+                let trimmed = text.trim();
+                if trimmed.is_empty() {
+                    return false;
+                }
+                // 守卫：脚注以标记开头（*、数字、†、‡、§）。
+                // 正文误标 fnBlock（如续行、标题）通常以字母或标点起头。
+                let first = trimmed.chars().next().unwrap();
+                first == '*'
+                    || first == '†'
+                    || first == '‡'
+                    || first == '§'
+                    || first.is_ascii_digit()
+            })
+        })
         .unwrap_or(false);
 
-    has_scan_footnote || has_fn_blocks
+    has_scan_footnote || has_valid_fn_blocks
 }
 
 fn first_footnote_marker(page: &RawPage) -> String {
