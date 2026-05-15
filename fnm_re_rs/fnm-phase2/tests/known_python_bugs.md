@@ -88,7 +88,23 @@ per region on average, which may indicate:
 gap (19 vs 62 note pages). Fixing Phase 1 F7+ role_heuristics will close most of
 the gap. post_body_titles wiring will handle the remaining fnBlock reclassification.
 
+**Updated (2026-05-16)**: Phase 1 note page gap resolved (62/62 = 100%). Remaining gaps:
+
+| Metric | Before | After | Issue |
+|--------|--------|-------|-------|
+| Note page role | 19/62 (31%) | **62/62 (100%)** ✅ | FIXED |
+| Kind reversal | 6 regions | **0 regions** ✅ | FIXED |
+| Phase 1 role agreement | 77% | 87.6% | front_matter over-classification |
+| Phase 2 region coverage | 29/75 (39%) | 23/75 (31%) | footnote band gap |
+| Phase 2 item coverage | 305/584 (52%) | 475/584 (81%) | from region gap |
+| Items/region | Rust 10.5 | Rust 20.7 | per-region extraction efficient |
+
+Region count decreased (29→23) despite better item coverage because the test uses
+hardcoded chapters (Ch1 starts at p17), but actual Phase 1 output has Ch1 at p30
+due to front_matter over-classification. This causes chapter-scope regions to be
+partitioned differently.
+
 **Next steps**:
-1. Complete Phase 1 F7+ role_heuristics → close the 19→62 note page gap
-2. Wire Phase1Summary.post_body_titles into Phase2Input for real pipeline runs
-3. Re-run golden generation after F7+ to establish new baseline
+1. Fix Phase 1 front_matter over-classification → auto-resolves chapter boundary cascade
+2. Investigate Phase 2 footnote_band gap (Rust 10 vs Python 62 footnote regions)
+3. Wire Phase1Summary.post_body_titles into Phase2Input for real pipeline runs

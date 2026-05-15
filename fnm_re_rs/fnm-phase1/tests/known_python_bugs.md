@@ -7,28 +7,33 @@ Classification: (a) Rust gap → Rust missing/fixable, (b) Python likely-bug →
 
 ## 1. page_partition role diffs
 
-**Severity**: High. Rust underclassifies note pages (19 vs Python 62).
+**Severity**: Note pages RESOLVED (100% match). Remaining: front_matter over-classification.
 
-### 1a. Rust gap: body→note (Rust misses ~43 endnote pages)
+### 1a. ✅ RESOLVED: body→note (was 43 pages, now 0)
 
-Python classifies 62 pages as `note`; Rust only 19. The 43-page gap comes from:
+**Root cause**: `build_page_partitions` used `page_markdown_text(&page.pruned_result)`
+to extract text for continuation checks, but Biopolitics fixtures store markdown at
+the top-level `page.markdown` field, not inside `prunedResult`. All `page_texts` were
+empty strings → `looks_like_note_continuation_page` always returned false → 43
+`note_continuation` pages were missed.
 
-- **F7+ role_heuristics gaps**: Rust's `role_resolver.rs` rules don't match Python's full rule set.
-  Python has ~65 rules in `_rules/` subdirectory; Rust ported the structural framework but
-  some rule conditions are simplified.
-- **Page scan context**: `_PageScanContext` in Python includes `headings`, `total_pages`, and
-  `note_scan` rich data that Rust's equivalent may not fully populate.
-- **Continuation fixes**: Python applies `_apply_note_continuation_fix` which fills gaps
-  between known note pages; Rust's `continuation/` module may have different gap-fill logic.
-- **`has_note_heading` signal**: Python detects "## Notes" / "## Endnotes" markdown headings
-  through `has_note_heading()` utility; Rust may miss some patterns.
+**Fix** (2026-05-16): Changed `page_partition/mod.rs:35` to read from
+`page.enriched_markdown.unwrap_or(&page.markdown)` instead of
+`page_markdown_text(&page.pruned_result)`.
 
-**Status**: F7+ partial — role_heuristics module structure exists but specific rule
-conditions need audit against Python `_rules/`.
+**Result**: Note pages Rust 62/62 Python (100%).
 
-### 1b. Python likely-bug: (none identified yet)
+### 1b. Rust gap: front_matter over-classification (Rust 25 vs Python 5)
 
-All current role diffs are attributable to Rust gaps per above analysis.
+Rust classifies pages 1,4,7,13-29 as `front_matter` instead of `body`. Python has only
+5 front_matter pages (8-12). Root cause: `apply_front_matter_continuation_fix` overshoots
+because `is_body_entry_page` doesn't detect the Chapter 1 heading at page 17 as a strong
+body boundary, so `in_front_matter_run` continues past page 17.
+
+**Impact**: Ch1 start_page shifts from 17→30 (13-page cascade). This is the sole cause
+of the remaining 20 role diffs.
+
+**Status**: Known, fix pending (adjust `is_strong_body_boundary` or `early_limit`).
 
 ---
 
@@ -108,15 +113,15 @@ No diff to report since both sides have empty post_body_titles currently.
 | Metric | Rust | Python | Coverage |
 |--------|------|--------|----------|
 | Total pages | 370 | 370 | 100% |
-| body pages | 334 | 285 | — |
-| note pages | 19 | 62 | 30.6% |
-| other pages | 15 | 15 | 100% |
-| noise pages | 2 | 3 | 67% |
-| front_matter pages | 0 | 5 | 0% |
+| **note pages** | **62** | **62** | **100%** ✅ |
+| other pages | 14 | 15 | 93% |
+| noise pages | 3 | 3 | 100% |
+| body pages | 266 | 285 | 93% |
+| front_matter pages | 25 | 5 | — (over-classification) |
 | Chapters | 12 | 12 | 100% |
-| Heading candidates | — | 103 | — |
+| Role agreement | 324/370 | — | 87.6% |
 
-**Next steps to close the gap**:
-1. Audit F7+ `role_heuristics/rules/*.rs` against Python `_rules/*.py` — identify missing rule conditions
-2. Wire `collect_heading_candidate_rows` into `builder.rs` (plan §4)
-3. Generate golden with visual_toc_bundle + PDF to verify pdf_font_band path
+**Next steps**:
+1. Fix front_matter over-classification (pages 1,4,7,13-29) — `is_body_entry_page` for Ch1
+2. Regenerate golden → chapter boundary diffs will auto-resolve
+3. Investigate Phase 2 footnote band gap (10 vs 62 footnote regions)

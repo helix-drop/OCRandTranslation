@@ -32,7 +32,14 @@ pub fn build_page_partitions(
         }
         let note_scan_value = page.note_scan.clone().unwrap_or_default();
         let headings = fnm_core::text::extract_page_headings(&page.pruned_result);
-        let text_buf = fnm_core::text::page_markdown_text(&page.pruned_result);
+        // 文本优先取 enriched_markdown，回退到页级 markdown 字段。
+        // page_markdown_text(prunedResult) 仅当 prunedResult 内含 markdown 时有效，
+        // 而 Biopolitics 等 fixture 的 markdown 在顶层 page.markdown。
+        let text_buf = page
+            .enriched_markdown
+            .as_deref()
+            .unwrap_or(&page.markdown)
+            .to_string();
 
         let ctx = PageScanContext {
             page_no,
