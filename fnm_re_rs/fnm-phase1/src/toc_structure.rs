@@ -41,15 +41,36 @@ pub fn build_phase1_structure(
     let partitions_result = build_page_partitions(pages, None, None);
     let page_partitions = partitions_result.partitions;
 
-    // 3. build_section_heads（需要先有 heading_candidates）
-    let heading_candidates: Vec<HeadingCandidate> = vec![];
+    // 3. 构建 heading candidates（page_rows → collect → normalize）
+    let page_rows = crate::chapter_skeleton::heading_candidates::page_rows::legacy_page_rows(
+        &page_partitions,
+        Some(pages),
+    );
+    let heading_candidates: Vec<HeadingCandidate> =
+        crate::chapter_skeleton::heading_candidates::collect_heading_candidate_rows(
+            &page_rows,
+            toc_items,
+            0,
+            &config.pdf_path.clone().unwrap_or_default(),
+            None,
+            Some(&partitions_result.file_idx_map),
+            &config.doc_id.clone().unwrap_or_default(),
+        );
+
+    // 4. build_section_heads
     let (section_heads, _) = build_section_heads(&[], &heading_candidates, &page_partitions, None);
 
-    // 4. build_heading_graph
+    // 5. build_heading_graph
     let heading_graph = build_heading_graph_simple(&heading_candidates);
 
-    // 5. build_chapter_skeleton
-    let skeleton = build_chapter_skeleton(pages, toc_items, &page_partitions, &heading_graph);
+    // 6. build_chapter_skeleton
+    let skeleton = build_chapter_skeleton(
+        pages,
+        toc_items,
+        &page_partitions,
+        &heading_graph,
+        heading_candidates,
+    );
 
     // 6. build_book_note_profile
     let _book_note_profile = build_book_note_profile(&skeleton.chapters, pages, None);
