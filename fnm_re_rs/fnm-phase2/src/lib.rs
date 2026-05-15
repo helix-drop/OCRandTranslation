@@ -19,18 +19,46 @@ use crate::note_items::build_note_items;
 use crate::note_regions::build_note_regions;
 use crate::output::Phase2Output;
 use fnm_core::db::Repository;
+use std::collections::{HashMap, HashSet};
 
 /// 同步入口（不含 LLM）。
 pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2Output> {
-    let _ = &input.config;
-
-    // 1. sup_recovery Layer 1/2（如果 pdf_path 且 !skip_sup_recovery）
-    // 2. build_note_regions
+    // 1. build_note_regions
     let note_regions =
         build_note_regions(input.phase1_chapters, input.raw_pages, input.phase1_pages);
 
-    // 3. build_note_items
+    // 2. build_note_items
     let note_items = build_note_items(input.raw_pages, &note_regions);
+
+    // 3. sup_recovery Layer 1/2（基于 note_items 提取的 chapter_markers，pdf_path 留给 G2 Layer 3）
+    let chapter_markers: HashMap<String, Vec<String>> = if !input.config.skip_sup_recovery {
+        let mut markers: HashMap<String, HashSet<String>> = HashMap::new();
+        for item in &note_items {
+            markers
+                .entry(item.chapter_id.clone())
+                .or_default()
+                .insert(item.marker.clone());
+        }
+        markers
+            .into_iter()
+            .map(|(k, v)| {
+                let mut sorted: Vec<String> = v.into_iter().collect();
+                sorted.sort();
+                (k, sorted)
+            })
+            .collect()
+    } else {
+        HashMap::new()
+    };
+    let recovered_sup = if !input.config.skip_sup_recovery {
+        crate::sup_recovery::recover_book_chapter_scoped(
+            input.raw_pages,
+            &chapter_markers,
+            input.pdf_path,
+        )
+    } else {
+        HashMap::new()
+    };
 
     // 4. endnote_chapter_explorer
     // 5. endnote_repair
@@ -46,13 +74,18 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
     // 7. book_structure 聚合
     let book_type = crate::book_structure::infer_book_type(&layers.chapter_note_modes);
 
+    let total_recovered: usize = recovered_sup.values().map(|v| v.len()).sum();
+
     Ok(Phase2Output {
         chapters: input.phase1_chapters.to_vec(),
         note_regions,
         note_items,
         chapter_note_modes: layers.chapter_note_modes,
         book_type,
-        diagnostics: serde_json::json!({}),
+        diagnostics: serde_json::json!({
+            "sup_recovery_recovered": total_recovered,
+            "sup_recovery_num_chapters": recovered_sup.len(),
+        }),
     })
 }
 
