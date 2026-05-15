@@ -3,30 +3,9 @@
 
 use crate::book_note_type::BookNoteProfile;
 use anyhow::{Context, Result};
-use base64::Engine;
 use fnm_core::records::Phase1Structure;
-use once_cell::sync::Lazy;
-use pdfium_render::prelude::*;
-use reqwest::Client;
+use fnm_core::vision::*;
 use serde_json::json;
-use std::sync::Mutex;
-use std::time::Duration;
-
-// ── 全局单例 ──────────────────────────────────────────────────────
-
-static PDFIUM: Lazy<Mutex<Pdfium>> = Lazy::new(|| {
-    let bindings = Pdfium::bind_to_system_library()
-        .or_else(|_| Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./")))
-        .expect("无法加载 PDFium 二进制库");
-    Mutex::new(Pdfium::new(bindings))
-});
-
-static HTTP_CLIENT: Lazy<Client> = Lazy::new(|| {
-    Client::builder()
-        .timeout(Duration::from_secs(180))
-        .build()
-        .expect("构造 HTTP client 失败")
-});
 
 // ── 类型 ──────────────────────────────────────────────────────────
 
@@ -54,32 +33,6 @@ pub struct LlmVerifyResult {
     pub llm_book_type: Option<String>,
     pub agreement_with_rules: bool,
     pub evidence: serde_json::Value,
-}
-
-// ── PDF 渲染 ──────────────────────────────────────────────────────
-
-fn render_page_to_base64_png(pdf_path: &str, page_index: u16) -> Result<String> {
-    let pdfium = PDFIUM.lock().expect("PDFIUM mutex poisoned");
-    let document = pdfium
-        .load_pdf_from_file(pdf_path, None)
-        .with_context(|| format!("加载 PDF 失败: {}", pdf_path))?;
-    let page = document
-        .pages()
-        .get(page_index)
-        .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
-    let render_config = PdfRenderConfig::new()
-        .set_target_width(2000)
-        .render_form_data(false);
-    let bitmap = page.render_with_config(&render_config)?;
-    let image = bitmap.as_image();
-    let mut png_bytes = Vec::new();
-    image
-        .write_to(
-            &mut std::io::Cursor::new(&mut png_bytes),
-            image::ImageFormat::Png,
-        )
-        .context("PNG 编码失败")?;
-    Ok(base64::engine::general_purpose::STANDARD.encode(&png_bytes))
 }
 
 // ── 页面选择 ──────────────────────────────────────────────────────
@@ -223,7 +176,7 @@ pub async fn verify_book_type_with_llm(
     // 2. 渲染所有页面
     let mut images: Vec<(i64, String)> = Vec::new();
     for &page_no in &pages {
-        match render_page_to_base64_png(pdf_path, page_no.max(1) as u16 - 1) {
+        match render_page_to_base64_png(pdf_path, page_no.max(1) - 1, 150) {
             Ok(b64) => images.push((page_no, b64)),
             Err(e) => {
                 tracing::warn!("页面 {} 渲染失败: {:?}", page_no, e);

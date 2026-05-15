@@ -30,6 +30,11 @@ r2d2_sqlite = "0.24"
 # Tokenizer
 tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
 
+pdfium-render = { version = "0.8", features = ["bindings", "sync", "image"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["png"] }
+
 [dev-dependencies]
 insta = { version = "1.34", features = ["json", "redactions"] }
 pretty_assertions = "1.4"

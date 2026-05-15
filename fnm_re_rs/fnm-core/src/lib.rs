@@ -45,6 +45,7 @@ pub mod text;
 pub mod title;
 pub mod token_counter;
 pub mod types;
+pub mod vision;
 
 #[cfg(test)]
 pub mod testing;

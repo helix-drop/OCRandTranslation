@@ -3,18 +3,10 @@
 
 use crate::sup_recovery::pdf_render::render_page_to_base64_png;
 use anyhow::{Context, Result};
-use once_cell::sync::Lazy;
-use reqwest::Client;
+pub use fnm_core::vision::VisionConfig;
+pub(crate) use fnm_core::vision::HTTP_CLIENT;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::time::Duration;
-
-pub(crate) static HTTP_CLIENT: Lazy<Client> = Lazy::new(|| {
-    Client::builder()
-        .timeout(Duration::from_secs(180))
-        .build()
-        .expect("构造 HTTP client 失败")
-});
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Layer3Candidate {
@@ -30,23 +22,6 @@ pub struct Layer3Result {
     pub accepted: bool,
     pub confidence: f64,
     pub reason: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct VisionConfig {
-    pub api_key: String,
-    pub model: String,
-    pub base_url: String,
-}
-
-impl Default for VisionConfig {
-    fn default() -> Self {
-        Self {
-            api_key: std::env::var("OPENAI_API_KEY").unwrap_or_default(),
-            model: "gpt-4o".into(),
-            base_url: "https://api.openai.com/v1".into(),
-        }
-    }
 }
 
 /// Vision LLM 验证候选 marker（异步）。
