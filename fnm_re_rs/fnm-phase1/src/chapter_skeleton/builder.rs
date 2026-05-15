@@ -34,14 +34,11 @@ pub fn build_chapter_skeleton(
         if items.is_empty() {
             (vec![], "fallback")
         } else {
-            // 用 heading_graph 的 anchor_page 确定真实章节起始页。
-            // TOC target 与 anchor_page 差异过大时以 heading 实际检测位置为准，
-            // 同时按 anchor_page 重排（Python heading_graph 可发现章顺序与 TOC 不同）。
-            let anchors: std::collections::HashMap<String, i64> = heading_graph
-                .graph_rows
+            // ←→ Python _resolve_visual_toc_target_page: 全局搜索 heading candidates，
+            // 按 chapter_title_match_key 匹配 TOC title，将目标页替换为 heading 实际位置。
+            let page_roles: std::collections::HashMap<i64, PageRole> = page_partitions
                 .iter()
-                .filter(|r| r.anchor_state == "resolved" && r.anchor_page > 0)
-                .map(|r| (r.title.clone(), r.anchor_page))
+                .map(|p| (p.page_no, p.page_role))
                 .collect();
 
             let mut chs: Vec<ChapterRecord> = items
@@ -49,10 +46,13 @@ pub fn build_chapter_skeleton(
                 .filter(|item| item.export_candidate.unwrap_or(true))
                 .enumerate()
                 .map(|(i, item)| {
-                    let start_page = anchors
-                        .get(&item.title)
-                        .copied()
-                        .unwrap_or(item.target_pdf_page.unwrap_or(1));
+                    let target = item.target_pdf_page.unwrap_or(1);
+                    let start_page = resolve_visual_toc_target_page(
+                        &item.title,
+                        target,
+                        &page_roles,
+                        &heading_candidates,
+                    );
                     ChapterRecord {
                         chapter_id: format!("toc-ch-{}", i + 1),
                         title: item.title.clone(),
@@ -87,10 +87,6 @@ pub fn build_chapter_skeleton(
             let back_matter_start =
                 infer_back_matter_start_page(page_partitions, items, total_pages);
             let mut trimmed: Vec<ChapterRecord> = Vec::new();
-            let page_roles: std::collections::HashMap<i64, PageRole> = page_partitions
-                .iter()
-                .map(|p| (p.page_no, p.page_role))
-                .collect();
 
             for ch in &chs {
                 let _title_key = chapter_title_match_key(&ch.title);
@@ -211,4 +207,104 @@ fn infer_back_matter_start_page(
     }
 
     candidate_pages.into_iter().min().unwrap_or(0)
+}
+
+/// 全局搜索 heading candidates，用 chapter_title_match_key 匹配 TOC title，
+/// 返回最佳候选的 page_no。←→ Python `_resolve_visual_toc_target_page`
+fn resolve_visual_toc_target_page(
+    title: &str,
+    target_page: i64,
+    page_roles: &std::collections::HashMap<i64, PageRole>,
+    heading_candidates: &[HeadingCandidate],
+) -> i64 {
+    let title_key = chapter_title_match_key(title);
+    if title_key.is_empty() {
+        return target_page;
+    }
+
+    // (score, -distance, -page_no, page_no)
+    let mut scored: Vec<(i64, i64, i64, i64)> = Vec::new();
+    let mut current_has_exact_heading = false;
+
+    for c in heading_candidates {
+        if c.page_no <= 0 {
+            continue;
+        }
+        if chapter_title_match_key(&c.text) != title_key {
+            continue;
+        }
+        if c.page_no == target_page && c.source != "visual_toc" {
+            current_has_exact_heading = true;
+        }
+        let role = page_roles
+            .get(&c.page_no)
+            .copied()
+            .unwrap_or(PageRole::Body);
+        if matches!(role, PageRole::Note | PageRole::Other | PageRole::Noise) {
+            continue;
+        }
+
+        let mut score: i64 = 0;
+        match role {
+            PageRole::Body => score += 300,
+            PageRole::FrontMatter => score += 120,
+            _ => {}
+        }
+        match c.source.as_str() {
+            "ocr_block" if c.block_label == "doc_title" => score += 36,
+            "markdown_heading" => score += 30,
+            "pdf_font_band" => score += 24,
+            "visual_toc" => score += 10,
+            _ => {}
+        }
+        match c.heading_family_guess.as_str() {
+            "chapter" | "book" => score += 18,
+            "section" => score += 10,
+            _ => {}
+        }
+        if c.top_band {
+            score += 8;
+        }
+        score += (c.confidence * 10.0).round() as i64;
+        let distance = (c.page_no - target_page).abs();
+        scored.push((score, -distance, -c.page_no, c.page_no));
+    }
+
+    if scored.is_empty() {
+        return target_page;
+    }
+
+    scored.sort_by(|a, b| b.cmp(a)); // descending
+
+    let best_page = scored[0].3;
+    let current_role = page_roles
+        .get(&target_page)
+        .copied()
+        .unwrap_or(PageRole::Body);
+    let best_role = page_roles
+        .get(&best_page)
+        .copied()
+        .unwrap_or(PageRole::Body);
+
+    let should_replace = matches!(
+        current_role,
+        PageRole::Noise | PageRole::Other | PageRole::Note
+    ) || (!current_has_exact_heading && best_page != target_page)
+        || (best_role == PageRole::Body && current_role != PageRole::Body)
+        || (current_role == PageRole::FrontMatter
+            && best_role == PageRole::Body
+            && is_toc_body_anchor_title(title));
+
+    if should_replace && best_page != target_page {
+        best_page
+    } else {
+        target_page
+    }
+}
+
+/// ←→ Python `_is_toc_body_anchor_title`: lecture titles 等应锚定到 body 页。
+fn is_toc_body_anchor_title(title: &str) -> bool {
+    static LECTURE_ANCHOR_RE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"(?i)\b(?:le[cç]on|chapter|chapitre|cours)\b").unwrap());
+    LECTURE_ANCHOR_RE.is_match(&normalize_title(title))
 }
