@@ -10,6 +10,7 @@ use fnm_core::types::PageRole;
 use fnm_phase1::chapter_skeleton::toc_semantics::build_toc_semantics;
 use fnm_phase1::input::RawPage;
 use fnm_phase1::page_partition::build_page_partitions;
+use fnm_phase1::toc_structure::Phase1Config;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -261,7 +262,6 @@ fn biopolitics_page_partition_field_by_field() {
 fn biopolitics_chapters_field_by_field() {
     let golden = load_golden();
     let pages = load_biopolitics_pages();
-    let result = build_page_partitions(&pages, None, None);
 
     let toc_items: Vec<fnm_phase1::input::TocItem> = vec![
         ("Leçon du 10 janvier 1979", 17),
@@ -288,25 +288,30 @@ fn biopolitics_chapters_field_by_field() {
     })
     .collect();
 
-    let toc_result = build_toc_semantics(&toc_items, &[], &pages, &result.partitions, &[]);
+    // 生产路径：build_phase1_structure → build_chapter_skeleton（含 heading 全局搜索 + _trim_chapter_rows）
+    let phase1 = fnm_phase1::toc_structure::build_phase1_structure(
+        &pages,
+        Some(&toc_items),
+        &Phase1Config::default(),
+    )
+    .expect("Phase 1 should build");
+    let rust_chapters = phase1.structure.chapters;
 
-    // 章节数量
     assert_eq!(
-        toc_result.aligned_chapters.len(),
+        rust_chapters.len(),
         golden.chapters.len(),
         "Chapter count mismatch"
     );
 
-    // 章节 start_page 精确匹配（应与 TOC items 对齐，不受 page_role 影响）；end_page 因角色差异可能级联偏离
     let mut chapter_diffs = Vec::new();
-    for (i, rust_ch) in toc_result.aligned_chapters.iter().enumerate() {
+    for (i, rust_ch) in rust_chapters.iter().enumerate() {
         let py_ch = &golden.chapters[i];
         if rust_ch.start_page != py_ch.start_page {
             chapter_diffs.push((
                 i + 1,
                 "start_page",
-                rust_ch.start_page as f64,
-                py_ch.start_page as f64,
+                rust_ch.start_page,
+                py_ch.start_page,
                 rust_ch.title.clone(),
             ));
         }
@@ -314,15 +319,15 @@ fn biopolitics_chapters_field_by_field() {
             chapter_diffs.push((
                 i + 1,
                 "end_page",
-                rust_ch.end_page as f64,
-                py_ch.end_page as f64,
+                rust_ch.end_page,
+                py_ch.end_page,
                 rust_ch.title.clone(),
             ));
         }
     }
 
     if !chapter_diffs.is_empty() {
-        eprintln!("  Chapter boundary diffs (domino from page_role gap):");
+        eprintln!("  Chapter boundary diffs:");
         for (idx, field, rust_val, py_val, title) in &chapter_diffs {
             eprintln!(
                 "    Ch{} {} \"{}\": Rust {} vs Python {} (delta={})",
@@ -334,21 +339,15 @@ fn biopolitics_chapters_field_by_field() {
                 rust_val - py_val
             );
         }
-        eprintln!(
-            "  → Expected: Rust note pages (19) ≠ Python (62) → different chapter alignment/trim"
+        panic!(
+            "{} chapter boundary diffs — all 12 chapters must byte-equal Python golden",
+            chapter_diffs.len()
         );
     }
 
-    // 总是断言 12 章（结构不变）
-    assert_eq!(
-        toc_result.aligned_chapters.len(),
-        12,
-        "Should always be 12 chapters"
-    );
-
     eprintln!(
-        "  Chapters: {}/{} aligned — start/end pages match",
-        toc_result.aligned_chapters.len(),
+        "  Chapters: {}/{} — 100% byte-equal with Python golden",
+        rust_chapters.len(),
         golden.chapters.len()
     );
 }

@@ -112,21 +112,23 @@ No diff to report since both sides have empty post_body_titles currently.
 
 ---
 
-## 5. Summary
+## 5. Summary (updated 2026-05-16)
 
-| Metric | Rust | Python | Coverage |
-|--------|------|--------|----------|
+| Metric | Rust | Python | Status |
+|--------|------|--------|--------|
 | Total pages | 370 | 370 | 100% |
-| **note pages** | **62** | **62** | **100%** ✅ |
-| other pages | 14 | 15 | 93% |
-| noise pages | 3 | 3 | 100% |
-| body pages | 266 | 285 | 93% |
-| front_matter pages | 25 | 5 | — (over-classification) |
-| Chapters | 12 | 12 | 100% |
-| Role agreement | 358/370 | — | 96.8% (0 role misclassifications) |
+| note pages | 62 | 62 | ✅ 100% |
+| body pages | 285 | 285 | ✅ 100% |
+| front_matter pages | 5 | 5 | ✅ 100% |
+| other pages | 15 | 15 | ✅ 100% |
+| noise pages | 3 | 3 | ✅ 100% |
+| **Role agreement** | 358/370 | — | **96.8%** (0 role misclassifications, 12 non-role field diffs) |
+| **Chapters (production)** | 12 | 12 | ✅ **100% byte-equal** |
+| Heading candidates | ~103 | 103 | ✅ matching |
 
-**Next steps**:
-1. Investigate Phase 2 footnote band gap (Rust 10 vs Python 62 footnote regions) —
-   the last remaining major gap in the pipeline
-2. Regenerate golden with full build_chapter_skeleton → resolve chapter boundary diffs
-3. Wire Phase1Summary.post_body_titles into production pipeline
+### Remaining: Phase 2 region content alignment
+
+Chapter boundaries are 100% byte-equal in production pipeline, but Phase 2
+semantic matching still shows 20 kind reversals + 60 page range diffs.
+Investigation pending — likely from footnote_band region boundary granularity
+differences or note_kind_resolver priority ordering.
