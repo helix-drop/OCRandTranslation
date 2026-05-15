@@ -7,6 +7,18 @@ cd fnm_re_rs
 cargo build
 ```
 
+## PDFium 依赖（Vision LLM）
+
+G1+（`sup_recovery/pdf_render.rs`）使用 pdfium-render crate 渲染 PDF 页面供 Vision LLM 调用。
+运行时需要 PDFium 二进制库：
+
+- **macOS (Homebrew)**: `brew install pdfium`
+- **Linux**: 从 https://github.com/bblanchon/pdfium-binaries/releases 下载对应架构包，解压后将 libpdfium.so 放入 `LD_LIBRARY_PATH`
+- **Windows**: 同上，将 pdfium.dll 放入 `PATH`
+
+pdfium-render 优先加载系统库（`bind_to_system_library`），失败时尝试同目录加载。
+对应的测试用 `#[ignore]` 标记，需要 PDFium 二进制 + 测试 PDF 才能运行。:
+
 ## 测试
 
 ```bash
