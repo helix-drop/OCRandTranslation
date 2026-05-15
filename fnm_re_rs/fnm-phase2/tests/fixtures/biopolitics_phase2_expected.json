@@ -1,0 +1,71 @@
+{
+  "description": "Phase 2 expected output extracted from module snapshot",
+  "endnote_array_rows_count": 78,
+  "endnote_array_sample": [
+    {
+      "region_id": "nr-fn-ch-0001-toc-ch-001-leçondu10janvier1979",
+      "region_kind": "footnote",
+      "bound_chapter_id": "toc-ch-001-leçondu10janvier1979",
+      "item_count": 1,
+      "numeric_marker_start": null,
+      "numeric_marker_end": null,
+      "numeric_marker_contiguous": false,
+      "marker_preview": [
+        "*"
+      ]
+    },
+    {
+      "region_id": "nr-fn-ch-0002-toc-ch-001-leçondu10janvier1979",
+      "region_kind": "footnote",
+      "bound_chapter_id": "toc-ch-001-leçondu10janvier1979",
+      "item_count": 1,
+      "numeric_marker_start": null,
+      "numeric_marker_end": null,
+      "numeric_marker_contiguous": false,
+      "marker_preview": [
+        "*"
+      ]
+    },
+    {
+      "region_id": "nr-fn-ch-0003-toc-ch-001-leçondu10janvier1979",
+      "region_kind": "footnote",
+      "bound_chapter_id": "toc-ch-001-leçondu10janvier1979",
+      "item_count": 1,
+      "numeric_marker_start": null,
+      "numeric_marker_end": null,
+      "numeric_marker_contiguous": false,
+      "marker_preview": [
+        "*"
+      ]
+    },
+    {
+      "region_id": "nr-fn-ch-0004-toc-ch-001-leçondu10janvier1979",
+      "region_kind": "footnote",
+      "bound_chapter_id": "toc-ch-001-leçondu10janvier1979",
+      "item_count": 1,
+      "numeric_marker_start": null,
+      "numeric_marker_end": null,
+      "numeric_marker_contiguous": false,
+      "marker_preview": [
+        "*"
+      ]
+    },
+    {
+      "region_id": "nr-fn-ch-0005-toc-ch-001-leçondu10janvier1979",
+      "region_kind": "footnote",
+      "bound_chapter_id": "toc-ch-001-leçondu10janvier1979",
+      "item_count": 1,
+      "numeric_marker_start": null,
+      "numeric_marker_end": null,
+      "numeric_marker_contiguous": false,
+      "marker_preview": [
+        "*"
+      ]
+    }
+  ],
+  "note_capture_summary": {},
+  "link_summary": {},
+  "anchor_kind_counts": {
+    "unknown": 535
+  }
+}

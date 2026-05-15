@@ -1,0 +1,117 @@
+{
+  "description": "Phase 1 expected output extracted from module snapshot (boundary_detection)",
+  "total_pages": 370,
+  "page_role_samples": [
+    {
+      "page_no": 1,
+      "target_pdf_page": 1,
+      "page_role": "front_matter",
+      "role_reason": "default_body",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 2,
+      "target_pdf_page": 2,
+      "page_role": "front_matter",
+      "role_reason": "blank_front_page",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 3,
+      "target_pdf_page": 3,
+      "page_role": "front_matter",
+      "role_reason": "archive_noise",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 17,
+      "target_pdf_page": 17,
+      "page_role": "body",
+      "role_reason": "default_body",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 18,
+      "target_pdf_page": 18,
+      "page_role": "body",
+      "role_reason": "default_body",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 19,
+      "target_pdf_page": 19,
+      "page_role": "body",
+      "role_reason": "default_body",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 40,
+      "target_pdf_page": 40,
+      "page_role": "note",
+      "role_reason": "note_scan_collection",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 41,
+      "target_pdf_page": 41,
+      "page_role": "note",
+      "role_reason": "note_continuation",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 42,
+      "target_pdf_page": 42,
+      "page_role": "note",
+      "role_reason": "note_continuation",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 349,
+      "target_pdf_page": 349,
+      "page_role": "other",
+      "role_reason": "default_body",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 350,
+      "target_pdf_page": 350,
+      "page_role": "other",
+      "role_reason": "index",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    },
+    {
+      "page_no": 351,
+      "target_pdf_page": 351,
+      "page_role": "other",
+      "role_reason": "default_body",
+      "role_confidence": 1.0,
+      "has_note_heading": false,
+      "section_hint": ""
+    }
+  ],
+  "first_body_page": 17,
+  "first_note_page": 40,
+  "region_count": 78
+}

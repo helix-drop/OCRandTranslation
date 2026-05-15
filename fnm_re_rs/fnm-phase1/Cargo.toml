@@ -1,0 +1,39 @@
+[package]
+name = "fnm-phase1"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+[dependencies]
+fnm-core = { path = "../fnm-core" }
+
+# 序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# 正则
+regex = "1.10"
+once_cell = "1.19"
+
+# 错误处理
+thiserror = "1.0"
+anyhow = "1.0"
+
+# 日志
+tracing = "0.1"
+
+# 并行
+rayon = "1.10"
+
+# PDF
+pdfium-render = { version = "0.8", features = ["bindings", "thread_safe"] }
+
+# HTTP（LLM 调用）
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "stream"] }
+tokio = { version = "1.35", features = ["rt-multi-thread", "macros"] }
+base64 = "0.22"
+
+[dev-dependencies]
+insta = { version = "1.34", features = ["json", "redactions"] }
+pretty_assertions = "1.4"
+tempfile = "3.10"

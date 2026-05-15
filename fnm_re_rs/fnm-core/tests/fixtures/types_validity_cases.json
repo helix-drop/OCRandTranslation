@@ -1,0 +1,1564 @@
+{
+  "is_valid_page_role": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": true
+    },
+    {
+      "input": "  body  ",
+      "expected": true
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": true
+    },
+    {
+      "input": "other",
+      "expected": true
+    }
+  ],
+  "is_valid_chapter_source": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": true
+    },
+    {
+      "input": "fallback",
+      "expected": true
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": true
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_boundary_state": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": true
+    },
+    {
+      "input": "review_required",
+      "expected": true
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_note_kind": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": true
+    },
+    {
+      "input": "endnote",
+      "expected": true
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_region_scope": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": true
+    },
+    {
+      "input": "book",
+      "expected": true
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_region_source": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": true
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": true
+    },
+    {
+      "input": "continuation_merge",
+      "expected": true
+    },
+    {
+      "input": "manual_rebind",
+      "expected": true
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": true
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": true
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": true
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_note_mode": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": true
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": true
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": true
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": true
+    },
+    {
+      "input": "no_notes",
+      "expected": true
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_anchor_kind": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": true
+    },
+    {
+      "input": "endnote",
+      "expected": true
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_link_status": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": true
+    },
+    {
+      "input": "orphan_note",
+      "expected": true
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_link_resolver": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": true
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": false
+    },
+    {
+      "input": "running",
+      "expected": false
+    },
+    {
+      "input": "error",
+      "expected": false
+    },
+    {
+      "input": "done",
+      "expected": false
+    },
+    {
+      "input": "rule",
+      "expected": true
+    },
+    {
+      "input": "fallback",
+      "expected": true
+    },
+    {
+      "input": "repair",
+      "expected": true
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ],
+  "is_valid_pipeline_state": [
+    {
+      "input": "",
+      "expected": false
+    },
+    {
+      "input": " ",
+      "expected": false
+    },
+    {
+      "input": "noise",
+      "expected": false
+    },
+    {
+      "input": "  body  ",
+      "expected": false
+    },
+    {
+      "input": "unknown_blah",
+      "expected": false
+    },
+    {
+      "input": "footnote",
+      "expected": false
+    },
+    {
+      "input": "endnote",
+      "expected": false
+    },
+    {
+      "input": "matched",
+      "expected": false
+    },
+    {
+      "input": "orphan_note",
+      "expected": false
+    },
+    {
+      "input": "visual_toc",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "ready",
+      "expected": false
+    },
+    {
+      "input": "review_required",
+      "expected": false
+    },
+    {
+      "input": "heading_scan",
+      "expected": false
+    },
+    {
+      "input": "chapter",
+      "expected": false
+    },
+    {
+      "input": "book",
+      "expected": false
+    },
+    {
+      "input": "footnote_band",
+      "expected": false
+    },
+    {
+      "input": "continuation_merge",
+      "expected": false
+    },
+    {
+      "input": "manual_rebind",
+      "expected": false
+    },
+    {
+      "input": "explorer_toc_match",
+      "expected": false
+    },
+    {
+      "input": "explorer_signal_match",
+      "expected": false
+    },
+    {
+      "input": "fallback_nearest_prior",
+      "expected": false
+    },
+    {
+      "input": "footnote_primary",
+      "expected": false
+    },
+    {
+      "input": "chapter_endnote_primary",
+      "expected": false
+    },
+    {
+      "input": "book_endnote_bound",
+      "expected": false
+    },
+    {
+      "input": "no_notes",
+      "expected": false
+    },
+    {
+      "input": "idle",
+      "expected": true
+    },
+    {
+      "input": "running",
+      "expected": true
+    },
+    {
+      "input": "error",
+      "expected": true
+    },
+    {
+      "input": "done",
+      "expected": true
+    },
+    {
+      "input": "rule",
+      "expected": false
+    },
+    {
+      "input": "fallback",
+      "expected": false
+    },
+    {
+      "input": "repair",
+      "expected": false
+    },
+    {
+      "input": "note",
+      "expected": false
+    },
+    {
+      "input": "other",
+      "expected": false
+    }
+  ]
+}

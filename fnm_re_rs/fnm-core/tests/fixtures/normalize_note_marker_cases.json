@@ -1,0 +1,170 @@
+[
+  {
+    "input": "12",
+    "expected": "12"
+  },
+  {
+    "input": " 1 2 ",
+    "expected": "12"
+  },
+  {
+    "input": "12a",
+    "expected": "12"
+  },
+  {
+    "input": "<sup>5</sup>",
+    "expected": "5"
+  },
+  {
+    "input": "",
+    "expected": ""
+  },
+  {
+    "input": "abc",
+    "expected": ""
+  },
+  {
+    "input": "1.",
+    "expected": "1"
+  },
+  {
+    "input": "[3]",
+    "expected": "3"
+  },
+  {
+    "input": " ⁵ ",
+    "expected": "5"
+  },
+  {
+    "input": "¹²",
+    "expected": "12"
+  },
+  {
+    "input": "²³⁴⁵",
+    "expected": "2345"
+  },
+  {
+    "input": "*",
+    "expected": "*"
+  },
+  {
+    "input": "**",
+    "expected": "**"
+  },
+  {
+    "input": "†",
+    "expected": "†"
+  },
+  {
+    "input": "‡‡",
+    "expected": "‡‡"
+  },
+  {
+    "input": "§",
+    "expected": "§"
+  },
+  {
+    "input": "¶",
+    "expected": "¶"
+  },
+  {
+    "input": "1.2",
+    "expected": "12"
+  },
+  {
+    "input": "100",
+    "expected": "100"
+  },
+  {
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "input": "01",
+    "expected": "1"
+  },
+  {
+    "input": "a",
+    "expected": "a"
+  },
+  {
+    "input": "Z",
+    "expected": "Z"
+  },
+  {
+    "input": "12345",
+    "expected": "12345"
+  },
+  {
+    "input": "¹",
+    "expected": "1"
+  },
+  {
+    "input": "²",
+    "expected": "2"
+  },
+  {
+    "input": "³",
+    "expected": "3"
+  },
+  {
+    "input": "⁴",
+    "expected": "4"
+  },
+  {
+    "input": "⁵",
+    "expected": "5"
+  },
+  {
+    "input": "⁶",
+    "expected": "6"
+  },
+  {
+    "input": "⁷",
+    "expected": "7"
+  },
+  {
+    "input": "⁸",
+    "expected": "8"
+  },
+  {
+    "input": "⁹",
+    "expected": "9"
+  },
+  {
+    "input": "⁰",
+    "expected": "0"
+  },
+  {
+    "input": " 1 ",
+    "expected": "1"
+  },
+  {
+    "input": "\t2\n",
+    "expected": "2"
+  },
+  {
+    "input": "[12]",
+    "expected": "12"
+  },
+  {
+    "input": "12;",
+    "expected": "12"
+  },
+  {
+    "input": "12:",
+    "expected": "12"
+  },
+  {
+    "input": "12,",
+    "expected": "12"
+  },
+  {
+    "input": "12)",
+    "expected": "12"
+  },
+  {
+    "input": "12.",
+    "expected": "12"
+  }
+]

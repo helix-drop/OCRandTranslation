@@ -1,0 +1,341 @@
+[
+  {
+    "fileIdx": 0,
+    "bookPage": 1,
+    "pdfPage": 1,
+    "printPage": null,
+    "printPageLabel": "",
+    "detectedPage": null,
+    "imgW": 778,
+    "imgH": 1290,
+    "blocks": [
+      {
+        "text": "NAISSANCE DE LA BIOPOLITIQUE",
+        "x": 90,
+        "bbox": [
+          90,
+          229,
+          680,
+          357
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0,
+        "textSource": "pdf"
+      },
+      {
+        "text": "Cours au Collège de France. 1978-1979",
+        "x": 143,
+        "bbox": [
+          143,
+          363,
+          626,
+          398
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0,
+        "textSource": "pdf"
+      },
+      {
+        "text": "HAUTES ÉTUDES",
+        "x": 278,
+        "bbox": [
+          278,
+          987,
+          500,
+          1019
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0,
+        "textSource": "pdf"
+      },
+      {
+        "text": "BR)",
+        "x": 344,
+        "bbox": [
+          344,
+          1030,
+          436,
+          1057
+        ],
+        "label": "image",
+        "is_meta": true,
+        "heading_level": 0,
+        "textSource": "pdf"
+      },
+      {
+        "text": "GALLIMARD SEUIL",
+        "x": 312,
+        "bbox": [
+          312,
+          1078,
+          467,
+          1143
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0,
+        "textSource": "pdf"
+      }
+    ],
+    "footnotes": "",
+    "indent": 100,
+    "textSource": "pdf",
+    "markdown": "## MICHEL FOUCAULT\n\nNAISSANCE\n\nDE LA BIOPOLITIQUE\n\nCours au Collège de France. 1978-1979\n\nHAUTES ÉTUDES\n\n<div style=\"text-align: center;\"><img src=\"imgs/img_in_image_box_344_1030_436_1057.jpg\" alt=\"Image\" width=\"11%\" /></div>\n\n\nGALLIMARD\n\nSEUIL",
+    "printPageDisplay": "",
+    "isFigurePage": false,
+    "_cleanup_applied": true,
+    "_note_scan_version": 1,
+    "_note_scan": {
+      "page_kind": "body",
+      "items": [],
+      "section_hints": [],
+      "ambiguity_flags": [],
+      "note_start_line_index": null,
+      "reviewed_by_model": false
+    }
+  },
+  {
+    "fileIdx": 1,
+    "bookPage": 2,
+    "pdfPage": 2,
+    "printPage": null,
+    "printPageLabel": "",
+    "detectedPage": null,
+    "imgW": 778,
+    "imgH": 1290,
+    "blocks": [],
+    "footnotes": "",
+    "indent": 100,
+    "textSource": "empty",
+    "markdown": "",
+    "isFigurePage": false,
+    "_cleanup_applied": true,
+    "_restored_missing_page": true,
+    "_note_scan_version": 1,
+    "_note_scan": {
+      "page_kind": "body",
+      "items": [],
+      "section_hints": [],
+      "ambiguity_flags": [],
+      "note_start_line_index": null,
+      "reviewed_by_model": false
+    }
+  },
+  {
+    "fileIdx": 2,
+    "bookPage": 3,
+    "pdfPage": 3,
+    "printPage": null,
+    "printPageLabel": "",
+    "detectedPage": null,
+    "imgW": 767,
+    "imgH": 1284,
+    "blocks": [
+      {
+        "text": "NAISANCE DE LA NOVAITRE",
+        "x": 156,
+        "bbox": [
+          156,
+          272,
+          566,
+          302
+        ],
+        "label": "figure_title",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "Digitized by the Internet Archive in 2024",
+        "x": 187,
+        "bbox": [
+          187,
+          603,
+          579,
+          672
+        ],
+        "label": "paragraph_title",
+        "is_meta": false,
+        "heading_level": 2,
+        "textSource": "pdf"
+      }
+    ],
+    "footnotes": "",
+    "indent": 166,
+    "textSource": "pdf",
+    "markdown": "<div style=\"text-align: center;\">NAISANCE DE LA NOVAITRE</div>\n\n\n## Digitized by the Internet Archive in 2024",
+    "printPageDisplay": "",
+    "isFigurePage": false,
+    "_cleanup_applied": true,
+    "_note_scan_version": 1,
+    "_note_scan": {
+      "page_kind": "body",
+      "items": [],
+      "section_hints": [],
+      "ambiguity_flags": [],
+      "note_start_line_index": null,
+      "reviewed_by_model": false
+    }
+  },
+  {
+    "fileIdx": 3,
+    "bookPage": 4,
+    "pdfPage": 4,
+    "printPage": null,
+    "printPageLabel": "",
+    "detectedPage": null,
+    "imgW": 778,
+    "imgH": 1290,
+    "blocks": [],
+    "footnotes": "",
+    "indent": 100,
+    "textSource": "empty",
+    "markdown": "",
+    "isFigurePage": false,
+    "_cleanup_applied": true,
+    "_restored_missing_page": true,
+    "_note_scan_version": 1,
+    "_note_scan": {
+      "page_kind": "body",
+      "items": [],
+      "section_hints": [],
+      "ambiguity_flags": [],
+      "note_start_line_index": null,
+      "reviewed_by_model": false
+    }
+  },
+  {
+    "fileIdx": 4,
+    "bookPage": 5,
+    "pdfPage": 5,
+    "printPage": null,
+    "printPageLabel": "",
+    "detectedPage": null,
+    "imgW": 764,
+    "imgH": 1284,
+    "blocks": [
+      {
+        "text": "The quick brown fox jumps over the lazy dog.",
+        "x": 216,
+        "bbox": [
+          216,
+          193,
+          562,
+          251
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "(1881-1891)",
+        "x": 267,
+        "bbox": [
+          267,
+          262,
+          513,
+          333
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "$ 2023^{th} $",
+        "x": 254,
+        "bbox": [
+          254,
+          343,
+          490,
+          396
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "(2020-10-01)\n\nDự Khoảng thưởng quả",
+        "x": 259,
+        "bbox": [
+          259,
+          407,
+          529,
+          459
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "(Gade-Tadé)\n\nVivianne de la plaisance",
+        "x": 264,
+        "bbox": [
+          264,
+          469,
+          524,
+          520
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "(10000",
+        "x": 255,
+        "bbox": [
+          255,
+          537,
+          537,
+          606
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "(1970-2014)",
+        "x": 261,
+        "bbox": [
+          261,
+          618,
+          532,
+          688
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      },
+      {
+        "text": "naissance de la biopolitique",
+        "x": 203,
+        "bbox": [
+          203,
+          982,
+          607,
+          1015
+        ],
+        "label": "text",
+        "is_meta": false,
+        "heading_level": 0
+      }
+    ],
+    "footnotes": "",
+    "indent": 213,
+    "textSource": "pdf",
+    "markdown": "The quick brown fox jumps over the lazy dog.\n\n(1881-1891)\n\n $ 2023^{th} $\n\n(2020-10-01)\n\nDự Khoảng thưởng quả\n\n(Gade-Tadé)\n\nVivianne de la plaisance\n\n(10000\n\n(1970-2014)\n\nNAISSANCE DE LA BIOPOLITIQUE",
+    "printPageDisplay": "",
+    "isFigurePage": false,
+    "_cleanup_applied": true,
+    "_note_scan_version": 1,
+    "_note_scan": {
+      "page_kind": "body",
+      "items": [],
+      "section_hints": [],
+      "ambiguity_flags": [],
+      "note_start_line_index": null,
+      "reviewed_by_model": false
+    }
+  }
+]

@@ -1,0 +1,153 @@
+//! ←→ FNM_RE/shared/token_counter.py
+//! 统一 token 计数与用量追踪。
+//!
+//! 使用 `tokenizers` crate 加载 GPT-4o tokenizer，与 Python `tiktoken` 对齐。
+
+use once_cell::sync::Lazy;
+use std::collections::HashMap;
+use std::sync::Mutex;
+use tokenizers::Tokenizer;
+
+const O200K_BASE_JSON: &[u8] = include_bytes!("../assets/o200k_base.json");
+
+static O200K_BASE: Lazy<Tokenizer> =
+    Lazy::new(|| Tokenizer::from_bytes(O200K_BASE_JSON).expect("load o200k_base tokenizer"));
+
+/// 全局用量记录（线程安全）。
+static USAGE_RECORDS: Lazy<Mutex<Vec<UsageRecord>>> = Lazy::new(|| Mutex::new(Vec::new()));
+
+#[derive(Debug, Clone)]
+pub struct UsageRecord {
+    pub stage: String,
+    pub model_id: String,
+    pub provider: String,
+    pub prompt_tokens: i64,
+    pub completion_tokens: i64,
+    pub total_tokens: i64,
+    pub request_count: i64,
+    pub dur_ms: i64,
+}
+
+/// 计算文本的 token 数。与 Python `tiktoken.encoding_for_model("gpt-4o").encode(text)` 对齐。
+pub fn count_tokens(text: &str) -> usize {
+    O200K_BASE.encode(text, false).map(|e| e.len()).unwrap_or(0)
+}
+
+/// 记录一次 LLM 用量。与 Python `record_usage` 一致。
+#[allow(clippy::too_many_arguments)]
+pub fn record_usage(
+    stage: &str,
+    model_id: &str,
+    provider: &str,
+    prompt_tokens: i64,
+    completion_tokens: i64,
+    total_tokens: i64,
+    request_count: i64,
+    dur_ms: i64,
+) {
+    if let Ok(mut records) = USAGE_RECORDS.lock() {
+        records.push(UsageRecord {
+            stage: stage.to_string(),
+            model_id: model_id.to_string(),
+            provider: provider.to_string(),
+            prompt_tokens,
+            completion_tokens,
+            total_tokens,
+            request_count,
+            dur_ms,
+        });
+    }
+}
+
+/// 获取分阶段和分模型的用量汇总。
+/// 与 Python `get_usage_summary` 一致。
+pub fn get_usage_summary() -> serde_json::Value {
+    let records = USAGE_RECORDS.lock().unwrap();
+    let mut by_stage: HashMap<String, HashMap<String, i64>> = HashMap::new();
+    let mut by_model: HashMap<String, HashMap<String, i64>> = HashMap::new();
+    let mut total: HashMap<&str, i64> = [
+        ("request_count", 0),
+        ("prompt_tokens", 0),
+        ("completion_tokens", 0),
+        ("total_tokens", 0),
+    ]
+    .into();
+
+    for c in records.iter() {
+        let sk = &c.stage;
+        let mk = &c.model_id;
+        by_stage.entry(sk.clone()).or_insert_with(|| {
+            HashMap::from([
+                ("request_count".into(), 0),
+                ("prompt_tokens".into(), 0),
+                ("completion_tokens".into(), 0),
+                ("total_tokens".into(), 0),
+            ])
+        });
+        by_model.entry(mk.clone()).or_insert_with(|| {
+            HashMap::from([
+                ("request_count".into(), 0),
+                ("prompt_tokens".into(), 0),
+                ("completion_tokens".into(), 0),
+                ("total_tokens".into(), 0),
+            ])
+        });
+        for key in &[
+            "request_count",
+            "prompt_tokens",
+            "completion_tokens",
+            "total_tokens",
+        ] {
+            let v = match *key {
+                "request_count" => c.request_count,
+                "prompt_tokens" => c.prompt_tokens,
+                "completion_tokens" => c.completion_tokens,
+                "total_tokens" => c.total_tokens,
+                _ => 0,
+            };
+            *by_stage.get_mut(sk).unwrap().get_mut(*key).unwrap() += v;
+            *by_model.get_mut(mk).unwrap().get_mut(*key).unwrap() += v;
+            *total.get_mut(*key).unwrap() += v;
+        }
+    }
+
+    serde_json::json!({
+        "by_stage": by_stage,
+        "by_model": by_model,
+        "total": total,
+    })
+}
+
+/// 清空用量记录。与 Python `clear_usage` 一致。
+pub fn clear_usage() {
+    if let Ok(mut records) = USAGE_RECORDS.lock() {
+        records.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn count_tokens_returns_nonzero() {
+        let n = count_tokens("Hello world");
+        assert!(n > 0);
+    }
+
+    #[test]
+    fn count_tokens_empty() {
+        let n = count_tokens("");
+        assert_eq!(n, 0);
+    }
+
+    #[test]
+    fn usage_recording() {
+        clear_usage();
+        record_usage("test", "gpt-4o", "openai", 100, 50, 150, 1, 200);
+        let summary = get_usage_summary();
+        let total = &summary["total"];
+        assert_eq!(total["prompt_tokens"], 100);
+        assert_eq!(total["completion_tokens"], 50);
+    }
+}

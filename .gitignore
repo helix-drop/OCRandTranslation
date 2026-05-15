@@ -40,6 +40,10 @@ env/
 *.sublime-project
 *.sublime-workspace
 
+# Rust 构建产物
+target/
+Cargo.lock
+
 # 日志文件
 *.log
 

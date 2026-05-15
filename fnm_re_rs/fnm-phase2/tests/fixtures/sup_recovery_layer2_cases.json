@@ -1,0 +1,17 @@
+[
+  {
+    "text": "1927-30 * ou",
+    "expected_marker": "30",
+    "reason": "symbol_after_year"
+  },
+  {
+    "text": "text ; 11 ; more",
+    "expected_marker": "11",
+    "reason": "punctuation_surrogate"
+  },
+  {
+    "text": "7. some note",
+    "expected_marker": "37",
+    "reason": "ocr_suffix"
+  }
+]

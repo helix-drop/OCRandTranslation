@@ -1,0 +1,23 @@
+[
+  {
+    "input": "1 2",
+    "expected": {
+      "marker": "12",
+      "is_reconstructed": true
+    }
+  },
+  {
+    "input": " 1 , 2 ",
+    "expected": {
+      "marker": "12",
+      "is_reconstructed": true
+    }
+  },
+  {
+    "input": "1.2",
+    "expected": {
+      "marker": "12",
+      "is_reconstructed": true
+    }
+  }
+]
