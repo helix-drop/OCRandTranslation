@@ -18,6 +18,7 @@ pub fn build_chapter_skeleton(
     toc_items: Option<&[TocItem]>,
     page_partitions: &[PagePartitionRecord],
     heading_graph: &crate::heading_graph::HeadingGraph,
+    heading_candidates: Vec<HeadingCandidate>,
 ) -> ChapterSkeleton {
     let total_pages = pages.len() as i64;
 
@@ -68,7 +69,7 @@ pub fn build_chapter_skeleton(
 
     ChapterSkeleton {
         chapters,
-        heading_candidates: vec![],
+        heading_candidates,
         diagnostics: serde_json::json!({
             "source": source,
             "total_pages": total_pages,

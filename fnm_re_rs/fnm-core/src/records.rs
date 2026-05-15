@@ -49,7 +49,7 @@ pub struct PagePartitionRecord {
     pub note_scan_summary: Value,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct HeadingCandidate {
     pub heading_id: String,
     pub page_no: i64,
