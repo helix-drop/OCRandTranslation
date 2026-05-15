@@ -104,7 +104,13 @@ hardcoded chapters (Ch1 starts at p17), but actual Phase 1 output has Ch1 at p30
 due to front_matter over-classification. This causes chapter-scope regions to be
 partitioned differently.
 
+**Updated (2026-05-16)**: Phase 1 front_matter fix applied. Phase 1 role distribution now 100% aligned.
+
+Remaining Phase 2 gaps (from using hardcoded chapters vs full builder pipeline):
+- Footnote region gap: Rust 10 vs Python 62 — `footnote_band` detection needs audit
+- Region count: Rust 23 vs Python 75 — hardcoded chapters don't match actual page roles
+
 **Next steps**:
-1. Fix Phase 1 front_matter over-classification → auto-resolves chapter boundary cascade
+1. Generate golden using full `build_chapter_skeleton` output → close chapter boundary cascade
 2. Investigate Phase 2 footnote_band gap (Rust 10 vs Python 62 footnote regions)
 3. Wire Phase1Summary.post_body_titles into Phase2Input for real pipeline runs
