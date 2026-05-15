@@ -1,13 +1,14 @@
 //! ←→ FNM_RE/stages/page_partition.py
 //! 页面角色判定入口 + build_page_partitions / build_page_partitions_streaming。
 
+pub mod continuation;
 pub mod role_heuristics;
 pub mod role_resolver;
+pub mod rules;
 
 use crate::input::{ManualPageOverride, RawPage};
 use fnm_core::records::PagePartitionRecord;
 use fnm_core::text::{first_section_hint, has_note_heading, note_scan_summary};
-use fnm_core::types::PageRole;
 use role_resolver::{resolve_page_role, PageScanContext};
 use std::collections::HashMap;
 
@@ -73,14 +74,35 @@ pub fn build_page_partitions(
 
     records.sort_by_key(|r| r.page_no);
 
-    // 应用 manual overrides
+    // 从 page_info_cache 构建 heading + text 缓存（供 continuation fixes 使用）
+    let page_headings: HashMap<i64, Vec<String>> = page_info_cache
+        .iter()
+        .map(|(&no, info)| (no, info.headings.clone()))
+        .collect();
+    let page_texts: HashMap<i64, String> = page_info_cache
+        .iter()
+        .map(|(&no, info)| (no, info.markdown.clone()))
+        .collect();
+
+    // 按 Python 顺序应用修复
+    continuation::apply_endnotes_start_page_hint(&mut records, endnotes_start_page);
+    continuation::apply_front_matter_continuation_fix(
+        &mut records,
+        total_pages.max(1),
+        &page_headings,
+        &page_texts,
+    );
+    continuation::apply_back_matter_continuation_fix(
+        &mut records,
+        total_pages.max(1),
+        &page_headings,
+        &page_texts,
+    );
+    continuation::apply_note_continuation_fix(&mut records, total_pages.max(1), &page_texts);
+
+    // 应用 manual overrides（最后执行，确保用户手动指定优先）
     if let Some(overrides) = page_overrides {
         apply_manual_overrides(&mut records, overrides);
-    }
-
-    // 应用 endnotes_start_page_hint
-    if let Some(start_page) = endnotes_start_page {
-        apply_endnotes_start_page_hint(&mut records, start_page);
     }
 
     let _synthetic = build_synthetic_page_by_no(&page_info_cache);
@@ -89,7 +111,7 @@ pub fn build_page_partitions(
         partitions: records,
         pre_extracted_page_candidates: vec![],
         file_idx_map,
-        page_texts: HashMap::new(),
+        page_texts,
     }
 }
 
@@ -108,43 +130,6 @@ fn apply_manual_overrides(
                     record.reason = "manual_override".into();
                 }
             }
-        }
-    }
-}
-
-/// 应用 endnotes_start_page 提示：从 start 往后，非 note 页改为 note。
-fn apply_endnotes_start_page_hint(records: &mut [PagePartitionRecord], start_page: i64) {
-    if start_page <= 0 {
-        return;
-    }
-    let mut seen_note = false;
-    for record in records.iter_mut() {
-        if record.page_no < start_page {
-            continue;
-        }
-        if record.page_role.as_str() == "note" {
-            seen_note = true;
-            continue;
-        }
-        if seen_note
-            && record.page_role.as_str() == "other"
-            && matches!(
-                record.reason.as_str(),
-                "rear_toc_tail"
-                    | "rear_author_blurb"
-                    | "rear_sparse_other"
-                    | "bibliography"
-                    | "index"
-                    | "illustrations"
-            )
-        {
-            break;
-        }
-        if matches!(record.page_role.as_str(), "body" | "other" | "front_matter") {
-            record.page_role = PageRole::Note;
-            record.confidence = record.confidence.max(0.90);
-            record.reason = "endnotes_start_page_hint".into();
-            seen_note = true;
         }
     }
 }
