@@ -128,6 +128,38 @@ static MU_HTML_TAG_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]+>").unwrap(
 static NOTE_DEF_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^\s*(\d{1,4}[A-Za-z]?)\s*[\.,\)\]]\s*(.*\S.*)?$").unwrap());
 
+static NOTE_DEF_OCR_SPLIT_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^\s*(\d{1,4}[A-Za-z]?)\s+[Il1]\s*[\.,\)\]]\s*(.*\S.*)?$").unwrap());
+
+static LEADING_OCR_NOTE_PUNCT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[\.,:;·•]+").unwrap());
+
+static TOC_EXPLICIT_CHAPTER_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"^(?:chapter|chapitre)\b|^(?:\d+|[ivxlcm]+)[\.\):\-]\s+\S+|\ble[cç]on du\b|\bcours\b|\bprologue\b|\bepilogue\b|\bconclusion\b",
+    )
+    .unwrap()
+});
+
+static BIBLIO_AUTHOR_ENTRY_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"(?:^|[.;]\s+)(?:[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’\-]+(?:,\s+[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’\-]+){0,2},)",
+    )
+    .unwrap()
+});
+
+/// 插图延续页的编号入口检测。
+static NUMBERED_ENTRY_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\b\d{1,3}\.\s+\S").unwrap());
+
+/// `_ENDNOTES_HINT_STOP_REASONS` — 遇到这些 reason 时停止 endnotes_start_page_hint 传播。
+pub(crate) const ENDNOTES_HINT_STOP_REASONS: &[&str] = &[
+    "rear_sparse_other",
+    "rear_toc_tail",
+    "rear_author_blurb",
+    "bibliography",
+    "index",
+    "illustrations",
+];
+
 // ── 文本工具 ──────────────────────────────────────────────────
 
 pub(crate) fn is_notes_heading_match(heading: &str) -> bool {
@@ -175,6 +207,228 @@ fn chapter_keyword_strength(title: &str) -> i64 {
 
 fn is_toc_force_export_title(title: &str) -> bool {
     TOC_FORCE_EXPORT_TITLE_RE.is_match(&normalize_title(title))
+}
+
+pub(crate) fn is_visual_toc_explicit_chapter_title(title: &str) -> bool {
+    let normalized = normalize_title(title);
+    if normalized.is_empty() {
+        return false;
+    }
+    if is_toc_force_export_title(&normalized) {
+        return true;
+    }
+    if MAIN_NUMBERED_TITLE_RE.is_match(&normalized) {
+        return true;
+    }
+    TOC_EXPLICIT_CHAPTER_TITLE_RE.is_match(&normalized)
+}
+
+/// 检查 text 是否可以用作强 body 边界判定。
+/// ←→ Python `_is_strong_body_boundary_page`（简化版：直接传 headings 代替 page_row）
+pub(crate) fn is_strong_body_boundary(headings: &[String], page_no: i64, total_pages: i64) -> bool {
+    let first_heading = headings.first().cloned().unwrap_or_default();
+    if first_heading.is_empty() {
+        return false;
+    }
+    let normalized = normalize_title(&first_heading);
+    if normalized.is_empty() {
+        return false;
+    }
+    if is_notes_heading_match(&normalized) {
+        return false;
+    }
+    if LECTURE_TITLE_RE.is_match(&normalized) {
+        return true;
+    }
+    if is_visual_toc_explicit_chapter_title(&normalized) {
+        return true;
+    }
+    let family = fnm_core::title::guess_title_family(&normalized, page_no, total_pages);
+    family == "chapter"
+}
+
+/// 检查 body 入口页（简化版：直接传 text/headings 代替 page_row）。
+/// ←→ Python `_is_body_entry_page`
+pub(crate) fn is_body_entry_page(
+    text: &str,
+    headings: &[String],
+    page_no: i64,
+    total_pages: i64,
+) -> bool {
+    if is_strong_body_boundary(headings, page_no, total_pages) {
+        return true;
+    }
+    let first_heading = headings.first().cloned().unwrap_or_default();
+    let normalized = normalize_title(&first_heading);
+    if normalized.is_empty() {
+        return false;
+    }
+    if is_notes_heading_match(&normalized) {
+        return false;
+    }
+    if looks_like_course_listing_page(text, page_no, total_pages) {
+        return false;
+    }
+    if looks_like_copyright_front_matter_page(text, page_no, total_pages) {
+        return false;
+    }
+    looks_like_prose_after_heading(text)
+}
+
+pub(crate) fn note_def_match(line: &str) -> bool {
+    let candidate = line.trim();
+    if candidate.is_empty() {
+        return false;
+    }
+    let candidate = if MARKDOWN_HEADING_RE.is_match(candidate) {
+        normalize_title(
+            MARKDOWN_HEADING_RE
+                .captures(candidate)
+                .and_then(|c| c.get(2))
+                .map(|m| m.as_str())
+                .unwrap_or(""),
+        )
+    } else {
+        candidate.to_string()
+    };
+    let candidate = LEADING_OCR_NOTE_PUNCT_RE.replace_all(&candidate, "");
+    NOTE_DEF_RE.is_match(&candidate) || NOTE_DEF_OCR_SPLIT_RE.is_match(&candidate)
+}
+
+pub(crate) fn looks_like_note_continuation_page(
+    text: &str,
+    page_no: i64,
+    total_pages: i64,
+) -> bool {
+    let normalized = text.trim();
+    if normalized.is_empty() {
+        return false;
+    }
+    if page_no <= (8).max((total_pages as f64 * 0.03) as i64) {
+        return false;
+    }
+    let lines = plain_text_lines(normalized);
+    if lines.is_empty() {
+        return false;
+    }
+    if is_notes_heading_match(&lines[0]) {
+        return true;
+    }
+    let note_def_count = lines.iter().filter(|l| note_def_match(l)).count();
+    if note_def_count < 2 {
+        return false;
+    }
+    if lines.len() < 5 {
+        return false;
+    }
+    let first_note_index = lines.iter().position(|l| note_def_match(l));
+    match first_note_index {
+        None => return false,
+        Some(idx) if idx > 3 => return false,
+        Some(idx) => {
+            let prelude_lines: Vec<&String> = lines.iter().take(idx).collect();
+            if note_def_count >= 2
+                && !prelude_lines.is_empty()
+                && prelude_lines
+                    .iter()
+                    .all(|l| MARKDOWN_HEADING_RE.is_match(l.trim()) || l.len() <= 80)
+            {
+                return true;
+            }
+        }
+    }
+    let non_note_line_count = lines.len().saturating_sub(note_def_count);
+    if non_note_line_count <= 1 && note_def_count >= 2 {
+        return true;
+    }
+    let first_content = lines
+        .iter()
+        .find(|l| !is_notes_heading_match(l))
+        .cloned()
+        .unwrap_or_default();
+    if !first_content.is_empty() && note_def_match(&first_content) {
+        return note_def_count >= 2;
+    }
+    note_def_count >= (4).max(lines.len() / 2)
+}
+
+pub(crate) fn looks_like_bibliography_continuation_page(text: &str) -> bool {
+    let normalized: String = plain_text_lines(text).join(" ");
+    if normalized.is_empty() {
+        return false;
+    }
+    let author_entry_count = BIBLIO_AUTHOR_ENTRY_RE.find_iter(&normalized).count();
+    let citation_hint_count = BIBLIO_CITATION_HINT_RE.find_iter(&normalized).count();
+    let year_count = YEAR_TOKEN_RE.find_iter(&normalized).count();
+    let quoted_title_count = normalized.matches('«').count() + normalized.matches('"').count();
+    if author_entry_count >= 2 && year_count >= 2 {
+        return true;
+    }
+    if citation_hint_count >= 3 && year_count >= 3 {
+        return true;
+    }
+    quoted_title_count >= 2 && citation_hint_count >= 2 && year_count >= 2
+}
+
+pub(crate) fn looks_like_index_continuation_page(text: &str) -> bool {
+    let normalized = text.trim();
+    if normalized.is_empty() {
+        return false;
+    }
+    INDEX_ENTRY_RE.find_iter(normalized).count() >= 2
+}
+
+pub(crate) fn looks_like_illustrations_continuation_page(text: &str) -> bool {
+    let normalized: String = plain_text_lines(text).join(" ");
+    if normalized.is_empty() {
+        return false;
+    }
+    let numbered_entry_count = NUMBERED_ENTRY_RE.find_iter(&normalized).count();
+    let hint_count = ILLUSTRATION_CONTENT_RE.find_iter(&normalized).count();
+    numbered_entry_count >= 2 && hint_count >= 2
+}
+
+pub(crate) fn looks_like_back_matter_continuation_page(
+    text: &str,
+    family: &str,
+    _page_no: i64,
+    _total_pages: i64,
+) -> bool {
+    let normalized_family = family.trim().to_lowercase();
+    match normalized_family.as_str() {
+        "bibliography" => looks_like_bibliography_continuation_page(text),
+        "index" => looks_like_index_continuation_page(text),
+        "illustrations" => looks_like_illustrations_continuation_page(text),
+        _ => false,
+    }
+}
+
+/// 从 record 中尝试提取 back matter family。
+/// ←→ Python `_seed_back_matter_family`
+pub(crate) fn seed_back_matter_family(
+    role: &str,
+    reason: &str,
+    headings: &[String],
+    page_no: i64,
+    total_pages: i64,
+) -> String {
+    let safe_total_pages = total_pages.max(1);
+    let safe_page_no = page_no.max(1);
+    if safe_total_pages > 20 && safe_page_no < (20).max((safe_total_pages as f64 * 0.6) as i64) {
+        return String::new();
+    }
+    if role == "other" && matches!(reason, "bibliography" | "index" | "illustrations") {
+        return reason.to_string();
+    }
+    let first_heading = headings.first().cloned().unwrap_or_default();
+    if first_heading.is_empty() {
+        return String::new();
+    }
+    let family = fnm_core::title::guess_title_family(&first_heading, page_no, total_pages);
+    if matches!(family, "bibliography" | "index" | "illustrations") {
+        return family.to_string();
+    }
+    String::new()
 }
 
 // ── 启发式判定 ───────────────────────────────────────────────
