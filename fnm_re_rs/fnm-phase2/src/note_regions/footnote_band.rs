@@ -6,8 +6,15 @@ use fnm_core::types::{NoteKind, RegionScope, RegionSource};
 use fnm_phase1::input::RawPage;
 use std::collections::HashSet;
 
+/// 检查页面是否有脚注信号。
+/// ←→ Python `_build_footnote_band_regions` 检测逻辑
+///
+/// 两路信号：
+/// 1. note_scan.items 有 kind=footnote（强信号，Biopolitics ~16 页）
+/// 2. fnBlocks 非空（弱信号，Biopolitics ~102 页——漏读这条导致 Rust 10 vs Python 62 footnote regions）
 fn has_footnote_items(page: &RawPage) -> bool {
-    page.note_scan
+    let has_scan_footnote = page
+        .note_scan
         .as_ref()
         .and_then(|ns| ns.get("items"))
         .and_then(|v| v.as_array())
@@ -16,7 +23,15 @@ fn has_footnote_items(page: &RawPage) -> bool {
                 .iter()
                 .any(|item| item.get("kind").and_then(|v| v.as_str()) == Some("footnote"))
         })
-        .unwrap_or(false)
+        .unwrap_or(false);
+
+    let has_fn_blocks = page
+        .fn_blocks
+        .as_array()
+        .map(|a| !a.is_empty())
+        .unwrap_or(false);
+
+    has_scan_footnote || has_fn_blocks
 }
 
 fn first_footnote_marker(page: &RawPage) -> String {
