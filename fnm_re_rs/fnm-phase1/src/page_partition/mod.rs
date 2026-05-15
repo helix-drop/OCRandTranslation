@@ -14,6 +14,44 @@ use std::collections::HashMap;
 
 pub use role_heuristics::summarize_page_partitions;
 
+/// 从 prunedResult Value 直接提取 headings。
+/// 与 `fnm_core::text::extract_page_headings` 逻辑相同，但入参是 prunedResult 本身而非完整 page dict。
+fn extract_headings_from_pruned_result(pruned_result: &serde_json::Value) -> Vec<String> {
+    let mut headings: Vec<String> = Vec::new();
+    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+
+    let blocks = pruned_result
+        .get("parsing_res_list")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
+
+    for block in blocks.iter().filter(|b| b.is_object()) {
+        let label = block
+            .get("block_label")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .trim()
+            .to_lowercase();
+        if label != "doc_title" && label != "paragraph_title" {
+            continue;
+        }
+        let text = fnm_core::title::normalize_title(
+            block
+                .get("block_content")
+                .and_then(|v| v.as_str())
+                .unwrap_or(""),
+        );
+        let key = fnm_core::title::normalized_title_key(&text);
+        if !text.is_empty() && !key.is_empty() && !seen.contains(&key) {
+            seen.insert(key);
+            headings.push(text);
+        }
+    }
+
+    headings
+}
+
 /// 构建页面分区，同时预提取 heading candidates 和 fileIdx→bookPage 映射。
 pub fn build_page_partitions(
     pages: &[RawPage],
@@ -31,7 +69,10 @@ pub fn build_page_partitions(
             continue;
         }
         let note_scan_value = page.note_scan.clone().unwrap_or_default();
-        let headings = fnm_core::text::extract_page_headings(&page.pruned_result);
+        // 从 prunedResult.parsing_res_list 直接提取 headings。
+        // 不能走 extract_page_headings(&page.pruned_result) —— 它会再套一层
+        // prunedResult.prunedResult，导致双重嵌套永不命中。
+        let headings = extract_headings_from_pruned_result(&page.pruned_result);
         // 文本优先取 enriched_markdown，回退到页级 markdown 字段。
         // page_markdown_text(prunedResult) 仅当 prunedResult 内含 markdown 时有效，
         // 而 Biopolitics 等 fixture 的 markdown 在顶层 page.markdown。

@@ -23,17 +23,21 @@ empty strings → `looks_like_note_continuation_page` always returned false → 
 
 **Result**: Note pages Rust 62/62 Python (100%).
 
-### 1b. Rust gap: front_matter over-classification (Rust 25 vs Python 5)
+### 1b. ✅ RESOLVED: front_matter over-classification (was 20 pages, now 0)
 
-Rust classifies pages 1,4,7,13-29 as `front_matter` instead of `body`. Python has only
-5 front_matter pages (8-12). Root cause: `apply_front_matter_continuation_fix` overshoots
-because `is_body_entry_page` doesn't detect the Chapter 1 heading at page 17 as a strong
-body boundary, so `in_front_matter_run` continues past page 17.
+**Root cause**: Same problem as §1a — `extract_page_headings(&page.pruned_result)` causes
+double nesting (`prunedResult.prunedResult.parsing_res_list`). No headings were ever
+extracted from prunedResult → `is_strong_body_boundary` always returned false →
+`is_body_entry_page` failed to detect the Ch1 lecture title "LEÇON DU 10 JANVIER 1979"
+→ `in_front_matter_run` continued past page 17, reclassifying pages 13-29 as FrontMatter.
 
-**Impact**: Ch1 start_page shifts from 17→30 (13-page cascade). This is the sole cause
-of the remaining 20 role diffs.
+**Fix** (2026-05-16): Added `extract_headings_from_pruned_result()` in
+`page_partition/mod.rs` — iterates `prunedResult.parsing_res_list` directly
+instead of going through `extract_page_headings` + `page_blocks` (which assumes
+full page dict input).
 
-**Status**: Known, fix pending (adjust `is_strong_body_boundary` or `early_limit`).
+**Result**: FrontMatter count Rust 5 = Python 5. Role distribution 100% aligned.
+Role agreement: 96.8% (remaining 12 diffs are confidence/has_note_heading metadata, not roles).
 
 ---
 
@@ -119,9 +123,10 @@ No diff to report since both sides have empty post_body_titles currently.
 | body pages | 266 | 285 | 93% |
 | front_matter pages | 25 | 5 | — (over-classification) |
 | Chapters | 12 | 12 | 100% |
-| Role agreement | 324/370 | — | 87.6% |
+| Role agreement | 358/370 | — | 96.8% (0 role misclassifications) |
 
 **Next steps**:
-1. Fix front_matter over-classification (pages 1,4,7,13-29) — `is_body_entry_page` for Ch1
-2. Regenerate golden → chapter boundary diffs will auto-resolve
-3. Investigate Phase 2 footnote band gap (10 vs 62 footnote regions)
+1. Investigate Phase 2 footnote band gap (Rust 10 vs Python 62 footnote regions) —
+   the last remaining major gap in the pipeline
+2. Regenerate golden with full build_chapter_skeleton → resolve chapter boundary diffs
+3. Wire Phase1Summary.post_body_titles into production pipeline
