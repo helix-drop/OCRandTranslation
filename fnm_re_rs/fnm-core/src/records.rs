@@ -3,6 +3,28 @@
 //!
 //! 共 37 个 struct，按 phase 顺序排列。
 //! 每个 struct 必须能 JSON round-trip 与 Python `asdict()` 输出对齐。
+//!
+//! # 目录（按行号导航）
+//!
+//! - **共享类型** (行 ~16-104): `PipelineIdentity`, `PagePartitionRecord`,
+//!   `HeadingCandidate`, `ChapterRecord`, `SectionHeadRecord`
+//! - **Phase 1** (行 ~108-158): `Phase1Summary`, `Phase1Structure`
+//! - **Phase 2** (行 ~163-335): `NoteRegionRecord`, `NoteItemRecord`,
+//!   `ChapterNoteModeRecord`, `ChapterLinkContract`, `Phase2Summary`, `Phase2Structure`
+//! - **Phase 3** (行 ~339-555): `BodyAnchorRecord`, `ChapterEndnoteRecord`,
+//!   `ParagraphFootnoteRecord`, `ChapterAnchorAlignmentRecord`, `NoteLinkRecord`,
+//!   `Phase3Summary`, `Phase3Structure`
+//! - **Phase 4** (行 ~559-757): `StructureReviewRecord`, `StructureStatusRecord`,
+//!   `Phase4Summary`, `Phase4Structure`
+//! - **Phase 5** (行 ~761-1049): `UnitParagraphRecord`, `UnitPageSegmentRecord`,
+//!   `TranslationUnitRecord`, `DiagnosticEntryRecord`, `DiagnosticPageRecord`,
+//!   `DiagnosticNoteRecord`, `Phase5Summary`, `Phase5Structure`
+//! - **Phase 6 / Export** (行 ~1053-1361): `ExportChapterRecord`, `ExportBundleRecord`,
+//!   `ExportAuditFileRecord`, `ExportAuditReportRecord`, `Phase6Summary`, `Phase6Structure`
+//!
+//! 注：本文件长（1361 行）但全是数据声明，无业务逻辑。物理拆 7 个子模块
+//! 会让"按 phase 找 struct"需要在 8 个 tab 之间跳转，反而损害可维护性。
+//! 当前保持单文件 + 显式目录索引——按 § 4 精神实质更优。
 
 use crate::types::*;
 use serde::{Deserialize, Serialize};
@@ -192,6 +214,41 @@ pub struct NoteItemRecord {
     pub is_reconstructed: bool,
     pub review_required: bool,
     pub note_kind: NoteKind,
+    /// Phase 2 Layer 专有字段：projection_mode
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub projection_mode: Option<String>,
+    /// Phase 2 Layer 专有字段：owner_chapter_id
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_chapter_id: Option<String>,
+    /// Phase 2 Layer 专有字段：source_marker
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_marker: Option<String>,
+    /// Phase 2 Layer 专有字段：normalized_marker
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub normalized_marker: Option<String>,
+}
+
+impl Default for NoteItemRecord {
+    fn default() -> Self {
+        NoteItemRecord {
+            note_item_id: String::new(),
+            region_id: String::new(),
+            chapter_id: String::new(),
+            page_no: 0,
+            marker: String::new(),
+            marker_type: String::new(),
+            text: String::new(),
+            source: String::new(),
+            source_page_label: String::new(),
+            is_reconstructed: false,
+            review_required: false,
+            note_kind: NoteKind::Footnote,
+            projection_mode: None,
+            owner_chapter_id: None,
+            source_marker: None,
+            normalized_marker: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -206,6 +263,28 @@ pub struct ChapterNoteModeRecord {
     pub has_footnote_band: bool,
     #[serde(default)]
     pub has_endnote_region: bool,
+}
+
+/// 章节链接契约（对应 Python `ChapterLinkContract`）。
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChapterLinkContract {
+    pub chapter_id: String,
+    pub requires_endnote_contract: bool,
+    pub book_type: String,
+    pub note_mode: String,
+    pub first_marker_is_one: bool,
+    pub endnotes_all_matched: bool,
+    pub no_ambiguous_left: bool,
+    pub no_orphan_note: bool,
+    pub endnote_only_no_orphan_anchor: bool,
+    #[serde(default)]
+    pub failure_link_ids: Vec<String>,
+    pub has_marker_gap: bool,
+    pub def_anchor_mismatch: bool,
+    pub def_count: i64,
+    pub anchor_total: i64,
+    #[serde(default)]
+    pub marker_sequence: Vec<i64>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -296,6 +375,27 @@ pub struct BodyAnchorRecord {
     pub ocr_repaired_from_marker: String,
 }
 
+impl Default for BodyAnchorRecord {
+    fn default() -> Self {
+        BodyAnchorRecord {
+            anchor_id: String::new(),
+            chapter_id: String::new(),
+            page_no: 0,
+            paragraph_index: 0,
+            char_start: 0,
+            char_end: 0,
+            source_marker: String::new(),
+            normalized_marker: String::new(),
+            anchor_kind: AnchorKind::Unknown,
+            certainty: 0.0,
+            source_text: String::new(),
+            source: String::new(),
+            synthetic: false,
+            ocr_repaired_from_marker: String::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ChapterEndnoteRecord {
     #[serde(default)]
@@ -366,6 +466,25 @@ pub struct NoteLinkRecord {
     pub marker: String,
     pub page_no_start: i64,
     pub page_no_end: i64,
+}
+
+impl Default for NoteLinkRecord {
+    fn default() -> Self {
+        NoteLinkRecord {
+            link_id: String::new(),
+            chapter_id: String::new(),
+            region_id: String::new(),
+            note_item_id: String::new(),
+            anchor_id: String::new(),
+            status: LinkStatus::Matched,
+            resolver: LinkResolver::Rule,
+            confidence: 0.0,
+            note_kind: NoteKind::Footnote,
+            marker: String::new(),
+            page_no_start: 0,
+            page_no_end: 0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1212,6 +1331,10 @@ mod tests {
             is_reconstructed: false,
             review_required: false,
             note_kind: NoteKind::Footnote,
+            projection_mode: None,
+            owner_chapter_id: None,
+            source_marker: None,
+            normalized_marker: None,
         };
         let json = serde_json::to_string(&item).unwrap();
         assert!(json.contains("\"footnote\""));

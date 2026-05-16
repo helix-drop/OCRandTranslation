@@ -6,11 +6,15 @@ use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord};
 use fnm_core::types::{BoundaryState, ChapterSource};
 
 /// 无 TOC 时，从 page_partitions 的 body 页构造 fallback 章节。
+///
+/// 注：Python 端用 `total_pages` 做边界 sanity check（如 last chapter end_page
+/// 不能超过 total）。当前 Rust fallback 是 stub 状态（FNM_PHASE12_AUDIT F4），
+/// 边界从 page_partitions 直接推导，未启用 total_pages 校验。
 pub fn build_chapter_skeleton_fallback(
     page_partitions: &[PagePartitionRecord],
     _heading_candidates: &[HeadingCandidate],
     _heading_graph: &HeadingGraph,
-    total_pages: i64,
+    _total_pages: i64,
 ) -> Vec<ChapterRecord> {
     if page_partitions.is_empty() {
         return vec![];
@@ -58,7 +62,6 @@ pub fn build_chapter_skeleton_fallback(
         });
     }
 
-    let _ = total_pages;
     chapters
 }
 

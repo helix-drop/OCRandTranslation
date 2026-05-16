@@ -10,24 +10,30 @@ static TITLE_PREFIX_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)^\s*(?:\d+|[ivxlcdm]+)[\.\)]\s*").unwrap());
 static TITLE_LABEL_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)^\s*(?:chapter|chapitre|part|section)\b[:\s\-]*").unwrap());
+static WHITESPACE_COLLAPSE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
 
-type PatternGroup<'a> = (&'a str, &'a [&'a str]);
-
-static OTHER_TITLE_PATTERNS: Lazy<Vec<PatternGroup>> = Lazy::new(|| {
+/// (family_name, 预编译的 Regex 列表)。AGENTS.md §2：避免 hot loop 内 Regex::new。
+static OTHER_TITLE_PATTERNS: Lazy<Vec<(&'static str, Vec<Regex>)>> = Lazy::new(|| {
+    let compile = |patterns: &[&str]| -> Vec<Regex> {
+        patterns
+            .iter()
+            .map(|p| Regex::new(p).expect("compile-time pattern should be valid"))
+            .collect()
+    };
     vec![
         (
             "contents",
-            &[
+            compile(&[
                 r"^contents\b",
                 r"^table of contents$",
                 r"^table$",
                 r"^table des mati[eè]res$",
                 r"^sommaire$",
-            ][..],
+            ]),
         ),
         (
             "illustrations",
-            &[
+            compile(&[
                 r"^illustrations?$",
                 r"^list of illustrations$",
                 r"^list of figures$",
@@ -37,21 +43,21 @@ static OTHER_TITLE_PATTERNS: Lazy<Vec<PatternGroup>> = Lazy::new(|| {
                 r"^tables$",
                 r"^figures and tables$",
                 r"^figures$",
-            ][..],
+            ]),
         ),
         (
             "bibliography",
-            &[
+            compile(&[
                 r"^bibliograph",
                 r"^references?$",
                 r"^works cited$",
                 r"^livres et articles\b",
-            ][..],
+            ]),
         ),
-        ("index", &[r"^index\b", r"^indices?\b"][..]),
+        ("index", compile(&[r"^index\b", r"^indices?\b"])),
         (
             "appendix",
-            &[
+            compile(&[
                 r"^appendix\b",
                 r"^appendices$",
                 r"^annex",
@@ -60,11 +66,11 @@ static OTHER_TITLE_PATTERNS: Lazy<Vec<PatternGroup>> = Lazy::new(|| {
                 r"^sources?$",
                 r"^conventions$",
                 r"^abbreviations?$",
-            ][..],
+            ]),
         ),
         (
             "front_matter",
-            &[
+            compile(&[
                 r"^acknowledg",
                 r"^remerciement",
                 r"^foreword$",
@@ -73,7 +79,7 @@ static OTHER_TITLE_PATTERNS: Lazy<Vec<PatternGroup>> = Lazy::new(|| {
                 r"^avertissement$",
                 r"^abstract$",
                 r"^introduction$",
-            ][..],
+            ]),
         ),
     ]
 });
@@ -84,8 +90,9 @@ pub fn normalize_title(value: &str) -> String {
     if trimmed.is_empty() {
         return String::new();
     }
-    let re = Regex::new(r"\s+").unwrap();
-    re.replace_all(trimmed, " ").to_string()
+    WHITESPACE_COLLAPSE_RE
+        .replace_all(trimmed, " ")
+        .into_owned()
 }
 
 /// 生成标题的归一化键（用于比对）。NFKD 归一化 + 去重音 + 去非字母数字。
@@ -115,12 +122,8 @@ pub fn guess_title_family(value: &str, page_no: i64, total_pages: i64) -> &'stat
     let safe_total_pages = total_pages.max(1);
     let lowered = normalize_title(value).to_lowercase();
     for (family, patterns) in OTHER_TITLE_PATTERNS.iter() {
-        for pattern in *patterns {
-            if Regex::new(pattern)
-                .ok()
-                .and_then(|re| re.find(&lowered))
-                .is_some()
-            {
+        for re in patterns {
+            if re.is_match(&lowered) {
                 return family;
             }
         }

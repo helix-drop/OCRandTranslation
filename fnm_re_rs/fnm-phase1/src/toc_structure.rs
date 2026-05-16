@@ -1,7 +1,6 @@
 //! ←→ FNM_RE/modules/toc_structure.py
 //! Phase1 顶层编排：组装所有子模块输出为 Phase1Structure。
 
-use crate::book_note_type::build_book_note_profile;
 use crate::chapter_skeleton::builder::build_chapter_skeleton;
 use crate::heading_graph::build_heading_graph;
 use crate::input::{ManualPageOverride, RawPage, TocItem, VisualTocBundle};
@@ -11,13 +10,27 @@ use fnm_core::db::Repository;
 use fnm_core::records::{HeadingCandidate, Phase1Structure};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Phase1Config {
     pub manual_page_overrides: Option<HashMap<String, ManualPageOverride>>,
     pub visual_toc_bundle: Option<VisualTocBundle>,
     pub pdf_path: Option<String>,
     pub doc_id: Option<String>,
+    /// LLM book-type 校验开关。当前 Rust 端 LLM 客户端尚未接入 phase1
+    /// 主入口，默认 `true`（跳过）；传 `false` 触发 `anyhow::bail!`。
     pub skip_llm_verify: bool,
+}
+
+impl Default for Phase1Config {
+    fn default() -> Self {
+        Self {
+            manual_page_overrides: None,
+            visual_toc_bundle: None,
+            pdf_path: None,
+            doc_id: None,
+            skip_llm_verify: true,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -34,12 +47,22 @@ pub fn build_phase1_structure(
 ) -> anyhow::Result<Phase1Output> {
     let total_pages = pages.len() as i64;
 
-    // 1. TOC 乱码检测（暂跳过，直接使用传入的 toc_items）
-    let _ = config;
+    // 1. LLM book-type 校验：Rust 端 LLM 客户端尚未接入主入口（FNM_PHASE12_AUDIT G5）。
+    //    config.skip_llm_verify=false 时显式 bail 防误用（AGENTS.md §9）。
+    if !config.skip_llm_verify {
+        anyhow::bail!(
+            "Phase1Config::skip_llm_verify=false 暂不支持——\
+             LLM book-type 校验需 vision client 接入主入口（FNM_PHASE12_AUDIT G5）"
+        );
+    }
 
-    // 2. build_page_partitions
-    let partitions_result = build_page_partitions(pages, None, None);
+    // 2. build_page_partitions —— 把 manual_page_overrides 真传下去（原 None 静默忽略 F7）
+    let partitions_result =
+        build_page_partitions(pages, config.manual_page_overrides.as_ref(), None);
     let page_partitions = partitions_result.partitions;
+    // 注：visual_toc_bundle 尚未在 chapter_skeleton/builder.rs 接收——
+    // 接通后此处需把 config.visual_toc_bundle 透传给 build_chapter_skeleton。
+    let _visual_toc_bundle = config.visual_toc_bundle.as_ref();
 
     // 3. 构建 heading candidates（page_rows → collect → normalize）
     let page_rows = crate::chapter_skeleton::heading_candidates::page_rows::legacy_page_rows(
@@ -91,8 +114,11 @@ pub fn build_phase1_structure(
         heading_candidates,
     );
 
-    // 6. build_book_note_profile
-    let _book_note_profile = build_book_note_profile(&skeleton.chapters, pages, None);
+    // 注：`build_book_note_profile` 不在主入口调用——
+    // 它推断的 `chapter_modes` 在 phase2 `chapter_split` 内会重新生成
+    // （CLAUDE.md §12 分类源头唯一：note_mode 是 phase2 决策权）。
+    // phase1 的 book_note_type 模块保留给 LLM book-type verify 用作 prior
+    // （FNM_PHASE12_AUDIT G5）。
 
     // 7. 组装 Phase1Structure（page_partitions 已 owned，零 clone）
     let structure = Phase1Structure {

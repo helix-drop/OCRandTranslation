@@ -25,6 +25,26 @@ pub struct ChapterLayer {
     pub endnote_regions: Vec<NoteRegionRecord>,
     pub note_mode: NoteMode,
     pub marker_count: i64,
+    /// 策略应用记录（如 note_mode、book_type 推导过程）。
+    pub policy_applied: HashMap<String, serde_json::Value>,
+}
+
+impl Default for ChapterLayer {
+    fn default() -> Self {
+        ChapterLayer {
+            chapter_id: String::new(),
+            title: String::new(),
+            start_page: 0,
+            end_page: 0,
+            body_pages: Vec::new(),
+            footnote_items: Vec::new(),
+            endnote_items: Vec::new(),
+            endnote_regions: Vec::new(),
+            note_mode: NoteMode::NoNotes,
+            marker_count: 0,
+            policy_applied: HashMap::new(),
+        }
+    }
 }
 
 /// Body page 层。
@@ -103,37 +123,69 @@ pub fn build_chapter_layers(
     }
 
     // endnote region 优先覆盖 footnote_primary → chapter_endnote_primary
+    //
+    // CLAUDE.md §12 第 2 条「分支条件穷尽且互斥」：4 分支显式列出，
+    // 每个分支写 reason，不让 else 静默吞掉边界情况。每个升级动作的 reason
+    // 都记到 `mode_override_reason`，最终写入 ChapterLayer.policy_applied 供审计。
+    let mut mode_override_reason: HashMap<String, &'static str> = HashMap::new();
     for region in note_regions {
         if region.note_kind != fnm_core::types::NoteKind::Endnote {
             continue;
         }
         let cid = &region.chapter_id;
-        if let Some(mode) = mode_by_chapter.get(cid) {
-            if *mode == NoteMode::FootnotePrimary {
-                let fn_count = item_by_chapter
-                    .get(cid.as_str())
-                    .map(|items| {
-                        items
-                            .iter()
-                            .filter(|i| i.note_kind == fnm_core::types::NoteKind::Footnote)
-                            .count()
-                    })
-                    .unwrap_or(0);
-                let en_count = item_by_chapter
-                    .get(cid.as_str())
-                    .map(|items| {
-                        items
-                            .iter()
-                            .filter(|i| i.note_kind == fnm_core::types::NoteKind::Endnote)
-                            .count()
-                    })
-                    .unwrap_or(0);
-                if fn_count > en_count && region.heading_text.is_empty() {
-                    continue;
-                }
-                mode_by_chapter.insert(cid.clone(), NoteMode::ChapterEndnotePrimary);
-            }
+        let current_mode = match mode_by_chapter.get(cid) {
+            Some(m) => *m,
+            None => continue,
+        };
+        if current_mode != NoteMode::FootnotePrimary {
+            continue;
         }
+        let fn_count = item_by_chapter
+            .get(cid.as_str())
+            .map(|items| {
+                items
+                    .iter()
+                    .filter(|i| i.note_kind == fnm_core::types::NoteKind::Footnote)
+                    .count()
+            })
+            .unwrap_or(0);
+        let en_count = item_by_chapter
+            .get(cid.as_str())
+            .map(|items| {
+                items
+                    .iter()
+                    .filter(|i| i.note_kind == fnm_core::types::NoteKind::Endnote)
+                    .count()
+            })
+            .unwrap_or(0);
+        let fn_dominant = fn_count > en_count;
+        let has_heading = !region.heading_text.is_empty();
+        let (next_mode, reason) = match (fn_dominant, has_heading) {
+            // (1) footnote 占多 + 无 endnote heading → 弱信号，不升级
+            (true, false) => (
+                NoteMode::FootnotePrimary,
+                "kept_fn_primary_weak_endnote_signal",
+            ),
+            // (2) footnote 占多 + 有 endnote heading → 强信号，升级
+            (true, true) => (
+                NoteMode::ChapterEndnotePrimary,
+                "promoted_by_endnote_heading_despite_fn_dominant",
+            ),
+            // (3) endnote >= footnote + 无 heading → 数量证据升级
+            (false, false) => (
+                NoteMode::ChapterEndnotePrimary,
+                "promoted_by_endnote_count_no_heading",
+            ),
+            // (4) endnote >= footnote + 有 heading → 强信号 + 数量都支持，升级
+            (false, true) => (
+                NoteMode::ChapterEndnotePrimary,
+                "promoted_by_endnote_heading_and_count",
+            ),
+        };
+        if next_mode != current_mode {
+            mode_by_chapter.insert(cid.clone(), next_mode);
+        }
+        mode_override_reason.insert(cid.clone(), reason);
     }
 
     // 构建 ChapterLayer
@@ -207,6 +259,18 @@ pub fn build_chapter_layers(
 
         let marker_count = endnote_items.len() as i64;
 
+        let mut policy_applied = HashMap::new();
+        policy_applied.insert(
+            "note_mode".to_string(),
+            serde_json::Value::String(mode.as_str().to_string()),
+        );
+        if let Some(reason) = mode_override_reason.get(chapter_id.as_str()) {
+            policy_applied.insert(
+                "mode_override_reason".to_string(),
+                serde_json::Value::String((*reason).to_string()),
+            );
+        }
+
         chapter_layers.push(ChapterLayer {
             chapter_id: chapter_id.clone(),
             title: ch.title.clone(),
@@ -218,6 +282,7 @@ pub fn build_chapter_layers(
             endnote_regions,
             note_mode: mode,
             marker_count,
+            policy_applied,
         });
 
         chapter_note_modes.push(ChapterNoteModeRecord {

@@ -76,16 +76,12 @@ pub fn build_page_partitions(
         // 文本优先取 enriched_markdown，回退到页级 markdown 字段。
         // page_markdown_text(prunedResult) 仅当 prunedResult 内含 markdown 时有效，
         // 而 Biopolitics 等 fixture 的 markdown 在顶层 page.markdown。
-        let text_buf = page
-            .enriched_markdown
-            .as_deref()
-            .unwrap_or(&page.markdown)
-            .to_string();
+        let text_buf: &str = page.enriched_markdown.as_deref().unwrap_or(&page.markdown);
 
         let ctx = PageScanContext {
             page_no,
             total_pages: total_pages.max(1),
-            text: &text_buf,
+            text: text_buf,
             note_scan: &note_scan_value,
             headings: &headings,
         };
@@ -112,7 +108,7 @@ pub fn build_page_partitions(
         page_info_cache.insert(
             page_no,
             PageInfo {
-                markdown: text_buf,
+                markdown: text_buf.to_string(),
                 headings,
                 page_role: role_str,
                 role_reason: matched.reason,
