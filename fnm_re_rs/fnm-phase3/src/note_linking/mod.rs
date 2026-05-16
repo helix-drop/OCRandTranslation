@@ -304,7 +304,7 @@ pub fn build_note_link_table(
             .get("anchor_summary")
             .cloned()
             .unwrap_or(Value::Null),
-        link_summary: evidence_assemble::link_summary_to_value_pub(&effective_link_summary),
+        link_summary: evidence_assemble::link_summary_to_value(&effective_link_summary),
     };
 
     // 复用本函数已经构建过的 phase2——避免 caller 再调一次
@@ -344,5 +344,4 @@ struct Phase2WithOverrides {
 }
 
 // 注：link_summary_to_value / link_quality_to_value / book_endnote_stream_summary_to_value
-// 已迁入 evidence_assemble.rs 内部 helper。NoteLinkTable.link_summary 字段需要的
-// 公共版本通过 `evidence_assemble::link_summary_to_value_pub` 暴露。
+// 已迁入 evidence_assemble.rs，前者为 pub(crate) 供 NoteLinkTable.link_summary 字段调用。

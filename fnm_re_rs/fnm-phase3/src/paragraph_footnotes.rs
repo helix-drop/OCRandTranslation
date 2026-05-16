@@ -6,7 +6,7 @@
 //! 3. 跨页合并
 //! 4. 挂载到正文段落
 
-use fnm_core::anchor_kind::patterns;
+use fnm_core::anchor_kind::{patterns, valid_bracket_ref_iter};
 use fnm_core::records::{ChapterRecord, PagePartitionRecord, ParagraphFootnoteRecord};
 use fnm_phase1::input::RawPage;
 use once_cell::sync::Lazy;
@@ -46,11 +46,11 @@ fn footnote_marker_in_body(line: &str, marker: &str) -> bool {
             }
         }
     }
-    for cap in patterns::BRACKET_REF_RE.captures_iter(line) {
-        if let Some(m) = cap.get(1) {
-            if m.as_str() == marker {
-                return true;
-            }
+    // BRACKET_REF_RE 是弱信号正则——用 valid_bracket_ref_iter 把守卫
+    // （前后非数字）与匹配在源头绑死，避免本 caller 假阳性命中日期/文档编号。
+    for (_, _, captured_marker) in valid_bracket_ref_iter(line) {
+        if captured_marker == marker {
+            return true;
         }
     }
     false

@@ -61,8 +61,26 @@ pub fn record_usage(
 
 /// 获取分阶段和分模型的用量汇总。
 /// 与 Python `get_usage_summary` 一致。
+///
+/// 注：lock 中毒（其他线程 panic 持锁）时返回空 summary 而非自身 panic。
+/// LLM 路径不应因 token 统计副作用 panic（AGENTS.md §9）。
 pub fn get_usage_summary() -> serde_json::Value {
-    let records = USAGE_RECORDS.lock().unwrap();
+    let records = match USAGE_RECORDS.lock() {
+        Ok(g) => g,
+        Err(_) => {
+            return serde_json::json!({
+                "by_stage": {},
+                "by_model": {},
+                "total": {
+                    "request_count": 0,
+                    "prompt_tokens": 0,
+                    "completion_tokens": 0,
+                    "total_tokens": 0,
+                },
+                "_error": "USAGE_RECORDS lock poisoned",
+            });
+        }
+    };
     let mut by_stage: HashMap<String, HashMap<String, i64>> = HashMap::new();
     let mut by_model: HashMap<String, HashMap<String, i64>> = HashMap::new();
     let mut total: HashMap<&str, i64> = [
@@ -73,10 +91,15 @@ pub fn get_usage_summary() -> serde_json::Value {
     ]
     .into();
 
+    let metric_fields = [
+        "request_count",
+        "prompt_tokens",
+        "completion_tokens",
+        "total_tokens",
+    ];
+
     for c in records.iter() {
-        let sk = &c.stage;
-        let mk = &c.model_id;
-        by_stage.entry(sk.clone()).or_insert_with(|| {
+        let stage_entry = by_stage.entry(c.stage.clone()).or_insert_with(|| {
             HashMap::from([
                 ("request_count".into(), 0),
                 ("prompt_tokens".into(), 0),
@@ -84,20 +107,7 @@ pub fn get_usage_summary() -> serde_json::Value {
                 ("total_tokens".into(), 0),
             ])
         });
-        by_model.entry(mk.clone()).or_insert_with(|| {
-            HashMap::from([
-                ("request_count".into(), 0),
-                ("prompt_tokens".into(), 0),
-                ("completion_tokens".into(), 0),
-                ("total_tokens".into(), 0),
-            ])
-        });
-        for key in &[
-            "request_count",
-            "prompt_tokens",
-            "completion_tokens",
-            "total_tokens",
-        ] {
+        for key in &metric_fields {
             let v = match *key {
                 "request_count" => c.request_count,
                 "prompt_tokens" => c.prompt_tokens,
@@ -105,9 +115,35 @@ pub fn get_usage_summary() -> serde_json::Value {
                 "total_tokens" => c.total_tokens,
                 _ => 0,
             };
-            *by_stage.get_mut(sk).unwrap().get_mut(*key).unwrap() += v;
-            *by_model.get_mut(mk).unwrap().get_mut(*key).unwrap() += v;
-            *total.get_mut(*key).unwrap() += v;
+            *stage_entry.entry((*key).to_string()).or_insert(0) += v;
+        }
+        let model_entry = by_model.entry(c.model_id.clone()).or_insert_with(|| {
+            HashMap::from([
+                ("request_count".into(), 0),
+                ("prompt_tokens".into(), 0),
+                ("completion_tokens".into(), 0),
+                ("total_tokens".into(), 0),
+            ])
+        });
+        for key in &metric_fields {
+            let v = match *key {
+                "request_count" => c.request_count,
+                "prompt_tokens" => c.prompt_tokens,
+                "completion_tokens" => c.completion_tokens,
+                "total_tokens" => c.total_tokens,
+                _ => 0,
+            };
+            *model_entry.entry((*key).to_string()).or_insert(0) += v;
+        }
+        for key in &metric_fields {
+            let v = match *key {
+                "request_count" => c.request_count,
+                "prompt_tokens" => c.prompt_tokens,
+                "completion_tokens" => c.completion_tokens,
+                "total_tokens" => c.total_tokens,
+                _ => 0,
+            };
+            *total.entry(*key).or_insert(0) += v;
         }
     }
 

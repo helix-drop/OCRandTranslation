@@ -1,5 +1,11 @@
 //! ←→ FNM_RE/stages/endnote_chapter_explorer.py
 //! 探索 endnote chapter 归属（无 TOC 时，三路径：TOC match / signal match / fallback）。
+//!
+//! # 状态：**STUB（未接入 phase2 主入口）**
+//!
+//! 当前实现 147 行 vs Python 722 行（约 20% 完成度）。`lib.rs::build_phase2_structure_sync`
+//! 跳过本模块——除 self-test 外**无生产 caller**。
+//! 接入前需补完所有 3 路径（详见 FNM_PHASE12_AUDIT.md F8）。
 #![allow(dead_code)]
 
 use fnm_core::records::ChapterRecord;

@@ -29,6 +29,20 @@ pub mod patterns {
         Lazy::new(|| Regex::new(r"\$\s*\^\{\s*(\*{1,4})\s*\}\s*\$").unwrap());
     // 注：去掉 lookahead (?=...)，捕获后续标点由消费方处理。
     pub static BARE_DIGIT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s(\d{1,3})").unwrap());
+    // 断裂左括号：[ 前紧跟字母/法文特殊字符，后紧跟标点（缺少右括号）。
+    // 注：Rust regex 不支持 lookaround，改为连续匹配模式。
+    pub static BROKEN_LEFT_BRACKET_REF_RE: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(
+            r#"[A-Za-zàâäéèêëïîôöùûüÿçœÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇŒ»"'')]\[(\d{1,4})[.,;:!?\u{2026}»"'')]]"#,
+        )
+        .unwrap()
+    });
+    // 括号后尾随符号：[N] 后跟 *、**、*** 等。
+    pub static TRAILING_SYMBOL_AFTER_BRACKET_RE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"[\]](\*{1,4})").unwrap());
+    // 引号后尾随符号：» 后跟 *、**、*** 等。
+    pub static TRAILING_SYMBOL_AFTER_QUOTE_RE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"[»](\*{1,4})").unwrap());
 }
 
 // ── 公开 API ────────────────────────────────────────────────────
@@ -37,12 +51,40 @@ pub mod patterns {
 ///
 /// 替代 Python 端的 `(?<!\d)...(?!\d)` lookaround 断言。
 /// BRACKET_REF_RE 捕获所有 `[NNNN]`，消费方须用此函数过滤伪匹配。
+///
+/// 注：新代码请优先用 [`valid_bracket_ref_iter`] 高阶 API——它把守卫与匹配
+/// 在源头绑死，避免 caller 漏调守卫（CLAUDE.md §12 分类源头唯一）。
 pub fn is_bracket_ref_valid(text: &str, match_start: usize, match_end: usize) -> bool {
     let before = match_start
         .checked_sub(1)
         .and_then(|i| text.as_bytes().get(i));
     let after = text.as_bytes().get(match_end);
     !before.is_some_and(|b| b.is_ascii_digit()) && !after.is_some_and(|b| b.is_ascii_digit())
+}
+
+/// 在 text 中按 `BRACKET_REF_RE` 扫描所有 `[NNNN]` 匹配并**已过滤伪匹配**。
+///
+/// 返回每个有效命中的 `(match_start, match_end, captured_marker)`——
+/// 即 group(1) 捕获的数字串。把守卫与匹配在源头绑死，避免 caller 漏调
+/// `is_bracket_ref_valid`（CLAUDE.md §12 第 1 条：分类源头唯一）。
+///
+/// # 用法
+/// ```ignore
+/// for (start, end, marker) in valid_bracket_ref_iter(line) {
+///     if marker == target { /* ... */ }
+/// }
+/// ```
+pub fn valid_bracket_ref_iter(text: &str) -> impl Iterator<Item = (usize, usize, &str)> {
+    patterns::BRACKET_REF_RE
+        .captures_iter(text)
+        .filter_map(|caps| {
+            let full = caps.get(0)?;
+            let marker = caps.get(1)?;
+            if !is_bracket_ref_valid(text, full.start(), full.end()) {
+                return None;
+            }
+            Some((full.start(), full.end(), marker.as_str()))
+        })
 }
 
 /// 判断 marker 是否像年份（1500–2100）。与 Python `looks_like_year_marker` 一致。

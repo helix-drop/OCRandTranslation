@@ -27,7 +27,7 @@ use tokio::sync::Semaphore;
 /// marker 都被当作缺口送入 LLM 验证（FNM_PHASE12_AUDIT 视觉恢复广播 bug）。
 /// 当前签名强制 caller 提供 anchors，避免「空数据冒充」。
 pub async fn build_visual_recovery_overrides(
-    pages: &[RawPage],
+    _pages: &[RawPage],
     body_anchors: &[BodyAnchorRecord],
     chapter_markers: &HashMap<String, HashSet<String>>,
     chapter_page_ranges: &HashMap<String, (i64, i64)>,
@@ -35,7 +35,8 @@ pub async fn build_visual_recovery_overrides(
     config: &VisionConfig,
     max_concurrent: usize,
 ) -> anyhow::Result<Vec<serde_json::Value>> {
-    let _ = pages; // 当前 pages 未用——保留参数以便未来 Layer 2 接入
+    // `_pages` 当前未用——保留参数以便未来 Layer 2（PDF rendering 与文本同步对齐）
+    // 接入；用 `_` 前缀替代 `let _ = pages` 表达「声明不用」（AGENTS.md §8）。
     if config.api_key.is_empty() {
         return Ok(Vec::new());
     }

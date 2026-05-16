@@ -64,8 +64,11 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         HashMap::new()
     };
 
-    // 4. endnote_chapter_explorer
-    // 5. endnote_repair
+    // 注：原 step 4/5（endnote_chapter_explorer / endnote_repair）尚未接入
+    // 主 pipeline——两模块当前在 phase2 内是 stub（完成度 20% / 37%）。
+    // 跳过这两步进入 chapter_split。一旦补完，需要在此处接入并把
+    // 输出喂给 chapter_split。
+    //
     // 6. chapter_split
     let layers = build_chapter_layers(
         input.phase1_chapters,
@@ -75,8 +78,12 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         input.raw_pages,
     );
 
-    // 7. book_structure 聚合
-    let book_type = crate::book_structure::infer_book_type(&layers.chapter_note_modes);
+    // 7. book_structure 聚合（infer_book_type 返回 BookType enum，
+    // Output.book_type 仍为 String 以保持 JSON serde 兼容；下游 phase3
+    // 通过 ChapterLayer.policy_applied["book_type"] 拿同一字符串值）。
+    let book_type = crate::book_structure::infer_book_type(&layers.chapter_note_modes)
+        .as_str()
+        .to_string();
 
     let total_recovered: usize = recovered_sup.values().map(|v| v.len()).sum();
 

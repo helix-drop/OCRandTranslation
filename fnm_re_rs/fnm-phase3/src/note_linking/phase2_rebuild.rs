@@ -18,30 +18,18 @@ use std::collections::{HashMap, HashSet};
 pub fn phase2_from_chapter_layers(
     chapter_layers: &ChapterLayers,
 ) -> (Phase2Structure, HashMap<String, String>, String) {
-    let chapter_policy_by_id: HashMap<String, HashMap<String, serde_json::Value>> = chapter_layers
-        .chapter_layers
-        .iter()
-        .map(|cl| {
-            let policy: HashMap<String, serde_json::Value> = cl
-                .policy_applied
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect();
-            (cl.chapter_id.clone(), policy)
-        })
-        .collect();
+    // 注：原 `chapter_policy_by_id` 索引已删——仅供 hot loop 内 `let _chapter_mode`
+    // 读取后丢弃用，是 hot loop 内每 region/item ×2 次无意义 HashMap 查询。
+    // 章级 note_mode 直接来自 chapter_layers.chapter_layers[].policy_applied，
+    // 在下方装配 ChapterNoteModeRecord 时直接读，不需要预索引。
 
     let mut region_note_kind_by_id: HashMap<String, String> = HashMap::new();
     let mut region_records: Vec<NoteRegionRecord> = Vec::new();
     for row in &chapter_layers.regions {
         let chapter_id = row.chapter_id.clone();
-        // CLAUDE.md §12：不可用章级 mode 重分类个体 entity（对齐 Python `_ = chapter_mode`）。
-        // 故意计算后丢弃以保留意图。注意：用 &str 不 to_string，避免 hot loop 内 alloc。
-        let _chapter_mode = chapter_policy_by_id
-            .get(&chapter_id)
-            .and_then(|p| p.get("note_mode"))
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        // CLAUDE.md §12 第 3 条「禁止广播」：章级 note_mode 绝不参与个体 entity 的
+        // note_kind 决定——意图通过本注释表达即可，不在 hot loop 内做 HashMap 查询。
+        // （Python 端 `_ = chapter_mode` 是 lint 抑制；Rust 无 unused 警告，注释足够。）
         let note_kind_str = row.note_kind.as_str();
         let note_kind = if note_kind_str == "footnote" || note_kind_str == "endnote" {
             note_kind_str.to_string()
@@ -82,12 +70,8 @@ pub fn phase2_from_chapter_layers(
             .as_ref()
             .unwrap_or(&row.chapter_id)
             .clone();
-        // CLAUDE.md §12：不可用章级 mode 重分类个体 entity（对齐 Python `_ = chapter_mode`）。
-        let _chapter_mode = chapter_policy_by_id
-            .get(&chapter_id)
-            .and_then(|p| p.get("note_mode"))
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        // CLAUDE.md §12 第 3 条「禁止广播」：章级 note_mode 绝不参与个体 entity 的
+        // note_kind 决定——见 region loop 上方注释，不在 hot loop 内做无用 HashMap 查询。
         let region_id = row.region_id.clone();
         let region_note_kind = region_note_kind_by_id
             .get(&region_id)

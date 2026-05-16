@@ -175,7 +175,7 @@ pub(super) fn build_diagnostics(inputs: DiagnosticsInputs) -> HashMap<String, Va
 
 // ── 内部 helpers（原 mod.rs 私有 helper，迁入这里使用更紧密） ─────
 
-fn link_summary_to_value(summary: &LinkSummary) -> Value {
+pub(crate) fn link_summary_to_value(summary: &LinkSummary) -> Value {
     serde_json::json!({
         "matched": summary.matched,
         "footnote_orphan_note": summary.footnote_orphan_note,
@@ -224,9 +224,4 @@ fn book_endnote_stream_summary_to_value(s: &chapter_meta::BookEndnoteStreamSumma
         "high_concentration_chapter_ids": s.high_concentration_chapter_ids,
         "chapters": chapters,
     })
-}
-
-// 提供给 mod.rs 调用的公共 helper（用于 NoteLinkTable.link_summary 字段）。
-pub(crate) fn link_summary_to_value_pub(summary: &LinkSummary) -> Value {
-    link_summary_to_value(summary)
 }

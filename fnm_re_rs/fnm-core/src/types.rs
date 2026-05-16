@@ -85,6 +85,7 @@ enum_with_str! {
 
 enum_with_str! {
     /// 与 Python `RegionSource` Literal 对应。
+    /// `Llm` 对应 Phase 3 LLM override 注入（Python 端运行期写 "llm" 字符串突破 Literal）。
     pub enum RegionSource {
         HeadingScan => "heading_scan",
         FootnoteBand => "footnote_band",
@@ -93,6 +94,7 @@ enum_with_str! {
         ExplorerTocMatch => "explorer_toc_match",
         ExplorerSignalMatch => "explorer_signal_match",
         FallbackNearestPrior => "fallback_nearest_prior",
+        Llm => "llm",
     }
 }
 
@@ -128,11 +130,12 @@ enum_with_str! {
 }
 
 enum_with_str! {
-    /// 与 Python `Literal["rule", "fallback", "repair"]` 对应。
+    /// 与 Python `Literal["rule", "fallback", "repair", "orphan_recovery"]` 对应。
     pub enum LinkResolver {
         Rule => "rule",
         Fallback => "fallback",
         Repair => "repair",
+        OrphanRecovery => "orphan_recovery",
     }
 }
 
@@ -143,6 +146,20 @@ enum_with_str! {
         Running => "running",
         Error => "error",
         Done => "done",
+    }
+}
+
+enum_with_str! {
+    /// 全书 note 类型分类（phase1 决策、phase2/3 透传）。
+    ///
+    /// 与 Python `Literal["mixed", "endnote_only", "footnote_only", "no_notes"]` 对应。
+    /// 用 enum 替代字符串字面量传递，避免下游 `if book_type == "endnote_only"`
+    /// 拼写错误的 silent fallthrough（CLAUDE.md §12 分类源头唯一）。
+    pub enum BookType {
+        Mixed => "mixed",
+        EndnoteOnly => "endnote_only",
+        FootnoteOnly => "footnote_only",
+        NoNotes => "no_notes",
     }
 }
 
@@ -176,11 +193,11 @@ mod tests {
         assert_eq!(BoundaryState::ALL.len(), 2);
         assert_eq!(NoteKind::ALL.len(), 2);
         assert_eq!(RegionScope::ALL.len(), 2);
-        assert_eq!(RegionSource::ALL.len(), 7);
+        assert_eq!(RegionSource::ALL.len(), 8);
         assert_eq!(NoteMode::ALL.len(), 5);
         assert_eq!(AnchorKind::ALL.len(), 3);
         assert_eq!(LinkStatus::ALL.len(), 5);
-        assert_eq!(LinkResolver::ALL.len(), 3);
+        assert_eq!(LinkResolver::ALL.len(), 4);
         assert_eq!(PipelineState::ALL.len(), 4);
     }
 

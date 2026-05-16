@@ -1,5 +1,11 @@
 //! ←→ FNM_RE/modules/endnote_repair.py
 //! Endnote 续行修复：检测截断的 endnote，合并后续行。
+//!
+//! # 状态：**STUB（未接入 phase2 主入口）**
+//!
+//! 当前实现 120 行 vs Python 325 行（约 37% 完成度）。`lib.rs::build_phase2_structure_sync`
+//! 跳过本模块——除 self-test 外**无生产 caller**。
+//! 接入前需补完缺失逻辑（详见 FNM_PHASE12_AUDIT.md F8）。
 
 use fnm_core::records::NoteItemRecord;
 use once_cell::sync::Lazy;
@@ -87,6 +93,10 @@ mod tests {
                 is_reconstructed: false,
                 review_required: false,
                 note_kind: NoteKind::Endnote,
+                projection_mode: None,
+                owner_chapter_id: None,
+                source_marker: None,
+                normalized_marker: None,
             },
             NoteItemRecord {
                 note_item_id: "ni-2".into(),
@@ -101,6 +111,10 @@ mod tests {
                 is_reconstructed: false,
                 review_required: false,
                 note_kind: NoteKind::Endnote,
+                projection_mode: None,
+                owner_chapter_id: None,
+                source_marker: None,
+                normalized_marker: None,
             },
         ];
         let (repaired, _stats) = repair_endnote_items(&items);

@@ -24,14 +24,21 @@ pub(super) fn run(
         if row_note_kind.as_str() != "footnote" || row_status.as_str() != "orphan_anchor" {
             continue;
         }
-        let row = repaired_links[orphan_index].clone();
+        // mem::take 替代 clone：row 用于下方 functional update（line 87 `..row`）
+        // 必须 owned；末尾保证回写 repaired_links[orphan_index]——若中途 continue
+        // 也需还原（见 continue 分支前的 restore）。
+        let row = std::mem::take(&mut repaired_links[orphan_index]);
         let anchor_id = row.anchor_id.trim().to_string();
         let explicit_index = match anchor_index_by_id.get(&anchor_id) {
             Some(&idx) => idx,
-            None => continue,
+            None => {
+                repaired_links[orphan_index] = row;
+                continue;
+            }
         };
         let explicit_anchor = repaired_anchors[explicit_index].clone();
         if explicit_anchor.synthetic {
+            repaired_links[orphan_index] = row;
             continue;
         }
 
@@ -67,6 +74,7 @@ pub(super) fn run(
         }
 
         if candidates.len() != 1 {
+            repaired_links[orphan_index] = row;
             continue;
         }
 

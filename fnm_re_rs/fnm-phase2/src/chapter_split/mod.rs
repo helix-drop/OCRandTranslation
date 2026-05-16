@@ -297,6 +297,18 @@ pub fn build_chapter_layers(
 
     let gate_report = gate::build_gate_report(&chapter_layers, &chapter_note_modes);
 
+    // 推算 book_type 并广播到每个 ChapterLayer.policy_applied——
+    // 下游 phase3 chapter_contracts 依赖该字段判断 endnote_only 分支。
+    // 此前 phase3 读 `policy_applied["book_type"]` 永远拿到 None
+    // （phantom key），导致 `if book_type == "endnote_only"` 永远 false（silently-wrong）。
+    let book_type = crate::book_structure::infer_book_type(&chapter_note_modes);
+    let book_type_value = serde_json::Value::String(book_type.as_str().to_string());
+    for layer in &mut chapter_layers {
+        layer
+            .policy_applied
+            .insert("book_type".to_string(), book_type_value.clone());
+    }
+
     ChapterLayers {
         chapters: chapters.to_vec(),
         regions: note_regions.to_vec(),

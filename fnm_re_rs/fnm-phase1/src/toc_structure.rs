@@ -3,7 +3,7 @@
 
 use crate::chapter_skeleton::builder::build_chapter_skeleton;
 use crate::heading_graph::build_heading_graph;
-use crate::input::{ManualPageOverride, RawPage, TocItem, VisualTocBundle};
+use crate::input::{ManualPageOverride, RawPage, TocItem};
 use crate::page_partition::build_page_partitions;
 use crate::section_heads::build_section_heads;
 use fnm_core::db::Repository;
@@ -13,7 +13,6 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 pub struct Phase1Config {
     pub manual_page_overrides: Option<HashMap<String, ManualPageOverride>>,
-    pub visual_toc_bundle: Option<VisualTocBundle>,
     pub pdf_path: Option<String>,
     pub doc_id: Option<String>,
     /// LLM book-type 校验开关。当前 Rust 端 LLM 客户端尚未接入 phase1
@@ -25,7 +24,6 @@ impl Default for Phase1Config {
     fn default() -> Self {
         Self {
             manual_page_overrides: None,
-            visual_toc_bundle: None,
             pdf_path: None,
             doc_id: None,
             skip_llm_verify: true,
@@ -60,9 +58,6 @@ pub fn build_phase1_structure(
     let partitions_result =
         build_page_partitions(pages, config.manual_page_overrides.as_ref(), None);
     let page_partitions = partitions_result.partitions;
-    // 注：visual_toc_bundle 尚未在 chapter_skeleton/builder.rs 接收——
-    // 接通后此处需把 config.visual_toc_bundle 透传给 build_chapter_skeleton。
-    let _visual_toc_bundle = config.visual_toc_bundle.as_ref();
 
     // 3. 构建 heading candidates（page_rows → collect → normalize）
     let page_rows = crate::chapter_skeleton::heading_candidates::page_rows::legacy_page_rows(

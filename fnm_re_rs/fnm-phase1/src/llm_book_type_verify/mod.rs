@@ -1,5 +1,15 @@
 //! ←→ FNM_RE/modules/llm_book_type_verify.py (1039 行)
 //! LLM 视觉验证书型：用 Vision API 看代表性页面确认 book_type 判定。
+//!
+//! # 状态：**模块完整但未接入 phase1 主入口**
+//!
+//! 主入口 `toc_structure.rs::build_phase1_structure` 当前不调用本模块，
+//! 通过 `Phase1Config::skip_llm_verify=true`（默认）跳过；
+//! 设 `skip_llm_verify=false` 会触发 `anyhow::bail!`，不会进入本模块。
+//!
+//! 模块自身实现已完整：Vision API、select_pages、parse_response + 4 个单测。
+//! 接入待 FNM_PHASE12_AUDIT.md G5 实施：在 phase1 主入口异步调用并把
+//! `evidence` 装入 `Phase1Output.diagnostics`。
 
 use crate::book_note_type::BookNoteProfile;
 use anyhow::{Context, Result};
