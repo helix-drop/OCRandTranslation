@@ -29,6 +29,7 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         input.raw_pages,
         input.phase1_pages,
         &input.post_body_titles,
+        input.phase1_heading_candidates,
     );
 
     // 2. build_note_items
@@ -64,16 +65,19 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         HashMap::new()
     };
 
-    // 注：原 step 4/5（endnote_chapter_explorer / endnote_repair）尚未接入
-    // 主 pipeline——两模块当前在 phase2 内是 stub（完成度 20% / 37%）。
-    // 跳过这两步进入 chapter_split。一旦补完，需要在此处接入并把
-    // 输出喂给 chapter_split。
-    //
-    // 6. chapter_split
+    // 4. endnote_repair：截断 endnote 合并修复（当前 stub，37% 完成度）
+    let (repaired_note_items, endnote_repair_summary) =
+        crate::endnote_repair::repair_endnote_items(&note_items);
+    let _ = endnote_repair_summary; // 当前仅日志用
+
+    // 5. endnote_chapter_explorer 在 note_regions/mod.rs 内部完成（20% 完成度）
+    //    见 `build_note_regions` 中 `rebind_book_regions` 之前的调用。
+
+    // 6. chapter_split（使用修复后的 note_items）
     let layers = build_chapter_layers(
         input.phase1_chapters,
         &note_regions,
-        &note_items,
+        &repaired_note_items,
         input.phase1_pages,
         input.raw_pages,
     );
@@ -134,6 +138,7 @@ mod tests {
             phase1_chapters: &[],
             phase1_pages: &[],
             phase1_section_heads: &[],
+            phase1_heading_candidates: &[],
             raw_pages: &[],
             pdf_path: None,
             config: crate::input::Phase2Config::default(),
@@ -166,6 +171,7 @@ mod tests {
             phase1_chapters: &chapters,
             phase1_pages: &[],
             phase1_section_heads: &[],
+            phase1_heading_candidates: &[],
             raw_pages: &pages,
             pdf_path: None,
             config: crate::input::Phase2Config::default(),

@@ -7,6 +7,8 @@ use fnm_core::note_marker::normalize_note_marker;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
+use super::context_guard::is_bare_digit_marker_context;
+
 // ── 确定性映射 ──────────────────────────────────────────────────
 
 static REF_PATTERN_CERTAINTY: Lazy<HashMap<&'static str, f64>> = Lazy::new(|| {
@@ -181,11 +183,15 @@ pub fn scan_inline_refs(text: &str) -> Vec<RawAnchor> {
         }
     }
 
-    // 模式 13: bare_digit（优先级最低，由 context_guard 在外层控制）
-    // 注：bare_digit 的过滤在 body_anchors 阶段通过 _is_bare_digit_marker_context
-    // 做预过滤，这里只做原始捕获。
+    // 模式 13: bare_digit（优先级最低）
+    // ←→ Python `_scan_inline_refs`：匹配后立即用 `_is_bare_digit_marker_context` 过滤
     for caps in patterns::BARE_DIGIT_RE.captures_iter(text) {
         let digit_match = caps.get(1).unwrap();
+        let digit_start = digit_match.start();
+        let digit_end = digit_match.end();
+        if !is_bare_digit_marker_context(text, digit_start, digit_end) {
+            continue;
+        }
         let marker = normalize_note_marker(digit_match.as_str());
         if marker.is_empty() {
             continue;
@@ -193,8 +199,8 @@ pub fn scan_inline_refs(text: &str) -> Vec<RawAnchor> {
         refs.push(RawAnchor {
             source_marker: digit_match.as_str().to_string(),
             normalized_marker: marker,
-            char_start: digit_match.start(),
-            char_end: digit_match.end(),
+            char_start: digit_start,
+            char_end: digit_end,
             pattern: "bare_digit".to_string(),
             certainty: pattern_certainty("bare_digit"),
         });

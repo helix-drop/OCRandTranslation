@@ -1,17 +1,22 @@
 //! ←→ note_regions.py: _rebind_book_regions / _chapter_endnote_start_page_map
 //! Book-scope region 重绑定 + endnote start page map。
 
-use fnm_core::records::{ChapterRecord, NoteRegionRecord};
+use fnm_core::chapters::nearest_prior_chapter;
+use fnm_core::records::{ChapterRecord, HeadingCandidate, NoteRegionRecord};
 use fnm_core::types::{NoteKind, RegionScope, RegionSource};
 use std::collections::{HashMap, HashSet};
 
-use crate::note_regions::chapter_lookup::find_nearest_prior;
-
 /// 重绑定 book-scope 且缺少有效 chapter_id 的 region 到最近的章。
 /// ←→ Python `_rebind_book_regions`
+///
+/// 注意：仅用 nearest_prior_chapter 兜底，不尝试 heading_candidate 匹配。
+/// Python `_rebind_book_regions` 也只有这一步，heading 匹配在 endnote 跨章场景下会
+/// 错误匹配下一页章的标题（如 ch-10 的尾注在 ch-11 首页 → 错误绑定到 ch-11），
+/// 详见 fnm_re_rs/docs/archive/B2_note_links_parity.md。
 pub fn rebind_book_regions(
     regions: Vec<NoteRegionRecord>,
     chapters: &[ChapterRecord],
+    _heading_candidates: &[HeadingCandidate],
 ) -> (Vec<NoteRegionRecord>, usize) {
     let chapter_ids: HashSet<String> = chapters.iter().map(|ch| ch.chapter_id.clone()).collect();
 
@@ -30,16 +35,34 @@ pub fn rebind_book_regions(
             continue;
         }
 
-        let rebound = find_nearest_prior(region.page_start, chapters);
-        if rebound.is_empty() {
+        // 仅用 nearest_prior_chapter 兜底（不尝试 heading_candidate 匹配——Python
+        // _rebind_book_regions 也只有这一步，heading 匹配在 endnote 跨章场景下会
+        // 错误匹配下一页章的标题，详见 B2 调查）。
+        // ←→ Python `_rebind_book_regions` 行 566
+        let rebound = {
+            let prior = nearest_prior_chapter(chapters, region.page_start);
+            if prior.is_empty() {
+                None
+            } else {
+                Some(prior)
+            }
+        };
+
+        if let Some(rebound) = rebound {
+            if rebound.is_empty() {
+                let mut r = region.clone();
+                r.review_required = true;
+                normalized.push(r);
+            } else {
+                rebind_count += 1;
+                let mut r = region.clone();
+                r.chapter_id = rebound;
+                r.source = RegionSource::FallbackNearestPrior;
+                normalized.push(r);
+            }
+        } else {
             let mut r = region.clone();
             r.review_required = true;
-            normalized.push(r);
-        } else {
-            rebind_count += 1;
-            let mut r = region.clone();
-            r.chapter_id = rebound;
-            r.source = RegionSource::FallbackNearestPrior;
             normalized.push(r);
         }
     }

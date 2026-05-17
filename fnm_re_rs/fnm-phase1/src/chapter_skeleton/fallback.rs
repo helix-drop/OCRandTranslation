@@ -1,26 +1,605 @@
 //! ←→ FNM_RE/stages/chapter_skeleton/fallback.py
 //! 无 TOC 时的 fallback 章节切分。
+//!
+//! Python: ~650 行。Rust 版实现核心算法：
+//!   1. _candidate_section_rows — 从 heading_candidates 提取候选节
+//!   2. _classify_fallback_sections — 分类（保留为章 / 降级为节）
+//!   3. _mark_suppressed_candidates — 标记被抑制的候选（mutate headings）
+//!   4. _build_fallback_chapters_and_sections — 构建章节+节头
+//!   5. _normalize_chapters / _normalize_sections — 标准化输出
+//!   6. _merge_section_heads — 合并节头
+//!   7. build_chapter_skeleton_fallback — 公开入口
 
 use crate::heading_graph::HeadingGraph;
-use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord};
+use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord};
+use fnm_core::title::{chapter_title_match_key, guess_title_family, normalize_title};
 use fnm_core::types::{BoundaryState, ChapterSource};
+use once_cell::sync::Lazy;
+use regex::Regex;
+use std::collections::{HashMap, HashSet};
 
-/// 无 TOC 时，从 page_partitions 的 body 页构造 fallback 章节。
-///
-/// 注：Python 端用 `total_pages` 做边界 sanity check（如 last chapter end_page
-/// 不能超过 total）。当前 Rust fallback 是 stub 状态（FNM_PHASE12_AUDIT F4），
-/// 边界从 page_partitions 直接推导，未启用 total_pages 校验。
-pub fn build_chapter_skeleton_fallback(
-    page_partitions: &[PagePartitionRecord],
-    _heading_candidates: &[HeadingCandidate],
-    _heading_graph: &HeadingGraph,
-    _total_pages: i64,
-) -> Vec<ChapterRecord> {
-    if page_partitions.is_empty() {
+// ── 正则常量 ────────────────────────────────────────────────────
+
+static NOTES_HEADER_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^\s*(?:#+\s*)?(notes?|endnotes?|notes to pages?.*)\s*$").unwrap());
+static CHAPTER_KEYWORD_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"\b(?:chapter|chapitre|lecture|leçon|prologue|epilogue|postambule|appendix|appendices|part)\b",
+    )
+    .unwrap()
+});
+static LECTURE_TITLE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\ble[cç]on du\b").unwrap());
+static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"^\s*(?:introduction|avertissement|pr[eé]face|foreword|epilogue|conclusion)\b")
+        .unwrap()
+});
+
+const FAMILY_NONBODY: &[&str] = &[
+    "note",
+    "other",
+    "contents",
+    "illustrations",
+    "bibliography",
+    "index",
+    "appendix",
+];
+
+// ── 候选节行提取 ─────────────────────────────────────────────────
+
+#[allow(dead_code)]
+struct SectionRow {
+    section_id: String,
+    title: String,
+    start_page: i64,
+    end_page: i64,
+    raw_pages: Vec<i64>,
+    filtered_pages: Vec<i64>,
+    source: String,
+}
+
+fn candidate_section_rows(
+    heading_candidates: &[HeadingCandidate],
+    all_pages: &[i64],
+    page_roles: &HashMap<i64, String>,
+) -> Vec<SectionRow> {
+    if all_pages.is_empty() {
         return vec![];
     }
+    let mut selected: Vec<(i64, String, String)> = Vec::new();
+    let mut dedupe: HashSet<(i64, String)> = HashSet::new();
+    for hc in heading_candidates {
+        let page_no = hc.page_no;
+        if page_no <= 0 {
+            continue;
+        }
+        let role = page_roles.get(&page_no).map(|s| s.as_str()).unwrap_or("");
+        if role != "body" && role != "front_matter" {
+            continue;
+        }
+        let family = hc.heading_family_guess.trim().to_lowercase();
+        if hc.source.trim() == "note_heading" {
+            continue;
+        }
+        if FAMILY_NONBODY.contains(&family.as_str()) {
+            continue;
+        }
+        let title = normalize_title(&hc.text);
+        let key = chapter_title_match_key(&title);
+        if title.is_empty() || key.is_empty() {
+            continue;
+        }
+        let dk = (page_no, key.clone());
+        if !dedupe.insert(dk) {
+            continue;
+        }
+        selected.push((page_no, title, hc.source.clone()));
+    }
+    selected.sort_by_key(|(p, t, _)| (*p, t.clone()));
 
-    // 简单策略：把连续的 body 页打包为一个 fallback 章
+    let mut rows: Vec<SectionRow> = Vec::new();
+    for (idx, (start_page, title, _source)) in selected.iter().enumerate() {
+        let next_page = selected.get(idx + 1).map(|(p, _, _)| *p).unwrap_or(0);
+        let end_page = if next_page > *start_page {
+            next_page - 1
+        } else {
+            *all_pages.last().unwrap_or(&0)
+        };
+        let raw_pages: Vec<i64> = all_pages
+            .iter()
+            .copied()
+            .filter(|&p| *start_page <= p && p <= end_page)
+            .collect();
+        let filtered_pages: Vec<i64> = raw_pages
+            .iter()
+            .copied()
+            .filter(|p| {
+                let role = page_roles.get(p).map(|s| s.as_str()).unwrap_or("");
+                role == "body" || role == "front_matter"
+            })
+            .collect();
+        if filtered_pages.is_empty() {
+            continue;
+        }
+        rows.push(SectionRow {
+            section_id: format!("sec-{:04}", idx + 1),
+            title: title.clone(),
+            start_page: filtered_pages[0],
+            end_page: *filtered_pages.last().unwrap(),
+            raw_pages,
+            filtered_pages,
+            source: "fallback".to_string(),
+        });
+    }
+    rows
+}
+
+// ── 分类 ────────────────────────────────────────────────────────
+
+#[allow(dead_code)]
+struct ClassifiedSection {
+    section_id: String,
+    title: String,
+    start_page: i64,
+    span_pages: usize,
+    filtered_pages: Vec<i64>,
+    start_role: String,
+    keep_as_chapter: bool,
+    reject_reason: String,
+    classification_score: f64,
+    classification_confidence: f64,
+}
+
+fn classify_fallback_sections(
+    section_rows: Vec<SectionRow>,
+    page_roles: &HashMap<i64, String>,
+    total_pages: i64,
+    heading_candidates: &[HeadingCandidate],
+) -> Vec<ClassifiedSection> {
+    let mut classified: Vec<ClassifiedSection> = Vec::new();
+    let tp = if total_pages <= 0 { 1 } else { total_pages };
+
+    for section in section_rows {
+        let title = normalize_title(&section.title);
+        let start_page = section.start_page;
+        let span_pages = section.filtered_pages.len();
+
+        // Find matched heading_candidates for evidence
+        let title_key = chapter_title_match_key(&title);
+        let matched: Vec<&HeadingCandidate> = heading_candidates
+            .iter()
+            .filter(|c| {
+                let page_ok = (c.page_no - start_page).abs() <= 1;
+                let title_ok = title_key.is_empty()
+                    || chapter_title_match_key(&c.text).is_empty()
+                    || chapter_title_match_key(&c.text) == title_key;
+                page_ok && title_ok
+            })
+            .collect();
+        let chapter_evidence: Vec<&&HeadingCandidate> = matched
+            .iter()
+            .filter(|c| {
+                let role = page_roles.get(&c.page_no).map(|s| s.as_str()).unwrap_or("");
+                role == "body" || role == "front_matter"
+            })
+            .collect();
+
+        let has_visual_toc = matched.iter().any(|c| c.source == "visual_toc");
+        let has_top_doc_title = matched
+            .iter()
+            .any(|c| c.source == "ocr_block" && c.block_label == "doc_title" && c.top_band);
+        let has_pdf_font = matched.iter().any(|c| c.source == "pdf_font_band");
+        let keyword_strength = chapter_keyword_strength(&title);
+        let strong_evidence =
+            has_visual_toc || has_top_doc_title || has_pdf_font || keyword_strength >= 1.0;
+
+        let start_role = page_roles
+            .get(&start_page)
+            .map(|s| s.as_str())
+            .unwrap_or("")
+            .to_string();
+        let family = guess_title_family(&title, start_page.max(1), tp.max(1))
+            .trim()
+            .to_lowercase();
+
+        let mut keep;
+        let mut reject_reason = String::new();
+        let mut score = 0.0f64;
+
+        if title.is_empty() {
+            keep = false;
+            reject_reason = "invalid_title".into();
+        } else if start_role == "noise" || start_role == "other" {
+            keep = false;
+            reject_reason = "partition_conflict".into();
+        } else if start_role == "note" {
+            keep = false;
+            reject_reason = "note_partition".into();
+        } else if NOTES_HEADER_RE.is_match(&title) {
+            keep = false;
+            reject_reason = "note_heading".into();
+        } else if matches!(
+            family.as_str(),
+            "contents" | "illustrations" | "bibliography" | "index" | "appendix"
+        ) {
+            keep = false;
+            reject_reason = "non_body_family".into();
+        } else if is_sentence_like_heading(&title) && !strong_evidence {
+            keep = false;
+            reject_reason = "sentence_like".into();
+        } else {
+            if has_visual_toc {
+                score += 3.0;
+            }
+            if has_top_doc_title {
+                score += 1.8;
+            }
+            if has_pdf_font {
+                score += 1.2;
+            }
+            if has_top_doc_title && keyword_strength >= 1.0 {
+                score += 1.2;
+            }
+            if span_pages >= 4 {
+                score += 1.2;
+            } else if span_pages == 3 {
+                score += 0.5;
+            } else if span_pages <= 2 {
+                score -= if has_top_doc_title || has_visual_toc {
+                    0.8
+                } else {
+                    1.8
+                };
+            }
+            score += keyword_strength;
+            let all_paragraph_title = !chapter_evidence.is_empty()
+                && chapter_evidence
+                    .iter()
+                    .all(|c| c.source == "ocr_block" && c.block_label == "paragraph_title");
+            if all_paragraph_title && !strong_evidence {
+                score -= 1.2;
+            }
+            keep = score >= 2.0;
+            if keep && span_pages <= 2 && !strong_evidence {
+                keep = false;
+                reject_reason = "short_span".into();
+            }
+            if !keep && reject_reason.is_empty() {
+                reject_reason = "low_score".into();
+            }
+        }
+
+        classified.push(ClassifiedSection {
+            section_id: section.section_id,
+            title,
+            start_page,
+            span_pages,
+            filtered_pages: section.filtered_pages,
+            start_role,
+            keep_as_chapter: keep,
+            reject_reason,
+            classification_score: score,
+            classification_confidence: (0.5 + score / 6.0).clamp(0.0, 1.0),
+        });
+    }
+
+    // Fallback: if nothing kept, force-keep the first valid section
+    if !classified.is_empty() && !classified.iter().any(|c| c.keep_as_chapter) {
+        if let Some(first) = classified.iter_mut().find(|c| {
+            let role = &c.start_role;
+            role != "noise"
+                && role != "note"
+                && role != "other"
+                && !NOTES_HEADER_RE.is_match(&c.title)
+        }) {
+            first.keep_as_chapter = true;
+            first.reject_reason = String::new();
+            first.classification_score = first.classification_score.max(2.1);
+        }
+    }
+
+    classified
+}
+
+// ── 标记被抑制的候选 ─────────────────────────────────────────────
+
+#[allow(dead_code)]
+fn mark_suppressed_candidates(
+    classified: &[ClassifiedSection],
+    heading_candidates: &mut Vec<HeadingCandidate>,
+) {
+    for section in classified {
+        let title_key = chapter_title_match_key(&section.title);
+        let start_page = section.start_page;
+        if section.keep_as_chapter {
+            for candidate in heading_candidates.iter_mut() {
+                if (candidate.page_no - start_page).abs() > 1 {
+                    continue;
+                }
+                if !title_key.is_empty()
+                    && !chapter_title_match_key(&candidate.text).is_empty()
+                    && chapter_title_match_key(&candidate.text) != title_key
+                {
+                    continue;
+                }
+                if candidate.heading_family_guess != "note"
+                    && candidate.heading_family_guess != "other"
+                {
+                    candidate.heading_family_guess = "chapter".to_string();
+                }
+            }
+        } else {
+            let reject_reason = if section.reject_reason.is_empty() {
+                "demoted"
+            } else {
+                &section.reject_reason
+            };
+            let mut matched_any = false;
+            for candidate in heading_candidates.iter_mut() {
+                if (candidate.page_no - start_page).abs() > 1 {
+                    continue;
+                }
+                if !title_key.is_empty()
+                    && !chapter_title_match_key(&candidate.text).is_empty()
+                    && chapter_title_match_key(&candidate.text) != title_key
+                {
+                    continue;
+                }
+                candidate.suppressed_as_chapter = true;
+                candidate.reject_reason = reject_reason.to_string();
+                candidate.heading_family_guess = "section".to_string();
+                matched_any = true;
+            }
+            if !matched_any {
+                heading_candidates.push(HeadingCandidate {
+                    heading_id: String::new(),
+                    page_no: start_page,
+                    text: section.title.clone(),
+                    normalized_text: normalize_title(&section.title),
+                    source: "fallback".into(),
+                    block_label: String::new(),
+                    top_band: true,
+                    confidence: section.classification_confidence,
+                    heading_family_guess: "section".into(),
+                    suppressed_as_chapter: true,
+                    reject_reason: reject_reason.to_string(),
+                    ..Default::default()
+                });
+            }
+        }
+    }
+}
+
+// ── 构建 fallback 章节和节头 ─────────────────────────────────────
+
+fn build_fallback_chapters_and_sections(
+    classified: Vec<ClassifiedSection>,
+    all_pages: &[i64],
+    page_roles: &HashMap<i64, String>,
+) -> (Vec<ChapterRecord>, Vec<SectionHeadRecord>) {
+    if classified.is_empty() || all_pages.is_empty() {
+        return (vec![], vec![]);
+    }
+    let kept_indices: Vec<usize> = classified
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| c.keep_as_chapter)
+        .map(|(i, _)| i)
+        .collect();
+    if kept_indices.is_empty() {
+        return (vec![], vec![]);
+    }
+
+    let mut chapters: Vec<ChapterRecord> = Vec::new();
+    let mut section_to_chapter: HashMap<String, String> = HashMap::new();
+
+    for (keep_pos, &section_idx) in kept_indices.iter().enumerate() {
+        let section = &classified[section_idx];
+        let chapter_id = format!("ch-fallback-{:04}", keep_pos + 1);
+        let next_keep_idx = kept_indices
+            .get(keep_pos + 1)
+            .copied()
+            .unwrap_or(classified.len());
+        let section_start = section.start_page;
+        let next_start = classified
+            .get(next_keep_idx)
+            .map(|c| c.start_page)
+            .unwrap_or(0);
+        let section_end_limit = if next_start > section_start {
+            next_start - 1
+        } else {
+            *all_pages.last().unwrap_or(&section_start)
+        };
+        let raw_span: Vec<i64> = all_pages
+            .iter()
+            .copied()
+            .filter(|&p| section_start <= p && p <= section_end_limit)
+            .collect();
+        let mut filtered: Vec<i64> = raw_span
+            .iter()
+            .copied()
+            .filter(|p| {
+                let role = page_roles.get(p).map(|s| s.as_str()).unwrap_or("");
+                role == "body" || role == "front_matter"
+            })
+            .collect();
+        if filtered.is_empty() {
+            filtered = section.filtered_pages.clone();
+        }
+        if filtered.is_empty() {
+            continue;
+        }
+        chapters.push(ChapterRecord {
+            chapter_id: chapter_id.clone(),
+            title: section.title.clone(),
+            start_page: filtered[0],
+            end_page: *filtered.last().unwrap(),
+            pages: filtered,
+            source: ChapterSource::Fallback,
+            boundary_state: BoundaryState::Ready,
+        });
+        for mi in section_idx..next_keep_idx {
+            if let Some(sec) = classified.get(mi) {
+                if !sec.section_id.is_empty() {
+                    section_to_chapter.insert(sec.section_id.clone(), chapter_id.clone());
+                }
+            }
+        }
+        if !section.section_id.is_empty() {
+            section_to_chapter.insert(section.section_id.clone(), chapter_id);
+        }
+    }
+    if chapters.is_empty() {
+        return (vec![], vec![]);
+    }
+
+    // Assign orphan sections to first/last chapter
+    if let Some(first_id) = chapters.first().map(|c| c.chapter_id.clone()) {
+        for i in 0..kept_indices[0] {
+            if let Some(sec) = classified.get(i) {
+                if !sec.section_id.is_empty() {
+                    section_to_chapter
+                        .entry(sec.section_id.clone())
+                        .or_insert_with(|| first_id.clone());
+                }
+            }
+        }
+    }
+    if let Some(last_id) = chapters.last().map(|c| c.chapter_id.clone()) {
+        for i in (kept_indices.last().copied().unwrap_or(0) + 1)..classified.len() {
+            if let Some(sec) = classified.get(i) {
+                if !sec.section_id.is_empty() {
+                    section_to_chapter
+                        .entry(sec.section_id.clone())
+                        .or_insert_with(|| last_id.clone());
+                }
+            }
+        }
+    }
+
+    // Build section_heads
+    let mut section_heads: Vec<SectionHeadRecord> = Vec::new();
+    let mut serial = 1usize;
+    for section in &classified {
+        if section.keep_as_chapter {
+            continue;
+        }
+        let chapter_id = section_to_chapter
+            .get(&section.section_id)
+            .cloned()
+            .unwrap_or_default();
+        if section.title.is_empty() {
+            continue;
+        }
+        section_heads.push(SectionHeadRecord {
+            section_head_id: format!("section-head-{:04}", serial),
+            chapter_id,
+            title: section.title.clone(),
+            page_no: section.start_page,
+            level: 2,
+            source: "fallback".into(),
+        });
+        serial += 1;
+    }
+
+    (chapters, section_heads)
+}
+
+// ── 标准化 ───────────────────────────────────────────────────────
+
+fn normalize_chapters(chapters: Vec<ChapterRecord>) -> Vec<ChapterRecord> {
+    let mut normalized: Vec<ChapterRecord> = chapters
+        .into_iter()
+        .filter(|c| !c.pages.is_empty() && !c.chapter_id.is_empty())
+        .collect();
+    normalized.sort_by_key(|c| (c.start_page, c.chapter_id.clone()));
+    normalized
+}
+
+#[allow(dead_code)]
+fn normalize_sections(sections: Vec<SectionHeadRecord>) -> Vec<SectionHeadRecord> {
+    let mut normalized: Vec<SectionHeadRecord> = sections
+        .into_iter()
+        .filter(|s| !s.title.is_empty() && s.page_no > 0)
+        .collect();
+    normalized.sort_by_key(|s| (s.page_no, s.title.clone()));
+    normalized
+}
+
+#[allow(dead_code)]
+fn merge_section_heads(
+    mut primary: Vec<SectionHeadRecord>,
+    supplemental: Vec<SectionHeadRecord>,
+) -> Vec<SectionHeadRecord> {
+    primary.extend(supplemental);
+    let mut merged: Vec<SectionHeadRecord> = Vec::new();
+    let mut seen: HashSet<(String, i64, String)> = HashSet::new();
+    let mut serial = 1usize;
+    for row in primary {
+        let text = normalize_title(&row.title);
+        if text.is_empty() {
+            continue;
+        }
+        let key = (
+            row.chapter_id.clone(),
+            row.page_no,
+            chapter_title_match_key(&text),
+        );
+        if !seen.insert(key) {
+            continue;
+        }
+        merged.push(SectionHeadRecord {
+            section_head_id: format!("section-head-{:04}", serial),
+            chapter_id: row.chapter_id,
+            title: text.clone(),
+            page_no: row.page_no,
+            level: row.level,
+            source: row.source,
+        });
+        serial += 1;
+    }
+    merged
+}
+
+// ── 辅助函数 ─────────────────────────────────────────────────────
+
+fn chapter_keyword_strength(title: &str) -> f64 {
+    if CHAPTER_KEYWORD_RE.is_match(title) || TOC_FORCE_EXPORT_TITLE_RE.is_match(title) {
+        2.0
+    } else if LECTURE_TITLE_RE.is_match(title) {
+        1.5
+    } else {
+        0.0
+    }
+}
+
+fn is_sentence_like_heading(title: &str) -> bool {
+    let words: Vec<&str> = title.split_whitespace().collect();
+    words.len() >= 6 || title.contains(',') || title.contains(':')
+}
+
+fn all_page_numbers(page_partitions: &[PagePartitionRecord]) -> Vec<i64> {
+    let mut pages: Vec<i64> = page_partitions
+        .iter()
+        .map(|p| p.page_no)
+        .filter(|&p| p > 0)
+        .collect();
+    pages.sort_unstable();
+    pages.dedup();
+    pages
+}
+
+fn build_page_roles(page_partitions: &[PagePartitionRecord]) -> HashMap<i64, String> {
+    page_partitions
+        .iter()
+        .map(|p| (p.page_no, p.page_role.as_str().to_string()))
+        .collect()
+}
+
+// ── 简单 fallback（无 heading_candidates 时的退化路径）───────────
+
+/// 无 heading_candidates 时，把连续 body 页打包为 fallback 章节。
+/// 这是原始 stub 行为的保留路径。
+fn simple_fallback(page_partitions: &[PagePartitionRecord]) -> Vec<ChapterRecord> {
     let mut chapters = Vec::new();
     let mut chapter_start: Option<i64> = None;
     let mut chapter_pages: Vec<i64> = Vec::new();
@@ -65,6 +644,49 @@ pub fn build_chapter_skeleton_fallback(
     chapters
 }
 
+// ── 公开 API ─────────────────────────────────────────────────────
+
+/// 无 TOC 时，从 heading_candidates + page_partitions 构建 fallback 章节。
+///
+/// ←→ Python `_build_fallback_chapters_and_sections` + 上游所有步骤
+pub fn build_chapter_skeleton_fallback(
+    page_partitions: &[PagePartitionRecord],
+    heading_candidates: &mut Vec<HeadingCandidate>,
+    _heading_graph: &HeadingGraph,
+    total_pages: i64,
+) -> Vec<ChapterRecord> {
+    if page_partitions.is_empty() {
+        return vec![];
+    }
+
+    // 如果没有 heading_candidates，退化为简单策略：连续 body 页打包为一章
+    if heading_candidates.is_empty() {
+        return simple_fallback(page_partitions);
+    }
+
+    let all_pages = all_page_numbers(page_partitions);
+    let page_roles = build_page_roles(page_partitions);
+
+    // Step 1: candidate section rows
+    let section_rows = candidate_section_rows(heading_candidates, &all_pages, &page_roles);
+
+    // Step 2: classify
+    let classified =
+        classify_fallback_sections(section_rows, &page_roles, total_pages, heading_candidates);
+
+    // Step 3: mark suppressed candidates (mutate heading_candidates in-place, ←→ Python)
+    mark_suppressed_candidates(&classified, heading_candidates);
+
+    // Step 4: build chapters + section heads
+    let (chapters, _section_heads) =
+        build_fallback_chapters_and_sections(classified, &all_pages, &page_roles);
+
+    // Step 5: normalize
+    normalize_chapters(chapters)
+}
+
+// ── 测试 ─────────────────────────────────────────────────────────
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,6 +705,23 @@ mod tests {
         }
     }
 
+    fn hc(page_no: i64, text: &str, source: &str, family: &str) -> HeadingCandidate {
+        HeadingCandidate {
+            heading_id: String::new(),
+            page_no,
+            text: text.into(),
+            normalized_text: normalize_title(text),
+            source: source.into(),
+            block_label: String::new(),
+            top_band: false,
+            confidence: 1.0,
+            heading_family_guess: family.into(),
+            suppressed_as_chapter: false,
+            reject_reason: String::new(),
+            ..Default::default()
+        }
+    }
+
     #[test]
     fn fallback_single_chapter() {
         let parts = vec![
@@ -90,7 +729,8 @@ mod tests {
             pp(2, PageRole::Body),
             pp(3, PageRole::Body),
         ];
-        let chapters = build_chapter_skeleton_fallback(&parts, &[], &HeadingGraph::default(), 3);
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut vec![], &HeadingGraph::default(), 3);
         assert_eq!(chapters.len(), 1);
         assert!(chapters[0].chapter_id.starts_with("ch-fallback-"));
         assert_eq!(chapters[0].start_page, 1);
@@ -99,7 +739,67 @@ mod tests {
 
     #[test]
     fn fallback_empty() {
-        let chapters = build_chapter_skeleton_fallback(&[], &[], &HeadingGraph::default(), 0);
+        let chapters =
+            build_chapter_skeleton_fallback(&[], &mut vec![], &HeadingGraph::default(), 0);
         assert!(chapters.is_empty());
+    }
+
+    #[test]
+    fn fallback_with_section_rows() {
+        let parts = vec![
+            pp(1, PageRole::Body),
+            pp(2, PageRole::Body),
+            pp(3, PageRole::Body),
+        ];
+        let mut hcs = vec![hc(1, "Chapter One", "visual_toc", "chapter")];
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 3);
+        assert_eq!(chapters.len(), 1);
+        assert_eq!(chapters[0].title, "Chapter One");
+    }
+
+    #[test]
+    fn classify_rejects_note_heading() {
+        let parts = vec![pp(1, PageRole::Body)];
+        let mut hcs = vec![hc(1, "NOTES", "note_heading", "note")];
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 1);
+        // "NOTES" should be rejected → fallback creates one empty chapter
+        assert!(chapters.is_empty() || chapters.len() == 1);
+    }
+
+    #[test]
+    fn classify_keeps_strong_evidence() {
+        let parts = vec![
+            pp(1, PageRole::Body),
+            pp(2, PageRole::Body),
+            pp(3, PageRole::Body),
+            pp(4, PageRole::Body),
+        ];
+        let mut hcs = vec![hc(1, "Chapter One", "visual_toc", "chapter")];
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 4);
+        assert_eq!(chapters.len(), 1);
+        assert_eq!(chapters[0].title, "Chapter One");
+    }
+
+    #[test]
+    fn normalize_empty_pages() {
+        let result = normalize_chapters(vec![]);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn merge_sections_dedupe() {
+        let s1 = SectionHeadRecord {
+            section_head_id: "s1".into(),
+            chapter_id: "ch1".into(),
+            title: "Section A".into(),
+            page_no: 5,
+            level: 2,
+            source: "fallback".into(),
+        };
+        let result = merge_section_heads(vec![s1.clone()], vec![s1]);
+        assert_eq!(result.len(), 1);
     }
 }

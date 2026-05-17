@@ -26,7 +26,7 @@ pub fn build_chapter_skeleton(
     toc_items: Option<&[TocItem]>,
     page_partitions: &[PagePartitionRecord],
     heading_graph: &crate::heading_graph::HeadingGraph,
-    heading_candidates: Vec<HeadingCandidate>,
+    mut heading_candidates: Vec<HeadingCandidate>,
 ) -> ChapterSkeleton {
     let total_pages = pages.len() as i64;
 
@@ -60,7 +60,7 @@ pub fn build_chapter_skeleton(
                     let chapter_id = if !item.item_id.trim().is_empty() {
                         format!("toc-{}", item.item_id.trim())
                     } else {
-                        format!("toc-ch-{}", i + 1)
+                        format!("toc-toc-ch-{}", i + 1)
                     };
                     ChapterRecord {
                         chapter_id,
@@ -132,7 +132,7 @@ pub fn build_chapter_skeleton(
     let chapters = if chapters.is_empty() {
         crate::chapter_skeleton::fallback::build_chapter_skeleton_fallback(
             page_partitions,
-            &[],
+            &mut heading_candidates,
             heading_graph,
             total_pages,
         )

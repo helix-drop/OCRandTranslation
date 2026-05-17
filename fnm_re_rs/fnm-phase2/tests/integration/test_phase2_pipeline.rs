@@ -46,6 +46,7 @@ fn full_pipeline_endnote_book() {
         phase1_chapters: &chapters,
         phase1_pages: &[],
         phase1_section_heads: &[],
+        phase1_heading_candidates: &[],
         raw_pages: &raw_pages,
         pdf_path: None,
         config: Phase2Config::default(),
@@ -85,6 +86,10 @@ fn endnote_repair_merges_truncated() {
             is_reconstructed: false,
             review_required: false,
             note_kind: NoteKind::Endnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
         },
         NoteItemRecord {
             note_item_id: "ni-2".into(),
@@ -99,6 +104,10 @@ fn endnote_repair_merges_truncated() {
             is_reconstructed: false,
             review_required: false,
             note_kind: NoteKind::Endnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
         },
     ];
 

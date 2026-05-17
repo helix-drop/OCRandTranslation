@@ -251,10 +251,10 @@ pub fn normalize_toc_chapter_id(raw_id: &str, order: usize, title: &str) -> Stri
     }
     let title_key = chapter_title_match_key(title);
     if title_key.is_empty() {
-        format!("toc-ch-{:03}", order)
+        format!("toc-toc-ch-{:03}", order)
     } else {
         let truncated: String = title_key.chars().take(24).collect();
-        format!("toc-ch-{:03}-{}", order, truncated)
+        format!("toc-toc-ch-{:03}-{}", order, truncated)
     }
 }
 

@@ -17,6 +17,8 @@ static WEAK_EXPECTED_DIGIT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s(\d{1,3
 static WEAK_DIGIT_LEFT_WORD_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"([A-Za-zàâäéèêëïîôöùûüÿçœÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇŒ]+)\s*$").unwrap());
 
+// ←→ Python `_WEAK_EXPECTED_SYMBOL_RE`: 要求字母在前，标点/空格在后。
+// 由于 Rust regex 不支持 lookaround，此处只捕获 * 本身，由消费方验证上下文。
 static WEAK_EXPECTED_SYMBOL_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\*{1,3}").unwrap());
 
 // ── 已知 endnote marker 页码映射 ────────────────────────────────
@@ -155,13 +157,23 @@ pub fn scan_expected_gap_bare_digits(text: &str, expected_markers: &HashSet<i64>
             if word.len() < 2 {
                 continue;
             }
-            // 右侧标点后紧跟数字 -> 拒绝
+            // ←→ Python `_WEAK_EXPECTED_DIGIT_RE` lookahead: 右侧需标点或空格+字母，拒绝紧跟数字
             let right = &text[digit_end..];
             let right_stripped = right.trim_start();
-            if let Some(first_char) = right_stripped.chars().next() {
-                if first_char.is_ascii_digit() {
-                    continue;
-                }
+            let valid_after = match right_stripped.chars().next() {
+                None => true,
+                Some(c) if c.is_ascii_digit() => false,
+                Some(c) if "],.;:)}»\"'".contains(c) => true,
+                Some(c) if c.is_whitespace() => right_stripped
+                    .trim_start()
+                    .chars()
+                    .next()
+                    .map(|n| n.is_alphabetic())
+                    .unwrap_or(false),
+                Some(_) => false,
+            };
+            if !valid_after {
+                continue;
             }
             matches.push(GapHit {
                 marker: marker.to_string(),
@@ -172,6 +184,26 @@ pub fn scan_expected_gap_bare_digits(text: &str, expected_markers: &HashSet<i64>
         }
     }
     matches
+}
+
+/// 判断符号是否在合理的 note 上下文中。
+/// ←→ Python `_WEAK_EXPECTED_SYMBOL_RE` 的 lookbehind + lookahead。
+fn symbol_in_note_context(text: &str, start: usize, end: usize) -> bool {
+    // 左侧需要有一个字母字符（替代 `(?<=[A-Za-z...])`  lookbehind）
+    let before = &text[..start];
+    let left_char = before.chars().last();
+    let has_letter_before = left_char.is_some_and(|c| c.is_alphabetic());
+
+    // 右侧需要空白或标点（替代 `(?=(?:\s|[.,;:)\]}»'"])`  lookahead）
+    let after = &text[end..];
+    let right_trimmed = after.trim_start();
+    let has_valid_after = if let Some(next) = right_trimmed.chars().next() {
+        next.is_whitespace() || "],.;:)}»'\"".contains(next)
+    } else {
+        true // end of text
+    };
+
+    has_letter_before && has_valid_after
 }
 
 /// 在文本中扫描 expected symbol markers。
@@ -185,6 +217,10 @@ pub fn scan_expected_gap_symbols(text: &str, expected_markers: &HashSet<String>)
     for m in WEAK_EXPECTED_SYMBOL_RE.find_iter(text) {
         let symbol = m.as_str();
         if !expected_markers.contains(symbol) {
+            continue;
+        }
+        // ←→ Python `_WEAK_EXPECTED_SYMBOL_RE` 上下文检查（替代 lookaround）
+        if !symbol_in_note_context(text, m.start(), m.end()) {
             continue;
         }
         matches.push(GapHit {

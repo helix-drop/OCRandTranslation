@@ -367,3 +367,48 @@ pub fn extract_candidates_from_pdf_pages(
 
     candidates
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn extract_empty_pages() {
+        let result = extract_candidates_from_pdf_pages(
+            &[],
+            &HashSet::new(),
+            &HashMap::new(),
+            &HashMap::new(),
+            0,
+        );
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn extract_with_no_candidate_pages() {
+        let pages = vec![json!({
+            "pageIdx": 1,
+            "pdfW": 600.0,
+            "pdfH": 800.0,
+            "items": [{"str": "Chapter 1", "y": 50.0, "x": 100.0, "height": 18.0, "width": 80.0, "font": "Times-Bold"}]
+        })];
+        let result = extract_candidates_from_pdf_pages(
+            &pages,
+            &HashSet::new(),
+            &HashMap::new(),
+            &HashMap::new(),
+            100,
+        );
+        assert!(
+            result.is_empty(),
+            "no candidate pages should yield no candidates"
+        );
+    }
+
+    #[test]
+    fn collect_empty_pdf_path() {
+        let result = collect_pdf_font_band_candidates(&[], &[], "", None, 0, None, "");
+        assert!(result.is_empty());
+    }
+}

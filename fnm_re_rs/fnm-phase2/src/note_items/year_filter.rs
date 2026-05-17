@@ -133,6 +133,10 @@ mod tests {
             is_reconstructed: false,
             review_required: false,
             note_kind: NoteKind::Endnote,
+            projection_mode: None,
+            owner_chapter_id: None,
+            source_marker: None,
+            normalized_marker: None,
         }
     }
 

@@ -23,6 +23,8 @@ pub struct NoteRegionContext<'a> {
     pub is_post_body_region: bool,
     pub is_book_scope: bool,
     pub explicit_markers: &'a [&'a str],
+    /// note_scan 检测的 page_kind，如 "endnote_collection"、"mixed_body_endnotes"。
+    pub scan_page_kind: &'a str,
 }
 
 pub struct NoteKindResolution {
@@ -35,6 +37,17 @@ pub struct NoteKindResolution {
 /// 单一权威函数：给定 region 上下文，决定 note_kind。
 pub fn resolve_note_kind(ctx: &NoteRegionContext) -> NoteKindResolution {
     let heading_lower = ctx.heading_text.to_lowercase();
+
+    // 0. note_scan page_kind 优先于标题文本（扫描信号比模糊标题更可靠）
+    let scan_kind = ctx.scan_page_kind.trim().to_lowercase();
+    if scan_kind == "endnote_collection" || scan_kind == "mixed_body_endnotes" {
+        return NoteKindResolution {
+            note_kind: NoteKind::Endnote,
+            confidence: 0.95,
+            reason: "endnote_scan".into(),
+            review_required: false,
+        };
+    }
 
     // 1. 显式 endnote heading
     if heading_lower.contains("endnote")
@@ -110,6 +123,7 @@ mod tests {
             is_post_body_region: false,
             is_book_scope: false,
             explicit_markers: &[],
+            scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
         assert_eq!(r.note_kind, NoteKind::Endnote);
@@ -124,6 +138,7 @@ mod tests {
             is_post_body_region: false,
             is_book_scope: false,
             explicit_markers: &[],
+            scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
         assert_eq!(r.note_kind, NoteKind::Footnote);
@@ -137,6 +152,7 @@ mod tests {
             is_post_body_region: false,
             is_book_scope: false,
             explicit_markers: &[],
+            scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
         assert_eq!(r.note_kind, NoteKind::Footnote);
@@ -150,6 +166,36 @@ mod tests {
             is_post_body_region: true,
             is_book_scope: false,
             explicit_markers: &[],
+            scan_page_kind: "",
+        };
+        let r = resolve_note_kind(&ctx);
+        assert_eq!(r.note_kind, NoteKind::Endnote);
+    }
+
+    #[test]
+    fn endnote_scan_collection() {
+        let ctx = NoteRegionContext {
+            heading_text: "",
+            has_footnote_band: false,
+            is_post_body_region: false,
+            is_book_scope: false,
+            explicit_markers: &[],
+            scan_page_kind: "endnote_collection",
+        };
+        let r = resolve_note_kind(&ctx);
+        assert_eq!(r.note_kind, NoteKind::Endnote);
+        assert_eq!(r.reason, "endnote_scan");
+    }
+
+    #[test]
+    fn endnote_scan_mixed_body() {
+        let ctx = NoteRegionContext {
+            heading_text: "",
+            has_footnote_band: false,
+            is_post_body_region: false,
+            is_book_scope: false,
+            explicit_markers: &[],
+            scan_page_kind: "mixed_body_endnotes",
         };
         let r = resolve_note_kind(&ctx);
         assert_eq!(r.note_kind, NoteKind::Endnote);
@@ -163,6 +209,7 @@ mod tests {
             is_post_body_region: false,
             is_book_scope: false,
             explicit_markers: &[],
+            scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
         assert!(r.review_required);

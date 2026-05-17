@@ -106,7 +106,7 @@ fn build_layer3_prompt(target_marker: &str, context: &str) -> String {
     )
 }
 
-fn parse_layer3_response(content: &str, marker: &str, page_no: i64) -> Result<Layer3Result> {
+pub fn parse_layer3_response(content: &str, marker: &str, page_no: i64) -> Result<Layer3Result> {
     // 提取 JSON（容忍 LLM 可能加 markdown ```json ... ``` 包装）
     let json_str = extract_json_block(content);
     let parsed: serde_json::Value = serde_json::from_str(&json_str)

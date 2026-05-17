@@ -69,6 +69,10 @@ pub fn apply_note_item_overrides(
                                 is_reconstructed: false,
                                 review_required: false,
                                 note_kind: region.note_kind,
+                                projection_mode: None,
+                                owner_chapter_id: None,
+                                source_marker: None,
+                                normalized_marker: None,
                             });
                         }
                     }

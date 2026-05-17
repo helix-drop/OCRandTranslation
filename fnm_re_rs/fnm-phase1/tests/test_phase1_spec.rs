@@ -187,3 +187,231 @@ fn spec_toc_semantics_single_chapter() {
     assert_eq!(result.aligned_chapters[0].title, "Chapter One");
     assert!(result.chapter_order_monotonic);
 }
+
+// ── SPEC 9: biopolitics_toc_gate — 12 章 + post_body 为空 ─────────
+
+#[test]
+fn spec_biopolitics_toc_gate() {
+    use fnm_phase1::toc_structure::{build_phase1_structure, Phase1Config};
+    let pages: Vec<RawPage> = (1..=60)
+        .map(|i| {
+            let md = if i == 1 {
+                "# Title Page".into()
+            } else if i % 5 == 0 {
+                format!("## Chapter {}\nBody text page {}.", i / 5, i)
+            } else {
+                format!("Body text page {}.", i)
+            };
+            RawPage {
+                book_page: i,
+                markdown: md,
+                ..Default::default()
+            }
+        })
+        .collect();
+    // 12 chapters + container + endnotes = 14 TOC items
+    let mut toc: Vec<TocItem> = (1..=12)
+        .map(|i| TocItem {
+            item_id: format!("toc-ch-{}", i),
+            title: format!("Chapter {}", i),
+            level: 1,
+            target_pdf_page: Some(i * 5),
+            role_hint: "chapter".into(),
+            export_candidate: Some(true),
+            ..Default::default()
+        })
+        .collect();
+    toc.push(TocItem {
+        item_id: "toc-notes".into(),
+        title: "Notes".into(),
+        level: 1,
+        role_hint: "endnotes".into(),
+        export_candidate: Some(false),
+        ..Default::default()
+    });
+
+    let config = Phase1Config::default();
+    let output = build_phase1_structure(&pages, Some(&toc), &config).unwrap();
+
+    assert!(
+        output.gate_report.hard.values().all(|&v| v),
+        "all hard gates should pass"
+    );
+    let chapters: Vec<_> = output
+        .structure
+        .chapters
+        .iter()
+        .filter(|c| c.source == fnm_core::types::ChapterSource::VisualToc)
+        .collect();
+    assert_eq!(chapters.len(), 12, "should have 12 visual-toc chapters");
+    // 所有 chapter 都应该是 visual_toc 或 fallback，没有 post_body 等价物
+    let non_standard: Vec<_> = output
+        .structure
+        .chapters
+        .iter()
+        .filter(|c| {
+            c.source != fnm_core::types::ChapterSource::VisualToc
+                && c.source != fnm_core::types::ChapterSource::Fallback
+        })
+        .collect();
+    assert!(
+        non_standard.is_empty(),
+        "all chapters should be standard source types"
+    );
+}
+
+// ── SPEC 10: manual_override_recorded ──────────────────────────
+
+#[test]
+fn spec_manual_override_recorded() {
+    use fnm_phase1::input::ManualPageOverride;
+    use fnm_phase1::toc_structure::{build_phase1_structure, Phase1Config};
+    use std::collections::HashMap;
+
+    let pages = vec![
+        RawPage {
+            book_page: 1,
+            markdown: "Copyright page.".into(),
+            ..Default::default()
+        },
+        RawPage {
+            book_page: 2,
+            markdown: "# Chapter One\nBody text.".into(),
+            ..Default::default()
+        },
+    ];
+    let toc = vec![TocItem {
+        item_id: "toc-1".into(),
+        title: "Chapter One".into(),
+        level: 1,
+        target_pdf_page: Some(2),
+        role_hint: "chapter".into(),
+        ..Default::default()
+    }];
+    let mut overrides: HashMap<String, ManualPageOverride> = HashMap::new();
+    overrides.insert(
+        "1".into(),
+        ManualPageOverride {
+            page_role: Some("front_matter".into()),
+            ..Default::default()
+        },
+    );
+
+    let config = Phase1Config {
+        manual_page_overrides: Some(overrides),
+        ..Phase1Config::default()
+    };
+    let output = build_phase1_structure(&pages, Some(&toc), &config).unwrap();
+
+    assert!(
+        !output.overrides_used.is_empty(),
+        "overrides should be recorded"
+    );
+    assert!(
+        output
+            .overrides_used
+            .iter()
+            .any(|r| r.kind == "page_override"),
+        "at least one override should have kind=page_override"
+    );
+}
+
+// ── SPEC 11: visual_toc_export_candidate_default ────────────────
+
+#[test]
+fn spec_visual_toc_export_candidate_default() {
+    use fnm_phase1::toc_structure::{build_phase1_structure, Phase1Config};
+
+    // 30 body pages + 3 level-1 TOC items, none declare export_candidate
+    let pages: Vec<RawPage> = (1..=30)
+        .map(|i| {
+            let md = match i {
+                5 => "# Chapter One\nBody text.".into(),
+                15 => "# Chapter Two\nBody text.".into(),
+                25 => "# Chapter Three\nBody text.".into(),
+                _ => format!("Body text page {}.", i),
+            };
+            RawPage {
+                book_page: i,
+                markdown: md,
+                ..Default::default()
+            }
+        })
+        .collect();
+    let toc = vec![
+        TocItem {
+            item_id: "toc-1".into(),
+            title: "Chapter One".into(),
+            level: 1,
+            target_pdf_page: Some(5),
+            role_hint: "chapter".into(),
+            export_candidate: None, // ← 关键：不设 export_candidate
+            ..Default::default()
+        },
+        TocItem {
+            item_id: "toc-2".into(),
+            title: "Chapter Two".into(),
+            level: 1,
+            target_pdf_page: Some(15),
+            role_hint: "chapter".into(),
+            export_candidate: None,
+            ..Default::default()
+        },
+        TocItem {
+            item_id: "toc-3".into(),
+            title: "Chapter Three".into(),
+            level: 1,
+            target_pdf_page: Some(25),
+            role_hint: "chapter".into(),
+            export_candidate: None,
+            ..Default::default()
+        },
+    ];
+
+    let config = Phase1Config::default();
+    let output = build_phase1_structure(&pages, Some(&toc), &config).unwrap();
+
+    let summary = output
+        .diagnostics
+        .get("chapter_source_summary")
+        .and_then(|v| v.as_object())
+        .expect("chapter_source_summary should exist in diagnostics");
+    assert_eq!(
+        summary.get("source").and_then(|v| v.as_str()),
+        Some("visual_toc"),
+        "source should be visual_toc, got {:?}",
+        summary.get("source")
+    );
+    let vt_count = summary
+        .get("visual_toc_chapter_count")
+        .and_then(|v| v.as_i64())
+        .unwrap_or(0);
+    assert!(
+        vt_count >= 3,
+        "visual_toc_chapter_count should be >= 3, got {}",
+        vt_count
+    );
+}
+
+// ── SPEC 12: endnotes_start_page 传递 ──────────────────────────
+
+#[test]
+fn spec_endnotes_start_page_applied() {
+    use fnm_phase1::toc_structure::{build_phase1_structure, Phase1Config};
+
+    let pages: Vec<RawPage> = (1..=10)
+        .map(|i| RawPage {
+            book_page: i,
+            markdown: format!("Body text page {}.", i),
+            ..Default::default()
+        })
+        .collect();
+    let config = Phase1Config {
+        endnotes_start_page: Some(8),
+        ..Phase1Config::default()
+    };
+    let output = build_phase1_structure(&pages, None, &config).unwrap();
+    assert_eq!(output.structure.pages.len(), 10);
+    let page_8 = output.structure.pages.iter().find(|p| p.page_no == 8);
+    assert!(page_8.is_some(), "page 8 should exist in partitions");
+}

@@ -22,7 +22,7 @@ pub mod merge_adjacent;
 pub mod normalize;
 pub mod post_body_promote;
 
-use fnm_core::records::{ChapterRecord, NoteRegionRecord, PagePartitionRecord};
+use fnm_core::records::{ChapterRecord, HeadingCandidate, NoteRegionRecord, PagePartitionRecord};
 use fnm_phase1::input::RawPage;
 use std::collections::{HashMap, HashSet};
 
@@ -35,6 +35,7 @@ pub fn build_note_regions(
     pages: &[RawPage],
     page_partitions: &[PagePartitionRecord],
     post_body_titles: &HashSet<String>,
+    heading_candidates: &[HeadingCandidate],
 ) -> Vec<NoteRegionRecord> {
     // 构建 page_by_no 和 page_role_by_no
     let page_by_no: HashMap<i64, &RawPage> = pages.iter().map(|p| (p.book_page, p)).collect();
@@ -84,9 +85,17 @@ pub fn build_note_regions(
     let (endnote_regions, _promoted_count) =
         post_body_promote::promote_post_body_regions(endnote_regions, phase1_chapters);
 
+    // 4b. Endnote chapter explorer（←→ Python `explore_endnote_chapter_regions`）
+    // 当前 stub（20% 完成度），接入但不期望实际修改 regions。
+    // 待完整实现后，此处结果应参与后序 rebind/章节重绑定。
+    let _explorations = crate::endnote_chapter_explorer::explore_endnote_chapter_regions(
+        pages,
+        phase1_chapters,
+    );
+
     // 5. Rebind book regions
     let (endnote_regions, _rebind_count) =
-        book_regions::rebind_book_regions(endnote_regions, phase1_chapters);
+        book_regions::rebind_book_regions(endnote_regions, phase1_chapters, heading_candidates);
 
     // 6. Normalize region IDs and combine
     let mut all_regions = Vec::new();
@@ -159,7 +168,7 @@ mod tests {
             has_note_heading: false,
             note_scan_summary: serde_json::json!({}),
         }];
-        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new());
+        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new(), &[]);
         assert!(!regions.is_empty());
         assert_eq!(regions[0].note_kind, NoteKind::Endnote);
     }
@@ -182,7 +191,7 @@ mod tests {
             has_note_heading: false,
             note_scan_summary: serde_json::json!({}),
         }];
-        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new());
+        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new(), &[]);
         assert!(!regions.is_empty());
         assert_eq!(regions[0].note_kind, NoteKind::Endnote);
         assert!(!regions[0].heading_text.is_empty());
@@ -190,7 +199,7 @@ mod tests {
 
     #[test]
     fn empty_input() {
-        let regions = build_note_regions(&[], &[], &[], &HashSet::new());
+        let regions = build_note_regions(&[], &[], &[], &HashSet::new(), &[]);
         assert!(regions.is_empty());
     }
 
@@ -311,7 +320,7 @@ mod tests {
             region_first_note_item_marker: String::new(),
             review_required: false,
         };
-        let (rebound, count) = book_regions::rebind_book_regions(vec![region], &chapters);
+        let (rebound, count) = book_regions::rebind_book_regions(vec![region], &chapters, &[]);
         assert_eq!(count, 1);
         assert_eq!(rebound[0].chapter_id, "ch-1");
     }

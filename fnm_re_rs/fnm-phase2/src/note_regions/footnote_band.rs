@@ -2,7 +2,7 @@
 //! 脚注 band 区域构建。
 
 use fnm_core::records::{ChapterRecord, NoteRegionRecord};
-use fnm_core::types::{NoteKind, RegionScope, RegionSource};
+use fnm_core::types::{RegionScope, RegionSource};
 use fnm_phase1::input::RawPage;
 use std::collections::HashSet;
 
@@ -128,7 +128,17 @@ pub fn build_footnote_band_regions(
                 page_start: start_page,
                 page_end: end_page,
                 pages: run_pages,
-                note_kind: NoteKind::Footnote,
+                note_kind: crate::note_kind_resolver::resolve_note_kind(
+                    &crate::note_kind_resolver::NoteRegionContext {
+                        heading_text: "",
+                        has_footnote_band: true,
+                        is_post_body_region: false,
+                        is_book_scope: false,
+                        explicit_markers: &[],
+                        scan_page_kind: "",
+                    },
+                )
+                .note_kind,
                 scope: RegionScope::Chapter,
                 source: RegionSource::FootnoteBand,
                 heading_text: String::new(),

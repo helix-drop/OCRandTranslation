@@ -3,7 +3,7 @@
 
 use fnm_core::note_marker::first_notes_heading;
 use fnm_core::records::{ChapterRecord, NoteRegionRecord};
-use fnm_core::types::{NoteKind, RegionScope, RegionSource};
+use fnm_core::types::{RegionScope, RegionSource};
 use fnm_phase1::input::RawPage;
 use std::collections::{HashMap, HashSet};
 
@@ -90,7 +90,22 @@ fn build_region_record(
         page_start: start_page,
         page_end: end_page,
         pages: pages.to_vec(),
-        note_kind: NoteKind::Endnote,
+        note_kind: {
+            // 由 endnote_regions_raw 构建的 region 已通过 is_endnote_candidate_page 验证，
+            // 因此始终标记为 endnote_collection 上下文。
+            let scan_page_kind = "endnote_collection";
+            crate::note_kind_resolver::resolve_note_kind(
+                &crate::note_kind_resolver::NoteRegionContext {
+                    heading_text,
+                    has_footnote_band: false,
+                    is_post_body_region: false,
+                    is_book_scope: scope == "book",
+                    explicit_markers: &[],
+                    scan_page_kind,
+                },
+            )
+            .note_kind
+        },
         scope: if scope == "book" {
             RegionScope::Book
         } else {

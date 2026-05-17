@@ -40,6 +40,14 @@ static HTML_SUP_RE: Lazy<Regex> =
 
 static LATEX_SUP_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\$\s*\^\{(\d{1,4})\}\s*\$").unwrap());
 
+// ── Embedded note definition regex ─────────────────────────
+
+/// ←→ Python `_EMBEDDED_NOTE_DEF_RE`：捕获行内注释放置的 marker。
+/// 匹配有至少 20 个前导字符后跟数字 marker 的行。
+static EMBEDDED_NOTE_DEF_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"^(?P<prefix>.{20,}?)\s+(?P<token>\d{1,4})(?P<body>\s+\S.*)$").unwrap()
+});
+
 // ── 解析逻辑 ──────────────────────────────────────────────────
 
 /// 解析单页 markdown 文本，提取所有注释项。
@@ -56,29 +64,45 @@ pub(crate) fn parse_page(
             continue;
         }
 
-        // 1. OCR split marker FIRST: "1 2 body" → marker="12", reconstructed
-        if let Some(caps) = OCR_SPLIT_NOTE_DEF_RE.captures(trimmed) {
-            let token = caps.name("token").map(|m| m.as_str()).unwrap_or("");
+        // 1. OCR split marker: "1 2 body" → marker="12", reconstructed.
+        // ←→ Python `_parse_note_definition_line`: checks both OCR split AND standard match,
+        // and prefers standard if the standard marker is followed by another digit
+        // (e.g., "25 1. body" should give marker="25" not OCR-collapsed "251").
+        if let Some(split_caps) = OCR_SPLIT_NOTE_DEF_RE.captures(trimmed) {
+            let token = split_caps.name("token").map(|m| m.as_str()).unwrap_or("");
             let has_sep = token.contains(' ')
                 || token.contains(',')
                 || token.contains('.')
                 || token.contains('-');
             if has_sep {
-                let body = caps
-                    .name("body")
-                    .map(|m| m.as_str().trim().to_string())
-                    .unwrap_or_default();
-                let marker = normalize_note_marker(token);
-                if !marker.is_empty() && !body.is_empty() {
-                    rows.push(ParsedNoteRow {
-                        page_no,
-                        marker,
-                        text: body,
-                        is_reconstructed: true,
-                        source: "note_scan".into(),
-                    });
+                let collapsed = normalize_note_marker(token);
+                // Check if standard match also fires and prefers standard.
+                let prefer_standard = NOTE_DEF_RE.captures(trimmed).is_some_and(|std_caps| {
+                    let std_raw = std_caps
+                        .name("bracket")
+                        .or_else(|| std_caps.name("num"))
+                        .or_else(|| std_caps.name("loose"))
+                        .map(|m| m.as_str())
+                        .unwrap_or("");
+                    let std_marker = normalize_note_marker(std_raw);
+                    std_marker != collapsed && !std_marker.is_empty()
+                });
+                if !prefer_standard {
+                    let body = split_caps
+                        .name("body")
+                        .map(|m| m.as_str().trim().to_string())
+                        .unwrap_or_default();
+                    if !collapsed.is_empty() && !body.is_empty() {
+                        rows.push(ParsedNoteRow {
+                            page_no,
+                            marker: collapsed,
+                            text: body,
+                            is_reconstructed: true,
+                            source: "note_scan".into(),
+                        });
+                    }
+                    continue;
                 }
-                continue;
             }
         }
 
@@ -175,6 +199,23 @@ pub(crate) fn parse_page(
             }
             continue;
         }
+
+        // 7. Embedded note definition: at least 20 leading chars, then number marker.
+        // ←→ Python `_EMBEDDED_NOTE_DEF_RE`
+        if let Some(caps) = EMBEDDED_NOTE_DEF_RE.captures(trimmed) {
+            let token = caps.name("token").map(|m| m.as_str()).unwrap_or("");
+            let body = caps.name("body").map(|m| m.as_str().trim()).unwrap_or("");
+            if !token.is_empty() && !body.is_empty() {
+                rows.push(ParsedNoteRow {
+                    page_no,
+                    marker: token.into(),
+                    text: body.to_string(),
+                    is_reconstructed: false,
+                    source: "markdown".into(),
+                });
+            }
+            continue;
+        }
     }
 
     rows
@@ -214,6 +255,10 @@ pub(crate) fn row_to_item(
         is_reconstructed: row.is_reconstructed,
         review_required: false,
         note_kind: region.note_kind,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
     }
 }
 
@@ -257,15 +302,21 @@ mod tests {
     }
 
     #[test]
-    fn ocr_split_marker_reconstructed() {
+    fn ocr_split_prefers_standard_when_followed_by_digit() {
+        // ←→ Python `_parse_note_definition_line`：当 standard match 的 marker
+        // 后跟另一数字时（如 "1 2 body"），优先使用 standard marker="1"，
+        // 而非 OCR 合并的 "12"。
         let rows = parse_page(
             "1 2 This is a split note.\n3. Next note.",
             1,
             &test_region(),
         );
         let split: Vec<&ParsedNoteRow> = rows.iter().filter(|r| r.is_reconstructed).collect();
-        assert_eq!(split.len(), 1);
-        assert_eq!(split[0].marker, "12");
+        // "1 2" → standard marker "1"（后跟 "2"），不做 OCR 合并
+        assert_eq!(split.len(), 0);
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].marker, "1");
+        assert_eq!(rows[1].marker, "3");
     }
 
     #[test]

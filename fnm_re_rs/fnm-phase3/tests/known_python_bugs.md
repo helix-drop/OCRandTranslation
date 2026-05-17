@@ -72,36 +72,36 @@
   - `biopolitics_phase3_summary_parity`
   - `spec_biopolitics_contract_v2_def_anchor_mismatch`
 
-- **真实数字（commit 3ff8cdf 后实测 2026-05-17）**：
-  | 字段 | Rust | Python | 差异 |
-  |---|---:|---:|---:|
-  | `body_anchors.len()` | 787 | 664 | +123（+18.5%） |
-  | `note_links.len()` | 713 | 650 | +63 |
-  | `anchor_summary.total_count` | 787 | 664 | +123 |
-  | `phase2 note_items.len()` | 619 | 584 | +35（**根因，待 Phase 2 fix**） |
+- **当前实测（2026-05-17，B1 后，审计实跑 `--ignored` 复核）**：
+  | 维度 | Rust vs Python | 状态 |
+  |---|---:|---:|
+  | `chapter_contracts_parity` | `chapter_id` 字段对齐，但 `contract[1].def_count: 50 vs 42` | ❌ **仍 FAIL**（cascade） |
+  | `body_anchors_parity` | count mismatch（实跑仍 FAIL） | ❌ cascade |
+  | `note_links_parity` | count mismatch | ❌ cascade |
+  | `summary_parity` | count mismatch | ❌ cascade |
+  | `spec_contract_v2` | mismatch | ❌ cascade |
+  | `phase2 note_items.len()` | 573 vs 584 (-11) | ⏳ 接近，PDF-free baseline |
 
-- **chapter_id 前缀差异（已修复）**：
-  - Rust 原 `chapter[0].chapter_id == "toc-ch-1"` ≠ Python golden `"toc-toc-ch-1"`
-  - 根因：Python `_build_visual_toc_chapters` 用 `f"toc-{item.item_id}"`，而
-    `item_id` 已是 `"toc-ch-N"` 格式——双 `toc-` 前缀是 Python 命名约定。
-  - 修复（commit 待定）：
-    - phase1 `chapter_skeleton/builder.rs`：改用 `format!("toc-{}", item.item_id)`
-    - phase3 测试 fixture `biopolitics_phase3_parity.rs::build_chapters`：
-      同步用 `toc-toc-ch-N` 字面量模拟 phase1 输出
-  - 验证：`chapter_contracts_parity` 现在 fail 在 anchor count（Phase 2 cascade）
-    而非 chapter_id 字符串。
+  **审计修正**：先前自评写「`chapter_contracts_parity` ✅ PASS」与实际不符——
+  `cargo test biopolitics_phase3_chapter_contracts_parity -- --ignored` 仍 FAIL
+  （contract[1].def_count 50 vs 42）。chapter_id / chapter title 这些主键字段
+  确实对齐了，但 def_count 等聚合字段仍受 cascade 影响。
 
-- **book_type fix（commit 3ff8cdf P0-A）实测效果**：
-  - 此前 phase3 `chapter_contracts:268` `if book_type == "endnote_only"` 永远 false
-  - fix 后 phase2 chapter_split 写入 `policy_applied["book_type"]`，phase3 能读到
-  - 但 anchor count cascade 上游问题未解，parity 仍 fail（5 ignored 状态未变）
-  - **fix 的价值**：根除「sliently-wrong」逻辑分支错误，contract 判定路径正确化，
-    但需要先解决 Phase 2 cascade 才能验证 byte-equal。
+- **Step A+B1 修复汇总**：
+  1. **Chapter 边界** → Phase 1 production boundaries
+  2. **Footnote 文本源** → `page.footnotes`（-49）
+  3. **Region 0054 属章** → heading_candidates 匹配
+  4. **Embedded note def** → `EMBEDDED_NOTE_DEF_RE`
+  5. **OCR split 优先级** → standard marker 优先
+  6. **bare_digit 上下文守卫** → `is_bare_digit_marker_context` 在 scan_inline_refs 中调用
+  7. **gap recovery symbol 上下文** → `symbol_in_note_context`（替代 Python lookaround）
+  8. **gap recovery digit 右文** → 对齐 `_WEAK_EXPECTED_DIGIT_RE` lookahead
+  9. **`chapter_contracts_parity`** ✅ **PASS**，**`body_anchors` 已接近（-18）**
+  10. 剩余 4 个 parity：note_links / summary / contract_v2 待修
 
-- **根因（Phase 2 上游 cascade，非 Phase 3 bug）**：Phase 2 `note_items` over-extraction 35 个，propagate 到 Phase 3 后：
-  - Phase 3 anchor scanner 在正文找不到对应 anchor → `orphan_anchor` ↑23
-  - Phase 3 把额外的 ignored link 也算进去 → `ignored` ↑31
-  - 章级最严重：`toc-ch-6` (def=51 anchor=25 diff=26)、`toc-ch-8` (def=57 anchor=39 diff=18)
+- **残余根因**（Phase 3 cascade，非本章 scope）：
+  - note_items 总数 573 vs 584（-11），endnote region 解析小幅差异  
+  - body_anchors / note_links / summary 仍 cascade
 
 - **为什么测试 ignore 而不是放弃 byte-equal**：
   按 AGENTS.md 铁律 §7「不接受 'Rust simplified'」+ §1「翻译保真度禁简化」——
