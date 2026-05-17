@@ -47,7 +47,9 @@ fn build_chapters() -> Vec<ChapterRecord> {
                 total_pages
             };
             ChapterRecord {
-                chapter_id: format!("toc-ch-{}", i + 1),
+                // Python 端 chapter_id 命名约定：`toc-{item_id}`，而 item_id 已是
+                // `toc-ch-N`——双 toc 前缀（见 known_python_bugs §7 chapter_id 命名）。
+                chapter_id: format!("toc-toc-ch-{}", i + 1),
                 title: title.to_string(),
                 start_page: *start,
                 end_page: end,

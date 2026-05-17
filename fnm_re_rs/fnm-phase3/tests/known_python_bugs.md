@@ -72,14 +72,31 @@
   - `biopolitics_phase3_summary_parity`
   - `spec_biopolitics_contract_v2_def_anchor_mismatch`
 
-- **真实数字（最近一次跑实测）**：
+- **真实数字（commit 3ff8cdf 后实测 2026-05-17）**：
   | 字段 | Rust | Python | 差异 |
   |---|---:|---:|---:|
   | `body_anchors.len()` | 787 | 664 | +123（+18.5%） |
-  | `note_links.matched` | 526 | 516 | +10 |
-  | `note_links.orphan_anchor` | 88 | 65 | +23 |
-  | `note_links.ignored` | 40 | 9 | +31 |
-  | `phase2 note_items.len()` | 619 | 584 | +35（**根因**） |
+  | `note_links.len()` | 713 | 650 | +63 |
+  | `anchor_summary.total_count` | 787 | 664 | +123 |
+  | `phase2 note_items.len()` | 619 | 584 | +35（**根因，待 Phase 2 fix**） |
+
+- **chapter_id 前缀差异（已修复）**：
+  - Rust 原 `chapter[0].chapter_id == "toc-ch-1"` ≠ Python golden `"toc-toc-ch-1"`
+  - 根因：Python `_build_visual_toc_chapters` 用 `f"toc-{item.item_id}"`，而
+    `item_id` 已是 `"toc-ch-N"` 格式——双 `toc-` 前缀是 Python 命名约定。
+  - 修复（commit 待定）：
+    - phase1 `chapter_skeleton/builder.rs`：改用 `format!("toc-{}", item.item_id)`
+    - phase3 测试 fixture `biopolitics_phase3_parity.rs::build_chapters`：
+      同步用 `toc-toc-ch-N` 字面量模拟 phase1 输出
+  - 验证：`chapter_contracts_parity` 现在 fail 在 anchor count（Phase 2 cascade）
+    而非 chapter_id 字符串。
+
+- **book_type fix（commit 3ff8cdf P0-A）实测效果**：
+  - 此前 phase3 `chapter_contracts:268` `if book_type == "endnote_only"` 永远 false
+  - fix 后 phase2 chapter_split 写入 `policy_applied["book_type"]`，phase3 能读到
+  - 但 anchor count cascade 上游问题未解，parity 仍 fail（5 ignored 状态未变）
+  - **fix 的价值**：根除「sliently-wrong」逻辑分支错误，contract 判定路径正确化，
+    但需要先解决 Phase 2 cascade 才能验证 byte-equal。
 
 - **根因（Phase 2 上游 cascade，非 Phase 3 bug）**：Phase 2 `note_items` over-extraction 35 个，propagate 到 Phase 3 后：
   - Phase 3 anchor scanner 在正文找不到对应 anchor → `orphan_anchor` ↑23

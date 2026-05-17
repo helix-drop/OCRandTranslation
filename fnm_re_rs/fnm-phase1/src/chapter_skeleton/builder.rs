@@ -53,8 +53,17 @@ pub fn build_chapter_skeleton(
                         &page_roles,
                         &heading_candidates,
                     );
+                    // ←→ Python `_build_visual_toc_chapters`：chapter_id 用
+                    // `toc-{item_id}` 而非硬编码 `toc-ch-{i+1}`，对齐 Python 命名
+                    // 约定（item_id 已含 `toc-ch-N` 时会出现 `toc-toc-ch-N`，
+                    // 这是 Python 端历史命名导致，Rust 必须 byte-equal 复制）。
+                    let chapter_id = if !item.item_id.trim().is_empty() {
+                        format!("toc-{}", item.item_id.trim())
+                    } else {
+                        format!("toc-ch-{}", i + 1)
+                    };
                     ChapterRecord {
-                        chapter_id: format!("toc-ch-{}", i + 1),
+                        chapter_id,
                         title: item.title.clone(),
                         start_page,
                         end_page: 0,
@@ -67,9 +76,8 @@ pub fn build_chapter_skeleton(
 
             // 按起始页排序（heading_graph 可能重排章顺序）
             chs.sort_by_key(|ch| ch.start_page);
-            for (i, ch) in chs.iter_mut().enumerate() {
-                ch.chapter_id = format!("toc-ch-{}", i + 1);
-            }
+            // 注：排序后**不**重新生成 chapter_id——保留 toc-item_id 命名
+            // （原 `toc-ch-{i+1}` 是按位置编号，与 Python `toc-{item_id}` 不一致）。
 
             // fill end_page
             for i in 0..chs.len() {
