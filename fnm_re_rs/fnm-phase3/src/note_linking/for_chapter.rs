@@ -90,7 +90,7 @@ pub fn build_note_links_for_chapter(
 
     let mut anchors_mut = anchors.clone();
     let (links, _link_summary) =
-        crate::note_links::build_note_links(&mut anchors_mut, &ch_items, &ch_pp, 1, &ch_modes);
+        crate::note_links::build_note_links(&mut anchors_mut, &ch_items, &ch_pp, 1, &ch_modes, &[]);
 
     (anchors_mut, links)
 }

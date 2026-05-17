@@ -59,7 +59,7 @@ fn spec_disordered_toc_monotonic() {
         make_toc_item("2", "Chapter One", 2, "chapter"),
     ];
 
-    let result = build_toc_semantics(&toc, &[], &pages, &[], &[]);
+    let result = build_toc_semantics(&toc, &[], &pages, &[], &[], None);
     assert!(
         result.chapter_order_monotonic,
         "Disordered TOC should be normalized to monotonic"
@@ -81,7 +81,7 @@ fn spec_section_role_hint_no_break() {
         make_toc_item("3", "Chapter Two", 3, "chapter"),
     ];
 
-    let result = build_toc_semantics(&toc, &[], &pages, &[], &[]);
+    let result = build_toc_semantics(&toc, &[], &pages, &[], &[], None);
     assert!(
         result.chapter_order_monotonic,
         "Section role hint should not break chapter order gate"
@@ -103,7 +103,7 @@ fn spec_mid_book_other_no_back_matter() {
         make_toc_item("3", "Chapter Two", 3, "chapter"),
     ];
 
-    let result = build_toc_semantics(&toc, &[], &pages, &[], &[]);
+    let result = build_toc_semantics(&toc, &[], &pages, &[], &[], None);
     assert!(
         !result.aligned_chapters.is_empty(),
         "Mid-book front_matter should not prevent chapter generation"
@@ -127,7 +127,7 @@ fn spec_toc_tree_preserves_roles() {
         make_toc_item("4", "Chapter Two", 4, "chapter"),
     ];
 
-    let result = build_toc_semantics(&toc, &[], &pages, &[], &[]);
+    let result = build_toc_semantics(&toc, &[], &pages, &[], &[], None);
     let has_chapter = result
         .toc_role_summary
         .get("chapter")
@@ -169,7 +169,7 @@ fn spec_page_partition_mixed_roles() {
 
 #[test]
 fn spec_toc_semantics_empty() {
-    let result = build_toc_semantics(&[], &[], &[], &[], &[]);
+    let result = build_toc_semantics(&[], &[], &[], &[], &[], None);
     assert!(result.aligned_chapters.is_empty());
     assert!(result.chapter_order_monotonic);
     assert!(result.semantic_blocking_reasons.is_empty());
@@ -182,7 +182,7 @@ fn spec_toc_semantics_single_chapter() {
     let pages = vec![make_page(1, "# Chapter One\nBody text.")];
     let toc = vec![make_toc_item("1", "Chapter One", 1, "chapter")];
 
-    let result = build_toc_semantics(&toc, &[], &pages, &[], &[]);
+    let result = build_toc_semantics(&toc, &[], &pages, &[], &[], None);
     assert_eq!(result.aligned_chapters.len(), 1);
     assert_eq!(result.aligned_chapters[0].title, "Chapter One");
     assert!(result.chapter_order_monotonic);

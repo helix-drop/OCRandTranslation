@@ -2,8 +2,8 @@
 //!
 //! 尾注 link 匹配：anchor → note_item 配对、orphan repair、正文搜索恢复。
 
-use fnm_core::records::{BodyAnchorRecord, NoteItemRecord};
-use fnm_core::types::{AnchorKind, LinkResolver, LinkStatus, NoteKind};
+use fnm_core::records::{BodyAnchorRecord, NoteItemRecord, NoteRegionRecord};
+use fnm_core::types::{AnchorKind, LinkResolver, LinkStatus, NoteKind, RegionScope};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 
@@ -35,6 +35,8 @@ pub fn build_endnote_links(
     used_anchor_ids: &mut HashSet<String>,
     page_text_by_no: &HashMap<i64, String>,
     link_serial_start: usize,
+    regions_by_id: &HashMap<String, &NoteRegionRecord>,
+    anchor_count_by_chapter: &HashMap<String, usize>,
 ) -> (Vec<fnm_core::records::NoteLinkRecord>, Vec<usize>) {
     let mut links: Vec<fnm_core::records::NoteLinkRecord> = Vec::new();
     let mut link_serial = link_serial_start;
@@ -84,8 +86,11 @@ pub fn build_endnote_links(
 
         let is_direct_match = !candidates.is_empty();
 
-        // fallback chapter 跨章搜索
-        if candidates.is_empty() && crate::link_utils::is_fallback_chapter_id(chapter_id) {
+        // fallback chapter 跨章搜索（带 anchor_count 守卫）
+        if candidates.is_empty()
+            && crate::link_utils::is_fallback_chapter_id(chapter_id)
+            && anchor_count_by_chapter.get(chapter_id).copied().unwrap_or(0) == 0
+        {
             candidates = crate::link_utils::link_candidate_anchors(
                 anchors,
                 &crate::link_utils::CandidateFilter {
@@ -99,6 +104,29 @@ pub fn build_endnote_links(
                     allow_cross_chapter: true,
                 },
             );
+        }
+
+        // scope=book 跨章搜索（Python endnote_links.py:201-207）
+        if candidates.is_empty() {
+            let scope = regions_by_id
+                .get(&note_item.region_id)
+                .map(|r| r.scope)
+                .unwrap_or(RegionScope::Chapter);
+            if scope == RegionScope::Book && !chapter_id.is_empty() {
+                candidates = crate::link_utils::link_candidate_anchors(
+                    anchors,
+                    &crate::link_utils::CandidateFilter {
+                        chapter_id,
+                        marker,
+                        expected_kinds: &[AnchorKind::Endnote],
+                        used_anchor_ids,
+                        page_no: Some(note_item.page_no),
+                        footnote_window: false,
+                        include_synthetic: false,
+                        allow_cross_chapter: false,
+                    },
+                );
+            }
         }
 
         // synthetic anchor 搜索
@@ -399,17 +427,41 @@ fn find_marker_in_body(body_text: &str, marker: &str, patterns: &[Regex]) -> Opt
         }
     }
 
-    // Unicode 上标搜索
+    // Unicode 上标搜索（带负前瞻：不匹配多位数上标的前缀）
+    // ←→ Python 有负前瞻 `(?![\d⁰¹²³⁴⁵⁶⁷⁸⁹])` 防止 "1" 匹配 "¹²"。
+    // Rust regex crate 不支持 lookahead，用字符边界手动验证。
     if let Some(unicode_pat) = unicode_superscript_pattern(marker) {
-        if let Some(pos) = body_text.find(&unicode_pat) {
-            let start = pos;
-            let end = pos + unicode_pat.len();
-            return Some(BodyHit {
-                start,
-                end,
-                matched_text: unicode_pat,
-                source_text: extract_context(body_text, start, end),
-            });
+        let body_chars: Vec<char> = body_text.chars().collect();
+        let pat_chars: Vec<char> = unicode_pat.chars().collect();
+        for start_idx in 0..body_chars.len().saturating_sub(pat_chars.len().saturating_sub(1)) {
+            if body_chars[start_idx..].starts_with(&pat_chars) {
+                let end_idx = start_idx + pat_chars.len();
+                // 负后顾：前一个字符不是上标数字
+                if start_idx > 0
+                    && "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(body_chars[start_idx - 1])
+                {
+                    continue;
+                }
+                // 负前瞻：后一个字符不是上标数字
+                if end_idx < body_chars.len()
+                    && "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(body_chars[end_idx])
+                {
+                    continue;
+                }
+                // 转换回字节偏移
+                let byte_start = body_text[..]
+                    .char_indices()
+                    .nth(start_idx)
+                    .map(|(i, _)| i)
+                    .unwrap_or(0);
+                let byte_end = byte_start + unicode_pat.len();
+                return Some(BodyHit {
+                    start: byte_start,
+                    end: byte_end,
+                    matched_text: unicode_pat.clone(),
+                    source_text: extract_context(body_text, byte_start, byte_end),
+                });
+            }
         }
     }
 

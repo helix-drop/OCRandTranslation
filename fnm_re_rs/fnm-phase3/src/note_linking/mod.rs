@@ -158,6 +158,7 @@ pub fn build_note_link_table(
         pages,
         1,
         &phase2_with_overrides.chapter_note_modes,
+        &phase2_with_overrides.note_regions,
     );
     // 注：build_note_links 返回的 links 包含 synthetic anchor 修改，对应
     // Python 行 1462 把它赋值给 note_links 并在行 1463 传给 repair。

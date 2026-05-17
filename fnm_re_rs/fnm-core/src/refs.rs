@@ -30,6 +30,9 @@ static NESTED_NOTE_REF_RE: Lazy<Regex> = Lazy::new(|| {
 static SPLIT_NOTE_REF_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)\{\{NO(\{\{NOTE_REF:([^}]+)\}\})TE_REF:([^}]+)\}\}").unwrap());
 
+static WHITESPACE_BEFORE_FN_REF_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\s+(\[\^[^\]]+\])").unwrap());
+
 // ── 公开 API ────────────────────────────────────────────────────
 
 /// 修复嵌套的 `{{NOTE_REF:...{{NOTE_REF:...}}...}}` 结构。
@@ -173,10 +176,9 @@ pub fn replace_frozen_refs(text: &str, _mode: EndnoteMode) -> String {
         .to_string();
 
     // 移除 [^...] 前的空白
-    payload = Regex::new(r"\s+(\[\^[^\]]+\])")
-        .unwrap()
+    payload = WHITESPACE_BEFORE_FN_REF_RE
         .replace_all(&payload, "$1")
-        .to_string();
+        .into_owned();
 
     payload
 }

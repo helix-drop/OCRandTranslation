@@ -65,8 +65,8 @@ fn test_empty_input() {
     let (ra, rl, summary) = repair_explicit_footnote_anchor_ocr_variants(&anchors, &links, &items);
     assert!(ra.is_empty());
     assert!(rl.is_empty());
-    assert_eq!(summary.get("rebound_match_count"), Some(&0));
-    assert_eq!(summary.get("ignored_orphan_count"), Some(&0));
+    assert_eq!(summary.get("explicit_anchor_rebind_count"), Some(&0));
+    assert_eq!(summary.get("ignored_orphan_anchor_count"), Some(&0));
     assert_eq!(summary.get("ambiguous_followup_match_count"), Some(&0));
     assert_eq!(summary.get("ambiguous_followup_rebind_count"), Some(&0));
     assert_eq!(
@@ -116,8 +116,8 @@ fn test_loop1_orphan_anchor_rebind() {
     links_with_item[1].note_item_id = "ni-1".to_string();
     let (_ra, rl, summary) =
         repair_explicit_footnote_anchor_ocr_variants(&anchors, &links_with_item, &items);
-    assert_eq!(summary.get("rebound_match_count"), Some(&1));
-    assert_eq!(summary.get("ignored_orphan_count"), Some(&1));
+    assert_eq!(summary.get("explicit_anchor_rebind_count"), Some(&1));
+    assert_eq!(summary.get("ignored_orphan_anchor_count"), Some(&1));
     // orphan link → ignored, matched link → rebound to explicit anchor
     let orphan_link = rl.iter().find(|l| l.link_id == "link-orphan").unwrap();
     assert_eq!(orphan_link.status, LinkStatus::Ignored);

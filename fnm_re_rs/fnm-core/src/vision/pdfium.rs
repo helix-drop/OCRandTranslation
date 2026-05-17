@@ -50,6 +50,24 @@ pub fn render_page_to_base64_png(pdf_path: &str, page_index: i64, _dpi: u32) -> 
     Ok(base64::engine::general_purpose::STANDARD.encode(&png_bytes))
 }
 
+/// 从 PDF 单页提取纯文本。
+/// ←→ Python `extract_pdf_text_by_page` (document/pdf_extract.py)
+pub fn extract_pdf_text_by_page(pdf_path: &str, page_index: i64) -> Result<String> {
+    let pdfium = PDFIUM.lock().expect("PDFIUM mutex poisoned");
+    let document = pdfium
+        .load_pdf_from_file(pdf_path, None)
+        .with_context(|| format!("加载 PDF 失败: {}", pdf_path))?;
+
+    let page = document
+        .pages()
+        .get(page_index as u16)
+        .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
+
+    let pdf_page_text = page.text()
+        .with_context(|| format!("提取 PDF 页 {} 文本失败", page_index))?;
+    Ok(pdf_page_text.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -19,12 +19,16 @@ use crate::note_items::build_note_items;
 use crate::note_regions::build_note_regions;
 use crate::output::Phase2Output;
 use fnm_core::db::Repository;
+use fnm_core::vision::VisionConfig;
 use std::collections::{HashMap, HashSet};
+use std::time::Instant;
 
-/// 同步入口（不含 LLM）。
+/// 同步入口（含 LLM sup_recovery Layer 3 vision 路径）。
 pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2Output> {
+    let start = Instant::now();
+
     // 1. build_note_regions
-    let note_regions = build_note_regions(
+    let mut note_regions = build_note_regions(
         input.phase1_chapters,
         input.raw_pages,
         input.phase1_pages,
@@ -32,10 +36,28 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         input.phase1_heading_candidates,
     );
 
+    // 1a. endnote_chapter_explorer: 修正 book-scope endnote regions 的 chapter_id
+    let endnote_explorations =
+        crate::endnote_chapter_explorer::explore_endnote_chapter_regions(
+            input.raw_pages,
+            input.phase1_chapters,
+        );
+    for exp in &endnote_explorations {
+        for region in note_regions.iter_mut() {
+            if region.scope == fnm_core::types::RegionScope::Book
+                && region.page_start <= exp.page_start
+                && region.page_end >= exp.page_end
+                && region.chapter_id.is_empty()
+            {
+                region.chapter_id = exp.chapter_id.clone();
+            }
+        }
+    }
+
     // 2. build_note_items
     let note_items = build_note_items(input.raw_pages, &note_regions);
 
-    // 3. sup_recovery Layer 1/2（基于 note_items 提取的 chapter_markers，pdf_path 留给 G2 Layer 3）
+    // 3. sup_recovery Layer 1/2/3（基于 note_items 提取的 chapter_markers，pdf_path 启用 vision）
     let chapter_markers: HashMap<String, Vec<String>> = if !input.config.skip_sup_recovery {
         let mut markers: HashMap<String, HashSet<String>> = HashMap::new();
         for item in &note_items {
@@ -55,25 +77,30 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
     } else {
         HashMap::new()
     };
+
+    let vision_config = if !input.config.skip_llm_verify {
+        let cfg = VisionConfig::default();
+        if cfg.api_key.is_empty() { None } else { Some(cfg) }
+    } else {
+        None
+    };
+
     let recovered_sup = if !input.config.skip_sup_recovery {
         crate::sup_recovery::recover_book_chapter_scoped(
             input.raw_pages,
             &chapter_markers,
             input.pdf_path,
+            vision_config.as_ref(),
         )
     } else {
         HashMap::new()
     };
 
-    // 4. endnote_repair：截断 endnote 合并修复（当前 stub，37% 完成度）
+    // 4. endnote_repair：引文缩写截断合并 + marker 连续性修复 + OCR split 合并
     let (repaired_note_items, endnote_repair_summary) =
         crate::endnote_repair::repair_endnote_items(&note_items);
-    let _ = endnote_repair_summary; // 当前仅日志用
 
-    // 5. endnote_chapter_explorer 在 note_regions/mod.rs 内部完成（20% 完成度）
-    //    见 `build_note_regions` 中 `rebind_book_regions` 之前的调用。
-
-    // 6. chapter_split（使用修复后的 note_items）
+    // 5. chapter_split（使用修复后的 note_items）
     let layers = build_chapter_layers(
         input.phase1_chapters,
         &note_regions,
@@ -82,29 +109,40 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         input.raw_pages,
     );
 
-    // 7. book_structure 聚合（infer_book_type 返回 BookType enum，
-    // Output.book_type 仍为 String 以保持 JSON serde 兼容；下游 phase3
-    // 通过 ChapterLayer.policy_applied["book_type"] 拿同一字符串值）。
+    // 6. book_structure 聚合
     let book_type = crate::book_structure::infer_book_type(&layers.chapter_note_modes)
         .as_str()
         .to_string();
 
     let total_recovered: usize = recovered_sup.values().map(|v| v.len()).sum();
 
+    // 7. LLM 路径诊断（llm_bare_digit_verify + visual_anchor_recovery 需 Phase 3 body_anchors）
+    let llm_ready = vision_config.is_some() && input.pdf_path.is_some();
+    let elapsed = start.elapsed();
+    let note_region_count = note_regions.len();
+    let note_item_count = repaired_note_items.len();
+
     Ok(Phase2Output {
         chapters: input.phase1_chapters.to_vec(),
         note_regions,
-        note_items,
+        note_items: repaired_note_items,
         chapter_note_modes: layers.chapter_note_modes,
         book_type,
         diagnostics: serde_json::json!({
             "sup_recovery_recovered": total_recovered,
             "sup_recovery_num_chapters": recovered_sup.len(),
+            "llm_vision_configured": llm_ready,
+            "llm_bare_digit_verify_ready": llm_ready,
+            "visual_anchor_recovery_ready": llm_ready,
+            "note_item_count": note_item_count,
+            "note_region_count": note_region_count,
+            "elapsed_ms": elapsed.as_millis(),
+            "endnote_repair": endnote_repair_summary,
         }),
     })
 }
 
-/// 把 Phase2Output 持久化到 DB（只写 Phase 2 表，不触碰 Phase 1 表）。
+/// 把 Phase2Output 持久化到 DB。
 pub fn persist_phase2(
     repo: &dyn Repository,
     doc_id: &str,

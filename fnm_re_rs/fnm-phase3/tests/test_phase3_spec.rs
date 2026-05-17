@@ -566,7 +566,7 @@ fn spec_synthetic_footnote_anchor_is_created_and_not_orphaned() {
 
     let mut anchors: Vec<fnm_core::records::BodyAnchorRecord> = vec![];
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     assert!(
         anchors.iter().any(|a| a.synthetic),
@@ -621,7 +621,7 @@ fn spec_explicit_anchor_can_replace_synthetic_match() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let matched: Vec<_> = links
         .iter()
@@ -665,7 +665,7 @@ fn spec_ocr_shortened_marker_is_repaired() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let repaired_link: Vec<_> = links
         .iter()
@@ -714,7 +714,7 @@ fn spec_chapter_scope_endnote_wont_cross_chapter_match() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -751,7 +751,7 @@ fn spec_book_scope_endnote_can_use_fallback_resolver() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -809,7 +809,7 @@ fn spec_ambiguous_candidates_return_ambiguous_status() {
     ];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -872,7 +872,7 @@ fn spec_nested_duplicate_candidates_prefer_more_local_anchor() {
     ];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -925,7 +925,7 @@ fn spec_html_and_plain_duplicate_candidates_collapse_to_local_anchor() {
     ];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -987,7 +987,7 @@ fn spec_footnote_multiple_candidates_choose_unique_nearest() {
     ];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -1031,7 +1031,7 @@ fn spec_fallback_chapter_endnote_can_repair_with_cross_chapter_anchor() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -1070,7 +1070,7 @@ fn spec_toc_chapter_endnote_can_repair_with_cross_chapter_anchor() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let target = links
         .iter()
@@ -1103,7 +1103,7 @@ fn spec_fallback_chapter_without_note_markers_skips_orphan_anchor() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &[], &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &[], &[], 1, &[], &[]);
 
     let orphan_anchor_links: Vec<_> = links
         .iter()
@@ -1140,7 +1140,7 @@ fn spec_toc_chapter_out_of_note_range_skips_orphan_anchor() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let orphan_anchor_links: Vec<_> = links
         .iter()
@@ -1172,7 +1172,7 @@ fn spec_unused_explicit_anchor_generates_orphan_anchor() {
     }];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &[], &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &[], &[], 1, &[], &[]);
 
     let orphan_anchor_links: Vec<_> = links
         .iter()
@@ -1244,7 +1244,7 @@ fn spec_review_seed_summary_collects_expected_ids() {
     ];
 
     let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[]);
+        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
 
     let orphan_notes: Vec<_> = links
         .iter()

@@ -214,7 +214,12 @@ pub fn repair_endnote_links_for_contract(
         if fallback_candidates.is_empty() {
             continue;
         }
-        fallback_candidates.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.2.len().cmp(&b.2.len())));
+        // 排序键对齐 Python `(anchor.page_no, link.link_id)`
+        // 原 bug：使用 a.2.len()（anchor_id 长度），Python 使用 (page_no, link_id)
+        fallback_candidates.sort_by(|a, b| {
+            a.0.cmp(&b.0)
+                .then_with(|| a.2.cmp(&b.2))
+        });
         let (_, orphan_ci, anchor_id, confidence) = fallback_candidates.into_iter().next().unwrap();
         fallback_pairings.push((index, anchor_id.clone(), LinkResolver::Fallback, confidence));
         orphan_ignore_indices.push(orphan_ci);
@@ -337,7 +342,7 @@ pub fn repair_endnote_links_for_contract(
                 anchor_id,
                 status: LinkStatus::Matched,
                 resolver: LinkResolver::Repair,
-                confidence: existing.confidence.clamp(0.0, 1.0).max(1.0),
+                confidence: existing.confidence.clamp(0.0, 1.0),
                 ..existing
             };
         }
@@ -430,7 +435,7 @@ pub fn repair_endnote_links_for_contract(
                     anchor_id: anchor_anchor_id,
                     status: LinkStatus::Matched,
                     resolver: LinkResolver::Fallback,
-                    confidence: anchor_confidence.clamp(0.0, 1.0).max(1.0),
+                    confidence: anchor_confidence.clamp(0.0, 1.0),
                     ..note_row
                 };
                 let anchor_row = std::mem::take(&mut repaired_links[anchor_index]);

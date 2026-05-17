@@ -4,8 +4,11 @@
 use crate::export_constants::{
     unicode_superscript_to_ascii, ANY_NOTE_REF_RE, CORRUPTED_NOTE_REF_RE,
 };
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
+
+static STAR_MARKER_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^\*{1,4}$").unwrap());
 
 /// 生成 marker 的规范化 key。与 Python `_marker_key` 一致。
 pub fn marker_key(raw: &str) -> String {
@@ -15,8 +18,7 @@ pub fn marker_key(raw: &str) -> String {
         .map(unicode_superscript_to_ascii)
         .collect();
     let normalized = normalized.to_lowercase();
-    let star_re = Regex::new(r"^\*{1,4}$").unwrap();
-    if star_re.is_match(&normalized) {
+    if STAR_MARKER_RE.is_match(&normalized) {
         return normalized;
     }
     let cleaned: String = normalized
@@ -171,7 +173,11 @@ pub fn local_endnote_ref_number(
             }
         }
     }
-    let next_num = local_ref_numbers.values().max().copied().unwrap_or(0) + 1;
+    // ←→ Python: while 循环跳过已被占用的编号，防止编号序列空洞
+    let mut next_num = local_ref_numbers.values().max().copied().unwrap_or(0) + 1;
+    while local_ref_numbers.values().any(|&v| v == next_num) {
+        next_num += 1;
+    }
     local_ref_numbers.insert(note_id.to_string(), next_num);
     ordered_note_ids.push(note_id.to_string());
     Some(next_num)
@@ -218,6 +224,151 @@ pub fn replace_note_refs_with_local_labels(
                     if let Some(ref mut ids) = footnote_ids_seen {
                         if !ids.contains(&resolved) {
                             ids.push(resolved.clone());
+                        }
+                    }
+                    "*".to_string()
+                }
+            }
+        })
+        .to_string()
+}
+
+/// 替换 `[N]` 格式的原始端末引用为本地编号 `[^N]`。
+/// ←→ Python `replace_raw_bracket_refs_with_local_labels`
+pub fn replace_raw_bracket_refs_with_local_labels(
+    text: &str,
+    marker_note_sequences: &HashMap<String, Vec<String>>,
+    marker_usage_index: &mut HashMap<String, usize>,
+    note_kind_by_id: &HashMap<String, String>,
+    local_ref_numbers: &mut HashMap<String, i64>,
+    ordered_note_ids: &mut Vec<String>,
+    mut footnote_ids_seen: Option<&mut Vec<String>>,
+    note_marker_by_id: Option<&HashMap<String, String>>,
+) -> String {
+    use crate::export_constants::RAW_BRACKET_NOTE_REF_RE;
+    RAW_BRACKET_NOTE_REF_RE
+        .replace_all(text, |caps: &regex::Captures| {
+            // ←→ Python `(?<!\d)...(?!\d)`：手动检查前后字符不是数字
+            let full_match = caps.get(0).map(|m| (m.start(), m.end()));
+            if let Some((start, end)) = full_match {
+                let before = text[..start].chars().last();
+                if before.map_or(false, |c| c.is_ascii_digit()) {
+                    return caps.get(0).unwrap().as_str().to_string();
+                }
+                let after = text[end..].chars().next();
+                if after.map_or(false, |c| c.is_ascii_digit()) {
+                    return caps.get(0).unwrap().as_str().to_string();
+                }
+            }
+            let marker = caps.get(1).map(|m| m.as_str()).unwrap_or("");
+            let note_id = consume_marker_note_id(marker, marker_note_sequences, marker_usage_index);
+            if note_id.is_empty() {
+                return caps.get(0).map(|m| m.as_str().to_string()).unwrap_or_default();
+            }
+            let ref_num = local_endnote_ref_number(
+                &note_id,
+                note_kind_by_id,
+                local_ref_numbers,
+                ordered_note_ids,
+                note_marker_by_id,
+            );
+            match ref_num {
+                Some(n) => format!("[^{}]", n),
+                None => {
+                    if let Some(ref mut ids) = footnote_ids_seen {
+                        if !ids.contains(&note_id) {
+                            ids.push(note_id);
+                        }
+                    }
+                    "*".to_string()
+                }
+            }
+        })
+        .to_string()
+}
+
+/// 替换 `<sup>N</sup>` 格式的原始上标引用为本地编号 `[^N]`。
+/// ←→ Python `replace_raw_superscript_refs_with_local_labels`
+pub fn replace_raw_superscript_refs_with_local_labels(
+    text: &str,
+    marker_note_sequences: &HashMap<String, Vec<String>>,
+    marker_usage_index: &mut HashMap<String, usize>,
+    note_kind_by_id: &HashMap<String, String>,
+    local_ref_numbers: &mut HashMap<String, i64>,
+    ordered_note_ids: &mut Vec<String>,
+    mut footnote_ids_seen: Option<&mut Vec<String>>,
+    note_marker_by_id: Option<&HashMap<String, String>>,
+) -> String {
+    use crate::export_constants::RAW_SUPERSCRIPT_NOTE_REF_RE;
+    RAW_SUPERSCRIPT_NOTE_REF_RE
+        .replace_all(text, |caps: &regex::Captures| {
+            let marker = caps
+                .get(1)
+                .or_else(|| caps.get(2))
+                .or_else(|| caps.get(3))
+                .or_else(|| caps.get(4))
+                .map(|m| m.as_str())
+                .unwrap_or("");
+            let note_id = consume_marker_note_id(marker, marker_note_sequences, marker_usage_index);
+            if note_id.is_empty() {
+                return caps.get(0).map(|m| m.as_str().to_string()).unwrap_or_default();
+            }
+            let ref_num = local_endnote_ref_number(
+                &note_id,
+                note_kind_by_id,
+                local_ref_numbers,
+                ordered_note_ids,
+                note_marker_by_id,
+            );
+            match ref_num {
+                Some(n) => format!("[^{}]", n),
+                None => {
+                    if let Some(ref mut ids) = footnote_ids_seen {
+                        if !ids.contains(&note_id) {
+                            ids.push(note_id);
+                        }
+                    }
+                    "*".to_string()
+                }
+            }
+        })
+        .to_string()
+}
+
+/// 替换 Unicode 上标（⁰¹²³⁴⁵⁶⁷⁸⁹）格式的原始引用为本地编号 `[^N]`。
+/// ←→ Python `replace_raw_unicode_superscript_refs_with_local_labels`
+pub fn replace_raw_unicode_superscript_refs_with_local_labels(
+    text: &str,
+    marker_note_sequences: &HashMap<String, Vec<String>>,
+    marker_usage_index: &mut HashMap<String, usize>,
+    note_kind_by_id: &HashMap<String, String>,
+    local_ref_numbers: &mut HashMap<String, i64>,
+    ordered_note_ids: &mut Vec<String>,
+    mut footnote_ids_seen: Option<&mut Vec<String>>,
+    note_marker_by_id: Option<&HashMap<String, String>>,
+) -> String {
+    use crate::export_constants::{unicode_superscript_to_ascii, RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE};
+    RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE
+        .replace_all(text, |caps: &regex::Captures| {
+            let raw = caps.get(1).map(|m| m.as_str()).unwrap_or("");
+            let marker: String = raw.chars().map(unicode_superscript_to_ascii).collect();
+            let note_id = consume_marker_note_id(&marker, marker_note_sequences, marker_usage_index);
+            if note_id.is_empty() {
+                return caps.get(0).map(|m| m.as_str().to_string()).unwrap_or_default();
+            }
+            let ref_num = local_endnote_ref_number(
+                &note_id,
+                note_kind_by_id,
+                local_ref_numbers,
+                ordered_note_ids,
+                note_marker_by_id,
+            );
+            match ref_num {
+                Some(n) => format!("[^{}]", n),
+                None => {
+                    if let Some(ref mut ids) = footnote_ids_seen {
+                        if !ids.contains(&note_id) {
+                            ids.push(note_id);
                         }
                     }
                     "*".to_string()

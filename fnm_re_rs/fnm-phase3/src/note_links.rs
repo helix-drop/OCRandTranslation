@@ -2,7 +2,9 @@
 //!
 //! note_links 编排入口：调用 endnote_links + footnote_links + orphan_anchor 路径。
 
-use fnm_core::records::{BodyAnchorRecord, ChapterNoteModeRecord, NoteItemRecord, NoteLinkRecord};
+use fnm_core::records::{
+    BodyAnchorRecord, ChapterNoteModeRecord, NoteItemRecord, NoteLinkRecord, NoteRegionRecord,
+};
 use fnm_core::types::LinkStatus;
 use fnm_phase1::input::RawPage;
 use std::collections::{HashMap, HashSet};
@@ -19,6 +21,7 @@ pub fn build_note_links(
     raw_pages: &[RawPage],
     link_serial_start: usize,
     chapter_note_modes: &[ChapterNoteModeRecord],
+    note_regions: &[NoteRegionRecord],
 ) -> (Vec<NoteLinkRecord>, NoteLinkSummary) {
     let page_text_by_no: HashMap<i64, String> = raw_pages
         .iter()
@@ -26,6 +29,21 @@ pub fn build_note_links(
         .collect();
 
     let mut used_anchor_ids: HashSet<String> = HashSet::new();
+
+    // 构建 regions_by_id + anchor_count_by_chapter
+    let regions_by_id: HashMap<String, &NoteRegionRecord> = note_regions
+        .iter()
+        .filter_map(|r| {
+            let id = r.region_id.trim();
+            if id.is_empty() { None } else { Some((id.to_string(), r)) }
+        })
+        .collect();
+    let mut anchor_count_by_chapter: HashMap<String, usize> = HashMap::new();
+    for anchor in anchors.iter() {
+        if !anchor.synthetic && !anchor.chapter_id.is_empty() {
+            *anchor_count_by_chapter.entry(anchor.chapter_id.clone()).or_default() += 1;
+        }
+    }
 
     // 按 page_no 排序 note_items
     let mut note_items_sorted: Vec<&NoteItemRecord> = note_items.iter().collect();
@@ -38,6 +56,8 @@ pub fn build_note_links(
         &mut used_anchor_ids,
         &page_text_by_no,
         link_serial_start,
+        &regions_by_id,
+        &anchor_count_by_chapter,
     );
 
     // ── 脚注匹配 ──
@@ -118,6 +138,8 @@ fn build_orphan_anchor_links(
     }
 
     let mut orphan_links: Vec<NoteLinkRecord> = Vec::new();
+    // 已作为 orphan_anchor 入池的 marker 去重，防止同一 marker 的多个 anchor 都入池
+    let mut used_marker_keys: HashSet<(String, String, String)> = HashSet::new();
     let mut link_serial = 1usize; // 临时序列号，由调用方重新编号
 
     for anchor in anchors {
@@ -139,7 +161,7 @@ fn build_orphan_anchor_links(
             inferred_kind.to_string(),
             normalized_marker.to_string(),
         );
-        if note_item_marker_keys.contains(&mkey) {
+        if note_item_marker_keys.contains(&mkey) || used_marker_keys.contains(&mkey) {
             continue;
         }
         let chapter_key = (chapter_id.to_string(), inferred_kind.to_string());
@@ -157,6 +179,7 @@ fn build_orphan_anchor_links(
                 }
             }
         }
+        used_marker_keys.insert(mkey);
         orphan_links.push(crate::link_utils::link_new_link(
             &crate::link_utils::NewLinkParams {
                 serial: link_serial,

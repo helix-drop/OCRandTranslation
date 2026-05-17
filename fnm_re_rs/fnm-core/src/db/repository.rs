@@ -7,6 +7,7 @@ use crate::types::*;
 use anyhow::{Context, Result};
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
+use serde_json::Value;
 use std::str::FromStr;
 
 // ── Phase products payload ───────────────────────────────────────
@@ -54,7 +55,45 @@ pub trait Repository {
     // ── Phase 3 ──
     fn list_fnm_body_anchors(&self, doc_id: &str) -> Result<Vec<BodyAnchorRecord>>;
     fn list_fnm_note_links(&self, doc_id: &str) -> Result<Vec<NoteLinkRecord>>;
+    fn list_fnm_chapter_anchor_alignments(
+        &self,
+        doc_id: &str,
+    ) -> Result<Vec<ChapterAnchorAlignmentRecord>>;
+    fn list_fnm_chapter_endnotes(&self, doc_id: &str) -> Result<Vec<ChapterEndnoteRecord>>;
+    fn list_fnm_paragraph_footnotes(&self, doc_id: &str) -> Result<Vec<ParagraphFootnoteRecord>>;
+    fn list_fnm_review_overrides_v2(&self, doc_id: &str) -> Result<Vec<Value>>;
     fn replace_fnm_phase3_products(&self, doc_id: &str, payload: &Phase3Products) -> Result<()>;
+
+    // ── Phase 3 按章 scope 写入──
+    fn upsert_fnm_chapter_anchor_alignment(
+        &self,
+        doc_id: &str,
+        chapter_id: &str,
+        alignment_status: &str,
+        body_anchor_count: i64,
+        endnote_count: i64,
+        mismatch: Option<Value>,
+    ) -> Result<()>;
+    fn replace_fnm_paragraph_footnotes(
+        &self,
+        doc_id: &str,
+        chapter_id: &str,
+        footnotes: &[ParagraphFootnoteRecord],
+    ) -> Result<()>;
+    fn replace_fnm_chapter_endnotes(
+        &self,
+        doc_id: &str,
+        chapter_id: &str,
+        endnotes: &[ChapterEndnoteRecord],
+    ) -> Result<()>;
+
+    // ── Translation units ──
+    fn list_fnm_translation_units(&self, doc_id: &str) -> Result<Vec<TranslationUnitRecord>>;
+    fn replace_fnm_translation_units(
+        &self,
+        doc_id: &str,
+        units: &[TranslationUnitRecord],
+    ) -> Result<()>;
 }
 
 // ── SqliteRepository ─────────────────────────────────────────────
@@ -351,6 +390,10 @@ impl Repository for SqliteRepository {
                 review_required: row.get::<_, Option<i64>>(10)?.unwrap_or(0) != 0,
                 note_kind: NoteKind::from_str(&row.get::<_, String>(5)?)
                     .unwrap_or(NoteKind::Footnote),
+                projection_mode: None,
+                owner_chapter_id: None,
+                source_marker: None,
+                normalized_marker: None,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -585,6 +628,310 @@ impl Repository for SqliteRepository {
             ])?;
         }
 
+        Ok(())
+    }
+
+    // ── Phase 3 Reads ──────────────────────────────────────────────
+
+    fn list_fnm_chapter_anchor_alignments(
+        &self,
+        doc_id: &str,
+    ) -> Result<Vec<ChapterAnchorAlignmentRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT chapter_id, alignment_status, body_anchor_count, endnote_count, mismatch_json
+             FROM fnm_chapter_anchor_alignment WHERE doc_id = ?1 ORDER BY chapter_id",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(ChapterAnchorAlignmentRecord {
+                doc_id: doc_id.to_string(),
+                chapter_id: row.get(0)?,
+                alignment_status: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                body_anchor_count: row.get::<_, Option<i64>>(2)?.unwrap_or(0),
+                endnote_count: row.get::<_, Option<i64>>(3)?.unwrap_or(0),
+                mismatch: row
+                    .get::<_, Option<String>>(4)?
+                    .and_then(|s| serde_json::from_str::<Value>(&s).ok()),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_chapter_endnotes(&self, doc_id: &str) -> Result<Vec<ChapterEndnoteRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT chapter_id, ordinal, marker, numbering_scheme, text,
+                    source_page_no, is_reconstructed, review_required
+             FROM fnm_chapter_endnotes WHERE doc_id = ?1 ORDER BY chapter_id, ordinal",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(ChapterEndnoteRecord {
+                doc_id: doc_id.to_string(),
+                chapter_id: row.get(0)?,
+                ordinal: row.get(1)?,
+                marker: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                numbering_scheme: row
+                    .get::<_, Option<String>>(3)?
+                    .unwrap_or_else(|| "per_chapter".to_string()),
+                text: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+                source_page_no: row.get::<_, Option<i64>>(5)?.unwrap_or(0),
+                is_reconstructed: row.get::<_, Option<i64>>(6)?.unwrap_or(0) != 0,
+                review_required: row.get::<_, Option<i64>>(7)?.unwrap_or(1) != 0,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_paragraph_footnotes(&self, doc_id: &str) -> Result<Vec<ParagraphFootnoteRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT chapter_id, page_no, paragraph_index, attachment_kind,
+                    source_marker, text
+             FROM fnm_paragraph_footnotes WHERE doc_id = ?1 ORDER BY chapter_id, page_no",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(ParagraphFootnoteRecord {
+                doc_id: doc_id.to_string(),
+                chapter_id: row.get(0)?,
+                page_no: row.get(1)?,
+                paragraph_index: row.get::<_, Option<i64>>(2)?.unwrap_or(0),
+                attachment_kind: row
+                    .get::<_, Option<String>>(3)?
+                    .unwrap_or_else(|| "page_tail".to_string()),
+                source_marker: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+                text: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_review_overrides_v2(&self, doc_id: &str) -> Result<Vec<Value>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT scope, target_id, payload_json
+             FROM fnm_review_overrides_v2 WHERE doc_id = ?1 ORDER BY scope, target_id",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            let scope: String = row.get(0)?;
+            let target_id: String = row.get(1)?;
+            let payload_json: String = row.get(2)?;
+            Ok(serde_json::json!({
+                "scope": scope,
+                "target_id": target_id,
+                "payload": serde_json::from_str::<Value>(&payload_json).unwrap_or(Value::Null),
+            }))
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    // ── Phase 3 按章 scope 写入 ────────────────────────────────────
+
+    fn upsert_fnm_chapter_anchor_alignment(
+        &self,
+        doc_id: &str,
+        chapter_id: &str,
+        alignment_status: &str,
+        body_anchor_count: i64,
+        endnote_count: i64,
+        mismatch: Option<Value>,
+    ) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+        let mismatch_json = mismatch
+            .as_ref()
+            .map(|v| serde_json::to_string(v).unwrap_or_default());
+        conn.execute(
+            "INSERT INTO fnm_chapter_anchor_alignment
+             (doc_id, chapter_id, alignment_status, body_anchor_count, endnote_count,
+              mismatch_json, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+             ON CONFLICT(doc_id, chapter_id) DO UPDATE SET
+                alignment_status = excluded.alignment_status,
+                body_anchor_count = excluded.body_anchor_count,
+                endnote_count = excluded.endnote_count,
+                mismatch_json = excluded.mismatch_json,
+                updated_at = excluded.updated_at",
+            rusqlite::params![
+                doc_id,
+                chapter_id,
+                alignment_status,
+                body_anchor_count,
+                endnote_count,
+                mismatch_json,
+                ts,
+                ts,
+            ],
+        )?;
+        Ok(())
+    }
+
+    fn replace_fnm_paragraph_footnotes(
+        &self,
+        doc_id: &str,
+        chapter_id: &str,
+        footnotes: &[ParagraphFootnoteRecord],
+    ) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+        conn.execute(
+            "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ?1 AND chapter_id = ?2",
+            rusqlite::params![doc_id, chapter_id],
+        )?;
+        let mut stmt = conn.prepare(
+            "INSERT INTO fnm_paragraph_footnotes
+             (doc_id, chapter_id, page_no, paragraph_index, attachment_kind,
+              source_marker, text, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+        )?;
+        for f in footnotes {
+            stmt.execute(rusqlite::params![
+                doc_id,
+                f.chapter_id,
+                f.page_no,
+                f.paragraph_index,
+                f.attachment_kind,
+                f.source_marker,
+                f.text,
+                ts,
+                ts,
+            ])?;
+        }
+        Ok(())
+    }
+
+    fn replace_fnm_chapter_endnotes(
+        &self,
+        doc_id: &str,
+        chapter_id: &str,
+        endnotes: &[ChapterEndnoteRecord],
+    ) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+        conn.execute(
+            "DELETE FROM fnm_chapter_endnotes WHERE doc_id = ?1 AND chapter_id = ?2",
+            rusqlite::params![doc_id, chapter_id],
+        )?;
+        let mut stmt = conn.prepare(
+            "INSERT INTO fnm_chapter_endnotes
+             (doc_id, chapter_id, ordinal, marker, numbering_scheme, text,
+              source_page_no, is_reconstructed, review_required, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+        )?;
+        for e in endnotes {
+            stmt.execute(rusqlite::params![
+                doc_id,
+                e.chapter_id,
+                e.ordinal,
+                e.marker,
+                e.numbering_scheme,
+                e.text,
+                e.source_page_no,
+                e.is_reconstructed as i64,
+                e.review_required as i64,
+                ts,
+                ts,
+            ])?;
+        }
+        Ok(())
+    }
+
+    // ── Translation units ──
+
+    fn list_fnm_translation_units(&self, doc_id: &str) -> Result<Vec<TranslationUnitRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT doc_id, unit_id, kind, owner_kind, owner_id, section_id, section_title,
+                    section_start_page, section_end_page, note_id, page_start, page_end,
+                    char_count, source_text, translated_text, status, error_msg, target_ref,
+                    page_segments_json, source_hash
+             FROM fnm_translation_units WHERE doc_id = ?1
+             ORDER BY page_start, unit_id",
+        )?;
+        let rows = stmt.query_map(rusqlite::params![doc_id], |row| {
+            let seg_json: String = row.get(18)?;
+            let page_segments: Vec<UnitPageSegmentRecord> =
+                serde_json::from_str(&seg_json).unwrap_or_default();
+            Ok(TranslationUnitRecord {
+                unit_id: row.get(1)?,
+                kind: row.get(2)?,
+                owner_kind: row.get(3)?,
+                owner_id: row.get(4)?,
+                section_id: row.get(5)?,
+                section_title: row.get(6)?,
+                section_start_page: row.get::<_, i64>(7)?,
+                section_end_page: row.get::<_, i64>(8)?,
+                note_id: row.get(9)?,
+                page_start: row.get::<_, i64>(10)?,
+                page_end: row.get::<_, i64>(11)?,
+                char_count: row.get::<_, i64>(12)?,
+                source_text: row.get(13)?,
+                translated_text: row.get(14)?,
+                status: row.get(15)?,
+                error_msg: row.get(16)?,
+                target_ref: row.get(17)?,
+                page_segments,
+                source_hash: row.get(19)?,
+                ..Default::default()
+            })
+        })?;
+        let mut units = Vec::new();
+        for row in rows {
+            units.push(row?);
+        }
+        Ok(units)
+    }
+
+    fn replace_fnm_translation_units(
+        &self,
+        doc_id: &str,
+        units: &[TranslationUnitRecord],
+    ) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+        conn.execute(
+            "DELETE FROM fnm_translation_units WHERE doc_id = ?1",
+            rusqlite::params![doc_id],
+        )?;
+        let mut stmt = conn.prepare(
+            "INSERT INTO fnm_translation_units
+             (doc_id, unit_id, kind, owner_kind, owner_id, section_id, section_title,
+              section_start_page, section_end_page, note_id, page_start, page_end,
+              char_count, source_text, translated_text, status, error_msg, target_ref,
+              page_segments_json, source_hash, segment_plan_hash, pipeline_run_id,
+              stale_reason, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
+                     ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)",
+        )?;
+        for unit in units {
+            let seg_json = serde_json::to_string(&unit.page_segments).unwrap_or_default();
+            stmt.execute(rusqlite::params![
+                doc_id,
+                unit.unit_id,
+                unit.kind,
+                unit.owner_kind,
+                unit.owner_id,
+                unit.section_id,
+                unit.section_title,
+                unit.section_start_page,
+                unit.section_end_page,
+                unit.note_id,
+                unit.page_start,
+                unit.page_end,
+                unit.char_count,
+                unit.source_text,
+                unit.translated_text,
+                unit.status,
+                unit.error_msg,
+                unit.target_ref,
+                seg_json,
+                unit.source_hash,
+                unit.segment_plan_hash,
+                unit.pipeline_run_id,
+                "", // stale_reason
+                ts,
+                ts,
+            ])?;
+        }
         Ok(())
     }
 }

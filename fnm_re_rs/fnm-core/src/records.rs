@@ -163,6 +163,37 @@ pub struct Phase1Summary {
     pub visual_toc_endnotes_summary: Value,
 }
 
+/// 页面角色记录（含 chapter 归属信息）。←→ Python `TocPageRole`
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TocPageRole {
+    #[serde(default)]
+    pub page_no: i64,
+    #[serde(default)]
+    pub role: String,
+    #[serde(default)]
+    pub source_role: String,
+    #[serde(default)]
+    pub reason: String,
+    #[serde(default)]
+    pub chapter_id: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TocNode {
+    #[serde(default)]
+    pub node_id: String,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub role: String,
+    #[serde(default)]
+    pub level: i64,
+    #[serde(default)]
+    pub target_pdf_page: i64,
+    #[serde(default)]
+    pub parent_id: String,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase1Structure {
     #[serde(default)]
@@ -177,6 +208,12 @@ pub struct Phase1Structure {
     pub endnote_explorer_hints: Value,
     #[serde(default)]
     pub summary: Phase1Summary,
+    /// TOC 树节点列表。←→ Python `TocStructure.toc_tree: list[TocNode]`
+    #[serde(default)]
+    pub toc_tree: Vec<TocNode>,
+    /// 每页的角色分配（含 chapter_id）。←→ Python `TocStructure.pages: list[TocPageRole]`
+    #[serde(default)]
+    pub page_roles: Vec<TocPageRole>,
 }
 
 // ── Phase 2 ────────────────────────────────────────────────────

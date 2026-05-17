@@ -40,6 +40,73 @@ static HTML_SUP_RE: Lazy<Regex> =
 
 static LATEX_SUP_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\$\s*\^\{(\d{1,4})\}\s*\$").unwrap());
 
+// ── 补充 Python `shared/notes.py` regex ──────────────────────
+
+/// ←→ Python `_INLINE_NOTE_BREAK_RE`：修复行内注释放置的断点。
+/// 匹配 `]. 1` 模式，其中 `]` 前的文本和后续数字可能被误分。
+// Rust regex 不支持 lookahead。将 Python 的 (?=digits) 改为捕获 digits 本身。
+static INLINE_NOTE_BREAK_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"(?P<prefix>[\.\]\)»\u{201d}])(?P<gap>\s+)(?P<digits>(?:\d[\s,\.\-]*){1,4}[\.,\)\]])",
+    )
+    .unwrap()
+});
+
+/// ←→ Python `_LEADING_NOISE_NOTE_DEF_RE`：去除 marker 前的噪音字符（引号、竖线等）。
+static LEADING_NOISE_NOTE_DEF_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"^\s*(?P<noise>[IiLl\|'\.,‘’“”])\s*(?P<rest>(?:\[(?:\d{1,4})\]|(?:\d{1,4})[\.;:,\)\]])\s*\S.*)$")
+        .unwrap()
+});
+
+/// ←→ Python `_SYMBOL_MARKER_ONLY_RE`：符号标记单独一行，无正文。
+static SYMBOL_MARKER_ONLY_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s*$").unwrap());
+
+/// ←→ Python `_INLINE_FOLLOWUP_TOKEN_RE`：行内跟随标记（避免被误分为新 note）。
+static INLINE_FOLLOWUP_TOKEN_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?:\s*[,;:·•]+\s*|\s+)(?P<token>\d(?:[ ,\.\-]{0,2}\d){0,3})(?:[\.,\)\]]|\s{1,3})")
+        .unwrap()
+});
+
+/// ←→ Python `_NOISY_NEXT_NOTE_RE`：噪音字符后的 marker。
+static NOISY_NEXT_NOTE_RE: Lazy<Regex> = Lazy::new(|| {
+    // 使用 ASCII 替代集，避免 raw string 中 Unicode 字符的解析问题
+    Regex::new(
+        r"^\s*(?P<noise>[!|\[\]()\.,;:?/\-]{1,6})\s*(?P<token>\d{1,4}[A-Za-z]{0,6})\s+(?P<body>\S.*)$",
+    )
+    .unwrap()
+});
+
+/// 预处理页面文本，修复 inline break 等。←→ Python `_normalized_page_text` 预处理部分。
+pub(crate) fn preprocess_page_text(text: &str) -> String {
+    // Python `_replace_inline_note_break`: 在 prefix（句末标点）和 digits 之间插入换行
+    INLINE_NOTE_BREAK_RE
+        .replace_all(text, |caps: &regex::Captures| {
+            let prefix = caps.name("prefix").map(|m| m.as_str()).unwrap_or("");
+            let digits = caps.name("digits").map(|m| m.as_str()).unwrap_or("");
+            format!("{}\n{}", prefix, digits)
+        })
+        .to_string()
+}
+
+/// 在 parse 后：对已识别的 ParsedNoteRow 应用 followup token 去重。
+#[allow(dead_code)]
+pub(crate) fn dedupe_followup_tokens(rows: &[ParsedNoteRow]) -> Vec<ParsedNoteRow> {
+    let mut result: Vec<ParsedNoteRow> = Vec::new();
+    for row in rows {
+        // 检查 marker 是否属于 followup token（跟在正文内的编号引用）
+        if INLINE_FOLLOWUP_TOKEN_RE.is_match(&row.marker) {
+            // 合并到前一 note，不生成独立条目
+            if let Some(last) = result.last_mut() {
+                last.text = format!("{} {}", last.text, row.text);
+            }
+            continue;
+        }
+        result.push(row.clone());
+    }
+    result
+}
+
 // ── Embedded note definition regex ─────────────────────────
 
 /// ←→ Python `_EMBEDDED_NOTE_DEF_RE`：捕获行内注释放置的 marker。

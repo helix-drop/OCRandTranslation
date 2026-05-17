@@ -132,6 +132,31 @@ pub fn first_notes_heading(markdown: &str) -> String {
     String::new()
 }
 
+/// 判断 short_marker 的数字是否是 long_marker 数字的有序子序列。
+///
+/// ←→ Python `FNM_RE/shared/notes.py:marker_digits_are_ordered_subsequence`
+///
+/// 例：`marker_digits_are_ordered_subsequence("12", "123")` → true
+///     `marker_digits_are_ordered_subsequence("13", "123")` → true
+///     `marker_digits_are_ordered_subsequence("21", "123")` → false
+pub fn marker_digits_are_ordered_subsequence(short_marker: &str, long_marker: &str) -> bool {
+    let short_digits = normalize_note_marker(short_marker);
+    let long_digits = normalize_note_marker(long_marker);
+    if short_digits.is_empty() || long_digits.is_empty() || short_digits == long_digits {
+        return false;
+    }
+    let mut cursor = 0;
+    for ch in long_digits.chars() {
+        if cursor < short_digits.len() && short_digits.chars().nth(cursor) == Some(ch) {
+            cursor += 1;
+            if cursor == short_digits.len() {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -233,5 +258,15 @@ mod tests {
     fn first_heading_not_found() {
         let md = "# Title\n## Chapter 1\nSome text";
         assert_eq!(first_notes_heading(md), "");
+    }
+
+    #[test]
+    fn ordered_subsequence_basic() {
+        assert!(marker_digits_are_ordered_subsequence("12", "123"));
+        assert!(marker_digits_are_ordered_subsequence("13", "123"));
+        assert!(!marker_digits_are_ordered_subsequence("21", "123"));
+        assert!(!marker_digits_are_ordered_subsequence("", "123"));
+        assert!(!marker_digits_are_ordered_subsequence("123", "123"));
+        assert!(!marker_digits_are_ordered_subsequence("4", "123"));
     }
 }

@@ -5,7 +5,9 @@ use crate::chapter_skeleton::builder::build_chapter_skeleton;
 use crate::heading_graph::build_heading_graph;
 use crate::input::{ManualPageOverride, RawPage, TocItem};
 use crate::page_partition::build_page_partitions;
+use crate::page_roles::build_page_roles;
 use crate::section_heads::build_section_heads;
+use crate::toc_tree::build_toc_tree;
 use fnm_core::db::Repository;
 use fnm_core::records::{HeadingCandidate, Phase1Structure};
 use fnm_core::types::ChapterSource;
@@ -61,6 +63,26 @@ pub struct Phase1Output {
     pub overrides_used: Vec<OverrideRecord>,
 }
 
+/// 检测 TOC 条目是否包含 OCR 乱码（控制字符比例 ≥5% 的条目占 ≥30%）。
+/// ←→ FNM_RE/modules/toc_structure.py `_toc_items_look_garbled`
+fn toc_items_look_garbled(toc_items: &[TocItem]) -> bool {
+    if toc_items.is_empty() {
+        return false;
+    }
+    let garbled_count = toc_items
+        .iter()
+        .filter(|item| {
+            let title = &item.title;
+            if title.is_empty() {
+                return false;
+            }
+            let ctrl_count = title.chars().filter(|c| c.is_control()).count();
+            ctrl_count > 0 && ctrl_count as f64 / title.len() as f64 > 0.05
+        })
+        .count();
+    garbled_count > 0 && garbled_count as f64 >= toc_items.len() as f64 * 0.3
+}
+
 /// Phase1 主入口：从原始页面构建章节骨架。
 pub fn build_phase1_structure(
     pages: &[RawPage],
@@ -68,6 +90,9 @@ pub fn build_phase1_structure(
     config: &Phase1Config,
 ) -> anyhow::Result<Phase1Output> {
     let total_pages = pages.len() as i64;
+
+    // 0. TOC 乱码检测
+    let toc_garbled = toc_items.map_or(false, |items| toc_items_look_garbled(items));
 
     // 1. LLM book-type 校验：Rust 端 LLM 客户端尚未接入主入口（FNM_PHASE12_AUDIT G5）。
     //    config.skip_llm_verify=false 时显式 bail 防误用（AGENTS.md §9）。
@@ -102,10 +127,7 @@ pub fn build_phase1_structure(
             &config.doc_id.clone().unwrap_or_default(),
         );
 
-    // 4. build_section_heads
-    let (section_heads, _) = build_section_heads(&[], &heading_candidates, &page_partitions, None);
-
-    // 5. build_heading_graph（完整版：local_exact + expanded_exact 锚点解析）
+    // 4. build_heading_graph（完整版：local_exact + expanded_exact 锚点解析）
     let toc_exportable: Vec<(String, i64, String)> = toc_items
         .map(|items| {
             items
@@ -142,38 +164,26 @@ pub fn build_phase1_structure(
     // phase1 的 book_note_type 模块保留给 LLM book-type verify 用作 prior
     // （FNM_PHASE12_AUDIT G5）。
 
-    // 7. 构建 gate_report（←→ Python `build_toc_structure` 的 gate_report 构造逻辑）
-    let pages_classified = page_partitions.iter().all(|p| {
-        let role = p.page_role.as_str();
-        !matches!(role, "unknown" | "noise")
-    });
-    let toc_chapter_order_monotonic = toc_items.map_or(true, |items| {
-        let mut prev_page: Option<i64> = None;
-        items
-            .iter()
-            .filter(|t| t.role_hint != "container")
-            .all(|t| {
-                let ok = prev_page.map_or(true, |p| t.target_pdf_page.map_or(true, |tp| tp >= p));
-                prev_page = t.target_pdf_page;
-                ok
-            })
-    });
-    let role_semantics_valid = skeleton
-        .chapters
+    // 7. build_section_heads（传入 toc_semantics 输出的 section_heads 作为 fallback sections）
+    let fallback_secs: Vec<serde_json::Value> = skeleton
+        .toc_semantics_section_heads
         .iter()
-        .all(|c| matches!(c.source, ChapterSource::VisualToc | ChapterSource::Fallback));
-
-    let gate_report = GateReport {
-        hard: HashMap::from([
-            ("toc.pages_classified".into(), pages_classified),
-            (
-                "toc.chapter_order_monotonic".into(),
-                toc_chapter_order_monotonic,
-            ),
-            ("toc.role_semantics_valid".into(), role_semantics_valid),
-        ]),
-        soft: HashMap::new(),
-    };
+        .map(|sh| {
+            serde_json::json!({
+                "chapter_id": sh.chapter_id,
+                "title": sh.title,
+                "page_no": sh.page_no,
+                "level": sh.level,
+                "source": sh.source,
+            })
+        })
+        .collect();
+    let (section_heads, _) = build_section_heads(
+        &skeleton.chapters,
+        &skeleton.heading_candidates,
+        &page_partitions,
+        Some(&fallback_secs),
+    );
 
     // 8. 构建 overrides_used（←→ Python `build_toc_structure` 行 494-517）
     let mut overrides_used: Vec<OverrideRecord> = Vec::new();
@@ -204,19 +214,177 @@ pub fn build_phase1_structure(
     };
 
     // 10. 组装 Phase1Structure（page_partitions 已 owned，零 clone）
+    let toc_semantic_meta = skeleton
+        .diagnostics
+        .get("toc_semantic_meta")
+        .cloned()
+        .unwrap_or_default();
+    let toc_tree = build_toc_tree(
+        toc_items.unwrap_or(&[]),
+        &skeleton.chapters,
+        &toc_semantic_meta,
+    );
+
+    // D5: TOC tree 过滤/补入（←→ Python toc_structure.py:401-449）
+    let mut filtered_chapters = skeleton.chapters.clone();
+    if !toc_tree.is_empty() {
+        // 构建非章 TOC node 的 title key set
+        let toc_non_chapter_keys: std::collections::HashSet<String> = toc_tree
+            .iter()
+            .filter(|n| !matches!(n.role.as_str(), "chapter" | "container" | "endnotes"))
+            .map(|n| fnm_core::title::chapter_title_match_key(&n.title))
+            .filter(|k| !k.is_empty())
+            .collect();
+        // 从章节列表剔除匹配的条目
+        if !toc_non_chapter_keys.is_empty() {
+            filtered_chapters.retain(|ch| {
+                !toc_non_chapter_keys.contains(&fnm_core::title::chapter_title_match_key(&ch.title))
+            });
+        }
+        // 补入 post_body / back_matter 条目
+        let existing_keys: std::collections::HashSet<String> = filtered_chapters
+            .iter()
+            .map(|ch| fnm_core::title::chapter_title_match_key(&ch.title))
+            .filter(|k| !k.is_empty())
+            .collect();
+        let mut extra_nodes: Vec<&fnm_core::records::TocNode> = toc_tree
+            .iter()
+            .filter(|n| n.role == "post_body" || n.role == "back_matter")
+            .collect();
+        extra_nodes.sort_by(|a, b| {
+            let pa = if a.target_pdf_page > 0 { a.target_pdf_page } else { 9999 };
+            let pb = if b.target_pdf_page > 0 { b.target_pdf_page } else { 9999 };
+            pa.cmp(&pb).then(a.title.cmp(&b.title))
+        });
+        let total_pages = page_partitions.len().max(1) as i64;
+        let all_starts: Vec<i64> = {
+            let mut s: Vec<i64> = filtered_chapters.iter().filter_map(|ch| {
+                if ch.start_page > 0 { Some(ch.start_page) } else { None }
+            }).collect();
+            s.sort();
+            s
+        };
+        for node in &extra_nodes {
+            let tk = fnm_core::title::chapter_title_match_key(&node.title);
+            if tk.is_empty() || existing_keys.contains(&tk) { continue; }
+            let start = if node.target_pdf_page > 0 { node.target_pdf_page } else { 0 };
+            let next = all_starts.iter().find(|&&s| s > start).copied().unwrap_or(total_pages + 1);
+            let end = next - 1;
+            let pages: Vec<i64> = if start > 0 && end >= start {
+                (start..=end).collect()
+            } else {
+                vec![]
+            };
+            filtered_chapters.push(fnm_core::records::ChapterRecord {
+                chapter_id: format!("toc-ch-{:03}-{}", filtered_chapters.len() + 1, &tk[..tk.len().min(20)]),
+                title: node.title.clone(),
+                start_page: start,
+                end_page: end,
+                pages,
+                source: fnm_core::types::ChapterSource::VisualToc,
+                boundary_state: fnm_core::types::BoundaryState::Ready,
+            });
+        }
+    }
+
+    let page_roles = build_page_roles(
+        &page_partitions,
+        &filtered_chapters,
+        0,
+    );
+
+    // 构建 gate_report（在 Phase1Structure 消耗数据前计算）
+    let pages_classified = page_partitions.iter().all(|p| {
+        let role = p.page_role.as_str();
+        !matches!(role, "unknown" | "noise")
+    });
+    let toc_semantic_contract_ok = skeleton
+        .diagnostics
+        .get("toc_semantic_meta")
+        .and_then(|m| m.get("toc_semantic_contract_ok"))
+        .and_then(|v| v.as_bool())
+        .unwrap_or(true);
+    let first_back_matter_page = page_roles
+        .iter()
+        .filter(|pr| pr.role == "back_matter")
+        .map(|pr| pr.page_no)
+        .min()
+        .unwrap_or(0);
+    let no_chapter_after_back_matter = first_back_matter_page <= 0
+        || !page_roles
+            .iter()
+            .any(|pr| pr.role == "chapter" && pr.page_no > first_back_matter_page);
+    let role_semantics_valid = toc_semantic_contract_ok && no_chapter_after_back_matter;
+
+    let toc_chapter_order_monotonic = if !toc_tree.is_empty() {
+        let chapter_targets: Vec<i64> = toc_tree
+            .iter()
+            .filter(|n| n.target_pdf_page > 0 && (n.role == "chapter" || n.role == "post_body"))
+            .map(|n| n.target_pdf_page)
+            .collect();
+        if chapter_targets.len() >= 2 {
+            chapter_targets.windows(2).all(|w| w[0] <= w[1])
+        } else {
+            let chs: Vec<i64> = filtered_chapters.iter().map(|c| c.start_page).collect();
+            chs.windows(2).all(|w| w[0] <= w[1])
+        }
+    } else {
+        toc_items.map_or(true, |items| {
+            let mut prev_page: Option<i64> = None;
+            items.iter().filter(|t| t.role_hint != "container").all(|t| {
+                let ok = prev_page.map_or(true, |p| t.target_pdf_page.map_or(true, |tp| tp >= p));
+                prev_page = t.target_pdf_page;
+                ok
+            })
+        })
+    };
+    let has_exportable_chapters = !filtered_chapters.is_empty();
+    let chapter_titles_aligned = skeleton
+        .diagnostics
+        .get("toc_semantic_meta")
+        .and_then(|m| m.get("chapter_title_alignment_ok"))
+        .and_then(|v| v.as_bool())
+        .unwrap_or(true);
+
+    let section_alignment_warn = chapter_titles_aligned;
+    let visual_toc_conflict_count = skeleton
+        .diagnostics
+        .get("toc_semantic_meta")
+        .and_then(|m| m.get("visual_toc_conflict_count"))
+        .and_then(|v| v.as_i64())
+        .unwrap_or(0);
+    let visual_toc_conflict_warn = visual_toc_conflict_count == 0;
+
+    let gate_report = GateReport {
+        hard: HashMap::from([
+            ("toc.pages_classified".into(), pages_classified),
+            ("toc.chapter_order_monotonic".into(), toc_chapter_order_monotonic),
+            ("toc.role_semantics_valid".into(), role_semantics_valid),
+            ("toc.has_exportable_chapters".into(), has_exportable_chapters),
+            ("toc.chapter_titles_aligned".into(), chapter_titles_aligned),
+        ]),
+        soft: HashMap::from([
+            ("toc.section_alignment_warn".into(), section_alignment_warn),
+            ("toc.visual_toc_conflict_warn".into(), visual_toc_conflict_warn),
+        ]),
+    };
+
     let structure = Phase1Structure {
         pages: page_partitions,
         heading_candidates: skeleton.heading_candidates,
-        chapters: skeleton.chapters,
+        chapters: filtered_chapters,
         section_heads,
         endnote_explorer_hints: Default::default(),
         summary: Default::default(),
+        toc_tree,
+        page_roles,
     };
 
     Ok(Phase1Output {
         structure,
         diagnostics: serde_json::json!({
             "total_pages": total_pages,
+            "toc_garbled": toc_garbled,
             "chapter_source_summary": {
                 "source": chapter_source,
                 "visual_toc_chapter_count": visual_toc_count,

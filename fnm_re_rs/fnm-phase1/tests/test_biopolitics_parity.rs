@@ -425,7 +425,7 @@ fn biopolitics_toc_semantics_smoke() {
     })
     .collect();
 
-    let result = build_toc_semantics(&toc_items, &[], &pages, &partitions.partitions, &[]);
+    let result = build_toc_semantics(&toc_items, &[], &pages, &partitions.partitions, &[], None);
 
     assert_eq!(result.aligned_chapters.len(), 12);
     assert!(result.chapter_order_monotonic);

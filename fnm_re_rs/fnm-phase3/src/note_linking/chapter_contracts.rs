@@ -258,8 +258,8 @@ pub fn chapter_contracts(
             .unwrap_or(true);
 
         let mut endnotes_all_matched = target_item_ids.is_subset(&matched_item_ids);
-        let no_ambiguous_left = ambiguous_link_ids.is_empty();
-        let no_orphan_note = orphan_note_link_ids.is_empty();
+        let mut no_ambiguous_left = ambiguous_link_ids.is_empty();
+        let mut no_orphan_note = orphan_note_link_ids.is_empty();
         let book_type = chapter
             .policy_applied
             .get("book_type")
@@ -271,7 +271,7 @@ pub fn chapter_contracts(
         {
             first_marker_is_one = true;
         }
-        let endnote_only_no_orphan_anchor = if book_type == "endnote_only" {
+        let mut endnote_only_no_orphan_anchor = if book_type == "endnote_only" {
             orphan_anchor_link_ids.is_empty()
         } else {
             true
@@ -279,7 +279,9 @@ pub fn chapter_contracts(
 
         if !requires_endnote_contract {
             endnotes_all_matched = true;
-            first_marker_is_one = true;
+            no_ambiguous_left = true;
+            no_orphan_note = true;
+            endnote_only_no_orphan_anchor = true;
         }
 
         // def_anchor_mismatch 与 marker gap 计算

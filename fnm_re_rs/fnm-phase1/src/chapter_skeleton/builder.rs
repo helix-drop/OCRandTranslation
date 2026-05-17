@@ -2,9 +2,9 @@
 //! 章节边界构建器。
 
 use crate::input::{RawPage, TocItem};
-use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord};
-use fnm_core::title::{chapter_title_match_key, guess_title_family, normalize_title};
-use fnm_core::types::{BoundaryState, ChapterSource, PageRole};
+use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord};
+use fnm_core::title::{guess_title_family, normalize_title};
+use fnm_core::types::PageRole;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -17,6 +17,10 @@ static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
 pub struct ChapterSkeleton {
     pub chapters: Vec<ChapterRecord>,
     pub heading_candidates: Vec<HeadingCandidate>,
+    /// toc_semantics 输出的 section_heads，交给 caller 作为 fallback_sections 传入
+    /// build_section_heads。←→ Python builder.py `visual_section_heads_raw` →
+    /// `merged_section_fallbacks`
+    pub toc_semantics_section_heads: Vec<SectionHeadRecord>,
     pub diagnostics: serde_json::Value,
 }
 
@@ -30,103 +34,66 @@ pub fn build_chapter_skeleton(
 ) -> ChapterSkeleton {
     let total_pages = pages.len() as i64;
 
-    let (chapters, source) = if let Some(items) = toc_items {
+    let (chapters, source, toc_result) = if let Some(items) = toc_items {
         if items.is_empty() {
-            (vec![], "fallback")
+            (vec![], "fallback", None)
         } else {
-            // ←→ Python _resolve_visual_toc_target_page: 全局搜索 heading candidates，
-            // 按 chapter_title_match_key 匹配 TOC title，将目标页替换为 heading 实际位置。
-            let page_roles: std::collections::HashMap<i64, PageRole> = page_partitions
-                .iter()
-                .map(|p| (p.page_no, p.page_role))
-                .collect();
+            // ←→ Python `_build_visual_toc_chapters_and_section_heads` (toc_semantics.py)
+            let result = crate::chapter_skeleton::toc_semantics::build_toc_semantics(
+                items,
+                &[],
+                pages,
+                page_partitions,
+                &heading_candidates,
+                Some(heading_graph),
+            );
 
-            let mut chs: Vec<ChapterRecord> = items
-                .iter()
-                .filter(|item| item.export_candidate.unwrap_or(true))
-                .enumerate()
-                .map(|(i, item)| {
-                    let target = item.target_pdf_page.unwrap_or(1);
-                    let start_page = resolve_visual_toc_target_page(
-                        &item.title,
-                        target,
-                        &page_roles,
-                        &heading_candidates,
-                    );
-                    // ←→ Python `_build_visual_toc_chapters`：chapter_id 用
-                    // `toc-{item_id}` 而非硬编码 `toc-ch-{i+1}`，对齐 Python 命名
-                    // 约定（item_id 已含 `toc-ch-N` 时会出现 `toc-toc-ch-N`，
-                    // 这是 Python 端历史命名导致，Rust 必须 byte-equal 复制）。
-                    let chapter_id = if !item.item_id.trim().is_empty() {
-                        format!("toc-{}", item.item_id.trim())
-                    } else {
-                        format!("toc-toc-ch-{}", i + 1)
-                    };
-                    ChapterRecord {
-                        chapter_id,
-                        title: item.title.clone(),
-                        start_page,
-                        end_page: 0,
-                        pages: vec![],
-                        source: ChapterSource::VisualToc,
-                        boundary_state: BoundaryState::Ready,
-                    }
-                })
-                .collect();
+            if result.aligned_chapters.is_empty() {
+                (vec![], "fallback", Some(result))
+            } else {
+                let chs = result.aligned_chapters.clone();
 
-            // 按起始页排序（heading_graph 可能重排章顺序）
-            chs.sort_by_key(|ch| ch.start_page);
-            // 注：排序后**不**重新生成 chapter_id——保留 toc-item_id 命名
-            // （原 `toc-ch-{i+1}` 是按位置编号，与 Python `toc-{item_id}` 不一致）。
-
-            // fill end_page
-            for i in 0..chs.len() {
-                let next_start = if i + 1 < chs.len() {
-                    chs[i + 1].start_page
-                } else {
-                    total_pages + 1
-                };
-                chs[i].end_page = next_start - 1;
-                chs[i].pages = (chs[i].start_page..=chs[i].end_page).collect();
-            }
-
-            // ←→ Python _trim_chapter_rows: 修剪章节页范围（仅保留 body/front_matter，
-            // 并在 back_matter 起点之后截断）。
-            let back_matter_start =
-                infer_back_matter_start_page(page_partitions, items, total_pages);
-            let mut trimmed: Vec<ChapterRecord> = Vec::new();
-
-            for ch in &chs {
-                let _title_key = chapter_title_match_key(&ch.title);
-                let is_force_export =
-                    TOC_FORCE_EXPORT_TITLE_RE.is_match(&normalize_title(&ch.title));
-                let mut filtered_pages: Vec<i64> = ch
-                    .pages
+                // ←→ Python `_infer_back_matter_start_page` + `_trim_chapter_rows`
+                let back_matter_start =
+                    infer_back_matter_start_page(page_partitions, items, total_pages);
+                let page_roles: std::collections::HashMap<i64, PageRole> = page_partitions
                     .iter()
-                    .filter(|&&p| {
-                        page_roles
-                            .get(&p)
-                            .is_some_and(|r| matches!(r, PageRole::Body | PageRole::FrontMatter))
-                    })
-                    .copied()
+                    .map(|p| (p.page_no, p.page_role))
                     .collect();
-                // Python: 有 back_matter 起点时截断非强制导出的章
-                if back_matter_start > 0 && !is_force_export {
-                    filtered_pages.retain(|&p| p < back_matter_start);
+
+                let mut trimmed: Vec<ChapterRecord> = Vec::new();
+                for ch in &chs {
+                    let is_force_export =
+                        TOC_FORCE_EXPORT_TITLE_RE.is_match(&normalize_title(&ch.title));
+                    let mut filtered_pages: Vec<i64> = ch
+                        .pages
+                        .iter()
+                        .filter(|&&p| {
+                            page_roles
+                                .get(&p)
+                                .is_some_and(|r| {
+                                    matches!(r, PageRole::Body | PageRole::FrontMatter)
+                                })
+                        })
+                        .copied()
+                        .collect();
+                    if back_matter_start > 0 && !is_force_export {
+                        filtered_pages.retain(|&p| p < back_matter_start);
+                    }
+                    if filtered_pages.is_empty() {
+                        continue;
+                    }
+                    let mut trimmed_ch = ch.clone();
+                    trimmed_ch.start_page = filtered_pages[0];
+                    trimmed_ch.end_page = *filtered_pages.last().unwrap();
+                    trimmed_ch.pages = filtered_pages;
+                    trimmed.push(trimmed_ch);
                 }
-                if filtered_pages.is_empty() {
-                    continue;
-                }
-                let mut trimmed_ch = ch.clone();
-                trimmed_ch.start_page = filtered_pages[0];
-                trimmed_ch.end_page = *filtered_pages.last().unwrap();
-                trimmed_ch.pages = filtered_pages;
-                trimmed.push(trimmed_ch);
+                (trimmed, "visual_toc", Some(result))
             }
-            (trimmed, "visual_toc")
         }
     } else {
-        (vec![], "fallback")
+        (vec![], "fallback", None)
     };
 
     let chapters = if chapters.is_empty() {
@@ -140,13 +107,35 @@ pub fn build_chapter_skeleton(
         chapters
     };
 
+    // 提取 toc_semantics section_heads 供 caller 作为 fallback_sections 传入
+    // build_section_heads
+    let toc_semantics_section_heads: Vec<SectionHeadRecord> = toc_result
+        .as_ref()
+        .map(|r| r.section_heads.clone())
+        .unwrap_or_default();
+
+    let mut diagnostics = serde_json::json!({
+        "source": source,
+        "total_pages": total_pages,
+    });
+    if let Some(ref result) = toc_result {
+        if let Some(cl) = result.chapter_level {
+            diagnostics["toc_chapter_level"] = serde_json::json!(cl);
+        }
+        diagnostics["toc_semantic_blocking_reasons"] =
+            serde_json::json!(result.semantic_blocking_reasons);
+        diagnostics["toc_chapter_order_monotonic"] =
+            serde_json::json!(result.chapter_order_monotonic);
+        diagnostics["toc_role_summary"] =
+            serde_json::to_value(&result.toc_role_summary).unwrap_or_default();
+        diagnostics["toc_semantic_meta"] = result.meta.clone();
+    }
+
     ChapterSkeleton {
         chapters,
         heading_candidates,
-        diagnostics: serde_json::json!({
-            "source": source,
-            "total_pages": total_pages,
-        }),
+        toc_semantics_section_heads,
+        diagnostics,
     }
 }
 
@@ -217,102 +206,3 @@ fn infer_back_matter_start_page(
     candidate_pages.into_iter().min().unwrap_or(0)
 }
 
-/// 全局搜索 heading candidates，用 chapter_title_match_key 匹配 TOC title，
-/// 返回最佳候选的 page_no。←→ Python `_resolve_visual_toc_target_page`
-fn resolve_visual_toc_target_page(
-    title: &str,
-    target_page: i64,
-    page_roles: &std::collections::HashMap<i64, PageRole>,
-    heading_candidates: &[HeadingCandidate],
-) -> i64 {
-    let title_key = chapter_title_match_key(title);
-    if title_key.is_empty() {
-        return target_page;
-    }
-
-    // (score, -distance, -page_no, page_no)
-    let mut scored: Vec<(i64, i64, i64, i64)> = Vec::new();
-    let mut current_has_exact_heading = false;
-
-    for c in heading_candidates {
-        if c.page_no <= 0 {
-            continue;
-        }
-        if chapter_title_match_key(&c.text) != title_key {
-            continue;
-        }
-        if c.page_no == target_page && c.source != "visual_toc" {
-            current_has_exact_heading = true;
-        }
-        let role = page_roles
-            .get(&c.page_no)
-            .copied()
-            .unwrap_or(PageRole::Body);
-        if matches!(role, PageRole::Note | PageRole::Other | PageRole::Noise) {
-            continue;
-        }
-
-        let mut score: i64 = 0;
-        match role {
-            PageRole::Body => score += 300,
-            PageRole::FrontMatter => score += 120,
-            _ => {}
-        }
-        match c.source.as_str() {
-            "ocr_block" if c.block_label == "doc_title" => score += 36,
-            "markdown_heading" => score += 30,
-            "pdf_font_band" => score += 24,
-            "visual_toc" => score += 10,
-            _ => {}
-        }
-        match c.heading_family_guess.as_str() {
-            "chapter" | "book" => score += 18,
-            "section" => score += 10,
-            _ => {}
-        }
-        if c.top_band {
-            score += 8;
-        }
-        score += (c.confidence * 10.0).round() as i64;
-        let distance = (c.page_no - target_page).abs();
-        scored.push((score, -distance, -c.page_no, c.page_no));
-    }
-
-    if scored.is_empty() {
-        return target_page;
-    }
-
-    scored.sort_by(|a, b| b.cmp(a)); // descending
-
-    let best_page = scored[0].3;
-    let current_role = page_roles
-        .get(&target_page)
-        .copied()
-        .unwrap_or(PageRole::Body);
-    let best_role = page_roles
-        .get(&best_page)
-        .copied()
-        .unwrap_or(PageRole::Body);
-
-    let should_replace = matches!(
-        current_role,
-        PageRole::Noise | PageRole::Other | PageRole::Note
-    ) || (!current_has_exact_heading && best_page != target_page)
-        || (best_role == PageRole::Body && current_role != PageRole::Body)
-        || (current_role == PageRole::FrontMatter
-            && best_role == PageRole::Body
-            && is_toc_body_anchor_title(title));
-
-    if should_replace && best_page != target_page {
-        best_page
-    } else {
-        target_page
-    }
-}
-
-/// ←→ Python `_is_toc_body_anchor_title`: lecture titles 等应锚定到 body 页。
-fn is_toc_body_anchor_title(title: &str) -> bool {
-    static LECTURE_ANCHOR_RE: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"(?i)\b(?:le[cç]on|chapter|chapitre|cours)\b").unwrap());
-    LECTURE_ANCHOR_RE.is_match(&normalize_title(title))
-}

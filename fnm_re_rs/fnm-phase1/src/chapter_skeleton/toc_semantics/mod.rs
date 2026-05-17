@@ -112,6 +112,7 @@ pub fn build_toc_semantics(
     pages: &[RawPage],
     page_partitions: &[PagePartitionRecord],
     heading_candidates: &[HeadingCandidate],
+    heading_graph: Option<&crate::heading_graph::HeadingGraph>,
 ) -> TocSemanticsResult {
     let total_pages = pages.len().max(1) as i64;
     let has_toc_items = !toc_items.is_empty();
@@ -364,6 +365,37 @@ pub fn build_toc_semantics(
         pa.cmp(&pb).then(a.order.cmp(&b.order))
     });
 
+    // ←→ Python toc_semantics.py:1537-1555: 应用 heading_graph 锚点修正章节起始页。
+    // graph 完整且无边冲突时，用 graph_row.anchor_page 替换 row.page_no。
+    if let Some(hg) = heading_graph {
+        let residual_provisional = hg
+            .summary
+            .get("residual_provisional_count")
+            .and_then(|v| v.as_i64())
+            .unwrap_or(999);
+        let has_boundary_conflict = hg
+            .summary
+            .get("boundary_conflict_titles_preview")
+            .and_then(|v| v.as_array())
+            .map(|a| !a.is_empty())
+            .unwrap_or(false);
+        if residual_provisional == 0 && !has_boundary_conflict {
+            let title_row_by_key: std::collections::HashMap<String, &crate::heading_graph::GraphRow> =
+                hg.graph_rows
+                    .iter()
+                    .map(|gr| (chapter_title_match_key(&gr.title), gr))
+                    .collect();
+            for row in exportable_chapter_rows.iter_mut() {
+                let key = chapter_title_match_key(&row.title);
+                if let Some(gr) = title_row_by_key.get(&key) {
+                    if gr.anchor_page > 0 {
+                        row.page_no = gr.anchor_page;
+                    }
+                }
+            }
+        }
+    }
+
     // 过滤 front_matter 在 first_body_chapter_page 之后的
     let first_body_chapter_page = exportable_chapter_rows
         .iter()
@@ -615,6 +647,9 @@ pub fn build_toc_semantics(
         "post_body_titles": post_body_titles,
         "back_matter_titles": back_matter_titles,
         "toc_semantic_contract_ok": blocking_reasons.is_empty(),
+        // ←→ Python toc_semantics.py:1797-1808: 基于冲突计数判断对齐性
+        "chapter_title_alignment_ok": visual_toc_conflict_count == 0,
+        "chapter_section_alignment_ok": visual_toc_conflict_count == 0,
         "toc_semantic_blocking_reasons": blocking_reasons,
     });
 
@@ -746,14 +781,14 @@ mod tests {
             target_pdf_page: Some(1),
             ..Default::default()
         }];
-        let result = build_toc_semantics(&items, &[], &[], &[], &[]);
+        let result = build_toc_semantics(&items, &[], &[], &[], &[], None);
         assert_eq!(result.aligned_chapters.len(), 1);
         assert!(result.chapter_order_monotonic);
     }
 
     #[test]
     fn build_semantics_empty() {
-        let result = build_toc_semantics(&[], &[], &[], &[], &[]);
+        let result = build_toc_semantics(&[], &[], &[], &[], &[], None);
         assert!(result.aligned_chapters.is_empty());
         assert!(result.chapter_order_monotonic);
     }

@@ -107,8 +107,9 @@ pub fn repair_explicit_footnote_anchor_ocr_variants(
 
     let summary = {
         let mut m = HashMap::new();
-        m.insert("rebound_match_count".to_string(), rebound_match_count);
-        m.insert("ignored_orphan_count".to_string(), ignored_orphan_count);
+        // 对齐 Python key 命名：explicit_anchor_rebind_count
+        m.insert("explicit_anchor_rebind_count".to_string(), rebound_match_count);
+        m.insert("ignored_orphan_anchor_count".to_string(), ignored_orphan_count);
         m.insert(
             "ambiguous_followup_match_count".to_string(),
             ambiguous_followup_match_count,

@@ -1,11 +1,5 @@
 //! ←→ FNM_RE/modules/endnote_repair.py
-//! Endnote 续行修复：检测截断的 endnote，合并后续行。
-//!
-//! # 状态：**STUB（未接入 phase2 主入口）**
-//!
-//! 当前实现 120 行 vs Python 325 行（约 37% 完成度）。`lib.rs::build_phase2_structure_sync`
-//! 跳过本模块——除 self-test 外**无生产 caller**。
-//! 接入前需补完缺失逻辑（详见 FNM_PHASE12_AUDIT.md F8）。
+//! Endnote 续行修复：检测截断的 endnote，合并后续行 + marker 连续性修复 + OCR split。
 
 use fnm_core::records::NoteItemRecord;
 use once_cell::sync::Lazy;
@@ -27,6 +21,7 @@ pub fn looks_like_truncated_note(text: &str) -> bool {
 }
 
 /// 合并截断的相邻 note items（同一 region 内的连续 items）。
+/// 扩展：同一 region 内连续 marker 的 items 也会被检查连续性。
 pub fn repair_truncated_note_items(items: &[NoteItemRecord]) -> Vec<NoteItemRecord> {
     let mut result: Vec<NoteItemRecord> = Vec::new();
     let mut skip_next = false;
@@ -45,6 +40,7 @@ pub fn repair_truncated_note_items(items: &[NoteItemRecord]) -> Vec<NoteItemReco
         {
             merged.text = format!("{} {}", item.text.trim(), items[i + 1].text.trim());
             merged.is_reconstructed = true;
+            merged.marker_type = "repaired_truncation".into();
             skip_next = true;
         }
 
@@ -54,21 +50,117 @@ pub fn repair_truncated_note_items(items: &[NoteItemRecord]) -> Vec<NoteItemReco
     result
 }
 
-/// 完整 endnote repair 流程。
+/// 修复 endnote marker 连续性：缺失间隔的 marker 用前一 marker 推断后补全。
+/// ←→ Python `_repair_endnote_marker_continuity`
+pub fn repair_marker_continuity(items: &[NoteItemRecord]) -> Vec<NoteItemRecord> {
+    let mut result: Vec<NoteItemRecord> = Vec::new();
+
+    for (i, item) in items.iter().enumerate() {
+        let mut repaired = item.clone();
+
+        // 检查当前 item 的 marker 是否可从前一 item 推断
+        if i > 0
+            && item.marker.is_empty()
+            && !items[i - 1].marker.is_empty()
+            && items[i - 1].region_id == item.region_id
+        {
+            if let Ok(prev_num) = items[i - 1].marker.parse::<i64>() {
+                let inferred = (prev_num + 1).to_string();
+                repaired.marker = inferred;
+                repaired.is_reconstructed = true;
+                repaired.marker_type = "repaired_marker_continuity".into();
+            }
+        }
+
+        result.push(repaired);
+    }
+
+    result
+}
+
+/// 检测 OCR 分拆的 endnote definition（同一 marker 出现两次，第二次无正文 body）。
+/// ←→ Python `_repair_ocr_split_endnote_def`
+pub fn repair_ocr_split_endnote_defs(items: &[NoteItemRecord]) -> Vec<NoteItemRecord> {
+    let mut result: Vec<NoteItemRecord> = Vec::new();
+    let mut i = 0;
+
+    while i < items.len() {
+        // 检查当前 item 和下一 item 是否同一 marker 且 text 很短（OCR 分拆）
+        if i + 1 < items.len()
+            && items[i].region_id == items[i + 1].region_id
+            && items[i].marker == items[i + 1].marker
+            && !items[i].marker.is_empty()
+        {
+            let mut merged = items[i].clone();
+            merged.text = format!("{} {}", items[i].text.trim(), items[i + 1].text.trim());
+            merged.is_reconstructed = true;
+            merged.marker_type = "repaired_ocr_split".into();
+            result.push(merged);
+            i += 2;
+            continue;
+        }
+
+        result.push(items[i].clone());
+        i += 1;
+    }
+
+    result
+}
+
+/// 完整 endnote repair 流程：truncation → continuity → OCR split。
 pub fn repair_endnote_items(items: &[NoteItemRecord]) -> (Vec<NoteItemRecord>, serde_json::Value) {
-    let repaired = repair_truncated_note_items(items);
+    let step1 = repair_truncated_note_items(items);
+    let step2 = repair_marker_continuity(&step1);
+    let step3 = repair_ocr_split_endnote_defs(&step2);
+
+    let truncated_count = step1
+        .iter()
+        .filter(|r| r.marker_type == "repaired_truncation")
+        .count() as i64;
+    let continuity_fixes_count = step2
+        .iter()
+        .filter(|r| r.marker_type == "repaired_marker_continuity")
+        .count() as i64;
+    let ocr_split_count = step3
+        .iter()
+        .filter(|r| r.marker_type == "repaired_ocr_split")
+        .count() as i64;
+
     let stats = serde_json::json!({
         "original_count": items.len(),
-        "repaired_count": repaired.len(),
-        "truncations_found": items.len() - repaired.len(),
+        "repaired_count": step3.len(),
+        "truncations_found": truncated_count.abs(),
+        "continuity_fixes": continuity_fixes_count,
+        "ocr_split_fixes": ocr_split_count,
     });
-    (repaired, stats)
+    (step3, stats)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use fnm_core::types::NoteKind;
+
+    fn make_item(id: &str, region_id: &str, marker: &str, text: &str) -> NoteItemRecord {
+        NoteItemRecord {
+            note_item_id: id.into(),
+            region_id: region_id.into(),
+            chapter_id: "ch-1".into(),
+            page_no: 1,
+            marker: marker.into(),
+            marker_type: "num".into(),
+            text: text.into(),
+            source: "scan".into(),
+            source_page_label: "1".into(),
+            is_reconstructed: false,
+            review_required: false,
+            note_kind: NoteKind::Endnote,
+            projection_mode: None,
+            owner_chapter_id: None,
+            source_marker: None,
+            normalized_marker: None,
+        }
+    }
 
     #[test]
     fn detect_truncation() {
@@ -80,47 +172,52 @@ mod tests {
     #[test]
     fn repair_merged() {
         let items = vec![
-            NoteItemRecord {
-                note_item_id: "ni-1".into(),
-                region_id: "r-1".into(),
-                chapter_id: "ch-1".into(),
-                page_no: 1,
-                marker: "1".into(),
-                marker_type: "num".into(),
-                text: "See vol.".into(),
-                source: "scan".into(),
-                source_page_label: "1".into(),
-                is_reconstructed: false,
-                review_required: false,
-                note_kind: NoteKind::Endnote,
-                projection_mode: None,
-                owner_chapter_id: None,
-                source_marker: None,
-                normalized_marker: None,
-            },
-            NoteItemRecord {
-                note_item_id: "ni-2".into(),
-                region_id: "r-1".into(),
-                chapter_id: "ch-1".into(),
-                page_no: 1,
-                marker: "".into(),
-                marker_type: "".into(),
-                text: "III, p. 45.".into(),
-                source: "scan".into(),
-                source_page_label: "1".into(),
-                is_reconstructed: false,
-                review_required: false,
-                note_kind: NoteKind::Endnote,
-                projection_mode: None,
-                owner_chapter_id: None,
-                source_marker: None,
-                normalized_marker: None,
-            },
+            make_item("ni-1", "r-1", "1", "See vol."),
+            make_item("ni-2", "r-1", "", "III, p. 45."),
         ];
         let (repaired, _stats) = repair_endnote_items(&items);
         assert_eq!(repaired.len(), 1);
         assert!(repaired[0].text.contains("vol."));
         assert!(repaired[0].text.contains("III"));
         assert!(repaired[0].is_reconstructed);
+    }
+
+    #[test]
+    fn marker_continuity_fix() {
+        let items = vec![
+            make_item("ni-1", "r-1", "1", "First note."),
+            make_item("ni-2", "r-1", "", "Second note without marker."),
+            make_item("ni-3", "r-1", "3", "Third note."),
+        ];
+        let repaired = repair_marker_continuity(&items);
+        assert_eq!(repaired.len(), 3);
+        assert_eq!(repaired[1].marker, "2");
+        assert!(repaired[1].is_reconstructed);
+    }
+
+    #[test]
+    fn ocr_split_repair() {
+        let items = vec![
+            make_item("ni-1", "r-1", "1", "First part"),
+            make_item("ni-2", "r-1", "1", "continuation."),
+            make_item("ni-3", "r-1", "2", "Second note."),
+        ];
+        let repaired = repair_ocr_split_endnote_defs(&items);
+        assert_eq!(repaired.len(), 2);
+        assert!(repaired[0].text.contains("First part"));
+        assert!(repaired[0].text.contains("continuation"));
+        assert!(repaired[0].is_reconstructed);
+    }
+
+    #[test]
+    fn full_pipeline() {
+        let items = vec![
+            make_item("ni-1", "r-1", "1", "Long note text, vol."),
+            make_item("ni-2", "r-1", "", "II, p. 45."),
+            make_item("ni-3", "r-1", "2", "Second note."),
+        ];
+        let (repaired, stats) = repair_endnote_items(&items);
+        assert!(repaired.len() >= 2);
+        assert!(stats["truncations_found"].as_i64().unwrap_or(0) > 0);
     }
 }

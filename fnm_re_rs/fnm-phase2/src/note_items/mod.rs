@@ -17,7 +17,7 @@ use fnm_phase1::input::RawPage;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-use self::marker_parse::{parse_page, row_to_item};
+use self::marker_parse::{parse_page, preprocess_page_text, row_to_item};
 use self::sequence_repair::{repair_parsed_row_sequence_markers, ParsedNoteRow};
 use self::year_filter::{fix_sequence_outlier_markers_in_place, fix_year_markers_in_place};
 
@@ -61,7 +61,8 @@ pub fn build_note_items(
             if text.is_empty() {
                 continue;
             }
-            rows.extend(parse_page(&text, page.book_page, region));
+            let processed = preprocess_page_text(&text);
+            rows.extend(parse_page(&processed, page.book_page, region));
         }
 
         // Phase B: endnote 序列修复

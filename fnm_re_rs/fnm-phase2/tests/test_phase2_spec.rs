@@ -381,7 +381,7 @@ fn spec_sup_recovery_finds_markers() {
     let mut chapter_markers = std::collections::HashMap::new();
     chapter_markers.insert("ch1".into(), vec!["42".into(), "7".into()]);
 
-    let result = recover_book_chapter_scoped(&pages, &chapter_markers, None);
+    let result = recover_book_chapter_scoped(&pages, &chapter_markers, None, None);
     let ch1_hits = result.get("ch1");
     assert!(ch1_hits.is_some(), "Should find markers in ch1");
     let hits = ch1_hits.unwrap();
@@ -412,7 +412,7 @@ fn spec_sup_recovery_layer2_ocr_punctuation_surrogate() {
     let mut markers: HashMap<String, Vec<String>> = HashMap::new();
     markers.insert("ch1".into(), vec!["10".into(), "11".into(), "12".into()]);
 
-    let result = recover_book_chapter_scoped(&[page], &markers, None);
+    let result = recover_book_chapter_scoped(&[page], &markers, None, None);
     if let Some(hits) = result.get("ch1") {
         assert!(
             hits.iter().any(|(_, m)| m == "11"),
@@ -447,7 +447,7 @@ fn spec_sup_recovery_layer2_ocr_suffix() {
     let mut markers: HashMap<String, Vec<String>> = HashMap::new();
     markers.insert("ch1".into(), vec!["36".into(), "37".into(), "38".into()]);
 
-    let result = recover_book_chapter_scoped(&[page], &markers, None);
+    let result = recover_book_chapter_scoped(&[page], &markers, None, None);
     if let Some(hits) = result.get("ch1") {
         assert!(
             hits.iter().any(|(_, m)| m == "37"),
@@ -481,7 +481,7 @@ fn spec_sup_recovery_layer2_symbol_after_year() {
     let mut markers: HashMap<String, Vec<String>> = HashMap::new();
     markers.insert("ch1".into(), vec!["29".into(), "30".into(), "31".into()]);
 
-    let result = recover_book_chapter_scoped(&[page], &markers, None);
+    let result = recover_book_chapter_scoped(&[page], &markers, None, None);
     if let Some(hits) = result.get("ch1") {
         assert!(
             hits.iter().any(|(_, m)| m == "30"),
