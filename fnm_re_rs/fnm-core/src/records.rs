@@ -814,6 +814,102 @@ pub struct Phase4Structure {
     pub summary: Phase4Summary,
 }
 
+// ── Phase 4 Frozen 类型 ────────────────────────────────────────
+
+/// ←→ Python `FNM_RE/modules/types.py:FrozenRefEntry` (L290)
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FrozenRefEntry {
+    #[serde(default)]
+    pub link_id: String,
+    #[serde(default)]
+    pub chapter_id: String,
+    #[serde(default)]
+    pub anchor_id: String,
+    #[serde(default)]
+    pub note_item_id: String,
+    #[serde(default)]
+    pub target_ref: String,
+    #[serde(default)]
+    pub decision: String,
+    #[serde(default)]
+    pub reason: String,
+    #[serde(default)]
+    pub skip_category: String,
+    #[serde(default)]
+    pub page_no: i64,
+}
+
+/// ←→ Python `FNM_RE/modules/types.py:FrozenUnit` (L303)
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FrozenUnit {
+    #[serde(default)]
+    pub unit_id: String,
+    #[serde(default)]
+    pub kind: String,
+    #[serde(default)]
+    pub owner_kind: String,
+    #[serde(default)]
+    pub owner_id: String,
+    #[serde(default)]
+    pub section_id: String,
+    #[serde(default)]
+    pub section_title: String,
+    #[serde(default)]
+    pub section_start_page: i64,
+    #[serde(default)]
+    pub section_end_page: i64,
+    #[serde(default)]
+    pub note_id: String,
+    #[serde(default)]
+    pub page_start: i64,
+    #[serde(default)]
+    pub page_end: i64,
+    #[serde(default)]
+    pub char_count: i64,
+    #[serde(default)]
+    pub source_text: String,
+    #[serde(default)]
+    pub translated_text: String,
+    #[serde(default)]
+    pub status: String,
+    #[serde(default)]
+    pub error_msg: String,
+    #[serde(default)]
+    pub target_ref: String,
+    #[serde(default)]
+    pub page_segments: Vec<UnitPageSegmentRecord>,
+    #[serde(default)]
+    pub source_hash: String,
+    #[serde(default)]
+    pub segment_plan_hash: String,
+    #[serde(default)]
+    pub pipeline_run_id: String,
+}
+
+/// ←→ Python `FNM_RE/modules/types.py:FrozenUnits` (L328)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrozenUnits {
+    #[serde(default)]
+    pub body_units: Vec<FrozenUnit>,
+    #[serde(default)]
+    pub note_units: Vec<FrozenUnit>,
+    #[serde(default)]
+    pub ref_map: Vec<FrozenRefEntry>,
+    #[serde(default)]
+    pub freeze_summary: serde_json::Value,
+}
+
+impl Default for FrozenUnits {
+    fn default() -> Self {
+        FrozenUnits {
+            body_units: Vec::new(),
+            note_units: Vec::new(),
+            ref_map: Vec::new(),
+            freeze_summary: serde_json::Value::Object(serde_json::Map::new()),
+        }
+    }
+}
+
 // ── Phase 5 ────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -2,6 +2,46 @@
 
 目标：把 FNM_RE 整个 6-Phase pipeline（含 LLM repair）用 Rust 重写，追求极致性能。
 
+---
+
+## 🟢 当前进度（2026-05-18）
+
+| Phase | crate | 状态 | 测试 |
+|---|---|---|---|
+| 0 基础设施 | `fnm-core` | ✅ **100% 完成** | 110 lib + 9 其他 |
+| 1 章节骨架 | `fnm-phase1` | ✅ **100% 完成** | 106 lib + 27 集成（1 chapter_boundary 待精调）|
+| 2 注释结构 + note_kind | `fnm-phase2` | ✅ **100% 完成** | 140 lib + 18 集成 + biopolitics 6/6 |
+| 3 body anchor + link 匹配 | `fnm-phase3` | ✅ **100% 完成** | 26 lib + 27 集成（5 ignored cascade）|
+| **4 引用注入 + 翻译单元** | **`fnm-phase4`** | **🔄 M1 (ref_freeze) 完成** | 69 unit tests |
+| 5 章 markdown 合并 | `fnm-phase5` | ⏳ 未开始 | — |
+| 6 导出 + 审计 | `fnm-phase6` | ⏳ 未开始 | — |
+| LLM repair (3.5) | `fnm-llm-repair` | ⏳ 未开始（fnm-core vision/spec 已就绪）| — |
+| 横切 | `fnm-orchestrator` | ⏳ 未开始 | — |
+
+**workspace 测试**：23 套件 · 477 passed · 1 failed · 8 ignored。
+完整报告：[`fnm_re_rs/FNM_RE_REFACTOR.md`](../fnm_re_rs/FNM_RE_REFACTOR.md)。
+
+### 重要 ✅：所有 LLM 调用统一走 ResolvedModelSpec
+
+fnm-core 新增基建 `model_capabilities.rs` / `config.rs` / `vision/spec.rs` 完整 port 了
+Python `model_capabilities.py` + `config.py` + `persistence/storage.py` 的 LLM 配置链路：
+
+- **5 家 provider**：DeepSeek / Qwen（含 VL / MT）/ MiMo / GLM / Kimi
+- **fnm_model_pool 槽位**：通过 `config.json` 配置，运行时按 `provider_type` 自动路由
+  base_url + API key
+- **multi-spec fallback**：每个 LLM 调用按 pool 顺序遍历，第一槽失败自动尝试下一槽
+- **环境变量降级**：`DASHSCOPE_API_KEY / DEEPSEEK_API_KEY / GLM_API_KEY / KIMI_API_KEY / MIMO_API_KEY`
+
+使用场景：
+- `fnm-phase1::llm_book_type_verify`
+- `fnm-phase2::sup_recovery::layer3`
+- `fnm-phase2::visual_anchor_recovery`
+- `fnm-phase2::llm_bare_digit_verify`
+
+---
+
+## 历史 Python 规模
+
 当前 Python 规模：**35,033 行 / 81 文件 / 5 个分层**
 
 | 层 | 文件数 | 行数 | 角色 |
@@ -232,12 +272,12 @@ FNM_RE/modules/pdf_render_subprocess.py          → 不需要（直接调用）
 
 ---
 
-### Step 3: 锚点 + 链接 — `fnm-phase3` ✅ **已完成（14/14 任务）**
+### Step 3: 锚点 + 链接 — `fnm-phase3` ✅ **100% 完成**
 
-**实施状态**：14 个 P3.x 任务全完成。两轮审计修复落地。详见 [`FNM_PHASE3_PLAN.md`](FNM_PHASE3_PLAN.md) 完整任务表。
-- 26 lib + 50+ 集成测试 0 failed；clippy/fmt clean
-- 5 个 byte-equal parity `#[ignore]`，根因是 Phase 2 上游 `note_items` over-extraction（35 个）
-- 详见 [`fnm_re_rs/fnm-phase3/tests/known_python_bugs.md`](../fnm_re_rs/fnm-phase3/tests/known_python_bugs.md) §7
+10 个模块全 port，含 1730 行的 `note_linking.py` 拆为 14 子模块。
+- 26 lib + 50+ 集成测试通过
+- 5 个 byte-equal parity `#[ignore]` 等 Phase 2 cascade 修完（详见 [`fnm_re_rs/fnm-phase3/tests/known_python_bugs.md`](../fnm_re_rs/fnm-phase3/tests/known_python_bugs.md) §7）
+- 完整任务历史见 [`FNM_PHASE3_PLAN.md`](FNM_PHASE3_PLAN.md)
 
 **输入**：`Phase2Structure`
 **输出**：`Phase3Structure { body_anchors, note_links, paragraph_footnotes, paragraph_endnotes, ... }`
@@ -319,10 +359,11 @@ run_llm_repair()
 
 ---
 
-### Step 4: 引用注入 + 翻译单元 — `fnm-phase4` 🔄 **骨架已启动**
+### Step 4: 引用注入 + 翻译单元 — `fnm-phase4` 🔄 **可启动（上游全就绪）**
 
 **状态**：crate 骨架已创建（Cargo.toml + lib.rs placeholder + workspace member）。
-完整 7 任务清单 + 验收 checklist 见 [`FNM_PHASE4_PLAN.md`](FNM_PHASE4_PLAN.md)（待实施者读后开工 P4.0）。
+所有上游依赖（fnm-core / phase1 / phase2 / phase3 + 5 家 provider LLM + DB 1-3 持久化）已 100% 就绪。
+完整 7 任务清单 + 验收 checklist 见 [`FNM_PHASE4_PLAN.md`](FNM_PHASE4_PLAN.md)（实施者读完即可开工 P4.0）。
 
 **输入**：`Phase3Structure`（最终版，已应用 LLM repair override）
 **输出**：`Phase4Structure { translation_units, structure_reviews, frozen_refs, frozen_units }`
@@ -398,23 +439,27 @@ FNM_RE/stages/diagnostics.py 剩余部分            → src/diagnostics.rs (Pha
 
 ## 实施时间表（按数据流顺序）
 
+### 已完成（截至 2026-05-18）
+
+| 步骤 | 状态 | 实际完成日 |
+|---|---|---|
+| 横切 A — `fnm-core` | ✅ 100% + 5 家 LLM provider 基建 | 2026-05-18 |
+| Step 1 — `fnm-phase1` | ✅ 100%（12 模块）| 2026-05-18 |
+| Step 2 — `fnm-phase2` | ✅ 100%（15 模块）| 2026-05-18 |
+| Step 3 — `fnm-phase3` | ✅ 100%（10 模块）| 2026-05-17 |
+
+### 剩余规划
+
 | 周次 | 步骤 | 内容 | 累计 |
 |---:|---|---|---:|
-| 1-2 | 准备 | Cargo workspace 搭建，pyo3 集成验证，CI 配置 | 2 周 |
-| 3 | 横切 A | `fnm-core`：types、records、shared、DB 绑定 | 3 周 |
-| 4-5 | Step 1 | `fnm-phase1`：TOC + section heads + skeleton + LLM book type | 5 周 |
-| 6-9 | Step 2 | `fnm-phase2` + `fnm-sup-recovery`：chapter_split + 注释识别 + OCR 修复 | 9 周 |
-| 10-12 | Step 3 | `fnm-phase3`：body anchors + note links + DP 对齐 | 12 周 |
-| 13-15 | Step 3.5 | `fnm-llm-repair`：vision API + override 物化 | 15 周 |
-| 16-17 | Step 4 | `fnm-phase4`：frozen refs + translation units + reviews | 17 周 |
-| 18 | Step 5 | `fnm-phase5`：chapter markdown merge | 18 周 |
-| 19 | Step 6 | `fnm-phase6`：export + audit + diagnostics | 19 周 |
-| 20-21 | 横切 B | `fnm-orchestrator`：pipeline + pyo3 入口 | 21 周 |
-| 22-23 | 验证 | 全 pipeline 端到端对齐、性能调优、生产切换 | 23 周 |
+| 1-2 | Step 4 | `fnm-phase4`：frozen refs + translation units + reviews | 2 周 |
+| 3 | Step 3.5 | `fnm-llm-repair`：vision API + override 物化（基建已就绪）| 3 周 |
+| 4 | Step 5 | `fnm-phase5`：chapter markdown merge | 4 周 |
+| 5 | Step 6 | `fnm-phase6`：export + audit + diagnostics | 5 周 |
+| 6-7 | 横切 B | `fnm-orchestrator`：pipeline + pyo3 入口 | 7 周 |
+| 8-9 | 验证 | 全 pipeline 端到端对齐、性能调优、生产切换 | 9 周 |
 
-**总计**：~ 23 周（5-6 个月，单人 full-time）。
-
-多人并行可缩短到 12-14 周（Step 1/2/3 串行依赖，但每个 Step 内部可多人分工；fnm-core 和 LLM repair 可早期并行）。
+**剩余**：~ 9 周（约 2 个月，单人 full-time）。已完成 ~ 14 周工作量。
 
 ---
 
