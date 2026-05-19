@@ -86,22 +86,46 @@ pub fn recover_book_chapter_scoped(
         }
     }
 
-    // Layer 3: 异步 Vision LLM 验证
-    if let (Some(pdf), Some(config)) = (pdf_path, vision_config) {
-        if !config.api_key.is_empty() && !layer3_candidates.is_empty() {
+    // Layer 3: 异步 Vision LLM 验证。
+    // 优先用 fnm_model_pool 解析的 ResolvedModelSpec（5 家 provider）；
+    // 若 pool 为空或无 vision-capable spec，则降级到旧 VisionConfig 路径。
+    if let Some(pdf) = pdf_path {
+        if !layer3_candidates.is_empty() {
+            let pool_specs = fnm_core::vision::resolve_fnm_model_pool_specs();
+            let vision_specs: Vec<fnm_core::vision::ResolvedModelSpec> = pool_specs
+                .into_iter()
+                .filter(|s| s.supports_vision && !s.api_key.is_empty())
+                .collect();
             for (chapter_id, candidates) in &layer3_candidates {
                 let rt = tokio::runtime::Runtime::new();
                 if let Ok(runtime) = rt {
-                    if let Ok(layer3_results) =
-                        runtime.block_on(layer3::layer3_verify_with_vision(pdf, candidates, config))
-                    {
-                        for r in &layer3_results {
-                            if r.accepted {
-                                results
-                                    .entry(chapter_id.clone())
-                                    .or_default()
-                                    .push((r.page_no, r.marker.clone()));
-                            }
+                    let layer3_results = if !vision_specs.is_empty() {
+                        runtime
+                            .block_on(layer3::layer3_verify_with_spec(
+                                pdf,
+                                candidates,
+                                &vision_specs,
+                            ))
+                            .unwrap_or_default()
+                    } else if let Some(config) = &vision_config {
+                        if !config.api_key.is_empty() {
+                            runtime
+                                .block_on(layer3::layer3_verify_with_vision(
+                                    pdf, candidates, config,
+                                ))
+                                .unwrap_or_default()
+                        } else {
+                            Vec::new()
+                        }
+                    } else {
+                        Vec::new()
+                    };
+                    for r in &layer3_results {
+                        if r.accepted {
+                            results
+                                .entry(chapter_id.clone())
+                                .or_default()
+                                .push((r.page_no, r.marker.clone()));
                         }
                     }
                 }

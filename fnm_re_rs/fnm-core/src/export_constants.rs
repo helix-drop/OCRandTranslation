@@ -6,6 +6,7 @@ use regex::Regex;
 
 pub const PENDING_TRANSLATION_TEXT: &str = "[待翻译]";
 pub const OBSIDIAN_EXPORT_CHAPTERS_PREFIX: &str = "chapters/";
+pub const OBSIDIAN_EXPORT_INDEX_MD: &str = "index.md";
 
 pub static NOTE_TEXT_BODY_MARKUP_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
@@ -45,6 +46,14 @@ pub static FRONT_MATTER_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
 
 pub static TOC_RESIDUE_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?im)^\s*(?:table of contents|contents|目录)\b").unwrap());
+
+/// 匹配正文中的 [^N] 引用（contract_summary 使用）。
+pub static LOCAL_FOOTNOTE_REF_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\[\^([0-9]+)\]").unwrap());
+
+/// 匹配行首的 [^N]: 定义行。
+pub static LOCAL_FOOTNOTE_DEF_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?m)^\[\^([0-9]+)\]:").unwrap());
 
 // ref_rewriter 依赖的正则
 pub static RAW_BRACKET_NOTE_REF_RE: Lazy<Regex> =

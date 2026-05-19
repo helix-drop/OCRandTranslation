@@ -4,6 +4,7 @@
 pub mod endnote_project;
 pub mod gate;
 pub mod overrides_apply;
+pub mod structure_model;
 pub mod synth_markers;
 
 use fnm_core::records::{

@@ -1102,6 +1102,38 @@ pub struct DiagnosticNoteRecord {
     pub region_id: String,
 }
 
+// ── Phase 5 / Chapter Markdown ───────────────────────────────────
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChapterMarkdownEntry {
+    #[serde(default)]
+    pub order: i64,
+    #[serde(default)]
+    pub chapter_id: String,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub path: String,
+    #[serde(default)]
+    pub markdown_text: String,
+    #[serde(default)]
+    pub start_page: i64,
+    #[serde(default)]
+    pub end_page: i64,
+    #[serde(default)]
+    pub pages: Vec<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChapterMarkdownSet {
+    #[serde(default)]
+    pub chapters: Vec<ChapterMarkdownEntry>,
+    #[serde(default)]
+    pub chapter_contract_summary: serde_json::Value,
+    #[serde(default)]
+    pub merge_summary: serde_json::Value,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase5Summary {
     #[serde(default)]

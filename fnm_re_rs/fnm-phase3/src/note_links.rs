@@ -35,13 +35,19 @@ pub fn build_note_links(
         .iter()
         .filter_map(|r| {
             let id = r.region_id.trim();
-            if id.is_empty() { None } else { Some((id.to_string(), r)) }
+            if id.is_empty() {
+                None
+            } else {
+                Some((id.to_string(), r))
+            }
         })
         .collect();
     let mut anchor_count_by_chapter: HashMap<String, usize> = HashMap::new();
     for anchor in anchors.iter() {
         if !anchor.synthetic && !anchor.chapter_id.is_empty() {
-            *anchor_count_by_chapter.entry(anchor.chapter_id.clone()).or_default() += 1;
+            *anchor_count_by_chapter
+                .entry(anchor.chapter_id.clone())
+                .or_default() += 1;
         }
     }
 

@@ -10,8 +10,10 @@ static NOTE_TEXT_BODY_MARKUP_RE: Lazy<Regex> =
 static LEADING_RAW_NOTE_MARKER_RE: Lazy<Regex> = Lazy::new(|| {
     // ←→ Python `_LEADING_RAW_NOTE_MARKER_RE`（export_constants.py:21-23）:
     // 覆盖 [N], N. N) N], *..**** , <sup>N</sup> 等格式。
-    Regex::new(r"^\s*(?:\[\d{1,4}[A-Za-z]?\]|\d{1,4}[A-Za-z]?[\.\)\]]|\*{1,4}\s+|<sup>\d{1,4}</sup>)\s*")
-        .unwrap()
+    Regex::new(
+        r"^\s*(?:\[\d{1,4}[A-Za-z]?\]|\d{1,4}[A-Za-z]?[\.\)\]]|\*{1,4}\s+|<sup>\d{1,4}</sup>)\s*",
+    )
+    .unwrap()
 });
 
 static WHITESPACE_COLLAPSE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());

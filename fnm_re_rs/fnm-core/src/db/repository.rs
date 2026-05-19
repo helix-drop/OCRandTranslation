@@ -37,6 +37,26 @@ pub struct Phase3Products {
     pub note_links: Vec<NoteLinkRecord>,
 }
 
+#[derive(Debug, Clone)]
+pub struct Phase4Products {
+    pub translation_units: Vec<TranslationUnitRecord>,
+    pub structure_reviews: Vec<StructureReviewRecord>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Phase5Products {
+    pub chapter_markdowns: Vec<ChapterMarkdownEntry>,
+    pub diagnostic_pages: Vec<DiagnosticPageRecord>,
+    pub diagnostic_notes: Vec<DiagnosticNoteRecord>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Phase6Products {
+    pub export_chapters: Vec<ExportChapterRecord>,
+    pub export_bundle: ExportBundleRecord,
+    pub export_audit: ExportAuditReportRecord,
+}
+
 // ── Repository trait ─────────────────────────────────────────────
 
 pub trait Repository {
@@ -62,6 +82,16 @@ pub trait Repository {
     fn list_fnm_chapter_endnotes(&self, doc_id: &str) -> Result<Vec<ChapterEndnoteRecord>>;
     fn list_fnm_paragraph_footnotes(&self, doc_id: &str) -> Result<Vec<ParagraphFootnoteRecord>>;
     fn list_fnm_review_overrides_v2(&self, doc_id: &str) -> Result<Vec<Value>>;
+    /// 清空指定 scope 的 LLM 修补 overrides（scope=None 时清空全部）。
+    /// ←→ Python `SQLiteRepository.clear_fnm_review_overrides`
+    fn clear_fnm_review_overrides_v2(&self, doc_id: &str, scope: Option<&str>) -> Result<()>;
+    /// 批量写入 review overrides。rows: [(scope, target_id, payload), ...]
+    /// ←→ Python `SQLiteRepository.batch_save_fnm_review_overrides`
+    fn batch_save_fnm_review_overrides_v2(
+        &self,
+        doc_id: &str,
+        rows: &[(String, String, Value)],
+    ) -> Result<()>;
     fn replace_fnm_phase3_products(&self, doc_id: &str, payload: &Phase3Products) -> Result<()>;
 
     // ── Phase 3 按章 scope 写入──
@@ -94,6 +124,29 @@ pub trait Repository {
         doc_id: &str,
         units: &[TranslationUnitRecord],
     ) -> Result<()>;
+
+    // ── Structure reviews ──
+    fn list_fnm_structure_reviews(&self, doc_id: &str) -> Result<Vec<StructureReviewRecord>>;
+    fn replace_fnm_structure_reviews(
+        &self,
+        doc_id: &str,
+        reviews: &[StructureReviewRecord],
+    ) -> Result<()>;
+
+    // ── Phase 4 ──
+    fn replace_fnm_phase4_products(&self, doc_id: &str, payload: &Phase4Products) -> Result<()>;
+
+    // ── Phase 5 ──
+    fn list_fnm_chapter_markdowns(&self, doc_id: &str) -> Result<Vec<ChapterMarkdownEntry>>;
+    fn list_fnm_diagnostic_pages(&self, doc_id: &str) -> Result<Vec<DiagnosticPageRecord>>;
+    fn list_fnm_diagnostic_notes(&self, doc_id: &str) -> Result<Vec<DiagnosticNoteRecord>>;
+    fn replace_fnm_phase5_products(&self, doc_id: &str, payload: &Phase5Products) -> Result<()>;
+
+    // ── Phase 6 ──
+    fn list_fnm_export_chapters(&self, doc_id: &str) -> Result<Vec<ExportChapterRecord>>;
+    fn list_fnm_export_audit(&self, doc_id: &str) -> Result<Option<ExportAuditReportRecord>>;
+    fn list_fnm_export_bundle(&self, doc_id: &str) -> Result<Option<ExportBundleRecord>>;
+    fn replace_fnm_phase6_products(&self, doc_id: &str, payload: &Phase6Products) -> Result<()>;
 }
 
 // ── SqliteRepository ─────────────────────────────────────────────
@@ -724,6 +777,49 @@ impl Repository for SqliteRepository {
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
+    fn clear_fnm_review_overrides_v2(&self, doc_id: &str, scope: Option<&str>) -> Result<()> {
+        let conn = self.get_conn()?;
+        if let Some(scope_value) = scope {
+            conn.execute(
+                "DELETE FROM fnm_review_overrides_v2 WHERE doc_id = ?1 AND scope = ?2",
+                rusqlite::params![doc_id, scope_value],
+            )?;
+        } else {
+            conn.execute(
+                "DELETE FROM fnm_review_overrides_v2 WHERE doc_id = ?1",
+                rusqlite::params![doc_id],
+            )?;
+        }
+        Ok(())
+    }
+
+    fn batch_save_fnm_review_overrides_v2(
+        &self,
+        doc_id: &str,
+        rows: &[(String, String, Value)],
+    ) -> Result<()> {
+        if rows.is_empty() {
+            return Ok(());
+        }
+        let mut conn = self.get_conn()?;
+        let tx = conn.transaction()?;
+        let now = Self::now_ts();
+        for (scope, target_id, payload) in rows {
+            let payload_json = serde_json::to_string(payload)?;
+            tx.execute(
+                "INSERT INTO fnm_review_overrides_v2(
+                    doc_id, scope, target_id, payload_json, created_at, updated_at
+                ) VALUES (?1, ?2, ?3, ?4, ?5, ?5)
+                ON CONFLICT(doc_id, scope, target_id) DO UPDATE SET
+                    payload_json = excluded.payload_json,
+                    updated_at = excluded.updated_at",
+                rusqlite::params![doc_id, scope, target_id, payload_json, now],
+            )?;
+        }
+        tx.commit()?;
+        Ok(())
+    }
+
     // ── Phase 3 按章 scope 写入 ────────────────────────────────────
 
     fn upsert_fnm_chapter_anchor_alignment(
@@ -933,5 +1029,365 @@ impl Repository for SqliteRepository {
             ])?;
         }
         Ok(())
+    }
+
+    fn list_fnm_structure_reviews(&self, doc_id: &str) -> Result<Vec<StructureReviewRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT review_type, chapter_id, page_start, page_end, payload_json, severity
+             FROM fnm_structure_reviews WHERE doc_id = ?1",
+        )?;
+        let rows = stmt.query_map(rusqlite::params![doc_id], |row| {
+            let payload_json: String = row.get(4)?;
+            let payload: Value = serde_json::from_str(&payload_json).unwrap_or(Value::Null);
+            Ok(StructureReviewRecord {
+                review_id: String::new(), // 将在下方重建
+                review_type: row.get(0)?,
+                chapter_id: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                page_start: row.get::<_, Option<i64>>(2)?.unwrap_or(0),
+                page_end: row.get::<_, Option<i64>>(3)?.unwrap_or(0),
+                severity: row.get(5)?,
+                payload,
+            })
+        })?;
+        let mut reviews = Vec::new();
+        for row in rows {
+            let mut review = row?;
+            // 重建 review_id
+            review.review_id = format!(
+                "review-{}-{}-{}-{}-{}",
+                review
+                    .review_type
+                    .replace(|c: char| !c.is_alphanumeric(), "-"),
+                review
+                    .chapter_id
+                    .replace(|c: char| !c.is_alphanumeric(), "-"),
+                review.page_start,
+                review.page_end,
+                "na"
+            );
+            reviews.push(review);
+        }
+        Ok(reviews)
+    }
+
+    fn replace_fnm_structure_reviews(
+        &self,
+        doc_id: &str,
+        reviews: &[StructureReviewRecord],
+    ) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+        conn.execute(
+            "DELETE FROM fnm_structure_reviews WHERE doc_id = ?1",
+            rusqlite::params![doc_id],
+        )?;
+        let mut stmt = conn.prepare(
+            "INSERT INTO fnm_structure_reviews
+             (doc_id, review_type, chapter_id, page_start, page_end, payload_json, severity, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+        )?;
+        for review in reviews {
+            let payload_json = serde_json::to_string(&review.payload).unwrap_or_default();
+            stmt.execute(rusqlite::params![
+                doc_id,
+                review.review_type,
+                review.chapter_id,
+                review.page_start,
+                review.page_end,
+                payload_json,
+                review.severity,
+                ts,
+                ts,
+            ])?;
+        }
+        Ok(())
+    }
+
+    fn replace_fnm_phase4_products(&self, doc_id: &str, payload: &Phase4Products) -> Result<()> {
+        self.replace_fnm_translation_units(doc_id, &payload.translation_units)?;
+        self.replace_fnm_structure_reviews(doc_id, &payload.structure_reviews)?;
+        Ok(())
+    }
+
+    // ── Phase 5 ──────────────────────────────────────────────────
+
+    fn list_fnm_chapter_markdowns(&self, doc_id: &str) -> Result<Vec<ChapterMarkdownEntry>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT chapter_id, order_idx, title, path, markdown_text,
+                    start_page, end_page, pages_json
+             FROM fnm_chapter_markdowns WHERE doc_id = ?1 ORDER BY order_idx",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(ChapterMarkdownEntry {
+                chapter_id: row.get(0)?,
+                order: row.get(1)?,
+                title: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                path: row.get::<_, Option<String>>(3)?.unwrap_or_default(),
+                markdown_text: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+                start_page: row.get::<_, Option<i64>>(5)?.unwrap_or(0),
+                end_page: row.get::<_, Option<i64>>(6)?.unwrap_or(0),
+                pages: row
+                    .get::<_, Option<String>>(7)?
+                    .and_then(|s| serde_json::from_str(&s).ok())
+                    .unwrap_or_default(),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_diagnostic_pages(&self, doc_id: &str) -> Result<Vec<DiagnosticPageRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT page_bp, status, pages, page_entries_json, fnm_source_json
+             FROM fnm_diagnostic_pages WHERE doc_id = ?1 ORDER BY page_bp",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(DiagnosticPageRecord {
+                _page_bp: row.get(0)?,
+                _status: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                pages: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                _page_entries: row
+                    .get::<_, Option<String>>(3)?
+                    .and_then(|s| serde_json::from_str(&s).ok())
+                    .unwrap_or_default(),
+                _fnm_source: row
+                    .get::<_, Option<String>>(4)?
+                    .and_then(|s| serde_json::from_str(&s).ok())
+                    .unwrap_or_default(),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_diagnostic_notes(&self, doc_id: &str) -> Result<Vec<DiagnosticNoteRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT note_id, section_id, section_title, section_start_page,
+                    section_end_page, kind, original_marker, start_page,
+                    pages_json, source_text, translated_text, translate_status, region_id
+             FROM fnm_diagnostic_notes WHERE doc_id = ?1 ORDER BY note_id",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(DiagnosticNoteRecord {
+                note_id: row.get(0)?,
+                section_id: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                section_title: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                section_start_page: row.get::<_, Option<i64>>(3)?.unwrap_or(0),
+                section_end_page: row.get::<_, Option<i64>>(4)?.unwrap_or(0),
+                kind: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
+                original_marker: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
+                start_page: row.get::<_, Option<i64>>(7)?.unwrap_or(0),
+                pages: row
+                    .get::<_, Option<String>>(8)?
+                    .and_then(|s| serde_json::from_str(&s).ok())
+                    .unwrap_or_default(),
+                source_text: row.get::<_, Option<String>>(9)?.unwrap_or_default(),
+                translated_text: row.get::<_, Option<String>>(10)?.unwrap_or_default(),
+                translate_status: row.get::<_, Option<String>>(11)?.unwrap_or_default(),
+                region_id: row.get::<_, Option<String>>(12)?.unwrap_or_default(),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn replace_fnm_phase5_products(&self, doc_id: &str, payload: &Phase5Products) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+
+        conn.execute(
+            "DELETE FROM fnm_chapter_markdowns WHERE doc_id = ?1",
+            [doc_id],
+        )?;
+        conn.execute(
+            "DELETE FROM fnm_diagnostic_pages WHERE doc_id = ?1",
+            [doc_id],
+        )?;
+        conn.execute(
+            "DELETE FROM fnm_diagnostic_notes WHERE doc_id = ?1",
+            [doc_id],
+        )?;
+
+        let mut stmt_cm = conn.prepare(
+            "INSERT INTO fnm_chapter_markdowns
+             (doc_id, chapter_id, order_idx, title, path, markdown_text,
+              start_page, end_page, pages_json, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+        )?;
+        for cm in &payload.chapter_markdowns {
+            stmt_cm.execute(rusqlite::params![
+                doc_id,
+                cm.chapter_id,
+                cm.order,
+                cm.title,
+                cm.path,
+                cm.markdown_text,
+                cm.start_page,
+                cm.end_page,
+                serde_json::to_string(&cm.pages).ok(),
+                ts,
+                ts,
+            ])?;
+        }
+
+        let mut stmt_dp = conn.prepare(
+            "INSERT INTO fnm_diagnostic_pages
+             (doc_id, page_bp, status, pages, page_entries_json,
+              fnm_source_json, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+        )?;
+        for dp in &payload.diagnostic_pages {
+            stmt_dp.execute(rusqlite::params![
+                doc_id,
+                dp._page_bp,
+                dp._status,
+                dp.pages,
+                serde_json::to_string(&dp._page_entries).ok(),
+                serde_json::to_string(&dp._fnm_source).ok(),
+                ts,
+                ts,
+            ])?;
+        }
+
+        let mut stmt_dn = conn.prepare(
+            "INSERT INTO fnm_diagnostic_notes
+             (doc_id, note_id, section_id, section_title, section_start_page,
+              section_end_page, kind, original_marker, start_page, pages_json,
+              source_text, translated_text, translate_status, region_id,
+              created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
+        )?;
+        for dn in &payload.diagnostic_notes {
+            stmt_dn.execute(rusqlite::params![
+                doc_id,
+                dn.note_id,
+                dn.section_id,
+                dn.section_title,
+                dn.section_start_page,
+                dn.section_end_page,
+                dn.kind,
+                dn.original_marker,
+                dn.start_page,
+                serde_json::to_string(&dn.pages).ok(),
+                dn.source_text,
+                dn.translated_text,
+                dn.translate_status,
+                dn.region_id,
+                ts,
+                ts,
+            ])?;
+        }
+
+        Ok(())
+    }
+
+    // ── Phase 6 ──────────────────────────────────────────────────
+
+    fn list_fnm_export_chapters(&self, doc_id: &str) -> Result<Vec<ExportChapterRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT section_id, order_idx, title, path, content,
+                    start_page, end_page, pages_json
+             FROM fnm_export_chapters WHERE doc_id = ?1 ORDER BY order_idx",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(ExportChapterRecord {
+                section_id: row.get(0)?,
+                order: row.get(1)?,
+                title: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                path: row.get::<_, Option<String>>(3)?.unwrap_or_default(),
+                content: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+                start_page: row.get::<_, Option<i64>>(5)?.unwrap_or(0),
+                end_page: row.get::<_, Option<i64>>(6)?.unwrap_or(0),
+                pages: row
+                    .get::<_, Option<String>>(7)?
+                    .and_then(|s| serde_json::from_str(&s).ok())
+                    .unwrap_or_default(),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_export_audit(&self, doc_id: &str) -> Result<Option<ExportAuditReportRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt =
+            conn.prepare("SELECT report_json FROM fnm_export_audit WHERE doc_id = ?1")?;
+        let mut rows = stmt.query_map([doc_id], |row| {
+            let json_str: String = row.get(0)?;
+            serde_json::from_str::<ExportAuditReportRecord>(&json_str)
+                .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))
+        })?;
+        match rows.next() {
+            Some(Ok(record)) => Ok(Some(record)),
+            Some(Err(e)) => Err(e.into()),
+            None => Ok(None),
+        }
+    }
+
+    fn replace_fnm_phase6_products(&self, doc_id: &str, payload: &Phase6Products) -> Result<()> {
+        let conn = self.get_conn()?;
+        let ts = Self::now_ts();
+
+        conn.execute(
+            "DELETE FROM fnm_export_chapters WHERE doc_id = ?1",
+            [doc_id],
+        )?;
+        conn.execute("DELETE FROM fnm_export_audit WHERE doc_id = ?1", [doc_id])?;
+        conn.execute("DELETE FROM fnm_export_bundle WHERE doc_id = ?1", [doc_id])?;
+
+        let mut stmt_ec = conn.prepare(
+            "INSERT INTO fnm_export_chapters
+             (doc_id, section_id, order_idx, title, path, content,
+              start_page, end_page, pages_json, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+        )?;
+        for ec in &payload.export_chapters {
+            stmt_ec.execute(rusqlite::params![
+                doc_id,
+                ec.section_id,
+                ec.order,
+                ec.title,
+                ec.path,
+                ec.content,
+                ec.start_page,
+                ec.end_page,
+                serde_json::to_string(&ec.pages).ok(),
+                ts,
+                ts,
+            ])?;
+        }
+
+        let report_json = serde_json::to_string(&payload.export_audit)?;
+        conn.execute(
+            "INSERT INTO fnm_export_audit (doc_id, report_json, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4)",
+            rusqlite::params![doc_id, report_json, ts, ts],
+        )?;
+
+        let bundle_json = serde_json::to_string(&payload.export_bundle)?;
+        conn.execute(
+            "INSERT INTO fnm_export_bundle (doc_id, bundle_json, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4)",
+            rusqlite::params![doc_id, bundle_json, ts, ts],
+        )?;
+
+        Ok(())
+    }
+
+    fn list_fnm_export_bundle(&self, doc_id: &str) -> Result<Option<ExportBundleRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt =
+            conn.prepare("SELECT bundle_json FROM fnm_export_bundle WHERE doc_id = ?1")?;
+        let mut rows = stmt.query_map([doc_id], |row| {
+            let json_str: String = row.get(0)?;
+            serde_json::from_str::<ExportBundleRecord>(&json_str)
+                .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))
+        })?;
+        match rows.next() {
+            Some(Ok(record)) => Ok(Some(record)),
+            Some(Err(e)) => Err(e.into()),
+            None => Ok(None),
+        }
     }
 }

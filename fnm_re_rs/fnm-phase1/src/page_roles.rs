@@ -20,7 +20,8 @@ pub fn build_page_roles(
     back_matter_start_hint: i64,
 ) -> Vec<TocPageRole> {
     // 1. 构建 chapter_by_page 映射
-    let mut chapter_by_page: std::collections::HashMap<i64, String> = std::collections::HashMap::new();
+    let mut chapter_by_page: std::collections::HashMap<i64, String> =
+        std::collections::HashMap::new();
     for chapter in chapters {
         if chapter.chapter_id.is_empty() {
             continue;
@@ -33,7 +34,9 @@ pub fn build_page_roles(
         // 按 start-end 范围补齐缺页
         if chapter.start_page > 0 && chapter.end_page >= chapter.start_page {
             for page_no in chapter.start_page..=chapter.end_page {
-                chapter_by_page.entry(page_no).or_insert_with(|| chapter.chapter_id.clone());
+                chapter_by_page
+                    .entry(page_no)
+                    .or_insert_with(|| chapter.chapter_id.clone());
             }
         }
     }
@@ -74,14 +77,14 @@ pub fn build_page_roles(
 
         // 12 条件分支，按优先级
         let (role, chapter_id) = if source_role == "note" {
-            ("note".into(), chapter.map(|s| s.clone()).unwrap_or_default())
+            (
+                "note".into(),
+                chapter.map(|s| s.clone()).unwrap_or_default(),
+            )
         } else if let Some(ch) = chapter {
             // 章节内的页面 → chapter role
             ("chapter".into(), ch.clone())
-        } else if page_no > 0
-            && back_matter_start > 0
-            && page_no >= back_matter_start
-        {
+        } else if page_no > 0 && back_matter_start > 0 && page_no >= back_matter_start {
             ("back_matter".into(), String::new())
         } else if back_matter_start == 0
             && BACK_MATTER_REASON_HINTS.contains(&row.reason.as_str())

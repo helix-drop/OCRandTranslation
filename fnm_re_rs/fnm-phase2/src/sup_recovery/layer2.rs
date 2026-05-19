@@ -1,5 +1,8 @@
-//! ←→ FNM_RE/modules/sup_recovery.py `_layer2_raw_blocks` + 3 surrogate generators
-//! OCR block 文本中找回丢失的上标 marker（5 种模式）。
+//! ←→ FNM_RE/modules/sup_recovery.py `_layer2_raw_blocks` + 4 surrogate generators
+//!
+//! OCR block 文本中找回丢失的上标 marker（4 种模式：direct_digit / ocr_surrogate /
+//! ocr_suffix / ocr_symbol_after_year）。修复 UTF-8 byte-boundary panic
+//! （Python 用 `[A-Za-zÀ-ÿ]` 支持法语；本模块使用 char-aware 切片避免切割多字节字符）。
 
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -11,20 +14,20 @@ pub struct Layer2Recovery {
     pub marker: String,
     pub before: String,
     pub after: String,
-    pub found_in: String, // text block source
-    pub mode: String,     // "direct_digit" | "ocr_surrogate" | "ocr_suffix" |  "ocr_symbol_after_year"
+    pub found_in: String,
+    pub mode: String, // "direct_digit" | "ocr_surrogate" | "ocr_suffix" | "ocr_symbol_after_year"
 }
 
-/// ←→ Python `_ocr_surrogate_for_marker`：全 1 的 marker 用 `!{n}` 匹配
+/// ←→ Python `_ocr_surrogate_for_marker`：全 1 的 marker 用 `!{n,}` 匹配。
 fn ocr_surrogate_for_marker(marker: &str) -> String {
     let m = marker.trim();
     if m.len() < 2 || m.chars().any(|c| c != '1') {
         return String::new();
     }
-    format!("!{{{}}}", m.len())
+    format!("!{{{},}}", m.len())
 }
 
-/// ←→ Python `_ocr_suffix_surrogate_for_marker`：2 位不同数字 marker 取末位
+/// ←→ Python `_ocr_suffix_surrogate_for_marker`：2 位不同数字 marker 取末位。
 fn ocr_suffix_surrogate_for_marker(marker: &str) -> String {
     let m = marker.trim();
     if m.len() != 2 || !m.chars().all(|c| c.is_ascii_digit()) {
@@ -39,7 +42,56 @@ fn ocr_suffix_surrogate_for_marker(marker: &str) -> String {
     b.to_string()
 }
 
-/// 在 block 文本中搜索缺失的 markers。←→ Python `_layer2_raw_blocks` 5 种模式。
+/// ←→ Python `_ocr_symbol_surrogate_for_marker`：2 位数字 marker 用 `*#%?` 替代。
+fn ocr_symbol_surrogate_for_marker(marker: &str) -> &'static str {
+    let m = marker.trim();
+    if m.len() == 2 && m.chars().all(|c| c.is_ascii_digit()) {
+        r"[*#%?]{1,2}"
+    } else {
+        ""
+    }
+}
+
+// ── UTF-8 安全切片辅助 ──────────────────────────────────────────
+
+/// 从字符串中按 char 边界向左截取 N 字符。
+fn chars_before(text: &str, byte_pos: usize, max_chars: usize) -> &str {
+    let safe_pos = byte_pos.min(text.len());
+    let prefix = &text[..safe_pos];
+    let mut start = safe_pos;
+    let mut count = 0;
+    for (idx, _) in prefix.char_indices().rev() {
+        if count == max_chars {
+            break;
+        }
+        start = idx;
+        count += 1;
+    }
+    &prefix[start..]
+}
+
+/// 从字符串中按 char 边界向右截取 N 字符。
+fn chars_after(text: &str, byte_pos: usize, max_chars: usize) -> &str {
+    let safe_pos = byte_pos.min(text.len());
+    let suffix = &text[safe_pos..];
+    let mut end = 0;
+    for (i, (idx, ch)) in suffix.char_indices().enumerate() {
+        if i == max_chars {
+            end = idx;
+            return &suffix[..end];
+        }
+        end = idx + ch.len_utf8();
+    }
+    &suffix[..end]
+}
+
+fn truncate_to_chars(text: &str, max_chars: usize) -> &str {
+    chars_after(text, 0, max_chars)
+}
+
+// ── 主入口 ───────────────────────────────────────────────────────
+
+/// 在 block 文本中搜索缺失的 markers。←→ Python `_layer2_raw_blocks` 4 种模式。
 pub fn find_markers_in_blocks(
     blocks_texts: &[String],
     missing_markers: &[String],
@@ -52,38 +104,45 @@ pub fn find_markers_in_blocks(
     sorted.sort_by(|a, b| b.len().cmp(&a.len()));
 
     for block_text in blocks_texts {
-        if block_text.len() < 3 {
+        if block_text.chars().count() < 3 {
             continue;
         }
 
         // ── 模式 1: direct digit match ──
+        // ←→ Python: `([A-Za-zÀ-ÿ])({m})([•·\s,;:\.\)])`
         for m in &sorted {
             if seen.contains(m.as_str()) || !m.chars().all(|c| c.is_ascii_digit()) {
                 continue;
             }
             let escaped = regex::escape(m);
-            // bullet chars: U+2022 (bullet), U+00B7 (middle dot)
-            let pattern_str = format!("([A-Za-z])({})([\u{2022}\u{00B7}\\s,;:.\\)])", escaped);
+            // Rust regex 不支持 `À-ÿ` 直接 unicode 范围，用 `[A-Za-zÀ-ÿ]` 等价模式：
+            // 启用 unicode 后 `[[:alpha:]]` 覆盖更广（包含拉丁补充字母）。
+            let pattern_str = format!(
+                r"((?:[A-Za-z]|[\u{{00C0}}-\u{{00FF}}]))({})([\u{{2022}}\u{{00B7}}\s,;:.\)])",
+                escaped
+            );
             if let Ok(re) = Regex::new(&pattern_str) {
                 if let Some(caps) = re.captures(block_text) {
-                    let full = caps.get(0).map(|x| x.as_str()).unwrap_or("");
-                    let pos = block_text.find(full).unwrap_or(0);
-                    let before = &block_text[0.max(pos as i64 - 30) as usize..pos + 1];
-                    let after_end = pos + full.len() - 1;
-                    let after = &block_text[after_end..(after_end + 40).min(block_text.len())];
-                    seen.insert(m.clone());
-                    results.push(Layer2Recovery {
-                        marker: m.clone(),
-                        before: before.to_string(),
-                        after: after.to_string(),
-                        found_in: block_text[..40.min(block_text.len())].to_string(),
-                        mode: "direct_digit".into(),
-                    });
+                    if let Some(full) = caps.get(0) {
+                        let pos = full.start();
+                        let before = chars_before(block_text, pos + 1, 30);
+                        let after_end = full.end() - 1;
+                        let after = chars_after(block_text, after_end, 40);
+                        seen.insert(m.clone());
+                        results.push(Layer2Recovery {
+                            marker: m.clone(),
+                            before: before.to_string(),
+                            after: after.to_string(),
+                            found_in: truncate_to_chars(block_text, 40).to_string(),
+                            mode: "direct_digit".into(),
+                        });
+                    }
                 }
             }
         }
 
         // ── 模式 2: OCR "!" surrogate ──
+        // ←→ Python: `(?P<before>[A-Za-zÀ-ÿ])\s*(?P<surrogate>!{n,})(?=\s+[A-Za-zÀ-ÿ])`
         for m in &sorted {
             if seen.contains(m.as_str()) {
                 continue;
@@ -93,23 +152,22 @@ pub fn find_markers_in_blocks(
                 continue;
             }
             let pattern_str = format!(
-                r"(?P<before>[A-Za-z])\s*(?P<surrogate>{})(?=\s+[A-Za-z])",
+                r"(?P<before>(?:[A-Za-z]|[\u{{00C0}}-\u{{00FF}}]))\s*(?P<surrogate>{})(?:\s+(?:[A-Za-z]|[\u{{00C0}}-\u{{00FF}}]))",
                 surrogate
             );
             if let Ok(re) = Regex::new(&pattern_str) {
                 if let Some(caps) = re.captures(block_text) {
                     if let Some(sur_match) = caps.name("surrogate") {
                         let pos = sur_match.start();
-                        let before = &block_text[0.max(pos as i64 - 40) as usize..pos];
+                        let before = chars_before(block_text, pos, 40);
                         let after_start = sur_match.end();
-                        let after = &block_text
-                            [after_start..(after_start + 40).min(block_text.len())];
+                        let after = chars_after(block_text, after_start, 40);
                         seen.insert(m.clone());
                         results.push(Layer2Recovery {
                             marker: m.clone(),
                             before: before.trim_end().to_string(),
                             after: after.to_string(),
-                            found_in: block_text[..40.min(block_text.len())].to_string(),
+                            found_in: truncate_to_chars(block_text, 40).to_string(),
                             mode: "ocr_surrogate".into(),
                         });
                     }
@@ -118,6 +176,7 @@ pub fn find_markers_in_blocks(
         }
 
         // ── 模式 3: OCR suffix surrogate ──
+        // ←→ Python: `(?P<word>[A-Za-zÀ-ÿ]{3,})\s+(?P<suffix>{s})(?P<trail>[•·,;:\.\)\]])`
         for m in &sorted {
             if seen.contains(m.as_str()) {
                 continue;
@@ -127,60 +186,61 @@ pub fn find_markers_in_blocks(
                 continue;
             }
             let pattern_str = format!(
-                r"(?P<word>[A-Za-z]{{3,}})\s+(?P<suffix>{})(?P<trail>[•·,;:\.\)\]])",
+                r"(?P<word>(?:[A-Za-z]|[\u{{00C0}}-\u{{00FF}}]){{3,}})\s+(?P<suffix>{})(?P<trail>[\u{{2022}}\u{{00B7}},;:.\)\]])",
                 regex::escape(&suffix)
             );
             if let Ok(re) = Regex::new(&pattern_str) {
-                if let Some(caps) = re.captures(block_text) {
+                for caps in re.captures_iter(block_text) {
                     if let Some(suf_match) = caps.name("suffix") {
                         let pos = suf_match.start();
-                        let before = &block_text[0.max(pos as i64 - 40) as usize..pos];
+                        let before = chars_before(block_text, pos, 40);
                         let after_start = suf_match.end();
-                        let after =
-                            &block_text[after_start..(after_start + 40).min(block_text.len())];
+                        let after = chars_after(block_text, after_start, 40);
                         seen.insert(m.clone());
                         results.push(Layer2Recovery {
                             marker: m.clone(),
                             before: before.trim_end().to_string(),
                             after: after.to_string(),
-                            found_in: block_text[..40.min(block_text.len())].to_string(),
+                            found_in: truncate_to_chars(block_text, 40).to_string(),
                             mode: "ocr_suffix".into(),
                         });
+                        break;
                     }
                 }
             }
         }
 
         // ── 模式 4: OCR symbol after year ──
+        // ←→ Python: `(?P<year>(?:\[\d{2}\]|(?:1[5-9]|20)\d{0,2}){m})\s+(?P<symbol>{sym})(?=\s+[A-Za-zÀ-ÿ])`
         for m in &sorted {
             if seen.contains(m.as_str()) || !m.chars().all(|c| c.is_ascii_digit()) {
                 continue;
             }
-            let escaped_m = regex::escape(m);
-            // marker 长度为 2 位数字时尝试 symbol surrogate
-            if m.len() != 2 {
+            let symbol = ocr_symbol_surrogate_for_marker(m);
+            if symbol.is_empty() {
                 continue;
             }
+            let escaped_m = regex::escape(m);
             let pattern_str = format!(
-                r"(?P<year>(?:\[\d{{2}}\]|(?:1[5-9]|20)\d{{0,2}}){})\s+(?P<symbol>[*#%?]{{1,2}})(?=\s+[A-Za-z])",
-                escaped_m
+                r"(?P<year>(?:\[\d{{2}}\]|(?:1[5-9]|20)\d{{0,2}}){})\s+(?P<symbol>{})(?:\s+(?:[A-Za-z]|[\u{{00C0}}-\u{{00FF}}]))",
+                escaped_m, symbol
             );
             if let Ok(re) = Regex::new(&pattern_str) {
-                if let Some(caps) = re.captures(block_text) {
+                for caps in re.captures_iter(block_text) {
                     if let Some(sym_match) = caps.name("symbol") {
                         let pos = sym_match.start();
-                        let before = &block_text[0.max(pos as i64 - 50) as usize..pos];
+                        let before = chars_before(block_text, pos, 50);
                         let after_start = sym_match.end();
-                        let after =
-                            &block_text[after_start..(after_start + 50).min(block_text.len())];
+                        let after = chars_after(block_text, after_start, 50);
                         seen.insert(m.clone());
                         results.push(Layer2Recovery {
                             marker: m.clone(),
                             before: before.trim_end().to_string(),
                             after: after.to_string(),
-                            found_in: block_text[..40.min(block_text.len())].to_string(),
+                            found_in: truncate_to_chars(block_text, 40).to_string(),
                             mode: "ocr_symbol_after_year".into(),
                         });
+                        break;
                     }
                 }
             }
@@ -188,6 +248,125 @@ pub fn find_markers_in_blocks(
     }
 
     results
+}
+
+// ── Layer 0：Unicode 上标归一化 ─────────────────────────────────
+
+/// 上标数字 Unicode → ASCII 映射表。
+fn unicode_sup_to_digit(c: char) -> Option<char> {
+    match c {
+        '\u{2070}' => Some('0'),
+        '\u{00B9}' => Some('1'),
+        '\u{00B2}' => Some('2'),
+        '\u{00B3}' => Some('3'),
+        '\u{2074}' => Some('4'),
+        '\u{2075}' => Some('5'),
+        '\u{2076}' => Some('6'),
+        '\u{2077}' => Some('7'),
+        '\u{2078}' => Some('8'),
+        '\u{2079}' => Some('9'),
+        _ => None,
+    }
+}
+
+static UNICODE_SUP_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"[\u{2070}\u{00B9}\u{00B2}\u{00B3}\u{2074}\u{2075}\u{2076}\u{2077}\u{2078}\u{2079}]+",
+    )
+    .unwrap()
+});
+
+/// ←→ Python `_normalize_unicode_superscripts`
+/// 把 `<sup>123</sup>` 形式的 Unicode 上标归一化为 `<sup>123</sup>` markdown 标记。
+pub fn normalize_unicode_superscripts(markdown: &str) -> (String, usize) {
+    let mut count = 0usize;
+    let result = UNICODE_SUP_RE.replace_all(markdown, |caps: &regex::Captures| -> String {
+        let original = caps.get(0).map(|m| m.as_str()).unwrap_or("");
+        let digits: String = original.chars().filter_map(unicode_sup_to_digit).collect();
+        if !digits.is_empty() && digits.chars().all(|c| c.is_ascii_digit()) {
+            count += 1;
+            format!("<sup>{}</sup>", digits)
+        } else {
+            original.to_string()
+        }
+    });
+    (result.into_owned(), count)
+}
+
+// ── Marker 已存在检测 ───────────────────────────────────────────
+
+static MARKER_EXISTS_RE_CACHE: Lazy<std::sync::Mutex<std::collections::HashMap<String, Regex>>> =
+    Lazy::new(|| std::sync::Mutex::new(std::collections::HashMap::new()));
+
+/// ←→ Python `_has_marker`：检测 markdown 中是否已有 marker 的显式上标格式。
+pub fn has_marker(markdown: &str, marker: &str) -> bool {
+    let esc = regex::escape(marker);
+    let pattern = format!(
+        r"<sup>\s*{esc}\s*</sup>|\$\s*\^\{{\s*{esc}\s*\}}\s*\$|\[\^{esc}\]",
+        esc = esc
+    );
+    let mut cache = MARKER_EXISTS_RE_CACHE.lock().unwrap();
+    let re = cache
+        .entry(pattern.clone())
+        .or_insert_with(|| Regex::new(&pattern).unwrap());
+    re.is_match(markdown)
+}
+
+// ── 位置查找 ─────────────────────────────────────────────────────
+
+const MAX_GAP_CHARS: usize = 80;
+
+static WORD_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?:[A-Za-z]|[\u{00C0}-\u{00FF}]){3,}").unwrap());
+
+/// ←→ Python `_find_insert_pos`：根据 before/after 上下文在 markdown 中找插入位置。
+pub fn find_insert_pos(markdown: &str, before_ctx: &str, after_ctx: &str) -> Option<usize> {
+    let before_words: Vec<&str> = WORD_RE.find_iter(before_ctx).map(|m| m.as_str()).collect();
+    let after_words: Vec<&str> = WORD_RE.find_iter(after_ctx).map(|m| m.as_str()).collect();
+
+    if !before_words.is_empty() && !after_words.is_empty() {
+        let bw = regex::escape(before_words.last().unwrap());
+        let aw = regex::escape(after_words.first().unwrap());
+        let combined = format!(r"(?i){bw}.{{0,{MAX_GAP_CHARS}}}{aw}");
+        if let Ok(re) = Regex::new(&combined) {
+            if let Some(m) = re.find(markdown) {
+                let inner_re = Regex::new(&format!(r"(?i){bw}")).ok()?;
+                if let Some(inner) = inner_re.find(m.as_str()) {
+                    return Some(m.start() + inner.end());
+                }
+            }
+        }
+    }
+
+    if !after_words.is_empty() {
+        let aw = regex::escape(after_words.first().unwrap());
+        let re = Regex::new(&format!(r"(?i){aw}")).ok()?;
+        if let Some(m) = re.find(markdown) {
+            return Some(m.start());
+        }
+    }
+
+    None
+}
+
+/// ←→ Python `_apply_insertions`：按位置降序插入 `<sup>marker</sup>`。
+pub fn apply_insertions(markdown: &str, insertions: &[(usize, String, String)]) -> String {
+    let mut sorted = insertions.to_vec();
+    sorted.sort_by_key(|(pos, _, _)| std::cmp::Reverse(*pos));
+    let mut result = markdown.to_string();
+    for (pos, marker, _layer) in sorted {
+        if pos > result.len() {
+            continue;
+        }
+        // 找到 char boundary（防止切到多字节字符中间）
+        let mut safe_pos = pos.min(result.len());
+        while !result.is_char_boundary(safe_pos) && safe_pos > 0 {
+            safe_pos -= 1;
+        }
+        let tag = format!("<sup>{}</sup>", marker);
+        result.insert_str(safe_pos, &tag);
+    }
+    result
 }
 
 // ── 旧 API 兼容 ──────────────────────────────────────────────────
@@ -208,8 +387,7 @@ pub fn find_markers_in_ocr_text(
     Ok(recovered)
 }
 
-static DIGIT_BOUNDARY_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"\b(\d{1,4})\b").unwrap());
+static DIGIT_BOUNDARY_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\b(\d{1,4})\b").unwrap());
 
 #[cfg(test)]
 mod tests {
@@ -224,15 +402,65 @@ mod tests {
 
     #[test]
     fn ocr_surrogate_double_one() {
-        assert_eq!(ocr_surrogate_for_marker("11"), "!{2}");
-        assert_eq!(ocr_surrogate_for_marker("111"), "!{3}");
+        assert_eq!(ocr_surrogate_for_marker("11"), "!{2,}");
+        assert_eq!(ocr_surrogate_for_marker("111"), "!{3,}");
         assert_eq!(ocr_surrogate_for_marker("12"), "");
     }
 
     #[test]
     fn suffix_surrogate() {
         assert_eq!(ocr_suffix_surrogate_for_marker("12"), "2");
-        assert_eq!(ocr_suffix_surrogate_for_marker("11"), ""); // 重复数字
-        assert_eq!(ocr_suffix_surrogate_for_marker("123"), ""); // 不是 2 位
+        assert_eq!(ocr_suffix_surrogate_for_marker("11"), "");
+        assert_eq!(ocr_suffix_surrogate_for_marker("123"), "");
+    }
+
+    #[test]
+    fn utf8_safe_does_not_panic_on_french() {
+        // 复现修复前的 panic：法语 `ç` 字符 + 40 字节窗口
+        let text = "2. Robert Walpole, premier Comte d'Orford (1676-1745), \
+            leader du parti whig, qui exerça les fonctions de « Premier ministre » \
+            (First Lord of the Treasury et Chancellor of the Exchequer) de 1720 à 1742; \
+            il gouverna avec pragmatisme, usant de la corruption pour controler le Parlement.";
+        let markers = vec!["2".into()];
+        // 不允许 panic
+        let _ = find_markers_in_blocks(&[text.to_string()], &markers);
+    }
+
+    #[test]
+    fn normalize_unicode_sup_to_html() {
+        let (out, count) = normalize_unicode_superscripts("foo ¹² bar ³");
+        assert_eq!(count, 2);
+        assert!(out.contains("<sup>12</sup>"));
+        assert!(out.contains("<sup>3</sup>"));
+    }
+
+    #[test]
+    fn has_marker_detects_html_sup() {
+        assert!(has_marker("text <sup>5</sup> more", "5"));
+        assert!(has_marker("text $^{5}$ more", "5"));
+        assert!(has_marker("text [^5] more", "5"));
+        assert!(!has_marker("text 5 more", "5"));
+    }
+
+    #[test]
+    fn find_insert_pos_basic() {
+        let md = "the quick brown fox jumps over the lazy dog";
+        let pos = find_insert_pos(md, "quick brown", "jumps over");
+        assert!(pos.is_some());
+    }
+
+    #[test]
+    fn apply_insertions_preserves_char_boundary() {
+        let md = "résumé continues";
+        let inserts = vec![(3, "5".into(), "test".into())];
+        // 不允许 panic（位置 3 在 'é' 字节中间）
+        let _ = apply_insertions(md, &inserts);
+    }
+
+    #[test]
+    fn chars_before_handles_multibyte() {
+        let text = "français ça va";
+        let result = chars_before(text, text.len(), 4);
+        assert_eq!(result.chars().count(), 4);
     }
 }

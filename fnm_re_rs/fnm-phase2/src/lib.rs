@@ -36,23 +36,19 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
         input.phase1_heading_candidates,
     );
 
-    // 1a. endnote_chapter_explorer: 修正 book-scope endnote regions 的 chapter_id
-    let endnote_explorations =
-        crate::endnote_chapter_explorer::explore_endnote_chapter_regions(
-            input.raw_pages,
+    // 1a. endnote_chapter_explorer 全量版：修正 book-scope endnote regions 的 chapter_id
+    // ←→ Python `explore_endnote_chapter_regions`
+    let page_by_no: HashMap<i64, &fnm_phase1::input::RawPage> =
+        input.raw_pages.iter().map(|p| (p.book_page, p)).collect();
+    let (explored_regions, _explorer_summary) =
+        crate::endnote_chapter_explorer::explore_endnote_chapter_regions_full(
+            note_regions,
             input.phase1_chapters,
+            input.phase1_heading_candidates,
+            &page_by_no,
+            None,
         );
-    for exp in &endnote_explorations {
-        for region in note_regions.iter_mut() {
-            if region.scope == fnm_core::types::RegionScope::Book
-                && region.page_start <= exp.page_start
-                && region.page_end >= exp.page_end
-                && region.chapter_id.is_empty()
-            {
-                region.chapter_id = exp.chapter_id.clone();
-            }
-        }
-    }
+    let mut note_regions = explored_regions;
 
     // 2. build_note_items
     let note_items = build_note_items(input.raw_pages, &note_regions);
@@ -80,7 +76,11 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
 
     let vision_config = if !input.config.skip_llm_verify {
         let cfg = VisionConfig::default();
-        if cfg.api_key.is_empty() { None } else { Some(cfg) }
+        if cfg.api_key.is_empty() {
+            None
+        } else {
+            Some(cfg)
+        }
     } else {
         None
     };

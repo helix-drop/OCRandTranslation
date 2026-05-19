@@ -11,11 +11,13 @@
 //!   7. build_chapter_skeleton_fallback — 公开入口
 
 use crate::heading_graph::HeadingGraph;
+use crate::input::TocItem;
 use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord};
 use fnm_core::title::{chapter_title_match_key, guess_title_family, normalize_title};
 use fnm_core::types::{BoundaryState, ChapterSource};
 use once_cell::sync::Lazy;
 use regex::Regex;
+use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
 // ── 正则常量 ────────────────────────────────────────────────────
@@ -47,7 +49,7 @@ const FAMILY_NONBODY: &[&str] = &[
 // ── 候选节行提取 ─────────────────────────────────────────────────
 
 #[allow(dead_code)]
-struct SectionRow {
+pub struct SectionRow {
     section_id: String,
     title: String,
     start_page: i64,
@@ -57,7 +59,7 @@ struct SectionRow {
     source: String,
 }
 
-fn candidate_section_rows(
+pub fn candidate_section_rows(
     heading_candidates: &[HeadingCandidate],
     all_pages: &[i64],
     page_roles: &HashMap<i64, String>,
@@ -136,7 +138,7 @@ fn candidate_section_rows(
 // ── 分类 ────────────────────────────────────────────────────────
 
 #[allow(dead_code)]
-struct ClassifiedSection {
+pub struct ClassifiedSection {
     section_id: String,
     title: String,
     start_page: i64,
@@ -149,7 +151,7 @@ struct ClassifiedSection {
     classification_confidence: f64,
 }
 
-fn classify_fallback_sections(
+pub fn classify_fallback_sections(
     section_rows: Vec<SectionRow>,
     page_roles: &HashMap<i64, String>,
     total_pages: i64,
@@ -303,7 +305,7 @@ fn classify_fallback_sections(
 // ── 标记被抑制的候选 ─────────────────────────────────────────────
 
 #[allow(dead_code)]
-fn mark_suppressed_candidates(
+pub fn mark_suppressed_candidates(
     classified: &[ClassifiedSection],
     heading_candidates: &mut Vec<HeadingCandidate>,
 ) {
@@ -371,7 +373,7 @@ fn mark_suppressed_candidates(
 
 // ── 构建 fallback 章节和节头 ─────────────────────────────────────
 
-fn build_fallback_chapters_and_sections(
+pub fn build_fallback_chapters_and_sections(
     classified: Vec<ClassifiedSection>,
     all_pages: &[i64],
     page_roles: &HashMap<i64, String>,
@@ -506,7 +508,7 @@ fn build_fallback_chapters_and_sections(
 
 // ── 标准化 ───────────────────────────────────────────────────────
 
-fn normalize_chapters(chapters: Vec<ChapterRecord>) -> Vec<ChapterRecord> {
+pub fn normalize_chapters(chapters: Vec<ChapterRecord>) -> Vec<ChapterRecord> {
     let mut normalized: Vec<ChapterRecord> = chapters
         .into_iter()
         .filter(|c| !c.pages.is_empty() && !c.chapter_id.is_empty())
@@ -516,7 +518,7 @@ fn normalize_chapters(chapters: Vec<ChapterRecord>) -> Vec<ChapterRecord> {
 }
 
 #[allow(dead_code)]
-fn normalize_sections(sections: Vec<SectionHeadRecord>) -> Vec<SectionHeadRecord> {
+pub fn normalize_sections(sections: Vec<SectionHeadRecord>) -> Vec<SectionHeadRecord> {
     let mut normalized: Vec<SectionHeadRecord> = sections
         .into_iter()
         .filter(|s| !s.title.is_empty() && s.page_no > 0)
@@ -526,7 +528,7 @@ fn normalize_sections(sections: Vec<SectionHeadRecord>) -> Vec<SectionHeadRecord
 }
 
 #[allow(dead_code)]
-fn merge_section_heads(
+pub fn merge_section_heads(
     mut primary: Vec<SectionHeadRecord>,
     supplemental: Vec<SectionHeadRecord>,
 ) -> Vec<SectionHeadRecord> {
@@ -577,7 +579,7 @@ fn is_sentence_like_heading(title: &str) -> bool {
     words.len() >= 6 || title.contains(',') || title.contains(':')
 }
 
-fn all_page_numbers(page_partitions: &[PagePartitionRecord]) -> Vec<i64> {
+pub fn all_page_numbers(page_partitions: &[PagePartitionRecord]) -> Vec<i64> {
     let mut pages: Vec<i64> = page_partitions
         .iter()
         .map(|p| p.page_no)
@@ -588,7 +590,7 @@ fn all_page_numbers(page_partitions: &[PagePartitionRecord]) -> Vec<i64> {
     pages
 }
 
-fn build_page_roles(page_partitions: &[PagePartitionRecord]) -> HashMap<i64, String> {
+pub fn build_page_roles(page_partitions: &[PagePartitionRecord]) -> HashMap<i64, String> {
     page_partitions
         .iter()
         .map(|p| (p.page_no, p.page_role.as_str().to_string()))
@@ -599,7 +601,7 @@ fn build_page_roles(page_partitions: &[PagePartitionRecord]) -> HashMap<i64, Str
 
 /// 无 heading_candidates 时，把连续 body 页打包为 fallback 章节。
 /// 这是原始 stub 行为的保留路径。
-fn simple_fallback(page_partitions: &[PagePartitionRecord]) -> Vec<ChapterRecord> {
+pub fn simple_fallback(page_partitions: &[PagePartitionRecord]) -> Vec<ChapterRecord> {
     let mut chapters = Vec::new();
     let mut chapter_start: Option<i64> = None;
     let mut chapter_pages: Vec<i64> = Vec::new();
@@ -683,6 +685,213 @@ pub fn build_chapter_skeleton_fallback(
 
     // Step 5: normalize
     normalize_chapters(chapters)
+}
+
+// ── Back matter 边界推断 + chapter trim（B3 之前缺失的 5%）────────
+
+const REAR_REASONS: &[&str] = &[
+    "appendix",
+    "bibliography",
+    "index",
+    "illustrations",
+    "rear_toc_tail",
+    "rear_author_blurb",
+    "rear_sparse_other",
+];
+
+const BACK_MATTER_FAMILIES: &[&str] = &["bibliography", "index", "illustrations"];
+
+/// ←→ Python `_infer_back_matter_start_page`
+///
+/// 综合 rear page_role 信号 + TOC items 的 back_matter 角色推断 back_matter 起始页。
+/// 返回 0 表示无法判断。
+pub fn infer_back_matter_start_page(
+    page_partitions: &[PagePartitionRecord],
+    toc_items: Option<&[TocItem]>,
+    toc_offset: i64,
+    file_idx_map: &HashMap<i64, i64>,
+) -> i64 {
+    let total_pages = page_partitions.len().max(1) as i64;
+    let rear_page_role_min_page = std::cmp::max(24, (total_pages as f64 * 0.45) as i64);
+    let rear_page_role_force_page =
+        std::cmp::max(rear_page_role_min_page, (total_pages as f64 * 0.8) as i64);
+    let toc_back_matter_min_page = std::cmp::max(24, (total_pages as f64 * 0.25) as i64);
+
+    let mut candidate_pages: Vec<i64> = Vec::new();
+
+    let rear_role_pages: Vec<i64> = {
+        let mut pages: Vec<i64> = page_partitions
+            .iter()
+            .filter(|row| {
+                row.page_no >= rear_page_role_min_page
+                    && row.page_role.as_str() == "other"
+                    && REAR_REASONS.iter().any(|r| *r == row.reason)
+            })
+            .map(|row| row.page_no)
+            .collect();
+        pages.sort_unstable();
+        pages
+    };
+
+    for row in page_partitions {
+        let page_no = row.page_no;
+        if page_no <= 0 || page_no < rear_page_role_min_page {
+            continue;
+        }
+        if row.page_role.as_str() != "other" {
+            continue;
+        }
+        if !REAR_REASONS.iter().any(|r| *r == row.reason) {
+            continue;
+        }
+        let has_neighbor = rear_role_pages
+            .iter()
+            .any(|&other| other != page_no && (other - page_no).abs() <= 6);
+        if page_no >= rear_page_role_force_page || has_neighbor {
+            candidate_pages.push(page_no);
+        }
+    }
+
+    if let Some(items) = toc_items {
+        for item in items {
+            let resolved_page = resolve_toc_item_target_pdf_page(item, toc_offset, file_idx_map);
+            if resolved_page <= 0 || resolved_page < toc_back_matter_min_page {
+                continue;
+            }
+            let role_hint = item.role_hint.trim().to_lowercase().replace('-', "_");
+            let family = guess_title_family(&item.title, resolved_page, total_pages);
+            let family_str: &str = &family;
+            if role_hint == "back_matter" || BACK_MATTER_FAMILIES.iter().any(|f| *f == family_str) {
+                candidate_pages.push(resolved_page);
+            }
+        }
+    }
+
+    candidate_pages.iter().copied().min().unwrap_or(0)
+}
+
+/// 解析 TocItem target_pdf_page（与 fileIdx 映射对齐）。
+/// 简化版：直接用 target_pdf_page；如未提供，则尝试 file_idx_map 反查。
+fn resolve_toc_item_target_pdf_page(
+    item: &TocItem,
+    offset: i64,
+    file_idx_map: &HashMap<i64, i64>,
+) -> i64 {
+    if let Some(pn) = item.target_pdf_page {
+        if pn > 0 {
+            return pn + offset;
+        }
+        // 0 / 负值时尝试 fileIdx 反查
+        if let Some(&mapped) = file_idx_map.get(&pn) {
+            if mapped > 0 {
+                return mapped;
+            }
+        }
+    }
+    0
+}
+
+#[derive(Debug, Clone)]
+pub struct ChapterRowDraft {
+    pub chapter_id: String,
+    pub title: String,
+    pub pages: Vec<i64>,
+    pub source: String,
+}
+
+/// ←→ Python `_trim_chapter_rows`
+///
+/// 用 back_matter_start_page 切掉 back_matter 之后的页面。preserve_title_keys 中
+/// 的章节（标题在保留集合）+ force-export titles（introduction/avertissement 等）
+/// 不被切割。
+pub fn trim_chapter_rows(
+    chapter_rows: Vec<ChapterRowDraft>,
+    page_roles: &HashMap<i64, String>,
+    back_matter_start_page: i64,
+    preserve_title_keys: &HashSet<String>,
+) -> Vec<ChapterRowDraft> {
+    let mut trimmed: Vec<ChapterRowDraft> = Vec::new();
+    for row in chapter_rows {
+        if row.pages.is_empty() {
+            continue;
+        }
+        let mut filtered: Vec<i64> = row
+            .pages
+            .iter()
+            .filter(|&&pn| {
+                pn > 0
+                    && matches!(
+                        page_roles.get(&pn).map(|s| s.as_str()),
+                        Some("body") | Some("front_matter")
+                    )
+            })
+            .copied()
+            .collect();
+
+        let title_key = chapter_title_match_key(&row.title);
+        if back_matter_start_page > 0
+            && !preserve_title_keys.contains(&title_key)
+            && !is_toc_force_export_title(&row.title)
+        {
+            filtered.retain(|&pn| pn < back_matter_start_page);
+        }
+
+        if filtered.is_empty() {
+            continue;
+        }
+        let mut clone = row.clone();
+        clone.pages = filtered;
+        trimmed.push(clone);
+    }
+    trimmed
+}
+
+fn is_toc_force_export_title(title: &str) -> bool {
+    let normalized = normalize_title(title);
+    TOC_FORCE_EXPORT_TITLE_RE.is_match(&normalized.to_lowercase())
+}
+
+// ── 默认 TOC summary 生成器（B3 之前缺失的 3 个 helper）─────────
+
+/// ←→ Python `_default_toc_alignment_summary`
+pub fn default_toc_alignment_summary(chapter_count: i64) -> Value {
+    json!({
+        "chapter_level_body_items": 0,
+        "exported_chapter_count": chapter_count,
+        "missing_chapter_titles_preview": Vec::<String>::new(),
+        "misleveled_titles_preview": Vec::<String>::new(),
+        "reanchored_titles_preview": Vec::<String>::new(),
+        "missing_section_titles_preview": Vec::<String>::new(),
+    })
+}
+
+/// ←→ Python `_default_toc_semantic_summary`
+pub fn default_toc_semantic_summary(chapter_count: i64) -> Value {
+    json!({
+        "body_item_count": 0,
+        "chapter_item_count": chapter_count,
+        "part_item_count": 0,
+        "endnotes_item_count": 0,
+        "back_matter_item_count": 0,
+        "first_body_pdf_page": 0,
+        "last_body_pdf_page": 0,
+        "body_span_ratio": 0.0,
+        "nonbody_contamination_count": 0,
+        "mixed_level_chapter_count": 0,
+    })
+}
+
+/// ←→ Python `_default_toc_role_summary`
+pub fn default_toc_role_summary(chapter_count: i64, section_count: i64) -> Value {
+    json!({
+        "container": 0,
+        "endnotes": 0,
+        "chapter": chapter_count,
+        "section": section_count,
+        "post_body": 0,
+        "back_matter": 0,
+        "front_matter": 0,
+    })
 }
 
 // ── 测试 ─────────────────────────────────────────────────────────

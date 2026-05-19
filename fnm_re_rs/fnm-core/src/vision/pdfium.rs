@@ -63,7 +63,8 @@ pub fn extract_pdf_text_by_page(pdf_path: &str, page_index: i64) -> Result<Strin
         .get(page_index as u16)
         .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
 
-    let pdf_page_text = page.text()
+    let pdf_page_text = page
+        .text()
         .with_context(|| format!("提取 PDF 页 {} 文本失败", page_index))?;
     Ok(pdf_page_text.to_string())
 }

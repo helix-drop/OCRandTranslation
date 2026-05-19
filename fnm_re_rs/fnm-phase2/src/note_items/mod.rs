@@ -7,6 +7,7 @@
 //! - year_filter: 年份误标过滤 + 序列异常值修正
 
 pub mod marker_parse;
+pub mod page_text;
 pub mod sequence_repair;
 pub mod year_filter;
 

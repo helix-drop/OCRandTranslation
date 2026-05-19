@@ -93,6 +93,16 @@ pub fn build_footnote_band_regions(
     chapters: &[ChapterRecord],
     pages: &[RawPage],
 ) -> (Vec<NoteRegionRecord>, HashSet<String>) {
+    build_footnote_band_regions_excluding(chapters, pages, &HashSet::new())
+}
+
+/// 构建脚注 band 区域，排除 reclassified pages（这些 fnBlocks 被重分类为 endnote）。
+/// ←→ Python `_reclassify_post_body_fnblocks_as_endnote` 调用后的下游消费
+pub fn build_footnote_band_regions_excluding(
+    chapters: &[ChapterRecord],
+    pages: &[RawPage],
+    exclude_pages: &HashSet<i64>,
+) -> (Vec<NoteRegionRecord>, HashSet<String>) {
     let page_map: std::collections::HashMap<i64, &RawPage> =
         pages.iter().map(|p| (p.book_page, p)).collect();
 
@@ -103,7 +113,11 @@ pub fn build_footnote_band_regions(
         let footnote_pages: Vec<i64> = chapter
             .pages
             .iter()
-            .filter(|&&pn| pn > 0 && page_map.get(&pn).is_some_and(|p| has_footnote_items(p)))
+            .filter(|&&pn| {
+                pn > 0
+                    && !exclude_pages.contains(&pn)
+                    && page_map.get(&pn).is_some_and(|p| has_footnote_items(p))
+            })
             .copied()
             .collect();
 

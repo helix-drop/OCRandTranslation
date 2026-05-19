@@ -3,10 +3,11 @@
 
 use crate::sup_recovery::pdf_render::render_page_to_base64_png;
 use anyhow::{Context, Result};
+use fnm_core::vision::ResolvedModelSpec;
 pub use fnm_core::vision::VisionConfig;
 pub(crate) use fnm_core::vision::HTTP_CLIENT;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Layer3Candidate {
@@ -128,6 +129,101 @@ fn extract_json_block(content: &str) -> String {
         }
     }
     content.to_string()
+}
+
+// ── ResolvedModelSpec 路径 ─────────────────────────────────────
+
+/// 用 ResolvedModelSpec 路径（5 家 provider 通过 fnm_model_pool 配置）。
+/// ←→ Python `_get_or_create_vision_client(spec)`
+pub async fn layer3_verify_with_spec(
+    pdf_path: &str,
+    candidates: &[Layer3Candidate],
+    specs: &[ResolvedModelSpec],
+) -> Result<Vec<Layer3Result>> {
+    if specs.is_empty() {
+        anyhow::bail!("no vision spec resolved");
+    }
+    let vision_specs: Vec<&ResolvedModelSpec> = specs
+        .iter()
+        .filter(|s| s.supports_vision && !s.api_key.is_empty())
+        .collect();
+    if vision_specs.is_empty() {
+        anyhow::bail!("no vision-capable spec available");
+    }
+    let futures = candidates
+        .iter()
+        .map(|c| verify_single_with_spec(pdf_path, c, &vision_specs));
+    let results: Vec<Result<Layer3Result>> = futures::future::join_all(futures).await;
+    results.into_iter().collect()
+}
+
+async fn verify_single_with_spec(
+    pdf_path: &str,
+    candidate: &Layer3Candidate,
+    specs: &[&ResolvedModelSpec],
+) -> Result<Layer3Result> {
+    let pdf_path_owned = pdf_path.to_string();
+    let page_index = candidate.page_no - 1;
+    let image_b64 = tokio::task::spawn_blocking(move || {
+        render_page_to_base64_png(&pdf_path_owned, page_index, 150)
+    })
+    .await??;
+    let prompt = build_layer3_prompt(&candidate.target_marker, &candidate.context_region);
+    let mut last_err: Option<anyhow::Error> = None;
+    for spec in specs {
+        match call_with_spec(spec, &prompt, &image_b64).await {
+            Ok(content) => {
+                return parse_layer3_response(&content, &candidate.target_marker, candidate.page_no)
+            }
+            Err(e) => {
+                last_err = Some(e);
+                continue;
+            }
+        }
+    }
+    Err(last_err.unwrap_or_else(|| anyhow::anyhow!("all specs failed")))
+}
+
+async fn call_with_spec(spec: &ResolvedModelSpec, prompt: &str, image_b64: &str) -> Result<String> {
+    let mut payload = json!({
+        "model": spec.model_id,
+        "max_tokens": 400,
+        "temperature": 0.0,
+        "messages": [{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {
+                    "url": format!("data:image/png;base64,{}", image_b64)
+                }}
+            ]
+        }]
+    });
+    if let Value::Object(overrides) = &spec.request_overrides {
+        for (k, v) in overrides {
+            if let Some(existing) = payload.get_mut(k) {
+                if let (Value::Object(e), Value::Object(n)) = (existing, v) {
+                    for (k2, v2) in n {
+                        e.insert(k2.clone(), v2.clone());
+                    }
+                    continue;
+                }
+            }
+            payload[k] = v.clone();
+        }
+    }
+    let response = HTTP_CLIENT
+        .post(format!("{}/chat/completions", spec.base_url))
+        .bearer_auth(&spec.api_key)
+        .json(&payload)
+        .send()
+        .await
+        .context("Vision API 请求失败")?;
+    let body: Value = response.json().await?;
+    Ok(body["choices"][0]["message"]["content"]
+        .as_str()
+        .unwrap_or("")
+        .to_string())
 }
 
 #[cfg(test)]

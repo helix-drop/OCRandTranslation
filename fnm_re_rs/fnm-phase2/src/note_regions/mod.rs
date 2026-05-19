@@ -51,17 +51,29 @@ pub fn build_note_regions(
             .or_insert_with(|| "unknown".into());
     }
 
-    // 重分类 post_body fnBlocks（修改 page_role_by_no 将 post-body 章节的 fnBlocks footnote → endnote）
-    reclassify_post_body_fnblocks(
+    // 重分类 post_body fnBlocks（返回被重分类的页号集合）
+    // ←→ Python `_reclassify_post_body_fnblocks_as_endnote`
+    let reclassified_pages = reclassify_post_body_fnblocks(
         phase1_chapters,
         &mut page_role_by_no,
         &page_by_no,
         post_body_titles,
     );
+    // Python 端用 `note_scan["has_reclassified_endnotes"]=True` 标记页面，下游
+    // `_is_endnote_candidate_page` 通过读取此标记把这些页认作 endnote candidate。
+    // Rust 端通过 reclassified_pages set 等价传递：把这些页面的 page_role 从
+    // "body" 提升到 "note"（满足 is_endnote_candidate_page 的 page_role=="note" 分支）。
+    for &pn in &reclassified_pages {
+        page_role_by_no.insert(pn, "note".into());
+    }
 
     // 1. Footnote band regions
     let (footnote_regions, chapters_with_footnote_band) =
-        footnote_band::build_footnote_band_regions(phase1_chapters, pages);
+        footnote_band::build_footnote_band_regions_excluding(
+            phase1_chapters,
+            pages,
+            &reclassified_pages,
+        );
 
     // 2. Endnote regions raw
     let sorted_page_nos: Vec<i64> = {
@@ -88,10 +100,8 @@ pub fn build_note_regions(
     // 4b. Endnote chapter explorer（←→ Python `explore_endnote_chapter_regions`）
     // 当前 stub（20% 完成度），接入但不期望实际修改 regions。
     // 待完整实现后，此处结果应参与后序 rebind/章节重绑定。
-    let _explorations = crate::endnote_chapter_explorer::explore_endnote_chapter_regions(
-        pages,
-        phase1_chapters,
-    );
+    let _explorations =
+        crate::endnote_chapter_explorer::explore_endnote_chapter_regions(pages, phase1_chapters);
 
     // 5. Rebind book regions
     let (endnote_regions, _rebind_count) =

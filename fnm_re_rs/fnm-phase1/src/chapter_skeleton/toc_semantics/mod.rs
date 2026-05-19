@@ -380,11 +380,14 @@ pub fn build_toc_semantics(
             .map(|a| !a.is_empty())
             .unwrap_or(false);
         if residual_provisional == 0 && !has_boundary_conflict {
-            let title_row_by_key: std::collections::HashMap<String, &crate::heading_graph::GraphRow> =
-                hg.graph_rows
-                    .iter()
-                    .map(|gr| (chapter_title_match_key(&gr.title), gr))
-                    .collect();
+            let title_row_by_key: std::collections::HashMap<
+                String,
+                &crate::heading_graph::GraphRow,
+            > = hg
+                .graph_rows
+                .iter()
+                .map(|gr| (chapter_title_match_key(&gr.title), gr))
+                .collect();
             for row in exportable_chapter_rows.iter_mut() {
                 let key = chapter_title_match_key(&row.title);
                 if let Some(gr) = title_row_by_key.get(&key) {

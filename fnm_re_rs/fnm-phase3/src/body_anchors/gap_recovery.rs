@@ -160,12 +160,9 @@ pub fn scan_expected_gap_bare_digits(text: &str, expected_markers: &HashSet<i64>
             // ←→ Python `_BARE_DIGIT_STRUCTURAL_PREFIX`: 结构性前缀词后的数字
             // 不可能是 note marker（如 "vol. 3", "p. 45", "chapter 2"）。
             const STRUCTURAL_PREFIXES: &[&str] = &[
-                "p", "pp", "vol", "fig", "no", "n",
-                "chap", "chapter", "section", "sect",
-                "page", "pages", "line", "lines",
-                "note", "notes", "part", "thesis",
-                "problem", "table", "tableau",
-                "article", "act", "scene",
+                "p", "pp", "vol", "fig", "no", "n", "chap", "chapter", "section", "sect", "page",
+                "pages", "line", "lines", "note", "notes", "part", "thesis", "problem", "table",
+                "tableau", "article", "act", "scene",
             ];
             if STRUCTURAL_PREFIXES.contains(&word.as_str()) {
                 continue;

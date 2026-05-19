@@ -76,17 +76,21 @@ pub fn promote_post_body_regions(
 
 /// 将 post_body 章节中 fnBlocks 来源的连续编号 footnote 重分类为 endnote。
 /// ←→ Python `_reclassify_post_body_fnblocks_as_endnote`
+///
+/// 返回值：被重分类的页号集合。下游 footnote_band 应跳过这些页面的 fnBlocks，
+/// endnote_candidate 应把它们当 endnote candidate。
 pub fn reclassify_post_body_fnblocks(
     chapters: &[ChapterRecord],
     page_role_by_no: &mut HashMap<i64, String>,
     page_by_no: &HashMap<i64, &RawPage>,
     post_body_titles: &HashSet<String>,
-) -> usize {
+) -> HashSet<i64> {
+    let mut reclassified_pages: HashSet<i64> = HashSet::new();
     if !page_role_by_no.values().any(|v| v == "note") {
-        return 0;
+        return reclassified_pages;
     }
     if post_body_titles.is_empty() {
-        return 0;
+        return reclassified_pages;
     }
 
     let mut post_body_chapter_ids: Vec<(String, i64)> = Vec::new();
@@ -96,10 +100,8 @@ pub fn reclassify_post_body_fnblocks(
         }
     }
     if post_body_chapter_ids.is_empty() {
-        return 0;
+        return reclassified_pages;
     }
-
-    let mut reclassified_count = 0usize;
 
     for (chapter_id, chap_start) in &post_body_chapter_ids {
         let chap_end = chapters
@@ -204,9 +206,12 @@ pub fn reclassify_post_body_fnblocks(
                 continue;
             }
 
-            reclassified_count += numbers.len();
+            // ←→ Python: 标记 band 内所有页为 has_reclassified_endnotes
+            for &pn in band {
+                reclassified_pages.insert(pn);
+            }
         }
     }
 
-    reclassified_count
+    reclassified_pages
 }

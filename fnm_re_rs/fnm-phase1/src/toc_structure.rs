@@ -252,23 +252,48 @@ pub fn build_phase1_structure(
             .filter(|n| n.role == "post_body" || n.role == "back_matter")
             .collect();
         extra_nodes.sort_by(|a, b| {
-            let pa = if a.target_pdf_page > 0 { a.target_pdf_page } else { 9999 };
-            let pb = if b.target_pdf_page > 0 { b.target_pdf_page } else { 9999 };
+            let pa = if a.target_pdf_page > 0 {
+                a.target_pdf_page
+            } else {
+                9999
+            };
+            let pb = if b.target_pdf_page > 0 {
+                b.target_pdf_page
+            } else {
+                9999
+            };
             pa.cmp(&pb).then(a.title.cmp(&b.title))
         });
         let total_pages = page_partitions.len().max(1) as i64;
         let all_starts: Vec<i64> = {
-            let mut s: Vec<i64> = filtered_chapters.iter().filter_map(|ch| {
-                if ch.start_page > 0 { Some(ch.start_page) } else { None }
-            }).collect();
+            let mut s: Vec<i64> = filtered_chapters
+                .iter()
+                .filter_map(|ch| {
+                    if ch.start_page > 0 {
+                        Some(ch.start_page)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
             s.sort();
             s
         };
         for node in &extra_nodes {
             let tk = fnm_core::title::chapter_title_match_key(&node.title);
-            if tk.is_empty() || existing_keys.contains(&tk) { continue; }
-            let start = if node.target_pdf_page > 0 { node.target_pdf_page } else { 0 };
-            let next = all_starts.iter().find(|&&s| s > start).copied().unwrap_or(total_pages + 1);
+            if tk.is_empty() || existing_keys.contains(&tk) {
+                continue;
+            }
+            let start = if node.target_pdf_page > 0 {
+                node.target_pdf_page
+            } else {
+                0
+            };
+            let next = all_starts
+                .iter()
+                .find(|&&s| s > start)
+                .copied()
+                .unwrap_or(total_pages + 1);
             let end = next - 1;
             let pages: Vec<i64> = if start > 0 && end >= start {
                 (start..=end).collect()
@@ -276,7 +301,11 @@ pub fn build_phase1_structure(
                 vec![]
             };
             filtered_chapters.push(fnm_core::records::ChapterRecord {
-                chapter_id: format!("toc-ch-{:03}-{}", filtered_chapters.len() + 1, &tk[..tk.len().min(20)]),
+                chapter_id: format!(
+                    "toc-ch-{:03}-{}",
+                    filtered_chapters.len() + 1,
+                    &tk[..tk.len().min(20)]
+                ),
                 title: node.title.clone(),
                 start_page: start,
                 end_page: end,
@@ -287,11 +316,7 @@ pub fn build_phase1_structure(
         }
     }
 
-    let page_roles = build_page_roles(
-        &page_partitions,
-        &filtered_chapters,
-        0,
-    );
+    let page_roles = build_page_roles(&page_partitions, &filtered_chapters, 0);
 
     // 构建 gate_report（在 Phase1Structure 消耗数据前计算）
     let pages_classified = page_partitions.iter().all(|p| {
@@ -331,11 +356,15 @@ pub fn build_phase1_structure(
     } else {
         toc_items.map_or(true, |items| {
             let mut prev_page: Option<i64> = None;
-            items.iter().filter(|t| t.role_hint != "container").all(|t| {
-                let ok = prev_page.map_or(true, |p| t.target_pdf_page.map_or(true, |tp| tp >= p));
-                prev_page = t.target_pdf_page;
-                ok
-            })
+            items
+                .iter()
+                .filter(|t| t.role_hint != "container")
+                .all(|t| {
+                    let ok =
+                        prev_page.map_or(true, |p| t.target_pdf_page.map_or(true, |tp| tp >= p));
+                    prev_page = t.target_pdf_page;
+                    ok
+                })
         })
     };
     let has_exportable_chapters = !filtered_chapters.is_empty();
@@ -358,14 +387,23 @@ pub fn build_phase1_structure(
     let gate_report = GateReport {
         hard: HashMap::from([
             ("toc.pages_classified".into(), pages_classified),
-            ("toc.chapter_order_monotonic".into(), toc_chapter_order_monotonic),
+            (
+                "toc.chapter_order_monotonic".into(),
+                toc_chapter_order_monotonic,
+            ),
             ("toc.role_semantics_valid".into(), role_semantics_valid),
-            ("toc.has_exportable_chapters".into(), has_exportable_chapters),
+            (
+                "toc.has_exportable_chapters".into(),
+                has_exportable_chapters,
+            ),
             ("toc.chapter_titles_aligned".into(), chapter_titles_aligned),
         ]),
         soft: HashMap::from([
             ("toc.section_alignment_warn".into(), section_alignment_warn),
-            ("toc.visual_toc_conflict_warn".into(), visual_toc_conflict_warn),
+            (
+                "toc.visual_toc_conflict_warn".into(),
+                visual_toc_conflict_warn,
+            ),
         ]),
     };
 

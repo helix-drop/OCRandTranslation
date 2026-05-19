@@ -124,7 +124,11 @@ pub fn build_raw_marker_note_sequences(
         .filter(|item| item.chapter_id == chapter_id)
         .filter_map(|item| {
             let id = resolve_note_id(item.note_item_id.trim(), note_text_by_id);
-            if id.is_empty() { None } else { Some(id) }
+            if id.is_empty() {
+                None
+            } else {
+                Some(id)
+            }
         })
         .collect();
     if fallback_note_ids.len() != 1 {
@@ -135,7 +139,10 @@ pub fn build_raw_marker_note_sequences(
         if item.chapter_id != chapter_id {
             continue;
         }
-        for marker in marker_aliases(&item.marker).into_iter().filter(|s| !s.is_empty()) {
+        for marker in marker_aliases(&item.marker)
+            .into_iter()
+            .filter(|s| !s.is_empty())
+        {
             let entry = sequences.entry(marker).or_default();
             if !entry.contains(fallback_id) {
                 entry.push(fallback_id.clone());
@@ -155,7 +162,11 @@ mod tests {
     #[test]
     fn empty_input() {
         let result = build_raw_marker_note_sequences(
-            "ch-1", &[], &HashMap::new(), &HashMap::new(), &HashMap::new(),
+            "ch-1",
+            &[],
+            &HashMap::new(),
+            &HashMap::new(),
+            &HashMap::new(),
         );
         assert!(result.is_empty());
     }
@@ -163,17 +174,28 @@ mod tests {
     #[test]
     fn skips_synthetic_anchor() {
         let link = NoteLinkRecord {
-            link_id: "l1".into(), chapter_id: "ch-1".into(), note_item_id: "ni-1".into(),
-            anchor_id: "a-1".into(), marker: "1".into(), status: LinkStatus::Matched,
-            confidence: 0.9, ..Default::default()
+            link_id: "l1".into(),
+            chapter_id: "ch-1".into(),
+            note_item_id: "ni-1".into(),
+            anchor_id: "a-1".into(),
+            marker: "1".into(),
+            status: LinkStatus::Matched,
+            confidence: 0.9,
+            ..Default::default()
         };
         let anchor = BodyAnchorRecord {
-            anchor_id: "a-1".into(), synthetic: true, ..Default::default()
+            anchor_id: "a-1".into(),
+            synthetic: true,
+            ..Default::default()
         };
         let mut anchors = HashMap::new();
         anchors.insert("a-1".into(), anchor);
         let result = build_raw_marker_note_sequences(
-            "ch-1", &[link], &HashMap::new(), &anchors, &HashMap::new(),
+            "ch-1",
+            &[link],
+            &HashMap::new(),
+            &anchors,
+            &HashMap::new(),
         );
         assert!(result.is_empty());
     }
@@ -181,20 +203,26 @@ mod tests {
     #[test]
     fn alias_expansion() {
         let link = NoteLinkRecord {
-            link_id: "l1".into(), chapter_id: "ch-1".into(), note_item_id: "ni-1".into(),
-            anchor_id: "a-1".into(), marker: "01".into(), status: LinkStatus::Matched,
-            confidence: 0.9, ..Default::default()
+            link_id: "l1".into(),
+            chapter_id: "ch-1".into(),
+            note_item_id: "ni-1".into(),
+            anchor_id: "a-1".into(),
+            marker: "01".into(),
+            status: LinkStatus::Matched,
+            confidence: 0.9,
+            ..Default::default()
         };
         let anchor = BodyAnchorRecord {
-            anchor_id: "a-1".into(), synthetic: false, ..Default::default()
+            anchor_id: "a-1".into(),
+            synthetic: false,
+            ..Default::default()
         };
         let mut anchors = HashMap::new();
         anchors.insert("a-1".into(), anchor);
         let mut texts = HashMap::new();
         texts.insert("ni-1".into(), "note text".into());
-        let result = build_raw_marker_note_sequences(
-            "ch-1", &[link], &HashMap::new(), &anchors, &texts,
-        );
+        let result =
+            build_raw_marker_note_sequences("ch-1", &[link], &HashMap::new(), &anchors, &texts);
         assert!(result.contains_key("01"));
         assert!(result.contains_key("1"));
     }
@@ -202,22 +230,40 @@ mod tests {
     #[test]
     fn anchor_sort_produces_stable_order() {
         let a1 = BodyAnchorRecord {
-            anchor_id: "a-1".into(), page_no: 1, paragraph_index: 0, char_start: 0,
-            synthetic: false, ..Default::default()
+            anchor_id: "a-1".into(),
+            page_no: 1,
+            paragraph_index: 0,
+            char_start: 0,
+            synthetic: false,
+            ..Default::default()
         };
         let a2 = BodyAnchorRecord {
-            anchor_id: "a-2".into(), page_no: 2, paragraph_index: 0, char_start: 0,
-            synthetic: false, ..Default::default()
+            anchor_id: "a-2".into(),
+            page_no: 2,
+            paragraph_index: 0,
+            char_start: 0,
+            synthetic: false,
+            ..Default::default()
         };
         let l1 = NoteLinkRecord {
-            link_id: "l1".into(), chapter_id: "ch-1".into(), note_item_id: "ni-1".into(),
-            anchor_id: "a-1".into(), marker: "1".into(), status: LinkStatus::Matched,
-            confidence: 0.9, ..Default::default()
+            link_id: "l1".into(),
+            chapter_id: "ch-1".into(),
+            note_item_id: "ni-1".into(),
+            anchor_id: "a-1".into(),
+            marker: "1".into(),
+            status: LinkStatus::Matched,
+            confidence: 0.9,
+            ..Default::default()
         };
         let l2 = NoteLinkRecord {
-            link_id: "l2".into(), chapter_id: "ch-1".into(), note_item_id: "ni-2".into(),
-            anchor_id: "a-2".into(), marker: "2".into(), status: LinkStatus::Matched,
-            confidence: 0.9, ..Default::default()
+            link_id: "l2".into(),
+            chapter_id: "ch-1".into(),
+            note_item_id: "ni-2".into(),
+            anchor_id: "a-2".into(),
+            marker: "2".into(),
+            status: LinkStatus::Matched,
+            confidence: 0.9,
+            ..Default::default()
         };
         let mut anchors = HashMap::new();
         anchors.insert("a-1".into(), a1);
@@ -225,9 +271,8 @@ mod tests {
         let mut texts = HashMap::new();
         texts.insert("ni-1".into(), "t1".into());
         texts.insert("ni-2".into(), "t2".into());
-        let result = build_raw_marker_note_sequences(
-            "ch-1", &[l2, l1], &HashMap::new(), &anchors, &texts,
-        );
+        let result =
+            build_raw_marker_note_sequences("ch-1", &[l2, l1], &HashMap::new(), &anchors, &texts);
         // 即使传入顺序为 l2, l1，排序后 l1(page_no=1) 应在 l2(page_no=2) 之前
         let seq1 = result.get("1").unwrap();
         assert_eq!(seq1[0], "ni-1");

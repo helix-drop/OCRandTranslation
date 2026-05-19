@@ -89,7 +89,11 @@ pub fn build_endnote_links(
         // fallback chapter 跨章搜索（带 anchor_count 守卫）
         if candidates.is_empty()
             && crate::link_utils::is_fallback_chapter_id(chapter_id)
-            && anchor_count_by_chapter.get(chapter_id).copied().unwrap_or(0) == 0
+            && anchor_count_by_chapter
+                .get(chapter_id)
+                .copied()
+                .unwrap_or(0)
+                == 0
         {
             candidates = crate::link_utils::link_candidate_anchors(
                 anchors,
@@ -433,18 +437,19 @@ fn find_marker_in_body(body_text: &str, marker: &str, patterns: &[Regex]) -> Opt
     if let Some(unicode_pat) = unicode_superscript_pattern(marker) {
         let body_chars: Vec<char> = body_text.chars().collect();
         let pat_chars: Vec<char> = unicode_pat.chars().collect();
-        for start_idx in 0..body_chars.len().saturating_sub(pat_chars.len().saturating_sub(1)) {
+        for start_idx in 0..body_chars
+            .len()
+            .saturating_sub(pat_chars.len().saturating_sub(1))
+        {
             if body_chars[start_idx..].starts_with(&pat_chars) {
                 let end_idx = start_idx + pat_chars.len();
                 // 负后顾：前一个字符不是上标数字
-                if start_idx > 0
-                    && "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(body_chars[start_idx - 1])
+                if start_idx > 0 && "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(body_chars[start_idx - 1])
                 {
                     continue;
                 }
                 // 负前瞻：后一个字符不是上标数字
-                if end_idx < body_chars.len()
-                    && "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(body_chars[end_idx])
+                if end_idx < body_chars.len() && "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(body_chars[end_idx])
                 {
                     continue;
                 }

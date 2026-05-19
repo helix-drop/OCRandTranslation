@@ -28,9 +28,11 @@
 
 pub mod anchor_kind;
 pub mod chapters;
+pub mod config;
 pub mod db;
 pub mod export_constants;
 pub mod marker_seq;
+pub mod model_capabilities;
 pub mod note_lookup;
 pub mod note_marker;
 pub mod note_modes;

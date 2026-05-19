@@ -57,7 +57,11 @@ pub fn normalize_unit_paragraph(
     print_page_label: &str,
 ) -> UnitParagraphRecord {
     let kind = if paragraph.kind.is_empty() {
-        if paragraph.heading_level > 0 { "heading" } else { "body" }
+        if paragraph.heading_level > 0 {
+            "heading"
+        } else {
+            "body"
+        }
     } else {
         &paragraph.kind
     };
@@ -117,7 +121,11 @@ pub fn build_fallback_unit_paragraphs(
     }
 
     let resolved_label = if print_page_label.trim().is_empty() {
-        if page_no > 0 { page_no.to_string() } else { String::new() }
+        if page_no > 0 {
+            page_no.to_string()
+        } else {
+            String::new()
+        }
     } else {
         print_page_label.to_string()
     };
@@ -142,13 +150,26 @@ pub fn build_fallback_unit_paragraphs(
         let (heading_level, clean_display) = normalize_heading_text(display_candidate);
         let (source_heading_level, clean_source) = normalize_heading_text(source_candidate);
 
-        let (final_heading_level, source_clean, display_clean) = if heading_level <= 0 && source_heading_level > 0 {
-            (source_heading_level, clean_source.clone(), clean_source.clone())
-        } else {
-            let sc = if source_heading_level > 0 { clean_source.clone() } else { source_candidate.to_string() };
-            let dc = if heading_level > 0 { clean_display.clone() } else { display_candidate.to_string() };
-            (heading_level, sc, dc)
-        };
+        let (final_heading_level, source_clean, display_clean) =
+            if heading_level <= 0 && source_heading_level > 0 {
+                (
+                    source_heading_level,
+                    clean_source.clone(),
+                    clean_source.clone(),
+                )
+            } else {
+                let sc = if source_heading_level > 0 {
+                    clean_source.clone()
+                } else {
+                    source_candidate.to_string()
+                };
+                let dc = if heading_level > 0 {
+                    clean_display.clone()
+                } else {
+                    display_candidate.to_string()
+                };
+                (heading_level, sc, dc)
+            };
 
         let section_path = if final_heading_level > 0 {
             let mut active_titles = if !title_stack.is_empty() && title_stack[0] == section_title {
@@ -172,7 +193,11 @@ pub fn build_fallback_unit_paragraphs(
             title_stack.clone()
         };
 
-        let kind = if final_heading_level > 0 { "heading" } else { "body" };
+        let kind = if final_heading_level > 0 {
+            "heading"
+        } else {
+            "body"
+        };
         let translated = translated_parts.get(idx).map(|s| s.trim()).unwrap_or("");
 
         paragraphs.push(UnitParagraphRecord {
@@ -180,13 +205,21 @@ pub fn build_fallback_unit_paragraphs(
             kind: kind.into(),
             heading_level: final_heading_level,
             source_text: source_clean.clone(),
-            display_text: if display_clean.is_empty() { source_clean } else { display_clean },
+            display_text: if display_clean.is_empty() {
+                source_clean
+            } else {
+                display_clean
+            },
             cross_page: serde_json::Value::Null,
             consumed_by_prev: false,
             section_path,
             print_page_label: resolved_label.clone(),
             translated_text: translated.to_string(),
-            translation_status: if translated.is_empty() { "pending".into() } else { "done".into() },
+            translation_status: if translated.is_empty() {
+                "pending".into()
+            } else {
+                "done".into()
+            },
             attempt_count: 0,
             last_error: String::new(),
             manual_resolved: false,
@@ -211,29 +244,22 @@ pub fn normalize_unit_page_segment(
             .iter()
             .enumerate()
             .map(|(idx, p)| {
-                normalize_unit_paragraph(
-                    p,
-                    (idx + 1) as i64,
-                    section_title,
-                    print_page_label,
-                )
+                normalize_unit_paragraph(p, (idx + 1) as i64, section_title, print_page_label)
             })
             .collect()
     } else {
         build_fallback_unit_paragraphs(
             &segment.source_text,
             &segment.display_text,
-            "",  // UnitPageSegmentRecord 无 translated_text 字段
+            "", // UnitPageSegmentRecord 无 translated_text 字段
             page_no,
             section_title,
             print_page_label,
         )
     };
 
-    let visible_paragraphs: Vec<&UnitParagraphRecord> = paragraphs
-        .iter()
-        .filter(|p| !p.consumed_by_prev)
-        .collect();
+    let visible_paragraphs: Vec<&UnitParagraphRecord> =
+        paragraphs.iter().filter(|p| !p.consumed_by_prev).collect();
 
     let source_text: String = visible_paragraphs
         .iter()

@@ -85,6 +85,10 @@ fn roundtrip_phase2_products() {
         is_reconstructed: false,
         review_required: false,
         note_kind: NoteKind::Footnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
     }];
 
     let chapter_note_modes = vec![ChapterNoteModeRecord {

@@ -21,5 +21,5 @@ pub mod llm_book_type_verify;
 pub mod page_partition;
 pub mod page_roles;
 pub mod section_heads;
-pub mod toc_tree;
 pub mod toc_structure;
+pub mod toc_tree;

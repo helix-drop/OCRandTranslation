@@ -94,6 +94,7 @@ enum_with_str! {
         ExplorerTocMatch => "explorer_toc_match",
         ExplorerSignalMatch => "explorer_signal_match",
         FallbackNearestPrior => "fallback_nearest_prior",
+        ChapterBoundaryFallback => "chapter_boundary_fallback",
         Llm => "llm",
     }
 }
@@ -193,7 +194,7 @@ mod tests {
         assert_eq!(BoundaryState::ALL.len(), 2);
         assert_eq!(NoteKind::ALL.len(), 2);
         assert_eq!(RegionScope::ALL.len(), 2);
-        assert_eq!(RegionSource::ALL.len(), 8);
+        assert_eq!(RegionSource::ALL.len(), 9);
         assert_eq!(NoteMode::ALL.len(), 5);
         assert_eq!(AnchorKind::ALL.len(), 3);
         assert_eq!(LinkStatus::ALL.len(), 5);

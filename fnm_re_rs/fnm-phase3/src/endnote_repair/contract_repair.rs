@@ -216,10 +216,7 @@ pub fn repair_endnote_links_for_contract(
         }
         // 排序键对齐 Python `(anchor.page_no, link.link_id)`
         // 原 bug：使用 a.2.len()（anchor_id 长度），Python 使用 (page_no, link_id)
-        fallback_candidates.sort_by(|a, b| {
-            a.0.cmp(&b.0)
-                .then_with(|| a.2.cmp(&b.2))
-        });
+        fallback_candidates.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.2.cmp(&b.2)));
         let (_, orphan_ci, anchor_id, confidence) = fallback_candidates.into_iter().next().unwrap();
         fallback_pairings.push((index, anchor_id.clone(), LinkResolver::Fallback, confidence));
         orphan_ignore_indices.push(orphan_ci);

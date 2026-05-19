@@ -263,7 +263,10 @@ pub fn replace_raw_bracket_refs_with_local_labels(
             let marker = caps.get(1).map(|m| m.as_str()).unwrap_or("");
             let note_id = consume_marker_note_id(marker, marker_note_sequences, marker_usage_index);
             if note_id.is_empty() {
-                return caps.get(0).map(|m| m.as_str().to_string()).unwrap_or_default();
+                return caps
+                    .get(0)
+                    .map(|m| m.as_str().to_string())
+                    .unwrap_or_default();
             }
             let ref_num = local_endnote_ref_number(
                 &note_id,
@@ -311,7 +314,10 @@ pub fn replace_raw_superscript_refs_with_local_labels(
                 .unwrap_or("");
             let note_id = consume_marker_note_id(marker, marker_note_sequences, marker_usage_index);
             if note_id.is_empty() {
-                return caps.get(0).map(|m| m.as_str().to_string()).unwrap_or_default();
+                return caps
+                    .get(0)
+                    .map(|m| m.as_str().to_string())
+                    .unwrap_or_default();
             }
             let ref_num = local_endnote_ref_number(
                 &note_id,
@@ -347,14 +353,20 @@ pub fn replace_raw_unicode_superscript_refs_with_local_labels(
     mut footnote_ids_seen: Option<&mut Vec<String>>,
     note_marker_by_id: Option<&HashMap<String, String>>,
 ) -> String {
-    use crate::export_constants::{unicode_superscript_to_ascii, RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE};
+    use crate::export_constants::{
+        unicode_superscript_to_ascii, RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE,
+    };
     RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE
         .replace_all(text, |caps: &regex::Captures| {
             let raw = caps.get(1).map(|m| m.as_str()).unwrap_or("");
             let marker: String = raw.chars().map(unicode_superscript_to_ascii).collect();
-            let note_id = consume_marker_note_id(&marker, marker_note_sequences, marker_usage_index);
+            let note_id =
+                consume_marker_note_id(&marker, marker_note_sequences, marker_usage_index);
             if note_id.is_empty() {
-                return caps.get(0).map(|m| m.as_str().to_string()).unwrap_or_default();
+                return caps
+                    .get(0)
+                    .map(|m| m.as_str().to_string())
+                    .unwrap_or_default();
             }
             let ref_num = local_endnote_ref_number(
                 &note_id,

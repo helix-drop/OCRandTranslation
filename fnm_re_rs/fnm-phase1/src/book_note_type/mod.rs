@@ -50,7 +50,9 @@ fn build_chapter_by_page(chapters: &[ChapterRecord]) -> std::collections::HashMa
         }
         if ch.start_page > 0 && ch.end_page >= ch.start_page {
             for page_no in ch.start_page..=ch.end_page {
-                mapped.entry(page_no).or_insert_with(|| ch.chapter_id.clone());
+                mapped
+                    .entry(page_no)
+                    .or_insert_with(|| ch.chapter_id.clone());
             }
         }
     }
@@ -171,14 +173,11 @@ pub fn build_book_note_profile(
 
     let chapter_by_page = build_chapter_by_page(chapters);
 
-    let last_chapter_end = chapters
-        .iter()
-        .map(|ch| ch.end_page)
-        .max()
-        .unwrap_or(0);
+    let last_chapter_end = chapters.iter().map(|ch| ch.end_page).max().unwrap_or(0);
 
     // 第一遍：找出有强信号（## NOTES 标题）的章，作为弱信号守卫
-    let mut chapters_with_heading: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut chapters_with_heading: std::collections::HashSet<String> =
+        std::collections::HashSet::new();
     for page in pages {
         let page_no = page.book_page;
         if page_no <= 0 {
@@ -223,8 +222,10 @@ pub fn build_book_note_profile(
     // 第二遍：逐页检测 fn/en
     let mut footnote_pages: std::collections::HashSet<i64> = std::collections::HashSet::new();
     let mut endnote_pages: std::collections::HashSet<i64> = std::collections::HashSet::new();
-    let mut chapter_has_footnote: std::collections::HashMap<String, std::collections::HashSet<i64>> =
-        std::collections::HashMap::new();
+    let mut chapter_has_footnote: std::collections::HashMap<
+        String,
+        std::collections::HashSet<i64>,
+    > = std::collections::HashMap::new();
     let mut chapter_has_endnote: std::collections::HashMap<String, std::collections::HashSet<i64>> =
         std::collections::HashMap::new();
     let mut book_endnote_pages: std::collections::HashSet<i64> = std::collections::HashSet::new();
@@ -316,7 +317,9 @@ pub fn build_book_note_profile(
                         // 将页内标记加入 endnote_pages
                         for p in &ch.pages {
                             if let Some(rp) = page_by_no.get(p) {
-                                let md = page_markdown_text(&serde_json::to_value(rp).unwrap_or_default());
+                                let md = page_markdown_text(
+                                    &serde_json::to_value(rp).unwrap_or_default(),
+                                );
                                 if !extract_note_markers(&md).is_empty() {
                                     endnote_pages.insert(*p);
                                     chapter_has_endnote
@@ -334,9 +337,10 @@ pub fn build_book_note_profile(
                 NoteMode::ChapterEndnotePrimary
             } else if has_fn {
                 NoteMode::FootnotePrimary
-            } else if book_endnote_pages.iter().any(|p| ch.start_page <= *p && *p <= ch.end_page)
-                || (!book_endnote_pages.is_empty()
-                    && ch.end_page >= last_chapter_end)
+            } else if book_endnote_pages
+                .iter()
+                .any(|p| ch.start_page <= *p && *p <= ch.end_page)
+                || (!book_endnote_pages.is_empty() && ch.end_page >= last_chapter_end)
             {
                 NoteMode::BookEndnoteBound
             } else {
@@ -350,7 +354,9 @@ pub fn build_book_note_profile(
                 primary_region_scope: "chapter".into(),
                 has_footnote_band: has_fn,
                 has_endnote_region: has_en
-                    || book_endnote_pages.iter().any(|p| ch.start_page <= *p && *p <= ch.end_page),
+                    || book_endnote_pages
+                        .iter()
+                        .any(|p| ch.start_page <= *p && *p <= ch.end_page),
             }
         })
         .collect();

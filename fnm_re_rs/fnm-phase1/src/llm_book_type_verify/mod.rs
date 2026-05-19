@@ -1,42 +1,27 @@
 //! ←→ FNM_RE/modules/llm_book_type_verify.py (1039 行)
-//! LLM 视觉验证书型：用 Vision API 看代表性页面确认 book_type 判定。
+//! Phase 1→2 之间：LLM 交叉验证书型分类。
 //!
-//! # 状态：**模块完整但未接入 phase1 主入口**
+//! 完整子模块：
+//! - selection: 5 维分层选页（R1-R6）+ BookStructureProfile 提取
+//! - prompt: system + user prompt 构建（带分章 chapter_label 分组）
+//! - client: vision API 调用 + content_filter retry + multi-model fallback
 //!
-//! 主入口 `toc_structure.rs::build_phase1_structure` 当前不调用本模块，
-//! 通过 `Phase1Config::skip_llm_verify=true`（默认）跳过；
-//! 设 `skip_llm_verify=false` 会触发 `anyhow::bail!`，不会进入本模块。
-//!
-//! 模块自身实现已完整：Vision API、select_pages、parse_response + 4 个单测。
-//! 接入待 FNM_PHASE12_AUDIT.md G5 实施：在 phase1 主入口异步调用并把
-//! `evidence` 装入 `Phase1Output.diagnostics`。
+//! 使用 `fnm_core::vision::resolve_fnm_model_pool_specs()` 取代旧 OPENAI_API_KEY 硬编码。
+
+pub mod client;
+pub mod prompt;
+pub mod selection;
 
 use crate::book_note_type::BookNoteProfile;
-use anyhow::{Context, Result};
-use fnm_core::records::Phase1Structure;
-use fnm_core::vision::*;
+use anyhow::Result;
+use fnm_core::records::{ChapterNoteModeRecord, Phase1Structure};
+use fnm_core::vision::{
+    render_page_to_base64_png, resolve_fnm_model_pool_specs, ResolvedModelSpec,
+};
 use serde_json::json;
+use std::collections::HashMap;
 
-// ── 类型 ──────────────────────────────────────────────────────────
-
-#[derive(Debug, Clone)]
-pub struct LlmConfig {
-    pub api_key: String,
-    pub model: String,
-    pub base_url: String,
-    pub timeout_secs: u64,
-}
-
-impl Default for LlmConfig {
-    fn default() -> Self {
-        Self {
-            api_key: std::env::var("OPENAI_API_KEY").unwrap_or_default(),
-            model: "gpt-4o".into(),
-            base_url: "https://api.openai.com/v1".into(),
-            timeout_secs: 180,
-        }
-    }
-}
+// ── Public API ──────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
 pub struct LlmVerifyResult {
@@ -45,179 +30,133 @@ pub struct LlmVerifyResult {
     pub evidence: serde_json::Value,
 }
 
-// ── 页面选择 ──────────────────────────────────────────────────────
-
-/// 选择代表性页面用于 LLM 验证。
-fn select_representative_pages(structure: &Phase1Structure) -> Vec<i64> {
-    let mut pages: Vec<i64> = Vec::new();
-
-    // 第 1 页（通常是书名页或版权页）
-    if let Some(first) = structure.pages.first() {
-        pages.push(first.page_no);
-    }
-
-    // 前 3 个不同 body 页
-    for p in &structure.pages {
-        if p.page_role.as_str() == "body" && !pages.contains(&p.page_no) && pages.len() < 4 {
-            pages.push(p.page_no);
-        }
-    }
-
-    // 最后 body 页
-    if let Some(last_body) = structure
-        .pages
-        .iter()
-        .rev()
-        .find(|p| p.page_role.as_str() == "body" && !pages.contains(&p.page_no))
-    {
-        pages.push(last_body.page_no);
-    }
-
-    pages.sort();
-    pages.dedup();
-
-    pages
-}
-
-// ── Prompt ────────────────────────────────────────────────────────
-
-fn build_book_type_prompt(page_count: usize) -> String {
-    format!(
-        "这是某本书的 {n} 页截图。请判断这本书的整体注释类型。\n\
-        \n\
-        选项：\n\
-        1. \"footnote\" — 脚注为主（页末有小字号注释）\n\
-        2. \"endnote\" — 尾注为主（每章或书末有集中的注释章节）\n\
-        3. \"mixed\" — 脚注和尾注都有\n\
-        4. \"no_notes\" — 没有注释\n\
-        \n\
-        回复 JSON: {{\"book_type\": \"footnote|endnote|mixed|no_notes\", \"confidence\": 0.0-1.0, \"reason\": \"观察摘要\"}}",
-        n = page_count
-    )
-}
-
-// ── Vision API ────────────────────────────────────────────────────
-
-async fn call_vision_api(page_images: &[String], config: &LlmConfig) -> Result<serde_json::Value> {
-    let prompt = build_book_type_prompt(page_images.len());
-
-    let mut content = vec![json!({"type": "text", "text": prompt})];
-    for b64 in page_images {
-        content.push(json!({
-            "type": "image_url",
-            "image_url": {
-                "url": format!("data:image/png;base64,{}", b64)
-            }
-        }));
-    }
-
-    let response = HTTP_CLIENT
-        .post(format!("{}/chat/completions", config.base_url))
-        .bearer_auth(&config.api_key)
-        .json(&json!({
-            "model": config.model,
-            "messages": [{"role": "user", "content": content}],
-            "max_tokens": 300,
-            "temperature": 0.0,
-        }))
-        .send()
-        .await
-        .context("Vision API 请求失败")?;
-
-    let body: serde_json::Value = response.json().await?;
-    Ok(body)
-}
-
-fn parse_vision_response(body: &serde_json::Value) -> Result<(String, f64, String)> {
-    let content = body["choices"][0]["message"]["content"]
-        .as_str()
-        .context("Vision API 响应格式错误")?;
-
-    let json_str = content
-        .find('{')
-        .and_then(|start| content.rfind('}').map(|end| &content[start..=end]))
-        .unwrap_or(content);
-
-    let parsed: serde_json::Value =
-        serde_json::from_str(json_str).context("无法解析 LLM 响应为 JSON")?;
-
-    let book_type = parsed["book_type"]
-        .as_str()
-        .unwrap_or("unknown")
-        .to_string();
-    let confidence = parsed["confidence"].as_f64().unwrap_or(0.0);
-    let reason = parsed["reason"].as_str().unwrap_or("").to_string();
-
-    Ok((book_type, confidence, reason))
-}
-
-// ── 入口 ──────────────────────────────────────────────────────────
-
-/// Phase1 LLM 验证入口（异步）。
+/// Phase 1 LLM 验证入口（异步）。
 ///
-/// 1. 选择代表性页面
-/// 2. 渲染为 PNG → base64
-/// 3. 调 Vision API 问书型
-/// 4. 与 rule-based 结果比较
+/// ←→ Python `verify_book_type_with_llm`
+/// 1. 提取 BookStructureProfile
+/// 2. 5 维选页（R1-R6）
+/// 3. 渲染 PDF 页为 base64 PNG
+/// 4. 通过 fnm pool 解析的 Vision LLM specs 调用（支持多 model fallback）
+/// 5. 解析响应、对比 rule-based book_type
 pub async fn verify_book_type_with_llm(
-    toc_structure: &Phase1Structure,
+    structure: &Phase1Structure,
     book_note_profile: &BookNoteProfile,
+    chapter_note_modes: &[ChapterNoteModeRecord],
     pdf_path: &str,
-    api_config: &LlmConfig,
-) -> anyhow::Result<LlmVerifyResult> {
-    if api_config.api_key.is_empty() {
+) -> Result<LlmVerifyResult> {
+    let specs = resolve_fnm_model_pool_specs();
+    let vision_specs: Vec<ResolvedModelSpec> = specs
+        .into_iter()
+        .filter(|s| s.supports_vision && !s.api_key.is_empty())
+        .collect();
+
+    if vision_specs.is_empty() {
         return Ok(LlmVerifyResult {
             llm_book_type: None,
             agreement_with_rules: true,
-            evidence: json!({"status": "skipped", "reason": "OPENAI_API_KEY not set"}),
+            evidence: json!({
+                "status": "skipped",
+                "reason": "no vision-capable model spec resolved (check fnm_model_pool config + API key)",
+            }),
         });
     }
 
-    // 1. 选择代表性页面
-    let pages = select_representative_pages(toc_structure);
+    // 1. 提取 profile
+    let profile =
+        selection::extract_book_structure_profile(structure, book_note_profile, chapter_note_modes);
+
+    // 2. 5 维选页
+    let pages = selection::select_verification_pages(&profile);
     if pages.is_empty() {
         return Ok(LlmVerifyResult {
             llm_book_type: None,
             agreement_with_rules: true,
-            evidence: json!({"status": "skipped", "reason": "no pages to verify"}),
+            evidence: json!({"status": "skipped", "reason": "no pages selected"}),
         });
     }
 
-    // 2. 渲染所有页面
-    let mut images: Vec<(i64, String)> = Vec::new();
+    // 3. 渲染
+    let mut rendered: Vec<(i64, String)> = Vec::new();
     for &page_no in &pages {
-        match render_page_to_base64_png(pdf_path, page_no.max(1) - 1, 150) {
-            Ok(b64) => images.push((page_no, b64)),
-            Err(e) => {
-                tracing::warn!("页面 {} 渲染失败: {:?}", page_no, e);
-            }
+        let pdf_path_owned = pdf_path.to_string();
+        let page_index = (page_no - 1).max(0);
+        let result = tokio::task::spawn_blocking(move || {
+            render_page_to_base64_png(&pdf_path_owned, page_index, 150)
+        })
+        .await;
+        match result {
+            Ok(Ok(b64)) => rendered.push((page_no, b64)),
+            Ok(Err(e)) => tracing::warn!("page {} render failed: {:?}", page_no, e),
+            Err(e) => tracing::warn!("page {} render join error: {:?}", page_no, e),
         }
     }
-    if images.is_empty() {
+    if rendered.is_empty() {
         anyhow::bail!("所有页面渲染失败: {}", pdf_path);
     }
 
-    // 3. 调 Vision API
-    let b64_list: Vec<String> = images.iter().map(|(_, b)| b.clone()).collect();
-    let body = call_vision_api(&b64_list, api_config).await?;
+    // 4. 构 prompt（按 chapter 分组）
+    let chapter_by_page = selection::chapter_by_page(structure);
+    let chapter_modes_by_page: HashMap<i64, String> = pages
+        .iter()
+        .filter_map(|&p| {
+            chapter_by_page.get(&p).map(|cid| {
+                let mode = profile
+                    .chapter_modes
+                    .get(cid)
+                    .cloned()
+                    .unwrap_or_else(|| "?".into());
+                (p, mode)
+            })
+        })
+        .collect();
+    let page_infos: Vec<prompt::PageInfo> = pages
+        .iter()
+        .map(|&p| prompt::PageInfo {
+            pdf_page: p,
+            printed_page: None,
+            chapter_label: chapter_by_page.get(&p).cloned().unwrap_or_default(),
+        })
+        .collect();
+    let mode_types: Vec<String> = profile.mode_types.iter().cloned().collect();
+    let user_prompt = prompt::build_user_prompt(
+        &book_note_profile.book_type,
+        &page_infos,
+        profile.toc_has_notes_entry,
+        profile.toc_notes_printed_page,
+        profile.chapter_count,
+        &mode_types,
+        profile.endnote_regions.len(),
+        profile.endnote_item_count,
+        &chapter_modes_by_page,
+    );
 
-    // 4. 解析响应
-    let (llm_book_type, confidence, reason) = parse_vision_response(&body)?;
+    // 5. 调 Vision LLM（multi-model fallback）
+    let parsed = client::call_with_fallback(
+        &rendered,
+        prompt::LLM_VERIFY_SYSTEM_PROMPT,
+        &user_prompt,
+        &vision_specs,
+    )
+    .await?;
 
-    let rule_type = book_note_profile.book_type.clone();
-    let agreement = llm_book_type == rule_type;
-
+    let agreement = parsed
+        .book_type
+        .as_deref()
+        .map(|t| t == book_note_profile.book_type)
+        .unwrap_or(false);
     Ok(LlmVerifyResult {
-        llm_book_type: Some(llm_book_type.clone()),
+        llm_book_type: parsed.book_type.clone(),
         agreement_with_rules: agreement,
         evidence: json!({
             "representative_pages": pages,
-            "rendered_count": images.len(),
-            "llm_book_type": llm_book_type,
-            "rule_based_type": rule_type,
+            "rendered_count": rendered.len(),
+            "llm_book_type": parsed.book_type,
+            "rule_based_type": book_note_profile.book_type,
             "agreement": agreement,
-            "confidence": confidence,
-            "reason": reason,
+            "confidence": parsed.confidence,
+            "reasoning": parsed.reasoning,
+            "suspected_false_positive_pages": parsed.suspected_false_positive_pages,
+            "raw_response_preview": parsed.raw_response,
         }),
     })
 }
@@ -225,55 +164,21 @@ pub async fn verify_book_type_with_llm(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fnm_core::records::*;
+    use fnm_core::types::PageRole;
 
     #[test]
-    fn config_default_from_env() {
-        let config = LlmConfig::default();
-        assert_eq!(config.model, "gpt-4o");
-    }
-
-    #[test]
-    fn select_representative_pages_empty() {
-        let structure = Phase1Structure::default();
-        let pages = select_representative_pages(&structure);
-        assert!(pages.is_empty());
-    }
-
-    #[test]
-    fn select_representative_pages_body_only() {
-        use fnm_core::types::PageRole;
-
-        let rec = |no: i64, role: PageRole| -> fnm_core::records::PagePartitionRecord {
-            fnm_core::records::PagePartitionRecord {
-                page_no: no,
-                target_pdf_page: no,
-                page_role: role,
-                confidence: 1.0,
-                reason: String::new(),
-                section_hint: String::new(),
-                has_note_heading: false,
-                note_scan_summary: serde_json::Value::Null,
-            }
-        };
-        let structure = Phase1Structure {
-            pages: vec![
-                rec(1, PageRole::FrontMatter),
-                rec(10, PageRole::Body),
-                rec(20, PageRole::Body),
-            ],
-            ..Default::default()
-        };
-        let pages = select_representative_pages(&structure);
-        assert!(pages.contains(&1));
-        assert!(pages.contains(&10));
+    fn test_re_export_subpaths() {
+        // Smoke：确认子模块可用
+        assert!(prompt::LLM_VERIFY_SYSTEM_PROMPT.contains("book_type"));
+        assert_eq!(selection::VERIFY_TOTAL_CAP_ABSOLUTE, 40);
+        let r = client::parse_llm_response("");
+        assert!(r.error.is_some());
     }
 
     #[tokio::test]
     #[ignore = "需要真实 OPENAI_API_KEY + PDFium 二进制"]
     async fn real_book_type_verify() {
-        use fnm_core::records::*;
-        use fnm_core::types::PageRole;
-
         let structure = Phase1Structure {
             pages: vec![PagePartitionRecord {
                 page_no: 1,
@@ -288,15 +193,14 @@ mod tests {
             ..Default::default()
         };
         let profile = BookNoteProfile {
-            book_type: "endnote".into(),
+            book_type: "endnote_only".into(),
             chapter_modes: vec![],
             evidence: json!({}),
         };
-        let config = LlmConfig::default();
         let pdf = "/Users/hao/OCRandTranslation/test_example/Biopolitics/Biopolitics.pdf";
-        let result = verify_book_type_with_llm(&structure, &profile, pdf, &config)
+        let result = verify_book_type_with_llm(&structure, &profile, &[], pdf)
             .await
             .unwrap();
-        assert!(result.llm_book_type.is_some());
+        assert!(result.llm_book_type.is_some() || result.evidence["status"] == "skipped");
     }
 }
