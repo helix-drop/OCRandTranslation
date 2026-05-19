@@ -189,6 +189,10 @@ def build_module_pipeline_snapshot_rust(
     pipeline_state: str = "done",
     start_phase: str = "toc",
     db_path: str | None = None,
+    enable_llm_repair: bool = False,
+    renderer=None,
+    auto_apply: bool = True,
+    confidence_threshold: float = 0.9,
 ) -> dict:
     """调用 fnm_re_rs Rust binding 跑 phase1→6 pipeline。
 
@@ -232,13 +236,139 @@ def build_module_pipeline_snapshot_rust(
     toc_json = _json.dumps(toc_items or [])
     config_json = _json.dumps(config)
 
-    if db_path:
+    if enable_llm_repair:
+        if not db_path:
+            raise ValueError("enable_llm_repair=True 需要传 db_path（LLM repair 通过 DB 中转）")
+        result_json = fnm_re_rs.run_pipeline_for_doc_with_llm_repair_json(
+            db_path, doc_id, pages_json, toc_json, config_json,
+            pdf_path, renderer, auto_apply, float(confidence_threshold),
+        )
+    elif db_path:
         result_json = fnm_re_rs.run_pipeline_for_doc_json(
             db_path, doc_id, pages_json, toc_json, config_json,
         )
     else:
         result_json = fnm_re_rs.run_pipeline_json(pages_json, toc_json, config_json)
     return _json.loads(result_json)
+
+
+# ── Shadow mode ─────────────────────────────────────────────
+# 信心建设工具：在 Python pipeline 旁路并行跑 Rust，把关键 counts 写日志，
+# 不替换 Python 主路径。用法（嵌入到 Python build_module_pipeline_snapshot 调用前后）：
+#
+#     FNM_SHADOW_RUST_PHASES=1 python -m ...   # 启用 shadow
+#
+#     # 代码内：
+#     rust_snapshot = FNM_RE.run_with_shadow(pages, toc_items, doc_id=doc_id)
+#     # rust_snapshot 是 dict（启用时）或 None（未启用）
+#     # 关键 counts 已 append 到 logs/fnm_rust_shadow.jsonl
+#
+# diff Python ↔ Rust：调用 `summarize_pipeline_snapshot(rust_or_py_snapshot)` 提取
+# counts，再用 set/diff 工具人工比对。
+#
+# 由 env 控制是为了在生产里能开关，不必改代码。
+
+
+def summarize_pipeline_snapshot(snapshot: dict) -> dict:
+    """从 ModulePipelineSnapshot dict 提取各 phase 的关键 counts，用于 shadow diff。
+
+    无论 Rust 还是 Python（dataclass.asdict()）产出的 snapshot 都能消费，
+    只要按相同字段名暴露 phase1..6。
+
+    ←→ Rust `SerPhase1..SerPhase6` 字段
+    """
+    counts: dict = {}
+    p1 = snapshot.get("phase1") or {}
+    counts["phase1"] = {
+        "chapters": len(p1.get("chapters") or []),
+        "pages": len(p1.get("pages") or []),
+        "heading_candidates": len(p1.get("heading_candidates") or []),
+        "section_heads": len(p1.get("section_heads") or []),
+    }
+    p2 = snapshot.get("phase2") or {}
+    counts["phase2"] = {
+        "note_regions": len(p2.get("note_regions") or []),
+        "note_items": len(p2.get("note_items") or []),
+        "chapter_note_modes": len(p2.get("chapter_note_modes") or []),
+    }
+    p3 = snapshot.get("phase3") or {}
+    counts["phase3"] = {
+        "body_anchors": len(p3.get("body_anchors") or []),
+        "note_links": len(p3.get("note_links") or []),
+    }
+    p4 = snapshot.get("phase4") or {}
+    counts["phase4"] = {
+        "translation_units": len(p4.get("translation_units") or []),
+        "structure_reviews": len(p4.get("structure_reviews") or []),
+    }
+    p5 = snapshot.get("phase5") or {}
+    counts["phase5"] = {"chapter_count": int(p5.get("chapter_count") or 0)}
+    p6 = snapshot.get("phase6") or {}
+    bundle = p6.get("export_bundle") or {}
+    counts["phase6"] = {
+        "export_chapters": len(bundle.get("chapters") or []),
+        "contract_ok": bool(bundle.get("export_semantic_contract_ok", False)),
+    }
+    counts["run_meta"] = snapshot.get("run_meta") or {}
+    return counts
+
+
+def run_with_shadow(
+    pages: list[dict],
+    toc_items: list[dict] | None = None,
+    *,
+    log_path: str | None = None,
+    env_var: str = "FNM_SHADOW_RUST_PHASES",
+    **kwargs,
+) -> dict | None:
+    """在 ``$FNM_SHADOW_RUST_PHASES`` 设置时跑 Rust pipeline 并把 counts append 到日志。
+
+    嵌入 Python 主路径（不替换）：
+
+    >>> py_snapshot = build_module_pipeline_snapshot(pages, toc_items, doc_id=doc_id)  # 主路径
+    >>> rust_snapshot = FNM_RE.run_with_shadow(pages, toc_items, doc_id=doc_id)  # 旁路
+
+    生产里 ``FNM_SHADOW_RUST_PHASES=1`` 启用；返回 ``dict | None``。
+    日志默认 ``logs/fnm_rust_shadow.jsonl`` 每行一条 JSON。
+    """
+    import os
+    import time
+    import json as _json
+
+    if not os.getenv(env_var):
+        return None
+
+    started_at = time.time()
+    try:
+        snapshot = build_module_pipeline_snapshot_rust(pages, toc_items, **kwargs)
+        success = True
+        err_msg = ""
+    except Exception as exc:  # 防御性：shadow 路径绝不影响主路径
+        snapshot = None
+        success = False
+        err_msg = f"{type(exc).__name__}: {exc}"
+
+    elapsed = time.time() - started_at
+    log_entry = {
+        "ts": int(started_at),
+        "elapsed_sec": round(elapsed, 3),
+        "doc_id": kwargs.get("doc_id", ""),
+        "slug": kwargs.get("slug", ""),
+        "success": success,
+        "error": err_msg,
+        "counts": summarize_pipeline_snapshot(snapshot) if snapshot else None,
+    }
+
+    log_path = log_path or "logs/fnm_rust_shadow.jsonl"
+    try:
+        import pathlib
+        pathlib.Path(log_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(log_path, "a") as fh:
+            fh.write(_json.dumps(log_entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass  # 日志写失败不影响主路径
+
+    return snapshot
 
 
 __all__ = [
@@ -268,4 +398,6 @@ __all__ = [
     "build_export_bundle",
     "build_module_pipeline_snapshot_rust",
     "fnm_re_rs_version",
+    "run_with_shadow",
+    "summarize_pipeline_snapshot",
 ]
