@@ -10,4 +10,5 @@ members = [
     "fnm-phase5",
     "fnm-phase6",
     "fnm-orchestrator",
+    "fnm-py",
 ]

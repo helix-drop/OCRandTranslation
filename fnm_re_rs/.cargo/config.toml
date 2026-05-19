@@ -1,0 +1,14 @@
+# pyo3 cdylib 在 macOS 上 cargo build 时需要 linker 显式允许 unresolved Python 符号
+# （正式安装到 Python 时 libpython 在 process 中提供这些符号）
+# ←→ pyo3 user guide "Building and Distribution" 章节
+[target.x86_64-apple-darwin]
+rustflags = [
+    "-C", "link-arg=-undefined",
+    "-C", "link-arg=dynamic_lookup",
+]
+
+[target.aarch64-apple-darwin]
+rustflags = [
+    "-C", "link-arg=-undefined",
+    "-C", "link-arg=dynamic_lookup",
+]
