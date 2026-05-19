@@ -157,6 +157,90 @@ def list_diagnostic_notes_for_doc(*args, **kwargs):
     return impl(*args, **kwargs)
 
 
+# ── Rust pipeline binding ────────────────────────────────────────
+# 安装：cd fnm_re_rs/fnm-py && maturin develop
+# 验证：FNM_RE.fnm_re_rs_version() 返回 "0.1.0" 表示就绪
+#
+# 与 Python 端 pipeline 区别：Rust 版本不读 SQLite documents/raw_pages 表，
+# 调用方需自行准备 raw_pages list[dict] + toc_items list[dict] + config dict。
+# 等价于 Python `build_module_pipeline_snapshot()`，返回 dict（JSON 序列化体）。
+
+
+def fnm_re_rs_version() -> str | None:
+    """返回已安装的 fnm_re_rs Rust binding 版本。未装时返回 None。"""
+    try:
+        import fnm_re_rs
+    except ImportError:
+        return None
+    return fnm_re_rs.version()
+
+
+def build_module_pipeline_snapshot_rust(
+    pages: list[dict],
+    toc_items: list[dict] | None = None,
+    *,
+    doc_id: str = "",
+    slug: str = "",
+    pdf_path: str = "",
+    toc_offset: int = 0,
+    max_body_chars: int = 6000,
+    include_diagnostic_entries: bool = False,
+    manual_toc_ready: bool = True,
+    pipeline_state: str = "done",
+    start_phase: str = "toc",
+    db_path: str | None = None,
+) -> dict:
+    """调用 fnm_re_rs Rust binding 跑 phase1→6 pipeline。
+
+    ←→ Rust `fnm_orchestrator::run_pipeline` / `run_pipeline_for_doc`
+
+    Args:
+        pages: raw OCR 页面 list[dict]（与 Python `build_module_pipeline_snapshot` 一致）
+        toc_items: 目录项 list[dict]
+        db_path: 传入则走 DB-driven 入口，每 phase 持久化到 SQLite；
+                 不传则走纯内存版（不持久化）
+        其余 kwargs 对齐 Python `build_module_pipeline_snapshot()` 同名参数
+
+    Returns:
+        dict（ModulePipelineSnapshot JSON 序列化体，含 phase1-6 + run_meta）
+
+    Raises:
+        ImportError: fnm-re-rs 未安装
+        RuntimeError: pipeline 内部异常
+    """
+    import json as _json
+
+    try:
+        import fnm_re_rs
+    except ImportError as e:
+        raise ImportError(
+            "fnm-re-rs 未安装。请运行：cd fnm_re_rs/fnm-py && maturin develop"
+        ) from e
+
+    config = {
+        "doc_id": doc_id,
+        "slug": slug,
+        "pdf_path": pdf_path,
+        "toc_offset": int(toc_offset or 0),
+        "max_body_chars": int(max_body_chars or 6000),
+        "include_diagnostic_entries": bool(include_diagnostic_entries),
+        "manual_toc_ready": bool(manual_toc_ready),
+        "pipeline_state": str(pipeline_state),
+        "start_phase": str(start_phase),
+    }
+    pages_json = _json.dumps(pages)
+    toc_json = _json.dumps(toc_items or [])
+    config_json = _json.dumps(config)
+
+    if db_path:
+        result_json = fnm_re_rs.run_pipeline_for_doc_json(
+            db_path, doc_id, pages_json, toc_json, config_json,
+        )
+    else:
+        result_json = fnm_re_rs.run_pipeline_json(pages_json, toc_json, config_json)
+    return _json.loads(result_json)
+
+
 __all__ = [
     "run_doc_pipeline",
     "load_doc_structure",
@@ -182,4 +266,6 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "build_module_pipeline_snapshot_rust",
+    "fnm_re_rs_version",
 ]
