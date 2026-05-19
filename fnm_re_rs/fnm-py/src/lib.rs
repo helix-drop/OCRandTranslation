@@ -20,9 +20,12 @@
 //! 当前版本采用 JSON 字符串边界（caller 自己 json.dumps/loads），避免 PyDict ↔ Rust struct
 //! 双向转换的复杂度。后续可加 PyDict 直通版本（如 `run_pipeline_dict`）。
 
+use std::path::Path;
+
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 
+use fnm_core::db::{open_pool, SqliteRepository};
 use fnm_orchestrator::types::PipelineConfig;
 use fnm_phase1::input::{RawPage, TocItem};
 
@@ -90,6 +93,46 @@ fn parse_pipeline_config(value: &serde_json::Value) -> PyResult<PipelineConfig> 
     })
 }
 
+/// DB-driven pipeline 入口（每个 phase 持久化到 SQLite）。
+///
+/// 参数：
+/// - `db_path`：SQLite 数据库文件路径
+/// - `doc_id`：文档 ID（决定 fnm_* 表的 doc_id 字段）
+/// - `pages_json` / `toc_items_json` / `config_json`：同 `run_pipeline_json`
+///
+/// 返回：`ModulePipelineSnapshot` JSON 字符串（含 phase1-6 序列化体 + run_meta）。
+///
+/// ←→ Python `FNM_RE/app/mainline.py::run_phase6_pipeline_for_doc()`
+#[pyfunction]
+fn run_pipeline_for_doc_json(
+    db_path: &str,
+    doc_id: &str,
+    pages_json: &str,
+    toc_items_json: &str,
+    config_json: &str,
+) -> PyResult<String> {
+    let pages: Vec<RawPage> = serde_json::from_str(pages_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
+    let toc_items: Vec<TocItem> = serde_json::from_str(toc_items_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid toc_items_json: {}", e)))?;
+
+    let config_value: serde_json::Value = serde_json::from_str(config_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid config_json: {}", e)))?;
+    let config = parse_pipeline_config(&config_value)?;
+
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let snapshot = fnm_orchestrator::run_pipeline_for_doc(
+        &repo, doc_id, pages, toc_items, config, None,
+    )
+    .map_err(|e| PyRuntimeError::new_err(format!("pipeline error: {}", e)))?;
+
+    serde_json::to_string(&snapshot)
+        .map_err(|e| PyRuntimeError::new_err(format!("snapshot serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -100,6 +143,7 @@ fn version() -> &'static str {
 #[pymodule]
 fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run_pipeline_json, m)?)?;
+    m.add_function(wrap_pyfunction!(run_pipeline_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }
