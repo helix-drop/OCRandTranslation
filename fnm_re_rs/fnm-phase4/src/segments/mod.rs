@@ -138,9 +138,7 @@ pub fn segment_paragraphs_from_body_pages(
 
         for index in 0..paragraph_total {
             let source_para = source_paras.get(index);
-            let display_para = display_paras
-                .get(index)
-                .or(source_para);
+            let display_para = display_paras.get(index).or(source_para);
 
             let aligned_source_text = if paragraph_total == 1 && raw_source_parts.len() > 1 {
                 raw_source_parts
@@ -193,9 +191,7 @@ pub fn segment_paragraphs_from_body_pages(
             let kind = if heading_level > 0 { "heading" } else { "body" };
 
             if heading_level > 0 {
-                let active_titles = if !title_stack.is_empty()
-                    && title_stack[0] == section_title
-                {
+                let active_titles = if !title_stack.is_empty() && title_stack[0] == section_title {
                     title_stack[1..].to_vec()
                 } else {
                     title_stack.clone()
@@ -236,7 +232,9 @@ pub fn segment_paragraphs_from_body_pages(
                 } else {
                     display_text
                 },
-                cross_page: cross_page.map(serde_json::Value::String).unwrap_or(serde_json::Value::Null),
+                cross_page: cross_page
+                    .map(serde_json::Value::String)
+                    .unwrap_or(serde_json::Value::Null),
                 consumed_by_prev,
                 section_path,
                 print_page_label,

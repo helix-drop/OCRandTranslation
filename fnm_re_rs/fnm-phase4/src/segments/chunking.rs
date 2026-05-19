@@ -6,9 +6,8 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 /// ←→ Python `_REF_TOKEN_FOR_DEDUPE_RE` (units.py:36)
-static REF_TOKEN_FOR_DEDUPE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"\{\{(?:NOTE|FN|EN)_REF:[^}]+\}\}|\[\^[^\]]+\]").unwrap()
-});
+static REF_TOKEN_FOR_DEDUPE_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\{\{(?:NOTE|FN|EN)_REF:[^}]+\}\}|\[\^[^\]]+\]").unwrap());
 
 /// ←→ Python `_paragraph_content_dedupe_key` (units.py:299-303)
 pub fn paragraph_content_dedupe_key(text: &str) -> String {
@@ -51,10 +50,7 @@ pub fn chunk_visible_paragraphs(
             continue;
         }
         let source_key = paragraph_content_dedupe_key(&source_text);
-        if !source_key.is_empty()
-            && !prior_key.is_empty()
-            && prior_key.contains(&source_key)
-        {
+        if !source_key.is_empty() && !prior_key.is_empty() && prior_key.contains(&source_key) {
             continue;
         }
         let mut un_consumed = paragraph.clone();
@@ -248,27 +244,21 @@ mod tests {
 
     #[test]
     fn test_chunk_body_page_segments_single() {
-        let seg = make_segment(
-            1,
-            vec![make_para("short text", false)],
-        );
+        let seg = make_segment(1, vec![make_para("short text", false)]);
         let chunks = chunk_body_page_segments(&[seg], 6000);
         assert_eq!(chunks.len(), 1);
         let chunk = &chunks[0];
         assert_eq!(chunk["page_start"], 1);
-        assert!(chunk["source_text"].as_str().unwrap().contains("short text"));
+        assert!(chunk["source_text"]
+            .as_str()
+            .unwrap()
+            .contains("short text"));
     }
 
     #[test]
     fn test_chunk_body_page_segments_split() {
-        let seg1 = make_segment(
-            1,
-            vec![make_para(&"x".repeat(3000), false)],
-        );
-        let seg2 = make_segment(
-            2,
-            vec![make_para(&"y".repeat(4000), false)],
-        );
+        let seg1 = make_segment(1, vec![make_para(&"x".repeat(3000), false)]);
+        let seg2 = make_segment(2, vec![make_para(&"y".repeat(4000), false)]);
         // max_body_chars = 6000, seg1 3000 + seg2 4000 = 7000 > 6000 → split
         let chunks = chunk_body_page_segments(&[seg1, seg2], 6000);
         assert!(chunks.len() >= 2);

@@ -38,10 +38,7 @@ pub fn skip_reason_to_category(reason: SkipReason) -> SkipCategory {
 /// 检查 frozen units 的契约合法性（9 种 issue）。
 ///
 /// ←→ Python `_unit_contract_issues` (ref_freeze.py:159-182)
-pub fn unit_contract_issues(
-    body_units: &[FrozenUnit],
-    note_units: &[FrozenUnit],
-) -> Vec<String> {
+pub fn unit_contract_issues(body_units: &[FrozenUnit], note_units: &[FrozenUnit]) -> Vec<String> {
     let mut issues: Vec<String> = Vec::new();
 
     for row in body_units.iter().chain(note_units.iter()) {

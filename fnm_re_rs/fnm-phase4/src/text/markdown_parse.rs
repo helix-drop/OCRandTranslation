@@ -72,7 +72,10 @@ pub struct TocHeadingCandidate {
 
 /// ←→ Python `_ALLCAPS_TITLE_RE`
 static ALLCAPS_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"^[A-Z\u{00c0}-\u{00d6}\u{00d8}-\u{00de}\s\-,':\u{00ab}\u{00bb}\u{201c}\u{201d}\.!?()]+$").unwrap()
+    Regex::new(
+        r"^[A-Z\u{00c0}-\u{00d6}\u{00d8}-\u{00de}\s\-,':\u{00ab}\u{00bb}\u{201c}\u{201d}\.!?()]+$",
+    )
+    .unwrap()
 });
 
 /// ←→ Python `_LATEX_FOOTNOTE_MARK_RE` — LaTeX footnote 标记
@@ -88,8 +91,12 @@ static OBSIDIAN_FOOTNOTE_MARK_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"\[\^(\d{1,6})\]").unwrap());
 
 /// ←→ Python `_SUPERSCRIPT_FOOTNOTE_MARK_RE` — Unicode 上标数字
-static SUPERSCRIPT_FOOTNOTE_MARK_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"[\u{2070}\u{00b9}\u{00b2}\u{00b3}\u{2074}\u{2075}\u{2076}\u{2077}\u{2078}\u{2079}]+").unwrap());
+static SUPERSCRIPT_FOOTNOTE_MARK_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"[\u{2070}\u{00b9}\u{00b2}\u{00b3}\u{2074}\u{2075}\u{2076}\u{2077}\u{2078}\u{2079}]+",
+    )
+    .unwrap()
+});
 
 /// 上标数字 → 普通数字转换表
 fn superscript_to_digit(c: char) -> Option<char> {
@@ -112,7 +119,10 @@ fn superscript_to_digit(c: char) -> Option<char> {
 
 /// 按 bookPage 查找页面。
 /// ←→ Python `_find_page` (L346)
-pub fn find_page<'a>(pages: &'a [SyntheticMarkdownPage], bp: i64) -> Option<&'a SyntheticMarkdownPage> {
+pub fn find_page<'a>(
+    pages: &'a [SyntheticMarkdownPage],
+    bp: i64,
+) -> Option<&'a SyntheticMarkdownPage> {
     pages.iter().find(|p| p.book_page == bp)
 }
 
@@ -157,10 +167,7 @@ pub fn normalize_latex_footnote_markers(text: &str) -> String {
 
     SUPERSCRIPT_FOOTNOTE_MARK_RE
         .replace_all(&normalized, |caps: &regex::Captures| {
-            let digits: String = caps[0]
-                .chars()
-                .filter_map(superscript_to_digit)
-                .collect();
+            let digits: String = caps[0].chars().filter_map(superscript_to_digit).collect();
             if digits.chars().all(|c| c.is_ascii_digit()) {
                 format!("[{}]", digits)
             } else {
@@ -181,7 +188,10 @@ pub fn looks_like_allcaps_title(txt: &str) -> i64 {
         return 0;
     }
     // 排除含中文的行
-    if Regex::new(r"[\u{4e00}-\u{9fff}\u{3000}-\u{303f}]").unwrap().is_match(clean) {
+    if Regex::new(r"[\u{4e00}-\u{9fff}\u{3000}-\u{303f}]")
+        .unwrap()
+        .is_match(clean)
+    {
         return 0;
     }
     if Regex::new(r"^[\W\d\s]+$").unwrap().is_match(clean) {
@@ -232,7 +242,10 @@ pub fn normalize_heading_key(text: &str) -> String {
             }
         })
         .collect();
-    Regex::new(r"[^a-z0-9]+").unwrap().replace_all(&ascii, "").to_string()
+    Regex::new(r"[^a-z0-9]+")
+        .unwrap()
+        .replace_all(&ascii, "")
+        .to_string()
 }
 
 /// ←→ Python `_heading_titles_match` (L398)
@@ -251,7 +264,11 @@ pub fn heading_titles_match(lhs: &str, rhs: &str) -> bool {
     // SequenceMatcher ratio 简化版：用较长公共前缀/平均长度近似
     let min_len = left.len().min(right.len());
     let max_len = left.len().max(right.len());
-    let common = left.chars().zip(right.chars()).take_while(|(a, b)| a == b).count();
+    let common = left
+        .chars()
+        .zip(right.chars())
+        .take_while(|(a, b)| a == b)
+        .count();
     (common as f64) / (max_len as f64) >= 0.72 && min_len >= 8
 }
 
@@ -339,7 +356,10 @@ pub fn inject_block_heading_candidates(
         if !looks_like_block_heading_candidate(&title) {
             continue;
         }
-        if existing_texts.iter().any(|e| heading_titles_match(&title, e)) {
+        if existing_texts
+            .iter()
+            .any(|e| heading_titles_match(&title, e))
+        {
             continue;
         }
 
@@ -360,12 +380,16 @@ pub fn inject_block_heading_candidates(
         }
 
         let insert_at = if !anchor_text.is_empty() {
-            let anchor_key = &normalize_heading_key(&anchor_text.chars().take(80).collect::<String>())[..40.min(normalize_heading_key(&anchor_text.chars().take(80).collect::<String>()).len())];
+            let anchor_key =
+                &normalize_heading_key(&anchor_text.chars().take(80).collect::<String>())[..40
+                    .min(
+                        normalize_heading_key(&anchor_text.chars().take(80).collect::<String>())
+                            .len(),
+                    )];
             segments
                 .iter()
                 .position(|seg| {
-                    !anchor_key.is_empty()
-                        && normalize_heading_key(&seg.text).contains(anchor_key)
+                    !anchor_key.is_empty() && normalize_heading_key(&seg.text).contains(anchor_key)
                 })
                 .unwrap_or(segments.len())
         } else {
@@ -548,7 +572,10 @@ pub fn parse_single_page_md(
 }
 
 /// ←→ Python `_fallback_blocks_to_paragraphs` (L914)
-pub fn fallback_blocks_to_paragraphs(page: &SyntheticMarkdownPage, bp: i64) -> Vec<ParsedParagraph> {
+pub fn fallback_blocks_to_paragraphs(
+    page: &SyntheticMarkdownPage,
+    bp: i64,
+) -> Vec<ParsedParagraph> {
     let mut raw: Vec<ParsedParagraph> = Vec::new();
     for block in &page.blocks {
         let txt = normalize_latex_footnote_markers(&block.text);
@@ -729,8 +756,7 @@ pub fn parse_page_markdown(
                 && ALLCAPS_TITLE_RE.is_match(txt.trim())
             {
                 true
-            } else if prev_hl == hl
-                && Regex::new(r"^[IVXLC]+$").unwrap().is_match(prev_txt.trim())
+            } else if prev_hl == hl && Regex::new(r"^[IVXLC]+$").unwrap().is_match(prev_txt.trim())
             {
                 true
             } else if txt.trim().len() <= 3 {
@@ -770,9 +796,8 @@ pub fn parse_page_markdown(
         }
 
         // 短碎片合并
-        let mut is_short = hl == 0
-            && txt.len() < 60
-            && !re_utils::has_explicit_sentence_end(txt.trim());
+        let mut is_short =
+            hl == 0 && txt.len() < 60 && !re_utils::has_explicit_sentence_end(txt.trim());
         if hl == 0 && Regex::new(r"^\([^)]+\)$").unwrap().is_match(txt.trim()) {
             is_short = true;
         }
@@ -840,9 +865,7 @@ pub fn parse_page_markdown(
                 return false;
             }
             match pg {
-                Some(p) => {
-                    get_page_note_scan(p).page_kind != "endnote_collection"
-                }
+                Some(p) => get_page_note_scan(p).page_kind != "endnote_collection",
                 None => false,
             }
         };
@@ -852,11 +875,7 @@ pub fn parse_page_markdown(
             if !is_joinable_cross_page(next_pg, next_para) {
                 return false;
             }
-            re_utils::is_mid_sentence_continuation(
-                prev_text,
-                &next_para.text,
-                true,
-            )
+            re_utils::is_mid_sentence_continuation(prev_text, &next_para.text, true)
         };
 
     let mut result: Vec<ParsedParagraph> = Vec::new();
@@ -1017,7 +1036,10 @@ mod tests {
     #[test]
     fn test_heading_titles_match_substring() {
         // "introduction" contained in "introduction generale" has len 12, need >= 16 for match
-        assert!(!heading_titles_match("Introduction", "Introduction Generale"));
+        assert!(!heading_titles_match(
+            "Introduction",
+            "Introduction Generale"
+        ));
     }
 
     #[test]

@@ -113,8 +113,7 @@ pub fn inject_token_once(
     let coord_end = anchor.char_end.max(0) as usize;
 
     if coord_start <= coord_end && coord_end <= payload.len() {
-        let (cs, ce) =
-            shift_coords_out_of_note_ref_token(payload, coord_start, coord_end);
+        let (cs, ce) = shift_coords_out_of_note_ref_token(payload, coord_start, coord_end);
 
         // 1. llm source → 在 char_end 插入
         if anchor_source == "llm" && ce >= cs && ce > 0 {
@@ -132,11 +131,9 @@ pub fn inject_token_once(
         if ce > cs {
             let coord_slice = &payload[cs..ce];
             if (!source_marker.is_empty() && coord_slice.contains(&source_marker))
-                || (!normalized_marker.is_empty()
-                    && coord_slice.contains(&normalized_marker))
+                || (!normalized_marker.is_empty() && coord_slice.contains(&normalized_marker))
             {
-                let result =
-                    format!("{}{}{}", &payload[..cs], token, &payload[ce..]);
+                let result = format!("{}{}{}", &payload[..cs], token, &payload[ce..]);
                 return (result, true);
             }
         }
@@ -197,18 +194,10 @@ pub fn inject_token_once(
 
     // 6. Regex fallback: `[ \s*(?:\^)?\s*{marker}\s* ]`
     if !normalized_marker.is_empty() {
-        let pattern = format!(
-            r"\[\s*(?:\^)?\s*{}\s*\]",
-            regex::escape(&normalized_marker)
-        );
+        let pattern = format!(r"\[\s*(?:\^)?\s*{}\s*\]", regex::escape(&normalized_marker));
         if let Ok(re) = Regex::new(&pattern) {
             if let Some(m) = re.find(payload) {
-                let result = format!(
-                    "{}{}{}",
-                    &payload[..m.start()],
-                    token,
-                    &payload[m.end()..]
-                );
+                let result = format!("{}{}{}", &payload[..m.start()], token, &payload[m.end()..]);
                 return (result, true);
             }
         }
@@ -219,12 +208,7 @@ pub fn inject_token_once(
         let pattern = format!(r"\b{}\b", regex::escape(&normalized_marker));
         if let Ok(re) = Regex::new(&pattern) {
             if let Some(m) = re.find(payload) {
-                let result = format!(
-                    "{}{}{}",
-                    &payload[..m.start()],
-                    token,
-                    &payload[m.end()..]
-                );
+                let result = format!("{}{}{}", &payload[..m.start()], token, &payload[m.end()..]);
                 return (result, true);
             }
         }
@@ -251,8 +235,9 @@ pub fn clean_skipped_marker(text: &str, marker: &str) -> String {
             let abs_pos = start + pos;
             // 检查前面不是 ^
             let after_start = abs_pos + bracket.len();
-            if (abs_pos > 0 && payload.as_bytes()[abs_pos - 1] == b'^') ||
-               (after_start < payload.len() && payload.as_bytes()[after_start] == b':') {
+            if (abs_pos > 0 && payload.as_bytes()[abs_pos - 1] == b'^')
+                || (after_start < payload.len() && payload.as_bytes()[after_start] == b':')
+            {
                 start = abs_pos + 1;
                 continue;
             }
@@ -327,7 +312,11 @@ mod tests {
         let (cs, _ce) = shift_coords_out_of_note_ref_token(text, 10, 12);
         // 移到 token 后（25 = "before " (7) + "{{NOTE_REF:abc}}" (18)）
         // token "{{NOTE_REF:abc}}" 结束于位置 23 (7+16 chars)
-        assert!(cs >= 23, "expected coord to shift past token end, got {}", cs);
+        assert!(
+            cs >= 23,
+            "expected coord to shift past token end, got {}",
+            cs
+        );
     }
 
     #[test]
@@ -341,12 +330,7 @@ mod tests {
     #[test]
     fn test_inject_token_once_already_present() {
         let anchor = make_anchor(0, 0, "", "", "", false);
-        let (result, injected) = inject_token_once(
-            "text {{NOTE_REF:n1}}",
-            &anchor,
-            "7",
-            "n1",
-        );
+        let (result, injected) = inject_token_once("text {{NOTE_REF:n1}}", &anchor, "7", "n1");
         assert!(injected);
         assert_eq!(result, "text {{NOTE_REF:n1}}");
     }

@@ -107,7 +107,7 @@ mod tests {
     fn test_chapter_order_map_skips_empty() {
         let layers = ChapterLayers {
             chapters: vec![
-                make_chapter(""),   // chapter_id 为空，应被跳过
+                make_chapter(""), // chapter_id 为空，应被跳过
                 make_chapter("ch1"),
             ],
             ..Default::default()

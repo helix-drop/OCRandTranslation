@@ -16,11 +16,11 @@ static META_LINE_PATTERNS: Lazy<Vec<Regex>> = Lazy::new(|| {
         r"^doi:\s*10\.",
         r"^10\.\d{4,}/",
         r"sagepub\.com|journals\.sagepub|springer\.com|wiley\.com",
-        r"\u{00a9}.*\d{4}",                      // ©
+        r"\u{00a9}.*\d{4}", // ©
         r"^article\s*reuse\s*guidelines",
         r"^SAGE$",
         r"^Article$",
-        r"^\d{1,4}[\u{2013}\-]\d{1,4}$",         // – or -
+        r"^\d{1,4}[\u{2013}\-]\d{1,4}$", // – or -
         r"^Vol\.\s*\d+",
         r"^Accepted:|^Received:|^Published:",
         r"^Corresponding\s+author",
@@ -40,8 +40,12 @@ static JOURNAL_RE: Lazy<Regex> = Lazy::new(|| {
 });
 
 /// ←→ Python `_SUPERSCRIPT_DIGITS_RE`
-static SUPERSCRIPT_DIGITS_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"[\u{2070}\u{00b9}\u{00b2}\u{00b3}\u{2074}\u{2075}\u{2076}\u{2077}\u{2078}\u{2079}]+$").unwrap());
+static SUPERSCRIPT_DIGITS_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"[\u{2070}\u{00b9}\u{00b2}\u{00b3}\u{2074}\u{2075}\u{2076}\u{2077}\u{2078}\u{2079}]+$",
+    )
+    .unwrap()
+});
 
 /// ←→ Python `_BRACKET_FOOTNOTE_TAIL_RE`
 static BRACKET_FOOTNOTE_TAIL_RE: Lazy<Regex> =
@@ -54,7 +58,10 @@ static TEXTSUPERSCRIPT_TAIL_RE: Lazy<Regex> =
 /// ←→ Python `_SENTENCE_END_RE`
 /// 包含 Unicode 左右引号 \u{201c}\u{201d} 和右书名号 \u{00bb}
 static SENTENCE_END_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"[.;:?!\u{3002}\u{ff1b}\u{ff1a}\u{ff01}\u{ff1f}\u{00bb}\u{201c}\u{201d}\u{2019})\]]\s*$").unwrap()
+    Regex::new(
+        r"[.;:?!\u{3002}\u{ff1b}\u{ff1a}\u{ff01}\u{ff1f}\u{00bb}\u{201c}\u{201d}\u{2019})\]]\s*$",
+    )
+    .unwrap()
 });
 
 /// ←→ Python `_CONTINUATION_PREFIX_CHARS`
@@ -205,7 +212,10 @@ pub fn is_mid_sentence_continuation(
     if starts_low(nxt) || starts_with_continuation_punctuation(nxt) {
         return true;
     }
-    if allow_uppercase && nxt.chars().next().unwrap().is_uppercase() && !has_explicit_sentence_end(prev) {
+    if allow_uppercase
+        && nxt.chars().next().unwrap().is_uppercase()
+        && !has_explicit_sentence_end(prev)
+    {
         return true;
     }
     false

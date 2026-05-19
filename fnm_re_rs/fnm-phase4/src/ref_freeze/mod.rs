@@ -30,7 +30,11 @@ pub fn build_frozen_units(
     max_body_chars: i64,
     pipeline_run_id: &str,
 ) -> anyhow::Result<FrozenUnits> {
-    let effective_max_chars = if max_body_chars <= 0 { 6000 } else { max_body_chars };
+    let effective_max_chars = if max_body_chars <= 0 {
+        6000
+    } else {
+        max_body_chars
+    };
 
     // ── Phase 1: 索引构建 (L200-245) ─────────────────────────
     let chapter_order = chapter_index::chapter_order_map(chapter_layers);
@@ -94,8 +98,14 @@ pub fn build_frozen_units(
             .get(&b.chapter_id)
             .copied()
             .unwrap_or(1_000_000);
-        let page_a = anchor_by_id.get(&a.anchor_id).map(|an| an.page_no).unwrap_or(0);
-        let page_b = anchor_by_id.get(&b.anchor_id).map(|an| an.page_no).unwrap_or(0);
+        let page_a = anchor_by_id
+            .get(&a.anchor_id)
+            .map(|an| an.page_no)
+            .unwrap_or(0);
+        let page_b = anchor_by_id
+            .get(&b.anchor_id)
+            .map(|an| an.page_no)
+            .unwrap_or(0);
         let char_a = anchor_by_id
             .get(&a.anchor_id)
             .map(|an| an.char_start)
@@ -152,42 +162,43 @@ pub fn build_frozen_units(
         }
     };
 
-    let mut record_skipped = |ref_map: &mut Vec<FrozenRefEntry>,
-                              link: &NoteLinkRecord,
-                              reason: &str,
-                              page_no: i64,
-                              target_ref: &str,
-                              chapter_body_pages: &mut HashMap<String, HashMap<i64, serde_json::Value>>,
-                              skipped_reason_counts: &mut HashMap<String, i64>,
-                              marker: &str| {
-        let category = skip_reason_to_category(reason);
-        *skipped_reason_counts.entry(reason.to_string()).or_insert(0) += 1;
-        ref_map.push(FrozenRefEntry {
-            link_id: link.link_id.clone(),
-            chapter_id: link.chapter_id.clone(),
-            anchor_id: link.anchor_id.clone(),
-            note_item_id: link.note_item_id.clone(),
-            target_ref: target_ref.to_string(),
-            decision: "skipped".to_string(),
-            reason: reason.to_string(),
-            skip_category: category.to_string(),
-            page_no,
-        });
-        // ceiling_skip / policy_skip → clean marker from body text
-        if (category == "ceiling_skip" || category == "policy_skip") && page_no > 0 {
-            if let Some(body_pages) = chapter_body_pages.get_mut(&link.chapter_id) {
-                if let Some(body_page) = body_pages.get_mut(&page_no) {
-                    if let Some(text) = body_page.get("text").and_then(|v| v.as_str()) {
-                        let cleaned = inject::clean_skipped_marker(text, marker);
-                        body_page.as_object_mut().unwrap().insert(
-                            "text".to_string(),
-                            serde_json::Value::String(cleaned),
-                        );
+    let mut record_skipped =
+        |ref_map: &mut Vec<FrozenRefEntry>,
+         link: &NoteLinkRecord,
+         reason: &str,
+         page_no: i64,
+         target_ref: &str,
+         chapter_body_pages: &mut HashMap<String, HashMap<i64, serde_json::Value>>,
+         skipped_reason_counts: &mut HashMap<String, i64>,
+         marker: &str| {
+            let category = skip_reason_to_category(reason);
+            *skipped_reason_counts.entry(reason.to_string()).or_insert(0) += 1;
+            ref_map.push(FrozenRefEntry {
+                link_id: link.link_id.clone(),
+                chapter_id: link.chapter_id.clone(),
+                anchor_id: link.anchor_id.clone(),
+                note_item_id: link.note_item_id.clone(),
+                target_ref: target_ref.to_string(),
+                decision: "skipped".to_string(),
+                reason: reason.to_string(),
+                skip_category: category.to_string(),
+                page_no,
+            });
+            // ceiling_skip / policy_skip → clean marker from body text
+            if (category == "ceiling_skip" || category == "policy_skip") && page_no > 0 {
+                if let Some(body_pages) = chapter_body_pages.get_mut(&link.chapter_id) {
+                    if let Some(body_page) = body_pages.get_mut(&page_no) {
+                        if let Some(text) = body_page.get("text").and_then(|v| v.as_str()) {
+                            let cleaned = inject::clean_skipped_marker(text, marker);
+                            body_page
+                                .as_object_mut()
+                                .unwrap()
+                                .insert("text".to_string(), serde_json::Value::String(cleaned));
+                        }
                     }
                 }
             }
-        }
-    };
+        };
 
     for link in &matched_links {
         let chapter_id = &link.chapter_id;
@@ -393,10 +404,7 @@ pub fn build_frozen_units(
             .iter()
             .map(|row| {
                 let page_no = row.get("page_no").and_then(|v| v.as_i64()).unwrap_or(0);
-                let text = row
-                    .get("text")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("");
+                let text = row.get("text").and_then(|v| v.as_str()).unwrap_or("");
                 serde_json::json!({
                     "page_no": page_no,
                     "text": refs::replace_frozen_refs(text, fnm_core::refs::EndnoteMode::Standard)
@@ -421,10 +429,7 @@ pub fn build_frozen_units(
                 .get("page_start")
                 .and_then(|v| v.as_i64())
                 .unwrap_or(0);
-            let pe = chunk
-                .get("page_end")
-                .and_then(|v| v.as_i64())
-                .unwrap_or(ps);
+            let pe = chunk.get("page_end").and_then(|v| v.as_i64()).unwrap_or(ps);
             let cc = chunk
                 .get("char_count")
                 .and_then(|v| v.as_i64())
@@ -454,8 +459,7 @@ pub fn build_frozen_units(
                 vec
             };
 
-            let (source_hash, plan_hash) =
-                hash::compute_unit_hash(&st, ps, pe, cc, &page_nos);
+            let (source_hash, plan_hash) = hash::compute_unit_hash(&st, ps, pe, cc, &page_nos);
 
             body_units.push(FrozenUnit {
                 unit_id: format!("body-{}-{:04}", chapter_id, chunk_index + 1),
@@ -491,69 +495,65 @@ pub fn build_frozen_units(
     let mut chapter_view_note_unit_count = 0;
     let mut owner_fallback_note_unit_count = 0;
 
-    let append_note_unit =
-        |note_units: &mut Vec<FrozenUnit>,
-         item: &NoteItemRecord,
-         resolved_chapter_id: &str,
-         chapter_by_id: &HashMap<String, &ChapterLayer>,
-         chapter_bounds: &HashMap<String, (i64, i64)>,
-         pipeline_run_id: &str,
-         seen: &mut HashSet<(String, String)>| {
-            let note_item_id = item.note_item_id.trim().to_string();
-            if note_item_id.is_empty() {
-                return false;
-            }
-            let dedupe_key = (resolved_chapter_id.to_string(), note_item_id.clone());
-            if seen.contains(&dedupe_key) {
-                return false;
-            }
-            let chapter = chapter_by_id.get(resolved_chapter_id);
-            let (section_start_page, section_end_page) = chapter_bounds
-                .get(resolved_chapter_id)
-                .copied()
-                .unwrap_or((item.page_no, item.page_no));
-            let n_ps = item.page_no;
-            let n_pe = item.page_no;
-            let n_cc = item.text.chars().count() as i64;
-            let n_st = item.text.clone();
-            let (n_src_hash, n_plan_hash) =
-                hash::compute_unit_hash(&n_st, n_ps, n_pe, n_cc, &[n_ps]);
+    let append_note_unit = |note_units: &mut Vec<FrozenUnit>,
+                            item: &NoteItemRecord,
+                            resolved_chapter_id: &str,
+                            chapter_by_id: &HashMap<String, &ChapterLayer>,
+                            chapter_bounds: &HashMap<String, (i64, i64)>,
+                            pipeline_run_id: &str,
+                            seen: &mut HashSet<(String, String)>| {
+        let note_item_id = item.note_item_id.trim().to_string();
+        if note_item_id.is_empty() {
+            return false;
+        }
+        let dedupe_key = (resolved_chapter_id.to_string(), note_item_id.clone());
+        if seen.contains(&dedupe_key) {
+            return false;
+        }
+        let chapter = chapter_by_id.get(resolved_chapter_id);
+        let (section_start_page, section_end_page) = chapter_bounds
+            .get(resolved_chapter_id)
+            .copied()
+            .unwrap_or((item.page_no, item.page_no));
+        let n_ps = item.page_no;
+        let n_pe = item.page_no;
+        let n_cc = item.text.chars().count() as i64;
+        let n_st = item.text.clone();
+        let (n_src_hash, n_plan_hash) = hash::compute_unit_hash(&n_st, n_ps, n_pe, n_cc, &[n_ps]);
 
-            note_units.push(FrozenUnit {
-                unit_id: format!(
-                    "{}-{}-{}",
-                    item.note_kind.as_str(),
-                    resolved_chapter_id,
-                    note_item_id
-                ),
-                kind: item.note_kind.as_str().to_string(),
-                owner_kind: "note_region".to_string(),
-                owner_id: item.region_id.clone(),
-                section_id: resolved_chapter_id.to_string(),
-                section_title: chapter.map_or_else(
-                    || resolved_chapter_id.to_string(),
-                    |c| c.title.clone(),
-                ),
-                section_start_page,
-                section_end_page,
-                note_id: note_item_id.clone(),
-                page_start: n_ps,
-                page_end: n_pe,
-                char_count: n_cc,
-                source_text: n_st,
-                source_hash: n_src_hash,
-                segment_plan_hash: n_plan_hash,
-                pipeline_run_id: pipeline_run_id.to_string(),
-                translated_text: String::new(),
-                status: "pending".to_string(),
-                error_msg: String::new(),
-                target_ref: refs::frozen_note_ref(&note_item_id),
-                page_segments: Vec::new(),
-                ..Default::default()
-            });
-            seen.insert(dedupe_key);
-            true
-        };
+        note_units.push(FrozenUnit {
+            unit_id: format!(
+                "{}-{}-{}",
+                item.note_kind.as_str(),
+                resolved_chapter_id,
+                note_item_id
+            ),
+            kind: item.note_kind.as_str().to_string(),
+            owner_kind: "note_region".to_string(),
+            owner_id: item.region_id.clone(),
+            section_id: resolved_chapter_id.to_string(),
+            section_title: chapter
+                .map_or_else(|| resolved_chapter_id.to_string(), |c| c.title.clone()),
+            section_start_page,
+            section_end_page,
+            note_id: note_item_id.clone(),
+            page_start: n_ps,
+            page_end: n_pe,
+            char_count: n_cc,
+            source_text: n_st,
+            source_hash: n_src_hash,
+            segment_plan_hash: n_plan_hash,
+            pipeline_run_id: pipeline_run_id.to_string(),
+            translated_text: String::new(),
+            status: "pending".to_string(),
+            error_msg: String::new(),
+            target_ref: refs::frozen_note_ref(&note_item_id),
+            page_segments: Vec::new(),
+            ..Default::default()
+        });
+        seen.insert(dedupe_key);
+        true
+    };
 
     // Chapter view 路径
     for chapter in &chapter_layers.chapter_layers {
@@ -563,15 +563,11 @@ pub fn build_frozen_units(
             .chain(chapter.endnote_items.iter())
             .collect();
         for item in chapter_note_items {
-            let (resolved_chapter_id, _source) = inject::resolve_note_item_owner(
-                item,
-                &region_by_id,
-                &valid_chapter_ids,
-            );
+            let (resolved_chapter_id, _source) =
+                inject::resolve_note_item_owner(item, &region_by_id, &valid_chapter_ids);
             let note_item_id = item.note_item_id.clone();
             if resolved_chapter_id.is_empty() {
-                if !note_item_id.is_empty()
-                    && !unresolved_note_item_id_set.contains(&note_item_id)
+                if !note_item_id.is_empty() && !unresolved_note_item_id_set.contains(&note_item_id)
                 {
                     unresolved_note_item_ids.push(note_item_id.clone());
                     unresolved_note_item_id_set.insert(note_item_id);
@@ -600,15 +596,11 @@ pub fn build_frozen_units(
             .then_with(|| a.note_item_id.cmp(&b.note_item_id))
     });
     for item in ordered_note_items {
-        let (resolved_chapter_id, _source) = inject::resolve_note_item_owner(
-            item,
-            &region_by_id,
-            &valid_chapter_ids,
-        );
+        let (resolved_chapter_id, _source) =
+            inject::resolve_note_item_owner(item, &region_by_id, &valid_chapter_ids);
         let note_item_id = item.note_item_id.clone();
         if resolved_chapter_id.is_empty() {
-            if !note_item_id.is_empty() && !unresolved_note_item_id_set.contains(&note_item_id)
-            {
+            if !note_item_id.is_empty() && !unresolved_note_item_id_set.contains(&note_item_id) {
                 unresolved_note_item_ids.push(note_item_id.clone());
                 unresolved_note_item_id_set.insert(note_item_id);
             }
@@ -658,21 +650,25 @@ pub fn build_frozen_units(
             .then_with(|| a.unit_id.cmp(&b.unit_id))
     });
 
-    let matched_link_ids: HashSet<String> = matched_links
-        .iter()
-        .map(|l| l.link_id.clone())
-        .collect();
+    let matched_link_ids: HashSet<String> =
+        matched_links.iter().map(|l| l.link_id.clone()).collect();
 
-    let injected_rows: Vec<&FrozenRefEntry> =
-        ref_map.iter().filter(|r| r.decision == "injected").collect();
+    let injected_rows: Vec<&FrozenRefEntry> = ref_map
+        .iter()
+        .filter(|r| r.decision == "injected")
+        .collect();
     let skipped_rows: Vec<&FrozenRefEntry> =
         ref_map.iter().filter(|r| r.decision == "skipped").collect();
     let injected_count = injected_rows.len() as i64;
     let skipped_count = (ref_map.len() as i64) - injected_count;
-    let synthetic_skipped_count =
-        skipped_reason_counts.get("synthetic_anchor").copied().unwrap_or(0);
-    let conflict_skipped_count =
-        skipped_reason_counts.get("conflict_anchor").copied().unwrap_or(0);
+    let synthetic_skipped_count = skipped_reason_counts
+        .get("synthetic_anchor")
+        .copied()
+        .unwrap_or(0);
+    let conflict_skipped_count = skipped_reason_counts
+        .get("conflict_anchor")
+        .copied()
+        .unwrap_or(0);
 
     let mut skipped_note_item_ids: Vec<String> = skipped_rows
         .iter()
@@ -683,8 +679,7 @@ pub fn build_frozen_units(
         .collect();
     skipped_note_item_ids.sort();
 
-    let mut contract_issues =
-        contract::unit_contract_issues(&body_units, &note_units);
+    let mut contract_issues = contract::unit_contract_issues(&body_units, &note_units);
     for nid in &unresolved_note_item_ids {
         contract_issues.push(format!("unresolved_note_item:{}", nid));
     }
