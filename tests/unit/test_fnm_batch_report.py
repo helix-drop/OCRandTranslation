@@ -60,7 +60,7 @@ class FnmBatchReportTest(unittest.TestCase):
 
         try:
             globals_dict["SQLiteRepository"] = lambda: _FakeRepo()
-            globals_dict["build_fnm_structure_status"] = lambda _doc_id, repo=None, snapshot=None: {
+            globals_dict["build_fnm_structure_status"] = lambda _doc_id, repo=None, snapshot=None, **_kw: {
                 "structure_state": "review_required",
                 "review_counts": {"toc_chapter_order_non_monotonic": 1},
                 "blocking_reasons": ["toc_chapter_order_non_monotonic"],
@@ -205,7 +205,7 @@ class FnmBatchReportTest(unittest.TestCase):
             def list_fnm_structure_reviews(self, _doc_id):
                 return []
 
-        def _fake_status_builder(_doc_id, repo=None, snapshot=None):
+        def _fake_status_builder(_doc_id, repo=None, snapshot=None, **_kw):
             captured["snapshot"] = snapshot
             return {
                 "structure_state": "ready",
@@ -276,7 +276,7 @@ class FnmBatchReportTest(unittest.TestCase):
 
         try:
             globals_dict["SQLiteRepository"] = lambda: _FakeRepo()
-            globals_dict["build_fnm_structure_status"] = lambda _doc_id, repo=None, snapshot=None: {
+            globals_dict["build_fnm_structure_status"] = lambda _doc_id, repo=None, snapshot=None, **_kw: {
                 "structure_state": "ready",
                 "review_counts": {},
                 "blocking_reasons": [],

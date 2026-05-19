@@ -101,6 +101,7 @@ def _note_item(note_id: str, marker: str) -> NoteItemRecord:
         source_page_label="1",
         is_reconstructed=False,
         review_required=False,
+        note_kind="endnote" if note_id.lower().startswith("en-") else "footnote",
     )
 
 

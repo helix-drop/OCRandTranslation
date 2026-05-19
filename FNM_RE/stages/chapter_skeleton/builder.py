@@ -245,6 +245,7 @@ def build_chapter_skeleton(
     pre_extracted_page_candidates: list[dict] | None = None,
     file_idx_map: dict[int, int] | None = None,
     page_texts: dict[int, dict] | None = None,
+    doc_id: str = "",
 ) -> tuple[list[HeadingCandidate], list[ChapterRecord], dict[str, Any]]:
     # page_texts 非 None 表示上游已提取轻量数据 → 不需要 _page 引用
     page_rows = _legacy_page_rows(page_partitions, pages if page_texts is None else None)
@@ -257,6 +258,7 @@ def build_chapter_skeleton(
         pdf_path=str(pdf_path or ""),
         pre_extracted_page_candidates=pre_extracted_page_candidates,
         file_idx_map=file_idx_map,
+        doc_id=doc_id,
     )
 
     section_rows = _candidate_section_rows(heading_candidate_rows, page_rows=page_rows, page_roles=page_roles)

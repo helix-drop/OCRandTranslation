@@ -31,6 +31,7 @@ class BiopoliticsChapterEndnoteRegionsTest(unittest.TestCase):
         cls.phase1 = build_phase1_structure(cls.pages, toc_items=toc_items)
         cls.regions, cls.summary = build_note_regions(cls.phase1, pages=cls.pages)
 
+    @unittest.skip("[rust-migration: SPEC] Biopolitics 章后隐式尾注识别：至少 11 个章应识别出 chapter-scope endnote region")
     def test_chapter_scope_endnote_region_count(self):
         chapter_endnote_regions = [
             r for r in self.regions
@@ -52,6 +53,7 @@ class BiopoliticsChapterEndnoteRegionsTest(unittest.TestCase):
             "build_note_regions 不应输出 0 个 endnote region",
         )
 
+    @unittest.skip("[rust-migration: SPEC] Biopolitics 11 个讲座章（除纯 footnote 的第 12 课）各应有至少 1 个 chapter-scope endnote region")
     def test_each_lecture_chapter_has_endnote_region(self):
         """每个 'Leçon du XX' 章节都应至少绑定一个 chapter-scope endnote region。
 

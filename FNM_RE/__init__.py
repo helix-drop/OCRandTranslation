@@ -4,25 +4,25 @@ from __future__ import annotations
 
 
 def prepare_page_translate_jobs(*args, **kwargs):
-    from FNM_RE.page_translate import prepare_page_translate_jobs as impl
+    from FNM_RE.app.page_translate import prepare_page_translate_jobs as impl
 
     return impl(*args, **kwargs)
 
 
 def build_retry_summary(*args, **kwargs):
-    from FNM_RE.page_translate import build_retry_summary as impl
+    from FNM_RE.app.page_translate import build_retry_summary as impl
 
     return impl(*args, **kwargs)
 
 
 def build_unit_progress(*args, **kwargs):
-    from FNM_RE.page_translate import build_unit_progress as impl
+    from FNM_RE.app.page_translate import build_unit_progress as impl
 
     return impl(*args, **kwargs)
 
 
 def run_llm_repair(*args, **kwargs):
-    from FNM_RE.llm_repair import run_llm_repair as impl
+    from FNM_RE.modules.llm_repair import run_llm_repair as impl
 
     return impl(*args, **kwargs)
 
@@ -34,13 +34,13 @@ def group_review_overrides(*args, **kwargs):
 
 
 def annotate_review_note_links(*args, **kwargs):
-    from FNM_RE.review import annotate_review_note_links as impl
+    from FNM_RE.shared.review import annotate_review_note_links as impl
 
     return impl(*args, **kwargs)
 
 
 def collect_llm_suggestions(*args, **kwargs):
-    from FNM_RE.review import collect_llm_suggestions as impl
+    from FNM_RE.shared.review import collect_llm_suggestions as impl
 
     return impl(*args, **kwargs)
 
@@ -94,25 +94,13 @@ def run_doc_pipeline(*args, **kwargs):
 
 
 def run_doc_pipeline_subprocess(doc_id: str, **kwargs) -> dict:
-    """子进程运行完整 pipeline，主进程仅 30 MB。子进程结束后 OS 强制回收内存。"""
-    import json, os, subprocess, sys as _sys
-    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "subprocess_pipeline.py")
-    payload = json.dumps({"doc_id": doc_id, "pdf_path": kwargs.get("pdf_path", "")})
-    proc = subprocess.run(
-        [_sys.executable, script],
-        input=payload, capture_output=True, text=True, timeout=900,
-        env={**os.environ, "PYTHONUNBUFFERED": "1"},
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(f"Pipeline subprocess failed: {(proc.stderr or '')[-500:]}")
-    lines = [l for l in (proc.stdout or "").strip().split("\n") if l.strip().startswith("{")]
-    return json.loads(lines[-1]) if lines else {"status": "empty_output"}
+    """三段子进程 pipeline：Phase1 → Phase2 → Phase3-6，每段结束后 OS 回收内存。"""
+    from FNM_RE.subprocess_runner import run_pipeline_in_subprocesses
+    return run_pipeline_in_subprocesses(doc_id, pdf_path=kwargs.get("pdf_path", ""))
 
 
-def run_doc_pipeline_phased_subprocess(doc_id: str, **kwargs) -> dict:
-    """两段子进程 pipeline：Phase 1-2 子进程 → OS 回收 → Phase 3-6 子进程。"""
-    from FNM_RE.subprocess_phases import run_pipeline_subprocess_phases
-    return run_pipeline_subprocess_phases(doc_id, pdf_path=kwargs.get("pdf_path", ""))
+# 保留旧名兼容
+run_doc_pipeline_phased_subprocess = run_doc_pipeline_subprocess
 
 
 def load_doc_structure(*args, **kwargs):

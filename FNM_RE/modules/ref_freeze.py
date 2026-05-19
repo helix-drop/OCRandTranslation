@@ -62,58 +62,8 @@ def _resolve_note_item_owner(
             return chapter_id, source
     return "", ""
 
-_NESTED_NOTE_REF_RE = re.compile(
-    r"\{\{NOTE_REF:([^}]*?)\{\{NOTE_REF:([^}]+)\}\}([^}]*?)\}\}", re.IGNORECASE
-)
-_NOTE_REF_TOKEN_RE = re.compile(r"\{\{NOTE_REF:[^}]+\}\}", re.IGNORECASE)
-_SPLIT_NOTE_REF_RE = re.compile(
-    r"\{\{NO(\{\{NOTE_REF:([^}]+)\}\})TE_REF:([^}]+)\}\}",
-    re.IGNORECASE,
-)
-
-
-
-def _cleanup_nested_note_refs(text: str) -> str:
-    """修复嵌套的 {{NOTE_REF:...{{NOTE_REF:...}}...}} 结构。
-
-    _inject_token_once 对同一区域多次替换时可能造出嵌套 NOTE_REF。
-    此函数检测并拆分为两个独立的 NOTE_REF。
-    """
-    payload = str(text or "")
-    changed = True
-    while changed:
-        changed = False
-        split_match = _SPLIT_NOTE_REF_RE.search(payload)
-        if split_match:
-            inner_token = str(split_match.group(1) or "")
-            outer_id = str(split_match.group(3) or "")
-            outer_token = f"{{{{NOTE_REF:{outer_id}}}}}"
-            replacement = _SPLIT_NOTE_REF_RE.sub(
-                lambda _m: f"{outer_token} {inner_token}",
-                payload,
-                count=1,
-            )
-            if replacement != payload:
-                payload = replacement
-                changed = True
-                continue
-        match = _NESTED_NOTE_REF_RE.search(payload)
-        if match:
-            outer_prefix = str(match.group(1) or "")
-            inner_id = str(match.group(2) or "")
-            outer_suffix = str(match.group(3) or "")
-            outer_full = outer_prefix + inner_id + outer_suffix
-            outer_token = f"{{{{NOTE_REF:{outer_full}}}}}"
-            inner_token = f"{{{{NOTE_REF:{inner_id}}}}}"
-            replacement = _NESTED_NOTE_REF_RE.sub(
-                lambda m: f"{inner_token} {outer_token}" if (m.group(1) or m.group(3)) else inner_token,
-                payload,
-                count=1,
-            )
-            if replacement != payload:
-                payload = replacement
-                changed = True
-    return payload
+from FNM_RE.shared.refs import cleanup_nested_note_refs as _cleanup_nested_note_refs
+from FNM_RE.shared.refs import _NOTE_REF_TOKEN_RE
 
 
 def _shift_coords_out_of_note_ref_token(

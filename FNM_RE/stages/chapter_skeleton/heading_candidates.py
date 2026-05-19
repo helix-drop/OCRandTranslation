@@ -498,6 +498,42 @@ def _collect_toc_heading_candidates(
         )
     return candidates
 
+def _pdf_file_hash(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    h.update(str(path.stat().st_size).encode())
+    with open(path, "rb") as f:
+        h.update(f.read(4096))
+    return h.hexdigest()[:16]
+
+
+def _run_pdf_font_subprocess(
+    pdf_path: str,
+    candidate_file_indices: set[int],
+    file_idx_to_page_no: dict[int, int],
+    candidate_pages: set[int],
+    page_role_by_no: dict[int, str],
+    total_pages: int,
+) -> list[dict]:
+    import subprocess, json as _json, sys as _sys
+    params = {
+        "pdf_path": pdf_path,
+        "candidate_file_indices": sorted(candidate_file_indices),
+        "file_idx_to_page_no": {str(k): v for k, v in file_idx_to_page_no.items()},
+        "candidate_pages": sorted(candidate_pages),
+        "page_role_by_no": {str(k): v for k, v in page_role_by_no.items()},
+        "total_pages": total_pages,
+    }
+    proc = subprocess.run(
+        [_sys.executable, "-m", "FNM_RE.stages.chapter_skeleton._pdf_font_worker"],
+        input=_json.dumps(params).encode(),
+        capture_output=True, timeout=120,
+    )
+    if proc.returncode != 0:
+        return []
+    return _json.loads(proc.stdout)
+
+
 def _collect_pdf_font_band_candidates(
     page_rows: list[dict],
     heading_candidates: list[dict],
@@ -506,6 +542,7 @@ def _collect_pdf_font_band_candidates(
     toc_items: list[dict] | None,
     toc_offset: int,
     file_idx_map: dict[int, int] | None = None,
+    doc_id: str = "",
 ) -> list[dict]:
     path = Path(str(pdf_path or "").strip())
     if not path.exists() or not path.is_file():
@@ -525,10 +562,8 @@ def _collect_pdf_font_band_candidates(
         file_idx_to_page_no = _build_pdf_page_by_file_idx(raw_pages)
     for item in toc_items or []:
         page_no = resolve_toc_item_target_pdf_page(
-            item,
-            offset=int(toc_offset or 0),
-            pages=raw_pages,
-            pdf_page_by_file_idx=file_idx_to_page_no,
+            item, offset=int(toc_offset or 0),
+            pages=raw_pages, pdf_page_by_file_idx=file_idx_to_page_no,
         )
         try:
             resolved = int(page_no)
@@ -536,27 +571,58 @@ def _collect_pdf_font_band_candidates(
             continue
         if resolved > 0:
             candidate_pages.add(resolved)
-    if not candidate_pages:
-        return []
-    try:
-        file_bytes = path.read_bytes()
-    except OSError:
-        return []
     candidate_file_indices: set[int] = set()
     for file_idx, page_no in file_idx_to_page_no.items():
         try:
-            normalized_file_idx = int(file_idx)
-            normalized_page_no = int(page_no or 0)
+            if int(file_idx) >= 0 and int(page_no or 0) in candidate_pages:
+                candidate_file_indices.add(int(file_idx))
         except (TypeError, ValueError):
             continue
-        if normalized_file_idx >= 0 and normalized_page_no in candidate_pages:
-            candidate_file_indices.add(normalized_file_idx)
-    pdf_pages = extract_pdf_text(file_bytes, page_indices=candidate_file_indices)
-    del file_bytes  # 立即释放 PDF 二进制 (~33MB)
-    if not pdf_pages:
+    if not candidate_file_indices:
         return []
+
     page_role_by_no = {int(row.get("page_no") or 0): str(row.get("page_role") or "") for row in page_rows}
     total_pages = max(1, len(page_rows))
+
+    import json as _json
+    page_indices_key = _json.dumps(sorted(candidate_file_indices))
+    pdf_hash = _pdf_file_hash(path) if doc_id else ""
+
+    # 查 DB 缓存
+    if doc_id:
+        try:
+            from persistence.sqlite_store import SQLiteRepository as _R
+            cached = _R().load_pdf_font_candidates(doc_id, pdf_hash, page_indices_key)
+            if cached is not None:
+                return cached
+        except Exception:
+            pass
+
+    # 子进程解析 PDF → 子进程退出即释放全部内存
+    candidates = _run_pdf_font_subprocess(
+        str(path), candidate_file_indices, file_idx_to_page_no,
+        candidate_pages, page_role_by_no, total_pages,
+    )
+
+    # 写缓存
+    if doc_id and candidates:
+        try:
+            from persistence.sqlite_store import SQLiteRepository as _R
+            _R().save_pdf_font_candidates(doc_id, pdf_hash, page_indices_key, candidates)
+        except Exception:
+            pass
+
+    return candidates
+
+
+def _extract_candidates_from_pdf_pages(
+    pdf_pages: list[dict],
+    candidate_pages: set[int],
+    file_idx_to_page_no: dict[int, int],
+    page_role_by_no: dict[int, str],
+    total_pages: int,
+) -> list[dict]:
+    """纯计算：从 extract_pdf_text 结果中筛选 heading candidates。"""
     candidates: list[dict] = []
     dedupe: dict[tuple[int, str, str, str], int] = {}
     for page in pdf_pages:
@@ -665,6 +731,7 @@ def _collect_heading_candidate_rows(
     pdf_path: str,
     pre_extracted_page_candidates: list[dict] | None = None,
     file_idx_map: dict[int, int] | None = None,
+    doc_id: str = "",
 ) -> list[dict]:
     candidates: list[dict] = []
 
@@ -683,6 +750,7 @@ def _collect_heading_candidate_rows(
             toc_items=toc_items,
             toc_offset=toc_offset,
             file_idx_map=file_idx_map,
+            doc_id=doc_id,
         )
     )
     candidates.sort(

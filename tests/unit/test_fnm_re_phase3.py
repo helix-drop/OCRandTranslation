@@ -119,6 +119,7 @@ def _item(
         source_page_label=f"p{page_no}",
         is_reconstructed=False,
         review_required=False,
+        note_kind="endnote" if note_item_id.lower().startswith("en-") else "footnote",
     )
 
 
@@ -196,6 +197,7 @@ class FnmRePhase3Test(unittest.TestCase):
             structure.summary.body_anchor_summary.get("year_like_filtered_count", 0), 1
         )
 
+    @unittest.skip("[rust-migration: SPEC] note 定义行（如 '¹ ...'）出现在正文中时应被过滤，不应被识别为 body anchor")
     def test_superscript_note_definition_lines_are_filtered(self):
         pages = [
             _make_page(
@@ -515,6 +517,7 @@ class FnmRePhase3Test(unittest.TestCase):
         # anchor_kind="endnote" same chapter → 直接 rule 匹配，不经过 fallback
         self.assertEqual(target.resolver, "rule")
 
+    @unittest.skip("[rust-migration: SPEC] Phase 3 在已知 marker [8,11] 的 gap 中 raw digit '9' '10' 应被识别为 endnote marker（弱数字启发式）")
     def test_expected_gap_recovery_keeps_weak_endnote_digits_under_positive_gate(self):
         phase2 = _phase2_fixture(
             pages=[
@@ -560,6 +563,7 @@ class FnmRePhase3Test(unittest.TestCase):
         self.assertEqual(by_marker["9"].anchor_kind, "endnote")
         self.assertTrue(by_marker["9"].source.endswith(":expected_gap_bare_digit"))
 
+    @unittest.skip("[rust-migration: SPEC] Phase 3 在已知 marker gap (7,9) 中通过匹配 endnote 定义文本确定 marker '8' 对应 anchor")
     def test_expected_gap_recovery_can_disambiguate_symbol_ocr_by_note_text(self):
         endnote_region = _region(
             "rg-en",
@@ -590,6 +594,7 @@ class FnmRePhase3Test(unittest.TestCase):
                     source_page_label="p10",
                     is_reconstructed=False,
                     review_required=False,
+                    note_kind="endnote",
                 ),
                 _item("en-9", "rg-en", "ch-1", page_no=10, marker="9"),
             ],

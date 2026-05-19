@@ -83,7 +83,7 @@ from FNM_RE.stages.page_partition import build_page_partitions, summarize_page_p
 from FNM_RE.stages.reviews import build_structure_reviews
 from FNM_RE.stages.section_heads import build_section_heads
 from FNM_RE.stages.units import build_translation_units
-from FNM_RE.status import build_module_gate_status, build_phase4_status, build_phase6_status
+from FNM_RE.app.status import build_module_gate_status, build_phase4_status, build_phase6_status
 
 
 @dataclass(slots=True)
@@ -107,6 +107,7 @@ class ModulePipelineSnapshot:
     diagnostic_pages: list[Any]
     diagnostic_notes: list[Any]
     phase6: Phase6Structure
+    pipeline_usage: dict = field(default_factory=dict)
 
     @property
     def phase6_shadow(self) -> Phase6Structure:
@@ -228,6 +229,7 @@ def _phase_note_items_from_layers(chapter_layers: ChapterLayers) -> list[NoteIte
             source_page_label=str(row.page_no or ""),
             is_reconstructed=bool(row.is_reconstructed),
             review_required=bool(row.review_required),
+            note_kind=row.note_kind,
         )
         for row in chapter_layers.note_items
         if str(row.note_item_id or "").strip()
@@ -635,7 +637,7 @@ def _phase6_summary_from_modules(
         container_titles = [
             title
             for title in container_titles
-            if _summary_title_key(title) not in exported_title_keys
+            if _summary_title_key(str(title or "")) not in exported_title_keys
         ]
     return Phase6Summary(
         page_partition_summary=dict(toc_result.evidence.get("page_partition_summary") or {}),
@@ -739,8 +741,7 @@ def _overlay_repo_units_on_frozen(
     """
     if not repo_units:
         return frozen_units
-    # directly modify frozen_units — its .data is not read by anyone after overlay
-    payload = frozen_units
+    payload = copy.deepcopy(frozen_units)
     by_id: dict[str, dict] = {}
     for row in list(repo_units or []):
         uid = str(row.get("unit_id") or "").strip()
@@ -786,4 +787,3 @@ def _overlay_repo_units_on_frozen(
             overlaid_count, stale_count, len(by_id),
         )
     return payload
-

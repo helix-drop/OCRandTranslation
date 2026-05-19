@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import unittest
 
-from FNM_RE.llm_repair import (
+from FNM_RE.modules.llm_repair import (
     _build_chapter_body_text,
     _enrich_synthesize_anchor_actions,
     _resolve_chapter_id_for_page,

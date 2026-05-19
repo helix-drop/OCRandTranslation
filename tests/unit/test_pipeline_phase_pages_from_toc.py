@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import unittest
 
-from FNM_RE.app.pipeline import _legacy_page_role_from_toc_role, _phase_pages_from_toc
+from FNM_RE.app.pipeline_converters import _toc_role_to_page_role as _legacy_page_role_from_toc_role, _phase_pages_from_toc
 from FNM_RE.modules.toc_structure import build_toc_structure
 from FNM_RE.modules.types import TocPageRole, TocStructure
 

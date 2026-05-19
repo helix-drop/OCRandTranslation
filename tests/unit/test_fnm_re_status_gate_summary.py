@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from FNM_RE.app.pipeline import build_module_pipeline_snapshot
-from FNM_RE.status import build_module_gate_status
+from FNM_RE.app.status import build_module_gate_status
 
 
 def _make_page(

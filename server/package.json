@@ -1,0 +1,7 @@
+{
+  "name": "claude-code-web",
+  "private": true,
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

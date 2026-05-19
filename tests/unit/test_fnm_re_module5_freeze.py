@@ -80,12 +80,13 @@ class FnmReModule5FreezeTest(unittest.TestCase):
             item_summary={},
         )
 
-    def test_biopolitics_main_path_reports_uninjected_matched_refs(self):
+    def test_biopolitics_main_path_blocks_uninjected_matched_refs(self):
         pages, layers, link_table = self._build_biopolitics_inputs()
         result = build_frozen_units(layers, link_table)
         self.assertTrue(result.gate_report.hard["freeze.only_matched_frozen"])
         self.assertTrue(result.gate_report.hard["freeze.no_duplicate_injection"])
-        self.assertTrue(result.gate_report.hard["freeze.closed_without_error"])
+        self.assertFalse(result.gate_report.hard["freeze.closed_without_error"])
+        self.assertIn("freeze_error_skip_detected", result.gate_report.reasons)
         self.assertTrue(result.gate_report.hard["freeze.unit_contract_valid"])
         self.assertTrue(result.data.body_units)
         self.assertEqual(len(result.data.note_units), len(layers.note_items))
@@ -95,6 +96,10 @@ class FnmReModule5FreezeTest(unittest.TestCase):
         )
         self.assertEqual(result.data.freeze_summary.get("max_body_chars"), 6000)
         self.assertGreater(int(result.data.freeze_summary.get("skipped_note_item_count") or 0), 0)
+        self.assertGreater(
+            int((result.data.freeze_summary.get("skip_category_counts") or {}).get("error_skip") or 0),
+            0,
+        )
         del pages
 
     def test_matched_explicit_link_injects_note_ref_token(self):

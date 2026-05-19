@@ -99,9 +99,7 @@ def _local_endnote_ref_number(
                 local_ref_numbers[note_id] = candidate
                 ordered_note_ids.append(note_id)
                 return candidate
-        # non-digit marker（如 *, **）的 endnote 不应消耗数字编号。
-        # 返回 None 使调用方输出 "*" 而非 [^20]。
-        if not original and kind == "endnote":
+        if original and not original.isdigit() and kind == "endnote":
             return None
         # 分配下一个可用编号，跳过已被占用的值以防止重复
         next_num = max(local_ref_numbers.values(), default=0) + 1

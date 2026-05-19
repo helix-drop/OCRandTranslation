@@ -264,14 +264,13 @@ def build_diagnostic_projection(
         chapter_id = str(item.chapter_id or "").strip()
         chapter = chapter_by_id.get(chapter_id)
         region = note_region_by_id.get(str(item.region_id or "").strip())
-        note_kind = str(region.note_kind if region else "")
         unit = note_units.get(note_id)
-        if not note_kind:
-            unit_kind = str(unit.kind if unit else "").strip().lower()
-            if unit_kind in {"footnote", "endnote"}:
-                note_kind = unit_kind
-            else:
-                note_kind = "endnote" if str(note_id).lower().startswith("en-") else "footnote"
+        # 源头唯一：region.note_kind 是 Phase2 的权威；缺失时退化到 item.note_kind
+        # （NoteItemRecord.note_kind 现已升级为 NoteKind Literal，必有合法值）
+        if region is not None and str(region.note_kind or "").strip():
+            note_kind = str(region.note_kind)
+        else:
+            note_kind = str(item.note_kind or "footnote")
         start_page = int(item.page_no or (unit.page_start if unit else 0) or 0)
         diagnostic_notes.append(
             DiagnosticNoteRecord(

@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import base64
 import json
 import math
 import re
@@ -599,9 +598,8 @@ def _build_user_prompt(
 
 def _render_page_image(
     pdf_path: str, page_no: int, pages: list[dict]
-) -> tuple[bytes, str]:
-    """渲染 PDF 中的一页为 JPEG。返回 (bytes, mime_type)。"""
-    # 从 page dict 找准确的 fileIdx
+) -> str | None:
+    """微进程渲染 PDF 页面为 JPEG data URL。"""
     file_idx = page_no - 1
     for p in pages:
         try:
@@ -610,13 +608,11 @@ def _render_page_image(
                 break
         except (TypeError, ValueError):
             continue
-
     try:
-        from FNM_RE.llm_repair import _render_repair_page_image
-
-        return _render_repair_page_image(pdf_path, file_idx)
+        from FNM_RE.modules.pdf_render_subprocess import render_repair_page_data_url
+        return render_repair_page_data_url(pdf_path, file_idx)
     except Exception:
-        return (b"", "")
+        return None
 
 
 def _render_selected_pages(
@@ -624,17 +620,12 @@ def _render_selected_pages(
     page_numbers: list[int],
     pages: list[dict],
 ) -> list[dict]:
-    """渲染选中页面为 base64 编码的 data URL 列表。"""
+    """渲染选中页面为 data URL 列表。"""
     rendered: list[dict] = []
     for pn in page_numbers:
-        img_bytes, mime = _render_page_image(pdf_path, pn, pages)
-        if not img_bytes or not mime:
-            continue
-        encoded = base64.b64encode(img_bytes).decode("ascii")
-        rendered.append({
-            "page_no": pn,
-            "image_url": f"data:{mime};base64,{encoded}",
-        })
+        data_url = _render_page_image(pdf_path, pn, pages)
+        if data_url:
+            rendered.append({"page_no": pn, "image_url": data_url})
     return rendered
 
 
@@ -704,7 +695,36 @@ def _call_vision_llm(
         else:
             create_kwargs[key] = value
 
-    response = client.chat.completions.create(**create_kwargs)
+    import time as _time, sys as _sys
+    _btv_model_id = str(model_args.get("model_id") or "")
+    _n_images = sum(1 for c in user_content if isinstance(c, dict) and c.get("type") == "image_url")
+    print(
+        f"[llm:req] model={_btv_model_id} stage=book_type_verify images={_n_images}",
+        file=_sys.stderr, flush=True,
+    )
+    _t0 = _time.monotonic()
+    try:
+        response = client.chat.completions.create(**create_kwargs)
+    except Exception as _api_exc:
+        _dur = _time.monotonic() - _t0
+        print(
+            f"[llm:res] model={_btv_model_id} stage=book_type_verify dur={_dur:.1f}s err={_api_exc}",
+            file=_sys.stderr, flush=True,
+        )
+        raise
+    _dur = _time.monotonic() - _t0
+    print(
+        f"[llm:res] model={_btv_model_id} stage=book_type_verify dur={_dur:.1f}s ok",
+        file=_sys.stderr, flush=True,
+    )
+    try:
+        from FNM_RE.shared.token_counter import record_usage
+        record_usage(stage="book_type_verify", model_id=_btv_model_id, provider="mimo",
+                     prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
+                     completion_tokens=getattr(response.usage, "completion_tokens", 0),
+                     total_tokens=getattr(response.usage, "total_tokens", 0), dur_ms=int(_dur * 1000))
+    except Exception:
+        pass
     raw_text = ""
     if response.choices and getattr(response.choices[0], "message", None):
         raw_text = str(

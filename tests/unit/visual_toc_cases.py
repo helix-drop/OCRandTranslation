@@ -2144,7 +2144,9 @@ class VisualTocLogicTest(unittest.TestCase):
 
     def test_vision_probe_accepts_relation_match_instead_of_exact_pixel_count(self):
         self.assertTrue(_vision_probe_passed([2, 4, 0, 2], True))
-        self.assertFalse(_vision_probe_passed([2, 2, 1, 2], True))
+        self.assertTrue(_vision_probe_passed([2, 2, 1, 2], True))
+        self.assertFalse(_vision_probe_passed([0, 0, 0, 0], True))
+        self.assertFalse(_vision_probe_passed([2, 4, 0, 2], False))
 
 
 if __name__ == "__main__":

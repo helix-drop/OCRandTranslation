@@ -14,6 +14,11 @@ class _RepoStub:
     def list_fnm_translation_units(self, _doc_id: str) -> list[dict]:
         return [dict(self._unit)]
 
+    def get_fnm_translation_unit_by_id(self, _doc_id: str, unit_id: str) -> dict | None:
+        if self._unit.get("unit_id") == unit_id:
+            return dict(self._unit)
+        return None
+
     def update_fnm_translation_unit(self, doc_id: str, unit_id: str, **fields) -> None:
         self.update_calls.append((doc_id, unit_id, dict(fields)))
         self._unit = {**self._unit, **fields}

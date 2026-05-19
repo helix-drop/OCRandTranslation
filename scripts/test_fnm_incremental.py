@@ -409,7 +409,8 @@ def main() -> int:
             import hashlib, uuid
             run_id = hashlib.sha256(f"{doc_id}-{run_ts}".encode()).hexdigest()[:12]
             repo = SQLiteRepository()
-            repo.save_dev_snapshot(doc_id, run_id=run_id, phase=0, snapshot={
+            import json as _json, tempfile, os
+            snap_data = {
                 "slug": slug,
                 "run_ts": run_ts,
                 "run_id": run_id,
@@ -419,7 +420,11 @@ def main() -> int:
                 "module_phase3": report.get("module_phase3_detail", {}),
                 "run_counts": report.get("run_counts", {}),
                 "by_phase": report.get("by_phase", {}),
-            })
+            }
+            snap_path = os.path.join(tempfile.gettempdir(), f"fnm_snap_{run_id}.json")
+            with open(snap_path, "w", encoding="utf-8") as fh:
+                _json.dump(snap_data, fh, ensure_ascii=False, indent=2)
+            repo.save_dev_snapshot(doc_id, 0, snap_path, note=f"run_id={run_id}")
             print(f"  checkpoint saved: run_id={run_id}", flush=True)
 
     # 汇总

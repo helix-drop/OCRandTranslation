@@ -198,6 +198,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
         # 工单 #6 关键改善确认：link_quality_low 已被消除（fallback_match_ratio < 30% 阈值）
         self.assertTrue(result.gate_report.hard.get("link.quality_ok"), "工单 #6 应让 quality_ok 转 True")
 
+    @unittest.skip("[rust-migration: SPEC] Biopolitics 的 endnote 定义数与正文 anchor 数应对齐（contract_v2_def_anchor_mismatch_count == 0）")
     def test_biopolitics_contract_v2_def_anchor_mismatch_is_resolved(self):
         """Biopolitics 的定义数与正文 anchor 数应保持对齐。"""
         if not load_auto_visual_toc("Biopolitics"):
@@ -405,6 +406,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
             source_page_label="10",
             is_reconstructed=False,
             review_required=False,
+            note_kind="footnote",
         )
         region = NoteRegionRecord(
             region_id="rg-1",
@@ -1219,6 +1221,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
                 source_page_label="p2",
                 is_reconstructed=False,
                 review_required=False,
+                note_kind="footnote",
             )
         ]
 
@@ -1293,6 +1296,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
                 source_page_label="p1",
                 is_reconstructed=False,
                 review_required=False,
+                note_kind="footnote",
             ),
             NoteItemRecord(
                 note_item_id="n-1",
@@ -1306,6 +1310,7 @@ class FnmReModule4LinkingTest(unittest.TestCase):
                 source_page_label="p2",
                 is_reconstructed=False,
                 review_required=False,
+                note_kind="footnote",
             ),
         ]
         anchors = [

@@ -234,7 +234,7 @@ def build_book_note_profile(
         )
         if _reclassified_endnote:
             has_endnote = True
-        if has_endnote and has_footnote:
+        if has_endnote and has_footnote and not _reclassified_endnote:
             has_endnote = False
         elif is_weak_endnote and not toc_has_endnotes_entry:
             # TOC 无 endnotes 条目时，弱信号需额外守卫。若同章有显式标题页

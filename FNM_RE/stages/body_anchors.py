@@ -214,6 +214,7 @@ def _positive_gate_bare_digit(
     chapter_note_items: dict[str, set[int]],
     pdf_path: str = "",
     pages: list[dict] | None = None,
+    bare_digit_verifier: Any | None = None,
 ) -> tuple[list[BodyAnchorRecord], list[BodyAnchorRecord]]:
     """正向证据 gate：bare_digit 必须满足正向条件才能保留。
     条件 3/4 被拒绝的候选送 LLM 视觉验证做二次判断。"""
@@ -266,17 +267,18 @@ def _positive_gate_bare_digit(
         accepted_bare.append(anchor)
 
     llm_verified: list[BodyAnchorRecord] = []
-    if llm_candidates and pdf_path and pages:
+    if llm_candidates and pdf_path and pages and bare_digit_verifier is not None:
         try:
-            from FNM_RE.modules.llm_bare_digit_verify import (
-                verify_bare_digit_candidates,
-            )  # lazy import：避免 body_anchors ↔ modules 循环依赖
-            verified, _rejected, _summary = verify_bare_digit_candidates(
+            verified, _rejected, _summary = bare_digit_verifier(
                 llm_candidates, pdf_path=pdf_path, pages=pages,
             )
             llm_verified = list(verified)
-        except Exception:
-            pass
+        except Exception as exc:
+            import warnings
+            warnings.warn(
+                f"LLM bare digit verification failed ({len(llm_candidates)} candidates lost): {exc}",
+                stacklevel=1,
+            )
 
     return non_bare + accepted_bare + llm_verified, llm_verified
 
@@ -559,6 +561,7 @@ def build_body_anchors(
     *,
     pages: list[dict],
     pdf_path: str = "",
+    bare_digit_verifier: Any | None = None,
 ) -> tuple[list[BodyAnchorRecord], dict]:
     page_by_no = _page_payload_by_no(pages)
     page_role_by_no = {
@@ -573,15 +576,17 @@ def build_body_anchors(
     chapter_note_items = _build_chapter_note_items_set(phase2)
 
     anchors: list[BodyAnchorRecord] = []
-    seen: set[tuple[str, str, str, int]] = set()
+    seen: set[tuple[Any, ...]] = set()
     anchor_counter = 0
     year_like_filtered_total = 0
 
-    # 扫描所有页面（不限定 page_role）：尾注页/过渡页中可能混有正文内容，
-    # 且 _positive_gate_bare_digit 后续会统一过滤假阳性。
+    _BODY_ANCHOR_ROLES = {"body", "chapter", "front_matter", "back_matter", "post_body", ""}
     for page_no in sorted(page_by_no.keys()):
+        role = page_role_by_no.get(page_no, "")
+        if role and role not in _BODY_ANCHOR_ROLES:
+            continue
         page_data = page_by_no[page_no]
-        text = str(page_data.get("markdown") or "")
+        text = str(page_data.get("enriched_markdown") or page_data.get("markdown") or "")
         if not text.strip():
             continue
         chapter_id = _chapter_id_for_page(phase2, page_no)
@@ -604,7 +609,18 @@ def build_body_anchors(
                 has_page_footnote_band=is_footnote_page,
             ):
                 continue
-            key = (pattern, marker, chapter_id, page_no)
+            if pattern == "bare_digit":
+                key = (pattern, marker, chapter_id, page_no)
+            else:
+                key = (
+                    pattern,
+                    marker,
+                    chapter_id,
+                    page_no,
+                    int(ref.get("paragraph_index") or 0),
+                    int(ref.get("char_start") or 0),
+                    int(ref.get("char_end") or 0),
+                )
             if key in seen:
                 continue
             seen.add(key)
@@ -638,6 +654,7 @@ def build_body_anchors(
     anchors, llm_verified = _positive_gate_bare_digit(
         anchors, chapter_note_items=chapter_note_items,
         pdf_path=pdf_path, pages=pages,
+        bare_digit_verifier=bare_digit_verifier,
     )
     anchors, anchor_counter = _recover_expected_gap_bare_digit_anchors(
         anchors,

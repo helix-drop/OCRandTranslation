@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import unittest
 
-from FNM_RE.llm_repair import (
+from FNM_RE.modules.llm_repair import (
     FUZZY_SCORE_THRESHOLD,
     MIN_CHAPTER_UNMATCHED_FOR_AUTO,
     _cluster_focus_pages,

@@ -122,6 +122,7 @@ class VisualAnchorRecoveryMaterializeTest(unittest.TestCase):
                     source_page_label="5",
                     is_reconstructed=False,
                     review_required=False,
+                    note_kind="endnote",
                 ),
                 NoteItemRecord(
                     note_item_id="en-2",
@@ -135,6 +136,7 @@ class VisualAnchorRecoveryMaterializeTest(unittest.TestCase):
                     source_page_label="5",
                     is_reconstructed=False,
                     review_required=False,
+                    note_kind="endnote",
                 ),
                 NoteItemRecord(
                     note_item_id="fn-99",
@@ -148,6 +150,7 @@ class VisualAnchorRecoveryMaterializeTest(unittest.TestCase):
                     source_page_label="2",
                     is_reconstructed=False,
                     review_required=False,
+                    note_kind="footnote",
                 ),
             ],
         )

@@ -10,6 +10,7 @@ from typing import Any
 
 from FNM_RE.app.persist_helpers import to_plain as _to_plain
 
+from FNM_RE.constants import NoteKind
 from FNM_RE.models import (
     BodyAnchorRecord,
     ChapterNoteModeRecord,
@@ -155,6 +156,13 @@ def _repo_note_item_record(row: dict[str, Any]) -> NoteItemRecord | None:
     note_item_id = str(row.get("note_item_id") or "").strip()
     if not note_item_id:
         return None
+    # DB schema: note_kind TEXT NOT NULL — 缺失/非法值视为数据损坏，但为了向后兼容
+    # 旧数据，缺失时根据 note_item_id 前缀兜底（en- → endnote, 其余 → footnote）。
+    raw_kind = str(row.get("note_kind") or "").strip().lower()
+    if raw_kind in {"footnote", "endnote"}:
+        note_kind: NoteKind = raw_kind  # type: ignore[assignment]
+    else:
+        note_kind = "endnote" if note_item_id.lower().startswith("en-") else "footnote"
     return NoteItemRecord(
         note_item_id=note_item_id,
         region_id=str(row.get("region_id") or ""),
@@ -167,6 +175,7 @@ def _repo_note_item_record(row: dict[str, Any]) -> NoteItemRecord | None:
         source_page_label=str(row.get("display_marker") or row.get("source_marker") or ""),
         is_reconstructed=False,
         review_required=False,
+        note_kind=note_kind,
     )
 
 

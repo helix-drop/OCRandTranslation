@@ -7,7 +7,6 @@ OCR (GlyphLessFont) 对上标数字存在系统性误识别（⁸→#/*, ¹→!,
 
 from __future__ import annotations
 
-import base64
 import json
 import re
 import time
@@ -611,7 +610,7 @@ def _materialize_visual_findings(
             char_end=char_end,
             source_marker=source_marker,
             normalized_marker=normalized_marker,
-            anchor_kind="unknown",
+            anchor_kind="endnote",
             certainty=VISUAL_RECOVERY_ANCHOR_CERTAINTY,
             source_text=anchor_phrase if anchor_phrase else "",
             source="visual_repair",
@@ -643,22 +642,14 @@ def _int_to_unicode_superscript(n: int) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _render_page_image(pdf_path: str, page_no: int) -> tuple[bytes, str]:
-    """渲染单个 PDF 页面为 JPEG bytes。"""
-    # fileIdx = bookPage - 1 (0-based)
+def _render_page_image(pdf_path: str, page_no: int) -> str | None:
+    """微进程渲染单页为 JPEG data URL。子进程退出后 OS 回收全部内存。"""
     file_idx = max(0, page_no - 1)
     try:
-        from FNM_RE.llm_repair import _render_repair_page_image
-
-        return _render_repair_page_image(pdf_path, file_idx)
+        from FNM_RE.modules.pdf_render_subprocess import render_repair_page_data_url
+        return render_repair_page_data_url(pdf_path, file_idx)
     except Exception:
-        try:
-            from document.pdf_extract import render_pdf_page
-
-            png = render_pdf_page(pdf_path, file_idx, scale=1.3)
-            return (png, "image/png") if png else (b"", "")
-        except Exception:
-            return (b"", "")
+        return None
 
 
 def _request_visual_findings(
@@ -708,7 +699,30 @@ def _request_visual_findings(
         else:
             create_kwargs[key] = value
 
-    response = client.chat.completions.create(**create_kwargs)
+    import time as _time, sys as _sys
+    _vr_model_id = str(model_args.get("model_id") or "")
+    print(
+        f"[llm:req] model={_vr_model_id} stage=visual_recovery"
+        f" pages={page_start}-{page_end} markers={missing_markers[:5]}",
+        file=_sys.stderr, flush=True,
+    )
+    _t0 = _time.monotonic()
+    try:
+        response = client.chat.completions.create(**create_kwargs)
+    except Exception as _api_exc:
+        _dur = _time.monotonic() - _t0
+        print(
+            f"[llm:res] model={_vr_model_id} stage=visual_recovery"
+            f" pages={page_start}-{page_end} dur={_dur:.1f}s err={_api_exc}",
+            file=_sys.stderr, flush=True,
+        )
+        raise
+    _dur = _time.monotonic() - _t0
+    print(
+        f"[llm:res] model={_vr_model_id} stage=visual_recovery"
+        f" pages={page_start}-{page_end} dur={_dur:.1f}s ok",
+        file=_sys.stderr, flush=True,
+    )
     raw_text = ""
     if response.choices and getattr(response.choices[0], "message", None):
         try:
@@ -767,15 +781,12 @@ def run_visual_anchor_recovery(
 
     sample_pages = _sample_page_range(min_page, max_page, VISUAL_RECOVERY_MAX_IMAGES)
 
-    # 渲染页面
+    # 渲染页面（微进程，每次渲染后 OS 回收内存）
     rendered: list[dict] = []
     for pno in sample_pages:
-        img_bytes, mime = _render_page_image(pdf_path, pno)
-        if img_bytes and mime:
-            encoded = base64.b64encode(img_bytes).decode("ascii")
-            rendered.append(
-                {"page_no": pno, "image_url": f"data:{mime};base64,{encoded}"}
-            )
+        data_url = _render_page_image(pdf_path, pno)
+        if data_url:
+            rendered.append({"page_no": pno, "image_url": data_url})
 
     if not rendered:
         print(

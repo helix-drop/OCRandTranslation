@@ -419,7 +419,7 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
                 write_calls.append(len(results))
 
             with (
-                patch.dict(main.__globals__, {"parse_args": lambda: Namespace(slug="", folder="", doc_id="", group="all", include_all=False, limit=0, batch_tag="batch")}),
+                patch.dict(main.__globals__, {"parse_args": lambda: Namespace(slug="", folder="", doc_id="", group="all", include_all=False, limit=0, batch_tag="batch", skip_translation=False, verbose=False)}),
                 patch.dict(main.__globals__, {"select_example_books": lambda **_kwargs: books}),
                 patch.dict(main.__globals__, {"OUTPUT_ROOT": output_dir}),
                 patch.dict(main.__globals__, {"_process_book": Mock(side_effect=[

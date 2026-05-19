@@ -17,7 +17,6 @@ from typing import Any
 from openai import OpenAI
 from rapidfuzz.fuzz import partial_ratio_alignment
 
-from document.pdf_extract import render_pdf_page
 from FNM_RE.shared.notes import normalize_note_marker
 from persistence.sqlite_store import SQLiteRepository
 from persistence.storage import get_pdf_path, resolve_fnm_model_pool_specs
@@ -75,21 +74,6 @@ def _get_repair_client(resolved_args: dict) -> object:
         )
         _llm_repair_client_args_hash = new_hash
     return _llm_repair_client
-
-_llm_repair_fitz_doc = None
-_llm_repair_fitz_path = ""
-
-def _get_repair_fitz_doc(pdf_path: str) -> object:
-    """复用 PyMuPDF 文档对象，避免每页重复打开。"""
-    global _llm_repair_fitz_doc, _llm_repair_fitz_path
-    if _llm_repair_fitz_doc is None or _llm_repair_fitz_path != pdf_path:
-        if _llm_repair_fitz_doc is not None:
-            try: _llm_repair_fitz_doc.close()
-            except Exception: pass
-        import fitz
-        _llm_repair_fitz_doc = fitz.open(pdf_path)
-        _llm_repair_fitz_path = pdf_path
-    return _llm_repair_fitz_doc
 
 LLM_REPAIR_FOOTNOTE_PAGE_PADDING = 1
 
@@ -994,6 +978,7 @@ def _resolved_spec_to_model_args(spec) -> dict:
 
 
 def _resolve_repair_model_args() -> dict:
+    """返回主模型参数（向后兼容）。"""
     specs = resolve_fnm_model_pool_specs()
     if not specs:
         raise RuntimeError("未配置可用的 FNM 视觉与修补模型")
@@ -1001,6 +986,19 @@ def _resolve_repair_model_args() -> dict:
     if not str(spec.api_key or "").strip():
         raise RuntimeError("当前 FNM 视觉与修补模型缺少 API Key")
     return _resolved_spec_to_model_args(spec)
+
+
+def _resolve_all_repair_model_args() -> list[dict]:
+    """返回所有可用模型参数列表（主模型 + 降级模型）。"""
+    specs = resolve_fnm_model_pool_specs()
+    result: list[dict] = []
+    for spec in specs:
+        if not str(spec.api_key or "").strip():
+            continue
+        result.append(_resolved_spec_to_model_args(spec))
+    if not result:
+        raise RuntimeError("未配置可用的 FNM 视觉与修补模型（所有槽位均无 API Key）")
+    return result
 
 
 def _cluster_focus_pages(cluster: dict) -> list[int]:
@@ -1109,7 +1107,7 @@ def _build_chapter_body_text(
     cursor = 0
     sep = "\n\n"
     if start > 0 and end >= start:
-        raw_pages = pages if pages is not None else repo.load_pages(doc_id)
+        raw_pages = pages if pages is not None else (getattr(repo, "load_pages_phase1", None) or repo.load_pages)(doc_id)
         if page_roles is not None:
             page_role_by_no = page_roles
         else:
@@ -1184,12 +1182,16 @@ def _resolve_page_span_from_range(
     for page_no, span_start, span_end in spans:
         if span_start <= start_offset < span_end and span_start < end_offset <= span_end:
             return int(page_no), int(span_start)
+    # 跨页情况：start_offset 和 end_offset 分属不同 span，取 start 所在页
+    for page_no, span_start, span_end in spans:
+        if span_start <= start_offset < span_end:
+            return int(page_no), int(span_start)
     return None
 
 
 def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepository, pages: list[dict] | None = None, page_map: dict[int, dict] | None = None) -> list[dict]:
     if page_map is None:
-        raw_pages = pages if pages is not None else repo.load_pages(doc_id)
+        raw_pages = pages if pages is not None else (getattr(repo, "load_pages_phase1", None) or repo.load_pages)(doc_id)
         page_map = {
             int(page.get("bookPage") or 0): dict(page)
             for page in (raw_pages or [])
@@ -1218,24 +1220,6 @@ def _build_cluster_page_contexts(doc_id: str, cluster: dict, *, repo: SQLiteRepo
     return contexts
 
 
-def _render_repair_page_image(pdf_path: str, file_idx: int) -> tuple[bytes, str]:
-    try:
-        doc = _get_repair_fitz_doc(pdf_path)
-        if file_idx < 0 or file_idx >= len(doc):
-            return (b"", "")
-        page = doc[file_idx]
-        pix = page.get_pixmap(matrix=fitz.Matrix(LLM_REPAIR_IMAGE_SCALE, LLM_REPAIR_IMAGE_SCALE), alpha=False)
-        img = pix.tobytes("jpg")
-        pix = None
-        return (img, "image/jpeg")
-    except Exception:
-        try:
-            rendered = render_pdf_page(pdf_path, file_idx, scale=LLM_REPAIR_IMAGE_SCALE)
-        except Exception:
-            return (b"", "")
-        return (rendered, "image/png") if rendered else (b"", "")
-
-
 def _attach_repair_images_to_contexts(contexts: list[dict], *, request_cluster: dict) -> list[dict]:
     if not _should_attach_repair_images(request_cluster):
         return [dict(item) for item in contexts or []]
@@ -1248,10 +1232,10 @@ def _attach_repair_images_to_contexts(contexts: list[dict], *, request_cluster: 
         except (TypeError, ValueError):
             file_idx = 0
         if pdf_path:
-            rendered, mime = _render_repair_page_image(pdf_path, file_idx)
-            if rendered and mime:
-                encoded = base64.b64encode(rendered).decode("ascii")
-                row["image_url"] = f"data:{mime};base64,{encoded}"
+            from FNM_RE.modules.pdf_render_subprocess import render_repair_page_data_url
+            data_url = render_repair_page_data_url(pdf_path, file_idx)
+            if data_url:
+                row["image_url"] = data_url
         out.append(row)
     return out
 
@@ -1381,6 +1365,11 @@ def request_llm_repair_actions(
     trace_callback=None,
 ) -> dict:
     resolved_args = dict(model_args or _resolve_repair_model_args())
+    fallback_model_args: list[dict] = []
+    if model_args is None:
+        all_args = _resolve_all_repair_model_args()
+        if len(all_args) > 1:
+            fallback_model_args = all_args[1:]  # 备用模型，审核异常时降级
     request_cluster = _slice_cluster_for_request(
         cluster,
         max_matched_examples=max_matched_examples,
@@ -1486,66 +1475,98 @@ def request_llm_repair_actions(
         "usage": {},
     }
     _emit_llm_trace(trace_callback, started_trace)
-    client = _get_repair_client(resolved_args)
+
+    all_model_args = [resolved_args] + fallback_model_args
+    response = None
     image_refused = False
     started = time.time()
+    last_error: Exception | None = None
 
-    def _do_call(content: list[dict[str, Any]]):
-        request_overrides = dict(resolved_args.get("request_overrides") or {})
-        if not request_overrides and str(resolved_args.get("provider") or "").strip().lower() == "qwen":
-            request_overrides = {"extra_body": {"enable_thinking": False}}
-        create_kwargs = {
-            "model": str(resolved_args.get("model_id") or ""),
-            "max_tokens": LLM_REPAIR_MAX_OUTPUT_TOKENS,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": content},
-            ],
-        }
-        _merge_overrides_into_chat_kwargs(create_kwargs, request_overrides)
-        with _time_limit(60):
-            return client.chat.completions.create(**create_kwargs)
-    try:
-        response = _do_call(user_content)
-    except Exception as exc:
-        # DashScope 的内容审核偶尔拒绝整批图片（尤其是 OCR 扫描件里的图像）。
-        # 只要存在图片，就剥离 image_url 再试一次纯文本路径，保证 Goldstein 这类
-        # 扫描页面仍能得到 LLM 修补建议。
-        msg = str(exc)
-        if (
-            "data_inspection_failed" in msg.lower()
-            or "DataInspectionFailed" in msg
-        ) and any(c.get("type") == "image_url" for c in user_content):
-            image_refused = True
-            text_only_content = [c for c in user_content if c.get("type") != "image_url"]
-            try:
-                response = _do_call(text_only_content)
-            except Exception as exc2:
-                failed = _classify_provider_exception(exc2)
+    for model_attempt, current_args in enumerate(all_model_args):
+        client = _get_repair_client(current_args)
+        started = time.time()
+
+        def _do_call(content: list[dict[str, Any]], _args: dict = current_args) -> Any:
+            request_overrides = dict(_args.get("request_overrides") or {})
+            if not request_overrides and str(_args.get("provider") or "").strip().lower() == "qwen":
+                request_overrides = {"extra_body": {"enable_thinking": False}}
+            create_kwargs = {
+                "model": str(_args.get("model_id") or ""),
+                "max_tokens": LLM_REPAIR_MAX_OUTPUT_TOKENS,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": content},
+                ],
+            }
+            _merge_overrides_into_chat_kwargs(create_kwargs, request_overrides)
+            with _time_limit(60):
+                return client.chat.completions.create(**create_kwargs)
+
+        try:
+            response = _do_call(user_content)
+            if model_attempt > 0:
+                # 降级模型成功，更新 resolved_args 为实际使用的模型
+                resolved_args = dict(current_args)
+            break
+        except Exception as exc:
+            last_error = exc
+            msg = str(exc)
+            is_moderation = (
+                "data_inspection_failed" in msg.lower()
+                or "DataInspectionFailed" in msg
+                or "content_filter" in msg.lower()
+                or "review" in msg.lower()
+            )
+            # DashScope 的内容审核偶尔拒绝整批图片 —— 先尝试剥离图片
+            if (
+                "data_inspection_failed" in msg.lower()
+                or "DataInspectionFailed" in msg
+            ) and any(c.get("type") == "image_url" for c in user_content):
+                image_refused = True
+                text_only_content = [c for c in user_content if c.get("type") != "image_url"]
+                try:
+                    response = _do_call(text_only_content)
+                    if model_attempt > 0:
+                        resolved_args = dict(current_args)
+                    break
+                except Exception as exc2:
+                    last_error = exc2
+                    if model_attempt + 1 < len(all_model_args):
+                        continue  # 尝试下一个模型
+                    failed = _classify_provider_exception(exc2)
+                    _emit_llm_trace(
+                        trace_callback,
+                        {
+                            **started_trace,
+                            "stage": f"{_LLM_REPAIR_USAGE_STAGE}.failed",
+                            "reason_for_request": "LLM repair 请求失败（所有模型已尝试）",
+                            "error": str(failed),
+                            "timing": {"duration_ms": int(max(0.0, (time.time() - started) * 1000.0))},
+                        },
+                    )
+                    raise failed from exc2
+            elif is_moderation and model_attempt + 1 < len(all_model_args):
+                # 审核/内容过滤错误，尝试下一个降级模型
+                continue
+            else:
+                if model_attempt + 1 < len(all_model_args):
+                    continue  # 未知错误也尝试降级（如 400）
+                failed = _classify_provider_exception(exc)
                 _emit_llm_trace(
                     trace_callback,
                     {
                         **started_trace,
                         "stage": f"{_LLM_REPAIR_USAGE_STAGE}.failed",
-                        "reason_for_request": "LLM repair 请求失败",
+                        "reason_for_request": "LLM repair 请求失败（所有模型已尝试）",
                         "error": str(failed),
                         "timing": {"duration_ms": int(max(0.0, (time.time() - started) * 1000.0))},
                     },
                 )
-                raise failed from exc2
-        else:
-            failed = _classify_provider_exception(exc)
-            _emit_llm_trace(
-                trace_callback,
-                {
-                    **started_trace,
-                    "stage": f"{_LLM_REPAIR_USAGE_STAGE}.failed",
-                    "reason_for_request": "LLM repair 请求失败",
-                    "error": str(failed),
-                    "timing": {"duration_ms": int(max(0.0, (time.time() - started) * 1000.0))},
-                },
-            )
-            raise failed from exc
+                raise failed from exc
+
+    if response is None:
+        failed = _classify_provider_exception(last_error or RuntimeError("all models failed"))
+        raise failed
     usage = _build_usage(
         prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
         completion_tokens=getattr(response.usage, "completion_tokens", 0),
@@ -1832,7 +1853,7 @@ def run_llm_repair(
     usage_events: list[dict] = []
     token_accounting: list[dict] = []
 
-    raw_pages = repo.load_pages(doc_id)
+    raw_pages = (getattr(repo, "load_pages_phase1", None) or repo.load_pages)(doc_id)
     # 预缓存：跨 cluster 不变的数据只查一次
     _cached_page_roles = _fnm_page_role_by_no(doc_id, repo=repo) or {}
     _cached_page_map = {
@@ -1976,7 +1997,9 @@ def run_llm_repair(
                 if not marker:
                     continue
                 anchor_id = f"llm-anchor-{_slug_token(note_item_id)}"
-                char_start = int(action.get("char_start") or 0)
+                char_start = int(action.get("char_start") if action.get("char_start") is not None else -1)
+                if char_start < 0:
+                    continue
                 char_end = int(action.get("char_end") or max(char_start + 1, 1))
                 # 去重：同一 (chapter, page, char_start, char_end) 位置不允许多个 note 复用
                 pos_key = (chapter_id, page_no, max(0, char_start), max(char_start + 1, char_end))

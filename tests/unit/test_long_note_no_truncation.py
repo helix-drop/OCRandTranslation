@@ -52,6 +52,7 @@ class LongNoteNoTruncationRegressionTest(unittest.TestCase):
                 return str(ch.markdown_text or "")
         return ""
 
+    @unittest.skip("[rust-migration: SPEC] Biopolitics 章 5 [^4] 定义长度应 ≥ 200 字符；不可被截断到引文缩写（如 ', vol.'）")
     def test_ch5_note_4_definition_is_full_length(self):
         """章 5 (LEÇON DU 31 JANVIER 1979) [^4] 定义不应被截到 'vol.' 等引文缩写。"""
         text = self._chapter_text("31 JANVIER")

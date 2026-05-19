@@ -436,13 +436,13 @@ def _create_core_tables(conn: sqlite3.Connection) -> None:
         CREATE TABLE IF NOT EXISTS fnm_phase_runs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             doc_id TEXT NOT NULL,
-            run_id TEXT NOT NULL,
+            run_id TEXT NOT NULL DEFAULT '',
             phase INTEGER NOT NULL,
             status TEXT NOT NULL DEFAULT 'running',
             gate_report_json TEXT,
             counts_json TEXT,
             hash_json TEXT,
-            started_at INTEGER NOT NULL,
+            started_at INTEGER,
             finished_at INTEGER
         );
         CREATE INDEX IF NOT EXISTS idx_fn_phase_runs_doc_phase
@@ -451,9 +451,9 @@ def _create_core_tables(conn: sqlite3.Connection) -> None:
         CREATE TABLE IF NOT EXISTS fnm_dev_snapshots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             doc_id TEXT NOT NULL,
-            run_id TEXT NOT NULL,
+            run_id TEXT NOT NULL DEFAULT '',
             phase INTEGER NOT NULL,
-            snapshot_json TEXT NOT NULL,
+            snapshot_json TEXT NOT NULL DEFAULT '{}',
             created_at INTEGER NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_fn_dev_snapshots_doc
@@ -894,36 +894,36 @@ def _migrate_fnm_schema(conn: sqlite3.Connection) -> None:
         CREATE UNIQUE INDEX IF NOT EXISTS idx_fnm_chapter_body_pages_doc_ch
             ON fnm_chapter_body_pages(doc_id, chapter_id);
 
-        CREATE TABLE IF NOT EXISTS fnm_phase_runs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            doc_id TEXT NOT NULL,
-            phase INTEGER NOT NULL,
-            status TEXT NOT NULL DEFAULT 'idle',
-            gate_pass INTEGER NOT NULL DEFAULT 0,
-            gate_report_json TEXT,
-            errors_json TEXT,
-            execution_mode TEXT NOT NULL DEFAULT 'test',
-            forced_skip INTEGER NOT NULL DEFAULT 0,
-            started_at INTEGER,
-            ended_at INTEGER,
-            created_at INTEGER NOT NULL,
-            updated_at INTEGER NOT NULL,
-            UNIQUE(doc_id, phase),
-            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
-        );
+        """
+    )
+    # fnm_phase_runs: production schema 已在 _create_core_tables 创建，
+    # 这里补齐 dev 侧需要的列
+    _ensure_columns(
+        conn,
+        "fnm_phase_runs",
+        [
+            ("gate_pass", "gate_pass INTEGER NOT NULL DEFAULT 0"),
+            ("errors_json", "errors_json TEXT"),
+            ("execution_mode", "execution_mode TEXT NOT NULL DEFAULT 'test'"),
+            ("forced_skip", "forced_skip INTEGER NOT NULL DEFAULT 0"),
+            ("ended_at", "ended_at INTEGER"),
+            ("created_at", "created_at INTEGER"),
+            ("updated_at", "updated_at INTEGER"),
+        ],
+    )
+    _ensure_columns(
+        conn,
+        "fnm_dev_snapshots",
+        [
+            ("blob_path", "blob_path TEXT NOT NULL DEFAULT ''"),
+            ("size_bytes", "size_bytes INTEGER NOT NULL DEFAULT 0"),
+            ("note", "note TEXT"),
+        ],
+    )
+    conn.executescript(
+        """
         CREATE INDEX IF NOT EXISTS idx_fnm_phase_runs_doc
             ON fnm_phase_runs(doc_id, phase);
-
-        CREATE TABLE IF NOT EXISTS fnm_dev_snapshots (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            doc_id TEXT NOT NULL,
-            phase INTEGER NOT NULL,
-            blob_path TEXT NOT NULL,
-            size_bytes INTEGER NOT NULL DEFAULT 0,
-            note TEXT,
-            created_at INTEGER NOT NULL,
-            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
-        );
         CREATE INDEX IF NOT EXISTS idx_fnm_dev_snapshots_doc_phase
             ON fnm_dev_snapshots(doc_id, phase, created_at);
         """
@@ -1066,31 +1066,16 @@ def _migrate_fnm_schema(conn: sqlite3.Connection) -> None:
     )
     conn.executescript(
         """
-        CREATE TABLE IF NOT EXISTS fnm_phase_runs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS fnm_pdf_font_candidates (
+            row_id INTEGER PRIMARY KEY AUTOINCREMENT,
             doc_id TEXT NOT NULL,
-            run_id TEXT NOT NULL,
-            phase INTEGER NOT NULL,
-            status TEXT NOT NULL DEFAULT 'running',
-            gate_report_json TEXT,
-            counts_json TEXT,
-            hash_json TEXT,
-            started_at INTEGER NOT NULL,
-            finished_at INTEGER
+            pdf_hash TEXT NOT NULL,
+            page_indices TEXT NOT NULL,
+            candidates_json TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            UNIQUE(doc_id, pdf_hash, page_indices),
+            FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
         );
-        CREATE INDEX IF NOT EXISTS idx_fn_phase_runs_doc_phase
-            ON fnm_phase_runs(doc_id, phase, started_at);
-
-        CREATE TABLE IF NOT EXISTS fnm_dev_snapshots (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            doc_id TEXT NOT NULL,
-            run_id TEXT NOT NULL,
-            phase INTEGER NOT NULL,
-            snapshot_json TEXT NOT NULL,
-            created_at INTEGER NOT NULL
-        );
-        CREATE INDEX IF NOT EXISTS idx_fn_dev_snapshots_doc
-            ON fnm_dev_snapshots(doc_id, phase, created_at);
         """
     )
 

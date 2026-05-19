@@ -21,7 +21,7 @@ from FNM_RE import (
     run_llm_repair,
     run_post_translate_export_checks_for_doc,
 )
-from FNM_RE.page_translate import collect_fnm_unit_failed_locations
+from FNM_RE.app.page_translate import collect_fnm_unit_failed_locations
 from persistence.task_logs import append_doc_task_log, create_doc_task_log
 from web.services import TranslationServices
 

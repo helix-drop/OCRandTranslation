@@ -42,7 +42,7 @@ from FNM_RE import (
     load_doc_structure as load_fnm_doc_structure,
     run_doc_pipeline as run_fnm_pipeline,
 )
-from FNM_RE.page_translate import (
+from FNM_RE.app.page_translate import (
     apply_body_unit_translations,
     build_fnm_body_unit_jobs,
     build_fnm_retry_summary,
@@ -507,7 +507,7 @@ def _format_reason_counts(reason_counts: Any) -> str:
     )
 
 
-def verify_fnm_structure(doc_id: str, *, snapshot: Any | None = None) -> dict[str, Any]:
+def verify_fnm_structure(doc_id: str, *, snapshot: Any | None = None, start_phase: str = "toc") -> dict[str, Any]:
     repo = SQLiteRepository()
     latest_run = repo.get_latest_fnm_run(doc_id)
     if not latest_run:
@@ -522,7 +522,7 @@ def verify_fnm_structure(doc_id: str, *, snapshot: Any | None = None) -> dict[st
     anchors = repo.list_fnm_body_anchors(doc_id)
     links = repo.list_fnm_note_links(doc_id)
     reviews = repo.list_fnm_structure_reviews(doc_id)
-    structure_status = build_fnm_structure_status(doc_id, repo=repo, snapshot=snapshot)
+    structure_status = build_fnm_structure_status(doc_id, repo=repo, snapshot=snapshot, start_phase=start_phase)
     footnote_items = [item for item in note_items if str(item.get("note_kind") or "") == "footnote"]
     endnote_items = [item for item in note_items if str(item.get("note_kind") or "") == "endnote"]
     linked_endnote_ids = {

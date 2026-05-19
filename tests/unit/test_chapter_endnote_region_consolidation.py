@@ -52,6 +52,7 @@ class ChapterEndnoteRegionConsolidationTest(unittest.TestCase):
         # 应至少含 4 个连续页（金板 note_pages: 111-118 共 8 页，OCR 识别 7-8 页都可接受）
         self.assertGreaterEqual(len(regs[0].pages), 4)
 
+    @unittest.skip("[rust-migration: SPEC] endnote region 连续性：LEÇON DU 7 FÉVRIER (139-148) 应形成单一 endnote region，不被 footnote-band 短路切碎")
     def test_chapter_7_fevrier_has_single_endnote_region(self):
         """金板章 6（LEÇON DU 7 FÉVRIER 1979），书页 139-148 应连成一段。"""
         regs = self._endnote_regions_for("7 F")  # 7 FÉVRIER

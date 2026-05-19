@@ -1097,6 +1097,34 @@ class FnmRepoMixin:
         with transaction(self.db_path) as conn:
             self._delete_fnm_products_from_phase(conn, doc_id, int(phase_from))
 
+    # ── PDF font band candidates 缓存 ──
+
+    def load_pdf_font_candidates(
+        self, doc_id: str, pdf_hash: str, page_indices: str
+    ) -> list[dict] | None:
+        import json as _json
+        with read_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT candidates_json FROM fnm_pdf_font_candidates "
+                "WHERE doc_id=? AND pdf_hash=? AND page_indices=?",
+                (doc_id, pdf_hash, page_indices),
+            ).fetchone()
+            return _json.loads(row[0]) if row else None
+
+    def save_pdf_font_candidates(
+        self, doc_id: str, pdf_hash: str, page_indices: str, candidates: list[dict],
+    ) -> None:
+        import json as _json
+        now = int(__import__("time").time())
+        with transaction(self.db_path) as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO fnm_pdf_font_candidates "
+                "(doc_id, pdf_hash, page_indices, candidates_json, created_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (doc_id, pdf_hash, page_indices,
+                 _json.dumps(candidates, ensure_ascii=False), now),
+            )
+
     def list_fnm_diagnostic_notes(self, doc_id: str) -> list[dict]:
         from FNM_RE import list_diagnostic_notes_for_doc
 
@@ -1121,6 +1149,37 @@ class FnmRepoMixin:
                 (doc_id,),
             ).fetchall()
             return [self._row_to_fnm_unit(row) for row in rows]
+
+    def list_fnm_translation_unit_metadata(self, doc_id: str) -> list[dict]:
+        """轻量查询：仅返回 unit_id/kind/status/section/page 元数据，不含 page_segments。
+        供翻译 worker 的 build_plan 和进度报告使用，避免加载数十 MB 的 page_segments_json。
+        """
+        with read_connection(self.db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT unit_id, kind, owner_kind, owner_id, section_id, section_title,
+                       section_start_page, section_end_page, note_id,
+                       page_start, page_end, char_count,
+                       status, error_msg, target_ref
+                FROM fnm_translation_units
+                WHERE doc_id = ?
+                ORDER BY
+                    CASE WHEN lower(COALESCE(owner_kind, '')) = 'chapter' THEN 0 ELSE 1 END ASC,
+                    COALESCE(section_start_page, page_start, 0) ASC,
+                    page_start ASC, unit_id ASC
+                """,
+                (doc_id,),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_fnm_translation_unit_by_id(self, doc_id: str, unit_id: str) -> dict | None:
+        """按 unit_id 查询单个翻译单元（含 page_segments），避免全表扫描。"""
+        with read_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT * FROM fnm_translation_units WHERE doc_id = ? AND unit_id = ?",
+                (doc_id, unit_id),
+            ).fetchone()
+            return self._row_to_fnm_unit(row)
 
     # ── 按章过滤的 list 方法（供逐章 DB 驱动 Phase 使用） ──
 
@@ -1506,61 +1565,6 @@ class FnmRepoMixin:
                 for r in rows
             ]
 
-    # ── 分章缓存：翻译单元读写 ──
-
-    def save_chapter_units(self, doc_id: str, chapter_id: str, units: list[dict]) -> None:
-        """写入单章翻译单元（先删后插）。"""
-        now = int(time.time())
-        with transaction(self.db_path) as conn:
-            conn.execute(
-                "DELETE FROM fnm_translation_units WHERE doc_id = ? AND chapter_id = ?",
-                (doc_id, chapter_id),
-            )
-            if units:
-                params = [
-                    (
-                        doc_id,
-                        u.get("unit_id"),
-                        chapter_id,
-                        u.get("section_id"),
-                        u.get("kind"),
-                        u.get("owner_kind"),
-                        u.get("order"),
-                        u.get("source_text"),
-                        u.get("translated_text"),
-                        u.get("status"),
-                        u.get("target_ref"),
-                        u.get("source_hash"),
-                        u.get("segment_plan_hash"),
-                        u.get("page_start"),
-                        u.get("page_end"),
-                        u.get("section_title"),
-                        json.dumps(_serialize_segments_for_db(u.get("page_segments") or []), ensure_ascii=False),
-                        json.dumps(u.get("payload") or {}, ensure_ascii=False),
-                        now,
-                        now,
-                    )
-                    for u in (units or [])
-                ]
-                conn.executemany(
-                    """INSERT INTO fnm_translation_units(
-                        doc_id, unit_id, chapter_id, section_id, kind, owner_kind, \"order\",
-                        source_text, translated_text, status, target_ref,
-                        source_hash, segment_plan_hash, page_start, page_end, section_title,
-                        page_segments_json, payload_json, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    params,
-                )
-
-    def load_chapter_units(self, doc_id: str, chapter_id: str) -> list[dict]:
-        """读取单章翻译单元。"""
-        with read_connection(self.db_path) as conn:
-            rows = conn.execute(
-                "SELECT * FROM fnm_translation_units WHERE doc_id = ? AND chapter_id = ? ORDER BY \"order\" ASC",
-                (doc_id, chapter_id),
-            ).fetchall()
-            return [dict(row) for row in rows]
-
     def get_fnm_section_for_page(self, doc_id: str, book_page: int) -> dict | None:
         with read_connection(self.db_path) as conn:
             row = conn.execute(
@@ -1841,51 +1845,14 @@ class FnmRepoMixin:
                 (str(status), now, doc_id, run_id, int(phase)),
             )
 
-    def save_dev_snapshot(self, doc_id: str, *, run_id: str, phase: int, snapshot: dict) -> None:
-        now = int(time.time())
-        with transaction(self.db_path) as conn:
-            conn.execute(
-                "INSERT INTO fnm_dev_snapshots(doc_id, run_id, phase, snapshot_json, created_at) VALUES (?, ?, ?, ?, ?)",
-                (doc_id, run_id, int(phase), json.dumps(snapshot, ensure_ascii=False), now),
-            )
-
-    def list_dev_snapshots(self, doc_id: str, phase: int | None = None) -> list[dict]:
-        rows = []
-        with transaction(self.db_path) as conn:
-            if phase is not None:
-                cur = conn.execute(
-                    "SELECT * FROM fnm_dev_snapshots WHERE doc_id=? AND phase=? ORDER BY created_at DESC",
-                    (doc_id, int(phase)),
-                )
-            else:
-                cur = conn.execute(
-                    "SELECT * FROM fnm_dev_snapshots WHERE doc_id=? ORDER BY created_at DESC",
-                    (doc_id,),
-                )
-            for row in cur.fetchall():
-                rows.append(dict(row))
-        return rows
-
     def reset_from_phase(self, doc_id: str, phase: int) -> dict[str, int]:
-        """清除 phase >= N 的所有产物。返回清除行数统计。"""
-        counts: dict[str, int] = {}
+        """清除 phase >= N 的所有产物。返回清除行数统计。
+        委托 _delete_fnm_products_from_phase 保证表覆盖一致。"""
         phase = int(phase)
         with transaction(self.db_path) as conn:
-            if phase <= 3:
-                conn.execute("DELETE FROM fnm_note_links WHERE doc_id=?", (doc_id,))
-                conn.execute("DELETE FROM fnm_body_anchors WHERE doc_id=?", (doc_id,))
-                conn.execute("DELETE FROM fnm_chapter_anchor_alignment WHERE doc_id=?", (doc_id,))
-                conn.execute("DELETE FROM fnm_paragraph_footnotes WHERE doc_id=?", (doc_id,))
-                conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id=?", (doc_id,))
-                counts["phase3"] = conn.total_changes
-            if phase <= 4:
-                conn.execute("DELETE FROM fnm_translation_units WHERE doc_id=?", (doc_id,))
-                counts["phase4"] = conn.total_changes - counts.get("phase3", 0)
-            if phase <= 2:
-                conn.execute("DELETE FROM fnm_note_items WHERE doc_id=?", (doc_id,))
-                conn.execute("DELETE FROM fnm_note_regions WHERE doc_id=?", (doc_id,))
-                conn.execute("DELETE FROM fnm_chapter_note_modes WHERE doc_id=?", (doc_id,))
-                counts["phase2"] = conn.total_changes - counts.get("phase3", 0) - counts.get("phase4", 0)
+            before = conn.total_changes
+            self._delete_fnm_products_from_phase(conn, doc_id, phase)
+            deleted = conn.total_changes - before
             conn.execute("DELETE FROM fnm_phase_runs WHERE doc_id=?", (doc_id,))
             conn.execute("DELETE FROM fnm_dev_snapshots WHERE doc_id=?", (doc_id,))
-        return counts
+        return {"phase_from": phase, "deleted_rows": deleted}

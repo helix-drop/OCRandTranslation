@@ -26,7 +26,7 @@ from FNM_RE import (
     load_doc_structure,
     run_doc_pipeline,
 )
-from FNM_RE.page_translate import (
+from FNM_RE.app.page_translate import (
     apply_body_unit_translations,
     build_fnm_body_unit_jobs,
     rebuild_fnm_diagnostic_page_entries,

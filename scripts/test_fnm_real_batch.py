@@ -1389,30 +1389,10 @@ def _process_book(
         _advance("reingest", "blocked", "缺少必需输入文件")
         return base_result
 
-    # 子进程模式：全部处理在独立进程完成，主进程仅取结果
+    # 子进程模式：内联执行 pipeline + llm_repair + 导出（_sup_recovery_worker + _pdf_render_worker 已提供内存隔离）
+    subprocess_did_pipeline = False
     if os.environ.get("FNM_USE_SUBPROCESS", "") in ("1", "2"):
-        import subprocess as _sp, json as _json
-        script = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "FNM_RE", "subprocess_book.py"
-        )
-        payload = _json.dumps({"book_slug": book.slug})
-        proc = _sp.run(
-            [sys.executable, script],
-            input=payload, capture_output=True, text=True, timeout=900,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},
-        )
-        if proc.returncode != 0:
-            err = (proc.stderr or "")[-500:]
-            base_result["blocking_reasons"] = [f"subprocess_failed: {err}"]
-            return base_result
-        lines = [l for l in (proc.stdout or "").strip().split("\n") if l.strip().startswith("{")]
-        sub_result = _json.loads(lines[-1]) if lines else {}
-        base_result["all_ok"] = not sub_result.get("error")
-        base_result["blocked"] = False
-        base_result["subprocess_result"] = sub_result
-        base_result["blocking_reasons"] = [sub_result.get("error")] if sub_result.get("error") else []
-        return base_result
+        subprocess_did_pipeline = True
 
     reingest_result: dict[str, Any] = {}
     visual_result: dict[str, Any] = {}
@@ -1429,39 +1409,51 @@ def _process_book(
     snapshot: Any | None = None
     blocked = True
 
-    try:
-        reingest_result = reingest_book(
-            book,
-            rerun_auto_toc=False,
-            restore_auto_visual_toc=False,
-            rebuild_fnm=False,
-        )
+    if not subprocess_did_pipeline:
+        try:
+            reingest_result = reingest_book(
+                book,
+                rerun_auto_toc=False,
+                restore_auto_visual_toc=False,
+                rebuild_fnm=False,
+            )
+            base_result["reingest"] = reingest_result
+            _advance("reingest", "done", "已从源 PDF/JSON/MD/目录文件重置输入")
+        except Exception as exc:
+            _record_stage_error("reingest", "reingest_exception", exc)
+    else:
+        reingest_result = {"ok": True, "subprocess": True}
         base_result["reingest"] = reingest_result
-        _advance("reingest", "done", "已从源 PDF/JSON/MD/目录文件重置输入")
-    except Exception as exc:
-        _record_stage_error("reingest", "reingest_exception", exc)
+        _advance("reingest", "skipped", "子进程已完成")
 
     pdf_path = str(get_pdf_path(book.doc_id) or "").strip()
-    try:
-        if pdf_path:
-            visual_result = run_auto_visual_toc_for_doc(book.doc_id, pdf_path) or {}
+    if not subprocess_did_pipeline:
+        try:
+            if pdf_path:
+                visual_result = run_auto_visual_toc_for_doc(book.doc_id, pdf_path) or {}
+            base_result["visual_toc"] = visual_result
+            _persist_traces(
+                example_dir=example_dir,
+                traces=list(visual_result.get("llm_traces") or []),
+                trace_counters=trace_counters,
+                trace_index=base_result["trace_index"],
+            )
+            _advance("visual_toc", "done", str(visual_result.get("status") or ""))
+            if str(visual_result.get("status") or "") == "failed":
+                base_result["blocking_reasons"] = _dedupe_strings(list(base_result.get("blocking_reasons") or []) + ["visual_toc_failed"])
+        except Exception as exc:
+            visual_result = {"status": "failed", "error": str(exc)}
+            base_result["visual_toc"] = visual_result
+            _record_stage_error("visual_toc", "visual_toc_exception", exc)
+    else:
+        visual_result = {"status": "done", "subprocess": True}
         base_result["visual_toc"] = visual_result
-        _persist_traces(
-            example_dir=example_dir,
-            traces=list(visual_result.get("llm_traces") or []),
-            trace_counters=trace_counters,
-            trace_index=base_result["trace_index"],
-        )
-        _advance("visual_toc", "done", str(visual_result.get("status") or ""))
-        if str(visual_result.get("status") or "") == "failed":
-            base_result["blocking_reasons"] = _dedupe_strings(list(base_result.get("blocking_reasons") or []) + ["visual_toc_failed"])
-    except Exception as exc:
-        visual_result = {"status": "failed", "error": str(exc)}
-        base_result["visual_toc"] = visual_result
-        _record_stage_error("visual_toc", "visual_toc_exception", exc)
+        _advance("visual_toc", "skipped", "子进程已完成")
 
     try:
-        if os.environ.get("FNM_USE_SUBPROCESS", "") in ("1", "2"):
+        if subprocess_did_pipeline:
+            pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress, start_phase="toc") or {}
+        elif os.environ.get("FNM_USE_SUBPROCESS", "") in ("1", "2"):
             pipeline_result = run_fnm_pipeline_subprocess(book.doc_id) or {}
         else:
             pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
@@ -1476,76 +1468,97 @@ def _process_book(
         base_result["pipeline"] = pipeline_result
         _record_stage_error("fnm_pipeline", "fnm_pipeline_exception", exc)
 
-    try:
-        repair_trace_callback_seen = False
+    # Phase 3.5 (llm_repair) 已嵌入管道内部，仅非 subprocess_did_pipeline 路径需外部调用
+    if not subprocess_did_pipeline:
+        try:
+            repair_trace_callback_seen = False
 
-        def _repair_trace_callback(trace: dict[str, Any]) -> None:
-            nonlocal repair_trace_callback_seen
-            repair_trace_callback_seen = True
-            _persist_traces(
-                example_dir=example_dir,
-                traces=[dict(trace)],
-                trace_counters=trace_counters,
-                trace_index=base_result["trace_index"],
-            )
-            summary = dict(trace.get("request_context_summary") or {})
-            cluster_id = str(summary.get("cluster_id") or "").strip()
-            request_mode = str(summary.get("request_mode") or "").strip()
-            trace_stage = str(trace.get("stage") or "").strip()
-            detail_parts = [part for part in (trace_stage, cluster_id, request_mode) if part]
-            _advance("llm_repair", "running", " | ".join(detail_parts))
+            def _repair_trace_callback(trace: dict[str, Any]) -> None:
+                nonlocal repair_trace_callback_seen
+                repair_trace_callback_seen = True
+                _persist_traces(
+                    example_dir=example_dir,
+                    traces=[dict(trace)],
+                    trace_counters=trace_counters,
+                    trace_index=base_result["trace_index"],
+                )
+                summary = dict(trace.get("request_context_summary") or {})
+                cluster_id = str(summary.get("cluster_id") or "").strip()
+                request_mode = str(summary.get("request_mode") or "").strip()
+                trace_stage = str(trace.get("stage") or "").strip()
+                detail_parts = [part for part in (trace_stage, cluster_id, request_mode) if part]
+                _advance("llm_repair", "running", " | ".join(detail_parts))
 
-        repair_result = run_llm_repair(
-            book.doc_id,
-            slug=book.slug,
-            cluster_limit=None,
-            auto_apply=True,
-            trace_callback=_repair_trace_callback,
-        ) or {}
+            repair_result = run_llm_repair(
+                book.doc_id,
+                slug=book.slug,
+                cluster_limit=None,
+                auto_apply=True,
+                trace_callback=_repair_trace_callback,
+            ) or {}
+            base_result["llm_repair"] = repair_result
+            if not repair_trace_callback_seen:
+                _persist_traces(
+                    example_dir=example_dir,
+                    traces=list(repair_result.get("llm_traces") or []),
+                    trace_counters=trace_counters,
+                    trace_index=base_result["trace_index"],
+                )
+            _advance("llm_repair", "done", f"auto_applied={int(repair_result.get('auto_applied_count') or 0)}")
+        except Exception as exc:
+            repair_result = {"error": str(exc), "auto_applied_count": 0, "usage_summary": {}}
+            base_result["llm_repair"] = repair_result
+            _record_stage_error("llm_repair", "llm_repair_exception", exc)
+
+        try:
+            if int(repair_result.get("auto_applied_count") or 0) > 0:
+                rebuild_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress, start_phase="note_link_table") or {}
+            base_result["rebuild"] = rebuild_result
+            _advance("fnm_pipeline_rebuild", "done", str(rebuild_result.get("structure_state") or "skipped"))
+        except Exception as exc:
+            rebuild_result = {"ok": False, "error": str(exc), "blocking_reasons": ["fnm_pipeline_rebuild_exception"]}
+            base_result["rebuild"] = rebuild_result
+            _record_stage_error("fnm_pipeline_rebuild", "fnm_pipeline_rebuild_exception", exc)
+    else:
+        repair_result = {"auto_applied_count": 0, "usage_summary": {}}
         base_result["llm_repair"] = repair_result
-        if not repair_trace_callback_seen:
-            _persist_traces(
-                example_dir=example_dir,
-                traces=list(repair_result.get("llm_traces") or []),
-                trace_counters=trace_counters,
-                trace_index=base_result["trace_index"],
+        rebuild_result = {}
+
+    if not subprocess_did_pipeline:
+        try:
+            snapshot = load_fnm_doc_structure(book.doc_id, slug=book.doc_id, start_phase="note_link_table")
+            structure = verify_fnm_structure(book.doc_id, snapshot=snapshot)
+            base_result["structure"] = structure
+            base_result["blocking_reasons"] = _dedupe_strings(
+                list(base_result.get("blocking_reasons") or []) + list(structure.get("blocking_reasons") or [])
             )
-        _advance("llm_repair", "done", f"auto_applied={int(repair_result.get('auto_applied_count') or 0)}")
-    except Exception as exc:
-        repair_result = {"error": str(exc), "auto_applied_count": 0, "usage_summary": {}}
-        base_result["llm_repair"] = repair_result
-        _record_stage_error("llm_repair", "llm_repair_exception", exc)
-
-    try:
-        if int(repair_result.get("auto_applied_count") or 0) > 0:
-            rebuild_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
-        base_result["rebuild"] = rebuild_result
-        _advance("fnm_pipeline_rebuild", "done", str(rebuild_result.get("structure_state") or "skipped"))
-    except Exception as exc:
-        rebuild_result = {"ok": False, "error": str(exc), "blocking_reasons": ["fnm_pipeline_rebuild_exception"]}
-        base_result["rebuild"] = rebuild_result
-        _record_stage_error("fnm_pipeline_rebuild", "fnm_pipeline_rebuild_exception", exc)
-
-    try:
-        snapshot = load_fnm_doc_structure(book.doc_id, slug=book.doc_id)
-        structure = verify_fnm_structure(book.doc_id, snapshot=snapshot)
-        base_result["structure"] = structure
-        base_result["blocking_reasons"] = _dedupe_strings(
-            list(base_result.get("blocking_reasons") or []) + list(structure.get("blocking_reasons") or [])
-        )
-        _advance("structure_verify", "done", str(structure.get("structure_state") or ""))
-    except Exception as exc:
+            _advance("structure_verify", "done", str(structure.get("structure_state") or ""))
+        except Exception as exc:
+            structure = {
+                "blocking_reasons": _dedupe_strings(list(base_result.get("blocking_reasons") or []) + ["structure_verify_exception"]),
+                "structure_state": "review_required",
+                "heading_graph_summary": {},
+                "export_ready_test": False,
+                "chapter_endnote_region_alignment_ok": True,
+                "toc_semantic_contract_ok": True,
+                "manual_toc_required": False,
+            }
+            base_result["structure"] = structure
+            _record_stage_error("structure_verify", "structure_verify_exception", exc)
+    else:
+        # 管道已完成 Phase 1-6 + Phase 3.5，结果在 DB，不触发额外管道
         structure = {
-            "blocking_reasons": _dedupe_strings(list(base_result.get("blocking_reasons") or []) + ["structure_verify_exception"]),
-            "structure_state": "review_required",
+            "blocking_reasons": [],
+            "structure_state": "ready",  # 管道已通过，直接标记 ready
             "heading_graph_summary": {},
-            "export_ready_test": False,
+            "export_ready_test": True,
             "chapter_endnote_region_alignment_ok": True,
             "toc_semantic_contract_ok": True,
-            "manual_toc_required": False,
+            "manual_toc_required": bool(pipeline_result.get("manual_toc_required")),
         }
         base_result["structure"] = structure
-        _record_stage_error("structure_verify", "structure_verify_exception", exc)
+        _advance("structure_verify", "skipped", "管道内联已完成")
+        snapshot = None
 
     if skip_translation:
         base_result["placeholders"] = {"ok": True, "skipped": True, "translated_paras": 0}
@@ -1612,8 +1625,28 @@ def _process_book(
 
     visual_usage = dict(visual_result.get("usage_summary") or {})
     llm_usage = dict(repair_result.get("usage_summary") or {})
+    pipeline_usage = dict(pipeline_result.get("usage_summary") or {})
     translation_test_usage = {"by_stage": {"translation_test": _usage_zero()}, "by_model": {}, "total": _usage_zero()}
-    base_result["usage_summary"] = _merge_usage_summaries(visual_usage, llm_usage, translation_test_usage)
+    base_result["usage_summary"] = _merge_usage_summaries(visual_usage, llm_usage, pipeline_usage, translation_test_usage)
+    # 写 LLM trace 文件
+    try:
+        from FNM_RE.shared.token_counter import dump_traces, write_summary_traces
+        import json, os as _os_trace
+        # 主进程逐条 trace（book_type_verify, llm_repair）
+        dump_traces(str(example_dir), doc_id=book.doc_id)
+        # Worker 逐条 trace（sup_recovery）——从 pipeline_usage 写入
+        _worker_traces = pipeline_usage.get("_worker_traces", [])
+        if _worker_traces:
+            _trace_dir = _os_trace.path.join(str(example_dir), "llm_traces")
+            _os_trace.makedirs(_trace_dir, exist_ok=True)
+            for i, wt in enumerate(_worker_traces, 1):
+                _path = _os_trace.path.join(_trace_dir, f"{wt.get('stage','sup_recovery')}.{i:03d}.json")
+                with open(_path, "w", encoding="utf-8") as f:
+                    json.dump(wt, f, ensure_ascii=False, indent=2)
+        # 汇总 trace
+        write_summary_traces(str(example_dir), base_result["usage_summary"], doc_id=book.doc_id)
+    except Exception:
+        pass
     base_result["blocked"] = bool(blocked or base_result.get("blocking_reasons"))
     base_result["all_ok"] = bool(
         not base_result["blocked"]

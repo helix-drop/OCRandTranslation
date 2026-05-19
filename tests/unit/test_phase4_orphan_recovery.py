@@ -92,12 +92,12 @@ class Phase4OrphanRecoveryIntegrationTest(unittest.TestCase):
 
     def test_orphan_recovery_functions_importable_and_callable(self):
         """恢复函数可直接从 note_links 模块导入并调用。"""
-        from FNM_RE.stages.note_links import (
+        from FNM_RE.stages.endnote_links import (
             _find_marker_in_body,
             _build_orphan_recovery_anchors,
         )
-        # 构造最小测试数据
-        pages = [{"bookPage": 1, "markdown": "Body text [42] reference."}]
+        # 构造最小测试数据——marker 须为上标格式（$ ^{N} $ 或 <sup>N</sup>）
+        pages = [{"bookPage": 1, "markdown": "Body text $ ^{42} $ reference."}]
         orphans = [{"marker": "42", "chapter_id": "ch1", "note_item_id": "n1", "page_nos": [1]}]
         recovered = _build_orphan_recovery_anchors(orphans, pages)
         self.assertEqual(len(recovered), 1)

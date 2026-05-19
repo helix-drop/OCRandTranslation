@@ -24,12 +24,10 @@ class VisualTocExportCandidateDefaultTest(unittest.TestCase):
         pages = load_pages("Germany_Madness")
         toc_items = load_auto_visual_toc("Germany_Madness")
         self.assertTrue(toc_items, "fixture should contain TOC items")
-        # Precondition for this regression: the snapshot TOC items do not
-        # carry an explicit `export_candidate` field.
-        self.assertFalse(
-            any("export_candidate" in item for item in toc_items),
-            "Germany_Madness fixture is expected to lack export_candidate fields",
-        )
+        # 模拟旧 fixture 不含 export_candidate 字段的场景
+        for item in toc_items:
+            item.pop("export_candidate", None)
+            item.pop("body_candidate", None)
 
         result = build_toc_structure(pages, toc_items)
         summary = result.diagnostics["chapter_source_summary"]

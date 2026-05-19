@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 
 from FNM_RE import run_post_translate_export_checks_for_doc
-from FNM_RE.page_translate import (
+from FNM_RE.app.page_translate import (
     apply_body_unit_entry_result,
     apply_body_unit_translations,
     build_fnm_body_unit_jobs,
@@ -148,10 +148,7 @@ def _unit_translated_paragraphs(diagnostic_entry: dict) -> list[str]:
 
 
 def _find_unit_by_id(doc_id: str, unit_id: str, *, repo: SQLiteRepository) -> dict | None:
-    for unit in repo.list_fnm_translation_units(doc_id):
-        if str(unit.get("unit_id") or "").strip() == str(unit_id or "").strip():
-            return dict(unit)
-    return None
+    return repo.get_fnm_translation_unit_by_id(doc_id, unit_id)
 
 
 def _mark_unit_manual_required(unit: dict) -> dict:
@@ -200,18 +197,38 @@ def _append_translation_attempt_history(doc_id: str, deps: dict, records: list[d
     )
 
 
-def _save_real_mode_failure_state(doc_id: str, deps: dict, repo: SQLiteRepository, *, retry_round: int | None = None) -> dict:
+def _save_real_mode_failure_state(doc_id: str, deps: dict, repo: SQLiteRepository, *, retry_round: int | None = None, just_completed_unit: dict | None = None) -> dict:
+    """保存真实模式的失败位置。若提供 just_completed_unit，仅增量更新该 unit 的状态。"""
     snapshot = deps["load_translate_state"](doc_id)
-    failed_locations: list[dict] = []
-    manual_required_locations: list[dict] = []
-    for unit in repo.list_fnm_translation_units(doc_id):
-        if str(unit.get("kind") or "") != "body":
-            continue
-        unit_failed = collect_fnm_unit_failed_locations(unit)
-        failed_locations.extend(unit_failed)
-        manual_required_locations.extend(
-            item for item in unit_failed if str(item.get("status") or "") == "manual_required"
-        )
+    existing_failed = list(snapshot.get("failed_locations") or [])
+    existing_manual = list(snapshot.get("manual_required_locations") or [])
+
+    if just_completed_unit and str(just_completed_unit.get("kind") or "") == "body":
+        unit_id = str(just_completed_unit.get("unit_id") or "")
+        # 从已有列表中移除该 unit 的旧记录
+        existing_failed = [f for f in existing_failed if str(f.get("unit_id") or "") != unit_id]
+        existing_manual = [m for m in existing_manual if str(m.get("unit_id") or "") != unit_id]
+        # 从 DB 加载该 unit 的最新状态并追加新记录
+        fresh_unit = repo.get_fnm_translation_unit_by_id(doc_id, unit_id)
+        if fresh_unit:
+            unit_failed = collect_fnm_unit_failed_locations(fresh_unit)
+            existing_failed.extend(unit_failed)
+            existing_manual.extend(
+                item for item in unit_failed if str(item.get("status") or "") == "manual_required"
+            )
+    else:
+        # 回退路径：全量扫描（仅在 retry 结束或无 just_completed_unit 时调用）
+        existing_failed = []
+        existing_manual = []
+        for unit in repo.list_fnm_translation_units(doc_id):
+            if str(unit.get("kind") or "") != "body":
+                continue
+            unit_failed = collect_fnm_unit_failed_locations(unit)
+            existing_failed.extend(unit_failed)
+            existing_manual.extend(
+                item for item in unit_failed if str(item.get("status") or "") == "manual_required"
+            )
+
     deps["save_translate_state"](
         doc_id,
         running=bool(snapshot.get("running", True)),
@@ -219,15 +236,15 @@ def _save_real_mode_failure_state(doc_id: str, deps: dict, repo: SQLiteRepositor
         phase=snapshot.get("phase", "running"),
         execution_mode="real",
         retry_round=int(snapshot.get("retry_round", 0) if retry_round is None else retry_round),
-        unresolved_count=len(failed_locations),
-        manual_required_count=len(manual_required_locations),
-        next_failed_location=(manual_required_locations or failed_locations or [None])[0],
-        failed_locations=failed_locations,
-        manual_required_locations=manual_required_locations,
+        unresolved_count=len(existing_failed),
+        manual_required_count=len(existing_manual),
+        next_failed_location=(existing_manual or existing_failed or [None])[0],
+        failed_locations=existing_failed,
+        manual_required_locations=existing_manual,
     )
     return {
-        "failed_locations": failed_locations,
-        "manual_required_locations": manual_required_locations,
+        "failed_locations": existing_failed,
+        "manual_required_locations": existing_manual,
     }
 
 
@@ -387,8 +404,12 @@ def _retry_real_mode_failed_units(doc_id: str, deps: dict, repo: SQLiteRepositor
     _save_real_mode_failure_state(doc_id, deps, repo, retry_round=len(retry_models))
 
 
-def _seed_fnm_unit_draft(deps: dict, doc_id: str, unit: dict, repo: SQLiteRepository, *, status: str, note: str, unit_error: str = "") -> None:
-    unit_progress = build_fnm_unit_progress(doc_id, repo=repo)
+def _seed_fnm_unit_draft(deps: dict, doc_id: str, unit: dict, repo: SQLiteRepository, *, status: str, note: str, unit_error: str = "", prebuilt_unit_items: list[dict] | None = None) -> None:
+    # 优先使用预构建的 unit_items（避免每单元全量加载 page_segments），fallback 到轻量查询
+    if prebuilt_unit_items is not None:
+        unit_items = prebuilt_unit_items
+    else:
+        unit_items = list(build_fnm_unit_progress(doc_id, repo=repo, use_lightweight=True).get("unit_items") or [])
     deps["save_stream_draft"](
         doc_id,
         mode="fnm_unit",
@@ -399,7 +420,7 @@ def _seed_fnm_unit_draft(deps: dict, doc_id: str, unit: dict, repo: SQLiteReposi
         unit_label=format_fnm_unit_label(unit),
         unit_pages=format_fnm_unit_pages(unit),
         unit_error=ensure_str(unit_error).strip(),
-        unit_items=list(unit_progress.get("unit_items") or []),
+        unit_items=unit_items,
         status=status,
         note=note,
     )
@@ -506,6 +527,10 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
             target_bps=[int(unit["unit_idx"]) for unit in target_units],
             target_unit_ids=[ensure_str(unit.get("unit_id", "")).strip() for unit in target_units],
         )
+        # 一次性构建 unit_items（轻量，不含 page_segments），供 _seed_fnm_unit_draft 复用
+        _prebuilt_unit_items = list(
+            build_fnm_unit_progress(doc_id, repo=repo, use_lightweight=True).get("unit_items") or []
+        )
         return {
             "worker_plan": {
                 "start_bp": start_idx,
@@ -532,6 +557,7 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
                     int(unit["unit_idx"]): dict(unit)
                     for unit in units
                 },
+                "unit_items": _prebuilt_unit_items,
             },
         }
 
@@ -561,6 +587,7 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
             repo,
             status="streaming",
             note="当前 unit 尚未提交到硬盘；如请求停止，将从该 unit 重新开始。",
+            prebuilt_unit_items=_kwargs["context"].get("unit_items"),
         )
         ctx, para_jobs = _unit_stream_context(unit, pages)
         try:
@@ -613,7 +640,7 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
             )
             changed_pages = unit_page_numbers(unit)
             if execution_mode == "real":
-                _save_real_mode_failure_state(doc_id, deps, repo)
+                _save_real_mode_failure_state(doc_id, deps, repo, just_completed_unit=unit)
             char_count = len(translated_payload["translated_text"])
         else:
             translated_text = translated_parts[0] if translated_parts else ""
@@ -647,6 +674,7 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
             repo,
             status="streaming",
             note="当前 unit 已提交，准备继续后续 unit。",
+            prebuilt_unit_items=_kwargs["context"].get("unit_items"),
         )
         return {
             "entry": entry,
@@ -691,7 +719,7 @@ def run_fnm_worker(doc_id: str, doc_title: str, deps: dict):
                 "unit_label": format_fnm_unit_label(unit) if unit else "",
                 "unit_pages": format_fnm_unit_pages(unit) if unit else "",
                 "unit_error": error_text,
-                "unit_items": list(build_fnm_unit_progress(doc_id, repo=repo).get("unit_items") or []),
+                "unit_items": list(build_fnm_unit_progress(doc_id, repo=repo, use_lightweight=True).get("unit_items") or []),
                 "para_idx": draft.get("para_idx"),
                 "para_total": draft.get("para_total", 0),
                 "para_done": draft.get("para_done", 0),

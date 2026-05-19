@@ -36,29 +36,40 @@ _SUP_FMT         = "<sup>{}</sup>"
 _VISION_TIMEOUT_SECONDS = 45.0
 
 # ── 内存守卫 ──
-_MEMORY_LIMIT_PCT = float(os.environ.get("SUP_RECOVERY_MEMORY_LIMIT", "90"))  # 默认 90%
+_FNM_RSS_WARN_MB = int(os.environ.get("FNM_RSS_WARN_MB", "400"))
+_FNM_RSS_LIMIT_MB = int(os.environ.get("FNM_RSS_LIMIT_MB", "600"))
 
 def _check_memory():
-    """当系统内存使用率 >= _MEMORY_LIMIT_PCT% 时，主动抛异常终止当前阶段。"""
+    """跨平台进程内存守卫。
+
+    警告线 (_FNM_RSS_WARN_MB, 默认 400 MB): gc.collect() + 清理缓存，不跳过工作。
+    硬限制 (_FNM_RSS_LIMIT_MB, 默认 600 MB): 抛 MemoryError，杀进程，报告内存超限。
+
+    环境变量：
+      FNM_RSS_WARN_MB=400  警告线（触发清理）
+      FNM_RSS_LIMIT_MB=600  硬限制（杀进程）
+    """
     try:
-        with open("/proc/meminfo") as f:
-            mem = {}
-            for line in f:
-                k, v = line.split(":", 1)
-                mem[k.strip()] = int(v.split()[0])
-        total = mem.get("MemTotal", 0)
-        avail = mem.get("MemAvailable", 0)
-        if total > 0:
-            used_pct = (total - avail) / total * 100
-            if used_pct >= _MEMORY_LIMIT_PCT:
-                raise MemoryError(
-                    f"内存使用率 {used_pct:.1f}% >= {_MEMORY_LIMIT_PCT:.0f}%，"
-                    f" 主动终止 sup_recovery（已完成的结果已写入 pages）"
-                )
-    except MemoryError:
-        raise
+        import resource
+        rss_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # macOS/Linux 兼容：ru_maxrss 在 macOS 上是 KB，Linux 上是 KB 或 bytes
+        if rss_mb > 1024 * 1024:
+            rss_mb /= 1024 * 1024  # Linux bytes → MB
+        else:
+            rss_mb /= 1024  # macOS/Linux KB → MB
     except Exception:
-        pass  # 非 Linux 环境跳过
+        return
+
+    if rss_mb >= _FNM_RSS_WARN_MB:
+        _LAYER3_CACHE.clear()
+        _VISION_CLIENT_CACHE.clear()
+        gc.collect()
+
+    if rss_mb >= _FNM_RSS_LIMIT_MB:
+        raise MemoryError(
+            f"进程 RSS {rss_mb:.0f} MB >= {_FNM_RSS_LIMIT_MB} MB 限制，"
+            f"主动终止 sup_recovery（已完成的结果已写入 pages）"
+        )
 
 _UNICODE_SUP_MAP = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 _UNICODE_SUP_RE  = re.compile(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+")
@@ -72,6 +83,8 @@ _HAS_MARKER_RE_TEMPLATE = (
 
 # 视觉调用缓存。key 必须包含 target_marker；同页不同 marker 不能共享负结果。
 _LAYER3_CACHE: dict[tuple, dict | None] = {}
+# 内存压力时清空的 vision client 缓存（防止 OOM）
+_VISION_CLIENT_CACHE: dict[int, object] = {}
 
 _vision_client: object | None = None
 _vision_client_spec_hash: int = 0
@@ -569,32 +582,18 @@ def _vision_find_superscript(
         cached = _LAYER3_CACHE[cache_key]
         return dict(cached) if cached else None
 
-    # 渲染页面图片（3x 精度，JPEG 格式省内存）
-    try:
-        doc = _fitz.open(pdf_path)
-        page = doc[page_no - 1]
-        rect = page.rect
-        text_rect = _fitz.Rect(rect.x0 + 30, rect.y0 + 40, rect.x1 - 30, rect.y1 - 50)
-        mat = _fitz.Matrix(5.0, 5.0)
-        pix = page.get_pixmap(matrix=mat, clip=text_rect)
-        img_bytes = pix.tobytes("png")  # PNG 无损，保证上标清晰
-        pix = None
-        doc.close()
-    except Exception:
+    # 微进程渲染：每次渲染后子进程退出，OS 回收 PyMuPDF 全部 native malloc
+    from FNM_RE.modules.pdf_render_subprocess import render_sup_l3_data_url
+    data_url = render_sup_l3_data_url(pdf_path, page_no)
+    if not data_url:
         return None
 
-    import base64
-    b64 = base64.b64encode(img_bytes).decode()
-    img_bytes = None
-    data_url = "data:image/png;base64," + b64
-
     try:
-        from persistence.storage import resolve_visual_model_spec
-        spec = resolve_visual_model_spec()
+        from persistence.storage import resolve_fnm_model_pool_specs, resolve_visual_model_spec
+        specs = resolve_fnm_model_pool_specs()
+        if not specs:
+            return None
     except Exception:
-        return None
-
-    if not spec or not getattr(spec, "supports_vision", False):
         return None
 
     prompt = (
@@ -604,24 +603,53 @@ def _vision_find_superscript(
         f"如果找不到，返回 {{\"marker\":\"\",\"before\":\"\",\"after\":\"\"}}。"
     )
 
-    try:
-        client = _get_or_create_vision_client(spec)
-        extra_body = dict(getattr(spec, "request_overrides", {}).get("extra_body", {}) or {})
-        response = client.chat.completions.create(
-            model=str(getattr(spec, "model_id", "") or "").strip(),
-            max_tokens=400,
-            timeout=_VISION_TIMEOUT_SECONDS,
-            extra_body=extra_body,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {"type": "image_url", "image_url": {"url": data_url}},
-                ],
-            }],
-        )
-        raw_text = response.choices[0].message.content or ""
-    except Exception:
+    raw_text = None
+    import time as _time, sys as _sys
+    for spec_idx, spec in enumerate(specs):
+        if not spec or not getattr(spec, "supports_vision", False):
+            continue
+        try:
+            client = _get_or_create_vision_client(spec)
+            extra_body = dict(getattr(spec, "request_overrides", {}).get("extra_body", {}) or {})
+            _model_id = str(getattr(spec, "model_id", "") or "").strip()
+            print(f"[llm:req] model={_model_id} stage=sup_recovery marker={target_marker} page={page_no}", file=_sys.stderr, flush=True)
+            _t0 = _time.monotonic()
+            response = client.chat.completions.create(
+                model=_model_id,
+                max_tokens=400,
+                timeout=_VISION_TIMEOUT_SECONDS,
+                extra_body=extra_body,
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": data_url}},
+                    ],
+                }],
+            )
+            _dur = _time.monotonic() - _t0
+            print(f"[llm:res] model={_model_id} stage=sup_recovery marker={target_marker} page={page_no} dur={_dur:.1f}s ok", file=_sys.stderr, flush=True)
+            raw_text = response.choices[0].message.content or ""
+            try:
+                from FNM_RE.shared.token_counter import record_usage
+                record_usage(stage="sup_recovery", model_id=_model_id, provider=str(getattr(spec, "provider", "")),
+                             prompt_tokens=getattr(response.usage, "prompt_tokens", 0),
+                             completion_tokens=getattr(response.usage, "completion_tokens", 0),
+                             total_tokens=getattr(response.usage, "total_tokens", 0), dur_ms=int(_dur * 1000))
+            except Exception:
+                pass
+            break  # 成功，退出模型循环
+        except Exception as _exc:
+            if '_t0' in dir():
+                _dur = _time.monotonic() - _t0
+                print(f"[llm:res] model={_model_id} stage=sup_recovery marker={target_marker} page={page_no} dur={_dur:.1f}s err={_exc}", file=_sys.stderr, flush=True)
+            # 错误 → 尝试下一个模型；无更多模型则返回 None
+            msg = str(_exc)
+            if spec_idx + 1 < len(specs):
+                continue
+            return None
+
+    if raw_text is None:
         return None
 
     import json as _json

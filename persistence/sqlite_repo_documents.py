@@ -288,7 +288,7 @@ class DocumentRepoMixin:
                 )
 
 
-    def load_pages(self, doc_id: str) -> list[dict]:
+    def load_pages(self, doc_id: str, *, exclude_pruned: bool = False) -> list[dict]:
         with read_connection(self.db_path) as conn:
             rows = conn.execute(
                 """
@@ -304,6 +304,8 @@ class DocumentRepoMixin:
                 payload = json.loads(row["payload_json"]) if row["payload_json"] else {}
                 if not isinstance(payload, dict):
                     payload = {}
+                if exclude_pruned:
+                    payload.pop("prunedResult", None)
                 payload.update({
                     "bookPage": row["book_page"],
                     "fileIdx": row["file_idx"],

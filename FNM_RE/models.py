@@ -156,6 +156,7 @@ class NoteItemRecord:
     source_page_label: str
     is_reconstructed: bool
     review_required: bool
+    note_kind: NoteKind
 
 
 @dataclass(slots=True)

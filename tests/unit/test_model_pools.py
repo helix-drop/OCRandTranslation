@@ -53,8 +53,8 @@ class ModelPoolsTest(unittest.TestCase):
 
         self.assertIn("translation_model_pool", migrated)
         self.assertIn("fnm_model_pool", migrated)
-        self.assertEqual(len(migrated["translation_model_pool"]), 3)
-        self.assertEqual(len(migrated["fnm_model_pool"]), 3)
+        self.assertEqual(len(migrated["translation_model_pool"]), 4)
+        self.assertEqual(len(migrated["fnm_model_pool"]), 4)
         self.assertEqual(migrated["translation_model_pool"][0]["mode"], "custom")
         self.assertEqual(migrated["translation_model_pool"][0]["provider_type"], "qwen")
         self.assertEqual(migrated["translation_model_pool"][0]["model_id"], "qwen3.5-plus")

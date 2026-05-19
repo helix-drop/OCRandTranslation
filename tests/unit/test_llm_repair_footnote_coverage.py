@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import unittest
 
-from FNM_RE.llm_repair import (
+from FNM_RE.modules.llm_repair import (
     LLM_REPAIR_IMAGE_SCALE,
     _should_attach_repair_images,
     _should_request_llm_for_cluster,
@@ -310,7 +310,7 @@ class SynthesizeAutoApplyPayloadShapeTest(unittest.TestCase):
     def test_auto_apply_references_cluster_note_system(self):
         import pathlib
 
-        source = pathlib.Path("FNM_RE/llm_repair.py").read_text(encoding="utf-8")
+        source = pathlib.Path("FNM_RE/modules/llm_repair.py").read_text(encoding="utf-8")
         self.assertIn('"anchor_kind": note_system', source)
         self.assertNotIn('"anchor_kind": "endnote",', source)
 

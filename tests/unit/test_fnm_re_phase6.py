@@ -10,7 +10,7 @@ from FNM_RE.app.pipeline import build_phase5_structure, build_phase6_structure
 from FNM_RE.models import Phase6Structure, SectionHeadRecord
 from FNM_RE.stages.export import build_export_bundle
 from FNM_RE.stages.export_audit import audit_phase6_export
-from FNM_RE.status import build_phase6_status
+from FNM_RE.app.status import build_phase6_status
 
 
 def _make_page(

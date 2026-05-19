@@ -546,6 +546,7 @@ def _materialize_note_item_overrides(
                 source_page_label=str(data.get("source_page_label") or page_no),
                 is_reconstructed=bool(data.get("is_reconstructed") or False),
                 review_required=bool(data.get("review_required") or False),
+                note_kind=str(note_kind or ""),
             )
         )
         existing_note_item_ids.add(note_item_id)
@@ -1042,6 +1043,7 @@ def _phase2_from_chapter_layers(chapter_layers: ChapterLayers) -> tuple[Phase2St
                 source_page_label=str(row.page_no),
                 is_reconstructed=bool(row.is_reconstructed),
                 review_required=bool(row.review_required),
+                note_kind=str(note_kind or ""),
             )
         )
 
@@ -1449,7 +1451,14 @@ def build_note_link_table(
             "source_marker": str(row.marker or ""),
             "normalized_marker": str(row.marker or ""),
         }
-    body_anchors, base_anchor_summary = build_body_anchors(phase2, pages=pages, pdf_path=str(pdf_path or ""))
+    _bare_verifier = None
+    if pdf_path:
+        try:
+            from FNM_RE.modules.llm_bare_digit_verify import verify_bare_digit_candidates
+            _bare_verifier = verify_bare_digit_candidates
+        except Exception:
+            pass
+    body_anchors, base_anchor_summary = build_body_anchors(phase2, pages=pages, pdf_path=str(pdf_path or ""), bare_digit_verifier=_bare_verifier)
     enhanced_anchors, note_links, note_link_meta = build_note_links(body_anchors, phase2, pages=pages)
     repaired_links, contract_repair_summary = _repair_endnote_links_for_contract(
         links=note_links,
@@ -1702,7 +1711,14 @@ def build_note_links_for_chapter(
 
     from FNM_RE.stages.body_anchors import build_body_anchors
     from FNM_RE.stages.note_links import build_note_links
-    anchors, _ = build_body_anchors(p2, pages=ch_pp or [], pdf_path=str(pdf_path or ""))
+    _ch_bare_verifier = None
+    if pdf_path:
+        try:
+            from FNM_RE.modules.llm_bare_digit_verify import verify_bare_digit_candidates
+            _ch_bare_verifier = verify_bare_digit_candidates
+        except Exception:
+            pass
+    anchors, _ = build_body_anchors(p2, pages=ch_pp or [], pdf_path=str(pdf_path or ""), bare_digit_verifier=_ch_bare_verifier)
     enhanced, links, _ = build_note_links(anchors, p2, pages=ch_pp or [])
     return enhanced, links
 

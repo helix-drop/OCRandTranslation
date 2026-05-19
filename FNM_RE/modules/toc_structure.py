@@ -269,7 +269,7 @@ def _build_page_roles(
             role = "front_matter"
             chapter_id = ""
         else:
-            role = "front_matter"
+            role = "other"
             chapter_id = ""
         rows.append(
             TocPageRole(
@@ -373,9 +373,8 @@ def build_toc_structure(
                     "markdown": page_markdown_text(p),
                     "headings": extract_page_headings(p),
                 }
-        pages.clear()
-        import gc as _gc
-        _gc.collect()
+        # pages.clear() 不在此处——由调用方（pipeline.py Phase1 persist）负责释放
+        # 旧路径（build_phase5/6_structure）依赖 pages 保持完整
 
     heading_candidates, phase1_chapters, chapter_meta = build_chapter_skeleton(
         page_partitions,
@@ -387,6 +386,7 @@ def build_toc_structure(
         pre_extracted_page_candidates=pre_extracted_page_candidates,
         file_idx_map=file_idx_map,
         page_texts=_page_texts,
+        doc_id=doc_id,
     )
     section_heads, heading_review_summary = build_section_heads(
         phase1_chapters,
@@ -409,8 +409,7 @@ def build_toc_structure(
             ch for ch in toc_chapters
             if chapter_title_match_key(ch.title) not in toc_non_chapter_keys
         ]
-    # 将 TOC 树中的 post_body 和 back_matter 条目补入导出章列表。
-    # skeleton 可能未检测到这些条目（非典型章标题），但它们应在导出中。
+    # 将 TOC 树中的 post_body 和 back_matter 条目补入导出章列表
     _existing_keys = {chapter_title_match_key(ch.title) for ch in toc_chapters}
     _all_starts = sorted(
         [int(ch.start_page) for ch in toc_chapters if int(ch.start_page) > 0]

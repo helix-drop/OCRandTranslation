@@ -192,12 +192,8 @@ def serialize_chapter_note_modes_for_repo(
     chapter_title_by_id: dict[str, str],
     region_pages_by_id: dict[str, list[int]],
 ) -> list[dict[str, Any]]:
+    from FNM_RE.shared.note_modes import to_db_alias
     payload: list[dict[str, Any]] = []
-    mode_alias = {
-        "chapter_endnote_primary": "chapter_endnotes",
-        "book_endnote_bound": "book_endnotes",
-        "no_notes": "body_only",
-    }
     for raw_row in rows:
         row = to_plain(raw_row)
         chapter_id = str(row.get("chapter_id") or "")
@@ -206,11 +202,15 @@ def serialize_chapter_note_modes_for_repo(
             sampled_pages.extend(region_pages_by_id.get(str(region_id), []))
         sampled_pages = sorted({int(page_no) for page_no in sampled_pages if int(page_no) > 0})
         note_mode = str(row.get("note_mode") or "")
+        # canonical 命中 → 别名；未命中 → 保留原值（向后兼容已写入的旧数据）
+        alias = to_db_alias(note_mode) if note_mode in {
+            "footnote_primary", "chapter_endnote_primary", "book_endnote_bound", "no_notes",
+        } else note_mode
         payload.append(
             {
                 "chapter_id": chapter_id,
                 "chapter_title": str(chapter_title_by_id.get(chapter_id) or chapter_id),
-                "note_mode": mode_alias.get(note_mode, note_mode),
+                "note_mode": alias,
                 "sampled_pages": sampled_pages,
                 "detection_confidence": 1.0,
             }

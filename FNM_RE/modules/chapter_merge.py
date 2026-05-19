@@ -89,6 +89,7 @@ def _to_note_item_records(chapter_layers: ChapterLayers) -> list[NoteItemRecord]
             source_page_label=str(row.page_no or ""),
             is_reconstructed=bool(row.is_reconstructed),
             review_required=bool(row.review_required),
+            note_kind=row.note_kind,
         )
         for row in chapter_layers.note_items
         if str(row.note_item_id or "").strip()

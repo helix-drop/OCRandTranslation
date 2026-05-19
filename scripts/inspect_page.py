@@ -61,12 +61,16 @@ def _resolve_page(slug: str, page_no: int) -> dict:
     raise SystemExit(f"未找到页面: slug={slug} page={page_no}")
 
 
-def _render_page(pdf_path: str, file_idx: int) -> tuple[bytes, str]:
-    from FNM_RE.llm_repair import _render_repair_page_image
-    img_bytes, mime = _render_repair_page_image(pdf_path, file_idx)
-    if not img_bytes:
+def _render_page(pdf_path: str, file_idx: int) -> tuple[str, str]:
+    """返回 (base64_str, mime_type)，失败抛出 SystemExit。"""
+    from FNM_RE.modules.pdf_render_subprocess import render_repair_page_data_url
+    data_url = render_repair_page_data_url(pdf_path, file_idx)
+    if not data_url:
         raise SystemExit(f"渲染失败: {pdf_path} file_idx={file_idx}")
-    return img_bytes, mime
+    # 解析 "data:image/jpeg;base64,XXXX" → (base64, mime)
+    header, b64 = data_url.split(",", 1)
+    mime = header.split(":")[1].split(";")[0] if ":" in header else "image/jpeg"
+    return b64, mime
 
 
 def _call_visual_model(
@@ -77,7 +81,7 @@ def _call_visual_model(
     model_args: dict | None = None,
 ) -> dict[str, Any]:
     from openai import OpenAI
-    from FNM_RE.llm_repair import _resolve_repair_model_args
+    from FNM_RE.modules.llm_repair import _resolve_repair_model_args
     from translation.translator import _merge_overrides_into_chat_kwargs
 
     args = dict(model_args or _resolve_repair_model_args())
@@ -193,11 +197,11 @@ def main() -> int:
         print(summary)
 
         try:
-            img_bytes, img_mime = _render_page(pdf_path, file_idx)
+            img_b64, img_mime = _render_page(pdf_path, file_idx)
         except SystemExit as e:
             print(f"  渲染失败: {e}")
             continue
-        print(f"  渲染: {len(img_bytes)} bytes ({img_mime})")
+        print(f"  渲染: {len(img_b64)} chars base64 ({img_mime})")
 
         analysis: dict = {"page_no": page_no, "slug": args.slug, "doc_id": doc_id}
 
@@ -206,7 +210,7 @@ def main() -> int:
             print(f"  调用视觉模型...")
             try:
                 result = _call_visual_model(
-                    base64.b64encode(img_bytes).decode("ascii"),
+                    img_b64,
                     img_mime,
                     prompt,
                 )
@@ -221,7 +225,7 @@ def main() -> int:
                 analysis["vision_error"] = str(exc)
 
         label = f"p{page_no:04d}_{args.slug}"
-        result_path = _save_result(label, img_bytes, analysis)
+        result_path = _save_result(label, img_b64.encode(), analysis)
         print(f"  结果: {result_path}")
         results.append(analysis)
 
@@ -241,12 +245,12 @@ def main() -> int:
         print(summary2)
 
         try:
-            img_bytes2, mime2 = _render_page(pdf_path2, file_idx2)
+            img_b64_2, mime2 = _render_page(pdf_path2, file_idx2)
         except SystemExit:
-            img_bytes2, mime2 = b"", ""
-        if img_bytes2:
+            img_b64_2, mime2 = "", ""
+        if img_b64_2:
             label2 = f"p{args.compare:04d}_{args.slug}"
-            _save_result(label2, img_bytes2, {"page_no": args.compare, "slug": args.slug})
+            _save_result(label2, img_b64_2.encode(), {"page_no": args.compare, "slug": args.slug})
 
     # 写入汇总
     summary_path = _OUTPUT_DIR / f"summary_{args.slug}_p{args.page}.json"

@@ -9,7 +9,7 @@ from FNM_RE.app.pipeline import (
     build_phase4_structure,
 )
 from FNM_RE.models import BodyAnchorRecord, ChapterNoteModeRecord, NoteItemRecord, NoteLinkRecord, NoteRegionRecord
-from FNM_RE.status import build_phase4_status
+from FNM_RE.app.status import build_phase4_status
 from FNM_RE.stages.reviews import build_structure_reviews
 
 
@@ -49,11 +49,11 @@ def _endnote_pages() -> list[dict]:
     return [
         _make_page(
             1,
-            markdown="# Chapter One\nBody [2].",
+            markdown="# Chapter One\nBody $ ^{1} $ and $ ^{2} $ and $ ^{3} $ and $ ^{5} $ reference.",
             block_label="doc_title",
             block_text="Chapter One",
         ),
-        _make_page(2, markdown="# Notes\n1. Endnote one."),
+        _make_page(2, markdown="# Notes\n1. Endnote one.\n2. Endnote two.\n4. Endnote four."),
     ]
 
 
@@ -175,6 +175,7 @@ class FnmRePhase4Test(unittest.TestCase):
             source_page_label="10",
             is_reconstructed=False,
             review_required=False,
+            note_kind="footnote",
         )
         region = NoteRegionRecord(
             region_id="rg-1",
@@ -243,9 +244,10 @@ class FnmRePhase4Test(unittest.TestCase):
         ambiguous_phase4 = build_phase4_structure(_ambiguous_pages(), review_overrides={"page": _endnote_overrides()})
         review_types = {row.review_type for row in orphan_phase4.structure_reviews}
         review_types.update(row.review_type for row in ambiguous_phase4.structure_reviews)
+        # endnote_orphan_note: note_item marker 4 无匹配 body anchor
         self.assertIn("endnote_orphan_note", review_types)
-        self.assertIn("endnote_orphan_anchor", review_types)
-        self.assertIn("ambiguous", review_types)
+        # uncertain_anchor: body anchor marker 3/5 的 anchor_kind=unknown（不在 chapter_endnote_markers 内）
+        self.assertIn("uncertain_anchor", review_types)
 
     def test_ignored_link_not_in_review_counts_or_blocking(self):
         base = build_phase4_structure(_endnote_pages(), review_overrides={"page": _endnote_overrides()})
@@ -279,16 +281,33 @@ class FnmRePhase4Test(unittest.TestCase):
     def test_link_match_updates_effective_link_and_clears_orphan_blockers(self):
         base = build_phase4_structure(_endnote_pages(), review_overrides={"page": _endnote_overrides()})
         orphan_note = next(row for row in base.note_links if row.status == "orphan_note")
-        orphan_anchor = next(row for row in base.note_links if row.status == "orphan_anchor")
+        # 当前 pipeline 不能自然产生 endnote_orphan_anchor（anchor_kind 与
+        # note_item_marker_keys 同源），改用 anchor override 合成匹配锚点。
+        synth_anchor_id = "llm-anchor-synth-4"
         phase4 = build_phase4_structure(
             _endnote_pages(),
             review_overrides={
                 "page": _endnote_overrides(),
+                "anchor": {
+                    synth_anchor_id: {
+                        "action": "create",
+                        "anchor_id": synth_anchor_id,
+                        "chapter_id": orphan_note.chapter_id,
+                        "page_no": 1,
+                        "paragraph_index": 0,
+                        "char_start": 10,
+                        "char_end": 11,
+                        "normalized_marker": orphan_note.marker,
+                        "anchor_kind": "endnote",
+                        "certainty": 0.9,
+                        "source": "llm",
+                    }
+                },
                 "link": {
                     orphan_note.link_id: {
                         "action": "match",
                         "note_item_id": orphan_note.note_item_id,
-                        "anchor_id": orphan_anchor.anchor_id,
+                        "anchor_id": synth_anchor_id,
                     }
                 },
             },

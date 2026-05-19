@@ -15,7 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from config import get_doc_meta, set_current_doc
 from FNM_RE import run_doc_pipeline as run_fnm_pipeline
-from FNM_RE.page_translate import rebuild_fnm_diagnostic_page_entries
+from FNM_RE.app.page_translate import rebuild_fnm_diagnostic_page_entries
 from persistence.storage import load_pages_from_disk
 from persistence.storage_toc import load_effective_toc
 from document.text_processing import (

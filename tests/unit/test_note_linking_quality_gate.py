@@ -3,9 +3,9 @@
 针对：
 1. `_summarize_links` 输出新指标 `fallback_match_ratio`（fallback resolver 命中的 matched / matched 总）。
 2. `build_note_link_table.gate_report.hard` 新增 `link.quality_ok`：
-   - `fallback_match_ratio > config.LINK_FALLBACK_MATCH_RATIO_THRESHOLD_DEFAULT` 触发
-   - 或 `footnote_orphan_anchor + endnote_orphan_anchor > config.LINK_ORPHAN_ANCHOR_THRESHOLD_DEFAULT` 触发
-   - 任一触发 → reasons 含 `link_quality_low`
+   - `endnote_orphan_anchor > threshold` 触发
+   - 或 `endnote_orphan_anchor > 0 AND fallback_match_ratio > threshold` 触发
+   - fallback 率仅在有 endnote orphan anchor 时才有质量含义
 3. 现有 `link_resolver_counts` 字段语义不动，但加文档澄清。
 """
 
@@ -109,7 +109,7 @@ class LinkQualityGateThresholdTest(unittest.TestCase):
         # 2/10 = 20% < 30% threshold → quality_ok
         self.assertTrue(gate["quality_ok"], gate)
 
-    def test_quality_low_when_fallback_ratio_above_threshold(self):
+    def test_quality_ok_when_fallback_ratio_high_but_no_orphan_anchors(self):
         links = [
             _link(link_id=f"r{i}", anchor_id=f"a{i}", status="matched", resolver="rule")
             for i in range(5)
@@ -118,9 +118,24 @@ class LinkQualityGateThresholdTest(unittest.TestCase):
             for i in range(5)
         ]
         gate = self._build_with_links(links)
-        # 5/10 = 50% > 30% threshold → quality_low
-        self.assertFalse(gate["quality_ok"], gate)
+        # 5/10 = 50% > 30% threshold 但没有 orphan anchor → quality_ok
+        self.assertTrue(gate["quality_ok"], gate)
         self.assertGreater(gate.get("fallback_match_ratio", 0.0), 0.30)
+
+    def test_quality_low_when_fallback_ratio_and_orphan_anchors_both_high(self):
+        links = [
+            _link(link_id=f"r{i}", anchor_id=f"a{i}", status="matched", resolver="rule")
+            for i in range(3)
+        ] + [
+            _link(link_id=f"f{i}", anchor_id=f"b{i}", status="matched", resolver="fallback")
+            for i in range(7)
+        ] + [
+            _link(link_id=f"oe{i}", anchor_id=f"oe{i}", status="orphan_anchor", resolver="rule", note_kind="endnote")
+            for i in range(5)
+        ]
+        gate = self._build_with_links(links)
+        # 7/10 = 70% > 30% + 5 endnote orphans → quality_low
+        self.assertFalse(gate["quality_ok"], gate)
 
     def test_quality_low_when_orphan_anchor_above_threshold(self):
         # 质量门只检查 endnote orphan_anchor（footnote 不计入阈值）

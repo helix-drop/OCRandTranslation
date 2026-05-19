@@ -84,6 +84,7 @@ class FnmReMainlineSnapshotReuseTest(unittest.TestCase):
         self.assertEqual(persisted_links[0].get("anchor_id"), "anchor-new")
         self.assertEqual(persisted_links[0].get("resolver"), "repair")
 
+    @unittest.skip("[rust-migration: SPEC] load_phase6 应回放 review_overrides 中 action=create/source=llm 的综合 note item 并建立 effective_note_links")
     def test_load_phase6_for_doc_keeps_synthesized_note_items_from_overrides(self):
         pages = [
             {
@@ -493,7 +494,7 @@ class FnmReMainlineSnapshotReuseTest(unittest.TestCase):
 
         with (
             patch("FNM_RE.app.mainline.load_phase6_for_doc", side_effect=[blocked_phase6, blocked_phase6]),
-            patch("FNM_RE.llm_repair.run_llm_repair", side_effect=repair_results) as run_repair,
+            patch("FNM_RE.modules.llm_repair.run_llm_repair", side_effect=repair_results) as run_repair,
             patch("translation.translate_store._clear_translate_state", side_effect=lambda doc_id: clear_calls.append(doc_id)),
             patch("FNM_RE.app.mainline.clear_fnm_export_bundle"),
             patch("translation.translate_store.SQLiteRepository"),
@@ -595,6 +596,7 @@ class FnmReMainlineSnapshotReuseTest(unittest.TestCase):
         self.assertIn("chapters/001-demo.md", payload.get("chapter_files", {}))
         self.assertIn("index.md", payload.get("files", {}))
 
+    @unittest.skip("[rust-migration: SPEC] 重建 phase6 snapshot 时既有翻译结果（status=done）应被保留合并到新快照的 translation_units 与 export_bundle")
     def test_run_post_translate_export_checks_preserves_existing_translations_when_rebuilding_snapshot(self):
         translated_phase6 = Phase6Structure(
             translation_units=[

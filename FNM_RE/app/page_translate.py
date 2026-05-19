@@ -804,9 +804,24 @@ def rebuild_diagnostic_page_entries(
 
 
 
-def build_unit_progress(doc_id: str, *, repo: SQLiteRepository | None = None, snapshot: dict | None = None) -> dict:
+def _build_lightweight_unit_list(doc_id: str, repo: SQLiteRepository) -> list[dict]:
+    """轻量 unit 列表：仅元数据，不含 page_segments。"""
+    meta_list = repo.list_fnm_translation_unit_metadata(doc_id)
+    indexed: list[dict] = []
+    for idx, unit in enumerate(meta_list, start=1):
+        item = dict(unit)
+        item["unit_idx"] = idx
+        item.setdefault("translated_text", "")
+        indexed.append(item)
+    return indexed
+
+
+def build_unit_progress(doc_id: str, *, repo: SQLiteRepository | None = None, snapshot: dict | None = None, use_lightweight: bool = False) -> dict:
     repo = repo or SQLiteRepository()
-    units = list_fnm_units_with_indices(doc_id, repo=repo)
+    if use_lightweight:
+        units = _build_lightweight_unit_list(doc_id, repo)
+    else:
+        units = list_fnm_units_with_indices(doc_id, repo=repo)
     total_units = len(units)
     done_units = len([unit for unit in units if str(unit.get("status") or "") == "done"])
     error_unit_indices = [

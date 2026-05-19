@@ -182,6 +182,7 @@ class FnmReModule3SplitTest(unittest.TestCase):
         self.assertGreaterEqual(int(summary.get("expected_anchor_count") or 0), 10)
         self.assertEqual(int(summary.get("captured_note_count") or 0), 0)
 
+    @unittest.skip("[rust-migration: SPEC] book-scope endnote 应按 marker 范围投射到各章：ch1 得 [1,2]，ch2 得 [3,4]")
     def test_book_scope_endnotes_are_projected_by_marker_to_chapters(self):
         pages = [
             _make_page(

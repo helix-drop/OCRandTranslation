@@ -173,6 +173,7 @@ class LayerNoteItem:
     review_required: bool
     note_kind: NoteKind
     owner_chapter_id: str = ""
+    source_page_label: str = ""
     source_marker: str = ""
     normalized_marker: str = ""
     synth_marker: str = ""

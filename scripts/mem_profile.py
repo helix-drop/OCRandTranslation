@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """FNM Pipeline 内存性能分析脚本。
-逐阶段记录 RSS 峰值，检测异常和回滚。
-用法: .venv/bin/python scripts/mem_profile.py --slug Heidegger_en_France [--streaming]
+逐阶段记录 RSS 峰值，定期采样捕捉中间峰值，事后分析 DB 表大小。
+用法: .venv/bin/python scripts/mem_profile.py --slug Heidegger_en_France [--detail]
 """
 from __future__ import annotations
 
-import argparse, os, re, subprocess, sys, time
+import argparse, json, os, re, subprocess, sys, threading, time
 from pathlib import Path
 from typing import Any
 
@@ -27,14 +27,38 @@ PHASE_MAP = [
 
 
 def get_rss(pid: int) -> float:
+    """采样进程树 RSS（含所有子进程后代），确保 renderer 微进程峰值不被漏看。"""
     try:
-        return int(subprocess.check_output(["ps", "-o", "rss=", "-p", str(pid)]).strip()) / 1024
+        total = 0
+        # 递归收集所有后代 PID
+        pids = {pid}
+        queue = [pid]
+        while queue:
+            parent = queue.pop()
+            try:
+                children = subprocess.check_output(
+                    ["pgrep", "-P", str(parent)]
+                ).decode().strip().split()
+                for child in children:
+                    child_pid = int(child)
+                    if child_pid not in pids:
+                        pids.add(child_pid)
+                        queue.append(child_pid)
+            except Exception:
+                pass
+        for p in pids:
+            try:
+                total += int(subprocess.check_output(
+                    ["ps", "-o", "rss=", "-p", str(p)]
+                ).strip())
+            except Exception:
+                pass
+        return total / 1024
     except Exception:
         return 0.0
 
 
 def resolve_doc_id(slug: str) -> str:
-    # 使用 test 脚本的映射
     known = {
         "Biopolitics": "0d285c0800db",
         "Germany_Madness": "67356d1f7d9a",
@@ -46,8 +70,8 @@ def resolve_doc_id(slug: str) -> str:
     return known.get(slug, slug)
 
 
-def run_test(slug: str, streaming: bool = False) -> dict[str, Any]:
-    """跑一次完整测试，收集各阶段 RSS 和异常。"""
+def run_test(slug: str, detail: bool = False) -> dict[str, Any]:
+    """跑一次完整测试，收集各阶段 RSS 和异常。外置定期采样捕捉峰值。"""
     cmd = [
         sys.executable,
         str(REPO_ROOT / "scripts" / "test_fnm_incremental.py"),
@@ -56,15 +80,46 @@ def run_test(slug: str, streaming: bool = False) -> dict[str, Any]:
     ]
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
+    # 确保不在 pipeline 进程内做内存检测
+    env.pop("FNM_MEMORY_TRACE", None)
 
     proc = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env,
     )
 
-    stages: list[dict] = []  # [{pct, stage, rss, dur_ms, elapsed_s}]
+    stages: list[dict] = []
     errors: list[str] = []
     start = time.time()
-    prev_rss = 0.0
+    rss_samples: list[tuple[float, float]] = []
+    sample_stop = threading.Event()
+    stderr_lines: list[str] = []
+
+    # 后台线程读 stderr（防止 pipe 满导致子进程死锁）
+    def _drain_stderr():
+        for line in proc.stderr:
+            stderr_lines.append(line.rstrip())
+    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
+    stderr_thread.start()
+
+    # 定期采样 + 存活检测线程
+    last_report = start
+    def _periodic_sample():
+        nonlocal last_report
+        while not sample_stop.is_set():
+            rss = get_rss(proc.pid)
+            alive = proc.poll() is None
+            if rss > 0:
+                rss_samples.append((time.time() - start, rss))
+            # 每 30 秒报告存活状态
+            now = time.time()
+            if now - last_report >= 30:
+                status = "ALIVE" if alive else "EXITED"
+                print(f"  [watchdog {now-start:.0f}s] {status} RSS={rss:.0f}MB samples={len(rss_samples)}", flush=True)
+                last_report = now
+            time.sleep(1.0)
+
+    sampler = threading.Thread(target=_periodic_sample, daemon=True)
+    sampler.start()
 
     # 收集 stdout 进度行
     for line in proc.stdout:
@@ -77,20 +132,22 @@ def run_test(slug: str, streaming: bool = False) -> dict[str, Any]:
             if pct_m:
                 pct = float(pct_m.group(1))
             rss = get_rss(proc.pid)
-            delta = rss - prev_rss if prev_rss else 0
+            delta = rss - (stages[-1]["rss"] if stages else 0)
             stages.append({
                 "pct": pct, "stage": stage, "rss": rss,
                 "delta": delta, "dur_ms": dur_ms, "elapsed_s": time.time() - start,
             })
-            prev_rss = rss
 
+    sample_stop.set()
+    sampler.join(timeout=2)
     proc.wait()
-    stderr_text = proc.stderr.read()
+    stderr_thread.join(timeout=2)
 
-    # 收集 stderr 异常
-    for line in stderr_text.splitlines():
+    for line in stderr_lines:
         if "Traceback" in line or "Error" in line or "回滚" in line or "FAILED" in line:
             errors.append(line.strip())
+
+    peak_sample = max(rss_samples, key=lambda x: x[1]) if rss_samples else (0, 0)
 
     return {
         "exit_code": proc.returncode,
@@ -98,6 +155,9 @@ def run_test(slug: str, streaming: bool = False) -> dict[str, Any]:
         "errors": errors,
         "total_s": time.time() - start,
         "slug": slug,
+        "rss_samples": rss_samples,
+        "peak_sample_elapsed": peak_sample[0],
+        "peak_sample_rss": peak_sample[1],
     }
 
 
@@ -108,7 +168,31 @@ def phase_name(pct: float) -> str:
     return "other"
 
 
-def format_report(result: dict[str, Any]) -> str:
+def analyze_db(doc_id: str) -> dict[str, int]:
+    """外置 DB 分析——读取各表行数和大小（不影响 pipeline 进程）。"""
+    result: dict[str, int] = {}
+    try:
+        from persistence.sqlite_store import get_document_db_path
+        import sqlite3
+        db_path = get_document_db_path(doc_id)
+        conn = sqlite3.connect(db_path)
+        for table in ["fnm_pages", "fnm_chapters", "fnm_note_items", "fnm_body_anchors",
+                       "fnm_note_links", "fnm_translation_units", "fnm_chapter_body_pages"]:
+            try:
+                count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                size = conn.execute(f"SELECT SUM(LENGTH(page_segments_json)) FROM {table}").fetchone()[0] or 0 if table == "fnm_translation_units" else 0
+                result[f"{table}_rows"] = count
+                if size:
+                    result[f"{table}_segments_mb"] = int(size / 1024 / 1024)
+            except Exception:
+                pass
+        conn.close()
+    except Exception:
+        pass
+    return result
+
+
+def format_report(result: dict[str, Any], db_info: dict[str, int] | None = None) -> str:
     lines = []
     lines.append(f"\n{'='*70}")
     lines.append(f"  内存分析报告: {result['slug']}")
@@ -119,13 +203,10 @@ def format_report(result: dict[str, Any]) -> str:
         lines.append("  ⚠ 未收集到任何阶段数据")
         return "\n".join(lines)
 
-    # 错误
     if result["errors"]:
         lines.append(f"\n  ❌ 检测到 {len(result['errors'])} 个异常:")
         for e in result["errors"][:10]:
             lines.append(f"     {e[:100]}")
-        if len(result["errors"]) > 10:
-            lines.append(f"     ... 还有 {len(result['errors']) - 10} 个")
     else:
         lines.append(f"\n  ✅ 无异常")
 
@@ -136,7 +217,6 @@ def format_report(result: dict[str, Any]) -> str:
     lines.append(f"\n  {'Stage':<35s} {'RSS':>7s} {'Δ':>7s} {'耗时':>8s}")
     lines.append(f"  {'-'*60}")
     for s in stages:
-        ph = phase_name(s["pct"])
         lines.append(
             f"  [{s['pct']:5.1f}%] {s['stage']:<25s} {s['rss']:6.0f} MB {s['delta']:+6.0f} MB {s['dur_ms']/1000:7.1f}s"
         )
@@ -164,10 +244,17 @@ def format_report(result: dict[str, Any]) -> str:
     # 全局峰值
     peak = max(stages, key=lambda s: s["rss"])
     final = stages[-1]
-    lines.append(f"\n  全局峰值: {peak['rss']:.0f} MB @ [{peak['pct']:.1f}%] {peak['stage']}")
+    lines.append(f"\n  全局峰值 (event): {peak['rss']:.0f} MB @ [{peak['pct']:.1f}%] {peak['stage']}")
+    lines.append(f"  全局峰值 (1s采样): {result['peak_sample_rss']:.0f} MB @ {result['peak_sample_elapsed']:.0f}s")
     lines.append(f"  终态:     {final['rss']:.0f} MB @ [{final['pct']:.1f}%] {final['stage']}")
     lines.append(f"  总耗时:   {result['total_s']:.0f}s")
-    lines.append(f"{'='*70}\n")
+    lines.append(f"{'='*70}")
+
+    if db_info:
+        lines.append(f"\n  DB 表行数:")
+        for k, v in sorted(db_info.items()):
+            lines.append(f"    {k}: {v}")
+        lines.append(f"{'='*70}\n")
 
     return "\n".join(lines)
 
@@ -175,7 +262,7 @@ def format_report(result: dict[str, Any]) -> str:
 def main():
     parser = argparse.ArgumentParser(description="FNM Pipeline 内存分析")
     parser.add_argument("--slug", default="Heidegger_en_France")
-    parser.add_argument("--streaming", action="store_true", help="使用流式 page 加载")
+    parser.add_argument("--detail", action="store_true", help="包含 DB 表大小分析")
     parser.add_argument("--runs", type=int, default=1, help="重复次数（取平均）")
     args = parser.parse_args()
 
@@ -183,12 +270,12 @@ def main():
     for i in range(args.runs):
         if args.runs > 1:
             print(f"\nRun {i+1}/{args.runs}...", flush=True)
-        result = run_test(args.slug, streaming=args.streaming)
+        result = run_test(args.slug, detail=args.detail)
         all_results.append(result)
-        print(format_report(result))
+        db_info = analyze_db(resolve_doc_id(args.slug)) if args.detail else None
+        print(format_report(result, db_info))
 
     if args.runs > 1:
-        # 平均
         for ph_name in [name for _, _, name in PHASE_MAP]:
             peaks = []
             for r in all_results:

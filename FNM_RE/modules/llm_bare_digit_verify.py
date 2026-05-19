@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import base64
 import json
 import re
 from typing import Any
@@ -14,7 +13,6 @@ from typing import Any
 from openai import OpenAI
 
 from FNM_RE.models import BodyAnchorRecord
-from FNM_RE.llm_repair import _render_repair_page_image
 
 _VERIFY_MAX_TOKENS = 1024
 _LLM_TIMEOUT = 60.0
@@ -61,8 +59,8 @@ def _build_user_prompt(marker: int, source_text: str) -> str:
 
 def _render_page_cropped(
     pdf_path: str, page_no: int, pages: list[dict]
-) -> tuple[bytes, str]:
-    """渲染 PDF 页面为 JPEG（后续可扩展裁剪到 anchor 段落区域）。"""
+) -> str | None:
+    """微进程渲染 PDF 页面为 JPEG data URL。"""
     file_idx = page_no - 1
     for p in pages:
         try:
@@ -72,9 +70,10 @@ def _render_page_cropped(
         except (TypeError, ValueError):
             continue
     try:
-        return _render_repair_page_image(pdf_path, file_idx)
+        from FNM_RE.modules.pdf_render_subprocess import render_repair_page_data_url
+        return render_repair_page_data_url(pdf_path, file_idx)
     except Exception:
-        return (b"", "")
+        return None
 
 
 def _resolve_model_args() -> dict | None:
@@ -107,15 +106,12 @@ def _call_vision_for_bare_digit(
     if cache_key in _VERIFY_CACHE:
         return dict(_VERIFY_CACHE[cache_key])
 
-    img_bytes, mime = _render_page_cropped(pdf_path, page_no, pages)
-    if not img_bytes or not mime:
+    image_url = _render_page_cropped(pdf_path, page_no, pages)
+    if not image_url:
         result: dict = {"is_note_marker": False, "confidence": "low",
                          "reasoning": "page render failed", "error": "render_failed"}
         _VERIFY_CACHE[cache_key] = result
         return result
-
-    encoded = base64.b64encode(img_bytes).decode("ascii")
-    image_url = f"data:{mime};base64,{encoded}"
 
     client = OpenAI(
         api_key=str(model_args.get("api_key") or ""),
@@ -136,6 +132,14 @@ def _call_vision_for_bare_digit(
     )
 
     raw = str(resp.choices[0].message.content or "")
+    try:
+        from FNM_RE.shared.token_counter import record_usage
+        record_usage(stage="bare_digit_verify", model_id=str(model_args.get("model_id", "")),
+                     prompt_tokens=getattr(resp.usage, "prompt_tokens", 0),
+                     completion_tokens=getattr(resp.usage, "completion_tokens", 0),
+                     total_tokens=getattr(resp.usage, "total_tokens", 0))
+    except Exception:
+        pass
     result = _parse_response(raw, marker)
     _VERIFY_CACHE[cache_key] = result
     return result

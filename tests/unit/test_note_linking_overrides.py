@@ -44,6 +44,7 @@ def _item(note_item_id: str, region_id: str, page_no: int, marker: str) -> NoteI
         source_page_label="",
         is_reconstructed=False,
         review_required=False,
+        note_kind="endnote" if note_item_id.lower().startswith("en-") else "footnote",
     )
 
 

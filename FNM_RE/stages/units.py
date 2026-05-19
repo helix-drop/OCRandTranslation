@@ -673,7 +673,7 @@ def _materialize_refs_for_chapter(
             page_payload_by_no[page_no] = payload
             injected_count += 1
             injected_anchor_ids.add(anchor_id)
-    from FNM_RE.modules.ref_freeze import _cleanup_nested_note_refs
+    from FNM_RE.shared.refs import cleanup_nested_note_refs as _cleanup_nested_note_refs
     for page_no, payload in page_payload_by_no.items():
         text = str(payload.get("text") or "")
         cleaned = _cleanup_nested_note_refs(text)

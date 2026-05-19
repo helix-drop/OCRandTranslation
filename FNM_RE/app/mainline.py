@@ -238,7 +238,7 @@ def _tail_translation_issue_payloads(
     repo: SQLiteRepository | None = None,
     snapshot: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    from FNM_RE.page_translate import build_retry_summary
+    from FNM_RE.app.page_translate import build_retry_summary
 
     summary = build_retry_summary(doc_id, repo=repo, snapshot=snapshot)
     issues: list[dict[str, Any]] = []
@@ -616,6 +616,14 @@ def _export_bundle_payload(phase6: Phase6Structure) -> dict[str, Any]:
     }
 
 
+def _persist_export_bundle_payload(doc_id: str, phase6: Phase6Structure) -> str:
+    """将 phase6.export_bundle 持久化到磁盘 JSON 文件，供后续 zip 构建使用。"""
+    from persistence.fnm_export_bundle import save_fnm_export_bundle
+
+    payload = _export_bundle_payload(phase6)
+    return save_fnm_export_bundle(doc_id, payload)
+
+
 def _export_bundle_record_from_payload(payload: dict[str, Any]) -> ExportBundleRecord:
     chapter_files = {
         str(path): str(content or "")
@@ -800,6 +808,7 @@ def _load_module_snapshot_for_doc(
     include_diagnostic_entries: bool = False,
     slug: str = "",
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
+    start_phase: str = "toc",
 ) -> tuple[Any, str]:
     run = _safe_dict(getattr(repo, "get_latest_fnm_run", None), doc_id)
     pipeline_state = str(pipeline_state_override or _phase_state_from_run(run)).strip().lower()
@@ -833,6 +842,7 @@ def _load_module_snapshot_for_doc(
         repo_units=repo_units,
         progress_callback=progress_callback,
         visual_toc_bundle=visual_toc_bundle,
+        start_phase=start_phase,
     )
     return snapshot, pipeline_state
 
@@ -847,11 +857,12 @@ def load_phase6_for_doc(
     pipeline_state_override: str | None = None,
     pages: list[dict] | None = None,
     overlay_mode: str = "hash_guarded",
+    start_phase: str = "note_link_table",
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Phase6Structure:
     repo = repo or SQLiteRepository()
     if pages is None:
-        pages = _safe_list(getattr(repo, "load_pages_light", None) or getattr(repo, "load_pages", None), doc_id)
+        pages = _safe_list(getattr(repo, "load_pages_phase1", None) or getattr(repo, "load_pages_light", None) or getattr(repo, "load_pages", None), doc_id)
     else:
         pages = list(pages or [])
 
@@ -865,6 +876,7 @@ def load_phase6_for_doc(
         include_diagnostic_entries=bool(include_diagnostic_entries),
         slug=str(slug or doc_id),
         progress_callback=progress_callback,
+        start_phase=start_phase,
     )
     return snapshot.phase6
 
@@ -893,6 +905,7 @@ def build_phase6_status_for_doc(
     *,
     snapshot: Any | None = None,
     repo: SQLiteRepository | None = None,
+    start_phase: str = "toc",
 ) -> dict[str, Any]:
     repo = repo or SQLiteRepository()
     run = _safe_dict(getattr(repo, "get_latest_fnm_run", None), doc_id)
@@ -905,6 +918,7 @@ def build_phase6_status_for_doc(
             slug=doc_id,
             repo=repo,
             pipeline_state_override=None,
+            start_phase=start_phase,
         )
     return _status_payload(
         status=phase6.status,
@@ -1053,7 +1067,8 @@ def _persist_phase6_to_repo(
         preserve_structure=True,
     )
     if clear_translate_state:
-        clear_fnm_export_bundle(doc_id)
+        # 先保存导出包，再清理翻译缓存（subprocess 模式需要持久化 bundle）
+        _persist_export_bundle_payload(doc_id, phase6)
         from translation.translate_store import _clear_translate_state
 
         _clear_translate_state(doc_id)
@@ -1065,6 +1080,7 @@ def run_phase6_pipeline_for_doc(
     max_body_chars: int | None = None,
     repo: SQLiteRepository | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
+    start_phase: str = "toc",
 ) -> dict[str, Any]:
     repo = repo or SQLiteRepository()
     pages = _safe_list(getattr(repo, "load_pages_phase1", None) or getattr(repo, "load_pages", None), doc_id)
@@ -1084,6 +1100,7 @@ def run_phase6_pipeline_for_doc(
             include_diagnostic_entries=False,
             slug=doc_id,
             progress_callback=progress_callback,
+            start_phase=start_phase,
         )
         phase6 = snapshot.phase6
         _persist_phase6_to_repo(doc_id, phase6, repo=repo)
@@ -1096,6 +1113,7 @@ def run_phase6_pipeline_for_doc(
         unit_count = len(phase6.translation_units)
         section_count = len(phase6.chapters)
         page_count = len(pages)
+        _pipeline_usage = getattr(snapshot, "pipeline_usage", {}) or {}
         return {
             "ok": True,
             "run_id": run_id,
@@ -1103,6 +1121,7 @@ def run_phase6_pipeline_for_doc(
             "section_count": section_count,
             "note_count": note_count,
             "unit_count": unit_count,
+            "usage_summary": _pipeline_usage,
             "structure_state": str(status_payload.get("structure_state") or "ready"),
             "manual_toc_required": bool(status_payload.get("manual_toc_required")),
             "blocking_reasons": list(status_payload.get("blocking_reasons") or []),
@@ -1127,7 +1146,7 @@ def run_post_translate_export_checks_for_doc(
     repo: SQLiteRepository | None = None,
 ) -> dict[str, Any]:
     repo = repo or SQLiteRepository()
-    pages = _safe_list(getattr(repo, "load_pages", None), doc_id)
+    pages = _safe_list(getattr(repo, "load_pages_phase1", None) or getattr(repo, "load_pages", None), doc_id)
     if not pages:
         return {"ok": False, "error": "no_pages"}
     from translation.translate_store import _load_translate_state, _save_translate_state
@@ -1183,7 +1202,7 @@ def run_post_translate_export_checks_for_doc(
     repair_rounds: list[dict[str, Any]] = []
 
     if not bool(phase6.export_audit.can_ship):
-        from FNM_RE.llm_repair import run_llm_repair
+        from FNM_RE.modules.llm_repair import run_llm_repair
         from persistence.storage import resolve_fnm_model_pool_specs
         _save_translate_state(
             doc_id,

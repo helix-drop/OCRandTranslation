@@ -636,6 +636,7 @@ def build_note_items(
                     source_page_label=f"p{int(row.get('page_no') or 0)}",
                     is_reconstructed=is_reconstructed,
                     review_required=bool(region.review_required),
+                    note_kind=region.note_kind,
                 )
             )
 

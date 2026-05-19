@@ -68,24 +68,28 @@ def reconstruct_book_note_profile(repo, doc_id: str):
 
     modes_raw = repo.list_fnm_chapter_note_modes(doc_id) or []
 
+    from FNM_RE.shared.note_modes import from_db_alias
     chapter_modes: list[ChapterNoteMode] = []
     note_mode_chapter_ids: list[str] = []
     for r in modes_raw:
-        note_mode = str(r.get("note_mode") or "no_notes")
+        # DB 存的是 alias（如 body_only/chapter_endnotes），还原为 canonical NoteMode
+        raw_mode = str(r.get("note_mode") or "no_notes")
+        canonical_mode = from_db_alias(raw_mode)
         chapter_modes.append(ChapterNoteMode(
             chapter_id=str(r.get("chapter_id") or ""),
-            note_mode=note_mode,
+            note_mode=canonical_mode,  # type: ignore[arg-type]
             evidence_page_nos=json.loads(r.get("sampled_pages_json") or "[]"),
         ))
-        if note_mode not in ("no_notes", "body_only", ""):
+        if canonical_mode not in ("no_notes", ""):
             note_mode_chapter_ids.append(str(r.get("chapter_id") or ""))
 
-    # 推导 book_type
+    # 推导 book_type（精确判断 canonical mode，不再 substring 启发式）
+    canonical_modes = {str(m.note_mode or "") for m in chapter_modes}
     if not note_mode_chapter_ids:
         book_type = "no_notes"
-    elif any("footnote" in str(m.note_mode or "").lower() for m in chapter_modes):
+    elif "footnote_primary" in canonical_modes:
         book_type = "mixed"
-    elif any("endnote" in str(m.note_mode or "").lower() for m in chapter_modes):
+    elif canonical_modes & {"chapter_endnote_primary", "book_endnote_bound"}:
         book_type = "endnote_only"
     else:
         book_type = "no_notes"
@@ -214,11 +218,12 @@ def reconstruct_chapter_layers(repo, doc_id: str):
         ))
 
     # ── BookStructureModel ──
+    from FNM_RE.shared.note_modes import from_db_alias
     book_type: str = "no_notes"
     for m in modes_raw:
-        nm = str(m.get("note_mode") or "")
-        if nm not in ("no_notes", "body_only", ""):
-            book_type = nm
+        canonical = from_db_alias(str(m.get("note_mode") or ""))
+        if canonical not in ("no_notes", ""):
+            book_type = canonical
             break
 
     from FNM_RE.modules.types import ChapterStructureModel
@@ -226,7 +231,7 @@ def reconstruct_chapter_layers(repo, doc_id: str):
     for m in modes_raw:
         chapter_models.append(ChapterStructureModel(
             chapter_id=str(m.get("chapter_id") or ""),
-            note_mode=str(m.get("note_mode") or "no_notes"),
+            note_mode=from_db_alias(str(m.get("note_mode") or "no_notes")),
             has_explicit_notes_heading=False,
         ))
     book_structure = BookStructureModel(

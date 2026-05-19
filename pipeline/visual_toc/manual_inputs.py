@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import base64
 import hashlib
 import json
 import logging
@@ -22,7 +21,6 @@ from config import update_doc_meta
 from document.pdf_extract import (
     extract_pdf_page_link_targets,
     read_pdf_page_labels,
-    render_pdf_page,
 )
 from document.text_layer_fixer import detect_and_fix_text, detect_garbled_text
 from persistence.sqlite_store import (

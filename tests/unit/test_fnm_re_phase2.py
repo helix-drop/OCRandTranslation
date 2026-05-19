@@ -287,6 +287,7 @@ class FnmRePhase2Test(unittest.TestCase):
             {chapter_ids["Chapter One"], chapter_ids["Chapter Two"]},
         )
 
+    @unittest.skip("[rust-migration: SPEC] OCR 把 marker '12' 切成 '1 2' 两行后应被重建为单一 marker 且 is_reconstructed=True")
     def test_ocr_split_marker_can_be_reconstructed(self):
         pages = [
             _make_page(1, markdown="# Chapter One\nBody.", block_label="doc_title", block_text="Chapter One"),

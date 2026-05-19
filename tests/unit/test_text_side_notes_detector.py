@@ -87,7 +87,7 @@ class BuildPagePartitionsNoteRoleTest(unittest.TestCase):
     def setUpClass(cls):
         from FNM_RE.stages.page_partition import build_page_partitions
         cls.pages = _load_biopolitics_pages()
-        cls.partitions = build_page_partitions(list(cls.pages))
+        cls.partitions, _, _ = build_page_partitions(list(cls.pages))
 
     def test_note_role_count_on_biopolitics(self):
         note_pages = sorted(
