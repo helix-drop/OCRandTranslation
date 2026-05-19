@@ -8,4 +8,5 @@ members = [
     "fnm-phase4",
     "fnm-llm-repair",
     "fnm-phase5",
+    "fnm-phase6",
 ]
