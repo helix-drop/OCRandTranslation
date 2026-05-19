@@ -15,12 +15,12 @@ fnm-phase3 完成情况，即可开工 Phase 4。
 | 1 章节骨架 | `fnm-phase1` | ✅ **100% 模块完成** | 106 lib + 27 集成（1 chapter_boundary parity 待精调）|
 | 2 注释结构 + note_kind | `fnm-phase2` | ✅ **100% 完成** | 140 lib + 18 集成 + biopolitics 6/6 |
 | 3 body anchor + link 匹配 | `fnm-phase3` | ✅ **100% 完成** | 26 lib + 27 集成（5 ignored cascade） |
-| **4 引用注入 + 翻译单元** | **`fnm-phase4`** | **🔄 M1 (ref_freeze) 完成（2026-05-18）** | 69 unit tests |
+| **4 引用注入 + 翻译单元** | **`fnm-phase4`** | ✅ **100% M1-M5 完成（2026-05-18）** | **106 lib + 6 parity + 8 spec = 120 tests** |
 | 5 章 markdown 合并 | `fnm-phase5` | ⏳ 未开始 | — |
 | 6 导出审计 | `fnm-phase6` | ⏳ 未开始 | — |
-| LLM repair (3.5) | `fnm-llm-repair` | ⏳ 未开始（fnm-core vision/spec 已就绪）| — |
+| LLM repair (3.5) | `fnm-llm-repair` | ✅ **100% 完成 + 二次审计通过** | **121 lib + 4 integration + 39 spec = 164 tests** |
 
-**workspace 测试**：23 套件 · 477 passed · 1 failed · 8 ignored。
+**workspace 测试**：27 套件 · ~664 passed · 1 failed · 多 ignored。
 完整状态见 [`fnm_re_rs/FNM_RE_REFACTOR.md`](../fnm_re_rs/FNM_RE_REFACTOR.md)。
 
 ---
@@ -33,7 +33,8 @@ fnm-phase3 完成情况，即可开工 Phase 4。
 | **fnm-phase1** | ✅ 100% | 12 模块完整，含 LLM book type verify |
 | **fnm-phase2** | ✅ 100% | 15 模块完整，含 visual_anchor_recovery 全 port |
 | **fnm-phase3** | ✅ 100% | 10 模块完整，含 1730 行 note_linking |
-| **DB Phase 1-3 持久化** | ✅ | Repository trait 含 replace_fnm_phase1/2/3_products |
+| **fnm-phase4** | ✅ 100% | M1-M5 全完成（ref_freeze + units + reviews + lib + persist）|
+| **DB Phase 1-4 持久化** | ✅ | Repository trait 含 replace_fnm_phase1/2/3/4_products |
 | **LLM 5 家 provider** | ✅ | DeepSeek / Qwen / MiMo / GLM / Kimi 通过 fnm_model_pool 路由 |
 | **fnm-core `ref_rewriter` / `segments` / `token_counter` / `db CRUD translation_units`** | ✅ | Phase 4 直接消费的基建全在 |
 
@@ -319,16 +320,18 @@ fnm-phase4/src/
 | P4.5 | `ref_freeze/mod.rs::build_frozen_units` 顶层编排 | M1 全部 | L | ✅ |
 | P4.5a | `segments/mod.rs` + `chunking.rs` — segment + chunk 算法（原 P4.9，M1 需要）| M1 依赖 | M | ✅ |
 | **M2: units** | | | | |
-| P4.6 | `units/page_split.rs`（7 个文本切分 helper）| M2.1 | M | ⏳ |
-| P4.7 | `units/body_pages.rs` + `endnote_lookup.rs`（结构化 body 收集）| M2.2 | M | ⏳ |
-| P4.8 | `units/ref_inject.rs`（ref_materialization_context + materialize_refs_for_chapter）| M2.3 | M | ⏳ |
+| P4.6 | `units/page_split.rs`（7 个文本切分 helper）| M2.1 | M | ✅ |
+| P4.7 | `units/body_pages.rs` + `endnote_lookup.rs`（结构化 body 收集）| M2.2 | M | ✅ |
+| P4.8 | `units/ref_inject.rs`（ref_materialization_context + materialize_refs_for_chapter）| M2.3 | M | ✅ |
 | P4.9 | `units/segments.rs` + `chunking.rs` → 已提前到 P4.5a（M1 依赖）| M2.4-2.5 | L | ✅ |
-| P4.10 | `units/mod.rs::build_translation_units` 顶层编排 | M2 全部 | L | ⏳ |
+| P4.10 | `units/mod.rs::build_translation_units` 顶层编排 | M2 全部 | L | ✅ |
 | **M3-M5: reviews + lib + persist** | | | | |
-| P4.11 | `reviews.rs::build_structure_reviews`（9 review type + dedup + sort）| M3 | M | ⏳ |
-| P4.12 | `lib.rs::build_phase4_structure` 顶层编排 + `persist_phase4` DB 持久化 | M4-M5 | M | ⏳ |
+| P4.11 | `reviews.rs::build_structure_reviews`（9 review type + dedup + sort）| M3 | M | ✅ |
+| P4.12 | `lib.rs::build_phase4_structure` 顶层编排 + `persist_phase4` DB 持久化 | M4-M5 | M | ✅ |
 | **测试** | | | | |
-| P4.13 | Biopolitics parity（生成 golden + 逐字段比对）+ 3 SPEC 测试翻译 | — | L | ⏳ |
+| P4.13 | Biopolitics parity（生成 golden + 逐字段比对）+ 3 SPEC 测试翻译 | — | L | ✅ |
+
+**M1-M5 全部完成，6,348 LOC（含测试），120 tests 全过**——超出原 plan 的 M1-only 估算。
 
 **规模合计**：4 S + 5 M + 4 L = 单 AI dev 串行约 21-25 session（按每任务 1-2 session 估）。
 

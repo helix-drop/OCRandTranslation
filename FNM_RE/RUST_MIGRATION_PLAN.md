@@ -12,13 +12,13 @@
 | 1 章节骨架 | `fnm-phase1` | ✅ **100% 完成** | 106 lib + 27 集成（1 chapter_boundary 待精调）|
 | 2 注释结构 + note_kind | `fnm-phase2` | ✅ **100% 完成** | 140 lib + 18 集成 + biopolitics 6/6 |
 | 3 body anchor + link 匹配 | `fnm-phase3` | ✅ **100% 完成** | 26 lib + 27 集成（5 ignored cascade）|
-| **4 引用注入 + 翻译单元** | **`fnm-phase4`** | **🔄 M1 (ref_freeze) 完成** | 69 unit tests |
+| **4 引用注入 + 翻译单元** | **`fnm-phase4`** | ✅ **100% M1-M5 完成** | **106 lib + 6 parity + 8 spec = 120 tests** |
 | 5 章 markdown 合并 | `fnm-phase5` | ⏳ 未开始 | — |
 | 6 导出 + 审计 | `fnm-phase6` | ⏳ 未开始 | — |
-| LLM repair (3.5) | `fnm-llm-repair` | ⏳ 未开始（fnm-core vision/spec 已就绪）| — |
+| LLM repair (3.5) | `fnm-llm-repair` | ✅ **100% 完成 + 二次审计通过** | **121 lib + 4 integration + 39 spec = 164 tests** |
 | 横切 | `fnm-orchestrator` | ⏳ 未开始 | — |
 
-**workspace 测试**：23 套件 · 477 passed · 1 failed · 8 ignored。
+**workspace 测试**：27 套件 · ~664 passed · 1 failed · 多 ignored。
 完整报告：[`fnm_re_rs/FNM_RE_REFACTOR.md`](../fnm_re_rs/FNM_RE_REFACTOR.md)。
 
 ### 重要 ✅：所有 LLM 调用统一走 ResolvedModelSpec
@@ -310,7 +310,29 @@ FNM_RE/stages/diagnostics.py 一部分              → src/diagnostics.rs (Phas
 
 ---
 
-### Step 3.5: LLM 修复 — `fnm-llm-repair`
+### Step 3.5: LLM 修复 — `fnm-llm-repair` ✅ **100% 完成 + 二次审计通过（2026-05-18）**
+
+9 个子模块 1:1 对应 Python 51 函数 + translator 4 helper：
+- `usage.rs`（4 helper）+ `cluster.rs`（4 函数）+ `page_context.rs`（10 函数 + RepairImageRenderer trait）
+- `prompt_builder.rs`（11 函数）+ `response_parser.rs`（2 函数 + RepairAction/SelectParams 类型）
+- `strategies/fuzzy.rs`（locate_anchor_phrase_in_body + partial_ratio 算法重写）
+- `override_materializer.rs`（7 函数）
+- `llm_client/{mod,request,error}.rs`（HTTP + multi-spec fallback + ProviderError 4 类分类 + 内容审核重试）
+- `run.rs::run_llm_repair`（顶层编排 + RunLlmRepairParams + LlmRepairReport）
+- `lib.rs`：仅 36 行模块声明 + re-export
+
+**总规模**：15 源文件 · ~6,700 LOC · **164 tests 全过**（121 lib + 4 integration + 39 spec）。
+Repository trait 扩展：`clear_fnm_review_overrides_v2` + `batch_save_fnm_review_overrides_v2`。
+Translator helper 复现：`_classify_provider_exception` / `_build_usage` / `_extract_openai_message_text` /
+`_merge_overrides_into_chat_kwargs` 全部在 Rust 端有对应实现。
+
+**两轮独立审计 → 修复**（功能完整 / AGENTS.md / Rust 习惯三路）：
+- 🔴 critical：ProviderError 4 类分类（RateLimited/QuotaExceeded/Transient/NonRetryable）已实现
+- 🟡 内容审核 4 关键字补齐 + auto_apply=false 不再误 batch_save + 删 dead code + 补 ←→ 注释
+- AGENTS.md 12 条铁律全合规（§4 mod.rs<400 / §5 ←→ 全覆盖 / §10 生产 0 Rc/Mutex / §11 clone 仅拓扑必需）
+- `cargo clippy --no-deps`：**0 warning** ✓
+
+
 
 **输入**：`Phase3Structure`（含 orphan_note / orphan_anchor 链接）+ PDF
 **输出**：`Vec<ReviewOverride>` 写入 `fnm_review_overrides` 表
@@ -359,11 +381,11 @@ run_llm_repair()
 
 ---
 
-### Step 4: 引用注入 + 翻译单元 — `fnm-phase4` 🔄 **可启动（上游全就绪）**
+### Step 4: 引用注入 + 翻译单元 — `fnm-phase4` ✅ **100% 完成**
 
-**状态**：crate 骨架已创建（Cargo.toml + lib.rs placeholder + workspace member）。
-所有上游依赖（fnm-core / phase1 / phase2 / phase3 + 5 家 provider LLM + DB 1-3 持久化）已 100% 就绪。
-完整 7 任务清单 + 验收 checklist 见 [`FNM_PHASE4_PLAN.md`](FNM_PHASE4_PLAN.md)（实施者读完即可开工 P4.0）。
+**状态**：M1-M5 全完成，21 个文件 / 6,348 LOC / 120 tests 全过。
+所有上游依赖（fnm-core / phase1 / phase2 / phase3 + 5 家 provider LLM + DB 1-4 持久化）已 100% 就绪。
+完整任务历史见 [`FNM_PHASE4_PLAN.md`](FNM_PHASE4_PLAN.md)。
 
 **输入**：`Phase3Structure`（最终版，已应用 LLM repair override）
 **输出**：`Phase4Structure { translation_units, structure_reviews, frozen_refs, frozen_units }`

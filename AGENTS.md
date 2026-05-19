@@ -275,3 +275,230 @@ Phase 1 → Phase 2 → Phase 3 → Phase 3.5 → Phase 4 → Phase 5 → Phase 
 2. 追 `_build_chapter_body_text` → `repo.load_pages` → page markdown 是否为空
 3. 检查 `has_body_text` 的 fallback 是否生效
 **修复位置**：`FNM_RE/llm_repair.py` 的 `_build_chapter_body_text()` 和 `request_llm_repair_actions()`
+
+---
+
+## Rust 重构代码规范（`fnm_re_rs/`）
+
+写 Rust 代码必须遵守这些规范，违反会被打回返工。这些规范来自审计 fnm-core / fnm-phase1 / fnm-phase2 后总结的差异——好的实现保真度接近 1:1 Python，差的实现简化到 30% 还需 lint allow 抑制反模式。
+
+### 1. 翻译保真度，不"简化"
+
+**默认是 1:1 翻译 Python**。Rust 代码量应该接近 Python（80-120%），不应该是 30-50%。
+
+❌ 反例（来自 sup_recovery/layer2.rs）：
+```rust
+// Python 是基于 block 文本对齐的复杂算法，简化为硬编码映射表
+let symbol_map: Vec<(&str, &str)> = vec![("*", "30"), (";", "11"), (":", "11")];
+```
+这只能让特定测试 case 通过，遇到新书一定崩。
+
+✅ 正例（来自 toc_semantics/sanitize.rs）：保留 Python 的"五遍 sanitize"结构：
+```rust
+pub fn sanitize_visual_toc_semantic_rows(rows: &mut [TocRow]) {
+    suppress_composite_root_duplicates(rows);   // Pass 1
+    merge_split_heading_rows(rows);              // Pass 2
+    suppress_prefixed_duplicates(rows);          // Pass 3
+    suppress_numeric_root_noise(rows);           // Pass 4
+    demote_rows_after_back_matter_start(rows);   // Pass 5
+}
+```
+
+**如果 Python 函数有 N 个内部分支或多遍处理，Rust 必须 N 个 pass / N 个分支保留**，不要因为"看起来差不多"就合并。
+
+### 2. Regex 必须用 `Lazy<Regex>` 静态
+
+**绝对禁止**在函数体或循环里 `Regex::new(...).unwrap()`。所有正则都用 `once_cell::sync::Lazy` 在模块顶部定义。
+
+❌ 反例：
+```rust
+fn parse(text: &str) {
+    for line in text.lines() {
+        // 每次循环都重新编译！
+        if let Some(caps) = Regex::new(r"^([a-zA-Z])\s{1,3}(\S.*)$").unwrap().captures(line) {
+            ...
+        }
+    }
+}
+```
+
+✅ 正例：
+```rust
+static LETTER_MARKER_RE: Lazy<Regex> = Lazy::new(||
+    Regex::new(r"^([a-zA-Z])\s{1,3}(\S.*)$").unwrap()
+);
+
+fn parse(text: &str) {
+    for line in text.lines() {
+        if let Some(caps) = LETTER_MARKER_RE.captures(line) { ... }
+    }
+}
+```
+
+**禁止用 `#![allow(clippy::regex_creation_in_loops)]` 抑制 lint**——任何文件出现这条都视为代码债。
+
+### 3. 复用 `fnm-core` 基础设施，不重复造轮子
+
+`fnm-core` 已经提供了所有 shared 工具。新代码动手前先看 fnm-core 有没有现成的：
+
+| 需求 | 用 fnm-core 的 |
+|---|---|
+| Unicode 上标 → ASCII 数字 | `fnm_core::note_marker::normalize_note_marker` |
+| `<sup>N</sup>` / `[^N]` 正则 | `fnm_core::anchor_kind::patterns::HTML_SUP_RE` 等 14 个 |
+| `## NOTES` / `## Endnotes` heading 判定 | `fnm_core::note_marker::is_notes_heading_line` |
+| Title 规范化 | `fnm_core::title::normalize_title` / `chapter_title_match_key` |
+| 章节匹配 key | `fnm_core::title::normalized_title_key` |
+| 文本工具 | `fnm_core::text::page_markdown_text` / `page_blocks` / `extract_page_headings` |
+| Anchor kind 判定 | `fnm_core::anchor_kind::resolve_anchor_kind` |
+| Marker 序列 | `fnm_core::marker_seq::*` |
+| 数据结构 | `fnm_core::records::*` (37 个 struct) |
+| 类型 enum | `fnm_core::types::*` (11 个 enum) |
+
+❌ 反例（来自 sup_recovery/layer1.rs）：
+```rust
+// 重新写 Unicode 上标映射，fnm-core 已经有
+let unicode_sup: Vec<(char, char)> = vec![
+    ('⁰', '0'), ('¹', '1'), ('²', '2'), ...
+];
+```
+
+✅ 正例：
+```rust
+use fnm_core::note_marker::normalize_note_marker;
+let ascii = normalize_note_marker("⁰¹²³");
+```
+
+如果发现 fnm-core 缺什么，**先去 fnm-core 加**，不要在 phase crate 内重新实现。
+
+### 4. 子模块拆分粒度：单一职责
+
+一个 `mod.rs` **不应超过 400 行**。超过就要拆子模块。
+
+❌ 反例：`note_regions/mod.rs` 459 行塞了 heading scan + footnote band + post_body endnote + manual_rebind + endnote candidates 5 个职责。
+
+✅ 正例：`toc_semantics/` 拆 7 个文件（mod / title_utils / row_collect / sanitize / lecture / page_resolve / role_inference / monotonic / container_detection），每个文件单一职责，<400 行。
+
+### 5. Python 对照注释
+
+每个公开函数的 doc comment 必须标明对应的 Python 函数：
+
+```rust
+/// 五遍 sanitize：composite_root_duplicates → split_heading_merge → ...
+/// 
+/// ←→ Python `_sanitize_visual_toc_semantic_rows()`
+pub fn sanitize_visual_toc_semantic_rows(rows: &mut [TocRow]) { ... }
+```
+
+文件头标 Python 文件 + 函数清单：
+```rust
+//! ←→ FNM_RE/stages/chapter_skeleton/toc_semantics.py
+//! 翻译的函数：_collect_visual_toc_rows / _sanitize_* / _build_lecture_collection_*
+```
+
+### 6. 测试用真实 fixture，不用 hand-crafted 字符串
+
+❌ 反例：
+```rust
+let pages = vec![RawPage {
+    book_page: 1,
+    markdown: "1. A test note.\n2. Another test note.".into(),
+    ..Default::default()
+}];
+```
+
+这种测试只验证"代码不 panic"，不验证业务规则。
+
+✅ 正例：
+```rust
+let raw: serde_json::Value = serde_json::from_str(include_str!(
+    "../../../test_example/Biopolitics/raw_pages.json"
+)).expect(...);
+let pages: Vec<RawPage> = ...; // 370 页真实数据
+let result = build_page_partitions(&pages, None, None);
+assert_eq!(result.partitions.len(), 370);
+```
+
+### 7. Parity 断言必须 byte-equal Python，不接受"Rust simplified"
+
+❌ 反例：
+```rust
+assert!(note_count >= 15, "Python finds 65, Rust simplified");
+```
+
+这是默认接受了"Rust 实现差于 Python"。
+
+✅ 正例：
+```rust
+// 用 Python 生成 expected JSON，Rust 输出必须 byte-equal
+let expected: serde_json::Value = serde_json::from_str(include_str!(
+    "fixtures/biopolitics_page_partition_expected.json"
+)).unwrap();
+let actual = serde_json::to_value(&result.partitions).unwrap();
+pretty_assertions::assert_eq!(actual, expected);
+```
+
+若 Rust 输出与 Python 不一致：要么改 Rust 实现，要么把 Python 行为视为 bug 写到 `FNM_RE_REFACTOR.md`。**不能默默接受"Rust 简化"**。
+
+### 8. 关键参数不能 `let _ = ...` 忽略
+
+❌ 反例：
+```rust
+pub fn build_phase1_structure(pages: &[RawPage], toc: Option<&[TocItem]>, config: &Phase1Config) -> ... {
+    let _ = config;  // 配置被静默忽略，skip_llm_verify / manual_overrides 都不生效
+    ...
+}
+```
+
+每一个 `let _ = ...` 都是一个静默的功能缺失。PR 描述里如果有这种行，必须解释为什么。否则 CR 拒绝。
+
+允许的 `let _ = ...`：
+- 临时变量绑定（如 `let _ = drop_guard;`）
+- 显式忽略 Result 的副作用（`let _ = some_io_call();`）
+
+### 9. Stub 用 `anyhow::bail!` 显式标注，不默默返回空值
+
+❌ 反例：
+```rust
+pub fn build_visual_recovery_overrides() -> serde_json::Value {
+    serde_json::json!({})  // 上游不知道这没实现
+}
+```
+
+✅ 正例：
+```rust
+pub fn build_visual_recovery_overrides() -> anyhow::Result<ReviewOverrides> {
+    anyhow::bail!(
+        "visual_recovery_overrides 未实现 — 见 FNM_PHASE12_AUDIT.md G3"
+    )
+}
+```
+
+让上游编译/运行时知道这块还没好。
+
+### 10. 0 个 `Rc<RefCell>` / 0 个 `Arc<Mutex>`
+
+借用模型设计健康的代码不需要 `Rc<RefCell>`。如果你发现自己想用，先停下来想：是不是所有权设计错了？
+
+**唯一允许的 `Mutex`**：`token_counter` 全局用量记录（对齐 Python 模块级状态）。其他地方出现都视为反模式。
+
+### 11. `.clone()` 节制
+
+参考 fnm-core 标准：27 个 clone 中 26 个合理（HashMap key / 返回 owned String / Value 深拷贝），1 个真正可优化的也已抽 private helper 修掉。
+
+新代码 `.clone()` 数量应该接近这个比例。如果一个模块出现 10+ 处 clone，先看能不能用 `&` 引用 / `Cow` / 抽 helper 函数减少。
+
+### 12. PR 验收 checklist
+
+每个 PR 必须通过：
+- [ ] `cargo build --release` 通过
+- [ ] `cargo clippy --all-targets -- -D warnings` 通过（**不允许新增 `allow()` 抑制**）
+- [ ] `cargo fmt --check` 通过
+- [ ] `cargo test --all` 通过
+- [ ] 涉及业务逻辑的模块：有 Python parity fixture 比对测试
+- [ ] 涉及 SPEC 测试的模块：有对应 Rust 集成测试
+- [ ] 0 个 `let _ = ...` 忽略关键参数（不解释就拒）
+- [ ] 0 个静默 stub（`json!({})` / `Ok(vec![])`）
+- [ ] 0 个循环内 `Regex::new()`
+- [ ] 0 个新增 `#![allow(clippy::*)]` 抑制
+- [ ] PR 描述说明：复用了 fnm-core 的哪些 API，没复用的解释为什么
+
