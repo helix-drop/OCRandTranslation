@@ -18,8 +18,32 @@ use fnm_core::db::{
     Phase1Products, Phase2Products, Phase3Products, Phase4Products, Phase5Products, Phase6Products,
     Repository,
 };
+use fnm_llm_repair::page_context::RepairImageRenderer;
+use fnm_llm_repair::run::{run_llm_repair, LlmRepairReport, RunLlmRepairParams};
 use fnm_phase1::input::{RawPage, TocItem};
 use fnm_phase2::chapter_split::build_chapter_layers;
+
+/// LLM repair 启用配置。
+///
+/// ←→ Python `run_llm_repair(doc_id, slug=..., auto_apply=True)` kwargs。
+pub struct LlmRepairOptions<'a> {
+    pub renderer: &'a dyn RepairImageRenderer,
+    pub pdf_path: &'a str,
+    pub auto_apply: bool,
+    pub confidence_threshold: f64,
+}
+
+impl<'a> LlmRepairOptions<'a> {
+    /// 默认值对齐 Python `run_llm_repair` kwargs。
+    pub fn with_renderer(renderer: &'a dyn RepairImageRenderer, pdf_path: &'a str) -> Self {
+        Self {
+            renderer,
+            pdf_path,
+            auto_apply: true,
+            confidence_threshold: 0.9,
+        }
+    }
+}
 
 /// DB-driven 入口：跑 phase1→6 并持久化到 SQLite。
 ///
@@ -34,6 +58,7 @@ pub fn run_pipeline_for_doc<R: Repository>(
     raw_pages: Vec<RawPage>,
     toc_items: Vec<TocItem>,
     config: PipelineConfig,
+    llm_repair: Option<LlmRepairOptions<'_>>,
 ) -> Result<ModulePipelineSnapshot> {
     let pipeline_run_id = pipeline::generate_run_id(doc_id);
 
@@ -93,9 +118,15 @@ pub fn run_pipeline_for_doc<R: Repository>(
         note_links: phase3_products.note_links,
     });
 
-    // ── Phase 3.5: LLM repair（暂未集成）──
-    // 后续 commit 接入：调 fnm_llm_repair::run_llm_repair(...) 写 review_overrides，
-    // phase4 读取应用 override 后的 phase3 产物。
+    // ── Phase 3.5: LLM repair（可选）──
+    // ←→ Python `pipeline.py:1598-1609`：phase3 持久化后调 run_llm_repair，
+    //    auto_apply=True 时直接写 fnm_review_overrides，phase4 读 DB 时自然消费。
+    let llm_repair_report = if let Some(opts) = llm_repair {
+        let report = run_llm_repair_sync(repo, doc_id, &raw_pages, &config, &opts)?;
+        Some(report)
+    } else {
+        None
+    };
 
     // ── Phase 4 ──
     let chapter_layers = build_chapter_layers(
@@ -153,12 +184,52 @@ pub fn run_pipeline_for_doc<R: Repository>(
         export_audit: phase6_products.export_audit,
     });
 
+    let llm_repair_summary = llm_repair_report.as_ref().map(|r| {
+        serde_json::json!({
+            "cluster_count": r.cluster_count,
+            "suggestion_count": r.suggestion_count,
+            "auto_applied_count": r.auto_applied_count,
+            "usage_summary": r.usage_summary.clone(),
+        })
+    });
+
     snapshot.run_meta = serde_json::json!({
         "pipeline_run_id": pipeline_run_id,
         "start_phase": format!("{:?}", config.start_phase),
         "phase_state": "done",
         "persisted": true,
+        "llm_repair": llm_repair_summary,
     });
 
     Ok(snapshot)
+}
+
+/// 同步包装 async `run_llm_repair`。
+///
+/// 在 orchestrator 内部创建 tokio runtime 执行 async LLM 调用，
+/// caller 不需要持有 runtime（对齐 Python `run_llm_repair` 同步语义）。
+fn run_llm_repair_sync<R: Repository>(
+    repo: &R,
+    doc_id: &str,
+    raw_pages: &[RawPage],
+    config: &PipelineConfig,
+    opts: &LlmRepairOptions<'_>,
+) -> Result<LlmRepairReport> {
+    let mut params = RunLlmRepairParams::new(doc_id, repo, raw_pages, opts.pdf_path, opts.renderer);
+    params.slug = if config.slug.is_empty() {
+        doc_id
+    } else {
+        &config.slug
+    };
+    params.auto_apply = opts.auto_apply;
+    params.confidence_threshold = opts.confidence_threshold;
+
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| OrchestratorError::LlmRepair(anyhow::anyhow!("tokio runtime: {}", e)))?;
+
+    runtime
+        .block_on(run_llm_repair(params))
+        .map_err(OrchestratorError::LlmRepair)
 }

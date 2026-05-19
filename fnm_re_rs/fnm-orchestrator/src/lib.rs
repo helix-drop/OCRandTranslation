@@ -15,7 +15,7 @@ pub mod pipeline;
 pub mod types;
 
 pub use error::{OrchestratorError, Result};
-pub use mainline::run_pipeline_for_doc;
+pub use mainline::{run_pipeline_for_doc, LlmRepairOptions};
 pub use pipeline::run_pipeline;
 pub use types::{
     ModulePipelineSnapshot, PipelineConfig, StartPhase,
