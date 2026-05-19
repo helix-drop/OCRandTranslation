@@ -367,19 +367,21 @@ pub fn build_toc_semantics(
 
     // ←→ Python toc_semantics.py:1537-1555: 应用 heading_graph 锚点修正章节起始页。
     // graph 完整且无边冲突时，用 graph_row.anchor_page 替换 row.page_no。
+    // gate：unresolved_titles_preview 为空 + boundary_conflict_titles_preview 为空
     if let Some(hg) = heading_graph {
-        let residual_provisional = hg
+        let heading_graph_incomplete = hg
             .summary
-            .get("residual_provisional_count")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(999);
+            .get("unresolved_titles_preview")
+            .and_then(|v| v.as_array())
+            .map(|a| !a.is_empty())
+            .unwrap_or(false);
         let has_boundary_conflict = hg
             .summary
             .get("boundary_conflict_titles_preview")
             .and_then(|v| v.as_array())
             .map(|a| !a.is_empty())
             .unwrap_or(false);
-        if residual_provisional == 0 && !has_boundary_conflict {
+        if !heading_graph_incomplete && !has_boundary_conflict {
             let title_row_by_key: std::collections::HashMap<
                 String,
                 &crate::heading_graph::GraphRow,
@@ -489,11 +491,30 @@ pub fn build_toc_semantics(
             .copied()
             .unwrap_or(max_page_no + 1);
 
-        let mut span_pages: Vec<i64> = eligible_pages_all
+        let raw_span_pages: Vec<i64> = eligible_pages_all
             .iter()
             .copied()
             .filter(|&p| p >= start_page && p < next_start_page)
             .collect();
+        let body_span_pages: Vec<i64> = raw_span_pages
+            .iter()
+            .copied()
+            .filter(|&p| page_role_by_no.get(&p).map(String::as_str) == Some("body"))
+            .collect();
+        let start_role = page_role_by_no
+            .get(&start_page)
+            .map(String::as_str)
+            .unwrap_or("");
+        let mut span_pages: Vec<i64> = if start_role == "front_matter"
+            && title_utils::is_toc_force_export_title(&row.title)
+            && !raw_span_pages.is_empty()
+        {
+            raw_span_pages
+        } else if !body_span_pages.is_empty() {
+            body_span_pages
+        } else {
+            raw_span_pages
+        };
 
         // trim front_matter/noise from start
         span_pages =
