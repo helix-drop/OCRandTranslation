@@ -117,5 +117,33 @@ finally:
 
 print()
 print("=" * 60)
+print("Test 3: run_pipeline_for_doc_with_llm_repair_json (NoopRenderer, 无 vision)")
+print("=" * 60)
+with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
+    db_path = tmp.name
+try:
+    # 不传 renderer → 内部用 NoopRenderer + pdf_path 空字符串 → LLM repair 无 cluster 可发，
+    # 仅验证调用链通畅（不抛错、产出 llm_repair 子段）
+    result_json = fnm_re_rs.run_pipeline_for_doc_with_llm_repair_json(
+        db_path,
+        "biopolitics-llm",
+        json.dumps(pages),
+        json.dumps(toc_items),
+        json.dumps(config),
+        "",  # pdf_path 空
+        None,  # renderer 用默认 Noop
+        True,  # auto_apply
+        0.9,  # confidence_threshold
+    )
+    result = json.loads(result_json)
+    llm = result["run_meta"].get("llm_repair")
+    print(f"llm_repair report: cluster_count={llm['cluster_count']}, "
+          f"suggestion_count={llm['suggestion_count']}, "
+          f"auto_applied_count={llm['auto_applied_count']}")
+finally:
+    os.unlink(db_path)
+
+print()
+print("=" * 60)
 print("✓ smoke test passed")
 print("=" * 60)
