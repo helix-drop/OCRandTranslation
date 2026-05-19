@@ -105,7 +105,7 @@ pub fn run_pipeline(
     Ok(snapshot)
 }
 
-fn generate_run_id(doc_id: &str) -> String {
+pub(crate) fn generate_run_id(doc_id: &str) -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -118,7 +118,7 @@ fn generate_run_id(doc_id: &str) -> String {
     format!("{:016x}", hasher.finish())
 }
 
-fn run_phase1(
+pub(crate) fn run_phase1(
     pages: &[RawPage],
     toc_items: &[TocItem],
     config: &PipelineConfig,
@@ -158,7 +158,7 @@ fn run_phase1(
     })
 }
 
-fn run_phase2(
+pub(crate) fn run_phase2(
     phase1: &Phase1Snapshot,
     pages: &[RawPage],
     config: &PipelineConfig,
@@ -214,7 +214,7 @@ fn run_phase2(
     })
 }
 
-fn run_phase3(
+pub(crate) fn run_phase3(
     phase1: &Phase1Snapshot,
     phase2: &Phase2Snapshot,
     pages: &[RawPage],
@@ -252,7 +252,7 @@ fn run_phase3(
     })
 }
 
-fn run_phase4(
+pub(crate) fn run_phase4(
     phase1: &Phase1Snapshot,
     phase2: &Phase2Snapshot,
     phase3: &Phase3Snapshot,
@@ -296,7 +296,7 @@ fn run_phase4(
     })
 }
 
-fn run_phase5(
+pub(crate) fn run_phase5(
     phase4: &Phase4Snapshot,
     phase3: &Phase3Snapshot,
     chapter_layers: &ChapterLayers,
@@ -316,7 +316,7 @@ fn run_phase5(
     Ok(Phase5Snapshot { chapter_markdowns })
 }
 
-fn run_phase6(
+pub(crate) fn run_phase6(
     phase5: &Phase5Snapshot,
     phase1: &Phase1Snapshot,
     config: &PipelineConfig,
