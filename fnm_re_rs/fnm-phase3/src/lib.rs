@@ -21,12 +21,24 @@ pub mod paragraph_footnotes;
 
 use fnm_core::{
     db::{Phase3Products, Repository},
-    records::Phase3Structure,
+    records::{NoteLinkRecord, Phase3Structure},
 };
 use fnm_phase2::chapter_split::build_chapter_layers;
 use input::Phase3Input;
 use output::Phase3Output;
 use serde_json::Value;
+
+/// 全局重编号 link_id，确保 (doc_id, link_id) 唯一约束满足。
+///
+/// 上游 `link_utils::link_new_link` 接受 `serial: usize` 但 caller 各自从 1 开始计数，
+/// 跨章/跨 stage 时 ID 会重叠（注释明确 "由调用方重新编号"）。本函数在 phase3 出口
+/// 统一按出现顺序重新分配 link-NNNNN。
+fn renumber_link_ids(mut links: Vec<NoteLinkRecord>) -> Vec<NoteLinkRecord> {
+    for (idx, link) in links.iter_mut().enumerate() {
+        link.link_id = format!("link-{:05}", idx + 1);
+    }
+    links
+}
 
 /// 构建 Phase 3 结构。
 ///
@@ -113,7 +125,7 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         note_items: phase2.note_items,
         chapter_note_modes: phase2.chapter_note_modes,
         body_anchors: result.data.anchors.clone(),
-        note_links: result.data.effective_links.clone(),
+        note_links: renumber_link_ids(result.data.effective_links.clone()),
         paragraph_footnotes,
         paragraph_endnotes,
         chapter_anchor_alignments,

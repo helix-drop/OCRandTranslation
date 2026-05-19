@@ -80,9 +80,12 @@ pub fn build_note_items(
         } else {
             "en"
         };
-        for (idx, row) in rows.iter().enumerate() {
+        // ID 生成：每 push 一次 all_items 增长 1，所以下一项序号 = 当前长度 + 1。
+        // 原写法 `all_items.len() + idx + 1` 在 push 后让 len 增长，跨 region 时
+        // 序号会跳号且与下一 region 起点重叠 → UNIQUE constraint failed。
+        for row in rows.iter() {
             let mut item = row_to_item(row, region, kind_tag);
-            item.note_item_id = format!("{}-{:04}", kind_tag, all_items.len() + idx + 1);
+            item.note_item_id = format!("{}-{:04}", kind_tag, all_items.len() + 1);
             all_items.push(item);
         }
     }

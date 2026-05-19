@@ -199,6 +199,9 @@ impl Repository for StubRepo {
     fn replace_fnm_phase6_products(&self, _doc_id: &str, _payload: &Phase6Products) -> Result<()> {
         anyhow::bail!("not implemented")
     }
+    fn upsert_document(&self, _doc_id: &str, _slug: &str) -> Result<()> {
+        Ok(())
+    }
 }
 
 // ── 集成测试 ────────────────────────────────────────────────────

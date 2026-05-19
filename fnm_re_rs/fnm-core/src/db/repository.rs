@@ -147,6 +147,29 @@ pub trait Repository {
     fn list_fnm_export_audit(&self, doc_id: &str) -> Result<Option<ExportAuditReportRecord>>;
     fn list_fnm_export_bundle(&self, doc_id: &str) -> Result<Option<ExportBundleRecord>>;
     fn replace_fnm_phase6_products(&self, doc_id: &str, payload: &Phase6Products) -> Result<()>;
+
+    // ── documents 元数据 ──
+    /// upsert documents 表（满足 fnm_* 表的外键约束）。
+    /// ←→ Python `SQLiteRepository.upsert_document(doc_id, slug)`
+    fn upsert_document(&self, doc_id: &str, slug: &str) -> Result<()>;
+}
+
+/// 把 Rust 端 heading_family_guess 映射到 schema CHECK 允许的 6 个值之一。
+///
+/// ←→ Python `FNM_RE/app/persist_helpers.py::serialize_heading_candidates_for_repo`
+/// 中的 family_alias 表 + 白名单兜底为 'unknown'。
+fn normalize_heading_family_guess(raw: &str) -> &'static str {
+    match raw.trim().to_ascii_lowercase().as_str() {
+        "book" => "book",
+        "chapter" => "chapter",
+        "section" => "section",
+        "note" => "note",
+        "other" => "other",
+        "unknown" => "unknown",
+        "front_matter" => "book",
+        "back_matter" => "other",
+        _ => "unknown",
+    }
 }
 
 // ── SqliteRepository ─────────────────────────────────────────────
@@ -255,7 +278,7 @@ impl SqliteRepository {
                 hc.block_label,
                 hc.top_band as i64,
                 hc.confidence,
-                hc.heading_family_guess,
+                normalize_heading_family_guess(&hc.heading_family_guess),
                 hc.suppressed_as_chapter as i64,
                 hc.reject_reason,
                 ts,
@@ -1389,5 +1412,15 @@ impl Repository for SqliteRepository {
             Some(Err(e)) => Err(e.into()),
             None => Ok(None),
         }
+    }
+
+    fn upsert_document(&self, doc_id: &str, slug: &str) -> Result<()> {
+        let conn = self.get_conn()?;
+        conn.execute(
+            "INSERT INTO documents (id, slug, state) VALUES (?1, ?2, 'idle')
+             ON CONFLICT(id) DO UPDATE SET slug = excluded.slug",
+            rusqlite::params![doc_id, slug],
+        )?;
+        Ok(())
     }
 }
