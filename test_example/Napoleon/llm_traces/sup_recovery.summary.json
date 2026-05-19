@@ -1,0 +1,10 @@
+{
+  "stage": "sup_recovery",
+  "usage": {
+    "request_count": 90,
+    "prompt_tokens": 325230,
+    "completion_tokens": 3360,
+    "total_tokens": 328590
+  },
+  "doc_id": "5df1d3d7f9c1"
+}

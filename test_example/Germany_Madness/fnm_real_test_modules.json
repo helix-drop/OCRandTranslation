@@ -9,12 +9,12 @@
     ],
     "page_role_counts": {
       "front_matter": 44,
-      "body": 360,
-      "note": 6,
+      "body": 363,
+      "note": 3,
       "other": 54
     },
     "first_body_page": 45,
-    "first_note_page": 129,
+    "first_note_page": 139,
     "page_role_samples": [
       {
         "page_no": 1,
@@ -71,15 +71,6 @@
         "section_hint": ""
       },
       {
-        "page_no": 129,
-        "target_pdf_page": 129,
-        "page_role": "note",
-        "role_reason": "note_continuation",
-        "role_confidence": 1.0,
-        "has_note_heading": false,
-        "section_hint": ""
-      },
-      {
         "page_no": 139,
         "target_pdf_page": 139,
         "page_role": "note",
@@ -91,6 +82,15 @@
       {
         "page_no": 280,
         "target_pdf_page": 280,
+        "page_role": "note",
+        "role_reason": "note_continuation",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 281,
+        "target_pdf_page": 281,
         "page_role": "note",
         "role_reason": "note_continuation",
         "role_confidence": 1.0,
@@ -125,14 +125,7 @@
         "section_hint": ""
       }
     ],
-    "structure_page_partition_summary": {
-      "total_pages": 464,
-      "noise": 1,
-      "front_matter": 12,
-      "body": 426,
-      "note": 6,
-      "other": 19
-    }
+    "structure_page_partition_summary": {}
   },
   "note_region_detection": {
     "decision_basis": [
@@ -144,20 +137,13 @@
       "structure.visual_toc_endnotes_summary"
     ],
     "visual_toc_endnotes_summary": {},
-    "chapter_binding_summary": {
-      "region_count": 45,
-      "book_scope_region_count": 0,
-      "unbound_region_count": 0,
-      "unbound_region_ids_preview": [],
-      "unassigned_item_count": 0,
-      "unassigned_item_ids_preview": []
-    },
+    "chapter_binding_summary": {},
     "chapter_endnote_region_alignment_summary": {},
     "region_rows": [
       {
-        "region_id": "nr-fn-ch-0001-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0001-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "start_page": 46,
         "end_page": 63,
         "pages": [
@@ -220,9 +206,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0002-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0002-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "start_page": 65,
         "end_page": 67,
         "pages": [
@@ -270,9 +256,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0003-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "start_page": 69,
         "end_page": 82,
         "pages": [
@@ -331,9 +317,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0004-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "start_page": 87,
         "end_page": 93,
         "pages": [
@@ -385,9 +371,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0005-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0005-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "start_page": 95,
         "end_page": 98,
         "pages": [
@@ -436,9 +422,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0006-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "start_page": 100,
         "end_page": 128,
         "pages": [
@@ -512,45 +498,9 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0007-toc-ch-002-2tworeformersandaworldgo",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
-        "start_page": 129,
-        "end_page": 129,
-        "pages": [
-          129
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 2,
-        "numeric_marker_count": 2,
-        "numeric_marker_start": 136,
-        "numeric_marker_end": 137,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "136",
-          "137"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "en-00001",
-            "page_no": 129,
-            "marker": "136",
-            "source_text_preview": "Paracelsus: Sämtliche Werke nach der 10-bändigen Huserschen Gesamtausgabe (1589–91), zum erstenmal in neuzetliches Deutsch übersetzt, ed. an..."
-          },
-          {
-            "note_item_id": "en-00002",
-            "page_no": 129,
-            "marker": "137",
-            "source_text_preview": "Kurt Goldammer, Paracelsus: Natur und Offenbarung (Hannover, 1953); Heinrich Schipperges, Paracelsus: Der Mensch in der Licht der Natur (Stu..."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0008-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0007-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "start_page": 130,
         "end_page": 134,
         "pages": [
@@ -600,9 +550,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0009-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0008-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "start_page": 136,
         "end_page": 138,
         "pages": [
@@ -650,9 +600,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0009-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "start_page": 140,
         "end_page": 158,
         "pages": [
@@ -716,9 +666,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0011-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0010-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "start_page": 160,
         "end_page": 162,
         "pages": [
@@ -766,9 +716,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0012-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0011-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "start_page": 164,
         "end_page": 178,
         "pages": [
@@ -828,9 +778,9 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-003-3academicpsychiatryandth-171-footnote",
+        "region_id": "llm-note-region-toc-ch-003-academicpsychiatryandthe-171-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "start_page": 171,
         "end_page": 171,
         "pages": [
@@ -849,7 +799,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "llm-note-anchor-00371-x",
+            "note_item_id": "llm-note-anchor-00530-x",
             "page_no": 171,
             "marker": "*",
             "source_text_preview": "Includes separate editions and reprints as part of an edition of the collected works."
@@ -857,9 +807,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0012-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "start_page": 180,
         "end_page": 183,
         "pages": [
@@ -908,9 +858,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0014-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0013-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "start_page": 185,
         "end_page": 200,
         "pages": [
@@ -971,9 +921,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0015-toc-ch-004-4witchcraftandthemelanch",
+        "region_id": "nr-fn-ch-0014-toc-ch-004-witchcraftandthemelancho",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
         "start_page": 202,
         "end_page": 203,
         "pages": [
@@ -1015,9 +965,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+        "region_id": "nr-fn-ch-0015-toc-ch-004-witchcraftandthemelancho",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
         "start_page": 205,
         "end_page": 246,
         "pages": [
@@ -1104,9 +1054,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0017-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0016-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 248,
         "end_page": 257,
         "pages": [
@@ -1161,9 +1111,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0018-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0017-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 259,
         "end_page": 259,
         "pages": [
@@ -1197,9 +1147,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0019-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0018-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 263,
         "end_page": 263,
         "pages": [
@@ -1226,9 +1176,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0020-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0019-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 265,
         "end_page": 265,
         "pages": [
@@ -1255,9 +1205,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0021-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0020-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 267,
         "end_page": 267,
         "pages": [
@@ -1291,9 +1241,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0022-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0021-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 269,
         "end_page": 269,
         "pages": [
@@ -1327,9 +1277,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0023-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0022-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 272,
         "end_page": 274,
         "pages": [
@@ -1377,9 +1327,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0024-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0023-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 277,
         "end_page": 277,
         "pages": [
@@ -1406,9 +1356,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0025-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0024-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 279,
         "end_page": 279,
         "pages": [
@@ -1449,9 +1399,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0026-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0025-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 282,
         "end_page": 290,
         "pages": [
@@ -1505,9 +1455,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0027-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0026-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 292,
         "end_page": 292,
         "pages": [
@@ -1548,9 +1498,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0028-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0027-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 294,
         "end_page": 294,
         "pages": [
@@ -1593,9 +1543,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0029-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "start_page": 296,
         "end_page": 296,
         "pages": [
@@ -1622,9 +1572,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0030-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0029-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "start_page": 297,
         "end_page": 307,
         "pages": [
@@ -1680,53 +1630,9 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "start_page": 309,
-        "end_page": 309,
-        "pages": [
-          309
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 4,
-        "numeric_marker_count": 4,
-        "numeric_marker_start": 50,
-        "numeric_marker_end": 53,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "50",
-          "51",
-          "52",
-          "53"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "en-00003",
-            "page_no": 309,
-            "marker": "50",
-            "source_text_preview": "Ibid."
-          },
-          {
-            "note_item_id": "en-00004",
-            "page_no": 309,
-            "marker": "51",
-            "source_text_preview": "Ibid."
-          },
-          {
-            "note_item_id": "en-00005",
-            "page_no": 309,
-            "marker": "52",
-            "source_text_preview": "Ibid."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0032-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0030-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "start_page": 310,
         "end_page": 318,
         "pages": [
@@ -1780,9 +1686,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0031-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "start_page": 320,
         "end_page": 320,
         "pages": [
@@ -1824,54 +1730,9 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0034-toc-ch-006-6pilgrimsinsearchoftheir",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "start_page": 321,
-        "end_page": 321,
-        "pages": [
-          321
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 5,
-        "numeric_marker_count": 5,
-        "numeric_marker_start": 20,
-        "numeric_marker_end": 1521,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "96",
-          "97",
-          "20",
-          "1520",
-          "1521"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "en-00007",
-            "page_no": 321,
-            "marker": "96",
-            "source_text_preview": "Bauer, \"Das älteste gedruckte Mirakelbüchlein von Altötting,\" p. 150, nos. 4, 6, 16, 24."
-          },
-          {
-            "note_item_id": "en-00008",
-            "page_no": 321,
-            "marker": "97",
-            "source_text_preview": "Bauer, \"Das Büchlein der Zuflucht zu Maria,\" p. 235, nos. 1, 2, 4b, 5, 6, 11, 24, 40, 43, 48, 64, 65, 66, 75. of the twenty-five miracles li..."
-          },
-          {
-            "note_item_id": "en-00009",
-            "page_no": 321,
-            "marker": "20",
-            "source_text_preview": "Madwoman: Margreth, Hanns Eyseleis's daughter. Panel painting from the Gnadentafel, Heilige Kapelle, Altötting."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0032-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "start_page": 322,
         "end_page": 330,
         "pages": [
@@ -1925,9 +1786,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0036-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "start_page": 332,
         "end_page": 340,
         "pages": [
@@ -1981,9 +1842,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0037-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0034-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 343,
         "end_page": 363,
         "pages": [
@@ -2049,9 +1910,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0038-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0035-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 365,
         "end_page": 367,
         "pages": [
@@ -2098,9 +1959,9 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-007-7madnessashelplessnesstw-367-footnote",
+        "region_id": "llm-note-region-toc-ch-007-madnessashelplessnesstwo-367-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 367,
         "end_page": 367,
         "pages": [
@@ -2119,7 +1980,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "llm-note-anchor-00899-x",
+            "note_item_id": "llm-note-anchor-01133-x",
             "page_no": 367,
             "marker": "*",
             "source_text_preview": "peas, oatmeal, barley, millet"
@@ -2127,9 +1988,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0039-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0036-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 369,
         "end_page": 370,
         "pages": [
@@ -2172,9 +2033,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0040-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0037-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 372,
         "end_page": 378,
         "pages": [
@@ -2226,9 +2087,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0041-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0038-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 382,
         "end_page": 383,
         "pages": [
@@ -2263,9 +2124,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0042-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0039-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 385,
         "end_page": 385,
         "pages": [
@@ -2292,9 +2153,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0043-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0040-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 387,
         "end_page": 395,
         "pages": [
@@ -2348,9 +2209,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0044-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0041-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "start_page": 398,
         "end_page": 403,
         "pages": [
@@ -2401,36 +2262,7 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-007-7madnessashelplessnesstw-399-footnote",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
-        "start_page": 399,
-        "end_page": 399,
-        "pages": [
-          399
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 1,
-        "numeric_marker_count": 0,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "llm-note-anchor-00977-x",
-            "page_no": 399,
-            "marker": "*",
-            "source_text_preview": "*she was described “as if demon possessed”"
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0045-toc-ch-008-epilogue",
+        "region_id": "nr-fn-ch-0042-toc-ch-008-epilogue",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-epilogue",
         "start_page": 406,
@@ -2467,100 +2299,13 @@
       "按 region_id 聚合生成注释数组",
       "检查 numeric marker 连续性与首尾 marker"
     ],
-    "note_capture_summary": {
-      "expected_anchor_count": 880,
-      "captured_note_count": 1123,
-      "capture_ratio": 1.2761,
-      "sparse_capture_chapter_ids": [],
-      "dense_anchor_zero_capture_pages": [],
-      "chapters": [
-        {
-          "chapter_id": "toc-ch-001-1historicalproblemssinst",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 162,
-          "captured_note_count": 159,
-          "capture_ratio": 0.9815
-        },
-        {
-          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 132,
-          "captured_note_count": 264,
-          "capture_ratio": 2.0
-        },
-        {
-          "chapter_id": "toc-ch-003-3academicpsychiatryandth",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 121,
-          "captured_note_count": 117,
-          "capture_ratio": 0.9669
-        },
-        {
-          "chapter_id": "toc-ch-004-4witchcraftandthemelanch",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 167,
-          "captured_note_count": 169,
-          "capture_ratio": 1.012
-        },
-        {
-          "chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 87,
-          "captured_note_count": 76,
-          "capture_ratio": 0.8736
-        },
-        {
-          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 48,
-          "captured_note_count": 159,
-          "capture_ratio": 3.3125
-        },
-        {
-          "chapter_id": "toc-ch-007-7madnessashelplessnesstw",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 162,
-          "captured_note_count": 178,
-          "capture_ratio": 1.0988
-        },
-        {
-          "chapter_id": "toc-ch-008-epilogue",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 1,
-          "captured_note_count": 1,
-          "capture_ratio": 1.0
-        }
-      ]
-    },
-    "book_endnote_stream_summary": {
-      "chapter_count": 2,
-      "chapters_with_endnote_stream": [
-        "toc-ch-002-2tworeformersandaworldgo",
-        "toc-ch-006-6pilgrimsinsearchoftheir"
-      ],
-      "high_concentration_chapter_ids": [],
-      "chapters": [
-        {
-          "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
-          "item_count": 2,
-          "projection_mode_counts": {
-            "native": 2
-          }
-        },
-        {
-          "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-          "item_count": 9,
-          "projection_mode_counts": {
-            "native": 9
-          }
-        }
-      ]
-    },
+    "note_capture_summary": {},
+    "book_endnote_stream_summary": {},
     "array_rows": [
       {
-        "region_id": "nr-fn-ch-0001-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0001-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "item_count": 60,
         "numeric_marker_start": 1,
         "numeric_marker_end": 60,
@@ -2577,9 +2322,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0002-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0002-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "item_count": 13,
         "numeric_marker_start": 61,
         "numeric_marker_end": 73,
@@ -2596,9 +2341,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0003-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0003-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "item_count": 44,
         "numeric_marker_start": 74,
         "numeric_marker_end": 117,
@@ -2615,9 +2360,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0004-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0004-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "item_count": 27,
         "numeric_marker_start": 118,
         "numeric_marker_end": 144,
@@ -2634,9 +2379,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0005-toc-ch-001-1historicalproblemssinst",
+        "region_id": "nr-fn-ch-0005-toc-ch-001-historicalproblemssinstv",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-1historicalproblemssinst",
+        "bound_chapter_id": "toc-ch-001-historicalproblemssinstv",
         "item_count": 15,
         "numeric_marker_start": 145,
         "numeric_marker_end": 159,
@@ -2653,9 +2398,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0006-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0006-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "item_count": 132,
         "numeric_marker_start": 1,
         "numeric_marker_end": 132,
@@ -2672,22 +2417,9 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0007-toc-ch-002-2tworeformersandaworldgo",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
-        "item_count": 2,
-        "numeric_marker_start": 136,
-        "numeric_marker_end": 137,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "136",
-          "137"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0008-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0007-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "item_count": 26,
         "numeric_marker_start": 133,
         "numeric_marker_end": 158,
@@ -2704,9 +2436,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0009-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0008-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "item_count": 12,
         "numeric_marker_start": 159,
         "numeric_marker_end": 170,
@@ -2723,9 +2455,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0010-toc-ch-002-2tworeformersandaworldgo",
+        "region_id": "nr-fn-ch-0009-toc-ch-002-tworeformersandaworldgon",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-2tworeformersandaworldgo",
+        "bound_chapter_id": "toc-ch-002-tworeformersandaworldgon",
         "item_count": 94,
         "numeric_marker_start": 171,
         "numeric_marker_end": 264,
@@ -2742,9 +2474,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0011-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0010-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "item_count": 8,
         "numeric_marker_start": 1,
         "numeric_marker_end": 8,
@@ -2761,9 +2493,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0012-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0011-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "item_count": 47,
         "numeric_marker_start": 9,
         "numeric_marker_end": 55,
@@ -2780,9 +2512,9 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-003-3academicpsychiatryandth-171-footnote",
+        "region_id": "llm-note-region-toc-ch-003-academicpsychiatryandthe-171-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "item_count": 1,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
@@ -2792,9 +2524,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0013-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0012-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "item_count": 8,
         "numeric_marker_start": 56,
         "numeric_marker_end": 63,
@@ -2811,9 +2543,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0014-toc-ch-003-3academicpsychiatryandth",
+        "region_id": "nr-fn-ch-0013-toc-ch-003-academicpsychiatryandthe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-3academicpsychiatryandth",
+        "bound_chapter_id": "toc-ch-003-academicpsychiatryandthe",
         "item_count": 54,
         "numeric_marker_start": 64,
         "numeric_marker_end": 117,
@@ -2830,9 +2562,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0015-toc-ch-004-4witchcraftandthemelanch",
+        "region_id": "nr-fn-ch-0014-toc-ch-004-witchcraftandthemelancho",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
         "item_count": 3,
         "numeric_marker_start": 1,
         "numeric_marker_end": 3,
@@ -2844,9 +2576,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0016-toc-ch-004-4witchcraftandthemelanch",
+        "region_id": "nr-fn-ch-0015-toc-ch-004-witchcraftandthemelancho",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-4witchcraftandthemelanch",
+        "bound_chapter_id": "toc-ch-004-witchcraftandthemelancho",
         "item_count": 166,
         "numeric_marker_start": 4,
         "numeric_marker_end": 169,
@@ -2863,9 +2595,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0017-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0016-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 19,
         "numeric_marker_start": 1,
         "numeric_marker_end": 19,
@@ -2882,9 +2614,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0018-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0017-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 2,
         "numeric_marker_start": 20,
         "numeric_marker_end": 21,
@@ -2895,9 +2627,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0019-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0018-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 1,
         "numeric_marker_start": 22,
         "numeric_marker_end": 22,
@@ -2907,9 +2639,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0020-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0019-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 1,
         "numeric_marker_start": 23,
         "numeric_marker_end": 23,
@@ -2919,9 +2651,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0021-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0020-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 2,
         "numeric_marker_start": 24,
         "numeric_marker_end": 25,
@@ -2932,9 +2664,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0022-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0021-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 2,
         "numeric_marker_start": 26,
         "numeric_marker_end": 27,
@@ -2945,9 +2677,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0023-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0022-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 11,
         "numeric_marker_start": 28,
         "numeric_marker_end": 38,
@@ -2964,9 +2696,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0024-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0023-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 1,
         "numeric_marker_start": 39,
         "numeric_marker_end": 39,
@@ -2976,9 +2708,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0025-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0024-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 3,
         "numeric_marker_start": 40,
         "numeric_marker_end": 42,
@@ -2990,9 +2722,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0026-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0025-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 25,
         "numeric_marker_start": 43,
         "numeric_marker_end": 67,
@@ -3009,9 +2741,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0027-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0026-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 3,
         "numeric_marker_start": 68,
         "numeric_marker_end": 70,
@@ -3023,9 +2755,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0028-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0027-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 5,
         "numeric_marker_start": 71,
         "numeric_marker_end": 75,
@@ -3039,9 +2771,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0029-toc-ch-005-5courtfoolsandtheirfolly",
+        "region_id": "nr-fn-ch-0028-toc-ch-005-courtfoolsandtheirfollyi",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-5courtfoolsandtheirfolly",
+        "bound_chapter_id": "toc-ch-005-courtfoolsandtheirfollyi",
         "item_count": 1,
         "numeric_marker_start": 76,
         "numeric_marker_end": 76,
@@ -3051,9 +2783,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0030-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0029-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "item_count": 47,
         "numeric_marker_start": 1,
         "numeric_marker_end": 47,
@@ -3070,24 +2802,9 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0031-toc-ch-006-6pilgrimsinsearchoftheir",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "item_count": 4,
-        "numeric_marker_start": 50,
-        "numeric_marker_end": 53,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "50",
-          "51",
-          "52",
-          "53"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0032-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0030-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "item_count": 36,
         "numeric_marker_start": 48,
         "numeric_marker_end": 83,
@@ -3104,9 +2821,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0033-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0031-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "item_count": 4,
         "numeric_marker_start": 84,
         "numeric_marker_end": 87,
@@ -3119,25 +2836,9 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0034-toc-ch-006-6pilgrimsinsearchoftheir",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "item_count": 5,
-        "numeric_marker_start": 20,
-        "numeric_marker_end": 1521,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "96",
-          "97",
-          "20",
-          "1520",
-          "1521"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0035-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0032-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "item_count": 37,
         "numeric_marker_start": 88,
         "numeric_marker_end": 124,
@@ -3154,9 +2855,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0036-toc-ch-006-6pilgrimsinsearchoftheir",
+        "region_id": "nr-fn-ch-0033-toc-ch-006-pilgrimsinsearchoftheirr",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
+        "bound_chapter_id": "toc-ch-006-pilgrimsinsearchoftheirr",
         "item_count": 35,
         "numeric_marker_start": 125,
         "numeric_marker_end": 159,
@@ -3173,9 +2874,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0037-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0034-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 73,
         "numeric_marker_start": 1,
         "numeric_marker_end": 73,
@@ -3192,9 +2893,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0038-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0035-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 7,
         "numeric_marker_start": 74,
         "numeric_marker_end": 80,
@@ -3210,9 +2911,9 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-007-7madnessashelplessnesstw-367-footnote",
+        "region_id": "llm-note-region-toc-ch-007-madnessashelplessnesstwo-367-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 1,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
@@ -3222,9 +2923,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0039-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0036-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 4,
         "numeric_marker_start": 81,
         "numeric_marker_end": 84,
@@ -3237,9 +2938,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0040-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0037-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 36,
         "numeric_marker_start": 85,
         "numeric_marker_end": 120,
@@ -3256,9 +2957,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0041-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0038-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 2,
         "numeric_marker_start": 121,
         "numeric_marker_end": 122,
@@ -3269,9 +2970,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0042-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0039-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 1,
         "numeric_marker_start": 123,
         "numeric_marker_end": 123,
@@ -3281,9 +2982,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0043-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0040-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 30,
         "numeric_marker_start": 124,
         "numeric_marker_end": 153,
@@ -3300,9 +3001,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0044-toc-ch-007-7madnessashelplessnesstw",
+        "region_id": "nr-fn-ch-0041-toc-ch-007-madnessashelplessnesstwo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
+        "bound_chapter_id": "toc-ch-007-madnessashelplessnesstwo",
         "item_count": 25,
         "numeric_marker_start": 154,
         "numeric_marker_end": 178,
@@ -3319,19 +3020,7 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-007-7madnessashelplessnesstw-399-footnote",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-7madnessashelplessnesstw",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0045-toc-ch-008-epilogue",
+        "region_id": "nr-fn-ch-0042-toc-ch-008-epilogue",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-epilogue",
         "item_count": 1,
@@ -3351,19 +3040,14 @@
       "导出 chapter markdown 中 local refs/local defs 的闭合情况",
       "structure.freeze_note_unit_summary"
     ],
-    "freeze_note_unit_summary": {
-      "chapter_view_note_unit_count": 1137,
-      "owner_fallback_note_unit_count": 0,
-      "unresolved_note_item_count": 0,
-      "unresolved_note_item_ids_preview": []
-    },
+    "freeze_note_unit_summary": {},
     "note_unit_rows": [
       {
-        "section_id": "toc-ch-001-1historicalproblemssinst",
-        "section_title": "1 Historical Problems: Sin, St. Vitus, and the Devil",
+        "section_id": "toc-ch-001-historicalproblemssinstv",
+        "section_title": "Historical Problems: Sin, St. Vitus, and the Devil",
         "note_unit_count": 159,
         "note_unit_kind_counts": {
-          "footnote": 159
+          "endnote": 159
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00001}}",
@@ -3378,12 +3062,11 @@
         ]
       },
       {
-        "section_id": "toc-ch-002-2tworeformersandaworldgo",
-        "section_title": "2 Two Reformers and a World Gone Mad: Luther and Paracelsus",
-        "note_unit_count": 266,
+        "section_id": "toc-ch-002-tworeformersandaworldgon",
+        "section_title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+        "note_unit_count": 264,
         "note_unit_kind_counts": {
-          "footnote": 264,
-          "endnote": 2
+          "endnote": 264
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00161}}",
@@ -3398,11 +3081,11 @@
         ]
       },
       {
-        "section_id": "toc-ch-003-3academicpsychiatryandth",
-        "section_title": "3 Academic \"Psychiatry\" and the Rise of Galenic Observation",
+        "section_id": "toc-ch-003-academicpsychiatryandthe",
+        "section_title": "Academic \"Psychiatry\" and the Rise of Galenic Observation",
         "note_unit_count": 118,
         "note_unit_kind_counts": {
-          "footnote": 118
+          "endnote": 118
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00425}}",
@@ -3417,11 +3100,11 @@
         ]
       },
       {
-        "section_id": "toc-ch-004-4witchcraftandthemelanch",
-        "section_title": "4 Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+        "section_id": "toc-ch-004-witchcraftandthemelancho",
+        "section_title": "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
         "note_unit_count": 169,
         "note_unit_kind_counts": {
-          "footnote": 169
+          "endnote": 169
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00543}}",
@@ -3436,11 +3119,11 @@
         ]
       },
       {
-        "section_id": "toc-ch-005-5courtfoolsandtheirfolly",
-        "section_title": "5 Court Fools and Their Folly: Image and Social Reality",
+        "section_id": "toc-ch-005-courtfoolsandtheirfollyi",
+        "section_title": "Court Fools and Their Folly: Image and Social Reality",
         "note_unit_count": 76,
         "note_unit_kind_counts": {
-          "footnote": 76
+          "endnote": 76
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00712}}",
@@ -3455,12 +3138,11 @@
         ]
       },
       {
-        "section_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "section_title": "6 Pilgrims in Search of Their Reason",
-        "note_unit_count": 168,
+        "section_id": "toc-ch-006-pilgrimsinsearchoftheirr",
+        "section_title": "Pilgrims in Search of Their Reason",
+        "note_unit_count": 159,
         "note_unit_kind_counts": {
-          "footnote": 159,
-          "endnote": 9
+          "endnote": 159
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00788}}",
@@ -3475,11 +3157,11 @@
         ]
       },
       {
-        "section_id": "toc-ch-007-7madnessashelplessnesstw",
-        "section_title": "7 Madness as Helplessness: Two Hospitals in the Age of the Reformations",
-        "note_unit_count": 180,
+        "section_id": "toc-ch-007-madnessashelplessnesstwo",
+        "section_title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+        "note_unit_count": 179,
         "note_unit_kind_counts": {
-          "footnote": 180
+          "endnote": 179
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00948}}",
@@ -3498,7 +3180,7 @@
         "section_title": "Epilogue",
         "note_unit_count": 1,
         "note_unit_kind_counts": {
-          "footnote": 1
+          "endnote": 1
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-01128}}"
@@ -3509,7 +3191,118 @@
         ]
       }
     ],
-    "export_merge_rows": []
+    "export_merge_rows": [
+      {
+        "title": "Historical Problems: Sin, St. Vitus, and the Devil",
+        "path": "chapters/001-Historical Problems Sin, St Vitus, and the Devil.md",
+        "note_unit_count": 159,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+        "path": "chapters/002-Two Reformers and a World Gone Mad Luther and Paracelsus.md",
+        "note_unit_count": 264,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Academic \"Psychiatry\" and the Rise of Galenic Observation",
+        "path": "chapters/003-Academic Psychiatry and the Rise of Galenic Observation.md",
+        "note_unit_count": 118,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+        "path": "chapters/004-Witchcraft and the Melancholy Interpretation of the Insanity Defense.md",
+        "note_unit_count": 169,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Court Fools and Their Folly: Image and Social Reality",
+        "path": "chapters/005-Court Fools and Their Folly Image and Social Reality.md",
+        "note_unit_count": 76,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Pilgrims in Search of Their Reason",
+        "path": "chapters/006-Pilgrims in Search of Their Reason.md",
+        "note_unit_count": 159,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+        "path": "chapters/007-Madness as Helplessness Two Hospitals in the Age of the Reformations.md",
+        "note_unit_count": 179,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Epilogue",
+        "path": "chapters/008-Epilogue.md",
+        "note_unit_count": 1,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Bibliography",
+        "path": "chapters/009-Bibliography.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Index",
+        "path": "chapters/010-Index.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      }
+    ]
   },
   "anchor_resolution": {
     "decision_basis": [
@@ -3517,326 +3310,278 @@
       "fnm_note_links.status/resolver/confidence",
       "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
     ],
-    "link_summary": {
-      "matched": 1077,
-      "footnote_orphan_note": 0,
-      "footnote_orphan_anchor": 0,
-      "endnote_orphan_note": 6,
-      "endnote_orphan_anchor": 0,
-      "ambiguous": 54,
-      "ignored": 1,
-      "fallback_count": 396,
-      "repair_count": 37,
-      "fallback_matched_count": 396,
-      "fallback_match_ratio": 0.36768802228412256
-    },
-    "chapter_link_contract_summary": {
-      "chapter_count": 8,
-      "contract_required_count": 2,
-      "failed_chapter_ids": [
-        "toc-ch-002-2tworeformersandaworldgo"
-      ],
-      "contract_v2_failed_chapter_ids": [
-        "toc-ch-006-6pilgrimsinsearchoftheir"
-      ],
-      "contract_v2_first_marker_violation_count": 0,
-      "contract_v2_marker_gap_violation_count": 0,
-      "contract_v2_def_anchor_mismatch_count": 1
-    },
+    "link_summary": {},
+    "chapter_link_contract_summary": {},
     "anchor_kind_counts": {
-      "footnote": 1425,
-      "unknown": 35,
-      "endnote": 5
+      "unknown": 1200
     },
     "link_status_counts": {
-      "orphan_note": 406,
-      "matched": 677,
-      "ambiguous": 54,
-      "orphan_anchor": 24,
-      "ignored": 1
+      "orphan_anchor": 1200
     },
     "link_resolver_counts": {
-      "rule": 727,
-      "repair": 434,
-      "orphan_recovery": 1
+      "rule": 1200
     },
     "anchor_samples": [
       {
-        "anchor_id": "llm-anchor-fn-00061",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
+        "anchor_id": "anchor-00003",
+        "chapter_id": "",
+        "page_no": 21,
         "paragraph_index": 0,
-        "marker": "61",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "Hugo van der Goes. A second basic problem is the possibility"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00062",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "62",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "the dancing mania, we encounter strange diseases that do not fit"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00063",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "63",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "the devil could obsess and possess a person, body and mind"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00065",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "65",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "Here was a religious madness that was of purely"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00074",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "74",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "the devil could obsess and possess a person, body and mind, mimicking the worst forms of madness"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00146",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "145",
-        "anchor_kind": "footnote",
-        "certainty": 0.95,
-        "source_text_preview": "the troubled late medieval painter Hugo van der Goes"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00147",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "146",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "dancing mania, we encounter strange diseases"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00148",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 45,
-        "paragraph_index": 0,
-        "marker": "147",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "tempting them to suicide. Here was a religious madness"
-      },
-      {
-        "anchor_id": "anchor-00001",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 46,
-        "paragraph_index": 1,
         "marker": "1",
-        "anchor_kind": "footnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "In 1475, or more likely 1477–78, the renowned Flemish painter Hugo van der Goes (1440?–1482) retreated from the world to become a converso,..."
+        "source_text_preview": ""
       },
       {
-        "anchor_id": "anchor-00002",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "page_no": 46,
-        "paragraph_index": 2,
+        "anchor_id": "anchor-00005",
+        "chapter_id": "",
+        "page_no": 21,
+        "paragraph_index": 0,
         "marker": "2",
-        "anchor_kind": "footnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "As his brother Nicolaes [a donatus, or lay brother in the same monastery] told me at the time, our brother Hugo, during one night on his jou..."
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00006",
+        "chapter_id": "",
+        "page_no": 21,
+        "paragraph_index": 0,
+        "marker": "3",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00007",
+        "chapter_id": "",
+        "page_no": 21,
+        "paragraph_index": 0,
+        "marker": "4",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00008",
+        "chapter_id": "",
+        "page_no": 23,
+        "paragraph_index": 0,
+        "marker": "5",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00009",
+        "chapter_id": "",
+        "page_no": 23,
+        "paragraph_index": 0,
+        "marker": "6",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00010",
+        "chapter_id": "",
+        "page_no": 23,
+        "paragraph_index": 0,
+        "marker": "7",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00011",
+        "chapter_id": "",
+        "page_no": 23,
+        "paragraph_index": 0,
+        "marker": "8",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00012",
+        "chapter_id": "",
+        "page_no": 24,
+        "paragraph_index": 0,
+        "marker": "9",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00013",
+        "chapter_id": "",
+        "page_no": 24,
+        "paragraph_index": 0,
+        "marker": "10",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
       }
     ],
     "link_samples": [
       {
         "link_id": "link-00001",
-        "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
-        "note_item_id": "en-00001",
-        "anchor_id": "",
-        "status": "orphan_note",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00003",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "136",
+        "marker": "1",
         "page_span": [
-          129,
-          129
+          21,
+          21
         ]
       },
       {
         "link_id": "link-00002",
-        "chapter_id": "toc-ch-002-2tworeformersandaworldgo",
-        "note_item_id": "en-00002",
-        "anchor_id": "",
-        "status": "orphan_note",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00005",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "137",
+        "marker": "2",
         "page_span": [
-          129,
-          129
+          21,
+          21
         ]
       },
       {
         "link_id": "link-00003",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00003",
-        "anchor_id": "llm-anchor-en-00003",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "50",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00006",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "3",
         "page_span": [
-          297,
-          297
+          21,
+          21
         ]
       },
       {
         "link_id": "link-00004",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00004",
-        "anchor_id": "llm-anchor-en-00004",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "51",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00007",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "4",
         "page_span": [
-          297,
-          297
+          21,
+          21
         ]
       },
       {
         "link_id": "link-00005",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00005",
-        "anchor_id": "llm-anchor-en-00005",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "52",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00008",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "5",
         "page_span": [
-          297,
-          297
+          23,
+          23
         ]
       },
       {
         "link_id": "link-00006",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00006",
-        "anchor_id": "llm-anchor-en-00006",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "53",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00009",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "6",
         "page_span": [
-          297,
-          297
+          23,
+          23
         ]
       },
       {
         "link_id": "link-00007",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00007",
-        "anchor_id": "",
-        "status": "orphan_note",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00010",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "96",
+        "marker": "7",
         "page_span": [
-          321,
-          321
+          23,
+          23
         ]
       },
       {
         "link_id": "link-00008",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00008",
-        "anchor_id": "",
-        "status": "orphan_note",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00011",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "97",
+        "marker": "8",
         "page_span": [
-          321,
-          321
+          23,
+          23
         ]
       },
       {
         "link_id": "link-00009",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00009",
-        "anchor_id": "orphan-recovery-en-00009",
-        "status": "matched",
-        "resolver": "orphan_recovery",
-        "marker": "20",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00012",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "9",
         "page_span": [
-          321,
-          321
+          24,
+          24
         ]
       },
       {
         "link_id": "link-00010",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00010",
-        "anchor_id": "",
-        "status": "orphan_note",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00013",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "1520",
+        "marker": "10",
         "page_span": [
-          321,
-          321
+          24,
+          24
         ]
       },
       {
         "link_id": "link-00011",
-        "chapter_id": "toc-ch-006-6pilgrimsinsearchoftheir",
-        "note_item_id": "en-00011",
-        "anchor_id": "",
-        "status": "orphan_note",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00014",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "1521",
+        "marker": "11",
         "page_span": [
-          321,
-          321
+          24,
+          24
         ]
       },
       {
         "link_id": "link-00012",
-        "chapter_id": "toc-ch-001-1historicalproblemssinst",
-        "note_item_id": "fn-00001",
-        "anchor_id": "anchor-00001",
-        "status": "matched",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00015",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "1",
+        "marker": "12",
         "page_span": [
-          46,
-          46
+          24,
+          24
         ]
       }
     ],
-    "llm_repair_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.started.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.started.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.started.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.started.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.started.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.started.006.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/llm_repair.cluster_request.006.json"
-    ],
-    "visual_toc_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/visual_toc.manual_input_extract.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Germany_Madness/llm_traces/visual_toc.manual_input_extract.002.json"
-    ]
+    "llm_repair_trace_refs": [],
+    "visual_toc_trace_refs": []
   }
 }

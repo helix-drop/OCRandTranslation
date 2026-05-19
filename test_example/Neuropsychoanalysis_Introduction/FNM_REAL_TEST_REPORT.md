@@ -24,7 +24,7 @@
 ## 占位翻译
 - translation_mode: `placeholder`
 - translation_api_called: `False`
-- translated_paras: `0`
+- translated_paras: `744`
 
 ## 模块过程取证文件
 - path: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/fnm_real_test_modules.json`
@@ -33,17 +33,17 @@
 - visual_toc.preflight: request=0, prompt=0, completion=0, total=0
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=2, prompt=2822, completion=1031, total=3853
+- visual_toc.manual_input_extract: request=0, prompt=0, completion=0, total=0
 - llm_repair.cluster_request: request=0, prompt=0, completion=0, total=0
 - translation_test: request=0, prompt=0, completion=0, total=0
 
 ## Heading Graph
-- optimized_anchor_count: `3`
+- optimized_anchor_count: `0`
 - residual_provisional_count: `0`
 - expanded_window_hit_count: `0`
-- composite_heading_count: `107`
+- composite_heading_count: `0`
 - residual_provisional_titles_preview: `[]`
-- `{"toc_body_item_count": 9, "resolved_anchor_count": 9, "provisional_anchor_count": 0, "section_node_count": 213, "unresolved_titles_preview": [], "boundary_conflict_titles_preview": [], "promoted_section_titles_preview": ["Introduction", "Conclusion"], "demoted_chapter_titles_preview": ["NEUROPSYCHOANALYSIS A Contemporary Introduction", "Aner Govrin – Editor", "Mismatch between psyche and brain – different models in psychoanalysis and neuroscience", "Overview and main goal of the book", "“Common currency” of brain and psyche - topography and dynamic", "“Common currency” of brain and psyche –", "Psyche in psychoanalysis – dynamic, topographic, and spatio-temporal", "Psychoanalysis and neuroscience – contrasting views of psyche and brain"], "optimized_anchor_count": 3, "residual_provisional_count": 0, "residual_provisional_titles_preview": [], "expanded_window_hit_count": 0, "composite_heading_count": 107}`
+- `{}`
 
 ## Endnotes Summary
 - present: `False`
@@ -54,16 +54,14 @@
 - subentry_pattern: ``
 
 ## TOC Role Summary
-- `{"container": 0, "endnotes": 0, "chapter": 9, "section": 0, "post_body": 0, "back_matter": 1, "front_matter": 0}`
+- `{}`
 
 ## Export
 - slug zip: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.Neuropsychoanalysis_Introduction.test.zip`
 - alias zip: `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.test.zip`
 
 ## LLM 交互摘要
-- trace_count: `2`
-- visual_toc.manual_input_extract: 从目录页截图中抽取单页原子目录项 -> `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json`
-- visual_toc.manual_input_extract: 根据整份目录页重建目录树，并识别尾注容器与子项 -> `/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json`
+- trace_count: `0`
 
 ## 模块过程取证
 ### 边界区分
@@ -76,26 +74,26 @@
 ### 尾注区确定
 - decision_basis: `["fnm_note_regions.region_kind/start_page/end_page/pages", "fnm_note_regions.bound_chapter_id", "fnm_note_regions.region_start_first_source_marker", "fnm_note_regions.region_first_note_item_marker", "structure.chapter_binding_summary", "structure.visual_toc_endnotes_summary"]`
 - visual_toc_endnotes_summary: `{}`
-- chapter_binding_summary: `{"region_count": 0, "book_scope_region_count": 0, "unbound_region_count": 0, "unbound_region_ids_preview": [], "unassigned_item_count": 0, "unassigned_item_ids_preview": []}`
+- chapter_binding_summary: `{}`
 - endnote_region_rows: `[]`
 
 ### 尾注数组建立
 - decision_basis: `["fnm_note_items.region_id/chapter_id/page_no/marker", "按 region_id 聚合生成注释数组", "检查 numeric marker 连续性与首尾 marker"]`
-- note_capture_summary: `{"expected_anchor_count": 1, "captured_note_count": 0, "capture_ratio": 0.0, "sparse_capture_chapter_ids": [], "dense_anchor_zero_capture_pages": [], "chapters": [{"chapter_id": "toc-ch-001-introduction", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-002-selfandnarcissism", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-003-attachmentandtrauma", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-004-defensemechanismsanddiss", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-005-cathexisandfreeenergy", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-006-unconsciousandconscious", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-007-dreams", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}, {"chapter_id": "toc-ch-008-schizophreniaanddepressi", "note_mode": "no_notes", "expected_anchor_count": 1, "captured_note_count": 0, "capture_ratio": 0.0}, {"chapter_id": "toc-ch-009-conclusion", "note_mode": "no_notes", "expected_anchor_count": 0, "captured_note_count": 0, "capture_ratio": 1.0}]}`
-- book_endnote_stream_summary: `{"chapter_count": 0, "chapters_with_endnote_stream": [], "high_concentration_chapter_ids": [], "chapters": []}`
+- note_capture_summary: `{}`
+- book_endnote_stream_summary: `{}`
 - endnote_array_rows: `[]`
 
 ### 尾注拼接
 - decision_basis: `["fnm_translation_units.kind/owner_kind/section_id/target_ref", "导出 chapter markdown 中 local refs/local defs 的闭合情况", "structure.freeze_note_unit_summary"]`
-- freeze_note_unit_summary: `{"chapter_view_note_unit_count": 0, "owner_fallback_note_unit_count": 0, "unresolved_note_item_count": 0, "unresolved_note_item_ids_preview": []}`
+- freeze_note_unit_summary: `{}`
 - note_unit_rows: `[]`
 - export_merge_rows: `[{"title": "Introduction", "path": "chapters/001-Introduction.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Self and narcissism", "path": "chapters/002-Self and narcissism.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Attachment and trauma", "path": "chapters/003-Attachment and trauma.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Defense mechanisms and dissociation", "path": "chapters/004-Defense mechanisms and dissociation.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Cathexis and free energy", "path": "chapters/005-Cathexis and free energy.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Unconscious and conscious", "path": "chapters/006-Unconscious and conscious.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Dreams", "path": "chapters/007-Dreams.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}, {"title": "Schizophrenia and depression", "path": "chapters/008-Schizophrenia and depression.md", "note_unit_count": 0, "local_ref_total": 0, "local_def_total": 0, "first_local_def_marker": "", "chapter_local_contract_ok": true, "orphan_local_definitions": [], "orphan_local_refs": []}]`
 
 ### 锚点寻找与链接
 - decision_basis: `["fnm_body_anchors.page_no/paragraph_index/char_start/char_end/source_marker", "fnm_note_links.status/resolver/confidence", "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"]`
-- link_summary: `{"matched": 0, "footnote_orphan_note": 0, "footnote_orphan_anchor": 0, "endnote_orphan_note": 0, "endnote_orphan_anchor": 0, "ambiguous": 0, "ignored": 0, "fallback_count": 0, "repair_count": 0, "fallback_matched_count": 0, "fallback_match_ratio": 0.0}`
-- link_resolver_counts: `{"rule": 1}`
-- anchor_samples: `[{"anchor_id": "anchor-00001", "chapter_id": "toc-ch-008-schizophreniaanddepressi", "page_no": 149, "paragraph_index": 10, "marker": "2", "anchor_kind": "unknown", "certainty": 0.6, "source_text_preview": "Fuchs T, Van Duppen Z (2017) Time and events: On the phenomenology of temporal experience in schizophrenia (Ancillary article to EAWE domain..."}]`
-- link_samples: `[{"link_id": "link-00001", "chapter_id": "toc-ch-008-schizophreniaanddepressi", "note_item_id": "", "anchor_id": "anchor-00001", "status": "orphan_anchor", "resolver": "rule", "marker": "2", "page_span": [149, 149]}]`
+- link_summary: `{}`
+- link_resolver_counts: `{}`
+- anchor_samples: `[]`
+- link_samples: `[]`
 
 ## 阻塞定位明细

@@ -1,0 +1,14 @@
+{
+  "stage": "book_type_verify",
+  "model_id": "mimo-v2.5",
+  "provider": "mimo",
+  "usage": {
+    "prompt_tokens": 15337,
+    "completion_tokens": 708,
+    "total_tokens": 16045
+  },
+  "timing": {
+    "duration_ms": 11130
+  },
+  "doc_id": "67356d1f7d9a"
+}

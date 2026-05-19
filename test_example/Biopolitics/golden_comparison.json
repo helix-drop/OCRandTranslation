@@ -1,0 +1,269 @@
+[
+  {
+    "export_name": "001-Leçon du 10 janvier 1979",
+    "body_similarity": 0.3596,
+    "export_refs": 17,
+    "golden_refs": 18,
+    "export_defs": 16,
+    "golden_defs": 18,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [7, 11]",
+      "多余正文引用 [^n]: [1]",
+      "正文引用计数不一致: 导出 17 vs golden 18",
+      "缺失尾注定义 [^n]: [7, 11]"
+    ]
+  },
+  {
+    "export_name": "002-Leçon du 17 janvier 1979",
+    "body_similarity": 0.0022,
+    "export_refs": 14,
+    "golden_refs": 16,
+    "export_defs": 14,
+    "golden_defs": 17,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [8, 14, 17]",
+      "多余正文引用 [^n]: [7]",
+      "正文引用计数不一致: 导出 14 vs golden 16",
+      "缺失尾注定义 [^n]: [8, 14, 17]"
+    ]
+  },
+  {
+    "export_name": "003-Leçon du 24 janvier 1979",
+    "body_similarity": 0.7461,
+    "export_refs": 24,
+    "golden_refs": 29,
+    "export_defs": 26,
+    "golden_defs": 32,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [1, 4, 7, 8, 9, 30]",
+      "多余正文引用 [^n]: [6]",
+      "正文引用计数不一致: 导出 24 vs golden 29",
+      "缺失尾注定义 [^n]: [1, 4, 7, 8, 9, 30]"
+    ]
+  },
+  {
+    "export_name": "004-Leçon du 31 janvier 1979",
+    "body_similarity": 0.9672,
+    "export_refs": 46,
+    "golden_refs": 53,
+    "export_defs": 43,
+    "golden_defs": 53,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [4, 14, 18, 19, 20, 22, 23, 28, 30, 53]",
+      "多余正文引用 [^n]: [27, 31, 44]",
+      "正文引用计数不一致: 导出 46 vs golden 53",
+      "缺失尾注定义 [^n]: [4, 14, 18, 19, 20, 22, 23, 28, 30, 53]"
+    ]
+  },
+  {
+    "export_name": "005-Leçon du 7 février 1979",
+    "body_similarity": 0.9462,
+    "export_refs": 51,
+    "golden_refs": 54,
+    "export_defs": 51,
+    "golden_defs": 54,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [22, 23, 24]",
+      "正文引用计数不一致: 导出 51 vs golden 54",
+      "缺失尾注定义 [^n]: [22, 23, 24]"
+    ]
+  },
+  {
+    "export_name": "006-Leçon du 14 février 1979",
+    "body_similarity": 0.9741,
+    "export_refs": 52,
+    "golden_refs": 62,
+    "export_defs": 52,
+    "golden_defs": 62,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [16, 27, 36, 37, 38, 40, 46, 60, 61, 62]",
+      "正文引用计数不一致: 导出 52 vs golden 62",
+      "缺失尾注定义 [^n]: [16, 27, 36, 37, 38, 40, 46, 60, 61, 62]"
+    ]
+  },
+  {
+    "export_name": "007-Leçon du 21 février 1979",
+    "body_similarity": 0.9098,
+    "export_refs": 25,
+    "golden_refs": 42,
+    "export_defs": 25,
+    "golden_defs": 42,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [6, 7, 8, 9, 10, 11, 18, 22, 23, 24, 25, 31, 32, 33, 34]",
+      "正文引用计数不一致: 导出 25 vs golden 42",
+      "缺失尾注定义 [^n]: [6, 7, 8, 9, 10, 11, 18, 22, 23, 24, 25, 31, 32, 33, 34]"
+    ]
+  },
+  {
+    "export_name": "008-Leçon du 7 mars 1979",
+    "body_similarity": 0.9924,
+    "export_refs": 41,
+    "golden_refs": 52,
+    "export_defs": 41,
+    "golden_defs": 52,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [7, 8, 9, 11, 23, 24, 36, 44, 45, 51, 52]",
+      "正文引用计数不一致: 导出 41 vs golden 52",
+      "缺失尾注定义 [^n]: [7, 8, 9, 11, 23, 24, 36, 44, 45, 51, 52]"
+    ]
+  },
+  {
+    "export_name": "009-Leçon du 14 mars 1979",
+    "body_similarity": 0.983,
+    "export_refs": 39,
+    "golden_refs": 41,
+    "export_defs": 38,
+    "golden_defs": 42,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [11, 36, 37, 39]",
+      "多余正文引用 [^n]: [1, 41]",
+      "正文引用计数不一致: 导出 39 vs golden 41",
+      "缺失尾注定义 [^n]: [11, 36, 37, 39]"
+    ]
+  },
+  {
+    "export_name": "010-Leçon du 21 mars 1979",
+    "body_similarity": 0.902,
+    "export_refs": 32,
+    "golden_refs": 36,
+    "export_defs": 32,
+    "golden_defs": 37,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [9, 10, 11, 25, 31]",
+      "多余正文引用 [^n]: [3]",
+      "正文引用计数不一致: 导出 32 vs golden 36",
+      "缺失尾注定义 [^n]: [9, 10, 11, 25, 31]"
+    ]
+  },
+  {
+    "export_name": "011-Leçon du 28 mars 1979",
+    "body_similarity": 0.8857,
+    "export_refs": 37,
+    "golden_refs": 36,
+    "export_defs": 34,
+    "golden_defs": 37,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [2, 18, 19]",
+      "多余正文引用 [^n]: [8, 8, 9, 9]",
+      "正文引用计数不一致: 导出 37 vs golden 36",
+      "缺失尾注定义 [^n]: [2, 18, 19]"
+    ]
+  },
+  {
+    "export_name": "012-Leçon du 4 avril 1979",
+    "body_similarity": 0.8442,
+    "export_refs": 24,
+    "golden_refs": 32,
+    "export_defs": 24,
+    "golden_defs": 32,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [1, 10, 11, 12, 17, 19, 21, 25]",
+      "正文引用计数不一致: 导出 24 vs golden 32",
+      "缺失尾注定义 [^n]: [1, 10, 11, 12, 17, 19, 21, 25]"
+    ]
+  },
+  {
+    "export_name": "013-RÉSUMÉ DU COURS",
+    "body_similarity": 0.9172,
+    "export_refs": 0,
+    "golden_refs": 0,
+    "export_defs": 0,
+    "golden_defs": 0,
+    "ignored_note_section_refs": 0,
+    "refs_ok": true,
+    "defs_ok": true,
+    "clean": true,
+    "issues": []
+  },
+  {
+    "export_name": "014-SITUATION DES COURS",
+    "body_similarity": 0.8908,
+    "export_refs": 10,
+    "golden_refs": 13,
+    "export_defs": 10,
+    "golden_defs": 13,
+    "ignored_note_section_refs": 0,
+    "refs_ok": false,
+    "defs_ok": false,
+    "clean": true,
+    "issues": [
+      "缺失正文引用 [^n]: [1, 2, 9]",
+      "正文引用计数不一致: 导出 10 vs golden 13",
+      "缺失尾注定义 [^n]: [1, 2, 9]"
+    ]
+  },
+  {
+    "export_name": "015-Index des notions",
+    "body_similarity": 0.0,
+    "export_refs": 0,
+    "golden_refs": 0,
+    "export_defs": 0,
+    "golden_defs": 0,
+    "ignored_note_section_refs": 0,
+    "refs_ok": true,
+    "defs_ok": true,
+    "clean": true,
+    "issues": []
+  },
+  {
+    "export_name": "016-Index des noms de personnes",
+    "body_similarity": 0.0,
+    "export_refs": 0,
+    "golden_refs": 0,
+    "export_defs": 0,
+    "golden_defs": 0,
+    "ignored_note_section_refs": 0,
+    "refs_ok": true,
+    "defs_ok": true,
+    "clean": true,
+    "issues": []
+  }
+]

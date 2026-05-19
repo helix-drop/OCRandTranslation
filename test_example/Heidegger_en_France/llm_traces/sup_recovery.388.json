@@ -1,0 +1,10 @@
+{
+  "stage": "sup_recovery",
+  "model_id": "mimo-v2.5",
+  "provider": "mimo_token_plan",
+  "prompt_tokens": 2660,
+  "completion_tokens": 32,
+  "total_tokens": 2692,
+  "request_count": 1,
+  "dur_ms": 4655
+}

@@ -9,9 +9,9 @@
     ],
     "page_role_counts": {
       "front_matter": 16,
-      "body": 268,
-      "note": 65,
-      "other": 21
+      "body": 270,
+      "note": 62,
+      "other": 22
     },
     "first_body_page": 17,
     "first_note_page": 40,
@@ -98,6 +98,15 @@
         "section_hint": ""
       },
       {
+        "page_no": 349,
+        "target_pdf_page": 349,
+        "page_role": "other",
+        "role_reason": "default_body",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
         "page_no": 350,
         "target_pdf_page": 350,
         "page_role": "other",
@@ -114,25 +123,9 @@
         "role_confidence": 1.0,
         "has_note_heading": false,
         "section_hint": ""
-      },
-      {
-        "page_no": 352,
-        "target_pdf_page": 352,
-        "page_role": "other",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
-        "has_note_heading": false,
-        "section_hint": ""
       }
     ],
-    "structure_page_partition_summary": {
-      "total_pages": 370,
-      "noise": 3,
-      "front_matter": 5,
-      "body": 282,
-      "note": 65,
-      "other": 15
-    }
+    "structure_page_partition_summary": {}
   },
   "note_region_detection": {
     "decision_basis": [
@@ -144,14 +137,7 @@
       "structure.visual_toc_endnotes_summary"
     ],
     "visual_toc_endnotes_summary": {},
-    "chapter_binding_summary": {
-      "region_count": 74,
-      "book_scope_region_count": 0,
-      "unbound_region_count": 0,
-      "unbound_region_ids_preview": [],
-      "unassigned_item_count": 0,
-      "unassigned_item_ids_preview": []
-    },
+    "chapter_binding_summary": {},
     "chapter_endnote_region_alignment_summary": {},
     "region_rows": [
       {
@@ -533,15 +519,13 @@
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 3,
-        "numeric_marker_count": 2,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 2,
-        "numeric_marker_contiguous": true,
+        "item_count": 1,
+        "numeric_marker_count": 0,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "*",
-          "1",
-          "2"
+          "*"
         ],
         "sample_note_items": [
           {
@@ -549,18 +533,6 @@
             "page_no": 58,
             "marker": "*",
             "source_text_preview": "M. Foucault passe ici rapidement sur les pages 18-20 du manuscrit : « On en trouverait évidemment beaucoup d’exemples dans le discours des r..."
-          },
-          {
-            "note_item_id": "fn-00017",
-            "page_no": 58,
-            "marker": "1",
-            "source_text_preview": "[p. 18bis] Cette hétérogénéité a été parfaitement sentie par les contemporains. Bentham, Dumont, les Droits de l’homme. Et elle est restée s..."
-          },
-          {
-            "note_item_id": "fn-00018",
-            "page_no": 58,
-            "marker": "2",
-            "source_text_preview": "[p. 19] Ligne de pente générale, mais qui n’efface pas l’autre. D’autant moins qu’il leur arrive de produire des effets similaires, bien que..."
           }
         ]
       },
@@ -586,7 +558,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00019",
+            "note_item_id": "fn-00017",
             "page_no": 62,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : Valeur d'utilité du gouvernement en face d'un système où # l'échange qui détermine la vraie valeur des choses. Comment..."
@@ -665,7 +637,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00020",
+            "note_item_id": "fn-00018",
             "page_no": 71,
             "marker": "*",
             "source_text_preview": "Le manuscrit ajoute, p. 5 : «en arrêtant la partie lorsque les pertes et les gains des différents partenaires s’écartent trop de la situatio..."
@@ -694,7 +666,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00021",
+            "note_item_id": "fn-00019",
             "page_no": 74,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : ça promet déjà"
@@ -724,13 +696,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00022",
+            "note_item_id": "fn-00020",
             "page_no": 76,
             "marker": "*",
             "source_text_preview": "Le manuscrit précise, p. 10 : « Castelreagh » [Henry Robert Stewart Castelreagh (1762-1822), ministre tory des Affaires étrangères britanniq..."
           },
           {
-            "note_item_id": "fn-00023",
+            "note_item_id": "fn-00021",
             "page_no": 76,
             "marker": "**",
             "source_text_preview": "M. F.: l’Angleterre"
@@ -764,19 +736,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00024",
+            "note_item_id": "fn-00022",
             "page_no": 78,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : il ne faut pas comprendre"
           },
           {
-            "note_item_id": "fn-00025",
+            "note_item_id": "fn-00023",
             "page_no": 78,
             "marker": "**",
             "source_text_preview": "Entre guillemets dans le manuscrit, p. 13."
           },
           {
-            "note_item_id": "fn-00026",
+            "note_item_id": "fn-00024",
             "page_no": 78,
             "marker": "***",
             "source_text_preview": "Entre guillemets dans le manuscrit, p. 13."
@@ -805,7 +777,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00028",
+            "note_item_id": "fn-00026",
             "page_no": 84,
             "marker": "**",
             "source_text_preview": "Entre guillemets dans le manuscrit."
@@ -885,7 +857,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00029",
+            "note_item_id": "fn-00027",
             "page_no": 99,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : car c’est là, je crois, un des traits essentiels sur lesquels il va falloir réfléchir et dont la programmation me paraî..."
@@ -918,13 +890,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00030",
+            "note_item_id": "fn-00028",
             "page_no": 107,
             "marker": "*",
             "source_text_preview": "M.F.: les libéraux le lui reprochent"
           },
           {
-            "note_item_id": "fn-00031",
+            "note_item_id": "fn-00029",
             "page_no": 108,
             "marker": "**",
             "source_text_preview": "M. Foucault répète : Où est le vrai socialisme ?"
@@ -1007,7 +979,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00032",
+            "note_item_id": "fn-00030",
             "page_no": 122,
             "marker": "*",
             "source_text_preview": "M. EF.: eu une importance directe sur"
@@ -1041,13 +1013,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00033",
+            "note_item_id": "fn-00031",
             "page_no": 124,
             "marker": "*",
             "source_text_preview": "Entre guillemets dans le manuscrit."
           },
           {
-            "note_item_id": "fn-00034",
+            "note_item_id": "fn-00032",
             "page_no": 127,
             "marker": "**",
             "source_text_preview": "M. Foucault ajoute : et de son histoire"
@@ -1078,13 +1050,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00035",
+            "note_item_id": "fn-00033",
             "page_no": 130,
             "marker": "*",
             "source_text_preview": "M.EF.: subordination"
           },
           {
-            "note_item_id": "fn-00036",
+            "note_item_id": "fn-00034",
             "page_no": 131,
             "marker": "**",
             "source_text_preview": "M.F.: socialistes"
@@ -1104,34 +1076,63 @@
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 3,
-        "numeric_marker_count": 1,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 1,
-        "numeric_marker_contiguous": true,
+        "item_count": 2,
+        "numeric_marker_count": 0,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "*",
-          "**",
-          "1"
+          "**"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00037",
+            "note_item_id": "fn-00035",
             "page_no": 134,
             "marker": "*",
             "source_text_preview": "M. F.: la resurgescence | ?]"
           },
           {
-            "note_item_id": "fn-00038",
+            "note_item_id": "fn-00036",
             "page_no": 135,
             "marker": "**",
-            "source_text_preview": "M. Foucault s’interrompt alors pour dire ceci :"
+            "source_text_preview": "M. Foucault s’interrompt alors pour dire ceci : Je m'aperçois qu’il est tard, je ne sais pas très bien si je vais commencer maintenant... Qu..."
+          }
+        ]
+      },
+      {
+        "region_id": "llm-note-region-toc-ch-005-leçondu7février1979-137-footnote",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-leçondu7février1979",
+        "start_page": 137,
+        "end_page": 137,
+        "pages": [
+          137
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 0,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "***",
+          "****"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "llm-note-anchor-00204-x",
+            "page_no": 137,
+            "marker": "***",
+            "source_text_preview": "qui est, je crois, spécifique à eux"
           },
           {
-            "note_item_id": "fn-00039",
-            "page_no": 135,
-            "marker": "1",
-            "source_text_preview": "Je m'aperçois qu’il est tard, je ne sais pas très bien si je vais commencer maintenant... Qu'est-ce que vous voulez? [On entend des «oui» da..."
+            "note_item_id": "llm-note-anchor-00205-x",
+            "page_no": 137,
+            "marker": "****",
+            "source_text_preview": "Entre guillemets dans le manuscrit."
           }
         ]
       },
@@ -1158,7 +1159,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00040",
+            "note_item_id": "fn-00037",
             "page_no": 137,
             "marker": "*",
             "source_text_preview": "M. F.: qui est, je crois, spécifique à eux FAN. FRERE *k%* M. Foucault répète : peut #%*#*# Entre guillemets dans le manuscrit."
@@ -1170,25 +1171,20 @@
         "region_kind": "chapter_endnotes",
         "bound_chapter_id": "toc-ch-005-leçondu7février1979",
         "start_page": 139,
-        "end_page": 147,
+        "end_page": 142,
         "pages": [
           139,
           140,
           141,
-          142,
-          143,
-          144,
-          145,
-          146,
-          147
+          142
         ],
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 54,
-        "numeric_marker_count": 54,
+        "item_count": 21,
+        "numeric_marker_count": 21,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 54,
+        "numeric_marker_end": 21,
         "numeric_marker_contiguous": true,
         "marker_preview": [
           "1",
@@ -1222,36 +1218,58 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-006-leçondu14février1979-150-footnote",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-leçondu14février1979",
-        "start_page": 150,
-        "end_page": 150,
+        "region_id": "nr-en-ch-0030-toc-ch-005-leçondu7février1979",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-005-leçondu7février1979",
+        "start_page": 144,
+        "end_page": 147,
         "pages": [
-          150
+          144,
+          145,
+          146,
+          147
         ],
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 1,
-        "numeric_marker_count": 1,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 1,
-        "numeric_marker_contiguous": true,
+        "region_marker_alignment_ok": false,
+        "item_count": 31,
+        "numeric_marker_count": 31,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 54,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "1"
+          "3",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "llm-note-anchor-00286-1",
-            "page_no": 150,
-            "marker": "1",
-            "source_text_preview": "Adam Smith à peine réactivé."
+            "note_item_id": "en-00144",
+            "page_no": 144,
+            "marker": "3",
+            "source_text_preview": "vol., 1980-1983."
+          },
+          {
+            "note_item_id": "en-00145",
+            "page_no": 144,
+            "marker": "25",
+            "source_text_preview": "Proclamée le 9 novembre 1918, dès l'annonce de l'abdication de Guillaume II, dotée d'une constitution en 1919, la République de Weimar (1919..."
+          },
+          {
+            "note_item_id": "en-00146",
+            "page_no": 144,
+            "marker": "26",
+            "source_text_preview": "Max Weber (1864-1920). Il n'est pas sûr que Foucault fasse ici référence au grand ouvrage de ce dernier, Wirtschaft und Gesellschaft (Tübing..."
           }
         ]
       },
       {
-        "region_id": "nr-fn-ch-0030-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0031-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 150,
@@ -1272,7 +1290,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00041",
+            "note_item_id": "fn-00038",
             "page_no": 150,
             "marker": "*",
             "source_text_preview": "Conjecture : mot inaudible."
@@ -1280,7 +1298,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0031-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0032-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 152,
@@ -1302,13 +1320,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00042",
+            "note_item_id": "fn-00039",
             "page_no": 152,
             "marker": "*",
             "source_text_preview": "M.F.: néo-positivistes"
           },
           {
-            "note_item_id": "fn-00043",
+            "note_item_id": "fn-00040",
             "page_no": 152,
             "marker": "**",
             "source_text_preview": "M. F.: future"
@@ -1316,7 +1334,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0032-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0033-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 157,
@@ -1338,13 +1356,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00044",
+            "note_item_id": "fn-00041",
             "page_no": 157,
             "marker": "*",
             "source_text_preview": "M. Foucault laisse ici de côté les p. 8-10 du manuscrit consacrées à la législation anti-cartel allemande de 1957."
           },
           {
-            "note_item_id": "fn-00045",
+            "note_item_id": "fn-00042",
             "page_no": 157,
             "marker": "**",
             "source_text_preview": "Suit une courte phrase en partie inaudible : Le néo-kantisme [...] littérature."
@@ -1352,7 +1370,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0033-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0034-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 162,
@@ -1375,13 +1393,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00046",
+            "note_item_id": "fn-00043",
             "page_no": 162,
             "marker": "*",
             "source_text_preview": "Suite de mots inaudibles, s’achevant par : certaines catégories, etc."
           },
           {
-            "note_item_id": "fn-00047",
+            "note_item_id": "fn-00044",
             "page_no": 162,
             "marker": "**",
             "source_text_preview": "Manuscrit, p. 16. Passage inaudibie dans l’enregistrement : [...] sur la part de revenus une tranche qui serait normalement dirigée vers l’é..."
@@ -1389,7 +1407,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0034-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0035-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 165,
@@ -1411,13 +1429,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00048",
+            "note_item_id": "fn-00045",
             "page_no": 165,
             "marker": "*",
             "source_text_preview": "M.F.: dans les années 1920-1960"
           },
           {
-            "note_item_id": "fn-00049",
+            "note_item_id": "fn-00046",
             "page_no": 165,
             "marker": "**",
             "source_text_preview": "M.F.: veulent dire"
@@ -1425,7 +1443,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0035-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0036-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 168,
@@ -1447,13 +1465,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00050",
+            "note_item_id": "fn-00047",
             "page_no": 168,
             "marker": "*",
             "source_text_preview": "Deux ou trois mots inaudibles."
           },
           {
-            "note_item_id": "fn-00051",
+            "note_item_id": "fn-00048",
             "page_no": 168,
             "marker": "**",
             "source_text_preview": "M.F.:1920-1960"
@@ -1461,7 +1479,7 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0036-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-en-ch-0037-toc-ch-006-leçondu14février1979",
         "region_kind": "chapter_endnotes",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "start_page": 170,
@@ -1496,19 +1514,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00177",
+            "note_item_id": "en-00175",
             "page_no": 170,
             "marker": "1",
             "source_text_preview": "Alexandre Issaïevitch Soljenitsyne (né en 1918), écrivain russe, auteur d'une œuvre considérable (parmi ses ouvrages les plus célèbres : Une..."
           },
           {
-            "note_item_id": "en-00178",
+            "note_item_id": "en-00176",
             "page_no": 170,
             "marker": "2",
             "source_text_preview": "Fondé en 1894, afin de réunir livres, brochures et périodiques utiles à la connaissance de la « question sociale », le Musée social réunit d..."
           },
           {
-            "note_item_id": "en-00179",
+            "note_item_id": "en-00177",
             "page_no": 170,
             "marker": "3",
             "source_text_preview": "Compte rendu des séances du colloque Walter Lippmann (26-30 août 1938), Travaux du Centre international d'études pour la rénovation du libér..."
@@ -1516,7 +1534,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0037-toc-ch-007-leçondu21février1979",
+        "region_id": "nr-fn-ch-0038-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "start_page": 181,
@@ -1538,13 +1556,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00052",
+            "note_item_id": "fn-00049",
             "page_no": 181,
             "marker": "*",
             "source_text_preview": "Mots ajoutés par M. Foucault."
           },
           {
-            "note_item_id": "fn-00053",
+            "note_item_id": "fn-00050",
             "page_no": 181,
             "marker": "**",
             "source_text_preview": "Mots ajoutés par M. Foucault. *#k* [L, Rougier dit: «des marchés »."
@@ -1552,7 +1570,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0038-toc-ch-007-leçondu21février1979",
+        "region_id": "nr-fn-ch-0039-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "start_page": 184,
@@ -1573,7 +1591,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00054",
+            "note_item_id": "fn-00051",
             "page_no": 184,
             "marker": "*",
             "source_text_preview": "Entre guillemets dans le manuscrit."
@@ -1581,7 +1599,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0039-toc-ch-007-leçondu21février1979",
+        "region_id": "nr-fn-ch-0040-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "start_page": 189,
@@ -1604,13 +1622,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00055",
+            "note_item_id": "fn-00052",
             "page_no": 189,
             "marker": "*",
             "source_text_preview": "M.F.: police"
           },
           {
-            "note_item_id": "fn-00056",
+            "note_item_id": "fn-00053",
             "page_no": 190,
             "marker": "**",
             "source_text_preview": "Sic. Le sens de cette expression demeure assez obscur."
@@ -1618,7 +1636,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0040-toc-ch-007-leçondu21février1979",
+        "region_id": "nr-fn-ch-0041-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "start_page": 196,
@@ -1639,7 +1657,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00057",
+            "note_item_id": "fn-00054",
             "page_no": 196,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : Alors simplement je ne ferai pas mon cours mercredi prochain, simplement pour des raisons de fatigue et pour reprendre..."
@@ -1647,8 +1665,8 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0041-toc-ch-007-leçondu21février1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0042-toc-ch-007-leçondu21février1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "start_page": 197,
         "end_page": 202,
@@ -1680,19 +1698,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00238",
+            "note_item_id": "en-00236",
             "page_no": 197,
             "marker": "1",
             "source_text_preview": "Cf. supra, p. 180-181."
           },
           {
-            "note_item_id": "en-00239",
+            "note_item_id": "en-00237",
             "page_no": 197,
             "marker": "2",
             "source_text_preview": "Cf. supra, leçon du 14 février 1979."
           },
           {
-            "note_item_id": "en-00240",
+            "note_item_id": "en-00238",
             "page_no": 197,
             "marker": "3",
             "source_text_preview": "Cf. infra, leçons du 21 mars et du 28 mars 1979."
@@ -1700,7 +1718,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0042-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0043-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 204,
@@ -1721,7 +1739,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00058",
+            "note_item_id": "fn-00055",
             "page_no": 204,
             "marker": "*",
             "source_text_preview": "M.F: terme"
@@ -1729,7 +1747,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0043-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0044-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 207,
@@ -1750,7 +1768,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00059",
+            "note_item_id": "fn-00056",
             "page_no": 207,
             "marker": "*",
             "source_text_preview": "M.F: considérer"
@@ -1758,7 +1776,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0044-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0045-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 214,
@@ -1779,7 +1797,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00060",
+            "note_item_id": "fn-00057",
             "page_no": 214,
             "marker": "*",
             "source_text_preview": "M. F: la prendre"
@@ -1787,7 +1805,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0045-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0046-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 218,
@@ -1808,7 +1826,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00061",
+            "note_item_id": "fn-00058",
             "page_no": 218,
             "marker": "*",
             "source_text_preview": "M.F: que les redistributions, au lieu d’aller à salaire égal"
@@ -1816,7 +1834,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0046-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0047-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 220,
@@ -1839,19 +1857,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00062",
+            "note_item_id": "fn-00059",
             "page_no": 220,
             "marker": "*",
             "source_text_preview": "M. Foucault laisse ici de côté les pages 20 et 21 du manuscrit :"
           },
           {
-            "note_item_id": "fn-00063",
+            "note_item_id": "fn-00060",
             "page_no": 220,
             "marker": "1",
             "source_text_preview": "«Ce décrochage et ce jeu économique avec clause de sauvegarde comprend deux volets : 1. L’un purement économique : rétablissement du jeu du..."
           },
           {
-            "note_item_id": "fn-00064",
+            "note_item_id": "fn-00061",
             "page_no": 220,
             "marker": "2",
             "source_text_preview": "L’autre volet comprend lui-même deux ensembles de mesures : a. reconstitution du “capital humain” {...], b. l'impôt négatif (Chicago). »"
@@ -1859,7 +1877,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0047-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0048-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 223,
@@ -1881,13 +1899,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00065",
+            "note_item_id": "fn-00062",
             "page_no": 223,
             "marker": "*",
             "source_text_preview": "Entre guillemets dans le manuscrit (p. 25)."
           },
           {
-            "note_item_id": "fn-00066",
+            "note_item_id": "fn-00063",
             "page_no": 223,
             "marker": "**",
             "source_text_preview": "Entre guillemets dans le manuscrit (p. 25)."
@@ -1895,11 +1913,11 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0048-toc-ch-008-leçondu7mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0049-toc-ch-008-leçondu7mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "start_page": 225,
-        "end_page": 232,
+        "end_page": 231,
         "pages": [
           225,
           226,
@@ -1907,16 +1925,15 @@
           228,
           229,
           230,
-          231,
-          232
+          231
         ],
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 52,
-        "numeric_marker_count": 52,
+        "item_count": 50,
+        "numeric_marker_count": 50,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 52,
+        "numeric_marker_end": 50,
         "numeric_marker_contiguous": true,
         "marker_preview": [
           "1",
@@ -1930,19 +1947,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00280",
+            "note_item_id": "en-00278",
             "page_no": 225,
             "marker": "1",
             "source_text_preview": "Cf. supra, leçon du 10 janvier 1979, p. 28, note 17."
           },
           {
-            "note_item_id": "en-00281",
+            "note_item_id": "en-00279",
             "page_no": 225,
             "marker": "2",
             "source_text_preview": "M. Foucault s'était déjà exprimé en termes assez proches sur ce sujet, en novembre 1977, dans son entretien avec R. Lefort à propos de l'aff..."
           },
           {
-            "note_item_id": "en-00282",
+            "note_item_id": "en-00280",
             "page_no": 225,
             "marker": "3",
             "source_text_preview": "Allusion à une conversation dans laquelle F. Ewald, alors assistant de M. Foucault au Collège de France, opposait dénonciation et accusation..."
@@ -1950,7 +1967,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0049-toc-ch-009-leçondu14mars1979",
+        "region_id": "nr-fn-ch-0050-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "start_page": 233,
@@ -1971,7 +1988,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00067",
+            "note_item_id": "fn-00064",
             "page_no": 233,
             "marker": "*",
             "source_text_preview": "M. Foucault annonce, au début de cette leçon, qu’il va « être obligé de partir à onze heures, parce qu[’il a] une réunion »."
@@ -1979,7 +1996,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0050-toc-ch-009-leçondu14mars1979",
+        "region_id": "nr-fn-ch-0051-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "start_page": 239,
@@ -2001,13 +2018,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00068",
+            "note_item_id": "fn-00065",
             "page_no": 239,
             "marker": "*",
             "source_text_preview": "Entre guillemets dans le manuscrit."
           },
           {
-            "note_item_id": "fn-00069",
+            "note_item_id": "fn-00066",
             "page_no": 239,
             "marker": "**",
             "source_text_preview": "Entre guillemets dans le manuscrit."
@@ -2015,36 +2032,7 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-009-leçondu14mars1979-242-footnote",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
-        "start_page": 242,
-        "end_page": 242,
-        "pages": [
-          242
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 1,
-        "numeric_marker_count": 1,
-        "numeric_marker_start": 26,
-        "numeric_marker_end": 26,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "26"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "llm-note-anchor-00542-26",
-            "page_no": 242,
-            "marker": "26",
-            "source_text_preview": "M. Foucault ajoute : et qui va produire quelque chose qui sont"
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0051-toc-ch-009-leçondu14mars1979",
+        "region_id": "nr-fn-ch-0052-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "start_page": 242,
@@ -2065,7 +2053,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00070",
+            "note_item_id": "fn-00067",
             "page_no": 242,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : et qui va produire quelque chose qui sont"
@@ -2073,7 +2061,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0052-toc-ch-009-leçondu14mars1979",
+        "region_id": "nr-fn-ch-0053-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "start_page": 249,
@@ -2095,13 +2083,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00071",
+            "note_item_id": "fn-00068",
             "page_no": 249,
             "marker": "*",
             "source_text_preview": "M. Foucault ajoute : et il place /un mot inaudible] d’ailleurs comme une catégorie de ce processus plus général |"
           },
           {
-            "note_item_id": "fn-00072",
+            "note_item_id": "fn-00069",
             "page_no": 249,
             "marker": "**",
             "source_text_preview": "M. F.: se situent les analyses des néolibéraux"
@@ -2109,8 +2097,8 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0053-toc-ch-009-leçondu14mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0054-toc-ch-009-leçondu14mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "start_page": 252,
         "end_page": 256,
@@ -2141,19 +2129,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00332",
+            "note_item_id": "en-00328",
             "page_no": 252,
             "marker": "1",
             "source_text_preview": "Sur la réception des idées néolibérales américaines en France à la fin des années soixante-dix, cf., outre le livre déjà cité, de H. Lepage..."
           },
           {
-            "note_item_id": "en-00333",
+            "note_item_id": "en-00329",
             "page_no": 252,
             "marker": "2",
             "source_text_preview": "Outre les livres et articles cités dans les notes suivantes, M. Foucault avait lu, sur le sujet, l'anthologie de H. J. Silverman, ed., Ameri..."
           },
           {
-            "note_item_id": "en-00334",
+            "note_item_id": "en-00330",
             "page_no": 252,
             "marker": "3",
             "source_text_preview": "Henry Calvert Simons (1889-1946), auteur de Économic Policy for a Free Society, University of Chicago Press, 1948."
@@ -2161,7 +2149,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0054-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0055-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 257,
@@ -2187,19 +2175,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00073",
+            "note_item_id": "fn-00070",
             "page_no": 257,
             "marker": "2",
             "source_text_preview": "NOMEEPits"
           },
           {
-            "note_item_id": "fn-00074",
+            "note_item_id": "fn-00071",
             "page_no": 257,
             "marker": "**",
             "source_text_preview": "Cette leçon, dans le manuscrit, porte le titre : « L'économie de marché et les rapports non marchands »."
           },
           {
-            "note_item_id": "fn-00075",
+            "note_item_id": "fn-00072",
             "page_no": 258,
             "marker": "*",
             "source_text_preview": "Entre guillemets dans le manuscrit."
@@ -2207,7 +2195,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0055-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0056-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 261,
@@ -2228,7 +2216,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00077",
+            "note_item_id": "fn-00074",
             "page_no": 261,
             "marker": "*",
             "source_text_preview": "M.F.: ce qu’ils font"
@@ -2236,7 +2224,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0056-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0057-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 263,
@@ -2258,7 +2246,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00078",
+            "note_item_id": "fn-00075",
             "page_no": 263,
             "marker": "*",
             "source_text_preview": "M.F.: évité"
@@ -2266,7 +2254,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0057-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0058-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 268,
@@ -2288,13 +2276,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00079",
+            "note_item_id": "fn-00076",
             "page_no": 268,
             "marker": "*",
             "source_text_preview": "Conjecture ; mot omis."
           },
           {
-            "note_item_id": "fn-00080",
+            "note_item_id": "fn-00077",
             "page_no": 268,
             "marker": "**",
             "source_text_preview": "Suite de mots difficilement audibles."
@@ -2302,7 +2290,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0058-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0059-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 270,
@@ -2324,7 +2312,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00081",
+            "note_item_id": "fn-00078",
             "page_no": 270,
             "marker": "*",
             "source_text_preview": "M. Foucault bute un peu sur ce mot, ajoutant : ou gouvernement…, enfin oui, gouvernementalisable"
@@ -2332,7 +2320,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0059-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0060-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 276,
@@ -2358,19 +2346,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00082",
+            "note_item_id": "fn-00079",
             "page_no": 276,
             "marker": "*",
             "source_text_preview": "M. F.: politique"
           },
           {
-            "note_item_id": "fn-00083",
+            "note_item_id": "fn-00080",
             "page_no": 276,
             "marker": "**",
             "source_text_preview": "Le manuscrit ajoute, p. 19: «non pas d’une annulation des technologies visant à influer sur le comportement des individus »."
           },
           {
-            "note_item_id": "fn-00084",
+            "note_item_id": "fn-00081",
             "page_no": 276,
             "marker": "***",
             "source_text_preview": "Jbid.: «Un sujet économique, c’est un sujet qui, au sens strict cherche en tout état de cause à maximiser son profit, à optimiser le rapport..."
@@ -2378,8 +2366,57 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0060-toc-ch-010-leçondu21mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0061-toc-ch-010-leçondu21mars1979",
+        "region_kind": "book_endnotes",
+        "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
+        "start_page": 278,
+        "end_page": 279,
+        "pages": [
+          278,
+          279
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 11,
+        "numeric_marker_count": 11,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00370",
+            "page_no": 278,
+            "marker": "1",
+            "source_text_preview": "changer la conception de la loi, ou du moins élucider sa fonction. Autrement dit, ne pas confondre sa forme (qui est toujours d'interdire ou..."
+          },
+          {
+            "note_item_id": "en-00371",
+            "page_no": 278,
+            "marker": "2",
+            "source_text_preview": "et considérer qu'au lieu de la supplémenter par une réglementation, une planification, une discipline calculer son « enforcement » - c'est-à..."
+          },
+          {
+            "note_item_id": "en-00372",
+            "page_no": 278,
+            "marker": "3",
+            "source_text_preview": "page] On a là une radicalisation de ce que les ordolibéraux allemands avaient déjà défini à propos de l'action gouvernementale : laisser le..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0062-toc-ch-010-leçondu21mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "start_page": 279,
         "end_page": 282,
@@ -2409,19 +2446,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00374",
+            "note_item_id": "en-00381",
             "page_no": 279,
             "marker": "1",
             "source_text_preview": "Cf. supra, leçon du 14 février 1979, p. 151."
           },
           {
-            "note_item_id": "en-00375",
+            "note_item_id": "en-00382",
             "page_no": 279,
             "marker": "2",
             "source_text_preview": "Cf. F. Bilger, La Pensée économique libérale de l'Allemagne contemporaine, op. cit., p. 186 : « La politique sociologique se décompose [...]..."
           },
           {
-            "note_item_id": "en-00376",
+            "note_item_id": "en-00383",
             "page_no": 279,
             "marker": "3",
             "source_text_preview": "Cf. supra, leçon du 14 février 1979, p. 153-154."
@@ -2429,7 +2466,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0061-toc-ch-011-leçondu28mars1979",
+        "region_id": "nr-fn-ch-0063-toc-ch-011-leçondu28mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
         "start_page": 292,
@@ -2450,7 +2487,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00087",
+            "note_item_id": "fn-00084",
             "page_no": 292,
             "marker": "*",
             "source_text_preview": "Le manuscrit ajoute, p.9: «a) D'abord par un radicalisme empirique à la manière de Hume, b) ensuite par une analyse des mécanismes du marché..."
@@ -2458,7 +2495,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0062-toc-ch-011-leçondu28mars1979",
+        "region_id": "nr-fn-ch-0064-toc-ch-011-leçondu28mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
         "start_page": 294,
@@ -2479,7 +2516,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00088",
+            "note_item_id": "fn-00085",
             "page_no": 294,
             "marker": "*",
             "source_text_preview": "Mot omis par M. Foucault."
@@ -2487,7 +2524,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0063-toc-ch-011-leçondu28mars1979",
+        "region_id": "nr-fn-ch-0065-toc-ch-011-leçondu28mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
         "start_page": 296,
@@ -2508,7 +2545,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00089",
+            "note_item_id": "fn-00086",
             "page_no": 296,
             "marker": "*",
             "source_text_preview": "M.F.: l’administration"
@@ -2516,8 +2553,8 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0064-toc-ch-011-leçondu28mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0066-toc-ch-011-leçondu28mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
         "start_page": 302,
         "end_page": 306,
@@ -2548,19 +2585,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00411",
+            "note_item_id": "en-00418",
             "page_no": 302,
             "marker": "1",
             "source_text_preview": "Ludwig von Mises, Human Action : A treatise on economics, op. cit. et trad. citée [supra, p. 98, note 11]."
           },
           {
-            "note_item_id": "en-00412",
+            "note_item_id": "en-00419",
             "page_no": 302,
             "marker": "2",
             "source_text_preview": "Cf. notamment Journal of Political Economy, vol. 70 (5), octobre 1962, 2<sup>e</sup> partie, coordonné par Th. Schultz, entièrement consacré..."
           },
           {
-            "note_item_id": "en-00413",
+            "note_item_id": "en-00420",
             "page_no": 302,
             "marker": "3",
             "source_text_preview": "G. Becker, « Investment in human capital: a theoretical analysis », art. cit. [supra, p. 241, note 18]."
@@ -2568,7 +2605,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0065-toc-ch-012-leçondu4avril1979",
+        "region_id": "nr-fn-ch-0067-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 309,
@@ -2589,7 +2626,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00090",
+            "note_item_id": "fn-00087",
             "page_no": 309,
             "marker": "*",
             "source_text_preview": "M.F.: une rééquilibration"
@@ -2597,7 +2634,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0066-toc-ch-012-leçondu4avril1979",
+        "region_id": "nr-fn-ch-0068-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 311,
@@ -2619,7 +2656,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00091",
+            "note_item_id": "fn-00088",
             "page_no": 311,
             "marker": "*",
             "source_text_preview": "Entre guillemets dans le manuscrit."
@@ -2627,7 +2664,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0067-toc-ch-012-leçondu4avril1979",
+        "region_id": "nr-fn-ch-0069-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 317,
@@ -2653,13 +2690,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00092",
+            "note_item_id": "fn-00089",
             "page_no": 317,
             "marker": "*",
             "source_text_preview": "M.F.: telle qu’on l’emploie"
           },
           {
-            "note_item_id": "fn-00093",
+            "note_item_id": "fn-00090",
             "page_no": 320,
             "marker": "**",
             "source_text_preview": "M. Foucault ajoute : En somme, la société civile sécrète son propre pouvoir qui n'en est ni la condition première ni le supplément. Cette ph..."
@@ -2667,7 +2704,36 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0068-toc-ch-012-leçondu4avril1979",
+        "region_id": "llm-note-region-toc-ch-012-leçondu4avril1979-323-footnote",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
+        "start_page": 323,
+        "end_page": 323,
+        "pages": [
+          323
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 25,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "llm-note-anchor-00519-25",
+            "page_no": 323,
+            "marker": "25",
+            "source_text_preview": "M. F. : un rapport"
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0070-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 323,
@@ -2688,7 +2754,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00094",
+            "note_item_id": "fn-00091",
             "page_no": 323,
             "marker": "*",
             "source_text_preview": "M. F.: un rapport"
@@ -2696,7 +2762,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0069-toc-ch-012-leçondu4avril1979",
+        "region_id": "nr-fn-ch-0071-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 326,
@@ -2717,7 +2783,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00095",
+            "note_item_id": "fn-00092",
             "page_no": 326,
             "marker": "*",
             "source_text_preview": "M. Foucault s’écarte ici du manuscrit, p. 20-21 : «En France, le problème a été plutôt retranscrit dans le débat sur la nécessité d’une Décl..."
@@ -2725,7 +2791,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0070-toc-ch-012-leçondu4avril1979",
+        "region_id": "nr-fn-ch-0072-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 328,
@@ -2746,7 +2812,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00096",
+            "note_item_id": "fn-00093",
             "page_no": 328,
             "marker": "*",
             "source_text_preview": "M.F.: trouver"
@@ -2754,8 +2820,8 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0071-toc-ch-012-leçondu4avril1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0073-toc-ch-012-leçondu4avril1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "start_page": 329,
         "end_page": 332,
@@ -2767,7 +2833,7 @@
         ],
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": false,
+        "region_marker_alignment_ok": true,
         "item_count": 33,
         "numeric_marker_count": 32,
         "numeric_marker_start": 1,
@@ -2785,19 +2851,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00448",
+            "note_item_id": "en-00455",
             "page_no": 329,
             "marker": "*",
             "source_text_preview": "(Suit un certain brouhaha.) M. Foucault répond brièvement à une série de questions ponctuelles et demande à quelqu'un, à un moment donné, s'..."
           },
           {
-            "note_item_id": "en-00449",
+            "note_item_id": "en-00456",
             "page_no": 329,
             "marker": "1",
             "source_text_preview": "John Locke, The Second Treatise of Government (1690), ch. 7 : « Of political or civil society » / Le Second Traité du gouvernement, trad. J...."
           },
           {
-            "note_item_id": "en-00450",
+            "note_item_id": "en-00457",
             "page_no": 329,
             "marker": "2",
             "source_text_preview": "Cf. supra, leçon du 28 mars 1979, p. 293, note 29. Comme le précise C. Gautier, trad. citée [ibid.], p. 99, l'Essay est en fait une version..."
@@ -2805,9 +2871,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0072-toc-ch-013-résuméducours",
+        "region_id": "nr-fn-ch-0074-toc-ch-001-résuméducours",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-résuméducours",
+        "bound_chapter_id": "toc-ch-001-résuméducours",
         "start_page": 337,
         "end_page": 337,
         "pages": [
@@ -2826,7 +2892,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00097",
+            "note_item_id": "fn-00094",
             "page_no": 337,
             "marker": "*",
             "source_text_preview": "Éd. Gallimard : « d’attendre ». **k ACF et Éd. Gallimard : « étant »."
@@ -2834,9 +2900,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0073-toc-ch-014-situationdescours",
+        "region_id": "nr-fn-ch-0075-toc-ch-002-situationdescours",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-014-situationdescours",
+        "bound_chapter_id": "toc-ch-002-situationdescours",
         "start_page": 343,
         "end_page": 343,
         "pages": [
@@ -2845,34 +2911,27 @@
         "region_start_first_source_marker": "",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 2,
-        "numeric_marker_count": 1,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 1,
-        "numeric_marker_contiguous": true,
+        "item_count": 1,
+        "numeric_marker_count": 0,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "*",
-          "1"
+          "*"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00098",
+            "note_item_id": "fn-00095",
             "page_no": 343,
             "marker": "*",
             "source_text_preview": "Michel Senellart est professeur de Philosophie politique à l’École normale supérieure des lettres et sciences humaines de Lyon. Il est l’aut..."
-          },
-          {
-            "note_item_id": "fn-00099",
-            "page_no": 343,
-            "marker": "1",
-            "source_text_preview": "[Les pages qui suivent sont extraites de la « Situation » accompagnant Sécurité, Territoire, Population. Cours au Collège de France, 1977-19..."
           }
         ]
       },
       {
-        "region_id": "nr-en-ch-0074-toc-ch-014-situationdescours",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-014-situationdescours",
+        "region_id": "nr-fn-ch-0076-toc-ch-002-situationdescours",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-situationdescours",
         "start_page": 345,
         "end_page": 348,
         "pages": [
@@ -2901,22 +2960,22 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00481",
+            "note_item_id": "fn-00096",
             "page_no": 345,
             "marker": "1",
-            "source_text_preview": "1. Foucault précise, dans le manuscrit du cours, quels sont les effets politiques de ses choix méthodologiques. Cf. Sécurité, Territoire, Po..."
+            "source_text_preview": "Foucault précise, dans le manuscrit du cours, quels sont les effets politiques de ses choix méthodologiques. Cf. Sécurité, Territoire, Popul..."
           },
           {
-            "note_item_id": "en-00482",
+            "note_item_id": "fn-00097",
             "page_no": 345,
             "marker": "2",
-            "source_text_preview": "2. Dans le manuscrit sur le « gouvernement » qui servit d'introduction au séminaire de 1979, Foucault décrit ce passage comme « le grand dép..."
+            "source_text_preview": "Dans le manuscrit sur le « gouvernement » qui servit d'introduction au séminaire de 1979, Foucault décrit ce passage comme « le grand déplac..."
           },
           {
-            "note_item_id": "en-00483",
+            "note_item_id": "fn-00098",
             "page_no": 345,
             "marker": "3",
-            "source_text_preview": "3. Manuscrit de la première leçon. Cf. supra, leçon du 10 janvier 1979, p. 24, note *."
+            "source_text_preview": "Manuscrit de la première leçon. Cf. supra, leçon du 10 janvier 1979, p. 24, note *."
           }
         ]
       }
@@ -2929,225 +2988,8 @@
       "按 region_id 聚合生成注释数组",
       "检查 numeric marker 连续性与首尾 marker"
     ],
-    "note_capture_summary": {
-      "expected_anchor_count": 466,
-      "captured_note_count": 470,
-      "capture_ratio": 1.0086,
-      "sparse_capture_chapter_ids": [],
-      "dense_anchor_zero_capture_pages": [],
-      "chapters": [
-        {
-          "chapter_id": "toc-ch-001-leçondu10janvier1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 18,
-          "captured_note_count": 18,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-002-leçondu17janvier1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 15,
-          "captured_note_count": 17,
-          "capture_ratio": 1.1333
-        },
-        {
-          "chapter_id": "toc-ch-003-leçondu24janvier1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 33,
-          "captured_note_count": 34,
-          "capture_ratio": 1.0303
-        },
-        {
-          "chapter_id": "toc-ch-004-leçondu31janvier1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 48,
-          "captured_note_count": 53,
-          "capture_ratio": 1.1042
-        },
-        {
-          "chapter_id": "toc-ch-005-leçondu7février1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 58,
-          "captured_note_count": 54,
-          "capture_ratio": 0.931
-        },
-        {
-          "chapter_id": "toc-ch-006-leçondu14février1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 58,
-          "captured_note_count": 61,
-          "capture_ratio": 1.0517
-        },
-        {
-          "chapter_id": "toc-ch-007-leçondu21février1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 34,
-          "captured_note_count": 42,
-          "capture_ratio": 1.2353
-        },
-        {
-          "chapter_id": "toc-ch-008-leçondu7mars1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 49,
-          "captured_note_count": 52,
-          "capture_ratio": 1.0612
-        },
-        {
-          "chapter_id": "toc-ch-009-leçondu14mars1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 40,
-          "captured_note_count": 42,
-          "capture_ratio": 1.05
-        },
-        {
-          "chapter_id": "toc-ch-010-leçondu21mars1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 35,
-          "captured_note_count": 37,
-          "capture_ratio": 1.0571
-        },
-        {
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "note_mode": "chapter_endnote_primary",
-          "expected_anchor_count": 37,
-          "captured_note_count": 37,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-012-leçondu4avril1979",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 27,
-          "captured_note_count": 7,
-          "capture_ratio": 0.2593
-        },
-        {
-          "chapter_id": "toc-ch-013-résuméducours",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 1,
-          "captured_note_count": 1,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-014-situationdescours",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 13,
-          "captured_note_count": 15,
-          "capture_ratio": 1.1538
-        }
-      ]
-    },
-    "book_endnote_stream_summary": {
-      "chapter_count": 13,
-      "chapters_with_endnote_stream": [
-        "toc-ch-001-leçondu10janvier1979",
-        "toc-ch-002-leçondu17janvier1979",
-        "toc-ch-003-leçondu24janvier1979",
-        "toc-ch-004-leçondu31janvier1979",
-        "toc-ch-005-leçondu7février1979",
-        "toc-ch-006-leçondu14février1979",
-        "toc-ch-007-leçondu21février1979",
-        "toc-ch-008-leçondu7mars1979",
-        "toc-ch-009-leçondu14mars1979",
-        "toc-ch-010-leçondu21mars1979",
-        "toc-ch-011-leçondu28mars1979",
-        "toc-ch-012-leçondu4avril1979",
-        "toc-ch-014-situationdescours"
-      ],
-      "high_concentration_chapter_ids": [],
-      "chapters": [
-        {
-          "chapter_id": "toc-ch-001-leçondu10janvier1979",
-          "item_count": 18,
-          "projection_mode_counts": {
-            "native": 18
-          }
-        },
-        {
-          "chapter_id": "toc-ch-002-leçondu17janvier1979",
-          "item_count": 17,
-          "projection_mode_counts": {
-            "native": 17
-          }
-        },
-        {
-          "chapter_id": "toc-ch-003-leçondu24janvier1979",
-          "item_count": 34,
-          "projection_mode_counts": {
-            "native": 34
-          }
-        },
-        {
-          "chapter_id": "toc-ch-004-leçondu31janvier1979",
-          "item_count": 53,
-          "projection_mode_counts": {
-            "native": 53
-          }
-        },
-        {
-          "chapter_id": "toc-ch-005-leçondu7février1979",
-          "item_count": 54,
-          "projection_mode_counts": {
-            "native": 54
-          }
-        },
-        {
-          "chapter_id": "toc-ch-006-leçondu14février1979",
-          "item_count": 61,
-          "projection_mode_counts": {
-            "native": 61
-          }
-        },
-        {
-          "chapter_id": "toc-ch-007-leçondu21février1979",
-          "item_count": 42,
-          "projection_mode_counts": {
-            "native": 42
-          }
-        },
-        {
-          "chapter_id": "toc-ch-008-leçondu7mars1979",
-          "item_count": 52,
-          "projection_mode_counts": {
-            "native": 52
-          }
-        },
-        {
-          "chapter_id": "toc-ch-009-leçondu14mars1979",
-          "item_count": 42,
-          "projection_mode_counts": {
-            "native": 42
-          }
-        },
-        {
-          "chapter_id": "toc-ch-010-leçondu21mars1979",
-          "item_count": 37,
-          "projection_mode_counts": {
-            "native": 37
-          }
-        },
-        {
-          "chapter_id": "toc-ch-011-leçondu28mars1979",
-          "item_count": 37,
-          "projection_mode_counts": {
-            "native": 37
-          }
-        },
-        {
-          "chapter_id": "toc-ch-012-leçondu4avril1979",
-          "item_count": 33,
-          "projection_mode_counts": {
-            "native": 33
-          }
-        },
-        {
-          "chapter_id": "toc-ch-014-situationdescours",
-          "item_count": 13,
-          "projection_mode_counts": {
-            "native": 13
-          }
-        }
-      ]
-    },
+    "note_capture_summary": {},
+    "book_endnote_stream_summary": {},
     "array_rows": [
       {
         "region_id": "nr-fn-ch-0001-toc-ch-001-leçondu10janvier1979",
@@ -3297,14 +3139,12 @@
         "region_id": "nr-fn-ch-0012-toc-ch-002-leçondu17janvier1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-002-leçondu17janvier1979",
-        "item_count": 3,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 2,
-        "numeric_marker_contiguous": true,
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "*",
-          "1",
-          "2"
+          "*"
         ]
       },
       {
@@ -3507,14 +3347,26 @@
         "region_id": "nr-fn-ch-0027-toc-ch-005-leçondu7février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-005-leçondu7février1979",
-        "item_count": 3,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 1,
-        "numeric_marker_contiguous": true,
+        "item_count": 2,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "*",
-          "**",
-          "1"
+          "**"
+        ]
+      },
+      {
+        "region_id": "llm-note-region-toc-ch-005-leçondu7février1979-137-footnote",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-005-leçondu7février1979",
+        "item_count": 2,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "***",
+          "****"
         ]
       },
       {
@@ -3533,9 +3385,9 @@
         "region_id": "nr-en-ch-0029-toc-ch-005-leçondu7février1979",
         "region_kind": "chapter_endnotes",
         "bound_chapter_id": "toc-ch-005-leçondu7février1979",
-        "item_count": 54,
+        "item_count": 21,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 54,
+        "numeric_marker_end": 21,
         "numeric_marker_contiguous": true,
         "marker_preview": [
           "1",
@@ -3549,19 +3401,26 @@
         ]
       },
       {
-        "region_id": "llm-note-region-toc-ch-006-leçondu14février1979-150-footnote",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-leçondu14février1979",
-        "item_count": 1,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 1,
-        "numeric_marker_contiguous": true,
+        "region_id": "nr-en-ch-0030-toc-ch-005-leçondu7février1979",
+        "region_kind": "chapter_endnotes",
+        "bound_chapter_id": "toc-ch-005-leçondu7février1979",
+        "item_count": 31,
+        "numeric_marker_start": 3,
+        "numeric_marker_end": 54,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "1"
+          "3",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31"
         ]
       },
       {
-        "region_id": "nr-fn-ch-0030-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0031-toc-ch-006-leçondu14février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "item_count": 1,
@@ -3570,19 +3429,6 @@
         "numeric_marker_contiguous": false,
         "marker_preview": [
           "*"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0031-toc-ch-006-leçondu14février1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-leçondu14février1979",
-        "item_count": 2,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*",
-          "**"
         ]
       },
       {
@@ -3638,7 +3484,20 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0036-toc-ch-006-leçondu14février1979",
+        "region_id": "nr-fn-ch-0036-toc-ch-006-leçondu14février1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-006-leçondu14février1979",
+        "item_count": 2,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*",
+          "**"
+        ]
+      },
+      {
+        "region_id": "nr-en-ch-0037-toc-ch-006-leçondu14février1979",
         "region_kind": "chapter_endnotes",
         "bound_chapter_id": "toc-ch-006-leçondu14février1979",
         "item_count": 61,
@@ -3657,7 +3516,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0037-toc-ch-007-leçondu21février1979",
+        "region_id": "nr-fn-ch-0038-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "item_count": 2,
@@ -3667,24 +3526,24 @@
         "marker_preview": [
           "*",
           "**"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0038-toc-ch-007-leçondu21février1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-leçondu21février1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
         ]
       },
       {
         "region_id": "nr-fn-ch-0039-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0040-toc-ch-007-leçondu21février1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "item_count": 2,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
@@ -3695,7 +3554,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0040-toc-ch-007-leçondu21février1979",
+        "region_id": "nr-fn-ch-0041-toc-ch-007-leçondu21février1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "item_count": 1,
@@ -3707,8 +3566,8 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0041-toc-ch-007-leçondu21février1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0042-toc-ch-007-leçondu21février1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-007-leçondu21février1979",
         "item_count": 42,
         "numeric_marker_start": 1,
@@ -3723,18 +3582,6 @@
           "6",
           "7",
           "8"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0042-toc-ch-008-leçondu7mars1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
         ]
       },
       {
@@ -3777,6 +3624,18 @@
         "region_id": "nr-fn-ch-0046-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0047-toc-ch-008-leçondu7mars1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "item_count": 3,
         "numeric_marker_start": 1,
         "numeric_marker_end": 2,
@@ -3788,7 +3647,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0047-toc-ch-008-leçondu7mars1979",
+        "region_id": "nr-fn-ch-0048-toc-ch-008-leçondu7mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
         "item_count": 2,
@@ -3801,12 +3660,12 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0048-toc-ch-008-leçondu7mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0049-toc-ch-008-leçondu7mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-008-leçondu7mars1979",
-        "item_count": 52,
+        "item_count": 50,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 52,
+        "numeric_marker_end": 50,
         "numeric_marker_contiguous": true,
         "marker_preview": [
           "1",
@@ -3820,7 +3679,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0049-toc-ch-009-leçondu14mars1979",
+        "region_id": "nr-fn-ch-0050-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "item_count": 1,
@@ -3829,37 +3688,25 @@
         "numeric_marker_contiguous": false,
         "marker_preview": [
           "*"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0050-toc-ch-009-leçondu14mars1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
-        "item_count": 2,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*",
-          "**"
-        ]
-      },
-      {
-        "region_id": "llm-note-region-toc-ch-009-leçondu14mars1979-242-footnote",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
-        "item_count": 1,
-        "numeric_marker_start": 26,
-        "numeric_marker_end": 26,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "26"
         ]
       },
       {
         "region_id": "nr-fn-ch-0051-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
+        "item_count": 2,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*",
+          "**"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0052-toc-ch-009-leçondu14mars1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "item_count": 1,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
@@ -3869,7 +3716,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0052-toc-ch-009-leçondu14mars1979",
+        "region_id": "nr-fn-ch-0053-toc-ch-009-leçondu14mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "item_count": 2,
@@ -3882,8 +3729,8 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0053-toc-ch-009-leçondu14mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0054-toc-ch-009-leçondu14mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-009-leçondu14mars1979",
         "item_count": 42,
         "numeric_marker_start": 1,
@@ -3901,7 +3748,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0054-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0055-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "item_count": 4,
@@ -3913,18 +3760,6 @@
           "**",
           "*",
           "***"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0055-toc-ch-010-leçondu21mars1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
         ]
       },
       {
@@ -3943,6 +3778,18 @@
         "region_id": "nr-fn-ch-0057-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0058-toc-ch-010-leçondu21mars1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "item_count": 2,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
@@ -3953,7 +3800,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0058-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0059-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "item_count": 1,
@@ -3965,7 +3812,7 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0059-toc-ch-010-leçondu21mars1979",
+        "region_id": "nr-fn-ch-0060-toc-ch-010-leçondu21mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "item_count": 5,
@@ -3981,8 +3828,27 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0060-toc-ch-010-leçondu21mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-en-bk-0061-toc-ch-010-leçondu21mars1979",
+        "region_kind": "book_endnotes",
+        "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
+        "item_count": 11,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 11,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0062-toc-ch-010-leçondu21mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-010-leçondu21mars1979",
         "item_count": 37,
         "numeric_marker_start": 1,
@@ -4000,30 +3866,6 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0061-toc-ch-011-leçondu28mars1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0062-toc-ch-011-leçondu28mars1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
-        ]
-      },
-      {
         "region_id": "nr-fn-ch-0063-toc-ch-011-leçondu28mars1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
@@ -4036,8 +3878,32 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0064-toc-ch-011-leçondu28mars1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-fn-ch-0064-toc-ch-011-leçondu28mars1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0065-toc-ch-011-leçondu28mars1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0066-toc-ch-011-leçondu28mars1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-011-leçondu28mars1979",
         "item_count": 37,
         "numeric_marker_start": 1,
@@ -4055,40 +3921,15 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0065-toc-ch-012-leçondu4avril1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0066-toc-ch-012-leçondu4avril1979",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
-        "item_count": 1,
-        "numeric_marker_start": null,
-        "numeric_marker_end": null,
-        "numeric_marker_contiguous": false,
-        "marker_preview": [
-          "*"
-        ]
-      },
-      {
         "region_id": "nr-fn-ch-0067-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
-        "item_count": 2,
+        "item_count": 1,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
         "numeric_marker_contiguous": false,
         "marker_preview": [
-          "*",
-          "**"
+          "*"
         ]
       },
       {
@@ -4107,12 +3948,25 @@
         "region_id": "nr-fn-ch-0069-toc-ch-012-leçondu4avril1979",
         "region_kind": "footnote",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
-        "item_count": 1,
+        "item_count": 2,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
         "numeric_marker_contiguous": false,
         "marker_preview": [
-          "*"
+          "*",
+          "**"
+        ]
+      },
+      {
+        "region_id": "llm-note-region-toc-ch-012-leçondu4avril1979-323-footnote",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
+        "item_count": 1,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 25,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25"
         ]
       },
       {
@@ -4128,8 +3982,32 @@
         ]
       },
       {
-        "region_id": "nr-en-ch-0071-toc-ch-012-leçondu4avril1979",
-        "region_kind": "chapter_endnotes",
+        "region_id": "nr-fn-ch-0071-toc-ch-012-leçondu4avril1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0072-toc-ch-012-leçondu4avril1979",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "*"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0073-toc-ch-012-leçondu4avril1979",
+        "region_kind": "book_endnotes",
         "bound_chapter_id": "toc-ch-012-leçondu4avril1979",
         "item_count": 33,
         "numeric_marker_start": 1,
@@ -4147,9 +4025,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0072-toc-ch-013-résuméducours",
+        "region_id": "nr-fn-ch-0074-toc-ch-001-résuméducours",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-résuméducours",
+        "bound_chapter_id": "toc-ch-001-résuméducours",
         "item_count": 1,
         "numeric_marker_start": null,
         "numeric_marker_end": null,
@@ -4159,22 +4037,21 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0073-toc-ch-014-situationdescours",
+        "region_id": "nr-fn-ch-0075-toc-ch-002-situationdescours",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-014-situationdescours",
-        "item_count": 2,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 1,
-        "numeric_marker_contiguous": true,
+        "bound_chapter_id": "toc-ch-002-situationdescours",
+        "item_count": 1,
+        "numeric_marker_start": null,
+        "numeric_marker_end": null,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "*",
-          "1"
+          "*"
         ]
       },
       {
-        "region_id": "nr-en-ch-0074-toc-ch-014-situationdescours",
-        "region_kind": "chapter_endnotes",
-        "bound_chapter_id": "toc-ch-014-situationdescours",
+        "region_id": "nr-fn-ch-0076-toc-ch-002-situationdescours",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-002-situationdescours",
         "item_count": 13,
         "numeric_marker_start": 1,
         "numeric_marker_end": 13,
@@ -4199,20 +4076,14 @@
       "导出 chapter markdown 中 local refs/local defs 的闭合情况",
       "structure.freeze_note_unit_summary"
     ],
-    "freeze_note_unit_summary": {
-      "chapter_view_note_unit_count": 594,
-      "owner_fallback_note_unit_count": 0,
-      "unresolved_note_item_count": 0,
-      "unresolved_note_item_ids_preview": []
-    },
+    "freeze_note_unit_summary": {},
     "note_unit_rows": [
       {
         "section_id": "toc-ch-001-leçondu10janvier1979",
         "section_title": "Leçon du 10 janvier 1979",
         "note_unit_count": 28,
         "note_unit_kind_counts": {
-          "footnote": 10,
-          "endnote": 18
+          "endnote": 28
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00001}}",
@@ -4227,12 +4098,26 @@
         ]
       },
       {
+        "section_id": "toc-ch-001-résuméducours",
+        "section_title": "RÉSUMÉ DU COURS",
+        "note_unit_count": 1,
+        "note_unit_kind_counts": {
+          "endnote": 1
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00094}}"
+        ],
+        "page_span": [
+          337,
+          337
+        ]
+      },
+      {
         "section_id": "toc-ch-002-leçondu17janvier1979",
         "section_title": "Leçon du 17 janvier 1979",
-        "note_unit_count": 26,
+        "note_unit_count": 24,
         "note_unit_kind_counts": {
-          "footnote": 9,
-          "endnote": 17
+          "endnote": 24
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00011}}",
@@ -4247,19 +4132,37 @@
         ]
       },
       {
+        "section_id": "toc-ch-002-situationdescours",
+        "section_title": "SITUATION DES COURS",
+        "note_unit_count": 14,
+        "note_unit_kind_counts": {
+          "endnote": 14
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00095}}",
+          "{{NOTE_REF:fn-00096}}",
+          "{{NOTE_REF:fn-00097}}",
+          "{{NOTE_REF:fn-00098}}",
+          "{{NOTE_REF:fn-00099}}"
+        ],
+        "page_span": [
+          343,
+          348
+        ]
+      },
+      {
         "section_id": "toc-ch-003-leçondu24janvier1979",
         "section_title": "Leçon du 24 janvier 1979",
         "note_unit_count": 43,
         "note_unit_kind_counts": {
-          "footnote": 9,
-          "endnote": 34
+          "endnote": 43
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00018}}",
+          "{{NOTE_REF:fn-00019}}",
           "{{NOTE_REF:fn-00020}}",
           "{{NOTE_REF:fn-00021}}",
-          "{{NOTE_REF:fn-00022}}",
-          "{{NOTE_REF:fn-00023}}",
-          "{{NOTE_REF:fn-00024}}"
+          "{{NOTE_REF:fn-00022}}"
         ],
         "page_span": [
           71,
@@ -4271,13 +4174,12 @@
         "section_title": "Leçon du 31 janvier 1979",
         "note_unit_count": 56,
         "note_unit_kind_counts": {
-          "footnote": 3,
-          "endnote": 53
+          "endnote": 56
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00027}}",
+          "{{NOTE_REF:fn-00028}}",
           "{{NOTE_REF:fn-00029}}",
-          "{{NOTE_REF:fn-00030}}",
-          "{{NOTE_REF:fn-00031}}",
           "{{NOTE_REF:en-00070}}",
           "{{NOTE_REF:en-00071}}"
         ],
@@ -4289,17 +4191,16 @@
       {
         "section_id": "toc-ch-005-leçondu7février1979",
         "section_title": "Leçon du 7 février 1979",
-        "note_unit_count": 63,
+        "note_unit_count": 62,
         "note_unit_kind_counts": {
-          "footnote": 9,
-          "endnote": 54
+          "endnote": 62
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00030}}",
+          "{{NOTE_REF:fn-00031}}",
           "{{NOTE_REF:fn-00032}}",
           "{{NOTE_REF:fn-00033}}",
-          "{{NOTE_REF:fn-00034}}",
-          "{{NOTE_REF:fn-00035}}",
-          "{{NOTE_REF:fn-00036}}"
+          "{{NOTE_REF:fn-00034}}"
         ],
         "page_span": [
           122,
@@ -4309,17 +4210,16 @@
       {
         "section_id": "toc-ch-006-leçondu14février1979",
         "section_title": "Leçon du 14 février 1979",
-        "note_unit_count": 73,
+        "note_unit_count": 72,
         "note_unit_kind_counts": {
-          "footnote": 12,
-          "endnote": 61
+          "endnote": 72
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00038}}",
+          "{{NOTE_REF:fn-00039}}",
+          "{{NOTE_REF:fn-00040}}",
           "{{NOTE_REF:fn-00041}}",
-          "{{NOTE_REF:llm-note-anchor-00286-1}}",
-          "{{NOTE_REF:fn-00042}}",
-          "{{NOTE_REF:fn-00043}}",
-          "{{NOTE_REF:fn-00044}}"
+          "{{NOTE_REF:fn-00042}}"
         ],
         "page_span": [
           150,
@@ -4331,15 +4231,14 @@
         "section_title": "Leçon du 21 février 1979",
         "note_unit_count": 48,
         "note_unit_kind_counts": {
-          "footnote": 6,
-          "endnote": 42
+          "endnote": 48
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00049}}",
+          "{{NOTE_REF:fn-00050}}",
+          "{{NOTE_REF:fn-00051}}",
           "{{NOTE_REF:fn-00052}}",
-          "{{NOTE_REF:fn-00053}}",
-          "{{NOTE_REF:fn-00054}}",
-          "{{NOTE_REF:fn-00055}}",
-          "{{NOTE_REF:fn-00056}}"
+          "{{NOTE_REF:fn-00053}}"
         ],
         "page_span": [
           181,
@@ -4349,37 +4248,35 @@
       {
         "section_id": "toc-ch-008-leçondu7mars1979",
         "section_title": "Leçon du 7 mars 1979",
-        "note_unit_count": 61,
+        "note_unit_count": 59,
         "note_unit_kind_counts": {
-          "footnote": 9,
-          "endnote": 52
+          "endnote": 59
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00055}}",
+          "{{NOTE_REF:fn-00056}}",
+          "{{NOTE_REF:fn-00057}}",
           "{{NOTE_REF:fn-00058}}",
-          "{{NOTE_REF:fn-00059}}",
-          "{{NOTE_REF:fn-00060}}",
-          "{{NOTE_REF:fn-00061}}",
-          "{{NOTE_REF:fn-00062}}"
+          "{{NOTE_REF:fn-00059}}"
         ],
         "page_span": [
           204,
-          232
+          231
         ]
       },
       {
         "section_id": "toc-ch-009-leçondu14mars1979",
         "section_title": "Leçon du 14 mars 1979",
-        "note_unit_count": 49,
+        "note_unit_count": 48,
         "note_unit_kind_counts": {
-          "footnote": 7,
-          "endnote": 42
+          "endnote": 48
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00064}}",
+          "{{NOTE_REF:fn-00065}}",
+          "{{NOTE_REF:fn-00066}}",
           "{{NOTE_REF:fn-00067}}",
-          "{{NOTE_REF:fn-00068}}",
-          "{{NOTE_REF:fn-00069}}",
-          "{{NOTE_REF:fn-00070}}",
-          "{{NOTE_REF:llm-note-anchor-00542-26}}"
+          "{{NOTE_REF:fn-00068}}"
         ],
         "page_span": [
           233,
@@ -4389,17 +4286,16 @@
       {
         "section_id": "toc-ch-010-leçondu21mars1979",
         "section_title": "Leçon du 21 mars 1979",
-        "note_unit_count": 51,
+        "note_unit_count": 62,
         "note_unit_kind_counts": {
-          "footnote": 14,
-          "endnote": 37
+          "endnote": 62
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00070}}",
+          "{{NOTE_REF:fn-00071}}",
+          "{{NOTE_REF:fn-00072}}",
           "{{NOTE_REF:fn-00073}}",
-          "{{NOTE_REF:fn-00074}}",
-          "{{NOTE_REF:fn-00075}}",
-          "{{NOTE_REF:fn-00076}}",
-          "{{NOTE_REF:fn-00077}}"
+          "{{NOTE_REF:fn-00074}}"
         ],
         "page_span": [
           257,
@@ -4411,15 +4307,14 @@
         "section_title": "Leçon du 28 mars 1979",
         "note_unit_count": 40,
         "note_unit_kind_counts": {
-          "footnote": 3,
-          "endnote": 37
+          "endnote": 40
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00087}}",
-          "{{NOTE_REF:fn-00088}}",
-          "{{NOTE_REF:fn-00089}}",
-          "{{NOTE_REF:en-00411}}",
-          "{{NOTE_REF:en-00412}}"
+          "{{NOTE_REF:fn-00084}}",
+          "{{NOTE_REF:fn-00085}}",
+          "{{NOTE_REF:fn-00086}}",
+          "{{NOTE_REF:en-00418}}",
+          "{{NOTE_REF:en-00419}}"
         ],
         "page_span": [
           292,
@@ -4429,60 +4324,205 @@
       {
         "section_id": "toc-ch-012-leçondu4avril1979",
         "section_title": "Leçon du 4 avril 1979",
-        "note_unit_count": 40,
+        "note_unit_count": 41,
         "note_unit_kind_counts": {
-          "footnote": 7,
-          "endnote": 33
+          "endnote": 41
         },
         "target_ref_preview": [
+          "{{NOTE_REF:fn-00087}}",
+          "{{NOTE_REF:fn-00088}}",
+          "{{NOTE_REF:fn-00089}}",
           "{{NOTE_REF:fn-00090}}",
-          "{{NOTE_REF:fn-00091}}",
-          "{{NOTE_REF:fn-00092}}",
-          "{{NOTE_REF:fn-00093}}",
-          "{{NOTE_REF:fn-00094}}"
+          "{{NOTE_REF:fn-00091}}"
         ],
         "page_span": [
           309,
           332
         ]
-      },
-      {
-        "section_id": "toc-ch-013-résuméducours",
-        "section_title": "RÉSUMÉ DU COURS",
-        "note_unit_count": 1,
-        "note_unit_kind_counts": {
-          "footnote": 1
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:fn-00097}}"
-        ],
-        "page_span": [
-          337,
-          337
-        ]
-      },
-      {
-        "section_id": "toc-ch-014-situationdescours",
-        "section_title": "SITUATION DES COURS",
-        "note_unit_count": 15,
-        "note_unit_kind_counts": {
-          "footnote": 2,
-          "endnote": 13
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:fn-00098}}",
-          "{{NOTE_REF:fn-00099}}",
-          "{{NOTE_REF:en-00481}}",
-          "{{NOTE_REF:en-00482}}",
-          "{{NOTE_REF:en-00483}}"
-        ],
-        "page_span": [
-          343,
-          348
-        ]
       }
     ],
-    "export_merge_rows": []
+    "export_merge_rows": [
+      {
+        "title": "Leçon du 10 janvier 1979",
+        "path": "chapters/001-Leçon du 10 janvier 1979.md",
+        "note_unit_count": 28,
+        "local_ref_total": 19,
+        "local_def_total": 18,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 17 janvier 1979",
+        "path": "chapters/002-Leçon du 17 janvier 1979.md",
+        "note_unit_count": 24,
+        "local_ref_total": 17,
+        "local_def_total": 16,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 24 janvier 1979",
+        "path": "chapters/003-Leçon du 24 janvier 1979.md",
+        "note_unit_count": 43,
+        "local_ref_total": 32,
+        "local_def_total": 31,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 31 janvier 1979",
+        "path": "chapters/004-Leçon du 31 janvier 1979.md",
+        "note_unit_count": 56,
+        "local_ref_total": 53,
+        "local_def_total": 49,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 7 février 1979",
+        "path": "chapters/005-Leçon du 7 février 1979.md",
+        "note_unit_count": 62,
+        "local_ref_total": 51,
+        "local_def_total": 51,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 14 février 1979",
+        "path": "chapters/006-Leçon du 14 février 1979.md",
+        "note_unit_count": 72,
+        "local_ref_total": 61,
+        "local_def_total": 57,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 21 février 1979",
+        "path": "chapters/007-Leçon du 21 février 1979.md",
+        "note_unit_count": 48,
+        "local_ref_total": 39,
+        "local_def_total": 37,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [
+          "8"
+        ]
+      },
+      {
+        "title": "Leçon du 7 mars 1979",
+        "path": "chapters/008-Leçon du 7 mars 1979.md",
+        "note_unit_count": 59,
+        "local_ref_total": 51,
+        "local_def_total": 49,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 14 mars 1979",
+        "path": "chapters/009-Leçon du 14 mars 1979.md",
+        "note_unit_count": 48,
+        "local_ref_total": 43,
+        "local_def_total": 40,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [
+          "36"
+        ]
+      },
+      {
+        "title": "Leçon du 21 mars 1979",
+        "path": "chapters/010-Leçon du 21 mars 1979.md",
+        "note_unit_count": 62,
+        "local_ref_total": 35,
+        "local_def_total": 35,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 28 mars 1979",
+        "path": "chapters/011-Leçon du 28 mars 1979.md",
+        "note_unit_count": 40,
+        "local_ref_total": 41,
+        "local_def_total": 37,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Leçon du 4 avril 1979",
+        "path": "chapters/012-Leçon du 4 avril 1979.md",
+        "note_unit_count": 41,
+        "local_ref_total": 31,
+        "local_def_total": 30,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "RÉSUMÉ DU COURS",
+        "path": "chapters/013-RÉSUMÉ DU COURS.md",
+        "note_unit_count": 1,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "SITUATION DES COURS",
+        "path": "chapters/014-SITUATION DES COURS.md",
+        "note_unit_count": 14,
+        "local_ref_total": 12,
+        "local_def_total": 12,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Index des notions",
+        "path": "chapters/015-Index des notions.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Index des noms de personnes",
+        "path": "chapters/016-Index des noms de personnes.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      }
+    ]
   },
   "anchor_resolution": {
     "decision_basis": [
@@ -4490,326 +4530,278 @@
       "fnm_note_links.status/resolver/confidence",
       "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
     ],
-    "link_summary": {
-      "matched": 576,
-      "footnote_orphan_note": 0,
-      "footnote_orphan_anchor": 41,
-      "endnote_orphan_note": 17,
-      "endnote_orphan_anchor": 0,
-      "ambiguous": 0,
-      "ignored": 6,
-      "fallback_count": 41,
-      "repair_count": 121,
-      "fallback_matched_count": 41,
-      "fallback_match_ratio": 0.07118055555555555
-    },
-    "chapter_link_contract_summary": {
-      "chapter_count": 14,
-      "contract_required_count": 13,
-      "failed_chapter_ids": [],
-      "contract_v2_failed_chapter_ids": [],
-      "contract_v2_first_marker_violation_count": 0,
-      "contract_v2_marker_gap_violation_count": 0,
-      "contract_v2_def_anchor_mismatch_count": 0
-    },
+    "link_summary": {},
+    "chapter_link_contract_summary": {},
     "anchor_kind_counts": {
-      "footnote": 333,
-      "unknown": 470,
-      "endnote": 147
+      "unknown": 535
     },
     "link_status_counts": {
-      "matched": 519,
-      "orphan_note": 74,
-      "ignored": 6,
-      "orphan_anchor": 170
+      "orphan_anchor": 535
     },
     "link_resolver_counts": {
-      "repair": 164,
-      "rule": 468,
-      "orphan_recovery": 137
+      "rule": 535
     },
     "anchor_samples": [
       {
-        "anchor_id": "llm-anchor-fn-00007",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 0,
-        "marker": "1",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "« Acheronta movebo¹. »"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00008",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 0,
-        "marker": "2",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole²"
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00009",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 0,
-        "marker": "3",
-        "anchor_kind": "footnote",
-        "certainty": 0.9,
-        "source_text_preview": "« Quieta non movere³ »"
-      },
-      {
         "anchor_id": "anchor-00001",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 1,
+        "chapter_id": "",
+        "page_no": 8,
+        "paragraph_index": 0,
         "marker": "1",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "[Vous connaissez] la citation de Freud : « Acheronta movebo<sup>1</sup>. » Eh bien, je voudrais placer le cours de cette année sous le signe..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00002",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 1,
-        "marker": "2",
-        "anchor_kind": "unknown",
-        "certainty": 1.0,
-        "source_text_preview": "[Vous connaissez] la citation de Freud : « Acheronta movebo<sup>1</sup>. » Eh bien, je voudrais placer le cours de cette année sous le signe..."
-      },
-      {
-        "anchor_id": "anchor-00003",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 1,
-        "marker": "3",
-        "anchor_kind": "unknown",
-        "certainty": 1.0,
-        "source_text_preview": "[Vous connaissez] la citation de Freud : « Acheronta movebo<sup>1</sup>. » Eh bien, je voudrais placer le cours de cette année sous le signe..."
-      },
-      {
-        "anchor_id": "anchor-00004",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 2,
+        "chapter_id": "",
+        "page_no": 9,
+        "paragraph_index": 0,
         "marker": "1",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autr..."
+        "source_text_preview": ""
       },
       {
-        "anchor_id": "anchor-00005",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 2,
+        "anchor_id": "anchor-00003",
+        "chapter_id": "",
+        "page_no": 9,
+        "paragraph_index": 0,
         "marker": "2",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autr..."
+        "source_text_preview": ""
       },
       {
-        "anchor_id": "anchor-00006",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 17,
-        "paragraph_index": 2,
+        "anchor_id": "anchor-00004",
+        "chapter_id": "",
+        "page_no": 9,
+        "paragraph_index": 0,
         "marker": "3",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autr..."
+        "source_text_preview": ""
       },
       {
-        "anchor_id": "anchor-00007",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "page_no": 19,
+        "anchor_id": "anchor-00005",
+        "chapter_id": "",
+        "page_no": 9,
         "paragraph_index": 0,
         "marker": "4",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer..."
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00006",
+        "chapter_id": "",
+        "page_no": 10,
+        "paragraph_index": 0,
+        "marker": "5",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00007",
+        "chapter_id": "",
+        "page_no": 11,
+        "paragraph_index": 0,
+        "marker": "8",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00008",
+        "chapter_id": "toc-ch-001-leçondu10janvier1979",
+        "page_no": 17,
+        "paragraph_index": 0,
+        "marker": "1",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00009",
+        "chapter_id": "toc-ch-001-leçondu10janvier1979",
+        "page_no": 17,
+        "paragraph_index": 0,
+        "marker": "2",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00010",
+        "chapter_id": "toc-ch-001-leçondu10janvier1979",
+        "page_no": 17,
+        "paragraph_index": 0,
+        "marker": "3",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
       }
     ],
     "link_samples": [
       {
         "link_id": "link-00001",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00001",
+        "chapter_id": "",
+        "note_item_id": "",
         "anchor_id": "anchor-00001",
-        "status": "matched",
-        "resolver": "repair",
+        "status": "orphan_anchor",
+        "resolver": "rule",
         "marker": "1",
         "page_span": [
-          39,
-          39
+          8,
+          8
         ]
       },
       {
         "link_id": "link-00002",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00002",
-        "anchor_id": "",
-        "status": "orphan_note",
-        "resolver": "repair",
-        "marker": "2",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00002",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "1",
         "page_span": [
-          40,
-          40
+          9,
+          9
         ]
       },
       {
         "link_id": "link-00003",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00003",
-        "anchor_id": "",
-        "status": "orphan_note",
-        "resolver": "repair",
-        "marker": "3",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00003",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "2",
         "page_span": [
-          40,
-          40
+          9,
+          9
         ]
       },
       {
         "link_id": "link-00004",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00004",
-        "anchor_id": "anchor-00007",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "4",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00004",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "3",
         "page_span": [
-          40,
-          40
+          9,
+          9
         ]
       },
       {
         "link_id": "link-00005",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00005",
-        "anchor_id": "anchor-00008",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "5",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00005",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "4",
         "page_span": [
-          40,
-          40
+          9,
+          9
         ]
       },
       {
         "link_id": "link-00006",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00006",
-        "anchor_id": "anchor-00009",
-        "status": "matched",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00006",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "6",
+        "marker": "5",
         "page_span": [
-          40,
-          40
+          10,
+          10
         ]
       },
       {
         "link_id": "link-00007",
-        "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00007",
-        "anchor_id": "anchor-00012",
-        "status": "matched",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00007",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "7",
+        "marker": "8",
         "page_span": [
-          40,
-          40
+          11,
+          11
         ]
       },
       {
         "link_id": "link-00008",
         "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00008",
-        "anchor_id": "anchor-00014",
-        "status": "matched",
+        "note_item_id": "",
+        "anchor_id": "anchor-00008",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "8",
+        "marker": "1",
         "page_span": [
-          40,
-          40
+          17,
+          17
         ]
       },
       {
         "link_id": "link-00009",
         "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00009",
-        "anchor_id": "orphan-recovery-en-00009",
-        "status": "matched",
-        "resolver": "orphan_recovery",
-        "marker": "9",
+        "note_item_id": "",
+        "anchor_id": "anchor-00009",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "2",
         "page_span": [
-          40,
-          40
+          17,
+          17
         ]
       },
       {
         "link_id": "link-00010",
         "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00010",
-        "anchor_id": "anchor-00016",
-        "status": "matched",
+        "note_item_id": "",
+        "anchor_id": "anchor-00010",
+        "status": "orphan_anchor",
         "resolver": "rule",
-        "marker": "10",
+        "marker": "3",
         "page_span": [
-          41,
-          41
+          17,
+          17
         ]
       },
       {
         "link_id": "link-00011",
         "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00011",
-        "anchor_id": "anchor-00018",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "11",
+        "note_item_id": "",
+        "anchor_id": "anchor-00011",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "4",
         "page_span": [
-          41,
-          41
+          19,
+          19
         ]
       },
       {
         "link_id": "link-00012",
         "chapter_id": "toc-ch-001-leçondu10janvier1979",
-        "note_item_id": "en-00012",
-        "anchor_id": "anchor-00020",
-        "status": "matched",
-        "resolver": "repair",
-        "marker": "12",
+        "note_item_id": "",
+        "anchor_id": "anchor-00012",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "5",
         "page_span": [
-          41,
-          41
+          19,
+          19
         ]
       }
     ],
-    "llm_repair_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.started.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.started.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.started.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.started.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.started.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.started.006.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/llm_repair.cluster_request.006.json"
-    ],
-    "visual_toc_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.preflight.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.manual_input_extract.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.manual_input_extract.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.manual_input_extract.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.manual_input_extract.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.manual_input_extract.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Biopolitics/llm_traces/visual_toc.manual_input_extract.006.json"
-    ]
+    "llm_repair_trace_refs": [],
+    "visual_toc_trace_refs": []
   }
 }

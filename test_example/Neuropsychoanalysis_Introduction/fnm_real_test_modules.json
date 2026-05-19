@@ -97,14 +97,7 @@
         "section_hint": ""
       }
     ],
-    "structure_page_partition_summary": {
-      "total_pages": 168,
-      "noise": 0,
-      "front_matter": 4,
-      "body": 146,
-      "note": 0,
-      "other": 18
-    }
+    "structure_page_partition_summary": {}
   },
   "note_region_detection": {
     "decision_basis": [
@@ -116,14 +109,7 @@
       "structure.visual_toc_endnotes_summary"
     ],
     "visual_toc_endnotes_summary": {},
-    "chapter_binding_summary": {
-      "region_count": 0,
-      "book_scope_region_count": 0,
-      "unbound_region_count": 0,
-      "unbound_region_ids_preview": [],
-      "unassigned_item_count": 0,
-      "unassigned_item_ids_preview": []
-    },
+    "chapter_binding_summary": {},
     "chapter_endnote_region_alignment_summary": {},
     "region_rows": [],
     "endnote_region_rows": []
@@ -134,84 +120,8 @@
       "按 region_id 聚合生成注释数组",
       "检查 numeric marker 连续性与首尾 marker"
     ],
-    "note_capture_summary": {
-      "expected_anchor_count": 1,
-      "captured_note_count": 0,
-      "capture_ratio": 0.0,
-      "sparse_capture_chapter_ids": [],
-      "dense_anchor_zero_capture_pages": [],
-      "chapters": [
-        {
-          "chapter_id": "toc-ch-001-introduction",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-002-selfandnarcissism",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-003-attachmentandtrauma",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-004-defensemechanismsanddiss",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-005-cathexisandfreeenergy",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-006-unconsciousandconscious",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-007-dreams",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-008-schizophreniaanddepressi",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 1,
-          "captured_note_count": 0,
-          "capture_ratio": 0.0
-        },
-        {
-          "chapter_id": "toc-ch-009-conclusion",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 0,
-          "captured_note_count": 0,
-          "capture_ratio": 1.0
-        }
-      ]
-    },
-    "book_endnote_stream_summary": {
-      "chapter_count": 0,
-      "chapters_with_endnote_stream": [],
-      "high_concentration_chapter_ids": [],
-      "chapters": []
-    },
+    "note_capture_summary": {},
+    "book_endnote_stream_summary": {},
     "array_rows": [],
     "endnote_array_rows": []
   },
@@ -221,12 +131,7 @@
       "导出 chapter markdown 中 local refs/local defs 的闭合情况",
       "structure.freeze_note_unit_summary"
     ],
-    "freeze_note_unit_summary": {
-      "chapter_view_note_unit_count": 0,
-      "owner_fallback_note_unit_count": 0,
-      "unresolved_note_item_count": 0,
-      "unresolved_note_item_ids_preview": []
-    },
+    "freeze_note_unit_summary": {},
     "note_unit_rows": [],
     "export_merge_rows": [
       {
@@ -327,6 +232,17 @@
         "chapter_local_contract_ok": true,
         "orphan_local_definitions": [],
         "orphan_local_refs": []
+      },
+      {
+        "title": "Index",
+        "path": "chapters/010-Index.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
       }
     ]
   },
@@ -336,68 +252,14 @@
       "fnm_note_links.status/resolver/confidence",
       "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
     ],
-    "link_summary": {
-      "matched": 0,
-      "footnote_orphan_note": 0,
-      "footnote_orphan_anchor": 0,
-      "endnote_orphan_note": 0,
-      "endnote_orphan_anchor": 0,
-      "ambiguous": 0,
-      "ignored": 0,
-      "fallback_count": 0,
-      "repair_count": 0,
-      "fallback_matched_count": 0,
-      "fallback_match_ratio": 0.0
-    },
-    "chapter_link_contract_summary": {
-      "chapter_count": 9,
-      "contract_required_count": 0,
-      "failed_chapter_ids": [],
-      "contract_v2_failed_chapter_ids": [],
-      "contract_v2_first_marker_violation_count": 0,
-      "contract_v2_marker_gap_violation_count": 0,
-      "contract_v2_def_anchor_mismatch_count": 0
-    },
-    "anchor_kind_counts": {
-      "unknown": 1
-    },
-    "link_status_counts": {
-      "orphan_anchor": 1
-    },
-    "link_resolver_counts": {
-      "rule": 1
-    },
-    "anchor_samples": [
-      {
-        "anchor_id": "anchor-00001",
-        "chapter_id": "toc-ch-008-schizophreniaanddepressi",
-        "page_no": 149,
-        "paragraph_index": 10,
-        "marker": "2",
-        "anchor_kind": "unknown",
-        "certainty": 0.6,
-        "source_text_preview": "Fuchs T, Van Duppen Z (2017) Time and events: On the phenomenology of temporal experience in schizophrenia (Ancillary article to EAWE domain..."
-      }
-    ],
-    "link_samples": [
-      {
-        "link_id": "link-00001",
-        "chapter_id": "toc-ch-008-schizophreniaanddepressi",
-        "note_item_id": "",
-        "anchor_id": "anchor-00001",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "2",
-        "page_span": [
-          149,
-          149
-        ]
-      }
-    ],
+    "link_summary": {},
+    "chapter_link_contract_summary": {},
+    "anchor_kind_counts": {},
+    "link_status_counts": {},
+    "link_resolver_counts": {},
+    "anchor_samples": [],
+    "link_samples": [],
     "llm_repair_trace_refs": [],
-    "visual_toc_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/llm_traces/visual_toc.manual_input_extract.002.json"
-    ]
+    "visual_toc_trace_refs": []
   }
 }

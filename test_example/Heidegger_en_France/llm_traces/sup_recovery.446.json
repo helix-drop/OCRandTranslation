@@ -1,0 +1,10 @@
+{
+  "stage": "sup_recovery",
+  "model_id": "qwen3.6-plus",
+  "provider": "qwen",
+  "prompt_tokens": 2422,
+  "completion_tokens": 27,
+  "total_tokens": 2449,
+  "request_count": 1,
+  "dur_ms": 4060
+}

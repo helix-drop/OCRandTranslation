@@ -1,0 +1,10 @@
+{
+  "stage": "llm_repair.cluster_request",
+  "usage": {
+    "request_count": 4,
+    "prompt_tokens": 9119,
+    "completion_tokens": 1493,
+    "total_tokens": 10612
+  },
+  "doc_id": "bd05138cd773"
+}

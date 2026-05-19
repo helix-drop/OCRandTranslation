@@ -8,11 +8,11 @@
       "fnm_pages.section_hint"
     ],
     "page_role_counts": {
-      "front_matter": 6,
-      "body": 344,
-      "other": 46
+      "front_matter": 40,
+      "body": 312,
+      "other": 44
     },
-    "first_body_page": 7,
+    "first_body_page": 41,
     "first_note_page": null,
     "page_role_samples": [
       {
@@ -43,8 +43,8 @@
         "section_hint": ""
       },
       {
-        "page_no": 7,
-        "target_pdf_page": 7,
+        "page_no": 41,
+        "target_pdf_page": 41,
         "page_role": "body",
         "role_reason": "default_body",
         "role_confidence": 1.0,
@@ -52,8 +52,8 @@
         "section_hint": ""
       },
       {
-        "page_no": 8,
-        "target_pdf_page": 8,
+        "page_no": 42,
+        "target_pdf_page": 42,
         "page_role": "body",
         "role_reason": "default_body",
         "role_confidence": 1.0,
@@ -61,27 +61,9 @@
         "section_hint": ""
       },
       {
-        "page_no": 9,
-        "target_pdf_page": 9,
+        "page_no": 43,
+        "target_pdf_page": 43,
         "page_role": "body",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
-        "has_note_heading": false,
-        "section_hint": ""
-      },
-      {
-        "page_no": 351,
-        "target_pdf_page": 351,
-        "page_role": "other",
-        "role_reason": "appendix",
-        "role_confidence": 1.0,
-        "has_note_heading": false,
-        "section_hint": ""
-      },
-      {
-        "page_no": 352,
-        "target_pdf_page": 352,
-        "page_role": "other",
         "role_reason": "default_body",
         "role_confidence": 1.0,
         "has_note_heading": false,
@@ -95,16 +77,27 @@
         "role_confidence": 1.0,
         "has_note_heading": false,
         "section_hint": ""
+      },
+      {
+        "page_no": 354,
+        "target_pdf_page": 354,
+        "page_role": "other",
+        "role_reason": "bibliography",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 355,
+        "target_pdf_page": 355,
+        "page_role": "other",
+        "role_reason": "bibliography",
+        "role_confidence": 1.0,
+        "has_note_heading": false,
+        "section_hint": ""
       }
     ],
-    "structure_page_partition_summary": {
-      "total_pages": 396,
-      "noise": 0,
-      "front_matter": 0,
-      "body": 356,
-      "note": 0,
-      "other": 40
-    }
+    "structure_page_partition_summary": {}
   },
   "note_region_detection": {
     "decision_basis": [
@@ -116,258 +109,13 @@
       "structure.visual_toc_endnotes_summary"
     ],
     "visual_toc_endnotes_summary": {},
-    "chapter_binding_summary": {
-      "region_count": 64,
-      "book_scope_region_count": 0,
-      "unbound_region_count": 0,
-      "unbound_region_ids_preview": [],
-      "unassigned_item_count": 0,
-      "unassigned_item_ids_preview": []
-    },
+    "chapter_binding_summary": {},
     "chapter_endnote_region_alignment_summary": {},
     "region_rows": [
       {
-        "region_id": "nr-fn-ch-0001-toc-ch-001-préambule",
+        "region_id": "nr-fn-ch-0001-toc-ch-001-uneinventionutiledansleg",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "start_page": 7,
-        "end_page": 11,
-        "pages": [
-          7,
-          8,
-          9,
-          10,
-          11
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 10,
-        "numeric_marker_count": 10,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 10,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "fn-00001",
-            "page_no": 7,
-            "marker": "1",
-            "source_text_preview": "Par Histoire, j'entends le déroulement des événements, en particulier politiques, et non pas la discipline qui l'étudie et en fait le récit."
-          },
-          {
-            "note_item_id": "fn-00002",
-            "page_no": 8,
-            "marker": "2",
-            "source_text_preview": "Jean-Étienne-Dominique Esquirol, Des maladies mentales [1838], 2 vol., t. I, Frénésie éditions, coll. «Insania. Les introuvables de la psych..."
-          },
-          {
-            "note_item_id": "fn-00003",
-            "page_no": 8,
-            "marker": "3",
-            "source_text_preview": "Charlotte Beradt, Réver sous le IIIe Reich, trad. de l'allemand par Pierre Saint-Germain, Payot & Rivages, « Petite bibliothèque Payot », 20..."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0002-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "start_page": 14,
-        "end_page": 29,
-        "pages": [
-          14,
-          15,
-          16,
-          17,
-          18,
-          19,
-          20,
-          21,
-          22,
-          23,
-          24,
-          25,
-          26,
-          27,
-          28,
-          29
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 26,
-        "numeric_marker_count": 26,
-        "numeric_marker_start": 11,
-        "numeric_marker_end": 36,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "fn-00011",
-            "page_no": 14,
-            "marker": "11",
-            "source_text_preview": "Une étude comparative avec des institutions privées ou/et provinciales de la même époque aurait sans doute apporté de fructueux éclairages;..."
-          },
-          {
-            "note_item_id": "fn-00012",
-            "page_no": 15,
-            "marker": "12",
-            "source_text_preview": "Jan Goldstein, Consoler et classifier. L'essor de la psychiatrie française, trad. de l'anglais (États-Unis) par Françoise Bouillot, Le Pless..."
-          },
-          {
-            "note_item_id": "fn-00013",
-            "page_no": 16,
-            "marker": "13",
-            "source_text_preview": "L'intégralité du texte de la « loi sur les aliénés » de 1838 est disponible sur : http://www.ch-charcot56.fr/textes/11838-7443.htm."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0003-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "start_page": 32,
-        "end_page": 33,
-        "pages": [
-          32,
-          33
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 2,
-        "numeric_marker_count": 2,
-        "numeric_marker_start": 37,
-        "numeric_marker_end": 38,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "37",
-          "38"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "fn-00037",
-            "page_no": 32,
-            "marker": "37",
-            "source_text_preview": "Bicêtre et la Salpêtrière, autrefois rattachés au département de la Seine, ne suffisant plus à l'accueil des aliénés, le Second Empire lança..."
-          },
-          {
-            "note_item_id": "fn-00038",
-            "page_no": 33,
-            "marker": "38",
-            "source_text_preview": "ADVDM, Maison royale de Charenton, Registre d'observations médicales, femmes, 1818, 4X677, f° 1. En 1817, la Salpêtrière reçut presque le do..."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0004-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "start_page": 37,
-        "end_page": 37,
-        "pages": [
-          37
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 3,
-        "numeric_marker_count": 3,
-        "numeric_marker_start": 40,
-        "numeric_marker_end": 42,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "40",
-          "41",
-          "42"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "fn-00039",
-            "page_no": 37,
-            "marker": "40",
-            "source_text_preview": "Jules Michelet, Nos fils, cité par Paul Viallaneix dans sa préface à Jules Michelet, Le Peuple, GF-Flammarion, 1974, p. 33."
-          },
-          {
-            "note_item_id": "fn-00040",
-            "page_no": 37,
-            "marker": "41",
-            "source_text_preview": "François Leuret, Du traitement moral de la folie, J.-B. Baillière, 1840, p. 185."
-          },
-          {
-            "note_item_id": "fn-00041",
-            "page_no": 37,
-            "marker": "42",
-            "source_text_preview": "Maxime Du Camp, Paris, ses organes, ses fonctions et sa vie dans la seconde moitié du XIXe siècle, t. IV, Hachette, 5e éd., 1875, p. 385."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0005-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "start_page": 40,
-        "end_page": 40,
-        "pages": [
-          40
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 3,
-        "numeric_marker_count": 3,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 3,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "1",
-          "2",
-          "3"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "fn-00042",
-            "page_no": 40,
-            "marker": "1",
-            "source_text_preview": "Lettre de Charles-Henri Sanson envoyée à Jacques-Antoine Dulaure, rédacteur au Thermomètre du jour, le 20 février 1793, pour démentir les pr..."
-          },
-          {
-            "note_item_id": "fn-00043",
-            "page_no": 40,
-            "marker": "2",
-            "source_text_preview": "Révolutions de Paris, n° 185, 15° trimestre, du 19 au 26 janvier 1793, p. 202. Le Moniteur universel affirme que la tête de Louis est tombée..."
-          },
-          {
-            "note_item_id": "fn-00044",
-            "page_no": 40,
-            "marker": "3",
-            "source_text_preview": "Mémoires de Cléry, de M. le duc de Montpensier, de Riouffe, avec avant-propos et notes de M. Fs. Barrière, Librairie de Firmin Didot, 1864,..."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-uneinventionutiledansleg",
+        "bound_chapter_id": "toc-ch-001-uneinventionutiledansleg",
         "start_page": 41,
         "end_page": 45,
         "pages": [
@@ -397,19 +145,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00045",
+            "note_item_id": "fn-00001",
             "page_no": 41,
             "marker": "4",
             "source_text_preview": "Roi des Français à l'époque de sa mort, Louis XVI n'en demeure pas moins le dernier à avoir été roi de France, c'est-à-dire héritier de la m..."
           },
           {
-            "note_item_id": "fn-00046",
+            "note_item_id": "fn-00002",
             "page_no": 41,
             "marker": "5",
             "source_text_preview": "Cité par Pierre-Édouard Lemontey, Essai sur l'établissement monarchique de Louis XIV, in Œuvres, t. V, Sautelet et C° éditeurs, Brissot-Thiv..."
           },
           {
-            "note_item_id": "fn-00047",
+            "note_item_id": "fn-00003",
             "page_no": 42,
             "marker": "6",
             "source_text_preview": "François-René de Chateaubriand, Mémoires d’outre-tombe, 2 vol., t. I, Galli-mard, « Bibliothèque de la Pléiade », 1951, p. 184."
@@ -417,9 +165,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0007-toc-ch-002-uneinventionutiledansleg",
+        "region_id": "nr-fn-ch-0002-toc-ch-001-uneinventionutiledansleg",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-uneinventionutiledansleg",
+        "bound_chapter_id": "toc-ch-001-uneinventionutiledansleg",
         "start_page": 48,
         "end_page": 49,
         "pages": [
@@ -443,19 +191,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00056",
+            "note_item_id": "fn-00012",
             "page_no": 48,
             "marker": "17",
             "source_text_preview": "«Lettre de M. Soemmering à M. Oelsner sur le supplice de la guillotine», Gazette nationale ou Le Moniteur universel, 18 brumaire an IV [9 no..."
           },
           {
-            "note_item_id": "fn-00057",
+            "note_item_id": "fn-00013",
             "page_no": 48,
             "marker": "18",
             "source_text_preview": "C.-E. Elsner, « Sur le supplice de la guillotine, par le professeur Soemmering », Magasin encyclopédique, vol. III, 1795, p. 464-465 ; Josep..."
           },
           {
-            "note_item_id": "fn-00058",
+            "note_item_id": "fn-00014",
             "page_no": 48,
             "marker": "1",
             "source_text_preview": ", brumaire an IV."
@@ -463,9 +211,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0008-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0003-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "start_page": 50,
         "end_page": 55,
         "pages": [
@@ -496,19 +244,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00061",
+            "note_item_id": "fn-00017",
             "page_no": 50,
             "marker": "21",
             "source_text_preview": "Lettres de Pinel, précédées d’une notice plus étendue sur sa vie, par son neveu le Dr Casimir Pinel, Victor Masson, 1859, p. 10."
           },
           {
-            "note_item_id": "fn-00062",
+            "note_item_id": "fn-00018",
             "page_no": 51,
             "marker": "22",
             "source_text_preview": "François-Joseph Talma, Mémoire de J.-F. Talma, écrit par lui-même et mis en ordre sur les papiers de sa famille par Alexandre Dumas [1849],..."
           },
           {
-            "note_item_id": "fn-00063",
+            "note_item_id": "fn-00019",
             "page_no": 51,
             "marker": "23",
             "source_text_preview": "Double sens familier sous la Révolution. On se souvient du mot fameux de Rivarol, à propos du gouverneur de la Bastille : « M. de Launay ava..."
@@ -516,9 +264,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0009-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0004-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "start_page": 60,
         "end_page": 60,
         "pages": [
@@ -537,7 +285,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00071",
+            "note_item_id": "fn-00027",
             "page_no": 60,
             "marker": "32",
             "source_text_preview": "Philippe Pinel, «Réflexions médicales sur l'état monastique», Journal gratuit, t. IX, n° 6, 1790, p. 80-93."
@@ -545,9 +293,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0010-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0005-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "start_page": 62,
         "end_page": 62,
         "pages": [
@@ -567,13 +315,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00072",
+            "note_item_id": "fn-00028",
             "page_no": 62,
             "marker": "33",
             "source_text_preview": "Ibid., p. 85."
           },
           {
-            "note_item_id": "fn-00073",
+            "note_item_id": "fn-00029",
             "page_no": 62,
             "marker": "34",
             "source_text_preview": "Gazette de santé, n° 7, p. 25-26."
@@ -581,9 +329,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0011-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0006-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "start_page": 64,
         "end_page": 65,
         "pages": [
@@ -606,19 +354,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00074",
+            "note_item_id": "fn-00030",
             "page_no": 64,
             "marker": "35",
             "source_text_preview": "Ibid., p. 91."
           },
           {
-            "note_item_id": "fn-00075",
+            "note_item_id": "fn-00031",
             "page_no": 64,
             "marker": "36",
             "source_text_preview": "Voir à ce sujet l'article de Dora B. Weiner, « Philippe Pinel (1745-1826) clerc tonsuré », Annales médico-psychologiques, vol. CXLIX, n° 2,..."
           },
           {
-            "note_item_id": "fn-00076",
+            "note_item_id": "fn-00032",
             "page_no": 65,
             "marker": "37",
             "source_text_preview": "Lettre à son frère, 7 juillet 1792, in Lettres de Pinel, op. cit., p. 53."
@@ -626,9 +374,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0012-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0007-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "start_page": 67,
         "end_page": 70,
         "pages": [
@@ -653,19 +401,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00078",
+            "note_item_id": "fn-00034",
             "page_no": 67,
             "marker": "40",
             "source_text_preview": "G. W. F. Hegel, Encyclopédie des sciences philosophiques, t. III, La Philosophie de l'esprit, § 408, trad. et annoté par Bernard Bourgeois,..."
           },
           {
-            "note_item_id": "fn-00079",
+            "note_item_id": "fn-00035",
             "page_no": 68,
             "marker": "41",
             "source_text_preview": "Philippe Pinel, « Observations sur la manie pour servir l'Histoire naturelle de l'homme », cité par Jacques Postel, Genèse de la psychiatrie..."
           },
           {
-            "note_item_id": "fn-00080",
+            "note_item_id": "fn-00036",
             "page_no": 69,
             "marker": "42",
             "source_text_preview": "Ibid., p. 245. C'est moi qui souligne. Sous la Restauration, Esquirol rappellera : « On a pensé que le traitement moral appliqué aux maniaqu..."
@@ -673,9 +421,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0013-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0008-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "start_page": 72,
         "end_page": 74,
         "pages": [
@@ -700,19 +448,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00082",
+            "note_item_id": "fn-00038",
             "page_no": 72,
             "marker": "45",
             "source_text_preview": "Philippe Pinel, Traité médico-philosophique sur l'aliénation mentale, 2° éd. entièrement refondue et très augmentée [1809], présenté et anno..."
           },
           {
-            "note_item_id": "fn-00083",
+            "note_item_id": "fn-00039",
             "page_no": 73,
             "marker": "46",
             "source_text_preview": "La réhabilitation du rôle de Pussin est relativement récente. Voir, entre autres, Dora B. Weiner, «The Apprenticeship of Philippe Pinel: A N..."
           },
           {
-            "note_item_id": "fn-00084",
+            "note_item_id": "fn-00040",
             "page_no": 73,
             "marker": "47",
             "source_text_preview": "Louis Sébastien Mercier, Tableau de Paris [1788], La Découverte, «Poche», 1998, p. 79-80."
@@ -720,9 +468,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0014-toc-ch-004-lesévénementsdelarévolut",
+        "region_id": "nr-fn-ch-0009-toc-ch-003-lesévènementsdelarévolut",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+        "bound_chapter_id": "toc-ch-003-lesévènementsdelarévolut",
         "start_page": 75,
         "end_page": 79,
         "pages": [
@@ -749,19 +497,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00087",
+            "note_item_id": "fn-00043",
             "page_no": 75,
             "marker": "50",
             "source_text_preview": "« Réponses aux questions de M. de Jussieu, lieutenant de Maire au département des hôpitaux, jointes à sa lettre, en date du 12 avril 1790, c..."
           },
           {
-            "note_item_id": "fn-00088",
+            "note_item_id": "fn-00044",
             "page_no": 76,
             "marker": "51",
             "source_text_preview": "Philippe Pinel, « Tableau général des fous de Bicêtre au nombre d'environ 200«, cité par D. B. Weiner, Comprendre et soigner, op. cit., p. 1..."
           },
           {
-            "note_item_id": "fn-00089",
+            "note_item_id": "fn-00045",
             "page_no": 77,
             "marker": "52",
             "source_text_preview": "J'ai établi ce tableau à partir des informations suivantes : « Dans le recensement des aliénés que je fis à Bicêtre l'an 3 de la République,..."
@@ -769,9 +517,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut",
+        "region_id": "nr-fn-ch-0010-toc-ch-003-lesévènementsdelarévolut",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+        "bound_chapter_id": "toc-ch-003-lesévènementsdelarévolut",
         "start_page": 81,
         "end_page": 86,
         "pages": [
@@ -802,19 +550,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00092",
+            "note_item_id": "fn-00048",
             "page_no": 81,
             "marker": "56",
             "source_text_preview": "P.-J.-B. Buchez et P.-C. Roux, Histoire de la Révolution française ou Journal des Assemblées nationales depuis 1789 jusqu'en 1815, t. XXV, P..."
           },
           {
-            "note_item_id": "fn-00093",
+            "note_item_id": "fn-00049",
             "page_no": 81,
             "marker": "57",
             "source_text_preview": "Voyage du Diable et de la Folie comme causes des Révolutions de France, Braband, Liège & autres, Imprimé dans la Lune, Mai 1793, l'an quatri..."
           },
           {
-            "note_item_id": "fn-00094",
+            "note_item_id": "fn-00050",
             "page_no": 82,
             "marker": "58",
             "source_text_preview": "Collection de Vinck. Inventaire analytique, t. II, La Constituante, Imprimerie nationale, 1914, p. 513, et t. III, La Législative et la Conv..."
@@ -822,9 +570,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine",
+        "region_id": "nr-fn-ch-0011-toc-ch-004-spectresdelaguillotine",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "start_page": 87,
         "end_page": 88,
         "pages": [
@@ -848,19 +596,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00103",
+            "note_item_id": "fn-00059",
             "page_no": 87,
             "marker": "67",
             "source_text_preview": "Victor Hugo, Les Misérables [1862], Gallimard, «Bibliothèque de la Pléiade», 1951, p. 18."
           },
           {
-            "note_item_id": "fn-00104",
+            "note_item_id": "fn-00060",
             "page_no": 87,
             "marker": "68",
             "source_text_preview": "Lettre de Sade à son avocat, 21 janvier 1795, citée par Gilbert Lely, Vie du marquis de Sade, nouv. éd. entièrement refondue, Jean-Jacques P..."
           },
           {
-            "note_item_id": "fn-00105",
+            "note_item_id": "fn-00061",
             "page_no": 88,
             "marker": "69",
             "source_text_preview": "Révolutions de Paris, n° 185, 15° trimestre, du 19 au 26 janvier 1793, p. 203."
@@ -868,9 +616,38 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0017-toc-ch-005-spectresdelaguillotine",
+        "region_id": "llm-note-region-toc-ch-004-spectresdelaguillotine-92-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
+        "start_page": 92,
+        "end_page": 92,
+        "pages": [
+          92
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 74,
+        "numeric_marker_end": 74,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "74"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "llm-note-fa-00075-74",
+            "page_no": 92,
+            "marker": "74",
+            "source_text_preview": "Jean Starobinski, Histoire du traitement de la mélancolie des origines à 1900, Bâle, Laboratoires Geigy, 1960, p. 55."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-004-spectresdelaguillotine",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "start_page": 92,
         "end_page": 92,
         "pages": [
@@ -891,19 +668,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00108",
+            "note_item_id": "fn-00064",
             "page_no": 92,
             "marker": "74",
             "source_text_preview": "Jean Starobinski, Histoire du traitement de la mélancolie des origines à 1900, Bâle, Laboratoires Geigy, 1960, p. 55."
           },
           {
-            "note_item_id": "fn-00109",
+            "note_item_id": "fn-00065",
             "page_no": 92,
             "marker": "75",
             "source_text_preview": "Pinel, Traité... [1809/2005], p. 304."
           },
           {
-            "note_item_id": "fn-00110",
+            "note_item_id": "fn-00066",
             "page_no": 92,
             "marker": "70",
             "source_text_preview": "Joseph Daquin, La Philosophie de la foîhe, Chez Née de La Rochelle, libraire, 1792, p. 52. Militant pour l'hygiène dans les asiles, préconis..."
@@ -911,9 +688,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0018-toc-ch-005-spectresdelaguillotine",
+        "region_id": "nr-fn-ch-0013-toc-ch-004-spectresdelaguillotine",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "start_page": 95,
         "end_page": 99,
         "pages": [
@@ -943,19 +720,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00111",
+            "note_item_id": "fn-00067",
             "page_no": 95,
             "marker": "77",
             "source_text_preview": "Pinel, Traité... [1800], p. 66-70. Les fines plaisanteries ne fonctionnent pas toujours. À un bigot fanatique, qui se dit la « quatrième per..."
           },
           {
-            "note_item_id": "fn-00112",
+            "note_item_id": "fn-00068",
             "page_no": 96,
             "marker": "78",
             "source_text_preview": "AAP-HP, Salpêtrière, Registre des mutations (1791-An XIII), f⁰s 70, 216 et 225."
           },
           {
-            "note_item_id": "fn-00113",
+            "note_item_id": "fn-00069",
             "page_no": 96,
             "marker": "79",
             "source_text_preview": "ADVM, Charenton, Registres médicaux, hommes et femmes, 1798-1826, 4X682 (2Mi60). Registre non foliote."
@@ -963,9 +740,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0019-toc-ch-005-spectresdelaguillotine",
+        "region_id": "nr-fn-ch-0014-toc-ch-004-spectresdelaguillotine",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "start_page": 102,
         "end_page": 103,
         "pages": [
@@ -989,19 +766,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00120",
+            "note_item_id": "fn-00076",
             "page_no": 102,
             "marker": "87",
             "source_text_preview": "Alexandre Dumas, Les Mille et Un Fantômes, précédé de La Femme au collier de velours [1849], éd. d'Anne-Marie Callet-Bianco, Gallimard, « Fo..."
           },
           {
-            "note_item_id": "fn-00121",
+            "note_item_id": "fn-00077",
             "page_no": 102,
             "marker": "88",
             "source_text_preview": "Ibid., p. 130."
           },
           {
-            "note_item_id": "fn-00122",
+            "note_item_id": "fn-00078",
             "page_no": 102,
             "marker": "89",
             "source_text_preview": "Ibid., p. 167."
@@ -1009,9 +786,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar",
+        "region_id": "nr-fn-ch-0015-toc-ch-005-maisonsdesantémaisonsdar",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+        "bound_chapter_id": "toc-ch-005-maisonsdesantémaisonsdar",
         "start_page": 106,
         "end_page": 108,
         "pages": [
@@ -1035,19 +812,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00125",
+            "note_item_id": "fn-00081",
             "page_no": 106,
             "marker": "2",
             "source_text_preview": "Décret du 16-24 août, titre XI, article 3. Voir le site de Michel Caire, sous l’onglet « Législation » et la rubrique « Internements », qui..."
           },
           {
-            "note_item_id": "fn-00126",
+            "note_item_id": "fn-00082",
             "page_no": 107,
             "marker": "3",
             "source_text_preview": "Mona Ozouf, «Saint-Just», Dictionnaire critique de la Révolution française, vol. «Acteurs», Flammarion, «Champs», 2007, p. 273-293."
           },
           {
-            "note_item_id": "fn-00127",
+            "note_item_id": "fn-00083",
             "page_no": 108,
             "marker": "4",
             "source_text_preview": "Pinel, Traité... [1800], p. 51."
@@ -1055,9 +832,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+        "region_id": "nr-fn-ch-0016-toc-ch-005-maisonsdesantémaisonsdar",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+        "bound_chapter_id": "toc-ch-005-maisonsdesantémaisonsdar",
         "start_page": 110,
         "end_page": 119,
         "pages": [
@@ -1092,19 +869,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00129",
+            "note_item_id": "fn-00085",
             "page_no": 110,
             "marker": "6",
             "source_text_preview": "AN, F74592. Précisons que le patronyme complet des Breteuil est Le Tonnelier de Breteuil — sans doute la citoyenne avait-elle trouvé prudent..."
           },
           {
-            "note_item_id": "fn-00130",
+            "note_item_id": "fn-00086",
             "page_no": 110,
             "marker": "7",
             "source_text_preview": "Jean-Charles Sournia, La Médecine révolutionnaire, 1789-1799, Payot, « Médecine et société », 1989, p. 210."
           },
           {
-            "note_item_id": "fn-00131",
+            "note_item_id": "fn-00087",
             "page_no": 111,
             "marker": "8",
             "source_text_preview": "Sur la maison Belhomme, voir Olivier Vincienne, «La maison de santé Belhomme. Légende et réalité, Paris et Île-de-France. Mémoires publiés p..."
@@ -1112,9 +889,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0022-toc-ch-007-dissidenceoudémence",
+        "region_id": "nr-fn-ch-0017-toc-ch-006-dissidenceoudémence",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-dissidenceoudémence",
+        "bound_chapter_id": "toc-ch-006-dissidenceoudémence",
         "start_page": 122,
         "end_page": 122,
         "pages": [
@@ -1133,7 +910,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00148",
+            "note_item_id": "fn-00104",
             "page_no": 122,
             "marker": "26",
             "source_text_preview": "Lettre de Pussin [improprement orthographié Piersin] aux citoyens membres de la Commission des administrations civiles, police et tribunaux,..."
@@ -1141,9 +918,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0023-toc-ch-007-dissidenceoudémence",
+        "region_id": "nr-fn-ch-0018-toc-ch-006-dissidenceoudémence",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-dissidenceoudémence",
+        "bound_chapter_id": "toc-ch-006-dissidenceoudémence",
         "start_page": 131,
         "end_page": 131,
         "pages": [
@@ -1163,13 +940,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00149",
+            "note_item_id": "fn-00105",
             "page_no": 131,
             "marker": "27",
             "source_text_preview": "Sur cette question des rapports entre l'idéologie et la science, je ne connais pas de meilleur livre que celui d'Anne Fausto-Sterling, Sexin..."
           },
           {
-            "note_item_id": "fn-00150",
+            "note_item_id": "fn-00106",
             "page_no": 131,
             "marker": "28",
             "source_text_preview": "Michael Sibalis, « Un aspect de la légende noire de Napoléon : le mythe de l'enfermement des opposants comme fous », Revue de l'Institut Nap..."
@@ -1177,9 +954,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0024-toc-ch-007-dissidenceoudémence",
+        "region_id": "nr-fn-ch-0019-toc-ch-006-dissidenceoudémence",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-dissidenceoudémence",
+        "bound_chapter_id": "toc-ch-006-dissidenceoudémence",
         "start_page": 133,
         "end_page": 136,
         "pages": [
@@ -1208,19 +985,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00151",
+            "note_item_id": "fn-00107",
             "page_no": 133,
             "marker": "29",
             "source_text_preview": "Marc-Antoine Baudot, Notes historiques sur la Convention nationale, le Directoire, l'Empire et l'exil des votants, publié sous les auspices..."
           },
           {
-            "note_item_id": "fn-00152",
+            "note_item_id": "fn-00108",
             "page_no": 133,
             "marker": "30",
             "source_text_preview": "Michael Sibalis, «L'enfermement de Théodore Desorgues: documents inédits», Annales historiques de la Révolution française, n° 284, 1991, p...."
           },
           {
-            "note_item_id": "fn-00153",
+            "note_item_id": "fn-00109",
             "page_no": 134,
             "marker": "31",
             "source_text_preview": "ADVDM, Charenton, Registre d'observations, hommes et femmes, 1799-1814, 4X681 (registre non folioté)."
@@ -1228,9 +1005,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0025-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0020-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "start_page": 139,
         "end_page": 145,
         "pages": [
@@ -1262,19 +1039,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00159",
+            "note_item_id": "fn-00115",
             "page_no": 139,
             "marker": "39",
             "source_text_preview": "On consultera notamment les trois biographies qui font autorité : Gilbert Lely, Vie du marquis de Sade, nouv. éd. entièrement refondue, Chez..."
           },
           {
-            "note_item_id": "fn-00160",
+            "note_item_id": "fn-00116",
             "page_no": 140,
             "marker": "40",
             "source_text_preview": "Lettre de Sade à Gaufridy, 1790, citée par G. Lely, Vie du marquis de Sade, op. cit., p. 399."
           },
           {
-            "note_item_id": "fn-00161",
+            "note_item_id": "fn-00117",
             "page_no": 140,
             "marker": "41",
             "source_text_preview": "AN, DV1, n° 7, cité par A. Tuetey, L'Assistance publique à Paris, op. cit., t. I, p. 455."
@@ -1282,9 +1059,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0021-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "start_page": 147,
         "end_page": 149,
         "pages": [
@@ -1308,19 +1085,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00170",
+            "note_item_id": "fn-00126",
             "page_no": 147,
             "marker": "50",
             "source_text_preview": "Cité in Journal inédit de Sade, op. cit., p. 116."
           },
           {
-            "note_item_id": "fn-00171",
+            "note_item_id": "fn-00127",
             "page_no": 147,
             "marker": "51",
             "source_text_preview": "«Une visite des établissements d'aliénés parisïens en 1808» par August-Friedrich Schweigger, trad. de l'allemand par Michel Caire et mis en..."
           },
           {
-            "note_item_id": "fn-00172",
+            "note_item_id": "fn-00128",
             "page_no": 148,
             "marker": "52",
             "source_text_preview": "Charles-François Giraudy, Mémoire sur la Maison nationale de Charenton, Imprimerie de la Société de médecine, 1804, p. 7."
@@ -1328,9 +1105,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0027-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0022-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "start_page": 152,
         "end_page": 154,
         "pages": [
@@ -1356,19 +1133,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00174",
+            "note_item_id": "fn-00130",
             "page_no": 152,
             "marker": "54",
             "source_text_preview": "Lettre du docteur Royer-Collard au ministre de l'Intérieur, Joseph Fouché,"
           },
           {
-            "note_item_id": "fn-00175",
+            "note_item_id": "fn-00131",
             "page_no": 152,
             "marker": "2",
             "source_text_preview": "août 1808, citée par G. Lely, Vie du marquis de Sade, op. cit., p. 640-641."
           },
           {
-            "note_item_id": "fn-00176",
+            "note_item_id": "fn-00132",
             "page_no": 152,
             "marker": "55",
             "source_text_preview": "Cité par G. Lely, op. cũ., p. 642."
@@ -1376,9 +1153,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0028-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0023-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "start_page": 156,
         "end_page": 158,
         "pages": [
@@ -1403,19 +1180,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00180",
+            "note_item_id": "fn-00136",
             "page_no": 156,
             "marker": "60",
             "source_text_preview": "Chapron est bien mentionné dans les archives comme le secrétaire de Coulmier. Son ignorance de l'orthographe m'engage à penser que, faute de..."
           },
           {
-            "note_item_id": "fn-00181",
+            "note_item_id": "fn-00137",
             "page_no": 157,
             "marker": "61",
             "source_text_preview": "AN, F¹⁵ 2608. Tous les témoignages cités figurent sous cette cote. J'ai respecté les italiques originales."
           },
           {
-            "note_item_id": "fn-00182",
+            "note_item_id": "fn-00138",
             "page_no": 158,
             "marker": "62",
             "source_text_preview": "AN, F¹⁵ 2609-2609B. Lettre datée du 5 avril 1813. Ce militaire alcoolique était alors sous le coup d’une procédure car il volait les autres..."
@@ -1423,9 +1200,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0029-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0024-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "start_page": 161,
         "end_page": 162,
         "pages": [
@@ -1447,19 +1224,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00185",
+            "note_item_id": "fn-00141",
             "page_no": 161,
             "marker": "65",
             "source_text_preview": "AN, F¹⁵ 2606-2607. Lettre de M. de Coulmier au ministre de l'Intérieur, non datée."
           },
           {
-            "note_item_id": "fn-00186",
+            "note_item_id": "fn-00142",
             "page_no": 161,
             "marker": "66",
             "source_text_preview": "Annie Le Brun, On n'enchaîne pas les volcans, Gallimard, 2006, p. 69 et suiv. Sur la notion de théâtralité chez Sade, on renverra également..."
           },
           {
-            "note_item_id": "fn-00187",
+            "note_item_id": "fn-00143",
             "page_no": 162,
             "marker": "67",
             "source_text_preview": "Royer-Collard, «État sommaire de la maison de Charenton sous le rapport du service médical et aperçu des réformes qui y sont nécessaires »,..."
@@ -1467,9 +1244,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0030-toc-ch-009-lhommequiseprenaitpourna",
+        "region_id": "nr-fn-ch-0025-toc-ch-008-lhommequiseprenaitpourna",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-009-lhommequiseprenaitpourna",
+        "bound_chapter_id": "toc-ch-008-lhommequiseprenaitpourna",
         "start_page": 165,
         "end_page": 165,
         "pages": [
@@ -1488,7 +1265,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00188",
+            "note_item_id": "fn-00144",
             "page_no": 165,
             "marker": "1",
             "source_text_preview": "Alphonse Esquiros, Paris ou Les Sciences, les institutions et les mœurs au XIX $ ^{e} $ siècle, t. II, Au comptoir des imprimeurs unis, 1847..."
@@ -1496,9 +1273,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0026-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "start_page": 167,
         "end_page": 168,
         "pages": [
@@ -1521,19 +1298,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00189",
+            "note_item_id": "fn-00145",
             "page_no": 167,
             "marker": "2",
             "source_text_preview": "Voir notamment «Esquirol et la nosographie», in Nouvelle histoire de la psychiatrie, sous la dir. de Jacques Postel et Claude Quetel, Dunod,..."
           },
           {
-            "note_item_id": "fn-00190",
+            "note_item_id": "fn-00146",
             "page_no": 167,
             "marker": "3",
             "source_text_preview": "Charles Duveyrier, Le Monomane, drame en cinq actes, Bufquin-Desessart éditeur, 1835, p. 32."
           },
           {
-            "note_item_id": "fn-00191",
+            "note_item_id": "fn-00147",
             "page_no": 168,
             "marker": "4",
             "source_text_preview": "Eugène Scribe, Une monomanie, comédie vaudeville en un acte, théâtre du Gymnase, 31 août 1832, in Œuvres complètes, II° série, vol. XXIV, E...."
@@ -1541,9 +1318,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0027-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "start_page": 171,
         "end_page": 177,
         "pages": [
@@ -1575,19 +1352,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00193",
+            "note_item_id": "fn-00149",
             "page_no": 171,
             "marker": "8",
             "source_text_preview": "Pinel, Traité... [1809/2005], p. 223."
           },
           {
-            "note_item_id": "fn-00194",
+            "note_item_id": "fn-00150",
             "page_no": 171,
             "marker": "9",
             "source_text_preview": "F.-J.-V. Broussais, De l’irritation et de la folie, t. II, J.-B. Baillière, 1839, p. 368."
           },
           {
-            "note_item_id": "fn-00195",
+            "note_item_id": "fn-00151",
             "page_no": 171,
             "marker": "10",
             "source_text_preview": "Ulysse Trélat, La Folie lucide, Adrien Delahaye, 1861, p. 178-223."
@@ -1595,9 +1372,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0033-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0028-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "start_page": 179,
         "end_page": 180,
         "pages": [
@@ -1619,19 +1396,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00206",
+            "note_item_id": "fn-00162",
             "page_no": 179,
             "marker": "22",
             "source_text_preview": "Gérard de Nerval, « Le roi de Bicêtre (xvi° siècle) : Raoul Spifame », Les Illuminés, in Œuvres complètes, t. II, Gallimard, « Bibliothèque..."
           },
           {
-            "note_item_id": "fn-00207",
+            "note_item_id": "fn-00163",
             "page_no": 180,
             "marker": "23",
             "source_text_preview": "Ibid., p. 892. Rappelons que cette pratique du dédoublement, Nerval, qui avait écrit « Je suis l'autre » sous l'un de ses rares portraits ph..."
           },
           {
-            "note_item_id": "fn-00208",
+            "note_item_id": "fn-00164",
             "page_no": 180,
             "marker": "24",
             "source_text_preview": "AAP-HP, Salpêtrière, Registre d'observations médicales, 5° division, 1° section (1820-1851), 6R1, f° 26. Le destin de cette patiente mérite..."
@@ -1639,9 +1416,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0034-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0029-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "start_page": 183,
         "end_page": 184,
         "pages": [
@@ -1664,19 +1441,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00209",
+            "note_item_id": "fn-00165",
             "page_no": 183,
             "marker": "26",
             "source_text_preview": "ADVDM, Charenton, Registre d'observations médicales, hommes et femmes, 1831, 4X699, f° 69. Entré le 29 mai 1831. Charenton est à l'époque di..."
           },
           {
-            "note_item_id": "fn-00210",
+            "note_item_id": "fn-00166",
             "page_no": 184,
             "marker": "27",
             "source_text_preview": "ADVDM, Charenton, Registre d'observations médicales, hommes et femmes (cas particulier), 1812-1844, 2Mi63 (non folioté), Entré le 21 août 18..."
           },
           {
-            "note_item_id": "fn-00211",
+            "note_item_id": "fn-00167",
             "page_no": 184,
             "marker": "28",
             "source_text_preview": "ADVDM, Charenton, Registre d'observations médicales, femmes, 1848-1849, 4X723, f° 63. Entrée le 27 mai 1848, transférée à la Salpêtrière le..."
@@ -1684,9 +1461,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0035-toc-ch-011-lemairedelunivers",
+        "region_id": "nr-fn-ch-0030-toc-ch-010-lemairedelunivers",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-lemairedelunivers",
+        "bound_chapter_id": "toc-ch-010-lemairedelunivers",
         "start_page": 185,
         "end_page": 185,
         "pages": [
@@ -1706,13 +1483,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00213",
+            "note_item_id": "fn-00169",
             "page_no": 185,
             "marker": "30",
             "source_text_preview": "Fr.-R. de Chateaubriand, Mémoires d'outre-tombe, op. cit., t. I, p. 1008."
           },
           {
-            "note_item_id": "fn-00214",
+            "note_item_id": "fn-00170",
             "page_no": 185,
             "marker": "31",
             "source_text_preview": "ADVDM, Charenton, Registre médical, hommes et femmes, 1818, 4X677, f° 35, 39 et 47."
@@ -1720,9 +1497,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0036-toc-ch-011-lemairedelunivers",
+        "region_id": "nr-fn-ch-0031-toc-ch-010-lemairedelunivers",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-lemairedelunivers",
+        "bound_chapter_id": "toc-ch-010-lemairedelunivers",
         "start_page": 187,
         "end_page": 195,
         "pages": [
@@ -1756,19 +1533,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00215",
+            "note_item_id": "fn-00171",
             "page_no": 187,
             "marker": "33",
             "source_text_preview": "Thierry Haustgen, Observations & certificats psychiatriques au XIXe siècle, Rueil-Malmaison, Ciba, 1985, p. 238-239."
           },
           {
-            "note_item_id": "fn-00216",
+            "note_item_id": "fn-00172",
             "page_no": 187,
             "marker": "34",
             "source_text_preview": "Au début du XXe siècle, Anna Anderson, parmi d'autres candidates, a prétendu être la grande-duchesse Anastasia, fille de Nicolas II, qui ava..."
           },
           {
-            "note_item_id": "fn-00217",
+            "note_item_id": "fn-00173",
             "page_no": 188,
             "marker": "35",
             "source_text_preview": "Que je n'aie pas trouvé d'autres occurrences dans les registres ne signifie pas nécessairement qu'il n'y ait pas eu d'autres prétendus dauph..."
@@ -1776,9 +1553,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0037-toc-ch-011-lemairedelunivers",
+        "region_id": "nr-fn-ch-0032-toc-ch-010-lemairedelunivers",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-lemairedelunivers",
+        "bound_chapter_id": "toc-ch-010-lemairedelunivers",
         "start_page": 197,
         "end_page": 200,
         "pages": [
@@ -1807,19 +1584,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00228",
+            "note_item_id": "fn-00184",
             "page_no": 197,
             "marker": "46",
             "source_text_preview": "ADVDM, Charenton, Registre d'observations médicales, hommes, 1841-1842, 4X708, F° 83. Entré début juin 1841, sorti le 31 août 1842 « tombé d..."
           },
           {
-            "note_item_id": "fn-00229",
+            "note_item_id": "fn-00185",
             "page_no": 197,
             "marker": "47",
             "source_text_preview": "ADVDM, Charenton, Registre d'observations médicales, juin 1841-octobre 1843, 4X721, f° 51. Entrée le 29 avril 1841, sortie guérie le 30 octo..."
           },
           {
-            "note_item_id": "fn-00230",
+            "note_item_id": "fn-00186",
             "page_no": 198,
             "marker": "48",
             "source_text_preview": "AAP-HP, Salpêtrière, Registre d'observations médicales, 5° division, 1° section, 1820-1851, 6R1, 298. Entrée le 14 février 1851, transférée..."
@@ -1827,9 +1604,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0038-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0033-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "start_page": 203,
         "end_page": 205,
         "pages": [
@@ -1854,19 +1631,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00236",
+            "note_item_id": "fn-00192",
             "page_no": 203,
             "marker": "60",
             "source_text_preview": "Benjamin Constant, Œuvres politiques, introd., notes et index par Charles Louandre, Charpentier et Cie, 1874, p. 47."
           },
           {
-            "note_item_id": "fn-00237",
+            "note_item_id": "fn-00193",
             "page_no": 203,
             "marker": "61",
             "source_text_preview": "Honoré de Balzac, Autre étude de femme, La Comédie humaine, Gallimard, *Bibliothèque de la Pléiade*, 1993, p. 700-701."
           },
           {
-            "note_item_id": "fn-00238",
+            "note_item_id": "fn-00194",
             "page_no": 204,
             "marker": "62",
             "source_text_preview": "ADVDM, Charenton, Registre médical, hommes et femmes, 1818, 4X677, f° 35."
@@ -1874,9 +1651,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0039-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0034-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "start_page": 207,
         "end_page": 219,
         "pages": [
@@ -1914,19 +1691,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00241",
+            "note_item_id": "fn-00197",
             "page_no": 207,
             "marker": "65",
             "source_text_preview": "E. de Las Cases (père), Mémorial de Sainte-Hélène [1823], t. II, Garnier frères, 1961, p. 58, cité par Marc Renneville, Le Langage des crâne..."
           },
           {
-            "note_item_id": "fn-00242",
+            "note_item_id": "fn-00198",
             "page_no": 207,
             "marker": "66",
             "source_text_preview": "David Richard, La Phrénologie et Napoléon, Imprimerie Pihan Delaforest, 1835, p. 3."
           },
           {
-            "note_item_id": "fn-00243",
+            "note_item_id": "fn-00199",
             "page_no": 208,
             "marker": "67",
             "source_text_preview": "Franz Gall et G. Spurzheim, Anatomie et physiologie du système nerveux en général, et du cerveau en particulier, Imprimerie Haussmann et d'H..."
@@ -1934,9 +1711,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0040-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0035-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "start_page": 221,
         "end_page": 221,
         "pages": [
@@ -1955,7 +1732,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00263",
+            "note_item_id": "fn-00219",
             "page_no": 221,
             "marker": "88",
             "source_text_preview": "Fr. Leuret, «Du traitement des idées ou conceptions délirantes», art. cité, p. 579."
@@ -1963,9 +1740,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0041-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0036-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "start_page": 223,
         "end_page": 224,
         "pages": [
@@ -1987,19 +1764,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00264",
+            "note_item_id": "fn-00220",
             "page_no": 223,
             "marker": "1",
             "source_text_preview": "François-René de Chateaubriand, Œuvres complètes, t. IV, Études historiques, Pourrat frères, 1834, p. 84."
           },
           {
-            "note_item_id": "fn-00265",
+            "note_item_id": "fn-00221",
             "page_no": 224,
             "marker": "2",
             "source_text_preview": "Ernest Jones, La Vie de Sigmund Freud, PUF, 1958, p. 204."
           },
           {
-            "note_item_id": "fn-00266",
+            "note_item_id": "fn-00222",
             "page_no": 224,
             "marker": "3",
             "source_text_preview": "La « névrose révolutionnaire » a fait l'objet d'un livre par le docteur Cabanès, quant à la « paranoïa reformatoria », c'est-à-dire à « idée..."
@@ -2007,9 +1784,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0042-toc-ch-013-théroignedeméricourtoula",
+        "region_id": "nr-fn-ch-0037-toc-ch-012-théroignedeméricourtoula",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-théroignedeméricourtoula",
+        "bound_chapter_id": "toc-ch-012-théroignedeméricourtoula",
         "start_page": 229,
         "end_page": 230,
         "pages": [
@@ -2031,19 +1808,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00267",
+            "note_item_id": "fn-00223",
             "page_no": 229,
             "marker": "4",
             "source_text_preview": "Jacques Postel, Éléments pour une histoire de la psychiatrie occidentale, L'Harmattan, 2007, p. 189. D'après Jacques Postel, c'est ce drame..."
           },
           {
-            "note_item_id": "fn-00268",
+            "note_item_id": "fn-00224",
             "page_no": 229,
             "marker": "5",
             "source_text_preview": "Une première version avait paru dans le Journal général de médecine, 2 $ ^{e} $ série, t. I, 1818, p. 341-347."
           },
           {
-            "note_item_id": "fn-00269",
+            "note_item_id": "fn-00225",
             "page_no": 230,
             "marker": "6",
             "source_text_preview": "Alphonse de Beauchamps et Étienne Psaume, Biographie moderne ou Galerie historique, civile, militaire, politique, littéraire et judiciaire,..."
@@ -2051,9 +1828,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0043-toc-ch-013-théroignedeméricourtoula",
+        "region_id": "nr-fn-ch-0038-toc-ch-012-théroignedeméricourtoula",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-théroignedeméricourtoula",
+        "bound_chapter_id": "toc-ch-012-théroignedeméricourtoula",
         "start_page": 232,
         "end_page": 232,
         "pages": [
@@ -2073,13 +1850,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00270",
+            "note_item_id": "fn-00226",
             "page_no": 232,
             "marker": "8",
             "source_text_preview": "A. Cabanès et L. Nass, La Néurose révolutionnaire, op. cit., p. 525."
           },
           {
-            "note_item_id": "fn-00271",
+            "note_item_id": "fn-00227",
             "page_no": 232,
             "marker": "9",
             "source_text_preview": "Signalon# !%e la Biog\"a hie mode\"ne n'en a\"le a# non l%#."
@@ -2087,9 +1864,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0044-toc-ch-013-théroignedeméricourtoula",
+        "region_id": "nr-fn-ch-0039-toc-ch-012-théroignedeméricourtoula",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-théroignedeméricourtoula",
+        "bound_chapter_id": "toc-ch-012-théroignedeméricourtoula",
         "start_page": 235,
         "end_page": 236,
         "pages": [
@@ -2111,19 +1888,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00272",
+            "note_item_id": "fn-00228",
             "page_no": 235,
             "marker": "11",
             "source_text_preview": "Ibid., p. 222."
           },
           {
-            "note_item_id": "fn-00273",
+            "note_item_id": "fn-00229",
             "page_no": 235,
             "marker": "12",
             "source_text_preview": "Les deux séries de dessins de Gabriel sont consultables à la Bibliothèque nationale de France. Le carnet des portraits de fous compte 95 des..."
           },
           {
-            "note_item_id": "fn-00274",
+            "note_item_id": "fn-00230",
             "page_no": 236,
             "marker": "13",
             "source_text_preview": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. I, p. 218."
@@ -2131,9 +1908,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0045-toc-ch-014-1830oulamaladiedelacivil",
+        "region_id": "nr-fn-ch-0040-toc-ch-013-1830oulamaladiedelacivil",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-014-1830oulamaladiedelacivil",
+        "bound_chapter_id": "toc-ch-013-1830oulamaladiedelacivil",
         "start_page": 238,
         "end_page": 238,
         "pages": [
@@ -2152,7 +1929,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00275",
+            "note_item_id": "fn-00231",
             "page_no": 238,
             "marker": "15",
             "source_text_preview": "Félix Voisin, Des causes morales et physiques des maladies mentales, J.-B. Baillière, 1826, p. 28-29."
@@ -2160,9 +1937,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0046-toc-ch-014-1830oulamaladiedelacivil",
+        "region_id": "nr-fn-ch-0041-toc-ch-013-1830oulamaladiedelacivil",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-014-1830oulamaladiedelacivil",
+        "bound_chapter_id": "toc-ch-013-1830oulamaladiedelacivil",
         "start_page": 240,
         "end_page": 247,
         "pages": [
@@ -2195,19 +1972,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00276",
+            "note_item_id": "fn-00232",
             "page_no": 240,
             "marker": "17",
             "source_text_preview": "J.-E.-D. Esquirol, Des Passions considérées comme causes, symptômes et moyens curatifs de l'aliénation mentale, Didot, an XIV (1805), p. 15."
           },
           {
-            "note_item_id": "fn-00277",
+            "note_item_id": "fn-00233",
             "page_no": 240,
             "marker": "18",
             "source_text_preview": "J.-E.-D. Esquirol, Des maladies mentales, op. cit., t. II, p. 303."
           },
           {
-            "note_item_id": "fn-00278",
+            "note_item_id": "fn-00234",
             "page_no": 240,
             "marker": "19",
             "source_text_preview": "Ibid., p. 304."
@@ -2215,9 +1992,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0047-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0042-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 249,
         "end_page": 255,
         "pages": [
@@ -2249,19 +2026,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00297",
+            "note_item_id": "fn-00253",
             "page_no": 249,
             "marker": "38",
             "source_text_preview": "Dr Jacques-Étienne Belhomme, Influence des événements et des commotions politiques sur le développement de la folie, mémoire lu à l'Académie..."
           },
           {
-            "note_item_id": "fn-00298",
+            "note_item_id": "fn-00254",
             "page_no": 249,
             "marker": "39",
             "source_text_preview": "L. Lunier, De l'influence des grandes commotions politiques et sociales sur le développement des maladies mentales, F. Savy, 1874, p. 14."
           },
           {
-            "note_item_id": "fn-00299",
+            "note_item_id": "fn-00255",
             "page_no": 250,
             "marker": "40",
             "source_text_preview": "Ibid., p. 24. L'allocation de Baillarger a été prononcée à l'Académie de médecine le 13 mars 1849."
@@ -2269,9 +2046,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0048-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0043-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 258,
         "end_page": 258,
         "pages": [
@@ -2291,13 +2068,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00309",
+            "note_item_id": "fn-00265",
             "page_no": 258,
             "marker": "51",
             "source_text_preview": "Pour une synthèse, voir l'article de Michelle Perrot, « 1848 : la révolution des femmes », L'Histoire, n° 218, 1998. Voir également les trav..."
           },
           {
-            "note_item_id": "fn-00310",
+            "note_item_id": "fn-00266",
             "page_no": 258,
             "marker": "52",
             "source_text_preview": "Alexandre Dumas, Le Mois. Revue historique et politique jour par jour de tous les événements qui se produisent en France et à l'étranger dep..."
@@ -2305,9 +2082,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0049-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0044-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 267,
         "end_page": 267,
         "pages": [
@@ -2326,7 +2103,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00311",
+            "note_item_id": "fn-00267",
             "page_no": 267,
             "marker": "53",
             "source_text_preview": "ADVDM, Registre d'observations médicales, femmes, 1848-1849, 4X723, f° 65. Entrée le 30 mai 1848, sortie guérie le 27 juillet 1848."
@@ -2334,9 +2111,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0050-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0045-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 269,
         "end_page": 273,
         "pages": [
@@ -2366,19 +2143,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00312",
+            "note_item_id": "fn-00268",
             "page_no": 269,
             "marker": "54",
             "source_text_preview": "Ibid., f° 136. Entrée le 22 octobre 1848. Le nom de Lamtine revient à plusieurs reprises dans les archives. Il « apparaît » à l'asile, dans..."
           },
           {
-            "note_item_id": "fn-00313",
+            "note_item_id": "fn-00269",
             "page_no": 270,
             "marker": "55",
             "source_text_preview": "Dr Bergeret, « Cas nombreux d'aliénation mentale d'une forme particulière ayant pour cause la perturbation politique et sociale de février 1..."
           },
           {
-            "note_item_id": "fn-00314",
+            "note_item_id": "fn-00270",
             "page_no": 270,
             "marker": "56",
             "source_text_preview": "Ibid., p. 148."
@@ -2386,9 +2163,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0051-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0046-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 276,
         "end_page": 278,
         "pages": [
@@ -2414,19 +2191,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00322",
+            "note_item_id": "fn-00278",
             "page_no": 276,
             "marker": "65",
             "source_text_preview": "Très hostile aux Ateliers nationaux, Trélat démissionna de son poste de ministre le 18 juin 1848. Par ses erreurs et son attentisme, il cont..."
           },
           {
-            "note_item_id": "fn-00323",
+            "note_item_id": "fn-00279",
             "page_no": 277,
             "marker": "66",
             "source_text_preview": "Alexis de Tocqueville, Souvenirs, Calmann-Lévy, 1893, p. 187."
           },
           {
-            "note_item_id": "fn-00324",
+            "note_item_id": "fn-00280",
             "page_no": 277,
             "marker": "67",
             "source_text_preview": "Ibid., p. 181."
@@ -2434,9 +2211,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0052-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0047-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 280,
         "end_page": 285,
         "pages": [
@@ -2467,19 +2244,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00328",
+            "note_item_id": "fn-00284",
             "page_no": 280,
             "marker": "72",
             "source_text_preview": "Alphonse de Lamartine, Histoire de la révolution de 1848, t. I, Perrotin libraire-éditeur, 1849, p. 233."
           },
           {
-            "note_item_id": "fn-00329",
+            "note_item_id": "fn-00285",
             "page_no": 280,
             "marker": "73",
             "source_text_preview": "Daniel Stern (Marie d'Agoult), Histoire de la révolution de 1848, t. III, Gustave Sandré, 1853, p. 33. C'est moi qui souligne."
           },
           {
-            "note_item_id": "fn-00330",
+            "note_item_id": "fn-00286",
             "page_no": 280,
             "marker": "74",
             "source_text_preview": "A. de Tocqueville, Souvenirs, op. cit., p. 182. C'est moi qui souligne."
@@ -2487,9 +2264,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0053-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0048-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "start_page": 287,
         "end_page": 290,
         "pages": [
@@ -2516,19 +2293,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00343",
+            "note_item_id": "fn-00299",
             "page_no": 287,
             "marker": "88",
             "source_text_preview": "Ibid., p. 521."
           },
           {
-            "note_item_id": "fn-00344",
+            "note_item_id": "fn-00300",
             "page_no": 287,
             "marker": "89",
             "source_text_preview": "Étienne Cabet, Voyage en Icarie, Au bureau du populaire, 1848. Voir également Yolaine Dilas-Rocherieux, « Utopie et communisme. Étienne Cabe..."
           },
           {
-            "note_item_id": "fn-00345",
+            "note_item_id": "fn-00301",
             "page_no": 288,
             "marker": "90",
             "source_text_preview": "Dans la préface à l'édition allemande de 1890 du Manifeste du parti communiste (1847), Engels rappelle qu'en 1847 « le socialisme signifiait..."
@@ -2536,9 +2313,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0054-toc-ch-016-lasiledelamisère",
+        "region_id": "nr-fn-ch-0049-toc-ch-015-lasiledelamisère",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-016-lasiledelamisère",
+        "bound_chapter_id": "toc-ch-015-lasiledelamisère",
         "start_page": 291,
         "end_page": 294,
         "pages": [
@@ -2566,19 +2343,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00349",
+            "note_item_id": "fn-00305",
             "page_no": 291,
             "marker": "94",
             "source_text_preview": "Alexandre Brierre de Boismont, Revue médicale, 31 juillet 1871, cité par Prosper Despine, De la folie au point de vue philosophique ou plus..."
           },
           {
-            "note_item_id": "fn-00350",
+            "note_item_id": "fn-00306",
             "page_no": 291,
             "marker": "95",
             "source_text_preview": "Louis Chevalier, Classes laborieuses et classes dangereuses [1958], Perrin, 2007, p. 518."
           },
           {
-            "note_item_id": "fn-00351",
+            "note_item_id": "fn-00307",
             "page_no": 292,
             "marker": "96",
             "source_text_preview": "Tous ces chiffres proviennent de l'entrée « Ouvriers » du Dictionnaire du Second Empire, sous la direction de Jean Tulard, Fayard, 1995. Voi..."
@@ -2586,9 +2363,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0055-toc-ch-016-lasiledelamisère",
+        "region_id": "nr-fn-ch-0050-toc-ch-015-lasiledelamisère",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-016-lasiledelamisère",
+        "bound_chapter_id": "toc-ch-015-lasiledelamisère",
         "start_page": 296,
         "end_page": 304,
         "pages": [
@@ -2622,19 +2399,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00356",
+            "note_item_id": "fn-00312",
             "page_no": 296,
             "marker": "101",
             "source_text_preview": "J.-E.-D. Esquirol, « Maison d'aliénés », Dictionnaire des sciences médicales, vol. XXX, Panckoucke, 1818, p. 84."
           },
           {
-            "note_item_id": "fn-00357",
+            "note_item_id": "fn-00313",
             "page_no": 296,
             "marker": "102",
             "source_text_preview": "Dr Auguste Voisin, Leçons cliniques sur les maladies mentales et sur les maladies nerveuses, Librairie J.-B. Baillière et fils, 1883, p. 428..."
           },
           {
-            "note_item_id": "fn-00358",
+            "note_item_id": "fn-00314",
             "page_no": 296,
             "marker": "103",
             "source_text_preview": "AAP-HP, Salpêtrière, Registre d'observations médicales, 5° division, 5° section, 1852-1855, 6R76, 92. Entrée le 18 mai 1853, sortie le 6 mai..."
@@ -2642,9 +2419,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0056-toc-ch-016-lasiledelamisère",
+        "region_id": "nr-fn-ch-0051-toc-ch-015-lasiledelamisère",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-016-lasiledelamisère",
+        "bound_chapter_id": "toc-ch-015-lasiledelamisère",
         "start_page": 306,
         "end_page": 307,
         "pages": [
@@ -2665,13 +2442,13 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00392",
+            "note_item_id": "fn-00348",
             "page_no": 306,
             "marker": "1",
             "source_text_preview": "Pour plus d'informations sur la situation de la Salpêtrière et de Bicêtre, voir AAP-HP, Fonds Fossoyeux, « Évacuations d'établissements hosp..."
           },
           {
-            "note_item_id": "fn-00393",
+            "note_item_id": "fn-00349",
             "page_no": 307,
             "marker": "2",
             "source_text_preview": "Drs Bouchereau et Magnan, «Statistiques des malades entrés en 1870 et 1871 au bureau d'admission des aliénés de la Seine», Annales médico-ps..."
@@ -2679,9 +2456,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0057-toc-ch-017-jeannedarcetlespanophobe",
+        "region_id": "nr-fn-ch-0052-toc-ch-016-jeannedarcetlespanophobe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-017-jeannedarcetlespanophobe",
+        "bound_chapter_id": "toc-ch-016-jeannedarcetlespanophobe",
         "start_page": 308,
         "end_page": 313,
         "pages": [
@@ -2712,19 +2489,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00394",
+            "note_item_id": "fn-00350",
             "page_no": 308,
             "marker": "3",
             "source_text_preview": "Michel de Clercq et François Lebigot, Les Traumatismes psychiques, Masson, 2001, p. 28. Voir également Louis Crocq, Les Traumatismes psychiq..."
           },
           {
-            "note_item_id": "fn-00395",
+            "note_item_id": "fn-00351",
             "page_no": 309,
             "marker": "4",
             "source_text_preview": "L’expression est notamment employée par Alphonse Daudet (Souvenirs d’un homme de lettres) et Victor Hugo, qui, dans son célèbre discours dem..."
           },
           {
-            "note_item_id": "fn-00396",
+            "note_item_id": "fn-00352",
             "page_no": 309,
             "marker": "5",
             "source_text_preview": "Benedict-Augustin Morel, «Du délire panophobique des aliénés géminseurs. Influence des événements de guerre sur la manifestation de cette fo..."
@@ -2732,9 +2509,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0058-toc-ch-018-deschacalsdespiesdessing",
+        "region_id": "nr-fn-ch-0053-toc-ch-017-deschacalsdespiesdessing",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+        "bound_chapter_id": "toc-ch-017-deschacalsdespiesdessing",
         "start_page": 315,
         "end_page": 315,
         "pages": [
@@ -2753,7 +2530,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00409",
+            "note_item_id": "fn-00365",
             "page_no": 315,
             "marker": "18",
             "source_text_preview": "L'étude qui suit a été faite à partir des registres suivants, à l'intérieur desquels j'ai isolé la période du 18 mars au 28 mai 1871 : AP, S..."
@@ -2761,9 +2538,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+        "region_id": "nr-fn-ch-0054-toc-ch-017-deschacalsdespiesdessing",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+        "bound_chapter_id": "toc-ch-017-deschacalsdespiesdessing",
         "start_page": 319,
         "end_page": 330,
         "pages": [
@@ -2800,19 +2577,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00410",
+            "note_item_id": "fn-00366",
             "page_no": 319,
             "marker": "20",
             "source_text_preview": "Claude Quétel et Jean-Yves Simon, « L'aliénation alcoolique en France (XIXe siècle et 1re moitié du XXe siècle) », Histoire, économie et soc..."
           },
           {
-            "note_item_id": "fn-00411",
+            "note_item_id": "fn-00367",
             "page_no": 319,
             "marker": "21",
             "source_text_preview": "Drs Magnan et Bouchereau, « Statistiques des alcooliques entrés au bureau d'admission à Sainte-Anne, pendant les mois de mars, avril, mai, j..."
           },
           {
-            "note_item_id": "fn-00412",
+            "note_item_id": "fn-00368",
             "page_no": 320,
             "marker": "22",
             "source_text_preview": "L. Lunier, De l'influence des grandes commotions politiques et sociales sur le développement des maladies mentales, F. Savy, 1874."
@@ -2820,9 +2597,74 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0060-toc-ch-019-lesbégaiementsdelhistoir",
+        "region_id": "llm-note-region-toc-ch-017-deschacalsdespiesdessing-324-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+        "bound_chapter_id": "toc-ch-017-deschacalsdespiesdessing",
+        "start_page": 324,
+        "end_page": 324,
+        "pages": [
+          324
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 2,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 31,
+        "numeric_marker_end": 31,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "31",
+          "31"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "llm-note-anchor-00458-31",
+            "page_no": 324,
+            "marker": "31",
+            "source_text_preview": "Louise Michel, La Commune, Stock, 1978, p. 403."
+          },
+          {
+            "note_item_id": "llm-note-fa-00423-31",
+            "page_no": 324,
+            "marker": "31",
+            "source_text_preview": "« l’horreur des choses vues »"
+          }
+        ]
+      },
+      {
+        "region_id": "llm-note-region-toc-ch-021-deschacalsdespiesdessing-324-footnote",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-021-deschacalsdespiesdessing",
+        "start_page": 324,
+        "end_page": 324,
+        "pages": [
+          324
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 1,
+        "numeric_marker_count": 1,
+        "numeric_marker_start": 31,
+        "numeric_marker_end": 31,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "31"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "llm-note-anchor-00425-31",
+            "page_no": 324,
+            "marker": "31",
+            "source_text_preview": "Louise Michel, La Commune, Stock, 1978, p. 403."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0055-toc-ch-018-lesbégaiementsdelhistoir",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-018-lesbégaiementsdelhistoir",
         "start_page": 331,
         "end_page": 337,
         "pages": [
@@ -2854,19 +2696,19 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00441",
+            "note_item_id": "fn-00397",
             "page_no": 331,
             "marker": "52",
             "source_text_preview": "Benedict-Augustin Morel, «La dégénérescence du peuple français, son caractère pathologique, ses symptômes et ses causes. Contribution de méd..."
           },
           {
-            "note_item_id": "fn-00442",
+            "note_item_id": "fn-00398",
             "page_no": 331,
             "marker": "53",
             "source_text_preview": "Ibid., p. 292."
           },
           {
-            "note_item_id": "fn-00443",
+            "note_item_id": "fn-00399",
             "page_no": 331,
             "marker": "54",
             "source_text_preview": "Ibid., p. 293."
@@ -2874,9 +2716,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0061-toc-ch-019-lesbégaiementsdelhistoir",
+        "region_id": "nr-fn-ch-0056-toc-ch-018-lesbégaiementsdelhistoir",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+        "bound_chapter_id": "toc-ch-018-lesbégaiementsdelhistoir",
         "start_page": 339,
         "end_page": 339,
         "pages": [
@@ -2895,7 +2737,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00455",
+            "note_item_id": "fn-00411",
             "page_no": 339,
             "marker": "67",
             "source_text_preview": "Maxime Du Camp, Les Convulsions de Paris, t. II, Librairie Hachette et Cie, 5° éd., 1881, p. 245. Explication : « Deux escargots ayant de la..."
@@ -2903,9 +2745,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0062-toc-ch-019-lesbégaiementsdelhistoir",
+        "region_id": "nr-fn-ch-0057-toc-ch-018-lesbégaiementsdelhistoir",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+        "bound_chapter_id": "toc-ch-018-lesbégaiementsdelhistoir",
         "start_page": 341,
         "end_page": 341,
         "pages": [
@@ -2924,7 +2766,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00456",
+            "note_item_id": "fn-00412",
             "page_no": 341,
             "marker": "68",
             "source_text_preview": "Jules Vallès, Le Réveil, 23 octobre 1881. Cité par Aude Fauvel, « Punition, dégénérescence ou malheur », Revue d’histoire du XIXe siècle, n°..."
@@ -2932,9 +2774,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0063-toc-ch-020-postambule",
+        "region_id": "nr-fn-ch-0058-toc-ch-001-postambule",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-020-postambule",
+        "bound_chapter_id": "toc-ch-001-postambule",
         "start_page": 344,
         "end_page": 344,
         "pages": [
@@ -2953,7 +2795,7 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00457",
+            "note_item_id": "fn-00413",
             "page_no": 344,
             "marker": "1",
             "source_text_preview": "J.-E.-D. Esquirol, «Des établissements d’aliénés en France et des moyens de les améliorer» (1818)», in Des maladies mentales, op. cit., t. I..."
@@ -2961,9 +2803,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0064-toc-ch-020-postambule",
+        "region_id": "nr-fn-ch-0059-toc-ch-001-postambule",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-020-postambule",
+        "bound_chapter_id": "toc-ch-001-postambule",
         "start_page": 346,
         "end_page": 347,
         "pages": [
@@ -2984,16 +2826,64 @@
         ],
         "sample_note_items": [
           {
-            "note_item_id": "fn-00458",
+            "note_item_id": "fn-00414",
             "page_no": 346,
             "marker": "2",
             "source_text_preview": "Pour un remarquable état des lieux de la psychiatrie actuelle en France, on se reportera au film de Philippe Borrel, Un monde sans fous (67..."
           },
           {
-            "note_item_id": "fn-00459",
+            "note_item_id": "fn-00415",
             "page_no": 347,
             "marker": "3",
             "source_text_preview": "Ces questionnaires à choix multiples, destinés à dépister chez l'enfant d'éventuels troubles psychiques (dépression, phobie, anxiété, etc.),..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0060-toc-ch-006-listedesillustration",
+        "region_kind": "book_endnotes",
+        "bound_chapter_id": "toc-ch-006-listedesillustration",
+        "start_page": 389,
+        "end_page": 389,
+        "pages": [
+          389
+        ],
+        "region_start_first_source_marker": "",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 12,
+        "numeric_marker_count": 12,
+        "numeric_marker_start": 24,
+        "numeric_marker_end": 35,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-00001",
+            "page_no": 389,
+            "marker": "24",
+            "source_text_preview": "Les Aliénés d’Ambroise Tardieu, Pl. IV.: Théroigne de Méricourt dans Des maladies mentales considérées sous les rapports médical, hygiènique..."
+          },
+          {
+            "note_item_id": "en-00002",
+            "page_no": 389,
+            "marker": "25",
+            "source_text_preview": "Portrait d'Étienne Esquirol, Auguste Pichon, XIXe siècle. Huile sur toile. © Bibliothèque de l'Académie nationale de médecine"
+          },
+          {
+            "note_item_id": "en-00003",
+            "page_no": 389,
+            "marker": "26",
+            "source_text_preview": "Le Charenton ministériel, Honoré Daumier, publié dans La Caricature du 31 mai 1832. 33,7 cm × 53,5 cm. Bibliothèque nationale de France, Par..."
           }
         ]
       }
@@ -3006,245 +2896,13 @@
       "按 region_id 聚合生成注释数组",
       "检查 numeric marker 连续性与首尾 marker"
     ],
-    "note_capture_summary": {
-      "expected_anchor_count": 460,
-      "captured_note_count": 459,
-      "capture_ratio": 0.9978,
-      "sparse_capture_chapter_ids": [],
-      "dense_anchor_zero_capture_pages": [],
-      "chapters": [
-        {
-          "chapter_id": "toc-ch-001-préambule",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 38,
-          "captured_note_count": 44,
-          "capture_ratio": 1.1579
-        },
-        {
-          "chapter_id": "toc-ch-002-uneinventionutiledansleg",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 16,
-          "captured_note_count": 16,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-003-unmédecinauchevetducorps",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 29,
-          "captured_note_count": 26,
-          "capture_ratio": 0.8966
-        },
-        {
-          "chapter_id": "toc-ch-004-lesévénementsdelarévolut",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 15,
-          "captured_note_count": 16,
-          "capture_ratio": 1.0667
-        },
-        {
-          "chapter_id": "toc-ch-005-spectresdelaguillotine",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 24,
-          "captured_note_count": 22,
-          "capture_ratio": 0.9167
-        },
-        {
-          "chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 22,
-          "captured_note_count": 23,
-          "capture_ratio": 1.0455
-        },
-        {
-          "chapter_id": "toc-ch-007-dissidenceoudémence",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 10,
-          "captured_note_count": 11,
-          "capture_ratio": 1.1
-        },
-        {
-          "chapter_id": "toc-ch-008-cethommenestpasaliénésad",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 27,
-          "captured_note_count": 29,
-          "capture_ratio": 1.0741
-        },
-        {
-          "chapter_id": "toc-ch-009-lhommequiseprenaitpourna",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 1,
-          "captured_note_count": 1,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 25,
-          "captured_note_count": 24,
-          "capture_ratio": 0.96
-        },
-        {
-          "chapter_id": "toc-ch-011-lemairedelunivers",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 29,
-          "captured_note_count": 23,
-          "capture_ratio": 0.7931
-        },
-        {
-          "chapter_id": "toc-ch-012-lusurpateur",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 31,
-          "captured_note_count": 31,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-013-théroignedeméricourtoula",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 8,
-          "captured_note_count": 8,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-014-1830oulamaladiedelacivil",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 23,
-          "captured_note_count": 22,
-          "capture_ratio": 0.9565
-        },
-        {
-          "chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 55,
-          "captured_note_count": 52,
-          "capture_ratio": 0.9455
-        },
-        {
-          "chapter_id": "toc-ch-016-lasiledelamisère",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 39,
-          "captured_note_count": 45,
-          "capture_ratio": 1.1538
-        },
-        {
-          "chapter_id": "toc-ch-017-jeannedarcetlespanophobe",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 15,
-          "captured_note_count": 15,
-          "capture_ratio": 1.0
-        },
-        {
-          "chapter_id": "toc-ch-018-deschacalsdespiesdessing",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 34,
-          "captured_note_count": 32,
-          "capture_ratio": 0.9412
-        },
-        {
-          "chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
-          "note_mode": "footnote_primary",
-          "expected_anchor_count": 15,
-          "captured_note_count": 16,
-          "capture_ratio": 1.0667
-        },
-        {
-          "chapter_id": "toc-ch-020-postambule",
-          "note_mode": "no_notes",
-          "expected_anchor_count": 4,
-          "captured_note_count": 3,
-          "capture_ratio": 0.75
-        }
-      ]
-    },
-    "book_endnote_stream_summary": {
-      "chapter_count": 0,
-      "chapters_with_endnote_stream": [],
-      "high_concentration_chapter_ids": [],
-      "chapters": []
-    },
+    "note_capture_summary": {},
+    "book_endnote_stream_summary": {},
     "array_rows": [
       {
-        "region_id": "nr-fn-ch-0001-toc-ch-001-préambule",
+        "region_id": "nr-fn-ch-0001-toc-ch-001-uneinventionutiledansleg",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "item_count": 10,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 10,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0002-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "item_count": 26,
-        "numeric_marker_start": 11,
-        "numeric_marker_end": 36,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0003-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "item_count": 2,
-        "numeric_marker_start": 37,
-        "numeric_marker_end": 38,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "37",
-          "38"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0004-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "item_count": 3,
-        "numeric_marker_start": 40,
-        "numeric_marker_end": 42,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "40",
-          "41",
-          "42"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0005-toc-ch-001-préambule",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-001-préambule",
-        "item_count": 3,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 3,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "region_id": "nr-fn-ch-0006-toc-ch-002-uneinventionutiledansleg",
-        "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-uneinventionutiledansleg",
+        "bound_chapter_id": "toc-ch-001-uneinventionutiledansleg",
         "item_count": 11,
         "numeric_marker_start": 4,
         "numeric_marker_end": 14,
@@ -3261,9 +2919,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0007-toc-ch-002-uneinventionutiledansleg",
+        "region_id": "nr-fn-ch-0002-toc-ch-001-uneinventionutiledansleg",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-002-uneinventionutiledansleg",
+        "bound_chapter_id": "toc-ch-001-uneinventionutiledansleg",
         "item_count": 5,
         "numeric_marker_start": 1,
         "numeric_marker_end": 20,
@@ -3277,9 +2935,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0008-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0003-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "item_count": 10,
         "numeric_marker_start": 21,
         "numeric_marker_end": 30,
@@ -3296,9 +2954,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0009-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0004-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "item_count": 1,
         "numeric_marker_start": 32,
         "numeric_marker_end": 32,
@@ -3308,9 +2966,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0010-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0005-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "item_count": 2,
         "numeric_marker_start": 33,
         "numeric_marker_end": 34,
@@ -3321,9 +2979,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0011-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0006-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "item_count": 4,
         "numeric_marker_start": 35,
         "numeric_marker_end": 38,
@@ -3336,9 +2994,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0012-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0007-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "item_count": 4,
         "numeric_marker_start": 40,
         "numeric_marker_end": 43,
@@ -3351,9 +3009,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0013-toc-ch-003-unmédecinauchevetducorps",
+        "region_id": "nr-fn-ch-0008-toc-ch-002-unmédecinauchevetducorps",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-003-unmédecinauchevetducorps",
+        "bound_chapter_id": "toc-ch-002-unmédecinauchevetducorps",
         "item_count": 5,
         "numeric_marker_start": 45,
         "numeric_marker_end": 49,
@@ -3367,9 +3025,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0014-toc-ch-004-lesévénementsdelarévolut",
+        "region_id": "nr-fn-ch-0009-toc-ch-003-lesévènementsdelarévolut",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+        "bound_chapter_id": "toc-ch-003-lesévènementsdelarévolut",
         "item_count": 5,
         "numeric_marker_start": 50,
         "numeric_marker_end": 54,
@@ -3383,9 +3041,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0015-toc-ch-004-lesévénementsdelarévolut",
+        "region_id": "nr-fn-ch-0010-toc-ch-003-lesévènementsdelarévolut",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-004-lesévénementsdelarévolut",
+        "bound_chapter_id": "toc-ch-003-lesévènementsdelarévolut",
         "item_count": 11,
         "numeric_marker_start": 56,
         "numeric_marker_end": 66,
@@ -3402,9 +3060,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0016-toc-ch-005-spectresdelaguillotine",
+        "region_id": "nr-fn-ch-0011-toc-ch-004-spectresdelaguillotine",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "item_count": 5,
         "numeric_marker_start": 67,
         "numeric_marker_end": 71,
@@ -3418,9 +3076,21 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0017-toc-ch-005-spectresdelaguillotine",
+        "region_id": "llm-note-region-toc-ch-004-spectresdelaguillotine-92-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
+        "item_count": 1,
+        "numeric_marker_start": 74,
+        "numeric_marker_end": 74,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "74"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0012-toc-ch-004-spectresdelaguillotine",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "item_count": 3,
         "numeric_marker_start": 70,
         "numeric_marker_end": 75,
@@ -3432,9 +3102,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0018-toc-ch-005-spectresdelaguillotine",
+        "region_id": "nr-fn-ch-0013-toc-ch-004-spectresdelaguillotine",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "item_count": 9,
         "numeric_marker_start": 77,
         "numeric_marker_end": 85,
@@ -3451,9 +3121,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0019-toc-ch-005-spectresdelaguillotine",
+        "region_id": "nr-fn-ch-0014-toc-ch-004-spectresdelaguillotine",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-005-spectresdelaguillotine",
+        "bound_chapter_id": "toc-ch-004-spectresdelaguillotine",
         "item_count": 5,
         "numeric_marker_start": 87,
         "numeric_marker_end": 91,
@@ -3467,9 +3137,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0020-toc-ch-006-maisonsdesantémaisonsdar",
+        "region_id": "nr-fn-ch-0015-toc-ch-005-maisonsdesantémaisonsdar",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+        "bound_chapter_id": "toc-ch-005-maisonsdesantémaisonsdar",
         "item_count": 4,
         "numeric_marker_start": 2,
         "numeric_marker_end": 5,
@@ -3482,9 +3152,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0021-toc-ch-006-maisonsdesantémaisonsdar",
+        "region_id": "nr-fn-ch-0016-toc-ch-005-maisonsdesantémaisonsdar",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-006-maisonsdesantémaisonsdar",
+        "bound_chapter_id": "toc-ch-005-maisonsdesantémaisonsdar",
         "item_count": 19,
         "numeric_marker_start": 6,
         "numeric_marker_end": 24,
@@ -3501,9 +3171,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0022-toc-ch-007-dissidenceoudémence",
+        "region_id": "nr-fn-ch-0017-toc-ch-006-dissidenceoudémence",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-dissidenceoudémence",
+        "bound_chapter_id": "toc-ch-006-dissidenceoudémence",
         "item_count": 1,
         "numeric_marker_start": 26,
         "numeric_marker_end": 26,
@@ -3513,9 +3183,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0023-toc-ch-007-dissidenceoudémence",
+        "region_id": "nr-fn-ch-0018-toc-ch-006-dissidenceoudémence",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-dissidenceoudémence",
+        "bound_chapter_id": "toc-ch-006-dissidenceoudémence",
         "item_count": 2,
         "numeric_marker_start": 27,
         "numeric_marker_end": 28,
@@ -3526,9 +3196,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0024-toc-ch-007-dissidenceoudémence",
+        "region_id": "nr-fn-ch-0019-toc-ch-006-dissidenceoudémence",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-007-dissidenceoudémence",
+        "bound_chapter_id": "toc-ch-006-dissidenceoudémence",
         "item_count": 8,
         "numeric_marker_start": 29,
         "numeric_marker_end": 36,
@@ -3545,9 +3215,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0025-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0020-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "item_count": 11,
         "numeric_marker_start": 39,
         "numeric_marker_end": 49,
@@ -3564,9 +3234,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0026-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0021-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "item_count": 4,
         "numeric_marker_start": 50,
         "numeric_marker_end": 53,
@@ -3579,9 +3249,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0027-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0022-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "item_count": 6,
         "numeric_marker_start": 2,
         "numeric_marker_end": 58,
@@ -3596,9 +3266,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0028-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0023-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "item_count": 5,
         "numeric_marker_start": 60,
         "numeric_marker_end": 64,
@@ -3612,9 +3282,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0029-toc-ch-008-cethommenestpasaliénésad",
+        "region_id": "nr-fn-ch-0024-toc-ch-007-cethommenestpasaliénésad",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-008-cethommenestpasaliénésad",
+        "bound_chapter_id": "toc-ch-007-cethommenestpasaliénésad",
         "item_count": 3,
         "numeric_marker_start": 65,
         "numeric_marker_end": 67,
@@ -3626,9 +3296,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0030-toc-ch-009-lhommequiseprenaitpourna",
+        "region_id": "nr-fn-ch-0025-toc-ch-008-lhommequiseprenaitpourna",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-009-lhommequiseprenaitpourna",
+        "bound_chapter_id": "toc-ch-008-lhommequiseprenaitpourna",
         "item_count": 1,
         "numeric_marker_start": 1,
         "numeric_marker_end": 1,
@@ -3638,9 +3308,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0031-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0026-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "item_count": 4,
         "numeric_marker_start": 2,
         "numeric_marker_end": 5,
@@ -3653,9 +3323,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0032-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0027-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "item_count": 13,
         "numeric_marker_start": 8,
         "numeric_marker_end": 20,
@@ -3672,9 +3342,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0033-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0028-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "item_count": 3,
         "numeric_marker_start": 22,
         "numeric_marker_end": 24,
@@ -3686,9 +3356,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0034-toc-ch-010-lamonomanieorgueilleuseo",
+        "region_id": "nr-fn-ch-0029-toc-ch-009-lamonomanieorgueilleuseo",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "bound_chapter_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "item_count": 4,
         "numeric_marker_start": 26,
         "numeric_marker_end": 29,
@@ -3701,9 +3371,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0035-toc-ch-011-lemairedelunivers",
+        "region_id": "nr-fn-ch-0030-toc-ch-010-lemairedelunivers",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-lemairedelunivers",
+        "bound_chapter_id": "toc-ch-010-lemairedelunivers",
         "item_count": 2,
         "numeric_marker_start": 30,
         "numeric_marker_end": 31,
@@ -3714,9 +3384,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0036-toc-ch-011-lemairedelunivers",
+        "region_id": "nr-fn-ch-0031-toc-ch-010-lemairedelunivers",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-lemairedelunivers",
+        "bound_chapter_id": "toc-ch-010-lemairedelunivers",
         "item_count": 13,
         "numeric_marker_start": 33,
         "numeric_marker_end": 45,
@@ -3733,9 +3403,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0037-toc-ch-011-lemairedelunivers",
+        "region_id": "nr-fn-ch-0032-toc-ch-010-lemairedelunivers",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-011-lemairedelunivers",
+        "bound_chapter_id": "toc-ch-010-lemairedelunivers",
         "item_count": 8,
         "numeric_marker_start": 46,
         "numeric_marker_end": 53,
@@ -3752,9 +3422,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0038-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0033-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "item_count": 5,
         "numeric_marker_start": 60,
         "numeric_marker_end": 64,
@@ -3768,9 +3438,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0039-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0034-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "item_count": 22,
         "numeric_marker_start": 65,
         "numeric_marker_end": 86,
@@ -3787,9 +3457,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0040-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0035-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "item_count": 1,
         "numeric_marker_start": 88,
         "numeric_marker_end": 88,
@@ -3799,9 +3469,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0041-toc-ch-012-lusurpateur",
+        "region_id": "nr-fn-ch-0036-toc-ch-011-lusurpateur",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-012-lusurpateur",
+        "bound_chapter_id": "toc-ch-011-lusurpateur",
         "item_count": 3,
         "numeric_marker_start": 1,
         "numeric_marker_end": 3,
@@ -3813,9 +3483,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0042-toc-ch-013-théroignedeméricourtoula",
+        "region_id": "nr-fn-ch-0037-toc-ch-012-théroignedeméricourtoula",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-théroignedeméricourtoula",
+        "bound_chapter_id": "toc-ch-012-théroignedeméricourtoula",
         "item_count": 3,
         "numeric_marker_start": 4,
         "numeric_marker_end": 6,
@@ -3827,9 +3497,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0043-toc-ch-013-théroignedeméricourtoula",
+        "region_id": "nr-fn-ch-0038-toc-ch-012-théroignedeméricourtoula",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-théroignedeméricourtoula",
+        "bound_chapter_id": "toc-ch-012-théroignedeméricourtoula",
         "item_count": 2,
         "numeric_marker_start": 8,
         "numeric_marker_end": 9,
@@ -3840,9 +3510,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0044-toc-ch-013-théroignedeméricourtoula",
+        "region_id": "nr-fn-ch-0039-toc-ch-012-théroignedeméricourtoula",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-013-théroignedeméricourtoula",
+        "bound_chapter_id": "toc-ch-012-théroignedeméricourtoula",
         "item_count": 3,
         "numeric_marker_start": 11,
         "numeric_marker_end": 13,
@@ -3854,9 +3524,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0045-toc-ch-014-1830oulamaladiedelacivil",
+        "region_id": "nr-fn-ch-0040-toc-ch-013-1830oulamaladiedelacivil",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-014-1830oulamaladiedelacivil",
+        "bound_chapter_id": "toc-ch-013-1830oulamaladiedelacivil",
         "item_count": 1,
         "numeric_marker_start": 15,
         "numeric_marker_end": 15,
@@ -3866,9 +3536,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0046-toc-ch-014-1830oulamaladiedelacivil",
+        "region_id": "nr-fn-ch-0041-toc-ch-013-1830oulamaladiedelacivil",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-014-1830oulamaladiedelacivil",
+        "bound_chapter_id": "toc-ch-013-1830oulamaladiedelacivil",
         "item_count": 21,
         "numeric_marker_start": 17,
         "numeric_marker_end": 37,
@@ -3885,9 +3555,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0047-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0042-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 12,
         "numeric_marker_start": 38,
         "numeric_marker_end": 49,
@@ -3904,9 +3574,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0048-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0043-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 2,
         "numeric_marker_start": 51,
         "numeric_marker_end": 52,
@@ -3917,9 +3587,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0049-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0044-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 1,
         "numeric_marker_start": 53,
         "numeric_marker_end": 53,
@@ -3929,9 +3599,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0050-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0045-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 10,
         "numeric_marker_start": 54,
         "numeric_marker_end": 63,
@@ -3948,9 +3618,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0051-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0046-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 6,
         "numeric_marker_start": 65,
         "numeric_marker_end": 70,
@@ -3965,9 +3635,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0052-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0047-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 15,
         "numeric_marker_start": 72,
         "numeric_marker_end": 86,
@@ -3984,9 +3654,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0053-toc-ch-015-1848oulapestedémocratiqu",
+        "region_id": "nr-fn-ch-0048-toc-ch-014-1848oulapestedémocratiqu",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "bound_chapter_id": "toc-ch-014-1848oulapestedémocratiqu",
         "item_count": 6,
         "numeric_marker_start": 88,
         "numeric_marker_end": 93,
@@ -4001,9 +3671,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0054-toc-ch-016-lasiledelamisère",
+        "region_id": "nr-fn-ch-0049-toc-ch-015-lasiledelamisère",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-016-lasiledelamisère",
+        "bound_chapter_id": "toc-ch-015-lasiledelamisère",
         "item_count": 7,
         "numeric_marker_start": 94,
         "numeric_marker_end": 100,
@@ -4019,9 +3689,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0055-toc-ch-016-lasiledelamisère",
+        "region_id": "nr-fn-ch-0050-toc-ch-015-lasiledelamisère",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-016-lasiledelamisère",
+        "bound_chapter_id": "toc-ch-015-lasiledelamisère",
         "item_count": 36,
         "numeric_marker_start": 101,
         "numeric_marker_end": 136,
@@ -4038,9 +3708,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0056-toc-ch-016-lasiledelamisère",
+        "region_id": "nr-fn-ch-0051-toc-ch-015-lasiledelamisère",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-016-lasiledelamisère",
+        "bound_chapter_id": "toc-ch-015-lasiledelamisère",
         "item_count": 2,
         "numeric_marker_start": 1,
         "numeric_marker_end": 2,
@@ -4051,9 +3721,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0057-toc-ch-017-jeannedarcetlespanophobe",
+        "region_id": "nr-fn-ch-0052-toc-ch-016-jeannedarcetlespanophobe",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-017-jeannedarcetlespanophobe",
+        "bound_chapter_id": "toc-ch-016-jeannedarcetlespanophobe",
         "item_count": 15,
         "numeric_marker_start": 3,
         "numeric_marker_end": 17,
@@ -4070,9 +3740,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0058-toc-ch-018-deschacalsdespiesdessing",
+        "region_id": "nr-fn-ch-0053-toc-ch-017-deschacalsdespiesdessing",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+        "bound_chapter_id": "toc-ch-017-deschacalsdespiesdessing",
         "item_count": 1,
         "numeric_marker_start": 18,
         "numeric_marker_end": 18,
@@ -4082,9 +3752,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0059-toc-ch-018-deschacalsdespiesdessing",
+        "region_id": "nr-fn-ch-0054-toc-ch-017-deschacalsdespiesdessing",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-018-deschacalsdespiesdessing",
+        "bound_chapter_id": "toc-ch-017-deschacalsdespiesdessing",
         "item_count": 31,
         "numeric_marker_start": 20,
         "numeric_marker_end": 51,
@@ -4101,9 +3771,34 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0060-toc-ch-019-lesbégaiementsdelhistoir",
+        "region_id": "llm-note-region-toc-ch-017-deschacalsdespiesdessing-324-footnote",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+        "bound_chapter_id": "toc-ch-017-deschacalsdespiesdessing",
+        "item_count": 2,
+        "numeric_marker_start": 31,
+        "numeric_marker_end": 31,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "31",
+          "31"
+        ]
+      },
+      {
+        "region_id": "llm-note-region-toc-ch-021-deschacalsdespiesdessing-324-footnote",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-021-deschacalsdespiesdessing",
+        "item_count": 1,
+        "numeric_marker_start": 31,
+        "numeric_marker_end": 31,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "31"
+        ]
+      },
+      {
+        "region_id": "nr-fn-ch-0055-toc-ch-018-lesbégaiementsdelhistoir",
+        "region_kind": "footnote",
+        "bound_chapter_id": "toc-ch-018-lesbégaiementsdelhistoir",
         "item_count": 14,
         "numeric_marker_start": 52,
         "numeric_marker_end": 65,
@@ -4120,9 +3815,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0061-toc-ch-019-lesbégaiementsdelhistoir",
+        "region_id": "nr-fn-ch-0056-toc-ch-018-lesbégaiementsdelhistoir",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+        "bound_chapter_id": "toc-ch-018-lesbégaiementsdelhistoir",
         "item_count": 1,
         "numeric_marker_start": 67,
         "numeric_marker_end": 67,
@@ -4132,9 +3827,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0062-toc-ch-019-lesbégaiementsdelhistoir",
+        "region_id": "nr-fn-ch-0057-toc-ch-018-lesbégaiementsdelhistoir",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-019-lesbégaiementsdelhistoir",
+        "bound_chapter_id": "toc-ch-018-lesbégaiementsdelhistoir",
         "item_count": 1,
         "numeric_marker_start": 68,
         "numeric_marker_end": 68,
@@ -4144,9 +3839,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0063-toc-ch-020-postambule",
+        "region_id": "nr-fn-ch-0058-toc-ch-001-postambule",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-020-postambule",
+        "bound_chapter_id": "toc-ch-001-postambule",
         "item_count": 1,
         "numeric_marker_start": 1,
         "numeric_marker_end": 1,
@@ -4156,9 +3851,9 @@
         ]
       },
       {
-        "region_id": "nr-fn-ch-0064-toc-ch-020-postambule",
+        "region_id": "nr-fn-ch-0059-toc-ch-001-postambule",
         "region_kind": "footnote",
-        "bound_chapter_id": "toc-ch-020-postambule",
+        "bound_chapter_id": "toc-ch-001-postambule",
         "item_count": 2,
         "numeric_marker_start": 2,
         "numeric_marker_end": 3,
@@ -4166,6 +3861,25 @@
         "marker_preview": [
           "2",
           "3"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0060-toc-ch-006-listedesillustration",
+        "region_kind": "book_endnotes",
+        "bound_chapter_id": "toc-ch-006-listedesillustration",
+        "item_count": 12,
+        "numeric_marker_start": 24,
+        "numeric_marker_end": 35,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31"
         ]
       }
     ],
@@ -4177,19 +3891,31 @@
       "导出 chapter markdown 中 local refs/local defs 的闭合情况",
       "structure.freeze_note_unit_summary"
     ],
-    "freeze_note_unit_summary": {
-      "chapter_view_note_unit_count": 459,
-      "owner_fallback_note_unit_count": 0,
-      "unresolved_note_item_count": 0,
-      "unresolved_note_item_ids_preview": []
-    },
+    "freeze_note_unit_summary": {},
     "note_unit_rows": [
       {
-        "section_id": "toc-ch-001-préambule",
-        "section_title": "Préambule",
-        "note_unit_count": 44,
+        "section_id": "toc-ch-001-postambule",
+        "section_title": "Postambule",
+        "note_unit_count": 3,
         "note_unit_kind_counts": {
-          "footnote": 44
+          "endnote": 3
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:fn-00413}}",
+          "{{NOTE_REF:fn-00414}}",
+          "{{NOTE_REF:fn-00415}}"
+        ],
+        "page_span": [
+          344,
+          347
+        ]
+      },
+      {
+        "section_id": "toc-ch-001-uneinventionutiledansleg",
+        "section_title": "« Une invention utile dans le genre funeste »",
+        "note_unit_count": 16,
+        "note_unit_kind_counts": {
+          "endnote": 16
         },
         "target_ref_preview": [
           "{{NOTE_REF:fn-00001}}",
@@ -4199,42 +3925,23 @@
           "{{NOTE_REF:fn-00005}}"
         ],
         "page_span": [
-          7,
-          40
-        ]
-      },
-      {
-        "section_id": "toc-ch-002-uneinventionutiledansleg",
-        "section_title": "« Une invention utile dans le genre funeste »",
-        "note_unit_count": 16,
-        "note_unit_kind_counts": {
-          "footnote": 16
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:fn-00045}}",
-          "{{NOTE_REF:fn-00046}}",
-          "{{NOTE_REF:fn-00047}}",
-          "{{NOTE_REF:fn-00048}}",
-          "{{NOTE_REF:fn-00049}}"
-        ],
-        "page_span": [
           41,
           49
         ]
       },
       {
-        "section_id": "toc-ch-003-unmédecinauchevetducorps",
+        "section_id": "toc-ch-002-unmédecinauchevetducorps",
         "section_title": "Un médecin au chevet du corps de l'État",
         "note_unit_count": 26,
         "note_unit_kind_counts": {
-          "footnote": 26
+          "endnote": 26
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00061}}",
-          "{{NOTE_REF:fn-00062}}",
-          "{{NOTE_REF:fn-00063}}",
-          "{{NOTE_REF:fn-00064}}",
-          "{{NOTE_REF:fn-00065}}"
+          "{{NOTE_REF:fn-00017}}",
+          "{{NOTE_REF:fn-00018}}",
+          "{{NOTE_REF:fn-00019}}",
+          "{{NOTE_REF:fn-00020}}",
+          "{{NOTE_REF:fn-00021}}"
         ],
         "page_span": [
           50,
@@ -4242,18 +3949,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-004-lesévénementsdelarévolut",
-        "section_title": "Les « événements de la Révolution »",
+        "section_id": "toc-ch-003-lesévènementsdelarévolut",
+        "section_title": "Les « évènements de la Révolution »",
         "note_unit_count": 16,
         "note_unit_kind_counts": {
-          "footnote": 16
+          "endnote": 16
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00087}}",
-          "{{NOTE_REF:fn-00088}}",
-          "{{NOTE_REF:fn-00089}}",
-          "{{NOTE_REF:fn-00090}}",
-          "{{NOTE_REF:fn-00091}}"
+          "{{NOTE_REF:fn-00043}}",
+          "{{NOTE_REF:fn-00044}}",
+          "{{NOTE_REF:fn-00045}}",
+          "{{NOTE_REF:fn-00046}}",
+          "{{NOTE_REF:fn-00047}}"
         ],
         "page_span": [
           75,
@@ -4261,18 +3968,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-005-spectresdelaguillotine",
+        "section_id": "toc-ch-004-spectresdelaguillotine",
         "section_title": "Spectres de la guillotine",
-        "note_unit_count": 22,
+        "note_unit_count": 23,
         "note_unit_kind_counts": {
-          "footnote": 22
+          "endnote": 23
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00103}}",
-          "{{NOTE_REF:fn-00104}}",
-          "{{NOTE_REF:fn-00105}}",
-          "{{NOTE_REF:fn-00106}}",
-          "{{NOTE_REF:fn-00107}}"
+          "{{NOTE_REF:fn-00059}}",
+          "{{NOTE_REF:fn-00060}}",
+          "{{NOTE_REF:fn-00061}}",
+          "{{NOTE_REF:fn-00062}}",
+          "{{NOTE_REF:fn-00063}}"
         ],
         "page_span": [
           87,
@@ -4280,18 +3987,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-006-maisonsdesantémaisonsdar",
+        "section_id": "toc-ch-005-maisonsdesantémaisonsdar",
         "section_title": "Maisons de santé, maisons d'arrêt",
         "note_unit_count": 23,
         "note_unit_kind_counts": {
-          "footnote": 23
+          "endnote": 23
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00125}}",
-          "{{NOTE_REF:fn-00126}}",
-          "{{NOTE_REF:fn-00127}}",
-          "{{NOTE_REF:fn-00128}}",
-          "{{NOTE_REF:fn-00129}}"
+          "{{NOTE_REF:fn-00081}}",
+          "{{NOTE_REF:fn-00082}}",
+          "{{NOTE_REF:fn-00083}}",
+          "{{NOTE_REF:fn-00084}}",
+          "{{NOTE_REF:fn-00085}}"
         ],
         "page_span": [
           106,
@@ -4299,18 +4006,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-007-dissidenceoudémence",
+        "section_id": "toc-ch-006-dissidenceoudémence",
         "section_title": "Dissidence ou démence ?",
         "note_unit_count": 11,
         "note_unit_kind_counts": {
-          "footnote": 11
+          "endnote": 11
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00148}}",
-          "{{NOTE_REF:fn-00149}}",
-          "{{NOTE_REF:fn-00150}}",
-          "{{NOTE_REF:fn-00151}}",
-          "{{NOTE_REF:fn-00152}}"
+          "{{NOTE_REF:fn-00104}}",
+          "{{NOTE_REF:fn-00105}}",
+          "{{NOTE_REF:fn-00106}}",
+          "{{NOTE_REF:fn-00107}}",
+          "{{NOTE_REF:fn-00108}}"
         ],
         "page_span": [
           122,
@@ -4318,18 +4025,37 @@
         ]
       },
       {
-        "section_id": "toc-ch-008-cethommenestpasaliénésad",
+        "section_id": "toc-ch-006-listedesillustration",
+        "section_title": "Liste des illustrations",
+        "note_unit_count": 12,
+        "note_unit_kind_counts": {
+          "endnote": 12
+        },
+        "target_ref_preview": [
+          "{{NOTE_REF:en-00001}}",
+          "{{NOTE_REF:en-00002}}",
+          "{{NOTE_REF:en-00003}}",
+          "{{NOTE_REF:en-00004}}",
+          "{{NOTE_REF:en-00005}}"
+        ],
+        "page_span": [
+          389,
+          389
+        ]
+      },
+      {
+        "section_id": "toc-ch-007-cethommenestpasaliénésad",
         "section_title": "« Cet homme n'est pas aliéné » : Sade à Charenton",
         "note_unit_count": 29,
         "note_unit_kind_counts": {
-          "footnote": 29
+          "endnote": 29
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00159}}",
-          "{{NOTE_REF:fn-00160}}",
-          "{{NOTE_REF:fn-00161}}",
-          "{{NOTE_REF:fn-00162}}",
-          "{{NOTE_REF:fn-00163}}"
+          "{{NOTE_REF:fn-00115}}",
+          "{{NOTE_REF:fn-00116}}",
+          "{{NOTE_REF:fn-00117}}",
+          "{{NOTE_REF:fn-00118}}",
+          "{{NOTE_REF:fn-00119}}"
         ],
         "page_span": [
           139,
@@ -4337,14 +4063,14 @@
         ]
       },
       {
-        "section_id": "toc-ch-009-lhommequiseprenaitpourna",
+        "section_id": "toc-ch-008-lhommequiseprenaitpourna",
         "section_title": "III. L'homme qui se prenait pour Napoléon",
         "note_unit_count": 1,
         "note_unit_kind_counts": {
-          "footnote": 1
+          "endnote": 1
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00188}}"
+          "{{NOTE_REF:fn-00144}}"
         ],
         "page_span": [
           165,
@@ -4352,18 +4078,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-010-lamonomanieorgueilleuseo",
+        "section_id": "toc-ch-009-lamonomanieorgueilleuseo",
         "section_title": "La monomanie orgueilleuse ou le mal du siècle",
         "note_unit_count": 24,
         "note_unit_kind_counts": {
-          "footnote": 24
+          "endnote": 24
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00189}}",
-          "{{NOTE_REF:fn-00190}}",
-          "{{NOTE_REF:fn-00191}}",
-          "{{NOTE_REF:fn-00192}}",
-          "{{NOTE_REF:fn-00193}}"
+          "{{NOTE_REF:fn-00145}}",
+          "{{NOTE_REF:fn-00146}}",
+          "{{NOTE_REF:fn-00147}}",
+          "{{NOTE_REF:fn-00148}}",
+          "{{NOTE_REF:fn-00149}}"
         ],
         "page_span": [
           167,
@@ -4371,18 +4097,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-011-lemairedelunivers",
+        "section_id": "toc-ch-010-lemairedelunivers",
         "section_title": "Le maire de l'Univers",
         "note_unit_count": 23,
         "note_unit_kind_counts": {
-          "footnote": 23
+          "endnote": 23
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00213}}",
-          "{{NOTE_REF:fn-00214}}",
-          "{{NOTE_REF:fn-00215}}",
-          "{{NOTE_REF:fn-00216}}",
-          "{{NOTE_REF:fn-00217}}"
+          "{{NOTE_REF:fn-00169}}",
+          "{{NOTE_REF:fn-00170}}",
+          "{{NOTE_REF:fn-00171}}",
+          "{{NOTE_REF:fn-00172}}",
+          "{{NOTE_REF:fn-00173}}"
         ],
         "page_span": [
           185,
@@ -4390,18 +4116,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-012-lusurpateur",
+        "section_id": "toc-ch-011-lusurpateur",
         "section_title": "L'Usurpateur",
         "note_unit_count": 31,
         "note_unit_kind_counts": {
-          "footnote": 31
+          "endnote": 31
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00236}}",
-          "{{NOTE_REF:fn-00237}}",
-          "{{NOTE_REF:fn-00238}}",
-          "{{NOTE_REF:fn-00239}}",
-          "{{NOTE_REF:fn-00240}}"
+          "{{NOTE_REF:fn-00192}}",
+          "{{NOTE_REF:fn-00193}}",
+          "{{NOTE_REF:fn-00194}}",
+          "{{NOTE_REF:fn-00195}}",
+          "{{NOTE_REF:fn-00196}}"
         ],
         "page_span": [
           203,
@@ -4409,18 +4135,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-013-théroignedeméricourtoula",
+        "section_id": "toc-ch-012-théroignedeméricourtoula",
         "section_title": "Théroigne de Méricourt ou la mélancolie révolutionnaire",
         "note_unit_count": 8,
         "note_unit_kind_counts": {
-          "footnote": 8
+          "endnote": 8
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00267}}",
-          "{{NOTE_REF:fn-00268}}",
-          "{{NOTE_REF:fn-00269}}",
-          "{{NOTE_REF:fn-00270}}",
-          "{{NOTE_REF:fn-00271}}"
+          "{{NOTE_REF:fn-00223}}",
+          "{{NOTE_REF:fn-00224}}",
+          "{{NOTE_REF:fn-00225}}",
+          "{{NOTE_REF:fn-00226}}",
+          "{{NOTE_REF:fn-00227}}"
         ],
         "page_span": [
           229,
@@ -4428,18 +4154,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-014-1830oulamaladiedelacivil",
+        "section_id": "toc-ch-013-1830oulamaladiedelacivil",
         "section_title": "1830 ou la maladie de la civilisation",
         "note_unit_count": 22,
         "note_unit_kind_counts": {
-          "footnote": 22
+          "endnote": 22
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00275}}",
-          "{{NOTE_REF:fn-00276}}",
-          "{{NOTE_REF:fn-00277}}",
-          "{{NOTE_REF:fn-00278}}",
-          "{{NOTE_REF:fn-00279}}"
+          "{{NOTE_REF:fn-00231}}",
+          "{{NOTE_REF:fn-00232}}",
+          "{{NOTE_REF:fn-00233}}",
+          "{{NOTE_REF:fn-00234}}",
+          "{{NOTE_REF:fn-00235}}"
         ],
         "page_span": [
           238,
@@ -4447,18 +4173,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-015-1848oulapestedémocratiqu",
+        "section_id": "toc-ch-014-1848oulapestedémocratiqu",
         "section_title": "1848 ou la peste démocratique",
         "note_unit_count": 52,
         "note_unit_kind_counts": {
-          "footnote": 52
+          "endnote": 52
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00297}}",
-          "{{NOTE_REF:fn-00298}}",
-          "{{NOTE_REF:fn-00299}}",
-          "{{NOTE_REF:fn-00300}}",
-          "{{NOTE_REF:fn-00301}}"
+          "{{NOTE_REF:fn-00253}}",
+          "{{NOTE_REF:fn-00254}}",
+          "{{NOTE_REF:fn-00255}}",
+          "{{NOTE_REF:fn-00256}}",
+          "{{NOTE_REF:fn-00257}}"
         ],
         "page_span": [
           249,
@@ -4466,18 +4192,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-016-lasiledelamisère",
+        "section_id": "toc-ch-015-lasiledelamisère",
         "section_title": "L'asile de la misère",
         "note_unit_count": 45,
         "note_unit_kind_counts": {
-          "footnote": 45
+          "endnote": 45
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00349}}",
-          "{{NOTE_REF:fn-00350}}",
-          "{{NOTE_REF:fn-00351}}",
-          "{{NOTE_REF:fn-00352}}",
-          "{{NOTE_REF:fn-00353}}"
+          "{{NOTE_REF:fn-00305}}",
+          "{{NOTE_REF:fn-00306}}",
+          "{{NOTE_REF:fn-00307}}",
+          "{{NOTE_REF:fn-00308}}",
+          "{{NOTE_REF:fn-00309}}"
         ],
         "page_span": [
           291,
@@ -4485,18 +4211,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-017-jeannedarcetlespanophobe",
-        "section_title": "Jeanne d’Arc et les panophobes gémisseurs",
+        "section_id": "toc-ch-016-jeannedarcetlespanophobe",
+        "section_title": "Jeanne d'Arc et les panophobes gémisseurs",
         "note_unit_count": 15,
         "note_unit_kind_counts": {
-          "footnote": 15
+          "endnote": 15
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00394}}",
-          "{{NOTE_REF:fn-00395}}",
-          "{{NOTE_REF:fn-00396}}",
-          "{{NOTE_REF:fn-00397}}",
-          "{{NOTE_REF:fn-00398}}"
+          "{{NOTE_REF:fn-00350}}",
+          "{{NOTE_REF:fn-00351}}",
+          "{{NOTE_REF:fn-00352}}",
+          "{{NOTE_REF:fn-00353}}",
+          "{{NOTE_REF:fn-00354}}"
         ],
         "page_span": [
           308,
@@ -4504,18 +4230,18 @@
         ]
       },
       {
-        "section_id": "toc-ch-018-deschacalsdespiesdessing",
+        "section_id": "toc-ch-017-deschacalsdespiesdessing",
         "section_title": "Des chacals, des pies, des singes et du pétrole",
-        "note_unit_count": 32,
+        "note_unit_count": 34,
         "note_unit_kind_counts": {
-          "footnote": 32
+          "endnote": 34
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00409}}",
-          "{{NOTE_REF:fn-00410}}",
-          "{{NOTE_REF:fn-00411}}",
-          "{{NOTE_REF:fn-00412}}",
-          "{{NOTE_REF:fn-00413}}"
+          "{{NOTE_REF:fn-00365}}",
+          "{{NOTE_REF:fn-00366}}",
+          "{{NOTE_REF:fn-00367}}",
+          "{{NOTE_REF:fn-00368}}",
+          "{{NOTE_REF:fn-00369}}"
         ],
         "page_span": [
           315,
@@ -4523,43 +4249,293 @@
         ]
       },
       {
-        "section_id": "toc-ch-019-lesbégaiementsdelhistoir",
-        "section_title": "Les bégaiements de l’Histoire",
+        "section_id": "toc-ch-018-lesbégaiementsdelhistoir",
+        "section_title": "Les bégaiements de l'Histoire",
         "note_unit_count": 16,
         "note_unit_kind_counts": {
-          "footnote": 16
+          "endnote": 16
         },
         "target_ref_preview": [
-          "{{NOTE_REF:fn-00441}}",
-          "{{NOTE_REF:fn-00442}}",
-          "{{NOTE_REF:fn-00443}}",
-          "{{NOTE_REF:fn-00444}}",
-          "{{NOTE_REF:fn-00445}}"
+          "{{NOTE_REF:fn-00397}}",
+          "{{NOTE_REF:fn-00398}}",
+          "{{NOTE_REF:fn-00399}}",
+          "{{NOTE_REF:fn-00400}}",
+          "{{NOTE_REF:fn-00401}}"
         ],
         "page_span": [
           331,
           341
         ]
-      },
-      {
-        "section_id": "toc-ch-020-postambule",
-        "section_title": "Postambule",
-        "note_unit_count": 3,
-        "note_unit_kind_counts": {
-          "footnote": 3
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:fn-00457}}",
-          "{{NOTE_REF:fn-00458}}",
-          "{{NOTE_REF:fn-00459}}"
-        ],
-        "page_span": [
-          344,
-          347
-        ]
       }
     ],
-    "export_merge_rows": []
+    "export_merge_rows": [
+      {
+        "title": "« Une invention utile dans le genre funeste »",
+        "path": "chapters/001-« Une invention utile dans le genre funeste ».md",
+        "note_unit_count": 16,
+        "local_ref_total": 14,
+        "local_def_total": 14,
+        "first_local_def_marker": "4",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Un médecin au chevet du corps de l'État",
+        "path": "chapters/002-Un médecin au chevet du corps de l'État.md",
+        "note_unit_count": 26,
+        "local_ref_total": 26,
+        "local_def_total": 25,
+        "first_local_def_marker": "22",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Les « évènements de la Révolution »",
+        "path": "chapters/003-Les « évènements de la Révolution ».md",
+        "note_unit_count": 16,
+        "local_ref_total": 14,
+        "local_def_total": 14,
+        "first_local_def_marker": "51",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Spectres de la guillotine",
+        "path": "chapters/004-Spectres de la guillotine.md",
+        "note_unit_count": 23,
+        "local_ref_total": 21,
+        "local_def_total": 19,
+        "first_local_def_marker": "68",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Maisons de santé, maisons d'arrêt",
+        "path": "chapters/005-Maisons de santé, maisons d'arrêt.md",
+        "note_unit_count": 23,
+        "local_ref_total": 22,
+        "local_def_total": 21,
+        "first_local_def_marker": "2",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Dissidence ou démence ?",
+        "path": "chapters/006-Dissidence ou démence.md",
+        "note_unit_count": 11,
+        "local_ref_total": 10,
+        "local_def_total": 10,
+        "first_local_def_marker": "26",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "« Cet homme n'est pas aliéné » : Sade à Charenton",
+        "path": "chapters/007-« Cet homme n'est pas aliéné » Sade à Charenton.md",
+        "note_unit_count": 29,
+        "local_ref_total": 28,
+        "local_def_total": 26,
+        "first_local_def_marker": "39",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "III. L'homme qui se prenait pour Napoléon",
+        "path": "chapters/008-III L'homme qui se prenait pour Napoléon.md",
+        "note_unit_count": 1,
+        "local_ref_total": 2,
+        "local_def_total": 1,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "La monomanie orgueilleuse ou le mal du siècle",
+        "path": "chapters/009-La monomanie orgueilleuse ou le mal du siècle.md",
+        "note_unit_count": 24,
+        "local_ref_total": 29,
+        "local_def_total": 24,
+        "first_local_def_marker": "2",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Le maire de l'Univers",
+        "path": "chapters/010-Le maire de l'Univers.md",
+        "note_unit_count": 23,
+        "local_ref_total": 24,
+        "local_def_total": 23,
+        "first_local_def_marker": "30",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "L'Usurpateur",
+        "path": "chapters/011-L'Usurpateur.md",
+        "note_unit_count": 31,
+        "local_ref_total": 37,
+        "local_def_total": 30,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Théroigne de Méricourt ou la mélancolie révolutionnaire",
+        "path": "chapters/012-Théroigne de Méricourt ou la mélancolie révolutionnaire.md",
+        "note_unit_count": 8,
+        "local_ref_total": 6,
+        "local_def_total": 6,
+        "first_local_def_marker": "4",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "1830 ou la maladie de la civilisation",
+        "path": "chapters/013-1830 ou la maladie de la civilisation.md",
+        "note_unit_count": 22,
+        "local_ref_total": 22,
+        "local_def_total": 22,
+        "first_local_def_marker": "15",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "1848 ou la peste démocratique",
+        "path": "chapters/014-1848 ou la peste démocratique.md",
+        "note_unit_count": 52,
+        "local_ref_total": 51,
+        "local_def_total": 48,
+        "first_local_def_marker": "38",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "L'asile de la misère",
+        "path": "chapters/015-L'asile de la misère.md",
+        "note_unit_count": 45,
+        "local_ref_total": 41,
+        "local_def_total": 39,
+        "first_local_def_marker": "96",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Jeanne d'Arc et les panophobes gémisseurs",
+        "path": "chapters/016-Jeanne d'Arc et les panophobes gémisseurs.md",
+        "note_unit_count": 15,
+        "local_ref_total": 15,
+        "local_def_total": 15,
+        "first_local_def_marker": "3",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Des chacals, des pies, des singes et du pétrole",
+        "path": "chapters/017-Des chacals, des pies, des singes et du pétrole.md",
+        "note_unit_count": 34,
+        "local_ref_total": 33,
+        "local_def_total": 32,
+        "first_local_def_marker": "18",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": [
+          "31"
+        ]
+      },
+      {
+        "title": "Les bégaiements de l'Histoire",
+        "path": "chapters/018-Les bégaiements de l'Histoire.md",
+        "note_unit_count": 16,
+        "local_ref_total": 16,
+        "local_def_total": 14,
+        "first_local_def_marker": "52",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Postambule",
+        "path": "chapters/019-Postambule.md",
+        "note_unit_count": 3,
+        "local_ref_total": 3,
+        "local_def_total": 3,
+        "first_local_def_marker": "1",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Liste des abréviations",
+        "path": "chapters/020-Liste des abréviations.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Bibliographie",
+        "path": "chapters/021-Bibliographie.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Index",
+        "path": "chapters/022-Index.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Remerciements",
+        "path": "chapters/023-Remerciements.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Liste des illustrations",
+        "path": "chapters/024-Liste des illustrations.md",
+        "note_unit_count": 12,
+        "local_ref_total": 3,
+        "local_def_total": 3,
+        "first_local_def_marker": "29",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      }
+    ]
   },
   "anchor_resolution": {
     "decision_basis": [
@@ -4567,167 +4543,127 @@
       "fnm_note_links.status/resolver/confidence",
       "llm_repair traces（若 resolver=repair 或存在 unresolved cluster）"
     ],
-    "link_summary": {
-      "matched": 404,
-      "footnote_orphan_note": 0,
-      "footnote_orphan_anchor": 0,
-      "endnote_orphan_note": 0,
-      "endnote_orphan_anchor": 0,
-      "ambiguous": 55,
-      "ignored": 5,
-      "fallback_count": 18,
-      "repair_count": 33,
-      "fallback_matched_count": 18,
-      "fallback_match_ratio": 0.04455445544554455
-    },
-    "chapter_link_contract_summary": {
-      "chapter_count": 20,
-      "contract_required_count": 0,
-      "failed_chapter_ids": [
-        "toc-ch-003-unmédecinauchevetducorps",
-        "toc-ch-004-lesévénementsdelarévolut",
-        "toc-ch-005-spectresdelaguillotine",
-        "toc-ch-006-maisonsdesantémaisonsdar",
-        "toc-ch-007-dissidenceoudémence",
-        "toc-ch-008-cethommenestpasaliénésad",
-        "toc-ch-010-lamonomanieorgueilleuseo",
-        "toc-ch-011-lemairedelunivers",
-        "toc-ch-013-théroignedeméricourtoula",
-        "toc-ch-014-1830oulamaladiedelacivil",
-        "toc-ch-015-1848oulapestedémocratiqu",
-        "toc-ch-017-jeannedarcetlespanophobe",
-        "toc-ch-018-deschacalsdespiesdessing",
-        "toc-ch-019-lesbégaiementsdelhistoir"
-      ],
-      "contract_v2_failed_chapter_ids": [],
-      "contract_v2_first_marker_violation_count": 14,
-      "contract_v2_marker_gap_violation_count": 16,
-      "contract_v2_def_anchor_mismatch_count": 0
-    },
+    "link_summary": {},
+    "chapter_link_contract_summary": {},
     "anchor_kind_counts": {
-      "footnote": 650,
-      "unknown": 189
+      "unknown": 470,
+      "footnote": 7
     },
     "link_status_counts": {
-      "ambiguous": 55,
-      "matched": 375,
-      "orphan_note": 29,
-      "orphan_anchor": 56,
-      "ignored": 5
+      "orphan_anchor": 470
     },
     "link_resolver_counts": {
-      "rule": 465,
-      "repair": 55
+      "rule": 470
     },
     "anchor_samples": [
       {
         "anchor_id": "anchor-00001",
-        "chapter_id": "toc-ch-001-préambule",
+        "chapter_id": "",
         "page_no": 7,
         "paragraph_index": 0,
         "marker": "1",
-        "anchor_kind": "footnote",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "Tout essai part d’une question qui le fonde, dont elle est à la fois le fanal et le fil rouge, le point de repère et l’axe directeur. Si abs..."
-      },
-      {
-        "anchor_id": "llm-anchor-fn-00039",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 7,
-        "paragraph_index": 0,
-        "marker": "40",
-        "anchor_kind": "footnote",
-        "certainty": 0.95,
-        "source_text_preview": "comment délire-t-on l’Histoire¹"
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00002",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 7,
-        "paragraph_index": 1,
-        "marker": "1",
-        "anchor_kind": "footnote",
+        "chapter_id": "",
+        "page_no": 8,
+        "paragraph_index": 0,
+        "marker": "2",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "Tout essai part d’une question qui le fonde, dont elle est à la fois le fanal et le fil rouge, le point de repère et l’axe directeur. Si abs..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00003",
-        "chapter_id": "toc-ch-001-préambule",
+        "chapter_id": "",
         "page_no": 8,
-        "paragraph_index": 2,
-        "marker": "2",
-        "anchor_kind": "footnote",
+        "paragraph_index": 0,
+        "marker": "3",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "«L’influence de nos malheurs politiques a été si constante, écrivait le docteur Étienne Esquirol en 1816, que je pourrais donner l’histoire..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00004",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 8,
-        "paragraph_index": 2,
-        "marker": "3",
-        "anchor_kind": "footnote",
+        "chapter_id": "",
+        "page_no": 10,
+        "paragraph_index": 0,
+        "marker": "7",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "«L’influence de nos malheurs politiques a été si constante, écrivait le docteur Étienne Esquirol en 1816, que je pourrais donner l’histoire..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00005",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 8,
-        "paragraph_index": 3,
-        "marker": "2",
-        "anchor_kind": "footnote",
+        "chapter_id": "",
+        "page_no": 10,
+        "paragraph_index": 0,
+        "marker": "8",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "«L’influence de nos malheurs politiques a été si constante, écrivait le docteur Étienne Esquirol en 1816, que je pourrais donner l’histoire..."
-      },
-      {
-        "anchor_id": "anchor-00006",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 8,
-        "paragraph_index": 3,
-        "marker": "3",
-        "anchor_kind": "footnote",
-        "certainty": 1.0,
-        "source_text_preview": "«L’influence de nos malheurs politiques a été si constante, écrivait le docteur Étienne Esquirol en 1816, que je pourrais donner l’histoire..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00007",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 9,
-        "paragraph_index": 1,
-        "marker": "4",
-        "anchor_kind": "footnote",
+        "chapter_id": "",
+        "page_no": 14,
+        "paragraph_index": 0,
+        "marker": "11",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "La folie n'a-t-elle pas au moins autant à nous apprendre que la vie onirique, dont elle est une secrète parente? Les analyses de Frantz Fano..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00008",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 9,
-        "paragraph_index": 1,
-        "marker": "5",
-        "anchor_kind": "footnote",
+        "chapter_id": "",
+        "page_no": 15,
+        "paragraph_index": 0,
+        "marker": "12",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "La folie n'a-t-elle pas au moins autant à nous apprendre que la vie onirique, dont elle est une secrète parente? Les analyses de Frantz Fano..."
+        "source_text_preview": ""
       },
       {
         "anchor_id": "anchor-00009",
-        "chapter_id": "toc-ch-001-préambule",
-        "page_no": 9,
-        "paragraph_index": 1,
-        "marker": "6",
-        "anchor_kind": "footnote",
+        "chapter_id": "",
+        "page_no": 16,
+        "paragraph_index": 0,
+        "marker": "13",
+        "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": "La folie n'a-t-elle pas au moins autant à nous apprendre que la vie onirique, dont elle est une secrète parente? Les analyses de Frantz Fano..."
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00010",
+        "chapter_id": "",
+        "page_no": 16,
+        "paragraph_index": 0,
+        "marker": "14",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
+      },
+      {
+        "anchor_id": "anchor-00011",
+        "chapter_id": "",
+        "page_no": 17,
+        "paragraph_index": 0,
+        "marker": "15",
+        "anchor_kind": "unknown",
+        "certainty": 1.0,
+        "source_text_preview": ""
       }
     ],
     "link_samples": [
       {
         "link_id": "link-00001",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00001",
-        "anchor_id": "",
-        "status": "ambiguous",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00001",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "1",
         "page_span": [
@@ -4737,10 +4673,10 @@
       },
       {
         "link_id": "link-00002",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00002",
-        "anchor_id": "",
-        "status": "ambiguous",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00002",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "2",
         "page_span": [
@@ -4750,10 +4686,10 @@
       },
       {
         "link_id": "link-00003",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00003",
-        "anchor_id": "",
-        "status": "ambiguous",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00003",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "3",
         "page_span": [
@@ -4763,49 +4699,10 @@
       },
       {
         "link_id": "link-00004",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00004",
-        "anchor_id": "anchor-00007",
-        "status": "matched",
-        "resolver": "rule",
-        "marker": "4",
-        "page_span": [
-          9,
-          9
-        ]
-      },
-      {
-        "link_id": "link-00005",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00005",
-        "anchor_id": "anchor-00008",
-        "status": "matched",
-        "resolver": "rule",
-        "marker": "5",
-        "page_span": [
-          9,
-          9
-        ]
-      },
-      {
-        "link_id": "link-00006",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00006",
-        "anchor_id": "anchor-00009",
-        "status": "matched",
-        "resolver": "rule",
-        "marker": "6",
-        "page_span": [
-          9,
-          9
-        ]
-      },
-      {
-        "link_id": "link-00007",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00007",
-        "anchor_id": "",
-        "status": "ambiguous",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00004",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "7",
         "page_span": [
@@ -4814,11 +4711,11 @@
         ]
       },
       {
-        "link_id": "link-00008",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00008",
-        "anchor_id": "",
-        "status": "ambiguous",
+        "link_id": "link-00005",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00005",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "8",
         "page_span": [
@@ -4827,37 +4724,11 @@
         ]
       },
       {
-        "link_id": "link-00009",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00009",
-        "anchor_id": "",
-        "status": "orphan_note",
-        "resolver": "repair",
-        "marker": "9",
-        "page_span": [
-          11,
-          11
-        ]
-      },
-      {
-        "link_id": "link-00010",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00010",
-        "anchor_id": "anchor-00014",
-        "status": "matched",
-        "resolver": "rule",
-        "marker": "10",
-        "page_span": [
-          11,
-          11
-        ]
-      },
-      {
-        "link_id": "link-00011",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00011",
-        "anchor_id": "anchor-00015",
-        "status": "matched",
+        "link_id": "link-00006",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00007",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "11",
         "page_span": [
@@ -4866,37 +4737,85 @@
         ]
       },
       {
-        "link_id": "link-00012",
-        "chapter_id": "toc-ch-001-préambule",
-        "note_item_id": "fn-00012",
-        "anchor_id": "anchor-00016",
-        "status": "matched",
+        "link_id": "link-00007",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00008",
+        "status": "orphan_anchor",
         "resolver": "rule",
         "marker": "12",
         "page_span": [
           15,
           15
         ]
+      },
+      {
+        "link_id": "link-00008",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00009",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "13",
+        "page_span": [
+          16,
+          16
+        ]
+      },
+      {
+        "link_id": "link-00009",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00010",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "14",
+        "page_span": [
+          16,
+          16
+        ]
+      },
+      {
+        "link_id": "link-00010",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00011",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "15",
+        "page_span": [
+          17,
+          17
+        ]
+      },
+      {
+        "link_id": "link-00011",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00012",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "16",
+        "page_span": [
+          17,
+          17
+        ]
+      },
+      {
+        "link_id": "link-00012",
+        "chapter_id": "",
+        "note_item_id": "",
+        "anchor_id": "anchor-00014",
+        "status": "orphan_anchor",
+        "resolver": "rule",
+        "marker": "17",
+        "page_span": [
+          18,
+          18
+        ]
       }
     ],
-    "llm_repair_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.started.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.started.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.started.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.003.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.started.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.004.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.started.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.005.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.started.006.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/llm_repair.cluster_request.006.json"
-    ],
-    "visual_toc_trace_refs": [
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/visual_toc.manual_input_extract.001.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/visual_toc.manual_input_extract.002.json",
-      "/Users/hao/OCRandTranslation/test_example/Napoleon/llm_traces/visual_toc.manual_input_extract.003.json"
-    ]
+    "llm_repair_trace_refs": [],
+    "visual_toc_trace_refs": []
   }
 }

@@ -1,11 +1,7 @@
 {
   "doc_id": "5df1d3d7f9c1",
-  "status": "blocked",
-  "reason": "structure_review_required",
-  "blocking_reasons": [
-    "freeze_matched_ref_not_injected",
-    "export_audit_blocking",
-    "export_cross_chapter_contamination"
-  ],
-  "generated_at": 1777756730
+  "status": "ready",
+  "reason": "ok",
+  "blocking_reasons": [],
+  "generated_at": 1778733715
 }

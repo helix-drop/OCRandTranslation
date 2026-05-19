@@ -1,0 +1,56 @@
+{
+  "status": "done",
+  "current_stage": "report_write",
+  "started_at": "2026-05-14T12:08:12",
+  "updated_at": "2026-05-14T12:31:43",
+  "stage_history": [
+    {
+      "stage": "reingest",
+      "status": "skipped",
+      "detail": "子进程已完成",
+      "at": "2026-05-14T12:08:12"
+    },
+    {
+      "stage": "visual_toc",
+      "status": "skipped",
+      "detail": "子进程已完成",
+      "at": "2026-05-14T12:08:12"
+    },
+    {
+      "stage": "fnm_pipeline",
+      "status": "done",
+      "detail": "review_required",
+      "at": "2026-05-14T12:31:32"
+    },
+    {
+      "stage": "structure_verify",
+      "status": "skipped",
+      "detail": "管道内联已完成",
+      "at": "2026-05-14T12:31:32"
+    },
+    {
+      "stage": "placeholder_translate",
+      "status": "done",
+      "detail": "translated_paras=3549",
+      "at": "2026-05-14T12:31:38"
+    },
+    {
+      "stage": "export_verify",
+      "status": "done",
+      "detail": "ok",
+      "at": "2026-05-14T12:31:43"
+    },
+    {
+      "stage": "zip_finalize",
+      "status": "done",
+      "detail": "ok",
+      "at": "2026-05-14T12:31:43"
+    },
+    {
+      "stage": "report_write",
+      "status": "done",
+      "detail": "单书结果、报告、进度均已写入",
+      "at": "2026-05-14T12:31:43"
+    }
+  ]
+}

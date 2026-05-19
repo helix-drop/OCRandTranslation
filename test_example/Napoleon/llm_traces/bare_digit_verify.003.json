@@ -1,0 +1,14 @@
+{
+  "stage": "bare_digit_verify",
+  "model_id": "mimo-v2.5",
+  "provider": "",
+  "usage": {
+    "prompt_tokens": 504,
+    "completion_tokens": 169,
+    "total_tokens": 673
+  },
+  "timing": {
+    "duration_ms": 0
+  },
+  "doc_id": "5df1d3d7f9c1"
+}
