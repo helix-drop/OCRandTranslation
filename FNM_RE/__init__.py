@@ -22,9 +22,28 @@ def build_unit_progress(*args, **kwargs):
 
 
 def run_llm_repair(*args, **kwargs):
-    from FNM_RE.modules.llm_repair import run_llm_repair as impl
+    """←→ Rust fnm_re_rs.run_llm_repair_json"""
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    pdf_path = kwargs.get("pdf_path", "")
+    renderer = kwargs.get("renderer")
+    slug = kwargs.get("slug", "")
+    auto_apply = kwargs.get("auto_apply", True)
+    confidence_threshold = kwargs.get("confidence_threshold", 0.9)
+    cluster_limit = kwargs.get("cluster_limit")
+    result_json = fnm_re_rs.run_llm_repair_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        pdf_path,
+        renderer,
+        slug,
+        auto_apply,
+        confidence_threshold,
+        cluster_limit,
+    )
+    import json as _json
+    return _json.loads(result_json)
 
 
 def group_review_overrides(*args, **kwargs):

@@ -28,6 +28,7 @@ use pyo3::types::{PyBytes, PyTuple};
 
 use fnm_core::db::{open_pool, Repository, SqliteRepository};
 use fnm_llm_repair::page_context::{NoopRenderer, RepairImageRenderer};
+use fnm_llm_repair::run::{run_llm_repair, RunLlmRepairParams};
 use fnm_orchestrator::mainline::LlmRepairOptions;
 use fnm_orchestrator::types::PipelineConfig;
 use fnm_phase1::input::{RawPage, TocItem};
@@ -625,6 +626,64 @@ fn run_doc_pipeline_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize summary: {}", e)))
 }
 
+/// 对已有 Phase1-3 数据运行 LLM repair。
+///
+/// 从 DB 拉 pages + phase1-3 → build unresolved clusters → 调 LLM → 物化 overrides。
+///
+/// ←→ Python `FNM_RE/__init__.py::run_llm_repair`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, pdf_path, renderer=None, slug="",
+                   auto_apply=true, confidence_threshold=0.9, cluster_limit=None))]
+fn run_llm_repair_json(
+    py: Python<'_>,
+    db_path: &str,
+    doc_id: &str,
+    pdf_path: &str,
+    renderer: Option<Py<PyAny>>,
+    slug: &str,
+    auto_apply: bool,
+    confidence_threshold: f64,
+    cluster_limit: Option<usize>,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let raw_pages = {
+        let conn = pool
+            .get()
+            .map_err(|e| PyRuntimeError::new_err(format!("get conn: {}", e)))?;
+        load_raw_pages_from_db(&conn, doc_id)?
+    };
+    let repo = SqliteRepository::new(pool);
+
+    let report = py.allow_threads(|| {
+        let py_renderer = renderer.map(PyRepairRenderer::new);
+        let noop = NoopRenderer;
+        let renderer_ref: &dyn RepairImageRenderer = match &py_renderer {
+            Some(r) => r,
+            None => &noop,
+        };
+
+        let mut params = RunLlmRepairParams::new(
+            doc_id, &repo, &raw_pages, pdf_path, renderer_ref,
+        );
+        params.slug = slug;
+        params.auto_apply = auto_apply;
+        params.confidence_threshold = confidence_threshold;
+        params.cluster_limit = cluster_limit;
+
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("tokio runtime");
+        runtime
+            .block_on(run_llm_repair(params))
+            .expect("llm repair")
+    });
+
+    serde_json::to_string(&report)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -645,6 +704,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(list_diagnostic_notes_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(get_diagnostic_entry_for_page_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_doc_pipeline_json, m)?)?;
+    m.add_function(wrap_pyfunction!(run_llm_repair_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }
