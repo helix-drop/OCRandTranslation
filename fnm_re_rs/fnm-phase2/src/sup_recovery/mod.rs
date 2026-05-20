@@ -152,4 +152,58 @@ mod tests {
         let result = recover_book_chapter_scoped(&[], &HashMap::new(), None, None);
         assert!(result.is_empty());
     }
+
+    #[test]
+    fn has_explicit_sup_html_sup_tag() {
+        assert!(has_explicit_sup("Some text<sup>12</sup> more", "12"));
+    }
+
+    #[test]
+    fn has_explicit_sup_no_marker() {
+        assert!(!has_explicit_sup("Some text without markers", "12"));
+    }
+
+    #[test]
+    fn has_explicit_sup_empty_markdown() {
+        assert!(!has_explicit_sup("", "1"));
+    }
+
+    #[test]
+    fn recover_book_single_page_with_marker() {
+        let page = RawPage {
+            book_page: 10,
+            markdown: "Text <sup>1</sup> footnote.".to_string(),
+            ..Default::default()
+        };
+        let mut markers = HashMap::new();
+        markers.insert("ch1".to_string(), vec!["1".to_string()]);
+        let result = recover_book_chapter_scoped(&[page], &markers, None, None);
+        // Layer 1 会匹配 <sup>1</sup>，返回命中结果
+        let ch1 = result.get("ch1").unwrap();
+        assert_eq!(ch1.len(), 1);
+        assert_eq!(ch1[0].0, 10); // book_page
+        assert_eq!(ch1[0].1, "1"); // marker
+    }
+
+    #[test]
+    fn recover_book_skip_unsolved_chapter() {
+        let page = RawPage {
+            book_page: 10,
+            markdown: "No superscripts here.".to_string(),
+            ..Default::default()
+        };
+        let markers = HashMap::new();
+        let result = recover_book_chapter_scoped(&[page], &markers, None, None);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn has_explicit_sup_html_dollar_caret() {
+        assert!(has_explicit_sup("Text$^{3}$more", "3"));
+    }
+
+    #[test]
+    fn has_explicit_sup_bracket_notation() {
+        assert!(has_explicit_sup("Text[^5] more", "5"));
+    }
 }
