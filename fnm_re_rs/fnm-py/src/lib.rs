@@ -842,6 +842,26 @@ fn build_doc_status_json(
 }
 
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
+/// 构建重试摘要。
+///
+/// ←→ Python `FNM_RE/__init__.py::build_retry_summary`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id))]
+fn build_retry_summary_json(
+    db_path: &str,
+    doc_id: &str,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let result = fnm_orchestrator::build_retry_summary(&repo, doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("build_retry_summary: {}", e)))?;
+
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 构建翻译单元进度。
 ///
 /// ←→ Python `FNM_RE/__init__.py::build_unit_progress`
@@ -886,6 +906,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run_llm_repair_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_doc_status_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_unit_progress_json, m)?)?;
+    m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }

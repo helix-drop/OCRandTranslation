@@ -10,9 +10,16 @@ def prepare_page_translate_jobs(*args, **kwargs):
 
 
 def build_retry_summary(*args, **kwargs):
-    from FNM_RE.app.page_translate import build_retry_summary as impl
+    """←→ Rust fnm_re_rs.build_retry_summary_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    result_json = fnm_re_rs.build_retry_summary_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+    )
+    return _json.loads(result_json)
 
 
 def build_unit_progress(*args, **kwargs):

@@ -84,7 +84,93 @@ fn preview_text(text: &str) -> String {
     }
 }
 
-/// ←→ Python `build_unit_progress()`
+/// ←→ Python `collect_fnm_unit_failed_locations()`
+fn collect_failed_locations(unit: &TranslationUnitRecord) -> Vec<Value> {
+    let section_title = unit.section_title.trim().to_string();
+    let mut locations: Vec<Value> = Vec::new();
+    for segment in &unit.page_segments {
+        let page_no = segment.page_no;
+        let mut visible_idx: i64 = 0;
+        for para in &segment.paragraphs {
+            if para.consumed_by_prev {
+                continue;
+            }
+            let status = para.translation_status.trim();
+            let is_failed = status == "error"
+                || status == "retry_pending"
+                || status == "retrying"
+                || status == "manual_required";
+            if is_failed && !para.manual_resolved {
+                locations.push(json!({
+                    "unit_id": unit.unit_id,
+                    "section_title": section_title,
+                    "page_no": page_no,
+                    "para_idx": visible_idx,
+                    "error": para.last_error,
+                    "status": status,
+                }));
+            }
+            visible_idx += 1;
+        }
+    }
+    locations
+}
+
+/// ←→ Python `build_retry_summary()` — 从 translation units 派生失败位置，
+/// 不依赖 Python `_load_translate_state`（去掉 snapshot 分支）。
+pub fn build_retry_summary(
+    repo: &dyn Repository,
+    doc_id: &str,
+) -> Result<Value, anyhow::Error> {
+    let units = repo.list_fnm_translation_units(doc_id)?;
+
+    let mut failed_locations: Vec<Value> = Vec::new();
+    let mut manual_required_locations: Vec<Value> = Vec::new();
+
+    for unit in &units {
+        if unit.kind != "body" {
+            continue;
+        }
+        for loc in collect_failed_locations(unit) {
+            let is_manual = loc.get("status").and_then(|s| s.as_str()) == Some("manual_required");
+            if is_manual {
+                manual_required_locations.push(loc.clone());
+            }
+            failed_locations.push(loc);
+        }
+    }
+
+    let unresolved_count = failed_locations.len() as i64;
+    let manual_required_count = manual_required_locations.len() as i64;
+
+    let blocking_export = false; // Python 也硬编码 false（real 模式不阻塞）
+    let reason = if manual_required_count > 0 {
+        "manual_required"
+    } else if unresolved_count > 0 {
+        "unresolved"
+    } else {
+        ""
+    };
+
+    let next_failed_location = manual_required_locations
+        .first()
+        .or_else(|| failed_locations.first())
+        .cloned();
+
+    Ok(json!({
+        "execution_mode": "test",
+        "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": unresolved_count,
+            "manual_required_count": manual_required_count,
+        },
+        "failed_locations": failed_locations,
+        "manual_required_locations": manual_required_locations,
+        "next_failed_location": next_failed_location,
+        "blocking_export": blocking_export,
+        "blocking_reason": reason,
+    }))
+}
 pub fn build_unit_progress(
     repo: &dyn Repository,
     doc_id: &str,
