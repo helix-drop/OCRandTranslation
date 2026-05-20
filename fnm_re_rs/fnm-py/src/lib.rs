@@ -373,6 +373,57 @@ fn build_export_zip_for_doc_json(
     Ok(PyBytes::new_bound(py, &zip_bytes).into())
 }
 
+/// 从 DB 读取 diagnostic entries（诊断页面）。
+///
+/// visible_bps 可选过滤；返回 DiagnosticPageRecord 数组 JSON。
+///
+/// ←→ Python `FNM_RE/__init__.py::list_diagnostic_entries_for_doc`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, visible_bps=None))]
+fn list_diagnostic_entries_for_doc_json(
+    db_path: &str,
+    doc_id: &str,
+    visible_bps: Option<Vec<i64>>,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let mut entries = repo
+        .list_fnm_diagnostic_pages(doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("list_fnm_diagnostic_pages: {}", e)))?;
+
+    if let Some(ref bps) = visible_bps {
+        let filter_set: std::collections::HashSet<i64> = bps.iter().copied().collect();
+        entries.retain(|e| filter_set.contains(&e._page_bp));
+    }
+
+    serde_json::to_string(&entries)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 从 DB 读取 diagnostic notes。
+///
+/// 返回 DiagnosticNoteRecord 数组 JSON。
+///
+/// ←→ Python `FNM_RE/__init__.py::list_diagnostic_notes_for_doc`
+#[pyfunction]
+fn list_diagnostic_notes_for_doc_json(
+    db_path: &str,
+    doc_id: &str,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let notes = repo
+        .list_fnm_diagnostic_notes(doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("list_fnm_diagnostic_notes: {}", e)))?;
+
+    serde_json::to_string(&notes)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -389,6 +440,8 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(audit_export_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_export_bundle_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_export_zip_for_doc_json, m)?)?;
+    m.add_function(wrap_pyfunction!(list_diagnostic_entries_for_doc_json, m)?)?;
+    m.add_function(wrap_pyfunction!(list_diagnostic_notes_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }

@@ -164,9 +164,18 @@ def audit_export_for_doc(*args, **kwargs):
 
 
 def list_diagnostic_entries_for_doc(*args, **kwargs):
-    from FNM_RE.app.mainline import list_phase6_diagnostic_entries_for_doc as impl
+    """←→ Rust fnm_re_rs.list_diagnostic_entries_for_doc_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    visible_bps = kwargs.get("visible_bps")
+    result_json = fnm_re_rs.list_diagnostic_entries_for_doc_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        list(visible_bps) if visible_bps is not None else None,
+    )
+    return _json.loads(result_json)
 
 
 def get_diagnostic_entry_for_page(*args, **kwargs):
@@ -176,9 +185,16 @@ def get_diagnostic_entry_for_page(*args, **kwargs):
 
 
 def list_diagnostic_notes_for_doc(*args, **kwargs):
-    from FNM_RE.app.mainline import list_phase6_diagnostic_notes_for_doc as impl
+    """←→ Rust fnm_re_rs.list_diagnostic_notes_for_doc_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    result_json = fnm_re_rs.list_diagnostic_notes_for_doc_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+    )
+    return _json.loads(result_json)
 
 
 # ── Rust pipeline binding ────────────────────────────────────────
