@@ -63,6 +63,7 @@ pub trait Repository {
     // ── Phase 1 ──
     fn list_fnm_pages(&self, doc_id: &str) -> Result<Vec<PagePartitionRecord>>;
     fn list_fnm_chapters(&self, doc_id: &str) -> Result<Vec<ChapterRecord>>;
+    fn list_fnm_heading_candidates(&self, doc_id: &str) -> Result<Vec<HeadingCandidate>>;
     fn list_fnm_section_heads(&self, doc_id: &str) -> Result<Vec<SectionHeadRecord>>;
     fn replace_fnm_phase1_products(&self, doc_id: &str, payload: &Phase1Products) -> Result<()>;
 
@@ -388,6 +389,33 @@ impl Repository for SqliteRepository {
                 page_no: row.get(3)?,
                 level: 0,
                 source: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn list_fnm_heading_candidates(&self, doc_id: &str) -> Result<Vec<HeadingCandidate>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT heading_id, page_no, text, normalized_text, source, block_label,
+                    top_band, confidence, heading_family_guess, suppressed_as_chapter,
+                    reject_reason
+             FROM fnm_heading_candidates WHERE doc_id = ?1 ORDER BY page_no",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            Ok(HeadingCandidate {
+                heading_id: row.get(0)?,
+                page_no: row.get(1)?,
+                text: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                normalized_text: row.get::<_, Option<String>>(3)?.unwrap_or_default(),
+                source: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+                block_label: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
+                top_band: row.get::<_, i64>(6)? != 0,
+                confidence: row.get(7)?,
+                heading_family_guess: row.get::<_, Option<String>>(8)?.unwrap_or_default(),
+                suppressed_as_chapter: row.get::<_, i64>(9)? != 0,
+                reject_reason: row.get::<_, Option<String>>(10)?.unwrap_or_default(),
+                ..Default::default()
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)

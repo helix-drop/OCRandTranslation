@@ -10,11 +10,13 @@
 #![deny(unused_must_use)]
 
 pub mod error;
+pub mod load;
 pub mod mainline;
 pub mod pipeline;
 pub mod types;
 
 pub use error::{OrchestratorError, Result};
+pub use load::load_phase6_structure;
 pub use mainline::{run_pipeline_for_doc, LlmRepairOptions};
 pub use pipeline::run_pipeline;
 pub use types::{

@@ -63,6 +63,9 @@ impl Repository for StubRepo {
     fn list_fnm_section_heads(&self, _doc_id: &str) -> Result<Vec<SectionHeadRecord>> {
         Ok(vec![])
     }
+    fn list_fnm_heading_candidates(&self, _doc_id: &str) -> Result<Vec<HeadingCandidate>> {
+        Ok(vec![])
+    }
     fn replace_fnm_phase1_products(&self, _doc_id: &str, _payload: &Phase1Products) -> Result<()> {
         anyhow::bail!("not implemented")
     }

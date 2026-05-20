@@ -93,20 +93,19 @@ def run_doc_pipeline(*args, **kwargs):
     return impl(*args, **kwargs)
 
 
-def run_doc_pipeline_subprocess(doc_id: str, **kwargs) -> dict:
-    """三段子进程 pipeline：Phase1 → Phase2 → Phase3-6，每段结束后 OS 回收内存。"""
-    from FNM_RE.subprocess_runner import run_pipeline_in_subprocesses
-    return run_pipeline_in_subprocesses(doc_id, pdf_path=kwargs.get("pdf_path", ""))
-
-
-# 保留旧名兼容
-run_doc_pipeline_phased_subprocess = run_doc_pipeline_subprocess
-
-
 def load_doc_structure(*args, **kwargs):
-    from FNM_RE.app.mainline import load_phase6_for_doc as impl
+    """←→ Rust fnm_re_rs.load_doc_structure_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    include_diag = kwargs.get("include_diagnostic_entries", False)
+    result_json = fnm_re_rs.load_doc_structure_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        include_diag,
+    )
+    return _json.loads(result_json)
 
 
 def build_doc_status(*args, **kwargs):
@@ -369,6 +368,18 @@ def run_with_shadow(
         pass  # 日志写失败不影响主路径
 
     return snapshot
+
+
+def _resolve_db_path(db_path=None, repo=None):
+    """统一提取数据库路径。优先显式路径 > repo 路径 > 默认路径。"""
+    if db_path:
+        return db_path
+    if repo is not None and hasattr(repo, "db_path"):
+        return repo.db_path
+    # 默认路径（与 persistence/sqlite_store 一致）
+    import os
+    _root = os.environ.get("FNM_BOOKS_ROOT", os.path.join(os.getcwd(), "data/fnm"))
+    return os.path.join(_root, "fnm_books.db")
 
 
 __all__ = [

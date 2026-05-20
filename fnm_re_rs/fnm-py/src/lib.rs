@@ -232,6 +232,32 @@ fn run_pipeline_for_doc_with_llm_repair_json(
         .map_err(|e| PyRuntimeError::new_err(format!("snapshot serialize: {}", e)))
 }
 
+/// 从 DB 加载 phase1-6 全部数据 → Phase6Structure JSON。
+///
+/// - `db_path`: SQLite 数据库文件路径
+/// - `doc_id`: 文档 ID
+/// - `include_diagnostic_entries`: 是否包含 diagnostic_pages/notes（默认 false，提速）
+///
+/// 返回 Phase6Structure JSON 字符串。
+///
+/// ←→ Python `FNM_RE/__init__.py::load_doc_structure`
+#[pyfunction]
+fn load_doc_structure_json(
+    db_path: &str,
+    doc_id: &str,
+    include_diagnostic_entries: bool,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let structure = fnm_orchestrator::load_phase6_structure(&repo, doc_id, include_diagnostic_entries)
+        .map_err(|e| PyRuntimeError::new_err(format!("load_phase6_structure: {}", e)))?;
+
+    serde_json::to_string(&structure)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -244,6 +270,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run_pipeline_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_pipeline_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_pipeline_for_doc_with_llm_repair_json, m)?)?;
+    m.add_function(wrap_pyfunction!(load_doc_structure_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }
