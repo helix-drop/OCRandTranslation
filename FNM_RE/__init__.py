@@ -315,6 +315,30 @@ def list_diagnostic_notes_for_doc(*args, **kwargs):
     return _json.loads(result_json)
 
 
+def body_paragraphs(markdown):
+    """←→ Rust fnm_re_rs.body_paragraphs_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.body_paragraphs_json(markdown))
+
+
+def definition_lines(markdown):
+    """←→ Rust fnm_re_rs.definition_lines_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.definition_lines_json(markdown))
+
+
+def split_body_and_definitions(markdown):
+    """←→ Rust fnm_re_rs.split_body_and_definitions_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return tuple(_json.loads(fnm_re_rs.split_body_and_definitions_json(markdown)))
+
+
 def replace_frozen_refs(text, *, endnote_mode="standard"):
     """←→ Rust fnm_re_rs.replace_frozen_refs_json"""
     import fnm_re_rs
@@ -593,6 +617,9 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "body_paragraphs",
+    "definition_lines",
+    "split_body_and_definitions",
     "replace_frozen_refs",
     "serialize_segments",
     "deserialize_segments_to_dicts",

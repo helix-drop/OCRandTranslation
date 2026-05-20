@@ -969,6 +969,37 @@ fn run_post_translate_export_checks_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 提取正文段落列表。
+///
+/// ←→ Python `FNM_RE/stages/export_audit.py::body_paragraphs`
+#[pyfunction]
+fn body_paragraphs_json(markdown: &str) -> PyResult<String> {
+    let result = fnm_phase6::export_audit::helpers::body_paragraphs(markdown);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 提取定义行列表。
+///
+/// ←→ Python `FNM_RE/stages/export_audit.py::definition_lines`
+#[pyfunction]
+fn definition_lines_json(markdown: &str) -> PyResult<String> {
+    let result = fnm_phase6::export_audit::helpers::definition_lines(markdown);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 分离正文和定义块。
+///
+/// ←→ Python `FNM_RE/stages/export_audit.py::split_body_and_definitions`
+#[pyfunction]
+fn split_body_and_definitions_json(markdown: &str) -> PyResult<String> {
+    let (body, defs) = fnm_phase6::export_audit::helpers::split_body_and_definitions(markdown);
+    let result = vec![body, defs];
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 把文本中的 NOTE_REF/FN_REF/EN_REF token 改写为 markdown 脚注 `[^id]`。
 ///
 /// - `text`: 含 frozen ref token 的文本
@@ -1034,6 +1065,9 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_post_translate_export_checks_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
+    m.add_function(wrap_pyfunction!(body_paragraphs_json, m)?)?;
+    m.add_function(wrap_pyfunction!(definition_lines_json, m)?)?;
+    m.add_function(wrap_pyfunction!(split_body_and_definitions_json, m)?)?;
     m.add_function(wrap_pyfunction!(replace_frozen_refs_json, m)?)?;
     m.add_function(wrap_pyfunction!(serialize_segments_json, m)?)?;
     m.add_function(wrap_pyfunction!(deserialize_segments_to_dicts_json, m)?)?;
