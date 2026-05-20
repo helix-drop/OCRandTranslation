@@ -16,9 +16,21 @@ def build_retry_summary(*args, **kwargs):
 
 
 def build_unit_progress(*args, **kwargs):
-    from FNM_RE.app.page_translate import build_unit_progress as impl
+    """←→ Rust fnm_re_rs.build_unit_progress_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    snapshot = kwargs.get("snapshot")
+    snapshot_json = _json.dumps(snapshot) if snapshot else None
+    use_lightweight = kwargs.get("use_lightweight", False)
+    result_json = fnm_re_rs.build_unit_progress_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        snapshot_json,
+        use_lightweight,
+    )
+    return _json.loads(result_json)
 
 
 def run_llm_repair(*args, **kwargs):
