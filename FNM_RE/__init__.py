@@ -4,9 +4,27 @@ from __future__ import annotations
 
 
 def prepare_page_translate_jobs(*args, **kwargs):
-    from FNM_RE.app.page_translate import prepare_page_translate_jobs as impl
+    """←→ Rust fnm_re_rs.prepare_page_translate_jobs_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    pages = args[0] if len(args) > 0 else kwargs.get("pages")
+    target_bp = args[1] if len(args) > 1 else kwargs.get("target_bp")
+    t_args = args[2] if len(args) > 2 else kwargs.get("t_args")
+    doc_id = args[3] if len(args) > 3 else kwargs.get("doc_id")
+
+    pages_json = _json.dumps(pages, ensure_ascii=False)
+    t_args_json = _json.dumps(t_args, ensure_ascii=False)
+
+    result_json = fnm_re_rs.prepare_page_translate_jobs_json(
+        pages_json,
+        target_bp,
+        t_args_json,
+        doc_id,
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+    )
+    result = _json.loads(result_json)
+    return result[0], result[1], result[2]
 
 
 def build_retry_summary(*args, **kwargs):

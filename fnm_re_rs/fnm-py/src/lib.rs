@@ -883,6 +883,35 @@ fn build_unit_progress_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 准备翻译任务（页级）。
+///
+/// 返回 JSON 数组 `[ctx, jobs, meta]`，Python wrapper 端 unpack 为 tuple。
+///
+/// ←→ Python `FNM_RE/__init__.py::prepare_page_translate_jobs`
+#[pyfunction]
+#[pyo3(signature = (pages_json, target_bp, t_args_json, doc_id, db_path))]
+fn prepare_page_translate_jobs_json(
+    pages_json: &str,
+    target_bp: i64,
+    t_args_json: &str,
+    doc_id: &str,
+    db_path: &str,
+) -> PyResult<String> {
+    let _ = t_args_json; // 透传，当前暂不解析 model args
+    let pages: Vec<RawPage> = serde_json::from_str(pages_json)
+        .map_err(|e| PyRuntimeError::new_err(format!("parse pages_json: {}", e)))?;
+
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let result = fnm_orchestrator::prepare_page_translate_jobs(&pages, target_bp, doc_id, &repo)
+        .map_err(|e| PyRuntimeError::new_err(format!("prepare_page_translate_jobs: {}", e)))?;
+
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -906,6 +935,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run_llm_repair_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_doc_status_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_unit_progress_json, m)?)?;
+    m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
