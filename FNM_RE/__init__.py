@@ -215,9 +215,40 @@ def build_export_zip_for_doc(*args, **kwargs):
 
 
 def run_post_translate_export_checks_for_doc(*args, **kwargs):
-    from FNM_RE.app.mainline import run_post_translate_export_checks_for_doc as impl
+    """←→ Rust fnm_re_rs.run_post_translate_export_checks_for_doc_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    max_repair_rounds = kwargs.get("max_repair_rounds", 3)
+    db_path = _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo"))
+
+    slug = doc_id
+    pdf_path = kwargs.get("pdf_path", "") or ""
+
+    from persistence.storage import resolve_fnm_model_pool_specs
+
+    model_args_list = []
+    for spec in resolve_fnm_model_pool_specs():
+        model_args_list.append({
+            "provider": str(spec.provider or "").strip(),
+            "model_id": str(spec.model_id or "").strip(),
+            "api_key": str(spec.api_key or "").strip(),
+            "base_url": str(spec.base_url or "").strip(),
+            "request_overrides": dict(spec.request_overrides or {}),
+            "display_label": str(spec.display_label or spec.model_id or "").strip(),
+        })
+    model_args_json = _json.dumps(model_args_list, ensure_ascii=False)
+
+    result_json = fnm_re_rs.run_post_translate_export_checks_for_doc_json(
+        db_path,
+        doc_id,
+        slug,
+        pdf_path,
+        model_args_json,
+        max_repair_rounds,
+    )
+    return _json.loads(result_json)
 
 
 def audit_export_for_doc(*args, **kwargs):

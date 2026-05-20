@@ -14,6 +14,7 @@ pub mod load;
 pub mod mainline;
 pub mod page_translate;
 pub mod pipeline;
+pub mod post_translate;
 pub mod types;
 
 pub use error::{OrchestratorError, Result};
@@ -21,6 +22,7 @@ pub use load::load_phase6_structure;
 pub use mainline::{run_pipeline_for_doc, LlmRepairOptions};
 pub use page_translate::{build_retry_summary, build_unit_progress, prepare_page_translate_jobs};
 pub use pipeline::run_pipeline;
+pub use post_translate::run_post_translate_export_checks;
 pub use types::{
     ModulePipelineSnapshot, PipelineConfig, StartPhase,
 };

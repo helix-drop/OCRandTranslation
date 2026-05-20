@@ -912,6 +912,63 @@ fn prepare_page_translate_jobs_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 翻译后导出检查 + 自修复循环。
+///
+/// ←→ Python `FNM_RE/__init__.py::run_post_translate_export_checks_for_doc`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, slug, pdf_path, model_args_json, max_repair_rounds=3))]
+fn run_post_translate_export_checks_for_doc_json(
+    db_path: &str,
+    doc_id: &str,
+    slug: &str,
+    pdf_path: &str,
+    model_args_json: &str,
+    max_repair_rounds: i64,
+) -> PyResult<String> {
+    let slug = if slug.is_empty() { doc_id } else { slug };
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool.clone());
+
+    // Load pages from DB via inline SQL
+    let pages = {
+        let conn = pool
+            .get()
+            .map_err(|e| PyRuntimeError::new_err(format!("get conn: {}", e)))?;
+        let mut stmt = conn
+            .prepare("SELECT payload_json FROM pages WHERE doc_id = ?1 ORDER BY book_page ASC")
+            .map_err(|e| PyRuntimeError::new_err(format!("prepare pages: {}", e)))?;
+        let rows = stmt
+            .query_map([doc_id], |row| {
+                let payload: String = row.get(0)?;
+                Ok(payload)
+            })
+            .map_err(|e| PyRuntimeError::new_err(format!("query pages: {}", e)))?;
+        let mut pages = Vec::new();
+        for row in rows {
+            let payload = row.map_err(|e| PyRuntimeError::new_err(format!("page row: {}", e)))?;
+            let page: RawPage = serde_json::from_str(&payload)
+                .map_err(|e| PyRuntimeError::new_err(format!("parse page: {}", e)))?;
+            pages.push(page);
+        }
+        pages
+    };
+
+    let result = fnm_orchestrator::run_post_translate_export_checks(
+        &repo,
+        doc_id,
+        slug,
+        &pages,
+        pdf_path,
+        model_args_json,
+        max_repair_rounds,
+    )
+    .map_err(|e| PyRuntimeError::new_err(format!("post_translate_export_check: {}", e)))?;
+
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -936,6 +993,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(build_doc_status_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_unit_progress_json, m)?)?;
     m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
+    m.add_function(wrap_pyfunction!(run_post_translate_export_checks_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
