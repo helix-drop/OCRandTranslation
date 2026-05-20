@@ -315,6 +315,21 @@ def list_diagnostic_notes_for_doc(*args, **kwargs):
     return _json.loads(result_json)
 
 
+def has_explicit_sup(markdown, marker):
+    """←→ Rust fnm_re_rs.has_explicit_sup_json"""
+    import fnm_re_rs
+
+    return fnm_re_rs.has_explicit_sup_json(markdown, marker)
+
+
+def recover_book(pages, pdf_path=""):
+    """←→ Rust fnm_re_rs.recover_book_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.recover_book_json(_json.dumps(pages, ensure_ascii=False), pdf_path))
+
+
 def body_paragraphs(markdown):
     """←→ Rust fnm_re_rs.body_paragraphs_json"""
     import json as _json
@@ -617,6 +632,8 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "has_explicit_sup",
+    "recover_book",
     "body_paragraphs",
     "definition_lines",
     "split_body_and_definitions",

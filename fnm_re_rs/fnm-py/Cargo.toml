@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 fnm-core = { path = "../fnm-core" }
 fnm-phase1 = { path = "../fnm-phase1" }
+fnm-phase2 = { path = "../fnm-phase2" }
 fnm-orchestrator = { path = "../fnm-orchestrator" }
 fnm-phase6 = { path = "../fnm-phase6" }
 fnm-llm-repair = { path = "../fnm-llm-repair" }

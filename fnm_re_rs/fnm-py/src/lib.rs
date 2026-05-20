@@ -969,6 +969,65 @@ fn run_post_translate_export_checks_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 检测 markdown 中是否已有 marker 的显式上标格式。
+///
+/// ←→ Python `FNM_RE/modules/sup_recovery.py::_has_marker`
+#[pyfunction]
+fn has_explicit_sup_json(markdown: &str, marker: &str) -> bool {
+    fnm_phase2::sup_recovery::has_explicit_sup(markdown, marker)
+}
+
+/// 恢复入口：pages + pdf_path → 恢复缺失上标。
+///
+/// ←→ Python `FNM_RE/modules/sup_recovery.py::recover_book_chapter_scoped`
+#[pyfunction]
+fn recover_book_json(pages_json: &str, pdf_path: &str) -> PyResult<String> {
+    let pages: Vec<fnm_phase1::input::RawPage> = serde_json::from_str(pages_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
+
+    let chapter_markers: std::collections::HashMap<String, Vec<String>> = {
+        let mut markers: std::collections::HashMap<String, std::collections::HashSet<String>> =
+            std::collections::HashMap::new();
+        for page in &pages {
+            if let Some(blocks) = page.fn_blocks.as_array() {
+                for block in blocks {
+                    let marker = block
+                        .get("marker")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .trim()
+                        .to_string();
+                    if !marker.is_empty() {
+                        markers
+                            .entry("auto".to_string())
+                            .or_default()
+                            .insert(marker);
+                    }
+                }
+            }
+        }
+        markers
+            .into_iter()
+            .map(|(k, v)| {
+                let mut sorted: Vec<String> = v.into_iter().collect();
+                sorted.sort();
+                (k, sorted)
+            })
+            .collect()
+    };
+
+    let pdf_opt = if pdf_path.is_empty() { None } else { Some(pdf_path) };
+    let result = fnm_phase2::sup_recovery::recover_book_chapter_scoped(
+        &pages,
+        &chapter_markers,
+        pdf_opt,
+        None, // no vision config
+    );
+
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 提取正文段落列表。
 ///
 /// ←→ Python `FNM_RE/stages/export_audit.py::body_paragraphs`
@@ -1065,6 +1124,8 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_post_translate_export_checks_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
+    m.add_function(wrap_pyfunction!(has_explicit_sup_json, m)?)?;
+    m.add_function(wrap_pyfunction!(recover_book_json, m)?)?;
     m.add_function(wrap_pyfunction!(body_paragraphs_json, m)?)?;
     m.add_function(wrap_pyfunction!(definition_lines_json, m)?)?;
     m.add_function(wrap_pyfunction!(split_body_and_definitions_json, m)?)?;

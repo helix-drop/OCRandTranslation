@@ -14,6 +14,13 @@ use std::collections::HashMap;
 
 /// 恢复入口：按章级 chapter_markers 修复缺失的上标标注。
 /// 当 pdf_path + VisionConfig 有效时启用 Layer 2/3。
+/// 检测 markdown 中是否已有 marker 的显式上标格式。
+///
+/// ←→ Python `_has_marker()` (sup_recovery.py) / 替代 `_has_explicit_sup`
+pub fn has_explicit_sup(markdown: &str, marker: &str) -> bool {
+    layer2::has_marker(markdown, marker)
+}
+
 pub fn recover_book_chapter_scoped(
     pages: &[RawPage],
     chapter_markers: &HashMap<String, Vec<String>>,
