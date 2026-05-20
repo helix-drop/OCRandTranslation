@@ -177,7 +177,9 @@ def main():
         assert isinstance(status, dict), f"expected dict, got {type(status)}"
         structure_state = status.get("structure_state")
         assert structure_state is not None, "missing structure_state"
-        print(f"  ✓ structure_state={structure_state}")
+        # structure_state 可能的值："" (seed 初始) / "done" / "in_progress" 等
+        assert isinstance(structure_state, str), f"expected str, got {type(structure_state)}"
+        print(f"  ✓ structure_state={structure_state!r}")
     except Exception as exc:
         print(f"  ✗ build_doc_status 失败: {exc}")
         traceback.print_exc()
