@@ -10,14 +10,14 @@ from persistence.sqlite_schema import read_connection, transaction
 
 
 def _serialize_segments_for_db(segments):
-    from FNM_RE.shared.segment_codec import serialize_segments
+    from FNM_RE import serialize_segments
     return serialize_segments(segments)
 
 
 def _deserialize_segments(raw):
     import json as _json
     raw_list = _json.loads(raw) if isinstance(raw, str) else (raw or [])
-    from FNM_RE.shared.segment_codec import deserialize_segments_to_dicts
+    from FNM_RE import deserialize_segments_to_dicts
     return deserialize_segments_to_dicts(raw_list)
 
 
@@ -56,7 +56,7 @@ class FnmRepoMixin:
         if not row:
             return None
         payload = dict(row)
-        from FNM_RE.shared.segment_codec import deserialize_segments_to_dicts
+        from FNM_RE import deserialize_segments_to_dicts
         payload["page_segments"] = deserialize_segments_to_dicts(json.loads(payload.pop("page_segments_json") or "[]"))
         owner_kind = str(payload.get("owner_kind") or "").strip().lower()
         if not owner_kind:

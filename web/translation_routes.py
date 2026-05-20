@@ -19,9 +19,9 @@ from FNM_RE import (
     group_review_overrides,
     run_doc_pipeline as run_fnm_pipeline,
     run_llm_repair,
+    collect_fnm_unit_failed_locations,
     run_post_translate_export_checks_for_doc,
 )
-from FNM_RE.app.page_translate import collect_fnm_unit_failed_locations
 from persistence.task_logs import append_doc_task_log, create_doc_task_log
 from web.services import TranslationServices
 

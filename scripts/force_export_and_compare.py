@@ -21,15 +21,13 @@ if str(REPO_ROOT) not in sys.path:
 from config import list_docs
 from example_manifest import select_example_books
 from FNM_RE import (
+    apply_body_unit_translations,
     build_export_bundle_for_doc,
     build_export_zip_for_doc,
-    load_doc_structure,
-    run_doc_pipeline,
-)
-from FNM_RE.app.page_translate import (
-    apply_body_unit_translations,
     build_fnm_body_unit_jobs,
+    load_doc_structure,
     rebuild_fnm_diagnostic_page_entries,
+    run_doc_pipeline,
 )
 from persistence.sqlite_store import SQLiteRepository
 from persistence.storage import load_pages_from_disk

@@ -17,10 +17,12 @@ if str(REPO_ROOT) not in sys.path:
 
 from FNM_RE import (
     audit_export_for_doc,
+    body_paragraphs,
     build_export_bundle_for_doc as build_fnm_obsidian_export_bundle,
     build_export_zip_for_doc as build_fnm_obsidian_export_zip,
+    definition_lines,
+    split_body_and_definitions,
 )
-from FNM_RE.stages.export_audit import body_paragraphs, definition_lines, split_body_and_definitions
 from example_manifest import select_example_books
 from persistence.sqlite_store import SQLiteRepository
 

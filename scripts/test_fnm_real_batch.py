@@ -31,8 +31,6 @@ from FNM_RE import (  # noqa: E402
     list_diagnostic_entries_for_doc,
     load_doc_structure as load_fnm_doc_structure,
     run_doc_pipeline as run_fnm_pipeline,
-    run_doc_pipeline_phased_subprocess as run_fnm_pipeline_phased,
-    run_doc_pipeline_subprocess as run_fnm_pipeline_subprocess,
     run_llm_repair,
 )
 from persistence.sqlite_store import SQLiteRepository  # noqa: E402
@@ -1453,8 +1451,6 @@ def _process_book(
     try:
         if subprocess_did_pipeline:
             pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress, start_phase="toc") or {}
-        elif os.environ.get("FNM_USE_SUBPROCESS", "") in ("1", "2"):
-            pipeline_result = run_fnm_pipeline_subprocess(book.doc_id) or {}
         else:
             pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
         base_result["pipeline"] = pipeline_result
@@ -1630,7 +1626,7 @@ def _process_book(
     base_result["usage_summary"] = _merge_usage_summaries(visual_usage, llm_usage, pipeline_usage, translation_test_usage)
     # 写 LLM trace 文件
     try:
-        from FNM_RE.shared.token_counter import dump_traces, write_summary_traces
+        from FNM_RE import dump_traces, write_summary_traces
         import json, os as _os_trace
         # 主进程逐条 trace（book_type_verify, llm_repair）
         dump_traces(str(example_dir), doc_id=book.doc_id)

@@ -20,7 +20,7 @@ from pathlib import Path
 # 保证能 import FNM_RE
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from FNM_RE.modules.sup_recovery import recover_book, _has_explicit_sup
+from FNM_RE import has_explicit_sup, recover_book
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 书目配置

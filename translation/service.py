@@ -17,7 +17,7 @@ from config import (
     get_doc_meta,
 )
 from persistence.sqlite_store import SQLiteRepository
-from FNM_RE.shared.refs import replace_frozen_refs
+from FNM_RE import replace_frozen_refs
 from document.text_processing import (
     get_page_range, get_next_page_bp,
     build_visible_page_view, resolve_visible_page_bp,

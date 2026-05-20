@@ -63,7 +63,7 @@ def _resolve_page(slug: str, page_no: int) -> dict:
 
 def _render_page(pdf_path: str, file_idx: int) -> tuple[str, str]:
     """返回 (base64_str, mime_type)，失败抛出 SystemExit。"""
-    from FNM_RE.modules.pdf_render_subprocess import render_repair_page_data_url
+    from FNM_RE import render_repair_page_data_url
     data_url = render_repair_page_data_url(pdf_path, file_idx)
     if not data_url:
         raise SystemExit(f"渲染失败: {pdf_path} file_idx={file_idx}")
@@ -81,10 +81,10 @@ def _call_visual_model(
     model_args: dict | None = None,
 ) -> dict[str, Any]:
     from openai import OpenAI
-    from FNM_RE.modules.llm_repair import _resolve_repair_model_args
+    from FNM_RE import resolve_repair_model_args
     from translation.translator import _merge_overrides_into_chat_kwargs
 
-    args = dict(model_args or _resolve_repair_model_args())
+    args = dict(model_args or resolve_repair_model_args())
     client = OpenAI(
         api_key=str(args.get("api_key") or ""),
         base_url=str(args.get("base_url") or ""),
