@@ -908,29 +908,15 @@ grep "from FNM_RE.app" FNM_RE/__init__.py
 
 ---
 
-## 14. M1 实施顺序建议
+## 14. M1 实施顺序
 
-按风险升序：
+**严格按本文档章节顺序执行**：M1.1 → M1.2 → ... → M1.12。
 
-```
-M1.6 list_diagnostic_notes      ← 最简：单 repo.list 方法
-M1.5 list_diagnostic_entries    ← 加 filter，简单
-M1.7 get_diagnostic_entry       ← 复用 M1.5
-M1.3 build_export_bundle        ← 单 repo.list 方法
-M1.4 build_export_zip           ← bytes 返回 + 可能 schema 改动
-M1.1 load_doc_structure         ← 16 个 repo 方法聚合
-M1.2 audit_export_for_doc       ← 调已有 audit 函数
-M1.9 run_llm_repair             ← async + tokio + PyRepairRenderer
-M1.8 run_doc_pipeline           ← 大块（含 fnm_run 状态机）
-M1.12 post_translate_checks     ← 复用 M1.1/2/4
-M1.10 build_doc_status          ← port status.py 748 行
-M1.11 page_translate 三件套     ← port page_translate.py 880 行
-```
+**每个 step 1 个独立 AI session**：前一个 session 完成报告 commit hash 后，再开下一个 session。
+不要在同一 session 连续做两个 step——上下文会膨胀且 cold-start 模式更可控。
 
-**理由**：
-- 先做 6-7 个薄包装积累 pyo3 / wrapper 模式熟练度
-- M1.10 / M1.11 是大块 port，留到熟悉模式后做
-- M1.8 (run_doc_pipeline) 涉及 fnm_run 状态机，需要先确定 schema
+完整 session prompt 见 [`M1_SESSION_PROMPTS.md`](./M1_SESSION_PROMPTS.md)，每个 step 一段 prompt
+可直接复制给其他 AI（自包含 cold-start）。
 
 ---
 
@@ -964,21 +950,17 @@ fnm_orchestrator::page_translate (M1.11a-c)
 
 ---
 
-## 16. 启动 M1.1 的 prompt 模板
+## 16. 完整 Session Prompts
 
-```
-按 FNM_RE/M1_DETAILED_PLAN.md § 1 实施 M1.1：
+12 个 step 的完整 cold-start prompt 见 [`M1_SESSION_PROMPTS.md`](./M1_SESSION_PROMPTS.md)。
 
-1. 调研 fnm-core Repository 的 16 个 list 方法，确认能拼出 Phase6Structure
-2. 新建 fnm-orchestrator/src/load.rs，实现 load_phase6_structure(repo, doc_id, include_diag)
-3. fnm-py/src/lib.rs 加 #[pyfunction] load_doc_structure_json
-4. FNM_RE/__init__.py::load_doc_structure 改为 thin Rust wrapper
-5. 新增 fnm_re_rs/fnm-py/tests/test_load_doc_structure.py 1 个用例
-6. cargo test --workspace 验证 ≥940 / 0 failed
-7. maturin develop + pytest 验证
-8. commit
+每段 prompt 包含：
+- 项目背景（30 秒）
+- 必读文档（4 个，按顺序）
+- 任务清单（本 step Action Checklist）
+- 关键约束（引 CLAUDE.md / AGENTS.md 条款）
+- 完成判据（cargo + maturin + pytest 命令）
+- 报告格式（commit hash + tests + 踩坑 + 额外发现）
 
-完成后报告 commit hash 和测试通过情况。
-```
-
-每个 step 类似。
+**用法**：把对应 step 的 ` ``` ` 代码块全部内容复制给其他 AI；
+该 AI 在新 session 中读完必读文档后即可独立执行。
