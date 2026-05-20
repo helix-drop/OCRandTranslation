@@ -1,7 +1,7 @@
 # FNM_RE 完全 Rust 化 · 收尾计划
 
 > 文档日期：2026-05-20
-> 前置完成：18 个 commit（fnm-core/phase1-6/llm-repair/orchestrator/py 10 个 crate + FNM_RE/__init__.py 加 Rust 入口 + Biopolitics e2e 跑通 2.844s）
+> 前置完成：21 个 commit（fnm-core/phase1-6/llm-repair/orchestrator/py 10 个 crate + FNM_RE/__init__.py 加 Rust 入口 + Biopolitics e2e 跑通 2.844s）
 > 上一份计划：[`docs/FNM_PHASE5_PHASE6_PLAN.md`](../归档/FNM_RE/docs/FNM_PHASE5_PHASE6_PLAN.md)（已完成归档）
 
 ---
@@ -19,242 +19,585 @@ Python 端 `FNM_RE/__init__.py` 通过 pyo3 wheel `fnm-re-rs` 已能调用 Rust 
 
 ---
 
-## 1. 当前状态总览
+## 1. 任务量单位约定（AI 友好）
 
-### 1.1 Rust 端（10 crate · 940 tests）
+每个 Step 标注以下指标，便于 AI 一次会话中判断范围：
 
-| crate | 状态 | tests | 用途 |
-|---|---|---:|---|
-| fnm-core | ✅ 100% | 110 | 类型 / DB / 工具 |
-| fnm-phase1 | ✅ 100% | 106 | TOC + chapter skeleton（chapter_boundary 12/12 byte-equal）|
-| fnm-phase2 | ✅ 100% | 140 | note_regions + note_items + sup_recovery |
-| fnm-phase3 | ✅ 100% | 26 | body_anchors + note_links（5 cascade tests ignored）|
-| fnm-phase4 | ✅ 100% | 106 | ref_freeze + units + reviews |
-| fnm-phase5 | ✅ 100% | 44 | chapter markdown merge |
-| fnm-phase6 | ✅ 100% | 148 | export + audit + book_assemble |
-| fnm-llm-repair | ✅ 100% | 121+39 | Step 3.5 LLM 修补 |
-| fnm-orchestrator | ✅ MVP | 0 | pipeline 编排 + DB-driven + LLM repair 集成 |
-| fnm-py | ✅ MVP | 0 | pyo3 binding（4 个 Python 函数）|
+| 字段 | 含义 | 典型量级 |
+|---|---|---|
+| `commits` | 预期 git commit 数 | 1-3 |
+| `files` | 修改/新增文件数 | 1-10 |
+| `LoC` | 大约代码行数（净新增） | 20-500 |
+| `tests` | 新增测试用例数 | 0-3 |
+| `verify` | 验收条件（命令 + 期望输出） | 1-2 行 |
 
-**测试**：940 lib + 6 biopolitics_phase4_parity + 8 spec + 12 phase2 / 27 phase1 集成 + 5 phase3 cascade ignored。
-
-### 1.2 Python 端剩余（按归档可能性分类）
-
-| 文件 | 行数 | 状态 | 外部依赖 |
-|---|---:|---|---|
-| `FNM_RE/__init__.py` | 250 | ✅ Rust 入口 + 旧 lazy-import 函数共存 | — |
-| `FNM_RE/README.md` | 68 | ⚠️ 仍描述 Python 实现，待重写 | — |
-| `FNM_RE/constants.py` | 70 | ⏳ 待归档（Rust types.rs 等价） | app/ 内部依赖 |
-| `FNM_RE/models.py` | 670 | ⏳ 待归档（Rust records.rs 等价） | app/ 内部依赖 |
-| `FNM_RE/app/mainline.py` | 1427 | ⏳ 待 port → 归档 | web/ 6 + translation/ 4 + scripts/ 7 |
-| `FNM_RE/app/pipeline.py` | 1789 | ⏳ 待 port → 归档（已有 Rust orchestrator 等价） | 内部 |
-| `FNM_RE/app/page_translate.py` | 880 | ⏳ 待 port → 归档 | translation/ |
-| `FNM_RE/app/persist_helpers.py` | 313 | ⏳ 待归档 | 内部 |
-| `FNM_RE/app/pipeline_converters.py` | 789 | ⏳ 待归档 | 内部 |
-| `FNM_RE/app/mainline_repo.py` | 288 | ⏳ 待归档 | 内部 |
-| `FNM_RE/app/status.py` | 748 | ⏳ 待 port | 内部 |
-| `FNM_RE/app/db_reconstruct.py` | 276 | ⏳ 待归档 | 内部 |
-| `FNM_RE/stages/` | ~3500 | ⏳ 跟 app 一起归档 | app/ |
-| `FNM_RE/modules/` | ~6800 | ⏳ 跟 app 一起归档 | app/ |
-| `FNM_RE/shared/` | ~2700 | ⏳ 跟 app 一起归档 | app/ + 部分外部直接 import |
-| `FNM_RE/dev/` | ~2000 | ✅ **保留**（web/dev_routes + 10 测试 import） | 长期保留 |
-
-**合计待归档**：约 **19,500 行 Python**（其中 `app/` 6535 + `stages/modules/shared` ~13,000）。
-
-### 1.3 已归档（前期完成）
-
-- `归档/FNM_RE/docs/`（8 个 *.md 历史规划/分析）
-- `归档/FNM_RE/handoff/`（2 个 *.md 交接清单）
-- `归档/FNM_RE/subprocess/`（4 个 subprocess_*.py，不再需要）
-- 早期 PHASE plan：`FNM_COMPLETION_PLAN.md` / `FNM_PHASE1_PLAN.md` / `FNM_PHASE2_PLAN.md` / `FNM_PHASE3_PLAN.md` / `FNM_CORE_PLAN.md` / `FNM_PHASE12_*.md`
+**不使用"天"作单位**——AI 不感知人类作息，按 step 完成度推进。
 
 ---
 
-## 2. 总体目标
+## 2. 当前状态总览
 
-1. **fnm-py 暴露 12 个旧 Python API 的 Rust 等价**（M1）
-2. **`web/` / `translation/` / `scripts/` 共 17 个 caller 切到 Rust binding**（M2）
-3. **DB-driven 主入口补足**：从 SQLite `documents` / `raw_pages` / `visual_toc` 读输入（M3）
-4. **归档 `FNM_RE/app/` + `stages/` + `modules/` + `shared/` + `constants/models`**（M4）
-5. **`fnm-py` wheel 正式发布流程**（M5）
+### 2.1 Rust 端（10 crate · 940 tests）
 
-**最终态**：`FNM_RE/` 仅含 `__init__.py` + `README.md` + `dev/` + `NEXT_PHASE_PLAN.md`（本文档完成后归档）。
+| crate | tests | 用途 |
+|---|---:|---|
+| fnm-core | 110 | 类型 / DB / 工具 |
+| fnm-phase1 | 106 | TOC + chapter skeleton（chapter_boundary 12/12 byte-equal）|
+| fnm-phase2 | 140 | note_regions + note_items + sup_recovery |
+| fnm-phase3 | 26 | body_anchors + note_links（5 cascade tests ignored）|
+| fnm-phase4 | 106 | ref_freeze + units + reviews |
+| fnm-phase5 | 44 | chapter markdown merge |
+| fnm-phase6 | 148 | export + audit + book_assemble |
+| fnm-llm-repair | 121+39 | Step 3.5 LLM 修补 |
+| fnm-orchestrator | 0 | pipeline 编排 + DB-driven + LLM repair 集成 |
+| fnm-py | 0 | pyo3 binding（4 个 Python 函数）|
 
-**附加目标**：
-- P1 清 Rust warnings（phase1=6 / phase2=20 / phase4=11）+ 5 个 phase3 ignored cascade tests
-- P2 fnm-py pytest e2e 套件 + shadow mode 完整 diff 工具
+### 2.2 Python 端剩余
 
----
+`FNM_RE/` 仍含约 **19,500 行 Python**（除 `__init__.py` / `README.md` / `dev/` 外全部待归档）。
 
-## 3. P0 任务分解（M1 → M5 拓扑序）
+`fnm-py` 当前公开 4 个函数：
+- `run_pipeline_json` / `run_pipeline_for_doc_json` / `run_pipeline_for_doc_with_llm_repair_json` / `version`
 
-### M1：pyo3 暴露 12 个旧公开 API（关键路径）
-
-12 个 API 按"是否已有 Rust 等价"分组：
-
-#### M1.A：薄包装（Rust 已等价，只需 pyo3 adapter）— 估 2 天
-
-| Python API | Rust 等价 | pyo3 adapter 工作量 |
-|---|---|---|
-| `run_doc_pipeline(doc_id, pdf_path, ...)` | `fnm_orchestrator::run_pipeline_for_doc` | 加 DB-based pages/toc load + 路径转换 |
-| `load_doc_structure(doc_id)` | DB 读 phase1-6 表后组装 | 已有 Repository.list_fnm_* 方法 |
-| `audit_export_for_doc(doc_id)` | `fnm_phase6::export_audit::audit_phase6_export` | 已有，DB 读 export_bundle |
-| `build_export_bundle_for_doc(doc_id)` | `fnm_phase6::build_module_export_bundle` | 已有 |
-| `build_export_zip_for_doc(doc_id)` | phase6 输出 export_zip bytes | 已有 |
-| `list_diagnostic_entries_for_doc(doc_id)` | DB 读 fnm_diagnostic_pages | 已有 list 方法 |
-| `list_diagnostic_notes_for_doc(doc_id)` | DB 读 fnm_diagnostic_notes | 已有 |
-| `get_diagnostic_entry_for_page(doc_id, page_no)` | filter list_diagnostic_entries | trivial filter |
-
-#### M1.B：独立调用入口（Rust 已有逻辑但只在 pipeline 内调用）— 估 1 天
-
-| Python API | Rust 等价 | 工作 |
-|---|---|---|
-| `run_llm_repair(doc_id, slug, auto_apply)` | `fnm_llm_repair::run::run_llm_repair` | pyo3 暴露独立调用 + PyRepairRenderer 包装 |
-
-#### M1.C：跨 SQLite-translation 桥接（Python 端有较多业务逻辑）— 估 2-3 天
-
-| Python API | 复杂度 | 工作 |
-|---|---|---|
-| `build_doc_status(doc_id, ...)` | 748 行（FNM_RE/app/status.py） | 需 port build_phase4_status / build_phase6_status + StructureStatusRecord |
-| `prepare_page_translate_jobs(pages, ...)` | 880 行（page_translate.py 主入口）| port 翻译任务调度 |
-| `build_retry_summary(doc_id, ...)` | page_translate 内辅助 | 中等 |
-| `build_unit_progress(doc_id, ...)` | page_translate 内辅助 | 简单 |
-| `run_post_translate_export_checks_for_doc(doc_id)` | mainline 内辅助 | 中等 |
-
-**M1 工时估计：5-6 天 single-developer。**
-
-**M1 验收**：
-- `fnm-py` 暴露 12 个新 pyo3 函数，签名与 Python 旧版兼容（参数 + 返回类型）
-- `FNM_RE/__init__.py` 旧 lazy-import 函数改为薄包装 Rust 调用
-- Biopolitics e2e 仍 byte-equal Python golden
-- workspace 940 tests + 新增 pyo3 集成 tests 0 failed
-
-### M2：caller 切换（mechanical）— 估 1-2 天
-
-17 个文件需改 import 路径：
-
-| 类别 | 文件 | 数量 | 工作 |
-|---|---|---:|---|
-| web/ | reading_routes / export_routes / translation_routes / dev_routes / services / reading_view | 6 | grep -r 替换 import |
-| translation/ | service / translate_runtime / translate_worker_common / translate_worker_fnm | 4 | 同上 |
-| scripts/ | onboard_example_books / test_fnm_incremental / inspect_page / apply_manual_toc_to_examples / run_sup_recovery / test_fnm_real_batch / audit_fnm_exports / force_export_and_compare | 7-8 | 同上 |
-| tests/ | 暂保留 Python 实现作 fallback test ground，单独 mark | — | 后续 M4 时一并归档或保留 |
-
-**关键事实**：M1 完成后 `FNM_RE.run_doc_pipeline` 等函数已经在 `__init__.py` 走 Rust 实现，
-**caller 不需改 import**——直接复用现有签名即可。
-
-**M2 工时估计：1-2 天**（含 web 端冒烟测试）。
-
-**M2 验收**：
-- web/ + translation/ + scripts/ 全部能正常启动，不依赖 Python `FNM_RE/app/`
-- 6 个 web 路由 manual smoke：导入 PDF → pipeline → export ZIP 端到端
-- scripts/test_fnm_real_batch.py 跑 1 本书通过
-
-### M3：DB-driven 输入完善 — 估 1-2 天
-
-当前 `fnm_orchestrator::run_pipeline_for_doc` 接受 caller 自备的 `raw_pages` + `toc_items`，
-Python 端 `mainline.run_phase6_pipeline_for_doc` 是从 SQLite `documents` / `raw_pages` /
-`visual_toc.manual_inputs` 读取后调用。
-
-M3 工作：
-- M3.1 在 fnm-orchestrator 加 `load_inputs_from_db(repo, doc_id) -> (Vec<RawPage>, Vec<TocItem>, PipelineConfig)`
-- M3.2 暴露 `run_pipeline_for_doc_from_db(repo, doc_id)`——caller 只需 doc_id
-- M3.3 fnm-py 加对应 pyo3 函数
-
-**M3 验收**：调用 `fnm_re_rs.run_pipeline_from_db_json(db_path, doc_id)` 一行跑通整本书 e2e。
-
-### M4：Python `app/` + `stages/` + `modules/` + `shared/` + constants/models 全归档 — 估 0.5-1 天
-
-- M4.1 `git mv FNM_RE/{app,stages,modules,shared,constants.py,models.py}` → `归档/FNM_RE/python/`
-- M4.2 `FNM_RE/__init__.py` 删除全部旧 lazy-import 函数（M1/M2/M3 后已无 caller）
-- M4.3 重写 `FNM_RE/README.md` 仅描述 Rust binding 用法
-- M4.4 `cargo test --workspace` + Python smoke test 验证无 regression
-
-**M4 验收**：`FNM_RE/` 仅剩 `__init__.py` + `README.md` + `dev/` + 本计划文档（也归档）。
-
-### M5：fnm-py wheel 发布流程 — 估 0.5-1 天
-
-- M5.1 `.github/workflows/rust.yml` 加 maturin build job（macOS + linux aarch64 + linux x86_64）
-- M5.2 `maturin build --release` 产出 wheel artifact
-- M5.3 PyPI 发布 / 内部 wheelhouse 文档说明
-- M5.4 用户面向 README：装 + 切 backend
-
-**M5 验收**：CI 通过后产出 3 个 abi3 wheel；本机 `pip install dist/fnm_re_rs-*.whl` 一键装好。
+待补完 12 个 Python 旧公开 API 的 Rust 等价，覆盖 `web/translation/scripts` 17 个 caller。
 
 ---
 
-## 4. P1 任务分解（代码质量，非关键路径，可并行）
+## 3. 大阶段总览
 
-### P1.1：清 Rust warnings — 估 0.5 天
+| 阶段 | 主目标 | step 数 | 总 commits |
+|---|---|---:|---:|
+| **M1** | fnm-py 暴露 12 个旧公开 API 的 Rust 等价 | 12 | 12-15 |
+| **M2** | 17 个外部 caller 切换 import（mechanical） | 5 | 5 |
+| **M3** | DB-driven 输入桥接（load_inputs_from_db） | 4 | 4-5 |
+| **M4** | 归档 `FNM_RE/{app,stages,modules,shared,constants,models}` | 4 | 4 |
+| **M5** | fnm-py wheel 正式 CI 发布 | 4 | 4 |
+| P1.1 | 清 Rust warnings | 3 | 3 |
+| P1.2 | phase3 5 个 cascade ignored | 5 | 5 |
+| P1.3 | PDFium binary 集成 | 2 | 2 |
+| P2.1 | fnm-py pytest e2e 套件 | 3 | 3 |
+| P2.2 | Python ↔ Rust shadow diff 完整版 | 3 | 3 |
+| P2.3 | 用户面向 README | 1 | 1 |
 
-```bash
-cargo build --workspace 2>&1 | grep "warning:" | sort -u
-# phase1=6 / phase2=20 / phase4=11 = 37 个
+**P0 (M1-M5)**：29 step / ~30 commit
+**P1**：10 step / ~10 commit
+**P2**：7 step / ~7 commit
+
+---
+
+## 4. M1 — fnm-py 暴露 12 个旧公开 API
+
+### 目标
+让 `FNM_RE/__init__.py` 里 12 个 lazy-import 函数走 Rust 实现，外部 caller import 路径不变。
+
+### 完成判据
+- `fnm-py` 新增 12 个 `#[pyfunction]`
+- `FNM_RE/__init__.py` 12 个旧函数改为 thin wrapper 调 Rust
+- `pytest fnm_re_rs/fnm-py/tests/` 全过
+- workspace 940 tests + 新增 12 个 pytest 用例 0 failed
+
+### Step 列表
+
+#### Step M1.1 — `load_doc_structure`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 (`fnm-py/src/lib.rs`, `FNM_RE/__init__.py`, `fnm-py/tests/test_load_doc_structure.py`) |
+| LoC | +80 |
+| tests | 1 |
+| verify | `pytest fnm_re_rs/fnm-py/tests/test_load_doc_structure.py -q` 1 passed |
+
+**实现要点**：
+- Rust 侧：`fn load_doc_structure_json(db_path: &str, doc_id: &str) -> PyResult<String>`
+  内部从 `Repository` 读 phase1-6 表，拼成 `Phase6Structure` JSON
+- Python 侧：`def load_doc_structure(doc_id, db_path=None, **kw)` 调上述函数后 `json.loads`
+
+#### Step M1.2 — `audit_export_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +60 |
+| tests | 1 |
+| verify | `pytest .../test_audit_export.py` + Biopolitics 已 export 的 DB 跑通 |
+
+**实现要点**：
+- 复用 `fnm_phase6::export_audit::audit_phase6_export(zip_path)`
+- DB 读 export_bundle → 临时写 zip → 调 audit → 返回 `ExportAuditReportRecord` JSON
+
+#### Step M1.3 — `build_export_bundle_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +60 |
+| tests | 1 |
+| verify | 返回 dict 含 chapters / chapter_files / contract_ok 字段 |
+
+#### Step M1.4 — `build_export_zip_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +50 |
+| tests | 1 |
+| verify | 返回 `bytes`（zip 二进制）+ 写入本地能解压 |
+
+#### Step M1.5 — `list_diagnostic_entries_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +40 |
+| tests | 1 |
+| verify | DB 读 `fnm_diagnostic_pages` → 返回 list[dict] |
+
+#### Step M1.6 — `list_diagnostic_notes_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +40 |
+| tests | 1 |
+| verify | DB 读 `fnm_diagnostic_notes` |
+
+#### Step M1.7 — `get_diagnostic_entry_for_page`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +30 |
+| tests | 1 |
+| verify | M1.5 + page_no filter |
+
+#### Step M1.8 — `run_doc_pipeline`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1-2 |
+| files | 3-4 |
+| LoC | +120 |
+| tests | 2 (in-memory + DB-driven) |
+| verify | Biopolitics 跑通，phase6 chapters=12 contract_ok=True |
+
+**实现要点**：
+- 已有 `fnm_orchestrator::run_pipeline_for_doc`
+- 增加从 DB 读 pages + toc_items 的 helper
+- pyo3 暴露 `run_doc_pipeline_json(db_path, doc_id, pdf_path)`
+
+#### Step M1.9 — `run_llm_repair`（独立入口）
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 |
+| LoC | +80 |
+| tests | 1 (NoopRenderer) |
+| verify | 不嵌入 pipeline 单独调用 LLM repair，返回 LlmRepairReport JSON |
+
+**实现要点**：
+- 已有 `fnm_llm_repair::run::run_llm_repair`
+- 复用 `PyRepairRenderer`
+- pyo3 暴露 `run_llm_repair_json(db_path, doc_id, pdf_path, renderer, ...)`
+
+#### Step M1.10 — `build_doc_status`
+
+| 字段 | 值 |
+|---|---|
+| commits | 2-3 |
+| files | 5-8 |
+| LoC | +500-700 |
+| tests | 2 |
+| verify | 返回 `StructureStatusRecord` 等价 dict（含 phase4/6 各 8 个 gate 字段） |
+
+**实现要点**：
+- 需 port `FNM_RE/app/status.py` 的 build_phase4_status / build_phase6_status
+- 在 fnm-orchestrator 加 `pub fn build_doc_status(repo, doc_id) -> StructureStatusRecord`
+- pyo3 暴露 thin wrapper
+
+**为什么大**：status.py 748 行，含多个 gate 计算 + Python ↔ Rust 字段映射。
+
+#### Step M1.11 — `prepare_page_translate_jobs` + `build_retry_summary` + `build_unit_progress`
+
+| 字段 | 值 |
+|---|---|
+| commits | 3 |
+| files | 6-9 |
+| LoC | +600-900 |
+| tests | 3 |
+| verify | translation/translate_worker_fnm.py 调用栈跑通（不实际翻译） |
+
+**实现要点**：
+- 三个函数都来自 `FNM_RE/app/page_translate.py` (880 行)
+- 顺序 port：先 build_unit_progress（最简）→ build_retry_summary → prepare_page_translate_jobs
+- 在 fnm-orchestrator 加 page_translate 子模块
+
+#### Step M1.12 — `run_post_translate_export_checks_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1-2 |
+| files | 4-6 |
+| LoC | +200-300 |
+| tests | 1 |
+| verify | 翻译完整本书后跑 export 检查通过 |
+
+---
+
+## 5. M2 — caller 切换（mechanical）
+
+### 目标
+17 个外部文件改 import 路径（M1 完成后 `FNM_RE.xxx` 已经 thin wrapper Rust，多数 caller 不需改）。
+
+### 完成判据
+- `grep -r "from FNM_RE.app\|from FNM_RE.stages\|from FNM_RE.modules\|from FNM_RE.shared" --include="*.py" .` 返回 0 行（除归档/、tests/）
+- 6 个 web 路由 smoke 通过
+
+### Step 列表
+
+#### Step M2.1 — `web/` 6 文件 import 更新
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 6 (reading_routes / export_routes / translation_routes / dev_routes / services / reading_view) |
+| LoC | ±50 |
+| tests | 0（依赖 M2.5 e2e） |
+| verify | `python -c "import web.reading_routes"` 等 6 个无 ImportError |
+
+#### Step M2.2 — `translation/` 4 文件 import 更新
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 4 (service / translate_runtime / translate_worker_common / translate_worker_fnm) |
+| LoC | ±30 |
+| tests | 0 |
+| verify | `python -c "import translation.service"` 等 4 个无 ImportError |
+
+#### Step M2.3 — `scripts/` 7-8 文件 import 更新
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 7-8 |
+| LoC | ±40 |
+| tests | 0 |
+| verify | `python scripts/test_fnm_real_batch.py --help` 退出码 0 |
+
+#### Step M2.4 — `pipeline/document_tasks.py` import 更新
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1 |
+| LoC | ±10 |
+| tests | 0 |
+| verify | `python -c "import pipeline.document_tasks"` 无 ImportError |
+
+#### Step M2.5 — e2e smoke（web + scripts）
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1（`scripts/smoke_post_m2.py`） |
+| LoC | +100 |
+| tests | 1 |
+| verify | 启动 web → 上传 Biopolitics PDF → pipeline → export ZIP 端到端 |
+
+---
+
+## 6. M3 — DB-driven 输入桥接
+
+### 目标
+让 fnm-orchestrator 直接从 SQLite `documents` / `raw_pages` / `visual_toc.manual_inputs` 读取输入，caller 只需 `doc_id`。
+
+### 完成判据
+- 新 API：`fnm_orchestrator::mainline::run_pipeline_from_db(repo, doc_id) -> Result<ModulePipelineSnapshot>`
+- fnm-py 暴露 `run_pipeline_from_db_json(db_path, doc_id) -> str`
+
+### Step 列表
+
+#### Step M3.1 — `repo.load_raw_pages_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2 (`fnm-core/src/db/repository.rs` + `fnm-core/migrations/`) |
+| LoC | +100 |
+| tests | 1 |
+| verify | 单测：写 5 个 raw_pages → 读 → 字段一致 |
+
+#### Step M3.2 — `repo.load_toc_items_for_doc`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2 |
+| LoC | +80 |
+| tests | 1 |
+| verify | 从 visual_toc.manual_inputs 表读 TOC items |
+
+#### Step M3.3 — `fnm_orchestrator::mainline::run_pipeline_from_db`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2 (`fnm-orchestrator/src/mainline.rs` + `lib.rs`) |
+| LoC | +60 |
+| tests | 1 |
+| verify | 单测：mock repo 跑 phase1-6 通过 |
+
+#### Step M3.4 — fnm-py 暴露 `run_pipeline_from_db_json`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2 (`fnm-py/src/lib.rs` + `FNM_RE/__init__.py`) |
+| LoC | +50 |
+| tests | 1 |
+| verify | `fnm_re_rs.run_pipeline_from_db_json("test.db", "biopolitics-smoke")` 跑通 |
+
+---
+
+## 7. M4 — 归档剩余 Python 实现
+
+### 目标
+`FNM_RE/` 仅剩 `__init__.py` + `README.md` + `dev/` + 本计划文档（也归档）。
+
+### 完成判据
+- `ls FNM_RE/` 输出 ≤ 5 个条目
+- `grep -r "from FNM_RE\.\(app\|stages\|modules\|shared\)" --include="*.py" . | grep -v 归档` 返回 0 行
+- `grep -r "from FNM_RE.constants\|from FNM_RE.models" --include="*.py" . | grep -v 归档` 返回 0 行
+- workspace 940 tests + 新增 pyo3 tests 全过
+
+### Step 列表
+
+#### Step M4.1 — 归档 `FNM_RE/{constants.py,models.py}`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | git mv 2 个 |
+| LoC | 0（rename） |
+| tests | 0 |
+| verify | `find FNM_RE -name "constants.py" -o -name "models.py"` 返回空 |
+
+#### Step M4.2 — 归档 `FNM_RE/{stages,modules,shared}/`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | git mv ~70 个 |
+| LoC | 0（rename） |
+| tests | 0 |
+| verify | `ls FNM_RE/stages FNM_RE/modules FNM_RE/shared` 全部 No such file |
+
+#### Step M4.3 — 归档 `FNM_RE/app/`
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | git mv 9 个 |
+| LoC | 0（rename） |
+| tests | 0 |
+| verify | `ls FNM_RE/app` No such file |
+
+#### Step M4.4 — `FNM_RE/__init__.py` 清理 + 重写 README + 归档本计划
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3 (`__init__.py` / `README.md` / git mv `NEXT_PHASE_PLAN.md`) |
+| LoC | -200（删旧 lazy-import），+50（新 README） |
+| tests | 0 |
+| verify | `ls FNM_RE/` 输出 `__init__.py README.md dev/`（+ `__pycache__/`） |
+
+---
+
+## 8. M5 — fnm-py wheel 正式 CI 发布
+
+### Step 列表
+
+#### Step M5.1 — `.github/workflows/rust.yml` 加 maturin job
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1 |
+| LoC | +60 |
+| tests | 0（CI 验证） |
+| verify | push 后 CI 跑 `maturin build --release` 三平台产出 wheel |
+
+#### Step M5.2 — manylinux2014 docker base
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1（workflow） |
+| LoC | +20 |
+| tests | 0 |
+| verify | linux x86_64 wheel size < 50MB，glibc 2.17 兼容 |
+
+#### Step M5.3 — wheel artifact 上传 + GitHub Release
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1 |
+| LoC | +30 |
+| tests | 0 |
+| verify | tag push 触发 release，3 个 wheel 附在 release |
+
+#### Step M5.4 — README 安装章节
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2 (`FNM_RE/README.md` + 根 `README.md` 链接) |
+| LoC | +80 |
+| tests | 0 |
+| verify | 文档 render 后样例可执行 |
+
+---
+
+## 9. P1 — Rust 代码质量（可并行）
+
+### Step P1.1.1 — 清 phase1 6 warnings
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 3-5 |
+| LoC | ±30 |
+| verify | `cargo build -p fnm-phase1 2>&1 | grep -c warning` 输出 0 |
+
+### Step P1.1.2 — 清 phase2 20 warnings
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 8-10 |
+| LoC | ±100 |
+| verify | `cargo build -p fnm-phase2 2>&1 | grep -c warning` 输出 0 |
+
+### Step P1.1.3 — 清 phase4 11 warnings
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 5-7 |
+| LoC | ±60 |
+| verify | `cargo build -p fnm-phase4 2>&1 | grep -c warning` 输出 0 |
+
+### Step P1.2.1-5 — phase3 5 个 cascade ignored tests 修复
+
+每个 step：
+| 字段 | 值 |
+|---|---|
+| commits | 1-2 |
+| files | 3-6 |
+| LoC | +50-200 |
+| tests | 解 ignore + 加单测 |
+| verify | 对应 parity test pass |
+
+涉及测试：
+1. `biopolitics_phase3_body_anchors_parity`
+2. `biopolitics_phase3_chapter_contracts_parity`
+3. `biopolitics_phase3_note_links_parity`
+4. `biopolitics_phase3_summary_parity`
+5. 详见 [`known_python_bugs.md`](../fnm_re_rs/fnm-phase3/tests/known_python_bugs.md) §7
+
+### Step P1.3.1 — PDFium binary 集成
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2 (`fnm-core/Cargo.toml` + workflow) |
+| LoC | +30 |
+| verify | `cargo test -p fnm-phase1 chapter_skeleton::pdf_font` 通过 |
+
+### Step P1.3.2 — llm_book_type_verify e2e（需 API key）
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1 |
+| LoC | ±20 |
+| verify | 设 `OPENAI_API_KEY` 后 `real_book_type_verify` 通过 |
+
+---
+
+## 10. P2 — 工程化补全（可推迟）
+
+### Step P2.1.1-3 — fnm-py pytest e2e 套件
+
+3 个 step，每个 step:
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 2-3 |
+| LoC | +100-200 |
+| tests | 3-5 |
+
+文件列表：
+- `tests/test_pipeline_e2e.py`（Biopolitics 全 phase）
+- `tests/test_llm_repair_pyo3.py`（NoopRenderer）
+- `tests/test_shadow_mode.py`（env on/off）
+
+### Step P2.2.1-3 — Python ↔ Rust shadow diff 完整版
+
+3 个 step：
+1. `dataclass_to_dict_recursive(obj)` helper（200 行）
+2. `compare_python_vs_rust_snapshots(py_obj, rust_dict)` diff 函数（300 行）
+3. e2e diff 报告 + 单测
+
+### Step P2.3.1 — 用户面向 README 重写
+
+| 字段 | 值 |
+|---|---|
+| commits | 1 |
+| files | 1（`FNM_RE/README.md`） |
+| LoC | +150 |
+| tests | 0 |
+
+---
+
+## 11. 依赖图
+
+```
+M1.1 ─ M1.2 ─ M1.3 ─ ... ─ M1.12         M1 内部 step 顺序无强依赖，建议按风险升序：
+  │                                       M1.1-M1.7 先（薄包装）
+  │                                       M1.8 中（pipeline 入口）
+  └─→ M2.1 ─ M2.2 ─ M2.3 ─ M2.4 ─ M2.5    M1.9 (LLM repair)
+       │                                   M1.10 (build_doc_status，大块）
+       │                                   M1.11 (page_translate，大块）
+       │   M3.1 ─ M3.2 ─ M3.3 ─ M3.4       M1.12 (post_translate_checks)
+       │   │
+       └───┴───→ M4.1 ─ M4.2 ─ M4.3 ─ M4.4
+                                     │
+                                     └─→ M5.1 ─ M5.2 ─ M5.3 ─ M5.4
+
+P1.* / P2.* 不依赖 M1-M5，可任何时机插入
 ```
 
-主要类别：
-- dead code（never used const/fn/regex）
-- unused mut
-- unused fields
-
-按 `cargo fix --lib -p fnm-phaseN` 半自动修，逐 crate verify 940 tests 不退步。
-
-### P1.2：phase3 5 个 ignored cascade tests — 估 2-3 天（需追根因）
-
-5 个 parity tests 被 `#[ignore]` 标记，等 phase2 cascade 修复：
-- `biopolitics_phase3_body_anchors_parity`
-- `biopolitics_phase3_chapter_contracts_parity`
-- `biopolitics_phase3_note_links_parity`
-- `biopolitics_phase3_summary_parity`
-- 详见 [`known_python_bugs.md`](../fnm_re_rs/fnm-phase3/tests/known_python_bugs.md) §7
-
-工作：逐个跑 ignore 测试，diff Python golden，定位 phase2 上游 cascade，按 CLAUDE.md §11 区分（数据统计 bug vs 模式过宽）。
-
-### P1.3：PDFium binary 集成 — 估 0.5 天
-
-`fnm-phase1::pdf_font::tests::empty_for_missing_pdf` ignored 等 PDFium binary。
-- 加 PDFium bundled feature 到 fnm-core
-- 或在 CI 安装 PDFium runtime
-
 ---
 
-## 5. P2 任务分解（工程化，可推迟）
-
-### P2.1：fnm-py pytest e2e 套件 — 估 1 天
-
-替代 `smoke_test.py` ad-hoc 脚本：
-- `fnm_re_rs/fnm-py/tests/test_pipeline_e2e.py` — 用 Biopolitics fixture 跑完整 6-phase + DB persist
-- `tests/test_llm_repair_pyo3.py` — NoopRenderer + 真实 cluster
-- `tests/test_shadow_mode.py` — env on/off
-
-集成到 pytest + CI。
-
-### P2.2：完整 Python ↔ Rust shadow diff 工具 — 估 1-2 天
-
-当前 `run_with_shadow` 只跑 Rust + 写日志。完整 diff 需：
-- 接受 Python `ModulePipelineSnapshot` 对象
-- 把它转 dict（dataclasses.asdict 或手动）
-- 与 Rust dict 逐字段 diff，按严重度（critical / warning / info）报告
-
-`FNM_RE.compare_python_vs_rust_snapshots(py_obj, rust_dict) -> diff_report`
-
-### P2.3：用户文档 — 估 0.5 天
-
-重写 `FNM_RE/README.md`：
-- 安装指南（maturin develop / pip install wheel）
-- 4 个公开 API 的使用样例
-- shadow mode 指南
-- 故障排查
-
----
-
-## 6. 验收 checklist（P0 全完成后）
+## 12. 验收 checklist（P0 全完成后）
 
 - [ ] `cargo test --workspace` ≥ 940 passed / 0 failed
-- [ ] `pip install dist/fnm_re_rs-*.whl` 一键装好
+- [ ] `pytest fnm_re_rs/fnm-py/tests/` ≥ 12 passed
+- [ ] `pip install dist/fnm_re_rs-*.whl` 在 macOS arm64 + linux x86_64 一键装好
 - [ ] `python -c "import fnm_re_rs; fnm_re_rs.run_pipeline_from_db_json('x.db', 'doc-id')"` 跑通
-- [ ] `FNM_RE/` 只剩 4 个条目：`__init__.py` / `README.md` / `dev/` / `__pycache__/`
-- [ ] `grep -r "from FNM_RE.app\|from FNM_RE.stages\|from FNM_RE.modules\|from FNM_RE.shared" --include="*.py" .` 返回 0 行（除归档/）
+- [ ] `FNM_RE/` 只剩 ≤4 个条目：`__init__.py` / `README.md` / `dev/` / `__pycache__/`
+- [ ] `grep -r "from FNM_RE.\(app\|stages\|modules\|shared\)" --include="*.py" . | grep -v 归档/` 返回 0 行
 - [ ] Biopolitics e2e 12/12 chapter byte-equal Python golden（用归档前的 golden fixture）
 - [ ] web/ 6 个路由 smoke 通过
 - [ ] scripts/test_fnm_real_batch.py 跑 ≥3 本书通过
@@ -262,85 +605,37 @@ cargo build --workspace 2>&1 | grep "warning:" | sort -u
 
 ---
 
-## 7. 依赖图
-
-```
-                    ┌───────────────────────┐
-                    │  M1: pyo3 暴露 12 API │
-                    │  (5-6 days)           │
-                    └──────────┬────────────┘
-                               │
-              ┌────────────────┼────────────────┐
-              ▼                ▼                ▼
-   ┌──────────────────┐ ┌─────────────┐ ┌───────────────────┐
-   │ M2: caller 切换   │ │ M3: DB load │ │ P1.1: 清 warnings │
-   │ (1-2 days)       │ │ (1-2 days)  │ │ (0.5 day)         │
-   └──────────┬───────┘ └──────┬──────┘ └───────────────────┘
-              └─────────┬──────┘
-                        ▼
-              ┌──────────────────────┐
-              │ M4: 归档 app/ + ...  │
-              │ (0.5-1 day)          │
-              └──────────┬───────────┘
-                         ▼
-              ┌──────────────────────┐
-              │ M5: wheel 发布       │
-              │ (0.5-1 day)          │
-              └──────────────────────┘
-
-P1.2 (phase3 cascade) / P1.3 (PDFium) / P2.* 可并行
-```
-
----
-
-## 8. 工时估计汇总
-
-| Milestone | 估计 | 关键路径 |
-|---|---:|---|
-| M1: pyo3 12 API | 5-6 d | ✓ |
-| M2: caller 切换 | 1-2 d | ✓ |
-| M3: DB-driven load | 1-2 d | ✓ |
-| M4: 归档 | 0.5-1 d | ✓ |
-| M5: wheel 发布 | 0.5-1 d | ✓ |
-| **P0 合计** | **8-12 d** | — |
-| P1.1: warnings | 0.5 d | 并行 |
-| P1.2: phase3 cascade | 2-3 d | 并行 |
-| P1.3: PDFium | 0.5 d | 并行 |
-| **P1 合计** | **3-4 d** | 可与 P0 并行 |
-| P2.1: pytest 套件 | 1 d | 并行 |
-| P2.2: shadow diff | 1-2 d | 并行 |
-| P2.3: 用户文档 | 0.5 d | 并行 |
-| **P2 合计** | **2.5-3.5 d** | 可推迟 |
-
-**single-developer full-time grand total**：
-- 仅 P0：8-12 天（约 2 周）
-- P0 + P1：11-16 天（约 3 周）
-- P0 + P1 + P2：13-19 天（约 3-4 周）
-
----
-
-## 9. 风险与缓解
+## 13. 风险与缓解
 
 | 风险 | 概率 | 影响 | 缓解 |
 |---|---|---|---|
-| M1.C 中 `build_doc_status` / `prepare_page_translate_jobs` Python 实现含隐式约束 Rust 漏译 | 中 | M2 caller smoke 失败 | 严格 snapshot diff，参考 P2.2 shadow tool |
-| M2 caller 切换破坏 web 生产路径 | 中 | 生产中断 | 先在 staging 环境验证 1 周；保留 Python `FNM_RE/app/` 一份归档可回滚 |
-| M3 SQLite schema 不一致 Rust 读不到 raw_pages | 低 | M1 全卡 | M3.1 先单独跑 schema validator |
-| pyo3 cdylib 跨平台 build | 中 | M5 wheel 失败 | macOS arm64 已验证；linux x86_64 用 manylinux docker；windows 可选不发 |
+| M1.10 `build_doc_status` 大块 port 漏译隐式约束 | 中 | M2 caller smoke 失败 | 步骤拆 3 个 commit；snapshot diff 验证 |
+| M1.11 `page_translate` 含翻译任务调度，pyo3 跨 FFI 复杂 | 中 | M1 拖延 | 先 port build_unit_progress（最简），逐步上 |
+| M2 caller 切换破坏 web 生产路径 | 中 | 生产中断 | 保留 Python `归档/FNM_RE/python/` 一份可回滚 |
+| M3 SQLite schema 不一致 Rust 读不到 raw_pages | 低 | M1.8 卡 | M3.1 先单独跑 schema validator |
+| pyo3 cdylib manylinux2014 build | 中 | M5 wheel 失败 | macOS arm64 已验证；linux 用 manylinux docker；windows 可选不发 |
 | phase3 cascade 涉及 phase2 数据 bug | 中 | P1.2 拖延 | 标 known issue 不阻断 P0；专项 phase2 audit |
 
 ---
 
-## 10. 下一步行动
+## 14. 下一步行动
 
-按依赖图，**第一步是 M1.A（薄包装 8 个 API）**——大部分只需 pyo3 adapter + DB 读路径，不涉及新业务逻辑。
+按依赖图，**M1.1-M1.7（薄包装 7 个 API）**是最低风险起点：
+- 每个 step 1 commit / ~50-80 行 / 1 测试
+- 不涉及新业务逻辑，仅 DB 读 + pyo3 adapter + Python wrapper
 
-建议拆为 8 个独立 PR（每个 API 1 个），每个 PR 含：
-1. 新 pyo3 函数（fnm-py/src/lib.rs）
-2. `FNM_RE/__init__.py` 旧 lazy-import 改为 Rust 调用
-3. 1 个 pytest 用例（用 Biopolitics fixture 跑过即可）
-4. 验证 workspace 940 tests 仍 0 failed
+每个 step 模板：
 
-每天合 1-2 个 PR，M1.A 约 1 周完成。然后 M1.B（1 天）+ M1.C（2-3 天）。
+1. Rust 侧加 `#[pyfunction]`（fnm_re_rs/fnm-py/src/lib.rs）
+2. fnm-orchestrator 暴露对应 helper（如需要）
+3. Python 侧 `FNM_RE/__init__.py` 旧 lazy-import 改为：
+   ```python
+   def load_doc_structure(*args, **kwargs):
+       import fnm_re_rs
+       return json.loads(fnm_re_rs.load_doc_structure_json(...))
+   ```
+4. 加 pytest 用例（fnm_re_rs/fnm-py/tests/test_load_doc_structure.py）
+5. `cargo test --workspace` 验证 940 不退步
+6. commit
 
-完整 P0 预期 2 周收官；M5 后此文档归档到 `归档/FNM_RE/docs/`。
+完成 M1.1 后我会再次询问继续 M1.2 还是其他。
