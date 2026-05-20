@@ -584,6 +584,7 @@ class ResolvedModelSpec:
     request_overrides: dict = field(default_factory=dict)
     pool_name: str = ""
     slot_index: int = 0
+    rate_limits: dict = field(default_factory=dict)  # {rpm, rpd, tpm}
 
 
 def _thinking_payload_for_provider(provider: str, enabled: bool, *, request_format: str = "") -> dict:
@@ -676,7 +677,10 @@ def _resolve_builtin_model_spec(
         stream_mode=str(model.get("stream_mode", "chat_json") or "chat_json"),
         companion_chat_model_key=str(model.get("companion_chat_model_key", "") or "").strip(),
         request_overrides=request_overrides,
+        rate_limits=dict(model.get("rate_limits", {}) or {}),
     )
+    return spec
+
 
 
 def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: str) -> ResolvedModelSpec:
@@ -742,6 +746,7 @@ def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: s
         ),
         companion_chat_model_key=str(builtin_spec.get("companion_chat_model_key", "") or "").strip(),
         request_overrides=request_overrides,
+        rate_limits=dict(builtin_spec.get("rate_limits", {}) or {}),
     )
 
 

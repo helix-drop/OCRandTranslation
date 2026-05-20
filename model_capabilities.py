@@ -13,6 +13,9 @@ def _chat_model(
     selectable: bool = True,
     thinking: bool = False,
     companion: str | None = None,
+    rpm: int = 0,
+    rpd: int = 0,
+    tpm: int = 0,
 ) -> dict:
     spec = {
         "id": model_id,
@@ -27,6 +30,7 @@ def _chat_model(
         "translation_selectable": selectable,
         "fnm_selectable": False,
         "visual_selectable": False,
+        "rate_limits": {"rpm": rpm, "rpd": rpd, "tpm": tpm},
     }
     if thinking:
         spec["supports_thinking_toggle"] = True
@@ -70,6 +74,9 @@ def _vision_model(
     thinking: bool = False,
     companion: str | None = None,
     supports_translation: bool = True,
+    rpm: int = 0,
+    rpd: int = 0,
+    tpm: int = 0,
 ) -> dict:
     spec = {
         "id": model_id,
@@ -84,6 +91,7 @@ def _vision_model(
         "translation_selectable": translation_selectable,
         "fnm_selectable": selectable,
         "visual_selectable": selectable,
+        "rate_limits": {"rpm": rpm, "rpd": rpd, "tpm": tpm},
     }
     if thinking:
         spec["supports_thinking_toggle"] = True
@@ -438,6 +446,9 @@ _MODEL_SPECS = {
         "Gemini 3.1 Flash Lite",
         "gemini",
         translation_selectable=True,
+        rpm=15,
+        rpd=500,
+        tpm=250_000,
     ),
 }
 

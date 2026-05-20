@@ -974,6 +974,7 @@ def _resolved_spec_to_model_args(spec) -> dict:
         "base_url": str(spec.base_url or "").strip(),
         "request_overrides": dict(spec.request_overrides or {}),
         "display_label": str(spec.display_label or spec.model_id or "").strip(),
+        "rate_limits": dict(getattr(spec, "rate_limits", {}) or {}),
     }
 
 
@@ -1499,6 +1500,19 @@ def request_llm_repair_actions(
                 ],
             }
             _merge_overrides_into_chat_kwargs(create_kwargs, request_overrides)
+            # 主动节流（RPM/TPM）
+            rate_cfg = _args.get("rate_limits", {}) or {}
+            if rate_cfg.get("rpm") or rate_cfg.get("tpm"):
+                from translation.rate_limiter import get_limiter
+                limiter = get_limiter(
+                    _args.get("model_id", ""),
+                    rpm=rate_cfg.get("rpm", 0),
+                    rpd=rate_cfg.get("rpd", 0),
+                    tpm=rate_cfg.get("tpm", 0),
+                )
+                # 预估 token ≈ 输入长度 + max_tokens（粗略）
+                estimated_tokens = len(str(content)) // 2 + LLM_REPAIR_MAX_OUTPUT_TOKENS
+                limiter.acquire(tokens=estimated_tokens, timeout=120.0)
             with _time_limit(60):
                 return client.chat.completions.create(**create_kwargs)
 
