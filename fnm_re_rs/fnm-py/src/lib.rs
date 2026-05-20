@@ -402,6 +402,40 @@ fn list_diagnostic_entries_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 从 DB 读取单页 diagnostic entry。
+///
+/// 如果找不到且 allow_fallback=true，返回 JSON null。
+///
+/// ←→ Python `FNM_RE/__init__.py::get_diagnostic_entry_for_page`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, bp, allow_fallback=true))]
+fn get_diagnostic_entry_for_page_json(
+    db_path: &str,
+    doc_id: &str,
+    bp: i64,
+    allow_fallback: bool,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let entries = repo
+        .list_fnm_diagnostic_pages(doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("list_fnm_diagnostic_pages: {}", e)))?;
+
+    let matched = entries.into_iter().find(|e| e._page_bp == bp);
+
+    match matched {
+        Some(entry) => serde_json::to_string(&entry)
+            .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e))),
+        None if allow_fallback => Ok("null".to_string()),
+        None => Err(PyRuntimeError::new_err(format!(
+            "diagnostic entry not found for doc_id '{}' page_bp {}",
+            doc_id, bp
+        ))),
+    }
+}
+
 /// 从 DB 读取 diagnostic notes。
 ///
 /// 返回 DiagnosticNoteRecord 数组 JSON。
@@ -442,6 +476,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(build_export_zip_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(list_diagnostic_entries_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(list_diagnostic_notes_for_doc_json, m)?)?;
+    m.add_function(wrap_pyfunction!(get_diagnostic_entry_for_page_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }

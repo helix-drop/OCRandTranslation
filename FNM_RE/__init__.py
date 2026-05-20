@@ -179,9 +179,20 @@ def list_diagnostic_entries_for_doc(*args, **kwargs):
 
 
 def get_diagnostic_entry_for_page(*args, **kwargs):
-    from FNM_RE.app.mainline import get_phase6_diagnostic_entry_for_doc as impl
+    """←→ Rust fnm_re_rs.get_diagnostic_entry_for_page_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    bp = args[1] if len(args) > 1 else kwargs.get("bp", 0)
+    allow_fallback = kwargs.get("allow_fallback", True)
+    result_json = fnm_re_rs.get_diagnostic_entry_for_page_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        bp,
+        allow_fallback,
+    )
+    return _json.loads(result_json) if result_json != "null" else None
 
 
 def list_diagnostic_notes_for_doc(*args, **kwargs):
