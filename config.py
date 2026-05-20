@@ -96,6 +96,7 @@ QWEN_BASE_URLS = {
     "us": "https://dashscope-us.aliyuncs.com/compatible-mode/v1",
 }
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 CUSTOM_MODEL_PROVIDER_TYPES = {
     "qwen",
     "qwen_mt",
@@ -105,6 +106,7 @@ CUSTOM_MODEL_PROVIDER_TYPES = {
     "openai_compatible",
     "mimo",
     "mimo_token_plan",
+    "gemini",
 }
 CUSTOM_MODEL_API_KEY_MODES = {
     "builtin_dashscope",
@@ -843,6 +845,14 @@ def get_kimi_api_key() -> str:
 
 def set_kimi_api_key(key: str):
     _set_config_value("kimi_api_key", key)
+
+
+def get_gemini_key() -> str:
+    return _get_config_value("gemini_key", "")
+
+
+def set_gemini_key(key: str):
+    _set_config_value("gemini_key", key)
 
 
 def get_translation_model_pool() -> list[dict]:

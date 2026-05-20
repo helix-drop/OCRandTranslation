@@ -15,8 +15,9 @@ from config import (
     MIMO_BASE_URL,
     GLM_BASE_URL,
     KIMI_BASE_URL,
+    GEMINI_BASE_URL,
     get_paddle_token, get_deepseek_key, get_dashscope_key, get_mimo_api_key,
-    get_glm_api_key, get_kimi_api_key,
+    get_glm_api_key, get_kimi_api_key, get_gemini_key,
     get_glossary,
     get_translation_model_pool, get_fnm_model_pool,
     get_translate_parallel_enabled, get_translate_parallel_limit,
@@ -653,6 +654,9 @@ def _resolve_builtin_model_spec(
     elif provider == "kimi":
         api_key = get_kimi_api_key()
         base_url = KIMI_BASE_URL
+    elif provider == "gemini":
+        api_key = get_gemini_key()
+        base_url = GEMINI_BASE_URL
     else:
         api_key = get_deepseek_key()
         base_url = DEEPSEEK_BASE_URL

@@ -432,6 +432,13 @@ _MODEL_SPECS = {
         supports_translation=False,
         companion="moonshot-v1-128k",
     ),
+    # Gemini (Google AI Studio)
+    "gemini-3.1-flash-lite": _vision_model(
+        "gemini-3.1-flash-lite",
+        "Gemini 3.1 Flash Lite",
+        "gemini",
+        translation_selectable=True,
+    ),
 }
 
 
@@ -446,7 +453,7 @@ MODELS = {
 
 
 DEFAULT_TRANSLATION_MODEL_KEY = "deepseek-chat"
-DEFAULT_VISUAL_MODEL_KEY = "qwen3.6-plus"
+DEFAULT_VISUAL_MODEL_KEY = "gemini-3.1-flash-lite"
 
 
 def get_model_spec(key: str, *, capability: str | None = None) -> dict:
