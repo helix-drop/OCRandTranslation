@@ -258,6 +258,60 @@ fn load_doc_structure_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 审计 Phase 6 导出。
+///
+/// - `db_path`: SQLite 数据库文件路径
+/// - `doc_id`: 文档 ID
+/// - `slug`: 文档 slug（为空时使用 doc_id）
+/// - `zip_path`: zip 文件路径（可选）
+/// - `zip_bytes`: zip 文件字节（可选）
+///
+/// 返回 ExportAuditReportRecord JSON 字符串。
+///
+/// ←→ Python `FNM_RE/__init__.py::audit_export_for_doc`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, slug="", zip_path=None, zip_bytes=None))]
+fn audit_export_for_doc_json(
+    db_path: &str,
+    doc_id: &str,
+    slug: &str,
+    zip_path: Option<&str>,
+    zip_bytes: Option<&[u8]>,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+    let slug = if slug.is_empty() { doc_id } else { slug };
+
+    let phase6 = fnm_orchestrator::load_phase6_structure(&repo, doc_id, false)
+        .map_err(|e| PyRuntimeError::new_err(format!("load_phase6_structure: {}", e)))?;
+
+    let payload: Option<Vec<u8>> = if let Some(bytes) = zip_bytes {
+        Some(bytes.to_vec())
+    } else if let Some(path_str) = zip_path {
+        let p = Path::new(path_str);
+        if !path_str.is_empty() && p.exists() {
+            Some(
+                std::fs::read(p)
+                    .map_err(|e| PyRuntimeError::new_err(format!("read zip file: {}", e)))?,
+            )
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    let (report, _summary) = fnm_phase6::export_audit::audit_phase6_export(
+        &phase6,
+        slug,
+        payload.as_deref(),
+    );
+
+    serde_json::to_string(&report)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -271,6 +325,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run_pipeline_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_pipeline_for_doc_with_llm_repair_json, m)?)?;
     m.add_function(wrap_pyfunction!(load_doc_structure_json, m)?)?;
+    m.add_function(wrap_pyfunction!(audit_export_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }

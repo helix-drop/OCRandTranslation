@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 fnm-core = { path = "../fnm-core" }
 fnm-phase1 = { path = "../fnm-phase1" }
 fnm-orchestrator = { path = "../fnm-orchestrator" }
+fnm-phase6 = { path = "../fnm-phase6" }
 fnm-llm-repair = { path = "../fnm-llm-repair" }
 
 pyo3 = { version = "0.21", features = ["extension-module", "abi3-py38"] }

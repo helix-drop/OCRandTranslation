@@ -133,9 +133,22 @@ def run_post_translate_export_checks_for_doc(*args, **kwargs):
 
 
 def audit_export_for_doc(*args, **kwargs):
-    from FNM_RE.app.mainline import audit_phase6_export_for_doc as impl
+    """←→ Rust fnm_re_rs.audit_export_for_doc_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    slug = kwargs.get("slug", "")
+    zip_path = kwargs.get("zip_path", "") or ""
+    zip_bytes = kwargs.get("zip_bytes")
+    result_json = fnm_re_rs.audit_export_for_doc_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        slug,
+        zip_path if zip_path else None,
+        zip_bytes,
+    )
+    return _json.loads(result_json)
 
 
 def list_diagnostic_entries_for_doc(*args, **kwargs):
