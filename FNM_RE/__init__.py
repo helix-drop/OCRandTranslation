@@ -139,9 +139,18 @@ def load_doc_structure(*args, **kwargs):
 
 
 def build_doc_status(*args, **kwargs):
-    from FNM_RE.app.mainline import build_phase6_status_for_doc as impl
+    """←→ Rust fnm_re_rs.build_doc_status_json"""
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    start_phase = kwargs.get("start_phase", "toc")
+    result_json = fnm_re_rs.build_doc_status_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        start_phase,
+    )
+    import json as _json
+    return _json.loads(result_json)
 
 
 def build_export_bundle_for_doc(*args, **kwargs):

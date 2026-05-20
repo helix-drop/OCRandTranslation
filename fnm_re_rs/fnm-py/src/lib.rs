@@ -1,3 +1,5 @@
+#![recursion_limit = "512"]
+
 //! `fnm-py` — pyo3 Python binding for `fnm-orchestrator`。
 //!
 //! ←→ Python `FNM_RE/__init__.py`：从 Python 调用 Rust pipeline。
@@ -684,6 +686,161 @@ fn run_llm_repair_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 构建文档状态摘要（含 Phase4/6 gate 字段）。
+///
+/// ←→ Python `FNM_RE/__init__.py::build_doc_status`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, _start_phase="toc"))]
+fn build_doc_status_json(
+    db_path: &str,
+    doc_id: &str,
+    _start_phase: &str,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+
+    let phase6 = fnm_orchestrator::load_phase6_structure(&repo, doc_id, false)
+        .map_err(|e| PyRuntimeError::new_err(format!("load phase6: {}", e)))?;
+
+    let validation_json: Option<serde_json::Value> = repo
+        .get_latest_fnm_run(doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("get_latest_fnm_run: {}", e)))?
+        .and_then(|r| {
+            r.validation_json
+                .and_then(|s| serde_json::from_str(&s).ok())
+        });
+
+    let toc_export_coverage = validation_json
+        .as_ref()
+        .and_then(|v| v.get("summary"))
+        .and_then(|s| s.get("toc_export_coverage_summary"))
+        .or_else(|| {
+            validation_json
+                .as_ref()
+                .and_then(|v| v.get("toc_export_coverage_summary"))
+        })
+        .cloned()
+        .unwrap_or(serde_json::Value::Null);
+
+    let s = &phase6.status;
+    let summary = &phase6.summary;
+    let toc_export = if toc_export_coverage.is_object() {
+        let obj = toc_export_coverage.as_object().unwrap();
+        serde_json::json!({
+            "resolved_body_items": obj.get("resolved_body_items").and_then(|v| v.as_i64()).unwrap_or(0),
+            "exported_body_items": obj.get("exported_body_items").and_then(|v| v.as_i64()).unwrap_or(0),
+            "missing_body_items_preview": obj.get("missing_body_items_preview")
+                .and_then(|v| v.as_array())
+                .map(|a| a.iter().take(8).cloned().collect::<Vec<_>>())
+                .unwrap_or_default(),
+        })
+    } else {
+        serde_json::Value::Null
+    };
+
+    fn or_empty(v: serde_json::Value) -> serde_json::Value {
+        if v.is_null() || v.is_array() && v.as_array().unwrap().is_empty() {
+            serde_json::Value::Object(Default::default())
+        } else {
+            v
+        }
+    }
+
+    macro_rules! v {
+        ($val:expr) => { or_empty(serde_json::to_value(&$val).unwrap_or_default()) };
+    }
+
+    let payload = serde_json::json!({
+        "structure_state": &s.structure_state,
+        "review_counts": v!(&s.review_counts),
+        "blocking_reasons": &s.blocking_reasons,
+        "link_summary": v!(&s.link_summary),
+        "page_partition_summary": v!(&s.page_partition_summary),
+        "chapter_mode_summary": v!(&s.chapter_mode_summary),
+        "heading_review_summary": v!(&s.heading_review_summary),
+        "heading_graph_summary": v!(&s.heading_graph_summary),
+        "chapter_source_summary": v!(&s.chapter_source_summary),
+        "visual_toc_conflict_count": s.visual_toc_conflict_count,
+        "toc_export_coverage_summary": &toc_export,
+        "toc_alignment_summary": v!(&s.toc_alignment_summary),
+        "toc_semantic_summary": v!(&s.toc_semantic_summary),
+        "toc_role_summary": v!(&s.toc_role_summary),
+        "container_titles": &s.container_titles,
+        "post_body_titles": &s.post_body_titles,
+        "back_matter_titles": &s.back_matter_titles,
+        "toc_semantic_contract_ok": s.toc_semantic_contract_ok,
+        "toc_semantic_blocking_reasons": &s.toc_semantic_blocking_reasons,
+        "chapter_title_alignment_ok": s.chapter_title_alignment_ok,
+        "chapter_section_alignment_ok": s.chapter_section_alignment_ok,
+        "chapter_endnote_region_alignment_ok": s.chapter_endnote_region_alignment_ok,
+        "chapter_endnote_region_alignment_summary": v!(&s.chapter_endnote_region_alignment_summary),
+        "export_drift_summary": v!(&s.export_drift_summary),
+        "chapter_local_endnote_contract_ok": s.chapter_local_endnote_contract_ok,
+        "export_semantic_contract_ok": s.export_semantic_contract_ok,
+        "front_matter_leak_detected": s.front_matter_leak_detected,
+        "toc_residue_detected": s.toc_residue_detected,
+        "mid_paragraph_heading_detected": s.mid_paragraph_heading_detected,
+        "duplicate_paragraph_detected": s.duplicate_paragraph_detected,
+        "manual_toc_required": s.manual_toc_required,
+        "manual_toc_ready": s.manual_toc_ready,
+        "manual_toc_summary": v!(&s.manual_toc_summary),
+        "chapter_progress_summary": v!(&s.chapter_progress_summary),
+        "note_region_progress_summary": v!(&s.note_region_progress_summary),
+        "chapter_binding_summary": v!(&s.chapter_binding_summary),
+        "note_capture_summary": v!(&s.note_capture_summary),
+        "footnote_synthesis_summary": v!(&s.footnote_synthesis_summary),
+        "chapter_link_contract_summary": v!(&s.chapter_link_contract_summary),
+        "book_endnote_stream_summary": v!(&s.book_endnote_stream_summary),
+        "freeze_note_unit_summary": v!(&s.freeze_note_unit_summary),
+        "chapter_issue_counts": v!(&s.chapter_issue_counts),
+        "chapter_issue_summary": &s.chapter_issue_summary,
+        "page_count": s.page_count,
+        "chapter_count": s.chapter_count,
+        "section_head_count": s.section_head_count,
+        "review_count": s.review_count,
+        "export_ready_test": s.export_ready_test,
+        "export_ready_real": s.export_ready_real,
+        "summary": serde_json::json!({
+            "heading_review_summary": v!(&summary.heading_review_summary),
+            "heading_graph_summary": v!(&summary.heading_graph_summary),
+            "chapter_source_summary": v!(&summary.chapter_source_summary),
+            "toc_alignment_summary": v!(&summary.toc_alignment_summary),
+            "toc_semantic_summary": v!(&summary.toc_semantic_summary),
+            "toc_role_summary": v!(&summary.toc_role_summary),
+            "container_titles": &summary.container_titles,
+            "post_body_titles": &summary.post_body_titles,
+            "back_matter_titles": &summary.back_matter_titles,
+            "toc_semantic_contract_ok": summary.toc_semantic_contract_ok,
+            "toc_semantic_blocking_reasons": &summary.toc_semantic_blocking_reasons,
+            "chapter_title_alignment_ok": summary.chapter_title_alignment_ok,
+            "chapter_section_alignment_ok": summary.chapter_section_alignment_ok,
+            "export_bundle_summary": v!(&summary.export_bundle_summary),
+            "export_audit_summary": v!(&summary.export_audit_summary),
+            "chapter_progress_summary": v!(&s.chapter_progress_summary),
+            "note_region_progress_summary": v!(&s.note_region_progress_summary),
+            "chapter_binding_summary": v!(&s.chapter_binding_summary),
+            "note_capture_summary": v!(&s.note_capture_summary),
+            "footnote_synthesis_summary": v!(&s.footnote_synthesis_summary),
+            "chapter_link_contract_summary": v!(&s.chapter_link_contract_summary),
+            "book_endnote_stream_summary": v!(&s.book_endnote_stream_summary),
+            "freeze_note_unit_summary": v!(&s.freeze_note_unit_summary),
+            "chapter_issue_counts": v!(&s.chapter_issue_counts),
+            "chapter_issue_summary": &s.chapter_issue_summary,
+            "export_drift_summary": v!(&s.export_drift_summary),
+            "chapter_local_endnote_contract_ok": s.chapter_local_endnote_contract_ok,
+            "export_semantic_contract_ok": s.export_semantic_contract_ok,
+            "front_matter_leak_detected": s.front_matter_leak_detected,
+            "toc_residue_detected": s.toc_residue_detected,
+            "mid_paragraph_heading_detected": s.mid_paragraph_heading_detected,
+            "duplicate_paragraph_detected": s.duplicate_paragraph_detected,
+        }),
+    });
+
+    serde_json::to_string(&payload)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -705,6 +862,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_diagnostic_entry_for_page_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_doc_pipeline_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_llm_repair_json, m)?)?;
+    m.add_function(wrap_pyfunction!(build_doc_status_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }

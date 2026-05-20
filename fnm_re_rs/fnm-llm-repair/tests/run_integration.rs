@@ -66,6 +66,9 @@ impl Repository for StubRepo {
     fn list_fnm_heading_candidates(&self, _doc_id: &str) -> Result<Vec<HeadingCandidate>> {
         Ok(vec![])
     }
+    fn get_latest_fnm_run(&self, _doc_id: &str) -> Result<Option<FnmRunRecord>> {
+        Ok(None)
+    }
     fn replace_fnm_phase1_products(&self, _doc_id: &str, _payload: &Phase1Products) -> Result<()> {
         anyhow::bail!("not implemented")
     }

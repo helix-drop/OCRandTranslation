@@ -626,6 +626,45 @@ pub struct StructureReviewRecord {
     pub payload: Value,
 }
 
+/// fnm_runs 表行记录。
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FnmRunRecord {
+    #[serde(default)]
+    pub id: i64,
+    #[serde(default)]
+    pub doc_id: String,
+    #[serde(default)]
+    pub status: String,
+    #[serde(default)]
+    pub error_msg: Option<String>,
+    #[serde(default)]
+    pub page_count: i64,
+    #[serde(default)]
+    pub section_count: i64,
+    #[serde(default)]
+    pub note_count: i64,
+    #[serde(default)]
+    pub unit_count: i64,
+    #[serde(default)]
+    pub validation_json: Option<String>,
+    #[serde(default)]
+    pub structure_state: Option<String>,
+    #[serde(default)]
+    pub review_counts_json: Option<String>,
+    #[serde(default)]
+    pub blocking_reasons_json: Option<String>,
+    #[serde(default)]
+    pub link_summary_json: Option<String>,
+    #[serde(default)]
+    pub page_partition_summary_json: Option<String>,
+    #[serde(default)]
+    pub chapter_mode_summary_json: Option<String>,
+    #[serde(default)]
+    pub created_at: i64,
+    #[serde(default)]
+    pub updated_at: i64,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct StructureStatusRecord {
     #[serde(default)]

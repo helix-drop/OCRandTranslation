@@ -153,6 +153,11 @@ pub trait Repository {
     /// upsert documents 表（满足 fnm_* 表的外键约束）。
     /// ←→ Python `SQLiteRepository.upsert_document(doc_id, slug)`
     fn upsert_document(&self, doc_id: &str, slug: &str) -> Result<()>;
+
+    // ── fnm_runs ──
+    /// 获取最新一条 fnm_run 记录。
+    /// ←→ Python `SQLiteRepository.get_latest_fnm_run(doc_id)`
+    fn get_latest_fnm_run(&self, doc_id: &str) -> Result<Option<FnmRunRecord>>;
 }
 
 /// 把 Rust 端 heading_family_guess 映射到 schema CHECK 允许的 6 个值之一。
@@ -1450,5 +1455,45 @@ impl Repository for SqliteRepository {
             rusqlite::params![doc_id, slug],
         )?;
         Ok(())
+    }
+
+    fn get_latest_fnm_run(&self, doc_id: &str) -> Result<Option<FnmRunRecord>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT id, doc_id, status, error_msg, page_count, section_count, note_count, unit_count,
+                    validation_json, structure_state, review_counts_json, blocking_reasons_json,
+                    link_summary_json, page_partition_summary_json, chapter_mode_summary_json,
+                    created_at, updated_at
+             FROM fnm_runs
+             WHERE doc_id = ?1
+             ORDER BY updated_at DESC, id DESC
+             LIMIT 1",
+        )?;
+        let mut rows = stmt.query_map([doc_id], |row| {
+            Ok(FnmRunRecord {
+                id: row.get(0)?,
+                doc_id: row.get(1)?,
+                status: row.get(2)?,
+                error_msg: row.get(3)?,
+                page_count: row.get(4)?,
+                section_count: row.get(5)?,
+                note_count: row.get(6)?,
+                unit_count: row.get(7)?,
+                validation_json: row.get(8)?,
+                structure_state: row.get(9)?,
+                review_counts_json: row.get(10)?,
+                blocking_reasons_json: row.get(11)?,
+                link_summary_json: row.get(12)?,
+                page_partition_summary_json: row.get(13)?,
+                chapter_mode_summary_json: row.get(14)?,
+                created_at: row.get(15)?,
+                updated_at: row.get(16)?,
+            })
+        })?;
+        match rows.next() {
+            Some(Ok(record)) => Ok(Some(record)),
+            Some(Err(e)) => Err(e.into()),
+            None => Ok(None),
+        }
     }
 }

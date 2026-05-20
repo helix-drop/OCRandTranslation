@@ -69,6 +69,10 @@ pub fn run_pipeline_for_doc<R: Repository>(
         ..Default::default()
     };
 
+    // ── 0. 确保 documents 行存在（满足 fnm_* 表的外键）──
+    repo.upsert_document(doc_id, &config.slug)
+        .map_err(|e| OrchestratorError::Phase1(anyhow::anyhow!("upsert document: {}", e)))?;
+
     // ── Phase 1 ──
     let phase1 = pipeline::run_phase1(&raw_pages, &toc_items, &config)?;
     let phase1_products = Phase1Products {
