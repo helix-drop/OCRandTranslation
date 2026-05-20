@@ -22,6 +22,8 @@
 
 pub mod cluster;
 pub mod llm_client;
+pub mod render;
+pub mod trace;
 pub mod override_materializer;
 pub mod page_context;
 pub mod prompt_builder;

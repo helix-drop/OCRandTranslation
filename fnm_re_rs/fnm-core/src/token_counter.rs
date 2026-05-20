@@ -154,6 +154,14 @@ pub fn get_usage_summary() -> serde_json::Value {
     })
 }
 
+/// 获取所有用量记录副本。与 Python 全局 `_counts` 等价。
+pub fn get_usage_records() -> Vec<UsageRecord> {
+    match USAGE_RECORDS.lock() {
+        Ok(g) => g.clone(),
+        Err(_) => Vec::new(),
+    }
+}
+
 /// 清空用量记录。与 Python `clear_usage` 一致。
 pub fn clear_usage() {
     if let Ok(mut records) = USAGE_RECORDS.lock() {
@@ -185,5 +193,55 @@ mod tests {
         let total = &summary["total"];
         assert_eq!(total["prompt_tokens"], 100);
         assert_eq!(total["completion_tokens"], 50);
+    }
+
+    #[test]
+    fn get_usage_records_empty() {
+        clear_usage();
+        let records = get_usage_records();
+        assert!(records.is_empty());
+    }
+
+    #[test]
+    fn get_usage_records_after_record() {
+        clear_usage();
+        record_usage("records_test_stage", "gpt-4o", "openai", 200, 100, 300, 2, 500);
+        let records = get_usage_records();
+        // 可能有并行测试污染，至少 1 条
+        assert!(records.len() >= 1);
+        let found = records.iter().any(|r| r.stage == "records_test_stage" && r.prompt_tokens == 200);
+        assert!(found, "expected records_test_stage record with prompt_tokens=200");
+    }
+
+    #[test]
+    fn usage_summary_by_stage() {
+        clear_usage();
+        record_usage("summary_stage_a", "model1", "openai", 10, 5, 15, 1, 100);
+        record_usage("summary_stage_a", "model1", "openai", 20, 10, 30, 1, 200);
+        record_usage("summary_stage_b", "model2", "anthropic", 5, 5, 10, 1, 50);
+        let summary = get_usage_summary();
+        let by_stage = summary.get("by_stage").unwrap();
+        assert!(by_stage.is_object());
+        // 弹性断言：并行测试可能污染全局状态，检查存在性而非精确值
+        let sa = by_stage.get("summary_stage_a").unwrap();
+        assert!(sa["request_count"].as_i64().unwrap() >= 2);
+        assert!(sa["prompt_tokens"].as_i64().unwrap() >= 30);
+        let sb = by_stage.get("summary_stage_b").unwrap();
+        assert!(sb["request_count"].as_i64().unwrap() >= 1);
+    }
+
+    #[test]
+    fn clear_usage_resets() {
+        clear_usage();
+        record_usage("clear_test_stage", "m", "p", 1, 1, 2, 1, 10);
+        assert!(!get_usage_records().is_empty());
+        clear_usage();
+        assert!(get_usage_records().is_empty());
+    }
+
+    #[test]
+    fn count_tokens_cjk_nonzero() {
+        let n = count_tokens("你好世界");
+        assert!(n > 0);
     }
 }

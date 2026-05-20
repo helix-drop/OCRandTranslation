@@ -6,6 +6,7 @@
 
 use anyhow::{Context, Result};
 use base64::Engine;
+use image::ImageFormat;
 use once_cell::sync::Lazy;
 use pdfium_render::prelude::*;
 use std::sync::Mutex;
@@ -17,6 +18,38 @@ pub static PDFIUM: Lazy<Mutex<Pdfium>> = Lazy::new(|| {
         .expect("无法加载 PDFium 二进制库");
     Mutex::new(Pdfium::new(bindings))
 });
+
+/// 渲染 PDF 单页为 data URL（JPEG，可调缩放）。
+///
+/// ←→ Python `_pdf_render_worker._render_repair_page`
+pub fn render_page_to_data_url(pdf_path: &str, page_index: i64, scale: f64) -> Result<String> {
+    let pdfium = PDFIUM.lock().expect("PDFIUM mutex poisoned");
+    let document = pdfium
+        .load_pdf_from_file(pdf_path, None)
+        .with_context(|| format!("加载 PDF 失败: {}", pdf_path))?;
+
+    let page = document
+        .pages()
+        .get(page_index as u16)
+        .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
+
+    // PDF size ≈ 612pt wide (letter), scale to desired pixel width
+    let target_width = (612.0 * scale).max(200.0) as i32;
+    let render_config = PdfRenderConfig::new()
+        .set_target_width(target_width)
+        .render_form_data(false);
+
+    let bitmap = page.render_with_config(&render_config)?;
+    let image = bitmap.as_image();
+
+    let mut jpeg_bytes: Vec<u8> = Vec::new();
+    image
+        .write_to(&mut std::io::Cursor::new(&mut jpeg_bytes), ImageFormat::Jpeg)
+        .context("JPEG 编码失败")?;
+
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&jpeg_bytes);
+    Ok(format!("data:image/jpeg;base64,{}", b64))
+}
 
 /// 渲染 PDF 单页为 base64 PNG（供 vision LLM 调用）。
 ///

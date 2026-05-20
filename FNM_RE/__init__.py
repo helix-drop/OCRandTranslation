@@ -315,6 +315,21 @@ def list_diagnostic_notes_for_doc(*args, **kwargs):
     return _json.loads(result_json)
 
 
+def dump_traces(example_dir, doc_id=""):
+    """←→ Rust fnm_re_rs.dump_traces_json"""
+    import fnm_re_rs
+
+    return fnm_re_rs.dump_traces_json(example_dir, doc_id)
+
+
+def write_summary_traces(example_dir, usage_summary, doc_id=""):
+    """←→ Rust fnm_re_rs.write_summary_traces_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.write_summary_traces_json(example_dir, _json.dumps(usage_summary, ensure_ascii=False)))
+
+
 def has_explicit_sup(markdown, marker):
     """←→ Rust fnm_re_rs.has_explicit_sup_json"""
     import fnm_re_rs
@@ -328,6 +343,122 @@ def recover_book(pages, pdf_path=""):
     import fnm_re_rs
 
     return _json.loads(fnm_re_rs.recover_book_json(_json.dumps(pages, ensure_ascii=False), pdf_path))
+
+
+def format_fnm_unit_label(unit):
+    """←→ Rust fnm_re_rs.format_fnm_unit_label_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return fnm_re_rs.format_fnm_unit_label_json(_json.dumps(unit, ensure_ascii=False))
+
+
+def format_fnm_unit_pages(unit):
+    """←→ Rust fnm_re_rs.format_fnm_unit_pages_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return fnm_re_rs.format_fnm_unit_pages_json(_json.dumps(unit, ensure_ascii=False))
+
+
+def collect_fnm_unit_failed_locations(unit):
+    """←→ Rust fnm_re_rs.collect_fnm_unit_failed_locations_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.collect_fnm_unit_failed_locations_json(
+        _json.dumps(unit, ensure_ascii=False),
+    ))
+
+
+def list_fnm_units_with_indices(*args, **kwargs):
+    """←→ Rust fnm_re_rs.list_fnm_units_with_indices_json"""
+    import json as _json
+    import fnm_re_rs
+
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    result_json = fnm_re_rs.list_fnm_units_with_indices_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+    )
+    return _json.loads(result_json)
+
+
+def sync_fnm_retry_state(*args, **kwargs):
+    """←→ Rust fnm_re_rs.sync_fnm_retry_state_json"""
+    import json as _json
+    import fnm_re_rs
+
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    result_json = fnm_re_rs.sync_fnm_retry_state_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+    )
+    return _json.loads(result_json)
+
+
+def rebuild_fnm_diagnostic_page_entries(*args, **kwargs):
+    """←→ Rust fnm_re_rs.rebuild_fnm_diagnostic_page_entries_json"""
+    import json as _json
+    import fnm_re_rs
+
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    pages = kwargs.get("pages", [])
+    result_json = fnm_re_rs.rebuild_fnm_diagnostic_page_entries_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        _json.dumps(pages, ensure_ascii=False),
+    )
+    return _json.loads(result_json)
+
+
+def build_fnm_body_unit_jobs(unit, pages):
+    """←→ Rust fnm_re_rs.build_fnm_body_unit_jobs_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.build_fnm_body_unit_jobs_json(
+        _json.dumps(unit, ensure_ascii=False),
+        _json.dumps(pages, ensure_ascii=False),
+    ))
+
+
+def apply_body_unit_translations(unit, translated_paragraphs):
+    """←→ Rust fnm_re_rs.apply_body_unit_translations_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.apply_body_unit_translations_json(
+        _json.dumps(unit, ensure_ascii=False),
+        _json.dumps(translated_paragraphs, ensure_ascii=False),
+    ))
+
+
+def apply_body_unit_entry_result(unit, entry, *, apply_only_unresolved=False):
+    """←→ Rust fnm_re_rs.apply_body_unit_entry_result_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.apply_body_unit_entry_result_json(
+        _json.dumps(unit, ensure_ascii=False),
+        _json.dumps(entry, ensure_ascii=False),
+        apply_only_unresolved,
+    ))
+
+
+def resolve_repair_model_args():
+    """←→ Rust fnm_re_rs.resolve_repair_model_args_json"""
+    import json as _json
+    import fnm_re_rs
+
+    return _json.loads(fnm_re_rs.resolve_repair_model_args_json())
+
+
+def render_repair_page_data_url(pdf_path, page_index, *, scale=1.3):
+    """←→ Rust fnm_re_rs.render_repair_page_data_url_json"""
+    import fnm_re_rs
+
+    return fnm_re_rs.render_repair_page_data_url_json(pdf_path, page_index, scale)
 
 
 def body_paragraphs(markdown):
@@ -632,8 +763,21 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "dump_traces",
+    "write_summary_traces",
     "has_explicit_sup",
     "recover_book",
+    "format_fnm_unit_label",
+    "format_fnm_unit_pages",
+    "collect_fnm_unit_failed_locations",
+    "list_fnm_units_with_indices",
+    "sync_fnm_retry_state",
+    "rebuild_fnm_diagnostic_page_entries",
+    "build_fnm_body_unit_jobs",
+    "apply_body_unit_translations",
+    "apply_body_unit_entry_result",
+    "resolve_repair_model_args",
+    "render_repair_page_data_url",
     "body_paragraphs",
     "definition_lines",
     "split_body_and_definitions",

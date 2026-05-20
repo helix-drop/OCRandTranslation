@@ -969,6 +969,27 @@ fn run_post_translate_export_checks_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 将全局 USAGE_RECORDS 逐条写入 llm_traces/ 目录。
+///
+/// ←→ Python `FNM_RE/shared/token_counter.py::dump_traces`
+#[pyfunction]
+#[pyo3(signature = (example_dir, doc_id=""))]
+fn dump_traces_json(example_dir: &str, doc_id: &str) -> i64 {
+    fnm_llm_repair::trace::dump::dump_traces(example_dir, doc_id)
+}
+
+/// 将 usage_summary 按阶段写入 llm_traces/ 目录。
+///
+/// ←→ Python `FNM_RE/shared/token_counter.py::write_summary_traces`
+#[pyfunction]
+fn write_summary_traces_json(example_dir: &str, usage_summary_json: &str) -> PyResult<String> {
+    let usage_summary: serde_json::Value = serde_json::from_str(usage_summary_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid usage_summary_json: {}", e)))?;
+    let written = fnm_llm_repair::trace::dump::write_summary_traces(example_dir, &usage_summary, "");
+    serde_json::to_string(&serde_json::json!({"written": written}))
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 检测 markdown 中是否已有 marker 的显式上标格式。
 ///
 /// ←→ Python `FNM_RE/modules/sup_recovery.py::_has_marker`
@@ -1098,6 +1119,160 @@ fn deserialize_segments_to_dicts_json(payload: &str) -> PyResult<String> {
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 格式化 unit 标签（纯 JSON dict 入/出）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::format_fnm_unit_label`
+#[pyfunction]
+fn format_fnm_unit_label_json(unit_json: &str) -> PyResult<String> {
+    let unit: serde_json::Value = serde_json::from_str(unit_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
+    let label = fnm_orchestrator::format_unit_label_value(&unit);
+    Ok(label)
+}
+
+/// 格式化 unit 页码范围（纯 JSON dict 入/出）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::format_fnm_unit_pages`
+#[pyfunction]
+fn format_fnm_unit_pages_json(unit_json: &str) -> PyResult<String> {
+    let unit: serde_json::Value = serde_json::from_str(unit_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
+    let pages = fnm_orchestrator::format_unit_pages_value(&unit);
+    Ok(pages)
+}
+
+/// 收集 unit 内失败段落位置（纯 JSON dict 入/出）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::collect_fnm_unit_failed_locations`
+#[pyfunction]
+fn collect_fnm_unit_failed_locations_json(unit_json: &str) -> PyResult<String> {
+    let unit: serde_json::Value = serde_json::from_str(unit_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
+    let locations = fnm_orchestrator::collect_unit_failed_locations_value(&unit);
+    serde_json::to_string(&locations)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 列出所有翻译单元（DB 驱动）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::list_fnm_units_with_indices`
+#[pyfunction]
+fn list_fnm_units_with_indices_json(db_path: &str, doc_id: &str) -> PyResult<String> {
+    let pool = fnm_core::db::open_pool(std::path::Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
+    let repo = fnm_core::db::SqliteRepository::new(pool);
+    let result = fnm_orchestrator::list_fnm_units_with_indices(&repo, doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("list_fnm_units_with_indices: {}", e)))?;
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 同步 retry 状态（返回 retry summary）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::sync_fnm_retry_state`
+#[pyfunction]
+fn sync_fnm_retry_state_json(db_path: &str, doc_id: &str) -> PyResult<String> {
+    let pool = fnm_core::db::open_pool(std::path::Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
+    let repo = fnm_core::db::SqliteRepository::new(pool);
+    let result = fnm_orchestrator::sync_fnm_retry_state(&repo, doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("sync_fnm_retry_state: {}", e)))?;
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 从 DB 读取 diagnostic pages BPs。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::rebuild_fnm_diagnostic_page_entries`
+#[pyfunction]
+fn rebuild_fnm_diagnostic_page_entries_json(
+    db_path: &str,
+    doc_id: &str,
+    pages_json: &str,
+) -> PyResult<String> {
+    let _pages: Vec<serde_json::Value> = serde_json::from_str(pages_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
+    let pool = fnm_core::db::open_pool(std::path::Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
+    let repo = fnm_core::db::SqliteRepository::new(pool);
+    let result = fnm_orchestrator::rebuild_fnm_diagnostic_page_entries(&repo, doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("rebuild_fnm_diagnostic_page_entries: {}", e)))?;
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 从 body unit 构建段级翻译任务（JSON 入/出）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::build_fnm_body_unit_jobs`
+#[pyfunction]
+fn build_fnm_body_unit_jobs_json(unit_json: &str, pages_json: &str) -> PyResult<String> {
+    let unit: serde_json::Value = serde_json::from_str(unit_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
+    let pages: Vec<serde_json::Value> = serde_json::from_str(pages_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
+    let result = fnm_orchestrator::build_fnm_body_unit_jobs(&unit, &pages);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 将译文注入 body unit（JSON 入/出）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::apply_body_unit_translations`
+#[pyfunction]
+fn apply_body_unit_translations_json(unit_json: &str, translated_paragraphs_json: &str) -> PyResult<String> {
+    let unit: serde_json::Value = serde_json::from_str(unit_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
+    let translated_paragraphs: Vec<serde_json::Value> = serde_json::from_str(translated_paragraphs_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid translated_paragraphs_json: {}", e)))?;
+    let result = fnm_orchestrator::apply_body_unit_translations(&unit, &translated_paragraphs);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 将流式翻译结果合并到 unit（JSON 入/出）。
+///
+/// ←→ Python `FNM_RE/app/page_translate.py::apply_body_unit_entry_result`
+#[pyfunction]
+#[pyo3(signature = (unit_json, entry_json, apply_only_unresolved=false))]
+fn apply_body_unit_entry_result_json(
+    unit_json: &str,
+    entry_json: &str,
+    apply_only_unresolved: bool,
+) -> PyResult<String> {
+    let unit: serde_json::Value = serde_json::from_str(unit_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
+    let entry: serde_json::Value = serde_json::from_str(entry_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid entry_json: {}", e)))?;
+    let result = fnm_orchestrator::apply_body_unit_entry_result(&unit, &entry, apply_only_unresolved);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 解析主模型参数（取 fnm pool 第一个 spec）。
+///
+/// ←→ Python `FNM_RE/modules/llm_repair.py::_resolve_repair_model_args`
+#[pyfunction]
+fn resolve_repair_model_args_json() -> PyResult<String> {
+    let args = fnm_llm_repair::llm_client::resolve_repair_model_args()
+        .map_err(|e| PyRuntimeError::new_err(format!("resolve_repair_model_args: {}", e)))?;
+    serde_json::to_string(&args)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 渲染 PDF 单页为 data:image/jpeg;base64,... data URL。
+///
+/// ←→ Python `FNM_RE/modules/pdf_render_subprocess.py::render_repair_page_data_url`
+#[pyfunction]
+#[pyo3(signature = (pdf_path, page_index, scale=1.3))]
+fn render_repair_page_data_url_json(
+    pdf_path: &str,
+    page_index: i64,
+    scale: f64,
+) -> PyResult<String> {
+    fnm_core::vision::pdfium::render_page_to_data_url(pdf_path, page_index, scale)
+        .map_err(|e| PyRuntimeError::new_err(format!("render_page: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -1124,6 +1299,8 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_post_translate_export_checks_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
+    m.add_function(wrap_pyfunction!(dump_traces_json, m)?)?;
+    m.add_function(wrap_pyfunction!(write_summary_traces_json, m)?)?;
     m.add_function(wrap_pyfunction!(has_explicit_sup_json, m)?)?;
     m.add_function(wrap_pyfunction!(recover_book_json, m)?)?;
     m.add_function(wrap_pyfunction!(body_paragraphs_json, m)?)?;
@@ -1132,6 +1309,17 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(replace_frozen_refs_json, m)?)?;
     m.add_function(wrap_pyfunction!(serialize_segments_json, m)?)?;
     m.add_function(wrap_pyfunction!(deserialize_segments_to_dicts_json, m)?)?;
+    m.add_function(wrap_pyfunction!(format_fnm_unit_label_json, m)?)?;
+    m.add_function(wrap_pyfunction!(format_fnm_unit_pages_json, m)?)?;
+    m.add_function(wrap_pyfunction!(collect_fnm_unit_failed_locations_json, m)?)?;
+    m.add_function(wrap_pyfunction!(list_fnm_units_with_indices_json, m)?)?;
+    m.add_function(wrap_pyfunction!(sync_fnm_retry_state_json, m)?)?;
+    m.add_function(wrap_pyfunction!(rebuild_fnm_diagnostic_page_entries_json, m)?)?;
+    m.add_function(wrap_pyfunction!(build_fnm_body_unit_jobs_json, m)?)?;
+    m.add_function(wrap_pyfunction!(apply_body_unit_translations_json, m)?)?;
+    m.add_function(wrap_pyfunction!(apply_body_unit_entry_result_json, m)?)?;
+    m.add_function(wrap_pyfunction!(resolve_repair_model_args_json, m)?)?;
+    m.add_function(wrap_pyfunction!(render_repair_page_data_url_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }
