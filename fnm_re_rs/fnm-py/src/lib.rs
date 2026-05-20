@@ -458,6 +458,173 @@ fn list_diagnostic_notes_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 从 DB `pages` 表读取 RawPage 列表。
+fn load_raw_pages_from_db(
+    conn: &rusqlite::Connection,
+    doc_id: &str,
+) -> PyResult<Vec<RawPage>> {
+    let mut stmt = conn
+        .prepare("SELECT payload_json FROM pages WHERE doc_id = ?1 ORDER BY book_page ASC")
+        .map_err(|e| PyRuntimeError::new_err(format!("prepare pages: {}", e)))?;
+
+    let rows = stmt
+        .query_map([doc_id], |row| {
+            let payload: String = row.get(0)?;
+            Ok(payload)
+        })
+        .map_err(|e| PyRuntimeError::new_err(format!("query pages: {}", e)))?;
+
+    let mut pages = Vec::new();
+    for row in rows {
+        let payload = row.map_err(|e| PyRuntimeError::new_err(format!("page row: {}", e)))?;
+        let page: RawPage = serde_json::from_str(&payload)
+            .map_err(|e| PyRuntimeError::new_err(format!("deserialize page: {}", e)))?;
+        pages.push(page);
+    }
+    Ok(pages)
+}
+
+/// 从 DB `documents` 表按优先级读取 TOC items。
+fn load_toc_items_from_db(
+    conn: &rusqlite::Connection,
+    doc_id: &str,
+) -> PyResult<Vec<TocItem>> {
+    let columns = ["toc_auto_visual_json", "toc_auto_pdf_json", "toc_user_json"];
+    for col in &columns {
+        let sql = format!("SELECT {} FROM documents WHERE id = ?1", col);
+        if let Ok(mut stmt) = conn.prepare(&sql) {
+            let result: Result<Option<String>, _> =
+                stmt.query_row([doc_id], |row| row.get(0));
+            if let Ok(Some(json_str)) = result {
+                let trimmed = json_str.trim();
+                if !trimmed.is_empty() && trimmed != "null" {
+                    if let Ok(items) = serde_json::from_str::<Vec<TocItem>>(trimmed) {
+                        if !items.is_empty() {
+                            return Ok(items);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(Vec::new())
+}
+
+/// 从 DB 拉页 + TOC → 跑完整 pipeline → 写 fnm_run → 返回摘要。
+///
+/// ←→ Python `FNM_RE/__init__.py::run_doc_pipeline`
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, max_body_chars=None, start_phase="toc"))]
+fn run_doc_pipeline_json(
+    db_path: &str,
+    doc_id: &str,
+    max_body_chars: Option<i64>,
+    start_phase: &str,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let conn = pool
+        .get()
+        .map_err(|e| PyRuntimeError::new_err(format!("get conn: {}", e)))?;
+
+    let pages = load_raw_pages_from_db(&conn, doc_id)?;
+    let page_count = pages.len();
+    if page_count == 0 {
+        return Err(PyRuntimeError::new_err(format!(
+            "no pages found for doc_id '{}'",
+            doc_id
+        )));
+    }
+    let toc_items = load_toc_items_from_db(&conn, doc_id)?;
+
+    let start_phase_parsed = fnm_orchestrator::types::StartPhase::from_str(start_phase)
+        .map_err(|e| {
+            PyRuntimeError::new_err(format!("invalid start_phase '{}': {}", start_phase, e))
+        })?;
+    let config = PipelineConfig {
+        doc_id: doc_id.to_string(),
+        slug: doc_id.to_string(),
+        pdf_path: String::new(),
+        toc_offset: 0,
+        max_body_chars: max_body_chars.unwrap_or(6000),
+        include_diagnostic_entries: false,
+        manual_toc_ready: false,
+        pipeline_state: "done".to_string(),
+        start_phase: start_phase_parsed,
+        review_overrides: None,
+        visual_toc_bundle: None,
+    };
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs() as i64;
+
+    let _run_count = conn
+        .execute(
+            "INSERT INTO fnm_runs (doc_id, status, page_count, created_at, updated_at) VALUES (?1, 'running', ?2, ?3, ?3)",
+            rusqlite::params![doc_id, page_count as i64, now],
+        )
+        .map_err(|e| PyRuntimeError::new_err(format!("create fnm_run: {}", e)))?;
+    let run_id = conn.last_insert_rowid();
+
+    let repo = SqliteRepository::new(pool);
+    let snapshot = fnm_orchestrator::mainline::run_pipeline_for_doc(
+        &repo, doc_id, pages, toc_items, config, None,
+    )
+    .map_err(|e| PyRuntimeError::new_err(format!("pipeline: {}", e)))?;
+
+    let section_count = snapshot
+        .phase1
+        .as_ref()
+        .map(|p| p.chapters.len() as i64)
+        .unwrap_or(0);
+    let note_count = snapshot
+        .phase2
+        .as_ref()
+        .map(|p| p.note_items.len() as i64)
+        .unwrap_or(0);
+    let unit_count = snapshot
+        .phase4
+        .as_ref()
+        .map(|p| p.translation_units.len() as i64)
+        .unwrap_or(0);
+
+    let structure_state = snapshot
+        .phase6
+        .as_ref()
+        .map(|p| p.export_audit.structure_state.clone())
+        .unwrap_or_default();
+
+    let blocking_reasons_json = serde_json::to_string(
+        &snapshot
+            .phase6
+            .as_ref()
+            .map(|p| &p.export_audit.blocking_reasons)
+            .unwrap_or(&vec![]),
+    )
+    .unwrap_or_default();
+
+    conn.execute(
+        "UPDATE fnm_runs SET status = 'done', section_count = ?1, note_count = ?2, unit_count = ?3, structure_state = ?4, blocking_reasons_json = ?5, updated_at = ?6 WHERE id = ?7",
+        rusqlite::params![section_count, note_count, unit_count, structure_state, blocking_reasons_json, now, run_id],
+    )
+    .map_err(|e| PyRuntimeError::new_err(format!("update fnm_run: {}", e)))?;
+
+    let summary = serde_json::json!({
+        "ok": true,
+        "run_id": run_id,
+        "page_count": page_count,
+        "section_count": section_count,
+        "note_count": note_count,
+        "unit_count": unit_count,
+        "structure_state": structure_state,
+    });
+
+    serde_json::to_string(&summary)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize summary: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -477,6 +644,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(list_diagnostic_entries_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(list_diagnostic_notes_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(get_diagnostic_entry_for_page_json, m)?)?;
+    m.add_function(wrap_pyfunction!(run_doc_pipeline_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }

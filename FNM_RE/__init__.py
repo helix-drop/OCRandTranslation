@@ -88,9 +88,20 @@ def build_export_bundle(*args, **kwargs):
 
 
 def run_doc_pipeline(*args, **kwargs):
-    from FNM_RE.app.mainline import run_phase6_pipeline_for_doc as impl
+    """←→ Rust fnm_re_rs.run_doc_pipeline_json"""
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    max_body_chars = kwargs.get("max_body_chars")
+    start_phase = kwargs.get("start_phase", "toc")
+    result_json = fnm_re_rs.run_doc_pipeline_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        max_body_chars,
+        start_phase,
+    )
+    import json as _json
+    return _json.loads(result_json)
 
 
 def load_doc_structure(*args, **kwargs):
