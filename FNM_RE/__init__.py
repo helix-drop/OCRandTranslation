@@ -115,9 +115,16 @@ def build_doc_status(*args, **kwargs):
 
 
 def build_export_bundle_for_doc(*args, **kwargs):
-    from FNM_RE.app.mainline import build_phase6_export_bundle_for_doc as impl
+    """←→ Rust fnm_re_rs.build_export_bundle_for_doc_json"""
+    import json as _json
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    result_json = fnm_re_rs.build_export_bundle_for_doc_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+    )
+    return _json.loads(result_json)
 
 
 def build_export_zip_for_doc(*args, **kwargs):
