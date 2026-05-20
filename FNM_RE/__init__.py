@@ -128,9 +128,14 @@ def build_export_bundle_for_doc(*args, **kwargs):
 
 
 def build_export_zip_for_doc(*args, **kwargs):
-    from FNM_RE.app.mainline import build_phase6_export_zip_for_doc as impl
+    """←→ Rust fnm_re_rs.build_export_zip_for_doc_json"""
+    import fnm_re_rs
 
-    return impl(*args, **kwargs)
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    return fnm_re_rs.build_export_zip_for_doc_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+    )
 
 
 def run_post_translate_export_checks_for_doc(*args, **kwargs):
