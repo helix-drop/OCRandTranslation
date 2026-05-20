@@ -315,6 +315,26 @@ def list_diagnostic_notes_for_doc(*args, **kwargs):
     return _json.loads(result_json)
 
 
+def serialize_segments(*args, **kwargs):
+    """←→ Rust fnm_re_rs.serialize_segments_json"""
+    import json as _json
+    import fnm_re_rs
+
+    segments = args[0] if args else kwargs.get("segments", [])
+    result_json = fnm_re_rs.serialize_segments_json(_json.dumps(segments, ensure_ascii=False))
+    return _json.loads(result_json)
+
+
+def deserialize_segments_to_dicts(*args, **kwargs):
+    """←→ Rust fnm_re_rs.deserialize_segments_to_dicts_json"""
+    import json as _json
+    import fnm_re_rs
+
+    payload = args[0] if args else kwargs.get("payload", [])
+    result_json = fnm_re_rs.deserialize_segments_to_dicts_json(_json.dumps(payload, ensure_ascii=False))
+    return _json.loads(result_json)
+
+
 # ── Rust pipeline binding ────────────────────────────────────────
 # 安装：cd fnm_re_rs/fnm-py && maturin develop
 # 验证：FNM_RE.fnm_re_rs_version() 返回 "0.1.0" 表示就绪
@@ -566,6 +586,8 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "serialize_segments",
+    "deserialize_segments_to_dicts",
     "build_module_pipeline_snapshot_rust",
     "fnm_re_rs_version",
     "run_with_shadow",

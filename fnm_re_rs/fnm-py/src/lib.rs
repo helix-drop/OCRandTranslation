@@ -969,6 +969,30 @@ fn run_post_translate_export_checks_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 压缩序列化 page_segments 列表（JSON 入/出）。
+///
+/// ←→ Python `FNM_RE/shared/segment_codec.py::serialize_segments`
+#[pyfunction]
+fn serialize_segments_json(segments_json: &str) -> PyResult<String> {
+    let segments: Vec<serde_json::Value> = serde_json::from_str(segments_json)
+        .map_err(|e| PyValueError::new_err(format!("invalid segments_json: {}", e)))?;
+    let result = fnm_core::segment_codec::serialize_segments(&segments);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
+/// 反序列化 page_segments 列表为完整 dict（JSON 入/出）。
+///
+/// ←→ Python `FNM_RE/shared/segment_codec.py::deserialize_segments_to_dicts`
+#[pyfunction]
+fn deserialize_segments_to_dicts_json(payload: &str) -> PyResult<String> {
+    let raw: Vec<serde_json::Value> = serde_json::from_str(payload)
+        .map_err(|e| PyValueError::new_err(format!("invalid payload_json: {}", e)))?;
+    let result = fnm_core::segment_codec::deserialize_segments_to_dicts(&raw);
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+}
+
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
@@ -995,6 +1019,8 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_post_translate_export_checks_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
+    m.add_function(wrap_pyfunction!(serialize_segments_json, m)?)?;
+    m.add_function(wrap_pyfunction!(deserialize_segments_to_dicts_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
     Ok(())
 }
