@@ -841,7 +841,6 @@ fn build_doc_status_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
-/// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 /// 构建重试摘要。
 ///
 /// ←→ Python `FNM_RE/__init__.py::build_retry_summary`
@@ -884,6 +883,7 @@ fn build_unit_progress_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")

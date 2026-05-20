@@ -75,12 +75,13 @@ fn format_unit_pages(unit: &TranslationUnitRecord) -> String {
 
 /// ←→ Python `replace_frozen_refs()` — simplified: strip frozen ref tokens for preview.
 /// Full implementation calls fnm-core regex patterns; this is sufficient for preview.
+/// Uses char-based truncation (not byte) to avoid panicking on multi-byte UTF-8 (CJK).
 fn preview_text(text: &str) -> String {
     let text = text.trim();
-    if text.len() <= 120 {
+    if text.chars().count() <= 120 {
         text.to_string()
     } else {
-        text[..120].to_string()
+        text.chars().take(120).collect()
     }
 }
 
@@ -251,4 +252,50 @@ pub fn build_unit_progress(
         "current_unit_pages": current_unit.map(format_unit_pages),
         "unit_items": unit_items,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_preview_text_cjk_truncation() {
+        // 121 个中文字符（每字 3 字节 = 363 字节），验证不会 panic
+        let long_cjk: String = std::iter::repeat('好').take(121).collect();
+        let preview = preview_text(&long_cjk);
+        assert_eq!(preview.chars().count(), 120);
+    }
+
+    #[test]
+    fn test_preview_text_short() {
+        assert_eq!(preview_text("hello"), "hello");
+        assert_eq!(preview_text(""), "");
+    }
+
+    #[test]
+    fn test_unit_page_numbers() {
+        let unit = TranslationUnitRecord {
+            page_start: 3,
+            page_end: 5,
+            ..Default::default()
+        };
+        assert_eq!(unit_page_numbers(&unit), vec![3, 4, 5]);
+    }
+
+    #[test]
+    fn test_unit_page_numbers_from_segments() {
+        let mut unit = TranslationUnitRecord::default();
+        unit.page_segments = vec![
+            fnm_core::records::UnitPageSegmentRecord {
+                page_no: 10,
+                ..Default::default()
+            },
+            fnm_core::records::UnitPageSegmentRecord {
+                page_no: 8,
+                ..Default::default()
+            },
+        ];
+        let pages = unit_page_numbers(&unit);
+        assert_eq!(pages, vec![8, 10]); // sorted and deduped
+    }
 }
