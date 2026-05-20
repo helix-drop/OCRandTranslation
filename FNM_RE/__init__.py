@@ -315,6 +315,13 @@ def list_diagnostic_notes_for_doc(*args, **kwargs):
     return _json.loads(result_json)
 
 
+def replace_frozen_refs(text, *, endnote_mode="standard"):
+    """←→ Rust fnm_re_rs.replace_frozen_refs_json"""
+    import fnm_re_rs
+
+    return fnm_re_rs.replace_frozen_refs_json(text, endnote_mode)
+
+
 def serialize_segments(*args, **kwargs):
     """←→ Rust fnm_re_rs.serialize_segments_json"""
     import json as _json
@@ -586,6 +593,7 @@ __all__ = [
     "build_frozen_units",
     "build_chapter_markdown_set",
     "build_export_bundle",
+    "replace_frozen_refs",
     "serialize_segments",
     "deserialize_segments_to_dicts",
     "build_module_pipeline_snapshot_rust",

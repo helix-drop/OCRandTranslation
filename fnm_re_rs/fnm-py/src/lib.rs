@@ -969,6 +969,21 @@ fn run_post_translate_export_checks_for_doc_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
+/// 把文本中的 NOTE_REF/FN_REF/EN_REF token 改写为 markdown 脚注 `[^id]`。
+///
+/// - `text`: 含 frozen ref token 的文本
+/// - `endnote_mode`: `"standard"` 或 `"legacy"`（默认 `"standard"`）
+///
+/// ←→ Python `FNM_RE/shared/refs.py::replace_frozen_refs`
+#[pyfunction]
+#[pyo3(signature = (text, endnote_mode="standard"))]
+fn replace_frozen_refs_json(text: &str, endnote_mode: &str) -> PyResult<String> {
+    let mode: fnm_core::refs::EndnoteMode = endnote_mode
+        .parse()
+        .map_err(|e| PyValueError::new_err(format!("{}. Use 'standard' or 'legacy'", e)))?;
+    Ok(fnm_core::refs::replace_frozen_refs(text, mode))
+}
+
 /// 压缩序列化 page_segments 列表（JSON 入/出）。
 ///
 /// ←→ Python `FNM_RE/shared/segment_codec.py::serialize_segments`
@@ -1019,6 +1034,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prepare_page_translate_jobs_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_post_translate_export_checks_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_retry_summary_json, m)?)?;
+    m.add_function(wrap_pyfunction!(replace_frozen_refs_json, m)?)?;
     m.add_function(wrap_pyfunction!(serialize_segments_json, m)?)?;
     m.add_function(wrap_pyfunction!(deserialize_segments_to_dicts_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
