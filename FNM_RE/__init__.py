@@ -83,64 +83,59 @@ def run_llm_repair(*args, **kwargs):
     return _json.loads(result_json)
 
 
-def group_review_overrides(*args, **kwargs):
-    from FNM_RE.shared.review_overrides import group_review_overrides as impl
-
-    return impl(*args, **kwargs)
-
-
-def annotate_review_note_links(*args, **kwargs):
-    from FNM_RE.shared.review import annotate_review_note_links as impl
-
-    return impl(*args, **kwargs)
-
-
-def collect_llm_suggestions(*args, **kwargs):
-    from FNM_RE.shared.review import collect_llm_suggestions as impl
-
-    return impl(*args, **kwargs)
-
-
-def build_toc_structure(*args, **kwargs):
-    from FNM_RE.modules.toc_structure import build_toc_structure as impl
-
-    return impl(*args, **kwargs)
-
-
-def build_book_note_profile(*args, **kwargs):
-    from FNM_RE.modules.book_note_type import build_book_note_profile as impl
-
-    return impl(*args, **kwargs)
-
-
-def build_chapter_layers(*args, **kwargs):
-    from FNM_RE.modules.chapter_split import build_chapter_layers as impl
-
-    return impl(*args, **kwargs)
+def group_review_overrides(review_overrides):
+    _KNOWN_SCOPES = {"page", "chapter", "region", "link", "llm_suggestion", "anchor", "note_item"}
+    from typing import Mapping
+    grouped = {scope: {} for scope in _KNOWN_SCOPES}
+    if not review_overrides:
+        return grouped
+    if isinstance(review_overrides, list):
+        for row in review_overrides:
+            payload = dict(row or {})
+            scope = str(payload.get("scope") or "").strip().lower()
+            target_id = str(payload.get("target_id") or "").strip()
+            data = dict(payload.get("payload") or {})
+            if not scope or not target_id:
+                continue
+            grouped.setdefault(scope, {})[target_id] = data
+        return grouped
+    if isinstance(review_overrides, Mapping):
+        if any(str(key) in _KNOWN_SCOPES for key in review_overrides.keys()):
+            for sc, rows in dict(review_overrides).items():
+                scope_key = str(sc or "").strip().lower()
+                if scope_key not in _KNOWN_SCOPES:
+                    continue
+                if not isinstance(rows, Mapping):
+                    continue
+                grouped[scope_key] = {
+                    str(target_id): dict(payload or {})
+                    for target_id, payload in dict(rows).items()
+                    if str(target_id or "").strip()
+                }
+            return grouped
+    return grouped
 
 
-def build_note_link_table(*args, **kwargs):
-    from FNM_RE.modules.note_linking import build_note_link_table as impl
-
-    return impl(*args, **kwargs)
-
-
-def build_frozen_units(*args, **kwargs):
-    from FNM_RE.modules.ref_freeze import build_frozen_units as impl
-
-    return impl(*args, **kwargs)
-
-
-def build_chapter_markdown_set(*args, **kwargs):
-    from FNM_RE.modules.chapter_merge import build_chapter_markdown_set as impl
-
-    return impl(*args, **kwargs)
+def annotate_review_note_links(note_links, overrides):
+    link_overrides = dict((overrides or {}).get("link") or {})
+    annotated = []
+    for link in note_links or []:
+        payload = dict(link or {})
+        override = dict(link_overrides.get(str(payload.get("link_id") or ""), {}) or {})
+        if override:
+            payload["review_override"] = override
+            payload["review_action"] = str(override.get("action") or "").strip().lower()
+        annotated.append(payload)
+    return annotated
 
 
-def build_export_bundle(*args, **kwargs):
-    from FNM_RE.modules.book_assemble import build_export_bundle as impl
-
-    return impl(*args, **kwargs)
+def collect_llm_suggestions(overrides):
+    suggestions = []
+    for suggestion_id, payload in sorted(dict((overrides or {}).get("llm_suggestion") or {}).items()):
+        item = dict(payload or {})
+        item["suggestion_id"] = suggestion_id
+        suggestions.append(item)
+    return suggestions
 
 
 def run_doc_pipeline(*args, **kwargs):
@@ -756,13 +751,6 @@ __all__ = [
     "group_review_overrides",
     "annotate_review_note_links",
     "collect_llm_suggestions",
-    "build_toc_structure",
-    "build_book_note_profile",
-    "build_chapter_layers",
-    "build_note_link_table",
-    "build_frozen_units",
-    "build_chapter_markdown_set",
-    "build_export_bundle",
     "dump_traces",
     "write_summary_traces",
     "has_explicit_sup",

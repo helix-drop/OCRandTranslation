@@ -1,67 +1,63 @@
 # FNM_RE
 
-FNM（脚注/尾注机）新实现目录。旧 `fnm/` 模块已退役，主链完全切到 FNM_RE。
+FNM（脚注/尾注机）的 Python thin wrapper。核心 pipeline 已用 Rust 重写（`fnm_re_rs/` 10 个 crate），此包仅通过 `fnm-re-rs` pyo3 wheel 暴露 surface API。
 
-## 架构
+## 状态
 
-FNM_RE 按七模块组织：
+- `FNM_RE/` 已归档到 `归档/FNM_RE/`（含 `app/`、`stages/`、`modules/`、`shared/`、`dev/`、`constants.py`、`models.py`）
+- `tests/unit/` 的 parity 测试已归档到 `归档/tests/unit/`
+- `tools/` 的 golden 生成器已归档到 `归档/tools/`
 
-| 模块 | 文件 | 作用 |
-|---|---|---|
-| M1 | `modules/toc_structure.py` | 目录结构与章节角色判定 |
-| M2 | `modules/book_note_type.py` | 全书注释类型分析 |
-| M3 | `modules/chapter_split.py` | 章节切分、注释区域绑定 |
-| M4 | `modules/note_linking.py` | 正文锚点与注释项链接闭合 |
-| M5 | `modules/ref_freeze.py` | 引用冻结与翻译单元构建 |
-| M6 | `modules/chapter_merge.py` | 章节 Markdown 合并 |
-| M7 | `modules/book_assemble.py` | 整书组装、语义审计与导出收口 |
+## Surface API（39 个）
 
-## 目录结构
+### Pipeline 入口
+- `run_doc_pipeline` / `build_module_pipeline_snapshot_rust`
 
-```
-FNM_RE/
-├── __init__.py          # 对外统一入口
-├── constants.py         # 常量定义
-├── models.py            # 数据模型（dataclass）
-├── review.py            # 人工审查覆盖
-├── llm_repair.py        # LLM 修补锚点/链接
-├── page_translate.py    # 翻译单元与诊断 helper
-├── status.py            # 状态构建
-├── app/                 # 应用入口层
-│   ├── mainline.py      # 主线接线：run_phase6_pipeline_for_doc
-│   ├── pipeline.py      # 分阶段入口：build_phase1~6_structure
-│   └── persist_helpers.py
-├── modules/             # 七模块核心
-│   ├── toc_structure.py
-│   ├── book_note_type.py
-│   ├── chapter_split.py
-│   ├── note_linking.py
-│   ├── ref_freeze.py
-│   ├── chapter_merge.py
-│   ├── book_assemble.py
-│   ├── contracts.py
-│   └── types.py
-├── stages/              # 子阶段处理
-├── shared/              # 共享工具
-└── handoff/             # 交接文档
-```
+### 结构加载
+- `load_doc_structure` / `build_doc_status`
 
-## 对外入口
+### 导出
+- `build_export_bundle_for_doc` / `build_export_zip_for_doc`
+- `audit_export_for_doc` / `run_post_translate_export_checks_for_doc`
 
-```python
-from FNM_RE import (
-    run_doc_pipeline,           # 运行完整 FNM 流水线
-    load_doc_structure,         # 加载文档结构快照
-    build_doc_status,           # 构建结构状态报告
-    build_export_zip_for_doc,   # 构建导出 ZIP
-    run_llm_repair,             # LLM 修补
-    audit_export_for_doc,       # 审计导出质量
-)
+### 诊断
+- `list_diagnostic_entries_for_doc` / `list_diagnostic_notes_for_doc`
+- `get_diagnostic_entry_for_page`
+
+### 翻译辅助
+- `prepare_page_translate_jobs` / `build_retry_summary` / `build_unit_progress`
+- `run_llm_repair`
+
+### page_translate helper（9 个）
+- `build_fnm_body_unit_jobs` / `apply_body_unit_translations` / `apply_body_unit_entry_result`
+- `list_fnm_units_with_indices` / `sync_fnm_retry_state` / `rebuild_fnm_diagnostic_page_entries`
+- `collect_fnm_unit_failed_locations`
+
+### 文本工具（4 个）
+- `serialize_segments` / `deserialize_segments_to_dicts`
+- `replace_frozen_refs` / `format_fnm_unit_label` / `format_fnm_unit_pages`
+
+### 导出审计 helper（3 个）
+- `body_paragraphs` / `definition_lines` / `split_body_and_definitions`
+
+### sup_recovery
+- `has_explicit_sup` / `recover_book`
+
+### LLM 工具
+- `dump_traces` / `write_summary_traces`
+- `resolve_repair_model_args` / `render_repair_page_data_url`
+
+### 阴影模式 / 工具
+- `fnm_re_rs_version` / `run_with_shadow` / `summarize_pipeline_snapshot`
+
+## 快速验证
+
+```bash
+.venv/bin/python -c "import FNM_RE; print(len(FNM_RE.__all__))"
+# 期望输出: 39
 ```
 
-## 当前状态
+## 历史计划
 
-- 七模块主链已完整落地，旧 `fnm/` 模块已退役
-- 样本批测脚本：`scripts/test_fnm_incremental.py`（增量，冻结已确认成果）和 `scripts/test_fnm_real_batch.py`（实批，多书完整回归）
-- Biopolitics 在真实模式管道中因 4 项阻塞原因未能通过（2026-04-28）
-- 处理流程：`reingest → visual_toc → pipeline → llm_repair → rebuild → structure_verify → placeholder_translate → export_verify → zip`
+见 `归档/FNM_RE/plans/`（M1-M3 详细计划 + M1 会话记录）。
+当前计划：`M4_DETAILED_PLAN.md`、`NEXT_PHASE_PLAN.md`。
