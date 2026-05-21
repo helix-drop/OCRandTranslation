@@ -652,7 +652,7 @@ class FnmRealModeIntegrationTest(ClientCSRFMixin, unittest.TestCase):
                 },
             ),
             patch(
-                "FNM_RE.app.mainline.build_phase6_export_bundle_for_doc",
+                "FNM_RE.build_export_bundle_for_doc",
                 return_value={"chapter_files": {"chapters/demo.md": "demo markdown"}},
             ),
         ):
@@ -679,7 +679,7 @@ class FnmRealModeIntegrationTest(ClientCSRFMixin, unittest.TestCase):
                 return_value={"blocking_export": False},
             ),
             patch(
-                "FNM_RE.app.mainline.build_phase6_export_bundle_for_doc",
+                "FNM_RE.build_export_bundle_for_doc",
                 return_value={"chapter_files": {"chapters/demo.md": "demo markdown"}},
             ),
         ):
