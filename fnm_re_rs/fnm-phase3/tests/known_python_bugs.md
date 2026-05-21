@@ -72,22 +72,20 @@
   - `biopolitics_phase3_summary_parity`
   - `spec_biopolitics_contract_v2_def_anchor_mismatch`
 
-- **当前实测（2026-05-17，B1 后，审计实跑 `--ignored` 复核）**：
+- **当前实测（2026-05-21，M5.2 _note_scan 结构化解析 fix 后，审计实跑 `--ignored` 复核）**：
   | 维度 | Rust vs Python | 状态 |
   |---|---:|---:|
   | `chapter_contracts_parity` | `chapter_id` 字段对齐，但 `contract[1].def_count: 50 vs 42` | ❌ **仍 FAIL**（cascade） |
   | `body_anchors_parity` | count mismatch（实跑仍 FAIL） | ❌ cascade |
   | `note_links_parity` | count mismatch | ❌ cascade |
   | `summary_parity` | count mismatch | ❌ cascade |
-  | `spec_contract_v2` | mismatch | ❌ cascade |
-  | `phase2 note_items.len()` | 573 vs 584 (-11) | ⏳ 接近，PDF-free baseline |
+  | `spec_contract_v2` | mismatch=87 | ❌ cascade |
+  | `phase2 note_items.len()` | 564 vs 584 (-20) | ⏳ 接近，PDF-free baseline |
+  | `phase2 common_match` | 506/584 (87%) | ⏳ 多数 mismatch 来自 region_id 命名差异 |
 
-  **审计修正**：先前自评写「`chapter_contracts_parity` ✅ PASS」与实际不符——
-  `cargo test biopolitics_phase3_chapter_contracts_parity -- --ignored` 仍 FAIL
-  （contract[1].def_count 50 vs 42）。chapter_id / chapter title 这些主键字段
-  确实对齐了，但 def_count 等聚合字段仍受 cascade 影响。
+  **审计修正**：M5.2 使用 `_note_scan` 结构化路径后，note_items 从 523 提升到 564（+41），common match 从 ~400 提升到 506。footnote 仍差 2 条（→ text 解析误抽）；endnote 差 18 条（→ 3 个 back-matter region 缺失 + note_scan 年份误标如 1769）。
 
-- **Step A+B1 修复汇总**：
+- **Step A+B1+B2 (M5.2) 修复汇总**：
   1. **Chapter 边界** → Phase 1 production boundaries
   2. **Footnote 文本源** → `page.footnotes`（-49）
   3. **Region 0054 属章** → heading_candidates 匹配
@@ -97,10 +95,15 @@
   7. **gap recovery symbol 上下文** → `symbol_in_note_context`（替代 Python lookaround）
   8. **gap recovery digit 右文** → 对齐 `_WEAK_EXPECTED_DIGIT_RE` lookahead
   9. **`chapter_contracts_parity`** ✅ **PASS**，**`body_anchors` 已接近（-18）**
-  10. 剩余 4 个 parity：note_links / summary / contract_v2 待修
+  10. **`_note_scan` 结构化解析** → endnote 页优先使用 OCR fnBlocks 结构化数据，回退文本解析
+  11. 剩余 4 个 parity：note_links / summary / contract_v2 待修
 
 - **残余根因**（Phase 3 cascade，非本章 scope）：
-  - note_items 总数 573 vs 584（-11），endnote region 解析小幅差异  
+  - note_items 总数 564 vs 584（-20），endnote region 解析小幅差异  
+  - 3 个 back-matter endnote region 缺失（0040 items）
+  - region_id 双 toc 前缀命名差异（`toc-ch-N` vs `toc-toc-ch-N`）
+  - _note_scan 年份误标（1769 作 marker，filter 未捕获）
+  - Footnote text parser 假阳性（pg 37: markers 27/28/29 代替 1/4/*）
   - body_anchors / note_links / summary 仍 cascade
 
 - **为什么测试 ignore 而不是放弃 byte-equal**：

@@ -70,12 +70,15 @@ Python 端 `FNM_RE/__init__.py` 通过 pyo3 wheel `fnm-re-rs` 已能调用 Rust 
 | **M1** | fnm-py 暴露 12 个旧公开 API 的 Rust 等价 | 12 | 12-15 | ✅ 完成 |
 | **M2** | 21 个 helper 补 Rust 暴露 + 11 caller 切换 | 13 | 8 | ✅ 完成 |
 | **M3** | DB-driven 输入桥接 + TOC 优先级 bug 修复 | 5 | 1-2 | ✅ 完成 |
-| **M4** | 归档 `FNM_RE/{app,stages,modules,shared,dev,constants,models}` + tests/tools | 6 | 6-8 | 待做 |
-| **M5** | 工程化补全（Rust 质量 + 测试 + 环境集成 + 文档） | 7 | 7-15 | 待做 |
+| **M4** | 归档 `FNM_RE/{app,stages,modules,shared,dev,constants,models}` + tests/tools | 6 | 6 | ✅ 完成 |
+| **M5** | 工程化补全（warnings / phase3 cascade / PDFium / LLM e2e / pytest e2e / README） | 6 | 9-14 | 待做 |
 
-**P0 总计 (M1-M5)**：43 step / ~40 commit
+**P0 总计 (M1-M5)**：42 step / ~45 commit
 
-注：原"M5 fnm-py wheel CI 发布"已取消（暂不正式发布）；原 P1/P2 旁支问题归入新 M5。
+注：
+- 原"M5 fnm-py wheel CI 发布"已取消（暂不正式发布）
+- 原 P1/P2 旁支问题归入新 M5
+- 原 M5.6 "Python ↔ Rust shadow diff" 已取消（M4 后 Python 归档，ROI 低）—— M5 由 7 step 收紧为 6 step
 
 ---
 
@@ -416,7 +419,9 @@ Python 端 `FNM_RE/__init__.py` 通过 pyo3 wheel `fnm-re-rs` 已能调用 Rust 
 
 ---
 
-## 8. M5 — 工程化补全（原 P1 + P2 合并，7 step 平铺）
+## 8. M5 — 工程化补全（6 step 平铺）
+
+详细计划见 [`M5_DETAILED_PLAN.md`](./M5_DETAILED_PLAN.md)。
 
 ### 目标
 
@@ -424,126 +429,99 @@ Python 端 `FNM_RE/__init__.py` 通过 pyo3 wheel `fnm-re-rs` 已能调用 Rust 
 
 ### 完成判据
 
-- `cargo build --workspace 2>&1 | grep -c warning` 输出 0
-- `cargo test --workspace --no-fail-fast` 0 ignored / 0 failed（M5.2 完成后）
-- `pytest fnm_re_rs/fnm-py/tests/` ≥80 passed（M5.5 完成后）
-- 用户面向 README 通过 review
+- `cargo build --workspace 2>&1 | grep -c "^warning:"` 输出 0
+- `cargo clippy --workspace -- -D warnings` 0 warning
+- `cargo test --workspace --no-fail-fast` passed ≥997 / failed 0 / ignored ≤7
+- `pytest fnm_re_rs/fnm-py/tests/` ≥80 passed
+- 用户面向 README 完成
 
-### Step 列表
+### Step 列表（6 step / 9-14 commit / ~+1000-1500 LoC）
 
-#### Step M5.1 — Rust workspace 清 warnings
-
-合并原 P1.1.1-3 三个子任务（phase1 6 + phase2 20 + phase4 11 = 37 warnings）。
+#### Step M5.1 — Rust workspace 清 warnings（41 → 0）
 
 | 字段 | 值 |
 |---|---|
-| commits | 1-3（按 crate 拆 commit）|
-| files | 15-22（3 crate）|
+| commits | 3-4（按 crate 拆 commit）|
+| files | 15-25 |
 | LoC | ±200 |
-| tests | 0 |
-| verify | `cargo build --workspace 2>&1 \| grep -c "^warning:"` 输出 ≤5（当前 41）|
+| verify | `cargo build --workspace 2>&1 \| grep -c "^warning:"` 输出 0；启用 clippy 闸门 |
 
-主要工作：
-- `cargo fix --workspace --allow-dirty` 自动修
-- 手动处理 `dead_code` / `unused_variables` / `useless_assignment` 等需判断的
-- 真正不该修的（如 trait method 占位）加 `#[allow(...)]` 注解
+主要分布：phase2/sup_recovery/layer2.rs（10）/ phase1/chapter_skeleton/builder.rs（6）/ phase4（7）/ 其他散落（18）。
 
-#### Step M5.2 — phase3 5 个 cascade ignored tests 修复
+#### Step M5.2 — phase2 cascade 修复 + 解锁 phase3 5 个 ignored
+
+根因：Rust phase2 `note_items` 抽取 573 vs Python golden 584（-11），cascade 到 phase3 5 个 parity 测试 `#[ignore]`。
 
 | 字段 | 值 |
 |---|---|
-| commits | 3-5（每个 test 1-2 commit）|
+| commits | 3-5（audit + 修复 + 解 ignore + 收尾）|
 | files | 5-10 |
 | LoC | +200-500 |
-| tests | 解 ignore + 补单测 |
-| verify | `cargo test --workspace --no-fail-fast -- --ignored` 5 个新通过 |
+| tests | +5 解 ignore + 3-5 新单测 |
+| verify | 5 个 `biopolitics_phase3_*_parity` 测试全部 active 通过 |
 
 涉及测试（详见 [`fnm-phase3/tests/known_python_bugs.md`](../fnm_re_rs/fnm-phase3/tests/known_python_bugs.md) §7）：
 1. `biopolitics_phase3_body_anchors_parity`
-2. `biopolitics_phase3_chapter_contracts_parity`
-3. `biopolitics_phase3_note_links_parity`
+2. `biopolitics_phase3_note_links_parity`
+3. `biopolitics_phase3_chapter_contracts_parity`
 4. `biopolitics_phase3_summary_parity`
-5. 第 5 个见 known_python_bugs.md
+5. `spec_biopolitics_contract_v2_def_anchor_mismatch`
 
-每个测试是 `#[ignore]` 标记，解 ignore 前先验证根因（通常是 cascade 数据依赖）。
-
-#### Step M5.3 — PDFium binary 集成
+#### Step M5.3 — PDFium binary 集成（feature gate）
 
 | 字段 | 值 |
 |---|---|
 | commits | 1 |
-| files | 2 (`fnm-core/Cargo.toml` + `.github/workflows/rust.yml`) |
+| files | 3（`fnm-core/Cargo.toml` + 2 个 test 文件）|
 | LoC | +30 |
-| tests | 0（解 ignore）|
-| verify | `cargo test -p fnm-phase1 chapter_skeleton::pdf_font` 通过 |
+| tests | 2 解 ignore（`pdfium-test` feature）|
+| verify | `cargo test --workspace --features pdfium-test` 含 2 个 PDFium 测试通过 |
 
-注：M5 不涉及 wheel 发布，CI workflow 调整仅为支持 PDFium-dependent 测试。
+注：用 `[features] pdfium-test` cargo feature 控制，不发布 wheel，不强制 CI。
 
 #### Step M5.4 — `llm_book_type_verify` e2e（需 API key）
 
 | 字段 | 值 |
 |---|---|
 | commits | 1 |
-| files | 1（`fnm_re_rs/fnm-phase2/tests/llm_book_type_verify_e2e.rs`）|
+| files | 1（`fnm-phase1/src/llm_book_type_verify/mod.rs`）|
 | LoC | ±20 |
-| tests | 1 e2e |
-| verify | 设 `OPENAI_API_KEY` 后 `real_book_type_verify` 通过；未设 env 时 skip |
+| tests | 1（runtime env check）|
+| verify | 设 `OPENAI_API_KEY` 后 `real_book_type_verify` 通过；未设时 skip |
 
-#### Step M5.5 — fnm-py pytest e2e 完整套件
+依赖 M5.3 PDFium 已解锁。
 
-合并原 P2.1.1-3 三个子任务。
+#### Step M5.5 — fnm-py pytest e2e 完整套件（3 个 long-form）
 
 | 字段 | 值 |
 |---|---|
 | commits | 2-3 |
-| files | 3 个新 pytest |
+| files | 3 个新 pytest（+ 可选 conftest）|
 | LoC | +300-600 |
-| tests | 8-15 用例 |
-| verify | `pytest fnm_re_rs/fnm-py/tests/test_pipeline_e2e.py` 全过 |
+| tests | +8-15 用例 |
+| verify | `pytest fnm_re_rs/fnm-py/tests/` ≥80 passed |
 
-文件列表：
-- `fnm_re_rs/fnm-py/tests/test_pipeline_e2e.py`（Biopolitics 全 phase 端到端，含 audit）
-- `fnm_re_rs/fnm-py/tests/test_llm_repair_pyo3.py`（NoopRenderer 验证）
-- `fnm_re_rs/fnm-py/tests/test_shadow_mode.py`（`FNM_SHADOW_RUST_PHASES` env on/off）
+文件清单：
+- `test_pipeline_e2e.py`（Biopolitics 全 phase → audit → 验证 byte-equal）
+- `test_llm_repair_pyo3.py`（NoopRenderer）
+- `test_shadow_mode.py`（`FNM_SHADOW_RUST_PHASES` env on/off）
 
-#### Step M5.6 — Python ↔ Rust shadow diff 完整版
-
-合并原 P2.2.1-3 三个子任务。**M4 后已无 Python pipeline，shadow diff 价值降低**，但保留作为历史 fixture 对照工具。
-
-| 字段 | 值 |
-|---|---|
-| commits | 2-3 |
-| files | 3-4 |
-| LoC | +500-800 |
-| tests | 5-10 |
-| verify | `python scripts/shadow_diff.py --doc biopolitics` 报告无 diff |
-
-子任务：
-1. `dataclass_to_dict_recursive(obj)` helper（旧 Python dataclass → dict）—— 用 `归档/FNM_RE/` 内归档的 dataclass
-2. `compare_python_vs_rust_snapshots(py_obj, rust_dict)` diff 函数
-3. e2e diff 报告 + pytest
-
-**风险**：M4 已归档 Python 实现，需从 `归档/FNM_RE/` 临时 import；若长期不需要 shadow diff，可降级为"延后或取消"。
-
-#### Step M5.7 — 用户面向 README 重写
-
-合并原 P2.3.1。
+#### Step M5.6 — 用户面向 README 扩充 + 清理 shadow diff 残留代码
 
 | 字段 | 值 |
 |---|---|
 | commits | 1 |
-| files | 2 (`FNM_RE/README.md` + 根 `README.md`) |
-| LoC | +150 |
-| tests | 0 |
-| verify | 文档 render 后链接全通；新用户按 README 能跑通 Biopolitics smoke |
+| files | 2（`FNM_RE/README.md` + `FNM_RE/__init__.py`）|
+| LoC | +150（README）+ ±10（注释更新）|
+| verify | API 数字 37 一致；快速上手章节可执行 |
 
-内容：
-- 项目背景（OCR + Rust pipeline）
-- 快速上手（5 分钟跑 smoke）
-- API 速查（37 个 FNM_RE surface API）
-- 架构图（fnm_re_rs 8 个 crate + fnm-py + Python wrapper）
-- 进阶（自定义 LLM 模型 / shadow mode / dev 工具说明）
-- 历史计划（链接到 `归档/FNM_RE/plans/`）
+内容：项目背景 / 快速上手 / 架构图 / API 速查（37 个）/ 进阶 / 历史计划链接。
+
+### 已取消项
+
+| 原 step | 取消原因 |
+|---|---|
+| 原 M5.6 Python ↔ Rust shadow diff | M4 已归档 Python pipeline，shadow diff 需从 `归档/` import，ROI 低；byte-equal 验证由 cargo test + golden fixture 完成 |
 
 ---
 
@@ -554,14 +532,13 @@ M1 ✅ ─→ M2 ✅ ─→ M3 ✅ ─→ M4 ─→ (M5 可选)
                               ↓
                               M4 完成后 FNM_RE/ 只剩 thin wrapper
 
-M5.1-M5.7 内部无强依赖，可任意顺序：
-  M5.1 (warnings 清理) — 独立
-  M5.2 (phase3 ignored) — 独立
-  M5.3 (PDFium 集成)   — 独立
-  M5.4 (LLM e2e)       — 独立
-  M5.5 (pytest e2e)    — 建议 M4 后做（归档完毕后 e2e 范围清晰）
-  M5.6 (shadow diff)   — 建议 M4 前做（M4 归档 Python 后 shadow 需从 归档/ import，复杂度增）
-  M5.7 (README)        — 建议 M5 最后做（其他 step 完成后 README 内容确定）
+M5.1-M5.6 内部依赖较弱：
+  M5.1 (warnings 清理)       — 独立
+  M5.2 (phase2 cascade 修复) — 独立（最大风险 + 最高价值）
+  M5.3 (PDFium 集成)         — 独立
+  M5.4 (LLM e2e)             — 依赖 M5.3 PDFium 已解锁
+  M5.5 (pytest e2e)          — 独立（M4 完成后 e2e 范围清晰）
+  M5.6 (README 扩充)         — 建议最后做（其他 step 完成后 README 内容确定）
 ```
 
 ---
@@ -596,8 +573,9 @@ M5.1-M5.7 内部无强依赖，可任意顺序：
 | M4.1 `tests/unit/` 内部交叉 import 漏归档导致 pytest collection 失败 | 中 | M4.1 卡 | 先跑 `pytest --collect-only` 验证；逐个 grep 内部 import |
 | M4.2 `web/app_factory.py` 注册 dev_routes 时无 try/except，归档后 web 启动 fail | 中 | M4.2 卡 | M4.2 内先 read app_factory；如硬注册则需 commit 解除注册 |
 | M4.4 业务 caller 残留 `from FNM_RE.app.` 未在 M2 切干净 | 极低 | M4.4 卡 | M2 验收已 grep 0 残留；M4 各 step 前再 grep 一遍 |
-| M5.2 phase3 cascade ignored 涉及 phase2 数据 bug | 中 | M5.2 拖延 | 标 known issue 不阻断 M5；专项 phase2 audit |
-| M5.6 shadow diff 在 M4 后需从 `归档/FNM_RE/` import Python，复杂度高 | 中 | M5.6 拖延或取消 | 建议 M5.6 提前到 M4 前；若 M4 已完成则评估是否取消 |
+| M5.2 phase2 cascade 根因不止 1 处，修了仍有残留 | 高 | M5.2 拖延 | audit 阶段先 dump 完整 11 条 missing；分批修；接受 4/5 phase3 测试通过 |
+| M5.1 启用 clippy 后冒出新 warnings | 中 | M5.1 拖延 | M5.1.4（启用 clippy）作为独立 commit；新 clippy warning 单独评估 |
+| M5.5 conftest 重构破坏 23 个现有 pytest | 低 | M5.5 拖延 | 不抽 conftest，每个新 e2e 自带 seed helper |
 | 归档目录 `归档/` 已有同名文件 | 低 | git mv 失败 | M4 各 step 前 `ls 归档/` 检查 |
 | pytest 配置未排除 `归档/`，归档后 collection 误扫 | 低 | 假绿/假红 | M4.1 内确认 `pyproject.toml` / `pytest.ini`；建议加 `--ignore=归档/` |
 
@@ -605,12 +583,12 @@ M5.1-M5.7 内部无强依赖，可任意顺序：
 
 ## 12. 下一步行动
 
-**M3 已完成（含工作区 polish）；下一步推进 M4**：
+**M1-M4 已全部完成；下一步推进 M5**：
 
-按 M4.1 → M4.6 顺序执行，每个 step 一个独立 session。详细计划见 [`M4_DETAILED_PLAN.md`](./M4_DETAILED_PLAN.md)。
+按 M5.1 → M5.6 顺序执行（或按价值优先选择）。详细计划见 [`M5_DETAILED_PLAN.md`](./M5_DETAILED_PLAN.md)。
 
-**M4 起点（M4.1）**：归档 tests/unit/ 52 个 parity 测试 + tools/ 6 个 generator。
-- 1 commit / 58 个 git mv / 0 LoC（rename）
-- 解锁后续 M4.3 归档 modules/stages/shared
+**M5 推荐起点**：
+- **M5.1 warnings 清理**（最低风险开胃菜，3-4 commit / ±200 LoC）
+- 或 **M5.2 phase2 cascade**（最高价值，解锁 byte-equal 保证）
 
-**完成 M4 后**：根据需要启动 M5 任意 step。M5 平铺 7 step 互不依赖，可按优先级灵活选择。
+**M5 完成后**：项目核心 Rust 化全部完成，FNM_RE 进入维护期。M5_DETAILED_PLAN.md 完成后归档到 `归档/FNM_RE/plans/`。

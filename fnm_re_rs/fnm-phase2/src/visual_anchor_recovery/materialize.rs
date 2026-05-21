@@ -10,7 +10,6 @@ use super::parsing::{
 };
 use fnm_core::note_marker::normalize_note_marker;
 use fnm_core::records::BodyAnchorRecord;
-use fnm_core::text::page_markdown_text;
 use fnm_core::types::AnchorKind;
 use fnm_phase1::input::RawPage;
 use serde_json::Value;

@@ -52,29 +52,10 @@ static INLINE_NOTE_BREAK_RE: Lazy<Regex> = Lazy::new(|| {
     .unwrap()
 });
 
-/// ←→ Python `_LEADING_NOISE_NOTE_DEF_RE`：去除 marker 前的噪音字符（引号、竖线等）。
-static LEADING_NOISE_NOTE_DEF_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"^\s*(?P<noise>[IiLl\|'\.,‘’“”])\s*(?P<rest>(?:\[(?:\d{1,4})\]|(?:\d{1,4})[\.;:,\)\]])\s*\S.*)$")
-        .unwrap()
-});
-
-/// ←→ Python `_SYMBOL_MARKER_ONLY_RE`：符号标记单独一行，无正文。
-static SYMBOL_MARKER_ONLY_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^\s*(\*{1,4}|†{1,2}|‡{1,2}|§|¶)\s*$").unwrap());
-
 /// ←→ Python `_INLINE_FOLLOWUP_TOKEN_RE`：行内跟随标记（避免被误分为新 note）。
 static INLINE_FOLLOWUP_TOKEN_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?:\s*[,;:·•]+\s*|\s+)(?P<token>\d(?:[ ,\.\-]{0,2}\d){0,3})(?:[\.,\)\]]|\s{1,3})")
         .unwrap()
-});
-
-/// ←→ Python `_NOISY_NEXT_NOTE_RE`：噪音字符后的 marker。
-static NOISY_NEXT_NOTE_RE: Lazy<Regex> = Lazy::new(|| {
-    // 使用 ASCII 替代集，避免 raw string 中 Unicode 字符的解析问题
-    Regex::new(
-        r"^\s*(?P<noise>[!|\[\]()\.,;:?/\-]{1,6})\s*(?P<token>\d{1,4}[A-Za-z]{0,6})\s+(?P<body>\S.*)$",
-    )
-    .unwrap()
 });
 
 /// 预处理页面文本，修复 inline break 等。←→ Python `_normalized_page_text` 预处理部分。

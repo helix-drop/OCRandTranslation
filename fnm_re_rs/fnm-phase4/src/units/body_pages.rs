@@ -3,7 +3,6 @@
 //! 章级 body pages 结构化：从 raw pages 提取正文内容。
 
 use fnm_core::records::ChapterRecord;
-use fnm_core::types::{BoundaryState, ChapterSource, NoteKind};
 use fnm_phase1::input::RawPage;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -84,7 +83,7 @@ pub fn build_structured_body_pages_for_chapter(
         .unwrap_or_default();
 
     // 辅助闭包：添加页面
-    let mut append_page = |page_no: i64,
+    let append_page = |page_no: i64,
                            text: &str,
                            body_pages: &mut Vec<StructuredBodyPage>,
                            appended: &mut HashSet<i64>| {
@@ -257,6 +256,7 @@ pub fn build_structured_body_pages_for_chapter(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fnm_core::types::{BoundaryState, ChapterSource};
 
     fn make_chapter(chapter_id: &str, title: &str, start: i64, end: i64) -> ChapterRecord {
         ChapterRecord {

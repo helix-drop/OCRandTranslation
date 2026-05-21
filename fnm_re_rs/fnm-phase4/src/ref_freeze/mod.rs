@@ -162,7 +162,7 @@ pub fn build_frozen_units(
         }
     };
 
-    let mut record_skipped =
+    let record_skipped =
         |ref_map: &mut Vec<FrozenRefEntry>,
          link: &NoteLinkRecord,
          reason: &str,
@@ -445,7 +445,7 @@ pub fn build_frozen_units(
                 .unwrap_or(serde_json::Value::Array(Vec::new()));
 
             let page_nos: Vec<i64> = {
-                let mut nos: HashSet<i64> = segs
+                let nos: HashSet<i64> = segs
                     .as_array()
                     .map(|arr| {
                         arr.iter()
@@ -697,7 +697,7 @@ pub fn build_frozen_units(
         .filter(|r| r.decision == "skipped" && r.skip_category == "policy_skip")
         .count() as i64;
 
-    let hard = serde_json::json!({
+    let _hard = serde_json::json!({
         "freeze.only_matched_frozen": injected_rows.iter().all(|r| matched_link_ids.contains(&r.link_id)),
         "freeze.no_duplicate_injection": injected_count == injected_rows.iter().map(|r| &r.anchor_id).collect::<HashSet<_>>().len() as i64,
         "freeze.closed_without_error": ref_map.len() == matched_links.len()
@@ -706,7 +706,7 @@ pub fn build_frozen_units(
         "freeze.unit_contract_valid": contract_issues.is_empty(),
     });
 
-    let soft = serde_json::json!({
+    let _soft = serde_json::json!({
         "freeze.ceiling_skip_warn": ceiling_skip_count == 0,
         "freeze.policy_skip_warn": policy_skip_count == 0,
         "freeze.synthetic_skip_warn": synthetic_skipped_count == 0,

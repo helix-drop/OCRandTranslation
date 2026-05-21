@@ -28,7 +28,7 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
     let start = Instant::now();
 
     // 1. build_note_regions
-    let mut note_regions = build_note_regions(
+    let note_regions = build_note_regions(
         input.phase1_chapters,
         input.raw_pages,
         input.phase1_pages,
@@ -48,7 +48,7 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
             &page_by_no,
             None,
         );
-    let mut note_regions = explored_regions;
+    let note_regions = explored_regions;
 
     // 2. build_note_items
     let note_items = build_note_items(input.raw_pages, &note_regions);

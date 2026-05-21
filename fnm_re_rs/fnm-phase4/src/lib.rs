@@ -23,7 +23,9 @@ pub mod text;
 pub mod units;
 
 use anyhow::Result;
-use fnm_core::records::{ChapterRecord, Phase3Summary};
+use fnm_core::records::ChapterRecord;
+#[cfg(test)]
+use fnm_core::records::Phase3Summary;
 use input::Phase4Input;
 use output::Phase4Output;
 

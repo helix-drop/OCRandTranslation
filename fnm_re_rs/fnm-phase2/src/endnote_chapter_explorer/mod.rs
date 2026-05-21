@@ -207,8 +207,10 @@ fn build_chapter_rows(chapters: &[ChapterRecord]) -> Vec<ChapterRow> {
 
 #[derive(Debug, Clone)]
 struct PageChapterSignal {
+    #[allow(dead_code)]
     page_no: i64,
     chapter_id: String,
+    #[allow(dead_code)]
     chapter_title: String,
     signal_title: String,
     source: String,
@@ -461,7 +463,7 @@ fn yield_page_signal_candidates(
     let mut yielded: Vec<(String, String, f64)> = Vec::new();
     let mut seen: HashSet<(String, String)> = HashSet::new();
 
-    let mut push = |yielded: &mut Vec<(String, String, f64)>,
+    let push = |yielded: &mut Vec<(String, String, f64)>,
                     seen: &mut HashSet<(String, String)>,
                     title: &str,
                     source: &str,

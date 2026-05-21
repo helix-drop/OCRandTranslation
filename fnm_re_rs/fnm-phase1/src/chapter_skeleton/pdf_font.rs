@@ -126,8 +126,11 @@ mod tests {
     use super::*;
 
     #[test]
-    #[ignore = "需要 PDFium 二进制 + 测试 PDF"]
     fn empty_for_missing_pdf() {
+        if std::env::var("FNM_PDFIUM_ENABLED").is_err() {
+            eprintln!("skipping: set FNM_PDFIUM_ENABLED=1 to enable PDFium tests");
+            return;
+        }
         let result = extract_font_candidates("nonexistent.pdf", &[1, 2]).unwrap();
         assert!(result.is_empty());
     }

@@ -15,15 +15,13 @@ pub mod page_split;
 pub mod ref_inject;
 
 use fnm_core::records::{
-    ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord, Phase4Structure,
-    TranslationUnitRecord,
+    ChapterRecord, NoteItemRecord, NoteRegionRecord, Phase4Structure, TranslationUnitRecord,
 };
 use fnm_core::refs::frozen_note_ref;
-use fnm_core::types::PageRole;
 use fnm_phase1::input::RawPage;
 use std::collections::HashMap;
 
-use self::body_pages::{build_structured_body_pages_for_chapter, StructuredBodyPage};
+use self::body_pages::build_structured_body_pages_for_chapter;
 use self::endnote_lookup::chapter_endnote_start_page_map;
 use self::ref_inject::{materialize_refs_for_chapter, ref_materialization_context};
 use crate::segments::chunking::chunk_body_page_segments;
@@ -354,7 +352,9 @@ fn sort_note_items<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fnm_core::types::{BoundaryState, ChapterSource};
+    use fnm_core::records::PagePartitionRecord;
+    use fnm_core::types::{BoundaryState, ChapterSource, PageRole};
+    use body_pages::StructuredBodyPage;
 
     fn make_chapter(chapter_id: &str, title: &str, start: i64, end: i64) -> ChapterRecord {
         ChapterRecord {

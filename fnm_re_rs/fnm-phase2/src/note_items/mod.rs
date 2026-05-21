@@ -7,6 +7,7 @@
 //! - year_filter: 年份误标过滤 + 序列异常值修正
 
 pub mod marker_parse;
+pub mod note_scan;
 pub mod page_text;
 pub mod sequence_repair;
 pub mod year_filter;
@@ -19,6 +20,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 use self::marker_parse::{parse_page, preprocess_page_text, row_to_item};
+use self::note_scan::scan_items_by_kind;
 use self::sequence_repair::{repair_parsed_row_sequence_markers, ParsedNoteRow};
 use self::year_filter::{fix_sequence_outlier_markers_in_place, fix_year_markers_in_place};
 
@@ -47,13 +49,34 @@ pub fn build_note_items(
             .filter(|p| region.pages.contains(&p.book_page))
             .collect();
 
-        // Phase A: 解析页文本 → ParsedNoteRow
+        // Phase A: 逐页解析 → ParsedNoteRow
+        // 策略（按 region kind 区分）：
+        //   endnote: 优先使用 _note_scan 结构化数据（OCR fnBlocks 预处理结果），
+        //            因文本解析在尾注集合页上会误抽页内引用数字（如 p. 278）作 marker。
+        //   footnote: 文本解析优先（含特殊 marker */**/***），
+        //             _note_scan 仅在文本解析返回空时作为 fallback。
+        // ←→ Python build_note_items 内层循环
         let mut rows: Vec<ParsedNoteRow> = Vec::new();
         for page in &region_pages {
+            if region.note_kind == NoteKind::Endnote {
+                let scan_items = scan_items_by_kind(page, "endnote");
+                if !scan_items.is_empty() {
+                    for item in &scan_items {
+                        rows.push(ParsedNoteRow {
+                            marker: item.marker.clone(),
+                            text: item.text.clone(),
+                            is_reconstructed: item.is_reconstructed,
+                            source: item.source.clone(),
+                            page_no: page.book_page,
+                        });
+                    }
+                    continue;
+                }
+            }
+
+            // 文本解析
             let text = if region.note_kind == NoteKind::Footnote {
                 // ←→ Python _normalized_page_text: footnote region 使用 `page.footnotes`
-                // 预提取文本（仅脚注内容，不含正文）。Python 的 annotate_pages_with_note_scans
-                // 在 Phase 1 提前完成此步骤，Rust 在 Phase 2 读取 RawPage.footnotes 字段。
                 page.footnotes.clone()
             } else {
                 page.markdown.clone()
@@ -63,7 +86,26 @@ pub fn build_note_items(
                 continue;
             }
             let processed = preprocess_page_text(&text);
-            rows.extend(parse_page(&processed, page.book_page, region));
+            let parsed = parse_page(&processed, page.book_page, region);
+
+            // footnote: 文本解析空时回退到 _note_scan
+            if parsed.is_empty() && region.note_kind == NoteKind::Footnote {
+                let scan_items = scan_items_by_kind(page, "footnote");
+                if !scan_items.is_empty() {
+                    for item in &scan_items {
+                        rows.push(ParsedNoteRow {
+                            marker: item.marker.clone(),
+                            text: item.text.clone(),
+                            is_reconstructed: item.is_reconstructed,
+                            source: item.source.clone(),
+                            page_no: page.book_page,
+                        });
+                    }
+                    continue;
+                }
+            }
+
+            rows.extend(parsed);
         }
 
         // Phase B: endnote 序列修复

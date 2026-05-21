@@ -11,7 +11,7 @@
 use fnm_core::db::Repository;
 use fnm_core::records::{DiagnosticNoteRecord, TranslationUnitRecord};
 use fnm_phase1::input::RawPage;
-use serde_json::{json, Map, Value};
+use serde_json::{json, Value};
 
 /// ←→ Python `format_fnm_unit_label()` — TranslationUnitRecord 版
 pub fn format_unit_label(unit: &TranslationUnitRecord) -> String {
@@ -948,7 +948,7 @@ pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value
         .map(|v| v.as_str().unwrap_or("").trim().to_string())
         .collect();
 
-    let section_title = unit
+    let _section_title = unit
         .get("section_title")
         .and_then(|v| v.as_str())
         .unwrap_or("")

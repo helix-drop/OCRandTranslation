@@ -110,8 +110,11 @@ mod tests {
     use super::*;
 
     #[test]
-    #[ignore = "需要 PDFium 二进制 + 测试 PDF"]
     fn render_biopolitics_page_1() {
+        if std::env::var("FNM_PDFIUM_ENABLED").is_err() {
+            eprintln!("skipping: set FNM_PDFIUM_ENABLED=1 to enable PDFium tests");
+            return;
+        }
         let pdf_path = "/Users/hao/OCRandTranslation/test_example/Biopolitics/Biopolitics.pdf";
         let result = render_page_to_base64_png(pdf_path, 0, 150).unwrap();
         assert!(!result.is_empty());

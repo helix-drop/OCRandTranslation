@@ -5,22 +5,10 @@
 use crate::chapter_skeleton::fallback;
 use crate::input::{RawPage, TocItem};
 use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord};
-use fnm_core::title::{chapter_title_match_key, normalize_title};
+use fnm_core::title::chapter_title_match_key;
 use fnm_core::types::{ChapterSource, PageRole};
-use once_cell::sync::Lazy;
-use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
-
-// ── 正则（与 Python 端对齐）─────────────────────────────────────
-
-static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"^\s*(?:introduction|avertissement|pr[eé]face|foreword|epilogue|conclusion)\b")
-        .unwrap()
-});
-
-static BARE_CHAPTER_NUMBER_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)^\s*(?:\d+|[ivxlcdm]+)[\.\):\-–—]?\s+").unwrap());
 
 // ── 公开输出 ────────────────────────────────────────────────────
 
@@ -31,27 +19,6 @@ pub struct ChapterSkeleton {
     pub toc_semantics_section_heads: Vec<SectionHeadRecord>,
     pub fallback_sections: Vec<SectionHeadRecord>,
     pub diagnostics: Value,
-}
-
-// ── 辅助 ─────────────────────────────────────────────────────────
-
-/// ←→ Python `_chapter_title_keys_for_visual_match`
-fn chapter_title_keys_for_visual_match(title: &str) -> HashSet<String> {
-    let mut keys: HashSet<String> = HashSet::new();
-    let normalized = normalize_title(title);
-    let primary = chapter_title_match_key(&normalized);
-    if !primary.is_empty() {
-        keys.insert(primary);
-    }
-    let stripped = BARE_CHAPTER_NUMBER_RE.replace(&normalized, "").to_string();
-    let stripped_trimmed = stripped.trim();
-    if !stripped_trimmed.is_empty() && stripped_trimmed != normalized {
-        let s = chapter_title_match_key(stripped_trimmed);
-        if !s.is_empty() {
-            keys.insert(s);
-        }
-    }
-    keys
 }
 
 /// ←→ Python `_compact_unique_titles`
@@ -159,7 +126,7 @@ pub fn build_chapter_skeleton(
 
     // ── Step 3: 选择 visual / fallback / empty ──────────────────
 
-    let (mut chapters_raw, mut merged_section_fallbacks, mut chapter_source_summary, source_hint) =
+    let (mut chapters_raw, merged_section_fallbacks, chapter_source_summary, source_hint) =
         if !visual_chapters_raw.is_empty() {
             let mut summary = visual_meta
                 .get("chapter_source_summary")
@@ -586,8 +553,6 @@ pub fn build_chapter_skeleton(
             .and_then(|v| v.as_str())
             .unwrap_or("fallback"),
     });
-
-    chapter_source_summary = chapter_source_summary; // suppress unused
 
     ChapterSkeleton {
         chapters,

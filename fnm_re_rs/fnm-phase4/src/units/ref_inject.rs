@@ -8,7 +8,7 @@
 use fnm_core::note_marker::normalize_note_marker;
 use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
 use fnm_core::refs::{cleanup_nested_note_refs, frozen_note_ref};
-use fnm_core::types::{AnchorKind, LinkStatus, NoteKind};
+use fnm_core::types::LinkStatus;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -339,6 +339,7 @@ pub fn materialize_refs_for_chapter(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fnm_core::types::{AnchorKind, NoteKind};
 
     fn make_anchor(
         anchor_id: &str,

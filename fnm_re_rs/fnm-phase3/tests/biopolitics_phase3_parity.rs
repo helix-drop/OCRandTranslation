@@ -304,7 +304,7 @@ fn run_biopolitics_phase3_with_phase2() -> fnm_phase3::output::Phase3Output {
 // 修复 Phase 2 cascade 后，直接 `cargo test ... -- --ignored` 验真。
 
 const PHASE2_CASCADE_IGNORE: &str =
-    "Phase 2 note_item over-extraction (619 vs 584) propagates to Phase 3; \
+    "Phase 2 note_item under-extraction (564 vs 584) propagates to Phase 3; \
      see known_python_bugs.md §7. Run with --ignored after Phase 2 fix.";
 
 // ── SPEC: Body anchor field-by-field parity ────────────────────

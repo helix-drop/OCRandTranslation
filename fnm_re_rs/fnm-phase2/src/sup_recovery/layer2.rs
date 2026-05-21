@@ -12,9 +12,13 @@ use std::collections::HashSet;
 #[derive(Debug, Clone)]
 pub struct Layer2Recovery {
     pub marker: String,
+    #[allow(dead_code)]
     pub before: String,
+    #[allow(dead_code)]
     pub after: String,
+    #[allow(dead_code)]
     pub found_in: String,
+    #[allow(dead_code)]
     pub mode: String, // "direct_digit" | "ocr_surrogate" | "ocr_suffix" | "ocr_symbol_after_year"
 }
 
@@ -250,49 +254,6 @@ pub fn find_markers_in_blocks(
     results
 }
 
-// ── Layer 0：Unicode 上标归一化 ─────────────────────────────────
-
-/// 上标数字 Unicode → ASCII 映射表。
-fn unicode_sup_to_digit(c: char) -> Option<char> {
-    match c {
-        '\u{2070}' => Some('0'),
-        '\u{00B9}' => Some('1'),
-        '\u{00B2}' => Some('2'),
-        '\u{00B3}' => Some('3'),
-        '\u{2074}' => Some('4'),
-        '\u{2075}' => Some('5'),
-        '\u{2076}' => Some('6'),
-        '\u{2077}' => Some('7'),
-        '\u{2078}' => Some('8'),
-        '\u{2079}' => Some('9'),
-        _ => None,
-    }
-}
-
-static UNICODE_SUP_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(
-        r"[\u{2070}\u{00B9}\u{00B2}\u{00B3}\u{2074}\u{2075}\u{2076}\u{2077}\u{2078}\u{2079}]+",
-    )
-    .unwrap()
-});
-
-/// ←→ Python `_normalize_unicode_superscripts`
-/// 把 `<sup>123</sup>` 形式的 Unicode 上标归一化为 `<sup>123</sup>` markdown 标记。
-pub fn normalize_unicode_superscripts(markdown: &str) -> (String, usize) {
-    let mut count = 0usize;
-    let result = UNICODE_SUP_RE.replace_all(markdown, |caps: &regex::Captures| -> String {
-        let original = caps.get(0).map(|m| m.as_str()).unwrap_or("");
-        let digits: String = original.chars().filter_map(unicode_sup_to_digit).collect();
-        if !digits.is_empty() && digits.chars().all(|c| c.is_ascii_digit()) {
-            count += 1;
-            format!("<sup>{}</sup>", digits)
-        } else {
-            original.to_string()
-        }
-    });
-    (result.into_owned(), count)
-}
-
 // ── Marker 已存在检测 ───────────────────────────────────────────
 
 static MARKER_EXISTS_RE_CACHE: Lazy<std::sync::Mutex<std::collections::HashMap<String, Regex>>> =
@@ -312,93 +273,11 @@ pub fn has_marker(markdown: &str, marker: &str) -> bool {
     re.is_match(markdown)
 }
 
-// ── 位置查找 ─────────────────────────────────────────────────────
 
-const MAX_GAP_CHARS: usize = 80;
-
-static WORD_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?:[A-Za-z]|[\u{00C0}-\u{00FF}]){3,}").unwrap());
-
-/// ←→ Python `_find_insert_pos`：根据 before/after 上下文在 markdown 中找插入位置。
-pub fn find_insert_pos(markdown: &str, before_ctx: &str, after_ctx: &str) -> Option<usize> {
-    let before_words: Vec<&str> = WORD_RE.find_iter(before_ctx).map(|m| m.as_str()).collect();
-    let after_words: Vec<&str> = WORD_RE.find_iter(after_ctx).map(|m| m.as_str()).collect();
-
-    if !before_words.is_empty() && !after_words.is_empty() {
-        let bw = regex::escape(before_words.last().unwrap());
-        let aw = regex::escape(after_words.first().unwrap());
-        let combined = format!(r"(?i){bw}.{{0,{MAX_GAP_CHARS}}}{aw}");
-        if let Ok(re) = Regex::new(&combined) {
-            if let Some(m) = re.find(markdown) {
-                let inner_re = Regex::new(&format!(r"(?i){bw}")).ok()?;
-                if let Some(inner) = inner_re.find(m.as_str()) {
-                    return Some(m.start() + inner.end());
-                }
-            }
-        }
-    }
-
-    if !after_words.is_empty() {
-        let aw = regex::escape(after_words.first().unwrap());
-        let re = Regex::new(&format!(r"(?i){aw}")).ok()?;
-        if let Some(m) = re.find(markdown) {
-            return Some(m.start());
-        }
-    }
-
-    None
-}
-
-/// ←→ Python `_apply_insertions`：按位置降序插入 `<sup>marker</sup>`。
-pub fn apply_insertions(markdown: &str, insertions: &[(usize, String, String)]) -> String {
-    let mut sorted = insertions.to_vec();
-    sorted.sort_by_key(|(pos, _, _)| std::cmp::Reverse(*pos));
-    let mut result = markdown.to_string();
-    for (pos, marker, _layer) in sorted {
-        if pos > result.len() {
-            continue;
-        }
-        // 找到 char boundary（防止切到多字节字符中间）
-        let mut safe_pos = pos.min(result.len());
-        while !result.is_char_boundary(safe_pos) && safe_pos > 0 {
-            safe_pos -= 1;
-        }
-        let tag = format!("<sup>{}</sup>", marker);
-        result.insert_str(safe_pos, &tag);
-    }
-    result
-}
-
-// ── 旧 API 兼容 ──────────────────────────────────────────────────
-
-/// 在单一 OCR text 中寻找数字 markers（简化旧接口）。
-pub fn find_markers_in_ocr_text(
-    ocr_text: &str,
-    markers: &[String],
-) -> anyhow::Result<Vec<(String, String)>> {
-    let marker_set: HashSet<&str> = markers.iter().map(|s| s.as_str()).collect();
-    let mut recovered: Vec<(String, String)> = Vec::new();
-    for caps in DIGIT_BOUNDARY_RE.captures_iter(ocr_text) {
-        let candidate = caps.get(1).map(|m| m.as_str()).unwrap_or("");
-        if marker_set.contains(candidate) {
-            recovered.push((candidate.to_string(), "ocr_aligned".into()));
-        }
-    }
-    Ok(recovered)
-}
-
-static DIGIT_BOUNDARY_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\b(\d{1,4})\b").unwrap());
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn find_digit_markers() {
-        let markers = vec!["30".into(), "11".into()];
-        let found = find_markers_in_ocr_text("text with 30 and 11 markers", &markers).unwrap();
-        assert_eq!(found.len(), 2);
-    }
 
     #[test]
     fn ocr_surrogate_double_one() {
@@ -427,34 +306,11 @@ mod tests {
     }
 
     #[test]
-    fn normalize_unicode_sup_to_html() {
-        let (out, count) = normalize_unicode_superscripts("foo ¹² bar ³");
-        assert_eq!(count, 2);
-        assert!(out.contains("<sup>12</sup>"));
-        assert!(out.contains("<sup>3</sup>"));
-    }
-
-    #[test]
     fn has_marker_detects_html_sup() {
         assert!(has_marker("text <sup>5</sup> more", "5"));
         assert!(has_marker("text $^{5}$ more", "5"));
         assert!(has_marker("text [^5] more", "5"));
         assert!(!has_marker("text 5 more", "5"));
-    }
-
-    #[test]
-    fn find_insert_pos_basic() {
-        let md = "the quick brown fox jumps over the lazy dog";
-        let pos = find_insert_pos(md, "quick brown", "jumps over");
-        assert!(pos.is_some());
-    }
-
-    #[test]
-    fn apply_insertions_preserves_char_boundary() {
-        let md = "résumé continues";
-        let inserts = vec![(3, "5".into(), "test".into())];
-        // 不允许 panic（位置 3 在 'é' 字节中间）
-        let _ = apply_insertions(md, &inserts);
     }
 
     #[test]

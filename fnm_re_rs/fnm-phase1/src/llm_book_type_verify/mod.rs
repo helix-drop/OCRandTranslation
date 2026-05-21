@@ -177,8 +177,14 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "需要真实 OPENAI_API_KEY + PDFium 二进制"]
     async fn real_book_type_verify() {
+        match std::env::var("OPENAI_API_KEY") {
+            Ok(k) if !k.is_empty() => k,
+            _ => {
+                eprintln!("Skipping: set OPENAI_API_KEY to enable");
+                return;
+            }
+        };
         let structure = Phase1Structure {
             pages: vec![PagePartitionRecord {
                 page_no: 1,
