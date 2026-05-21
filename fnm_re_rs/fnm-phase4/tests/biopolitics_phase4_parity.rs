@@ -1,6 +1,9 @@
 //! Biopolitics Phase 4 parity 测试。
 //!
-//! 比对 Rust 和 Python 的 Phase 4 输出，验证 reviews 的一致性和数量匹配。
+//! 比对 Rust pipeline Phase 4 输出与持久化 golden（Biopolitics 章节级 ground truth），
+//! 验证 reviews 的一致性和数量匹配。
+//!
+//! golden 历史：来源于 M4 前 Python 实现的导出，M5 起作为 Rust pipeline 的回归基准。
 
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -35,11 +38,11 @@ fn biopolitics_phase4_golden_loads() {
 #[test]
 fn biopolitics_phase4_structure_review_count() {
     let golden = load_golden();
-    // Python 端产生 405 条 structure_reviews
+    // Biopolitics golden 包含 405 条 structure_reviews（章节级 ground truth）
     assert_eq!(
         golden.structure_reviews.len(),
         405,
-        "Expected 405 structure_reviews from Python, got {}",
+        "Expected 405 structure_reviews in golden, got {}",
         golden.structure_reviews.len()
     );
 }

@@ -1,9 +1,9 @@
 //! F12: Biopolitics parity 比对测试。
 //!
-//! 加载 Biopolitics 全量 raw_pages.json 和 Python golden fixture，
-//! 逐字段比对 Rust vs Python Phase 1 输出。
+//! 加载 Biopolitics 全量 raw_pages.json 和 历史 golden fixture（M4 前 Python 实现导出），
+//! 逐字段比对 Rust Phase 1 输出与 golden。
 //!
-//! 差异文档：tests/known_python_bugs.md
+//! 差异文档：tests/known_golden_diffs.md
 
 use fnm_core::records::PagePartitionRecord;
 use fnm_core::types::PageRole;
@@ -78,7 +78,7 @@ fn load_biopolitics_pages() -> Vec<RawPage> {
         .collect()
 }
 
-/// 加载 Python golden fixture
+/// 加载 历史 golden fixture（M4 前 Python 实现导出）
 fn load_golden() -> GoldenFixture {
     let raw = include_str!("fixtures/biopolitics_phase1_golden.json");
     serde_json::from_str(raw).expect("Failed to parse golden fixture")
@@ -89,12 +89,12 @@ fn load_golden() -> GoldenFixture {
 #[derive(Debug, Default)]
 #[allow(dead_code)]
 struct DiffSummary {
-    role_diffs: Vec<(i64, String, String)>, // (page_no, rust_role, python_role)
+    role_diffs: Vec<(i64, String, String)>, // (page_no, rust_role, golden_role)
     confidence_diffs: Vec<(i64, f64, f64)>,
     has_note_heading_diffs: Vec<(i64, bool, bool)>,
     target_page_diffs: Vec<(i64, i64, i64)>,
     missing_in_rust: Vec<i64>,
-    missing_in_python: Vec<i64>,
+    missing_in_golden: Vec<i64>,
 }
 
 #[test]
@@ -133,7 +133,7 @@ fn biopolitics_page_partition_field_by_field() {
         let py = match py_by_page.get(&pn) {
             Some(p) => p,
             None => {
-                summary.missing_in_python.push(pn);
+                summary.missing_in_golden.push(pn);
                 continue;
             }
         };
@@ -187,7 +187,7 @@ fn biopolitics_page_partition_field_by_field() {
 
     eprintln!("=== Page role distribution ===");
     eprintln!("  Rust:  {:?}", rust_roles);
-    eprintln!("  Python: {:?}", py_roles);
+    eprintln!("  Golden: {:?}", py_roles);
     eprintln!(
         "  Role agreement: {}/{} pages ({:.1}%)",
         matched,
@@ -197,7 +197,7 @@ fn biopolitics_page_partition_field_by_field() {
 
     if !summary.role_diffs.is_empty() {
         eprintln!(
-            "  Role diffs (Rust→Python): {} pages differ",
+            "  Role diffs (Rust→Golden): {} pages differ",
             summary.role_diffs.len()
         );
         // 按类型分组
@@ -243,16 +243,16 @@ fn biopolitics_page_partition_field_by_field() {
         / py_roles.get("note").copied().unwrap_or(1) as f64
         * 100.0;
     eprintln!(
-        "  Note page coverage: Rust {}/{} Python ({:.0}%)",
+        "  Note page coverage: Rust {}/{} Golden ({:.0}%)",
         rust_roles.get("note").copied().unwrap_or(0),
         py_roles.get("note").copied().unwrap_or(0),
         note_match_rate
     );
 
-    // ⚠️ 不锁精确值——差异记录在 known_python_bugs.md
+    // ⚠️ 不锁精确值——差异记录在 known_golden_diffs.md
     // 如果 Rust 覆盖率<50%，打印明显警告（后续应改善）
     if note_match_rate < 50.0 {
-        eprintln!("  ⚠️  WARNING: Note page coverage below 50% — see tests/known_python_bugs.md");
+        eprintln!("  ⚠️  WARNING: Note page coverage below 50% — see tests/known_golden_diffs.md");
     }
 }
 
@@ -330,7 +330,7 @@ fn biopolitics_chapters_field_by_field() {
         eprintln!("  Chapter boundary diffs:");
         for (idx, field, rust_val, py_val, title) in &chapter_diffs {
             eprintln!(
-                "    Ch{} {} \"{}\": Rust {} vs Python {} (delta={})",
+                "    Ch{} {} \"{}\": Rust {} vs Golden {} (delta={})",
                 idx,
                 field,
                 title,
@@ -340,19 +340,19 @@ fn biopolitics_chapters_field_by_field() {
             );
         }
         panic!(
-            "{} chapter boundary diffs — all 12 chapters must byte-equal Python golden",
+            "{} chapter boundary diffs — all 12 chapters must byte-equal golden",
             chapter_diffs.len()
         );
     }
 
     eprintln!(
-        "  Chapters: {}/{} — 100% byte-equal with Python golden",
+        "  Chapters: {}/{} — 100% byte-equal with golden",
         rust_chapters.len(),
         golden.chapters.len()
     );
 }
 
-// ── SPEC 3: known_python_bugs.md consistency check ────────────
+// ── SPEC 3: known_golden_diffs.md consistency check ────────────
 
 #[test]
 fn role_coverage_is_documented() {
@@ -371,24 +371,24 @@ fn role_coverage_is_documented() {
         .filter(|p| p.page_role == PageRole::Note)
         .count() as i64;
 
-    // 差异存在时，known_python_bugs.md 必须存在并记录
+    // 差异存在时，known_golden_diffs.md 必须存在并记录
     if py_note != rust_note {
         let bugs_path =
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/known_python_bugs.md");
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/known_golden_diffs.md");
         assert!(
             bugs_path.exists(),
-            "known_python_bugs.md must exist when Rust≠Python:\n\
-             Rust note={}, Python note={}\n\
+            "known_golden_diffs.md must exist when Rust≠golden:\n\
+             Rust note={}, golden note={}\n\
              Expected at: {}",
             rust_note,
             py_note,
             bugs_path.display()
         );
         let content =
-            std::fs::read_to_string(&bugs_path).expect("known_python_bugs.md must be readable");
+            std::fs::read_to_string(&bugs_path).expect("known_golden_diffs.md must be readable");
         assert!(
             content.contains("page_partition role"),
-            "known_python_bugs.md should document page_partition role diffs"
+            "known_golden_diffs.md should document page_partition role diffs"
         );
     }
 }

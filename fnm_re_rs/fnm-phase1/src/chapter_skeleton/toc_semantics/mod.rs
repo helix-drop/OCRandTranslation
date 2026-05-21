@@ -22,10 +22,8 @@ pub static TOC_PART_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?i)^\s*(?:part|partie|livre|book|section)\s+(?:[ivxlcm]+|\d+)\b").unwrap()
 });
 
-pub static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"(?i)^\s*(?:introduction|avertissement|pr[eé]face|foreword|epilogue|conclusion)\b")
-        .unwrap()
-});
+// 兼容 re-export：内部统一为 `fnm_core::title::FRONT_MATTER_FORCE_EXPORT_TITLE_RE`。
+pub use fnm_core::title::FRONT_MATTER_FORCE_EXPORT_TITLE_RE as TOC_FORCE_EXPORT_TITLE_RE;
 
 pub static TOC_EXPLICIT_CHAPTER_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(

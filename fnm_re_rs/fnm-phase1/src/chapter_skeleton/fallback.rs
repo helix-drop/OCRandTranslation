@@ -30,11 +30,45 @@ static CHAPTER_KEYWORD_RE: Lazy<Regex> = Lazy::new(|| {
     )
     .unwrap()
 });
-static LECTURE_TITLE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\ble[cç]on du\b").unwrap());
-static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"^\s*(?:introduction|avertissement|pr[eé]face|foreword|epilogue|conclusion)\b")
-        .unwrap()
-});
+// LECTURE_TITLE_RE 已 dedup → `crate::chapter_skeleton::toc_semantics::title_utils::LECTURE_TITLE_RE`
+// （审计 #3 已扩展为支持 Foucault 系列 + 英语 lecture/lesson 编号型）
+
+// TOC_FORCE_EXPORT_TITLE_RE 已 dedup → `fnm_core::title::FRONT_MATTER_FORCE_EXPORT_TITLE_RE`
+
+// ── Fallback chapter classify 权重常量 ──────────────────────────────────
+//
+// **设计说明（CLAUDE.md §7 / §10 / 审计 #6）：**
+//
+// 以下权重值来自针对 Biopolitics fixture 的经验调参，**没有理论或多书校准依据**。
+// 应通过 ≥3 本书的 golden fixture 反推校准（详见 NEXT_PHASE_PLAN.md M5+）。
+//
+// 修改前请 read 完整 `classify_fallback_sections()` 算法 + 跑现有 fixture 回归。
+// 阈值 SCORE_THRESHOLD_KEEP_CHAPTER=2.0 是 keep_as_chapter 判定的 cut-off — 改它
+// 会让其他书的章节切分结果剧变。
+
+/// 该章在 TOC 中有显式 entry。最强证据。
+const SCORE_WEIGHT_VISUAL_TOC: f64 = 3.0;
+/// PDF 顶部 OCR 识别为 doc_title。
+const SCORE_WEIGHT_TOP_DOC_TITLE: f64 = 1.8;
+/// PDF 字体 band 信号匹配。
+const SCORE_WEIGHT_PDF_FONT: f64 = 1.2;
+/// top_doc_title 与 chapter keyword 同时存在的协同加权。
+const SCORE_WEIGHT_TITLE_KEYWORD_SYNERGY: f64 = 1.2;
+/// span_pages ≥ 4：长章节，加分。
+const SCORE_WEIGHT_LONG_SPAN: f64 = 1.2;
+/// span_pages == 3：中等章节，小加分。
+const SCORE_WEIGHT_MID_SPAN: f64 = 0.5;
+/// span_pages ≤ 2：短章节，减分（除非有强证据则减分轻一些）。
+const SCORE_PENALTY_SHORT_SPAN_WITH_EVIDENCE: f64 = 0.8;
+const SCORE_PENALTY_SHORT_SPAN_NO_EVIDENCE: f64 = 1.8;
+/// 全为 paragraph_title 类型的弱证据，减分。
+const SCORE_PENALTY_PARAGRAPH_TITLE_ONLY: f64 = 1.2;
+/// keep_as_chapter 判定 cut-off。score ≥ 此值才保留章节。
+const SCORE_THRESHOLD_KEEP_CHAPTER: f64 = 2.0;
+/// classification_confidence = (0.5 + score / SCORE_CONFIDENCE_NORMALIZER).clamp(0,1)。
+const SCORE_CONFIDENCE_NORMALIZER: f64 = 6.0;
+/// 当全部 classified 都被拒时强制保留首个有效章 → 分数下限。
+const SCORE_FORCE_KEEP_FIRST_FLOOR: f64 = 2.1;
 
 const FAMILY_NONBODY: &[&str] = &[
     "note",
@@ -230,26 +264,26 @@ pub fn classify_fallback_sections(
             reject_reason = "sentence_like".into();
         } else {
             if has_visual_toc {
-                score += 3.0;
+                score += SCORE_WEIGHT_VISUAL_TOC;
             }
             if has_top_doc_title {
-                score += 1.8;
+                score += SCORE_WEIGHT_TOP_DOC_TITLE;
             }
             if has_pdf_font {
-                score += 1.2;
+                score += SCORE_WEIGHT_PDF_FONT;
             }
             if has_top_doc_title && keyword_strength >= 1.0 {
-                score += 1.2;
+                score += SCORE_WEIGHT_TITLE_KEYWORD_SYNERGY;
             }
             if span_pages >= 4 {
-                score += 1.2;
+                score += SCORE_WEIGHT_LONG_SPAN;
             } else if span_pages == 3 {
-                score += 0.5;
+                score += SCORE_WEIGHT_MID_SPAN;
             } else if span_pages <= 2 {
                 score -= if has_top_doc_title || has_visual_toc {
-                    0.8
+                    SCORE_PENALTY_SHORT_SPAN_WITH_EVIDENCE
                 } else {
-                    1.8
+                    SCORE_PENALTY_SHORT_SPAN_NO_EVIDENCE
                 };
             }
             score += keyword_strength;
@@ -258,9 +292,9 @@ pub fn classify_fallback_sections(
                     .iter()
                     .all(|c| c.source == "ocr_block" && c.block_label == "paragraph_title");
             if all_paragraph_title && !strong_evidence {
-                score -= 1.2;
+                score -= SCORE_PENALTY_PARAGRAPH_TITLE_ONLY;
             }
-            keep = score >= 2.0;
+            keep = score >= SCORE_THRESHOLD_KEEP_CHAPTER;
             if keep && span_pages <= 2 && !strong_evidence {
                 keep = false;
                 reject_reason = "short_span".into();
@@ -280,7 +314,7 @@ pub fn classify_fallback_sections(
             keep_as_chapter: keep,
             reject_reason,
             classification_score: score,
-            classification_confidence: (0.5 + score / 6.0).clamp(0.0, 1.0),
+            classification_confidence: (0.5 + score / SCORE_CONFIDENCE_NORMALIZER).clamp(0.0, 1.0),
         });
     }
 
@@ -295,7 +329,9 @@ pub fn classify_fallback_sections(
         }) {
             first.keep_as_chapter = true;
             first.reject_reason = String::new();
-            first.classification_score = first.classification_score.max(2.1);
+            first.classification_score = first
+                .classification_score
+                .max(SCORE_FORCE_KEEP_FIRST_FLOOR);
         }
     }
 
@@ -565,9 +601,13 @@ pub fn merge_section_heads(
 // ── 辅助函数 ─────────────────────────────────────────────────────
 
 fn chapter_keyword_strength(title: &str) -> f64 {
-    if CHAPTER_KEYWORD_RE.is_match(title) || TOC_FORCE_EXPORT_TITLE_RE.is_match(title) {
+    if CHAPTER_KEYWORD_RE.is_match(title)
+        || fnm_core::title::matches_front_matter_force_export(title)
+    {
         2.0
-    } else if LECTURE_TITLE_RE.is_match(title) {
+    } else if crate::chapter_skeleton::toc_semantics::title_utils::LECTURE_TITLE_RE
+        .is_match(title)
+    {
         1.5
     } else {
         0.0
@@ -848,7 +888,7 @@ pub fn trim_chapter_rows(
 
 fn is_toc_force_export_title(title: &str) -> bool {
     let normalized = normalize_title(title);
-    TOC_FORCE_EXPORT_TITLE_RE.is_match(&normalized.to_lowercase())
+    fnm_core::title::matches_front_matter_force_export(&normalized.to_lowercase())
 }
 
 // ── 默认 TOC summary 生成器（B3 之前缺失的 3 个 helper）─────────

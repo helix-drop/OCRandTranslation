@@ -1,8 +1,8 @@
-//! Audit: 对比 Rust build_note_items 输出与 Python golden 的逐条差异。
+//! Audit: 对比 Rust build_note_items 输出与 golden 的逐条差异。
 //!
 //! 输出 JSON 到 /tmp/audit_note_items/ 目录：
-//! - extra_items.json: Rust 有 Python 无（按类型归类）
-//! - missing_items.json: Python 有 Rust 无（按类型归类）
+//! - extra_items.json: Rust 有 golden 无（按类型归类）
+//! - missing_items.json: Golden 有 Rust 无（按类型归类）
 //! - summary.json: 汇总计数
 //!
 //! 运行：cargo test -p fnm-phase2 audit_note_items -- --nocapture
@@ -129,14 +129,14 @@ fn build_chapters() -> Vec<ChapterRecord> {
 // ── 主测试 ────────────────────────────────────────────────────
 
 #[test]
-fn audit_note_items_rust_vs_python() {
+fn audit_note_items_rust_vs_golden() {
     let rust_items = run_rust_pipeline();
     let golden = load_golden();
 
     let rust_count = rust_items.len();
     let py_count = golden.note_items.len();
     eprintln!("=== Phase 2 note_items 审计 ===");
-    eprintln!("Rust: {rust_count} items, Python: {py_count} items, Diff: {}", {
+    eprintln!("Rust: {rust_count} items, Golden: {py_count} items, Diff: {}", {
         if rust_count >= py_count {
             format!("+{}", rust_count - py_count)
         } else {
@@ -155,7 +155,7 @@ fn audit_note_items_rust_vs_python() {
         } else {
             format!("-{}", p - r)
         };
-        eprintln!("  {kind}: Rust={r}, Python={p}, Diff={diff}");
+        eprintln!("  {kind}: Rust={r}, Golden={p}, Diff={diff}");
     }
 
     // 按 region 分类
@@ -177,7 +177,7 @@ fn audit_note_items_rust_vs_python() {
             } else {
                 format!("-{}", p - r)
             };
-            eprintln!("  {rid}: Rust={r}, Python={p}, Diff={diff}");
+            eprintln!("  {rid}: Rust={r}, Golden={p}, Diff={diff}");
         }
     }
 
@@ -290,10 +290,10 @@ fn audit_note_items_rust_vs_python() {
 
     let summary = serde_json::json!({
         "rust_count": rust_count,
-        "python_count": py_count,
+        "golden_count": py_count,
         "diff": if rust_count >= py_count { rust_count - py_count } else { py_count - rust_count },
         "rust_by_kind": rust_by_kind,
-        "python_by_kind": py_by_kind,
+        "golden_by_kind": py_by_kind,
         "extra_count": extra.len(),
         "missing_count": missing.len(),
         "matched_count": rust_keys.intersection(&py_keys).count(),

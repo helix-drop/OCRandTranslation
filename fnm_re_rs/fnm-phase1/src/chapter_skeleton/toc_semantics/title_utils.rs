@@ -25,8 +25,28 @@ pub static NOTE_DEF_RE: Lazy<Regex> =
 
 pub static HTML_TAG_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]+>").unwrap());
 
-pub static LECTURE_TITLE_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)\ble[cç]on du\b").unwrap());
+/// 讲座标题识别——覆盖法语 Collège de France 课程系列 + 英语学术讲稿格式。
+///
+/// 设计说明（CLAUDE.md §7 / 审计 #3 修复 2026-05-21）：
+/// 原版本仅匹配 `le[cç]on du`（Foucault Biopolitics 一本书的格式）。扩展到：
+/// - **`le[cç]on du`**：Foucault Collège de France 系列 13 卷通用日期型讲稿标题
+/// - **`cours du`**：Foucault 另一类课程标题（如《Society Must Be Defended》某些卷）
+/// - **`lecture \d+` / `lesson \d+`**：英语学术讲稿常见格式（编号型）
+/// - **`lecture (?:no\.?)? \d+` / `lesson no\.? \d+`**：带 "No." 的变体
+///
+/// **未覆盖**（属未来扩展）：中文"第N讲"/"第N课"、日文"第N講"、德文"Vorlesung N" 等。
+/// 这些应通过 LLM book_type_verify 在主入口判定 doc 语言后注入额外 pattern，
+/// 而非在此罗列（详见 #5 重组方向）。
+pub static LECTURE_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(concat!(
+        r"(?i)",
+        // 法语 Foucault 系列：leçon/lecon du / cours du
+        r"\ble[cç]on du\b|\bcours du\b",
+        // 英语学术讲稿：lecture/lesson + 可选 "no."/"#" + 数字
+        r"|\b(?:lecture|lesson)\s+(?:no\.?\s+|#\s*)?\d+\b",
+    ))
+    .unwrap()
+});
 
 pub static MAIN_NUMBERED_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?i)^(?:chapter\s+)?(?:\d+|[IVXLCMivxlcm]+)[\.\):\-]?\s+\S+").unwrap()
@@ -47,10 +67,8 @@ pub static TOC_NON_BODY_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
     .unwrap()
 });
 
-pub static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"(?i)^\s*(?:introduction|avertissement|pr[eé]face|foreword|epilogue|conclusion)\b")
-        .unwrap()
-});
+// 兼容 re-export：内部统一为 `fnm_core::title::FRONT_MATTER_FORCE_EXPORT_TITLE_RE`。
+pub use fnm_core::title::FRONT_MATTER_FORCE_EXPORT_TITLE_RE as TOC_FORCE_EXPORT_TITLE_RE;
 
 pub static TOC_EXCLUDED_FAMILIES: &[&str] = &[
     "contents",
@@ -101,9 +119,18 @@ static LECTURE_TRAILING_PAGE_SUFFIX_RE: Lazy<Regex> = Lazy::new(|| {
         .unwrap()
 });
 
+/// 讲座集排除标题：年份/学年型课程封面 + 法语学术书前后记标题。
+///
+/// 设计说明（CLAUDE.md §7 "不写逐书修补"）：
+/// - `cours,? ann[eé]e \d{4}-\d{4}` 通用化任意学年（原硬编码 1978-1979 已废）
+/// - `avertissement` 是法语学术书通用前言标题（不限 Foucault 系列）
+/// - `situation du cours` 是 Foucault Collège de France 课程系列 13 卷通用末附录
+///   （非单本书特例；保留作为系列级 marker）
 static LECTURE_COLLECTION_EXCLUDED_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"(?i)^\s*(?:cours,\s*ann[eé]e\s*1978-1979|avertissement|situation du cours)\s*$")
-        .unwrap()
+    Regex::new(
+        r"(?i)^\s*(?:cours,?\s*ann[eé]e\s*\d{4}\s*[-‒–—]\s*\d{4}|avertissement|situation du cours)\s*$",
+    )
+    .unwrap()
 });
 
 static LECTURE_COLLECTION_BOUNDARY_TITLE_RE: Lazy<Regex> =
@@ -407,4 +434,99 @@ pub struct TocRow {
     pub export_candidate: Option<bool>,
     pub semantic_role: String,
     pub source: String,
+}
+
+#[cfg(test)]
+mod lecture_excluded_tests {
+    use super::is_lecture_collection_excluded;
+
+    #[test]
+    fn matches_any_academic_year_french_course_cover() {
+        // 原 1978-1979 应仍匹配
+        assert!(is_lecture_collection_excluded("Cours, année 1978-1979"));
+        // 其他学年也匹配（不再硬编码 Foucault Biopolitics 专属年份）
+        assert!(is_lecture_collection_excluded("Cours, année 1975-1976"));
+        assert!(is_lecture_collection_excluded("cours année 2010-2011"));
+        assert!(is_lecture_collection_excluded("COURS, ANNÉE 1983–1984")); // en-dash
+    }
+
+    #[test]
+    fn matches_french_academic_prefatory() {
+        assert!(is_lecture_collection_excluded("Avertissement"));
+        assert!(is_lecture_collection_excluded("avertissement"));
+    }
+
+    #[test]
+    fn matches_foucault_series_appendix() {
+        // Foucault Collège de France 系列 13 卷通用末附录
+        assert!(is_lecture_collection_excluded("Situation du cours"));
+    }
+
+    #[test]
+    fn rejects_unrelated_titles() {
+        assert!(!is_lecture_collection_excluded("Chapter 1"));
+        assert!(!is_lecture_collection_excluded("Leçon du 10 janvier 1979"));
+        assert!(!is_lecture_collection_excluded(""));
+        // 没有年份范围的"cours"不匹配
+        assert!(!is_lecture_collection_excluded("cours, année"));
+    }
+}
+
+#[cfg(test)]
+mod lecture_title_tests {
+    //! 审计 #3：LECTURE_TITLE_RE 扩展验证
+    use super::is_lecture_title;
+
+    #[test]
+    fn matches_french_foucault_lecon_du() {
+        // Foucault Biopolitics 等 Collège de France 课程系列
+        assert!(is_lecture_title("Leçon du 10 janvier 1979"));
+        assert!(is_lecture_title("leçon du 17 février 1976"));
+        assert!(is_lecture_title("Lecon du 14 mars 1979")); // 无 cedilla
+    }
+
+    #[test]
+    fn matches_french_cours_du() {
+        // Foucault 其他课程标题变体
+        assert!(is_lecture_title("Cours du 10 janvier"));
+        assert!(is_lecture_title("cours du 14 mars 1979"));
+    }
+
+    #[test]
+    fn matches_english_lecture_numbered() {
+        // 英语学术讲稿编号型
+        assert!(is_lecture_title("Lecture 1"));
+        assert!(is_lecture_title("Lecture 12"));
+        assert!(is_lecture_title("Lecture No. 5"));
+        assert!(is_lecture_title("Lecture no 7"));
+        assert!(is_lecture_title("Lecture #3"));
+    }
+
+    #[test]
+    fn matches_english_lesson_numbered() {
+        assert!(is_lecture_title("Lesson 1"));
+        assert!(is_lecture_title("Lesson No. 4"));
+        assert!(is_lecture_title("lesson 8"));
+    }
+
+    #[test]
+    fn rejects_non_lecture_titles() {
+        // 普通章节
+        assert!(!is_lecture_title("Chapter 1"));
+        assert!(!is_lecture_title("Part I"));
+        assert!(!is_lecture_title("Introduction"));
+        // "lecture" 不带数字（普通讨论）
+        assert!(!is_lecture_title("On the nature of lecture"));
+        // 历史书带日期但非讲稿
+        assert!(!is_lecture_title("The Battle of 1815"));
+        // 空和单字
+        assert!(!is_lecture_title(""));
+        assert!(!is_lecture_title("Lecture")); // 没有编号
+    }
+
+    #[test]
+    fn case_insensitive() {
+        assert!(is_lecture_title("LEÇON DU 10 JANVIER 1979"));
+        assert!(is_lecture_title("LECTURE 5"));
+    }
 }

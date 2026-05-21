@@ -118,10 +118,7 @@ static MAIN_NUMBERED_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?i)^(?:chapter\s+)?(?:\d+|[IVXLCMivxlcm]+)[\.\):\-]?\s+\S+").unwrap()
 });
 
-static TOC_FORCE_EXPORT_TITLE_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"(?i)^\s*(?:introduction|avertissement|pr[eé]face|foreword|epilogue|conclusion)\b")
-        .unwrap()
-});
+// TOC_FORCE_EXPORT_TITLE_RE 已 dedup → `fnm_core::title::FRONT_MATTER_FORCE_EXPORT_TITLE_RE`
 
 static MU_HTML_TAG_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]+>").unwrap());
 
@@ -206,7 +203,7 @@ fn chapter_keyword_strength(title: &str) -> i64 {
 }
 
 fn is_toc_force_export_title(title: &str) -> bool {
-    TOC_FORCE_EXPORT_TITLE_RE.is_match(&normalize_title(title))
+    fnm_core::title::matches_front_matter_force_export(&normalize_title(title))
 }
 
 pub(crate) fn is_visual_toc_explicit_chapter_title(title: &str) -> bool {

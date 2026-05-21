@@ -181,15 +181,19 @@ fn test_strip_trailing_image_only_block_no_image() {
 }
 
 // ── title ───────────────────────────────────────────────────────
+//
+// 审计 #2 修复（2026-05-21）：原 `leçon du` 强制全大写规则已移除（违反逐书修补）。
+// 当前 `format_chapter_title` 透传原标题；这 3 个测试验证透传语义。
 
 #[test]
-fn test_format_chapter_title_lecon_du() {
+fn test_format_chapter_title_lecon_du_passthrough() {
+    // 不再全大写——透传原始大小写
     let result = format_chapter_title("Leçon du 1", "");
-    assert_eq!(result, "LEÇON DU 1");
+    assert_eq!(result, "Leçon du 1");
 }
 
 #[test]
-fn test_format_chapter_title_other() {
+fn test_format_chapter_title_other_passthrough() {
     let result = format_chapter_title("Introduction", "");
     assert_eq!(result, "Introduction");
 }
@@ -198,6 +202,13 @@ fn test_format_chapter_title_other() {
 fn test_format_chapter_title_empty() {
     let result = format_chapter_title("", "");
     assert_eq!(result, "");
+}
+
+#[test]
+fn test_format_chapter_title_uppercase_input_preserved() {
+    // 调用方若已传入全大写，则原样保留——本函数不再涉及大小写决策
+    let result = format_chapter_title("LEÇON DU 10 JANVIER 1979", "");
+    assert_eq!(result, "LEÇON DU 10 JANVIER 1979");
 }
 
 // ── book_type ───────────────────────────────────────────────────

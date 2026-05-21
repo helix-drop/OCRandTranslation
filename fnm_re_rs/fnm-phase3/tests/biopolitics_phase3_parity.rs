@@ -1,7 +1,8 @@
-//! F13: Biopolitics Phase 3 parity 比对测试框架。
+//! Biopolitics Phase 3 byte-equal 回归测试。
 //!
-//! 注：当前为占位框架——golden fixture 需从 Python `build_note_link_table` 生成。
-//! 待 `tools/gen_biopolitics_phase3_golden.py` 产出 golden 后补充逐字段断言。
+//! 比对 Rust pipeline Phase 3 输出与持久化 golden（章节级 ground truth）。
+//! golden 已固化在 `fixtures/biopolitics_phase3_golden.json`（M4 前 项目历史 pipeline 输出（M4 已归档），
+//! 现作为 Rust pipeline 的回归基准，独立于历史源）。
 
 use fnm_core::records::ChapterRecord;
 use fnm_core::types::{BoundaryState, ChapterSource};
@@ -47,8 +48,8 @@ fn build_chapters() -> Vec<ChapterRecord> {
                 total_pages
             };
             ChapterRecord {
-                // Python 端 chapter_id 命名约定：`toc-{item_id}`，而 item_id 已是
-                // `toc-ch-N`——双 toc 前缀（见 known_python_bugs §7 chapter_id 命名）。
+                // golden chapter_id 命名：`toc-{item_id}`，而 item_id 已是
+                // `toc-ch-N` —— 双 toc 前缀（项目历史命名约定，见 known_golden_diffs.md §1）。
                 chapter_id: format!("toc-toc-ch-{}", i + 1),
                 title: title.to_string(),
                 start_page: *start,
@@ -94,7 +95,7 @@ fn biopolitics_phase3_smoke() {
 // 当前 Phase 2 产物未直接传入 Phase 3，需从 DB 或 golden fixture 加载。
 
 #[test]
-#[ignore = "Phase 2 cascade (note_item over-extraction: 619 vs 584), see known_python_bugs.md §7"]
+#[ignore = "Rust phase2 note_items 数量与 golden 仍有 -20 差距，待边界规则调校（known_golden_diffs.md §1）"]
 fn spec_biopolitics_contract_v2_def_anchor_mismatch() {
     let pages = load_biopolitics_pages();
     let chapters = build_chapters();
@@ -294,25 +295,25 @@ fn run_biopolitics_phase3_with_phase2() -> fnm_phase3::output::Phase3Output {
     fnm_phase3::build_phase3_structure(phase3_input).expect("Phase 3 should build")
 }
 
-// ── 严格 parity（暂 #[ignore]：等 Phase 2 cascade 修复后启用） ───
+// ── 严格 byte-equal 回归（暂 #[ignore]：等 Phase 2 调校后启用） ───
 //
-// 当前 Phase 2 note_items over-extraction（Rust 619 vs Python 584，详见
-// known_python_bugs.md §7）会让 Phase 3 多产 ~123 个 body_anchor。
-// 在上游修复前，byte-equal 跑不通，但断言本身必须是 byte-equal——
+// 当前 Rust phase2 note_items 抽取（564）与 golden（584）仍有 -20 差距，
+// cascade 到 phase3 会让 body_anchor / note_link 数量与 golden 偏离。
+// 在上游 phase2 边界规则调校前，byte-equal 跑不通；但断言本身必须保持 byte-equal —
 // 不允许用 coverage 阈值或 eprintln 掩盖（AGENTS.md 铁律 §7）。
 //
-// 修复 Phase 2 cascade 后，直接 `cargo test ... -- --ignored` 验真。
+// 上游修复后，直接 `cargo test ... -- --ignored` 验真。
 
-const PHASE2_CASCADE_IGNORE: &str =
-    "Phase 2 note_item under-extraction (564 vs 584) propagates to Phase 3; \
-     see known_python_bugs.md §7. Run with --ignored after Phase 2 fix.";
+const PHASE2_GOLDEN_DIFF_REASON: &str =
+    "Rust phase2 note_items=564 vs golden=584 (-20); cascade 到 phase3 body_anchor 数量； \
+     see known_golden_diffs.md §1. Run with --ignored after phase2 调校.";
 
 // ── SPEC: Body anchor field-by-field parity ────────────────────
 
 #[test]
-#[ignore = "Phase 2 cascade — see known_python_bugs.md §7"]
+#[ignore = "phase2 调校未完成（known_golden_diffs.md §1）"]
 fn biopolitics_phase3_body_anchors_parity() {
-    let _ = PHASE2_CASCADE_IGNORE;
+    let _ = PHASE2_GOLDEN_DIFF_REASON;
     let golden = load_phase3_golden();
     let output = run_biopolitics_phase3_with_phase2();
     let rust_anchors = &output.structure.body_anchors;
@@ -320,7 +321,7 @@ fn biopolitics_phase3_body_anchors_parity() {
     assert_eq!(
         rust_anchors.len(),
         golden.body_anchors.len(),
-        "body_anchor count mismatch: rust={} python={}",
+        "body_anchor count mismatch: rust={} golden={}",
         rust_anchors.len(),
         golden.body_anchors.len()
     );
@@ -353,7 +354,7 @@ fn biopolitics_phase3_body_anchors_parity() {
         );
         assert!(
             (rust.certainty - gold.certainty).abs() < 1e-9,
-            "anchor[{i}].certainty: rust={} python={}",
+            "anchor[{i}].certainty: rust={} golden={}",
             rust.certainty,
             gold.certainty
         );
@@ -368,7 +369,7 @@ fn biopolitics_phase3_body_anchors_parity() {
 // ── SPEC: Note link field-by-field parity ──────────────────────
 
 #[test]
-#[ignore = "Phase 2 cascade — see known_python_bugs.md §7"]
+#[ignore = "phase2 调校未完成（known_golden_diffs.md §1）"]
 fn biopolitics_phase3_note_links_parity() {
     let golden = load_phase3_golden();
     let output = run_biopolitics_phase3_with_phase2();
@@ -377,7 +378,7 @@ fn biopolitics_phase3_note_links_parity() {
     assert_eq!(
         rust_links.len(),
         golden.note_links.len(),
-        "note_link count mismatch: rust={} python={}",
+        "note_link count mismatch: rust={} golden={}",
         rust_links.len(),
         golden.note_links.len()
     );
@@ -409,7 +410,7 @@ fn biopolitics_phase3_note_links_parity() {
 // ── SPEC: Chapter link contract parity ─────────────────────────
 
 #[test]
-#[ignore = "Phase 2 cascade — see known_python_bugs.md §7"]
+#[ignore = "phase2 调校未完成（known_golden_diffs.md §1）"]
 fn biopolitics_phase3_chapter_contracts_parity() {
     let golden = load_phase3_golden();
     let output = run_biopolitics_phase3_with_phase2();
@@ -461,7 +462,7 @@ fn biopolitics_phase3_chapter_contracts_parity() {
 // ── SPEC: Phase 3 summary parity (anchor_summary key fields) ──
 
 #[test]
-#[ignore = "Phase 2 cascade — see known_python_bugs.md §7"]
+#[ignore = "phase2 调校未完成（known_golden_diffs.md §1）"]
 fn biopolitics_phase3_summary_parity() {
     let golden = load_phase3_golden();
     let output = run_biopolitics_phase3_with_phase2();
@@ -506,7 +507,7 @@ fn biopolitics_phase3_summary_parity() {
 // ── Shape smoke（始终启用）─────────────────────────────────────
 //
 // 不是 parity，仅作 sanity check：确认 Phase 3 不会输出空或爆炸数量。
-// 阈值故意放宽：±50%，因为 Phase 2 cascade 当前会让 Rust 多 18% 左右。
+// 阈值故意放宽：±50%，因为 Phase 2 当前 Rust 与 golden 仍有偏差。
 // **不要**把这个测试改名带 "parity"——它不是 parity，是 shape。
 
 #[test]
@@ -519,8 +520,8 @@ fn biopolitics_phase3_count_shape_smoke() {
     let gold_links = golden.note_links.len();
 
     eprintln!(
-        "shape: anchors rust={rust_anchors} python={gold_anchors} ({:.0}%), \
-         links rust={rust_links} python={gold_links} ({:.0}%)",
+        "shape: anchors rust={rust_anchors} golden={gold_anchors} ({:.0}%), \
+         links rust={rust_links} golden={gold_links} ({:.0}%)",
         rust_anchors as f64 / gold_anchors.max(1) as f64 * 100.0,
         rust_links as f64 / gold_links.max(1) as f64 * 100.0,
     );

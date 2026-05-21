@@ -1,8 +1,8 @@
 //! F12: Biopolitics Phase 2 parity 比对测试。
 //!
-//! 加载 Python Phase 2 golden fixture，逐字段比对 Rust Phase 2 输出。
+//! 加载 历史 Phase 2 golden（M4 前 Python 导出） fixture，逐字段比对 Rust Phase 2 输出。
 //!
-//! 差异文档：tests/known_python_bugs.md
+//! 差异文档：tests/known_golden_diffs.md
 
 use fnm_core::records::{ChapterRecord, NoteRegionRecord};
 use fnm_core::types::{BoundaryState, ChapterSource};
@@ -197,7 +197,7 @@ fn biopolitics_note_regions_field_by_field() {
         rust_kinds
     );
     eprintln!(
-        "  Python: {} total — {:?}",
+        "  Golden: {} total — {:?}",
         golden.note_regions.len(),
         py_kinds
     );
@@ -211,8 +211,8 @@ fn biopolitics_note_regions_field_by_field() {
         region_coverage
     );
 
-    // 语义匹配：Rust/Python region_id 命名格式不同，用 (note_kind, 最近 page_start) 匹配。
-    // 每个 Rust region 找 Python 中 kind 相同且 page_start 最接近的，容忍 ±5 页偏移。
+    // 语义匹配：Rust 与 golden region_id 命名格式不同，用 (note_kind, 最近 page_start) 匹配。
+    // 每个 Rust region 找 golden 中 kind 相同且 page_start 最接近的，容忍 ±5 页偏移。
     let mut used_py: HashSet<usize> = HashSet::new();
     let mut matched = 0usize;
     let mut kind_reversals: Vec<(String, String, String, i64)> = Vec::new();
@@ -222,7 +222,7 @@ fn biopolitics_note_regions_field_by_field() {
     for rust_r in &output.note_regions {
         let rust_kind = format!("{:?}", rust_r.note_kind).to_lowercase();
 
-        // 找 Python 中最接近的 region（kind 相同优先，否则 page_start 最近）
+        // 找 golden 中最接近的 region（kind 相同优先（golden），否则 page_start 最近）
         let mut best: Option<(usize, i64, bool)> = None; // (py_idx, dist, same_kind)
         for (j, py_r) in golden.note_regions.iter().enumerate() {
             if used_py.contains(&j) {
@@ -281,7 +281,7 @@ fn biopolitics_note_regions_field_by_field() {
         }
     }
 
-    let unmatched_python = golden.note_regions.len() - used_py.len();
+    let unmatched_golden = golden.note_regions.len() - used_py.len();
 
     eprintln!(
         "  Exact match (kind+pages): {}/{}",
@@ -305,13 +305,13 @@ fn biopolitics_note_regions_field_by_field() {
         }
         if endnote_to_footnote > 0 {
             eprintln!(
-                "    Rust=Endnote → Python=footnote (Rust over-classified): {} regions",
+                "    Rust=Endnote → golden=footnote (Rust over-classified): {} regions",
                 endnote_to_footnote
             );
         }
         if footnote_to_endnote > 0 {
             eprintln!(
-                "    Rust=Footnote → Python=endnote (Rust under-classified): {} regions",
+                "    Rust=Footnote → golden=endnote (Rust under-classified): {} regions",
                 footnote_to_endnote
             );
         }
@@ -321,15 +321,15 @@ fn biopolitics_note_regions_field_by_field() {
     }
     eprintln!("  Page range diffs: {}", page_range_diffs.len());
     eprintln!(
-        "  Unmatched Rust: {} / Unmatched Python: {}",
+        "  Unmatched Rust: {} / Unmatched Golden: {}",
         unmatched_rust.len(),
-        unmatched_python
+        unmatched_golden
     );
 
     // 如果覆盖率 < 50%，标记已知差异来自 Phase 1 role gap
     if region_coverage < 50.0 {
         eprintln!("  ⚠️  Region coverage < 50% — cascade from Phase 1 page_role gap (19 vs 62 note pages)");
-        eprintln!("     See fnm-phase1/tests/known_python_bugs.md §1a");
+        eprintln!("     See fnm-phase1/tests/known_golden_diffs.md §1a");
     }
 }
 
@@ -393,7 +393,7 @@ fn biopolitics_note_regions_with_real_phase1() {
         rust_kinds
     );
     eprintln!(
-        "  Python: {} total — {:?}",
+        "  Golden: {} total — {:?}",
         golden.note_regions.len(),
         py_kinds
     );
@@ -463,7 +463,7 @@ fn biopolitics_note_regions_with_real_phase1() {
         }
     }
 
-    let unmatched_python = golden.note_regions.len() - used_py.len();
+    let unmatched_golden = golden.note_regions.len() - used_py.len();
     eprintln!("  Exact match: {}/{}", matched, output.note_regions.len());
     eprintln!("  Kind reversals: {}", kind_reversals.len());
     if !kind_reversals.is_empty() {
@@ -484,7 +484,7 @@ fn biopolitics_note_regions_with_real_phase1() {
         }
     }
     eprintln!("  Page range diffs: {}", page_range_diffs.len());
-    eprintln!("  Unmatched Python: {}", unmatched_python);
+    eprintln!("  Unmatched Golden: {}", unmatched_golden);
 }
 
 // ── SPEC 2: Note item field-by-field comparison ───────────────
@@ -518,7 +518,7 @@ fn biopolitics_note_items_field_by_field() {
         output.note_regions.len()
     );
     eprintln!(
-        "  Python: {} items / {} regions",
+        "  Golden: {} items / {} regions",
         golden.note_items.len(),
         golden.note_regions.len()
     );
@@ -533,7 +533,7 @@ fn biopolitics_note_items_field_by_field() {
     let rust_ratio = output.note_items.len() as f64 / output.note_regions.len().max(1) as f64;
     let py_ratio = golden.note_items.len() as f64 / golden.note_regions.len().max(1) as f64;
     eprintln!(
-        "  Items/region: Rust {:.1} vs Python {:.1}",
+        "  Items/region: Rust {:.1} vs golden {:.1}",
         rust_ratio, py_ratio
     );
 
@@ -549,14 +549,14 @@ fn biopolitics_note_items_field_by_field() {
         *py_kinds.entry(item.note_kind.clone()).or_insert(0) += 1;
     }
     eprintln!("  Rust item kinds:   {:?}", rust_kinds);
-    eprintln!("  Python item kinds: {:?}", py_kinds);
+    eprintln!("  Golden item kinds: {:?}", py_kinds);
 
     if item_coverage < 50.0 {
         eprintln!("  ⚠️  Item coverage < 50% — cascade from Phase 1 page_role gap");
     }
 }
 
-// ── SPEC 3: known_python_bugs.md consistency ──────────────────
+// ── SPEC 3: known_golden_diffs.md consistency ──────────────────
 
 #[test]
 fn phase2_coverage_is_documented() {
@@ -583,10 +583,10 @@ fn phase2_coverage_is_documented() {
 
     if region_gap > 5 || item_gap > 10 {
         let bugs_path =
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/known_python_bugs.md");
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/known_golden_diffs.md");
         assert!(
             bugs_path.exists(),
-            "known_python_bugs.md must exist when Rust≠Python:\n\
+            "known_golden_diffs.md must exist when Rust≠Golden:\n\
              Region gap={}, item gap={}\n\
              Expected at: {}",
             region_gap,
@@ -737,16 +737,16 @@ fn biopolitics_regions_per_chapter_alignment() {
     );
     if !kind_mismatch_pages.is_empty() {
         eprintln!(
-            "  Kind mismatch pages: {} — Rust and Python assign different note_kind to same page",
+            "  Kind mismatch pages: {} — Rust 与 golden assign different note_kind to same page",
             kind_mismatch_pages.len()
         );
         for (pn, rust, py) in &kind_mismatch_pages[..kind_mismatch_pages.len().min(15)] {
-            eprintln!("    page {}: Rust=[{}] Python=[{}]", pn, rust, py);
+            eprintln!("    page {}: Rust=[{}] Golden=[{}]", pn, rust, py);
         }
     }
     if !rust_only_pages.is_empty() {
         eprintln!(
-            "  Rust-only note pages: {} — Rust creates region but Python doesn't",
+            "  Rust-only note pages: {} — Rust creates region but golden doesn't",
             rust_only_pages.len()
         );
         eprintln!(
@@ -756,7 +756,7 @@ fn biopolitics_regions_per_chapter_alignment() {
     }
     if !py_only_pages.is_empty() {
         eprintln!(
-            "  Python-only note pages: {} — Python creates region but Rust doesn't",
+            "  Golden-only note pages: {} — Golden creates region but Rust doesn't",
             py_only_pages.len()
         );
         eprintln!(
