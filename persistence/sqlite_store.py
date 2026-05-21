@@ -9,7 +9,6 @@ from typing import Any
 from config import get_sqlite_db_path, normalize_doc_id
 from persistence.sqlite_catalog_schema import initialize_catalog_database
 from persistence.sqlite_db_paths import get_catalog_db_path, get_document_db_path
-from persistence.sqlite_repo_dev import DevRepoMixin
 from persistence.sqlite_repo_documents import DocumentRepoMixin
 from persistence.sqlite_repo_fnm import FnmRepoMixin
 from persistence.sqlite_repo_state import StateRepoMixin
@@ -33,7 +32,6 @@ class SingleDBRepository(
     DocumentRepoMixin,
     TranslationRepoMixin,
     FnmRepoMixin,
-    DevRepoMixin,
     StateRepoMixin,
 ):
     """单库仓储实现。"""

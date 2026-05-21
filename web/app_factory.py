@@ -8,7 +8,6 @@ from flask import Flask
 
 from logging_config import setup_logging
 from web.csrf import register_csrf
-from web.dev_routes import register_dev_routes
 from web.document_routes import register_document_routes
 from web.export_routes import register_export_routes
 from web.page_editor_routes import register_page_editor_routes
@@ -41,5 +40,4 @@ def create_app() -> Flask:
     register_settings_routes(app, services.settings)
     register_export_routes(app, services.export)
     register_toc_routes(app, services.toc)
-    register_dev_routes(app)
     return app
