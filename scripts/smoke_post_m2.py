@@ -68,7 +68,7 @@ def main():
         print(f"  DB (temp): {db_path}")
 
     # Step 1 — 读 fixture + 运行 pipeline
-    print(f"\n[1/7] run_pipeline_for_doc …")
+    print(f"\n[1/9] run_pipeline_for_doc …")
     try:
         with open(FIXTURE_PATH) as fh:
             raw = json.load(fh)
@@ -100,7 +100,7 @@ def main():
         sys.exit(1)
 
     # Step 2 — load_doc_structure → 验证 12 章
-    print(f"\n[2/7] load_doc_structure …")
+    print(f"\n[2/9] load_doc_structure …")
     try:
         from FNM_RE import load_doc_structure
         loaded = load_doc_structure(doc_id=doc_id, db_path=db_path)
@@ -120,7 +120,7 @@ def main():
         sys.exit(2)
 
     # Step 3 — build_export_zip_for_doc
-    print(f"\n[3/7] build_export_zip_for_doc …")
+    print(f"\n[3/9] build_export_zip_for_doc …")
     zip_path = None
     try:
         from FNM_RE import build_export_zip_for_doc
@@ -136,7 +136,7 @@ def main():
         sys.exit(3)
 
     # Step 4 — audit_export_for_doc
-    print(f"\n[4/7] audit_export_for_doc …")
+    print(f"\n[4/9] audit_export_for_doc …")
     try:
         from FNM_RE import audit_export_for_doc
         audit = audit_export_for_doc(doc_id=doc_id, db_path=db_path,
@@ -153,7 +153,7 @@ def main():
         sys.exit(4)
 
     # Step 5 — build_unit_progress + build_retry_summary
-    print(f"\n[5/7] build_unit_progress + build_retry_summary …")
+    print(f"\n[5/9] build_unit_progress + build_retry_summary …")
     try:
         from FNM_RE import build_unit_progress, build_retry_summary
         progress = build_unit_progress(doc_id=doc_id, db_path=db_path)
@@ -170,7 +170,7 @@ def main():
         sys.exit(5)
 
     # Step 6 — build_doc_status
-    print(f"\n[6/7] build_doc_status …")
+    print(f"\n[6/9] build_doc_status …")
     try:
         from FNM_RE import build_doc_status
         status = build_doc_status(doc_id=doc_id, db_path=db_path)
@@ -187,7 +187,7 @@ def main():
 
     # Step 7 — (可选) run_post_translate_export_checks_for_doc
     if not args.skip_translate:
-        print(f"\n[7/7] run_post_translate_export_checks_for_doc …")
+        print(f"\n[7/9] run_post_translate_export_checks_for_doc …")
         try:
             from FNM_RE import run_post_translate_export_checks_for_doc
             result = run_post_translate_export_checks_for_doc(
@@ -201,7 +201,126 @@ def main():
             traceback.print_exc()
             sys.exit(7)
     else:
-        print(f"\n[7/7] 已跳过 (--skip-translate)")
+        print(f"\n[7/9] 已跳过 (--skip-translate)")
+
+    # Step 8 — run_doc_pipeline_json（DB-driven，含 fnm_run 生命周期）
+    print(f"\n[8/9] run_doc_pipeline_json (DB-driven) …")
+    try:
+        import sqlite3
+        tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+        pipe_db = tmp.name
+        tmp.close()
+
+        conn = sqlite3.connect(pipe_db)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS documents (
+                id TEXT PRIMARY KEY,
+                slug TEXT,
+                state TEXT NOT NULL DEFAULT 'idle'
+            );
+            CREATE TABLE IF NOT EXISTS pages (
+                doc_id TEXT NOT NULL,
+                book_page INTEGER NOT NULL,
+                payload_json TEXT
+            );
+            CREATE TABLE IF NOT EXISTS fnm_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                doc_id TEXT NOT NULL,
+                status TEXT,
+                page_count INTEGER,
+                section_count INTEGER,
+                note_count INTEGER,
+                unit_count INTEGER,
+                structure_state TEXT,
+                blocking_reasons_json TEXT,
+                created_at INTEGER,
+                updated_at INTEGER
+            );
+        """)
+        # 加 TOC 列
+        for col in ("toc_user_json", "toc_auto_visual_json", "toc_auto_pdf_json"):
+            conn.execute(f"ALTER TABLE documents ADD COLUMN {col} TEXT DEFAULT '[]'")
+
+        now = 1700000000
+        # seed TOC
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_user_json) VALUES (?, ?, ?)",
+            ("smoke-pipe", "biopolitics", json.dumps(_make_toc_items())),
+        )
+        # seed pages（前 5 页）
+        with open(FIXTURE_PATH) as fh:
+            raw = json.load(fh)
+        for p in raw["pages"][:5]:
+            conn.execute(
+                "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?, ?, ?)",
+                ("smoke-pipe", p.get("bookPage", 0), json.dumps(p)),
+            )
+        conn.commit()
+        conn.close()
+
+        result_json = fnm_re_rs.run_doc_pipeline_json(str(pipe_db), "smoke-pipe", 6000, "toc")
+        result = json.loads(result_json)
+        assert result.get("ok"), f"run_doc_pipeline_json failed: {result}"
+        assert result.get("run_id", 0) > 0, f"no run_id: {result}"
+        assert result.get("page_count", 0) >= 5, f"expected >=5 pages: {result}"
+        print(f"  ✓ run_doc_pipeline_json OK, run_id={result['run_id']}, "
+              f"sections={result['section_count']}, pages={result['page_count']}")
+        Path(pipe_db).unlink(missing_ok=True)
+    except Exception as exc:
+        print(f"  ✗ run_doc_pipeline_json (DB-driven) 失败: {exc}")
+        traceback.print_exc()
+        sys.exit(8)
+
+    # Step 9 — load_toc_items_for_doc_json（TOC 优先级验证）
+    print(f"\n[9/9] load_toc_items_for_doc_json (TOC 优先级) …")
+    try:
+        import sqlite3
+        tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+        toc_db = tmp.name
+        tmp.close()
+
+        conn = sqlite3.connect(toc_db)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS documents (
+                id TEXT PRIMARY KEY,
+                slug TEXT,
+                state TEXT NOT NULL DEFAULT 'idle'
+            );
+            CREATE TABLE IF NOT EXISTS pages (
+                doc_id TEXT NOT NULL,
+                book_page INTEGER NOT NULL,
+                payload_json TEXT
+            );
+        """)
+        for col in ("toc_user_json", "toc_auto_visual_json", "toc_auto_pdf_json"):
+            conn.execute(f"ALTER TABLE documents ADD COLUMN {col} TEXT DEFAULT '[]'")
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_user_json, toc_auto_visual_json, toc_auto_pdf_json) "
+            "VALUES (?, ?, ?, ?, ?)",
+            ("toc-prio", "test",
+             json.dumps([{"item_id": "user-1", "title": "User Ch", "level": 1, "depth": 0}]),
+             json.dumps([{"item_id": "vis-1", "title": "Vis Ch", "level": 1, "depth": 0}]),
+             json.dumps([{"item_id": "pdf-1", "title": "Pdf Ch", "level": 1, "depth": 0}])),
+        )
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?, 1, '{}')",
+            ("toc-prio",),
+        )
+        conn.commit()
+        conn.close()
+
+        toc_json = fnm_re_rs.load_toc_items_for_doc_json(str(toc_db), "toc-prio")
+        items = json.loads(toc_json)
+        assert len(items) == 1, f"expected 1 item, got {len(items)}"
+        assert items[0]["item_id"] == "user-1", f"expected user-1 priority, got {items[0]}"
+        print(f"  ✓ TOC priority correct: user over visual/pdf, item={items[0]['item_id']}")
+        Path(toc_db).unlink(missing_ok=True)
+    except Exception as exc:
+        print(f"  ✗ load_toc_items_for_doc_json (TOC 优先级) 失败: {exc}")
+        traceback.print_exc()
+        sys.exit(9)
 
     # 清理
     if not args.db_path:

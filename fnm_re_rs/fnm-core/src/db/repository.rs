@@ -158,6 +158,37 @@ pub trait Repository {
     /// 获取最新一条 fnm_run 记录。
     /// ←→ Python `SQLiteRepository.get_latest_fnm_run(doc_id)`
     fn get_latest_fnm_run(&self, doc_id: &str) -> Result<Option<FnmRunRecord>>;
+
+    // ── Input bridge (M3) ──
+    /// 从 `pages` 表加载原始 OCR 页面。
+    ///
+    /// ←→ Python `SQLiteRepository.load_raw_pages(doc_id)` / `fnm-py/src/lib.rs:465`
+    fn load_raw_pages_for_doc(&self, doc_id: &str) -> Result<Vec<RawPage>>;
+
+    /// 从 `documents` 表加载 TOC 条目，按优先级选择数据源。
+    /// 优先级：toc_user_json（最高）> toc_auto_visual_json > toc_auto_pdf_json（最低）。
+    ///
+    /// ←→ Python `fnm-py/src/lib.rs:491`
+    fn load_toc_items_for_doc(&self, doc_id: &str) -> Result<Vec<TocItem>>;
+
+    /// 创建一条 fnm_runs 记录，状态为 'running'，返回 run_id。
+    ///
+    /// ←→ Python `INSERT INTO fnm_runs` in `fnm-py/src/lib.rs:566`
+    fn create_fnm_run(&self, doc_id: &str, page_count: i64) -> Result<i64>;
+
+    /// 更新 fnm_runs 记录的状态和统计字段。
+    ///
+    /// ←→ Python `UPDATE fnm_runs` in `fnm-py/src/lib.rs:611`
+    fn update_fnm_run(
+        &self,
+        run_id: i64,
+        status: &str,
+        section_count: i64,
+        note_count: i64,
+        unit_count: i64,
+        structure_state: &str,
+        blocking_reasons_json: &str,
+    ) -> Result<()>;
 }
 
 /// 把 Rust 端 heading_family_guess 映射到 schema CHECK 允许的 6 个值之一。
@@ -1495,5 +1526,291 @@ impl Repository for SqliteRepository {
             Some(Err(e)) => Err(e.into()),
             None => Ok(None),
         }
+    }
+
+    // ── Input bridge (M3) ──────────────────────────────────────────
+
+    fn load_raw_pages_for_doc(&self, doc_id: &str) -> Result<Vec<RawPage>> {
+        let conn = self.get_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT payload_json FROM pages WHERE doc_id = ?1 ORDER BY book_page ASC",
+        )?;
+        let rows = stmt.query_map([doc_id], |row| {
+            let payload: String = row.get(0)?;
+            serde_json::from_str::<RawPage>(&payload)
+                .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    fn load_toc_items_for_doc(&self, doc_id: &str) -> Result<Vec<TocItem>> {
+        let conn = self.get_conn()?;
+
+        // 优先级：toc_user_json（最高）> toc_auto_visual_json > toc_auto_pdf_json（最低）
+        let mut stmt = conn.prepare(
+            "SELECT toc_user_json, toc_auto_visual_json, toc_auto_pdf_json
+             FROM documents WHERE id = ?1",
+        )?;
+        let mut rows = stmt.query_map([doc_id], |row| -> std::result::Result<(Value, Value, Value), rusqlite::Error> {
+            let parse = |idx: usize| -> Value {
+                row.get::<_, Option<String>>(idx)
+                    .ok()
+                    .flatten()
+                    .and_then(|s| serde_json::from_str(&s).ok())
+                    .unwrap_or(Value::Null)
+            };
+            Ok((parse(0), parse(1), parse(2)))
+        })?;
+
+        let (_user, _visual, _pdf) = match rows.next() {
+            Some(Ok(triple)) => triple,
+            _ => return Ok(vec![]),
+        };
+
+        // 选第一个非空数据源（按优先级）
+        let source_json = _user
+            .as_array()
+            .filter(|a| !a.is_empty())
+            .or_else(|| _visual.as_array().filter(|a| !a.is_empty()))
+            .or_else(|| _pdf.as_array().filter(|a| !a.is_empty()));
+
+        let items: Vec<TocItem> = match source_json {
+            Some(arr) => arr
+                .iter()
+                .filter_map(|v| serde_json::from_value(v.clone()).ok())
+                .collect(),
+            None => vec![],
+        };
+        Ok(items)
+    }
+
+    fn create_fnm_run(&self, doc_id: &str, page_count: i64) -> Result<i64> {
+        let conn = self.get_conn()?;
+        let now = Self::now_ts();
+        conn.execute(
+            "INSERT INTO fnm_runs (doc_id, status, page_count, created_at, updated_at) VALUES (?1, 'running', ?2, ?3, ?3)",
+            rusqlite::params![doc_id, page_count, now],
+        )?;
+        Ok(conn.last_insert_rowid())
+    }
+
+    fn update_fnm_run(
+        &self,
+        run_id: i64,
+        status: &str,
+        section_count: i64,
+        note_count: i64,
+        unit_count: i64,
+        structure_state: &str,
+        blocking_reasons_json: &str,
+    ) -> Result<()> {
+        let conn = self.get_conn()?;
+        let now = Self::now_ts();
+        conn.execute(
+            "UPDATE fnm_runs SET status = ?1, section_count = ?2, note_count = ?3, unit_count = ?4, structure_state = ?5, blocking_reasons_json = ?6, updated_at = ?7 WHERE id = ?8",
+            rusqlite::params![status, section_count, note_count, unit_count, structure_state, blocking_reasons_json, now, run_id],
+        )?;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::db::schema;
+
+    fn setup_repo() -> SqliteRepository {
+        let manager = r2d2_sqlite::SqliteConnectionManager::memory();
+        let pool = Pool::builder().build(manager).unwrap();
+        let conn = pool.get().unwrap();
+        conn.execute_batch("PRAGMA foreign_keys=ON;").unwrap();
+        schema::run_migrations(&conn).unwrap();
+        // 创建 pages 表（Python 侧建表，Rust 迁移不包含）
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS pages (
+                row_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                doc_id       TEXT NOT NULL,
+                book_page    INTEGER NOT NULL,
+                payload_json TEXT
+            );",
+        )
+        .unwrap();
+        // 添加 TOC 列（Python 侧 ALTER TABLE 加列，Rust 迁移不包含）
+        for col in &[
+            "toc_user_json",
+            "toc_auto_visual_json",
+            "toc_auto_pdf_json",
+        ] {
+            let sql = format!(
+                "ALTER TABLE documents ADD COLUMN {} TEXT DEFAULT '[]'",
+                col
+            );
+            let _ = conn.execute_batch(&sql); // 忽略已存在错误
+        }
+        SqliteRepository::new(pool)
+    }
+
+    fn seed_page(repo: &SqliteRepository, doc_id: &str, book_page: i64, markdown: &str) {
+        let conn = repo.get_conn().unwrap();
+        let payload = serde_json::json!({
+            "bookPage": book_page,
+            "markdown": markdown,
+        });
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, ?2, ?3)",
+            rusqlite::params![doc_id, book_page, payload.to_string()],
+        )
+        .unwrap();
+    }
+
+    // ── Tests ──────────────────────────────────────────────────────
+
+    #[test]
+    fn load_raw_pages_empty_when_no_pages() {
+        let repo = setup_repo();
+        let pages = repo.load_raw_pages_for_doc("no-such-doc").unwrap();
+        assert!(pages.is_empty(), "expected empty vec for unknown doc_id");
+    }
+
+    #[test]
+    fn load_raw_pages_returns_pages_ordered_by_book_page() {
+        let repo = setup_repo();
+        seed_page(&repo, "doc-1", 3, "page three");
+        seed_page(&repo, "doc-1", 1, "page one");
+        seed_page(&repo, "doc-1", 2, "page two");
+
+        let pages = repo.load_raw_pages_for_doc("doc-1").unwrap();
+        assert_eq!(pages.len(), 3);
+        assert_eq!(pages[0].book_page, 1);
+        assert_eq!(pages[0].markdown, "page one");
+        assert_eq!(pages[1].book_page, 2);
+        assert_eq!(pages[1].markdown, "page two");
+        assert_eq!(pages[2].book_page, 3);
+        assert_eq!(pages[2].markdown, "page three");
+    }
+
+    #[test]
+    fn load_raw_pages_handles_optional_fields() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        let payload = serde_json::json!({
+            "bookPage": 1,
+            "markdown": "body",
+            "enriched_markdown": "enriched",
+            "pdfPage": 42,
+            "fileIdx": 7,
+            "prunedResult": {"key": "val"},
+        });
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json)
+             VALUES (?1, 1, ?2)",
+            rusqlite::params!["doc-opt", payload.to_string()],
+        )
+        .unwrap();
+
+        let pages = repo.load_raw_pages_for_doc("doc-opt").unwrap();
+        assert_eq!(pages.len(), 1);
+        assert_eq!(pages[0].book_page, 1);
+        assert_eq!(pages[0].markdown, "body");
+        assert_eq!(pages[0].enriched_markdown.as_deref(), Some("enriched"));
+        assert_eq!(pages[0].pdf_page, Some(42));
+        assert_eq!(pages[0].file_idx, Some(7));
+        assert_eq!(pages[0].pruned_result["key"], "val");
+        // 未设置的字段应为默认值
+        assert!(pages[0].note_scan.is_none());
+        assert!(pages[0].target_pdf_page.is_none());
+    }
+
+    #[test]
+    fn load_toc_items_prefers_user_over_visual() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_user_json, toc_auto_visual_json, toc_auto_pdf_json)
+             VALUES (?1, 'test',
+               '[{\"item_id\":\"user-1\",\"title\":\"User Ch\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]',
+               '[{\"item_id\":\"vis-1\",\"title\":\"Vis Ch\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]',
+               '[{\"item_id\":\"pdf-1\",\"title\":\"Pdf Ch\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]')",
+            rusqlite::params!["doc-toc-prio"],
+        )
+        .unwrap();
+
+        let items = repo.load_toc_items_for_doc("doc-toc-prio").unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].item_id, "user-1");
+        assert_eq!(items[0].title, "User Ch");
+    }
+
+    #[test]
+    fn load_toc_items_falls_back_visual_when_user_empty() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_user_json, toc_auto_visual_json)
+             VALUES (?1, 'test',
+               '[]',
+               '[{\"item_id\":\"vis-1\",\"title\":\"Vis Ch\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]')",
+            rusqlite::params!["doc-toc-fb"],
+        )
+        .unwrap();
+
+        let items = repo.load_toc_items_for_doc("doc-toc-fb").unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].item_id, "vis-1");
+    }
+
+    #[test]
+    fn load_toc_items_returns_empty_when_no_toc() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug) VALUES (?1, 'no-toc')",
+            rusqlite::params!["doc-no-toc"],
+        )
+        .unwrap();
+
+        let items = repo.load_toc_items_for_doc("doc-no-toc").unwrap();
+        assert!(items.is_empty());
+    }
+
+    // ── 3.3a: fnm_run CRUD ──
+
+    fn seed_doc(repo: &SqliteRepository, doc_id: &str) {
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT OR IGNORE INTO documents (id, slug) VALUES (?1, ?1)",
+            rusqlite::params![doc_id],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn create_fnm_run_returns_nonzero_id() {
+        let repo = setup_repo();
+        seed_doc(&repo, "run-doc-1");
+
+        let run_id = repo.create_fnm_run("run-doc-1", 42).unwrap();
+        assert!(run_id > 0, "run_id should be positive, got {}", run_id);
+    }
+
+    #[test]
+    fn update_fnm_run_changes_status() {
+        let repo = setup_repo();
+        seed_doc(&repo, "run-doc-2");
+
+        let run_id = repo.create_fnm_run("run-doc-2", 10).unwrap();
+
+        repo.update_fnm_run(run_id, "done", 3, 15, 8, "needs_review", "[]")
+            .unwrap();
+
+        // 读回来验证
+        let run = repo.get_latest_fnm_run("run-doc-2").unwrap().expect("run exists");
+        assert_eq!(run.status, "done");
+        assert_eq!(run.page_count, 10);
+        assert_eq!(run.section_count, 3);
+        assert_eq!(run.note_count, 15);
+        assert_eq!(run.unit_count, 8);
+        assert_eq!(run.structure_state.as_deref(), Some("needs_review"));
+        assert!(run.updated_at > 0);
     }
 }

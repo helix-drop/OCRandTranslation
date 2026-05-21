@@ -33,6 +33,59 @@ use std::collections::HashMap;
 
 // ── 跨 phase 基础类型 ──────────────────────────────────────────
 
+/// OCR 输出的原始页面。与 Python `raw_pages.json` 单个元素对齐。
+///
+/// ←→ `fnm-phase1/src/input.py:RawPage`
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RawPage {
+    #[serde(rename = "bookPage")]
+    pub book_page: i64,
+    #[serde(rename = "pdfPage", default)]
+    pub pdf_page: Option<i64>,
+    #[serde(rename = "fileIdx", default)]
+    pub file_idx: Option<i64>,
+    #[serde(default)]
+    pub markdown: String,
+    #[serde(default)]
+    pub enriched_markdown: Option<String>,
+    #[serde(default, rename = "prunedResult")]
+    pub pruned_result: Value,
+    #[serde(default)]
+    pub footnotes: String,
+    #[serde(default, rename = "fnBlocks")]
+    pub fn_blocks: Value,
+    #[serde(default, rename = "_note_scan")]
+    pub note_scan: Option<Value>,
+    /// 兼容旧 fixture
+    #[serde(default, rename = "target_pdf_page")]
+    pub target_pdf_page: Option<i64>,
+}
+
+/// Visual TOC 提取的目录项。
+///
+/// ←→ `fnm-phase1/src/input.py:TocItem`
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TocItem {
+    #[serde(default)]
+    pub item_id: String,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub level: i64,
+    #[serde(default)]
+    pub depth: i64,
+    #[serde(default)]
+    pub target_pdf_page: Option<i64>,
+    #[serde(default)]
+    pub role_hint: String,
+    #[serde(default)]
+    pub parent_title: String,
+    #[serde(default)]
+    pub export_candidate: Option<bool>,
+    #[serde(default)]
+    pub body_candidate: Option<bool>,
+}
+
 /// 每次 pipeline run 的统一身份标识。
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PipelineIdentity {

@@ -22,3 +22,6 @@ tokio = { version = "1.35", features = ["rt-multi-thread", "macros"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
+rusqlite = { version = "0.31", features = ["bundled"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.24"

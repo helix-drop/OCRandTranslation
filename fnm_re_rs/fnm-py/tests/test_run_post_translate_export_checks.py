@@ -12,6 +12,11 @@ def _seed(db_path: str, doc_id: str):
     conn = sqlite3.connect(db_path)
     conn.execute("CREATE TABLE IF NOT EXISTS documents (id TEXT PRIMARY KEY, slug TEXT, state TEXT)")
     conn.execute("INSERT OR IGNORE INTO documents (id, slug, state) VALUES (?, ?, 'idle')", (doc_id, doc_id))
+    for col in ("toc_user_json", "toc_auto_visual_json", "toc_auto_pdf_json"):
+        try:
+            conn.execute(f"ALTER TABLE documents ADD COLUMN {col} TEXT DEFAULT '[]'")
+        except Exception:
+            pass
     conn.execute("CREATE TABLE IF NOT EXISTS pages (doc_id TEXT, book_page INTEGER, payload_json TEXT)")
     conn.execute(
         "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?, 1, ?)",

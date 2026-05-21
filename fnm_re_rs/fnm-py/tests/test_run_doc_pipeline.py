@@ -31,6 +31,13 @@ def test_run_doc_pipeline_via_python_seeded_db():
                 slug TEXT,
                 state TEXT NOT NULL DEFAULT 'idle'
             );
+        """)
+        for col in ("toc_user_json", "toc_auto_visual_json", "toc_auto_pdf_json"):
+            try:
+                conn.execute(f"ALTER TABLE documents ADD COLUMN {col} TEXT DEFAULT '[]'")
+            except Exception:
+                pass
+        conn.executescript("""
             CREATE TABLE IF NOT EXISTS pages (
                 doc_id TEXT NOT NULL,
                 book_page INTEGER NOT NULL,

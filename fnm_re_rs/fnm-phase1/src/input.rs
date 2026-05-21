@@ -1,58 +1,11 @@
-//! Phase1 输入类型：RawPage / TocItem / VisualTocBundle / ManualPageOverride。
+//! Phase1 输入类型：VisualTocBundle / ManualPageOverride。RawPage 和 TocItem 由
+//! fnm_core::records 提供（此处 re-export 保持 import path 兼容）。
 //!
 //! 与 Python `raw_pages.json` 和 `visual_toc.json` 的 JSON schema 对齐。
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-
-/// OCR 输出的原始页面。与 Python `raw_pages.json` 单个元素对齐。
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct RawPage {
-    #[serde(rename = "bookPage")]
-    pub book_page: i64,
-    #[serde(rename = "pdfPage", default)]
-    pub pdf_page: Option<i64>,
-    #[serde(rename = "fileIdx", default)]
-    pub file_idx: Option<i64>,
-    #[serde(default)]
-    pub markdown: String,
-    #[serde(default)]
-    pub enriched_markdown: Option<String>,
-    #[serde(default, rename = "prunedResult")]
-    pub pruned_result: Value,
-    #[serde(default)]
-    pub footnotes: String,
-    #[serde(default, rename = "fnBlocks")]
-    pub fn_blocks: Value,
-    #[serde(default, rename = "_note_scan")]
-    pub note_scan: Option<Value>,
-    /// 兼容旧 fixture
-    #[serde(default, rename = "target_pdf_page")]
-    pub target_pdf_page: Option<i64>,
-}
-
-/// Visual TOC 提取的目录项。
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct TocItem {
-    #[serde(default)]
-    pub item_id: String,
-    #[serde(default)]
-    pub title: String,
-    #[serde(default)]
-    pub level: i64,
-    #[serde(default)]
-    pub depth: i64,
-    #[serde(default)]
-    pub target_pdf_page: Option<i64>,
-    #[serde(default)]
-    pub role_hint: String,
-    #[serde(default)]
-    pub parent_title: String,
-    #[serde(default)]
-    pub export_candidate: Option<bool>,
-    #[serde(default)]
-    pub body_candidate: Option<bool>,
-}
+pub use fnm_core::records::{RawPage, TocItem};
 
 /// 整本书的 visual TOC bundle（manual 标注 + auto 提取的混合）。
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

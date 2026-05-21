@@ -69,6 +69,27 @@ impl Repository for StubRepo {
     fn get_latest_fnm_run(&self, _doc_id: &str) -> Result<Option<FnmRunRecord>> {
         Ok(None)
     }
+    fn load_raw_pages_for_doc(&self, _doc_id: &str) -> Result<Vec<RawPage>> {
+        anyhow::bail!("not implemented")
+    }
+    fn load_toc_items_for_doc(&self, _doc_id: &str) -> Result<Vec<TocItem>> {
+        anyhow::bail!("not implemented")
+    }
+    fn create_fnm_run(&self, _doc_id: &str, _page_count: i64) -> Result<i64> {
+        anyhow::bail!("not implemented")
+    }
+    fn update_fnm_run(
+        &self,
+        _run_id: i64,
+        _status: &str,
+        _section_count: i64,
+        _note_count: i64,
+        _unit_count: i64,
+        _structure_state: &str,
+        _blocking_reasons_json: &str,
+    ) -> Result<()> {
+        anyhow::bail!("not implemented")
+    }
     fn replace_fnm_phase1_products(&self, _doc_id: &str, _payload: &Phase1Products) -> Result<()> {
         anyhow::bail!("not implemented")
     }
