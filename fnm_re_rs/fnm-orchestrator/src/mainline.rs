@@ -242,6 +242,7 @@ fn run_llm_repair_sync<R: Repository>(
 ///
 /// 与 [`run_pipeline_for_doc`] 的区别：本函数自动从 DB 加载 pages + TOC items，
 /// 并自动维护 fnm_runs 表的 create/update 生命周期。
+/// **错误路径也会 finalize fnm_run**（状态设为 error + 记录错误消息），不会留下 `running` 悬挂。
 ///
 /// ←→ Python `FNM_RE/__init__.py::run_doc_pipeline()`
 pub fn run_pipeline_from_db<R: Repository>(
@@ -249,7 +250,7 @@ pub fn run_pipeline_from_db<R: Repository>(
     doc_id: &str,
     config: PipelineConfig,
     llm_repair: Option<LlmRepairOptions<'_>>,
-) -> Result<serde_json::Value> {
+) -> Result<ModulePipelineSnapshot> {
     let pages = repo
         .load_raw_pages_for_doc(doc_id)
         .map_err(|e| OrchestratorError::Phase1(anyhow::anyhow!("load pages: {}", e)))?;
@@ -268,57 +269,57 @@ pub fn run_pipeline_from_db<R: Repository>(
         .create_fnm_run(doc_id, page_count)
         .map_err(|e| OrchestratorError::Phase1(anyhow::anyhow!("create fnm_run: {}", e)))?;
 
-    let snapshot = run_pipeline_for_doc(repo, doc_id, pages, toc_items, config, llm_repair)?;
+    // 跑 pipeline，无论成功/失败都 finalize fnm_run
+    let result = run_pipeline_for_doc(repo, doc_id, pages, toc_items, config, llm_repair);
+    match result {
+        Ok(snapshot) => {
+            let section_count = snapshot
+                .phase1
+                .as_ref()
+                .map(|p| p.chapters.len() as i64)
+                .unwrap_or(0);
+            let note_count = snapshot
+                .phase2
+                .as_ref()
+                .map(|p| p.note_items.len() as i64)
+                .unwrap_or(0);
+            let unit_count = snapshot
+                .phase4
+                .as_ref()
+                .map(|p| p.translation_units.len() as i64)
+                .unwrap_or(0);
+            let structure_state = snapshot
+                .phase6
+                .as_ref()
+                .map(|p| p.export_audit.structure_state.clone())
+                .unwrap_or_default();
+            let blocking_reasons = snapshot
+                .phase6
+                .as_ref()
+                .map(|p| p.export_audit.blocking_reasons.clone())
+                .unwrap_or_default();
+            let blocking_reasons_json =
+                serde_json::to_string(&blocking_reasons).unwrap_or_default();
 
-    let section_count = snapshot
-        .phase1
-        .as_ref()
-        .map(|p| p.chapters.len() as i64)
-        .unwrap_or(0);
-    let note_count = snapshot
-        .phase2
-        .as_ref()
-        .map(|p| p.note_items.len() as i64)
-        .unwrap_or(0);
-    let unit_count = snapshot
-        .phase4
-        .as_ref()
-        .map(|p| p.translation_units.len() as i64)
-        .unwrap_or(0);
-    let structure_state = snapshot
-        .phase6
-        .as_ref()
-        .map(|p| p.export_audit.structure_state.clone())
-        .unwrap_or_default();
-    let blocking_reasons = snapshot
-        .phase6
-        .as_ref()
-        .map(|p| p.export_audit.blocking_reasons.clone())
-        .unwrap_or_default();
-    let blocking_reasons_json = serde_json::to_string(&blocking_reasons).unwrap_or_default();
+            let _ = repo.update_fnm_run(
+                run_id,
+                "done",
+                section_count,
+                note_count,
+                unit_count,
+                &structure_state,
+                &blocking_reasons_json,
+                "",
+            );
 
-    repo.update_fnm_run(
-        run_id,
-        "done",
-        section_count,
-        note_count,
-        unit_count,
-        &structure_state,
-        &blocking_reasons_json,
-    )
-    .map_err(|e| OrchestratorError::Phase1(anyhow::anyhow!("update fnm_run: {}", e)))?;
-
-    let summary = serde_json::json!({
-        "ok": true,
-        "run_id": run_id,
-        "page_count": page_count,
-        "section_count": section_count,
-        "note_count": note_count,
-        "unit_count": unit_count,
-        "structure_state": structure_state,
-    });
-
-    Ok(summary)
+            Ok(snapshot)
+        }
+        Err(e) => {
+            let err_msg = format!("{:#}", e);
+            let _ = repo.update_fnm_run(run_id, "error", 0, 0, 0, "", "[]", &err_msg);
+            Err(e)
+        }
+    }
 }
 
 #[cfg(test)]
@@ -344,11 +345,7 @@ mod tests {
             );",
         )
         .unwrap();
-        for col in &[
-            "toc_user_json",
-            "toc_auto_visual_json",
-            "toc_auto_pdf_json",
-        ] {
+        for col in &["toc_user_json", "toc_auto_visual_json", "toc_auto_pdf_json"] {
             let sql = format!("ALTER TABLE documents ADD COLUMN {} TEXT DEFAULT '[]'", col);
             let _ = conn.execute_batch(&sql);
         }
@@ -409,12 +406,14 @@ mod tests {
             conn.execute(
                 "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 1, ?2)",
                 rusqlite::params![doc_id, p1.to_string()],
-            ).unwrap();
+            )
+            .unwrap();
             let p2 = serde_json::json!({"bookPage": 2, "markdown": "Page two content."});
             conn.execute(
                 "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 2, ?2)",
                 rusqlite::params![doc_id, p2.to_string()],
-            ).unwrap();
+            )
+            .unwrap();
         });
 
         let repo = fnm_core::db::SqliteRepository::new(pool);
@@ -426,10 +425,10 @@ mod tests {
             result.as_ref().err()
         );
 
-        let summary = result.unwrap();
-        assert_eq!(summary["ok"], true);
-        assert!(summary["run_id"].as_i64().unwrap() > 0);
-        assert_eq!(summary["page_count"].as_i64().unwrap(), 2);
+        let snapshot = result.unwrap();
+        assert_eq!(snapshot.doc_id, doc_id);
+        assert!(snapshot.phase1.is_some(), "phase1 should be present");
+        assert_eq!(snapshot.phase1.as_ref().unwrap().chapters.len(), 1);
     }
 
     #[test]
@@ -447,7 +446,8 @@ mod tests {
             conn.execute(
                 "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 1, ?2)",
                 rusqlite::params![doc_id, p.to_string()],
-            ).unwrap();
+            )
+            .unwrap();
         });
 
         let repo = fnm_core::db::SqliteRepository::new(pool);
@@ -466,5 +466,21 @@ mod tests {
         assert_eq!(run.status, "done");
         assert_eq!(run.page_count, 1);
         assert!(run.updated_at > 0);
+    }
+
+    #[test]
+    fn run_pipeline_from_db_errors_when_no_pages_does_not_create_run() {
+        // 验证：页面加载错误发生在 create_fnm_run 之前，不会创建 fnm_run。
+        let pool = create_test_db();
+        let repo = fnm_core::db::SqliteRepository::new(pool);
+        let config = default_config("ghost-doc");
+        let result = run_pipeline_from_db(&repo, "ghost-doc", config, None);
+        assert!(result.is_err(), "expected error for empty pages");
+
+        let run = repo.get_latest_fnm_run("ghost-doc").unwrap();
+        assert!(
+            run.is_none(),
+            "no fnm_run should exist when error is before create_fnm_run"
+        );
     }
 }

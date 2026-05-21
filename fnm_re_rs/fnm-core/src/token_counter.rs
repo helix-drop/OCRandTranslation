@@ -205,12 +205,26 @@ mod tests {
     #[test]
     fn get_usage_records_after_record() {
         clear_usage();
-        record_usage("records_test_stage", "gpt-4o", "openai", 200, 100, 300, 2, 500);
+        record_usage(
+            "records_test_stage",
+            "gpt-4o",
+            "openai",
+            200,
+            100,
+            300,
+            2,
+            500,
+        );
         let records = get_usage_records();
         // 可能有并行测试污染，至少 1 条
         assert!(records.len() >= 1);
-        let found = records.iter().any(|r| r.stage == "records_test_stage" && r.prompt_tokens == 200);
-        assert!(found, "expected records_test_stage record with prompt_tokens=200");
+        let found = records
+            .iter()
+            .any(|r| r.stage == "records_test_stage" && r.prompt_tokens == 200);
+        assert!(
+            found,
+            "expected records_test_stage record with prompt_tokens=200"
+        );
     }
 
     #[test]

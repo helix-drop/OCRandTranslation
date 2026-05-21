@@ -188,6 +188,7 @@ pub trait Repository {
         unit_count: i64,
         structure_state: &str,
         blocking_reasons_json: &str,
+        error_msg: &str,
     ) -> Result<()>;
 }
 
@@ -1533,14 +1534,35 @@ impl Repository for SqliteRepository {
     fn load_raw_pages_for_doc(&self, doc_id: &str) -> Result<Vec<RawPage>> {
         let conn = self.get_conn()?;
         let mut stmt = conn.prepare(
-            "SELECT payload_json FROM pages WHERE doc_id = ?1 ORDER BY book_page ASC",
+            "SELECT payload_json, book_page FROM pages WHERE doc_id = ?1 ORDER BY book_page ASC",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
-            let payload: String = row.get(0)?;
-            serde_json::from_str::<RawPage>(&payload)
-                .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))
+            let payload: Option<String> = row.get(0)?;
+            let book_page: i64 = row.get(1)?;
+            // NULL / 空字符串 / 非法 JSON 均跳过该行，不返回 Err
+            let page: RawPage = match payload {
+                Some(ref s) if !s.trim().is_empty() => match serde_json::from_str(s) {
+                    Ok(p) => p,
+                    Err(e) => {
+                        tracing::warn!(
+                            "load_raw_pages_for_doc: book_page={} invalid payload_json: {}",
+                            book_page,
+                            e,
+                        );
+                        return Ok(None);
+                    }
+                },
+                _ => return Ok(None),
+            };
+            Ok(Some(page))
         })?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+        let mut pages = Vec::new();
+        for row in rows {
+            if let Some(Some(page)) = row.ok() {
+                pages.push(page);
+            }
+        }
+        Ok(pages)
     }
 
     fn load_toc_items_for_doc(&self, doc_id: &str) -> Result<Vec<TocItem>> {
@@ -1551,16 +1573,19 @@ impl Repository for SqliteRepository {
             "SELECT toc_user_json, toc_auto_visual_json, toc_auto_pdf_json
              FROM documents WHERE id = ?1",
         )?;
-        let mut rows = stmt.query_map([doc_id], |row| -> std::result::Result<(Value, Value, Value), rusqlite::Error> {
-            let parse = |idx: usize| -> Value {
-                row.get::<_, Option<String>>(idx)
-                    .ok()
-                    .flatten()
-                    .and_then(|s| serde_json::from_str(&s).ok())
-                    .unwrap_or(Value::Null)
-            };
-            Ok((parse(0), parse(1), parse(2)))
-        })?;
+        let mut rows = stmt.query_map(
+            [doc_id],
+            |row| -> std::result::Result<(Value, Value, Value), rusqlite::Error> {
+                let parse = |idx: usize| -> Value {
+                    row.get::<_, Option<String>>(idx)
+                        .ok()
+                        .flatten()
+                        .and_then(|s| serde_json::from_str(&s).ok())
+                        .unwrap_or(Value::Null)
+                };
+                Ok((parse(0), parse(1), parse(2)))
+            },
+        )?;
 
         let (_user, _visual, _pdf) = match rows.next() {
             Some(Ok(triple)) => triple,
@@ -1603,12 +1628,13 @@ impl Repository for SqliteRepository {
         unit_count: i64,
         structure_state: &str,
         blocking_reasons_json: &str,
+        error_msg: &str,
     ) -> Result<()> {
         let conn = self.get_conn()?;
         let now = Self::now_ts();
         conn.execute(
-            "UPDATE fnm_runs SET status = ?1, section_count = ?2, note_count = ?3, unit_count = ?4, structure_state = ?5, blocking_reasons_json = ?6, updated_at = ?7 WHERE id = ?8",
-            rusqlite::params![status, section_count, note_count, unit_count, structure_state, blocking_reasons_json, now, run_id],
+            "UPDATE fnm_runs SET status = ?1, section_count = ?2, note_count = ?3, unit_count = ?4, structure_state = ?5, blocking_reasons_json = ?6, error_msg = ?7, updated_at = ?8 WHERE id = ?9",
+            rusqlite::params![status, section_count, note_count, unit_count, structure_state, blocking_reasons_json, error_msg, now, run_id],
         )?;
         Ok(())
     }
@@ -1636,15 +1662,8 @@ mod tests {
         )
         .unwrap();
         // 添加 TOC 列（Python 侧 ALTER TABLE 加列，Rust 迁移不包含）
-        for col in &[
-            "toc_user_json",
-            "toc_auto_visual_json",
-            "toc_auto_pdf_json",
-        ] {
-            let sql = format!(
-                "ALTER TABLE documents ADD COLUMN {} TEXT DEFAULT '[]'",
-                col
-            );
+        for col in &["toc_user_json", "toc_auto_visual_json", "toc_auto_pdf_json"] {
+            let sql = format!("ALTER TABLE documents ADD COLUMN {} TEXT DEFAULT '[]'", col);
             let _ = conn.execute_batch(&sql); // 忽略已存在错误
         }
         SqliteRepository::new(pool)
@@ -1719,6 +1738,67 @@ mod tests {
         // 未设置的字段应为默认值
         assert!(pages[0].note_scan.is_none());
         assert!(pages[0].target_pdf_page.is_none());
+    }
+
+    #[test]
+    fn load_raw_pages_skips_null_payload() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 1, NULL)",
+            rusqlite::params!["doc-null"],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 2, '')",
+            rusqlite::params!["doc-null"],
+        )
+        .unwrap();
+        let payload = serde_json::json!({"bookPage": 3, "markdown": "valid"});
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 3, ?2)",
+            rusqlite::params!["doc-null", payload.to_string()],
+        )
+        .unwrap();
+
+        let pages = repo.load_raw_pages_for_doc("doc-null").unwrap();
+        assert_eq!(pages.len(), 1, "NULL and empty rows should be skipped");
+        assert_eq!(pages[0].book_page, 3);
+    }
+
+    #[test]
+    fn load_toc_items_pdf_fallback() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_auto_pdf_json)
+             VALUES (?1, 'test',
+               '[{\"item_id\":\"pdf-1\",\"title\":\"Pdf Ch\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]')",
+            rusqlite::params!["doc-pdf-fb"],
+        )
+        .unwrap();
+
+        let items = repo.load_toc_items_for_doc("doc-pdf-fb").unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].item_id, "pdf-1");
+    }
+
+    #[test]
+    fn load_toc_items_skips_invalid_json_in_user_col() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_user_json, toc_auto_visual_json)
+             VALUES (?1, 'test',
+               'not valid json',
+               '[{\"item_id\":\"vis-1\",\"title\":\"Vis Ch\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]')",
+            rusqlite::params!["doc-bad-json"],
+        )
+        .unwrap();
+
+        let items = repo.load_toc_items_for_doc("doc-bad-json").unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].item_id, "vis-1");
     }
 
     #[test]
@@ -1800,11 +1880,14 @@ mod tests {
 
         let run_id = repo.create_fnm_run("run-doc-2", 10).unwrap();
 
-        repo.update_fnm_run(run_id, "done", 3, 15, 8, "needs_review", "[]")
+        repo.update_fnm_run(run_id, "done", 3, 15, 8, "needs_review", "[]", "")
             .unwrap();
 
         // 读回来验证
-        let run = repo.get_latest_fnm_run("run-doc-2").unwrap().expect("run exists");
+        let run = repo
+            .get_latest_fnm_run("run-doc-2")
+            .unwrap()
+            .expect("run exists");
         assert_eq!(run.status, "done");
         assert_eq!(run.page_count, 10);
         assert_eq!(run.section_count, 3);

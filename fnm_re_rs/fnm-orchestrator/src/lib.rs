@@ -19,7 +19,7 @@ pub mod types;
 
 pub use error::{OrchestratorError, Result};
 pub use load::load_phase6_structure;
-pub use mainline::{run_pipeline_for_doc, LlmRepairOptions};
+pub use mainline::{run_pipeline_for_doc, run_pipeline_from_db, LlmRepairOptions};
 pub use page_translate::{
     apply_body_unit_entry_result, apply_body_unit_translations, build_fnm_body_unit_jobs,
     build_retry_summary, build_unit_progress, collect_unit_failed_locations_value,
@@ -29,6 +29,4 @@ pub use page_translate::{
 };
 pub use pipeline::run_pipeline;
 pub use post_translate::run_post_translate_export_checks;
-pub use types::{
-    ModulePipelineSnapshot, PipelineConfig, StartPhase,
-};
+pub use types::{ModulePipelineSnapshot, PipelineConfig, StartPhase};

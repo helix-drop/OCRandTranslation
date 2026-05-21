@@ -43,11 +43,7 @@ pub fn format_unit_label(unit: &TranslationUnitRecord) -> String {
 
 /// ←→ Python `unit_page_numbers()`
 pub fn unit_page_numbers(unit: &TranslationUnitRecord) -> Vec<i64> {
-    let mut pages: Vec<i64> = unit
-        .page_segments
-        .iter()
-        .map(|s| s.page_no)
-        .collect();
+    let mut pages: Vec<i64> = unit.page_segments.iter().map(|s| s.page_no).collect();
     pages.sort_unstable();
     pages.dedup();
     if !pages.is_empty() {
@@ -131,7 +127,11 @@ pub fn unit_page_numbers_value(unit: &Value) -> Vec<i64> {
 
 /// ←→ Python `format_fnm_unit_label()` — Value 版（纯 dict）。
 pub fn format_unit_label_value(unit: &Value) -> String {
-    let kind = unit.get("kind").and_then(|v| v.as_str()).unwrap_or("").trim();
+    let kind = unit
+        .get("kind")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .trim();
     let kind_label = match kind {
         "body" => "正文",
         "footnote" => "脚注",
@@ -175,7 +175,11 @@ pub fn collect_unit_failed_locations_value(unit: &Value) -> Vec<Value> {
             let mut visible_idx: i64 = 0;
             if let Some(paragraphs) = segment.get("paragraphs").and_then(|v| v.as_array()) {
                 for para in paragraphs {
-                    if para.get("consumed_by_prev").and_then(|v| v.as_bool()).unwrap_or(false) {
+                    if para
+                        .get("consumed_by_prev")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false)
+                    {
                         visible_idx += 1;
                         continue;
                     }
@@ -189,7 +193,10 @@ pub fn collect_unit_failed_locations_value(unit: &Value) -> Vec<Value> {
                         || status == "retry_pending"
                         || status == "retrying"
                         || status == "manual_required";
-                    let manual_resolved = para.get("manual_resolved").and_then(|v| v.as_bool()).unwrap_or(false);
+                    let manual_resolved = para
+                        .get("manual_resolved")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
                     if is_failed && !manual_resolved {
                         locations.push(json!({
                             "unit_id": unit.get("unit_id").and_then(|v| v.as_str()).unwrap_or(""),
@@ -295,10 +302,7 @@ fn collect_failed_locations(unit: &TranslationUnitRecord) -> Vec<Value> {
 
 /// ←→ Python `build_retry_summary()` — 从 translation units 派生失败位置，
 /// 不依赖 Python `_load_translate_state`（去掉 snapshot 分支）。
-pub fn build_retry_summary(
-    repo: &dyn Repository,
-    doc_id: &str,
-) -> Result<Value, anyhow::Error> {
+pub fn build_retry_summary(repo: &dyn Repository, doc_id: &str) -> Result<Value, anyhow::Error> {
     let units = repo.list_fnm_translation_units(doc_id)?;
 
     let mut failed_locations: Vec<Value> = Vec::new();
@@ -745,13 +749,11 @@ pub fn build_unit_progress(
         .map(|(idx, u)| {
             let unit_idx = *idx as i64 + 1;
             let status = u.status.as_str();
-            let preview = preview_text(
-                if u.translated_text.is_empty() {
-                    &u.source_text
-                } else {
-                    &u.translated_text
-                },
-            );
+            let preview = preview_text(if u.translated_text.is_empty() {
+                &u.source_text
+            } else {
+                &u.translated_text
+            });
             json!({
                 "unit_idx": unit_idx,
                 "unit_id": u.unit_id,
@@ -827,7 +829,12 @@ pub fn build_fnm_body_unit_jobs(unit: &Value, pages: &[Value]) -> Value {
                         .unwrap_or("")
                         .trim()
                         .to_string();
-                    if text.is_empty() || para.get("consumed_by_prev").and_then(|v| v.as_bool()).unwrap_or(false) {
+                    if text.is_empty()
+                        || para
+                            .get("consumed_by_prev")
+                            .and_then(|v| v.as_bool())
+                            .unwrap_or(false)
+                    {
                         continue;
                     }
                     let section_path: Vec<Value> = para
@@ -884,12 +891,19 @@ pub fn build_fnm_body_unit_jobs(unit: &Value, pages: &[Value]) -> Value {
         } else {
             String::new()
         };
-        let heading_level = row.get("heading_level").and_then(|v| v.as_i64()).unwrap_or(0);
+        let heading_level = row
+            .get("heading_level")
+            .and_then(|v| v.as_i64())
+            .unwrap_or(0);
         let prev_context = if heading_level > 0 {
             String::new()
         } else {
             let chars: Vec<char> = prev_text.chars().collect();
-            let start = if chars.len() > 200 { chars.len() - 200 } else { 0 };
+            let start = if chars.len() > 200 {
+                chars.len() - 200
+            } else {
+                0
+            };
             chars[start..].iter().collect()
         };
         let next_context = if heading_level > 0 {
@@ -952,7 +966,11 @@ pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value
                 .and_then(|v| v.as_array())
                 .map(|a| {
                     a.iter()
-                        .filter(|p| !p.get("consumed_by_prev").and_then(|v| v.as_bool()).unwrap_or(false))
+                        .filter(|p| {
+                            !p.get("consumed_by_prev")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false)
+                        })
                         .collect()
                 })
                 .unwrap_or_default();
@@ -971,7 +989,10 @@ pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value
             if let Some(orig_paragraphs) = segment.get("paragraphs").and_then(|v| v.as_array()) {
                 for para in orig_paragraphs {
                     let mut p = para.clone();
-                    if p.get("consumed_by_prev").and_then(|v| v.as_bool()).unwrap_or(false) {
+                    if p.get("consumed_by_prev")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false)
+                    {
                         p["translated_text"] = json!("");
                     } else {
                         p["translated_text"] = json!(trans_iter.next().unwrap_or(&String::new()));
@@ -999,7 +1020,11 @@ pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value
 }
 
 /// ←→ Python `apply_body_unit_entry_result()`: 将流式翻译结果合并到 unit。
-pub fn apply_body_unit_entry_result(unit: &Value, entry: &Value, apply_only_unresolved: bool) -> Value {
+pub fn apply_body_unit_entry_result(
+    unit: &Value,
+    entry: &Value,
+    apply_only_unresolved: bool,
+) -> Value {
     let page_entries: Vec<Value> = entry
         .get("_page_entries")
         .and_then(|v| v.as_array())
@@ -1013,9 +1038,7 @@ pub fn apply_body_unit_entry_result(unit: &Value, entry: &Value, apply_only_unre
         .trim()
         .to_string();
 
-    let unresolved_statuses = [
-        "error", "retry_pending", "retrying", "manual_required",
-    ];
+    let unresolved_statuses = ["error", "retry_pending", "retrying", "manual_required"];
 
     let mut updated_segments: Vec<Value> = Vec::new();
     let mut failed_locations: Vec<Value> = Vec::new();
@@ -1033,7 +1056,10 @@ pub fn apply_body_unit_entry_result(unit: &Value, entry: &Value, apply_only_unre
             if let Some(paragraphs) = segment.get("paragraphs").and_then(|v| v.as_array()) {
                 for para in paragraphs {
                     let mut p = para.clone();
-                    if p.get("consumed_by_prev").and_then(|v| v.as_bool()).unwrap_or(false) {
+                    if p.get("consumed_by_prev")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false)
+                    {
                         p["translated_text"] = json!("");
                         updated_paragraphs.push(p);
                         continue;
@@ -1074,9 +1100,17 @@ pub fn apply_body_unit_entry_result(unit: &Value, entry: &Value, apply_only_unre
                             .trim()
                             .to_lowercase();
 
-                        let attempt = p.get("attempt_count").and_then(|v| v.as_i64()).unwrap_or(0).max(0) + 1;
+                        let attempt = p
+                            .get("attempt_count")
+                            .and_then(|v| v.as_i64())
+                            .unwrap_or(0)
+                            .max(0)
+                            + 1;
                         p["attempt_count"] = json!(attempt);
-                        let manual_resolved = p.get("manual_resolved").and_then(|v| v.as_bool()).unwrap_or(false);
+                        let manual_resolved = p
+                            .get("manual_resolved")
+                            .and_then(|v| v.as_bool())
+                            .unwrap_or(false);
                         p["manual_resolved"] = json!(manual_resolved);
 
                         if entry_status == "done"
@@ -1084,7 +1118,11 @@ pub fn apply_body_unit_entry_result(unit: &Value, entry: &Value, apply_only_unre
                             && !translated_text.starts_with("[翻译失败:")
                         {
                             p["translated_text"] = json!(translated_text);
-                            p["translation_status"] = json!(if manual_resolved { "manual_resolved" } else { "done" });
+                            p["translation_status"] = json!(if manual_resolved {
+                                "manual_resolved"
+                            } else {
+                                "done"
+                            });
                             p["last_error"] = json!("");
                         } else {
                             p["translated_text"] = json!("");
@@ -1114,7 +1152,10 @@ pub fn apply_body_unit_entry_result(unit: &Value, entry: &Value, apply_only_unre
                         .unwrap_or("")
                         .trim()
                         .to_string();
-                    let manual_resolved = p.get("manual_resolved").and_then(|v| v.as_bool()).unwrap_or(false);
+                    let manual_resolved = p
+                        .get("manual_resolved")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
                     if unresolved_statuses.contains(&para_status.as_str()) && !manual_resolved {
                         failed_locations.push(json!({
                             "unit_id": unit.get("unit_id").and_then(|v| v.as_str()).unwrap_or(""),

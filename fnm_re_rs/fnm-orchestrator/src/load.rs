@@ -20,9 +20,10 @@ pub fn load_phase6_structure(
         .list_fnm_pages(doc_id)
         .map_err(|e| OrchestratorError::Phase1(e.into()))?;
     if pages.is_empty() {
-        return Err(OrchestratorError::Phase1(
-            anyhow::anyhow!("doc_id '{}' not found or has no pages", doc_id),
-        ));
+        return Err(OrchestratorError::Phase1(anyhow::anyhow!(
+            "doc_id '{}' not found or has no pages",
+            doc_id
+        )));
     }
     let chapters = repo
         .list_fnm_chapters(doc_id)
@@ -104,5 +105,3 @@ pub fn load_phase6_structure(
         summary: Phase6Summary::default(),
     })
 }
-
-

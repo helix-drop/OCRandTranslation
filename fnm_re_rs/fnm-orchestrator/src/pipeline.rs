@@ -145,12 +145,9 @@ pub(crate) fn run_phase1(
         Some(toc_items)
     };
 
-    let output = fnm_phase1::toc_structure::build_phase1_structure(
-        pages,
-        toc_items_opt,
-        &phase1_config,
-    )
-    .map_err(OrchestratorError::Phase1)?;
+    let output =
+        fnm_phase1::toc_structure::build_phase1_structure(pages, toc_items_opt, &phase1_config)
+            .map_err(OrchestratorError::Phase1)?;
 
     Ok(Phase1Snapshot {
         structure: output.structure,
@@ -191,7 +188,8 @@ pub(crate) fn run_phase2(
         post_body_titles,
     };
 
-    let output = fnm_phase2::build_phase2_structure_sync(input).map_err(OrchestratorError::Phase2)?;
+    let output =
+        fnm_phase2::build_phase2_structure_sync(input).map_err(OrchestratorError::Phase2)?;
 
     // Phase2 上游 phase1 数据原样透传，phase2 自身产物覆盖 chapters/notes
     let structure = fnm_core::records::Phase2Structure {

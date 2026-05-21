@@ -44,7 +44,10 @@ pub fn render_page_to_data_url(pdf_path: &str, page_index: i64, scale: f64) -> R
 
     let mut jpeg_bytes: Vec<u8> = Vec::new();
     image
-        .write_to(&mut std::io::Cursor::new(&mut jpeg_bytes), ImageFormat::Jpeg)
+        .write_to(
+            &mut std::io::Cursor::new(&mut jpeg_bytes),
+            ImageFormat::Jpeg,
+        )
         .context("JPEG 编码失败")?;
 
     let b64 = base64::engine::general_purpose::STANDARD.encode(&jpeg_bytes);

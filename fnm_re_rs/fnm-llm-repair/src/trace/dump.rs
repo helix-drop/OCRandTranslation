@@ -46,7 +46,11 @@ pub fn dump_traces(example_dir: &str, doc_id: &str) -> i64 {
 /// 将 usage_summary 按阶段写入 llm_traces/ 目录（每阶段一个文件）。
 ///
 /// ←→ Python `write_summary_traces()`
-pub fn write_summary_traces(example_dir: &str, usage_summary: &serde_json::Value, doc_id: &str) -> i64 {
+pub fn write_summary_traces(
+    example_dir: &str,
+    usage_summary: &serde_json::Value,
+    doc_id: &str,
+) -> i64 {
     let trace_dir = Path::new(example_dir).join("llm_traces");
     let _ = std::fs::create_dir_all(&trace_dir);
 
@@ -103,7 +107,16 @@ mod tests {
     #[test]
     fn dump_traces_writes_files() {
         fnm_core::token_counter::clear_usage();
-        fnm_core::token_counter::record_usage("dump_test_stage", "gpt-4o", "openai", 100, 50, 150, 1, 300);
+        fnm_core::token_counter::record_usage(
+            "dump_test_stage",
+            "gpt-4o",
+            "openai",
+            100,
+            50,
+            150,
+            1,
+            300,
+        );
         let dir = tempfile::tempdir().unwrap();
         let written = dump_traces(dir.path().to_str().unwrap(), "test-doc");
         assert!(written >= 1);

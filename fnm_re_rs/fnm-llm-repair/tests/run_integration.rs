@@ -87,6 +87,7 @@ impl Repository for StubRepo {
         _unit_count: i64,
         _structure_state: &str,
         _blocking_reasons_json: &str,
+        _error_msg: &str,
     ) -> Result<()> {
         anyhow::bail!("not implemented")
     }

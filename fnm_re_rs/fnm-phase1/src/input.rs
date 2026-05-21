@@ -3,9 +3,9 @@
 //!
 //! 与 Python `raw_pages.json` 和 `visual_toc.json` 的 JSON schema 对齐。
 
+pub use fnm_core::records::{RawPage, TocItem};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-pub use fnm_core::records::{RawPage, TocItem};
 
 /// 整本书的 visual TOC bundle（manual 标注 + auto 提取的混合）。
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

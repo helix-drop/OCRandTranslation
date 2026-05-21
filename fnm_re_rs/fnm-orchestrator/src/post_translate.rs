@@ -170,8 +170,7 @@ pub fn run_post_translate_export_checks(
 
     let trans_blockers = translation_blockers(repo, doc_id)?;
 
-    let mut phase6 =
-        load_phase6_structure(repo, doc_id, false).context("load phase6 structure")?;
+    let mut phase6 = load_phase6_structure(repo, doc_id, false).context("load phase6 structure")?;
     let (audit_report, _) = fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, None);
     let mut can_ship = audit_report.can_ship;
     let mut blocking_reasons: Vec<String> =
@@ -217,8 +216,7 @@ pub fn run_post_translate_export_checks(
                     let (new_audit, _) =
                         fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, None);
                     can_ship = new_audit.can_ship;
-                    blocking_reasons =
-                        phase6.status.blocking_reasons.iter().cloned().collect();
+                    blocking_reasons = phase6.status.blocking_reasons.iter().cloned().collect();
                 }
                 Err(e) => {
                     round_record["error"] = json!(format!("reload phase6: {}", e));
