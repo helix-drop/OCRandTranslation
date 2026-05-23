@@ -205,6 +205,7 @@ pub fn run_post_translate_export_checks(
 
     let mut repair_rounds: Vec<Value> = Vec::new();
     let mut attempted_rounds: i64 = 0;
+    let mut repair_applied = false;
 
     if !can_ship && max_rounds > 0 {
         for round_no in 1..=max_rounds {
@@ -233,6 +234,9 @@ pub fn run_post_translate_export_checks(
                     round_record["suggestion_count"] = json!(sc);
                 }
                 if let Some(aa) = rep.get("auto_applied_count").and_then(|v| v.as_i64()) {
+                    if aa > 0 {
+                        repair_applied = true;
+                    }
                     round_record["auto_applied_count"] = json!(aa);
                 }
             }
@@ -280,6 +284,7 @@ pub fn run_post_translate_export_checks(
         "final_blocking_reasons": final_blocking_reasons,
         "translation_blockers": trans_blockers,
         "repair_rounds": repair_rounds,
+        "repair_applied_but_not_reexported": repair_applied,
     });
 
     let blocking_summary = tail_blocking_summary(&trans_blockers, &blocking_reasons);

@@ -72,8 +72,6 @@ pub fn load_phase6_structure(
         .map_err(|e| OrchestratorError::Phase6(e.into()))?
         .unwrap_or_default();
 
-    let has_export_bundle =
-        !export_bundle.chapters.is_empty() || !export_bundle.chapter_files.is_empty();
     let has_export_audit = !export_audit.structure_state.is_empty()
         || !export_audit.blocking_reasons.is_empty()
         || export_audit.can_ship;
@@ -95,6 +93,18 @@ pub fn load_phase6_structure(
         .filter(|r| r.note_kind == NoteKind::Endnote)
         .all(|r| r.region_marker_alignment_ok);
 
+    let (structure_state, blocking_reasons) = if has_export_audit {
+        (
+            export_audit.structure_state.clone(),
+            export_audit.blocking_reasons.clone(),
+        )
+    } else {
+        (
+            "phase6_not_available".into(),
+            vec!["export_audit_missing".into()],
+        )
+    };
+
     Ok(Phase6Structure {
         pages,
         heading_candidates,
@@ -114,23 +124,8 @@ pub fn load_phase6_structure(
         export_bundle,
         export_audit,
         status: StructureStatusRecord {
-            structure_state: if has_export_audit {
-                String::new()
-            } else {
-                "incomplete: export audit not found".into()
-            },
-            blocking_reasons: if has_export_bundle && has_export_audit {
-                vec![]
-            } else {
-                let mut reasons = Vec::new();
-                if !has_export_bundle {
-                    reasons.push("export_bundle_missing".into());
-                }
-                if !has_export_audit {
-                    reasons.push("export_audit_missing".into());
-                }
-                reasons
-            },
+            structure_state,
+            blocking_reasons,
             chapter_endnote_region_alignment_ok,
             toc_semantic_contract_ok: true,
             export_ready_test: true,

@@ -70,6 +70,7 @@ pub fn run_pipeline(
     );
     let phase4 = run_phase4(
         &phase1,
+        &phase2,
         &phase3,
         &chapter_layers,
         &pages,
@@ -124,7 +125,11 @@ pub(crate) fn run_phase1(
 ) -> Result<Phase1Snapshot> {
     let phase1_config = fnm_phase1::toc_structure::Phase1Config {
         manual_page_overrides: None,
-        endnotes_start_page: None,
+        endnotes_start_page: config
+            .visual_toc_bundle
+            .as_ref()
+            .and_then(|b| b.get("endnotes_start_page"))
+            .and_then(|v| v.as_i64()),
         pdf_path: if config.pdf_path.is_empty() {
             None
         } else {
@@ -135,7 +140,7 @@ pub(crate) fn run_phase1(
         } else {
             Some(config.doc_id.clone())
         },
-        skip_llm_verify: true,
+        skip_llm_verify: config.skip_llm_verify,
     };
 
     let toc_items_opt = if toc_items.is_empty() {
@@ -168,8 +173,8 @@ pub(crate) fn run_phase2(
         .collect();
 
     let phase2_config = fnm_phase2::input::Phase2Config {
-        skip_sup_recovery: true,
-        skip_llm_verify: true,
+        skip_sup_recovery: config.skip_sup_recovery,
+        skip_llm_verify: config.skip_llm_verify,
     };
 
     let input = fnm_phase2::input::Phase2Input {
@@ -261,13 +266,13 @@ pub(crate) fn run_phase3(
 
 pub(crate) fn run_phase4(
     phase1: &Phase1Snapshot,
+    phase2: &Phase2Snapshot,
     phase3: &Phase3Snapshot,
     chapter_layers: &ChapterLayers,
     pages: &[RawPage],
     pipeline_run_id: &str,
     config: &PipelineConfig,
 ) -> Result<Phase4Snapshot> {
-    // phase2 数据已通过 chapter_layers 传递，无需作为独立参数。
     let max_body_chars = if config.max_body_chars > 0 {
         config.max_body_chars
     } else {
@@ -282,7 +287,7 @@ pub(crate) fn run_phase4(
         chapters: &phase1.structure.chapters,
         body_anchors: &phase3.structure.body_anchors,
         effective_note_links: &phase3.structure.note_links,
-        note_regions: &phase3.structure.note_regions,
+        note_regions: &phase2.note_regions,
         summary: &phase3.structure.summary,
         max_body_chars,
         pipeline_run_id: pipeline_run_id.to_string(),

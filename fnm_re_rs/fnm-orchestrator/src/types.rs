@@ -68,6 +68,10 @@ pub struct PipelineConfig {
     /// visual_toc_bundle（含 items + endnotes_summary 等）。
     /// ←→ Python `pipeline.py:visual_toc_bundle`
     pub visual_toc_bundle: Option<Value>,
+    /// 跳过 superscript recovery（默认 true）。
+    pub skip_sup_recovery: bool,
+    /// 跳过 LLM verify（默认 true）。
+    pub skip_llm_verify: bool,
 }
 
 /// Phase 1 输出快照（DB 持久化前的内存形态）。

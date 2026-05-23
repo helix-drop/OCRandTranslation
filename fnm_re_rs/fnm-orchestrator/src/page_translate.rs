@@ -942,7 +942,12 @@ pub fn build_fnm_body_unit_jobs(unit: &Value, pages: &[Value]) -> Value {
 }
 
 /// ←→ Python `apply_body_unit_translations()`: 将译文注入 body unit 的 segments。
-pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value]) -> Value {
+///
+/// 段落数不匹配时返回 `Err`（P2-6）。
+pub fn apply_body_unit_translations(
+    unit: &Value,
+    translated_paragraphs: &[Value],
+) -> Result<Value, anyhow::Error> {
     let translated: Vec<String> = translated_paragraphs
         .iter()
         .map(|v| v.as_str().unwrap_or("").trim().to_string())
@@ -978,8 +983,7 @@ pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value
             total_parts += paragraphs.len();
             let next_cursor = cursor + paragraphs.len();
             if next_cursor > translated.len() {
-                // Python raises RuntimeError — in Rust, return error info
-                return json!({"error": "FNM body unit 段落数与译文数不一致"});
+                return Err(anyhow::anyhow!("FNM body unit 段落数与译文数不一致"));
             }
             let translated_parts: Vec<String> = translated[cursor..next_cursor].to_vec();
             cursor = next_cursor;
@@ -1010,13 +1014,13 @@ pub fn apply_body_unit_translations(unit: &Value, translated_paragraphs: &[Value
     }
 
     if cursor != translated.len() || cursor != total_parts {
-        return json!({"error": "FNM body unit 段落数与译文数不一致"});
+        return Err(anyhow::anyhow!("FNM body unit 段落数与译文数不一致"));
     }
 
-    json!({
+    Ok(json!({
         "translated_text": translated.join("\n\n"),
         "page_segments": updated_segments,
-    })
+    }))
 }
 
 /// ←→ Python `apply_body_unit_entry_result()`: 将流式翻译结果合并到 unit。
@@ -1358,9 +1362,9 @@ mod tests {
                 "paragraphs": [{"source_text": "A", "section_path": []}]
             }]
         });
-        // 传入 2 个翻译但只有 1 个段落 → 应返回 error
+        // 传入 2 个翻译但只有 1 个段落 → 应返回 Err
         let result = apply_body_unit_translations(&unit, &[json!("T1"), json!("T2")]);
-        assert!(result.get("error").is_some());
+        assert!(result.is_err());
     }
 
     #[test]

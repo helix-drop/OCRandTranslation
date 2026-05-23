@@ -1229,6 +1229,10 @@ pub struct ChapterMarkdownSet {
     pub chapter_contract_summary: serde_json::Value,
     #[serde(default)]
     pub merge_summary: serde_json::Value,
+    #[serde(default)]
+    pub diagnostic_pages: Vec<DiagnosticPageRecord>,
+    #[serde(default)]
+    pub diagnostic_notes: Vec<DiagnosticNoteRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

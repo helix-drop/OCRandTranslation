@@ -198,5 +198,7 @@ pub fn build_chapter_markdown_set(
         chapters,
         chapter_contract_summary,
         merge_summary,
+        diagnostic_pages: phase5.diagnostic_pages,
+        diagnostic_notes: phase5.diagnostic_notes,
     })
 }

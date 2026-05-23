@@ -132,6 +132,36 @@ pub fn run_pipeline_for_doc<R: Repository>(
         None
     };
 
+    // ── Phase 3.5 后：如 LLM repair 产生了物化 override，重建 Phase3 (P0-1) ──
+    // 让 Phase4-6 消费 repair 后的 link table，而不是 repair 前的 state。
+    let phase3 = if let Some(ref report) = llm_repair_report {
+        if report.auto_applied_count > 0 && report.error.is_none() {
+            let overrides = repo.list_fnm_review_overrides_v2(doc_id).map_err(|e| {
+                OrchestratorError::Phase3(anyhow::anyhow!("reload overrides: {}", e))
+            })?;
+            let mut config = config.clone();
+            config.review_overrides = Some(serde_json::Value::Array(overrides));
+            let phase3 = pipeline::run_phase3(&phase1, &phase2, &raw_pages, &config)?;
+            let phase3_products = Phase3Products {
+                body_anchors: phase3.body_anchors.clone(),
+                note_links: phase3.note_links.clone(),
+            };
+            repo.replace_fnm_phase3_products(doc_id, &phase3_products)
+                .map_err(|e| {
+                    OrchestratorError::Phase3(anyhow::anyhow!("re-persist phase3: {}", e))
+                })?;
+            snapshot.phase3 = Some(SerPhase3 {
+                body_anchors: phase3_products.body_anchors,
+                note_links: phase3_products.note_links,
+            });
+            phase3
+        } else {
+            phase3
+        }
+    } else {
+        phase3
+    };
+
     // ── Phase 4 ──
     let chapter_layers = build_chapter_layers(
         &phase1.structure.chapters,
@@ -142,6 +172,7 @@ pub fn run_pipeline_for_doc<R: Repository>(
     );
     let phase4 = pipeline::run_phase4(
         &phase1,
+        &phase2,
         &phase3,
         &chapter_layers,
         &raw_pages,
@@ -163,8 +194,8 @@ pub fn run_pipeline_for_doc<R: Repository>(
     let phase5 = pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
     let phase5_products = Phase5Products {
         chapter_markdowns: phase5.chapter_markdowns.chapters.clone(),
-        diagnostic_pages: Vec::new(),
-        diagnostic_notes: Vec::new(),
+        diagnostic_pages: phase5.chapter_markdowns.diagnostic_pages.clone(),
+        diagnostic_notes: phase5.chapter_markdowns.diagnostic_notes.clone(),
     };
     repo.replace_fnm_phase5_products(doc_id, &phase5_products)
         .map_err(|e| OrchestratorError::Phase5(anyhow::anyhow!("persist phase5: {}", e)))?;
@@ -325,7 +356,15 @@ pub fn run_pipeline_from_db<R: Repository>(
         }
         Err(e) => {
             let err_msg = format!("{:#}", e);
-            let _ = repo.update_fnm_run(run_id, "error", 0, 0, 0, "", "[]", &err_msg);
+            if let Err(finalize_err) =
+                repo.update_fnm_run(run_id, "error", 0, 0, 0, "", "[]", &err_msg)
+            {
+                // TODO: replace with tracing::warn! when subscriber is initialized
+                eprintln!(
+                    "[WARN] mainline::finalize: failed to finalize fnm_run {} as error: {}",
+                    run_id, finalize_err
+                );
+            }
             Err(e)
         }
     }
@@ -382,6 +421,8 @@ mod tests {
             start_phase: StartPhase::Toc,
             review_overrides: None,
             visual_toc_bundle: None,
+            skip_sup_recovery: true,
+            skip_llm_verify: true,
         }
     }
 
