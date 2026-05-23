@@ -80,12 +80,13 @@ def test_apply_body_unit_translations_basic():
 
 
 def test_apply_body_unit_translations_mismatch():
-    """译文数不匹配时返回 error."""
+    """译文数不匹配时抛 RuntimeError."""
     translated = ["译文一"]
-    result = json.loads(fnm_re_rs.apply_body_unit_translations_json(
-        json.dumps(SAMPLE_UNIT), json.dumps(translated),
-    ))
-    assert "error" in result
+    import pytest
+    with pytest.raises(RuntimeError, match="段落数与译文数不一致"):
+        fnm_re_rs.apply_body_unit_translations_json(
+            json.dumps(SAMPLE_UNIT), json.dumps(translated),
+        )
 
 
 def test_apply_body_unit_entry_result_basic():
@@ -140,3 +141,10 @@ def test_apply_body_unit_entry_result_apply_only_unresolved():
     # 第一段状态 done 且 apply_only_unresolved=True → 不覆盖
     assert segs[0]["paragraphs"][0]["translation_status"] == "done"
     assert segs[0]["paragraphs"][0]["translated_text"] == "原有译文"
+    # 第二段状态 error → 被覆盖为 "修复译文"
+    p1 = segs[0]["paragraphs"][1]
+    assert p1["translated_text"] == "修复译文"
+    assert p1["translation_status"] == "done"
+    assert p1["last_error"] == ""
+    # 成功修复，无失败段落
+    assert len(result.get("failed_locations", [])) == 0

@@ -23,6 +23,7 @@
 //! 双向转换的复杂度。后续可加 PyDict 直通版本（如 `run_pipeline_dict`）。
 
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
@@ -39,13 +40,23 @@ use fnm_phase1::input::{RawPage, TocItem};
 ///
 /// Python 端签名：`(pdf_path: str, file_idx: int) -> Optional[str]`
 /// 返回 `data:image/...;base64,...` 形式的 URL 或 None。
+///
+/// 错误先收集到 `errors`，不 panic（P1-7）。
 struct PyRepairRenderer {
     callback: Py<PyAny>,
+    errors: Arc<Mutex<Vec<String>>>,
 }
 
 impl PyRepairRenderer {
     fn new(callback: Py<PyAny>) -> Self {
-        Self { callback }
+        Self {
+            callback,
+            errors: Arc::new(Mutex::new(Vec::new())),
+        }
+    }
+
+    fn take_errors(&self) -> Vec<String> {
+        std::mem::take(&mut *self.errors.lock().unwrap())
     }
 }
 
@@ -53,9 +64,21 @@ impl RepairImageRenderer for PyRepairRenderer {
     fn render_page_data_url(&self, pdf_path: &str, file_idx: i64) -> Option<String> {
         Python::with_gil(|py| -> Option<String> {
             let args = PyTuple::new_bound(py, &[pdf_path.into_py(py), file_idx.into_py(py)]);
-            let result = self.callback.call1(py, args).ok()?;
-            // 期望 Optional[str]：None / str / 抛错都视作 None
-            result.extract::<Option<String>>(py).ok().flatten()
+            match self.callback.call1(py, args) {
+                Ok(result) => result.extract::<Option<String>>(py).ok().flatten(),
+                Err(e) => {
+                    let msg = format!(
+                        "renderer callback failed for page {}: {}",
+                        file_idx,
+                        e.value_bound(py)
+                            .str()
+                            .map(|s| s.to_string())
+                            .unwrap_or_default(),
+                    );
+                    self.errors.lock().unwrap().push(msg);
+                    None
+                }
+            }
         })
     }
 }
@@ -121,6 +144,14 @@ fn parse_pipeline_config(value: &serde_json::Value) -> PyResult<PipelineConfig> 
         start_phase,
         review_overrides: obj.get("review_overrides").cloned(),
         visual_toc_bundle: obj.get("visual_toc_bundle").cloned(),
+        skip_sup_recovery: obj
+            .get("skip_sup_recovery")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(true),
+        skip_llm_verify: obj
+            .get("skip_llm_verify")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(true),
     })
 }
 
@@ -467,12 +498,13 @@ fn load_toc_items_for_doc_json(db_path: &str, doc_id: &str) -> PyResult<String> 
 ///
 /// ←→ Python `FNM_RE/__init__.py::run_doc_pipeline`
 #[pyfunction]
-#[pyo3(signature = (db_path, doc_id, max_body_chars=None, start_phase="toc"))]
+#[pyo3(signature = (db_path, doc_id, max_body_chars=None, start_phase="toc", config_json=None))]
 fn run_doc_pipeline_json(
     db_path: &str,
     doc_id: &str,
     max_body_chars: Option<i64>,
     start_phase: &str,
+    config_json: Option<&str>,
 ) -> PyResult<String> {
     let pool = open_pool(Path::new(db_path))
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
@@ -482,7 +514,8 @@ fn run_doc_pipeline_json(
         fnm_orchestrator::types::StartPhase::from_str(start_phase).map_err(|e| {
             PyRuntimeError::new_err(format!("invalid start_phase '{}': {}", start_phase, e))
         })?;
-    let config = PipelineConfig {
+
+    let mut config = PipelineConfig {
         doc_id: doc_id.to_string(),
         slug: doc_id.to_string(),
         pdf_path: String::new(),
@@ -494,7 +527,49 @@ fn run_doc_pipeline_json(
         start_phase: start_phase_parsed,
         review_overrides: None,
         visual_toc_bundle: None,
+        skip_sup_recovery: true,
+        skip_llm_verify: true,
     };
+
+    if let Some(json_str) = config_json {
+        if !json_str.is_empty() {
+            let extra: serde_json::Value = serde_json::from_str(json_str)
+                .map_err(|e| PyValueError::new_err(format!("invalid config_json: {}", e)))?;
+            if let Some(v) = extra.get("pdf_path").and_then(|v| v.as_str()) {
+                if !v.is_empty() {
+                    config.pdf_path = v.to_string();
+                }
+            }
+            if let Some(v) = extra.get("slug").and_then(|v| v.as_str()) {
+                if !v.is_empty() {
+                    config.slug = v.to_string();
+                }
+            }
+            if let Some(v) = extra
+                .get("include_diagnostic_entries")
+                .and_then(|v| v.as_bool())
+            {
+                config.include_diagnostic_entries = v;
+            }
+            if let Some(v) = extra.get("toc_offset").and_then(|v| v.as_i64()) {
+                config.toc_offset = v;
+            }
+            if let Some(v) = extra.get("manual_toc_ready").and_then(|v| v.as_bool()) {
+                config.manual_toc_ready = v;
+            }
+            if let Some(v) = extra.get("pipeline_state").and_then(|v| v.as_str()) {
+                config.pipeline_state = v.to_string();
+            }
+            config.review_overrides = extra.get("review_overrides").cloned();
+            config.visual_toc_bundle = extra.get("visual_toc_bundle").cloned();
+            if let Some(v) = extra.get("skip_sup_recovery").and_then(|v| v.as_bool()) {
+                config.skip_sup_recovery = v;
+            }
+            if let Some(v) = extra.get("skip_llm_verify").and_then(|v| v.as_bool()) {
+                config.skip_llm_verify = v;
+            }
+        }
+    }
 
     // run_pipeline_from_db 负责 create/update fnm_run（含错误路径）
     let snapshot = fnm_orchestrator::mainline::run_pipeline_from_db(&repo, doc_id, config, None)
@@ -578,12 +653,12 @@ fn run_llm_repair_json(
         .load_raw_pages_for_doc(doc_id)
         .map_err(|e| PyRuntimeError::new_err(format!("load pages: {}", e)))?;
 
+    let py_renderer = renderer.map(PyRepairRenderer::new);
     let report = py
         .allow_threads(|| -> Result<_, String> {
-            let py_renderer = renderer.map(PyRepairRenderer::new);
             let noop = NoopRenderer;
             let renderer_ref: &dyn RepairImageRenderer = match &py_renderer {
-                Some(r) => r,
+                Some(ref r) => r,
                 None => &noop,
             };
             let trace_bridge = |trace: serde_json::Value| {
@@ -624,7 +699,21 @@ fn run_llm_repair_json(
         })
         .map_err(PyRuntimeError::new_err)?;
 
-    serde_json::to_string(&report).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
+    let mut report_value = serde_json::to_value(&report)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))?;
+
+    // 注入 renderer 错误（P1-7）
+    let errors: Vec<String> = py_renderer
+        .as_ref()
+        .map(|r| r.take_errors())
+        .unwrap_or_default();
+    if !errors.is_empty() {
+        report_value["renderer_errors"] =
+            serde_json::Value::Array(errors.into_iter().map(serde_json::Value::String).collect());
+    }
+
+    serde_json::to_string(&report_value)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
 /// 构建文档状态摘要（含 Phase4/6 gate 字段）。
@@ -1161,7 +1250,8 @@ fn apply_body_unit_translations_json(
         serde_json::from_str(translated_paragraphs_json).map_err(|e| {
             PyValueError::new_err(format!("invalid translated_paragraphs_json: {}", e))
         })?;
-    let result = fnm_orchestrator::apply_body_unit_translations(&unit, &translated_paragraphs);
+    let result = fnm_orchestrator::apply_body_unit_translations(&unit, &translated_paragraphs)
+        .map_err(|e| PyRuntimeError::new_err(format!("apply_body_unit_translations: {}", e)))?;
     serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
