@@ -149,6 +149,7 @@ pub fn resolve_builtin_model_spec(
         "mimo" => (get_mimo_api_key(), MIMO_BASE_URL.to_string()),
         "glm" => (get_glm_api_key(), GLM_BASE_URL.to_string()),
         "kimi" => (get_kimi_api_key(), KIMI_BASE_URL.to_string()),
+        "gemini" => (get_gemini_key(), GEMINI_BASE_URL.to_string()),
         _ => (get_deepseek_key(), DEEPSEEK_BASE_URL.to_string()),
     };
     let request_overrides = thinking_request_overrides(&provider, &model, thinking_enabled);
@@ -216,6 +217,7 @@ pub fn resolve_custom_model_spec(slot: &ModelPoolSlot, capability: &str) -> Reso
         "deepseek" => (get_deepseek_key(), DEEPSEEK_BASE_URL.to_string()),
         "glm" => (get_glm_api_key(), GLM_BASE_URL.to_string()),
         "kimi" => (get_kimi_api_key(), KIMI_BASE_URL.to_string()),
+        "gemini" => (get_gemini_key(), GEMINI_BASE_URL.to_string()),
         "mimo" => (get_mimo_api_key(), MIMO_BASE_URL.to_string()),
         "mimo_token_plan" => (
             slot.custom_api_key.clone(),
@@ -360,6 +362,23 @@ pub fn resolve_fnm_model_pool_specs() -> Vec<ResolvedModelSpec> {
         .collect()
 }
 
+/// LLM repair 依据配置角色选模；`final_round=true` 只返回末轮兜底模型。
+pub fn resolve_fnm_repair_model_specs(final_round: bool) -> Vec<ResolvedModelSpec> {
+    let specs = resolve_fnm_model_pool_specs();
+    let target = if final_round {
+        get_fnm_repair_final_model_id()
+    } else {
+        get_fnm_repair_primary_model_id()
+    };
+    if target.is_empty() {
+        return specs;
+    }
+    specs
+        .into_iter()
+        .filter(|spec| spec.model_id == target || spec.model_key == target)
+        .collect()
+}
+
 /// ←→ Python `resolve_visual_model_spec`：返回 fnm pool 第一个 vision-capable spec。
 pub fn resolve_visual_model_spec() -> Option<ResolvedModelSpec> {
     resolve_fnm_model_pool_specs()
@@ -384,6 +403,15 @@ mod tests {
         let spec = resolve_builtin_model_spec("deepseek-chat", Some("translation"), false);
         assert_eq!(spec.provider, "deepseek");
         assert_eq!(spec.base_url, DEEPSEEK_BASE_URL);
+    }
+
+    #[test]
+    fn builtin_gemini_routes_to_gemini_base() {
+        let spec = resolve_builtin_model_spec("gemini-3.1-flash-lite", Some("fnm"), false);
+        assert_eq!(spec.provider, "gemini");
+        assert_eq!(spec.base_url, GEMINI_BASE_URL);
+        assert!(spec.supports_vision);
+        assert!(spec.request_overrides.is_null());
     }
 
     #[test]

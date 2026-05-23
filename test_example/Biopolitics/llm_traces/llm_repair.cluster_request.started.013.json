@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -183,13 +183,37 @@
         "page_no": 66,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 66,
+        "ocr_excerpt": "# LECON DU 24 JANVIER 1979 Les traits spécifiques de l'art libéral de gouverner (II) : (3) Le problème de l'équilibre européen et des rapports internationaux. - Le calcul économique et politique dans le mercantilisme. Le principe de la liberté du marché selon les physiocrates et Adam Smith : naissance d'un nouveau modèle européen. - L'apparition d'une rationalité gouvernementale étendue à l'échelle mondiale. Exemples : la question du droit de la mer ; les projets de paix perpétuelle au x/111\" siècle. - Les principes du nouvel art libéral de gouverner : un « naturalisme gouvernemental « ; la production de la liberté. - Le problème de l'arbitrage libéral. Ses instruments : (1) la gestion des dangers et la mise en œuvre de mécanismes de sécurité ; (2) les contrôles disciplinaires (le panoptisme de Bentham) ; (3) les politiques interventionnistes. - La gestion de la liberté et ses crises. La dernière fois, j'avais essayé de préciser quelques-uns de ce qui me paraît être les caractères fondamentaux de l'art libéral de gouverner. D'abord, j'avais parlé du problème de la vérité économique et de la véridiction du marché. et puis du problème de la limitation de la gouvernementalité par le calcul d'utilité. Je voudrais maintenant aborder un troisième aspect. lui aussi je crois, fondamental, celui des équilibres internationaux, enfin l'Europe et l'espace international dans le libéralisme. ...",
+        "page_no": 67,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 67,
+        "ocr_excerpt": "la balance européenne, dont le principe est celui-ci : faire en sorte qu'il n'y ait aucun État qui l'emporte suffisamment sur les autres pour pouvoir reconstituer en Europe l'unité impériale ; faire en sorte, par conséquent, qu'il n'y ait pas un État dominant tous les autres, qu'aucun État ne l'emporte suffisamment sur l'ensemble de ses voisins pour pouvoir faire régner sur eux sa domination, etc. Le lien entre ces deux mécanismes, celui à objectifs illimités, l'État de police, celui à objectifs limités, la balance européenne, on le voit, on le comprend très facilement dans la mesure en effet où, s'il est vrai que l'État de police, ou si vous voulez les mécanismes intérieurs qui organisent et développent à l'infini l'État de police ont pour raison d'être, finalité et objectif le renforcement de l'État lui-même, chaque État a donc pour cible son renforcement à l'infini, c'est-à-dire une majoration de puissance illimitée par rapport aux autres. En termes clairs, la concurrence chez celui qui est le meilleur dans le jeu de la concurrence va introduire en Europe un certain nombre d'inégalités, inégalités qui iront s'accroissant, qui seront sanctionnées par un déséquilibre dans la population, par conséquent dans les forces militaires, et on en arrivera donc à cette fameuse situation impériale dont l'équilibre européens, depuis le traité de Westphalie, a voulu affranchir l'Europe. C' ...",
+        "page_no": 68,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 68,
+        "ocr_excerpt": "un seul, qu'il va falloir, en stricte logique économique, – pour éviter ce phénomène, cette conséquence politique de la concurrence ainsi définie –, que s'établisse quelque chose comme un équilibre qui permettra d'interrompre en quelque sorte le jeu à un moment donné. C'est-à-dire : lorsque les écarts entre les joueurs risqueront d'être trop importants, on arrêtera la partie, et c'est cela précisément en quoi consiste l'équilibre européen. C'est exactement, enfin jusqu'à un certain point, le problème pascalien³ : qu'est-ce qui arrive lorsque dans un jeu à somme nulle, on interrompt le jeu et on répartit les gains entre les partenaires ? Interrompre le jeu de la concurrence par la diplomatie de l'équilibre européen, c'est cela qui est nécessairement impliqué par la conception et la pratique monétariste des mercantilistes. Voilà le point de départ. Or, qu'est-ce qui va se passer en ce milieu du XVIII<sup>e</sup> siècle dont je vous parle et où j'essaie de repérer la formation d'une nouvelle raison gouvernementale ? Dans cette nouvelle raison d'État ou cette raison du moindre État qui trouve donc dans le marché sa véridiction de base et dans l'utilité sa juridiction de fait, il est bien entendu que les choses vont être tout à fait différentes. En effet, pour les physiocrates mais, d'ailleurs, également pour Adam Smith, la liberté du marché peut et doit fonctionner d'une telle mani ...",
+        "page_no": 69,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body"
   },
   "request_metrics": {
@@ -197,14 +221,14 @@
       "synthesize_anchor",
       "needs_review"
     ],
-    "chars": 11533,
+    "chars": 13888,
     "cluster_id": "ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote",
-    "estimated_prompt_tokens": 3288,
+    "estimated_prompt_tokens": 3941,
     "image_refused": false,
     "matched_examples": 2,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body",
     "skip_reason": "",
     "skipped": false,
@@ -215,7 +239,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 3288,
+    "estimated_input_tokens": 3941,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

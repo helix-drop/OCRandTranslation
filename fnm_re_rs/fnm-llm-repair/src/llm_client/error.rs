@@ -126,11 +126,21 @@ pub fn classify_provider_error(
 ) -> ProviderError {
     let retry_after = parse_retry_after_seconds(retry_after_header);
     let normalized = message.to_lowercase();
+    let provider_code = body
+        .and_then(|payload| payload.get("error"))
+        .and_then(|error| error.get("code"))
+        .map(|code| {
+            code.as_str()
+                .map(ToString::to_string)
+                .unwrap_or_else(|| code.to_string())
+        })
+        .unwrap_or_default();
 
     // 1. 429 / rate limit
     if status == Some(429)
         || normalized.contains("rate limit")
         || normalized.contains("too many requests")
+        || matches!(provider_code.as_str(), "1302" | "1303")
     {
         return ProviderError::RateLimited {
             retry_after_s: retry_after,
@@ -156,10 +166,37 @@ pub fn classify_provider_error(
     if matches!(status, Some(500) | Some(502) | Some(503) | Some(504))
         || normalized.contains("timeout")
         || normalized.contains("temporarily unavailable")
+        || matches!(provider_code.as_str(), "1305" | "1312")
     {
         return ProviderError::Transient {
             retry_after_s: retry_after,
         };
+    }
+
+    // 3b. 传输层瞬时失败（无 HTTP 响应：DNS / connect / reset / broken pipe）
+    if status.is_none() {
+        const TRANSPORT_KEYWORDS: &[&str] = &[
+            "connection refused",
+            "connection reset",
+            "broken pipe",
+            "network unreachable",
+            "host unreachable",
+            "dns error",
+            "error sending request",
+            "connection closed before message completed",
+            "connection closed",
+            "incomplete message",
+            "reset by peer",
+            "eof",
+        ];
+        if TRANSPORT_KEYWORDS
+            .iter()
+            .any(|kw| normalized.contains(kw))
+        {
+            return ProviderError::Transient {
+                retry_after_s: None,
+            };
+        }
     }
 
     // 4. 4xx 非 429/402 → NonRetryable
@@ -261,9 +298,48 @@ mod tests {
 
     #[test]
     fn test_other_fallback() {
-        let err = classify_provider_error(None, None, None, "connection refused");
+        let err = classify_provider_error(None, None, None, "some completely unknown error");
         assert!(matches!(err, ProviderError::Other(_)));
         assert!(!err.is_retryable());
+    }
+
+    #[test]
+    fn test_transport_connection_refused_is_transient() {
+        let err = classify_provider_error(None, None, None, "error sending request for url (http://127.0.0.1:1/chat/completions): error trying to connect: tcp connect error: Connection refused (os error 61)");
+        assert!(matches!(err, ProviderError::Transient { .. }));
+        assert!(err.is_retryable());
+    }
+
+    #[test]
+    fn test_transport_connection_reset_is_transient() {
+        let err = classify_provider_error(None, None, None, "connection reset by peer");
+        assert!(matches!(err, ProviderError::Transient { .. }));
+        assert!(err.is_retryable());
+    }
+
+    #[test]
+    fn test_transport_broken_pipe_is_transient() {
+        let err = classify_provider_error(None, None, None, "broken pipe");
+        assert!(matches!(err, ProviderError::Transient { .. }));
+    }
+
+    #[test]
+    fn test_transport_dns_error_is_transient() {
+        let err = classify_provider_error(None, None, None, "dns error: failed to lookup address");
+        assert!(matches!(err, ProviderError::Transient { .. }));
+    }
+
+    #[test]
+    fn test_transport_incomplete_message_is_transient() {
+        let err = classify_provider_error(None, None, None, "connection closed before message completed");
+        assert!(matches!(err, ProviderError::Transient { .. }));
+    }
+
+    #[test]
+    fn test_transport_with_status_stays_non_transport() {
+        // 有 HTTP status 的错误不走传输层分支
+        let err = classify_provider_error(Some(400), None, None, "connection refused");
+        assert!(matches!(err, ProviderError::NonRetryable { .. }));
     }
 
     #[test]
@@ -358,5 +434,19 @@ mod tests {
         });
         let err = classify_provider_error(Some(400), None, Some(&body), "Bad Request");
         assert!(matches!(err, ProviderError::NonRetryable { .. }));
+    }
+
+    #[test]
+    fn test_glm_business_code_1302_is_rate_limited() {
+        let body = json!({"error": {"code": "1302", "message": "您当前使用该 API 的并发数过高"}});
+        let err = classify_provider_error(Some(400), None, Some(&body), "provider error");
+        assert!(matches!(err, ProviderError::RateLimited { .. }));
+    }
+
+    #[test]
+    fn test_glm_business_code_1305_is_transient() {
+        let body = json!({"error": {"code": "1305", "message": "该 API 已触发流量限制"}});
+        let err = classify_provider_error(Some(400), None, Some(&body), "provider error");
+        assert!(matches!(err, ProviderError::Transient { .. }));
     }
 }

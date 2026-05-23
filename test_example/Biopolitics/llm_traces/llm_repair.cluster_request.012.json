@@ -4,12 +4,12 @@
       {
         "action": "synthesize_anchor",
         "anchor_id": "",
-        "anchor_phrase": "le genre d'analyse que je vous suggère",
-        "confidence": 0.95,
+        "anchor_phrase": "je vous suggère",
+        "confidence": 0.9,
         "marker": "",
         "note_item_id": "fn-0358",
         "note_text": "",
-        "reason": "该短语在文中唯一，且紧接在标记“2”出现的位置之后。"
+        "reason": "正文有唯一短语\"je vous suggère\"对应尾注2"
       },
       {
         "action": "needs_review",
@@ -17,16 +17,26 @@
         "anchor_phrase": "",
         "confidence": 0.8,
         "marker": "",
-        "note_item_id": "",
+        "note_item_id": "fn-0359",
         "note_text": "",
-        "reason": "标记为双星号的脚注（fn-0359, fn-0362）在正文中没有明确的锚点对应位置，且 OCR 无法识别对应文本。"
+        "reason": "正文无对应\"**\"标记的短语"
+      },
+      {
+        "action": "needs_review",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "confidence": 0.8,
+        "marker": "",
+        "note_item_id": "fn-0362",
+        "note_text": "",
+        "reason": "正文无对应\"**\"标记的短语"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -133,12 +143,12 @@
     {
       "action": "synthesize_anchor",
       "anchor_id": "",
-      "anchor_phrase": "le genre d'analyse que je vous suggère",
-      "confidence": 0.95,
+      "anchor_phrase": "je vous suggère",
+      "confidence": 0.9,
       "marker": "",
       "note_item_id": "fn-0358",
       "note_text": "",
-      "reason": "该短语在文中唯一，且紧接在标记“2”出现的位置之后。"
+      "reason": "正文有唯一短语\"je vous suggère\"对应尾注2"
     },
     {
       "action": "needs_review",
@@ -146,30 +156,40 @@
       "anchor_phrase": "",
       "confidence": 0.8,
       "marker": "",
-      "note_item_id": "",
+      "note_item_id": "fn-0359",
       "note_text": "",
-      "reason": "标记为双星号的脚注（fn-0359, fn-0362）在正文中没有明确的锚点对应位置，且 OCR 无法识别对应文本。"
+      "reason": "正文无对应\"**\"标记的短语"
+    },
+    {
+      "action": "needs_review",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "confidence": 0.8,
+      "marker": "",
+      "note_item_id": "fn-0362",
+      "note_text": "",
+      "reason": "正文无对应\"**\"标记的短语"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0358\",\n    \"anchor_phrase\": \"le genre d'analyse que je vous suggère\",\n    \"confidence\": 0.95,\n    \"reason\": \"该短语在文中唯一，且紧接在标记“2”出现的位置之后。\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"标记为双星号的脚注（fn-0359, fn-0362）在正文中没有明确的锚点对应位置，且 OCR 无法识别对应文本。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"synthesize_anchor\", \"anchor_phrase\": \"je vous suggère\", \"note_item_id\": \"fn-0358\", \"confidence\": 0.9, \"reason\": \"正文有唯一短语\\\"je vous suggère\\\"对应尾注2\"}, {\"action\": \"needs_review\", \"reason\": \"正文无对应\\\"**\\\"标记的短语\", \"note_item_id\": \"fn-0359\"}, {\"action\": \"needs_review\", \"reason\": \"正文无对应\\\"**\\\"标记的短语\", \"note_item_id\": \"fn-0362\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 3654
+    "duration_ms": 30838
   },
   "token_accounting": {
     "estimated_input_tokens": 1905,
-    "input_tokens": 1792,
-    "output_tokens": 155,
+    "input_tokens": 1679,
+    "output_tokens": 1329,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1947
+    "total_tokens": 3008
   },
   "usage": {
-    "completion_tokens": 155,
-    "prompt_tokens": 1792,
+    "completion_tokens": 1329,
+    "prompt_tokens": 1679,
     "request_count": 1,
-    "total_tokens": 1947
+    "total_tokens": 3008
   }
 }

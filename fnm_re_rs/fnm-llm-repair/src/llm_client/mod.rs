@@ -4,7 +4,7 @@
 //! - `mod.rs`（本文件）—— 类型契约 + trace/metrics 辅助函数 + model spec 解析
 //! - `request.rs` —— `request_llm_repair_actions` 顶层 + provider HTTP 调用 + 内容审核回退
 
-use fnm_core::vision::{resolve_fnm_model_pool_specs, ResolvedModelSpec};
+use fnm_core::vision::{resolve_fnm_repair_model_specs, ResolvedModelSpec};
 use serde_json::{json, Value};
 
 use crate::constants::{
@@ -77,6 +77,7 @@ pub fn resolved_spec_to_model_args(spec: &ResolvedModelSpec) -> Value {
         "model_id": spec.model_id.trim(),
         "api_key": spec.api_key.trim(),
         "base_url": spec.base_url.trim(),
+        "supports_vision": spec.supports_vision,
         "request_overrides": spec.request_overrides.clone(),
         "display_label": if spec.display_label.trim().is_empty() {
             spec.model_id.trim()
@@ -90,7 +91,7 @@ pub fn resolved_spec_to_model_args(spec: &ResolvedModelSpec) -> Value {
 ///
 /// 返回主模型参数（向后兼容；其它路径用 `resolve_all_repair_model_args`）。
 pub fn resolve_repair_model_args() -> anyhow::Result<Value> {
-    let specs = resolve_fnm_model_pool_specs();
+    let specs = resolve_fnm_repair_model_specs(false);
     let Some(first) = specs.first() else {
         anyhow::bail!("未配置可用的 FNM 视觉与修补模型");
     };
@@ -102,7 +103,7 @@ pub fn resolve_repair_model_args() -> anyhow::Result<Value> {
 
 /// ←→ Python `_resolve_all_repair_model_args` (llm_repair.py:991-1001)
 pub fn resolve_all_repair_model_args() -> anyhow::Result<Vec<Value>> {
-    let specs = resolve_fnm_model_pool_specs();
+    let specs = resolve_fnm_repair_model_specs(false);
     let mut result: Vec<Value> = Vec::new();
     for spec in &specs {
         if spec.api_key.trim().is_empty() {
@@ -243,6 +244,7 @@ mod tests {
             base_url: "https://api.qwen".to_string(),
             api_key: "key123".to_string(),
             display_label: "Qwen VL".to_string(),
+            supports_vision: true,
             request_overrides: json!({"extra_body": {"enable_thinking": false}}),
             ..Default::default()
         };
@@ -250,6 +252,7 @@ mod tests {
         assert_eq!(args["provider"], "qwen");
         assert_eq!(args["model_id"], "qwen3.5-vl-plus");
         assert_eq!(args["api_key"], "key123");
+        assert_eq!(args["supports_vision"], true);
         assert_eq!(
             args["request_overrides"]["extra_body"]["enable_thinking"],
             false

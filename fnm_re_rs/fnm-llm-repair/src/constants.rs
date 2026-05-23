@@ -27,9 +27,15 @@ pub const LLM_REPAIR_MAX_MATCHED_EXAMPLES: usize = 2;
 pub const LLM_REPAIR_MAX_UNMATCHED_DEFINITIONS: usize = 8;
 pub const LLM_REPAIR_MAX_UNMATCHED_REFS: usize = 8;
 pub const LLM_REPAIR_MAX_FOCUS_PAGES: usize = 8;
-pub const LLM_REPAIR_MAX_IMAGE_PAGES: usize = 2;
+pub const LLM_REPAIR_MAX_IMAGE_PAGES: usize = 5;
 pub const LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS: usize = 700;
 pub const LLM_REPAIR_IMAGE_SCALE: f64 = 1.3;
+
+// ── GLM-4.6V 官方模型限制 ──
+// 文档公开上下文窗口为 128K；repair 自身采用 2K 输出预算。
+pub const GLM46V_CONTEXT_TOKENS: i64 = 128_000;
+pub const GLM46V_MAX_IN_FLIGHT_REQUESTS: usize = 1;
+pub const GLM46V_MAX_RETRY_ATTEMPTS: usize = 2;
 
 // ── Footnote padding（llm_repair.py:78）──
 pub const LLM_REPAIR_FOOTNOTE_PAGE_PADDING: i64 = 1;

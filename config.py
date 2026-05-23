@@ -97,6 +97,8 @@ QWEN_BASE_URLS = {
 }
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+FNM_REPAIR_PRIMARY_MODEL_ID_DEFAULT = ""
+FNM_REPAIR_FINAL_MODEL_ID_DEFAULT = ""
 CUSTOM_MODEL_PROVIDER_TYPES = {
     "qwen",
     "qwen_mt",
@@ -875,6 +877,18 @@ def save_fnm_model_pool(pool: list[dict]) -> None:
     cfg = load_config()
     cfg["fnm_model_pool"] = _normalize_model_pool(pool, capability="fnm")
     save_config(cfg)
+
+
+def get_fnm_repair_primary_model_id() -> str:
+    return str(
+        load_config().get("fnm_repair_primary_model_id", FNM_REPAIR_PRIMARY_MODEL_ID_DEFAULT) or ""
+    ).strip()
+
+
+def get_fnm_repair_final_model_id() -> str:
+    return str(
+        load_config().get("fnm_repair_final_model_id", FNM_REPAIR_FINAL_MODEL_ID_DEFAULT) or ""
+    ).strip()
 
 
 def _glossary_state_key(doc_id: str) -> str:

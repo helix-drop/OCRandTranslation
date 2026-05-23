@@ -117,19 +117,26 @@ fn run_one_repair_round(
             Ok(report) => {
                 let suggestion_count = report.suggestion_count as i64;
                 let auto_applied = report.auto_applied_count as i64;
-                model_attempts.push(json!({
+                let has_error = report.error.is_some();
+                let result_label = if has_error { "partial" } else { "used" };
+                let mut attempt = json!({
                     "model_id": model_id,
                     "model_label": label,
                     "provider": provider,
-                    "result": "used",
+                    "result": result_label,
                     "suggestion_count": suggestion_count,
                     "auto_applied_count": auto_applied,
-                }));
+                    "clusters_completed": report.clusters_completed,
+                    "cluster_count": report.cluster_count,
+                });
+                if let Some(ref err) = report.error {
+                    attempt["error"] = json!(err);
+                }
+                model_attempts.push(attempt);
                 repair_result = Some(
                     serde_json::to_value(&report)
                         .unwrap_or(json!({"error": "serialize report failed"})),
                 );
-                // Keep first working model; let the round-level logic handle retry
                 break;
             }
             Err(e) => {
@@ -152,6 +159,26 @@ fn run_one_repair_round(
     }
 
     (model_attempts, repair_result)
+}
+
+fn model_args_for_round(model_args_list: &[Value], round_no: i64, max_rounds: i64) -> Vec<Value> {
+    let desired_role = if round_no == max_rounds {
+        "final"
+    } else {
+        "primary"
+    };
+    let selected: Vec<Value> = model_args_list
+        .iter()
+        .filter(|args| {
+            args.get("repair_role").and_then(|value| value.as_str()) == Some(desired_role)
+        })
+        .cloned()
+        .collect();
+    if selected.is_empty() {
+        model_args_list.to_vec()
+    } else {
+        selected
+    }
 }
 
 /// ←→ Python `run_post_translate_export_checks_for_doc()`
@@ -183,6 +210,7 @@ pub fn run_post_translate_export_checks(
         for round_no in 1..=max_rounds {
             attempted_rounds = round_no;
             let clear_overrides = round_no == 1;
+            let round_model_args = model_args_for_round(&model_args_list, round_no, max_rounds);
 
             let (model_attempts, repair_result) = run_one_repair_round(
                 repo,
@@ -192,7 +220,7 @@ pub fn run_post_translate_export_checks(
                 pdf_path,
                 true,
                 clear_overrides,
-                &model_args_list,
+                &round_model_args,
             );
 
             let mut round_record = json!({
@@ -269,4 +297,29 @@ pub fn run_post_translate_export_checks(
         "repair_rounds": repair_rounds,
         "post_translate_export_check": repair_payload,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn selects_glm_primary_before_gemini_final_round() {
+        let models = vec![
+            json!({"model_id": "glm-4.6v", "repair_role": "primary"}),
+            json!({"model_id": "gemini-3.1-flash-lite", "repair_role": "final"}),
+        ];
+        assert_eq!(
+            model_args_for_round(&models, 1, 3)[0]["model_id"],
+            "glm-4.6v"
+        );
+        assert_eq!(
+            model_args_for_round(&models, 2, 3)[0]["model_id"],
+            "glm-4.6v"
+        );
+        assert_eq!(
+            model_args_for_round(&models, 3, 3)[0]["model_id"],
+            "gemini-3.1-flash-lite"
+        );
+    }
 }

@@ -223,18 +223,21 @@ def run_post_translate_export_checks_for_doc(*args, **kwargs):
     slug = doc_id
     pdf_path = kwargs.get("pdf_path", "") or ""
 
-    from persistence.storage import resolve_fnm_model_pool_specs
+    from persistence.storage import resolve_fnm_repair_model_specs
 
     model_args_list = []
-    for spec in resolve_fnm_model_pool_specs():
-        model_args_list.append({
-            "provider": str(spec.provider or "").strip(),
-            "model_id": str(spec.model_id or "").strip(),
-            "api_key": str(spec.api_key or "").strip(),
-            "base_url": str(spec.base_url or "").strip(),
-            "request_overrides": dict(spec.request_overrides or {}),
-            "display_label": str(spec.display_label or spec.model_id or "").strip(),
-        })
+    for repair_role, final_round in (("primary", False), ("final", True)):
+        for spec in resolve_fnm_repair_model_specs(final_round=final_round):
+            model_args_list.append({
+                "provider": str(spec.provider or "").strip(),
+                "model_id": str(spec.model_id or "").strip(),
+                "api_key": str(spec.api_key or "").strip(),
+                "base_url": str(spec.base_url or "").strip(),
+                "supports_vision": bool(spec.supports_vision),
+                "request_overrides": dict(spec.request_overrides or {}),
+                "display_label": str(spec.display_label or spec.model_id or "").strip(),
+                "repair_role": repair_role,
+            })
     model_args_json = _json.dumps(model_args_list, ensure_ascii=False)
 
     result_json = fnm_re_rs.run_post_translate_export_checks_for_doc_json(

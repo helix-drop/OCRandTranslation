@@ -2,9 +2,9 @@
   "doc_id": "",
   "stage": "llm_repair.cluster_request",
   "usage": {
-    "completion_tokens": 7919,
-    "prompt_tokens": 92103,
+    "completion_tokens": 43392,
+    "prompt_tokens": 89425,
     "request_count": 52,
-    "total_tokens": 100022
+    "total_tokens": 132817
   }
 }

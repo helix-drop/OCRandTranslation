@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -145,13 +145,37 @@
         "page_no": 19,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 19,
+        "ocr_excerpt": "n'existe encore pas assez. Et la raison d'État, c'est précisément une pratique ou plutôt une rationalisation d'une pratique qui va se situer entre un État présenté comme donné et un État présenté comme à construire et à bâtir. L'art de gouverner doit alors fixer ses règles et rationaliser ses manières de faire en se proposant en quelque sorte pour objectif de faire passer à l'être le devoir-être de l'État. Le devoir-faire du gouvernement doit s'identifier au devoir-être de l'État. L'État tel qu'il est donné, eh bien : la ratio gouvernementale, c'est ce qui permettra, d'une manière réfléchie, raisonnée, calculée, de le faire passer à son maximum d'être. Qu'est-ce que c'est que gouverner ? Gouverner selon le principe de la raison d'État, c'est faire en sorte que l'État puisse être rendu solide et permanent, qu'il puisse être rendu riche, qu'il puisse être rendu fort en face de tout ce qui peut le détruire. Deux mots sur ce que j'avais essayé donc de dire l'an dernier, pour résumer un petit peu le cours de l'année dernière. Je voudrais insister sur deux ou trois points. Premièrement, vous vous souvenez, ce qui caractérisait cette nouvelle rationalité gouvernementale appelée raison d'État qui s'était constituée en gros au cours du XVIe siècle, c'est que l'État y était défini et découpé comme une réalité à la fois spécifique et autonome, ou du moins relativement autonome. C'est-à-di ...",
+        "page_no": 20,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 20,
+        "ocr_excerpt": "quelque sorte une théophanie de Dieu dans le monde, théophanie qui conduirait les hommes en une humanité enfin réunie jusqu'au bord de la fin du monde. Il n'y a pas, donc, d'intégration de l'État à l'Empire. L'État n'existe que comme les États, au pluriel. Spécificité et pluralité de l'État. Cette spécificité plurielle de l'État, j'avais essayé d'autre part de vous montrer qu'elle avait pris corps dans un certain nombre de manières précises de gouverner, à la fois manières de gouverner et institutions corrélatives à ces manières. Premièrement, du côté économique, c'était le mercantilisme, c'est-à-dire une forme de gouvernement. Le mercantilisme n'est pas une doctrine économique, c'est bien plus, c'est bien autre chose qu'une doctrine économique. C'est une certaine organisation de la production et des circuits commerciaux selon le principe que, premièrement, l'État doit s'enrichir par l'accumulation monétaire, deuxièmement, il doit se renforcer par l'accroissement de la population, troisièmement, il doit se trouver et se maintenir dans un état de concurrence permanent avec les puissances étrangères. Voilà pour le mercantilisme. Deuxième façon pour le gouvernement selon la raison d'État de s'organiser et de prendre corps dans une pratique, c'est la gestion intérieure, c'est-à-dire ce qu'on appelait à l'époque la police, c'est-à-dire la réglementation indéfinie du pays selon le mo ...",
+        "page_no": 21,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 21,
+        "ocr_excerpt": "comment elle invente, forme, développe de nouvelles pratiques, c'est cela le problème, et non pas de faire de [l'État]*, sur la scène d'un guignol, une sorte de gendarme qui viendrait assommer les différents personnages de l'histoire. Plusieurs remarques à ce sujet. D'abord ceci : dans cet art de gouverner ordonné à la raison d'État, il y a un trait que je pense tout à fait caractéristique et important pour comprendre la suite. C'est que, vous le voyez, l'État ou plutôt le gouvernement selon la raison d'État, dans sa politique étrangère, disons dans ses rapports avec les autres États, se donne un objectif qui est un objectif limité, à la différence de ce qui avait été finalement l'horizon, le projet, le désir de la plupart des gouvernants et des souverains du Moyen Âge, à savoir se placer à l'égard des autres États dans cette position impériale qui lui donnerait, à la fois dans l'histoire et dans la théophanie, un rôle décisif. En revanche, avec la raison d'État, on admet que chaque État a ses intérêts, qu'il a, par conséquent, à défendre, et à défendre absolument, ses intérêts, mais que son objectif ne doit pas être de rejoindre à la fin des temps la position unificatrice d'un empire total et global. Il n'a pas à rêver d'être un jour l'empire du dernier jour. Chaque État doit s'autolimiter dans ses propres objectifs, assurer son indépendance et un certain état de ses forces qu ...",
+        "page_no": 22,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body"
   },
   "request_metrics": {
@@ -159,14 +183,14 @@
       "synthesize_anchor",
       "needs_review"
     ],
-    "chars": 10297,
+    "chars": 12667,
     "cluster_id": "ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote",
-    "estimated_prompt_tokens": 2934,
+    "estimated_prompt_tokens": 3587,
     "image_refused": false,
     "matched_examples": 2,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body",
     "skip_reason": "",
     "skipped": false,
@@ -177,7 +201,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 2934,
+    "estimated_input_tokens": 3587,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

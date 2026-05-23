@@ -20,6 +20,7 @@ from config import (
     get_glm_api_key, get_kimi_api_key, get_gemini_key,
     get_glossary,
     get_translation_model_pool, get_fnm_model_pool,
+    get_fnm_repair_primary_model_id, get_fnm_repair_final_model_id,
     get_translate_parallel_enabled, get_translate_parallel_limit,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
     get_doc_cleanup_headers_footers,
@@ -789,6 +790,22 @@ def resolve_translation_model_pool_specs() -> list[ResolvedModelSpec]:
 
 def resolve_fnm_model_pool_specs() -> list[ResolvedModelSpec]:
     return _resolve_pool_specs("fnm", "fnm")
+
+
+def resolve_fnm_repair_model_specs(*, final_round: bool = False) -> list[ResolvedModelSpec]:
+    """按 FNM repair 角色返回模型；视觉目录的首槽顺序不影响修补主模型。"""
+    specs = resolve_fnm_model_pool_specs()
+    target = (
+        get_fnm_repair_final_model_id()
+        if final_round
+        else get_fnm_repair_primary_model_id()
+    )
+    if not target:
+        return specs
+    return [
+        spec for spec in specs
+        if target in {spec.model_id, spec.model_key}
+    ]
 
 
 def resolve_model_spec(target: str | None = None) -> ResolvedModelSpec:

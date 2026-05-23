@@ -4,19 +4,19 @@
       {
         "action": "synthesize_anchor",
         "anchor_id": "",
-        "anchor_phrase": "quand on avait parlé l'an dernier de la raison d'État",
+        "anchor_phrase": "raison d'État",
         "confidence": 0.95,
         "marker": "",
         "note_item_id": "fn-0053",
         "note_text": "",
-        "reason": "该短语唯一且明确指向脚注星号标记的论述背景。"
+        "reason": "锚点\"raison d'État\"在正文中存在但无结构化记录"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -78,33 +78,33 @@
     {
       "action": "synthesize_anchor",
       "anchor_id": "",
-      "anchor_phrase": "quand on avait parlé l'an dernier de la raison d'État",
+      "anchor_phrase": "raison d'État",
       "confidence": 0.95,
       "marker": "",
       "note_item_id": "fn-0053",
       "note_text": "",
-      "reason": "该短语唯一且明确指向脚注星号标记的论述背景。"
+      "reason": "锚点\"raison d'État\"在正文中存在但无结构化记录"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0053\",\n    \"anchor_phrase\": \"quand on avait parlé l'an dernier de la raison d'État\",\n    \"confidence\": 0.95,\n    \"reason\": \"该短语唯一且明确指向脚注星号标记的论述背景。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"synthesize_anchor\", \"note_item_id\": \"fn-0053\", \"anchor_phrase\": \"raison d'État\", \"confidence\": 0.95, \"reason\": \"锚点\\\"raison d'État\\\"在正文中存在但无结构化记录\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 4340
+    "duration_ms": 7155
   },
   "token_accounting": {
     "estimated_input_tokens": 1508,
-    "input_tokens": 1389,
-    "output_tokens": 94,
+    "input_tokens": 1303,
+    "output_tokens": 270,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1483
+    "total_tokens": 1573
   },
   "usage": {
-    "completion_tokens": 94,
-    "prompt_tokens": 1389,
+    "completion_tokens": 270,
+    "prompt_tokens": 1303,
     "request_count": 1,
-    "total_tokens": 1483
+    "total_tokens": 1573
   }
 }

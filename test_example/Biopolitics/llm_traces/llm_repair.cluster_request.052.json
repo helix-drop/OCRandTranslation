@@ -9,14 +9,14 @@
         "marker": "",
         "note_item_id": "",
         "note_text": "",
-        "reason": "Marker 326 在当前页面正文中无对应锚点，疑似跨页引用或 OCR 错误。"
+        "reason": "无法在正文中找到对应marker 326的锚点短语"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -100,28 +100,28 @@
       "marker": "",
       "note_item_id": "",
       "note_text": "",
-      "reason": "Marker 326 在当前页面正文中无对应锚点，疑似跨页引用或 OCR 错误。"
+      "reason": "无法在正文中找到对应marker 326的锚点短语"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Marker 326 在当前页面正文中无对应锚点，疑似跨页引用或 OCR 错误。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"needs_review\", \"reason\": \"无法在正文中找到对应marker 326的锚点短语\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 950
+    "duration_ms": 19794
   },
   "token_accounting": {
     "estimated_input_tokens": 1736,
-    "input_tokens": 1640,
-    "output_tokens": 49,
+    "input_tokens": 1547,
+    "output_tokens": 765,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1689
+    "total_tokens": 2312
   },
   "usage": {
-    "completion_tokens": 49,
-    "prompt_tokens": 1640,
+    "completion_tokens": 765,
+    "prompt_tokens": 1547,
     "request_count": 1,
-    "total_tokens": 1689
+    "total_tokens": 2312
   }
 }

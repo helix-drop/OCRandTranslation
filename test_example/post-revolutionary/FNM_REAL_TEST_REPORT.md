@@ -33,7 +33,7 @@
 - visual_toc.preflight: request=1, prompt=1140, completion=19, total=1159
 - visual_toc.classify_candidates: request=0, prompt=0, completion=0, total=0
 - visual_toc.extract_page_items: request=0, prompt=0, completion=0, total=0
-- visual_toc.manual_input_extract: request=2, prompt=3316, completion=2604, total=5920
+- visual_toc.manual_input_extract: request=2, prompt=3324, completion=2605, total=5929
 - llm_repair.cluster_request: request=0, prompt=0, completion=0, total=0
 - translation_test: request=0, prompt=0, completion=0, total=0
 

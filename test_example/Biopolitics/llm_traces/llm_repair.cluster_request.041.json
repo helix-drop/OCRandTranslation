@@ -4,19 +4,19 @@
       {
         "action": "synthesize_anchor",
         "anchor_id": "",
-        "anchor_phrase": "Aujourd'hui, je voudrais commencer à vous parler",
+        "anchor_phrase": "Aujourd'hui*",
         "confidence": 0.95,
         "marker": "",
         "note_item_id": "fn-0310",
         "note_text": "",
-        "reason": "该短语在正文开头出现且唯一，对应文中第一个星号注。"
+        "reason": "正文中有带*的‘Aujourd'hui’短语"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -78,33 +78,33 @@
     {
       "action": "synthesize_anchor",
       "anchor_id": "",
-      "anchor_phrase": "Aujourd'hui, je voudrais commencer à vous parler",
+      "anchor_phrase": "Aujourd'hui*",
       "confidence": 0.95,
       "marker": "",
       "note_item_id": "fn-0310",
       "note_text": "",
-      "reason": "该短语在正文开头出现且唯一，对应文中第一个星号注。"
+      "reason": "正文中有带*的‘Aujourd'hui’短语"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0310\",\n    \"anchor_phrase\": \"Aujourd'hui, je voudrais commencer à vous parler\",\n    \"confidence\": 0.95,\n    \"reason\": \"该短语在正文开头出现且唯一，对应文中第一个星号注。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"synthesize_anchor\", \"note_item_id\": \"fn-0310\", \"anchor_phrase\": \"Aujourd'hui*\", \"confidence\": 0.95, \"reason\": \"正文中有带*的‘Aujourd'hui’短语\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
     "duration_ms": 6382
   },
   "token_accounting": {
     "estimated_input_tokens": 1508,
-    "input_tokens": 1392,
-    "output_tokens": 93,
+    "input_tokens": 1318,
+    "output_tokens": 237,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1485
+    "total_tokens": 1555
   },
   "usage": {
-    "completion_tokens": 93,
-    "prompt_tokens": 1392,
+    "completion_tokens": 237,
+    "prompt_tokens": 1318,
     "request_count": 1,
-    "total_tokens": 1485
+    "total_tokens": 1555
   }
 }

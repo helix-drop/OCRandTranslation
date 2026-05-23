@@ -735,13 +735,17 @@ mod tests {
         let contexts = vec![
             json!({"page_no": 5, "file_idx": 4, "source_pdf_path": "/tmp/x.pdf"}),
             json!({"page_no": 6, "file_idx": 5, "source_pdf_path": "/tmp/x.pdf"}),
-            // 第三个超过 LLM_REPAIR_MAX_IMAGE_PAGES = 2 → 被裁
             json!({"page_no": 7, "file_idx": 6, "source_pdf_path": "/tmp/x.pdf"}),
+            json!({"page_no": 8, "file_idx": 7, "source_pdf_path": "/tmp/x.pdf"}),
+            json!({"page_no": 9, "file_idx": 8, "source_pdf_path": "/tmp/x.pdf"}),
+            // 第六个超过 LLM_REPAIR_MAX_IMAGE_PAGES = 5 → 被裁
+            json!({"page_no": 10, "file_idx": 9, "source_pdf_path": "/tmp/x.pdf"}),
         ];
         let cluster = json!({"allowed_actions": ["match", "synthesize_note_item"]});
         let out = attach_repair_images_to_contexts(&contexts, &cluster, &StubRenderer);
-        assert_eq!(out.len(), 2);
+        assert_eq!(out.len(), 5);
         assert!(out[0].get("image_url").is_some());
+        assert_eq!(out[4]["page_no"], 9);
     }
 
     #[test]

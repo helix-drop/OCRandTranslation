@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -225,13 +225,37 @@
         "page_no": 312,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 312,
+        "ocr_excerpt": "c'est comme la sexualité. C'est ce que j'appellerai des réalités de transaction, c'est-à-dire que c'est dans le jeu précisément et des relations de pouvoir et de ce qui sans cesse leur échappe, c'est de cela que naissent, en quelque sorte à l'interface des gouvernants et des gouvernés, ces figures transactionnelles et transitoires qui, pour n'avoir pas existé de tout temps, n'en sont pas moins réelles et que l'on peut appeler, en l'occurrence, la société civile, ailleurs la folie, etc. Société civile, donc, comme élément de réalité transactionnelle dans l'histoire des technologies gouvernements, réalité transactionnelle qui me paraît tout à fait corrélation de cette forme même de technologie gouvernementale que l'on appelle le libéralisme, c'est-à-dire une technologie de gouvernement ayant pour objectif sa propre autolimitation dans la mesure même où elle est indexée à la spécificité des processus économiques. Deux mots, maintenant, sur cette société civile et ce qui la caractérise. Je voudrais essayer de vous montrer, au moins comme ça, en principe, parce qu'on arrive maintenant à la fin du cours, comment cette notion de société civile peut bien résoudre les problèmes que j'ai essayé tout à l'heure d'indiquer. Alors, sur la société civile, première remarque d'une banalité déplorable, à savoir que la notion même de société civile a complètement changé au cours du XVIII<sup>e</s ...",
+        "page_no": 313,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 313,
+        "ocr_excerpt": "Ferguson, traduit en français en 1783 sous le titre Essai sur l'histoire de la société civile², texte proche, très proche d'Adam Smith et de l'Essai sur la richesse des nations, le mot « nation » d'ailleurs chez Adam Smith ayant à peu près le sens de société civile chez Ferguson³. Nous avons là le corrélatif politique, enfin le corrélatif en terme de société civile, de ce qu'Adam Smith étudiait en termes purement économiques. La société civile de Ferguson, c'est en effet l'élément concret, la globalité concrète à l'intérieur de laquelle fonctionnent les hommes économiques qu'Adam Smith essayait d'étudier. Cette société civile, chez Ferguson, je voudrais en relever trois ou quatre caractères essentiels : premièrement, la société civile entendue comme constante historico-naturelle ; deuxièmement, la société civile comme principe de synthèse spontanée ; troisièmement, la société civile comme matrice permanente de pouvoir politique ; et quatrièmement, la société civile comme élément moteur de l'histoire. Premièrement, la société civile comme constante historico-naturelle. Pour Ferguson, en effet, la société civile est une donnée au-delà de laquelle il n'y a rien à chercher. Avant la société civile, rien n'existe ou si quelque chose existe, dit Ferguson, c'est quelque chose qui est pour nous absolument inaccessible, tellement reculé dans le fond des âges, tellement en quelque sorte ...",
+        "page_no": 314,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 314,
+        "ocr_excerpt": "on serait passé de la nature à l'histoire, de la non-société à la société. La nature de la nature humaine est d'être historique, car la nature de la nature humaine est d'être sociale. Il n'y a pas de nature humaine qui soit dissociable du fait même de la société. Et Ferguson évoque l'espèce de mythe, d'utopie méthodologique souvent reprise au XVIIIe siècle : soit, dit-il, une troupe d'enfants que l'on aurait laissés s'éduquer eux-mêmes en dehors de toute autre forme de société. Supposons des enfants que l'on mette dans un désert en les laissant se débrouiller dès leur plus jeune âge, qu'on les laisse se former tout seuls, sans instruction et sans guide, eh bien si nous revenions cinq ans, dix ans, quinze ans après, à condition bien sûr qu'ils ne soient pas morts, qu'est-ce que nous verrions? « Nous verrions les membres de cette petite société manger, dormir, aller en troupes, jouer ensemble, se faire un langage, se diviser, se quereller », se lier d'amitié, oublier pour les autres leur propre conservation $ ^{6} $. Donc, le lien social se forme spontanément. Il n'y a pas d'opération spécifique qui puisse l'établir ou le fonder. Il n'y a pas à instaurer ou à auto-instaurer la société. On est de toute façon dans la société. Le lien social est sans préhistoire. Dire qu'il est sans préhistoire, ça veut dire qu'il est, à la fois, permanent et indispensable. Permanent, ça veut dire q ...",
+        "page_no": 315,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0012:nr-en-bk-0077-ch-fallback-0012:endnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body"
   },
   "request_metrics": {
@@ -239,14 +263,14 @@
       "synthesize_anchor",
       "needs_review"
     ],
-    "chars": 11956,
+    "chars": 14326,
     "cluster_id": "ch-fallback-0012:nr-en-bk-0077-ch-fallback-0012:endnote",
-    "estimated_prompt_tokens": 3395,
+    "estimated_prompt_tokens": 4048,
     "image_refused": false,
     "matched_examples": 2,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body",
     "skip_reason": "",
     "skipped": false,
@@ -257,7 +281,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 3395,
+    "estimated_input_tokens": 4048,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

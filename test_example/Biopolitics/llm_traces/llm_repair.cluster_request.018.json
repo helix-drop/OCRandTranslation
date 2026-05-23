@@ -1,32 +1,11 @@
 {
   "derived_truth": {
-    "parsed_actions": [
-      {
-        "action": "needs_review",
-        "anchor_id": "",
-        "anchor_phrase": "",
-        "confidence": 0.8,
-        "marker": "",
-        "note_item_id": "",
-        "note_text": "",
-        "reason": "截图中可见注释内容，但无法确定对应的正文锚点短语。"
-      },
-      {
-        "action": "needs_review",
-        "anchor_id": "",
-        "anchor_phrase": "",
-        "confidence": 0.8,
-        "marker": "",
-        "note_item_id": "",
-        "note_text": "",
-        "reason": "截图中可见注释内容，但无法确定对应的正文锚点短语。"
-      }
-    ]
+    "parsed_actions": []
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -106,47 +85,26 @@
     "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
     "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"chapter_body_excerpt\": \"# LEÇON DU 21 FÉVRIER 1979 Second aspect de la « politique de société », selon les ordolibéraux : le problème du droit dans une société régulée selon le modèle de l'économie concurrentielle de marché. - Retour au colloque Walter Lippmann. - Réflexions à partir d'un texte de Louis Rougier. - (1) L'idée d'un ordre juridico-économique. Réciprocité des rapports entre les processus économiques et le cadre institutionnel. - Enjeu politique : le problème de la survie du capitalisme. - Deux problèmes complémentaires : la théorie de la concurrence et l'analyse historique et sociologique du capitalisme. - (2) La question de l'interventionnisme juridique. - Rappel historique : l'État de droit au XVIIIe siècle, par opposition au despotisme et à l'État de police. Réélaboration de la notion au XIXe siècle : la question des arbitrages entre citoyens et puissance publique. Le problème des tribunaux administratifs. - Le projet néolibéral : introduire les principes de l'État de droit dans l'ordre économique. - État de droit et planification selon Hayek. - (3) La croissance de la demande judiciaire. - Conclusion générale : la spécificité de l'art néolibéral de gouverner en Allemagne. L'ordolibéralisme face au pessimisme de Schumpeter. La dernière fois, j'avais essayé de vous montrer comment, dans l'ordolibéralisme, se trouvait impliquée la nécessité d'une Gesellschaftspolitik, comme ils disent, d'une politique de société et d'un interventionnisme social à la fois actif, multiple, vigilant et omniprésent. Donc, économie de marché, d'une part, et politique sociale active, intense, interventionniste. Mais faut-il encore souligner avec soin que cette politique sociale, dans l'ordolibéralisme, n'a pas pour fonction d'être comme un mécanisme compensatoire destiné à éponger ou annuler les effets ...\",\n  \"chapter_title\": \"LEÇON DU 21 FÉVRIER 1979\",\n  \"cluster_id\": \"ch-fallback-0008:nr-fn-ch-0045-ch-fallback-0008:footnote\",\n  \"matched_examples\": [],\n  \"note_system\": \"footnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"souveraineté, et puis d'autre part les décisions particulières de la puissance publique. Autrement dit, un État de droit, c'est un État dans lequel sont distinguées, dans leur principe, dans leurs effets et dans leur validité, les dispositions légales d'une part, expression de la souveraineté, et les mesures administratives de l'autre. C'est en gros cela, cette théorie de la puissance publique et du droit de la puissance publique, qui a organisé à la fin du XVIII<sup>e</sup> siècle et au début du XIX<sup>e</sup> ce qu'on appelle la théorie de l'État de droit contre les formes de pouvoir et de droit public qui fonctionnaient au XVIII<sup>e</sup> siècle. Cette double théorie de l'État de droit ...\",\n      \"page_no\": 189\n    },\n    {\n      \"ocr_excerpt\": \"Bähr* 22 par exemple, objectent qu'un tribunal administratif, dans la mesure où il émane de la puissance publique et où il n'est qu'une des formes, au fond, de la puissance publique, ne peut pas être un arbitre valable entre l'État et les citoyens, que c'est seulement la justice, l'appareil de justice, dans la mesure où celui-ci, réellement ou fictivement, serait indépendant de la puissance publique, c'est l'appareil de justice ordinaire qui pourrait arbitrer entre les citoyens et l'État. C'est, en tout cas, la thèse anglaise, et dans toutes les analyses que les Anglais font du Rule of law, du règne de la loi [à] cette même époque, [à] la fin du XIXe siècle 23, ils définissent clairement un ...\",\n      \"page_no\": 190\n    }\n  ],\n  \"page_range\": [\n    189,\n    190\n  ],\n  \"rebind_candidates\": [],\n  \"request_mode\": \"note_only_with_body\",\n  \"unmatched_anchors\": [],\n  \"unmatched_note_items\": [\n    {\n      \"marker\": \"*\",\n      \"note_item_id\": \"fn-0211\",\n      \"page_no\": 189,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"**\",\n      \"note_item_id\": \"fn-0213\",\n      \"page_no\": 190,\n      \"source_text\": \"\"\n    }\n  ]\n}"
   },
-  "response_parsed": [
-    {
-      "action": "needs_review",
-      "anchor_id": "",
-      "anchor_phrase": "",
-      "confidence": 0.8,
-      "marker": "",
-      "note_item_id": "",
-      "note_text": "",
-      "reason": "截图中可见注释内容，但无法确定对应的正文锚点短语。"
-    },
-    {
-      "action": "needs_review",
-      "anchor_id": "",
-      "anchor_phrase": "",
-      "confidence": 0.8,
-      "marker": "",
-      "note_item_id": "",
-      "note_text": "",
-      "reason": "截图中可见注释内容，但无法确定对应的正文锚点短语。"
-    }
-  ],
-  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"截图中可见注释内容，但无法确定对应的正文锚点短语。\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"截图中可见注释内容，但无法确定对应的正文锚点短语。\"\n  }\n]",
+  "response_parsed": [],
+  "response_raw_text": "",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 996
+    "duration_ms": 37517
   },
   "token_accounting": {
     "estimated_input_tokens": 1759,
-    "input_tokens": 1647,
-    "output_tokens": 81,
+    "input_tokens": 1558,
+    "output_tokens": 2048,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1728
+    "total_tokens": 3606
   },
   "usage": {
-    "completion_tokens": 81,
-    "prompt_tokens": 1647,
+    "completion_tokens": 2048,
+    "prompt_tokens": 1558,
     "request_count": 1,
-    "total_tokens": 1728
+    "total_tokens": 3606
   }
 }

@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -138,13 +138,21 @@
         "page_no": 220,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 222,
+        "ocr_excerpt": "Deuxièmement, cet impôt négatif est, vous le voyez, une manière d'éviter absolument tout ce qui pourrait avoir, dans la politique sociale, des effets de redistribution générale des revenus, c'est-à-dire en gros tout ce qu'on pourrait placer sous le signe de la politique socialiste. Si on appelle politique socialiste une politique de la pauvreté « relative »*, c'est-à-dire une politique qui tend à modifier les écarts entre les différents revenus; si on entend par politique socialiste une politique dans laquelle on essaiera d'atténuer les effets de pauvreté relative due à un écart de revenus entre les plus riches et les plus pauvres, il est absolument évident que la politique impliquée par l'impôt négatif est le contraire même d'une politique socialiste. La pauvreté relative n'entre aucunement dans les objectifs d'une semblable politique sociale. Le seul problème, c'est la pauvreté « absolue »*, c'est-à-dire ce seuil au-dessous duquel on considère que les gens n'ont pas un revenu décent susceptible de leur assurer une consommation suffisante $ ^{51} $. Par pauvreté absolue, et je crois que là il faut faire une ou deux remarques, il ne faut pas entendre, bien sûr, une sorte de seuil valable pour l'humanité tout entière. Cette pauvreté absolue, elle est relative pour toute société, et il y a des sociétés pour lesquelles le seuil de pauvreté absolu se situera relativement haut et d' ...",
+        "page_no": 223,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0009:ch-fallback-0009:footnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 3,
     "request_mode": "ref_only_visual"
   },
   "request_metrics": {
@@ -153,14 +161,14 @@
       "synthesize_note_item",
       "needs_review"
     ],
-    "chars": 6377,
+    "chars": 7161,
     "cluster_id": "ch-fallback-0009:ch-fallback-0009:footnote",
-    "estimated_prompt_tokens": 1826,
+    "estimated_prompt_tokens": 2044,
     "image_refused": false,
     "matched_examples": 0,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 3,
     "request_mode": "ref_only_visual",
     "skip_reason": "",
     "skipped": false,
@@ -171,7 +179,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 1826,
+    "estimated_input_tokens": 2044,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

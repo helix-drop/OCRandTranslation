@@ -2,21 +2,21 @@
   "derived_truth": {
     "parsed_actions": [
       {
-        "action": "synthesize_anchor",
+        "action": "needs_review",
         "anchor_id": "",
-        "anchor_phrase": "le partage se fait entre agenda et non agenda",
-        "confidence": 0.95,
+        "anchor_phrase": "",
+        "confidence": 0.8,
         "marker": "",
-        "note_item_id": "fn-0012",
+        "note_item_id": "",
         "note_text": "",
-        "reason": "锚点短语唯一，位于页内明确对应星号注释。"
+        "reason": "无法确定锚点位置或注释内容"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -76,35 +76,35 @@
   },
   "response_parsed": [
     {
-      "action": "synthesize_anchor",
+      "action": "needs_review",
       "anchor_id": "",
-      "anchor_phrase": "le partage se fait entre agenda et non agenda",
-      "confidence": 0.95,
+      "anchor_phrase": "",
+      "confidence": 0.8,
       "marker": "",
-      "note_item_id": "fn-0012",
+      "note_item_id": "",
       "note_text": "",
-      "reason": "锚点短语唯一，位于页内明确对应星号注释。"
+      "reason": "无法确定锚点位置或注释内容"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0012\",\n    \"anchor_phrase\": \"le partage se fait entre agenda et non agenda\",\n    \"confidence\": 0.95,\n    \"reason\": \"锚点短语唯一，位于页内明确对应星号注释。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"needs_review\", \"reason\": \"无法确定锚点位置或注释内容\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 1441
+    "duration_ms": 19418
   },
   "token_accounting": {
     "estimated_input_tokens": 1508,
-    "input_tokens": 1386,
-    "output_tokens": 87,
+    "input_tokens": 1297,
+    "output_tokens": 568,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1473
+    "total_tokens": 1865
   },
   "usage": {
-    "completion_tokens": 87,
-    "prompt_tokens": 1386,
+    "completion_tokens": 568,
+    "prompt_tokens": 1297,
     "request_count": 1,
-    "total_tokens": 1473
+    "total_tokens": 1865
   }
 }

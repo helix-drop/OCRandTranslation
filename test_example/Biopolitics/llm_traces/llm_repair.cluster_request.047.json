@@ -5,18 +5,18 @@
         "action": "synthesize_anchor",
         "anchor_id": "",
         "anchor_phrase": "doctrine du sujet de droit",
-        "confidence": 0.95,
+        "confidence": 0.9,
         "marker": "",
         "note_item_id": "fn-0405",
         "note_text": "",
-        "reason": "锚点短语位于页内注释引用的段落末尾，唯一且准确对应脚注位置。"
+        "reason": "锚点短语在正文第292页，与尾注标记*位置对应"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -79,32 +79,32 @@
       "action": "synthesize_anchor",
       "anchor_id": "",
       "anchor_phrase": "doctrine du sujet de droit",
-      "confidence": 0.95,
+      "confidence": 0.9,
       "marker": "",
       "note_item_id": "fn-0405",
       "note_text": "",
-      "reason": "锚点短语位于页内注释引用的段落末尾，唯一且准确对应脚注位置。"
+      "reason": "锚点短语在正文第292页，与尾注标记*位置对应"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0405\",\n    \"anchor_phrase\": \"doctrine du sujet de droit\",\n    \"confidence\": 0.95,\n    \"reason\": \"锚点短语位于页内注释引用的段落末尾，唯一且准确对应脚注位置。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"synthesize_anchor\", \"note_item_id\": \"fn-0405\", \"anchor_phrase\": \"doctrine du sujet de droit\", \"confidence\": 0.9, \"reason\": \"锚点短语在正文第292页，与尾注标记*位置对应\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 10719
+    "duration_ms": 16215
   },
   "token_accounting": {
     "estimated_input_tokens": 1508,
-    "input_tokens": 1377,
-    "output_tokens": 90,
+    "input_tokens": 1293,
+    "output_tokens": 1019,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1467
+    "total_tokens": 2312
   },
   "usage": {
-    "completion_tokens": 90,
-    "prompt_tokens": 1377,
+    "completion_tokens": 1019,
+    "prompt_tokens": 1293,
     "request_count": 1,
-    "total_tokens": 1467
+    "total_tokens": 2312
   }
 }

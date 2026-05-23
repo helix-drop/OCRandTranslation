@@ -300,6 +300,20 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
                             "usage": {},
                         }
                     )
+                    trace_callback(
+                        {
+                            "stage": "llm_repair.cluster_request",
+                            "reason_for_request": "完成请求 LLM 修补 cluster",
+                            "model": {"model_id": "glm-4.6v"},
+                            "request_context_summary": {"cluster_id": "c-1"},
+                            "usage": {
+                                "request_count": 1,
+                                "prompt_tokens": 20,
+                                "completion_tokens": 5,
+                                "total_tokens": 25,
+                            },
+                        }
+                    )
                 raise RuntimeError("repair boom")
 
             repair_mock = Mock(side_effect=_repair_with_incremental_trace)
@@ -401,6 +415,8 @@ class FnmRealBatchRuntimeTest(unittest.TestCase):
             self.assertTrue(result["zip_written"])
             self.assertTrue(result["blocked"])
             self.assertIn("llm_repair_exception", result["blocking_reasons"])
+            self.assertEqual(result["usage_summary"]["by_stage"]["llm_repair.cluster_request"]["request_count"], 1)
+            self.assertEqual(result["usage_summary"]["by_model"]["glm-4.6v"]["total_tokens"], 25)
             self.assertTrue(result["blocking_details"])
             self.assertFalse(result["translation_api_called"])
             self.assertIn("input_assets", result)

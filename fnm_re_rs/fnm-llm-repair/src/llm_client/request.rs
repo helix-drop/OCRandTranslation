@@ -10,10 +10,15 @@
 
 use anyhow::Result;
 use fnm_core::vision::HTTP_CLIENT;
+use once_cell::sync::Lazy;
 use serde_json::{json, Map, Value};
 use std::time::{Duration, Instant};
+use tokio::sync::Semaphore;
 
-use crate::constants::{LLM_REPAIR_MAX_OUTPUT_TOKENS, LLM_REPAIR_USAGE_STAGE};
+use crate::constants::{
+    GLM46V_CONTEXT_TOKENS, GLM46V_MAX_IN_FLIGHT_REQUESTS, GLM46V_MAX_RETRY_ATTEMPTS,
+    LLM_REPAIR_MAX_OUTPUT_TOKENS, LLM_REPAIR_USAGE_STAGE,
+};
 use crate::page_context::{attach_repair_images_to_contexts, page_context_trace_rows};
 use crate::prompt_builder::{
     repair_system_prompt, repair_user_prompt, should_attach_repair_images,
@@ -28,6 +33,16 @@ use super::{
     resolve_all_repair_model_args, resolve_repair_model_args, token_accounting_for_request,
     RepairCallResult, RepairRequestParams, TraceCallback,
 };
+
+static GLM46V_REQUEST_GATE: Lazy<Semaphore> =
+    Lazy::new(|| Semaphore::new(GLM46V_MAX_IN_FLIGHT_REQUESTS));
+
+fn model_supports_repair_images(model_args: &Value) -> bool {
+    model_args
+        .get("supports_vision")
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+}
 
 /// ←→ Python `request_llm_repair_actions` (llm_repair.py:1356-1641)
 ///
@@ -76,7 +91,8 @@ pub async fn request_llm_repair_actions(
     }
 
     // 附加截图
-    if should_attach_repair_images(&request_cluster) {
+    if should_attach_repair_images(&request_cluster) && model_supports_repair_images(&resolved_args)
+    {
         let contexts = request_cluster
             .get("page_contexts")
             .and_then(|v| v.as_array())
@@ -355,7 +371,7 @@ async fn run_fallback_loop(
     let mut last_error: Option<anyhow::Error> = None;
 
     for (model_attempt, current_args) in all_model_args.iter().enumerate() {
-        match call_provider(current_args, system_prompt, user_content).await {
+        match call_provider_with_policy(current_args, system_prompt, user_content).await {
             Ok(body) => {
                 if model_attempt > 0 {
                     *resolved_args = current_args.clone();
@@ -384,7 +400,7 @@ async fn run_fallback_loop(
                         .filter(|c| c.get("type").and_then(|v| v.as_str()) != Some("image_url"))
                         .cloned()
                         .collect();
-                    match call_provider(current_args, system_prompt, &text_only).await {
+                    match call_provider_with_policy(current_args, system_prompt, &text_only).await {
                         Ok(body) => {
                             if model_attempt > 0 {
                                 *resolved_args = current_args.clone();
@@ -448,6 +464,71 @@ fn emit_failed_trace(
 /// 单次 provider 调用：组装 payload + 发 HTTP + 解析 body。
 ///
 /// ←→ Python `request_llm_repair_actions::_do_call` (llm_repair.py:1489-1503)
+fn is_glm46v(args: &Value) -> bool {
+    args.get("provider").and_then(|v| v.as_str()) == Some("glm")
+        && args.get("model_id").and_then(|v| v.as_str()) == Some("glm-4.6v")
+}
+
+fn validate_glm46v_text_budget(system_prompt: &str, user_content: &[Value]) -> Result<()> {
+    let user_text = user_content
+        .iter()
+        .filter_map(|content| {
+            (content.get("type").and_then(|v| v.as_str()) == Some("text"))
+                .then(|| content.get("text").and_then(|v| v.as_str()).unwrap_or(""))
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let estimated_input = crate::prompt_builder::estimate_prompt_tokens(system_prompt)
+        + crate::prompt_builder::estimate_prompt_tokens(&user_text);
+    let reserved_output = LLM_REPAIR_MAX_OUTPUT_TOKENS;
+    if estimated_input + reserved_output > GLM46V_CONTEXT_TOKENS {
+        anyhow::bail!(
+            "GLM-4.6V 文本上下文超过官方 128K 窗口：estimated_input={estimated_input}, max_output={reserved_output}"
+        );
+    }
+    Ok(())
+}
+
+async fn call_provider_with_policy(
+    args: &Value,
+    system_prompt: &str,
+    user_content: &[Value],
+) -> Result<Value> {
+    let glm46v = is_glm46v(args);
+    if glm46v {
+        validate_glm46v_text_budget(system_prompt, user_content)?;
+    }
+    let max_retries = if glm46v { GLM46V_MAX_RETRY_ATTEMPTS } else { 0 };
+    for retry_no in 0..=max_retries {
+        let result = if glm46v {
+            let _permit = GLM46V_REQUEST_GATE.acquire().await?;
+            call_provider(args, system_prompt, user_content).await
+        } else {
+            call_provider(args, system_prompt, user_content).await
+        };
+        match result {
+            Ok(body) => return Ok(body),
+            Err(err) if retry_no < max_retries => {
+                let retryable = err
+                    .downcast_ref::<super::ProviderError>()
+                    .is_some_and(super::ProviderError::is_retryable);
+                if !retryable {
+                    return Err(err);
+                }
+                let provider_wait = err
+                    .downcast_ref::<super::ProviderError>()
+                    .and_then(super::ProviderError::retry_after_seconds);
+                let seconds = provider_wait
+                    .unwrap_or(2_f64.powi(retry_no as i32))
+                    .max(1.0);
+                tokio::time::sleep(Duration::from_secs_f64(seconds)).await;
+            }
+            Err(err) => return Err(err),
+        }
+    }
+    anyhow::bail!("GLM-4.6V 请求退避循环意外退出")
+}
+
 async fn call_provider(args: &Value, system_prompt: &str, user_content: &[Value]) -> Result<Value> {
     let model_id = args.get("model_id").and_then(|v| v.as_str()).unwrap_or("");
     let base_url = args
@@ -681,10 +762,33 @@ mod tests {
         assert_eq!(usage["total_tokens"], 15);
     }
 
+    #[test]
+    fn glm_repair_reserves_small_output_budget_inside_context_window() {
+        assert!(LLM_REPAIR_MAX_OUTPUT_TOKENS < GLM46V_CONTEXT_TOKENS);
+    }
+
+    #[test]
+    fn glm_repair_rejects_text_larger_than_official_context_window() {
+        let oversized = "上下文".repeat(130_000);
+        let result =
+            validate_glm46v_text_budget("system", &[json!({"type": "text", "text": oversized})]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn repair_images_require_vision_capable_model_args() {
+        assert!(model_supports_repair_images(
+            &json!({"supports_vision": true})
+        ));
+        assert!(!model_supports_repair_images(
+            &json!({"supports_vision": false})
+        ));
+        assert!(!model_supports_repair_images(&json!({})));
+    }
+
     #[tokio::test]
-    async fn test_call_provider_classifies_connect_refused() {
-        // 端口 1 通常无服务 → reqwest 给出 connect/refused 错误 → 应被分类为 Other 或 Transient
-        // （不同平台可能返回不同消息，这里只断言能成功转换为 ProviderError）。
+    async fn test_call_provider_classifies_connect_refused_as_retryable_transient() {
+        // 端口 1 通常无服务；无 HTTP 响应的连接失败必须进入瞬时重试路径。
         let args = json!({
             "provider": "qwen",
             "model_id": "qwen-test",
@@ -695,16 +799,10 @@ mod tests {
         });
         let result = call_provider(&args, "sys", &[json!({"type":"text","text":"u"})]).await;
         assert!(result.is_err(), "本地端口 1 必然失败");
-        let err_chain = format!("{:#}", result.err().unwrap());
-        // ProviderError 已经把消息嵌入 Display；确认带"LLM provider error"或"模型"前缀
-        assert!(
-            err_chain.contains("LLM provider error")
-                || err_chain.contains("模型")
-                || err_chain.contains("connection")
-                || err_chain.contains("refused")
-                || err_chain.contains("Connection")
-                || err_chain.contains("error sending"),
-            "未识别的错误消息: {err_chain}"
-        );
+        let err = result.err().unwrap();
+        let provider_err = err
+            .downcast_ref::<crate::llm_client::ProviderError>()
+            .expect("传输错误应分类为 ProviderError");
+        assert!(provider_err.is_retryable());
     }
 }

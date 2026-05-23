@@ -18,7 +18,7 @@ sha2 = "0.10"
 base64 = "0.22"
 rapidfuzz = "0.5"
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
-tokio = { version = "1.35", features = ["rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.35", features = ["rt-multi-thread", "macros", "time", "sync"] }
 
 [dev-dependencies]
 insta = { version = "1.34", features = ["json"] }

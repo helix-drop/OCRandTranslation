@@ -11,5 +11,6 @@ pub use http::{VisionConfig, HTTP_CLIENT};
 pub use pdfium::{render_page_to_base64_png, render_page_to_data_url, PDFIUM};
 pub use spec::{
     resolve_builtin_model_spec, resolve_custom_model_spec, resolve_fnm_model_pool_specs,
-    resolve_translation_model_pool_specs, resolve_visual_model_spec, ResolvedModelSpec,
+    resolve_fnm_repair_model_specs, resolve_translation_model_pool_specs,
+    resolve_visual_model_spec, ResolvedModelSpec,
 };

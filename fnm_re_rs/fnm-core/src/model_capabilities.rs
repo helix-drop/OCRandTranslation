@@ -640,12 +640,25 @@ pub static MODEL_SPECS: Lazy<HashMap<String, ModelSpec>> = Lazy::new(|| {
             false,
         ),
     );
+    m.insert(
+        "gemini-3.1-flash-lite".into(),
+        vision_model(
+            "gemini-3.1-flash-lite",
+            "Gemini 3.1 Flash Lite",
+            "gemini",
+            true,
+            true,
+            false,
+            None,
+            true,
+        ),
+    );
 
     m
 });
 
 pub const DEFAULT_TRANSLATION_MODEL_KEY: &str = "deepseek-chat";
-pub const DEFAULT_VISUAL_MODEL_KEY: &str = "qwen3.6-plus";
+pub const DEFAULT_VISUAL_MODEL_KEY: &str = "gemini-3.1-flash-lite";
 
 /// ←→ Python `normalize_builtin_model_key`
 pub fn normalize_builtin_model_key(key: &str, capability: Option<&str>) -> String {
@@ -826,6 +839,7 @@ pub fn infer_builtin_key_from_custom_model(
             }
             pick("kimi-k2.6")
         }
+        "gemini" => pick("gemini-3.1-flash-lite"),
         "mimo" | "mimo_token_plan" => {
             if m.contains("omni") {
                 return pick("mimo-v2-omni");

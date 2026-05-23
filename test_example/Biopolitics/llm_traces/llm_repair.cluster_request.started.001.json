@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -267,13 +267,37 @@
         "page_no": 180,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 180,
+        "ocr_excerpt": "quable en ce qui concerne les principes généraux de ce néolibéralisme. Et voici ce qu'il dit à propos, justement, du problème juridique : « Le régime libéral n'est pas seulement le résultat d'un ordre naturel spontané comme le déclaraient, au XVIIIe siècle, les nombreux auteurs des Codes de la nature ; il est aussi le résultat d'un ordre légal qui suppose un interventionnisme juridique de l'État. La vie économique se déroule [en effet] dans un cadre juridique qui fixe le régime de la propriété, des contrats, des brevets d'invention, de la faillite, le statut des associations professionnelles et des sociétés commerciales, la monnaie et la banque, toutes choses qui ne sont pas des données de la nature, comme les lois de l'équilibre économique, mais des créations contingentes du législateur. Il n'y a dès lors aucune raison de supposer que les institutions légales, historiquement existantes à l'heure actuelle, soient d'une façon définitive et permanente les mieux appropriées à la sauvegarde de la liberté des transactions. La question du cadre légal le mieux approprié au fonctionnement le plus souple, le plus efficace, le plus loyal du marché a été négligée par les économistes classiques et mériterait de faire l'objet d'un Centre International d'Études pour la Rénovation du Libéralisme. Être libéral, ce n'est donc nullement être conservateur, dans le sens du maintien des privilèges ...",
+        "page_no": 181,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 181,
+        "ocr_excerpt": "Eh bien, dans ce texte, je crois qu'on peut trouver un certain nombre d'éléments. Mettons tout de suite de côté certaines propositions que les ordolibéraux n'admettraient évidemment pas. C'est tout ce qui concerne le caractère naturel des mécanismes de la concurrence. Lorsque Rougier dit que le régime libéral n'est pas seulement le résultat d'un ordre naturel, mais qu'il est aussi le résultat d'un ordre légal, les ordolibéraux diraient évidemment : pas vrai, l'ordre naturel, ce qu'on entend par ordre naturel, ce que les économistes classiques ou ceux du XVIIIe siècle, en tout cas, entendaient par ordre naturel, ce n'est rien d'autre que l'effet d'un certain ordre légal. Laissons, si vous voulez, ces éléments qui sont à la charnière du libéralisme classique et du néolibéralisme, ou de cette forme-là de néolibéralisme, et passons plutôt aux éléments plus significatifs, plus propres au néolibéralisme, qu'on trouve dans ce texte. Premièrement, je crois, il faut faire remarquer ceci : c'est que pour Rougier, comme d'ailleurs pour les ordolibéraux, vous voyez que le juridique n'est pas de l'ordre de la superstructure. C'est-à-dire que le juridique n'est pas conçu, par eux, comme se trouvant dans un rapport de pur et simple expression ou instrumentalité par rapport à l'économie. Ce n'est pas l'économie qui, purement et simplement, détermine un ordre juridique qui serait dans un rappor ...",
+        "page_no": 182,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 182,
+        "ocr_excerpt": "règles, ça peut être un habitus social, ça peut être une prescription religieuse, ça peut être une éthique, ça peut être un règlement corporatif, ça peut être également une loi. De toute façon l'économique, ce n'est pas un processus mécanique ou naturel, ce n'est pas un processus que l'on puisse détacher, sauf par abstraction à posteriori, par abstraction formalisante 9. L'économique ne peut être jamais considéré que comme un ensemble d'activités, et qui dit activités dit forcément activités réglées. C'est cet ensemble économico-juridique, c'est cet ensemble d'activités réglées que Eucken appelle – alors là, dans une perspective plus phénoménologique que wébérienne – le « système 10 ». Le système, qu'est-ce que c'est ? Eh bien, c'est un ensemble complexe qui comprend des processus économiques dont l'analyse proprement économique relève bien, en effet, d'une théorie pure et d'une formalisation qui peut être, par exemple, la formalisation des mécanismes de concurrence, mais ces processus économiques n'existent réellement, dans l'histoire, que dans la mesure où un cadre institutionnel et des règles positives lui ont donné ses conditions de possibilité 11. Voilà ce que, historiquement, veut dire cette analyse commune, enfin cette analyse d'ensemble des rapports de production. Historiquement, cela veut dire quoi? Eh bien, cela veut dire qu'il faudrait se garder d'imaginer qu'il y a ...",
+        "page_no": 183,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body"
   },
   "request_metrics": {
@@ -281,14 +305,14 @@
       "synthesize_anchor",
       "needs_review"
     ],
-    "chars": 12080,
+    "chars": 14456,
     "cluster_id": "ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote",
-    "estimated_prompt_tokens": 3441,
+    "estimated_prompt_tokens": 4095,
     "image_refused": false,
     "matched_examples": 2,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body",
     "skip_reason": "",
     "skipped": false,
@@ -299,7 +323,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 3441,
+    "estimated_input_tokens": 4095,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

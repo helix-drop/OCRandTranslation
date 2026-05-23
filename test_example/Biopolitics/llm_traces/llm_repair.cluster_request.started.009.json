@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -100,13 +100,21 @@
         "page_no": 10,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 10,
+        "ocr_excerpt": "Michel Foucault abordait son enseignement comme un chercheur : explorations pour un livre à venir, défrichement aussi de champs de problématisation, qui se formuleraient plutôt comme une invitation lancée à d'éventuels chercheurs. C'est ainsi que les cours au Collège de France ne redoublent pas les livres publiés. Ils n'en sont pas l'ébauche, même si des thèmes peuvent être communs entre livres et cours. Ils ont leur propre statut. Ils relèvent d'un régime discursif spécifique dans l'ensemble des « actes philosophiques » effectués par Michel Foucault. Il y déploie tout particulièrement le programme d'une généalogie des rapports savoir/pouvoir en fonction duquel, à partir du début des années 1970, il réfléchira son travail – en opposition avec celui d'une archéologie des formations discursives qu'il avait jusqu'alors dominé7. Les cours avaient aussi une fonction dans l'actualité. L'auditeur qui venait les suivre n'était pas seulement captivé par le récit qui se construisait semaine après semaine ; il n'était pas seulement séduit par la rigueur de l'exposition ; il y trouvait aussi un éclairage de l'actualité. L'art de Michel Foucault était de diagonaliser l'actualité par l'histoire. Il pouvait parler de Nietzsche ou d'Aristote, de l'expertise psychiatrique au XIX<sup>e</sup> siècle ou de la pastorale chrétienne, l'auditeur en tirait toujours une lumière sur le présent et les évé ...",
+        "page_no": 11,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0001:nr-fn-ch-0001-ch-fallback-0001:footnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 3,
     "request_mode": "note_only_with_body"
   },
   "request_metrics": {
@@ -114,14 +122,14 @@
       "synthesize_anchor",
       "needs_review"
     ],
-    "chars": 7051,
+    "chars": 7838,
     "cluster_id": "ch-fallback-0001:nr-fn-ch-0001-ch-fallback-0001:footnote",
-    "estimated_prompt_tokens": 2015,
+    "estimated_prompt_tokens": 2232,
     "image_refused": false,
     "matched_examples": 2,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 3,
     "request_mode": "note_only_with_body",
     "skip_reason": "",
     "skipped": false,
@@ -132,7 +140,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 2015,
+    "estimated_input_tokens": 2232,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -90,13 +90,21 @@
         "page_no": 51,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 58,
+        "ocr_excerpt": "plus tard $ ^{15} $. Mais ce que je veux tout de même souligner maintenant, c'est que, entre ces deux systèmes hétérogènes – celui donc de l'axiomatique révolutionnaire, du droit public et des droits de l'homme, et le chemin empirique et utilitaire qui définit, à partir de la nécessaire limitation du gouvernement, la sphère d'indépendance des gouvernés – il y a, bien sûr, une connexion, connexion incessante, toute une série de ponts, de passer-elles, de joints. Par exemple, regardez l'histoire du droit de propriété.\" Mais il est bien évident (de cela je vous parlerai dans le cours) que, dans les deux systèmes, il y en a un qui a tenu et qui a été fort et l'autre, au contraire, qui a régressé. Celui qui a tenu et celui qui a été fort, c'est bien entendu la voie radicale qui consistait à essayer de définir la limitation juridique de la puissance publique en termes d'utilité gouvernementale. Et c'est cette ligne de pente-là qui va caractériser non seulement l'histoire du libéralisme européen proprement dit, mais l'histoire de la puissance publique en Occident. Et par conséquent, c'est bien ce problème de l'utilité, de l'utilité individuelle et collective, de l'utilité de chacun et de tous, de l'utilité des individus et de l'utilité générale, c'est ce problème-là qui va être finalement le grand critère d'élaboration des limites de la puissance publique et de formation d'un droit pu ...",
+        "page_no": 59,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0003:ch-fallback-0003:footnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 3,
     "request_mode": "ref_only_visual"
   },
   "request_metrics": {
@@ -105,14 +113,14 @@
       "synthesize_note_item",
       "needs_review"
     ],
-    "chars": 5168,
+    "chars": 5957,
     "cluster_id": "ch-fallback-0003:ch-fallback-0003:footnote",
-    "estimated_prompt_tokens": 1492,
+    "estimated_prompt_tokens": 1710,
     "image_refused": false,
     "matched_examples": 0,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 3,
     "request_mode": "ref_only_visual",
     "skip_reason": "",
     "skipped": false,
@@ -123,7 +131,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 1492,
+    "estimated_input_tokens": 1710,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

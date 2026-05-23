@@ -93,6 +93,9 @@ pub struct LlmRepairReport {
     pub token_accounting: Vec<Value>,
     pub llm_traces: Vec<Value>,
     pub usage_summary: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    pub clusters_completed: usize,
 }
 
 fn record_to_value<T: serde::Serialize>(record: &T) -> Value {
@@ -164,6 +167,8 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
     let cached_page_roles = fnm_page_role_by_no(doc_id, repo);
 
     let cluster_count = clusters.len();
+    let mut clusters_completed: usize = 0;
+    let mut fatal_error: Option<String> = None;
     // 4. 逐 cluster 处理
     for (cluster_index, mut cluster) in clusters.into_iter().enumerate() {
         let cluster_index = cluster_index + 1;
@@ -192,12 +197,11 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
             .map(|a| !a.is_empty())
             .unwrap_or(false);
         if !has_anchors && !has_notes {
+            clusters_completed += 1;
             continue;
         }
 
         // 4c. 调 LLM
-        // 注：model_args clone 每 cluster 一次（小 dict，~100 bytes），相对 LLM 网络
-        // 调用 100ms+ 量级可忽略。若未来 cluster 数 > 1000，可考虑改 Arc 共享。
         let llm_request = RepairRequestParams {
             cluster: &cluster,
             model_args: params.model_args.clone(),
@@ -209,7 +213,15 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
             trace_callback: params.trace_callback,
             renderer,
         };
-        let llm_result = request_llm_repair_actions(llm_request).await?;
+        let llm_result = match request_llm_repair_actions(llm_request).await {
+            Ok(r) => r,
+            Err(e) => {
+                fatal_error = Some(format!(
+                    "cluster {cluster_index}/{cluster_count} 失败: {e}"
+                ));
+                break;
+            }
+        };
 
         // 4d. 富化 synthesize_anchor 动作（fuzzy_score + page_no + char_offsets）
         let enriched_actions =
@@ -349,6 +361,7 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
         if !cluster_overrides.is_empty() {
             repo.batch_save_fnm_review_overrides_v2(doc_id, &cluster_overrides)?;
         }
+        clusters_completed += 1;
     }
 
     let usage_summary = serde_json::to_value(summarize_usage_events(
@@ -366,6 +379,8 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
         token_accounting: token_accounting_log,
         llm_traces,
         usage_summary,
+        error: fatal_error,
+        clusters_completed,
     })
 }
 

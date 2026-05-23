@@ -59,7 +59,7 @@ class ModelPoolsTest(unittest.TestCase):
         self.assertEqual(migrated["translation_model_pool"][0]["provider_type"], "qwen")
         self.assertEqual(migrated["translation_model_pool"][0]["model_id"], "qwen3.5-plus")
         self.assertEqual(migrated["fnm_model_pool"][0]["mode"], "builtin")
-        self.assertEqual(migrated["fnm_model_pool"][0]["builtin_key"], "qwen3.6-plus")
+        self.assertEqual(migrated["fnm_model_pool"][0]["builtin_key"], "gemini-3.1-flash-lite")
 
     def test_resolve_translation_model_pool_specs_supports_mimo_paygo(self) -> None:
         from persistence.storage import resolve_translation_model_pool_specs
@@ -328,6 +328,37 @@ class ModelPoolsTest(unittest.TestCase):
         self.assertEqual(fnm_specs[0].request_overrides["extra_body"]["thinking"]["type"], "enabled")
         self.assertEqual(fnm_specs[1].provider, "kimi")
         self.assertEqual(fnm_specs[1].request_overrides["extra_body"]["thinking"]["type"], "enabled")
+
+    def test_fnm_repair_roles_do_not_follow_visual_primary_order(self) -> None:
+        from persistence.storage import resolve_fnm_repair_model_specs, resolve_visual_model_spec
+
+        config.save_config(
+            {
+                "gemini_key": "gemini-key",
+                "glm_api_key": "glm-key",
+                "fnm_repair_primary_model_id": "glm-4.6v",
+                "fnm_repair_final_model_id": "gemini-3.1-flash-lite",
+                "fnm_model_pool": [
+                    {
+                        "mode": "custom",
+                        "display_name": "Gemini Visual",
+                        "provider_type": "gemini",
+                        "model_id": "gemini-3.1-flash-lite",
+                        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+                        "custom_api_key": "gemini-key",
+                    },
+                    {"mode": "builtin", "builtin_key": "glm-4.6v"},
+                    {"mode": "empty"},
+                ],
+            }
+        )
+
+        self.assertEqual(resolve_visual_model_spec().model_id, "gemini-3.1-flash-lite")
+        self.assertEqual(resolve_fnm_repair_model_specs()[0].model_id, "glm-4.6v")
+        self.assertEqual(
+            resolve_fnm_repair_model_specs(final_round=True)[0].model_id,
+            "gemini-3.1-flash-lite",
+        )
 
     def test_custom_provider_slots_apply_provider_specific_thinking_payloads(self) -> None:
         from persistence.storage import resolve_translation_model_pool_specs

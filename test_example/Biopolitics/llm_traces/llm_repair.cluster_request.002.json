@@ -4,22 +4,22 @@
       {
         "action": "synthesize_anchor",
         "anchor_id": "",
-        "anchor_phrase": "l'homme d'État anglais Walpole",
+        "anchor_phrase": "l'homme d'État anglais Walpole²",
         "confidence": 0.95,
         "marker": "",
         "note_item_id": "fn-0020",
         "note_text": "",
-        "reason": "Walpole 对应文中 marker 2 的位置，短语唯一且准确。"
+        "reason": "正文有唯一短语锚点，无结构化anchor记录"
       },
       {
         "action": "synthesize_anchor",
         "anchor_id": "",
-        "anchor_phrase": "Quieta non movere",
+        "anchor_phrase": "Quieta non movere³",
         "confidence": 0.95,
         "marker": "",
         "note_item_id": "fn-0021",
         "note_text": "",
-        "reason": "该拉丁文短语是 marker 3 的直接引用对象。"
+        "reason": "正文有唯一短语锚点，无结构化anchor记录"
       },
       {
         "action": "needs_review",
@@ -29,14 +29,14 @@
         "marker": "",
         "note_item_id": "",
         "note_text": "",
-        "reason": "fn-0018, fn-0023, fn-0024, fn-0025 在文中缺乏对应数字 marker 或显式锚点。"
+        "reason": "无法确定其他note items对应锚点"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -177,22 +177,22 @@
     {
       "action": "synthesize_anchor",
       "anchor_id": "",
-      "anchor_phrase": "l'homme d'État anglais Walpole",
+      "anchor_phrase": "l'homme d'État anglais Walpole²",
       "confidence": 0.95,
       "marker": "",
       "note_item_id": "fn-0020",
       "note_text": "",
-      "reason": "Walpole 对应文中 marker 2 的位置，短语唯一且准确。"
+      "reason": "正文有唯一短语锚点，无结构化anchor记录"
     },
     {
       "action": "synthesize_anchor",
       "anchor_id": "",
-      "anchor_phrase": "Quieta non movere",
+      "anchor_phrase": "Quieta non movere³",
       "confidence": 0.95,
       "marker": "",
       "note_item_id": "fn-0021",
       "note_text": "",
-      "reason": "该拉丁文短语是 marker 3 的直接引用对象。"
+      "reason": "正文有唯一短语锚点，无结构化anchor记录"
     },
     {
       "action": "needs_review",
@@ -202,28 +202,28 @@
       "marker": "",
       "note_item_id": "",
       "note_text": "",
-      "reason": "fn-0018, fn-0023, fn-0024, fn-0025 在文中缺乏对应数字 marker 或显式锚点。"
+      "reason": "无法确定其他note items对应锚点"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0020\",\n    \"anchor_phrase\": \"l'homme d'État anglais Walpole\",\n    \"confidence\": 0.95,\n    \"reason\": \"Walpole 对应文中 marker 2 的位置，短语唯一且准确。\"\n  },\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0021\",\n    \"anchor_phrase\": \"Quieta non movere\",\n    \"confidence\": 0.95,\n    \"reason\": \"该拉丁文短语是 marker 3 的直接引用对象。\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"fn-0018, fn-0023, fn-0024, fn-0025 在文中缺乏对应数字 marker 或显式锚点。\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"synthesize_anchor\", \"note_item_id\": \"fn-0020\", \"anchor_phrase\": \"l'homme d'État anglais Walpole²\", \"confidence\": 0.95, \"reason\": \"正文有唯一短语锚点，无结构化anchor记录\"}, {\"action\": \"synthesize_anchor\", \"note_item_id\": \"fn-0021\", \"anchor_phrase\": \"Quieta non movere³\", \"confidence\": 0.95, \"reason\": \"正文有唯一短语锚点，无结构化anchor记录\"}, {\"action\": \"needs_review\", \"reason\": \"无法确定其他note items对应锚点\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 1606
+    "duration_ms": 13620
   },
   "token_accounting": {
     "estimated_input_tokens": 1722,
-    "input_tokens": 1735,
-    "output_tokens": 228,
+    "input_tokens": 1555,
+    "output_tokens": 880,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1963
+    "total_tokens": 2435
   },
   "usage": {
-    "completion_tokens": 228,
-    "prompt_tokens": 1735,
+    "completion_tokens": 880,
+    "prompt_tokens": 1555,
     "request_count": 1,
-    "total_tokens": 1963
+    "total_tokens": 2435
   }
 }

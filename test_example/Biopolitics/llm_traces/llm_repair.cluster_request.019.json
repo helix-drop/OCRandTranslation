@@ -9,14 +9,14 @@
         "marker": "",
         "note_item_id": "",
         "note_text": "",
-        "reason": "Note items correspond to empty source_text, impossible to verify anchor or content from provided data."
+        "reason": "无法确定尾注对应正文锚点，需人工核对页面内容"
       }
     ]
   },
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
   "request_content": {
@@ -97,28 +97,28 @@
       "marker": "",
       "note_item_id": "",
       "note_text": "",
-      "reason": "Note items correspond to empty source_text, impossible to verify anchor or content from provided data."
+      "reason": "无法确定尾注对应正文锚点，需人工核对页面内容"
     }
   ],
-  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Note items correspond to empty source_text, impossible to verify anchor or content from provided data.\"\n  }\n]",
+  "response_raw_text": "\n[{\"action\": \"needs_review\", \"reason\": \"无法确定尾注对应正文锚点，需人工核对页面内容\"}]",
   "stage": "llm_repair.cluster_request",
   "timing": {
-    "duration_ms": 980
+    "duration_ms": 13296
   },
   "token_accounting": {
     "estimated_input_tokens": 1540,
-    "input_tokens": 1475,
-    "output_tokens": 44,
+    "input_tokens": 1381,
+    "output_tokens": 443,
     "request_count": 1,
     "skip_reason": "",
     "skipped": false,
     "source": "provider_usage",
-    "total_tokens": 1519
+    "total_tokens": 1824
   },
   "usage": {
-    "completion_tokens": 44,
-    "prompt_tokens": 1475,
+    "completion_tokens": 443,
+    "prompt_tokens": 1381,
     "request_count": 1,
-    "total_tokens": 1519
+    "total_tokens": 1824
   }
 }

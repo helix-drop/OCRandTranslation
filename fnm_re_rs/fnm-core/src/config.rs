@@ -32,6 +32,7 @@ pub const MIMO_BASE_URL: &str = "https://api.xiaomimimo.com/v1";
 pub const MIMO_TOKEN_PLAN_BASE_URL_DEFAULT: &str = "https://token-plan-sgp.xiaomimimo.com/v1";
 pub const GLM_BASE_URL: &str = "https://open.bigmodel.cn/api/paas/v4/";
 pub const KIMI_BASE_URL: &str = "https://api.moonshot.ai/v1";
+pub const GEMINI_BASE_URL: &str = "https://generativelanguage.googleapis.com/v1beta/openai/";
 
 pub const MODEL_POOL_SLOT_COUNT: usize = 4;
 pub const ACTIVE_BUILTIN_MODEL_KEY_DEFAULT: &str = "deepseek-chat";
@@ -85,6 +86,12 @@ pub struct AppConfig {
     pub glm_api_key: String,
     #[serde(default)]
     pub kimi_api_key: String,
+    #[serde(default)]
+    pub gemini_key: String,
+    #[serde(default)]
+    pub fnm_repair_primary_model_id: String,
+    #[serde(default)]
+    pub fnm_repair_final_model_id: String,
     #[serde(default)]
     pub translation_model_pool: Vec<ModelPoolSlot>,
     #[serde(default)]
@@ -234,6 +241,22 @@ pub fn get_kimi_api_key() -> String {
         return cfg.kimi_api_key;
     }
     std::env::var("KIMI_API_KEY").unwrap_or_default()
+}
+
+pub fn get_gemini_key() -> String {
+    let cfg = load_config();
+    if !cfg.gemini_key.is_empty() {
+        return cfg.gemini_key;
+    }
+    std::env::var("GEMINI_API_KEY").unwrap_or_default()
+}
+
+pub fn get_fnm_repair_primary_model_id() -> String {
+    load_config().fnm_repair_primary_model_id.trim().to_string()
+}
+
+pub fn get_fnm_repair_final_model_id() -> String {
+    load_config().fnm_repair_final_model_id.trim().to_string()
 }
 
 /// ←→ Python `_thinking_payload_for_provider`

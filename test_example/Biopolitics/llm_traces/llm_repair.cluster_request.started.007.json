@@ -1,8 +1,8 @@
 {
   "model": {
-    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-    "model_id": "gemini-3.1-flash-lite",
-    "provider": "gemini"
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+    "model_id": "glm-4.6v",
+    "provider": "glm"
   },
   "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
   "request_content": {
@@ -211,13 +211,37 @@
         "page_no": 208,
         "sha256": "",
         "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 208,
+        "ocr_excerpt": "très extraordinaire, très curieuse, très nouvelle organisation, c'est cette très nouvelle gouvernementalité de parti apparue en Europe à la fin du XIXe siècle qui est vraisemblablement – enfin, c'est en tout cas ce que j'essaierai peut-être de vous montrer l'an prochain, si j'ai toujours ces idées-là en tête $ ^{10} $ –, c'est cette gouvernementalité de parti qui est à l'origine historique de quelque chose comme les régimes totalitaires, de quelque chose comme le nazisme, de quelque chose comme le fascisme, de quelque chose comme le stalinisme. Autre thèse que je voudrais avancer, c'est celle-ci (enfin, c'est la réciproque de ce que je viens de vous dire), c'est que ce qui est actuellement en question dans notre réalité, ce n'est pas tellement la croissance de l'État et de la raison d'État, mais ce serait beaucoup plutôt sa décroissance, que l'on voit apparaître dans nos sociétés du xx<sup>e</sup> siècle sous ces deux formes : l'une, qui est précisément la décroissance de la gouvernementalité d'État par la croissance de la gouvernementalité de parti, et d'un autre côté, l'autre forme de décroissance qui est celle que l'on peut constater dans des régimes comme le nôtre, où l'on essaie de rechercher une gouvernementalité libérale. J'ajoute aussitôt qu'en disant cela, j'essaie de ne porter aucun jugement de valeur. En parlant de gouvernementalité libérale, je ne veux pas, par l'ut ...",
+        "page_no": 209,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 209,
+        "ocr_excerpt": "le décrire et tel que je voudrais maintenant vous montrer quelques formes de sa diffusion, ce n'est pas le modèle si souvent disqualifié, banni, honni, vomi de l'État bismarckien devenant hitlérien. Le modèle allemand qui se diffuse, le modèle allemand qui est en question, le modèle allemand qui fait partie de notre actualité, qui la structure et qui la profile sous sa découpe réelle, ce modèle allemand, c'est la possibilité d'une gouvernementalité néolibérale. Cette diffusion du modèle allemand, on pourrait la suivre de deux façons. J'essaierai de le faire aujourd'hui pour la France et peut-être, là encore si je n'ai pas changé d'avis, pour les USA la fois prochaine. En France, ce qu'on pourrait appeler la diffusion du modèle allemand s'est faite d'une façon lente, insidieuse, grinçante, et avec, je crois, trois caractères. Premièrement, il ne faut pas oublier que cette diffusion du modèle néolibéral allemand s'est faite, en France, à partir de ce qu'on pourrait appeler une gouvernementalité fortement étatisée, fortement dirigiste, fortement administrative, avec tous les problèmes justement que ça implique. Deuxièmement, ce modèle néolibéral allemand, on essaie de l'introduire et de le mettre en œuvre en France dans un contexte de crise, de crise économique d'abord relativement limitée, maintenant aiguë, et cette crise économique constitue à la fois le motif, prétexte et raiso ...",
+        "page_no": 210,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 210,
+        "ocr_excerpt": "autour des gens de Fribourg, et puis le néolibéralisme américain, il y a tout un tas de relations historiques sans doute assez difficiles à débrouiller. Le deuxième caractère de cette diffusion du modèle allemand aux États-Unis, c'est qu'il se développe aussi dans un contexte de crise, mais une crise qui est tout à fait différente de celle qu'on connaît en France, puisqu'il s'agit d'une crise économique, bien sûr, mais qui a une tout autre forme et qui est sans doute beaucoup moins aiguë qu'en France. En revanche, il se développe à l'intérieur d'une crise politique, où le problème de l'influence, de l'action, de l'intervention du gouvernement fédéral, de sa crédibilité politique, etc., se trouvait posé déjà dès le New Deal, à plus forte raison depuis Johnson, depuis Nixon $ ^{12} $, depuis Carter $ ^{13} $. Enfin, troisième caractère de cette diffusion du néolibéralisme aux États-Unis, c'est que cette gouvernementalité néolibérale, au lieu d'être, en quelque sorte, la propriété quasi exclusive du personnel gouvernemental et de ses conseillers, comme c'est le cas en France, se présente, au moins en partie, comme une sorte de grande alternative économique politique qui prend la forme, à un certain moment en tout cas, de tout un mouvement d'opposition politique, sinon de masse, du moins très largement répandu à l'intérieur de la société américaine. Tout ça fait qu'il est tout à fa ...",
+        "page_no": 211,
+        "sha256": "",
+        "source_pdf_path": ""
       }
     ]
   },
   "request_context_summary": {
     "cluster_id": "ch-fallback-0009:nr-en-ch-0054-ch-fallback-0009:endnote",
     "image_count": 0,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body"
   },
   "request_metrics": {
@@ -225,14 +249,14 @@
       "synthesize_anchor",
       "needs_review"
     ],
-    "chars": 11649,
+    "chars": 14004,
     "cluster_id": "ch-fallback-0009:nr-en-ch-0054-ch-fallback-0009:endnote",
-    "estimated_prompt_tokens": 3306,
+    "estimated_prompt_tokens": 3960,
     "image_refused": false,
     "matched_examples": 2,
     "model_max_input_tokens_no_think": 991808,
     "model_max_input_tokens_thinking": 983616,
-    "page_context_count": 2,
+    "page_context_count": 5,
     "request_mode": "note_only_with_body",
     "skip_reason": "",
     "skipped": false,
@@ -243,7 +267,7 @@
   },
   "stage": "llm_repair.cluster_request.started",
   "token_accounting": {
-    "estimated_input_tokens": 3306,
+    "estimated_input_tokens": 3960,
     "input_tokens": 0,
     "output_tokens": 0,
     "request_count": 0,

@@ -68,7 +68,7 @@
     }
   },
   "cleanup": {
-    "cleaned_at": "2026-05-23T15:33:36",
+    "cleaned_at": "2026-05-23T20:33:35",
     "example_dir": "/Users/hao/OCRandTranslation/test_example/post-revolutionary",
     "removed": [
       "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces",
@@ -102,14 +102,14 @@
       "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.001.json",
       "reason_for_request": "从目录页截图中抽取单页原子目录项",
       "model_id": "gemini-3.1-flash-lite",
-      "total_tokens": 2829
+      "total_tokens": 2832
     },
     {
       "stage": "visual_toc.manual_input_extract",
       "file": "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.002.json",
       "reason_for_request": "根据整份目录页重建目录树，并识别尾注容器与子项",
       "model_id": "gemini-3.1-flash-lite",
-      "total_tokens": 3091
+      "total_tokens": 3097
     }
   ],
   "translation_mode": "placeholder",
@@ -2369,68 +2369,68 @@
   "progress": {
     "status": "done",
     "current_stage": "report_write",
-    "started_at": "2026-05-23T15:33:36",
-    "updated_at": "2026-05-23T15:34:17",
+    "started_at": "2026-05-23T20:33:36",
+    "updated_at": "2026-05-23T20:34:14",
     "stage_history": [
       {
         "stage": "reingest",
         "status": "done",
         "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
-        "at": "2026-05-23T15:33:36"
+        "at": "2026-05-23T20:33:36"
       },
       {
         "stage": "visual_toc",
         "status": "done",
         "detail": "ready",
-        "at": "2026-05-23T15:33:52"
+        "at": "2026-05-23T20:34:06"
       },
       {
         "stage": "fnm_pipeline",
         "status": "done",
         "detail": "done",
-        "at": "2026-05-23T15:33:55"
+        "at": "2026-05-23T20:34:07"
       },
       {
         "stage": "llm_repair",
         "status": "done",
         "detail": "auto_applied=0",
-        "at": "2026-05-23T15:33:55"
+        "at": "2026-05-23T20:34:07"
       },
       {
         "stage": "fnm_pipeline_rebuild",
         "status": "done",
         "detail": "skipped",
-        "at": "2026-05-23T15:33:55"
+        "at": "2026-05-23T20:34:07"
       },
       {
         "stage": "structure_verify",
         "status": "done",
         "detail": "",
-        "at": "2026-05-23T15:33:55"
+        "at": "2026-05-23T20:34:07"
       },
       {
         "stage": "placeholder_translate",
         "status": "done",
         "detail": "translated_paras=890",
-        "at": "2026-05-23T15:34:17"
+        "at": "2026-05-23T20:34:14"
       },
       {
         "stage": "export_verify",
         "status": "done",
         "detail": "ok",
-        "at": "2026-05-23T15:34:17"
+        "at": "2026-05-23T20:34:14"
       },
       {
         "stage": "zip_finalize",
         "status": "done",
         "detail": "ok",
-        "at": "2026-05-23T15:34:17"
+        "at": "2026-05-23T20:34:14"
       },
       {
         "stage": "report_write",
         "status": "done",
         "detail": "单书结果、报告、进度均已写入",
-        "at": "2026-05-23T15:34:17"
+        "at": "2026-05-23T20:34:14"
       }
     ]
   },
@@ -2456,9 +2456,9 @@
       },
       "visual_toc.manual_input_extract": {
         "request_count": 2,
-        "prompt_tokens": 3316,
-        "completion_tokens": 2604,
-        "total_tokens": 5920
+        "prompt_tokens": 3324,
+        "completion_tokens": 2605,
+        "total_tokens": 5929
       },
       "llm_repair.cluster_request": {
         "request_count": 0,
@@ -2476,16 +2476,16 @@
     "by_model": {
       "gemini-3.1-flash-lite": {
         "request_count": 3,
-        "prompt_tokens": 4456,
-        "completion_tokens": 2623,
-        "total_tokens": 7079
+        "prompt_tokens": 4464,
+        "completion_tokens": 2624,
+        "total_tokens": 7088
       }
     },
     "total": {
       "request_count": 3,
-      "prompt_tokens": 4456,
-      "completion_tokens": 2623,
-      "total_tokens": 7079
+      "prompt_tokens": 4464,
+      "completion_tokens": 2624,
+      "total_tokens": 7088
     }
   },
   "reingest": {
@@ -2737,7 +2737,7 @@
         {
           "title": "List of Illustrations",
           "depth": 0,
-          "printed_page": null,
+          "printed_page": 9,
           "visual_order": 1,
           "role_hint": "content",
           "endnotes_candidate": false,
@@ -2746,7 +2746,7 @@
         {
           "title": "Preface",
           "depth": 0,
-          "printed_page": null,
+          "printed_page": 11,
           "visual_order": 2,
           "role_hint": "content",
           "endnotes_candidate": false,
@@ -2862,7 +2862,7 @@
         },
         {
           "title": "Note on Sources",
-          "depth": 0,
+          "depth": 1,
           "printed_page": 399,
           "visual_order": 15,
           "role_hint": "back_matter",
@@ -2871,7 +2871,7 @@
         },
         {
           "title": "Index",
-          "depth": 0,
+          "depth": 1,
           "printed_page": 403,
           "visual_order": 16,
           "role_hint": "back_matter",
@@ -2885,7 +2885,7 @@
         {
           "title": "List of Illustrations",
           "depth": 0,
-          "printed_page": 9,
+          "printed_page": null,
           "file_idx": null,
           "visual_order": 1,
           "role_hint": "front_matter"
@@ -2893,7 +2893,7 @@
         {
           "title": "Preface",
           "depth": 0,
-          "printed_page": 11,
+          "printed_page": null,
           "file_idx": null,
           "visual_order": 2,
           "role_hint": "front_matter"
@@ -2999,7 +2999,7 @@
           "printed_page": 331,
           "file_idx": null,
           "visual_order": 14,
-          "role_hint": "back_matter"
+          "role_hint": "endnotes"
         },
         {
           "title": "Note on Sources",
@@ -3022,7 +3022,7 @@
         "present": true,
         "container_title": "Notes",
         "container_printed_page": 331,
-        "container_visual_order": 14,
+        "container_visual_order": 13,
         "has_chapter_keyed_subentries_in_toc": false,
         "subentry_pattern": null
       }
@@ -3057,8 +3057,8 @@
         "model_id": "gemini-3.1-flash-lite",
         "request_count": 1,
         "prompt_tokens": 1500,
-        "completion_tokens": 1329,
-        "total_tokens": 2829,
+        "completion_tokens": 1332,
+        "total_tokens": 2832,
         "doc_id": "7ba9bca783fd",
         "slug": "",
         "context": {
@@ -3071,9 +3071,9 @@
         "provider": "gemini",
         "model_id": "gemini-3.1-flash-lite",
         "request_count": 1,
-        "prompt_tokens": 1816,
-        "completion_tokens": 1275,
-        "total_tokens": 3091,
+        "prompt_tokens": 1824,
+        "completion_tokens": 1273,
+        "total_tokens": 3097,
         "doc_id": "7ba9bca783fd",
         "slug": "",
         "context": {
@@ -3092,9 +3092,9 @@
         },
         "visual_toc.manual_input_extract": {
           "request_count": 2,
-          "prompt_tokens": 3316,
-          "completion_tokens": 2604,
-          "total_tokens": 5920
+          "prompt_tokens": 3324,
+          "completion_tokens": 2605,
+          "total_tokens": 5929
         },
         "visual_toc.classify_candidates": {
           "request_count": 0,
@@ -3112,16 +3112,16 @@
       "by_model": {
         "gemini-3.1-flash-lite": {
           "request_count": 3,
-          "prompt_tokens": 4456,
-          "completion_tokens": 2623,
-          "total_tokens": 7079
+          "prompt_tokens": 4464,
+          "completion_tokens": 2624,
+          "total_tokens": 7088
         }
       },
       "total": {
         "request_count": 3,
-        "prompt_tokens": 4456,
-        "completion_tokens": 2623,
-        "total_tokens": 7079
+        "prompt_tokens": 4464,
+        "completion_tokens": 2624,
+        "total_tokens": 7088
       }
     },
     "llm_traces": [
@@ -3181,7 +3181,7 @@
           }
         },
         "timing": {
-          "duration_ms": 2955
+          "duration_ms": 2093
         }
       },
       {
@@ -3209,12 +3209,12 @@
           "source": "pdf",
           "file_idx": 0
         },
-        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": null,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": null,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": 21,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": 60,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"II THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": 103,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n    \"depth\": 2,\n    \"printed_page\": 139,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"5 Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": 182,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": 233,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": 269,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": 316,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 1,\n    \"printed_page\": 331,\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 0,\n    \"printed_page\": 399,\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 0,\n    \"printed_page\": 403,\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
+        "response_raw_text": "```json\n[\n  {\n    \"title\": \"List of Illustrations\",\n    \"depth\": 0,\n    \"printed_page\": 9,\n    \"visual_order\": 1,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Preface\",\n    \"depth\": 0,\n    \"printed_page\": 11,\n    \"visual_order\": 2,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n    \"depth\": 0,\n    \"printed_page\": 1,\n    \"visual_order\": 3,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 4,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n    \"depth\": 2,\n    \"printed_page\": 21,\n    \"visual_order\": 5,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"2 The Revolutionary Schooling of Imagination\",\n    \"depth\": 2,\n    \"printed_page\": 60,\n    \"visual_order\": 6,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"II THE POLITICS OF SELFHOOD\",\n    \"depth\": 1,\n    \"printed_page\": null,\n    \"visual_order\": 7,\n    \"role_hint\": \"container\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n    \"depth\": 2,\n    \"printed_page\": 103,\n    \"visual_order\": 8,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n    \"depth\": 2,\n    \"printed_page\": 139,\n    \"visual_order\": 9,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"5 Cousinian Hegemony\",\n    \"depth\": 2,\n    \"printed_page\": 182,\n    \"visual_order\": 10,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n    \"depth\": 2,\n    \"printed_page\": 233,\n    \"visual_order\": 11,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n    \"depth\": 2,\n    \"printed_page\": 269,\n    \"visual_order\": 12,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Epilogue\",\n    \"depth\": 0,\n    \"printed_page\": 316,\n    \"visual_order\": 13,\n    \"role_hint\": \"content\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Notes\",\n    \"depth\": 1,\n    \"printed_page\": 331,\n    \"visual_order\": 14,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": true,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Note on Sources\",\n    \"depth\": 1,\n    \"printed_page\": 399,\n    \"visual_order\": 15,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  },\n  {\n    \"title\": \"Index\",\n    \"depth\": 1,\n    \"printed_page\": 403,\n    \"visual_order\": 16,\n    \"role_hint\": \"back_matter\",\n    \"endnotes_candidate\": false,\n    \"endnotes_subentry_candidate\": false\n  }\n]\n```",
         "response_parsed": [
           {
             "title": "List of Illustrations",
             "depth": 0,
-            "printed_page": null,
+            "printed_page": 9,
             "visual_order": 1,
             "role_hint": "content",
             "endnotes_candidate": false,
@@ -3223,7 +3223,7 @@
           {
             "title": "Preface",
             "depth": 0,
-            "printed_page": null,
+            "printed_page": 11,
             "visual_order": 2,
             "role_hint": "content",
             "endnotes_candidate": false,
@@ -3339,7 +3339,7 @@
           },
           {
             "title": "Note on Sources",
-            "depth": 0,
+            "depth": 1,
             "printed_page": 399,
             "visual_order": 15,
             "role_hint": "back_matter",
@@ -3348,7 +3348,7 @@
           },
           {
             "title": "Index",
-            "depth": 0,
+            "depth": 1,
             "printed_page": 403,
             "visual_order": 16,
             "role_hint": "back_matter",
@@ -3361,7 +3361,7 @@
             {
               "title": "List of Illustrations",
               "depth": 0,
-              "printed_page": null,
+              "printed_page": 9,
               "visual_order": 1,
               "role_hint": "content",
               "endnotes_candidate": false,
@@ -3370,7 +3370,7 @@
             {
               "title": "Preface",
               "depth": 0,
-              "printed_page": null,
+              "printed_page": 11,
               "visual_order": 2,
               "role_hint": "content",
               "endnotes_candidate": false,
@@ -3486,7 +3486,7 @@
             },
             {
               "title": "Note on Sources",
-              "depth": 0,
+              "depth": 1,
               "printed_page": 399,
               "visual_order": 15,
               "role_hint": "back_matter",
@@ -3495,7 +3495,7 @@
             },
             {
               "title": "Index",
-              "depth": 0,
+              "depth": 1,
               "printed_page": 403,
               "visual_order": 16,
               "role_hint": "back_matter",
@@ -3510,8 +3510,8 @@
           "model_id": "gemini-3.1-flash-lite",
           "request_count": 1,
           "prompt_tokens": 1500,
-          "completion_tokens": 1329,
-          "total_tokens": 2829,
+          "completion_tokens": 1332,
+          "total_tokens": 2832,
           "doc_id": "7ba9bca783fd",
           "slug": "",
           "context": {
@@ -3520,7 +3520,7 @@
           }
         },
         "timing": {
-          "duration_ms": 5794
+          "duration_ms": 6194
         }
       },
       {
@@ -3531,7 +3531,7 @@
           "model_id": "gemini-3.1-flash-lite",
           "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/"
         },
-        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- Introduction: Psychological Interiority versus Self-Talk\n- 1 The Perils of Imagination at the End of the Old Regime\n- 2 The Revolutionary Schooling of Imagination\n- 3 Is There a Self in This Mental Apparatus?\n- 4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\n- 5 Cousinian Hegemony\n- 6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\n- 7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\n- Epilogue\n- Notes\n- Note on Sources\n- Index",
+        "request_prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。已抽到的目录标题草稿如下，请优先沿用可见标题原文和顺序，但可以补回漏掉的容器层：\n- List of Illustrations\n- Preface\n- Introduction: Psychological Interiority versus Self-Talk\n- 1 The Perils of Imagination at the End of the Old Regime\n- 2 The Revolutionary Schooling of Imagination\n- 3 Is There a Self in This Mental Apparatus?\n- 4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\n- 5 Cousinian Hegemony\n- 6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\n- 7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\n- Epilogue\n- Notes\n- Note on Sources\n- Index",
         "request_content": {
           "images": [
             {
@@ -3548,13 +3548,13 @@
           "source": "organization",
           "images_count": 1
         },
-        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": true,\n    \"container_title\": \"Notes\",\n    \"container_printed_page\": 331,\n    \"container_visual_order\": 14,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"List of Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": 9,\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Preface\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": 11,\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n      \"depth\": 1,\n      \"visual_order\": 5,\n      \"printed_page\": 21,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"2 The Revolutionary Schooling of Imagination\",\n      \"depth\": 1,\n      \"visual_order\": 6,\n      \"printed_page\": 60,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"II THE POLITICS OF SELFHOOD\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n      \"depth\": 1,\n      \"visual_order\": 8,\n      \"printed_page\": 103,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n      \"depth\": 1,\n      \"visual_order\": 9,\n      \"printed_page\": 139,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"5 Cousinian Hegemony\",\n      \"depth\": 1,\n      \"visual_order\": 10,\n      \"printed_page\": 182,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n      \"depth\": 1,\n      \"visual_order\": 11,\n      \"printed_page\": 233,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n      \"depth\": 1,\n      \"visual_order\": 12,\n      \"printed_page\": 269,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": 316,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Notes\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": 331,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Note on Sources\",\n      \"depth\": 0,\n      \"visual_order\": 15,\n      \"printed_page\": 399,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 16,\n      \"printed_page\": 403,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
+        "response_raw_text": "```json\n{\n  \"endnotes_summary\": {\n    \"present\": true,\n    \"container_title\": \"Notes\",\n    \"container_printed_page\": 331,\n    \"container_visual_order\": 13,\n    \"has_chapter_keyed_subentries_in_toc\": false,\n    \"subentry_pattern\": null\n  },\n  \"items\": [\n    {\n      \"title\": \"List of Illustrations\",\n      \"depth\": 0,\n      \"visual_order\": 1,\n      \"printed_page\": \"ix\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Preface\",\n      \"depth\": 0,\n      \"visual_order\": 2,\n      \"printed_page\": \"xi\",\n      \"role_hint\": \"front_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Introduction: Psychological Interiority versus Self-Talk\",\n      \"depth\": 0,\n      \"visual_order\": 3,\n      \"printed_page\": 1,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\",\n      \"depth\": 0,\n      \"visual_order\": 4,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"1 The Perils of Imagination at the End of the Old Regime\",\n      \"depth\": 1,\n      \"visual_order\": 5,\n      \"printed_page\": 21,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"2 The Revolutionary Schooling of Imagination\",\n      \"depth\": 1,\n      \"visual_order\": 6,\n      \"printed_page\": 60,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"I THE PROBLEM FOR WHICH PSYCHOLOGY FURNISHED A SOLUTION\"\n    },\n    {\n      \"title\": \"II THE POLITICS OF SELFHOOD\",\n      \"depth\": 0,\n      \"visual_order\": 7,\n      \"printed_page\": null,\n      \"role_hint\": \"container\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"3 Is There a Self in This Mental Apparatus?\",\n      \"depth\": 1,\n      \"visual_order\": 8,\n      \"printed_page\": 103,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\",\n      \"depth\": 1,\n      \"visual_order\": 9,\n      \"printed_page\": 139,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"5 Cousinian Hegemony\",\n      \"depth\": 1,\n      \"visual_order\": 10,\n      \"printed_page\": 182,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\",\n      \"depth\": 1,\n      \"visual_order\": 11,\n      \"printed_page\": 233,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\",\n      \"depth\": 1,\n      \"visual_order\": 12,\n      \"printed_page\": 269,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"II THE POLITICS OF SELFHOOD\"\n    },\n    {\n      \"title\": \"Epilogue\",\n      \"depth\": 0,\n      \"visual_order\": 13,\n      \"printed_page\": 316,\n      \"role_hint\": \"chapter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Notes\",\n      \"depth\": 0,\n      \"visual_order\": 14,\n      \"printed_page\": 331,\n      \"role_hint\": \"endnotes\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Note on Sources\",\n      \"depth\": 0,\n      \"visual_order\": 15,\n      \"printed_page\": 399,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    },\n    {\n      \"title\": \"Index\",\n      \"depth\": 0,\n      \"visual_order\": 16,\n      \"printed_page\": 403,\n      \"role_hint\": \"back_matter\",\n      \"parent_title\": \"\"\n    }\n  ]\n}\n```",
         "response_parsed": {
           "endnotes_summary": {
             "present": true,
             "container_title": "Notes",
             "container_printed_page": 331,
-            "container_visual_order": 14,
+            "container_visual_order": 13,
             "has_chapter_keyed_subentries_in_toc": false,
             "subentry_pattern": null
           },
@@ -3563,7 +3563,7 @@
               "title": "List of Illustrations",
               "depth": 0,
               "visual_order": 1,
-              "printed_page": 9,
+              "printed_page": "ix",
               "role_hint": "front_matter",
               "parent_title": ""
             },
@@ -3571,7 +3571,7 @@
               "title": "Preface",
               "depth": 0,
               "visual_order": 2,
-              "printed_page": 11,
+              "printed_page": "xi",
               "role_hint": "front_matter",
               "parent_title": ""
             },
@@ -3668,7 +3668,7 @@
               "depth": 0,
               "visual_order": 14,
               "printed_page": 331,
-              "role_hint": "back_matter",
+              "role_hint": "endnotes",
               "parent_title": ""
             },
             {
@@ -3694,7 +3694,7 @@
             {
               "title": "List of Illustrations",
               "depth": 0,
-              "printed_page": 9,
+              "printed_page": null,
               "file_idx": null,
               "visual_order": 1,
               "role_hint": "front_matter"
@@ -3702,7 +3702,7 @@
             {
               "title": "Preface",
               "depth": 0,
-              "printed_page": 11,
+              "printed_page": null,
               "file_idx": null,
               "visual_order": 2,
               "role_hint": "front_matter"
@@ -3808,7 +3808,7 @@
               "printed_page": 331,
               "file_idx": null,
               "visual_order": 14,
-              "role_hint": "back_matter"
+              "role_hint": "endnotes"
             },
             {
               "title": "Note on Sources",
@@ -3831,7 +3831,7 @@
             "present": true,
             "container_title": "Notes",
             "container_printed_page": 331,
-            "container_visual_order": 14,
+            "container_visual_order": 13,
             "has_chapter_keyed_subentries_in_toc": false,
             "subentry_pattern": null
           }
@@ -3841,9 +3841,9 @@
           "provider": "gemini",
           "model_id": "gemini-3.1-flash-lite",
           "request_count": 1,
-          "prompt_tokens": 1816,
-          "completion_tokens": 1275,
-          "total_tokens": 3091,
+          "prompt_tokens": 1824,
+          "completion_tokens": 1273,
+          "total_tokens": 3097,
           "doc_id": "7ba9bca783fd",
           "slug": "",
           "context": {
@@ -3852,7 +3852,7 @@
           }
         },
         "timing": {
-          "duration_ms": 6057
+          "duration_ms": 21686
         }
       }
     ]
@@ -3862,7 +3862,7 @@
     "note_count": 654,
     "ok": true,
     "page_count": 431,
-    "run_id": 45,
+    "run_id": 46,
     "section_count": 8,
     "structure_state": "done",
     "unit_count": 183
@@ -3892,7 +3892,8 @@
         "request_count": 0,
         "total_tokens": 0
       }
-    }
+    },
+    "clusters_completed": 0
   },
   "rebuild": {},
   "structure": {
