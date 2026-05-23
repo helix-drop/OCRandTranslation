@@ -84,3 +84,6 @@ app.db
 test_example/Napoleon/*.pdf
 test_example/Germany_Madness/Bell*.pdf
 
+# Heidegger golden exports（外部程序产出，不属于 Phase4 管辖）
+test_example/Heidegger_en_France/golden_exports/
+
